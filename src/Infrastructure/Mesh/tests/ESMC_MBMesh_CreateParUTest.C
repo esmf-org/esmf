@@ -28,7 +28,7 @@
 // other headers
 #include "ESMCI_MBMesh.h"
 #include "ESMCI_MBMesh_Glue.h"
-#include "ESMCI_MBMesh_Search_EToP.h"
+#include "ESMCI_MBMesh_Search_EtoP.h"
 #include "ESMCI_MBMesh_Util.h"
 
 #include "MBTagConventions.hpp"

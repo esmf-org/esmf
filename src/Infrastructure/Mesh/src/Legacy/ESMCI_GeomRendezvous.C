@@ -22,6 +22,11 @@
 
 #include <limits>
 
+// #define ESMF_REGRID_DEBUG_MAP_ELEM1 836800
+// #define ESMF_REGRID_DEBUG_MAP_ELEM2 836801
+// #define ESMF_REGRID_DEBUG_MAP_NODE 4323801
+// #define ESMF_REGRID_DEBUG_MAP_ANY
+
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
@@ -371,6 +376,17 @@ static void rcb_isect(Zoltan_Struct *zz, MEField<> &coord, std::vector<MeshObj*>
 
     MeshObj &elem = **si;
 
+    int id;
+#ifdef ESMF_REGRID_DEBUG_MAP_ANY
+    id = elem.get_id();
+#endif
+#ifdef ESMF_REGRID_DEBUG_MAP_ELEM1
+    id = elem.get_id();
+#endif
+#ifdef ESMF_REGRID_DEBUG_MAP_ELEM2
+    id = elem.get_id();
+#endif
+
     BBox ebox(coord, elem, geom_tol, on_sph);
 
     // Insersect with the cuts
@@ -383,6 +399,19 @@ static void rcb_isect(Zoltan_Struct *zz, MEField<> &coord, std::vector<MeshObj*>
                              &procs[0],
                              &numprocs);
 
+// need to find object id and put into an if statement
+#ifdef ESMF_REGRID_DEBUG_MAP_ANY
+    printf("%d# Elem %d send to procs [", Par::Rank(), id);
+#endif
+#ifdef ESMF_REGRID_DEBUG_MAP_ELEM1
+    if (id==ESMF_REGRID_DEBUG_MAP_ELEM1)
+      printf("%d# Elem %d send to procs [", Par::Rank(), id);
+#endif
+#ifdef ESMF_REGRID_DEBUG_MAP_ELEM2
+    if (id==ESMF_REGRID_DEBUG_MAP_ELEM2)
+      printf("%d# Elem %d send to procs [", Par::Rank(), id);
+#endif
+
     // Add to comm
     for (UInt i = 0; i < (UInt) numprocs; i++) {
       CommRel::CommNode cnode(&elem, procs[i]);
@@ -393,8 +422,29 @@ static void rcb_isect(Zoltan_Struct *zz, MEField<> &coord, std::vector<MeshObj*>
       // Add if not already there
       if (lb == mignode.end() || *lb != cnode)
         mignode.insert(lb, cnode);
-
+#ifdef ESMF_REGRID_DEBUG_MAP_ANY
+    printf("%d, ", i);
+#endif
+#ifdef ESMF_REGRID_DEBUG_MAP_ELEM1
+    if (id==ESMF_REGRID_DEBUG_MAP_ELEM1)
+      printf("%d, ", i);
+#endif
+#ifdef ESMF_REGRID_DEBUG_MAP_ELEM2
+    if (id==ESMF_REGRID_DEBUG_MAP_ELEM2)
+      printf("%d, ", i);
+#endif
     } // for nproc
+#ifdef ESMF_REGRID_DEBUG_MAP_ANY
+    printf("]\n");
+#endif
+#ifdef ESMF_REGRID_DEBUG_MAP_ELEM1
+    if (id==ESMF_REGRID_DEBUG_MAP_ELEM1)
+      printf("]\n");
+#endif
+#ifdef ESMF_REGRID_DEBUG_MAP_ELEM2
+    if (id==ESMF_REGRID_DEBUG_MAP_ELEM2)
+      printf("]\n");
+#endif
   } // for si
 }
 
@@ -547,7 +597,6 @@ void GeomRend::build_src_mig_plist(ZoltanUD &zud, int numExport,
       idx_list2.push_back(idx_list[i]);
     }
   }
-
 
   // Setup pattern and sizes
   if (num_snd_procs >0) {
@@ -764,6 +813,9 @@ void GeomRend::build_dst_mig_plist(ZoltanUD &zud, int numExport,
       proc_counts[exportProcs[i]]++;
       idx_list[exportProcs[i]].push_back(exportGids[i*2+1]);
       mymoving[exportGids[i*2+1]]=1;
+#ifdef ESMF_REGRID_DEBUG_MAP_ANY
+      printf("%d# LOOP1: Node %d send by [%d]\n", Par::Rank(), exportGids[i*2+1], exportProcs[i]);
+#endif
     }
   }
 
@@ -780,6 +832,12 @@ void GeomRend::build_dst_mig_plist(ZoltanUD &zud, int numExport,
       snd_sizes.push_back(proc_counts[i]*snd_size);
       snd_counts.push_back(proc_counts[i]);
       idx_list2.push_back(idx_list[i]);
+#ifdef ESMF_REGRID_DEBUG_MAP_ANY
+      printf("%d# LOOP2: Proc %d to send nodes [", Par::Rank(), i);
+      for (int j = 0 ; j < idx_list[i].size(); ++j)
+        printf("%d, ", idx_list[i].at(j));
+      printf("]\n");
+#endif
     }
   }
 
@@ -842,7 +900,7 @@ void GeomRend::build_dst_mig_plist(ZoltanUD &zud, int numExport,
 
   if (plist_rend_size >= 0) {
 
-    //    dstplist_rend = new ESMCI::PointList(plist_rend_size,sdim);
+    // dstplist_rend = new ESMCI::PointList(plist_rend_size,sdim);
 
     int orig_dstpointlist_size = dstplist->get_curr_num_pts();
     for (int i=0; i<orig_dstpointlist_size; i++) {

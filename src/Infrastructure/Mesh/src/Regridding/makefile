@@ -7,22 +7,23 @@ ALL: build_here
 ESMF_CXXCOMPILECPPFLAGS += -DMPICH_IGNORE_CXX_SEEK
 
 SOURCEC	  = \
-					 ESMCI_Conserve2ndInterp.C \
-					 ESMCI_ConserveInterp.C \
-					 ESMCI_Extrapolation.C \
-					 ESMCI_Integrate.C \
-					 ESMCI_Interp.C \
-					 ESMCI_Mapping.C \
-					 ESMCI_CreepFill.C \
-					 ESMCI_MeshRegrid.C \
-					 ESMCI_PatchRecovery.C \
-					 ESMCI_Regrid_Helper.C \
-					 ESMCI_Search.C \
-					 ESMCI_SearchNearest.C \
-					 ESMCI_SearchNearestNPnts.C \
-					 ESMCI_SearchNearestDToS.C \
-					 ESMCI_ShapeFunc.C \
-					 ESMCI_WMat.C \
+            ESMCI_Conserve2ndInterp.C \
+            ESMCI_ConserveInterp.C \
+            ESMCI_ExtrapolationPoleLGC.C \
+            ESMCI_Integrate.C \
+            ESMCI_Interp.C \
+            ESMCI_Mapping.C \
+            ESMCI_CreepFill.C \
+            ESMCI_MeshRegrid.C \
+            ESMCI_PatchRecovery.C \
+            ESMCI_Regrid_Helper.C \
+            ESMCI_Search.C \
+            ESMCI_SearchNearestDToSLGC.C \
+            ESMCI_SearchNearestLGC.C \
+            ESMCI_SearchNearestNPntsLGC.C \
+            ESMCI_ShapeFunc.C \
+            ESMCI_SpaceDir.C \
+            ESMCI_WMat.C \
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))

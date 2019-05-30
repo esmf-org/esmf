@@ -126,6 +126,8 @@
 !     This interface assigns a string value to an ESMF_StaggerLoc
 !
 !EOPI
+         module procedure ESMF_StaggerLocToInt
+         module procedure ESMF_IntToStaggerLoc
       end interface
 !------------------------------------------------------------------------------
 !BOPI
@@ -264,6 +266,19 @@
       endif
 
       end subroutine ESMF_StaggerLocAssignment
+      
+subroutine ESMF_StaggerLocToInt(lhsInt, rhsStaggerLoc)
+  integer,                   intent(out) :: lhsInt
+  type(ESMF_StaggerLoc),     intent(in)  :: rhsStaggerLoc
+  lhsInt = rhsStaggerLoc%staggerloc
+end subroutine
+
+subroutine ESMF_IntToStaggerLoc(lhsStaggerLoc, rhsInt)
+  type(ESMF_StaggerLoc),     intent(out) :: lhsStaggerLoc
+  integer,                   intent(in)  :: rhsInt
+  lhsStaggerLoc = ESMF_StaggerLoc(rhsInt)
+end subroutine
+      
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StaggerLocEqual"

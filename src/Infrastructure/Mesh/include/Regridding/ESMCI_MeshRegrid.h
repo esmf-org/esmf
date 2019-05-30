@@ -14,10 +14,12 @@
 
 #include <Mesh/include/ESMCI_Mesh.h>
 #include <PointList/include/ESMCI_PointList.h>
-#include <Mesh/include/Regridding/ESMCI_Extrapolation.h>
+#include <Mesh/include/Regridding/ESMCI_ExtrapolationPoleLGC.h>
 #include <Mesh/include/Regridding/ESMCI_Integrate.h>
 #include <Mesh/include/Regridding/ESMCI_Interp.h>
 #include <Mesh/include/Legacy/ESMCI_WriteWeightsPar.h>
+
+#include <Mesh/include/ESMCI_RegridConstants.h>
 
 #ifdef REGRIDTIMING
 #include <mpi.h>
@@ -36,35 +38,6 @@ public:
 private:
 } ;
 #endif
-
-enum {ESMC_NORM_TYPE_DSTAREA = 0, ESMC_NORM_TYPE_FRACAREA = 1};
-
-enum {ESMC_REGRID_SCHEME_FULL3D = 0,
-      ESMC_REGRID_SCHEME_NATIVE,
-      ESMC_REGRID_SCHEME_REGION3D,
-      ESMC_REGRID_SCHEME_FULLTOREG3D,
-      ESMC_REGRID_SCHEME_REGTOFULL3D,
-      ESMC_REGRID_SCHEME_DCON3D,
-      ESMC_REGRID_SCHEME_DCON3DWPOLE};
-
-
-#define ESMC_REGRID_STATUS_DST_MASKED 0
-#define ESMC_REGRID_STATUS_SRC_MASKED 1
-#define ESMC_REGRID_STATUS_OUTSIDE 2
-#define ESMC_REGRID_STATUS_MAPPED 4
-#define ESMC_REGRID_STATUS_EXTRAP_MAPPED 8
-
-#define ESMC_EXTRAPMETHOD_NONE 0
-#define ESMC_EXTRAPMETHOD_NEAREST_STOD 1
-#define ESMC_EXTRAPMETHOD_NEAREST_IDAVG 2
-#define ESMC_EXTRAPMETHOD_CREEP 3
-
-
-enum {ESMC_REGRID_METHOD_BILINEAR = 0, ESMC_REGRID_METHOD_PATCH,
-      ESMC_REGRID_METHOD_CONSERVE, ESMC_REGRID_METHOD_NEAREST_SRC_TO_DST, ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC,
-      ESMC_REGRID_METHOD_CONSERVE_2ND, ESMC_REGRID_METHOD_NEAREST_IDAVG};
-enum {ESMC_REGRID_CONSERVE_OFF = 0, ESMC_REGRID_CONSERVE_ON = 1};
-enum {ESMC_REGRID_POLETYPE_NONE = 0, ESMC_REGRID_POLETYPE_ALL = 1, ESMC_REGRID_POLETYPE_NPNT = 2, ESMC_REGRID_POLETYPE_TEETH = 3};
 
 // offline
  int regrid(Mesh *srcmesh, PointList *srcpointlist, Mesh *dstmesh, PointList *dstpointlist,

@@ -9,7 +9,7 @@
 ! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
-#define ESMF_FILENAME "ESMF_FieldBundle.F90"
+^define ESMF_FILENAME "ESMF_FieldBundle.F90"
 !==============================================================================
 !
 ! ESMF FieldBundle Module
@@ -21,7 +21,8 @@ module ESMF_FieldBundleMod
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
-#include "ESMF.h"
+^include "ESMF.h"
+#include "ESMF_TypeKindRankMacros.hcppF90"
 
 !==============================================================================
 !BOPI
@@ -72,9 +73,9 @@ module ESMF_FieldBundleMod
 !------------------------------------------------------------------------------
 
   type ESMF_FieldBundleStatus
-#ifndef ESMF_NO_SEQUENCE
+^ifndef ESMF_NO_SEQUENCE
   sequence
-#endif
+^endif
     integer :: status
   end type
 
@@ -88,9 +89,9 @@ module ESMF_FieldBundleMod
 !------------------------------------------------------------------------------
 
   type ESMF_FieldBundleType
-#ifndef ESMF_NO_SEQUENCE
+^ifndef ESMF_NO_SEQUENCE
   sequence
-#endif
+^endif
     type(ESMF_Base)              :: base      ! base class object
     type(ESMF_GeomBase)          :: geombase  ! base class object
     type(ESMF_Container)         :: container ! internal storage implementation
@@ -101,9 +102,9 @@ module ESMF_FieldBundleMod
 
   ! F90 class type to hold pointer to FieldBundleType
   type ESMF_FieldBundle
-#ifndef ESMF_NO_SEQUENCE
+^ifndef ESMF_NO_SEQUENCE
   sequence
-#endif
+^endif
     type(ESMF_FieldBundleType), pointer :: this
     ESMF_INIT_DECLARE
   end type
@@ -187,6 +188,26 @@ module ESMF_FieldBundleMod
 !EOPI
 
   end interface
+
+! -------------------------- ESMF-public method -------------------------------
+!BOPI
+! !IROUTINE: ESMF_FieldBundleCreate -- Overloaded FieldBunleCreate interface
+
+! !INTERFACE:
+  interface ESMF_FieldBundleCreate
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+    module procedure ESMF_FieldBundleCreateDefault
+    TypeKindRankInterfaceMacro(FieldBundleCreateGridDataPtr)
+
+! !DESCRIPTION:
+! This interface provides a single entry point for the various
+!  types of {\tt ESMF\_FieldBundleCreate} subroutines.
+
+  end interface
+
+!EOPI
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOPI
@@ -401,8 +422,8 @@ contains
 
 
 !-------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleEQ()"
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldBundleEQ()"
 !BOPI
 ! !IROUTINE:  ESMF_FieldBundleEQ - Compare two FieldBundles for equality
 !
@@ -452,8 +473,8 @@ contains
 
 
 !-------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleNE()"
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldBundleNE()"
 !BOPI
 ! !IROUTINE:  ESMF_FieldBundleNE - Compare two FieldBundles for non-equality
 !
@@ -490,8 +511,8 @@ contains
 
 
 !------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleAddList()"
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldBundleAddList()"
 !BOP
 ! !IROUTINE: ESMF_FieldBundleAdd - Add Fields to a FieldBundle
 !
@@ -644,14 +665,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! No garbage, all fieldList should be linked
       !
       ! Obviously the attribute linking of the geombase object is a bit tricky,
-      ! right now, we don't restrict the geombase to be matched among the fields in the
+      ! right now, we do not restrict the geombase to be matched among the fields in the
       ! fieldBundle. But for attribute hierarchy, we actually assume that all fields in
       ! the fieldBundle should be built on the same geombase object.
       !
       ! 3/7/13
       ! New behavior for geombase:
       ! 1. FieldBundleSet() can always change the geombase object in a FieldBundle
-      ! 2. Add/AddReplace/Replace can  change the geombase object in a FieldBundle if it's not set
+      ! 2. Add/AddReplace/Replace can  change the geombase object in a FieldBundle if it is not set
       ! 3. Add/AddReplace/Replace can NOT change  geombase object in a FieldBundle after its set
       !
       ! Attribute link
@@ -681,8 +702,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleAddItem()"
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldBundleAddItem()"
 !BOPI
 ! !IROUTINE: ESMF_FieldBundleAdd - Add one Field to a FieldBundle
 !
@@ -751,8 +772,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleAddReplace()"
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldBundleAddReplace()"
 !BOP
 ! !IROUTINE: ESMF_FieldBundleAddReplace - Conditionally add or replace Fields in a FieldBundle
 !
@@ -856,17 +877,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
 !------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleCreate()"
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldBundleCreateDefault()"
 !BOP
-! !IROUTINE: ESMF_FieldBundleCreate - Create a FieldBundle from a list of Fields
+! !IROUTINE: ESMF_FieldBundleCreate - Create a non packed FieldBundle from a list of Fields
 !
 ! !INTERFACE:
-  function ESMF_FieldBundleCreate(keywordEnforcer, fieldList, &
+  ! Private name; call using ESMF_FieldBundleCreate()
+  function ESMF_FieldBundleCreateDefault(keywordEnforcer, fieldList, &
       multiflag, relaxedflag, name, rc)
 !         
 ! !RETURN VALUE:
-    type(ESMF_FieldBundle) :: ESMF_FieldBundleCreate
+    type(ESMF_FieldBundle) :: ESMF_FieldBundleCreateDefault
 !
 ! !ARGUMENTS:
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -942,7 +964,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Initialize
     nullify(this)
-    nullify(ESMF_FieldBundleCreate%this)
+    nullify(ESMF_FieldBundleCreateDefault%this)
     
     ! Create the internal objects
     allocate(this, stat=localrc)
@@ -966,17 +988,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     this%is_proxy = .false.
 
     ! Set return value
-    ESMF_FieldBundleCreate%this => this
+    ESMF_FieldBundleCreateDefault%this => this
 
     ! Add reference to this object into ESMF garbage collection table
     ! Only call this in those Create() methods that call Construct()
-    call c_ESMC_VMAddFObject(ESMF_FieldBundleCreate, ESMF_ID_FIELDBUNDLE%objectID)
+    call c_ESMC_VMAddFObject(ESMF_FieldBundleCreateDefault, ESMF_ID_FIELDBUNDLE%objectID)
 
     ! Set init code
-    ESMF_INIT_SET_CREATED(ESMF_FieldBundleCreate)
+    ESMF_INIT_SET_CREATED(ESMF_FieldBundleCreateDefault)
 
     if(present(fieldList)) then
-      call ESMF_FieldBundleAdd(ESMF_FieldBundleCreate, fieldList, &
+      call ESMF_FieldBundleAdd(ESMF_FieldBundleCreateDefault, fieldList, &
         multiflag=multiflag, relaxedflag=relaxedflag, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -985,13 +1007,212 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
     
-  end function ESMF_FieldBundleCreate
+  end function ESMF_FieldBundleCreateDefault
 !------------------------------------------------------------------------------
 
+#define FieldBundleCreateGridDataPtrDoc() \
+!---------------------------------------------------------------------------- @\
+!BOP @\
+! !IROUTINE: ESMF_FieldBundleCreate - Create packed FieldBundle from Fortran array pointer and Grid @\
+! @\
+! !INTERFACE: @\
+! ! Private name; call using ESMF_FieldBundleCreate() @\
+! function ESMF_FieldBundleCreateGrid<rank><type><kind>(fieldNameList, & @\
+!   farrayPtr, grid, fieldCountDim, keywordEnforcer, & @\
+!   indexflag, staggerLoc, & @\
+!   gridToFieldMap, ungriddedLbound, ungriddedUBound, & @\
+!   totalLWidth, totalUWidth, name, rc) @\
+! @\
+! !RETURN VALUE: @\
+!   type(ESMF_FieldBundle) :: ESMF_FieldBundleCreateGridDataPtr<rank><type><kind> @\
+! @\
+! !ARGUMENTS: @\
+!   character(len=*), intent(in)            :: fieldNameList(:) @\
+!   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: farrayPtr @\
+!   type(ESMF_Grid), intent(in)             :: grid @\
+!   integer,          intent(in)            :: fieldCountDim @\
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+!   type(ESMF_Index_Flag), intent(in), optional      :: indexflag @\
+!   type(ESMF_StaggerLoc), intent(in), optional      :: staggerloc @\
+!   integer,          intent(in),  optional :: gridToFieldMap(:) @\
+!   integer,          intent(in),  optional :: ungriddedLBound(:) @\
+!   integer,          intent(in),  optional :: ungriddedUBound:) @\
+!   integer,          intent(in),  optional :: totalLWidth(:) @\
+!   integer,          intent(in),  optional :: totalUWidth(:) @\
+!   integer,          intent(in),  optional :: name @\
+!   integer,          intent(out), optional :: rc @\
+! @\
+! !DESCRIPTION: @\
+! Create a packed FieldBundle from user supplied list of field names, pre-allocated @\
+! Fortran array pointer, and {\tt ESMF\_Grid} object. @\
+! @\
+! The arguments are: @\
+! \begin{description} @\
+! \item [fieldNameList]  @\
+!   A list of field names for the Fields held by the packed {\tt FieldBundle}. @\
+! \item[farrayPtr] @\
+!   Pre-allocated Fortran array pointer holding the memory of the list of Fields. @\
+! \item [grid] @\
+!   The {\tt ESMF\_Grid} object on which the Fields in the packed FieldBundle are built. @\
+! \item [fieldCountDim] @\
+!   The dimension in the {\tt farrayPtr} that has the size of fieldCount. @\
+! \item [{[indexflag]}] @\
+!       Indicate how DE-local indices are defined. See section @\
+!       \ref{const:indexflag} for a list of valid indexflag options. @\
+!       All Fields in packed FieldBundle use identical indexflag setting. @\
+! \item [{[staggerloc]}] @\
+!       Stagger location of data in grid cells.  For valid @\
+!       predefined values see section \ref{const:staggerloc}. @\
+!       To create a custom stagger location see section @\
+!       \ref{sec:usage:staggerloc:adv}. The default @\
+!       value is {\tt ESMF\_STAGGERLOC\_CENTER}. @\
+! \item [{[gridToFieldMap]}] @\
+!       List with number of elements equal to the @\
+!       {\tt grid}|s dimCount.  The list elements map each dimension @\
+!       of the {\tt grid} to a dimension in the {\tt farray} by @\
+!       specifying the appropriate {\tt farray} dimension index. The default is to @\
+!       map all of the {\tt grid}|s dimensions against the lowest dimensions of @\
+!       the {\tt farray} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../). @\
+!       The values of all {\tt gridToFieldMap} entries must be greater than or equal @\
+!       to one and smaller than or equal to the {\tt farray} rank. @\
+!       It is erroneous to specify the same {\tt gridToFieldMap} entry @\
+!       multiple times. The total ungridded dimensions in the {\tt field} @\
+!       are the total {\tt farray} dimensions less @\
+!       the total (distributed + undistributed) dimensions in @\
+!       the {\tt grid}.  Ungridded dimensions must be in the same order they are @\
+!       stored in the {\t farray}.  Permutations of the order of @\
+!       dimensions are handled via individual communication methods.  For example, @\
+!       an undistributed dimension can be remapped to a distributed dimension @\
+!       as part of the {\tt ESMF\_ArrayRedist()} operation. @\
+!       All Fields in packed FieldBundle use identical gridToFieldMap setting. @\
+! \item [{[ungriddedLBound]}] @\
+!       Lower bounds of the ungridded dimensions of the {\tt field}. @\
+!       The number of elements in the {\tt ungriddedLBound} is equal to the number of ungridded @\
+!       dimensions in the {\tt field}.  All ungridded dimensions of the @\
+!       {\tt field} are also undistributed. When field dimension count is @\
+!       greater than grid dimension count, both ungriddedLBound and ungriddedUBound @\
+!       must be specified. When both are specified the values are checked @\
+!       for consistency.  Note that the the ordering of @\
+!       these ungridded dimensions is the same as their order in the {\tt farray}. @\
+!       All Fields in packed FieldBundle use identical ungriddedLBound setting. @\
+! \item [{[ungriddedUBound]}] @\
+!       Upper bounds of the ungridded dimensions of the {\tt field}. @\
+!       The number of elements in the {\tt ungriddedUBound} is equal to the number of ungridded @\
+!       dimensions in the {\tt field}.  All ungridded dimensions of the @\
+!       {\tt field} are also undistributed. When field dimension count is @\
+!       greater than grid dimension count, both ungriddedLBound and ungriddedUBound @\
+!       must be specified. When both are specified the values are checked @\
+!       for consistency.  Note that the the ordering of @\
+!       these ungridded dimensions is the same as their order in the {\tt farray}. @\
+!       All Fields in packed FieldBundle use identical ungriddedUBound setting. @\
+! \item [{[totalLWidth]}] @\
+!       Lower bound of halo region.  The size of this array is the number @\
+!       of gridded dimensions in the Field.  However, ordering of the elements @\
+!       needs to be the same as they appear in the {\tt farray}.  Values default @\
+!       to 0.  If values for totalLWidth are specified they must be reflected in @\
+!       the size of the {\tt farray}.  That is, for each gridded dimension the @\
+!       {\tt farray} size should be max( {\tt totalLWidth} + {\tt totalUWidth} @\
+!       + {\tt computationalCount}, {\tt exclusiveCount} ). @\
+!       All Fields in packed FieldBundle use identical totalLWidth setting. @\
+! \item [{[totalUWidth]}] @\
+!       Upper bound of halo region.  The size of this array is the number @\
+!       of gridded dimensions in the Field.  However, ordering of the elements @\
+!       needs to be the same as they appear in the {\tt farray}.  Values default @\
+!       to 0.  If values for totalUWidth are specified they must be reflected in @\
+!       the size of the {\tt farray}.  That is, for each gridded dimension the @\
+!       {\tt farray} size should max( {\tt totalLWidth} + {\tt totalUWidth} @\
+!       + {\tt computationalCount}, {\tt exclusiveCount} ). @\
+!       All Fields in packed FieldBundle use identical totalUWidth setting. @\
+! \item [{[name]}]  @\
+!       Field name.  @\
+! \item [{[rc]}]  @\
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+! \end{description} @\
+! @\
+!EOP @\
+!---------------------------------------------------------------------------- @\
+
+#define FieldBundleCreateGridDataPtrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
+!---------------------------------------------------------------------------- @\
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_FieldBundleCreateGridDataPtr" @\
+  function ESMF_FieldBundleCreateGridDataPtr##mrank##D##mtypekind(fieldNameList, & @\
+   farrayPtr, grid, fieldCountDim, keywordEnforcer, & @\
+   indexflag, staggerLoc, & @\
+   gridToFieldMap, ungriddedLbound, ungriddedUBound, & @\
+   totalLWidth, totalUWidth, name, rc) @\
+@\
+ ! return value @\
+    type(ESMF_FieldBundle) :: ESMF_FieldBundleCreateGridDataPtr##mrank##D##mtypekind @\
+@\
+ !ARGUMENTS: @\
+    character(len=*), intent(in)            :: fieldNameList(:) @\
+    mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farrayPtr @\
+    type(ESMF_Grid), intent(in)             :: grid @\
+    integer,          intent(in)            :: fieldCountDim @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+    type(ESMF_Index_Flag), intent(in), optional      :: indexflag @\
+    type(ESMF_StaggerLoc), intent(in), optional      :: staggerloc @\
+    integer,          intent(in),  optional :: gridToFieldMap(:) @\
+    integer,          intent(in),  optional :: ungriddedLBound(:) @\
+    integer,          intent(in),  optional :: ungriddedUBound(:) @\
+    integer,          intent(in),  optional :: totalLWidth(:) @\
+    integer,          intent(in),  optional :: totalUWidth(:) @\
+    character(len=*), intent(in),  optional :: name @\
+    integer,          intent(out), optional :: rc @\
+@\
+    ! local variables @\
+    type(ESMF_FieldBundleType), pointer  :: this @\
+    integer          :: localrc @\
+@\
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+    localrc = ESMF_RC_NOT_IMPL @\
+@\
+    ! Initialize @\
+    nullify(this) @\
+    nullify(ESMF_FieldBundleCreateGridDataPtr##mrank##D##mtypekind%this) @\
+@\
+    ! Create the internal objects @\
+    allocate(this, stat=localrc) @\
+    if (ESMF_LogFoundAllocError(localrc, & @\
+        msg="- Allocating FieldBundle Type", & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
+@\
+    call ESMF_BaseCreate(this%base, "FieldBundle", name, 0, rc=localrc) @\
+    if (ESMF_LogFoundError(localrc, & @\
+        ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
+@\
+    this%container = ESMF_ContainerCreate(rc=localrc) @\
+    if (ESMF_LogFoundError(localrc, & @\
+        ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
+@\
+    this%status = ESMF_FBSTATUS_EMPTY @\
+@\
+    ! Set up proxy flag @\
+    this%is_proxy = .false. @\
+@\
+    ! Set return value @\
+    ESMF_FieldBundleCreateGridDataPtr##mrank##D##mtypekind%this => this @\
+@\
+    ! Add reference to this object into ESMF garbage collection table @\
+    ! Only call this in those Create() methods that call Construct() @\
+    call c_ESMC_VMAddFObject(ESMF_FieldBundleCreateGridDataPtr##mrank##D##mtypekind, ESMF_ID_FIELDBUNDLE%objectID) @\
+@\
+    ! Set init code @\
+    ESMF_INIT_SET_CREATED(ESMF_FieldBundleCreateGridDataPtr##mrank##D##mtypekind) @\
+@\
+    if (present(rc)) rc = ESMF_SUCCESS @\
+@\
+  end function ESMF_FieldBundleCreateGridDataPtr##mrank##D##mtypekind  @\
+!---------------------------------------------------------------------------- @\
+
+TypeKindRankDeclarationMacro(FieldBundleCreateGridDataPtr)
 
 ! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleDestroy()"
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldBundleDestroy()"
 !BOP
 ! !IROUTINE: ESMF_FieldBundleDestroy - Release resources associated with a FieldBundle
 
@@ -1100,8 +1321,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleDestruct()"
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldBundleDestruct()"
 !BOPI
 ! !IROUTINE: ESMF_FieldBundleDestruct - Destruct the FieldBundleType
 !
@@ -1189,8 +1410,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleGetListAll()"
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldBundleGetListAll()"
 !BOP
 ! !IROUTINE: ESMF_FieldBundleGet - Get object-wide information from a FieldBundle
 !
@@ -1416,8 +1637,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleGetItem()"
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldBundleGetItem()"
 !BOP
 ! !IROUTINE: ESMF_FieldBundleGet - Get information about a Field by name and optionally return a Field
 !
@@ -1490,8 +1711,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if(fieldCount .gt. 1) then
         if(present(field)) then
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-            msg = "field argument cannot be specified when fieldCount is "// &
-              "greater than 1", ESMF_CONTEXT, rcToReturn=rc)
+msg="field argument cannot be specified when fieldCount is greater than 1",&
+              ESMF_CONTEXT, rcToReturn=rc)
           return
         endif
       endif
@@ -1511,8 +1732,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleGetList()"
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldBundleGetList()"
 !BOP
 ! !IROUTINE: ESMF_FieldBundleGet - Get a list of Fields by name
 !
@@ -1615,8 +1836,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleGetIndex()"
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldBundleGetIndex()"
 !BOPI
 ! !IROUTINE: ESMF_FieldBundleGet - Access the fieldIndex-th Field in FieldBundle
 !
@@ -1705,8 +1926,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleHalo()"
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldBundleHalo()"
 !BOP
 ! !IROUTINE: ESMF_FieldBundleHalo - Execute a FieldBundle halo operation
 !
@@ -1824,8 +2045,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end subroutine ESMF_FieldBundleHalo
 
 !------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleHaloRelease()"
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldBundleHaloRelease()"
 !BOP
 ! !IROUTINE: ESMF_FieldBundleHaloRelease - Release resources associated with a FieldBundle halo operation
 !
@@ -1902,8 +2123,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end subroutine ESMF_FieldBundleHaloRelease
 
 !------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleHaloStore()"
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldBundleHaloStore()"
 !BOP
 ! !IROUTINE: ESMF_FieldBundleHaloStore - Precompute a FieldBundle halo operation
 !
@@ -2008,8 +2229,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
 ! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleIsCreated()"
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldBundleIsCreated()"
 !BOP
 ! !IROUTINE: ESMF_FieldBundleIsCreated - Check whether a FieldBundle object has been created
 
@@ -2047,8 +2268,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
 ! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundlePrint()"
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldBundlePrint()"
 !BOP
 ! !IROUTINE: ESMF_FieldBundlePrint - Print FieldBundle information
 
@@ -2066,7 +2287,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Print internal information of the specified {\tt fieldbundle} object. \\
+!   Print internal information of the specified {\tt fieldbundle} object.
 !
 !   The arguments are:
 !   \begin{description}
@@ -2125,8 +2346,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
 ! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleRead()"
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldBundleRead()"
 !BOP
 ! !IROUTINE: ESMF_FieldBundleRead - Read Fields to a FieldBundle from file(s)
 ! \label{api:FieldBundleRead}
@@ -2199,7 +2420,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
     integer                        :: file_ext_p
     integer                        :: time
 
-#ifdef ESMF_PIO
+^ifdef ESMF_PIO
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2302,17 +2523,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
       if (rc == ESMF_SUCCESS) rc = localrc
     end if
 
-#else
+^else
     ! Return indicating PIO not present
     if (present(rc)) rc = ESMF_RC_LIB_NOT_PRESENT
-#endif
+^endif
 
   end subroutine ESMF_FieldBundleRead
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleRedist()"
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldBundleRedist()"
 !BOP
 ! !IROUTINE: ESMF_FieldBundleRedist - Execute a FieldBundle redistribution
 !
@@ -2465,8 +2686,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   end subroutine ESMF_FieldBundleRedist
 
 !------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleRedistRelease()"
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldBundleRedistRelease()"
 !BOP
 ! !IROUTINE: ESMF_FieldBundleRedistRelease - Release resources associated with a FieldBundle redistribution
 !
@@ -2632,8 +2853,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP 
 !---------------------------------------------------------------------------- 
 
-#undef  ESMF_METHOD 
-#define ESMF_METHOD "ESMF_FieldBundleRedistStoreI4" 
+^undef  ESMF_METHOD 
+^define ESMF_METHOD "ESMF_FieldBundleRedistStoreI4" 
 !BOPI
 ! !IROUTINE: ESMF_FieldBundleRedistStore - Precompute a FieldBundle redistribution
 !
@@ -2713,8 +2934,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end subroutine ESMF_FieldBundleRedistStoreI4
 !------------------------------------------------------------------------------ 
 
-#undef  ESMF_METHOD 
-#define ESMF_METHOD "ESMF_FieldBundleRedistStoreI8" 
+^undef  ESMF_METHOD 
+^define ESMF_METHOD "ESMF_FieldBundleRedistStoreI8" 
 !BOPI
 ! !IROUTINE: ESMF_FieldBundleRedistStore - Precompute a FieldBundle redistribution
 !
@@ -2793,8 +3014,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end subroutine ESMF_FieldBundleRedistStoreI8
 !------------------------------------------------------------------------------ 
 
-#undef  ESMF_METHOD 
-#define ESMF_METHOD "ESMF_FieldBundleRedistStoreR4"
+^undef  ESMF_METHOD 
+^define ESMF_METHOD "ESMF_FieldBundleRedistStoreR4"
 !BOPI
 ! !IROUTINE: ESMF_FieldBundleRedistStore - Precompute a FieldBundle redistribution
 !
@@ -2873,8 +3094,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end subroutine ESMF_FieldBundleRedistStoreR4
 !------------------------------------------------------------------------------ 
 
-#undef  ESMF_METHOD 
-#define ESMF_METHOD "ESMF_FieldBundleRedistStoreR8"
+^undef  ESMF_METHOD 
+^define ESMF_METHOD "ESMF_FieldBundleRedistStoreR8"
 !BOPI
 ! !IROUTINE: ESMF_FieldBundleRedistStore - Precompute a FieldBundle redistribution
 !
@@ -3042,8 +3263,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP 
 !---------------------------------------------------------------------------- 
 
-#undef  ESMF_METHOD 
-#define ESMF_METHOD "ESMF_FieldBundleRedistStoreNF" 
+^undef  ESMF_METHOD 
+^define ESMF_METHOD "ESMF_FieldBundleRedistStoreNF" 
 !BOPI
 ! !IROUTINE: ESMF_FieldBundleRedistStore - Precompute a FieldBundle redistribution
 !
@@ -3132,8 +3353,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
 !------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleRegrid()"
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldBundleRegrid()"
 !BOP
 ! !IROUTINE: ESMF_FieldBundleRegrid - Execute a FieldBundle regrid operation
 !
@@ -3262,8 +3483,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
 !------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleRegridRelease()"
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldBundleRegridRelease()"
 !BOP
 ! !IROUTINE: ESMF_FieldBundleRegridRelease - Release resources associated with a FieldBundle regrid operation
 !
@@ -3342,8 +3563,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
 !------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleRegridStore()"
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldBundleRegridStore()"
 !BOP
 ! !IROUTINE: ESMF_FieldBundleRegridStore - Precompute a FieldBundle regrid operation
 ! \label{api:esmf_fieldbundleregridstore}
@@ -3784,10 +4005,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       if (.not.rhListMatch) then
         ! No match found: precompute new RH for this field pair
-#if 0
+^if 0
 call ESMF_LogWrite("no rhListMatch -> pre-compute new remapping!", &
   ESMF_LOGMSG_INFO)
-#endif
+^endif
         if (gridPair) then
           ! add a new rhList element
           allocate(rhListE)
@@ -3797,10 +4018,10 @@ call ESMF_LogWrite("no rhListMatch -> pre-compute new remapping!", &
 
         if (associated(rhListG)) then
           ! able to reuse already precomputed weight matrix
-#if 0
+^if 0
 call ESMF_LogWrite("able to reuse already precomputed weight matrix!", &
   ESMF_LOGMSG_INFO)
-#endif
+^endif
           factorList=>rhListG%factorList
           factorIndexList=>rhListG%factorIndexList
           call ESMF_FieldSMMStore(srcField=srcFields(i), &
@@ -3813,10 +4034,10 @@ call ESMF_LogWrite("able to reuse already precomputed weight matrix!", &
             ESMF_CONTEXT, rcToReturn=rc)) return
         else
           ! must precompute full regridding
-#if 0
+^if 0
 call ESMF_LogWrite("must precompute full regridding!", &
   ESMF_LOGMSG_INFO)
-#endif
+^endif
           factorList=>NULL()
           factorIndexList=>NULL()
           call ESMF_FieldRegridStore(srcField=srcFields(i), &
@@ -3858,10 +4079,10 @@ call ESMF_LogWrite("must precompute full regridding!", &
         endif
       else
         ! Match found: reuse previous RH for this field pair
-#if 0
+^if 0
 call ESMF_LogWrite("found rhListMatch -> reuse routehandle!", &
   ESMF_LOGMSG_INFO)
-#endif
+^endif
         ! pull out the routehandle from the matching rhList element
         rhh = rhListE%rh
         ! deallocate temporary grid/field info
@@ -3925,8 +4146,8 @@ call ESMF_LogWrite("found rhListMatch -> reuse routehandle!", &
 
 
 !------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleRemove()"
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldBundleRemove()"
 !BOP
 ! !IROUTINE: ESMF_FieldBundleRemove - Remove Fields from FieldBundle
 !
@@ -4040,8 +4261,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
 !------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleReplace()"
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldBundleReplace()"
 !BOP
 ! !IROUTINE: ESMF_FieldBundleReplace - Replace Fields in FieldBundle
 !
@@ -4162,8 +4383,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
 !------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleSetGrid"
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldBundleSetGrid"
 !BOP
 ! !IROUTINE: ESMF_FieldBundleSet - Associate a Grid with an empty FieldBundle
 ! 
@@ -4241,8 +4462,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
 !------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleSetMesh"
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldBundleSetMesh"
 !BOP
 ! !IROUTINE: ESMF_FieldBundleSet - Associate a Mesh with an empty FieldBundle
 ! 
@@ -4313,8 +4534,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
 !------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleSetLS"
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldBundleSetLS"
 !BOP
 ! !IROUTINE: ESMF_FieldBundleSet - Associate a LocStream with an empty FieldBundle
 ! 
@@ -4392,8 +4613,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
 !------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleSetXGrid"
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldBundleSetXGrid"
 !BOP
 ! !IROUTINE: ESMF_FieldBundleSet - Associate a XGrid with an empty FieldBundle
 ! 
@@ -4463,8 +4684,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
 !------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleSMM()"
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldBundleSMM()"
 !BOP
 ! !IROUTINE: ESMF_FieldBundleSMM - Execute a FieldBundle sparse matrix multiplication
 !
@@ -4659,8 +4880,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end subroutine ESMF_FieldBundleSMM
 
 !------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleSMMRelease()"
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldBundleSMMRelease()"
 !BOP
 ! !IROUTINE: ESMF_FieldBundleSMMRelease - Release resources associated with a FieldBundle sparse matrix multiplication
 !
@@ -4872,8 +5093,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP 
 !---------------------------------------------------------------------------- 
 
-#undef  ESMF_METHOD 
-#define ESMF_METHOD "ESMF_FieldBundleSMMStoreI4" 
+^undef  ESMF_METHOD 
+^define ESMF_METHOD "ESMF_FieldBundleSMMStoreI4" 
 !BOPI
 ! !IROUTINE: ESMF_FieldBundleSMMStore - Precompute a FieldBundle sparse matrix multiplication
 !
@@ -4953,8 +5174,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end subroutine ESMF_FieldBundleSMMStoreI4
 !------------------------------------------------------------------------------ 
 
-#undef  ESMF_METHOD 
-#define ESMF_METHOD "ESMF_FieldBundleSMMStoreI8" 
+^undef  ESMF_METHOD 
+^define ESMF_METHOD "ESMF_FieldBundleSMMStoreI8" 
 !BOPI
 ! !IROUTINE: ESMF_FieldBundleSMMStore - Precompute a FieldBundle sparse matrix multiplication
 !
@@ -5034,8 +5255,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end subroutine ESMF_FieldBundleSMMStoreI8
 !------------------------------------------------------------------------------ 
 
-#undef  ESMF_METHOD 
-#define ESMF_METHOD "ESMF_FieldBundleSMMStoreR4"
+^undef  ESMF_METHOD 
+^define ESMF_METHOD "ESMF_FieldBundleSMMStoreR4"
 !BOPI
 ! !IROUTINE: ESMF_FieldBundleSMMStore - Precompute a FieldBundle sparse matrix multiplication
 !
@@ -5115,8 +5336,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end subroutine ESMF_FieldBundleSMMStoreR4
 !------------------------------------------------------------------------------ 
 
-#undef  ESMF_METHOD 
-#define ESMF_METHOD "ESMF_FieldBundleSMMStoreR8"
+^undef  ESMF_METHOD 
+^define ESMF_METHOD "ESMF_FieldBundleSMMStoreR8"
 !BOPI
 ! !IROUTINE: ESMF_FieldBundleSMMStore - Precompute a FieldBundle sparse matrix multiplication
 !
@@ -5197,8 +5418,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !---------------------------------------------------------------------------- 
 
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleSMMStoreNF"
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldBundleSMMStoreNF"
 !BOP
 ! !IROUTINE: ESMF_FieldBundleSMMStore - Precompute a FieldBundle sparse matrix multiplication
 !
@@ -5366,8 +5587,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! ---------------------------------------------------------------------------- 
 
 ! ----------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleSMMStoreFromFile"
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldBundleSMMStoreFromFile"
 
 !BOP
 ! !IROUTINE: ESMF_FieldBundleSMMStore - Precompute field bundle sparse matrix multiplication using factors read from file
@@ -5460,8 +5681,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end subroutine ESMF_FieldBundleSMMStoreFromFile
 
 ! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleValidate()"
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldBundleValidate()"
 !BOP
 ! !IROUTINE: ESMF_FieldBundleValidate - Validate fieldbundle internals
 
@@ -5512,8 +5733,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
 ! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleWrite()"
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldBundleWrite()"
 !BOP
 ! !IROUTINE: ESMF_FieldBundleWrite - Write the Fields into a file
 ! \label{api:FieldBundleWrite}
@@ -5650,7 +5871,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
     logical                         :: errorFound        ! True if err. cond.
     integer                         :: file_ext_p
 
-#ifdef ESMF_PIO
+^ifdef ESMF_PIO
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -5707,15 +5928,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
          ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Create an I/O object
-#if 0
+^if 0
 call ESMF_LogWrite("Bef IOCreate", ESMF_LOGMSG_INFO, rc=rc)
-#endif
+^endif
     io = ESMF_IOCreate(rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
         ESMF_CONTEXT, rcToReturn=rc)) return
-#if 0
+^if 0
 call ESMF_LogWrite("Aft IOCreate", ESMF_LOGMSG_INFO, rc=rc)
-#endif
+^endif
 
     ! From here on out, we need to clean up so no returning on error
     if (singlef) then
@@ -5739,16 +5960,16 @@ call ESMF_LogWrite("Aft IOCreate", ESMF_LOGMSG_INFO, rc=rc)
             ESMF_CONTEXT, rcToReturn=rc)) return
       enddo
 
-#if 0
+^if 0
 call ESMF_LogWrite("Bef ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
-#endif
+^endif
       call ESMF_IOWrite(io, trim(fileName), overwrite=opt_overwriteflag,    &
           status=opt_status, timeslice=timeslice, iofmt=opt_iofmt, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
           ESMF_CONTEXT, rcToReturn=rc)) return
-#if 0
+^if 0
 call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
-#endif
+^endif
 
     else
       do i=1,fieldCount
@@ -5794,17 +6015,17 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
       if (rc == ESMF_SUCCESS) rc = localrc
     end if
 
-#else
+^else
     ! Return indicating PIO not present
     if (present(rc)) rc = ESMF_RC_LIB_NOT_PRESENT
-#endif
+^endif
  
   end subroutine ESMF_FieldBundleWrite
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleSerialize"
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldBundleSerialize"
 
 !BOPI
 ! !IROUTINE: ESMF_FieldBundleSerialize - Serialize fieldbundle info into a byte stream
@@ -5929,8 +6150,8 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
     end subroutine ESMF_FieldBundleSerialize
 
 !------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleDeserialize"
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldBundleDeserialize"
 
 !BOPI
 ! !IROUTINE: ESMF_FieldBundleDeserialize - Deserialize a byte stream into a FieldBundle
@@ -6103,8 +6324,8 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
     end function ESMF_FieldBundleDeserialize
 
 ! -------------------------- ESMF-internal method -----------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleSetGeom()"
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldBundleSetGeom()"
 !BOPI
 ! !IROUTINE: ESMF_FieldBundleSetGeom - Set a GeomBase in FieldBundle
 !
@@ -6205,8 +6426,8 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
 
 
 ! -------------------------- ESMF-internal method -----------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleRemoveGeom()"
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldBundleRemoveGeom()"
 !BOPI
 ! !IROUTINE: ESMF_FieldBundleRemoveGeom - Remove the GeomBase in FieldBundle
 !
@@ -6242,7 +6463,7 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
     ! check input arguments
     ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
 
-    ! should never call this method when it's not GRIDSET
+    ! should never call this method when it is not GRIDSET
     if(fieldbundle%this%status /= ESMF_FBSTATUS_GRIDSET) then
       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
         msg = " - cannot remove a gemobase from a fieldbundle that is empty", &
@@ -6275,8 +6496,8 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
 ! -----------------------------------------------------------------------------
 
 ! -------------------------- ESMF-internal method -----------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleToAB()"
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldBundleToAB()"
 !BOPI
 ! !IROUTINE: ESMF_FieldBundleToAB - Create an ArrayBundle from a FieldBundle
 !
@@ -6336,13 +6557,13 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
         call ESMF_FieldGet(flist(i), array=alist(i), rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-#if 0
+^if 0
         call ESMF_ArrayGet(alist(i), name=name, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         write(msgString,*) "alist(",i,") name:", trim(name)
         call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
-#endif
+^endif
     enddo
 
     ESMF_FieldBundleToAB = ESMF_ArrayBundleCreate(arrayList=alist, rc=localrc)
@@ -6357,8 +6578,8 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
 ! -----------------------------------------------------------------------------
 
 ! -------------------------- ESMF-internal method -----------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleGetInit()"
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldBundleGetInit()"
 !BOPI
 ! !IROUTINE: ESMF_FieldBundleGetInit - Internal access routine for init code
 !

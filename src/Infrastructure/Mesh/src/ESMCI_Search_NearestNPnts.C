@@ -9,18 +9,13 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <Mesh/include/Regridding/ESMCI_Search.h>
-#include <Mesh/include/Legacy/ESMCI_MeshTypes.h>
-#include <Mesh/include/Legacy/ESMCI_MeshObjTopo.h>
-#include <Mesh/include/Regridding/ESMCI_Mapping.h>
-#include <Mesh/include/Legacy/ESMCI_MeshObj.h>
-#include <Mesh/include/ESMCI_Mesh.h>
-#include <Mesh/include/Legacy/ESMCI_MeshUtils.h>
+#include <Mesh/include/ESMCI_Search_Nearest.h>
+#include <Mesh/include/Regridding/ESMCI_SpaceDir.h>
 #include <Mesh/include/ESMCI_OTree.h>
-#include <Mesh/include/Legacy/ESMCI_Mask.h>
+// #include <Mesh/include/Legacy/ESMCI_Mask.h>
 #include <Mesh/include/Legacy/ESMCI_ParEnv.h>
-#include <Mesh/include/Regridding/ESMCI_MeshRegrid.h>
 #include <Mesh/include/ESMCI_MathUtil.h>
+#include <Mesh/include/ESMCI_RegridConstants.h>
 
 #include "PointList/include/ESMCI_PointList.h"
 
@@ -36,8 +31,6 @@
 #include <limits>
 #include <vector>
 
-#include <Mesh/include/Legacy/ESMCI_BBox.h>
-#include <Mesh/include/Legacy/ESMCI_SpaceDir.h>
 
 using std::vector;
 
@@ -50,8 +43,6 @@ static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
-
-  bool snn_debug=false;
 
 #define SN_BAD_ID -1
 
@@ -239,13 +230,11 @@ struct SearchData {
 
 #if 0
     // DEBUG
-    if (snn_debug) {
       printf(" nnf2: dst_id=%d :: ",573);
       for (int i=0; i<num_valid_pnts; i++) {
         printf(" %d ",pnts[i].src_id);
       }
       printf("\n");
-    }
 #endif
 
     // return was_added status
@@ -316,8 +305,8 @@ struct SearchData {
 
 
 // The main routine
-  void SearchNearestSrcToDstNPnts(const PointList &src_pl, const PointList &dst_pl, int num_pnts, int unmappedaction, SearchResult &result, bool set_dst_status, WMat &dst_status) {
-  Trace __trace("Search(PointList &src_pl, PointList &dst_pl, int unmappedaction, SearchResult &result)");
+  void SearchNearestSrcToDstNPnts(const PointList &src_pl, const PointList &dst_pl, int num_pnts, int unmappedaction, SearchNearestResultList &result, bool set_dst_status, WMat &dst_status) {
+  Trace __trace("Search(PointList &src_pl, PointList &dst_pl, int unmappedaction, SearchNearestResultList &result)");
 
   // Get spatial dim and make sure both have the same
   UInt sdim=src_pl.get_coord_dim();
@@ -388,7 +377,7 @@ struct SearchData {
     if (sd.num_valid_pnts > 0) {
 
       // New search result
-      Search_result *sr=new Search_result();
+      Search_nearest_result *sr=new Search_nearest_result();
 
       // Fill search results
       sr->dst_gid=p;  // save the location in the dst point list, so we can pull info out
@@ -397,8 +386,7 @@ struct SearchData {
         SearchDataPnt *pnt=sd.pnts+i;
 
         // Fill in tmp_snr
-        Search_node_result tmp_snr;
-        tmp_snr.node=NULL;
+        Search_nearest_node_result tmp_snr;
         tmp_snr.dst_gid=pnt->src_id; // Yeah this is ugly, but it seems a shame to add a new member
                                        // TODO: rename these members to be more generic
         MU_ASSIGN_VEC3D(tmp_snr.pcoord,pnt->coord);
@@ -467,10 +455,8 @@ struct CommDataBack {
 };
 
 
-  void ParSearchNearestSrcToDstNPnts(const PointList &src_pl, const PointList &dst_pl, int num_pnts,  int unmappedaction, SearchResult &result, bool set_dst_status, WMat &dst_status) {
-    Trace __trace("Search(const PointList &src_pl, const PointList &dst_pl, int unmappedaction, SearchResult &result)");
-  //int FindPnts(const Mesh &mesh, int unmappedaction, int dim_pnts, int num_pnts, double *pnts, int *procs, int *gids) {
-  //  Trace __trace("FindPnts()");
+  void ParSearchNearestSrcToDstNPnts(const PointList &src_pl, const PointList &dst_pl, int num_pnts,  int unmappedaction, SearchNearestResultList &result, bool set_dst_status, WMat &dst_status) {
+    Trace __trace("Search(const PointList &src_pl, const PointList &dst_pl, int unmappedaction, SearchNearestResultList &result)");
 
   // Get spatial dim and make sure both have the same
   int sdim=src_pl.get_coord_dim();
@@ -876,7 +862,7 @@ struct CommDataBack {
     if (sd_list[p].num_valid_pnts > 0) {
 
       // We've found a nearest source point, so add to results list
-      Search_result *sr=new Search_result();
+      Search_nearest_result *sr=new Search_nearest_result();
 
       // Fill search results
       sr->dst_gid=p;  // save the location in the dst point list, so we can pull info out
@@ -885,8 +871,7 @@ struct CommDataBack {
         SearchDataPnt *pnt=sd_list[p].pnts+i;
 
         // Fill in tmp_snr
-        Search_node_result tmp_snr;
-        tmp_snr.node=NULL;
+        Search_nearest_node_result tmp_snr;
         tmp_snr.dst_gid=pnt->src_id; // Yeah this is ugly, but it seems a shame to add a new member
         // TODO: rename these members to be more generic
         MU_ASSIGN_VEC3D(tmp_snr.pcoord,pnt->coord);

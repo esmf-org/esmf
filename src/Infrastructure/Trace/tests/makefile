@@ -46,7 +46,7 @@ CLOBBERDIRS =
 
 ESMF_TESTTRACE_TARGET = ftest_profile
 
-ifeq ($(ESMF_TESTTRACE),ON)
+ifeq ($(ESMF_TRACE_LIB_BUILD),ON)
 ESMF_F90COMPILEOPTS += -DESMF_TESTTRACE
 # add link options for static builds, if required
 ifneq ($(ESMF_TRACE_BUILD_SHARED),ON)

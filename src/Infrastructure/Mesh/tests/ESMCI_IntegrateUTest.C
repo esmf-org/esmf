@@ -15,7 +15,7 @@
 #endif
 #include <mpi.h>
 
-#include <ESMCI_Extrapolation.h>
+#include <ESMCI_ExtrapolationPoleLGC.h>
 #include <ESMCI_Interp.h>
 #include <ESMCI_Integrate.h>
 #include <ESMCI_Mesh.h>

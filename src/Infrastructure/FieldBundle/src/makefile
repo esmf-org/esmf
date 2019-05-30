@@ -3,11 +3,10 @@
 
 ALL: build_here 
 
-AUTOGEN   = 
+AUTOGEN   = ESMF_FieldBundle.F90
 
 SOURCEC	  = 
-#SOURCEF	  = ESMF_FieldBundle.F90 ESMF_FieldBundleSMM.F90 ESMF_FieldBundleRedist.F90 ESMF_FieldBundleHalo.F90 ESMF_FieldBundleRegrid.F90 $(AUTOGEN)
-SOURCEF	  = ESMF_FieldBundle.F90 $(AUTOGEN)
+SOURCEF	  = $(AUTOGEN)
 SOURCEH	  = 
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
@@ -22,6 +21,8 @@ CLEANFILES  = $(AUTOGEN) $(addprefix ../doc/, $(TEXFILES) )
 CLOBBERDIRS =
 
 include $(ESMF_DIR)/makefile
+
+#ESMF_CPPDEFAULT             = gcc -E -P -x c -C -w
 
 DIRS	  = 
 

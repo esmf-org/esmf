@@ -26,7 +26,7 @@
 
 // include associated header file
 #include <Mesh/include/ESMCI_OTree.h>
-#include <Mesh/include/Legacy/ESMCI_SpaceDir.h>
+#include <Mesh/include/Regridding/ESMCI_SpaceDir.h>
 #include "stdlib.h"
 #include <Mesh/include/Legacy/ESMCI_ParEnv.h>
 

@@ -36,6 +36,8 @@
 
 #include "MBTagConventions.hpp"
 
+// #define ESMF_REGRID_DEBUG_MAP_ANY
+
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
@@ -977,7 +979,7 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
                                            std::vector<PL_Comm_Pair> *point_to_proc_list,
                                            PointList **out_pl) {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "create_mbmesh_redist_elem_move_points()"
+#define ESMC_METHOD "create_mbmesh_redist_pointlist_move_points()"
     int merr;
 
     // Get Parallel Information
@@ -992,6 +994,8 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
 
     SparseMsg comm;
 
+    std::vector<int> mymoving(pl->get_curr_num_pts(),0);
+
     // construct a per proc list of location in pl to be sent to procs
     //      also mark which points are moving
     std::vector<int> proc_counts;
@@ -999,11 +1003,17 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
     std::vector< std::vector<int> > idx_list; // TODO: optimize sparse vector
     idx_list.resize(petCount);
 
+    int num_snd_pts = 0;
     std::vector<PL_Comm_Pair>::iterator pb = point_to_proc_list->begin();
     std::vector<PL_Comm_Pair>::iterator pe = point_to_proc_list->end();
-    for (pb; pb != pe; ++pb) {
+    for (pb; pb !=  pe; ++pb) {
+        num_snd_pts++;
         proc_counts[pb->proc]++;
         idx_list[pb->proc].push_back(pb->loc);
+        mymoving[pb->loc] = 1;
+#ifdef ESMF_REGRID_DEBUG_MAP_ANY
+        printf("%d# LOOP1: Node %d send by [%d]\n", Par::Rank(), pb->loc, pb->proc);
+#endif
     }
 
     // construct lists used to set up the communication pattern
@@ -1021,6 +1031,12 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
         snd_sizes.push_back(proc_counts[i]*snd_size);
         snd_counts.push_back(proc_counts[i]);
         idx_list2.push_back(idx_list[i]); // dense version of idx_list
+#ifdef ESMF_REGRID_DEBUG_MAP_ANY
+      printf("%d# LOOP2: Proc %d to send nodes [", Par::Rank(), i);
+      for (int j = 0 ; j < idx_list[i].size(); ++j)
+        printf("%d, ", idx_list[i].at(j));
+      printf("]\n");
+#endif
       }
     }
 
@@ -1083,28 +1099,26 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
     }
     comm.resetBuffers();
 
-    // int pl_rend_size=pl->get_curr_num_pts() - num_snd_pts + num_rcv_pts;
-    int pl_rend_size=num_pts;
+    int pl_rend_size=pl->get_curr_num_pts() - num_snd_pts + num_pts;
+    // int pl_rend_size=num_pts;
 #ifdef DEBUG
     printf("PET %d - create_pointlist_redist_move_points: pl_rend_size (%d) = pl->size (%d)\n", localPet, pl_rend_size, pl->get_curr_num_pts());
 #endif
-    // Create source rendezvous point list (create outside of if, so will work even if 0-sized)
+
+    // Create source rendezvous point list, start with points that are not being sent to other processors
     PointList *pl_rend;
     pl_rend = new ESMCI::PointList(pl_rend_size,sdim);
 
-    if (pl_rend_size > 0) {
+    if (pl_rend_size >= 0) {
 
-      // srcplist_rend = new ESMCI::PointList(plist_rend_size,sdim);
-
-      // TODO: verify that Zoltan is not checking that point are sent to their native processors, if so we can remove this loop and the mymoving vector
-      // int orig_srcpointlist_size = pl->get_curr_num_pts();
-      // for (int i=0; i<orig_srcpointlist_size; i++) {
-      //   if (mymoving[i] == 0) {
-      //     int temp_id=pl->get_id(i);
-      //     double *temp_pnt = (double *)pl->get_coord_ptr(i);
-      //     pl_rend->add(temp_id,temp_pnt);
-      //   }
-      // }
+      int orig_dstpointlist_size = pl->get_curr_num_pts();
+      for (int i=0; i<orig_dstpointlist_size; i++) {
+        if (mymoving[i] == 0) {
+          int temp_id=pl->get_id(i);
+          double *temp_pnt = (double *)pl->get_coord_ptr(i);
+          pl_rend->add(temp_id,temp_pnt);
+        }
+      }
 
       int ip=0;
       for (std::vector<UInt>::iterator p = comm.inProc_begin(); p != comm.inProc_end(); ++p) {

@@ -29,7 +29,7 @@
 #include <Mesh/include/ESMCI_MBMesh.h>
 #include <Mesh/include/Regridding/ESMCI_WMat.h>
 #include <Mesh/include/ESMCI_MBMesh_BBox.h>
-#include <Mesh/include/ESMCI_MBMesh_Search_EToE.h>
+#include <Mesh/include/ESMCI_MBMesh_Search_EtoE.h>
 #include <Mesh/include/ESMCI_MBMesh_Util.h>
 #include <Mesh/include/ESMCI_MBMesh_Rendez_Elem.h>
 #include <Mesh/include/Regridding/ESMCI_Interp.h>

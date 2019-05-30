@@ -31,16 +31,18 @@
 #include "ESMCI_TraceRegion.h"
 
 #include "Mesh/include/Legacy/ESMCI_Exception.h"
-#include "Mesh/include/Regridding/ESMCI_Interp.h"
-#include "Mesh/include/Regridding/ESMCI_Extrapolation.h"
+// #include "Mesh/include/Regridding/ESMCI_Interp.h"
+// #include "Mesh/include/Regridding/ESMCI_ExtrapolationPoleLGC.h"
 
 #include "Mesh/include/ESMCI_MathUtil.h"
 
 #include "Mesh/include/ESMCI_MBMesh.h"
 #include "Mesh/include/ESMCI_MBMesh_Regrid_Glue.h"
-#include "Mesh/include/ESMCI_MBMesh_Conserve.h"
-#include "Mesh/include/ESMCI_MBMesh_Bilinear.h"
+#include "Mesh/include/ESMCI_RegridConstants.h"
 #include "Mesh/include/ESMCI_MBMesh_Glue.h"
+#include "Mesh/include/ESMCI_MBMesh_Bilinear.h"
+#include "Mesh/include/ESMCI_MBMesh_Conserve.h"
+#include "Mesh/include/ESMCI_MBMesh_Extrapolation.h"
 
 #include <iostream>
 #include <vector>
@@ -57,11 +59,18 @@
 using namespace std;
 using namespace ESMCI;
 
-int calc_regrid_wgts(MBMesh *srcmbmp, MBMesh *dstmbmp, PointList *dstpl, IWeights &wts,
+int calc_regrid_wgts(MBMesh *srcmbmp, MBMesh *dstmbmp, 
+                     PointList *srcpl, PointList *dstpl, IWeights &wts,
                      int *regridConserve, int *regridMethod,
                      int *regridPoleType, int *regridPoleNPnts,
                      int *regridScheme,
-                     int *map_type, int *unmappedaction,
+                     int *map_type, 
+                     int *extrapMethod,
+                     int *extrapNumSrcPnts,
+                     ESMC_R8 *extrapDistExponent,
+                     int *extrapNumLevels,
+                     int *extrapNumInputLevels, 
+                     int *unmappedaction,
                      bool set_dst_status, WMat &dst_status);
 // prototypes from below
 static bool all_mbmesh_node_ids_in_wmat(PointList *pointlist, WMat &wts, int *missing_id);
@@ -79,23 +88,30 @@ extern "C" void FTN_X(c_esmc_arraysmmstoreind4)(ESMCI::Array **srcArray,
     int *srcTermProcessing, int *pipelineDepth, int *rc);
 
 
-void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::PointList **plsrcpp,
-                     void **meshdstpp, ESMCI::Array **arraydstpp, ESMCI::PointList **pldstpp,
-                     int *regridMethod,
-                     int *map_type,
-                     int *norm_type,
-                     int *regridPoleType, int *regridPoleNPnts,
-                     int *regridScheme,
-                     int *unmappedaction, int *_ignoreDegenerate,
-                     int *srcTermProcessing, int *pipelineDepth,
-                     ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
-                     int *nentries, ESMCI::TempWeights **tweights,
-                     int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl,
-                     int *_has_statusArray, ESMCI::Array **_statusArray,
-                     int*rc) {
+void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, 
+                          ESMCI::PointList **plsrcpp,
+                          void **meshdstpp, ESMCI::Array **arraydstpp, 
+                          ESMCI::PointList **pldstpp,
+                          int *regridMethod,
+                          int *map_type,
+                          int *norm_type,
+                          int *regridPoleType, int *regridPoleNPnts,
+                          int *regridScheme,
+                          int *extrapMethod,
+                          int *extrapNumSrcPnts,
+                          ESMC_R8 *extrapDistExponent,
+                          int *extrapNumLevels,
+                          int *extrapNumInputLevels, 
+                          int *unmappedaction, int *_ignoreDegenerate,
+                          int *srcTermProcessing, int *pipelineDepth,
+                          ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
+                          int *nentries, ESMCI::TempWeights **tweights,
+                          int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl,
+                          int *_has_statusArray, ESMCI::Array **_statusArray,
+                          int*rc) {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_regrid_create()"
-  Trace __trace(" FTN_X(regrid_test)(ESMCI::Grid **gridsrcpp, ESMCI::Grid **griddstcpp, int*rc");
+#define ESMC_METHOD "MBMesh_regrid_create()"
+  Trace __trace("MBMesh_regrid_create()");
 
   // Get Moab Mesh wrapper
   MBMesh *mbmsrcp=*((MBMesh **)meshsrcpp);
@@ -239,30 +255,29 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::Po
     VM::logMemInfo(std::string("before MOAB Mesh Weight Generation"));
 #endif
 
-    // to do NEARESTDTOS just do NEARESTSTOD and invert results
-    if (*regridMethod != ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) {
-      if(!calc_regrid_wgts(mbmsrcp, mbmdstp, dstpl, wts, &regridConserve, regridMethod,
-                        regridPoleType, regridPoleNPnts,
-                        regridScheme, map_type, &temp_unmappedaction,
-                        set_dst_status, dst_status))
-        Throw() << "Online regridding error" << std::endl;
-    } else {
-      int tempRegridMethod=ESMC_REGRID_METHOD_NEAREST_SRC_TO_DST;
-      if(!calc_regrid_wgts(mbmdstp, mbmsrcp, dstpl, wts, &regridConserve, &tempRegridMethod,
-                        regridPoleType, regridPoleNPnts,
-                        regridScheme, map_type, &temp_unmappedaction,
-                        set_dst_status, dst_status))
-        Throw() << "Online regridding error" << std::endl;
-    }
+    // need to pass the pole_constraint_id for extrapolation
+    //   |--> after pole handling implemented, which is after gridtombmesh
+    if(!calc_regrid_wgts(mbmsrcp, mbmdstp, srcpl, dstpl, wts, 
+                         &regridConserve, regridMethod,
+                         regridPoleType, regridPoleNPnts,
+                         regridScheme, map_type, 
+                         extrapMethod,
+                         extrapNumSrcPnts,
+                         extrapDistExponent,
+                         extrapNumLevels,
+                         extrapNumInputLevels, 
+                         &temp_unmappedaction,
+                         set_dst_status, dst_status))
+    Throw() << "Online regridding error" << std::endl;
 
 #ifdef ESMF_PROFILE_MESH_WEIGHTGEN_MBMESH
     VM::logMemInfo(std::string("after MOAB Mesh Weight Generation"));
     ESMCI_REGION_EXIT("MOAB Mesh Weight Generation", localrc)
 #endif
 
-// #define BILINEAR_WEIGHTS
-#ifdef BILINEAR_WEIGHTS
-  cout << endl << "Bilinear Weight Matrix" << endl;
+// #define OUTPUT_WEIGHTS
+#ifdef OUTPUT_WEIGHTS
+  cout << endl << "Weight Matrix" << endl;
   // print out weights
   WMat::WeightMap::iterator mb = wts.begin_row(), me = wts.end_row();
   for(; mb != me; ++mb) {
@@ -1147,21 +1162,60 @@ void mbcopy_cnsv_rs_from_WMat_to_Array(WMat *wmat, ESMCI::Array *array) {
 }
 
 
-int calc_regrid_wgts(MBMesh *srcmbmp, MBMesh *dstmbmp, PointList *dstpl, IWeights &wts,
+int calc_regrid_wgts(MBMesh *srcmbmp, MBMesh *dstmbmp,
+                     PointList *srcpl, PointList *dstpl,
+                     IWeights &wts,
                      int *regridConserve, int *regridMethod,
                      int *regridPoleType, int *regridPoleNPnts,
                      int *regridScheme,
-                     int *map_type, int *unmappedaction,
+                     int *map_type, 
+                     int *extrapMethod,
+                     int *extrapNumSrcPnts,
+                     ESMC_R8 *extrapDistExponent,
+                     int *extrapNumLevels,
+                     int *extrapNumInputLevels, 
+                     int *unmappedaction,
                      bool set_dst_status, WMat &dst_status) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "calc_regrid_wgts()"
+  Trace __trace("calc_regrid_wgts()");
+
+  int localrc;
 
   // Branch to different subroutines based on method
   if (*regridMethod == ESMC_REGRID_METHOD_CONSERVE) {
     calc_cnsrv_regrid_wgts(srcmbmp, dstmbmp, wts);
-  } else if (*regridMethod == ESMC_REGRID_METHOD_BILINEAR){
+  } else if (*regridMethod == ESMC_REGRID_METHOD_BILINEAR) {
     calc_bilinear_regrid_wgts(srcmbmp, dstpl, wts, map_type,
                               set_dst_status, dst_status);
+  } else if (*regridMethod == ESMC_REGRID_METHOD_NEAREST_SRC_TO_DST) {
+    calc_nearest_regrid_wgts(srcpl, dstpl, wts,
+                             set_dst_status, dst_status, 
+                             regridMethod, extrapNumSrcPnts,
+                             extrapDistExponent);
+  } else if (*regridMethod == ESMC_REGRID_METHOD_NEAREST_IDAVG) {
+    calc_nearest_regrid_wgts(srcpl, dstpl, wts, 
+                             set_dst_status, dst_status, 
+                             regridMethod, extrapNumSrcPnts, 
+                             extrapDistExponent);
+  } else if (*regridMethod == ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) {
+    calc_nearest_regrid_wgts(dstpl, srcpl, wts,
+                             set_dst_status, dst_status,
+                             regridMethod, extrapNumSrcPnts,
+                             extrapDistExponent);
   } else {
-    Throw() << "This regrid method not currently supported with MOAB";
+    Throw() << "This regrid method is not currently supported.";
+  }
+
+  // Do extrapolation if the user has requested it
+  if (*extrapMethod != ESMC_EXTRAPMETHOD_NONE) {
+    MBMesh_Extrapolate(srcmbmp, srcpl, dstmbmp, dstpl,
+                       wts, 
+                       // map_type, // RLO: not sure if this is needed
+                       NULL, // pole_constraint_id only used with src_mesh
+                       extrapMethod, extrapNumSrcPnts, extrapDistExponent,
+                       extrapNumLevels, extrapNumInputLevels,
+                       set_dst_status, dst_status, &localrc);
   }
 
   return 1;

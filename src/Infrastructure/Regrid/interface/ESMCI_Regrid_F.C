@@ -28,7 +28,7 @@
 #include "Mesh/include/ESMCI_Mesh.h"
 #include "Mesh/include/ESMCI_MeshCap.h"
 #include "Mesh/include/Regridding/ESMCI_Integrate.h"
-#include "Mesh/include/Regridding/ESMCI_Extrapolation.h"
+#include "Mesh/include/Regridding/ESMCI_ExtrapolationPoleLGC.h"
 #include "Mesh/include/Legacy/ESMCI_MeshRead.h"
 #include "Mesh/include/Legacy/ESMCI_Exception.h"
 

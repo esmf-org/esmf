@@ -16,19 +16,23 @@ The Field metadata is implemented as an ESMF Attribute Package:
      {\bf Attribute name} & {\bf Definition} & {\bf Controlled vocabulary}\\
      \hline\hline
      {\tt Connected} & Connected status.& false, true\\ \hline
-     {\tt TimeStamp} & Nine integer values representing ESMF Time object.& N/A\\ \hline
+     {\tt TimeStamp} & Ten integer values representing ESMF Time object.& N/A\\ \hline
      {\tt ProducerConnection} & String value indicating whether the Field has been connected with a producer. & open, targeted,\newline connected\\ \hline
      {\tt ConsumerConnection} & String value indicating whether the Field has been connected with a consumer.& open, targeted,\newline connected\\ \hline
      {\tt Updated} & String value indicating updated status during initialization.& false, true\\ \hline
-     {\tt TransferOfferField} & String value indicating a component's intention to transfer the advertised Field object.& will provide,\newline can provide,\newline cannot provide\\ \hline
-     {\tt TransferActionField} & String value indicating the action a component is supposed to take with respect to transferring the Field object.& provide, accept\\ \hline
-     {\tt SharePolicyField} & String value indicating a component's poilcy with respect to sharing the Field data allocation.& share,\newline not share\\ \hline
+     {\tt TransferOfferGeomObject} & String value indicating a component's ability to transfer information about the advertised Field, including its GeomObject.& will provide,\newline can provide,\newline cannot provide\\ \hline
+     {\tt TransferActionGeomObject} & String value indicating the action a component is supposed to take with respect to transferring Field information, including its GeomObject.& provide, accept\\ \hline
+     {\tt SharePolicyField} & String value indicating a component's policy with respect to sharing the Field data allocation.& share,\newline not share\\ \hline
      {\tt ShareStatusField} & String value indicating the status with respect to sharing the underlying Field data allocation that was negotiated.& shared,\newline not shared\\ \hline
-     {\tt TransferOfferGeomObject} & String value indicating a component's intention to transfer the underlying Grid or Mesh on which an advertised Field object is defined.& will provide,\newline can provide,\newline cannot provide\\ \hline
-     {\tt TransferActionGeomObject} & String value indicating the action a component is supposed to take with respect to transferring the underlying Grid or Mesh on which an advertised Field object is defined.& provide, accept\\ \hline
-     {\tt SharePolicyGeomObject} & String value indicating a component's poilcy with respect to sharing the Grid or Mesh on which the advertised FIeld object is defined.& share,\newline not share\\ \hline
+     {\tt SharePolicyGeomObject} & String value indicating a component's policy with respect to sharing the Grid or Mesh on which the advertised FIeld object is defined.& share,\newline not share\\ \hline
      {\tt ShareStatusGeomObject} & String value indicating the status with respect to sharing the underlying GeomObject that was negotiated.& shared,\newline not shared\\ \hline
      {\tt UngriddedLBound} & Integer value list. If present equals the {\tt ungriddedLBound} of the provider field during a GeomObject transfer. & {\em no restriction}\\ \hline
      {\tt UngriddedUBound} & Integer value list. If present equals the {\tt ungriddedUBound} of the provider field.during a GeomObject transfer. & {\em no restriction}\\ \hline
+     {\tt GridToFieldMap} & Integer value list. If present equals the {\tt gridToFieldMap} of the provider field.during a GeomObject transfer. & {\em no restriction}\\ \hline
+     {\tt ArbDimCount} & Integer value. If present equals the {\tt arbDimCount} of the provider field.during a GeomObject transfer. & {\em no restriction}\\ \hline
+     {\tt MinIndex} & Integer value list. If present equals the {\tt minIndex} (of tile 1) of the provider field.during a GeomObject transfer. & {\em no restriction}\\ \hline
+     {\tt MaxIndex} & Integer value list. If present equals the {\tt maxIndex} (of tile 1) of the provider field.during a GeomObject transfer. & {\em no restriction}\\ \hline
+     {\tt TypeKind} & Integer value. If present equals the integer representation of {\tt typekind} of the provider field.during a GeomObject transfer. & {\em implementation dependent range}\\ \hline
+     {\tt GeomLoc} & Integer value. If present equals the integer representation of {\tt staggerloc} (for Grid) or {\tt meshloc} (for Mesh) of the provider field.during a GeomObject transfer. & {\em implementation dependent range}\\ \hline
      \hline
 \end{longtable}

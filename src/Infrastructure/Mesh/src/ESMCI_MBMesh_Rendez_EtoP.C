@@ -36,6 +36,11 @@
 #include "Mesh/include/Legacy/ESMCI_BBox.h"
 #include "ESMCI_PointList.h"
 
+// #define ESMF_REGRID_DEBUG_MAP_ELEM1 836800
+// #define ESMF_REGRID_DEBUG_MAP_ELEM2 836801
+// #define ESMF_REGRID_DEBUG_MAP_NODE 4323801
+// #define ESMF_REGRID_DEBUG_MAP_ANY
+
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
@@ -170,6 +175,17 @@ static void assign_elems_to_procs(MBMesh *mesh,
   std::vector<EntityHandle>::iterator si = elems->begin(), se = elems->end();
   for (; si != se; ++si) {
     EntityHandle &elem = *si;
+    
+    int id;
+#ifdef ESMF_REGRID_DEBUG_MAP_ANY
+    MBMesh_get_gid(mesh, elem, &id);
+#endif
+#ifdef ESMF_REGRID_DEBUG_MAP_ELEM1
+    MBMesh_get_gid(mesh, elem, &id);
+#endif
+#ifdef ESMF_REGRID_DEBUG_MAP_ELEM2
+    MBMesh_get_gid(mesh, elem, &id);
+#endif
 
     // Get bounding box for elem
     MBMesh_BBox ebox(mesh, elem, geom_tol, is_sph);
@@ -184,6 +200,19 @@ static void assign_elems_to_procs(MBMesh *mesh,
                              &procs[0],
                              &numprocs);
 
+// need to find object id and put into an if statement
+#ifdef ESMF_REGRID_DEBUG_MAP_ANY
+      printf("%d# Elem %d send to procs [", Par::Rank(), id);
+#endif
+#ifdef ESMF_REGRID_DEBUG_MAP_ELEM1
+    if (id==ESMF_REGRID_DEBUG_MAP_ELEM1)
+      printf("%d# Elem %d send to procs [", Par::Rank(), id);
+#endif
+#ifdef ESMF_REGRID_DEBUG_MAP_ELEM2
+    if (id==ESMF_REGRID_DEBUG_MAP_ELEM2)
+      printf("%d# Elem %d send to procs [", Par::Rank(), id);
+#endif
+
     // Add to pattern
     for (int i = 0; i < numprocs; i++) {
       EH_Comm_Pair ecp(elem, procs[i]);
@@ -194,47 +223,118 @@ static void assign_elems_to_procs(MBMesh *mesh,
       // Add if not already there
       if (lb == elem_to_proc_list->end() || *lb != ecp)
         elem_to_proc_list->insert(lb, ecp);
+#ifdef ESMF_REGRID_DEBUG_MAP_ANY
+      printf("%d, ", i);
+#endif
+#ifdef ESMF_REGRID_DEBUG_MAP_ELEM1
+    if (id==ESMF_REGRID_DEBUG_MAP_ELEM1)
+      printf("%d, ", i);
+#endif
+#ifdef ESMF_REGRID_DEBUG_MAP_ELEM2
+    if (id==ESMF_REGRID_DEBUG_MAP_ELEM2)
+      printf("%d, ", i);
+#endif
     } // for nproc
+#ifdef ESMF_REGRID_DEBUG_MAP_ANY
+      printf("]\n");
+#endif
+#ifdef ESMF_REGRID_DEBUG_MAP_ELEM1
+    if (id==ESMF_REGRID_DEBUG_MAP_ELEM1)
+      printf("]\n");
+#endif
+#ifdef ESMF_REGRID_DEBUG_MAP_ELEM2
+    if (id==ESMF_REGRID_DEBUG_MAP_ELEM2)
+      printf("]\n");
+#endif
   } // for si
 }
 
-static void assign_points_to_procs(PointList *pl,
-                                   std::vector<point*> *points,
-                                   double geom_tol, UInt sdim,
-                                   Zoltan_Struct *zz,
+// static void assign_points_to_procs_old(PointList *pl,
+//                                    std::vector<point*> *points,
+//                                    double geom_tol, UInt sdim,
+//                                    Zoltan_Struct *zz,
+//                                    std::vector<PL_Comm_Pair> *point_to_proc_list) {
+//   Trace __trace("assign_points_to_procs()");
+// #undef  ESMC_METHOD
+// #define ESMC_METHOD "assign_points_to_procs()"
+// 
+//   // Get number of Pets
+//   int localrc;
+//   int petCount = VM::getCurrent(&localrc)->getPetCount();
+//   if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+//     throw localrc;  // bail out with exception
+// 
+//   // Allocate list of procs where each elem should be assigned
+//   int numprocs;
+//   std::vector<int> procs(petCount);
+// 
+//   // Loop through objects assigning them to procs
+//   for (unsigned int i = 0; i < points->size(); ++i) {
+// 
+//     point *p = points->at(i);
+// 
+// #ifdef ESMF_REGRID_DEBUG_MAP_ANY
+//     int id = pl->get_id(i);
+//     printf("%d# Node %d send to procs [", Par::Rank(), id);
+// #endif
+// #ifdef ESMF_REGRID_DEBUG_MAP_NODE
+//     int id = pl->get_id(i);
+// 
+//     if (id==ESMF_REGRID_DEBUG_MAP_NODE)
+//       printf("%d# Node %d send to procs [", Par::Rank(), id);
+// #endif
+// 
+//     // Assign elems to procs using zoltan struct
+//     Zoltan_LB_Box_Assign(zz, p->coords[0]-geom_tol,
+//                          p->coords[1]-geom_tol,
+//                          (sdim > 2 ? p->coords[2] : 0) - geom_tol,
+//                          p->coords[0]+geom_tol,
+//                          p->coords[1]+geom_tol,
+//                          (sdim > 2 ? p->coords[2] : 0) + geom_tol,
+//                          &procs[0],
+//                          &numprocs);
+// 
+//     // Add to pattern
+//     for (int j = 0; j < numprocs; j++) {
+//       PL_Comm_Pair pcp(i, procs[j]);
+// 
+//       std::vector<PL_Comm_Pair>::iterator lb =
+//         std::lower_bound(point_to_proc_list->begin(),
+//                          point_to_proc_list->end(), pcp);
+// 
+//       // Add if not already there
+//       if (lb == point_to_proc_list->end() || *lb != pcp)
+//         point_to_proc_list->insert(lb, pcp);
+// #ifdef ESMF_REGRID_DEBUG_MAP_ANY
+//       printf("%d, ", j);
+// #endif
+// #ifdef ESMF_REGRID_DEBUG_MAP_NODE
+//       if (id==ESMF_REGRID_DEBUG_MAP_NODE)
+//         printf("%d, ", j);
+// #endif
+//     } // for nproc
+// #ifdef ESMF_REGRID_DEBUG_MAP_ANY
+//     printf("]\n");
+// #endif
+// #ifdef ESMF_REGRID_DEBUG_MAP_NODE
+//     if (id==ESMF_REGRID_DEBUG_MAP_NODE)
+//       printf("]\n");
+// #endif
+//   } // for si
+// }
+
+static void assign_points_to_procs(PointList *pl, int numExport, ZOLTAN_ID_PTR exportGids,
+                                   ZOLTAN_ID_PTR exportLids,
+                                   int *exportProcs, int list1_size,
                                    std::vector<PL_Comm_Pair> *point_to_proc_list) {
   Trace __trace("assign_points_to_procs()");
 #undef  ESMC_METHOD
 #define ESMC_METHOD "assign_points_to_procs()"
 
-  // Get number of Pets
-  int localrc;
-  int petCount = VM::getCurrent(&localrc)->getPetCount();
-  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-    throw localrc;  // bail out with exception
-
-  // Allocate list of procs where each elem should be assigned
-  int numprocs;
-  std::vector<int> procs(petCount);
-
   // Loop through objects assigning them to procs
-  for (unsigned int i = 0; i < points->size(); ++i) {
-
-    point *p = points->at(i);
-
-    // Assign elems to procs using zoltan struct
-    Zoltan_LB_Box_Assign(zz, p->coords[0]-geom_tol,
-                         p->coords[1]-geom_tol,
-                         (sdim > 2 ? p->coords[2] : 0) - geom_tol,
-                         p->coords[0]+geom_tol,
-                         p->coords[1]+geom_tol,
-                         (sdim > 2 ? p->coords[2] : 0) + geom_tol,
-                         &procs[0],
-                         &numprocs);
-
-    // Add to pattern
-    for (int j = 0; j < numprocs; j++) {
-      PL_Comm_Pair pcp(i, procs[j]);
+  for (unsigned int i = 0; i < numExport; ++i) {
+    if (exportGids[i*2]==1) {
+      PL_Comm_Pair pcp(exportLids[i]-list1_size, exportProcs[i]);
 
       std::vector<PL_Comm_Pair>::iterator lb =
         std::lower_bound(point_to_proc_list->begin(),
@@ -243,8 +343,12 @@ static void assign_points_to_procs(PointList *pl,
       // Add if not already there
       if (lb == point_to_proc_list->end() || *lb != pcp)
         point_to_proc_list->insert(lb, pcp);
-    } // for nproc
-  } // for si
+
+#ifdef ESMF_REGRID_DEBUG_MAP_ANY
+      printf("%d# Node %d[%d] will be sent by proc [%d]\n", Par::Rank(), exportGids[i*2+1], exportLids[i]-list1_size, exportProcs[i]);
+#endif
+    }
+  }
 }
 
 // TODO: this should be a member function of a PointList, or PointList should
@@ -388,8 +492,10 @@ void calc_rendez_comm_pattern(MBMesh *srcmesh, PointList *dstpl,
                                    zz, src_elem_to_proc_list, is_sph);
 
   // Calc. where destintation points are to go
-  assign_points_to_procs(dstpl, &(zd.dst_points), 1e-6, dstpl->get_coord_dim(),
-                         zz, dst_point_to_proc_list);
+  // assign_points_to_procs(dstpl, &(zd.dst_points), 1e-6, dstpl->get_coord_dim(),
+  //                        zz, dst_point_to_proc_list);
+  assign_points_to_procs(dstpl, numExport, exportGlobalids, exportLocalids, 
+                         exportProcs, zd.src_elems.size(), dst_point_to_proc_list);
 
   // Free Zoltan struct
   Zoltan_Destroy(&zz);

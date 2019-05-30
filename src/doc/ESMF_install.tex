@@ -945,6 +945,15 @@ ESMF\_PTHREADS} variable) will produce ESMF error messages during system test
 execution if the system tests were compiled with {\tt ESMF\_TESTWITHTHREADS}
 set to {\tt ON}.
 
+\item[ESMF\_TRACE\_LIB\_BUILD]
+Possible value: {\em ON} (default), {\em OFF}
+
+This variables determines whether extra libraries are built that are used
+to add additional symbols to the ESMF tracing and profiling capability,
+such as MPI communication functions.
+If set to {\tt ON} the libraries are built and placed into the
+{\tt ESMF\_INSTALL\_LIBDIR} alongside the ESMF library itself.
+
 \item[ESMF\_XERCES]
 See \ref{sec:xerces}
 

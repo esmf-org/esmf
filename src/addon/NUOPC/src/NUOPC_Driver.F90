@@ -304,8 +304,8 @@ module NUOPC_Driver
   
   !-----------------------------------------------------------------------------
 
-  recursive subroutine InitializeP0(gcomp, importState, exportState, clock, rc)
-    type(ESMF_GridComp)   :: gcomp
+  recursive subroutine InitializeP0(driver, importState, exportState, clock, rc)
+    type(ESMF_GridComp)   :: driver
     type(ESMF_State)      :: importState, exportState
     type(ESMF_Clock)      :: clock
     integer, intent(out)  :: rc
@@ -318,7 +318,7 @@ module NUOPC_Driver
     rc = ESMF_SUCCESS
 
     ! query the component for info
-    call NUOPC_CompGet(gcomp, name=name, verbosity=verbosity, rc=rc)
+    call NUOPC_CompGet(driver, name=name, verbosity=verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -340,8 +340,8 @@ module NUOPC_Driver
   
   !-----------------------------------------------------------------------------
 
-  recursive subroutine InitializeP1(gcomp, importState, exportState, clock, rc)
-    type(ESMF_GridComp)   :: gcomp
+  recursive subroutine InitializeP1(driver, importState, exportState, clock, rc)
+    type(ESMF_GridComp)   :: driver
     type(ESMF_State)      :: importState, exportState
     type(ESMF_Clock)      :: clock
     integer, intent(out)  :: rc
@@ -351,11 +351,12 @@ module NUOPC_Driver
     character(ESMF_MAXSTR)    :: name
     integer                   :: verbosity
     type(type_InternalState)  :: is
+    logical                   :: isSet
 
     rc = ESMF_SUCCESS
 
     ! query the component for info
-    call NUOPC_CompGet(gcomp, name=name, verbosity=verbosity, rc=rc)
+    call NUOPC_CompGet(driver, name=name, verbosity=verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -364,26 +365,34 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-    ! turn off hierarchy support b/c this entry point goes outside NUOPC
-    call NUOPC_CompAttributeSet(gcomp, &
-      name="HierarchyProtocol", value="off", rc=rc)
+    ! check if HierarchyProtocol attribute was set
+    call NUOPC_CompAttributeGet(driver, name="HierarchyProtocol", isSet=isSet, &
+      rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+    if (.not.isSet) then
+      ! turn hierarchy support to connect outside NUOPC
+      call NUOPC_CompAttributeSet(driver, &
+        name="HierarchyProtocol", value="ConnectProvidedFields", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+
     ! call the actual initialize routines
-    call InitializeIPDv02p1(gcomp, importState, exportState, clock, rc=rc)
+    call InitializeIPDv02p1(driver, importState, exportState, clock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call InitializeIPDv02p3(gcomp, importState, exportState, clock, rc=rc)
+    call InitializeIPDv02p3(driver, importState, exportState, clock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call InitializeIPDv02p5(gcomp, importState, exportState, clock, rc=rc)
+    call InitializeIPDv02p5(driver, importState, exportState, clock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
     ! query Component for the internal State
     nullify(is%wrap)
-    call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -407,9 +416,9 @@ module NUOPC_Driver
   
   !-----------------------------------------------------------------------------
 
-  recursive subroutine InitializeExternalAdvertise(gcomp, importState, &
+  recursive subroutine InitializeExternalAdvertise(driver, importState, &
     exportState, clock, rc)
-    type(ESMF_GridComp)   :: gcomp
+    type(ESMF_GridComp)   :: driver
     type(ESMF_State)      :: importState, exportState
     type(ESMF_Clock)      :: clock
     integer, intent(out)  :: rc
@@ -419,11 +428,12 @@ module NUOPC_Driver
     character(ESMF_MAXSTR)    :: name
     integer                   :: verbosity
     type(type_InternalState)  :: is
+    logical                   :: isSet
 
     rc = ESMF_SUCCESS
 
     ! query the component for info
-    call NUOPC_CompGet(gcomp, name=name, verbosity=verbosity, rc=rc)
+    call NUOPC_CompGet(driver, name=name, verbosity=verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -432,14 +442,22 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-    ! turn off hierarchy support b/c this entry point goes outside NUOPC
-    call NUOPC_CompAttributeSet(gcomp, &
-      name="HierarchyProtocol", value="off", rc=rc)
+    ! check if HierarchyProtocol attribute was set
+    call NUOPC_CompAttributeGet(driver, name="HierarchyProtocol", isSet=isSet, &
+      rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+    if (.not.isSet) then
+      ! turn hierarchy support to connect outside NUOPC
+      call NUOPC_CompAttributeSet(driver, &
+        name="HierarchyProtocol", value="ConnectProvidedFields", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+
     ! call the actual initialize routine
-    call InitializeIPDv02p1(gcomp, importState, exportState, clock, rc=rc)
+    call InitializeIPDv02p1(driver, importState, exportState, clock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
@@ -452,9 +470,9 @@ module NUOPC_Driver
   
   !-----------------------------------------------------------------------------
 
-  recursive subroutine InitializeIPDv02p1(gcomp, importState, exportState, &
+  recursive subroutine InitializeIPDv02p1(driver, importState, exportState, &
     clock, rc)
-    type(ESMF_GridComp)  :: gcomp
+    type(ESMF_GridComp)  :: driver
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
@@ -476,10 +494,9 @@ module NUOPC_Driver
     logical                   :: stateIsCreated
     logical                   :: areServicesSet
     logical                   :: needConnector
-    logical                   :: parentIsNUOPC
     integer                   :: rootPet, rootVas
     type(ESMF_VM)             :: vm
-    character(ESMF_MAXSTR)    :: name
+    character(ESMF_MAXSTR)    :: name, valueString
     character(ESMF_MAXSTR)    :: msgString, pLabel
     integer                   :: phase
     integer                   :: verbosity, vInherit
@@ -497,7 +514,7 @@ module NUOPC_Driver
     rc = ESMF_SUCCESS
 
     ! query the component for info
-    call NUOPC_CompGet(gcomp, name=name, verbosity=verbosity, rc=rc)
+    call NUOPC_CompGet(driver, name=name, verbosity=verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -508,21 +525,21 @@ module NUOPC_Driver
 
     ! handle verbosity
     if (btest(verbosity,8)) then
-      call ESMF_GridCompGet(gcomp, currentPhase=phase, rc=rc)
+      call ESMF_GridCompGet(driver, currentPhase=phase, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
         return  ! bail out
-      call NUOPC_CompSearchRevPhaseMap(gcomp, ESMF_METHOD_INITIALIZE, &
+      call NUOPC_CompSearchRevPhaseMap(driver, ESMF_METHOD_INITIALIZE, &
         phaseIndex=phase, phaseLabel=pLabel, rc=rc)
-      if (len_trim(pLabel)==0) pLabel="<none>"
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      call ESMF_GridCompGet(gcomp, clockIsPresent=clockIsPresent, rc=rc)
+      if (len_trim(pLabel)==0) pLabel="<none>"
+      call ESMF_GridCompGet(driver, clockIsPresent=clockIsPresent, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
         return  ! bail out
       if (clockIsPresent) then
-        call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
+        call ESMF_GridCompGet(driver, clock=internalClock, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) &
           return  ! bail out
@@ -549,13 +566,13 @@ module NUOPC_Driver
       msg="Allocation of internal state memory failed.", &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-    call ESMF_UserCompSetInternalState(gcomp, label_InternalState, is, rc)
+    call ESMF_UserCompSetInternalState(driver, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     
     ! test whether internal Clock has already been set in the Component
-    call ESMF_GridCompGet(gcomp, clockIsPresent=clockIsPresent, rc=rc)
+    call ESMF_GridCompGet(driver, clockIsPresent=clockIsPresent, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
@@ -566,7 +583,7 @@ module NUOPC_Driver
       return  ! bail out
     if (.not.clockIsPresent .and. clockIsCreated) then
       ! set the internal Clock as a copy of the incoming Clock by a default
-      call NUOPC_CompSetClock(gcomp, clock, rc=rc)
+      call NUOPC_CompSetClock(driver, clock, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -596,7 +613,7 @@ module NUOPC_Driver
     is%wrap%legacyReady = .false.
         
     ! SPECIALIZE by calling into attached method to SetServices for modelComps
-    call ESMF_MethodExecute(gcomp, label=label_SetModelServices, &
+    call ESMF_MethodExecute(driver, label=label_SetModelServices, &
       userRc=userrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -641,24 +658,22 @@ module NUOPC_Driver
 
     ! associated modelComps and create their import and export States + connectorComps
     nullify(compList, petLists)
-    call NUOPC_DriverGetComp(gcomp, compList, petLists, rc=rc)    
+    call NUOPC_DriverGetComp(driver, compList, petLists, rc=rc)    
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! determine whether this driver is plugged into a parent NUOPC driver or not
-    parentIsNUOPC = .true. ! initialize
-    call NUOPC_CompAttributeGet(gcomp, name="CompLabel", &
+    call NUOPC_CompAttributeGet(driver, name="CompLabel", &
       value=srcCompLabel, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (trim(srcCompLabel)=="_uninitialized") then
       ! this driver is not plugged into a NUOPC parent
-      parentIsNUOPC = .false.
       ! the ESMF component name to be used as NUOPC CompLabel
-      call ESMF_GridCompGet(gcomp, name=srcCompLabel, rc=rc)
+      call ESMF_GridCompGet(driver, name=srcCompLabel, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return
-      call NUOPC_CompAttributeSet(gcomp, name="CompLabel", &
+      call NUOPC_CompAttributeSet(driver, name="CompLabel", &
         value=trim(srcCompLabel), rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return
@@ -670,7 +685,7 @@ module NUOPC_Driver
       nullify(i_petList)
       if (i==0) then
       
-        is%wrap%modelComp(0) = gcomp      ! driver itself is in slot 0
+        is%wrap%modelComp(0) = driver     ! driver itself is in slot 0
         is%wrap%modelIS(0) = importState  ! driver import State
         is%wrap%modelES(0) = exportState  ! driver export State
         
@@ -727,7 +742,7 @@ module NUOPC_Driver
       if (associated(i_petList)) rootPet = i_petList(1)
       ! need to translate rootPet->rootVas because connector petList may
       ! scamble PETs across VASs
-      call ESMF_GridCompGet(gcomp, vm=vm, rc=rc)
+      call ESMF_GridCompGet(driver, vm=vm, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -768,7 +783,7 @@ module NUOPC_Driver
         ! dependencies have been removed
         if (i==0) then
           ! driver-self
-          call NUOPC_CompAttributeGet(gcomp, name="CompLabel", &
+          call NUOPC_CompAttributeGet(driver, name="CompLabel", &
             value=srcCompLabel, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -781,7 +796,7 @@ module NUOPC_Driver
         endif
         if (j==0) then
           ! driver-self
-          call NUOPC_CompAttributeGet(gcomp, name="CompLabel", &
+          call NUOPC_CompAttributeGet(driver, name="CompLabel", &
             value=dstCompLabel, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -794,16 +809,30 @@ module NUOPC_Driver
 
         ! now look up the associated connector, okay if it is not a valid object
         ! invalid components are detectable by the CompAreServicesSet() method
-        call NUOPC_DriverGetComp(gcomp, srcCompLabel, dstCompLabel, &
+        call NUOPC_DriverGetComp(driver, srcCompLabel, dstCompLabel, &
           comp=connector, petList=petList, relaxedflag=.true., rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         
         ! potentially the connector must be created here to/from driver-self
-        call NUOPC_CompAttributeGet(gcomp, name="HierarchyProtocol", &
-          value=hierarchyProtocol, rc=rc)
+        call NUOPC_CompAttributeGet(driver, name="HierarchyProtocol", &
+          isSet=needConnector, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        needConnector=.not.needConnector  ! default to do connection
+        if (.not.needConnector) then
+          ! inspect the HierarchyProtocol attribute to see if it requests a
+          ! connection
+          call NUOPC_CompAttributeGet(driver, name="HierarchyProtocol", &
+            value=hierarchyProtocol, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (trim(hierarchyProtocol)=="PushUpAllExportsAndUnsatisfiedImports" &
+            .or. trim(hierarchyProtocol)=="ConnectProvidedFields" &
+            .or. trim(hierarchyProtocol)=="Explorer") then
+            needConnector = .true.
+          endif
+        endif
         areServicesSet = NUOPC_CompAreServicesSet(connector, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -813,49 +842,54 @@ module NUOPC_Driver
           if (.not.(i==0.and.j==0)) then
             ! not a driver-to-driver-self connection, which has no known purpose
             if (i==0) then
-              needConnector = ESMF_StateIsCreated(is%wrap%modelIS(i), rc=rc)
+              needConnector = needConnector.and. &
+                ESMF_StateIsCreated(is%wrap%modelIS(i), rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return
-              if (parentIsNUOPC ) then
-                ! make sure a valid HieraryProtocol is requested
-                if (trim(hierarchyProtocol) /= &
-                  "PushUpAllExportsUnsatisfiedImports") then
-                  needConnector = .false.
-                endif
-              endif
             else
               ! j==0
-              needConnector = ESMF_StateIsCreated(is%wrap%modelES(j), rc=rc)
+              needConnector = needConnector.and. &
+                ESMF_StateIsCreated(is%wrap%modelES(j), rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return
-              if (parentIsNUOPC ) then
-                ! make sure a valid HieraryProtocol is requested
-                if (trim(hierarchyProtocol) /= &
-                  "PushUpAllExportsUnsatisfiedImports") then
-                  needConnector = .false.
-                endif
-              endif
             endif
             if (needConnector) then
-              ! the driver import or export States exist
+              ! driver import or export States exist and connection requested
               ! -> automatic connector add
-              call NUOPC_DriverAddComp(gcomp, &
+              call NUOPC_DriverAddComp(driver, &
                 srcCompLabel=srcCompLabel, dstCompLabel=dstCompLabel, &
                 compSetServicesRoutine=cplSS, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail
               ! retrieve the component with petList
-              call NUOPC_DriverGetComp(gcomp, srcCompLabel, dstCompLabel, &
+              call NUOPC_DriverGetComp(driver, srcCompLabel, dstCompLabel, &
                 comp=connector, petList=petList, relaxedflag=.true., rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail
-              ! automatically created connectors inherit lower 8-bit
-              ! of parent's verbosity setting
-              vInherit = ibits(verbosity,0,8)
-#if 0
-vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
-#endif
-              write(vString,"(I10)") vInherit
+              ! automatically created connectors inherit Verbosity from parent
+              call NUOPC_CompAttributeGet(driver, name="Verbosity", &
+                value=valueString, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail
+              if (trim(valueString)=="max" .or. trim(valueString)=="high" .or. &
+                trim(valueString)=="low" .or. trim(valueString)=="off") then
+                ! directly inherit presets
+                vString = trim(valueString)
+              else
+                ! not a present: lower 8-bit of parent's verbosity setting
+                vInherit = ibits(verbosity,0,8)
+                write(vString,"(I10)") vInherit
+              endif
+              if (btest(verbosity,13)) then
+                write (msgString,"(A)") trim(name)//&
+                  " - Setting verbosity on created component to: "// &
+                  trim(vString)
+                call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, &
+                  file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                  return  ! bail out
+              endif
               call NUOPC_CompAttributeSet(connector, name="Verbosity", &
                 value=vString, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -877,7 +911,7 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
     deallocate(compList, petLists)
 
     ! query Component for its Clock (set during specialization)
-    call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
+    call ESMF_GridCompGet(driver, clock=internalClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
@@ -984,7 +1018,7 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
     is%wrap%legacyReady = .true.
 
     ! SPECIALIZE by calling into optional attached method that sets RunSequence
-    call ESMF_MethodExecute(gcomp, label=label_SetRunSequence, &
+    call ESMF_MethodExecute(driver, label=label_SetRunSequence, &
       existflag=existflag, userRc=userrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -995,7 +1029,7 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
 
     ! SPECIALIZE by calling into optional attached method allowing modification
     ! of the "InitializePhaseMap" metadata.
-    call ESMF_MethodExecute(gcomp, label=label_ModifyInitializePhaseMap, &
+    call ESMF_MethodExecute(driver, label=label_ModifyInitializePhaseMap, &
       existflag=existflag, userRc=userrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -1037,125 +1071,125 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
     ! -> Now encode the NUOPC IPDv00, IPDv01, IPDv02, IPDv03, IPDv04, IPDv05
       
     ! modelComps
-    call loopModelCompsS(gcomp, phaseString="IPDv00p1", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv00p1", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(gcomp, phaseString="IPDv01p1", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv01p1", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(gcomp, phaseString="IPDv02p1", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv02p1", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(gcomp, phaseString="IPDv03p1", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv03p1", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(gcomp, phaseString="IPDv04p1", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv04p1", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(gcomp, phaseString="IPDv05p1", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv05p1", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
     ! connectorComps
-    call loopConnectorCompsS(gcomp, phaseString="IPDv05p1", rc=rc)
+    call loopConnectorCompsS(driver, phaseString="IPDv05p1", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
 
     ! modelComps (new for IPDv05)
-    call loopModelCompsS(gcomp, phaseString="IPDv05p2", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv05p2", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
     ! connectorComps
-    call loopConnectorCompsS(gcomp, phaseString="IPDv00p1", rc=rc)
+    call loopConnectorCompsS(driver, phaseString="IPDv00p1", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopConnectorCompsS(gcomp, phaseString="IPDv01p1", rc=rc)
+    call loopConnectorCompsS(driver, phaseString="IPDv01p1", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopConnectorCompsS(gcomp, phaseString="IPDv02p1", rc=rc)
+    call loopConnectorCompsS(driver, phaseString="IPDv02p1", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopConnectorCompsS(gcomp, phaseString="IPDv03p1", rc=rc)
+    call loopConnectorCompsS(driver, phaseString="IPDv03p1", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopConnectorCompsS(gcomp, phaseString="IPDv04p1a", rc=rc)
+    call loopConnectorCompsS(driver, phaseString="IPDv04p1a", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopConnectorCompsS(gcomp, phaseString="IPDv04p1b", rc=rc)
+    call loopConnectorCompsS(driver, phaseString="IPDv04p1b", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
     ! warning - this ordering only works (with the two above) if we
     ! prevent mixing IPD versions in the same connector
-    call loopConnectorCompsS(gcomp, phaseString="IPDv05p2a", rc=rc)
+    call loopConnectorCompsS(driver, phaseString="IPDv05p2a", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopConnectorCompsS(gcomp, phaseString="IPDv05p2b", rc=rc)
+    call loopConnectorCompsS(driver, phaseString="IPDv05p2b", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
 
     ! modelComps
     ! moved down one level
-    !call loopModelCompsS(gcomp, phaseString="IPDv00p2", rc=rc)
+    !call loopModelCompsS(driver, phaseString="IPDv00p2", rc=rc)
     !if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     !  line=__LINE__, file=trim(name)//":"//FILENAME)) &
     !  return  ! bail out
-    call loopModelCompsS(gcomp, phaseString="IPDv01p2", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv01p2", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(gcomp, phaseString="IPDv02p2", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv02p2", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(gcomp, phaseString="IPDv03p2", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv03p2", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(gcomp, phaseString="IPDv04p2", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv04p2", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(gcomp, phaseString="IPDv05p3", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv05p3", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
     ! connectorComps
-    call loopConnectorCompsS(gcomp, phaseString="IPDv00p2a", rc=rc)
+    call loopConnectorCompsS(driver, phaseString="IPDv00p2a", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopConnectorCompsS(gcomp, phaseString="IPDv01p2", rc=rc)
+    call loopConnectorCompsS(driver, phaseString="IPDv01p2", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopConnectorCompsS(gcomp, phaseString="IPDv02p2", rc=rc)
+    call loopConnectorCompsS(driver, phaseString="IPDv02p2", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopConnectorCompsS(gcomp, phaseString="IPDv03p2", rc=rc)
+    call loopConnectorCompsS(driver, phaseString="IPDv03p2", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopConnectorCompsS(gcomp, phaseString="IPDv04p2", rc=rc)
+    call loopConnectorCompsS(driver, phaseString="IPDv04p2", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopConnectorCompsS(gcomp, phaseString="IPDv05p3", rc=rc)
+    call loopConnectorCompsS(driver, phaseString="IPDv05p3", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
@@ -1181,12 +1215,12 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
 
     ! handle verbosity
     if (btest(verbosity,8)) then
-      call ESMF_GridCompGet(gcomp, clockIsPresent=clockIsPresent, rc=rc)
+      call ESMF_GridCompGet(driver, clockIsPresent=clockIsPresent, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
         return  ! bail out
       if (clockIsPresent) then
-        call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
+        call ESMF_GridCompGet(driver, clock=internalClock, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) &
           return  ! bail out
@@ -1456,18 +1490,15 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
   
   !-----------------------------------------------------------------------------
 
-  recursive subroutine InitializeIPDv02p3(gcomp, importState, exportState, &
+  recursive subroutine InitializeIPDv02p3(driver, importState, exportState, &
     clock, rc)
-    type(ESMF_GridComp)  :: gcomp
+    type(ESMF_GridComp)  :: driver
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
     
     ! local variables
     character(*), parameter   :: rName="InitializeIPDv02p3"
-    type(type_InternalState)  :: is
-    integer                   :: i, j
-    type(ESMF_VM)             :: vm
     character(ESMF_MAXSTR)    :: name
     integer                   :: verbosity
     type(ESMF_Clock)          :: internalClock
@@ -1478,7 +1509,7 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
     rc = ESMF_SUCCESS
 
     ! query the component for info
-    call NUOPC_CompGet(gcomp, name=name, verbosity=verbosity, rc=rc)
+    call NUOPC_CompGet(driver, name=name, verbosity=verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1489,21 +1520,21 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
 
     ! handle verbosity
     if (btest(verbosity,8)) then
-      call ESMF_GridCompGet(gcomp, currentPhase=phase, rc=rc)
+      call ESMF_GridCompGet(driver, currentPhase=phase, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
         return  ! bail out
-      call NUOPC_CompSearchRevPhaseMap(gcomp, ESMF_METHOD_INITIALIZE, &
+      call NUOPC_CompSearchRevPhaseMap(driver, ESMF_METHOD_INITIALIZE, &
         phaseIndex=phase, phaseLabel=pLabel, rc=rc)
-      if (len_trim(pLabel)==0) pLabel="<none>"
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      call ESMF_GridCompGet(gcomp, clockIsPresent=clockIsPresent, rc=rc)
+      if (len_trim(pLabel)==0) pLabel="<none>"
+      call ESMF_GridCompGet(driver, clockIsPresent=clockIsPresent, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
         return  ! bail out
       if (clockIsPresent) then
-        call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
+        call ESMF_GridCompGet(driver, clock=internalClock, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) &
           return  ! bail out
@@ -1524,168 +1555,155 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
         return  ! bail out
     endif
 
-    ! query Component for the internal State
-    nullify(is%wrap)
-    call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-      return  ! bail out
-
-    ! get the vm
-    call ESMF_GridCompGet(gcomp, vm=vm, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-      return  ! bail out
-
     ! connectorComps
-    call loopConnectorCompsS(gcomp, phaseString="IPDv00p2b", rc=rc)
+    call loopConnectorCompsS(driver, phaseString="IPDv00p2b", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
 
     ! modelComps
-    call loopModelCompsS(gcomp, phaseString="IPDv00p2", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv00p2", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(gcomp, phaseString="IPDv01p3", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv01p3", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(gcomp, phaseString="IPDv02p3", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv02p3", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(gcomp, phaseString="IPDv03p3", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv03p3", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(gcomp, phaseString="IPDv04p3", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv04p3", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(gcomp, phaseString="IPDv05p4", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv05p4", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
     ! connectorComps
-    call loopConnectorCompsS(gcomp, phaseString="IPDv03p3", rc=rc)
+    call loopConnectorCompsS(driver, phaseString="IPDv03p3", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopConnectorCompsS(gcomp, phaseString="IPDv04p3", rc=rc)
+    call loopConnectorCompsS(driver, phaseString="IPDv04p3", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopConnectorCompsS(gcomp, phaseString="IPDv05p4", rc=rc)
+    call loopConnectorCompsS(driver, phaseString="IPDv05p4", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
 
     ! modelComps
-    call loopModelCompsS(gcomp, phaseString="IPDv03p4", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv03p4", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(gcomp, phaseString="IPDv04p4", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv04p4", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(gcomp, phaseString="IPDv05p5", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv05p5", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
     ! connectorComps
-    call loopConnectorCompsS(gcomp, phaseString="IPDv03p4", rc=rc)
+    call loopConnectorCompsS(driver, phaseString="IPDv03p4", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopConnectorCompsS(gcomp, phaseString="IPDv04p4", rc=rc)
+    call loopConnectorCompsS(driver, phaseString="IPDv04p4", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopConnectorCompsS(gcomp, phaseString="IPDv05p5", rc=rc)
+    call loopConnectorCompsS(driver, phaseString="IPDv05p5", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
 
     ! modelComps
-    call loopModelCompsS(gcomp, phaseString="IPDv03p5", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv03p5", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(gcomp, phaseString="IPDv04p5", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv04p5", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(gcomp, phaseString="IPDv05p6", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv05p6", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
     ! connectorComps
-    call loopConnectorCompsS(gcomp, phaseString="IPDv01p3a", rc=rc)
+    call loopConnectorCompsS(driver, phaseString="IPDv01p3a", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopConnectorCompsS(gcomp, phaseString="IPDv01p3b", rc=rc)
+    call loopConnectorCompsS(driver, phaseString="IPDv01p3b", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopConnectorCompsS(gcomp, phaseString="IPDv02p3a", rc=rc)
+    call loopConnectorCompsS(driver, phaseString="IPDv02p3a", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopConnectorCompsS(gcomp, phaseString="IPDv02p3b", rc=rc)
+    call loopConnectorCompsS(driver, phaseString="IPDv02p3b", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopConnectorCompsS(gcomp, phaseString="IPDv03p5a", rc=rc)
+    call loopConnectorCompsS(driver, phaseString="IPDv03p5a", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopConnectorCompsS(gcomp, phaseString="IPDv03p5b", rc=rc)
+    call loopConnectorCompsS(driver, phaseString="IPDv03p5b", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopConnectorCompsS(gcomp, phaseString="IPDv04p5a", rc=rc)
+    call loopConnectorCompsS(driver, phaseString="IPDv04p5a", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopConnectorCompsS(gcomp, phaseString="IPDv04p5b", rc=rc)
+    call loopConnectorCompsS(driver, phaseString="IPDv04p5b", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopConnectorCompsS(gcomp, phaseString="IPDv05p6a", rc=rc)
+    call loopConnectorCompsS(driver, phaseString="IPDv05p6a", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopConnectorCompsS(gcomp, phaseString="IPDv05p6b", rc=rc)
+    call loopConnectorCompsS(driver, phaseString="IPDv05p6b", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
 
     ! modelComps
-    call loopModelCompsS(gcomp, phaseString="IPDv00p3", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv00p3", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(gcomp, phaseString="IPDv01p4", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv01p4", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(gcomp, phaseString="IPDv02p4", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv02p4", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(gcomp, phaseString="IPDv03p6", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv03p6", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(gcomp, phaseString="IPDv04p6", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv04p6", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(gcomp, phaseString="IPDv05p7", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv05p7", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
@@ -1694,12 +1712,12 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
 
     ! handle verbosity
     if (btest(verbosity,8)) then
-      call ESMF_GridCompGet(gcomp, clockIsPresent=clockIsPresent, rc=rc)
+      call ESMF_GridCompGet(driver, clockIsPresent=clockIsPresent, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
         return  ! bail out
       if (clockIsPresent) then
-        call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
+        call ESMF_GridCompGet(driver, clock=internalClock, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) &
           return  ! bail out
@@ -1729,9 +1747,9 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
   
   !-----------------------------------------------------------------------------
 
-  recursive subroutine InitializeIPDv02p5(gcomp, importState, exportState, &
+  recursive subroutine InitializeIPDv02p5(driver, importState, exportState, &
     clock, rc)
-    type(ESMF_GridComp)   :: gcomp
+    type(ESMF_GridComp)   :: driver
     type(ESMF_State)      :: importState, exportState
     type(ESMF_Clock)      :: clock
     integer, intent(out)  :: rc
@@ -1755,7 +1773,7 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
     rc = ESMF_SUCCESS
 
     ! query the component for info
-    call NUOPC_CompGet(gcomp, name=name, verbosity=verbosity, rc=rc)
+    call NUOPC_CompGet(driver, name=name, verbosity=verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1766,21 +1784,21 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
 
     ! handle verbosity
     if (btest(verbosity,8)) then
-      call ESMF_GridCompGet(gcomp, currentPhase=phase, rc=rc)
+      call ESMF_GridCompGet(driver, currentPhase=phase, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
         return  ! bail out
-      call NUOPC_CompSearchRevPhaseMap(gcomp, ESMF_METHOD_INITIALIZE, &
+      call NUOPC_CompSearchRevPhaseMap(driver, ESMF_METHOD_INITIALIZE, &
         phaseIndex=phase, phaseLabel=pLabel, rc=rc)
-      if (len_trim(pLabel)==0) pLabel="<none>"
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      call ESMF_GridCompGet(gcomp, clockIsPresent=clockIsPresent, rc=rc)
+      if (len_trim(pLabel)==0) pLabel="<none>"
+      call ESMF_GridCompGet(driver, clockIsPresent=clockIsPresent, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
         return  ! bail out
       if (clockIsPresent) then
-        call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
+        call ESMF_GridCompGet(driver, clock=internalClock, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) &
           return  ! bail out
@@ -1810,7 +1828,7 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
       call ESMF_ClockGet(clock, currTime=currTime, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
+      call ESMF_GridCompGet(driver, clock=internalClock, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
         return  ! bail out
@@ -1831,7 +1849,7 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       ! get the value of the "InitializeDataComplete" attribute
-      call NUOPC_CompAttributeGet(gcomp, name="InitializeDataComplete", &
+      call NUOPC_CompAttributeGet(driver, name="InitializeDataComplete", &
         value=oldDataComplete, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
@@ -1860,7 +1878,7 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
     ! calling into the DataInitialize could be implemented via MethodExecute,
     ! as for NUOPC_Model, but currently there seems to be no reason for this.
     ! -> call directly into the subroutine
-    call InitializeIPDv02p5Data(gcomp, importState, exportState, clock, rc=rc)
+    call InitializeIPDv02p5Data(driver, importState, exportState, clock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
@@ -1872,7 +1890,7 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
 
     if (stateIsCreated) then
       ! re-set the "InitializeDataProgress" attribute to "false"
-      call NUOPC_CompAttributeSet(gcomp, &
+      call NUOPC_CompAttributeSet(driver, &
         name="InitializeDataProgress", value="false", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out
@@ -1885,13 +1903,13 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
       if (newUpdatedCount > oldUpdatedCount) then
         ! there are more Fields now that have "Updated" set "true"
         ! -> set "InitializeDataProgress" attribute "true"
-        call NUOPC_CompAttributeSet(gcomp, &
+        call NUOPC_CompAttributeSet(driver, &
           name="InitializeDataProgress", value="true", rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME)) return  ! bail out
       endif
       ! get the value of the "InitializeDataComplete" attribute
-      call NUOPC_CompAttributeGet(gcomp, name="InitializeDataComplete", &
+      call NUOPC_CompAttributeGet(driver, name="InitializeDataComplete", &
         value=newDataComplete, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
@@ -1900,7 +1918,7 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
       if (trim(newDataComplete) /= trim(oldDataComplete)) then
         ! there was a change in the "InitializeDataComplete" attribute setting
         ! -> set "InitializeDataProgress" attribute "true"
-        call NUOPC_CompAttributeSet(gcomp, &
+        call NUOPC_CompAttributeSet(driver, &
           name="InitializeDataProgress", value="true", rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME)) return  ! bail out
@@ -1917,7 +1935,7 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
       endif
 
       ! correct setting of timestamps
-      call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
+      call ESMF_GridCompGet(driver, clock=internalClock, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
         return  ! bail out
@@ -1940,12 +1958,12 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
 
     ! handle verbosity
     if (btest(verbosity,8)) then
-      call ESMF_GridCompGet(gcomp, clockIsPresent=clockIsPresent, rc=rc)
+      call ESMF_GridCompGet(driver, clockIsPresent=clockIsPresent, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
         return  ! bail out
       if (clockIsPresent) then
-        call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
+        call ESMF_GridCompGet(driver, clock=internalClock, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) &
           return  ! bail out
@@ -1975,9 +1993,9 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
 
   !-----------------------------------------------------------------------------
 
-  recursive subroutine InitializeIPDv02p5Data(gcomp, importState, exportState, &
+  recursive subroutine InitializeIPDv02p5Data(driver, importState, exportState,&
     clock, rc)
-    type(ESMF_GridComp)  :: gcomp
+    type(ESMF_GridComp)  :: driver
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
@@ -1985,7 +2003,6 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
     ! local variables
     character(*), parameter   :: rName="InitializeIPDv02p5Data"
     type(type_InternalState)  :: is
-    integer                   :: i, j
     type(ESMF_VM)             :: vm
     character(ESMF_MAXSTR)    :: name, valueString
     integer                   :: verbosity
@@ -1996,7 +2013,7 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
     rc = ESMF_SUCCESS
 
     ! query the component for info
-    call NUOPC_CompGet(gcomp, name=name, verbosity=verbosity, rc=rc)
+    call NUOPC_CompGet(driver, name=name, verbosity=verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -2007,13 +2024,13 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
 
     ! query Component for the internal State
     nullify(is%wrap)
-    call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
 
     ! get the vm
-    call ESMF_GridCompGet(gcomp, vm=vm, rc=rc)
+    call ESMF_GridCompGet(driver, vm=vm, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -2021,36 +2038,36 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
     ! modelComps
     if (is%wrap%firstTimeDataInit) then
       ! IPDv < 02 data initialize phase only called once
-      call loopModelCompsS(gcomp, phaseString="IPDv00p4", rc=rc)
+      call loopModelCompsS(driver, phaseString="IPDv00p4", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
         return  ! bail out
-      call loopModelCompsS(gcomp, phaseString="IPDv01p5", rc=rc)
+      call loopModelCompsS(driver, phaseString="IPDv01p5", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
         return  ! bail out
       is%wrap%firstTimeDataInit=.false. ! set guard flag for next time
     endif
     execFlagCollect = .false.
-    call loopModelCompsS(gcomp, phaseString="IPDv02p5", execFlag=execFlag, &
+    call loopModelCompsS(driver, phaseString="IPDv02p5", execFlag=execFlag, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
     execFlagCollect = execFlagCollect.or.execFlag
-    call loopModelCompsS(gcomp, phaseString="IPDv03p7", execFlag=execFlag, &
+    call loopModelCompsS(driver, phaseString="IPDv03p7", execFlag=execFlag, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
     execFlagCollect = execFlagCollect.or.execFlag
-    call loopModelCompsS(gcomp, phaseString="IPDv04p7", execFlag=execFlag, &
+    call loopModelCompsS(driver, phaseString="IPDv04p7", execFlag=execFlag, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
     execFlagCollect = execFlagCollect.or.execFlag
-    call loopModelCompsS(gcomp, phaseString="IPDv05p8", execFlag=execFlag, &
+    call loopModelCompsS(driver, phaseString="IPDv05p8", execFlag=execFlag, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
@@ -2081,7 +2098,7 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       endif
       
-      call loopDataDependentInitialize(gcomp, is%wrap%dataDepAllComplete, rc=rc)
+      call loopDataDependentInitialize(driver, is%wrap%dataDepAllComplete, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
         return  ! bail out
@@ -2100,7 +2117,7 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
     valueString="false"
     if (is%wrap%dataDepAllComplete) valueString="true"
     
-    call NUOPC_CompAttributeSet(gcomp, &
+    call NUOPC_CompAttributeSet(driver, &
       name="InitializeDataComplete", value=valueString, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -2116,9 +2133,9 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
 
   !-----------------------------------------------------------------------------
 
-  recursive subroutine loopModelCompsS(gcomp, phaseString, execFlag, rc)
+  recursive subroutine loopModelCompsS(driver, phaseString, execFlag, rc)
     ! only to be used for phase>0
-    type(ESMF_GridComp)     :: gcomp
+    type(ESMF_GridComp)     :: driver
     character(*), intent(in):: phaseString
     logical, intent(out), optional :: execFlag ! .true. if at least one executed
     integer, intent(out)    :: rc
@@ -2135,17 +2152,17 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
     rc = ESMF_SUCCESS
     if (present(execFlag)) execFlag = .false.
     ! query the component for info
-    call NUOPC_CompGet(gcomp, name=name, rc=rc)
+    call NUOPC_CompGet(driver, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! query Component for the internal State
     nullify(is%wrap)
-    call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     ! query Component for clock
-    call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
+    call ESMF_GridCompGet(driver, clock=internalClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -2233,9 +2250,9 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
 
   !-----------------------------------------------------------------------------
 
-  recursive subroutine loopConnectorCompsS(gcomp, phaseString, execFlag, rc)
+  recursive subroutine loopConnectorCompsS(driver, phaseString, execFlag, rc)
     ! only to be used for phase>0
-    type(ESMF_GridComp)     :: gcomp
+    type(ESMF_GridComp)     :: driver
     character(*), intent(in):: phaseString
     logical, intent(out), optional :: execFlag ! .true. if at least one executed
     integer, intent(out)    :: rc
@@ -2251,17 +2268,17 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
     rc = ESMF_SUCCESS
     if (present(execFlag)) execFlag = .false.
     ! query the component for info
-    call NUOPC_CompGet(gcomp, name=name, rc=rc)
+    call NUOPC_CompGet(driver, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! query Component for the internal State
     nullify(is%wrap)
-    call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     ! query Component for clock
-    call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
+    call ESMF_GridCompGet(driver, clock=internalClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -2292,7 +2309,7 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           if (i==0) then
             ! connect to the drivers import State
-            call ESMF_GridCompGet(gcomp, importState=imState, rc=rc)
+            call ESMF_GridCompGet(driver, importState=imState, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) &
               return  ! bail out
@@ -2301,7 +2318,7 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
           endif
           if (j==0) then
             ! connect to the drivers export State
-            call ESMF_GridCompGet(gcomp, exportState=exState, rc=rc)
+            call ESMF_GridCompGet(driver, exportState=exState, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) &
               return  ! bail out
@@ -2336,9 +2353,9 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
 
   !-----------------------------------------------------------------------------
 
-  recursive subroutine loopDataDependentInitialize(gcomp, dataDepAllComplete, rc)
+  recursive subroutine loopDataDependentInitialize(driver, dataDepAllComplete, rc)
     ! resolve data dependencies
-    type(ESMF_GridComp)             :: gcomp
+    type(ESMF_GridComp)             :: driver
     logical, optional, intent(out)  :: dataDepAllComplete
     integer, intent(out)            :: rc
     
@@ -2365,7 +2382,7 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
     rc = ESMF_SUCCESS
     
     ! query the component for info
-    call NUOPC_CompGet(gcomp, name=name, verbosity=verbosity, rc=rc)
+    call NUOPC_CompGet(driver, name=name, verbosity=verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -2376,13 +2393,13 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
 
     ! query Component for the internal State
     nullify(is%wrap)
-    call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
 
     ! get the vm, etc.
-    call ESMF_GridCompGet(gcomp, vm=vm, petCount=petCount, &
+    call ESMF_GridCompGet(driver, vm=vm, petCount=petCount, &
       clock=internalClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
@@ -2480,7 +2497,7 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
               write (cpString, *) cphase
               if (j==0) then
                 ! connect to the drivers import State
-                call ESMF_GridCompGet(gcomp, importState=imState, rc=rc)
+                call ESMF_GridCompGet(driver, importState=imState, rc=rc)
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME)) &
                   return  ! bail out
@@ -2489,7 +2506,7 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
               endif
               if (i==0) then
                 ! connect to the drivers export State
-                call ESMF_GridCompGet(gcomp, exportState=exState, rc=rc)
+                call ESMF_GridCompGet(driver, exportState=exState, rc=rc)
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME)) &
                   return  ! bail out
@@ -2606,8 +2623,8 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
 
   !-----------------------------------------------------------------------------
 
-  recursive subroutine routine_Run(gcomp, importState, exportState, clock, rc)
-    type(ESMF_GridComp)  :: gcomp
+  recursive subroutine routine_Run(driver, importState, exportState, clock, rc)
+    type(ESMF_GridComp)  :: driver
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
@@ -2635,6 +2652,7 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
     integer                         :: loopLevel, loopLevelPrev
     integer                         :: levelMember, levelMemberPrev
     integer                         :: loopIteration, loopIterationPrev
+    logical                         :: internalFlag
 
     rc = ESMF_SUCCESS
 
@@ -2644,7 +2662,7 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
 #endif
     
     ! query the component for info
-    call NUOPC_CompGet(gcomp, name=name, verbosity=verbosity, &
+    call NUOPC_CompGet(driver, name=name, verbosity=verbosity, &
       profiling=profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
@@ -2656,7 +2674,7 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! query Component for its clock and currentPhase
-    call ESMF_GridCompGet(gcomp, clock=internalClock, currentPhase=runPhase, &
+    call ESMF_GridCompGet(driver, clock=internalClock, currentPhase=runPhase, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -2664,15 +2682,15 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
     
     ! query Component for the internal State
     nullify(is%wrap)
-    call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
 
     ! conditionally output info to Log file
     if (btest(verbosity,9)) then
-      call NUOPC_CompSearchRevPhaseMap(gcomp, ESMF_METHOD_RUN, &
-        phaseIndex=phase, phaseLabel=pLabel, rc=rc)
+      call NUOPC_CompSearchRevPhaseMap(driver, ESMF_METHOD_RUN, &
+        phaseIndex=runPhase, phaseLabel=pLabel, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       call ESMF_ClockPrint(internalClock, options="currTime", &
@@ -2713,7 +2731,7 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
     
     ! SPECIALIZE required: label_SetRunClock
     ! -> first check for the label with phase index
-    call ESMF_MethodExecute(gcomp, label=label_SetRunClock, index=phase, &
+    call ESMF_MethodExecute(driver, label=label_SetRunClock, index=phase, &
       existflag=existflag, userRc=userrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -2722,7 +2740,7 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
       return  ! bail out
     if (.not.existflag) then
       ! -> next check for the label without phase index
-      call ESMF_MethodExecute(gcomp, label=label_SetRunClock, &
+      call ESMF_MethodExecute(driver, label=label_SetRunClock, &
         userRc=userrc, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -2833,11 +2851,13 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         if (areServicesSet) then
           write (iString, *) i
+          internalFlag = .false.
+          if (i==0) internalFlag = .true. ! driver self
           call NUOPC_CompSearchRevPhaseMap(is%wrap%modelComp(i), &
-            ESMF_METHOD_RUN, phaseIndex=phase, phaseLabel=pLabel, rc=rc)
+            ESMF_METHOD_RUN, phaseIndex=phase, phaseLabel=pLabel, &
+            internalFlag=internalFlag, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          
           isPetLocal = ESMF_GridCompIsPetLocal(is%wrap%modelComp(i), rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -3088,8 +3108,8 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
   
   !-----------------------------------------------------------------------------
   
-  recursive subroutine SetRunClock(gcomp, rc)
-    type(ESMF_GridComp)   :: gcomp
+  recursive subroutine SetRunClock(driver, rc)
+    type(ESMF_GridComp)   :: driver
     integer, intent(out)  :: rc
     
     ! Set the internal clock according to the incoming driver clock.
@@ -3103,13 +3123,13 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
     rc = ESMF_SUCCESS
 
     ! query the component for info
-    call NUOPC_CompGet(gcomp, name=name, rc=rc)
+    call NUOPC_CompGet(driver, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! query component for its internal state
     nullify(is%wrap)
-    call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -3119,7 +3139,7 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
 
     if (clockIsCreated) then
       ! check and set the model clock against the driver clock
-      call NUOPC_CompCheckSetClock(gcomp, is%wrap%driverClock, rc=rc)
+      call NUOPC_CompCheckSetClock(driver, is%wrap%driverClock, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -3128,8 +3148,8 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
     
   !-----------------------------------------------------------------------------
 
-  recursive subroutine Finalize(gcomp, importState, exportState, clock, rc)
-    type(ESMF_GridComp)  :: gcomp
+  recursive subroutine Finalize(driver, importState, exportState, clock, rc)
+    type(ESMF_GridComp)  :: driver
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
@@ -3154,7 +3174,7 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
     rc = ESMF_SUCCESS
 
     ! query the component for info
-    call NUOPC_CompGet(gcomp, name=name, verbosity=verbosity, rc=rc)
+    call NUOPC_CompGet(driver, name=name, verbosity=verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -3164,14 +3184,14 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! query Component for its Clock
-    call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
+    call ESMF_GridCompGet(driver, clock=internalClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     
     ! query Component for the internal State
     nullify(is%wrap)
-    call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -3230,7 +3250,7 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
     enddo
     
     ! SPECIALIZE by calling into optional attached method
-    call ESMF_MethodExecute(gcomp, label=label_Finalize, existflag=existflag, &
+    call ESMF_MethodExecute(driver, label=label_Finalize, existflag=existflag, &
       userRc=urc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -3242,7 +3262,7 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
     ! destroy components in the compList and their import and export States,
     ! and also petLists that were set by the user (and ownership transferred)
     nullify(compList)
-    call NUOPC_DriverGetComp(gcomp, compList, rc=rc)    
+    call NUOPC_DriverGetComp(driver, compList, rc=rc)    
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     do i=1, size(compList)
@@ -3272,7 +3292,7 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
     ! and also petLists for which ownership was transferred
     nullify(connectorList)
     nullify(petLists)
-    call NUOPC_DriverGetComp(gcomp, connectorList, petLists, rc=rc)    
+    call NUOPC_DriverGetComp(driver, connectorList, petLists, rc=rc)    
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     do i=1, size(connectorList)
@@ -3392,8 +3412,8 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
   end subroutine
   !-----------------------------------------------------------------------------
 
-  recursive subroutine FinalizeReset(gcomp, importState, exportState, clock, rc)
-    type(ESMF_GridComp)  :: gcomp
+  recursive subroutine FinalizeReset(driver, importState, exportState, clock, rc)
+    type(ESMF_GridComp)  :: driver
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
@@ -3418,7 +3438,7 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
     rc = ESMF_SUCCESS
 
     ! query the component for info
-    call NUOPC_CompGet(gcomp, name=name, verbosity=verbosity, rc=rc)
+    call NUOPC_CompGet(driver, name=name, verbosity=verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -3428,14 +3448,14 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! query Component for its Clock
-    call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
+    call ESMF_GridCompGet(driver, clock=internalClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     
     ! query Component for the internal State
     nullify(is%wrap)
-    call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -3494,7 +3514,7 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
     enddo
     
     ! SPECIALIZE by calling into optional attached method
-    call ESMF_MethodExecute(gcomp, label=label_Finalize, existflag=existflag, &
+    call ESMF_MethodExecute(driver, label=label_Finalize, existflag=existflag, &
       userRc=urc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -3509,12 +3529,12 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
     is%wrap%dataDepAllComplete = .true.
     
     ! reset attributes on the component
-    call NUOPC_CompAttributeSet(gcomp, &
+    call NUOPC_CompAttributeSet(driver, &
       name="InitializeDataComplete", value="false", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-    call NUOPC_CompAttributeSet(gcomp, &
+    call NUOPC_CompAttributeSet(driver, &
       name="InitializeDataProgress", value="false", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -4277,6 +4297,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_GridComp)             :: comp
     integer                         :: phase
     logical                         :: relaxed
+    logical                         :: internalFlag
     
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -4332,9 +4353,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
     endif
     
+    ! consider driver self
+    internalFlag = .false.
+    if (iComp==0) internalFlag = .true.
+    
     ! Figure out the phase index
     call NUOPC_CompSearchPhaseMap(comp, methodflag=ESMF_METHOD_RUN, &
-      phaseLabel=phaseLabel, phaseIndex=phase, rc=localrc)
+      phaseLabel=phaseLabel, phaseIndex=phase, internalFlag=internalFlag, &
+      rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -5904,6 +5930,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(ESMF_MAXSTR)    :: name
     integer                   :: verbosity
     logical                   :: stateIsCreated
+    logical                   :: isSet, needMirror
     character(len=80)         :: hierarchyProtocol
 
     rc = ESMF_SUCCESS
@@ -5919,36 +5946,45 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     call NUOPC_CompAttributeGet(driver, name="HierarchyProtocol", &
-      value=hierarchyProtocol, rc=rc)
+      isSet=isSet, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    needMirror = .not.isSet  ! by default request mirroring
+    
+    if (.not.needMirror) then
+      ! see if HieraryProtocol attribute explicitly requests mirroring
+      call NUOPC_CompAttributeGet(driver, name="HierarchyProtocol", &
+        value=hierarchyProtocol, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      if (trim(hierarchyProtocol)=="PushUpAllExportsAndUnsatisfiedImports" &
+        .or. trim(hierarchyProtocol)=="Explorer") &
+        needMirror = .true.
+    endif
 
     stateIsCreated = ESMF_StateIsCreated(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-    if (stateIsCreated) then
-      if (trim(hierarchyProtocol)=="PushUpAllExportsUnsatisfiedImports") then
-        ! request that connectors transfer all fields into the importState
-        call NUOPC_SetAttribute(importState, name="FieldTransferPolicy", &
-          value="transferAll", rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      endif
+    if (needMirror.and.stateIsCreated) then
+      ! request that connectors transfer all fields into the importState
+      call NUOPC_SetAttribute(importState, name="FieldTransferPolicy", &
+        value="transferAll", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
     
     stateIsCreated = ESMF_StateIsCreated(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-    if (stateIsCreated) then
-      if (trim(hierarchyProtocol)=="PushUpAllExportsUnsatisfiedImports") then
-        ! request that connectors transfer all fields into the exportState
-        call NUOPC_SetAttribute(exportState, name="FieldTransferPolicy", &
-          value="transferAll", rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      endif
+    if (needMirror.and.stateIsCreated) then
+      ! request that connectors transfer all fields into the exportState
+      call NUOPC_SetAttribute(exportState, name="FieldTransferPolicy", &
+        value="transferAll", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
 
     ! extro
@@ -6176,6 +6212,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(ESMF_MAXSTR)    :: name
     integer                   :: verbosity
     logical                   :: stateIsCreated
+    logical                   :: isSet, checkImportProducer
     character(len=80)         :: hierarchyProtocol
 
     rc = ESMF_SUCCESS
@@ -6191,21 +6228,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     call NUOPC_CompAttributeGet(driver, name="HierarchyProtocol", &
-      value=hierarchyProtocol, rc=rc)
+      isSet=isSet, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    checkImportProducer = .not.isSet  ! by default request checking
+    
+    if (.not.checkImportProducer) then
+      ! see if HieraryProtocol attribute explicitly requests mirroring
+      call NUOPC_CompAttributeGet(driver, name="HierarchyProtocol", &
+        value=hierarchyProtocol, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      if (trim(hierarchyProtocol)=="PushUpAllExportsAndUnsatisfiedImports") &
+        checkImportProducer = .true.
+    endif
 
     stateIsCreated = ESMF_StateIsCreated(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-    if (stateIsCreated) then
-      if (trim(hierarchyProtocol)=="PushUpAllExportsUnsatisfiedImports") then
-        ! - check that all connected fields in importState have producer
-        call checkProducerConnection(importState, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      endif
+    if (checkImportProducer.and.stateIsCreated) then
+      ! - check that all connected fields in importState have producer
+      call checkProducerConnection(importState, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
     
     stateIsCreated = ESMF_StateIsCreated(exportState, rc=rc)
@@ -6425,6 +6472,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       logical                         :: isPresent
       integer(ESMF_KIND_I4), pointer  :: ungriddedLBound(:), ungriddedUBound(:)
       integer(ESMF_KIND_I4), pointer  :: gridToFieldMap(:)
+      integer                         :: tk
+      type(ESMF_TypeKind_Flag)        :: tkf
       
       rc = ESMF_SUCCESS
 
@@ -6437,8 +6486,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (associated(fieldList)) then
         do i=1, size(fieldList)
           ! the transferred Grid is already set, allocate memory for data
-          !TODO: This assumes R8, etc. Make this 
-          !TODO: more general to handle all field cases.
+          !TODO: Only Grids work. Also make this work for Mesh and LocStream.
+
+          ! TypeKind attribute
+          call ESMF_AttributeGet(fieldList(i), name="TypeKind", &
+            convention="NUOPC", purpose="Instance", &
+            value=tk, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          tkf=tk  ! convert integer into actual TypeKind_Flag
 
           ! GridToFieldMap attribute
           call ESMF_AttributeGet(fieldList(i), name="GridToFieldMap", &
@@ -6512,7 +6568,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             ! create field with ungridded dims
             call ESMF_FieldEmptyComplete(fieldList(i), &
-              gridToFieldMap=gridToFieldMap, typekind=ESMF_TYPEKIND_R8, &
+              gridToFieldMap=gridToFieldMap, typekind=tkf, &
               ungriddedLBound=ungriddedLBound, &
               ungriddedUBound=ungriddedUBound, &
               rc=rc)
@@ -6522,7 +6578,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           else
             ! create field with no ungridded dims
             call ESMF_FieldEmptyComplete(fieldList(i), &
-              gridToFieldMap=gridToFieldMap, typekind=ESMF_TYPEKIND_R8, rc=rc)
+              gridToFieldMap=gridToFieldMap, typekind=tkf, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           endif

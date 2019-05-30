@@ -37,7 +37,6 @@ struct Search_node_result {
   double pcoord[3];  // parametric coord of node in elem
 };
 
-
 struct Search_result {
   const MeshObj *elem;
   std::vector<Search_node_result> nodes;

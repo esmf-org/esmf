@@ -30,15 +30,24 @@
 #include "ESMCI_GridToMesh.h"
 #include "ESMC_Util.h"
 #include "ESMCI_Array.h"
-#include "Mesh/include/ESMCI_Mesh.h"
-#include "Mesh/include/Legacy/ESMCI_MeshRead.h"
-#include "Mesh/include/Regridding/ESMCI_MeshRegrid.h"
-#include "Mesh/include/Legacy/ESMCI_Exception.h"
-#include "Mesh/include/Regridding/ESMCI_Integrate.h"
-#include "Mesh/include/Regridding/ESMCI_Interp.h"
-#include "Mesh/include/Regridding/ESMCI_Extrapolation.h"
-#include "Mesh/include/ESMCI_MathUtil.h"
+
+#include "Mesh/include/ESMCI_MBMesh.h"
+#include "Mesh/include/ESMCI_Regrid_Nearest.h"
+
+// for temp weights, this file should be merged into something else
 #include "Mesh/include/Regridding/ESMCI_Regrid_Helper.h"
+
+// #include "Mesh/include/ESMCI_Mesh.h"
+// #include "Mesh/include/ESMCI_MathUtil.h"
+
+// #include "Mesh/include/Regridding/ESMCI_MeshRegrid.h"
+// #include "Mesh/include/Regridding/ESMCI_Integrate.h"
+// #include "Mesh/include/Regridding/ESMCI_Interp.h"
+// #include "Mesh/include/Regridding/ESMCI_ExtrapolationPoleLGC.h"
+// #include "Mesh/include/Regridding/ESMCI_Regrid_Helper.h"
+
+#include "Mesh/include/Legacy/ESMCI_Exception.h"
+// #include "Mesh/include/Legacy/ESMCI_MeshRead.h"
 
 
 //-----------------------------------------------------------------------------
@@ -51,13 +60,20 @@
 using namespace ESMCI;
 
  
-void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::PointList **plsrcpp,
-                          void **meshdstpp, ESMCI::Array **arraydstpp, ESMCI::PointList **pldstpp,
+void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, 
+                          ESMCI::PointList **plsrcpp,
+                          void **meshdstpp, ESMCI::Array **arraydstpp, 
+                          ESMCI::PointList **pldstpp,
                           int *regridMethod,
                           int *map_type,
                           int *norm_type,
                           int *regridPoleType, int *regridPoleNPnts,  
                           int *regridScheme, 
+                          int *extrapMethod,
+                          int *extrapNumSrcPnts,
+                          ESMC_R8 *extrapDistExponent,
+                          int *extrapNumLevels,
+                          int *extrapNumInputLevels, 
                           int *unmappedaction, int *_ignoreDegenerate,
                           int *srcTermProcessing, int *pipelineDepth, 
                           ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,

@@ -59,8 +59,9 @@ enum ESMC_Decomp_Flag {ESMC_DECOMP_INVALID=0,
                        ESMC_DECOMP_RESTLAST, ESMC_DECOMP_CYCLIC};
 
 enum ESMC_ExtrapMethod_Flag {ESMC_EXTRAPMETHOD_NONE=0,
-                                         ESMC_EXTRAPMETHOD_NEAREST_STOD,
-                             ESMC_EXTRAPMETHOD_NEAREST_IDAVG};
+                             ESMC_EXTRAPMETHOD_NEAREST_STOD,
+                             ESMC_EXTRAPMETHOD_NEAREST_IDAVG,
+                             ESMC_EXTRAPMETHOD_CREEP};
 
 enum ESMC_FileFormat_Flag {ESMC_FILEFORMAT_UNDEFINED, ESMC_FILEFORMAT_VTK,
                            ESMC_FILEFORMAT_SCRIP, ESMC_FILEFORMAT_ESMFMESH,

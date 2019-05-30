@@ -22,9 +22,7 @@
 #include "ESMC_Test.h"
 
 // other headers
-#include "ESMCI_MBMesh.h"
-#include "ESMCI_MBMesh_Glue.h"
-#include "ESMCI_MBMesh_Util.h"
+#include "ESMCI_Regrid_Nearest.h"
 #include "ESMCI_PointList.h"
 
 #include <iostream>
@@ -35,6 +33,75 @@
 #if !defined (M_PI)
 // for Windows...
 #define M_PI 3.14159265358979323846
+#endif
+
+static double UNINITVAL2 = -42;
+
+bool weights_correct_nearest(WMat &wts, std::vector<double> weights) {
+  bool correct = true;
+  if (weights[0] != UNINITVAL2) {
+    int ind = 0;
+    WMat::WeightMap::iterator mb = wts.begin_row(), me = wts.end_row();
+    for(; mb != me; ++mb) {
+      std::vector<WMat::Entry> row = mb->second;
+      std::vector<WMat::Entry>::iterator vb = row.begin(), ve = row.end();
+      for(; vb != ve; ++vb) {
+        WMat::Entry rv = *vb;
+        if (rv.value /= weights[ind]) correct = false;
+        ++ind;
+      }
+    }
+    if (weights.size() != ind) correct = false;
+  }
+  
+  return correct;
+}
+
+#if defined ESMF_MOAB
+bool weight_gen_nearest(PointList *pl1, PointList *pl, 
+                        std::vector<double> weights,
+                        int method = 3, int num_pts = 0,
+                        double dist_exponent = 2) {
+  bool correct = false;
+
+  // early exit for ESMF_MOAB=OFF
+  if (pl1 == NULL || pl == NULL)
+    return true;
+  
+  // do bilinear regridding between mesh and pointlist
+  WMat wt, dst_status;
+  WMat &wts = wt;
+  WMat &ds = dst_status;
+  calc_nearest_regrid_wgts(pl1, pl, wts, true, ds, &method, &num_pts, &dist_exponent);
+
+  // verify results
+  if (weights_correct_nearest(wts, weights)) correct = true;
+
+  // output weight matrix for debugging purposes
+#define OUTPUT_WEIGHTS
+#ifdef OUTPUT_WEIGHTS
+  std::cout << std::endl << "Bilinear Weight Matrix" << std::endl;
+  // print out weights
+  WMat::WeightMap::iterator mb = wts.begin_row(), me = wts.end_row();
+  for(; mb != me; ++mb) {
+    WMat::Entry col = mb->first;
+    std::vector<WMat::Entry> row = mb->second;
+
+    std::cout << "[" << col.id << "," << col.idx << "," << col.value << ","
+         << col.src_id << "] - ";
+
+    std::vector<WMat::Entry>::iterator vb = row.begin(), ve = row.end();
+    for(; vb != ve; ++vb) {
+      WMat::Entry rv = *vb;
+      std::cout << "[" << rv.id << "," << rv.idx << "," << rv.value << ","
+           << rv.src_id << "] ";
+    }
+    std::cout << std::endl;
+  }
+  std::cout << std::endl;
+#endif
+  return correct;
+}
 #endif
 
 PointList* create_pointlist(std::vector<double*> *cv, int &rc) {
@@ -200,6 +267,263 @@ PointList* create_pointlist_for_quad(std::vector<double*> *cv, int &rc) {
     p.id = i+1;
     p.coords[0] = x[i];
     p.coords[1] = y[i];
+    pl->add(p.id, p.coords);
+  }
+
+  rc = ESMF_SUCCESS;
+  return pl;
+}
+
+PointList* create_pointlist_par(int &rc) {
+  //
+  //
+  //  3.0    ------- 3 -------   ---   -------   ------- 4 -------   -------
+  //       |         |         |     |         |         |         |         |
+  //       |         |         |     |         |         |         |         |
+  //       |         |         |     |         |         |         |         |
+  //  2.0    ------- 1 -------   ---   -------   ------- 2 -------   -------
+  //
+  //  PET0
+  //
+  //     1.25       1.5       1.75  1.95       2.25     2.5      2.75      2.95
+  //
+  //  3.0    -------   ------- 3 ---   -------   -------   ------- 4 -------
+  //       |         |         |     |         |         |         |         |
+  //       |         |         |     |         |         |         |         |
+  //       |         |         |     |         |         |         |         |
+  //  2.0    -------   ------- 1 ---   -------   -------   ------- 2 -------
+  //
+  //  PET1
+  //
+  //     1.25       1.5       1.75  1.95       2.25     2.5      2.75      2.95
+  //
+  //  3.0  3 -------   -------   ---   ------- 4 -------   -------   -------
+  //       |         |         |     |         |         |         |         |
+  //       |         |         |     |         |         |         |         |
+  //       |         |         |     |         |         |         |         |
+  //  2.0  1 -------   -------   ---   ------- 2 -------   -------   -------
+  //
+  //  PET2
+  //
+  //     1.25       1.5       1.75  1.95       2.25     2.5      2.75      2.95
+  //
+  //  3.0    -------   -------   --- 3 -------   -------   -------   ------- 4
+  //       |         |         |     |         |         |         |         |
+  //       |         |         |     |         |         |         |         |
+  //       |         |         |     |         |         |         |         |
+  //  2.0    -------   -------   --- 1 -------   -------   -------   ------- 2
+  //
+  //  PET3
+  //
+  //     1.25       1.5       1.75  1.95       2.25     2.5      2.75      2.95
+  //
+
+  rc = ESMF_RC_NOT_IMPL;
+
+  // Get parallel information
+  int localPet, petCount;
+  ESMC_VM vm;
+
+  vm=ESMC_VMGetGlobal(&rc);
+  if (rc != ESMF_SUCCESS) return 0;
+
+  rc=ESMC_VMGet(vm, &localPet, &petCount, (int *)NULL, (MPI_Comm *)NULL,
+                (int *)NULL, (int *)NULL);
+  if (rc != ESMF_SUCCESS) return NULL;
+
+  if (petCount != 4) {
+    Throw() << "Test function must be run with 4 processors";
+    return NULL;
+  }
+
+  int np = 4;
+  int dim = 2;
+
+  double x[np];
+  double y[np];
+
+  if (localPet == 0) {
+    x[0] = 1.5;
+    x[1] = 2.5;
+    x[2] = 1.5;
+    x[3] = 2.5;
+
+    y[0] = 2.0;
+    y[1] = 2.0;
+    y[2] = 3.0;
+    y[3] = 3.0;
+  } else if (localPet == 1) {
+    x[0] = 1.75;
+    x[1] = 2.75;
+    x[2] = 1.75;
+    x[3] = 2.75;
+
+    y[0] = 2.0;
+    y[1] = 2.0;
+    y[2] = 3.0;
+    y[3] = 3.0;
+  } else if (localPet == 2) {
+    x[0] = 1.25;
+    x[1] = 2.25;
+    x[2] = 1.25;
+    x[3] = 2.25;
+
+    y[0] = 2.0;
+    y[1] = 2.0;
+    y[2] = 3.0;
+    y[3] = 3.0;
+  } else if (localPet == 3) {
+    x[0] = 1.95;
+    x[1] = 2.95;
+    x[2] = 1.95;
+    x[3] = 2.95;
+
+    y[0] = 2.0;
+    y[1] = 2.0;
+    y[2] = 3.0;
+    y[3] = 3.0;
+  }
+
+  PointList *pl = new PointList(np, dim);
+
+  for (int i = 0; i < np; ++i) {
+    point p = point();
+    p.id = localPet*petCount+i;
+    p.coords[0] = x[i];
+    p.coords[1] = y[i];
+    pl->add(p.id, p.coords);
+  }
+
+  rc = ESMF_SUCCESS;
+  return pl;
+}
+
+PointList* create_pointlist_par_sph(int &rc) {
+  //
+  //
+  //  3.0    ------- 3 -------   ---   -------   ------- 4 -------   -------
+  //       |         |         |     |         |         |         |         |
+  //       |         |         |     |         |         |         |         |
+  //       |         |         |     |         |         |         |         |
+  //  2.0    ------- 1 -------   ---   -------   ------- 2 -------   -------
+  //
+  //  PET0
+  //
+  //     1.25       1.5       1.75  1.95       2.25     2.5      2.75      2.95
+  //
+  //  3.0    -------   ------- 3 ---   -------   -------   ------- 4 -------
+  //       |         |         |     |         |         |         |         |
+  //       |         |         |     |         |         |         |         |
+  //       |         |         |     |         |         |         |         |
+  //  2.0    -------   ------- 1 ---   -------   -------   ------- 2 -------
+  //
+  //  PET1
+  //
+  //     1.25       1.5       1.75  1.95       2.25     2.5      2.75      2.95
+  //
+  //  3.0  3 -------   -------   ---   ------- 4 -------   -------   -------
+  //       |         |         |     |         |         |         |         |
+  //       |         |         |     |         |         |         |         |
+  //       |         |         |     |         |         |         |         |
+  //  2.0  1 -------   -------   ---   ------- 2 -------   -------   -------
+  //
+  //  PET2
+  //
+  //     1.25       1.5       1.75  1.95       2.25     2.5      2.75      2.95
+  //
+  //  3.0    -------   -------   --- 3 -------   -------   -------   ------- 4
+  //       |         |         |     |         |         |         |         |
+  //       |         |         |     |         |         |         |         |
+  //       |         |         |     |         |         |         |         |
+  //  2.0    -------   -------   --- 1 -------   -------   -------   ------- 2
+  //
+  //  PET3
+  //
+  //     1.25       1.5       1.75  1.95       2.25     2.5      2.75      2.95
+  //
+
+  rc = ESMF_RC_NOT_IMPL;
+
+  // Get parallel information
+  int localPet, petCount;
+  ESMC_VM vm;
+
+  vm=ESMC_VMGetGlobal(&rc);
+  if (rc != ESMF_SUCCESS) return 0;
+
+  rc=ESMC_VMGet(vm, &localPet, &petCount, (int *)NULL, (MPI_Comm *)NULL,
+                (int *)NULL, (int *)NULL);
+  if (rc != ESMF_SUCCESS) return NULL;
+
+  if (petCount != 4) {
+    Throw() << "Test function must be run with 4 processors";
+    return NULL;
+  }
+
+  int np = 4;
+  int dim = 3;
+
+  double x[np];
+  double y[np];
+
+  int pi2 = 3.14159/2;
+
+  double z[np];
+  z[0] = 1;
+  z[1] = 1;
+  z[2] = 1;
+  z[3] = 1;
+
+  if (localPet == 0) {
+    x[0] = 1.5 * pi2;
+    x[1] = 2.5 * pi2;
+    x[2] = 1.5 * pi2;
+    x[3] = 2.5 * pi2;
+
+    y[0] = 2.0 * pi2;
+    y[1] = 2.0 * pi2;
+    y[2] = 3.0 * pi2;
+    y[3] = 3.0 * pi2;
+  } else if (localPet == 1) {
+    x[0] = 1.75 * pi2;
+    x[1] = 2.75 * pi2;
+    x[2] = 1.75 * pi2;
+    x[3] = 2.75 * pi2;
+
+    y[0] = 2.0 * pi2;
+    y[1] = 2.0 * pi2;
+    y[2] = 3.0 * pi2;
+    y[3] = 3.0 * pi2;
+  } else if (localPet == 2) {
+    x[0] = 1.25 * pi2;
+    x[1] = 2.25 * pi2;
+    x[2] = 1.25 * pi2;
+    x[3] = 2.25 * pi2;
+
+    y[0] = 2.0 * pi2;
+    y[1] = 2.0 * pi2;
+    y[2] = 3.0 * pi2;
+    y[3] = 3.0 * pi2;
+  } else if (localPet == 3) {
+    x[0] = 1.95 * pi2;
+    x[1] = 2.95 * pi2;
+    x[2] = 1.95 * pi2;
+    x[3] = 2.95 * pi2;
+
+    y[0] = 2.0 * pi2;
+    y[1] = 2.0 * pi2;
+    y[2] = 3.0 * pi2;
+    y[3] = 3.0 * pi2;
+  }
+
+  PointList *pl = new PointList(np, dim);
+
+  for (int i = 0; i < np; ++i) {
+    point p = point();
+    p.id = localPet*petCount+i;
+    p.coords[0] = x[i];
+    p.coords[1] = y[i];
+    p.coords[2] = z[i];
     pl->add(p.id, p.coords);
   }
 

@@ -18,7 +18,7 @@
 #include <Mesh/include/ESMCI_MBMesh.h>
 #include <Mesh/include/ESMCI_MBMesh_Bilinear.h>
 #include <Mesh/include/ESMCI_MBMesh_BBox.h>
-#include <Mesh/include/ESMCI_MBMesh_Search_EToP.h>
+#include <Mesh/include/ESMCI_MBMesh_Search_EtoP.h>
 #include <Mesh/include/ESMCI_MBMesh_Util.h>
 #include <Mesh/include/ESMCI_MBMesh_Rendez_EtoP.h>
 

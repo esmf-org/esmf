@@ -1048,84 +1048,86 @@ namespace ESMCI {
     }
 
 
-// triangulate > 4 sided
-// sdim = spatial dim
-// num_p = number of points in poly
-// p     = poly coords size=num_p*sdim
-// td    = temporary buffer size=num_p*sdim
-// ti    = temporary integer buffer size = num_p
-// tri_ind = output array  size = 3*(nump-2)
-// tri_frac = fraction each triangle is of whole poly size=(num_p-2)
-void mb_triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_ind, 
-                 double *tri_frac) {
-          int localrc;
-          
-
-          // Call into triagulation routines
-          int ret;
-          if (sdim==2) {
-            ret=triangulate_poly<GEOM_CART2D>(num_p, p, td,
-                                              ti, tri_ind);
-          } else if (sdim==3) {
-            ret=triangulate_poly<GEOM_SPH2D3D>(num_p, p, td, 
-                                               ti, tri_ind);
-          } else {
-            Throw() <<" - triangulate can't be used for polygons with spatial dimension not equal to 2 or 3";
-          }
-          
-
-          // Check return code
-          if (ret != ESMCI_TP_SUCCESS) {
-            if (ret == ESMCI_TP_DEGENERATE_POLY) {
-              Throw() << " - can't triangulate a polygon with less than 3 sides"; 
-            } else if (ret == ESMCI_TP_CLOCKWISE_POLY) {
-              Throw() <<" - there was a problem with triangulation (e.g. repeated points, clockwise poly, etc.)";
-            } else {
-              Throw() <<" - unknown error in triangulation";
-            }
-          }
-
-
-          // Calculate triangule areas
-          double tot_area=0.0;
-          int ti_pos=0;
-          for (int i=0; i<num_p-2; i++) {
-            // Copy triangle coordinates into td
-            int td_pos=0;
-            for (int j=0; j<3; j++) {
-              double *pnt=p+sdim*tri_ind[ti_pos+j];
-              for (int k=0; k<sdim; k++) {
-                td[td_pos]=pnt[k];
-                td_pos++;
-              }
-            }
-
-            // compute area of triangle
-            double tri_area;
-            if (sdim == 2) {
-              tri_area = area_of_flat_2D_polygon(3, td);
-            } else if (sdim == 3) {
-              tri_area = great_circle_area(3, td);
-            } // Other sdim caught above
-
-            // Save areas to use for computing fractions
-            tri_frac[i]=tri_area;
-            
-            // compute total
-            tot_area += tri_area;
-
-            // Advance to next triangle
-            ti_pos +=3;
-          }
-
-          // Calculate triangle fractions
-          for (int i=0; i<num_p-2; i++) {
-            if (tot_area >0.0) tri_frac[i]=tri_frac[i]/tot_area;
-            else tri_frac[i]=0.0;
-          }
-
-    return;
-}
+  // triangulate > 4 sided
+  // sdim = spatial dim
+  // num_p = number of points in poly
+  // p     = poly coords size=num_p*sdim
+  // td    = temporary buffer size=num_p*sdim
+  // ti    = temporary integer buffer size = num_p
+  // tri_ind = output array  size = 3*(nump-2)
+  // tri_frac = fraction each triangle is of whole poly size=(num_p-2)
+  void mb_triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_ind, 
+                   double *tri_frac) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "mb_triangulate()"
+  
+  int localrc;
+  
+  // Call into triagulation routines
+  int ret;
+  if (sdim==2) {
+    ret=triangulate_poly<GEOM_CART2D>(num_p, p, td,
+                                      ti, tri_ind);
+  } else if (sdim==3) {
+    ret=triangulate_poly<GEOM_SPH2D3D>(num_p, p, td, 
+                                       ti, tri_ind);
+  } else {
+    Throw() <<" - triangulate can't be used for polygons with spatial dimension not equal to 2 or 3";
+  }
+  
+  
+  // Check return code
+  if (ret != ESMCI_TP_SUCCESS) {
+    if (ret == ESMCI_TP_DEGENERATE_POLY) {
+      Throw() << " - can't triangulate a polygon with less than 3 sides"; 
+    } else if (ret == ESMCI_TP_CLOCKWISE_POLY) {
+      Throw() <<" - there was a problem with triangulation (e.g. repeated points, clockwise poly, etc.)";
+    } else {
+      Throw() <<" - unknown error in triangulation";
+    }
+  }
+  
+  
+  // Calculate triangule areas
+  double tot_area=0.0;
+  int ti_pos=0;
+  for (int i=0; i<num_p-2; i++) {
+    // Copy triangle coordinates into td
+    int td_pos=0;
+    for (int j=0; j<3; j++) {
+      double *pnt=p+sdim*tri_ind[ti_pos+j];
+      for (int k=0; k<sdim; k++) {
+        td[td_pos]=pnt[k];
+        td_pos++;
+      }
+    }
+  
+    // compute area of triangle
+    double tri_area;
+    if (sdim == 2) {
+      tri_area = area_of_flat_2D_polygon(3, td);
+    } else if (sdim == 3) {
+      tri_area = great_circle_area(3, td);
+    } // Other sdim caught above
+  
+    // Save areas to use for computing fractions
+    tri_frac[i]=tri_area;
+    
+    // compute total
+    tot_area += tri_area;
+  
+    // Advance to next triangle
+    ti_pos +=3;
+  }
+  
+  // Calculate triangle fractions
+  for (int i=0; i<num_p-2; i++) {
+    if (tot_area >0.0) tri_frac[i]=tri_frac[i]/tot_area;
+    else tri_frac[i]=0.0;
+  }
+  
+  return;
+  }
 
   // sort MDSS by id
   bool mb_less_by_ids(MDSS a, MDSS b) {
@@ -1152,7 +1154,9 @@ void mb_triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tr
   void get_unique_elems_around_node(const EntityHandle *node, MBMesh *mesh, 
                                     MDSS *tmp_mdss, int *_num_ids, int *ids, 
                                     bool &allnotowned) {
-    
+#undef  ESMC_METHOD
+#define ESMC_METHOD "get_unique_elems_around_node()"
+
     int merr, localrc;
     
     // Get useful info
@@ -1393,6 +1397,8 @@ if (range_elem.size() == 3) printf("%d# 3 adjacencies, node %d owener %d\n", Par
 
   // Add the elements in the ghost to the local split_orig_id map
   void add_ghost_elems_to_split_orig_id_map(MBMesh *mesh) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "add_ghost_elems_to_split_orig_id_map()"
 
     int merr, localrc;
     
