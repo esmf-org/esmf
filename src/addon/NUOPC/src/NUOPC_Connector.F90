@@ -1570,7 +1570,7 @@ module NUOPC_Connector
               name="TransferActionGeomObject", value="provide", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            if (btest(verbosity,12)) then
+            if (btest(verbosity,11)) then
               write (msgString, '(A)') trim(name)//": "//&
                 "- both sides must provide the Field/GeomObject."
               call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
@@ -1579,7 +1579,7 @@ module NUOPC_Connector
                 return  ! bail out
             endif
           elseif (trim(eTransferOffer)=="can provide") then
-            ! -> import side must provide, export side must accept
+            ! -> import side must provide, export side may accept
             acceptFlag=.true.
             call NUOPC_SetAttribute(iField, &
               name="TransferActionGeomObject", value="provide", rc=rc)
@@ -1589,16 +1589,16 @@ module NUOPC_Connector
               name="TransferActionGeomObject", value="accept", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            if (btest(verbosity,12)) then
+            if (btest(verbosity,11)) then
               write (msgString, '(A)') trim(name)//": "//&
-                "- import side must provide, export side must accept the Field/GeomObject."
+                "- import side must provide, export side may accept the Field/GeomObject."
               call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
                 return  ! bail out
             endif
           else  ! eTransferOffer=="cannot provide"
-            ! -> import side must provide, export side must accept
+            ! -> import side must provide, export side may accept
             acceptFlag=.true.
             call NUOPC_SetAttribute(iField, &
               name="TransferActionGeomObject", value="provide", rc=rc)
@@ -1608,9 +1608,9 @@ module NUOPC_Connector
               name="TransferActionGeomObject", value="accept", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            if (btest(verbosity,12)) then
+            if (btest(verbosity,11)) then
               write (msgString, '(A)') trim(name)//": "//&
-                "- import side must provide, export side must accept the Field/GeomObject."
+                "- import side must provide, export side may accept the Field/GeomObject."
               call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -1619,7 +1619,7 @@ module NUOPC_Connector
           endif
         elseif (trim(iTransferOffer)=="can provide") then
           if (trim(eTransferOffer)=="will provide") then
-            ! -> import side must accept, export side must provide
+            ! -> import side may accept, export side must provide
             acceptFlag=.true.
             call NUOPC_SetAttribute(iField, &
               name="TransferActionGeomObject", value="accept", rc=rc)
@@ -1629,16 +1629,16 @@ module NUOPC_Connector
               name="TransferActionGeomObject", value="provide", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            if (btest(verbosity,12)) then
+            if (btest(verbosity,11)) then
               write (msgString, '(A)') trim(name)//": "//&
-                "- import side must accept, export side must provide the Field/GeomObject."
+                "- import side may accept, export side must provide the Field/GeomObject."
               call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
                 return  ! bail out
             endif
           elseif (trim(eTransferOffer)=="can provide") then
-            ! -> import side must provide, export side must accept
+            ! -> import side must provide, export side may accept
             acceptFlag=.true.
             call NUOPC_SetAttribute(iField, &
               name="TransferActionGeomObject", value="provide", rc=rc)
@@ -1648,16 +1648,16 @@ module NUOPC_Connector
               name="TransferActionGeomObject", value="accept", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            if (btest(verbosity,12)) then
+            if (btest(verbosity,11)) then
               write (msgString, '(A)') trim(name)//": "//&
-                "- import side must provide, export side must accept the Field/GeomObject."
+                "- import side must provide, export side may accept the Field/GeomObject."
               call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
                 return  ! bail out
             endif
           else  ! eTransferOffer=="cannot provide"
-            ! -> import side must provide, export side must accept
+            ! -> import side must provide, export side may accept
             acceptFlag=.true.
             call NUOPC_SetAttribute(iField, &
               name="TransferActionGeomObject", value="provide", rc=rc)
@@ -1667,9 +1667,9 @@ module NUOPC_Connector
               name="TransferActionGeomObject", value="accept", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            if (btest(verbosity,12)) then
+            if (btest(verbosity,11)) then
               write (msgString, '(A)') trim(name)//": "//&
-                "- import side must provide, export side must accept the Field/GeomObject."
+                "- import side must provide, export side may accept the Field/GeomObject."
               call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -1678,7 +1678,7 @@ module NUOPC_Connector
           endif
         else  ! iTransferOffer=="cannot provide"
           if (trim(eTransferOffer)=="will provide") then
-            ! -> import side must accept, export side must provide
+            ! -> import side may accept, export side must provide
             acceptFlag=.true.
             call NUOPC_SetAttribute(iField, &
               name="TransferActionGeomObject", value="accept", rc=rc)
@@ -1688,16 +1688,16 @@ module NUOPC_Connector
               name="TransferActionGeomObject", value="provide", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            if (btest(verbosity,12)) then
+            if (btest(verbosity,11)) then
               write (msgString, '(A)') trim(name)//": "//&
-                "- import side must accept, export side must provide the Field/GeomObject."
+                "- import side may accept, export side must provide the Field/GeomObject."
               call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
                 return  ! bail out
             endif
           elseif (trim(eTransferOffer)=="can provide") then
-            ! -> import side must accept, export side must provide
+            ! -> import side may accept, export side must provide
             acceptFlag=.true.
             call NUOPC_SetAttribute(iField, &
               name="TransferActionGeomObject", value="accept", rc=rc)
@@ -1707,9 +1707,9 @@ module NUOPC_Connector
               name="TransferActionGeomObject", value="provide", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            if (btest(verbosity,12)) then
+            if (btest(verbosity,11)) then
               write (msgString, '(A)') trim(name)//": "//&
-                "- import side must accept, export side must provide the Field/GeomObject."
+                "- import side may accept, export side must provide the Field/GeomObject."
               call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -1909,6 +1909,8 @@ module NUOPC_Connector
     type(ESMF_Time)                 :: currTime
     character(len=40)               :: currTimeString
     character(len=40)               :: transferDirection
+    type(ESMF_TypeKind_Flag)        :: tkf
+    integer                         :: tk, gl
     
     rc = ESMF_SUCCESS
 
@@ -2201,9 +2203,12 @@ module NUOPC_Connector
           
         ! transfer the underlying DistGrid from provider to acceptor
         ! or share the providerField or providerGeomObject with the acceptor
-        call ESMF_FieldGet(providerField, geomtype=geomtype, rc=rc)
+        call ESMF_FieldGet(providerField, geomtype=geomtype, typekind=tkf, &
+          rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        
+        ! ESMF_GEOMTYPE_GRID
         if (geomtype==ESMF_GEOMTYPE_GRID) then
           call ESMF_FieldGet(providerField, grid=grid, staggerloc=staggerloc, &
             rc=rc)
@@ -2255,8 +2260,8 @@ module NUOPC_Connector
             endif
           endif
           ! query additional provider information
-          call ESMF_FieldGet(providerField, grid=grid, &
-            dimCount=fieldDimCount, rc=rc)
+          call ESMF_FieldGet(providerField, grid=grid, dimCount=fieldDimCount, &
+            rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           call ESMF_GridGet(grid, dimCount=gridDimCount, &
@@ -2298,6 +2303,24 @@ module NUOPC_Connector
           endif
           if (.not.sharedFlag) then
             ! transfer additional provider info in form of attributes
+            tk = tkf  ! convert TypeKind_Flag to integer
+            call ESMF_AttributeSet(acceptorField, &
+              name="TypeKind", value=tk, &
+              convention="NUOPC", purpose="Instance", &
+              attnestflag=ESMF_ATTNEST_ON, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+            gl = staggerloc  ! convert StaggerLoc to integer
+            call ESMF_AttributeSet(acceptorField, &
+              name="GeomLoc", value=gl, &
+              convention="NUOPC", purpose="Instance", &
+              attnestflag=ESMF_ATTNEST_ON, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
             call ESMF_AttributeSet(acceptorField, &
               name="MinIndex", valueList=minIndex, &
               convention="NUOPC", purpose="Instance", &
@@ -2334,8 +2357,6 @@ module NUOPC_Connector
               return  ! bail out
             if (fieldDimCount - gridDimCount > 0) then
               ! bring over ungridded dim bounds as attributes
-!            print *, "fieldDimCount = ", fieldDimCount
-!            print *, "gridDimCount = ", gridDimCount
               call ESMF_AttributeSet(acceptorField, &
                 name="UngriddedLBound", valueList=ungriddedLBound, &
                 convention="NUOPC", purpose="Instance", &
@@ -2408,7 +2429,8 @@ module NUOPC_Connector
               msg="Deallocating ungriddedUBound", &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           endif
-          
+        
+        ! ESMF_GEOMTYPE_MESH
         elseif (geomtype==ESMF_GEOMTYPE_MESH) then
           call ESMF_FieldGet(providerField, mesh=mesh, meshloc=meshloc, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2453,8 +2475,8 @@ module NUOPC_Connector
             endif
           endif
           ! query additional provider information
-          call ESMF_FieldGet(providerField, mesh=mesh, &
-            dimCount=fieldDimCount, rc=rc)
+          call ESMF_FieldGet(providerField, mesh=mesh, dimCount=fieldDimCount,&
+            rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           call ESMF_DistGridGet(providerDG, dimCount=gridDimCount, rc=rc)
@@ -2488,6 +2510,24 @@ module NUOPC_Connector
           endif
           if (.not.sharedFlag) then
             ! transfer additional provider info in form of attributes
+            tk = tkf  ! convert TypeKind_Flag to integer
+            call ESMF_AttributeSet(acceptorField, &
+              name="TypeKind", value=tk, &
+              convention="NUOPC", purpose="Instance", &
+              attnestflag=ESMF_ATTNEST_ON, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+            gl = meshloc  ! convert StaggerLoc to integer
+            call ESMF_AttributeSet(acceptorField, &
+              name="GeomLoc", value=gl, &
+              convention="NUOPC", purpose="Instance", &
+              attnestflag=ESMF_ATTNEST_ON, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
             ! bring over gridToFieldMap as attributes
             call ESMF_AttributeSet(acceptorField, &
               name="GridToFieldMap", valueList=gridToFieldMap, &
@@ -2569,6 +2609,7 @@ module NUOPC_Connector
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           endif
 
+        ! ESMF_GEOMTYPE_LOCSTREAM
         elseif (geomtype==ESMF_GEOMTYPE_LOCSTREAM) then
           call ESMF_FieldGet(providerField, locstream=locstream, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2605,6 +2646,18 @@ module NUOPC_Connector
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           endif
+          ! transfer additional provider info in form of attributes
+          tk = tkf  ! convert TypeKind_Flag to integer
+          call ESMF_AttributeSet(acceptorField, &
+            name="TypeKind", value=tk, &
+            convention="NUOPC", purpose="Instance", &
+            attnestflag=ESMF_ATTNEST_ON, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+
+        ! unsupported ESMF_GEOMTYPE
         else
           call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
             msg="Provided GeomType must be Grid, Mesh, or LocStream.", &
@@ -3552,15 +3605,20 @@ module NUOPC_Connector
           value=eShareStatus, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-#if 0
-call ESMF_LogWrite("iShareStatus: "//trim(iShareStatus), ESMF_LOGMSG_INFO, rc=rc)
-call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc)
-#endif
         sharedFlag = .false. ! reset
         if (trim(iShareStatus)=="shared" .and. trim(eShareStatus)=="shared") &
           sharedFlag = .true.
         if (.not.sharedFlag) then
           ! not sharing -> add the import and export Fields to FieldBundles
+          if (btest(verbosity,12)) then
+            write (msgString, '(A)') trim(name)//": "//&
+              "- no Field sharing between import and export side: remap."
+            call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+          endif
+          ! add the import and export Fields to FieldBundles
           call ESMF_FieldBundleAdd(is%wrap%srcFields, (/iField/), &
             multiflag=.true., rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &

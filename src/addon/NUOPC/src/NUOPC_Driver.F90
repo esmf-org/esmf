@@ -6472,6 +6472,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       logical                         :: isPresent
       integer(ESMF_KIND_I4), pointer  :: ungriddedLBound(:), ungriddedUBound(:)
       integer(ESMF_KIND_I4), pointer  :: gridToFieldMap(:)
+      integer                         :: tk
+      type(ESMF_TypeKind_Flag)        :: tkf
       
       rc = ESMF_SUCCESS
 
@@ -6484,8 +6486,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (associated(fieldList)) then
         do i=1, size(fieldList)
           ! the transferred Grid is already set, allocate memory for data
-          !TODO: This assumes R8, etc. Make this 
-          !TODO: more general to handle all field cases.
+          !TODO: Only Grids work. Also make this work for Mesh and LocStream.
+
+          ! TypeKind attribute
+          call ESMF_AttributeGet(fieldList(i), name="TypeKind", &
+            convention="NUOPC", purpose="Instance", &
+            value=tk, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          tkf=tk  ! convert integer into actual TypeKind_Flag
 
           ! GridToFieldMap attribute
           call ESMF_AttributeGet(fieldList(i), name="GridToFieldMap", &
@@ -6559,7 +6568,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             ! create field with ungridded dims
             call ESMF_FieldEmptyComplete(fieldList(i), &
-              gridToFieldMap=gridToFieldMap, typekind=ESMF_TYPEKIND_R8, &
+              gridToFieldMap=gridToFieldMap, typekind=tkf, &
               ungriddedLBound=ungriddedLBound, &
               ungriddedUBound=ungriddedUBound, &
               rc=rc)
@@ -6569,7 +6578,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           else
             ! create field with no ungridded dims
             call ESMF_FieldEmptyComplete(fieldList(i), &
-              gridToFieldMap=gridToFieldMap, typekind=ESMF_TYPEKIND_R8, rc=rc)
+              gridToFieldMap=gridToFieldMap, typekind=tkf, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           endif
