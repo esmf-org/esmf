@@ -2271,7 +2271,7 @@ module NUOPC_Connector
           allocate(minIndex(gridDimCount), maxIndex(gridDimCount), stat=rc)
           if (ESMF_LogFoundAllocError(rc, msg="Allocating minIndex, maxIndex", &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          call ESMF_GridGetIndex(grid, tileNo=1, &
+          call ESMF_GridGetIndex(grid, tileNo=1, &  !TODO: support tileCount>1!!
             minIndex=minIndex, maxIndex=maxIndex, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
