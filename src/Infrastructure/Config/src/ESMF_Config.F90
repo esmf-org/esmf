@@ -85,7 +85,7 @@
 !
 !==============================================================================
 !BOPI
-! !IROUTINE: ESMF_ConfigCreate - Create an {\tt ESMF\_Config} object.
+! !IROUTINE: ESMF_ConfigCreate - Create a Config object
 !
 ! !INTERFACE:
     interface ESMF_ConfigCreate
@@ -105,7 +105,7 @@
 !------------------------------------------------------------------------------
 
 !BOPI
-! !IROUTINE: ESMF_ConfigGetAttribute - Get an attribute from a Config
+! !IROUTINE: ESMF_ConfigGetAttribute - Get an attribute from a Config object
 !
 ! !INTERFACE:
     interface ESMF_ConfigGetAttribute
@@ -134,7 +134,7 @@
 !
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_ConfigSetAttribute - Set an attribute in a Config
+! !IROUTINE: ESMF_ConfigSetAttribute - Set an attribute in a Config object
 !
 ! !INTERFACE:
     interface ESMF_ConfigSetAttribute
@@ -161,7 +161,7 @@
       end interface
 !
 !------------------------------------------------------------------------------
-!! !IROUTINE: ESMF_ConfigEQ - Test objects for equivalence
+!! !IROUTINE: ESMF_ConfigEQ - Test Config objects for equivalence
 !
 ! !INTERFACE:
     interface operator(==)
@@ -366,7 +366,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigAttrUsedGetInit"
 !BOPI
-! !IROUTINE:  ESMF_ConfigAttrUsedGetInit - Get initialization status.
+! !IROUTINE:  ESMF_ConfigAttrUsedGetInit - Get initialization status of a Config object
 
 ! !INTERFACE:
     function ESMF_ConfigAttrUsedGetInit(s)
@@ -464,7 +464,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigClassGetInit"
 !BOPI
-! !IROUTINE:  ESMF_ConfigClassGetInit - Get initialization status.
+! !IROUTINE:  ESMF_ConfigClassGetInit - Get initialization status of a Config object
 
 ! !INTERFACE:
     function ESMF_ConfigClassGetInit(s)
@@ -565,7 +565,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigGetInit"
 !BOPI
-! !IROUTINE:  ESMF_ConfigGetInit - Get initialization status.
+! !IROUTINE:  ESMF_ConfigGetInit - Get initialization status of a Config object
 
 ! !INTERFACE:
     function ESMF_ConfigGetInit(d)
@@ -679,11 +679,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,intent(out), optional :: rc
 !
-!
-! !STATUS:
-! \begin{itemize}
-! \item Introduced in ESMF version 8.0.0
-! \end{itemize}
 !
 ! !DESCRIPTION:
 !   Instantiates an {\tt ESMF\_Config} object from a section of an existing
@@ -851,7 +846,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #define ESMF_METHOD "ESMF_ConfigFindLabel"
 !BOP
 !
-! !IROUTINE: ESMF_ConfigFindLabel - Find a label
+! !IROUTINE: ESMF_ConfigFindLabel - Find a label in a Config object
 !
 ! !INTERFACE:
     subroutine ESMF_ConfigFindLabel(config, label, keywordEnforcer, isPresent, rc)
@@ -958,7 +953,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #define ESMF_METHOD "ESMF_ConfigFindNextLabel"
 !BOP
 !
-! !IROUTINE: ESMF_ConfigFindNextLabel - Find a label starting from current position
+! !IROUTINE: ESMF_ConfigFindNextLabel - Find a label in Config object starting from current position
 !
 ! !INTERFACE:
     subroutine ESMF_ConfigFindNextLabel(config, label, keywordEnforcer, isPresent, rc)
@@ -970,11 +965,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       logical,           intent(out),  optional  :: isPresent
       integer,           intent(out),  optional  :: rc
 
-!
-! !STATUS:
-! \begin{itemize}
-! \item Introduced in version 8.0.0
-! \end{itemize}
 !
 ! !DESCRIPTION: Finds the {\tt label} (key) string in the {\tt config} object,
 !   starting from the current position pointer.
@@ -1056,7 +1046,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end subroutine ESMF_ConfigFindNextLabel
 
 !BOP
-! !IROUTINE: ESMF_ConfigGetAttribute - Get a value 
+! !IROUTINE: ESMF_ConfigGetAttribute - Get an attribute value from Config object
 !
 !
 ! !INTERFACE:
@@ -1108,7 +1098,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP -------------------------------------------------------------------
 
 !BOP -------------------------------------------------------------------
-! !IROUTINE: ESMF_ConfigGetAttribute - Get a list of values 
+! !IROUTINE: ESMF_ConfigGetAttribute - Get a list of attribute values from Config object
 !
 ! !INTERFACE:
 !      subroutine ESMF_ConfigGetAttribute(config, <value list argument>, &
@@ -2416,7 +2406,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #define ESMF_METHOD "ESMF_ConfigGetChar"
 !BOP
 !
-! !IROUTINE: ESMF_ConfigGetChar - Get a character
+! !IROUTINE: ESMF_ConfigGetChar - Get a character attribute value from Config object
 !
 ! !INTERFACE:
       subroutine ESMF_ConfigGetChar(config, value, &
@@ -2498,7 +2488,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #define ESMF_METHOD "ESMF_ConfigGetDim"
 !BOP
 !
-! !IROUTINE: ESMF_ConfigGetDim - Get table sizes
+! !IROUTINE: ESMF_ConfigGetDim - Get table sizes from Config object
 !
 ! !INTERFACE:
     subroutine ESMF_ConfigGetDim(config, lineCount, columnCount, &
@@ -2603,7 +2593,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigGetLen"
 !BOP
-! !IROUTINE: ESMF_ConfigGetLen - Get the length of the line in words
+! !IROUTINE: ESMF_ConfigGetLen - Get the length of the line in words from Config object
 !
 ! !INTERFACE:
     integer function ESMF_ConfigGetLen(config, keywordEnforcer, label, rc)
@@ -2728,7 +2718,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #define ESMF_METHOD "ESMF_ConfigLoadFile"
 !BOP
 !
-! !IROUTINE: ESMF_ConfigLoadFile - Load resource file into memory
+! !IROUTINE: ESMF_ConfigLoadFile - Load resource file into Config object memory
 !
 ! !INTERFACE:
     subroutine ESMF_ConfigLoadFile(config, filename, &
@@ -2802,7 +2792,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #define ESMF_METHOD "ESMF_ConfigLoadFile_1proc_"
 !BOPI -------------------------------------------------------------------
 !
-! !IROUTINE: ESMF_ConfigLoadFile_1proc - Load resource file into memory
+! !IROUTINE: ESMF_ConfigLoadFile_1proc - Load resource file into Config object memory
 !
 
 ! !INTERFACE:
@@ -2911,7 +2901,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #define ESMF_METHOD "ESMF_ConfigNextLine"
 !BOP
 !
-! !IROUTINE: ESMF_ConfigNextLine - Find next line
+! !IROUTINE: ESMF_ConfigNextLine - Find next line in a Config object
 !
 ! !INTERFACE:
     subroutine ESMF_ConfigNextLine(config, keywordEnforcer, tableEnd, rc)
@@ -2995,7 +2985,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #define ESMF_METHOD "ESMF_ConfigParseAttributes"
 !BOPI
 !
-! !IROUTINE: ESMF_ConfigParseAttributes - Parse all attribute labels
+! !IROUTINE: ESMF_ConfigParseAttributes - Parse all attribute labels in a Config object
 !
 ! !INTERFACE:
 
@@ -3106,7 +3096,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #define ESMF_METHOD "ESMF_ConfigPrint"
 !BOP
 !
-! !IROUTINE: ESMF_ConfigPrint - Write content of {\tt ESMF\_Config} object to unit
+! !IROUTINE: ESMF_ConfigPrint - Write content of Config object to unit
 !
 ! !INTERFACE:
     subroutine ESMF_ConfigPrint(config, keywordEnforcer, unit, rc)
@@ -3117,11 +3107,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer, optional, intent(in)  :: unit
       integer, optional, intent(out) :: rc
 !
-!
-! !STATUS:
-! \begin{itemize}
-! \item Introduced in ESMF version 8.0.0
-! \end{itemize}
 !
 ! !DESCRIPTION:
 !   Write content of input {\tt ESMF\_Config} object to unit {\tt unit}.
@@ -3168,7 +3153,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !BOP
 !
-! !IROUTINE: ESMF_ConfigSetAttribute - Set a value
+! !IROUTINE: ESMF_ConfigSetAttribute - Set a value in Config object
 !
 !
 ! !INTERFACE:
