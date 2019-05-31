@@ -252,3 +252,7 @@ ESMF_SL_LIBS_TO_MAKE  =
 #
 ESMF_NOWEBSERVTESTING = TRUE
 
+############################################################
+# Turn off trace lib building. It is currently not supported on MinGW
+#
+ESMF_TRACE_LIB_BUILD = OFF
