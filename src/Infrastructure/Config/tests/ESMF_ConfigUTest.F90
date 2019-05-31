@@ -32,8 +32,6 @@
 
 #include "ESMF.h"
 
-#define ESMF_TESTEXHAUSTIVE
-
 module config_subrs
 
         use ESMF_TestMod
@@ -1530,7 +1528,7 @@ subroutine MultPar_SingleLine_Vf
       end if
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       ! Test Config From Empty Section Destroy
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Config From Empty Section Print Test"
@@ -1546,7 +1544,7 @@ subroutine MultPar_SingleLine_Vf
       end if
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       ! Test Config From Empty Section Destroy
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Config From Empty Section Destroy Test"
@@ -1562,7 +1560,7 @@ subroutine MultPar_SingleLine_Vf
       end if
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       ! Test Config Create From Section
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Config Create From Section Test"
@@ -1578,7 +1576,7 @@ subroutine MultPar_SingleLine_Vf
       end if
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       ! Test Config From Section Print
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Config Print Test"
@@ -1594,7 +1592,7 @@ subroutine MultPar_SingleLine_Vf
       end if
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       ! Test Config From Section Destroy
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Config From Section Destroy Test"
@@ -1610,7 +1608,7 @@ subroutine MultPar_SingleLine_Vf
       end if
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       ! Test Config Create From Section
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Config Create From Section Test"
@@ -1743,7 +1741,7 @@ subroutine MultPar_SingleLine_Vf
       end if
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       ! TEST Config Section Read Table
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Config Section Read Table Test"
@@ -1760,7 +1758,7 @@ subroutine MultPar_SingleLine_Vf
       end if
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       ! TEST Config Section Validate Table Dimensions
       write(failMsg, *) "Did not validate table dimensions"
       write(name, *) "Config Section Read Table Dimensions Test"
@@ -1792,7 +1790,7 @@ subroutine MultPar_SingleLine_Vf
       end if
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       ! TEST Config Section Validate Table Values
       write(failMsg, *) "Did not validate table values"
       write(name, *) "Config Section Read Table Values Test"
@@ -1849,7 +1847,7 @@ subroutine MultPar_SingleLine_Vf
       endif
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       ! Test Config From Section Destroy
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Config From Section Destroy Test"
