@@ -1,4 +1,3 @@
-// $Id$ 
 // @HEADER
 // ***********************************************************************
 //
@@ -20,7 +19,7 @@
 //
 // You should have received a copy of the GNU Lesser General Public
 // License along with this library; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+// Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301
 // USA
 // Questions? Contact David M. Gay (dmgay@sandia.gov) or Eric T. Phipps
 // (etphipp@sandia.gov).
@@ -36,8 +35,13 @@
 #define SACADO_RAD_H
 
 #include <stddef.h>
-#include <cmath>
-#include <math.h>
+#include "Sacado_cmath.hpp"
+
+#include "Sacado_ConfigDefs.h"
+
+#if defined(RAD_DEBUG_BLOCKKEEP) && !defined(HAVE_SACADO_UNINIT)
+#undef RAD_DEBUG_BLOCKKEEP
+#endif
 
 namespace Sacado {
 namespace Radnt {	// nontemplated RAD
@@ -59,6 +63,7 @@ namespace Radnt {	// nontemplated RAD
   using std::sinh;
   using std::tanh;
   using std::abs;
+  using std::fabs;
   using std::atan2;
   using std::pow;
 #endif //!RAD_NO_USING_STDCC
@@ -93,7 +98,8 @@ ADcontext {	// A singleton class: one instance in radops.c
  public:
 	ADcontext();
 	void *Memalloc(size_t len);
-	static void Gradcomp();
+	static void Gradcomp(int);
+	static inline void Gradcomp() { Gradcomp(1); }
 	static void Weighted_Gradcomp(int, ADvar**, double*);
 	};
 
@@ -311,7 +317,10 @@ IndepADvar
 
 	inline double val() const { return cv->Val; }
 	inline double adj() const { return cv->aval; }
-	static inline void Gradcomp() { ADcontext::Gradcomp(); }
+	static inline void Gradcomp(int wantgrad)
+		{ ADcontext::Gradcomp(wantgrad); }
+	static inline void Gradcomp()
+		{ ADcontext::Gradcomp(1); }
 	static inline void aval_reset() { ConstADvari::aval_reset(); }
 	static inline void Weighted_Gradcomp(int n, ADvar **v, double *w)
 				{ ADcontext::Weighted_Gradcomp(n, v, w); }
@@ -433,7 +442,10 @@ ADvar: public IndepADvar {		// an "active" variable
 		ConstADvari::cadc.fpval_implies_const = newval;
 		return oldval;
 		}
-	static inline void Gradcomp() { ADcontext::Gradcomp(); }
+	static inline void Gradcomp(int wantgrad)
+				{ ADcontext::Gradcomp(wantgrad); }
+	static inline void Gradcomp()
+				{ ADcontext::Gradcomp(1); }
 	static inline void aval_reset() { ConstADvari::aval_reset(); }
 	static inline void Weighted_Gradcomp(int n, ADvar **v, double *w)
 				{ ADcontext::Weighted_Gradcomp(n, v, w); }
