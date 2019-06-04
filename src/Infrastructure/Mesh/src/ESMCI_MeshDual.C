@@ -105,6 +105,9 @@ namespace ESMCI {
   // Add ghostcells to source mesh, because we need the surrounding 
   // cells
    {
+
+  // BOB: Use convenience function to comm. all fields
+#if 0
     int num_snd=0;
     MEField<> *snd[10],*rcv[10];
     
@@ -145,6 +148,8 @@ namespace ESMCI {
       rcv[num_snd]=psf;
       num_snd++;
     }
+#endif
+
 
 #ifdef DEBUG_TRI
 {
@@ -178,9 +183,17 @@ namespace ESMCI {
   ESMCI_meshwrite(&src_mesh, fname, rc, len);}
 #endif
 
-    // TODO: add elem mask fields and mask_val fields   
+    // Create ghost cells
     src_mesh->CreateGhost();
+
+    // Communicate values to ghost cells
+    src_mesh->GhostCommAllFields();
+
+    // BOB: Use convenince method to comm all fields 
+#if 0
     src_mesh->GhostComm().SendFields(num_snd, snd, rcv);
+#endif
+
 
 #ifdef DEBUG_WRITE_MESH
   {int *rc;
