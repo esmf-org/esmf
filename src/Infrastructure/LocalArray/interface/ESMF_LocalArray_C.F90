@@ -9,6 +9,8 @@
 ! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
+#define ESMF_FILENAME "ESMF_LocalArray_C.F90"
+!==============================================================================
 !
 ! F77 interface files for C++ layer calling into F90 implementation layer.
 ! This cannot use any F90 syntax in the API such as F90 array syntax,
@@ -25,10 +27,14 @@
 !      character(*), parameter, private :: version = &
 !      '$Id$'
 !==============================================================================
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_localarrayf90allocate"
 subroutine f_esmf_localarrayf90allocate(array, rank, typekind, counts, &
   lbounds, ubounds, rc)
   use ESMF_UtilTypesMod     ! ESMF base class
   use ESMF_BaseMod          ! ESMF base class
+  use ESMF_LogErrMod        ! ESMF error logging
   use ESMF_LocalArrayMod
   
   implicit none
@@ -44,12 +50,19 @@ subroutine f_esmf_localarrayf90allocate(array, rank, typekind, counts, &
   ! Beware - these args are not in the same order
   call ESMF_LocalArrConstrF90Ptr(array, counts, typekind, rank, &
     lbounds, ubounds, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, &
+    ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT)) return
+    
 end subroutine f_esmf_localarrayf90allocate
 
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_localarrayf90deallocate"
 subroutine f_esmf_localarrayf90deallocate(array, rank, typekind, rc)
   use ESMF_UtilTypesMod     ! ESMF base class
   use ESMF_BaseMod          ! ESMF base class
+  use ESMF_LogErrMod        ! ESMF error logging
   use ESMF_LocalArrayMod
 
   implicit none
@@ -60,13 +73,20 @@ subroutine f_esmf_localarrayf90deallocate(array, rank, typekind, rc)
   integer :: rc
 
   call ESMF_LocalArrayF90Deallocate(array, typekind, rank, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, &
+    ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT)) return
+    
 end subroutine f_esmf_localarrayf90deallocate
 
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_localarrayadjust"
 subroutine f_esmf_localarrayadjust(array, rank, typekind, counts, &
   lbounds, ubounds, rc)
-  use ESMF_UtilTypesMod    ! ESMF base class
-  use ESMF_BaseMod    ! ESMF base class
+  use ESMF_UtilTypesMod     ! ESMF base class
+  use ESMF_BaseMod          ! ESMF base class
+  use ESMF_LogErrMod        ! ESMF error logging
   use ESMF_LocalArrayMod
   
   implicit none
@@ -81,12 +101,19 @@ subroutine f_esmf_localarrayadjust(array, rank, typekind, counts, &
 
   call ESMF_LocalArrayAdjust(array, counts, typekind, rank, &
     lbounds, ubounds,rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, &
+    ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT)) return
+    
 end subroutine f_esmf_localarrayadjust
 
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_localarraycopyf90ptr"
 subroutine f_esmf_localarraycopyf90ptr(arrayInArg, arrayOutArg, rc)
-  use ESMF_UtilTypesMod    ! ESMF base class
-  use ESMF_BaseMod    ! ESMF base class
+  use ESMF_UtilTypesMod     ! ESMF base class
+  use ESMF_BaseMod          ! ESMF base class
+  use ESMF_LogErrMod        ! ESMF error logging
   use ESMF_LocalArrayMod
   
   implicit none
@@ -114,14 +141,20 @@ subroutine f_esmf_localarraycopyf90ptr(arrayInArg, arrayOutArg, rc)
 
   ! do the actual copy, allocating the required memory
   call ESMF_LocalArrayCopyF90Ptr(arrayIn, arrayOut, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, &
+    ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT)) return
   
 end subroutine f_esmf_localarraycopyf90ptr
 
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_localarrayctof90"
 subroutine f_esmf_localarrayctof90(array, cptr, rank, typekind, counts, &
   lbounds, ubounds, rc)
   use ESMF_UtilTypesMod     ! ESMF base class
   use ESMF_BaseMod          ! ESMF base class
+  use ESMF_LogErrMod        ! ESMF error logging
   use ESMF_LocalArrayMod
   use ISO_C_BINDING
   
@@ -139,5 +172,8 @@ subroutine f_esmf_localarrayctof90(array, cptr, rank, typekind, counts, &
   ! Beware - these args are not in the same order
   call ESMF_LocalArrCToF90Ptr(array, cptr, counts, typekind, rank, &
     lbounds, ubounds, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, &
+    ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT)) return
+    
 end subroutine f_esmf_localarrayctof90
-
