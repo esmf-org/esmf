@@ -96,6 +96,32 @@ extern "C" {
 
   void FTN_X(f_esmf_xgridgetcentroid)(ESMCI::XGrid *xgridp, int *elemCount, int*dimCount, ESMC_R8 *centroid, int *rc);
 
+
+  void FTN_X(f_esmf_xgridgetsparsemata2x)(ESMCI::XGrid *xgridp, int *sideAIndex, 
+                                          int *factorListCount, 
+                                          double **factorList, 
+                                          int **factorIndexList, 
+                                          int *rc);
+
+  void FTN_X(f_esmf_xgridgetsparsematx2a)(ESMCI::XGrid *xgridp, int *sideAIndex, 
+                                          int *factorListCount, 
+                                          double **factorList, 
+                                          int **factorIndexList, 
+                                          int *rc);
+
+  void FTN_X(f_esmf_xgridgetsparsematb2x)(ESMCI::XGrid *xgridp, int *sideBIndex, 
+                                          int *factorListCount, 
+                                          double **factorList, 
+                                          int **factorIndexList, 
+                                          int *rc);
+
+  void FTN_X(f_esmf_xgridgetsparsematx2b)(ESMCI::XGrid *xgridp, int *sideBIndex, 
+                                          int *factorListCount, 
+                                          double **factorList, 
+                                          int **factorIndexList, 
+                                          int *rc);
+
+
 }
 
 //
@@ -721,6 +747,188 @@ namespace ESMCI {
 
     // get info from XGrid
     FTN_X(f_esmf_xgridgetcentroid)(this, &elemCount, &dimCount, centroid, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return;
+    
+    // return successfully
+    if (rc) *rc = ESMF_SUCCESS;
+    return;
+  }
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XGrid::getSparseMatA2X()"
+//BOP
+// !IROUTINE:  ESMCI::XGrid::getSparseMatA2X() 
+//
+// !INTERFACE:
+  void XGrid::getSparseMatA2X(
+//
+// !RETURN VALUE:
+//     N/A
+//
+// !ARGUMENTS:
+                              int sideAIndex, 
+                              int *factorListCount,
+                              double **factorList, 
+                              int **factorIndexList,
+                              int *rc) {     // out - return code
+//
+// !DESCRIPTION:
+//     Fill and array with element areas
+//
+//EOP
+    // Initialize return code. Assume routine not implemented
+    int localrc = ESMC_RC_NOT_IMPL;
+
+    // Make sideAIndex 0 based
+    int sideAIndex_base0=sideAIndex+1;
+
+    // get info from XGrid
+    FTN_X(f_esmf_xgridgetsparsemata2x)(this,
+                                       &sideAIndex, 
+                                       factorListCount, 
+                                       factorList, 
+                                       factorIndexList, 
+                                       &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return;
+    
+    // return successfully
+    if (rc) *rc = ESMF_SUCCESS;
+    return;
+  }
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XGrid::getSparseMatX2A()"
+//BOP
+// !IROUTINE:  ESMCI::XGrid::getSparseMatX2A() 
+//
+// !INTERFACE:
+  void XGrid::getSparseMatX2A(
+//
+// !RETURN VALUE:
+//     N/A
+//
+// !ARGUMENTS:
+                              int sideAIndex, 
+                              int *factorListCount,
+                              double **factorList, 
+                              int **factorIndexList,
+                              int *rc) {     // out - return code
+//
+// !DESCRIPTION:
+//     Fill and array with element areas
+//
+//EOP
+    // Initialize return code. Assume routine not implemented
+    int localrc = ESMC_RC_NOT_IMPL;
+
+    // Make sideAIndex 0 based
+    int sideAIndex_base0=sideAIndex+1;
+
+    // get info from XGrid
+    FTN_X(f_esmf_xgridgetsparsematx2a)(this,
+                                       &sideAIndex, 
+                                       factorListCount, 
+                                       factorList, 
+                                       factorIndexList, 
+                                       &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return;
+    
+    // return successfully
+    if (rc) *rc = ESMF_SUCCESS;
+    return;
+  }
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XGrid::getSparseMatB2X()"
+//BOP
+// !IROUTINE:  ESMCI::XGrid::getSparseMatB2X() 
+//
+// !INTERFACE:
+  void XGrid::getSparseMatB2X(
+//
+// !RETURN VALUE:
+//     N/A
+//
+// !ARGUMENTS:
+                              int sideBIndex, 
+                              int *factorListCount,
+                              double **factorList, 
+                              int **factorIndexList,
+                              int *rc) {     // out - return code
+//
+// !DESCRIPTION:
+//     Fill and array with element areas
+//
+//EOP
+    // Initialize return code. Assume routine not implemented
+    int localrc = ESMC_RC_NOT_IMPL;
+
+    // Make sideBIndex 0 based
+    int sideBIndex_base0=sideBIndex+1;
+
+    // get info from XGrid
+    FTN_X(f_esmf_xgridgetsparsematb2x)(this,
+                                       &sideBIndex, 
+                                       factorListCount, 
+                                       factorList, 
+                                       factorIndexList, 
+                                       &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return;
+    
+    // return successfully
+    if (rc) *rc = ESMF_SUCCESS;
+    return;
+  }
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XGrid::getSparseMatX2B()"
+//BOP
+// !IROUTINE:  ESMCI::XGrid::getSparseMatX2B() 
+//
+// !INTERFACE:
+  void XGrid::getSparseMatX2B(
+//
+// !RETURN VALUE:
+//     N/A
+//
+// !ARGUMENTS:
+                              int sideBIndex, 
+                              int *factorListCount,
+                              double **factorList, 
+                              int **factorIndexList,
+                              int *rc) {     // out - return code
+//
+// !DESCRIPTION:
+//     Fill and array with element areas
+//
+//EOP
+    // Initialize return code. Assume routine not implemented
+    int localrc = ESMC_RC_NOT_IMPL;
+
+    // Make sideBIndex 0 based
+    int sideBIndex_base0=sideBIndex+1;
+
+    // get info from XGrid
+    FTN_X(f_esmf_xgridgetsparsematx2b)(this,
+                                       &sideBIndex, 
+                                       factorListCount, 
+                                       factorList, 
+                                       factorIndexList, 
+                                       &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return;
     

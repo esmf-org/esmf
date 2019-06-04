@@ -315,6 +315,116 @@ extern "C" {
   }
 //--------------------------------------------------------------------------
 
+//--------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_XGridGetSparseMatA2X()"
+  void ESMC_XGridGetSparseMatA2X(ESMC_XGrid xgrid, int sideAIndex, 
+                                 int *factorListCount, 
+                                 double **factorList, 
+                                 int **factorIndexList, 
+                                 int *rc){
+
+    // Initialize return code; assume routine not implemented
+    if(rc) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    
+    // typecast into ESMCI type
+    ESMCI::XGrid *xgridp = reinterpret_cast<ESMCI::XGrid *>(xgrid.ptr);
+
+    // Invoke the C++ interface
+    xgridp->getSparseMatA2X(sideAIndex, factorListCount, 
+                            factorList, factorIndexList, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return;
+    // return successfully
+    if(rc) *rc = ESMF_SUCCESS;
+    return;
+  }
+//--------------------------------------------------------------------------
+
+//--------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_XGridGetSparseMatX2A()"
+  void ESMC_XGridGetSparseMatX2A(ESMC_XGrid xgrid, int sideAIndex, 
+                                 int *factorListCount, 
+                                 double **factorList, 
+                                 int **factorIndexList, 
+                                 int *rc){
+
+    // Initialize return code; assume routine not implemented
+    if(rc) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    
+    // typecast into ESMCI type
+    ESMCI::XGrid *xgridp = reinterpret_cast<ESMCI::XGrid *>(xgrid.ptr);
+
+    // Invoke the C++ interface
+    xgridp->getSparseMatX2A(sideAIndex, factorListCount, 
+                            factorList, factorIndexList, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return;
+    // return successfully
+    if(rc) *rc = ESMF_SUCCESS;
+    return;
+  }
+//--------------------------------------------------------------------------
+
+//--------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_XGridGetSparseMatB2X()"
+  void ESMC_XGridGetSparseMatB2X(ESMC_XGrid xgrid, int sideBIndex, 
+                                 int *factorListCount, 
+                                 double **factorList, 
+                                 int **factorIndexList, 
+                                 int *rc){
+
+    // Initialize return code; assume routine not implemented
+    if(rc) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    
+    // typecast into ESMCI type
+    ESMCI::XGrid *xgridp = reinterpret_cast<ESMCI::XGrid *>(xgrid.ptr);
+
+    // Invoke the C++ interface
+    xgridp->getSparseMatB2X(sideBIndex, factorListCount, 
+                            factorList, factorIndexList, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return;
+    // return successfully
+    if(rc) *rc = ESMF_SUCCESS;
+    return;
+  }
+//--------------------------------------------------------------------------
+
+
+//--------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_XGridGetSparseMatX2B()"
+  void ESMC_XGridGetSparseMatX2B(ESMC_XGrid xgrid, int sideBIndex, 
+                                 int *factorListCount, 
+                                 double **factorList, 
+                                 int **factorIndexList, 
+                                 int *rc){
+
+    // Initialize return code; assume routine not implemented
+    if(rc) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    
+    // typecast into ESMCI type
+    ESMCI::XGrid *xgridp = reinterpret_cast<ESMCI::XGrid *>(xgrid.ptr);
+
+    // Invoke the C++ interface
+    xgridp->getSparseMatX2B(sideBIndex, factorListCount, 
+                            factorList, factorIndexList, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return;
+    // return successfully
+    if(rc) *rc = ESMF_SUCCESS;
+    return;
+  }
+//--------------------------------------------------------------------------
+
+
 
 //--------------------------------------------------------------------------
 

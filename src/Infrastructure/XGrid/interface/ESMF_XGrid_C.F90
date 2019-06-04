@@ -497,6 +497,451 @@
   
   end subroutine f_esmf_xgridgetcentroid
 
+#undef  ESMF_METHOD 
+#define ESMF_METHOD "f_esmf_xgridgetsparsemata2x"
+  subroutine f_esmf_xgridgetsparsemata2x(xgrid,           &
+                                         sideAIndex_base0, &
+                                         factorListCount, &
+                                         factorList,      &
+                                         factorIndexList, &
+                                         rc)
+
+    use ESMF_XGridMod
+    use ESMF_XGridGetMod
+    use ESMF_XGridCreateMod
+    use ESMF_XGridGeomBaseMod
+    use ESMF_UtilTypesMod
+    use ESMF_BaseMod
+    use ESMF_LogErrMod
+    use iso_c_binding
+
+    implicit none
+
+    type(ESMF_XGrid)     :: xgrid
+    integer, intent(in)  :: sideAIndex_base0
+    integer, intent(out) :: factorListCount
+    type(C_PTR)          :: factorList
+    type(C_PTR)          :: factorIndexList
+    integer, intent(out) :: rc              
+
+    ! Local Variables
+    real(ESMF_KIND_R8), pointer    :: factorListFPtr(:)
+    integer(ESMF_KIND_I4), pointer :: factorIndexListFPtr(:,:)
+    integer :: sideAGridCount, sideAMeshCount
+    type(ESMF_XGridSpec), allocatable :: sparseMatA2X(:)
+    integer :: sideAIndex
+
+    ! Init rc
+    rc = ESMF_RC_NOT_IMPL
+
+    ! Make sideA index base 1
+    sideAIndex=sideAIndex_base0+1
+
+    ! Get number of side A Grids
+    call ESMF_XGridGet(xgrid, sideAGridCount=sideAGridCount, rc=rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Get number of side A Meshes
+    call ESMF_XGridGet(xgrid, sideAMeshCount=sideAMeshCount, rc=rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Make sure the index is not too big
+    if (sideAIndex > sideAGridCount+sideAMeshCount) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+         msg="sideAIndex bigger than the number of Grids and Meshes on sideA", &
+         ESMF_CONTEXT, rcToReturn=rc) 
+      return
+    endif
+
+    ! Make sure the index is not too small
+    if (sideAIndex < 1) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+         msg="sideAIndex below 1 in Fortran or 0 in C.", &
+         ESMF_CONTEXT, rcToReturn=rc) 
+      return
+    endif
+
+
+    ! Allocate XGridSpec array
+    allocate(sparseMatA2X(sideAGridCount+sideAMeshCount))
+
+    ! Get info
+    call ESMF_XGridGet(xgrid, sparseMatA2X=sparseMatA2X, rc=rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Get sparse matrix information
+    factorListCount = size(sparseMatA2X(sideAIndex)%factorList, 1)
+
+    ! Associate the Fortran pointers with C pointers. Only do this if
+    ! factors were created during the regrid store call.
+    if (factorListCount > 0) then
+       factorList = C_LOC(sparseMatA2X(sideAIndex)%factorList(1))
+       factorIndexList = C_LOC(sparseMatA2X(sideAIndex)%factorIndexList(1,1))
+    endif
+
+    ! set rc to success
+    rc = ESMF_SUCCESS
+  
+  end subroutine f_esmf_xgridgetsparsemata2x
+
+
+#undef  ESMF_METHOD 
+#define ESMF_METHOD "f_esmf_xgridgetsparsematx2a"
+  subroutine f_esmf_xgridgetsparsematx2a(xgrid,           &
+                                         sideAIndex_base0, &
+                                         factorListCount, &
+                                         factorList,      &
+                                         factorIndexList, &
+                                         rc)
+
+    use ESMF_XGridMod
+    use ESMF_XGridGetMod
+    use ESMF_XGridCreateMod
+    use ESMF_XGridGeomBaseMod
+    use ESMF_UtilTypesMod
+    use ESMF_BaseMod
+    use ESMF_LogErrMod
+    use iso_c_binding
+
+    implicit none
+
+    type(ESMF_XGrid)     :: xgrid
+    integer, intent(in)  :: sideAIndex_base0
+    integer, intent(out) :: factorListCount
+    type(C_PTR)          :: factorList
+    type(C_PTR)          :: factorIndexList
+    integer, intent(out) :: rc              
+
+    ! Local Variables
+    real(ESMF_KIND_R8), pointer    :: factorListFPtr(:)
+    integer(ESMF_KIND_I4), pointer :: factorIndexListFPtr(:,:)
+    integer :: sideAGridCount, sideAMeshCount
+    type(ESMF_XGridSpec), allocatable :: sparseMatX2A(:)
+    integer :: sideAIndex
+
+    ! Init rc
+    rc = ESMF_RC_NOT_IMPL
+
+    ! Make sideA index base 1
+    sideAIndex=sideAIndex_base0+1
+
+    ! Get number of side A Grids
+    call ESMF_XGridGet(xgrid, sideAGridCount=sideAGridCount, rc=rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Get number of side A Meshes
+    call ESMF_XGridGet(xgrid, sideAMeshCount=sideAMeshCount, rc=rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Make sure the index is not too big
+    if (sideAIndex > sideAGridCount+sideAMeshCount) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+         msg="sideAIndex bigger than the number of Grids and Meshes on sideA", &
+         ESMF_CONTEXT, rcToReturn=rc) 
+      return
+    endif
+
+    ! Make sure the index is not too small
+    if (sideAIndex < 1) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+         msg="sideAIndex below 1 in Fortran or 0 in C.", &
+         ESMF_CONTEXT, rcToReturn=rc) 
+      return
+    endif
+
+
+    ! Allocate XGridSpec array
+    allocate(sparseMatX2A(sideAGridCount+sideAMeshCount))
+
+    ! Get info
+    call ESMF_XGridGet(xgrid, sparseMatX2A=sparseMatX2A, rc=rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Get sparse matrix information
+    factorListCount = size(sparseMatX2A(sideAIndex)%factorList, 1)
+
+    ! Associate the Fortran pointers with C pointers. Only do this if
+    ! factors were created during the regrid store call.
+    if (factorListCount > 0) then
+       factorList = C_LOC(sparseMatX2A(sideAIndex)%factorList(1))
+       factorIndexList = C_LOC(sparseMatX2A(sideAIndex)%factorIndexList(1,1))
+    endif
+
+    ! set rc to success
+    rc = ESMF_SUCCESS
+  
+  end subroutine f_esmf_xgridgetsparsematx2a
+
+#undef  ESMF_METHOD 
+#define ESMF_METHOD "f_esmf_xgridgetsparsematb2x"
+  subroutine f_esmf_xgridgetsparsematb2x(xgrid,           &
+                                         sideBIndex_base0, &
+                                         factorListCount, &
+                                         factorList,      &
+                                         factorIndexList, &
+                                         rc)
+
+    use ESMF_XGridMod
+    use ESMF_XGridGetMod
+    use ESMF_XGridCreateMod
+    use ESMF_XGridGeomBaseMod
+    use ESMF_UtilTypesMod
+    use ESMF_BaseMod
+    use ESMF_LogErrMod
+    use iso_c_binding
+
+    implicit none
+
+    type(ESMF_XGrid)     :: xgrid
+    integer, intent(in)  :: sideBIndex_base0
+    integer, intent(out) :: factorListCount
+    type(C_PTR)          :: factorList
+    type(C_PTR)          :: factorIndexList
+    integer, intent(out) :: rc              
+
+    ! Local Variables
+    real(ESMF_KIND_R8), pointer    :: factorListFPtr(:)
+    integer(ESMF_KIND_I4), pointer :: factorIndexListFPtr(:,:)
+    integer :: sideBGridCount, sideBMeshCount
+    type(ESMF_XGridSpec), allocatable :: sparseMatB2X(:)
+    integer :: sideBIndex
+
+    ! Init rc
+    rc = ESMF_RC_NOT_IMPL
+
+    ! Make sideA index base 1
+    sideBIndex=sideBIndex_base0+1
+
+    ! Get number of side B Grids
+    call ESMF_XGridGet(xgrid, sideBGridCount=sideBGridCount, rc=rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Get number of side B Meshes
+    call ESMF_XGridGet(xgrid, sideBMeshCount=sideBMeshCount, rc=rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Make sure the index is not too big
+    if (sideBIndex > sideBGridCount+sideBMeshCount) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+         msg="sideBIndex bigger than the number of Grids and Meshes on side B", &
+         ESMF_CONTEXT, rcToReturn=rc) 
+      return
+    endif
+
+    ! Make sure the index is not too small
+    if (sideBIndex < 1) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+         msg="sideBIndex below 1 in Fortran or 0 in C.", &
+         ESMF_CONTEXT, rcToReturn=rc) 
+      return
+    endif
+
+
+    ! Allocate XGridSpec array
+    allocate(sparseMatB2X(sideBGridCount+sideBMeshCount))
+
+    ! Get info
+    call ESMF_XGridGet(xgrid, sparseMatB2X=sparseMatB2X, rc=rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Get sparse matrix information
+    factorListCount = size(sparseMatB2X(sideBIndex)%factorList, 1)
+
+    ! Associate the Fortran pointers with C pointers. Only do this if
+    ! factors were created during the regrid store call.
+    if (factorListCount > 0) then
+       factorList = C_LOC(sparseMatB2X(sideBIndex)%factorList(1))
+       factorIndexList = C_LOC(sparseMatB2X(sideBIndex)%factorIndexList(1,1))
+    endif
+
+    ! set rc to success
+    rc = ESMF_SUCCESS
+  
+  end subroutine f_esmf_xgridgetsparsematb2x
+
+
+#undef  ESMF_METHOD 
+#define ESMF_METHOD "f_esmf_xgridgetsparsematx2b"
+  subroutine f_esmf_xgridgetsparsematx2b(xgrid,           &
+                                         sideBIndex_base0, &
+                                         factorListCount, &
+                                         factorList,      &
+                                         factorIndexList, &
+                                         rc)
+
+    use ESMF_XGridMod
+    use ESMF_XGridGetMod
+    use ESMF_XGridCreateMod
+    use ESMF_XGridGeomBaseMod
+    use ESMF_UtilTypesMod
+    use ESMF_BaseMod
+    use ESMF_LogErrMod
+    use iso_c_binding
+
+    implicit none
+
+    type(ESMF_XGrid)     :: xgrid
+    integer, intent(in)  :: sideBIndex_base0
+    integer, intent(out) :: factorListCount
+    type(C_PTR)          :: factorList
+    type(C_PTR)          :: factorIndexList
+    integer, intent(out) :: rc              
+
+    ! Local Variables
+    real(ESMF_KIND_R8), pointer    :: factorListFPtr(:)
+    integer(ESMF_KIND_I4), pointer :: factorIndexListFPtr(:,:)
+    integer :: sideBGridCount, sideBMeshCount
+    type(ESMF_XGridSpec), allocatable :: sparseMatX2B(:)
+    integer :: sideBIndex
+
+    ! Init rc
+    rc = ESMF_RC_NOT_IMPL
+
+    ! Make sideA index base 1
+    sideBIndex=sideBIndex_base0+1
+
+    ! Get number of side B Grids
+    call ESMF_XGridGet(xgrid, sideBGridCount=sideBGridCount, rc=rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Get number of side B Meshes
+    call ESMF_XGridGet(xgrid, sideBMeshCount=sideBMeshCount, rc=rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Make sure the index is not too big
+    if (sideBIndex > sideBGridCount+sideBMeshCount) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+         msg="sideBIndex bigger than the number of Grids and Meshes on side B", &
+         ESMF_CONTEXT, rcToReturn=rc) 
+      return
+    endif
+
+    ! Make sure the index is not too small
+    if (sideBIndex < 1) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+         msg="sideBIndex below 1 in Fortran or 0 in C.", &
+         ESMF_CONTEXT, rcToReturn=rc) 
+      return
+    endif
+
+
+    ! Allocate XGridSpec array
+    allocate(sparseMatX2B(sideBGridCount+sideBMeshCount))
+
+    ! Get info
+    call ESMF_XGridGet(xgrid, sparseMatX2B=sparseMatX2B, rc=rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Get sparse matrix information
+    factorListCount = size(sparseMatX2B(sideBIndex)%factorList, 1)
+
+    ! Associate the Fortran pointers with C pointers. Only do this if
+    ! factors were created during the regrid store call.
+    if (factorListCount > 0) then
+       factorList = C_LOC(sparseMatX2B(sideBIndex)%factorList(1))
+       factorIndexList = C_LOC(sparseMatX2B(sideBIndex)%factorIndexList(1,1))
+    endif
+
+    ! set rc to success
+    rc = ESMF_SUCCESS
+  
+  end subroutine f_esmf_xgridgetsparsematx2b
+
+
+! Do we want to do things like the below instead???
+#if 0
+#undef  ESMF_METHOD  
+#define ESMF_METHOD "f_esmf_xgridgetgtoxsparsemat"
+  subroutine f_esmf_xgridgetgtoxsparsemat(xgrid,           &
+                                          side,            &
+                                          gridIndex,       &
+                                          factorListCount, &
+                                          factorList,      &
+                                          factorIndexList, &
+                                          rc)
+
+    use ESMF_XGridMod
+    use ESMF_XGridGetMod
+    use ESMF_XGridCreateMod
+    use ESMF_XGridGeomBaseMod
+    use ESMF_UtilTypesMod
+    use ESMF_BaseMod
+    use ESMF_LogErrMod
+    use iso_c_binding
+
+! XMRKX !
+    implicit none
+
+    type(ESMF_XGrid)     :: xgrid
+    integer, intent(in)  :: side
+    integer, intent(in)  :: gridIndex
+    integer, intent(out) :: factorListCount
+    type(C_PTR)          :: factorList
+    type(C_PTR)          :: factorIndexList
+    integer, intent(out) :: rc              
+
+    ! Local Variables
+    real(ESMF_KIND_R8), pointer    :: factorListFPtr(:)
+    integer(ESMF_KIND_I4), pointer :: factorIndexListFPtr(:,:)
+    integer :: sideGridCount, sideMeshCount
+    type(ESMF_XGridSpec), allocatable :: sparseMat(:)
+
+    ! Init rc
+    rc = ESMF_RC_NOT_IMPL
+
+    ! Operate based on side
+    if (side==0) then
+       ! Get number of side A Grids
+       call ESMF_XGridGet(xgrid, sideAGridCount=sideGridCount, rc=rc)
+       if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+       
+       ! Get number of side A Meshes
+       call ESMF_XGridGet(xgrid, sideAMeshCount=sideMeshCount, rc=rc)
+       if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+       
+       ! Allocate XGridSpec array
+       allocate(sparseMat(sideGridCount+sideMeshCount))
+       
+       ! Get info
+       call ESMF_XGridGet(xgrid, sparseMatA2X=sparseMat, rc=rc)
+       if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+       
+       ! Get sparse matrix information
+       factorListCount = size(sparseMat(gridIndex)%factorList, 1)
+       
+       ! Associate the Fortran pointers with C pointers. Only do this if
+       ! factors were created during the regrid store call.
+       if (factorListCount > 0) then
+          factorList = C_LOC(sparseMat(gridIndex)%factorList(1))
+          factorIndexList = C_LOC(sparseMat(gridIndex)%factorIndexList(1,1))
+       endif
+       
+    else if (side==1) then
+       
+    else
+
+    endif
+
+    ! set rc to success
+    rc = ESMF_SUCCESS
+  
+  end subroutine f_esmf_xgridgetgtoxsparsemat
+#endif                 
 
 
 #if 0
@@ -515,9 +960,6 @@
 
 
     
-
-
-
   end subroutine f_esmf_xgridget
 #endif
 

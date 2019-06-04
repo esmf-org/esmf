@@ -442,7 +442,7 @@ void ESMC_XGridGetElementCentroid(
 //
 // !DESCRIPTION:
 //
-//    Get the number of elements in the XGrid.
+//    Get the centroid for each element in the exchange grid. 
 //
 //  The arguments are:
 //  \begin{description}
@@ -457,6 +457,218 @@ void ESMC_XGridGetElementCentroid(
 //
 //EOP
 //-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_XGridGetSparseMatA2X - Get the sparse matrix that goes from a side A grid to the exchange grid.
+
+//
+// !INTERFACE:
+void ESMC_XGridGetSparseMatA2X(
+                               ESMC_XGrid xgrid,      // in
+                               int sideAIndex,        // in
+                               int *factorListCount,  // out
+                               double **factorList,   // out
+                               int **factorIndexList, // out
+                               int *rc);
+
+// !RETURN VALUE:
+//     N/A
+//
+// !DESCRIPTION:
+// 
+//    Get the sparse matrix that goes from a side A grid to the exchange grid.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[xgrid]
+//    The XGrid from which to get the information.
+//  \item[sideAIndex]
+//    The 0 based index of the Grid/Mesh on side A to get the sparse matrix for.
+//    If a priority has been specified for Grids and Meshes, then this index is 
+//    in priority order. If no priority was specified, then the all the Grids are
+//    first followed by all the Meshes in the order they were passed into the XGrid 
+//    create call. 
+//  \item[factorListCount]
+//    The size of the sparse matrix.
+//  \item[factorList]
+//    A pointer to the list of factors for the requested sparse matrix. 
+//    The list is of size {\tt factorListCount}. To save space
+//    this is a pointer to the internal xgrid memory for this list. 
+//    Don't deallocate it. 
+//  \item[factorIndexList]
+//    A pointer to the list of indices for the requested sparse matrix. 
+//    The list is of size 2*{\tt factorListCount}. For each pair of entries
+//    in this array: entry 0 is the sequence index in the source grid, and entry 1 is
+//    the sequence index in the destination grid. To save space
+//    this is a pointer to the internal xgrid memory for this list. 
+//    Don't deallocate it. 
+//  \item[{[rc]}]
+//    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_XGridGetSparseMatA2X - Get the sparse matrix that goes from the exchange grid to a side A grid.
+
+//
+// !INTERFACE:
+void ESMC_XGridGetSparseMatX2A(
+                               ESMC_XGrid xgrid,      // in
+                               int sideAIndex,        // in
+                               int *factorListCount,  // out
+                               double **factorList,   // out
+                               int **factorIndexList, // out
+                               int *rc);
+
+// !RETURN VALUE:
+//     N/A
+//
+// !DESCRIPTION:
+// 
+//    Get the sparse matrix that goes from the exchange grid to a side A grid. 
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[xgrid]
+//    The XGrid from which to get the information.
+//  \item[sideAIndex]
+//    The 0 based index of the Grid/Mesh on side A to get the sparse matrix for.
+//    If a priority has been specified for Grids and Meshes, then this index is 
+//    in priority order. If no priority was specified, then the all the Grids are
+//    first followed by all the Meshes in the order they were passed into the XGrid 
+//    create call. 
+//  \item[factorListCount]
+//    The size of the sparse matrix.
+//  \item[factorList]
+//    A pointer to the list of factors for the requested sparse matrix. 
+//    The list is of size {\tt factorListCount}. To save space
+//    this is a pointer to the internal xgrid memory for this list. 
+//    Don't deallocate it. 
+//  \item[factorIndexList]
+//    A pointer to the list of indices for the requested sparse matrix. 
+//    The list is of size 2*{\tt factorListCount}. For each pair of entries
+//    in this array: entry 0 is the sequence index in the source grid, and entry 1 is
+//    the sequence index in the destination grid. To save space 
+//    this is a pointer to the internal xgrid memory for this list. 
+//    Don't deallocate it. 
+//  \item[{[rc]}]
+//    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_XGridGetSparseMatB2X - Get the sparse matrix that goes from a side B grid to the exchange grid.
+
+//
+// !INTERFACE:
+void ESMC_XGridGetSparseMatB2X(
+                               ESMC_XGrid xgrid,      // in
+                               int sideBIndex,        // in
+                               int *factorListCount,  // out
+                               double **factorList,   // out
+                               int **factorIndexList, // out
+                               int *rc);
+
+// !RETURN VALUE:
+//     N/A
+//
+// !DESCRIPTION:
+// 
+//    Get the sparse matrix that goes from a side B grid to the exchange grid.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[xgrid]
+//    The XGrid from which to get the information.
+//  \item[sideBIndex]
+//    The 0 based index of the Grid/Mesh on side B to get the sparse matrix for.
+//    If a priority has been specified for Grids and Meshes, then this index is 
+//    in priority order. If no priority was specified, then the all the Grids are
+//    first followed by all the Meshes in the order they were passed into the XGrid 
+//    create call. 
+//  \item[factorListCount]
+//    The size of the sparse matrix.
+//  \item[factorList]
+//    A pointer to the list of factors for the requested sparse matrix. 
+//    The list is of size {\tt factorListCount}. To save space
+//    this is a pointer to the internal xgrid memory for this list. 
+//    Don't deallocate it. 
+//  \item[factorIndexList]
+//    A pointer to the list of indices for the requested sparse matrix. 
+//    The list is of size 2*{\tt factorListCount}. For each pair of entries
+//    in this array: entry 0 is the sequence index in the source grid, and entry 1 is
+//    the sequence index in the destination grid. To save space
+//    this is a pointer to the internal xgrid memory for this list. 
+//    Don't deallocate it. 
+//  \item[{[rc]}]
+//    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_XGridGetSparseMatB2X - Get the sparse matrix that goes from the exchange grid to a side B grid.
+
+//
+// !INTERFACE:
+void ESMC_XGridGetSparseMatX2B(
+                               ESMC_XGrid xgrid,      // in
+                               int sideBIndex,        // in
+                               int *factorListCount,  // out
+                               double **factorList,   // out
+                               int **factorIndexList, // out
+                               int *rc);
+
+// !RETURN VALUE:
+//     N/A
+//
+// !DESCRIPTION:
+// 
+//    Get the sparse matrix that goes from the exchange grid to a side B grid. 
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[xgrid]
+//    The XGrid from which to get the information.
+//  \item[sideBIndex]
+//    The 0 based index of the Grid/Mesh on side B to get the sparse matrix for.
+//    If a priority has been specified for Grids and Meshes, then this index is 
+//    in priority order. If no priority was specified, then the all the Grids are
+//    first followed by all the Meshes in the order they were passed into the XGrid 
+//    create call. 
+//  \item[factorListCount]
+//    The size of the sparse matrix.
+//  \item[factorList]
+//    A pointer to the list of factors for the requested sparse matrix. 
+//    The list is of size {\tt factorListCount}. To save space
+//    this is a pointer to the internal xgrid memory for this list. 
+//    Don't deallocate it. 
+//  \item[factorIndexList]
+//    A pointer to the list of indices for the requested sparse matrix. 
+//    The list is of size 2*{\tt factorListCount}. For each pair of entries
+//    in this array: entry 0 is the sequence index in the source grid, and entry 1 is
+//    the sequence index in the destination grid. To save space 
+//    this is a pointer to the internal xgrid memory for this list. 
+//    Don't deallocate it. 
+//  \item[{[rc]}]
+//    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+
 
 
 #if defined (__cplusplus)

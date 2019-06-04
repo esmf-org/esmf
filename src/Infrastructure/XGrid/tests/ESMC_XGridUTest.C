@@ -54,6 +54,9 @@ int main(void){
   ESMC_Grid side_b_grids[NUM_SIDE_B_GRIDS];
 
   ESMC_XGrid xgrid;
+  int factorListCount=0;
+  double *factorList;
+  int *factorIndexList;
 
 
   //----------------------------------------------------------------------------
@@ -419,6 +422,119 @@ int main(void){
 
   ESMC_Test((rc==ESMF_SUCCESS) && correct, name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  // Test XGrid A2X
+  strcpy(name, "Get A2X Sparse Matrix");
+  strcpy(failMsg, "Test either had incorrect result or ESMF method(s) did not succeed.");
+
+  // Init error stuff
+  correct=true;
+  rc=ESMF_SUCCESS;
+
+  // Get sparse matrix
+  ESMC_XGridGetSparseMatA2X(xgrid,
+                            0,                // sideAIndex,
+                            &factorListCount, // factorListCount,
+                            &factorList,      // factorList,
+                            &factorIndexList, // factorIndexList,
+                            &localrc);
+
+#if 0
+  printf("A2X factorListCount=%d\n",factorListCount);
+  for (int i=0; i<factorListCount; i++) {
+    printf("%d s=%d d=%d w=%f  \n",i,factorIndexList[2*i],factorIndexList[2*i+1],factorList[i]);
+  }
+#endif
+
+  ESMC_Test((rc==ESMF_SUCCESS) && correct, name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  // Test XGrid Get X2A
+  strcpy(name, "Get X2A Sparse Matrix");
+  strcpy(failMsg, "Test either had incorrect result or ESMF method(s) did not succeed.");
+
+  // Init error stuff
+  correct=true;
+  rc=ESMF_SUCCESS;
+
+  // Get sparse matrix
+  ESMC_XGridGetSparseMatX2A(xgrid,
+                            0,                // sideAIndex,
+                            &factorListCount, // factorListCount,
+                            &factorList,      // factorList,
+                            &factorIndexList, // factorIndexList,
+                            &localrc);
+
+#if 0
+  printf("X2A factorListCount=%d\n",factorListCount);
+  for (int i=0; i<factorListCount; i++) {
+    printf("%d s=%d d=%d w=%f  \n",i,factorIndexList[2*i],factorIndexList[2*i+1],factorList[i]);
+  }
+#endif
+
+  ESMC_Test((rc==ESMF_SUCCESS) && correct, name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  // Test XGrid Get B2X
+  strcpy(name, "Get B2X Sparse Matrix");
+  strcpy(failMsg, "Test either had incorrect result or ESMF method(s) did not succeed.");
+
+  // Init error stuff
+  correct=true;
+  rc=ESMF_SUCCESS;
+
+  // Get sparse matrix
+  ESMC_XGridGetSparseMatB2X(xgrid,
+                            0,                // sideAIndex,
+                            &factorListCount, // factorListCount,
+                            &factorList,      // factorList,
+                            &factorIndexList, // factorIndexList,
+                            &localrc);
+
+#if 0
+  printf("B2X factorListCount=%d\n",factorListCount);
+  for (int i=0; i<factorListCount; i++) {
+    printf("%d s=%d d=%d w=%f  \n",i,factorIndexList[2*i],factorIndexList[2*i+1],factorList[i]);
+  }
+#endif
+
+  ESMC_Test((rc==ESMF_SUCCESS) && correct, name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  // Test XGrid Get X2B
+  strcpy(name, "Get X2B Sparse Matrix");
+  strcpy(failMsg, "Test either had incorrect result or ESMF method(s) did not succeed.");
+
+  // Init error stuff
+  correct=true;
+  rc=ESMF_SUCCESS;
+
+  // Get sparse matrix
+  ESMC_XGridGetSparseMatX2B(xgrid,
+                            0,                // sideAIndex,
+                            &factorListCount, // factorListCount,
+                            &factorList,      // factorList,
+                            &factorIndexList, // factorIndexList,
+                            &localrc);
+
+#if 0
+  printf("X2B factorListCount=%d\n",factorListCount);
+  for (int i=0; i<factorListCount; i++) {
+    printf("%d s=%d d=%d w=%f  \n",i,factorIndexList[2*i],factorIndexList[2*i+1],factorList[i]);
+  }
+#endif
+
+  ESMC_Test((rc==ESMF_SUCCESS) && correct, name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
 
   //----------------------------------------------------------------------------
   //EX_UTest

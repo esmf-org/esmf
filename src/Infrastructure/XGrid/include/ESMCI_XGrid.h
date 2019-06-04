@@ -89,6 +89,35 @@ namespace ESMCI{
     ESMC_Mesh getMesh(int *rc);
     void getArea(ESMC_R8 *area, int *rc);
     void getCentroid(ESMC_R8 *centroid, int *rc);
+    void getSparseMatA2X(
+                         int sideAIndex, 
+                         int *factorListCount,
+                         double **factorList, 
+                         int **factorIndexList,
+                         int *rc);
+
+    void getSparseMatX2A(
+                         int sideAIndex, 
+                         int *factorListCount,
+                         double **factorList, 
+                         int **factorIndexList,
+                         int *rc);
+
+    void getSparseMatB2X(
+                         int sideBIndex, 
+                         int *factorListCount,
+                         double **factorList, 
+                         int **factorIndexList,
+                         int *rc);
+
+    void getSparseMatX2B(
+                         int sideBIndex, 
+                         int *factorListCount,
+                         double **factorList, 
+                         int **factorIndexList,
+                         int *rc);
+
+
 
 
     // BEGIN OLD STUFF
