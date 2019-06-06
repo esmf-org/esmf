@@ -1,34 +1,33 @@
-// $Id$ 
 // @HEADER
 // ***********************************************************************
-// 
+//
 //                           Sacado Package
 //                 Copyright (2006) Sandia Corporation
-// 
+//
 // Under the terms of Contract DE-AC04-94AL85000 with Sandia Corporation,
 // the U.S. Government retains certain rights in this software.
-// 
+//
 // This library is free software; you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as
 // published by the Free Software Foundation; either version 2.1 of the
 // License, or (at your option) any later version.
-//  
+//
 // This library is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // Lesser General Public License for more details.
-//  
+//
 // You should have received a copy of the GNU Lesser General Public
 // License along with this library; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+// Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301
 // USA
 // Questions? Contact David M. Gay (dmgay@sandia.gov) or Eric T. Phipps
 // (etphipp@sandia.gov).
-// 
+//
 // ***********************************************************************
 //
 // The forward-mode AD classes in Sacado are a derivative work of the
-// expression template classes in the Fad package by Nicolas Di Cesare.  
+// expression template classes in the Fad package by Nicolas Di Cesare.
 // The following banner is included in the original Fad source code:
 //
 // ************ DO NOT REMOVE THIS BANNER ****************
@@ -36,10 +35,10 @@
 //  Nicolas Di Cesare <Nicolas.Dicesare@ann.jussieu.fr>
 //  http://www.ann.jussieu.fr/~dicesare
 //
-//            CEMRACS 98 : C++ courses, 
-//         templates : new C++ techniques 
-//            for scientific computing 
-// 
+//            CEMRACS 98 : C++ courses,
+//         templates : new C++ techniques
+//            for scientific computing
+//
 //********************************************************
 //
 //  NumericalTraits class to illustrate TRAITS
@@ -55,78 +54,150 @@
 // Forward declarations
 namespace Sacado {
   namespace CacheFad {
-    template <typename T1, typename T2> class DFad;
+    template <typename T> class DFad;
   }
 }
 
 namespace Sacado {
 
   //! Specialization of %Promote to DFad types
-  template <typename ValueT, typename ScalarT>
-  struct Promote< CacheFad::DFad<ValueT,ScalarT>, CacheFad::DFad<ValueT,ScalarT> > {
-    typedef CacheFad::DFad<ValueT,ScalarT> type;
-  };
-
-  //! Specialization of %Promote to DFad types
-  template <typename ValueT, typename ScalarT, typename R>
-  struct Promote< CacheFad::DFad<ValueT,ScalarT>, R > {
-    typedef typename ValueType< CacheFad::DFad<ValueT,ScalarT> >::type value_type_l;
-    typedef typename ValueType<R>::type value_type_r;
-    typedef typename Promote<value_type_l,value_type_r>::type value_type;
-
-    typedef CacheFad::DFad<value_type,ScalarT> type;
-  };
-
-  //! Specialization of %Promote to DFad types
-  template <typename L, typename ValueT, typename ScalarT>
-  struct Promote< L, CacheFad::DFad<ValueT, ScalarT> > {
-  public:
-
-    typedef typename ValueType<L>::type value_type_l;
-    typedef typename ValueType< CacheFad::DFad<ValueT,ScalarT> >::type value_type_r;
-    typedef typename Promote<value_type_l,value_type_r>::type value_type;
-
-    typedef CacheFad::DFad<value_type,ScalarT> type;
-  };
+  SACADO_FAD_PROMOTE_SPEC( CacheFad, DFad )
 
   //! Specialization of %ScalarType to DFad types
-  template <typename ValueT, typename ScalarT>
-  struct ScalarType< CacheFad::DFad<ValueT,ScalarT> > {
-    typedef ScalarT type;
+  template <typename ValueT>
+  struct ScalarType< CacheFad::DFad<ValueT> > {
+    typedef typename CacheFad::DFad<ValueT>::ScalarT type;
   };
 
   //! Specialization of %ValueType to DFad types
-  template <typename ValueT, typename ScalarT>
-  struct ValueType< CacheFad::DFad<ValueT,ScalarT> > {
+  template <typename ValueT>
+  struct ValueType< CacheFad::DFad<ValueT> > {
     typedef ValueT type;
   };
 
-   //! Specialization of %ScalarValueType to DFad types
-  template <typename ValueT, typename ScalarT>
-  struct ScalarValueType< CacheFad::DFad<ValueT,ScalarT> > {
-    typedef typename ScalarValueType< ValueT >::type type;
-  };
-
   //! Specialization of %IsADType to DFad types
-  template <typename ValueT, typename ScalarT>
-  struct IsADType< CacheFad::DFad<ValueT,ScalarT> > {
+  template <typename ValueT>
+  struct IsADType< CacheFad::DFad<ValueT> > {
     static const bool value = true;
   };
 
   //! Specialization of %IsADType to DFad types
-  template <typename ValueT, typename ScalarT>
-  struct IsScalarType< CacheFad::DFad<ValueT,ScalarT> > {
+  template <typename ValueT>
+  struct IsScalarType< CacheFad::DFad<ValueT> > {
     static const bool value = false;
   };
 
   //! Specialization of %Value to DFad types
-  template <typename ValueT, typename ScalarT>
-  struct Value< CacheFad::DFad<ValueT,ScalarT> > {
-    typedef typename ValueType< CacheFad::DFad<ValueT,ScalarT> >::type value_type;
-    static const value_type& eval(const CacheFad::DFad<ValueT,ScalarT>& x) { 
+  template <typename ValueT>
+  struct Value< CacheFad::DFad<ValueT> > {
+    typedef typename ValueType< CacheFad::DFad<ValueT> >::type value_type;
+    KOKKOS_INLINE_FUNCTION
+    static const value_type& eval(const CacheFad::DFad<ValueT>& x) {
       return x.val(); }
   };
 
+  //! Specialization of %ScalarValue to DFad types
+  template <typename ValueT>
+  struct ScalarValue< CacheFad::DFad<ValueT> > {
+    typedef typename ValueType< CacheFad::DFad<ValueT> >::type value_type;
+    typedef typename ScalarType< CacheFad::DFad<ValueT> >::type scalar_type;
+    KOKKOS_INLINE_FUNCTION
+    static const scalar_type& eval(const CacheFad::DFad<ValueT>& x) {
+      return ScalarValue<value_type>::eval(x.val()); }
+  };
+
+  //! Specialization of %StringName to DFad types
+  template <typename ValueT>
+  struct StringName< CacheFad::DFad<ValueT> > {
+    static std::string eval() {
+      return std::string("Sacado::CacheFad::DFad< ") +
+        StringName<ValueT>::eval() + " >"; }
+  };
+
+  //! Specialization of %IsEqual to DFad types
+  template <typename ValueT>
+  struct IsEqual< CacheFad::DFad<ValueT> > {
+    KOKKOS_INLINE_FUNCTION
+    static bool eval(const CacheFad::DFad<ValueT>& x,
+                     const CacheFad::DFad<ValueT>& y) {
+      return x.isEqualTo(y);
+    }
+  };
+
+  //! Specialization of %IsStaticallySized to DFad types
+  template <typename ValueT>
+  struct IsStaticallySized< CacheFad::DFad<ValueT> > {
+    static const bool value = false;
+  };
+
+  //! Specialization of %IsStaticallySized to DFad types
+  template <typename ValueT>
+  struct IsStaticallySized< const CacheFad::DFad<ValueT> > {
+    static const bool value = false;
+  };
+
 } // namespace Sacado
+
+// Define Teuchos traits classes
+#ifdef HAVE_SACADO_TEUCHOS
+#include "Teuchos_PromotionTraits.hpp"
+#include "Teuchos_ScalarTraits.hpp"
+#include "Sacado_Fad_ScalarTraitsImp.hpp"
+
+namespace Teuchos {
+
+  //! Specialization of %Teuchos::PromotionTraits to DFad types
+  template <typename ValueT>
+  struct PromotionTraits< Sacado::CacheFad::DFad<ValueT>,
+                          Sacado::CacheFad::DFad<ValueT> > {
+    typedef typename Sacado::Promote< Sacado::CacheFad::DFad<ValueT>,
+                                      Sacado::CacheFad::DFad<ValueT> >::type
+    promote;
+  };
+
+  //! Specialization of %Teuchos::PromotionTraits to DFad types
+  template <typename ValueT, typename R>
+  struct PromotionTraits< Sacado::CacheFad::DFad<ValueT>, R > {
+    typedef typename Sacado::Promote< Sacado::CacheFad::DFad<ValueT>, R >::type
+    promote;
+  };
+
+  //! Specialization of %Teuchos::PromotionTraits to DFad types
+  template <typename L, typename ValueT>
+  struct PromotionTraits< L, Sacado::CacheFad::DFad<ValueT> > {
+  public:
+    typedef typename Sacado::Promote< L, Sacado::CacheFad::DFad<ValueT> >::type
+    promote;
+  };
+
+  //! Specializtion of %Teuchos::ScalarTraits
+  template <typename ValueT>
+  struct ScalarTraits< Sacado::CacheFad::DFad<ValueT> > :
+    public Sacado::Fad::ScalarTraitsImp< Sacado::CacheFad::DFad<ValueT> >
+  {};
+
+  //! Specialization of %Teuchos::SerializationTraits
+  template <typename Ordinal, typename ValueT>
+  struct SerializationTraits<Ordinal, Sacado::CacheFad::DFad<ValueT> > :
+    public Sacado::Fad::SerializationTraitsImp< Ordinal,
+                                                Sacado::CacheFad::DFad<ValueT> >
+  {};
+
+  //! Specialization of %Teuchos::ValueTypeSerializer
+  template <typename Ordinal, typename ValueT>
+  struct ValueTypeSerializer<Ordinal, Sacado::CacheFad::DFad<ValueT> > :
+    public Sacado::Fad::SerializerImp< Ordinal,
+                                       Sacado::CacheFad::DFad<ValueT>,
+                                       ValueTypeSerializer<Ordinal,ValueT> >
+  {
+    typedef Sacado::CacheFad::DFad<ValueT> FadType;
+    typedef ValueTypeSerializer<Ordinal,ValueT> ValueSerializer;
+    typedef Sacado::Fad::SerializerImp< Ordinal,FadType,ValueSerializer> Base;
+    ValueTypeSerializer(const Teuchos::RCP<const ValueSerializer>& vs,
+                        Ordinal sz = 0) :
+      Base(vs, sz) {}
+  };
+}
+#endif // HAVE_SACADO_TEUCHOS
 
 #endif // SACADO_FAD_DFADTRAITS_HPP

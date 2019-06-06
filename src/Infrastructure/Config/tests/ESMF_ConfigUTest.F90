@@ -32,7 +32,6 @@
 
 #include "ESMF.h"
 
-
 module config_subrs
 
         use ESMF_TestMod
@@ -41,7 +40,7 @@ module config_subrs
 
         public
 
-      type (ESMF_Config), save :: cf, cf1
+      type (ESMF_Config), save :: cf, cf1, cf2
       type (ESMF_Config), save :: cf_alias
       
       ! individual test failure message
@@ -1488,6 +1487,384 @@ subroutine MultPar_SingleLine_Vf
     end subroutine SingleParSet
 
 !--------------------------------------------------------------------
+    subroutine Sections()
+!--------------------------------------------------------------------
+
+      character(ESMF_MAXSTR) :: failMsg
+      character(ESMF_MAXSTR) :: name
+      character(ESMF_MAXSTR) :: token_string
+      integer :: result = 0
+      integer :: columnCount, lineCount, m, n
+      logical :: success
+      real :: rvalue
+
+      integer, parameter :: ncol = 5
+      integer, parameter :: nrow = 3
+      integer, parameter :: nval = 9
+      real, dimension(nval), parameter :: data_values = &
+        (/ 0.71, 1.37, 2.63, 5.00, 9.50, 18.1, 34.5, 65.5, 125.0 /)
+      real, dimension(nrow,ncol), parameter :: table_values = &
+        reshape((/ &
+          0.1, 0.2, 0.3, 0.4, 0.5, &
+          1.1, 1.2, 1.3, 1.4, 1.5, &
+          2.1, 2.2, 2.3, 2.4, 2.5  &
+        /), (/nrow,ncol/), order=(/2,1/))
+
+      rc = 0
+!''''''''''''''''''''''''''''
+      !EX_UTest
+      ! Test Config Create From Empty Section
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Config Create From Empty Section Test"
+      cf2 = ESMF_ConfigCreate(cf, "%section_empty_open", "%section_empty_close", rc=rc)
+      success = rc.eq.ESMF_SUCCESS
+      call ESMF_Test(success, name, failMsg, result, ESMF_SRCLINE)
+
+      counter_total = counter_total + 1
+      if (success) then
+        counter_success = counter_success + 1
+      else
+        print *, trim(name) // ' ERROR: rc = ', rc
+      end if
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Config From Empty Section Destroy
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Config From Empty Section Print Test"
+      call ESMF_ConfigPrint(cf2, rc=rc)
+      success = rc.eq.ESMF_SUCCESS
+      call ESMF_Test(success, name, failMsg, result, ESMF_SRCLINE)
+
+      counter_total = counter_total + 1
+      if (success) then
+        counter_success = counter_success + 1
+      else
+        print *, trim(name) // ' ERROR: rc = ', rc
+      end if
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Config From Empty Section Destroy
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Config From Empty Section Destroy Test"
+      call ESMF_ConfigDestroy(cf2, rc=rc)
+      success = rc.eq.ESMF_SUCCESS
+      call ESMF_Test(success, name, failMsg, result, ESMF_SRCLINE)
+
+      counter_total = counter_total + 1
+      if (success) then
+        counter_success = counter_success + 1
+      else
+        print *, trim(name) // ' ERROR: rc = ', rc
+      end if
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Config Create From Section
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Config Create From Section Test"
+      cf2 = ESMF_ConfigCreate(cf, "%section_open", "%section_close", rc=rc)
+      success = rc.eq.ESMF_SUCCESS
+      call ESMF_Test(success, name, failMsg, result, ESMF_SRCLINE)
+
+      counter_total = counter_total + 1
+      if (success) then
+        counter_success = counter_success + 1
+      else
+        print *, trim(name) // ' ERROR: rc = ', rc
+      end if
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Config From Section Print
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Config Print Test"
+      call ESMF_ConfigPrint(cf2, rc=rc)
+      success = rc.eq.ESMF_SUCCESS
+      call ESMF_Test(success, name, failMsg, result, ESMF_SRCLINE)
+
+      counter_total = counter_total + 1
+      if (success) then
+        counter_success = counter_success + 1
+      else
+        print *, trim(name) // ' ERROR: rc = ', rc
+      end if
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Config From Section Destroy
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Config From Section Destroy Test"
+      call ESMF_ConfigDestroy( cf2, rc=rc)
+      success = rc.eq.ESMF_SUCCESS
+      call ESMF_Test(success, name, failMsg, result, ESMF_SRCLINE)
+
+      counter_total = counter_total + 1
+      if (success) then
+        counter_success = counter_success + 1
+      else
+        print *, trim(name) // ' ERROR: rc = ', rc
+      end if
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Config Create From Section
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Config Create From Section Test"
+      cf2 = ESMF_ConfigCreate(cf, "%section_with_table", "%%", rc=rc)
+      success = rc.eq.ESMF_SUCCESS
+      call ESMF_Test(success, name, failMsg, result, ESMF_SRCLINE)
+
+      counter_total = counter_total + 1
+      if (success) then
+        counter_success = counter_success + 1
+      else
+        print *, trim(name) // ' ERROR: rc = ', rc
+      end if
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Config Section Get Attribute String multi-word token Test
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Config Section Get Attribute String Multi-word Token"
+      call ESMF_ConfigGetAttribute(cf2, token_string, &
+        label='section_table_token:', rc=rc)
+      success = rc.eq.ESMF_SUCCESS
+      call ESMF_Test(success, name, failMsg, result, ESMF_SRCLINE)
+
+      counter_total = counter_total + 1
+      if (success) then
+        counter_success = counter_success + 1
+      else
+        print *, trim(name) // ' ERROR: rc = ', rc
+      end if
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Config Section Validate Attribute String multi-word token Test
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Config Section Validate Attribute String Multi-word apostrophe Token Test"
+      success = (token_string == 'This example deals with sections including a table')
+      call ESMF_Test(success, name, failMsg, result, ESMF_SRCLINE)
+
+      counter_total = counter_total + 1
+      if (success) then
+        counter_success = counter_success + 1
+      else
+        print *, trim(name) // ' ERROR: did not validate'
+        print *,'read in : ' // trim(token_string)
+        print *,'expected: ' // 'This example deals with sections including a table'
+      end if
+
+      !-----------------------------------------------------------------------
+      !EX_UTest
+      ! Config Section Get Attribute section_data_num Test
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Config Section Get Attribute section_data_num Test"
+      call ESMF_ConfigGetAttribute(cf2, m, label='section_data_num:', rc=rc)
+      success = (rc.eq.ESMF_SUCCESS)
+      call ESMF_Test(success, name, failMsg, result, ESMF_SRCLINE)
+
+      counter_total = counter_total + 1
+      if (success) then
+        counter_success = counter_success + 1
+      else
+        print *, trim(name) // ' ERROR: rc = ', rc
+      end if
+
+      !-----------------------------------------------------------------------
+      !EX_UTest
+      ! Config Section Validate Attribute section_data_num Values Test
+      write(failMsg, *) "Did not validate section_data_num value"
+      write(name, *) "Config Section Validate Attribute section_data_num Value Test"
+      success = (m.eq.nval)
+      call ESMF_Test(success, name, failMsg, result, ESMF_SRCLINE)
+
+      counter_total = counter_total + 1
+      if (success) then
+        counter_success = counter_success + 1
+      else
+        print *, trim(name) // ' ERROR: did not validate'
+        print *,'read in : ', m
+        print *,'expected: ', nval
+      end if
+
+      !-----------------------------------------------------------------------
+      !EX_UTest
+      ! Config Section Get Attribute section_data_values Test
+      write(failMsg, *) "Did not return section_data_values and ESMF_SUCCESS"
+      write(name, *) "Config Section Get Attribute section_data_values Test"
+
+      call ESMF_ConfigFindLabel(cf2, "section_data_values:", rc=rc)
+      success = rc.eq.ESMF_SUCCESS
+      call ESMF_Test(success, name, failMsg, result, ESMF_SRCLINE)
+
+      counter_total = counter_total + 1
+      if (success) then
+        counter_success = counter_success + 1
+      else
+        print *, trim(name) // ' ERROR: rc = ', rc
+      end if
+
+      !-----------------------------------------------------------------------
+      !EX_UTest
+      ! Config Section Attribute Validate section_data_values Values Test
+      write(failMsg, *) "Did not validate section_data_values: multiple values"
+      write(name, *) "Config Section Validate Attribute section_data_values Values Test"
+
+      counter_total = counter_total + 1
+
+      if (success) then
+        n = 0
+        do while (success .and. (n.lt.m))
+          n = n + 1
+          call ESMF_ConfigGetAttribute(cf2, rvalue, default=0.0, rc=rc)
+          success = (rc.eq.ESMF_SUCCESS) .and. (rvalue.eq.data_values(n))
+        end do
+
+        call ESMF_Test(success, name, failMsg, result, ESMF_SRCLINE)
+
+        if (success) then
+          counter_success = counter_success + 1
+        else
+          if (rc.eq.ESMF_SUCCESS) then
+            print *, trim(name) // ' ERROR: did not validate'
+            print *,'read in : ', m
+            print *,'expected: ', nval
+          else
+            print *, trim(name) // ' ERROR: rc = ', rc
+          end if
+        end if
+      else
+        call ESMF_Test(success, name, failMsg, result, ESMF_SRCLINE)
+      end if
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! TEST Config Section Read Table
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Config Section Read Table Test"
+
+      call ESMF_ConfigFindLabel(cf2, "section_table::", rc=rc)
+      success = rc.eq.ESMF_SUCCESS
+      call ESMF_Test(success, name, failMsg, result, ESMF_SRCLINE)
+
+      counter_total = counter_total + 1
+      if (success) then
+        counter_success = counter_success + 1
+      else
+        print *, trim(name) // ' ERROR: rc = ', rc
+      end if
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! TEST Config Section Validate Table Dimensions
+      write(failMsg, *) "Did not validate table dimensions"
+      write(name, *) "Config Section Read Table Dimensions Test"
+
+      counter_total = counter_total + 1
+
+      if (success) then
+        columnCount = 0
+        lineCount = 0
+        call ESMF_ConfigGetDim(cf2, lineCount, columnCount, rc=rc)
+        success = (columnCount.eq.ncol) .and. (lineCount.eq.nrow)
+        success = success .and. rc.eq.ESMF_SUCCESS
+
+        call ESMF_Test(success, name, failMsg, result, ESMF_SRCLINE)
+
+        if (success) then
+          counter_success = counter_success + 1
+        else
+          if (rc.eq.ESMF_SUCCESS) then
+            print *, trim(name) // ' ERROR: did not validate'
+            print *,'read in : ', lineCount, columnCount
+            print *,'expected: ', nrow, ncol
+          else
+            print *, trim(name) // ' ERROR: rc = ', rc
+          end if
+        end if
+      else
+        call ESMF_Test(success, name, failMsg, result, ESMF_SRCLINE)
+      end if
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! TEST Config Section Validate Table Values
+      write(failMsg, *) "Did not validate table values"
+      write(name, *) "Config Section Read Table Values Test"
+
+      call ESMF_ConfigFindLabel(cf2, "section_table::", rc=rc)
+      success = rc.eq.ESMF_SUCCESS
+
+      counter_total = counter_total + 1
+
+      if (success) then
+        m = 0
+        do while (success .and. (m.lt.lineCount))
+          m = m + 1
+          call ESMF_ConfigNextLine(cf2, rc=rc)
+          success = rc.eq.ESMF_SUCCESS
+          n = 0
+          do while (success .and. (n.lt.columnCount))
+            n = n + 1
+            call ESMF_ConfigGetAttribute(cf2, rvalue, default=0.0, rc=rc)
+            success = (rc.eq.ESMF_SUCCESS) .and. (rvalue.eq.table_values(m,n))
+          end do
+        end do
+
+        call ESMF_Test(success, name, failMsg, result, ESMF_SRCLINE)
+
+        if (success) then
+          counter_success = counter_success + 1
+        else
+          if (rc.eq.ESMF_SUCCESS) then
+            print *, trim(name) // ' ERROR: did not validate'
+            print *,'read in : ', rvalue
+            print *,'expected: ', table_values(m,n)
+          else
+            print *, trim(name) // ' ERROR: rc = ', rc
+          end if
+        end if
+      else
+        call ESMF_Test(success, name, failMsg, result, ESMF_SRCLINE)
+      end if
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Config Validate
+      write(failMsg, *) "Did not return ESMF_RC_ATTR_UNUSED"
+      write(name, *) "Config From Section Validate Test"
+      call ESMF_ConfigValidate(cf2, options="unusedAttributes", rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_ATTR_UNUSED), name, failMsg, result, ESMF_SRCLINE)
+
+      counter_total = counter_total + 1
+      if (rc == ESMF_RC_ATTR_UNUSED) then
+         counter_success = counter_success + 1
+      else
+         print *,'ESMF_ConfigValidate failed, rc =', rc
+      endif
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Config From Section Destroy
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Config From Section Destroy Test"
+      call ESMF_ConfigDestroy(cf2, rc=rc)
+      success = rc.eq.ESMF_SUCCESS
+      call ESMF_Test(success, name, failMsg, result, ESMF_SRCLINE)
+
+      counter_total = counter_total + 1
+      if (success) then
+        counter_success = counter_success + 1
+      else
+        print *, trim(name) // ' ERROR: rc = ', rc
+      end if
+
+    end subroutine Sections
+
+!--------------------------------------------------------------------
     subroutine Finalization()
 !--------------------------------------------------------------------
 
@@ -1723,6 +2100,10 @@ end module config_subrs
 ! Setting of single parameters
 ! ------------------------------
       call SingleParSet()
+
+! Sections
+! ------------------------------
+      call Sections()
 
 
 ! Finalization

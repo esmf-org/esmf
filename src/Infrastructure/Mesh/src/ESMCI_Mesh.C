@@ -1652,6 +1652,30 @@ void Mesh::RemoveGhost() {
   delete sghost; sghost = 0; // does delete do this?? don't remember...
 }
 
+// Convenience function to communicate all fields to ghost locations
+ void Mesh::GhostCommAllFields() {
+
+   // Error check
+   if (!sghost) Throw()<<"Ghost communicator must be present for ghost communication.";
+   
+   // Vector of  all Fields in mesh
+   std::vector<MEField<>*> fields;
+   
+   // Loop adding all fields in mesh to list
+   Mesh::FieldReg::MEField_iterator fi = this->Field_begin(), fe = this->Field_end();
+   for (; fi != fe; ++fi) {
+     fields.push_back(&*fi);
+   }
+   
+   // Send Fields
+   if (fields.size() > 0) {
+     sghost->SendFields(fields.size(), &fields[0], &fields[0]);
+   } else {
+     sghost->SendFields(0, NULL, NULL);
+   }
+ }
+ 
+
 void Mesh::build_sym_comm_rel(UInt obj_type) {
   Trace __trace("Mesh::build_sym_comm_rel(UInt obj_type)");
 
@@ -1976,7 +2000,7 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
    if (rc!=NULL) *rc=ESMF_SUCCESS;
    return plp;
 
-}
+ }
 
 
 

@@ -1209,25 +1209,46 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
           case (1)
             call ESMF_LocalArrConstrF90Ptr1DI1(array, totalCount, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (2)
             call ESMF_LocalArrConstrF90Ptr2DI1(array, totalCount, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (3)
             call ESMF_LocalArrConstrF90Ptr3DI1(array, totalCount, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (4)
             call ESMF_LocalArrConstrF90Ptr4DI1(array, totalCount, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 ^ifndef ESMF_NO_GREATER_THAN_4D
           case (5)
             call ESMF_LocalArrConstrF90Ptr5DI1(array, totalCount, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (6)
             call ESMF_LocalArrConstrF90Ptr6DI1(array, totalCount, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (7)
             call ESMF_LocalArrConstrF90Ptr7DI1(array, totalCount, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 ^endif
           case default
             if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
@@ -1241,25 +1262,46 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
           case (1)
             call ESMF_LocalArrConstrF90Ptr1DI2(array, totalCount, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (2)
             call ESMF_LocalArrConstrF90Ptr2DI2(array, totalCount, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (3)
             call ESMF_LocalArrConstrF90Ptr3DI2(array, totalCount, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (4)
             call ESMF_LocalArrConstrF90Ptr4DI2(array, totalCount, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 ^ifndef ESMF_NO_GREATER_THAN_4D
           case (5)
             call ESMF_LocalArrConstrF90Ptr5DI2(array, totalCount, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (6)
             call ESMF_LocalArrConstrF90Ptr6DI2(array, totalCount, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (7)
             call ESMF_LocalArrConstrF90Ptr7DI2(array, totalCount, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 ^endif
           case default
             if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
@@ -1272,25 +1314,46 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
           case (1)
             call ESMF_LocalArrConstrF90Ptr1DI4(array, totalCount, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (2)
             call ESMF_LocalArrConstrF90Ptr2DI4(array, totalCount, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (3)
             call ESMF_LocalArrConstrF90Ptr3DI4(array, totalCount, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (4)
             call ESMF_LocalArrConstrF90Ptr4DI4(array, totalCount, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 ^ifndef ESMF_NO_GREATER_THAN_4D
           case (5)
             call ESMF_LocalArrConstrF90Ptr5DI4(array, totalCount, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (6)
             call ESMF_LocalArrConstrF90Ptr6DI4(array, totalCount, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (7)
             call ESMF_LocalArrConstrF90Ptr7DI4(array, totalCount, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 ^endif
           case default
             if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
@@ -1302,25 +1365,46 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
           case (1)
             call ESMF_LocalArrConstrF90Ptr1DI8(array, totalCount, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (2)
             call ESMF_LocalArrConstrF90Ptr2DI8(array, totalCount, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (3)
             call ESMF_LocalArrConstrF90Ptr3DI8(array, totalCount, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (4)
             call ESMF_LocalArrConstrF90Ptr4DI8(array, totalCount, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 ^ifndef ESMF_NO_GREATER_THAN_4D
           case (5)
             call ESMF_LocalArrConstrF90Ptr5DI8(array, totalCount, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (6)
             call ESMF_LocalArrConstrF90Ptr6DI8(array, totalCount, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (7)
             call ESMF_LocalArrConstrF90Ptr7DI8(array, totalCount, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 ^endif
           case default
             if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
@@ -1332,25 +1416,46 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
           case (1)
             call ESMF_LocalArrConstrF90Ptr1DR4(array, totalCount, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (2)
             call ESMF_LocalArrConstrF90Ptr2DR4(array, totalCount, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (3)
             call ESMF_LocalArrConstrF90Ptr3DR4(array, totalCount, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (4)
             call ESMF_LocalArrConstrF90Ptr4DR4(array, totalCount, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 ^ifndef ESMF_NO_GREATER_THAN_4D
           case (5)
             call ESMF_LocalArrConstrF90Ptr5DR4(array, totalCount, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (6)
             call ESMF_LocalArrConstrF90Ptr6DR4(array, totalCount, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (7)
             call ESMF_LocalArrConstrF90Ptr7DR4(array, totalCount, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 ^endif
           case default
             if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
@@ -1362,25 +1467,46 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
           case (1)
             call ESMF_LocalArrConstrF90Ptr1DR8(array, totalCount, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (2)
             call ESMF_LocalArrConstrF90Ptr2DR8(array, totalCount, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (3)
             call ESMF_LocalArrConstrF90Ptr3DR8(array, totalCount, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (4)
             call ESMF_LocalArrConstrF90Ptr4DR8(array, totalCount, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 ^ifndef ESMF_NO_GREATER_THAN_4D
           case (5)
             call ESMF_LocalArrConstrF90Ptr5DR8(array, totalCount, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (6)
             call ESMF_LocalArrConstrF90Ptr6DR8(array, totalCount, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (7)
             call ESMF_LocalArrConstrF90Ptr7DR8(array, totalCount, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 ^endif
           case default
             if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
@@ -1667,31 +1793,52 @@ TypeKindRankDeclarationMacro(LocalArrConstrF90Ptr)
             call ESMF_LocalArrCToF90Ptr1DI1(array, cptr, totalCount, &
               datacopyflag=ESMF_DATACOPY_REFERENCE, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (2)
             call ESMF_LocalArrCToF90Ptr2DI1(array, cptr, totalCount, &
               datacopyflag=ESMF_DATACOPY_REFERENCE, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (3)
             call ESMF_LocalArrCToF90Ptr3DI1(array, cptr, totalCount, &
               datacopyflag=ESMF_DATACOPY_REFERENCE, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (4)
             call ESMF_LocalArrCToF90Ptr4DI1(array, cptr, totalCount, &
               datacopyflag=ESMF_DATACOPY_REFERENCE, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 ^ifndef ESMF_NO_GREATER_THAN_4D
           case (5)
             call ESMF_LocalArrCToF90Ptr5DI1(array, cptr, totalCount, &
               datacopyflag=ESMF_DATACOPY_REFERENCE, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (6)
             call ESMF_LocalArrCToF90Ptr6DI1(array, cptr, totalCount, &
               datacopyflag=ESMF_DATACOPY_REFERENCE, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (7)
             call ESMF_LocalArrCToF90Ptr7DI1(array, cptr, totalCount, &
               datacopyflag=ESMF_DATACOPY_REFERENCE, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 ^endif
           case default
             if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
@@ -1706,31 +1853,52 @@ TypeKindRankDeclarationMacro(LocalArrConstrF90Ptr)
             call ESMF_LocalArrCToF90Ptr1DI2(array, cptr, totalCount, &
               datacopyflag=ESMF_DATACOPY_REFERENCE, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (2)
             call ESMF_LocalArrCToF90Ptr2DI2(array, cptr, totalCount, &
               datacopyflag=ESMF_DATACOPY_REFERENCE, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (3)
             call ESMF_LocalArrCToF90Ptr3DI2(array, cptr, totalCount, &
               datacopyflag=ESMF_DATACOPY_REFERENCE, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (4)
             call ESMF_LocalArrCToF90Ptr4DI2(array, cptr, totalCount, &
               datacopyflag=ESMF_DATACOPY_REFERENCE, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 ^ifndef ESMF_NO_GREATER_THAN_4D
           case (5)
             call ESMF_LocalArrCToF90Ptr5DI2(array, cptr, totalCount, &
               datacopyflag=ESMF_DATACOPY_REFERENCE, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (6)
             call ESMF_LocalArrCToF90Ptr6DI2(array, cptr, totalCount, &
               datacopyflag=ESMF_DATACOPY_REFERENCE, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (7)
             call ESMF_LocalArrCToF90Ptr7DI2(array, cptr, totalCount, &
               datacopyflag=ESMF_DATACOPY_REFERENCE, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 ^endif
           case default
             if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
@@ -1744,31 +1912,52 @@ TypeKindRankDeclarationMacro(LocalArrConstrF90Ptr)
             call ESMF_LocalArrCToF90Ptr1DI4(array, cptr, totalCount, &
               datacopyflag=ESMF_DATACOPY_REFERENCE, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (2)
             call ESMF_LocalArrCToF90Ptr2DI4(array, cptr, totalCount, &
               datacopyflag=ESMF_DATACOPY_REFERENCE, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (3)
             call ESMF_LocalArrCToF90Ptr3DI4(array, cptr, totalCount, &
               datacopyflag=ESMF_DATACOPY_REFERENCE, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (4)
             call ESMF_LocalArrCToF90Ptr4DI4(array, cptr, totalCount, &
               datacopyflag=ESMF_DATACOPY_REFERENCE, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 ^ifndef ESMF_NO_GREATER_THAN_4D
           case (5)
             call ESMF_LocalArrCToF90Ptr5DI4(array, cptr, totalCount, &
               datacopyflag=ESMF_DATACOPY_REFERENCE, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (6)
             call ESMF_LocalArrCToF90Ptr6DI4(array, cptr, totalCount, &
               datacopyflag=ESMF_DATACOPY_REFERENCE, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (7)
             call ESMF_LocalArrCToF90Ptr7DI4(array, cptr, totalCount, &
               datacopyflag=ESMF_DATACOPY_REFERENCE, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 ^endif
           case default
             if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
@@ -1781,31 +1970,52 @@ TypeKindRankDeclarationMacro(LocalArrConstrF90Ptr)
             call ESMF_LocalArrCToF90Ptr1DI8(array, cptr, totalCount, &
               datacopyflag=ESMF_DATACOPY_REFERENCE, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (2)
             call ESMF_LocalArrCToF90Ptr2DI8(array, cptr, totalCount, &
               datacopyflag=ESMF_DATACOPY_REFERENCE, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (3)
             call ESMF_LocalArrCToF90Ptr3DI8(array, cptr, totalCount, &
               datacopyflag=ESMF_DATACOPY_REFERENCE, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (4)
             call ESMF_LocalArrCToF90Ptr4DI8(array, cptr, totalCount, &
               datacopyflag=ESMF_DATACOPY_REFERENCE, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 ^ifndef ESMF_NO_GREATER_THAN_4D
           case (5)
             call ESMF_LocalArrCToF90Ptr5DI8(array, cptr, totalCount, &
               datacopyflag=ESMF_DATACOPY_REFERENCE, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (6)
             call ESMF_LocalArrCToF90Ptr6DI8(array, cptr, totalCount, &
               datacopyflag=ESMF_DATACOPY_REFERENCE, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (7)
             call ESMF_LocalArrCToF90Ptr7DI8(array, cptr, totalCount, &
               datacopyflag=ESMF_DATACOPY_REFERENCE, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 ^endif
           case default
             if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
@@ -1818,31 +2028,52 @@ TypeKindRankDeclarationMacro(LocalArrConstrF90Ptr)
             call ESMF_LocalArrCToF90Ptr1DR4(array, cptr, totalCount, &
               datacopyflag=ESMF_DATACOPY_REFERENCE, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (2)
             call ESMF_LocalArrCToF90Ptr2DR4(array, cptr, totalCount, &
               datacopyflag=ESMF_DATACOPY_REFERENCE, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (3)
             call ESMF_LocalArrCToF90Ptr3DR4(array, cptr, totalCount, &
               datacopyflag=ESMF_DATACOPY_REFERENCE, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (4)
             call ESMF_LocalArrCToF90Ptr4DR4(array, cptr, totalCount, &
               datacopyflag=ESMF_DATACOPY_REFERENCE, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 ^ifndef ESMF_NO_GREATER_THAN_4D
           case (5)
             call ESMF_LocalArrCToF90Ptr5DR4(array, cptr, totalCount, &
               datacopyflag=ESMF_DATACOPY_REFERENCE, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (6)
             call ESMF_LocalArrCToF90Ptr6DR4(array, cptr, totalCount, &
               datacopyflag=ESMF_DATACOPY_REFERENCE, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (7)
             call ESMF_LocalArrCToF90Ptr7DR4(array, cptr, totalCount, &
               datacopyflag=ESMF_DATACOPY_REFERENCE, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 ^endif
           case default
             if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
@@ -1855,31 +2086,52 @@ TypeKindRankDeclarationMacro(LocalArrConstrF90Ptr)
             call ESMF_LocalArrCToF90Ptr1DR8(array, cptr, totalCount, &
               datacopyflag=ESMF_DATACOPY_REFERENCE, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (2)
             call ESMF_LocalArrCToF90Ptr2DR8(array, cptr, totalCount, &
               datacopyflag=ESMF_DATACOPY_REFERENCE, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (3)
             call ESMF_LocalArrCToF90Ptr3DR8(array, cptr, totalCount, &
               datacopyflag=ESMF_DATACOPY_REFERENCE, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (4)
             call ESMF_LocalArrCToF90Ptr4DR8(array, cptr, totalCount, &
               datacopyflag=ESMF_DATACOPY_REFERENCE, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 ^ifndef ESMF_NO_GREATER_THAN_4D
           case (5)
             call ESMF_LocalArrCToF90Ptr5DR8(array, cptr, totalCount, &
               datacopyflag=ESMF_DATACOPY_REFERENCE, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (6)
             call ESMF_LocalArrCToF90Ptr6DR8(array, cptr, totalCount, &
               datacopyflag=ESMF_DATACOPY_REFERENCE, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (7)
             call ESMF_LocalArrCToF90Ptr7DR8(array, cptr, totalCount, &
               datacopyflag=ESMF_DATACOPY_REFERENCE, &
               totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 ^endif
           case default
             if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
@@ -2315,19 +2567,40 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
         select case (rank)
           case (1)
             call ESMF_LocalArrayCopy1DI1(localarrayIn, localarrayOut, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (2)
             call ESMF_LocalArrayCopy2DI1(localarrayIn, localarrayOut, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (3)
             call ESMF_LocalArrayCopy3DI1(localarrayIn, localarrayOut, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (4)
             call ESMF_LocalArrayCopy4DI1(localarrayIn, localarrayOut, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 ^ifndef ESMF_NO_GREATER_THAN_4D
           case (5)
             call ESMF_LocalArrayCopy5DI1(localarrayIn, localarrayOut, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (6)
             call ESMF_LocalArrayCopy6DI1(localarrayIn, localarrayOut, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (7)
             call ESMF_LocalArrayCopy7DI1(localarrayIn, localarrayOut, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 ^endif
           case default
             if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
@@ -2340,19 +2613,40 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
         select case(rank)
           case (1)
             call ESMF_LocalArrayCopy1DI2(localarrayIn, localarrayOut, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (2)
             call ESMF_LocalArrayCopy2DI2(localarrayIn, localarrayOut, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (3)
             call ESMF_LocalArrayCopy3DI2(localarrayIn, localarrayOut, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (4)
             call ESMF_LocalArrayCopy4DI2(localarrayIn, localarrayOut, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 ^ifndef ESMF_NO_GREATER_THAN_4D
           case (5)
             call ESMF_LocalArrayCopy5DI2(localarrayIn, localarrayOut, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (6)
             call ESMF_LocalArrayCopy6DI2(localarrayIn, localarrayOut, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (7)
             call ESMF_LocalArrayCopy7DI2(localarrayIn, localarrayOut, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 ^endif
            case default
             if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
@@ -2364,19 +2658,40 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
         select case(rank)
           case (1)
             call ESMF_LocalArrayCopy1DI4(localarrayIn, localarrayOut, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (2)
             call ESMF_LocalArrayCopy2DI4(localarrayIn, localarrayOut, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (3)
             call ESMF_LocalArrayCopy3DI4(localarrayIn, localarrayOut, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (4)
             call ESMF_LocalArrayCopy4DI4(localarrayIn, localarrayOut, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 ^ifndef ESMF_NO_GREATER_THAN_4D
           case (5)
             call ESMF_LocalArrayCopy5DI4(localarrayIn, localarrayOut, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (6)
             call ESMF_LocalArrayCopy6DI4(localarrayIn, localarrayOut, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (7)
             call ESMF_LocalArrayCopy7DI4(localarrayIn, localarrayOut, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 ^endif
           case default
             if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
@@ -2387,19 +2702,40 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
         select case(rank)
           case (1)
             call ESMF_LocalArrayCopy1DI8(localarrayIn, localarrayOut, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (2)
             call ESMF_LocalArrayCopy2DI8(localarrayIn, localarrayOut, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (3)
             call ESMF_LocalArrayCopy3DI8(localarrayIn, localarrayOut, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (4)
             call ESMF_LocalArrayCopy4DI8(localarrayIn, localarrayOut, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 ^ifndef ESMF_NO_GREATER_THAN_4D
           case (5)
             call ESMF_LocalArrayCopy5DI8(localarrayIn, localarrayOut, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (6)
             call ESMF_LocalArrayCopy6DI8(localarrayIn, localarrayOut, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (7)
             call ESMF_LocalArrayCopy7DI8(localarrayIn, localarrayOut, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 ^endif
           case default
             if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
@@ -2410,19 +2746,40 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
         select case(rank)
           case (1)
             call ESMF_LocalArrayCopy1DR4(localarrayIn, localarrayOut, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (2)
             call ESMF_LocalArrayCopy2DR4(localarrayIn, localarrayOut, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (3)
             call ESMF_LocalArrayCopy3DR4(localarrayIn, localarrayOut, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (4)
             call ESMF_LocalArrayCopy4DR4(localarrayIn, localarrayOut, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 ^ifndef ESMF_NO_GREATER_THAN_4D
           case (5)
             call ESMF_LocalArrayCopy5DR4(localarrayIn, localarrayOut, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (6)
             call ESMF_LocalArrayCopy6DR4(localarrayIn, localarrayOut, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (7)
             call ESMF_LocalArrayCopy7DR4(localarrayIn, localarrayOut, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 ^endif
           case default
             if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
@@ -2433,19 +2790,40 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
         select case(rank)
           case (1)
             call ESMF_LocalArrayCopy1DR8(localarrayIn, localarrayOut, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (2)
             call ESMF_LocalArrayCopy2DR8(localarrayIn, localarrayOut, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (3)
             call ESMF_LocalArrayCopy3DR8(localarrayIn, localarrayOut, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (4)
             call ESMF_LocalArrayCopy4DR8(localarrayIn, localarrayOut, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 ^ifndef ESMF_NO_GREATER_THAN_4D
           case (5)
             call ESMF_LocalArrayCopy5DR8(localarrayIn, localarrayOut, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (6)
             call ESMF_LocalArrayCopy6DR8(localarrayIn, localarrayOut, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (7)
             call ESMF_LocalArrayCopy7DR8(localarrayIn, localarrayOut, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 ^endif
           case default
             if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
@@ -2457,9 +2835,6 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
           msg="Unsupported typekind", &
           ESMF_CONTEXT, rcToReturn=rc)) return
     end select
-    if (ESMF_LogFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set init code
     ESMF_INIT_SET_CREATED(localarrayOut)
@@ -2638,25 +3013,46 @@ TypeKindRankDeclarationMacro(LocalArrayCopy)
               case (1)
                 call ESMF_LocalArrayAdjust1DI1(array, totalCount, &
                                     lb=totalLBound, ub=totalUBound, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
               case (2)
                 call ESMF_LocalArrayAdjust2DI1(array, totalCount, &
                                     lb=totalLBound, ub=totalUBound, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
               case (3)
                 call ESMF_LocalArrayAdjust3DI1(array, totalCount, &
                                     lb=totalLBound, ub=totalUBound, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
               case (4)
                 call ESMF_LocalArrayAdjust4DI1(array, totalCount, &
                                     lb=totalLBound, ub=totalUBound, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
 ^ifndef ESMF_NO_GREATER_THAN_4D
               case (5)
                 call ESMF_LocalArrayAdjust5DI1(array, totalCount, &
                                     lb=totalLBound, ub=totalUBound, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
               case (6)
                 call ESMF_LocalArrayAdjust6DI1(array, totalCount, &
                                     lb=totalLBound, ub=totalUBound, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
               case (7)
                 call ESMF_LocalArrayAdjust7DI1(array, totalCount, &
                                     lb=totalLBound, ub=totalUBound, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
 ^endif
               case default
                     if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
@@ -2670,25 +3066,46 @@ TypeKindRankDeclarationMacro(LocalArrayCopy)
               case (1)
                 call ESMF_LocalArrayAdjust1DI2(array, totalCount, &
                                     lb=totalLBound, ub=totalUBound, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
               case (2)
                 call ESMF_LocalArrayAdjust2DI2(array, totalCount, &
                                     lb=totalLBound, ub=totalUBound, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
               case (3)
                 call ESMF_LocalArrayAdjust3DI2(array, totalCount, &
                                     lb=totalLBound, ub=totalUBound, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
               case (4)
                 call ESMF_LocalArrayAdjust4DI2(array, totalCount, &
                                     lb=totalLBound, ub=totalUBound, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
 ^ifndef ESMF_NO_GREATER_THAN_4D
               case (5)
                 call ESMF_LocalArrayAdjust5DI2(array, totalCount, &
                                     lb=totalLBound, ub=totalUBound, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
               case (6)
                 call ESMF_LocalArrayAdjust6DI2(array, totalCount, &
                                     lb=totalLBound, ub=totalUBound, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
               case (7)
                 call ESMF_LocalArrayAdjust7DI2(array, totalCount, &
                                     lb=totalLBound, ub=totalUBound, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
 ^endif
               case default
                     if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
@@ -2701,25 +3118,46 @@ TypeKindRankDeclarationMacro(LocalArrayCopy)
               case (1)
                 call ESMF_LocalArrayAdjust1DI4(array, totalCount, &
                                     lb=totalLBound, ub=totalUBound, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
               case (2)
                 call ESMF_LocalArrayAdjust2DI4(array, totalCount, &
                                     lb=totalLBound, ub=totalUBound, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
               case (3)
                 call ESMF_LocalArrayAdjust3DI4(array, totalCount, &
                                     lb=totalLBound, ub=totalUBound, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
               case (4)
                 call ESMF_LocalArrayAdjust4DI4(array, totalCount, &
                                     lb=totalLBound, ub=totalUBound, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
 ^ifndef ESMF_NO_GREATER_THAN_4D
               case (5)
                 call ESMF_LocalArrayAdjust5DI4(array, totalCount, &
                                     lb=totalLBound, ub=totalUBound, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
               case (6)
                 call ESMF_LocalArrayAdjust6DI4(array, totalCount, &
                                     lb=totalLBound, ub=totalUBound, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
               case (7)
                 call ESMF_LocalArrayAdjust7DI4(array, totalCount, &
                                     lb=totalLBound, ub=totalUBound, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
 ^endif
               case default
                     if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
@@ -2731,25 +3169,46 @@ TypeKindRankDeclarationMacro(LocalArrayCopy)
               case (1)
                 call ESMF_LocalArrayAdjust1DI8(array, totalCount, &
                                     lb=totalLBound, ub=totalUBound, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
               case (2)
                 call ESMF_LocalArrayAdjust2DI8(array, totalCount, &
                                     lb=totalLBound, ub=totalUBound, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
               case (3)
                 call ESMF_LocalArrayAdjust3DI8(array, totalCount, &
                                     lb=totalLBound, ub=totalUBound, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
               case (4)
                 call ESMF_LocalArrayAdjust4DI8(array, totalCount, &
                                     lb=totalLBound, ub=totalUBound, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
 ^ifndef ESMF_NO_GREATER_THAN_4D
               case (5)
                 call ESMF_LocalArrayAdjust5DI8(array, totalCount, &
                                     lb=totalLBound, ub=totalUBound, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
               case (6)
                 call ESMF_LocalArrayAdjust6DI8(array, totalCount, &
                                     lb=totalLBound, ub=totalUBound, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
               case (7)
                 call ESMF_LocalArrayAdjust7DI8(array, totalCount, &
                                     lb=totalLBound, ub=totalUBound, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
 ^endif
               case default
                     if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
@@ -2761,25 +3220,46 @@ TypeKindRankDeclarationMacro(LocalArrayCopy)
               case (1)
                 call ESMF_LocalArrayAdjust1DR4(array, totalCount, &
                                     lb=totalLBound, ub=totalUBound, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
               case (2)
                 call ESMF_LocalArrayAdjust2DR4(array, totalCount, &
                                     lb=totalLBound, ub=totalUBound, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
               case (3)
                 call ESMF_LocalArrayAdjust3DR4(array, totalCount, &
                                     lb=totalLBound, ub=totalUBound, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
               case (4)
                 call ESMF_LocalArrayAdjust4DR4(array, totalCount, &
                                     lb=totalLBound, ub=totalUBound, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
 ^ifndef ESMF_NO_GREATER_THAN_4D
               case (5)
                 call ESMF_LocalArrayAdjust5DR4(array, totalCount, &
                                     lb=totalLBound, ub=totalUBound, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
               case (6)
                 call ESMF_LocalArrayAdjust6DR4(array, totalCount, &
                                     lb=totalLBound, ub=totalUBound, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
               case (7)
                 call ESMF_LocalArrayAdjust7DR4(array, totalCount, &
                                     lb=totalLBound, ub=totalUBound, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
 ^endif
               case default
                     if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
@@ -2791,25 +3271,46 @@ TypeKindRankDeclarationMacro(LocalArrayCopy)
               case (1)
                 call ESMF_LocalArrayAdjust1DR8(array, totalCount, &
                                     lb=totalLBound, ub=totalUBound, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
               case (2)
                 call ESMF_LocalArrayAdjust2DR8(array, totalCount, &
                                     lb=totalLBound, ub=totalUBound, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
               case (3)
                 call ESMF_LocalArrayAdjust3DR8(array, totalCount, &
                                     lb=totalLBound, ub=totalUBound, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
               case (4)
                 call ESMF_LocalArrayAdjust4DR8(array, totalCount, &
                                     lb=totalLBound, ub=totalUBound, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
 ^ifndef ESMF_NO_GREATER_THAN_4D
               case (5)
                 call ESMF_LocalArrayAdjust5DR8(array, totalCount, &
                                     lb=totalLBound, ub=totalUBound, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
               case (6)
                 call ESMF_LocalArrayAdjust6DR8(array, totalCount, &
                                     lb=totalLBound, ub=totalUBound, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
               case (7)
                 call ESMF_LocalArrayAdjust7DR8(array, totalCount, &
                                     lb=totalLBound, ub=totalUBound, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
 ^endif
               case default
                     if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
@@ -2821,11 +3322,6 @@ TypeKindRankDeclarationMacro(LocalArrayCopy)
                                 msg="Unsupported kind", &
                                  ESMF_CONTEXT, rcToReturn=rc)) return
         end select
-
-    ! check localrc for errors
-    if (ESMF_LogFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -3107,13 +3603,15 @@ TypeKindRankDeclarationMacro(LocalArrayAdjustShape)
 
     if(present(options)) then
         call c_ESMC_LocalArrayPrint(array, options, localrc)
+        if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
     else
         call c_ESMC_LocalArrayPrint(array, defaultopts, localrc)
+        if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
     endif
-
-    if (ESMF_LogFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully
     if (rcpresent) rc = ESMF_SUCCESS

@@ -113,6 +113,45 @@ int ESMC_ConfigDestroy(
 
 //-----------------------------------------------------------------------------
 //BOP
+// !IROUTINE: ESMC_ConfigCreate - Create a Config object from a section of an existing Config object
+//
+// !INTERFACE:
+ESMC_Config ESMC_ConfigCreateFromSection(
+  ESMC_Config config,       // in
+  const char* olabel,       // in
+  const char* clabel,       // in
+  int* rc                   // out
+);
+// !RETURN VALUE:
+//  ESMC_Config*  to newly allocated ESMC_Config
+//
+// !DESCRIPTION:
+//   Instantiates an {\tt ESMC\_Config} object from a section of an existing
+//   {\tt ESMC\_Config} object delimited by {\tt openlabel} and {\tt closelabel}.
+//   An error is returned if neither of the input labels is found in input
+//   {\tt config}.
+//
+//   Note that a section is intended as the content of a given {\tt ESMC\_Config}
+//   object delimited by two distinct labels. Such content, as well as each of the
+//   surrounding labels, are still within the scope of the parent {\tt ESMC\_Config}
+//   object. Therefore, including in a section labels used outside that
+//   section should be done carefully to prevent parsing conflicts.
+//
+//   The arguments are:
+//   \begin{description}
+//     \item[config]
+//       The input {\tt ESMC\_Config} object.
+//     \item[openlabel]
+//       Label marking the beginning of a section in {\tt config}.
+//     \item[closelabel]
+//       Label marking the end of a section in {\tt config}.
+//   \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
 // !IROUTINE: ESMC_ConfigFindLabel - Find a label
 //
 // !INTERFACE:
@@ -151,6 +190,41 @@ int ESMC_ConfigFindLabel(
 
 //-----------------------------------------------------------------------------
 //BOP
+// !IROUTINE: ESMC_ConfigFindNextLabel - Find a label
+//
+// !INTERFACE:
+int ESMC_ConfigFindNextLabel(
+  ESMC_Config config,        // in
+  const char* label,         // in
+  int *isPresent             // out
+);
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//  If label not found, and the {\tt isPresent} pointer is {\tt NULL},
+//  an error will be returned.
+//
+// !DESCRIPTION: Finds the {\tt label} (key) string in the {\tt config} object,
+//   starting from the current position pointer.
+//
+//   This method is equivalent to {\tt ESMC\_ConfigFindLabel}, but the search
+//   is performed starting from the current position pointer.
+//
+//   The arguments are:
+//   \begin{description}
+//   \item [config]
+//     Already created {\tt ESMC\_Config} object.
+//   \item [label]
+//     Identifying label.
+//   \item [isPresent]
+//     If non-NULL, the address specified is given a value of 1 if the
+//     label is found, and 0 when the label is not found.
+//   \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
 // !IROUTINE: ESMC_ConfigGetDim - Get table sizes
 //
 // !INTERFACE:
@@ -164,7 +238,7 @@ int ESMC_ConfigGetDim(
 //  Return code; equals ESMF_SUCCESS if there are no errors.
 //
 // !DESCRIPTION:
-//  Returns the number of lines in the table in {\tt lineCount} and 
+//  Returns the number of lines in the table in {\tt lineCount} and
 //  the maximum number of words in a table line in {\tt columnCount}.
 //
 //   The arguments are:
@@ -276,6 +350,29 @@ int ESMC_ConfigNextLine(
 //   \item [{[tableEnd]}]
 //     End of table mark (::) found flag.  Returns 1 when found, and 0 when
 //     not found.
+//   \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_ConfigPrint - Write content of config object to standard output
+//
+// !INTERFACE:
+int ESMC_ConfigPrint(
+  ESMC_Config config        // in
+);
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//   Write content of a {\tt ESMC\_Config} object to standard output.
+//
+//   The arguments are:
+//   \begin{description}
+//   \item [config]
+//     Already created {\tt ESMC\_Config} object.
 //   \end{description}
 //
 //EOP

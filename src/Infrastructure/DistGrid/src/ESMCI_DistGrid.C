@@ -287,7 +287,7 @@ DistGrid *DistGrid::create(
       if (dg->delayout->getLocalDeCount() == 0){
         // need to prepare a dummy LocalArray object
         larrayList[0] = LocalArray::create(dg->indexTK, 1,
-          &(elementCount[0][0]), NULL, DATA_NONE, &localrc);
+          NULL, NULL, DATA_NONE, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
       }

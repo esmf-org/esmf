@@ -28,5 +28,11 @@ The Field metadata is implemented as an ESMF Attribute Package:
      {\tt ShareStatusGeomObject} & String value indicating the status with respect to sharing the underlying GeomObject that was negotiated.& shared,\newline not shared\\ \hline
      {\tt UngriddedLBound} & Integer value list. If present equals the {\tt ungriddedLBound} of the provider field during a GeomObject transfer. & {\em no restriction}\\ \hline
      {\tt UngriddedUBound} & Integer value list. If present equals the {\tt ungriddedUBound} of the provider field.during a GeomObject transfer. & {\em no restriction}\\ \hline
+     {\tt GridToFieldMap} & Integer value list. If present equals the {\tt gridToFieldMap} of the provider field.during a GeomObject transfer. & {\em no restriction}\\ \hline
+     {\tt ArbDimCount} & Integer value. If present equals the {\tt arbDimCount} of the provider field.during a GeomObject transfer. & {\em no restriction}\\ \hline
+     {\tt MinIndex} & Integer value list. If present equals the {\tt minIndex} (of tile 1) of the provider field.during a GeomObject transfer. & {\em no restriction}\\ \hline
+     {\tt MaxIndex} & Integer value list. If present equals the {\tt maxIndex} (of tile 1) of the provider field.during a GeomObject transfer. & {\em no restriction}\\ \hline
+     {\tt TypeKind} & Integer value. If present equals the integer representation of {\tt typekind} of the provider field.during a GeomObject transfer. & {\em implementation dependent range}\\ \hline
+     {\tt GeomLoc} & Integer value. If present equals the integer representation of {\tt staggerloc} (for Grid) or {\tt meshloc} (for Mesh) of the provider field.during a GeomObject transfer. & {\em implementation dependent range}\\ \hline
      \hline
 \end{longtable}
