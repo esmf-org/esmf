@@ -603,9 +603,10 @@ ESMC_Grid create_grid_2D(int *maxIndex, double *minCoord, double *maxCoord, int 
   // Set coordinate information 
   ESMC_CoordSys_Flag coordsys = ESMC_COORDSYS_CART;
   ESMC_TypeKind_Flag typekind = ESMC_TYPEKIND_R8;
+  ESMC_IndexFlag     indexflag=ESMC_INDEX_GLOBAL;
 
   // Create Grid
-  outGrid = ESMC_GridCreateNoPeriDim(&i_maxIndex, &coordsys, &typekind, NULL, &localrc);
+  outGrid = ESMC_GridCreateNoPeriDim(&i_maxIndex, &coordsys, &typekind, &indexflag, &localrc);
   if (localrc != ESMF_SUCCESS) {
     *rc=ESMF_FAILURE;
     return outGrid;
