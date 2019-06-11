@@ -1,0 +1,35 @@
+% $Id$
+
+\label{sec:xgrid:desc}
+An exchange grid represents the 2D boundary layer usually between the
+atmosphere on one side and ocean and land on the other in an Earth
+system model. There are dynamical and thermodynamical processes on
+either side of the boundary layer and on the boundary layer itself.
+The boundary layer exchanges fluxes from either side and adjusts
+boundary conditions for the model components involved. For climate modeling,
+it is critical that the fluxes transferred by the boundary layer are
+conservative.
+
+The ESMF exchange grid is implemented as the {\tt ESMC\_XGrid} class. 
+Internally it's represented by a collection of the intersected cells
+between atmosphere and ocean/land\cite{BalajiXGrid} grids. 
+These polygonal cells can have irregular shapes
+and can be broken down into triangles facilitating a finite element
+approach. 
+
+Through the C API there is one way to create an {\tt ESMC\_XGrid} object from
+user supplied information. The {\tt ESMC\_XGrid} takes
+two lists of {\tt ESMC\_Grid} or {\tt ESMC\_Mesh} that represent the model component grids on
+either side of the exchange grid. From the two lists of {\tt ESMC\_Grid} or {\tt ESMC\_Mesh},
+information required for flux exchange calculation between any pair of the 
+model components from either side of the exchange grid is computed. In addition, the
+internal representation of the {\tt ESMC\_XGrid} is computed and can be optionally stored
+as an {\tt ESMC\_Mesh}. This internal representation is the collection of the intersected
+polygonal cells as a result of merged {\tt ESMC\_Mesh}es from both sides of the exchange grid.
+{\tt ESMC\_Field} can be created on the {\tt ESMC\_XGrid} and used for weight generation
+and regridding as the internal representation in the {\tt ESMC\_XGrid} has
+a complete geometrical description of the exchange grid.
+
+Once an {\tt ESMC\_XGrid} has been created, information describing it (e.g. cell areas, mesh representation, etc.)
+can be retrieved from the object using a set of get calls (e.g. {\tt ESMC\_XGridGetElementArea()). The full extent of these
+can be found in the API section below.  

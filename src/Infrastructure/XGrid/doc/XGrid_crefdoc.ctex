@@ -1,0 +1,114 @@
+% $Id$
+
+#ifdef STANDALONE
+\documentclass[]{article}
+
+\usepackage{epsf}
+\usepackage{html}
+\usepackage{times}
+\usepackage{alltt}
+\usepackage[T1]{fontenc}
+\usepackage[dvips]{graphics,color}
+
+\textwidth 6.5in
+\textheight 8.5in
+\addtolength{\oddsidemargin}{-.75in}
+\newcommand{\mytitle}{XGrid Fortran Reference}
+\newcommand{\myauthors}{Fei Liu}
+% set a standard paragraph style
+\setlength{\parskip}{0pt}
+\setlength{\parindent}{0pt}
+\setlength{\baselineskip}{11pt}
+% these are temporary patches until something more
+% permanent is done to the protex script.
+\newlength{\oldparskip}
+\newlength{\oldparindent}
+\newlength{\oldbaselineskip}
+#endif
+
+#ifdef STANDALONE
+\begin{document}
+#endif
+
+\bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
+
+#ifdef STANDALONE
+% Title page
+\input{../../../doc/title_alldoc}
+
+\newpage
+\tableofcontents
+
+\newpage
+\setlength{\parskip}{1.5ex}
+
+#endif
+
+\section{XGrid Class}
+
+% Use C description when everything has been implemented on C side, then use the same for both. 
+\subsection{Description}
+#ifdef STANDALONE
+\input{XGrid_cdesc}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/XGrid/doc/XGrid_cdesc}
+#endif
+
+% No options on C side
+%\subsection{Constants}
+%#ifdef STANDALONE
+%\input{XGrid_options}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/XGrid/doc/XGrid_options}
+%#endif
+
+% Need to add a C example
+%\subsection{Use and Examples}
+%#ifdef STANDALONE
+%%\input{XGrid_usage}
+%\input{ESMF_XGridEx_fapi}
+%\input{ESMF_XGridSparseMatEx_fapi}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/XGrid/doc/XGrid_usage}
+%\input{../Infrastructure/XGrid/doc/ESMF_XGridEx_fapi}
+%\input{../Infrastructure/XGrid/doc/ESMF_XGridSparseMatEx_fapi}
+%#endif
+
+% Use F90 restriction description
+\subsection{Restrictions and Future Work}
+#ifdef STANDALONE
+\input{XGrid_rest}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/XGrid/doc/XGrid_rest}
+#endif
+
+% Use F90 Design and implementation notes
+\subsection{Design and Implementation Notes}
+#ifdef STANDALONE
+\input{XGrid_implnotes}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/XGrid/doc/XGrid_implnotes}
+#endif
+
+\subsection{Class API}
+#ifdef STANDALONE
+\input{ESMC_XGrid_chapi}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/XGrid/doc/ESMC_XGrid_chapi}
+#endif
+
+#ifdef STANDALONE
+\section{Review Status}
+%\input{XGrid_desrev}
+#endif
+
+#ifdef STANDALONE
+%\section{Bibliography}
+\bibliography{XGrid} 
+\bibliographystyle{plain}
+\addcontentsline{toc}{section}{Bibliography}
+#endif
+
+#ifdef STANDALONE
+\end{document}
+#endif

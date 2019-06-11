@@ -338,8 +338,8 @@ int main(void){
   if (localrc != ESMF_SUCCESS) rc=ESMF_FAILURE;
 
   // Write to check
-  localrc=ESMC_MeshWrite(mesh,"tstMesh");
-  if (localrc != ESMF_SUCCESS) rc=ESMF_FAILURE;
+  // localrc=ESMC_MeshWrite(mesh,"tstMesh");
+  //if (localrc != ESMF_SUCCESS) rc=ESMF_FAILURE;
 
   ESMC_Test((rc==ESMF_SUCCESS) && correct, name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
