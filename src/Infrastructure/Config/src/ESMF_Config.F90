@@ -50,6 +50,7 @@
        public :: ESMF_ConfigDestroy    ! destroys configuration
        public :: ESMF_ConfigLoadFile   ! loads resource file into memory
        public :: ESMF_ConfigFindLabel  ! selects a label (key)
+       public :: ESMF_ConfigFindNextLabel  ! selects a following label (key)
        public :: ESMF_ConfigNextLine   ! selects next line (for tables)
        public :: ESMF_ConfigGetAttribute ! returns next value
        public :: ESMF_ConfigGetChar    ! returns only a single character
@@ -58,6 +59,7 @@
                                    ! and max number of columns by word 
                                    ! counting disregarding type (function)
        public :: ESMF_ConfigIsCreated
+       public :: ESMF_ConfigPrint  ! print content of config object
        public :: ESMF_ConfigSetAttribute ! sets value
        public :: ESMF_ConfigValidate   ! validates config object
 !------------------------------------------------------------------------------
@@ -83,7 +85,27 @@
 !
 !==============================================================================
 !BOPI
-! !IROUTINE: ESMF_ConfigGetAttribute - Get an attribute from a Config
+! !IROUTINE: ESMF_ConfigCreate - Create a Config object
+!
+! !INTERFACE:
+    interface ESMF_ConfigCreate
+
+! !PRIVATE MEMBER FUNCTIONS:
+        module procedure ESMF_ConfigCreateEmpty
+        module procedure ESMF_ConfigCreateFromSection
+
+! !DESCRIPTION:
+!     This interface provides methods to create an empty {\tt ESMF\_Config}
+!     object or a new {\tt ESMF\_Config} object from a section of an existing
+!     one.
+!
+!EOPI
+      end interface
+!
+!------------------------------------------------------------------------------
+
+!BOPI
+! !IROUTINE: ESMF_ConfigGetAttribute - Get an attribute from a Config object
 !
 ! !INTERFACE:
     interface ESMF_ConfigGetAttribute
@@ -112,7 +134,7 @@
 !
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_ConfigSetAttribute - Set an attribute in a Config
+! !IROUTINE: ESMF_ConfigSetAttribute - Set an attribute in a Config object
 !
 ! !INTERFACE:
     interface ESMF_ConfigSetAttribute
@@ -139,7 +161,7 @@
       end interface
 !
 !------------------------------------------------------------------------------
-!! !IROUTINE: ESMF_ConfigEQ - Test objects for equivalence
+!! !IROUTINE: ESMF_ConfigEQ - Test Config objects for equivalence
 !
 ! !INTERFACE:
     interface operator(==)
@@ -344,7 +366,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigAttrUsedGetInit"
 !BOPI
-! !IROUTINE:  ESMF_ConfigAttrUsedGetInit - Get initialization status.
+! !IROUTINE:  ESMF_ConfigAttrUsedGetInit - Get initialization status of a Config object
 
 ! !INTERFACE:
     function ESMF_ConfigAttrUsedGetInit(s)
@@ -442,7 +464,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigClassGetInit"
 !BOPI
-! !IROUTINE:  ESMF_ConfigClassGetInit - Get initialization status.
+! !IROUTINE:  ESMF_ConfigClassGetInit - Get initialization status of a Config object
 
 ! !INTERFACE:
     function ESMF_ConfigClassGetInit(s)
@@ -543,7 +565,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigGetInit"
 !BOPI
-! !IROUTINE:  ESMF_ConfigGetInit - Get initialization status.
+! !IROUTINE:  ESMF_ConfigGetInit - Get initialization status of a Config object
 
 ! !INTERFACE:
     function ESMF_ConfigGetInit(d)
@@ -575,13 +597,14 @@
 
 !
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ConfigCreate"
+#define ESMF_METHOD "ESMF_ConfigCreateEmpty"
 !BOP
 !
-! !IROUTINE: ESMF_ConfigCreate - Instantiate a Config object
+! !IROUTINE: ESMF_ConfigCreateEmpty - Instantiate a Config object
 !
 ! !INTERFACE:
-      type(ESMF_Config) function ESMF_ConfigCreate(keywordEnforcer, rc)
+      ! Private name; call using ESMF_ConfigCreate()
+      type(ESMF_Config) function ESMF_ConfigCreateEmpty(keywordEnforcer, rc)
 
 ! !ARGUMENTS:
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -612,7 +635,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  
 ! Initialization
       allocate(config_local, stat=memstat)
-      ESMF_ConfigCreate%cptr => config_local
+      ESMF_ConfigCreateEmpty%cptr => config_local
       if (ESMF_LogFoundAllocError(memstat, msg="Allocating config class", &
                                         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -634,10 +657,120 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       if (present( rc ))  rc = ESMF_SUCCESS
 
-      ESMF_INIT_SET_CREATED(ESMF_ConfigCreate)
+      ESMF_INIT_SET_CREATED(ESMF_ConfigCreateEmpty)
       return
 
-    end function ESMF_ConfigCreate
+    end function ESMF_ConfigCreateEmpty
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConfigCreateFromSection"
+!BOP
+!
+! !IROUTINE: ESMF_ConfigCreateFromSection - Instantiate a new Config object from a Config section
+!
+! !INTERFACE:
+    ! Private name; call using ESMF_ConfigCreate()
+    type(ESMF_Config) function ESMF_ConfigCreateFromSection(config, &
+      openlabel, closelabel, keywordEnforcer, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Config)             :: config
+      character(len=*),  intent(in) :: openlabel, closelabel
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer,intent(out), optional :: rc
+!
+!
+! !DESCRIPTION:
+!   Instantiates an {\tt ESMF\_Config} object from a section of an existing
+!   {\tt ESMF\_Config} object delimited by {\tt openlabel} and {\tt closelabel}.
+!   An error is returned if neither of the input labels is found in input
+!   {\tt config}.
+!
+!   Note that a section is intended as the content of a given {\tt ESMF\_Config}
+!   object delimited by two distinct labels. Such content, as well as each of the
+!   surrounding labels, are still within the scope of the parent {\tt ESMF\_Config}
+!   object. Therefore, including in a section labels used outside that
+!   section should be done carefully to prevent parsing conflicts.
+!
+!   The arguments are:
+!   \begin{description}
+!     \item[config]
+!       The input {\tt ESMF\_Config} object.
+!     \item[openlabel]
+!       Label marking the beginning of a section in {\tt config}.
+!     \item[closelabel]
+!       Label marking the end of a section in {\tt config}.
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if a section is found
+!      and a new {\tt ESMF\_Config} object returned.
+!   \end{description}
+!
+!EOP -------------------------------------------------------------------
+
+      integer :: localrc
+      integer :: ptr, section_open, section_close
+      logical, parameter :: unique = .false.
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! Look for opening section label in whole input Config object
+      call ESMF_ConfigFindLabel(config, openlabel, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, &
+        msg="Opening section label not found",  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      section_open = config % cptr % value_begin
+
+      ! Look closing section label after opening label
+      call ESMF_ConfigFindNextLabel(config, closelabel, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, &
+        msg="Closing section label not found",  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      section_close = config % cptr % value_begin - len(closelabel) - 1
+
+      if (section_close < section_open) then
+        call ESMF_LogSetError(ESMF_RC_NOT_FOUND, &
+          msg="Closing section label precedes opening section label", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      end if
+
+      ! Create and populate new Config object from parent object's section
+      ESMF_ConfigCreateFromSection = ESMF_ConfigCreateEmpty(rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, &
+        msg="Instantiating new config object",  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ptr = section_close - section_open + 1
+      if (config % cptr % buffer(section_open:section_open) == EOL) then
+        ESMF_ConfigCreateFromSection % cptr % buffer(1:ptr) = &
+          config % cptr % buffer(section_open:section_close)
+      else
+        ptr = ptr + 1
+        ESMF_ConfigCreateFromSection % cptr % buffer(1:1) = EOL
+        ESMF_ConfigCreateFromSection % cptr % buffer(2:ptr) = &
+          config % cptr % buffer(section_open:section_close)
+      end if
+
+      ptr = ptr + 1
+      ESMF_ConfigCreateFromSection % cptr % nbuf = ptr
+      ESMF_ConfigCreateFromSection % cptr % buffer(ptr:ptr) = EOB
+
+      ESMF_ConfigCreateFromSection % cptr % this_line = ' '
+      ESMF_ConfigCreateFromSection % cptr % next_line = 1
+      ESMF_ConfigCreateFromSection % cptr % value_begin = 1
+
+      call ESMF_ConfigParseAttributes(ESMF_ConfigCreateFromSection, &
+                                      unique=unique, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+    end function ESMF_ConfigCreateFromSection
+
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigDestroy"
@@ -713,7 +846,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #define ESMF_METHOD "ESMF_ConfigFindLabel"
 !BOP
 !
-! !IROUTINE: ESMF_ConfigFindLabel - Find a label
+! !IROUTINE: ESMF_ConfigFindLabel - Find a label in a Config object
 !
 ! !INTERFACE:
     subroutine ESMF_ConfigFindLabel(config, label, keywordEnforcer, isPresent, rc)
@@ -736,7 +869,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{description}
 ! \end{itemize}
 !
-! !DESCRIPTION: Finds the {\tt label} (key) string in the {\tt config} object. 
+! !DESCRIPTION: Finds the {\tt label} (key) string in the {\tt config} object
+!   starting from the beginning of its content.
 !
 !   Since the search is done by looking for a string, possibly multi-worded,
 !   in the whole {\tt Config} object, it is important to use special 
@@ -816,8 +950,104 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       
     end subroutine ESMF_ConfigFindLabel
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConfigFindNextLabel"
 !BOP
-! !IROUTINE: ESMF_ConfigGetAttribute - Get a value 
+!
+! !IROUTINE: ESMF_ConfigFindNextLabel - Find a label in Config object starting from current position
+!
+! !INTERFACE:
+    subroutine ESMF_ConfigFindNextLabel(config, label, keywordEnforcer, isPresent, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Config), intent(inout)           :: config
+      character(len=*),  intent(in)              :: label
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      logical,           intent(out),  optional  :: isPresent
+      integer,           intent(out),  optional  :: rc
+
+!
+! !DESCRIPTION: Finds the {\tt label} (key) string in the {\tt config} object,
+!   starting from the current position pointer.
+!
+!   This method is equivalent to {\tt ESMF\_ConfigFindLabel}, but the search
+!   is performed starting from the current position pointer.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item [config]
+!     Already created {\tt ESMF\_Config} object.
+!   \item [label]
+!     Identifying label.
+!   \item [{[isPresent]}]
+!     Set to {\tt .true.} if the item is found.
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     If the label is not found, and the {\tt isPresent} argument is
+!     not present, an error is returned.
+!   \end{description}
+!
+!EOP -------------------------------------------------------------------
+
+      integer   :: i, j, ptr
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      !check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
+
+      if (present (isPresent)) then
+        isPresent = .false.
+      end if
+
+!     Determine whether label exists from current position onward
+!     -----------------------------------------------------------
+!     ptr = max(config%cptr%next_line, 1)
+      ptr = max(config%cptr%next_line-1, 1)
+      i = index_ ( config%cptr%buffer(ptr:config%cptr%nbuf ), EOL//label) + 1
+
+      !! NOTE: to be fixed !! breaks empty sections
+      if ( i .eq. 1 ) then
+         config%cptr%this_line = BLK // EOL
+         if (present (isPresent)) then
+           if (present (rc)) rc = ESMF_SUCCESS
+           return
+         end if
+         if (ESMF_LogFoundError(ESMF_RC_NOT_FOUND, &
+                                msg="label " // trim (label) // " not found", &
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
+      elseif(i.le.0) then
+         if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                                msg="invalid operation with index_", &
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
+      end if
+
+      if (present (isPresent)) then
+        isPresent = .true.
+      end if
+
+!     Save current attribute label without colon,
+!       to associate with subsequent GetAttribute() or GetChar()
+!     -------------------------------------------
+      config%cptr%current_attr = label(1:(index_(label, ":") - 1))
+
+!     Extract the line associated with this label
+!     -------------------------------------------
+      i = i + len ( label ) + ptr - 1
+      j = i + index_ ( config%cptr%buffer(i:config%cptr%nbuf),EOL ) - 2
+      config%cptr%this_line = config%cptr%buffer(ptr:j) // BLK // EOL
+
+      config%cptr%next_line = j + 2
+
+      config%cptr%value_begin = i
+
+      if ( present (rc )) rc = ESMF_SUCCESS
+
+    end subroutine ESMF_ConfigFindNextLabel
+
+!BOP
+! !IROUTINE: ESMF_ConfigGetAttribute - Get an attribute value from Config object
 !
 !
 ! !INTERFACE:
@@ -869,7 +1099,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP -------------------------------------------------------------------
 
 !BOP -------------------------------------------------------------------
-! !IROUTINE: ESMF_ConfigGetAttribute - Get a list of values 
+! !IROUTINE: ESMF_ConfigGetAttribute - Get a list of attribute values from Config object
 !
 ! !INTERFACE:
 !      subroutine ESMF_ConfigGetAttribute(config, <value list argument>, &
@@ -2177,7 +2407,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #define ESMF_METHOD "ESMF_ConfigGetChar"
 !BOP
 !
-! !IROUTINE: ESMF_ConfigGetChar - Get a character
+! !IROUTINE: ESMF_ConfigGetChar - Get a character attribute value from Config object
 !
 ! !INTERFACE:
       subroutine ESMF_ConfigGetChar(config, value, &
@@ -2259,7 +2489,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #define ESMF_METHOD "ESMF_ConfigGetDim"
 !BOP
 !
-! !IROUTINE: ESMF_ConfigGetDim - Get table sizes
+! !IROUTINE: ESMF_ConfigGetDim - Get table sizes from Config object
 !
 ! !INTERFACE:
     subroutine ESMF_ConfigGetDim(config, lineCount, columnCount, &
@@ -2364,7 +2594,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigGetLen"
 !BOP
-! !IROUTINE: ESMF_ConfigGetLen - Get the length of the line in words
+! !IROUTINE: ESMF_ConfigGetLen - Get the length of the line in words from Config object
 !
 ! !INTERFACE:
     integer function ESMF_ConfigGetLen(config, keywordEnforcer, label, rc)
@@ -2489,7 +2719,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #define ESMF_METHOD "ESMF_ConfigLoadFile"
 !BOP
 !
-! !IROUTINE: ESMF_ConfigLoadFile - Load resource file into memory
+! !IROUTINE: ESMF_ConfigLoadFile - Load resource file into Config object memory
 !
 ! !INTERFACE:
     subroutine ESMF_ConfigLoadFile(config, filename, &
@@ -2563,7 +2793,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #define ESMF_METHOD "ESMF_ConfigLoadFile_1proc_"
 !BOPI -------------------------------------------------------------------
 !
-! !IROUTINE: ESMF_ConfigLoadFile_1proc - Load resource file into memory
+! !IROUTINE: ESMF_ConfigLoadFile_1proc - Load resource file into Config object memory
 !
 
 ! !INTERFACE:
@@ -2672,7 +2902,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #define ESMF_METHOD "ESMF_ConfigNextLine"
 !BOP
 !
-! !IROUTINE: ESMF_ConfigNextLine - Find next line
+! !IROUTINE: ESMF_ConfigNextLine - Find next line in a Config object
 !
 ! !INTERFACE:
     subroutine ESMF_ConfigNextLine(config, keywordEnforcer, tableEnd, rc)
@@ -2756,7 +2986,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #define ESMF_METHOD "ESMF_ConfigParseAttributes"
 !BOPI
 !
-! !IROUTINE: ESMF_ConfigParseAttributes - Parse all attribute labels
+! !IROUTINE: ESMF_ConfigParseAttributes - Parse all attribute labels in a Config object
 !
 ! !INTERFACE:
 
@@ -2862,9 +3092,69 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     end subroutine ESMF_ConfigParseAttributes
 
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConfigPrint"
 !BOP
 !
-! !IROUTINE: ESMF_ConfigSetAttribute - Set a value
+! !IROUTINE: ESMF_ConfigPrint - Write content of Config object to unit
+!
+! !INTERFACE:
+    subroutine ESMF_ConfigPrint(config, keywordEnforcer, unit, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Config), intent(in)  :: config
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer, optional, intent(in)  :: unit
+      integer, optional, intent(out) :: rc
+!
+!
+! !DESCRIPTION:
+!   Write content of input {\tt ESMF\_Config} object to unit {\tt unit}.
+!   If {\tt unit} not provided, writes to standard output.
+!
+!   The arguments are:
+!   \begin{description}
+!     \item[config]
+!       The input {\tt ESMF\_Config} object.
+!     \item[{[unit]}]
+!       Output unit.
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP -------------------------------------------------------------------
+
+      integer   :: iounit
+      integer   :: lbeg, lend
+
+      ! Standard output unit
+      integer, parameter :: stdout = 6
+
+      ! Initialize return code; assume routine not implemented
+      if ( present (rc) ) then
+        rc = ESMF_RC_NOT_IMPL
+      endif
+
+      iounit = stdout
+      if (present(unit)) iounit = unit
+
+      lbeg = 2
+      lend = index_( config % cptr % buffer(lbeg:config % cptr % nbuf), EOL )
+      do while (lend >= lbeg .and. lend < config % cptr % nbuf)
+        write(iounit, '(a)') trim(config % cptr % buffer(lbeg:lend))
+        lbeg = lend + 2
+        lend = lend + &
+          index_( config % cptr % buffer(lbeg:config % cptr % nbuf), EOL )
+      end do
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+    end subroutine ESMF_ConfigPrint
+
+!BOP
+!
+! !IROUTINE: ESMF_ConfigSetAttribute - Set a value in Config object
 !
 !
 ! !INTERFACE:

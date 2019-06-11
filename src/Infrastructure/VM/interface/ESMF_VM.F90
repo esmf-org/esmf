@@ -925,7 +925,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(syncflag)) then
       if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          msg="- non-blocking mode not yet implemented", &
+          msg="non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
@@ -986,7 +986,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(syncflag)) then
       if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          msg="- non-blocking mode not yet implemented", &
+          msg="non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
@@ -1047,7 +1047,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(syncflag)) then
       if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          msg="- non-blocking mode not yet implemented", &
+          msg="non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
@@ -1108,7 +1108,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(syncflag)) then
       if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          msg="- non-blocking mode not yet implemented", &
+          msg="non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
@@ -1663,7 +1663,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(syncflag)) then
       if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          msg="- non-blocking mode not yet implemented", &
+          msg="non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
@@ -1723,7 +1723,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(syncflag)) then
       if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          msg="- non-blocking mode not yet implemented", &
+          msg="non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
@@ -1783,7 +1783,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(syncflag)) then
       if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          msg="- non-blocking mode not yet implemented", &
+          msg="non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
@@ -1843,7 +1843,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(syncflag)) then
       if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          msg="- non-blocking mode not yet implemented", &
+          msg="non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
@@ -1903,7 +1903,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(syncflag)) then
       if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          msg="- non-blocking mode not yet implemented", &
+          msg="non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
@@ -1965,8 +1965,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(syncflag)) then
       if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-            msg="- non-blocking mode not yet implemented", &
-            ESMF_CONTEXT, rcToReturn=rc)
+          msg="non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
     endif
@@ -2102,7 +2102,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(syncflag)) then
       if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          msg="- non-blocking mode not yet implemented", &
+          msg="non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
@@ -2162,7 +2162,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(syncflag)) then
       if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          msg="- non-blocking mode not yet implemented", &
+          msg="non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
@@ -2221,7 +2221,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(syncflag)) then
       if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          msg="- non-blocking mode not yet implemented", &
+          msg="non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
@@ -2282,7 +2282,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(syncflag)) then
       if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          msg="- non-blocking mode not yet implemented", &
+          msg="non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
@@ -2343,7 +2343,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(syncflag)) then
       if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          msg="- non-blocking mode not yet implemented", &
+          msg="non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
@@ -2481,7 +2481,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(syncflag)) then
       if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          msg="- non-blocking mode not yet implemented", &
+          msg="non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
@@ -2540,7 +2540,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(syncflag)) then
       if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          msg="- non-blocking mode not yet implemented", &
+          msg="non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
@@ -2599,7 +2599,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(syncflag)) then
       if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          msg="- non-blocking mode not yet implemented", &
+          msg="non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
@@ -2658,7 +2658,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(syncflag)) then
       if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          msg="- non-blocking mode not yet implemented", &
+          msg="non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
@@ -2805,7 +2805,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(syncflag)) then
       if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          msg="- non-blocking mode not yet implemented", &
+          msg="non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
@@ -2866,7 +2866,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(syncflag)) then
       if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          msg="- non-blocking mode not yet implemented", &
+          msg="non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
@@ -2927,7 +2927,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(syncflag)) then
       if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          msg="- non-blocking mode not yet implemented", &
+          msg="non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
@@ -2988,7 +2988,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(syncflag)) then
       if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          msg="- non-blocking mode not yet implemented", &
+          msg="non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
@@ -3054,7 +3054,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(syncflag)) then
       if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          msg="- non-blocking mode not yet implemented", &
+          msg="non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
@@ -3115,7 +3115,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(syncflag)) then
       if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          msg="- non-blocking mode not yet implemented", &
+          msg="non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
@@ -4805,19 +4805,38 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
-    ! Call into the C++ interface.
-    call c_ESMC_VMGet(vm, localPet, petCount, peCount, ssiCount, &
-      ssiMinPetCount, ssiMaxPetCount, ssiLocalPetCount, mpiCommunicator, &
-      pthreadsEnabledFlagArg, openMPEnabledFlagArg, &
-      ssiSharedMemoryEnabledFlagArg, localrc)
-    if (present (pthreadsEnabledFlag))  &
-      pthreadsEnabledFlag = pthreadsEnabledFlagArg
-    if (present (openMPEnabledFlag))  &
-      openMPEnabledFlag = openMPEnabledFlagArg
-    if (present (ssiSharedMemoryEnabledFlag))  &
-      ssiSharedMemoryEnabledFlag = ssiSharedMemoryEnabledFlagArg
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (vm%this /= ESMF_NULL_POINTER) then
+      ! Call into the C++ interface.
+      call c_ESMC_VMGet(vm, localPet, petCount, peCount, ssiCount, &
+        ssiMinPetCount, ssiMaxPetCount, ssiLocalPetCount, mpiCommunicator, &
+        pthreadsEnabledFlagArg, openMPEnabledFlagArg, &
+        ssiSharedMemoryEnabledFlagArg, localrc)
+      if (present (pthreadsEnabledFlag))  &
+        pthreadsEnabledFlag = pthreadsEnabledFlagArg
+      if (present (openMPEnabledFlag))  &
+        openMPEnabledFlag = openMPEnabledFlagArg
+      if (present (ssiSharedMemoryEnabledFlag))  &
+        ssiSharedMemoryEnabledFlag = ssiSharedMemoryEnabledFlagArg
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      ! Only very specific cases are supported for a NULL this pointer
+      if (present(localPet) .or. present(petCount) .or. present(peCount) .or. &
+        present(ssiCount) .or. present(ssiMinPetCount) .or. &
+        present(ssiMaxPetCount) .or. present(ssiLocalPetCount) .or. &
+        present(pthreadsEnabledFlag) .or. present(openMPEnabledFlag) .or. &
+        present(ssiSharedMemoryEnabledFlag)) then
+        call ESMF_LogSetError(ESMF_RC_PTR_NULL, &
+          msg="Not a valid pointer to VM", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+      if (present(mpiCommunicator)) then
+        call c_ESMC_VMGetMpiCommNull(mpiCommunicator, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+    endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -6107,7 +6126,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(syncflag)) then
       if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          msg="- non-blocking mode not yet implemented", &
+          msg="non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
@@ -6169,7 +6188,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(syncflag)) then
       if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          msg="- non-blocking mode not yet implemented", &
+          msg="non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
@@ -6231,7 +6250,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(syncflag)) then
       if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          msg="- non-blocking mode not yet implemented", &
+          msg="non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
@@ -6293,7 +6312,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(syncflag)) then
       if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          msg="- non-blocking mode not yet implemented", &
+          msg="non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
@@ -9609,7 +9628,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(syncflag)) then
       if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          msg="- non-blocking mode not yet implemented", &
+          msg="non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
@@ -9676,7 +9695,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Not implemented features
     if (.not. blocking) then
       call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-        msg="- non-blocking mode not yet implemented", &
+        msg="non-blocking mode not yet implemented", &
         ESMF_CONTEXT, rcToReturn=rc)
       return
     endif

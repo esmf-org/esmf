@@ -185,6 +185,7 @@ module ESMF_MeshMod
 ! !PUBLIC MEMBER FUNCTIONS:
 
 ! - ESMF-public methods:
+  public assignment(=)
   public operator(==)
   public operator(/=)
 
@@ -249,6 +250,14 @@ module ESMF_MeshMod
      module procedure ESMF_MeshCreateFromGrid
    end interface
 
+!------------------------------------------------------------------------------
+!BOPI
+! !INTERFACE:
+      interface assignment (=)
+         module procedure ESMF_MeshLocToInt
+         module procedure ESMF_IntToMeshLoc
+      end interface
+!
 !------------------------------------------------------------------------------
 !BOPI
 ! !INTERFACE:
@@ -452,6 +461,18 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+
+subroutine ESMF_MeshLocToInt(lhsInt, rhsMeshLoc)
+  integer,                   intent(out) :: lhsInt
+  type(ESMF_MeshLoc),        intent(in)  :: rhsMeshLoc
+  lhsInt = rhsMeshLoc%meshloc
+end subroutine
+
+subroutine ESMF_IntToMeshLoc(lhsMeshLoc, rhsInt)
+  type(ESMF_MeshLoc),        intent(out) :: lhsMeshLoc
+  integer,                   intent(in)  :: rhsInt
+  lhsMeshLoc = ESMF_MeshLoc(rhsInt)
+end subroutine
 
 !-------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -5455,12 +5476,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out) , optional            :: rc
 !
 ! !DESCRIPTION:
+!   This method is only temporary. It was created to enable testing during the stage in ESMF development while 
+!   we have two internal mesh implementations. At some point it will be removed. 
+!
 !   This method can be employed to turn on or off using the MOAB library
 !   to hold the internal structure of the Mesh. When set to .true. the following
 !   Mesh create calls create a Mesh using MOAB internally. When set to .false. the following
 !   Mesh create calls use the ESMF native internal mesh respresentation. Note that ESMF Meshes
 !   created on MOAB are only supported in a limited set of operations and should be used
 !   with caution as they haven't yet been tested as thoroughly as the native version.
+!   Also, operations that use a pair of Meshes (e.g. regrid weight generation) are only supported between
+!   meshes of the same type (e.g. you can regrid between two MOAB meshes, but not between a MOAB and
+!   a native mesh). 
 !
 !   \begin{description}
 !   \item [moabOn]

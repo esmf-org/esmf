@@ -192,6 +192,10 @@ ifndef ESMF_SHARED_LIB_BUILD
 export ESMF_SHARED_LIB_BUILD = default
 endif
 
+ifndef ESMF_TRACE_LIB_BUILD
+export ESMF_TRACE_LIB_BUILD = default
+endif
+
 ifndef ESMF_FORTRANSYMBOLS
 export ESMF_FORTRANSYMBOLS = default
 endif
@@ -408,6 +412,10 @@ ifneq ($(ESMF_SHARED_LIB_BUILD),OFF)
 export ESMF_SHARED_LIB_BUILD = ON
 endif
 
+ifneq ($(ESMF_TRACE_LIB_BUILD),OFF)
+export ESMF_TRACE_LIB_BUILD = ON
+endif
+
 ifneq ($(ESMF_TESTCOMPTUNNEL),OFF)
 export ESMF_TESTCOMPTUNNEL = ON
 endif
@@ -481,7 +489,7 @@ export ESMF_INSTALL_LIBDIR_ABSPATH = $(ESMF_INSTALL_LIBDIR)
 endif
 
 ifndef ESMF_INSTALL_BINDIR
-ESMF_INSTALL_BINDIR := bin/bin$(ESMF_BOPT)/$(ESMF_OS).$(ESMF_COMPILER).$(ESMF_ABI).$(ESMF_COMM).$(ESMF_SITE)
+ESMF_INSTALL_BINDIR = bin/bin$(ESMF_BOPT)/$(ESMF_OS).$(ESMF_COMPILER).$(ESMF_ABI).$(ESMF_COMM).$(ESMF_SITE)
 endif
 pathtype := $(shell $(ESMF_DIR)/scripts/pathtype $(ESMF_INSTALL_BINDIR))
 ifeq ($(pathtype),rel)
@@ -1618,7 +1626,7 @@ endif
 endif
 
 ifneq ($(ESMF_CXXSTD),default)
-ESMF_CXXCOMPILEOPTS  += -std=c++$(ESMF_CXXSTD)
+ESMF_CXXCOMPILEOPTS  += -std=c++$(ESMF_CXXSTD) -DESMF_CXXSTD=$(ESMF_CXXSTD)
 endif
 
 #-------------------------------------------------------------------------------
@@ -2000,7 +2008,7 @@ ifneq ($(strip $(ESMF_SL_LIBS_TO_MAKE)),)
 endif
 
 build_tracelibs:
-ifeq ($(ESMF_TESTTRACE),ON)
+ifeq ($(ESMF_TRACE_LIB_BUILD),ON)
 	cd $(ESMF_DIR)/src/Infrastructure/Trace/preload ;\
 	$(MAKE) tracelib_static
 ifeq ($(ESMF_TRACE_BUILD_SHARED),ON)

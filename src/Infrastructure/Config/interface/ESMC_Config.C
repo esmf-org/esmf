@@ -60,10 +60,18 @@ extern "C" {
 
   void FTN_X(f_esmf_configdestroy)(ESMCI_Config* config, int* rc);
 
+  void FTN_X(f_esmf_configcreatefromsection)(ESMCI_Config* config,
+    ESMCI_Config* configin, const char* olabel, const char* clabel, int* rc,
+    ESMCI_FortranStrLenArg olen, ESMCI_FortranStrLenArg clen);
+
   void FTN_X(f_esmf_configloadfile)(ESMCI_Config* config, const char* fname,
     int* unique, int* rc, ESMCI_FortranStrLenArg flen);
 
   void FTN_X(f_esmf_configfindlabel)(ESMCI_Config* config, const char* label,
+    ESMC_Logical *isPresent, int* rc,
+    ESMCI_FortranStrLenArg llen);
+
+  void FTN_X(f_esmf_configfindnextlabel)(ESMCI_Config* config, const char* label,
     ESMC_Logical *isPresent, int* rc,
     ESMCI_FortranStrLenArg llen);
 
@@ -87,6 +95,8 @@ extern "C" {
 
   void FTN_X(f_esmf_configvalidate)(ESMCI_Config* config, char* options, int* rc,
     ESMCI_FortranStrLenArg olen);
+
+  void FTN_X(f_esmf_configprint)(ESMCI_Config* config, int* rc);
 
   void FTN_X(f_esmf_configvalidatenooptions)(ESMCI_Config* config, int* rc);
 
@@ -292,6 +302,99 @@ int ESMC_ConfigDestroy(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_ConfigCreateFromSection()"
+//BOP
+// !IROUTINE:  ESMC_ConfigCreateFromSection - Create a Config object from section
+//
+// !INTERFACE:
+ESMC_Config ESMC_ConfigCreateFromSection(
+//
+// !RETURN VALUE:
+//  ESMC_Config*  to newly allocated ESMC_Config
+//
+// !ARGUMENTS:
+//
+  ESMC_Config configin,      // in  - ESMC_Config object
+  const char* openlabel,     // in  - section opening label
+  const char* closelabel,    // in  - section closing label
+  int* rc                    // out - return code
+  ) {
+//
+// !DESCRIPTION:
+//   Instantiates an {\tt ESMC\_Config} object from a section of an existing
+//   {\tt ESMC\_Config} object delimited by {\tt openlabel} and {\tt closelabel}.
+//   An error is returned if neither of the input labels is found in input
+//   {\tt configin}.
+//
+//   Note that a section is intended as the content of a given {\tt ESMC\_Config}
+//   object delimited by two distinct labels. Such content, as well as each of the
+//   surrounding labels, are still within the scope of the parent {\tt ESMC\_Config}
+//   object. Therefore, including in a section labels used outside that
+//   section should be done carefully to prevent parsing conflicts.
+//
+//   The arguments are:
+//   \begin{description}
+//     \item[configin]
+//       The input {\tt ESMC\_Config} object.
+//     \item[openlabel]
+//       Label marking the beginning of a section in {\tt config}.
+//     \item[closelabel]
+//       Label marking the end of a section in {\tt config}.
+//   \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // local vars
+  int localrc;                // local return code
+
+  // Initialize return code; assume routine not implemented
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+  localrc = ESMC_RC_NOT_IMPL;
+
+  ESMC_Config config;
+  config.ptr = NULL;  // initialize
+
+  // return with errors for NULL pointer
+  if (configin.ptr == ESMC_NULL_POINTER) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid pointer to Config", ESMC_CONTEXT, rc);
+    return config;
+  }
+
+  // allocate the new Config object
+  ESMCI_Config* configp;
+  try{
+    configp = new ESMCI_Config;
+  }catch(...){
+     // allocation error
+     ESMC_LogDefault.MsgAllocError("for new ESMCI_Config.", ESMC_CONTEXT, rc);
+     return config;
+  }
+
+  // typecase into ESMCI type
+  ESMCI_Config *configinp = (ESMCI_Config*)(configin.ptr);
+
+  // call into Fortran interface
+  FTN_X(f_esmf_configcreatefromsection)(configp, configinp, openlabel, closelabel,
+    &localrc, strlen (openlabel), strlen (closelabel));
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) {
+    delete configp;
+    return config;
+  }
+
+  // set return code for this branch
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+  // final return
+  config.ptr = (void*)configp;
+  return config;
+
+} // end ESMC_ConfigCreateFromSection
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_ConfigLoadFile()"
 //BOP
 // !IROUTINE:  ESMC_ConfigLoadFile - Load resource file into memory
@@ -485,6 +588,86 @@ int ESMC_ConfigFindLabel(
 } // end ESMC_ConfigFindLabel
 //-----------------------------------------------------------------------------
 
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_ConfigFindNextLabel()"
+//BOP
+// !IROUTINE:  ESMC_ConfigFindLabel - Find a label staring from current position
+//
+// !INTERFACE:
+int ESMC_ConfigFindNextLabel(
+//
+// !RETURN VALUE:
+//  int error return code
+//  Equals {\tt ESMF\_SUCCESS} if there are no errors.
+//  If the {\tt isPresent} argument is set to {\tt NULL},
+//  and the label is not found, an error is returned.
+//
+// !ARGUMENTS:
+  ESMC_Config config,        // in  - ESMC_Config object
+  const char* label,         // in  - label
+  int *isPresent             // out - label presence flag
+  ) {
+//
+// !DESCRIPTION: Finds the {\tt label} (key) string in the {\tt config} object,
+//   starting from the current position pointer.
+//
+//   This method is equivalent to {\tt ESMC\_ConfigFindLabel}, but the search
+//   is performed starting from the current position pointer.
+//
+//   The arguments are:
+//   \begin{description}
+//   \item [config]
+//     Already created {\tt ESMC\_Config} object.
+//   \item [label]
+//     Identifying label.
+//   \item [isPresent]
+//     If non-NULL, the address specified is given a value of 1 if the
+//     label is found, and 0 when the label is not found.
+//   \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // local vars
+  int rc;                     // return code
+  int localrc;                // local return code
+
+  // Initialize return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+  localrc = ESMC_RC_NOT_IMPL;
+
+  // return with errors for NULL pointer
+  if (config.ptr == ESMC_NULL_POINTER) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid pointer to Config", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+  // typecase into ESMCI type
+  ESMCI_Config *configp = (ESMCI_Config*)(config.ptr);
+
+  // call Fortran interface
+  ESMC_Logical Fpresent;
+  FTN_X(f_esmf_configfindnextlabel)(configp, label,
+      &Fpresent, &localrc, strlen (label));
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) {
+    if (isPresent != NULL)
+      *isPresent = 0;
+    return rc;
+  }
+  if (isPresent != NULL)
+    *isPresent = Fpresent == ESMF_TRUE;
+
+  // set return code for this branch
+  rc = ESMF_SUCCESS;
+
+  // final return
+  return rc;
+
+} // end ESMC_ConfigFindNextLabel
+//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -918,6 +1101,70 @@ int ESMC_ConfigNextLine(
 } // end ESMC_ConfigGetDim
 //-----------------------------------------------------------------------------
 
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_ConfigPrint()"
+//BOP
+// !IROUTINE:  ESMC_ConfigPrint - Write content of a Config object to standard output
+//
+// !INTERFACE:
+int ESMC_ConfigPrint(
+//
+// !RETURN VALUE:
+//  int error return code
+//  Equals {\tt ESMF\_SUCCESS} if there are no errors.
+//  Equals {\tt ESMF\_RC\_ATTR\_UNUSED} if any unused attributes are found
+//  with option "unusedAttributes" below.
+//
+// !ARGUMENTS:
+  ESMC_Config config         // in  - ESMC_Config object
+  ) {
+//
+// !DESCRIPTION:
+//   Write content of a {\tt ESMC\_Config} object to standard output.
+//
+//   The arguments are:
+//   \begin{description}
+//   \item [config]
+//     Already created {\tt ESMC\_Config} object.
+//   \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // local vars
+  int rc;                     // return code
+  int localrc;                // local return code
+
+  // Initialize return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+  localrc = ESMC_RC_NOT_IMPL;
+
+  // return with errors for NULL pointer
+  if (config.ptr == ESMC_NULL_POINTER) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid pointer to Config", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+  // typecase into ESMCI type
+  ESMCI_Config *configp = (ESMCI_Config*)(config.ptr);
+
+  // call into Fortran interface
+  FTN_X(f_esmf_configprint)(configp, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) {
+    return rc;
+  }
+
+  // set return code for this branch
+  rc = ESMF_SUCCESS;
+
+  // final return
+  return rc;
+
+} // end ESMC_ConfigPrint
+//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD

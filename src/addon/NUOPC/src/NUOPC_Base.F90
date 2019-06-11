@@ -1632,7 +1632,7 @@ module NUOPC_Base
 !EOPI
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR)            :: attrList(17)
+    character(ESMF_MAXSTR)            :: attrList(19)
     character(ESMF_MAXSTR)            :: tempString
     logical                           :: accepted
     integer                           :: i
@@ -1660,6 +1660,8 @@ module NUOPC_Base
     attrList(15)= "ArbDimCount"
     attrList(16)= "MinIndex"
     attrList(17)= "MaxIndex"
+    attrList(18)= "TypeKind"
+    attrList(19)= "GeomLoc"   ! either staggerloc or meshloc
     
     ! add Attribute packages
     call ESMF_AttributeAdd(field, convention="ESG", purpose="General", rc=localrc)

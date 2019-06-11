@@ -1302,8 +1302,9 @@ interface operator (/=)
 end interface
 
 interface assignment (=)
+  module procedure ESMF_TypeKindToInt
+  module procedure ESMF_IntToTypeKind
   module procedure ESMF_bfas
-  module procedure ESMF_dkas
   module procedure ESMF_dkas_string
   module procedure ESMF_tfas
   module procedure ESMF_tfas_v
@@ -1521,12 +1522,21 @@ function ESMF_dkne(dk1, dk2)
  ESMF_dkne = (dk1%dkind /= dk2%dkind)
 end function
 
-subroutine ESMF_dkas(intval, dkval)
- integer, intent(out) :: intval
- type(ESMF_TypeKind_Flag), intent(in) :: dkval
+!------------------------------------------------------------------------------
+! TypeKind assignments
 
- intval = dkval%dkind
+subroutine ESMF_TypeKindToInt(lhsInt, rhsTypeKind)
+  integer,                   intent(out) :: lhsInt
+  type(ESMF_TypeKind_Flag),  intent(in)  :: rhsTypeKind
+  lhsInt = rhsTypeKind%dkind
 end subroutine
+
+subroutine ESMF_IntToTypeKind(lhsTypeKind, rhsInt)
+  type(ESMF_TypeKind_Flag),  intent(out) :: lhsTypeKind
+  integer,                   intent(in)  :: rhsInt
+  lhsTypeKind = ESMF_TypeKind_Flag(rhsInt)
+end subroutine
+
 
 !------------------------------------------------------------------------------
 ! subroutine to assign string value of an ESMF_TypeKind_Flag
@@ -1574,7 +1584,7 @@ end subroutine
 
 
 !------------------------------------------------------------------------------
-! function to compare two ESMF_Sync_Flags
+! function to assign ESMF_Sync_Flags
 
 subroutine ESMF_bfas(bf1, bf2)
  type(ESMF_Sync_Flag), intent(out) :: bf1

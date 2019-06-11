@@ -22,7 +22,7 @@ CLOBBERDIRS =
 
 include $(ESMF_DIR)/makefile
 
-ESMF_CPPDEFAULT             = gcc -E -P -x c -C -w
+#ESMF_CPPDEFAULT             = gcc -E -P -x c -C -w
 
 DIRS	  = 
 

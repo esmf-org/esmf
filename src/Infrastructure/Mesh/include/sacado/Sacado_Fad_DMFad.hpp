@@ -1,45 +1,60 @@
-// $Id$ 
 // @HEADER
 // ***********************************************************************
-// 
+//
 //                           Sacado Package
 //                 Copyright (2006) Sandia Corporation
-// 
+//
 // Under the terms of Contract DE-AC04-94AL85000 with Sandia Corporation,
 // the U.S. Government retains certain rights in this software.
-// 
+//
 // This library is free software; you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as
 // published by the Free Software Foundation; either version 2.1 of the
 // License, or (at your option) any later version.
-//  
+//
 // This library is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // Lesser General Public License for more details.
-//  
+//
 // You should have received a copy of the GNU Lesser General Public
 // License along with this library; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+// Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301
 // USA
 // Questions? Contact David M. Gay (dmgay@sandia.gov) or Eric T. Phipps
 // (etphipp@sandia.gov).
-// 
+//
 // ***********************************************************************
 // @HEADER
 
 #ifndef SACADO_FAD_DMFAD_HPP
 #define SACADO_FAD_DMFAD_HPP
 
+#include "Sacado_ConfigDefs.h"
+
+#ifdef SACADO_NEW_FAD_DESIGN_IS_DEFAULT
+
+#include "Sacado_Fad_MemPoolStorage.hpp" // For Fad::MemPoolStorage<> alias
+#include "Mesh/include/sacado/new_design/Sacado_Fad_Exp_DMFad.hpp"
+
+namespace Sacado {
+  namespace Fad {
+    template <typename T>
+    using DMFad = Exp::GeneralFad< Exp::MemPoolStorage<T> >;
+  }
+}
+
+#else
+
 #include "Sacado_Fad_GeneralFadExpr.hpp"
-#include "Sacado_Fad_MemPoolStorage.hpp"
 #include "Sacado_Fad_DMFadTraits.hpp"
+#include "Sacado_Fad_MemPoolStorage.hpp"
 
 namespace Sacado {
 
   namespace Fad {
 
-    /*! 
+    /*!
      * \brief Forward-mode AD class using dynamic memory allocation and
      * expression templates.
      */
@@ -48,124 +63,31 @@ namespace Sacado {
      * memory allocation, and is appropriate for whenever the number
      * of derivative components is not known at compile time.  The user
      * interface is provided by Sacado::Fad::GeneralFad.
-     *
-     * The class is templated on two types, \c ValueT and \c ScalarT.  Type
-     * \c ValueT is the type for values the derivative class holds, while
-     * type \c ScalarT is the type of basic scalars in the code being
-     * differentiated (usually \c doubles).  When computing first derivatives, 
-     * these two types are generally the same,  However when computing
-     * higher derivatives, \c ValueT may be DFad<double> while \c ScalarT will
-     * still be \c double.  Usually \c ScalarT does not need to be explicitly
-     * specified since it can be deduced from \c ValueT through the template
-     * metafunction ScalarValueType.
      */
-    template <typename ValueT, 
-	      typename ScalarT = typename ScalarValueType<ValueT>::type >
+    template <typename ValueT>
     class DMFad : public Expr< GeneralFad<ValueT,MemPoolStorage<ValueT> > > {
 
     public:
 
-      /*!
-       * @name Initialization methods
-       */
-      //@{
+      //! Base classes
+      typedef MemPoolStorage<ValueT> StorageType;
+      typedef GeneralFad<ValueT,StorageType> GeneralFadType;
+      typedef Expr<GeneralFadType> ExprType;
 
-      //! Default constructor.
-      /*!
-       * Initializes value to 0 and derivative array is empty
-       */
-      DMFad() : 
-	Expr< GeneralFad< ValueT,MemPoolStorage<ValueT> > >() {}
+      //! Typename of values
+      typedef typename ExprType::value_type value_type;
 
-      //! Constructor with supplied value \c x of type ValueT
-      /*!
-       * Initializes value to \c x and derivative array is empty
-       */
-      DMFad(const ValueT& x) : 
-	Expr< GeneralFad< ValueT,MemPoolStorage<ValueT> > >(x) {}
+      //! Typename of scalar's (which may be different from value_type)
+      typedef typename ExprType::scalar_type scalar_type;
 
-      //! Constructor with supplied value \c x of type ScalarT
-      /*!
-       * Initializes value to \c ValueT(x) and derivative array is empty
-       */
-      DMFad(const ScalarT& x) : 
-	Expr< GeneralFad< ValueT,MemPoolStorage<ValueT> > >(ValueT(x)) {}
+      //! Typename of scalar's (which may be different from ValueT)
+      typedef typename ScalarType<ValueT>::type ScalarT;
 
-      //! Constructor with size \c sz and value \c x
-      /*!
-       * Initializes value to \c x and derivative array 0 of length \c sz
-       */
-      DMFad(const int sz, const ValueT& x) : 
-	Expr< GeneralFad< ValueT,MemPoolStorage<ValueT> > >(sz,x) {}
-
-      //! Constructor with size \c sz, index \c i, and value \c x
-      /*!
-       * Initializes value to \c x and derivative array of length \c sz
-       * as row \c i of the identity matrix, i.e., sets derivative component
-       * \c i to 1 and all other's to zero.
-       */
-      DMFad(const int sz, const int i, const ValueT & x) : 
-	Expr< GeneralFad< ValueT,MemPoolStorage<ValueT> > >(sz,i,x) {}
-
-      //! Copy constructor
-      DMFad(const DMFad& x) : 
-	Expr< GeneralFad< ValueT,MemPoolStorage<ValueT> > >(x) {}
-
-      //! Copy constructor from any Expression object
-      template <typename S> DMFad(const Expr<S>& x) : 
-	Expr< GeneralFad< ValueT,MemPoolStorage<ValueT> > >(x) {}
-
-      //@}
-
-      //! Destructor
-      ~DMFad() {}
-
-      //! Assignment operator with constant right-hand-side
-      DMFad& operator=(const ValueT& val) {
-	GeneralFad< ValueT,MemPoolStorage<ValueT> >::operator=(val);
-	return *this;
-      }
-
-      //! Assignment operator with constant right-hand-side
-      DMFad& operator=(const ScalarT& val) {
-	GeneralFad< ValueT,MemPoolStorage<ValueT> >::operator=(ValueT(val));
-	return *this;
-      }
-
-      //! Assignment operator with DMFad right-hand-side
-      DMFad& operator=(const DMFad& x) {
-	GeneralFad< ValueT,MemPoolStorage<ValueT> >::operator=(static_cast<const GeneralFad< ValueT,MemPoolStorage<ValueT> >&>(x));
-	return *this;
-      }
-
-      //! Assignment operator with any expression right-hand-side
-      template <typename S> DMFad& operator=(const Expr<S>& x) 
-      {
-	GeneralFad< ValueT,MemPoolStorage<ValueT> >::operator=(x);
-	return *this;
-      }
-
-      //! Set the default memory pool for new objects
-      static void setDefaultPool(MemPool* pool) {
-	MemPoolStorage<ValueT>::defaultPool_ = pool;
-      }
-	
-    }; // class DMFad<ScalarT,ValueT>
-
-    /*! 
-     * \brief Forward-mode AD class using dynamic memory allocation and
-     * expression templates.
-     */
-    /*!
-     * This is the specialization of DMFad<ValueT,ScalarT> for when
-     * \c ValueT and \c ScalarT are the same type.  It removes an extra
-     * constructor that would be duplicated in this case.
-     */
-    template <typename ValueT>
-    class DMFad<ValueT,ValueT> : 
-      public Expr< GeneralFad<ValueT,MemPoolStorage<ValueT> > > {
-
-    public:
+      //! Turn DMFad into a meta-function class usable with mpl::apply
+      template <typename T>
+      struct apply {
+        typedef DMFad<T> type;
+      };
 
       /*!
        * @name Initialization methods
@@ -176,22 +98,23 @@ namespace Sacado {
       /*!
        * Initializes value to 0 and derivative array is empty
        */
-      DMFad() : 
-	Expr< GeneralFad< ValueT,MemPoolStorage<ValueT> > >() {}
+      DMFad() :
+        ExprType() {}
 
-      //! Constructor with supplied value \c x of type ValueT
+      //! Constructor with supplied value \c x convertible to ValueT
       /*!
-       * Initializes value to \c x and derivative array is empty
+       * Initializes value to \c ValueT(x) and derivative array is empty.
        */
-      DMFad(const ValueT& x) : 
-	Expr< GeneralFad< ValueT,MemPoolStorage<ValueT> > >(x) {}
+      template <typename S>
+      DMFad(const S& x, SACADO_ENABLE_VALUE_CTOR_DECL) :
+        ExprType(x) {}
 
       //! Constructor with size \c sz and value \c x
       /*!
        * Initializes value to \c x and derivative array 0 of length \c sz
        */
-      DMFad(const int sz, const ValueT& x) : 
-	Expr< GeneralFad< ValueT,MemPoolStorage<ValueT> > >(sz,x) {}
+      DMFad(const int sz, const ValueT& x, const DerivInit zero_out = InitDerivArray) :
+        ExprType(sz,x,zero_out) {}
 
       //! Constructor with size \c sz, index \c i, and value \c x
       /*!
@@ -199,16 +122,17 @@ namespace Sacado {
        * as row \c i of the identity matrix, i.e., sets derivative component
        * \c i to 1 and all other's to zero.
        */
-      DMFad(const int sz, const int i, const ValueT& x) : 
-	Expr< GeneralFad< ValueT,MemPoolStorage<ValueT> > >(sz,i,x) {}
+      DMFad(const int sz, const int i, const ValueT & x) :
+        ExprType(sz,i,x) {}
 
       //! Copy constructor
-      DMFad(const DMFad& x) : 
-	Expr< GeneralFad< ValueT,MemPoolStorage<ValueT> > >(x) {}
+      DMFad(const DMFad& x) :
+        ExprType(x) {}
 
       //! Copy constructor from any Expression object
-      template <typename S> DMFad(const Expr<S>& x) : 
-	Expr< GeneralFad< ValueT,MemPoolStorage<ValueT> > >(x) {}
+      template <typename S>
+      DMFad(const Expr<S>& x, SACADO_ENABLE_EXPR_CTOR_DECL) :
+        ExprType(x) {}
 
       //@}
 
@@ -216,33 +140,163 @@ namespace Sacado {
       ~DMFad() {}
 
       //! Assignment operator with constant right-hand-side
-      DMFad& operator=(const ValueT& val) {
-	GeneralFad< ValueT,MemPoolStorage<ValueT> >::operator=(val);
-	return *this;
+      template <typename S>
+      SACADO_ENABLE_VALUE_FUNC(DMFad&) operator=(const S& v) {
+        GeneralFadType::operator=(v);
+        return *this;
       }
 
       //! Assignment operator with DMFad right-hand-side
       DMFad& operator=(const DMFad& x) {
-	GeneralFad< ValueT,MemPoolStorage<ValueT> >::operator=(static_cast<const GeneralFad< ValueT,MemPoolStorage<ValueT> >&>(x));
-	return *this;
+        GeneralFadType::operator=(static_cast<const GeneralFadType&>(x));
+        return *this;
       }
 
       //! Assignment operator with any expression right-hand-side
-      template <typename S> DMFad& operator=(const Expr<S>& x) 
+      template <typename S>
+      SACADO_ENABLE_EXPR_FUNC(DMFad&) operator=(const Expr<S>& x)
       {
-	GeneralFad< ValueT,MemPoolStorage<ValueT> >::operator=(x);
-	return *this;
+        GeneralFadType::operator=(x);
+        return *this;
       }
 
       //! Set the default memory pool for new objects
       static void setDefaultPool(MemPool* pool) {
-	MemPoolStorage<ValueT>::defaultPool_ = pool;
+        MemPoolStorage<ValueT>::defaultPool_ = pool;
+      }
+
+      //! Addition-assignment operator with constant right-hand-side
+      template <typename S>
+      KOKKOS_INLINE_FUNCTION
+      SACADO_ENABLE_VALUE_FUNC(DMFad&) operator += (const S& x) {
+        GeneralFadType::operator+=(x);
+        return *this;
+      }
+
+      //! Subtraction-assignment operator with constant right-hand-side
+      template <typename S>
+      KOKKOS_INLINE_FUNCTION
+      SACADO_ENABLE_VALUE_FUNC(DMFad&) operator -= (const S& x) {
+        GeneralFadType::operator-=(x);
+        return *this;
+      }
+
+      //! Multiplication-assignment operator with constant right-hand-side
+      template <typename S>
+      KOKKOS_INLINE_FUNCTION
+      SACADO_ENABLE_VALUE_FUNC(DMFad&) operator *= (const S& x) {
+        GeneralFadType::operator*=(x);
+        return *this;
+      }
+
+      //! Division-assignment operator with constant right-hand-side
+      template <typename S>
+      KOKKOS_INLINE_FUNCTION
+      SACADO_ENABLE_VALUE_FUNC(DMFad&) operator /= (const S& x) {
+        GeneralFadType::operator/=(x);
+        return *this;
+      }
+
+      //! Addition-assignment operator with DMFad right-hand-side
+      DMFad& operator += (const DMFad& x) {
+        GeneralFadType::operator+=(static_cast<const GeneralFadType&>(x));
+        return *this;
+      }
+
+      //! Subtraction-assignment operator with DMFad right-hand-side
+      DMFad& operator -= (const DMFad& x) {
+        GeneralFadType::operator-=(static_cast<const GeneralFadType&>(x));
+        return *this;
+      }
+
+      //! Multiplication-assignment operator with DMFad right-hand-side
+      DMFad& operator *= (const DMFad& x) {
+        GeneralFadType::operator*=(static_cast<const GeneralFadType&>(x));
+        return *this;
+      }
+
+      //! Division-assignment operator with DMFad right-hand-side
+      DMFad& operator /= (const DMFad& x) {
+        GeneralFadType::operator/=(static_cast<const GeneralFadType&>(x));
+        return *this;
+      }
+
+      //! Addition-assignment operator with Expr right-hand-side
+      template <typename S>
+      KOKKOS_INLINE_FUNCTION
+      SACADO_ENABLE_EXPR_FUNC(DMFad&) operator += (const Expr<S>& x) {
+        GeneralFadType::operator+=(x);
+        return *this;
+      }
+
+      //! Subtraction-assignment operator with Expr right-hand-side
+      template <typename S>
+      KOKKOS_INLINE_FUNCTION
+      SACADO_ENABLE_EXPR_FUNC(DMFad&) operator -= (const Expr<S>& x) {
+        GeneralFadType::operator-=(x);
+        return *this;
+      }
+
+      //! Multiplication-assignment operator with Expr right-hand-side
+      template <typename S>
+      KOKKOS_INLINE_FUNCTION
+      SACADO_ENABLE_EXPR_FUNC(DMFad&) operator *= (const Expr<S>& x) {
+        GeneralFadType::operator*=(x);
+        return *this;
+      }
+
+      //! Division-assignment operator with Expr right-hand-side
+      template <typename S>
+      KOKKOS_INLINE_FUNCTION
+      SACADO_ENABLE_EXPR_FUNC(DMFad&) operator /= (const Expr<S>& x) {
+        GeneralFadType::operator/=(x);
+        return *this;
       }
 
     }; // class DMFad<ValueT>
 
+    template <typename T>
+    struct BaseExpr< GeneralFad<T,Fad::MemPoolStorage<T> > > {
+      typedef DMFad< typename GeneralFad<T,Fad::MemPoolStorage<T> >::value_type > type;
+    };
+
+    template <typename T>
+    struct ExprLevel< DMFad<T> > {
+      static const unsigned value =
+        ExprLevel< typename DFad<T>::value_type >::value + 1;
+    };
+
+    template <typename T>
+    struct IsFadExpr< DMFad<T> > {
+      static const bool value = true;
+    };
+
   } // namespace Fad
 
+  template <typename T>
+  struct IsExpr< Fad::DMFad<T> > {
+    static const bool value = true;
+  };
+
+  template <typename T>
+  struct BaseExprType< Fad::DMFad<T> > {
+    typedef typename Fad::DMFad<T>::base_expr_type type;
+  };
+
+  //! The View Fad type associated with this type
+  template< class ValueType, unsigned length, unsigned stride >
+  struct ViewFadType< Sacado::Fad::DMFad< ValueType >, length, stride > {
+    typedef Sacado::Fad::ViewFad< ValueType,length,stride,Sacado::Fad::DMFad<ValueType> > type;
+  };
+
+  //! The View Fad type associated with this type
+  template< class ValueType, unsigned length, unsigned stride >
+  struct ViewFadType< const Sacado::Fad::DMFad< ValueType >, length, stride > {
+    typedef Sacado::Fad::ViewFad< const ValueType,length,stride,Sacado::Fad::DMFad<const ValueType> > type;
+  };
+
 } // namespace Sacado
+
+#endif // SACADO_NEW_FAD_DESIGN_IS_DEFAULT
 
 #endif // SACADO_FAD_DMFAD_HPP

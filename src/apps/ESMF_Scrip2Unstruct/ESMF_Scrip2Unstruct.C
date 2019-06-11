@@ -396,6 +396,7 @@ int main(int argc, char** argv)
 #define MAX_GRID_RANK 2
   int grid_dims[MAX_GRID_RANK];
   int ogr_dimid, ogd_id;  
+  int corner360;
 
   ESMC_Initialize(&status, ESMC_ArgLast);
   vm = ESMC_VMGetGlobal(&status);
@@ -573,9 +574,11 @@ int main(int argc, char** argv)
     }
   }
 
+  corner360 = 0;
   // convert longitude to (0, 360) degrees
   for (i = 0; i < gcdim*gsdim; i++) {
     if (cornerlons[i] <= 0) {
+      corner360 = 1;
       cornerlons[i] += 360.0;
     }
     if (cornerlats[i] < minlat) minlat=cornerlats[i];
@@ -619,10 +622,22 @@ int main(int argc, char** argv)
   // this value will decide the maximal edges of the dual mesh
   nodelatlon = (double*)malloc(sizeof(double)*totalnodes*2);
   totalneighbors=(int*)calloc(totalnodes, sizeof(int));
-  for (i=0; i<totalnodes; i++) {
-    nodelatlon[i*2]=nodelons[i];
-    nodelatlon[i*2+1]=nodelats[i];
+  // if the original longitude is in (-180, 180), conver it back
+  if (corner360) {
+    for (i=0; i<totalnodes; i++) {
+      if (nodelons[i] > 180.0) 
+	nodelatlon[i*2]=nodelons[i]-360.0;
+      else
+	nodelatlon[i*2]=nodelons[i];
+      nodelatlon[i*2+1]=nodelats[i];
+    }
+  } else {
+    for (i=0; i<totalnodes; i++) {
+      nodelatlon[i*2]=nodelons[i];
+      nodelatlon[i*2+1]=nodelats[i];
+    }
   }
+
   free(nodelons);
   free(nodelats);
 
@@ -850,12 +865,14 @@ int main(int argc, char** argv)
 	      inbuf[i] *= rad2deg;
 	    }
 	  }
+	  /*  Keep it's original longitude, do not convert to (0, 360)
           // convert longitude to (0, 360)
 	  for (i=0; i<gsdim; i++) {
               if (inbuf[i] <= 0) {
 		inbuf[i] += 360.0;
 	      }
 	  }
+	  */
 	  if (doesmf) {
 	    // copy inbuf to inbuf1
 	    for (i=0; i<gsdim; i++) {
@@ -932,12 +949,12 @@ int main(int argc, char** argv)
     for (i=0; i<gsdim; i++) {
       inbuf1[i*2+1]=inbuf[i];
     }
-    status = nc_inq_varid(ncid1, "grid_center_lon", &ctlatid);
+    status = nc_inq_varid(ncid1, "grid_center_lon", &ctlonid);
     if (status != NC_NOERR) {
       fprintf(stderr, "grid_center_lon has to exist to create a dual mesh.\n");
       handle_error(status,__LINE__);
     }
-    status = nc_get_var_double(ncid1, ctlatid, inbuf);
+    status = nc_get_var_double(ncid1, ctlonid, inbuf);
     if (status != NC_NOERR) handle_error(status,__LINE__);
     // copy inbuf to inbuf1
     for (i=0; i<gsdim; i++) {
@@ -965,13 +982,15 @@ int main(int argc, char** argv)
     }
     free(inbuf);
 
+    /* Do not convert to (0, 360)
     // convert longitude to (0, 360) degrees
     for (i = 0; i < mypart; i++) {
       if (inbuf1[i*2] <= 0) {
 	inbuf1[i*2] += 360.0;
       }
     }
-    
+    */
+
     dualcells = (int*)malloc(sizeof(int)*maxconnection*totalnodes);
     dualcellcounts = (int*)malloc(sizeof(int)*totalnodes);
     for (i=0; i<totalnodes; i++)

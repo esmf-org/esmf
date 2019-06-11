@@ -500,7 +500,7 @@ extern "C" {
 #else
       *mpiCommunicator = (int)MPI_Comm_c2f(mpiCommTemp);
 #endif
-    }        
+    }
     if (ESMC_NOT_PRESENT_FILTER(pthreadsEnabledFlag) != ESMC_NULL_POINTER){
       if ((*ptr)->isPthreadsEnabled())
         *pthreadsEnabledFlag = ESMF_TRUE;
@@ -519,6 +519,25 @@ extern "C" {
         *ssiSharedMemoryEnabledFlag = ESMF_TRUE;
       else
         *ssiSharedMemoryEnabledFlag = ESMF_FALSE;
+    }
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_vmgetmpicommnull)(int *mpiCommunicator, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmgetmpicommnull()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    MPI_Comm mpiCommTemp;
+    // fill return values
+    if (ESMC_NOT_PRESENT_FILTER(mpiCommunicator) != ESMC_NULL_POINTER){
+      mpiCommTemp = MPI_COMM_NULL;
+#ifdef ESMF_DONT_HAVE_MPI_COMM_C2F
+      *mpiCommunicator = (int)(mpiCommTemp);
+#else
+      *mpiCommunicator = (int)MPI_Comm_c2f(mpiCommTemp);
+#endif
     }
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -1520,7 +1539,7 @@ extern "C" {
     }
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
-  }  
+  }
 
   void FTN_X(c_esmc_vmlogcurrentgarbageinfo)(char *prefix, int *rc,
     ESMCI_FortranStrLenArg prefix_l){

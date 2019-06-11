@@ -15,7 +15,7 @@
 #include <Mesh/include/Legacy/ESMCI_Quadrature.h>
 
 #include <Mesh/include/Legacy/ESMCI_Exception.h>
-#include <Mesh/include/sacado/Sacado.hpp>
+#include <Mesh/include/sacado/Sacado_No_Kokkos.hpp>
 
 #include <cmath>
 #include <map>
