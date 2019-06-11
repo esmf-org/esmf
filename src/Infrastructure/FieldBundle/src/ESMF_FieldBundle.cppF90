@@ -1013,14 +1013,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #define FieldBundleCreateGridDataPtrDoc() \
 !---------------------------------------------------------------------------- @\
 !BOP @\
-! !IROUTINE: ESMF_FieldBundleCreate - Create packed FieldBundle from Fortran array pointer and Grid @\
+! !IROUTINE: ESMF_FieldBundleCreate - Create a packed FieldBundle from Fortran array pointer and Grid @\
 ! @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldBundleCreate() @\
 ! function ESMF_FieldBundleCreateGrid<rank><type><kind>(fieldNameList, & @\
-!   farrayPtr, grid, fieldCountDim, keywordEnforcer, & @\
+!   farrayPtr, grid, fieldDim, keywordEnforcer, & @\
 !   indexflag, staggerLoc, & @\
-!   gridToFieldMap, ungriddedLbound, ungriddedUBound, & @\
+!   gridToFieldMap, & @\
 !   totalLWidth, totalUWidth, name, rc) @\
 ! @\
 ! !RETURN VALUE: @\
@@ -1030,13 +1030,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   character(len=*), intent(in)            :: fieldNameList(:) @\
 !   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: farrayPtr @\
 !   type(ESMF_Grid), intent(in)             :: grid @\
-!   integer,          intent(in)            :: fieldCountDim @\
+!   integer,          intent(in)            :: fieldDim @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
 !   type(ESMF_Index_Flag), intent(in), optional      :: indexflag @\
 !   type(ESMF_StaggerLoc), intent(in), optional      :: staggerloc @\
 !   integer,          intent(in),  optional :: gridToFieldMap(:) @\
-!   integer,          intent(in),  optional :: ungriddedLBound(:) @\
-!   integer,          intent(in),  optional :: ungriddedUBound:) @\
 !   integer,          intent(in),  optional :: totalLWidth(:) @\
 !   integer,          intent(in),  optional :: totalUWidth(:) @\
 !   integer,          intent(in),  optional :: name @\
@@ -1054,8 +1052,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Pre-allocated Fortran array pointer holding the memory of the list of Fields. @\
 ! \item [grid] @\
 !   The {\tt ESMF\_Grid} object on which the Fields in the packed FieldBundle are built. @\
-! \item [fieldCountDim] @\
-!   The dimension in the {\tt farrayPtr} that has the size of fieldCount. @\
+! \item [fieldDim] @\
+!   The dimension in the {\tt farrayPtr} that contains the indices of Fields to be packed. @\
 ! \item [{[indexflag]}] @\
 !       Indicate how DE-local indices are defined. See section @\
 !       \ref{const:indexflag} for a list of valid indexflag options. @\
@@ -1068,63 +1066,44 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       value is {\tt ESMF\_STAGGERLOC\_CENTER}. @\
 ! \item [{[gridToFieldMap]}] @\
 !       List with number of elements equal to the @\
-!       {\tt grid}|s dimCount.  The list elements map each dimension @\
-!       of the {\tt grid} to a dimension in the {\tt farray} by @\
-!       specifying the appropriate {\tt farray} dimension index. The default is to @\
+!       {\tt grid}|s dimCount. The list elements map each dimension @\
+!       of the {\tt grid} to a dimension in the {\tt farrayPtr} by @\
+!       specifying the appropriate {\tt farrayPtr} dimension index after the packed fieldDim is 
+!       removed from the {\tt farrayPtr}. The default is to @\
 !       map all of the {\tt grid}|s dimensions against the lowest dimensions of @\
-!       the {\tt farray} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../). @\
+!       the {\tt farrayPtr} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../). @\
 !       The values of all {\tt gridToFieldMap} entries must be greater than or equal @\
-!       to one and smaller than or equal to the {\tt farray} rank. @\
+!       to one and smaller than or equal to the {\tt farrayPtr} rank. @\
 !       It is erroneous to specify the same {\tt gridToFieldMap} entry @\
 !       multiple times. The total ungridded dimensions in the {\tt field} @\
-!       are the total {\tt farray} dimensions less @\
+!       are the total {\tt farrayPtr} dimensions less @\
 !       the total (distributed + undistributed) dimensions in @\
 !       the {\tt grid}.  Ungridded dimensions must be in the same order they are @\
-!       stored in the {\t farray}.  Permutations of the order of @\
+!       stored in the {\t farrayPtr}.  Permutations of the order of @\
 !       dimensions are handled via individual communication methods.  For example, @\
 !       an undistributed dimension can be remapped to a distributed dimension @\
 !       as part of the {\tt ESMF\_ArrayRedist()} operation. @\
 !       All Fields in packed FieldBundle use identical gridToFieldMap setting. @\
-! \item [{[ungriddedLBound]}] @\
-!       Lower bounds of the ungridded dimensions of the {\tt field}. @\
-!       The number of elements in the {\tt ungriddedLBound} is equal to the number of ungridded @\
-!       dimensions in the {\tt field}.  All ungridded dimensions of the @\
-!       {\tt field} are also undistributed. When field dimension count is @\
-!       greater than grid dimension count, both ungriddedLBound and ungriddedUBound @\
-!       must be specified. When both are specified the values are checked @\
-!       for consistency.  Note that the the ordering of @\
-!       these ungridded dimensions is the same as their order in the {\tt farray}. @\
-!       All Fields in packed FieldBundle use identical ungriddedLBound setting. @\
-! \item [{[ungriddedUBound]}] @\
-!       Upper bounds of the ungridded dimensions of the {\tt field}. @\
-!       The number of elements in the {\tt ungriddedUBound} is equal to the number of ungridded @\
-!       dimensions in the {\tt field}.  All ungridded dimensions of the @\
-!       {\tt field} are also undistributed. When field dimension count is @\
-!       greater than grid dimension count, both ungriddedLBound and ungriddedUBound @\
-!       must be specified. When both are specified the values are checked @\
-!       for consistency.  Note that the the ordering of @\
-!       these ungridded dimensions is the same as their order in the {\tt farray}. @\
-!       All Fields in packed FieldBundle use identical ungriddedUBound setting. @\
 ! \item [{[totalLWidth]}] @\
 !       Lower bound of halo region.  The size of this array is the number @\
 !       of gridded dimensions in the Field.  However, ordering of the elements @\
-!       needs to be the same as they appear in the {\tt farray}.  Values default @\
+!       needs to be the same as they appear in the {\tt farrayPtr}.  Values default @\
 !       to 0.  If values for totalLWidth are specified they must be reflected in @\
-!       the size of the {\tt farray}.  That is, for each gridded dimension the @\
-!       {\tt farray} size should be max( {\tt totalLWidth} + {\tt totalUWidth} @\
+!       the size of the {\tt farrayPtr}.  That is, for each gridded dimension the @\
+!       {\tt farrayPtr} size should be max( {\tt totalLWidth} + {\tt totalUWidth} @\
 !       + {\tt computationalCount}, {\tt exclusiveCount} ). @\
 !       All Fields in packed FieldBundle use identical totalLWidth setting. @\
 ! \item [{[totalUWidth]}] @\
 !       Upper bound of halo region.  The size of this array is the number @\
 !       of gridded dimensions in the Field.  However, ordering of the elements @\
-!       needs to be the same as they appear in the {\tt farray}.  Values default @\
+!       needs to be the same as they appear in the {\tt farrayPtr}.  Values default @\
 !       to 0.  If values for totalUWidth are specified they must be reflected in @\
-!       the size of the {\tt farray}.  That is, for each gridded dimension the @\
-!       {\tt farray} size should max( {\tt totalLWidth} + {\tt totalUWidth} @\
+!       the size of the {\tt farrayPtr}.  That is, for each gridded dimension the @\
+!       {\tt farrayPtr} size should max( {\tt totalLWidth} + {\tt totalUWidth} @\
 !       + {\tt computationalCount}, {\tt exclusiveCount} ). @\
 !       All Fields in packed FieldBundle use identical totalUWidth setting. @\
 ! \item [{[name]}]  @\
-!       Field name.  @\
+!       FieldBundle name.  @\
 ! \item [{[rc]}]  @\
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 ! \end{description} @\
@@ -1137,9 +1116,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldBundleCreateGridDataPtr" @\
   function ESMF_FieldBundleCreateGridDataPtr##mrank##D##mtypekind(fieldNameList, & @\
-   farrayPtr, grid, fieldCountDim, keywordEnforcer, & @\
+   farrayPtr, grid, fieldDim, keywordEnforcer, & @\
    indexflag, staggerLoc, & @\
-   gridToFieldMap, ungriddedLbound, ungriddedUBound, & @\
+   gridToFieldMap, & @\
    totalLWidth, totalUWidth, name, rc) @\
 @\
  ! return value @\
@@ -1149,13 +1128,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*), intent(in)            :: fieldNameList(:) @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farrayPtr @\
     type(ESMF_Grid), intent(in)             :: grid @\
-    integer,          intent(in)            :: fieldCountDim @\
+    integer,          intent(in)            :: fieldDim @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
     type(ESMF_Index_Flag), intent(in), optional      :: indexflag @\
     type(ESMF_StaggerLoc), intent(in), optional      :: staggerloc @\
     integer,          intent(in),  optional :: gridToFieldMap(:) @\
-    integer,          intent(in),  optional :: ungriddedLBound(:) @\
-    integer,          intent(in),  optional :: ungriddedUBound(:) @\
     integer,          intent(in),  optional :: totalLWidth(:) @\
     integer,          intent(in),  optional :: totalUWidth(:) @\
     character(len=*), intent(in),  optional :: name @\
@@ -1163,7 +1140,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
     ! local variables @\
     type(ESMF_FieldBundleType), pointer  :: this @\
-    integer          :: localrc @\
+    integer          :: gridDimCount, fieldCount @\
+    type(ESMF_Field) :: fieldList(1) @\
+    integer, allocatable   :: reducedIndices(:) @\
+    integer, allocatable   :: ig2fmap(:) @\
+    character(ESMF_MAXSTR) :: encodeName @\
+    integer          :: i, localrc @\
 @\
     if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
     localrc = ESMF_RC_NOT_IMPL @\
@@ -1171,6 +1153,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Initialize @\
     nullify(this) @\
     nullify(ESMF_FieldBundleCreateGridDataPtr##mrank##D##mtypekind%this) @\
+@\
+    if (size(fieldNameList) /= size(farrayPtr, fieldDim) ) then @\
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & @\
+        msg = " - size of fieldNameList is not equal to size of the fieldCount indicated", & @\
+        ESMF_CONTEXT, rcToReturn=rc) @\
+      return @\
+    endif @\
+    fieldCount = size(fieldNameList) @\
 @\
     ! Create the internal objects @\
     allocate(this, stat=localrc) @\
@@ -1203,6 +1193,41 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Set init code @\
     ESMF_INIT_SET_CREATED(ESMF_FieldBundleCreateGridDataPtr##mrank##D##mtypekind) @\
 @\
+    encodeName = fieldNameList(1) @\
+    do i = 2, size(fieldNameList) @\
+      write(encodeName, "(3A)") encodeName, ":", fieldNameList(i) @\
+    enddo @\
+ @\
+    ! Create an internal g2f map @\
+    if(present(gridToFieldMap)) then @\
+      allocate(ig2fmap(size(gridToFieldMap))) @\
+      do i = 1, size(gridToFieldMap) @\
+        if(gridToFieldMap(i) < fieldDim) then @\
+          ig2fmap(i) = gridToFieldMap(i) @\
+        else @\
+          ig2fmap(i) = gridToFieldMap(i)+1 @\
+        endif @\
+      enddo @\
+    else @\
+      call ESMF_GridGet(grid, gridDimCount, rc=rc) @\
+      allocate(ig2fmap(gridDimCount)) @\
+      do i = 1, gridDimCount @\
+        if(i < fieldDim) then @\
+          ig2fmap(i) = i @\
+        else @\
+          ig2fmap(i) = i+1 @\
+        endif @\
+      enddo @\
+    endif @\
+    print *, ig2fmap @\
+  @\
+    fieldList(1) = ESMF_FieldCreate(grid, farrayPtr, staggerloc=staggerloc, & @\
+    gridToFieldMap=ig2fmap, totalLWidth=totalLWidth, totalUWidth=totalUWidth, name=encodeName, rc=localrc) @\
+    if (ESMF_LogFoundError(localrc, & @\
+      ESMF_ERR_PASSTHRU, & @\
+      ESMF_CONTEXT, rcToReturn=rc)) return @\
+@\
+    deallocate(ig2fmap) @\
     if (present(rc)) rc = ESMF_SUCCESS @\
 @\
   end function ESMF_FieldBundleCreateGridDataPtr##mrank##D##mtypekind  @\
