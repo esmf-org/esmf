@@ -324,6 +324,79 @@ MeshCXX* MeshCXX::createFromFile(const char *filename, int fileTypeFlag,
 } // MeshCXX::createFromFile
 
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MeshCXX::createFromPtr()"
+MeshCXX* MeshCXX::createFromPtr(Mesh *meshp,
+                                int parametricDim,
+                                int spatialDim,
+                                ESMC_CoordSys_Flag coordSys,
+                                int *rc) {
+   MeshCXX* meshCXXp;
+   
+   // Initialize the parallel environment for mesh (if not already done)
+   {
+     int localrc;
+     ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                       ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+   }
+
+
+   // Create struct
+   meshCXXp = new MeshCXX();
+   (meshCXXp)->meshPointer = meshp;
+
+   // Set dimensions
+   meshCXXp->spatialDim=spatialDim;
+   meshCXXp->parametricDim=parametricDim;
+
+   // Set CoordSys
+   meshCXXp->coordSys=coordSys;
+
+   // Set the number of nodes and elements
+   meshCXXp->numLElements = calc_num_local_elems(*meshp);
+
+   meshCXXp->numLNodes = meshp->num_nodes();
+
+   meshCXXp->meshFreed = 0;
+
+   // Mark Mesh as finshed
+   meshCXXp->level=MeshCXXLevel_Finished;
+
+   // Calc and set the number of owned nodes
+   int num_owned_nodes=0;
+   Mesh::iterator ni2 = meshp->node_begin(), ne2 = meshp->node_end();
+   for (ni2; ni2 != ne2; ++ni2) {
+     MeshObj &node = *ni2;
+     if (!GetAttr(node).is_locally_owned()) continue;
+     num_owned_nodes++;
+   }
+   meshCXXp->numOwnedNodes=num_owned_nodes;
+
+   // Calc and set the number of owned elements
+   int num_owned_elems=0;
+   Mesh::iterator ei = meshp->elem_begin(), ee = meshp->elem_end();
+   for (; ei != ee; ++ei) {
+     MeshObj &elem = *ei;
+
+     // Only do owned
+     if (!GetAttr(elem).is_locally_owned()) continue;
+
+     // Don't do split elements
+     if (meshp->is_split && (elem.get_id() > meshp->max_non_split_id)) continue;
+
+     num_owned_elems++;
+   }
+   meshCXXp->numOwnedElements=num_owned_elems;
+
+
+   // Set return code
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+   return meshCXXp;
+} // MeshCXX::createFromPtr
+
+
   int MeshCXX::destroy(MeshCXX **meshpp) {
      int localrc;
 
