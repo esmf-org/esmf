@@ -396,7 +396,6 @@ int main(int argc, char** argv)
 #define MAX_GRID_RANK 2
   int grid_dims[MAX_GRID_RANK];
   int ogr_dimid, ogd_id;  
-  int corner360;
 
   ESMC_Initialize(&status, ESMC_ArgLast);
   vm = ESMC_VMGetGlobal(&status);
@@ -574,13 +573,7 @@ int main(int argc, char** argv)
     }
   }
 
-  corner360 = 0;
-  // convert longitude to (0, 360) degrees
   for (i = 0; i < gcdim*gsdim; i++) {
-    if (cornerlons[i] <= 0) {
-      corner360 = 1;
-      cornerlons[i] += 360.0;
-    }
     if (cornerlats[i] < minlat) minlat=cornerlats[i];
     if (cornerlats[i] > maxlat) maxlat=cornerlats[i];
   }
@@ -623,19 +616,9 @@ int main(int argc, char** argv)
   nodelatlon = (double*)malloc(sizeof(double)*totalnodes*2);
   totalneighbors=(int*)calloc(totalnodes, sizeof(int));
   // if the original longitude is in (-180, 180), conver it back
-  if (corner360) {
-    for (i=0; i<totalnodes; i++) {
-      if (nodelons[i] > 180.0) 
-	nodelatlon[i*2]=nodelons[i]-360.0;
-      else
-	nodelatlon[i*2]=nodelons[i];
-      nodelatlon[i*2+1]=nodelats[i];
-    }
-  } else {
-    for (i=0; i<totalnodes; i++) {
-      nodelatlon[i*2]=nodelons[i];
-      nodelatlon[i*2+1]=nodelats[i];
-    }
+  for (i=0; i<totalnodes; i++) {
+    nodelatlon[i*2]=nodelons[i];
+    nodelatlon[i*2+1]=nodelats[i];
   }
 
   free(nodelons);
@@ -865,14 +848,6 @@ int main(int argc, char** argv)
 	      inbuf[i] *= rad2deg;
 	    }
 	  }
-	  /*  Keep it's original longitude, do not convert to (0, 360)
-          // convert longitude to (0, 360)
-	  for (i=0; i<gsdim; i++) {
-              if (inbuf[i] <= 0) {
-		inbuf[i] += 360.0;
-	      }
-	  }
-	  */
 	  if (doesmf) {
 	    // copy inbuf to inbuf1
 	    for (i=0; i<gsdim; i++) {
@@ -981,15 +956,6 @@ int main(int argc, char** argv)
       }
     }
     free(inbuf);
-
-    /* Do not convert to (0, 360)
-    // convert longitude to (0, 360) degrees
-    for (i = 0; i < mypart; i++) {
-      if (inbuf1[i*2] <= 0) {
-	inbuf1[i*2] += 360.0;
-      }
-    }
-    */
 
     dualcells = (int*)malloc(sizeof(int)*maxconnection*totalnodes);
     dualcellcounts = (int*)malloc(sizeof(int)*totalnodes);
