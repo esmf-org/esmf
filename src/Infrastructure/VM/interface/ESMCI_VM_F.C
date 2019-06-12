@@ -73,6 +73,9 @@ extern "C" {
     }
     if (ESMC_LogDefault.MsgFoundError(localrc,"Unsupported data type.",
       ESMC_CONTEXT, rc)) return;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
     localrc = (*vm)->allfullreduce(input, output, *count, vmt, (vmOp)(*op));
     if (localrc){
       char *message = new char[160];
@@ -93,6 +96,9 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
     localrc = (*vm)->allgather(input, output, *size);
     if (localrc){
       char *message = new char[160];
@@ -114,6 +120,9 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     *commhandle = NULL; // reset the commhandle
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
     localrc = (*vm)->allgather(input, output, *size,
       (ESMCI::VMK::commhandle **)commhandle);
     if (localrc){
@@ -165,6 +174,9 @@ extern "C" {
     }
     if (ESMC_LogDefault.MsgFoundError(localrc, "Unsupported data type.",
       ESMC_CONTEXT, rc)) return;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
     localrc = (*vm)->allgatherv(sendData, *sendCount, recvData, recvCounts,
       recvOffsets, vmt);
     if (localrc){
@@ -207,6 +219,9 @@ extern "C" {
     }
     if (ESMC_LogDefault.MsgFoundError(localrc, "Unsupported data type.",
       ESMC_CONTEXT, rc)) return;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
     localrc = (*vm)->allreduce(input, output, *count, vmt, (vmOp)(*op));
     if (localrc){
       char *message = new char[160];
@@ -250,6 +265,9 @@ extern "C" {
     }
     if (ESMC_LogDefault.MsgFoundError(localrc, "Unsupported data type.",
       ESMC_CONTEXT, rc)) return;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
     localrc = (*vm)->alltoall(sendData, *sendCount,
       recvData, *recvCount, vmt);
     if (localrc){
@@ -304,6 +322,9 @@ extern "C" {
     }
     if (ESMC_LogDefault.MsgFoundError(localrc, "Unsupported data type.",
       ESMC_CONTEXT, rc)) return;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
     localrc = (*vm)->alltoallv(sendData, sendCounts, sendOffsets, recvData,
       recvCounts, recvOffsets, vmt);
     if (localrc){
@@ -318,13 +339,16 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_vmbarrier)(ESMCI::VM **ptr, int *rc){
+  void FTN_X(c_esmc_vmbarrier)(ESMCI::VM **vm, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmbarrier()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
-    localrc = (*ptr)->barrier();
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
+    localrc = (*vm)->barrier();
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
@@ -344,6 +368,9 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
     localrc = (*vm)->broadcast(data, *size, *root);
     if (localrc){
       char *message = new char[160];
@@ -365,6 +392,9 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     *commhandle = NULL; // reset the commhandle
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
     localrc = (*vm)->broadcast(data, *size, *root,
       (ESMCI::VMK::commhandle **)commhandle);
     if (localrc){
@@ -386,6 +416,9 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
     localrc = (*vm)->gather(input, output, *size, *root);
     if (localrc){
       char *message = new char[160];
@@ -407,6 +440,9 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     *commhandle = NULL; // reset the commhandle
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
     localrc = (*vm)->gather(input, output, *size, *root, 
       (ESMCI::VMK::commhandle **)commhandle);
     if (localrc){
@@ -450,6 +486,9 @@ extern "C" {
     }
     if (ESMC_LogDefault.MsgFoundError(localrc, "Unsupported data type.",
       ESMC_CONTEXT, rc)) return;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
     localrc = (*vm)->gatherv(sendData, *sendCount, recvData, recvCounts,
       recvOffsets, vmt, *root);
     if (localrc){
@@ -464,7 +503,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
-  void FTN_X(c_esmc_vmget)(ESMCI::VM **ptr, int *localPet, int *petCount, 
+  void FTN_X(c_esmc_vmget)(ESMCI::VM **vm, int *localPet, int *petCount, 
     int *peCount, int *ssiCount, int *ssiMinPetCount, int *ssiMaxPetCount,
     int *ssiLocalPetCount, int *mpiCommunicator,
     ESMC_Logical *pthreadsEnabledFlag, ESMC_Logical *openMPEnabledFlag,
@@ -474,27 +513,30 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     MPI_Comm mpiCommTemp;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
     // fill return values
     if (ESMC_NOT_PRESENT_FILTER(localPet) != ESMC_NULL_POINTER)
-      *localPet = (*ptr)->getLocalPet();
+      *localPet = (*vm)->getLocalPet();
     if (ESMC_NOT_PRESENT_FILTER(petCount) != ESMC_NULL_POINTER)
-      *petCount = (*ptr)->getPetCount();
+      *petCount = (*vm)->getPetCount();
     if (ESMC_NOT_PRESENT_FILTER(peCount) != ESMC_NULL_POINTER){
-      int npets = (*ptr)->getNpets();
+      int npets = (*vm)->getNpets();
       *peCount = 0; // reset
       for (int i=0; i<npets; i++)
-        *peCount += (*ptr)->getNcpet(i);
+        *peCount += (*vm)->getNcpet(i);
     }
     if (ESMC_NOT_PRESENT_FILTER(ssiCount) != ESMC_NULL_POINTER)
-      *ssiCount = (*ptr)->getSsiCount();
+      *ssiCount = (*vm)->getSsiCount();
     if (ESMC_NOT_PRESENT_FILTER(ssiMinPetCount) != ESMC_NULL_POINTER)
-      *ssiMinPetCount = (*ptr)->getSsiMinPetCount();
+      *ssiMinPetCount = (*vm)->getSsiMinPetCount();
     if (ESMC_NOT_PRESENT_FILTER(ssiMaxPetCount) != ESMC_NULL_POINTER)
-      *ssiMaxPetCount = (*ptr)->getSsiMaxPetCount();
+      *ssiMaxPetCount = (*vm)->getSsiMaxPetCount();
     if (ESMC_NOT_PRESENT_FILTER(ssiLocalPetCount) != ESMC_NULL_POINTER)
-      *ssiLocalPetCount = (*ptr)->getSsiLocalPetCount();
+      *ssiLocalPetCount = (*vm)->getSsiLocalPetCount();
     if (ESMC_NOT_PRESENT_FILTER(mpiCommunicator) != ESMC_NULL_POINTER){
-      mpiCommTemp = (*ptr)->getMpi_c();
+      mpiCommTemp = (*vm)->getMpi_c();
 #ifdef ESMF_DONT_HAVE_MPI_COMM_C2F
       *mpiCommunicator = (int)(mpiCommTemp);
 #else
@@ -502,20 +544,20 @@ extern "C" {
 #endif
     }
     if (ESMC_NOT_PRESENT_FILTER(pthreadsEnabledFlag) != ESMC_NULL_POINTER){
-      if ((*ptr)->isPthreadsEnabled())
+      if ((*vm)->isPthreadsEnabled())
         *pthreadsEnabledFlag = ESMF_TRUE;
       else
         *pthreadsEnabledFlag = ESMF_FALSE;
     }
     if (ESMC_NOT_PRESENT_FILTER(openMPEnabledFlag) != ESMC_NULL_POINTER){
-      if ((*ptr)->isOpenMPEnabled())
+      if ((*vm)->isOpenMPEnabled())
         *openMPEnabledFlag = ESMF_TRUE;
       else
         *openMPEnabledFlag = ESMF_FALSE;
     }
     if (ESMC_NOT_PRESENT_FILTER(ssiSharedMemoryEnabledFlag)
       != ESMC_NULL_POINTER){
-      if ((*ptr)->isSsiSharedMemoryEnabled())
+      if ((*vm)->isSsiSharedMemoryEnabled())
         *ssiSharedMemoryEnabledFlag = ESMF_TRUE;
       else
         *ssiSharedMemoryEnabledFlag = ESMF_FALSE;
@@ -543,15 +585,18 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_vmgetpetlocalinfo)(ESMCI::VM **ptr, int *pet, int *peCount, 
+  void FTN_X(c_esmc_vmgetpetlocalinfo)(ESMCI::VM **vm, int *pet, int *peCount, 
     int *accDeviceCount, int *ssiId, int *threadCount, int *threadId,
     int *vas, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmgetpetlocalinfo()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
     // check that pet is within bounds
-    int petCount = (*ptr)->getPetCount();
+    int petCount = (*vm)->getPetCount();
     if (*pet < 0 || *pet >= petCount){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "- provided pet id is out of range", ESMC_CONTEXT, rc);
@@ -559,41 +604,47 @@ extern "C" {
     }
     // fill return values
     if (ESMC_NOT_PRESENT_FILTER(peCount) != ESMC_NULL_POINTER)
-      *peCount = (*ptr)->getNcpet(*pet);
+      *peCount = (*vm)->getNcpet(*pet);
     if (ESMC_NOT_PRESENT_FILTER(accDeviceCount) != ESMC_NULL_POINTER)
-      *accDeviceCount = (*ptr)->getNadevs(*pet);
+      *accDeviceCount = (*vm)->getNadevs(*pet);
     if (ESMC_NOT_PRESENT_FILTER(ssiId) != ESMC_NULL_POINTER)
-      *ssiId = (*ptr)->getSsi(*pet);
+      *ssiId = (*vm)->getSsi(*pet);
     if (ESMC_NOT_PRESENT_FILTER(threadCount) != ESMC_NULL_POINTER)
-      *threadCount = (*ptr)->getNthreads(*pet);
+      *threadCount = (*vm)->getNthreads(*pet);
     if (ESMC_NOT_PRESENT_FILTER(threadId) != ESMC_NULL_POINTER)
-      *threadId = (*ptr)->getTid(*pet);
+      *threadId = (*vm)->getTid(*pet);
     if (ESMC_NOT_PRESENT_FILTER(vas) != ESMC_NULL_POINTER)
-      *vas = (*ptr)->getVas(*pet);
+      *vas = (*vm)->getVas(*pet);
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
-  void FTN_X(c_esmc_vmgetvmid)(ESMCI::VM **ptr, ESMCI::VMId **vmid, int *rc){
+  void FTN_X(c_esmc_vmgetvmid)(ESMCI::VM **vm, ESMCI::VMId **vmid, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmgetvmid()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
-    *vmid = (*ptr)->getVMId(&localrc);
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
+    ESMCI_NULL_CHECK_PRC(vmid, rc)
+    *vmid = (*vm)->getVMId(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return;
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_vmprint)(ESMCI::VM **ptr, int *rc){
+  void FTN_X(c_esmc_vmprint)(ESMCI::VM **vm, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmprint()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-    // Call into the actual C++ method wrapped inside LogErr handling
-    if (ESMC_LogDefault.MsgFoundError((*ptr)->print(),
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
+    if (ESMC_LogDefault.MsgFoundError((*vm)->print(),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // Flush before crossing language interface to ensure correct output order
@@ -602,35 +653,45 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_vmprintmatchtable)(ESMCI::VM **ptr){
+  void FTN_X(c_esmc_vmprintmatchtable)(ESMCI::VM **vm){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmprintmatchtable()"
-    (*ptr)->printMatchTable();
+    int localrc = ESMC_RC_NOT_IMPL;
+    int *rc = &localrc;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
+    (*vm)->printMatchTable();
     // Flush before crossing language interface to ensure correct output order
     fflush(stdout);
   }
 
-  void FTN_X(c_esmc_vmvalidate)(ESMCI::VM **ptr, int *rc){
+  void FTN_X(c_esmc_vmvalidate)(ESMCI::VM **vm, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmvalidate()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-    // Call into the actual C++ method wrapped inside LogErr handling
-    if (ESMC_LogDefault.MsgFoundError((*ptr)->validate(),
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
+    if (ESMC_LogDefault.MsgFoundError((*vm)->validate(),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_vmrecv)(ESMCI::VM **ptr, void *message, int *size,
+  void FTN_X(c_esmc_vmrecv)(ESMCI::VM **vm, void *message, int *size,
     int *source, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmrecv()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
-    localrc = (*ptr)->recv(message, *size, *source);
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
+    localrc = (*vm)->recv(message, *size, *source);
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
@@ -643,15 +704,19 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_vmrecvnb)(ESMCI::VM **ptr, void *message, int *size, 
+  void FTN_X(c_esmc_vmrecvnb)(ESMCI::VM **vm, void *message, int *size, 
     int *source, void **commhandle, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmrecvnb()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
+    ESMCI_NULL_CHECK_PRC(commhandle, rc)
     *commhandle = NULL; // reset the commhandle
-    localrc = (*ptr)->recv(message, *size, *source,
+    localrc = (*vm)->recv(message, *size, *source,
       (ESMCI::VMK::commhandle **)commhandle);
     if (localrc){
       char *message = new char[160];
@@ -693,6 +758,9 @@ extern "C" {
     }
     if (ESMC_LogDefault.MsgFoundError(localrc,"Unsupported data type.",
       ESMC_CONTEXT, rc)) return;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
     localrc = (*vm)->reduce(input, output, *count, vmt, (vmOp)(*op), *root);
     if (localrc){
       char *message = new char[160];
@@ -713,6 +781,9 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
     localrc = (*vm)->scatter(input, output, *size, *root);
     if (localrc){
       char *message = new char[160];
@@ -733,6 +804,10 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
+    ESMCI_NULL_CHECK_PRC(commhandle, rc)
     *commhandle = NULL; // reset the commhandle
     localrc = (*vm)->scatter(input, output, *size, *root, 
       (ESMCI::VMK::commhandle **)commhandle);
@@ -777,6 +852,9 @@ extern "C" {
     }
     if (ESMC_LogDefault.MsgFoundError(localrc, "Unsupported data type.",
       ESMC_CONTEXT, rc)) return;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
     localrc = (*vm)->scatterv(sendData, sendCounts, sendOffsets, recvData,
       *recvCount, vmt, *root);
     if (localrc){
@@ -791,14 +869,17 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
-  void FTN_X(c_esmc_vmsend)(ESMCI::VM **ptr, void *message, int *size, int *dest,
+  void FTN_X(c_esmc_vmsend)(ESMCI::VM **vm, void *message, int *size, int *dest,
     int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmsend()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
-    localrc = (*ptr)->send(message, *size, *dest);
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
+    localrc = (*vm)->send(message, *size, *dest);
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
@@ -811,15 +892,19 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_vmsendnb)(ESMCI::VM **ptr, void *message, int *size,
+  void FTN_X(c_esmc_vmsendnb)(ESMCI::VM **vm, void *message, int *size,
     int *dest, void **commhandle, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmsendnb()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
+    ESMCI_NULL_CHECK_PRC(commhandle, rc)
     *commhandle = NULL; // reset the commhandle
-    localrc = (*ptr)->send(message, *size, *dest, 
+    localrc = (*vm)->send(message, *size, *dest, 
       (ESMCI::VMK::commhandle **)commhandle);
     if (localrc){
       char *message = new char[160];
@@ -833,14 +918,17 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_vmsendrecv)(ESMCI::VM **ptr, void *sendData, int *sendSize, 
+  void FTN_X(c_esmc_vmsendrecv)(ESMCI::VM **vm, void *sendData, int *sendSize, 
     int *dst, void *recvData, int *recvSize, int *src, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmsendrecv()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
-    localrc = (*ptr)->sendrecv(sendData, *sendSize, *dst, recvData,
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
+    localrc = (*vm)->sendrecv(sendData, *sendSize, *dst, recvData,
       *recvSize, *src);
     if (localrc){
       char *message = new char[160];
@@ -854,7 +942,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_vmsendrecvnb)(ESMCI::VM **ptr, void *sendData, int *sendSize, 
+  void FTN_X(c_esmc_vmsendrecvnb)(ESMCI::VM **vm, void *sendData, int *sendSize, 
     int *dst, void *recvData, int *recvSize, int *src, void **commhandle, 
     int *rc){
 #undef  ESMC_METHOD
@@ -862,8 +950,12 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
+    ESMCI_NULL_CHECK_PRC(commhandle, rc)
     *commhandle = NULL; // reset the commhandle
-    localrc = (*ptr)->sendrecv(sendData, *sendSize, *dst, recvData,
+    localrc = (*vm)->sendrecv(sendData, *sendSize, *dst, recvData,
       *recvSize, *src, (ESMCI::VMK::commhandle **)commhandle);
     if (localrc){
       char *message = new char[160];
@@ -877,13 +969,17 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
-  void FTN_X(c_esmc_vmcommwait)(ESMCI::VM **ptr, void **commhandle, int *rc){
+  void FTN_X(c_esmc_vmcommwait)(ESMCI::VM **vm, void **commhandle, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmcommwait()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
-    localrc = (*ptr)->commwait((ESMCI::VMK::commhandle **)commhandle);
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
+    ESMCI_NULL_CHECK_PRC(commhandle, rc)
+    localrc = (*vm)->commwait((ESMCI::VMK::commhandle **)commhandle);
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
@@ -896,12 +992,15 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_vmcommqueuewait)(ESMCI::VM **ptr, int *rc){
+  void FTN_X(c_esmc_vmcommqueuewait)(ESMCI::VM **vm, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmcommqueuewait()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-    (*ptr)->commqueuewait();
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
+    (*vm)->commqueuewait();
     if (rc!=NULL) *rc = ESMF_SUCCESS; // TODO: finish error handling
   }
 
@@ -923,13 +1022,16 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS; // TODO: finish error handling
   }
 
-  void FTN_X(c_esmc_vmthreadbarrier)(ESMCI::VM **ptr, int *rc){
+  void FTN_X(c_esmc_vmthreadbarrier)(ESMCI::VM **vm, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmthreadbarrier()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
-    localrc = (*ptr)->threadbarrier();
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
+    localrc = (*vm)->threadbarrier();
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
@@ -942,20 +1044,22 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_vmgetcurrent)(ESMCI::VM **ptr, int *rc){
+  void FTN_X(c_esmc_vmgetcurrent)(ESMCI::VM **vm, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmgetcurrent()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
-    *ptr = ESMCI::VM::getCurrent(&localrc);
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    *vm = ESMCI::VM::getCurrent(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return;
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_vminitialize)(ESMCI::VM **ptr, int *mpiCommunicator, int *rc){
+  void FTN_X(c_esmc_vminitialize)(ESMCI::VM **vm, int *mpiCommunicator, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vminitialize()"
     // Initialize return code; assume routine not implemented
@@ -971,7 +1075,11 @@ extern "C" {
 #endif
     }else
       localMpiComm = MPI_COMM_WORLD;  // this is the default
-    *ptr = ESMCI::VM::initialize(localMpiComm, &localrc);
+    if (vm==NULL){
+      *rc = ESMC_RC_INTNRL_BAD;
+      return;
+    }
+    *vm = ESMCI::VM::initialize(localMpiComm, &localrc);
     // Cannot use LogErr here because LogErr initializes _after_ VM
     if (rc!=NULL) *rc = localrc;
   }
@@ -1034,6 +1142,11 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr_vmparent, rc)
+    ESMCI_NULL_CHECK_PRC(*ptr_vmparent, rc)
+    ESMCI_NULL_CHECK_PRC(ptr_vmplan, rc)
+    ESMCI_NULL_CHECK_PRC(vm_info, rc)
     (*ptr_vmparent)->shutdown(*ptr_vmplan, *vm_info, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return;
@@ -1045,21 +1158,25 @@ extern "C" {
   // ESMCI::VMPlan interfaces
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   
-  void FTN_X(c_esmc_vmplanconstruct)(ESMCI::VMPlan **ptr, ESMCI::VM **ptr_vm,
+  void FTN_X(c_esmc_vmplanconstruct)(ESMCI::VMPlan **ptr, ESMCI::VM **vm,
     int *npetlist, int *petlist, ESMC_ContextFlag *contextflag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmplanconstruct()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
     (*ptr) = new ESMCI::VMPlan;
     if (*contextflag==ESMF_CHILD_IN_PARENT_VM)
-      (*ptr)->vmkplan_useparentvm(**ptr_vm);
+      (*ptr)->vmkplan_useparentvm(**vm);
     else if (*npetlist > 0){
-      (*ptr)->vmkplan_minthreads(**ptr_vm, 1, (int*)petlist, *npetlist);
-      (*ptr)->vmkplan_mpi_c_part(**ptr_vm);
+      (*ptr)->vmkplan_minthreads(**vm, 1, (int*)petlist, *npetlist);
+      (*ptr)->vmkplan_mpi_c_part(**vm);
     }else{
-      (*ptr)->vmkplan_minthreads(**ptr_vm, 1);
-      (*ptr)->vmkplan_mpi_c_part(**ptr_vm);
+      (*ptr)->vmkplan_minthreads(**vm, 1);
+      (*ptr)->vmkplan_mpi_c_part(**vm);
     }
     // set the nothreadflag because this is the default for new VMs
     (*ptr)->nothreadflag = 1; // override what vmkplan_minthreads() above set
@@ -1083,6 +1200,9 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_vmplandestruct()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
+    ESMCI_NULL_CHECK_PRC(*ptr, rc)
     // Do garbage collection on this PET's VM instances that were allocated
     for (int i=0; i<(*ptr)->nspawn; i++)
       delete (*ptr)->myvms[i];
@@ -1094,7 +1214,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
-  void FTN_X(c_esmc_vmplanmaxpes)(ESMCI::VMPlan **ptr, ESMCI::VM **ptr_vm,
+  void FTN_X(c_esmc_vmplanmaxpes)(ESMCI::VMPlan **ptr, ESMCI::VM **vm,
     int *max, int *pref_intra_process, int *pref_intra_ssi, int *pref_inter_ssi,
     int *npetlist, int *petlist, int *rc){
 #undef  ESMC_METHOD
@@ -1102,6 +1222,10 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
     // Sort out the non-present F90 optional arguments. 
     max = ESMC_NOT_PRESENT_FILTER(max);
     pref_intra_process = ESMC_NOT_PRESENT_FILTER(pref_intra_process);
@@ -1127,7 +1251,7 @@ extern "C" {
     delete [] (*ptr)->myvms;
     delete [] (*ptr)->myvmachs;
     // Now define a new vmplan
-    localrc = (*ptr)->vmkplan_maxcores(**ptr_vm, maxx, (int*)petlist,
+    localrc = (*ptr)->vmkplan_maxcores(**vm, maxx, (int*)petlist,
       *npetlist, ppref_intra_process, ppref_intra_ssi, ppref_inter_ssi);
     if (localrc) localrc = ESMF_FAILURE;
     else localrc = ESMF_SUCCESS;
@@ -1149,7 +1273,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
        
-  void FTN_X(c_esmc_vmplanmaxthreads)(ESMCI::VMPlan **ptr, ESMCI::VM **ptr_vm,
+  void FTN_X(c_esmc_vmplanmaxthreads)(ESMCI::VMPlan **ptr, ESMCI::VM **vm,
     int *max, int *pref_intra_process, int *pref_intra_ssi, int *pref_inter_ssi,
     int *npetlist, int *petlist, int *rc){
 #undef  ESMC_METHOD
@@ -1157,6 +1281,10 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
     // Sort out the non-present F90 optional arguments. 
     max = ESMC_NOT_PRESENT_FILTER(max);
     pref_intra_process = ESMC_NOT_PRESENT_FILTER(pref_intra_process);
@@ -1182,7 +1310,7 @@ extern "C" {
     delete [] (*ptr)->myvms;
     delete [] (*ptr)->myvmachs;
     // Now define a new vmplan
-    localrc = (*ptr)->vmkplan_maxthreads(**ptr_vm, maxx, (int*)petlist,
+    localrc = (*ptr)->vmkplan_maxthreads(**vm, maxx, (int*)petlist,
       *npetlist, ppref_intra_process, ppref_intra_ssi, ppref_inter_ssi);
     if (localrc) localrc = ESMF_FAILURE;
     else localrc = ESMF_SUCCESS;
@@ -1204,7 +1332,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
-  void FTN_X(c_esmc_vmplanminthreads)(ESMCI::VMPlan **ptr, ESMCI::VM **ptr_vm,
+  void FTN_X(c_esmc_vmplanminthreads)(ESMCI::VMPlan **ptr, ESMCI::VM **vm,
     int *max, int *pref_intra_process, int *pref_intra_ssi, int *pref_inter_ssi,
     int *npetlist, int *petlist, int *rc){
 #undef  ESMC_METHOD
@@ -1212,6 +1340,10 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
     // Sort out the non-present F90 optional arguments. 
     max = ESMC_NOT_PRESENT_FILTER(max);
     pref_intra_process = ESMC_NOT_PRESENT_FILTER(pref_intra_process);
@@ -1237,7 +1369,7 @@ extern "C" {
     delete [] (*ptr)->myvms;
     delete [] (*ptr)->myvmachs;
     // Now define a new vmplan
-    localrc = (*ptr)->vmkplan_minthreads(**ptr_vm, maxx, (int*)petlist,
+    localrc = (*ptr)->vmkplan_minthreads(**vm, maxx, (int*)petlist,
       *npetlist, ppref_intra_process, ppref_intra_ssi, ppref_inter_ssi);
     if (localrc) localrc = ESMF_FAILURE;
     else localrc = ESMF_SUCCESS;
@@ -1269,6 +1401,8 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vmid, rc)
     *vmid = ESMCI::VM::getCurrentID(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return;
@@ -1282,6 +1416,10 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_vmidcompare()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vmid1, rc)
+    ESMCI_NULL_CHECK_PRC(vmid2, rc)
+    ESMCI_NULL_CHECK_PRC(result, rc)
     bool resultBool = ESMCI::VMIdCompare(*vmid1, *vmid2);
     *result = resultBool ? ESMF_TRUE : ESMF_FALSE;
     // return successfully
@@ -1294,6 +1432,9 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_vmidcopy()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(dest, rc)
+    ESMCI_NULL_CHECK_PRC(source, rc)
     int localrc = ESMCI::VMIdCopy(*dest, *source);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return;
@@ -1307,6 +1448,8 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vmid, rc)
     *vmid = new ESMCI::VMId;              // allocate memory off the heap
     localrc = (*vmid)->create ();         // allocate VMId internal members
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -1321,6 +1464,9 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vmid, rc)
+    ESMCI_NULL_CHECK_PRC(*vmid, rc)
     localrc = (*vmid)->destroy ();      // free memory for internal members
     delete *vmid;                       // free memory for this VMId
     *vmid=NULL;
@@ -1338,6 +1484,9 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vmid, rc)
+    ESMCI_NULL_CHECK_PRC(*vmid, rc)
     localrc = (*vmid)->get(localID, key, key_len);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return;
@@ -1350,7 +1499,9 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_vmidprint()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-    // ESMCI::VMIdPrint(*vmid);
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vmid, rc)
+    ESMCI_NULL_CHECK_PRC(*vmid, rc)
     int localrc = (*vmid)->ESMCI::VMId::print();
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return;
@@ -1364,11 +1515,13 @@ extern "C" {
       char *key, int *rc, ESMCI_FortranStrLenArg key_len) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmci_vmidset()"
-//  This method is primarily intended for use by VM unit tests.
+    // This method is primarily intended for use by VM unit tests.
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
-    ESMCI::VMId *localvmid = *vmid;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vmid, rc)
+    ESMCI_NULL_CHECK_PRC(*vmid, rc)
     localrc = (*vmid)->set(*localID, key, key_len);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return;
@@ -1376,28 +1529,38 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_vmsendvmid)(ESMCI::VM **ptr, ESMCI::VMId **vmid, int *dest,
+  void FTN_X(c_esmc_vmsendvmid)(ESMCI::VM **vm, ESMCI::VMId **vmid, int *dest,
     int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmsendvmid()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
-    localrc = (*ptr)->sendVMId(*vmid, *dest);
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
+    ESMCI_NULL_CHECK_PRC(vmid, rc)
+    ESMCI_NULL_CHECK_PRC(*vmid, rc)
+    localrc = (*vm)->sendVMId(*vmid, *dest);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return;
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_vmrecvvmid)(ESMCI::VM **ptr, ESMCI::VMId **vmid, int *source,
+  void FTN_X(c_esmc_vmrecvvmid)(ESMCI::VM **vm, ESMCI::VMId **vmid, int *source,
     int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmrecvvmid()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
-    localrc = (*ptr)->recvVMId(*vmid, *source);
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
+    ESMCI_NULL_CHECK_PRC(vmid, rc)
+    ESMCI_NULL_CHECK_PRC(*vmid, rc)
+    localrc = (*vm)->recvVMId(*vmid, *source);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return;
     // return successfully
@@ -1414,6 +1577,11 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // start assuming local success
     int localrc = ESMF_SUCCESS;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
+    ESMCI_NULL_CHECK_PRC(sendData, rc)
+    ESMCI_NULL_CHECK_PRC(recvData, rc)
     localrc = (*vm)->alltoallvVMId(sendData, sendCounts, sendOffsets,
       recvData, recvCounts, recvOffsets);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -1422,7 +1590,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_vmallgathervvmid)(ESMCI::VM **ptr,
+  void FTN_X(c_esmc_vmallgathervvmid)(ESMCI::VM **vm,
       ESMCI::VMId **sendData, int *sendCount,
       ESMCI::VMId **recvData, int *recvCounts, int *recvOffsets,
       int *rc){
@@ -1431,7 +1599,12 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
-    localrc = (*ptr)->allgathervVMId(sendData, *sendCount, recvData,  
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
+    ESMCI_NULL_CHECK_PRC(sendData, rc)
+    ESMCI_NULL_CHECK_PRC(recvData, rc)
+    localrc = (*vm)->allgathervVMId(sendData, *sendCount, recvData,  
       recvCounts, recvOffsets);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return;
@@ -1439,14 +1612,18 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_vmbcastvmid)(ESMCI::VM **ptr, ESMCI::VMId **vmid, int *count,
+  void FTN_X(c_esmc_vmbcastvmid)(ESMCI::VM **vm, ESMCI::VMId **vmid, int *count,
     int *root, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmbcastvmid()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
-    localrc = (*ptr)->bcastVMId(vmid, *count, *root);
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
+    ESMCI_NULL_CHECK_PRC(vmid, rc)
+    localrc = (*vm)->bcastVMId(vmid, *count, *root);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return;
     // return successfully
