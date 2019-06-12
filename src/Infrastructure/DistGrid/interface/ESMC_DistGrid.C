@@ -87,6 +87,8 @@ int ESMC_DistGridPrint(ESMC_DistGrid distgrid){
   
   // typecast into ESMCI type
   ESMCI::DistGrid *dgp = (ESMCI::DistGrid *)(distgrid.ptr);
+  // test for NULL pointer via macro before calling any class methods
+  ESMCI_NULL_CHECK_RC(dgp, rc)
   
   // call into ESMCI method  
   localrc = dgp->print();
@@ -106,15 +108,13 @@ int ESMC_DistGridDestroy(ESMC_DistGrid *distgrid){
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
-  // check input
-  if (distgrid->ptr == NULL){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-    "- Not a valid ESMC_DistGrid object", ESMC_CONTEXT, &rc);
-    return rc;  // bail out
-  }
+  // test for NULL pointer via macro before calling any class methods
+  ESMCI_NULL_CHECK_RC(distgrid, rc)
   
   // typecast into ESMCI type
   ESMCI::DistGrid *dgp = (ESMCI::DistGrid *)(distgrid->ptr);
+  // test for NULL pointer via macro before calling any class methods
+  ESMCI_NULL_CHECK_RC(dgp, rc)
 
   // call into ESMCI method  
   localrc = ESMCI::DistGrid::destroy(&dgp);

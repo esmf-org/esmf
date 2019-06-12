@@ -86,6 +86,8 @@ extern "C" {
       if (*balanceflag == ESMF_TRUE) balanceflagOpt = true;
     // all PETs call into the C++ create(), but the actualFlag identifies PETs
     // that are expected to create actual DistGrid objects
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
     *ptr = ESMCI::DistGrid::create(*dg, firstExtra, lastExtra,
       ESMC_NOT_PRESENT_FILTER(indexflag), connectionList, 
       balanceflagOpt, opt_delayout, opt_vm, actualFlag, &localrc);
@@ -130,6 +132,8 @@ extern "C" {
 #endif
     if (actualFlag){
       // on PETs with actual members call into C++
+      // test for NULL pointer via macro before calling any class methods
+      ESMCI_NULL_CHECK_PRC(ptr, rc)
       *ptr = ESMCI::DistGrid::create(minIndex, maxIndex, regDecomp,
         decompflag, *decompflagCount, regDecompFirstExtra, regDecompLastExtra,
         deLabelList, ESMC_NOT_PRESENT_FILTER(indexflag),
@@ -164,7 +168,8 @@ extern "C" {
     else opt_delayout = *delayout;
     if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
     else opt_vm = *vm;
-    // call into C++
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
     *ptr = ESMCI::DistGrid::create(minIndex, maxIndex, regDecomp,
       decompflag, *decompflagCount1, *decompflagCount2, 
       regDecompFirstExtra, regDecompLastExtra, deLabelList, 
@@ -192,7 +197,8 @@ extern "C" {
     // deal with optional arguments
     if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
     else opt_vm = *vm;
-    // call into C++
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
     *ptr = ESMCI::DistGrid::create(minIndex, maxIndex, regDecomp,
       decompflag, *decompflagCount, regDecompFirstExtra, regDecompLastExtra,
       deLabelList, ESMC_NOT_PRESENT_FILTER(indexflag),
@@ -225,7 +231,8 @@ extern "C" {
     if (ESMC_NOT_PRESENT_FILTER(indexTK) == ESMC_NULL_POINTER) 
       opt_indexTK = ESMF_NOKIND;
     else opt_indexTK = *indexTK;
-    // call into C++
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
     *ptr = ESMCI::DistGrid::create(minIndex, maxIndex, deBlockList,
       deLabelList, ESMC_NOT_PRESENT_FILTER(indexflag),
       connectionList, opt_delayout, opt_vm, &localrc, opt_indexTK);
@@ -257,7 +264,8 @@ extern "C" {
     if (ESMC_NOT_PRESENT_FILTER(indexTK) == ESMC_NULL_POINTER) 
       opt_indexTK = ESMF_NOKIND;
     else opt_indexTK = *indexTK;
-    // call into C++
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
     *ptr = ESMCI::DistGrid::create(minIndex, maxIndex, deBlockList,
       deToTileMap, deLabelList, ESMC_NOT_PRESENT_FILTER(indexflag),
       connectionList, opt_delayout, opt_vm, &localrc, opt_indexTK);
@@ -275,7 +283,9 @@ extern "C" {
     bool noGarbageOpt = false;  // default
     if (ESMC_NOT_PRESENT_FILTER(noGarbage) != ESMC_NULL_POINTER)
       if (*noGarbage == ESMF_TRUE) noGarbageOpt = true;
-    // call into C++
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
+    ESMCI_NULL_CHECK_PRC(*ptr, rc)
     ESMC_LogDefault.MsgFoundError(ESMCI::DistGrid::destroy(ptr, noGarbageOpt),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, 
       ESMC_NOT_PRESENT_FILTER(rc));
@@ -301,6 +311,9 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
+    ESMCI_NULL_CHECK_PRC(*ptr, rc)
     // fill simple return values
     if (ESMC_NOT_PRESENT_FILTER(delayout) != ESMC_NULL_POINTER)
       *delayout = (*ptr)->getDELayout();
@@ -600,6 +613,9 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (ESMC_NOT_PRESENT_FILTER(rc)) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
+    ESMCI_NULL_CHECK_PRC(*ptr, rc)
     // shift input indices
     int localDe = *localDeArg;  // already base 0
     // check input values
@@ -662,6 +678,9 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
+    ESMCI_NULL_CHECK_PRC(*ptr, rc)
     // shift input indices
     int localDe = *localDeArg;  // already base 0
     int dim = *dimArg - 1;      // shift to base 0
@@ -712,7 +731,9 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_distgridprint()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-    // Call into the actual C++ method wrapped inside LogErr handling
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
+    ESMCI_NULL_CHECK_PRC(*ptr, rc)
     ESMC_LogDefault.MsgFoundError((*ptr)->print(),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
@@ -725,7 +746,9 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_distgridvalidate()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-    // Call into the actual C++ method wrapped inside LogErr handling
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
+    ESMCI_NULL_CHECK_PRC(*ptr, rc)
     ESMC_LogDefault.MsgFoundError((*ptr)->validate(),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
@@ -767,7 +790,9 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_distgridset()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-    // Call into the actual C++ method wrapped inside LogErr handling
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
+    ESMCI_NULL_CHECK_PRC(*ptr, rc)
     ESMC_LogDefault.MsgFoundError(
       (*ptr)->setCollocationPDim(collocationPDim),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -781,7 +806,9 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_distgridsetarbseqindex()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-    // Call into the actual C++ method wrapped inside LogErr handling
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
+    ESMCI_NULL_CHECK_PRC(*ptr, rc)
     ESMC_LogDefault.MsgFoundError(
       (*ptr)->setArbSeqIndex(arbSeqIndex, *localDe, *collocation),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -795,7 +822,9 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_distgridsetarbseqindex()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-    // Call into the actual C++ method wrapped inside LogErr handling
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
+    ESMCI_NULL_CHECK_PRC(*ptr, rc)
     ESMC_LogDefault.MsgFoundError(
       (*ptr)->setArbSeqIndex(arbSeqIndex, *localDe, *collocation),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -807,11 +836,11 @@ extern "C" {
     ESMCI_FortranStrLenArg buf_l){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridserialize()"
-
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-
-    // Call into the actual C++ method wrapped inside LogErr handling
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(distgrid, rc)
+    ESMCI_NULL_CHECK_PRC(*distgrid, rc)
     ESMC_LogDefault.MsgFoundError(
       (*distgrid)->serialize(buf, length, offset, *inquireflag),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -823,17 +852,14 @@ extern "C" {
     ESMCI_FortranStrLenArg buf_l){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgriddeserialize()"
-
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-
-    // Deserialize the distgrid
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(distgrid, rc)
     *distgrid=ESMCI::DistGrid::deserialize(buf, offset);
-
     // Return success
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
-
 
 #undef  ESMC_METHOD
 }

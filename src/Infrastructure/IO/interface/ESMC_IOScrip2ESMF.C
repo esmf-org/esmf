@@ -65,15 +65,11 @@ void orderit(int index, double lon, double lat, int numedges, double *latlonbuf,
   int i, j, min, temp1;
   angles = (double*)malloc(sizeof(double)*numedges);
 
-  // change them to (0 360) before comparison
-  if (lon < 0) lon = +360.0;
- 
   // When the corner vertices are cross the periodic boundary (0 degree longitude), need to
   // convert the longitudes to be consistent with all the corners and the center
   for (i=0; i< numedges; i++) {
     j=*(next+i)-1;
     clon = latlonbuf[j*2];
-    if (clon < 0) clon += 360.0;
     clat = latlonbuf[j*2+1];
     if (fabs(clon-lon) > 180) {
       if (lon >= 180) {
@@ -402,13 +398,6 @@ void FTN_X(c_convertscrip)(
     }
   }
 
-  // convert longitude to (0, 360) degrees
-  for (i = 0; i < gcdim*gsdim; i++) {
-    if (cornerlons[i] <= 0) {
-      cornerlons[i] += 360.0;
-    }
-  }
-
   totalsize = gsdim * gcdim;
   cells = (int*)malloc(sizeof(int)*totalsize);
   ESMCI::ClumpPntsLL(totalsize, cornerlons, cornerlats, TOL, cells, &totalnodes,
@@ -708,13 +697,6 @@ void FTN_X(c_convertscrip)(
     }
   }
   free(inbuf);
-
-  // convert longitude to (0, 360) degrees
-  for (i = 0; i < gsdim; i++) {
-    if (inbuf1[i*2] <= 0) {
-      inbuf1[i*2] += 360.0;
-    }
-  }
 
   dualcellcounts = (int*)malloc(sizeof(int)*totalnodes);
   dualcells = (int*)malloc(sizeof(int)*maxconnection*totalnodes);
