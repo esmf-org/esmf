@@ -68,6 +68,8 @@ extern "C" {
 #endif
     if (actualFlag){
       // on PETs with actual members call into C++
+      // test for NULL pointer via macro before calling any class methods
+      ESMCI_NULL_CHECK_PRC(ptr, rc)
       *ptr = ESMCI::DELayout::create(petMap, *petMapCount,
         ESMC_NOT_PRESENT_FILTER(pinFlag), 
         opt_vm, &localrc);
@@ -104,6 +106,8 @@ extern "C" {
 #endif
     if (actualFlag){
       // on PETs with actual members call into C++
+      // test for NULL pointer via macro before calling any class methods
+      ESMCI_NULL_CHECK_PRC(ptr, rc)
       *ptr = ESMCI::DELayout::create(
         ESMC_NOT_PRESENT_FILTER(deCount), 
         deGrouping,
@@ -125,7 +129,8 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     ESMC_Logical cyclic = ESMF_TRUE;  // TODO: fix API
-    // call into C++
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
     *ptr = ESMCI::DELayout::create(**vm, deCountList, *deCountListCount,
       petList, *petListCount, &cyclic, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -144,7 +149,9 @@ extern "C" {
     bool noGarbageOpt = false;  // default
     if (ESMC_NOT_PRESENT_FILTER(noGarbage) != ESMC_NULL_POINTER)
       if (*noGarbage == ESMF_TRUE) noGarbageOpt = true;
-    // call into C++
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
+    ESMCI_NULL_CHECK_PRC(*ptr, rc)
     if (ESMC_LogDefault.MsgFoundError(ESMCI::DELayout::destroy(ptr, 
       noGarbageOpt),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -163,6 +170,9 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_delayoutget()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
+    ESMCI_NULL_CHECK_PRC(*ptr, rc)
     // fill return values
     if (ESMC_NOT_PRESENT_FILTER(vm) != ESMC_NULL_POINTER)
       *vm = (*ptr)->getVM();
@@ -255,7 +265,9 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_delayoutgetdematchde()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-    // Call into the actual C++ method wrapped inside LogErr handling
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
+    ESMCI_NULL_CHECK_PRC(*ptr, rc)
     if (ESMC_LogDefault.MsgFoundError((*ptr)->getDEMatchDE(
       *DEid, **ptrMatch, 
       ESMC_NOT_PRESENT_FILTER(deMatchCount),
@@ -273,7 +285,9 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_delayoutgetdematchpet()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-    // Call into the actual C++ method wrapped inside LogErr handling
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
+    ESMCI_NULL_CHECK_PRC(*ptr, rc)
     if (ESMC_LogDefault.MsgFoundError((*ptr)->getDEMatchPET(
       *DEid, **ptrMatch, 
       ESMC_NOT_PRESENT_FILTER(petMatchCount),
@@ -293,7 +307,9 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_delayoutgetdeprecated()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-    // call into C++
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
+    ESMCI_NULL_CHECK_PRC(*ptr, rc)
     if (ESMC_LogDefault.MsgFoundError((*ptr)->getDeprecated(
       ESMC_NOT_PRESENT_FILTER(deCount), 
       ESMC_NOT_PRESENT_FILTER(dimCount), 
@@ -316,7 +332,9 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_delayoutgetdelocalinfo()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-    // Call into the actual C++ method wrapped inside LogErr handling
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
+    ESMCI_NULL_CHECK_PRC(*ptr, rc)
     if (ESMC_LogDefault.MsgFoundError((*ptr)->getDELocalInfo(
       *DEid, DEcoord, *len_coord, DEcde, *len_cde, DEcw, *len_cw,
       ESMC_NOT_PRESENT_FILTER(nDEc),
@@ -332,7 +350,9 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_delayoutprint()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-    // Call into the actual C++ method wrapped inside LogErr handling
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
+    ESMCI_NULL_CHECK_PRC(*ptr, rc)
     if (ESMC_LogDefault.MsgFoundError((*ptr)->print(),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return; // bail out
@@ -347,7 +367,9 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_delayoutvalidate()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-    // Call into the actual C++ method wrapped inside LogErr handling
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
+    ESMCI_NULL_CHECK_PRC(*ptr, rc)
     if (ESMC_LogDefault.MsgFoundError((*ptr)->validate(),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return; // bail out
@@ -362,7 +384,9 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
-    // call into C++
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
+    ESMCI_NULL_CHECK_PRC(*ptr, rc)
     *reply = (*ptr)->serviceOffer(*de, &localrc);
 //TODO: enable LogErr once it is thread-safe
     *rc=localrc;  
@@ -378,7 +402,9 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_delayoutservicecomplete()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-    // call into C++
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
+    ESMCI_NULL_CHECK_PRC(*ptr, rc)
     if (ESMC_LogDefault.MsgFoundError((*ptr)->serviceComplete(*de),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return; // bail out
@@ -393,7 +419,9 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_delayoutserialize"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-    // Call into the actual C++ method wrapped inside LogErr handling
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(delayout, rc)
+    ESMCI_NULL_CHECK_PRC(*delayout, rc)
     if (ESMC_LogDefault.MsgFoundError(
       (*delayout)->serialize(buf, length, offset,*inquireflag),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -410,7 +438,9 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
-    (*delayout) = ESMCI::DELayout::deserialize(buf, offset);
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(delayout, rc)
+    *delayout = ESMCI::DELayout::deserialize(buf, offset);
     if (*delayout == NULL) 
       localrc = ESMC_RC_INTNRL_BAD;
     else
