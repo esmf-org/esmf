@@ -129,7 +129,7 @@ static bool esmfFinalized = false;
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::VMIdKeyCompare()"
-static bool VMKeyCompare(char *vmKey1, char *vmKey2){
+static bool VMKeyCompare(unsigned char *vmKey1, unsigned char *vmKey2){
   int i;
 #if 0
   std::cout << ESMC_METHOD << ": entered" << std::endl;
@@ -187,7 +187,7 @@ int VMId::create() {
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  vmKey = new char[vmKeyWidth];
+  vmKey = new unsigned char[vmKeyWidth];
   for (int i=0; i<vmKeyWidth; i++)
     vmKey[i] = 0x00;  // zero out all bits
   localID = 0;        // reset
@@ -522,7 +522,7 @@ VMId VMIdCreate(
 
   // allocates memory for vmKey member
   VMId vmID;    // temporary stack variable
-  vmID.vmKey = new char[vmKeyWidth];
+  vmID.vmKey = new unsigned char[vmKeyWidth];
   for (int i=0; i<vmKeyWidth; i++)
     vmID.vmKey[i] = 0x00;  // zero out all bits
   vmID.localID = 0;   // reset
@@ -2755,7 +2755,10 @@ VM *VM::initialize(
     ++vmKeyWidth;               // correction for extra bits
     vmKeyOff = 8 - vmKeyOff;    // number of extra bits in last char
   }
-//printf("gjt in ESMC_VMInitialize, vmKeyWidth = %d\n", vmKeyWidth);
+#define DEBUG
+#ifdef DEBUG
+  printf("ESMC_VMInitialize, vmKeyWidth=%d vmKeyOff=%d\n", vmKeyWidth, vmKeyOff);
+#endif
   int localrc;
   matchTable_vmID[matchTableBound] = ESMCI::VMIdCreate(&localrc);
   for (int i=0; i<vmKeyWidth; i++)
