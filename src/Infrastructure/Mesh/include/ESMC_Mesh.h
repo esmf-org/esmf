@@ -308,6 +308,8 @@ ESMC_Mesh ESMC_MeshCreateFromFile(
 //EOP
 //-----------------------------------------------------------------------------
 
+
+
 //------------------------------------------------------------------------------
 //BOP
 // !IROUTINE: ESMC_MeshGetCoord - Get lat/lon coordinates from a Mesh \label{sec:mesh:capi:meshgetcoord}
@@ -685,6 +687,44 @@ int ESMC_MeshVTKBody(
   int *elemConn
 );
 //EOPI
+
+
+//------------------------------------------------------------------------------
+//BOPI
+// !IROUTINE: ESMC_MeshCreateFromPtr - Create a Mesh from information and a pointer
+//
+// !INTERFACE:
+  ESMC_Mesh ESMC_MeshCreateFromPtr(void *mesh_ptr,
+                                   int parametricDim,
+                                   int spatialDim, 
+                                   enum ESMC_CoordSys_Flag coordSys,
+                                   int *rc               // out
+);
+// !RETURN VALUE:
+//  type(ESMC_Mesh)         :: ESMC_MeshCreateFromPtr
+//
+// !DESCRIPTION:
+//
+// Method to create a Mesh object from a NetCDF file in either SCRIP, UGRID,
+// or ESMF file formats.
+//
+//  The required arguments are:
+//  \begin{description}
+//   \item [mesh_ptr]
+//         Internal Mesh pointer
+//   \item[parametricDim]
+//         The parametric dimension of the Mesh.
+//   \item[spatialDim]
+//         The spatial dimension of the Mesh.
+//   \item[coordSys]
+//         The coordinate system the Mesh is expressed in. 
+//   \item [{[rc]}]
+//         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+//  \end{description}
+//
+//EOPI
+//-----------------------------------------------------------------------------
+
 
 
 #if defined (__cplusplus)

@@ -106,6 +106,31 @@ ESMC_Mesh ESMC_MeshCreateFromFile(const char *filename, int fileTypeFlag,
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_MeshCreateFromPtr()"
+  ESMC_Mesh ESMC_MeshCreateFromPtr(void *mesh_ptr, int parametricDim, int spatialDim, enum ESMC_CoordSys_Flag coordSys,
+                          int *rc){
+  // Initialize return code. Assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;
+  if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
+
+  // Init Mesh
+  ESMC_Mesh mesh;
+  mesh.ptr = NULL;
+
+  // call into ESMCI method
+  mesh.ptr = (void *)MeshCXX::createFromPtr((ESMCI::Mesh *)mesh_ptr, parametricDim, spatialDim, coordSys, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) return mesh; // bail out
+
+  // return successfully
+  if (rc) *rc = ESMF_SUCCESS;
+  return mesh;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_MeshAddNodes"
 int ESMC_MeshAddNodes(ESMC_Mesh mesh, int nodeCount, int *nodeIds,
   double *nodeCoords, int *nodeOwners){
