@@ -12005,9 +12005,13 @@ int Array::sparseMatMul(
   int srcSuperVecSizeUnd[3];                    // undistributed: r, s, t
   int *srcSuperVecSizeDis[2];                   // distributed: i, j
   vector<int> srcdist_i(srcLocalDeCount);
-  srcSuperVecSizeDis[0] = &srcdist_i[0];
   vector<int> srcdist_j(srcLocalDeCount);
-  srcSuperVecSizeDis[1] = &srcdist_j[0];
+  srcSuperVecSizeDis[0] = NULL; // initialze
+  srcSuperVecSizeDis[1] = NULL; // initialze
+  if (srcLocalDeCount){
+    srcSuperVecSizeDis[0] = &srcdist_i[0];
+    srcSuperVecSizeDis[1] = &srcdist_j[0];
+  }
   superVecParam(srcArray, srcLocalDeCount, xxe->superVectorOkay,
     srcSuperVecSizeUnd, srcSuperVecSizeDis, vectorLength);
 
@@ -12018,9 +12022,13 @@ int Array::sparseMatMul(
   int dstSuperVecSizeUnd[3];                    // undistributed: r, s, t
   int *dstSuperVecSizeDis[2];                   // distributed: i, j
   vector<int> dstdist_i(dstLocalDeCount);
-  dstSuperVecSizeDis[0] = &dstdist_i[0];
   vector<int> dstdist_j(dstLocalDeCount);
-  dstSuperVecSizeDis[1] = &dstdist_j[0];
+  dstSuperVecSizeDis[0] = NULL;
+  dstSuperVecSizeDis[1] = NULL;
+  if (dstLocalDeCount){
+    dstSuperVecSizeDis[0] = &dstdist_i[0];
+    dstSuperVecSizeDis[1] = &dstdist_j[0];
+  }
   superVecParam(dstArray, dstLocalDeCount, xxe->superVectorOkay,
     dstSuperVecSizeUnd, dstSuperVecSizeDis, vectorLength);
 
