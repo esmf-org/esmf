@@ -873,6 +873,13 @@ unexport ESMF_F90LINKOPTS
 endif
 ifeq ($(origin ESMF_F90LINKOPTS_ENV), environment)
 ESMF_F90LINKOPTS = $(ESMF_F90LINKOPTS_ENV)
+else
+ifeq ($(ESMF_BOPT),g)
+ESMF_F90LINKOPTS += $(ESMF_F90OPTFLAG_G) $(ESMF_CXXOPTFLAG_G)
+endif
+ifeq ($(ESMF_BOPT),O)
+ESMF_F90LINKOPTS += $(ESMF_F90OPTFLAG_O) $(ESMF_CXXOPTFLAG_O)
+endif
 endif
 ESMF_F90LINKOPTS     +=
 # - make sure environment variable gets prepended _once_
@@ -920,6 +927,13 @@ unexport ESMF_CXXLINKOPTS
 endif
 ifeq ($(origin ESMF_CXXLINKOPTS_ENV), environment)
 ESMF_CXXLINKOPTS = $(ESMF_CXXLINKOPTS_ENV)
+else
+ifeq ($(ESMF_BOPT),g)
+ESMF_CXXLINKOPTS += $(ESMF_F90OPTFLAG_G) $(ESMF_CXXOPTFLAG_G)
+endif
+ifeq ($(ESMF_BOPT),O)
+ESMF_CXXLINKOPTS += $(ESMF_F90OPTFLAG_O) $(ESMF_CXXOPTFLAG_O)
+endif
 endif
 ESMF_CXXLINKOPTS     +=
 # - make sure environment variable gets prepended _once_
