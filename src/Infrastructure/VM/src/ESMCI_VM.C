@@ -401,29 +401,25 @@ int VMId::print() const{
 
   // print info about the ESMCI::VM object
   std::cout << "--- ESMCI::VMId::print() start ---" << std::endl;
-  if (this == NULL){
-    std::cout << "VMId object on this PET is NULL, probably a proxy member." << std::endl;
-  }else{
-    std::cout << "  vmKeyWidth = " << vmKeyWidth << std::endl;
-    printf("  vmKey=0x");
-    int bitmap=0;
-    int k=0;
-    for (int i=0; i<vmKeyWidth; i++){
-      bitmap |= vmKey[i];
-      bitmap = bitmap << 8;
-      ++k;
-      if (k==4){
-        printf("%X", bitmap);
-        bitmap=0;
-        k=0;
-      }
+  std::cout << "  vmKeyWidth = " << vmKeyWidth << std::endl;
+  printf("  vmKey=0x");
+  int bitmap=0;
+  int k=0;
+  for (int i=0; i<vmKeyWidth; i++){
+    bitmap |= vmKey[i];
+    bitmap = bitmap << 8;
+    ++k;
+    if (k==4){
+      printf("%X", bitmap);
+      bitmap=0;
+      k=0;
     }
-    if (k!=0){
-      bitmap = bitmap << (3-k)*8;
-      printf("%X\n", bitmap);
-    }
-    std::cout << "  localID = " << localID << std::endl;
   }
+  if (k!=0){
+    bitmap = bitmap << (3-k)*8;
+    printf("%X\n", bitmap);
+  }
+  std::cout << "  localID = " << localID << std::endl;
   std::cout << "--- ESMCI::VMId::print() end ---" << std::endl;
 
   // return successfully
@@ -1585,15 +1581,11 @@ int VM::print() const{
 
   // print info about the ESMCI::VM object
   printf("--- ESMCI::VM::print() start ---\n");
-  if (this == NULL){
-    printf("VM object on this PET is NULL, probably a proxy member.\n");
-  }else{
-    VMId *vmid = getVMId(&localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      &rc)) return rc;
-    vmid->print();
-    VMK::print();
-  }
+  VMId *vmid = getVMId(&localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
+  vmid->print();
+  VMK::print();
   printf("--- ESMCI::VM::print() end ---\n");
 
   // return successfully
@@ -1624,12 +1616,7 @@ int VM::validate()const{
   // initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  // check against NULL pointer
-  if (this == ESMC_NULL_POINTER){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      " - 'this' pointer is NULL.", ESMC_CONTEXT, &rc);
-    return rc;
-  }
+  //TODO: complete this method
 
   // return successfully
   rc = ESMF_SUCCESS;

@@ -1337,12 +1337,6 @@ int DELayout::print()const{
   // initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  // return with errors for NULL pointer
-  if (this == NULL){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      " - 'this' pointer is NULL.", ESMC_CONTEXT, &rc);
-    return rc;
-  }
   // print info about the DELayout object
   printf("--- ESMCI::DELayout::print() start ---\n");
   if (oldstyle){
@@ -1435,12 +1429,7 @@ int DELayout::validate()const{
   // initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  // check against NULL pointer
-  if (this == ESMC_NULL_POINTER){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      " - 'this' pointer is NULL.", ESMC_CONTEXT, &rc);
-    return rc;
-  }
+  //TODO: complete this method
 
   // return successfully
   rc = ESMF_SUCCESS;

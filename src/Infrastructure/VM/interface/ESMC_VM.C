@@ -49,6 +49,8 @@ int ESMC_VMBarrier(ESMC_VM vm){
   
   // typecast into ESMCI type
   ESMCI::VM *vmp = (ESMCI::VM *)(vm.ptr);
+  // test for NULL pointer via macro before calling any class methods
+  ESMCI_NULL_CHECK_RC(vmp, rc)
 
   // call into ESMCI method  
   localrc = vmp->barrier();
@@ -72,6 +74,8 @@ int ESMC_VMBroadcast(ESMC_VM vm, void *bcstData, int count,
   
   // typecast into ESMCI type
   ESMCI::VM *vmp = (ESMCI::VM *)(vm.ptr);
+  // test for NULL pointer via macro before calling any class methods
+  ESMCI_NULL_CHECK_RC(vmp, rc)
 
   int len = count;
   // have to manually reset because the enum values don't line up
@@ -115,6 +119,8 @@ int ESMC_VMGet(ESMC_VM vm, int *localPet, int *petCount, int *peCount,
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   ESMCI::VM *vmp = (ESMCI::VM*)(vm.ptr);
+  // test for NULL pointer via macro before calling any class methods
+  ESMCI_NULL_CHECK_RC(vmp, rc)
 
   if (localPet) *localPet = vmp->getLocalPet();
   if (petCount) *petCount = vmp->getPetCount();
@@ -150,9 +156,9 @@ ESMC_VM ESMC_VMGetCurrent(int *rc){
 
   ESMCI::VM *vmp = ESMCI::VM::getCurrent(&localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-    rc))
-    return vm;  // bail out
+    rc)) return vm;  // bail out
 
+  // assign to return variable
   vm.ptr = (void*)vmp;
 
   // return successfully
@@ -174,9 +180,9 @@ ESMC_VM ESMC_VMGetGlobal(int *rc){
 
   ESMCI::VM *vmp = ESMCI::VM::getGlobal(&localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-    rc))
-    return vm;  // bail out
+    rc)) return vm;  // bail out
 
+  // assign to return variable
   vm.ptr = (void*)vmp;
 
   // return successfully
@@ -195,12 +201,13 @@ int ESMC_VMPrint(ESMC_VM vm){
   
   // typecast into ESMCI type
   ESMCI::VM *vmp = (ESMCI::VM *)(vm.ptr);
+  // test for NULL pointer via macro before calling any class methods
+  ESMCI_NULL_CHECK_RC(vmp, rc)
 
   // call into ESMCI method  
   localrc = vmp->print();
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-    &rc))
-    return rc;  // bail out
+    &rc)) return rc;  // bail out
     
   // return successfully
   rc = ESMF_SUCCESS;
@@ -219,6 +226,8 @@ int ESMC_VMReduce(ESMC_VM vm, void *in, void *out, int len,
   
   // typecast into ESMCI type
   ESMCI::VM *vmp = (ESMCI::VM *)(vm.ptr);
+  // test for NULL pointer via macro before calling any class methods
+  ESMCI_NULL_CHECK_RC(vmp, rc)
 
   vmType vmt;
   vmOp vmo;
@@ -248,8 +257,7 @@ int ESMC_VMReduce(ESMC_VM vm, void *in, void *out, int len,
   // call into ESMCI method  
   localrc = vmp->reduce(in, out, len, vmt, vmo, root);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-    &rc))
-    return rc;  // bail out
+    &rc)) return rc;  // bail out
 
   // return successfully
   rc = ESMF_SUCCESS;

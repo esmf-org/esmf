@@ -276,7 +276,7 @@
       write(name, *) "Initializing VMId solutions array Test"
       rc = ESMF_SUCCESS
       do, i=1, size (vmidarray1)
-        call c_ESMCI_VMIdSet (vmidarray1(i), 0, 0, localrc)
+        call c_ESMCI_VMIdSet (vmidarray1(i), i, " ", localrc)
         if (localrc /= ESMF_SUCCESS) rc = localrc
       end do
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

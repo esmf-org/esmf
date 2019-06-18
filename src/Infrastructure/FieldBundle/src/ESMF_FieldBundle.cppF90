@@ -1068,7 +1068,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       List with number of elements equal to the @\
 !       {\tt grid}|s dimCount. The list elements map each dimension @\
 !       of the {\tt grid} to a dimension in the {\tt farrayPtr} by @\
-!       specifying the appropriate {\tt farrayPtr} dimension index after the packed fieldDim is 
+!       specifying the appropriate {\tt farrayPtr} dimension index after the packed fieldDim is @\
 !       removed from the {\tt farrayPtr}. The default is to @\
 !       map all of the {\tt grid}|s dimensions against the lowest dimensions of @\
 !       the {\tt farrayPtr} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../). @\

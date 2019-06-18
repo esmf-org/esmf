@@ -58,37 +58,37 @@
     ! Arguments
     type(ESMF_XGrid)               :: xgrid
     integer, intent(in)            :: num_sideAGrid
-    type(ESMF_Pointer)             :: sideAGrid(1:num_sideAGrid)
+    type(ESMF_Pointer)             :: sideAGrid(num_sideAGrid)
     integer, intent(in)            :: num_sideAMesh
-    type(ESMF_Pointer)             :: sideAMesh(1:num_sideAMesh)
+    type(ESMF_Pointer)             :: sideAMesh(num_sideAMesh)
     integer, intent(in)            :: num_sideBGrid
-    type(ESMF_Pointer)             :: sideBGrid(1:num_sideBGrid)
+    type(ESMF_Pointer)             :: sideBGrid(num_sideBGrid)
     integer, intent(in)            :: num_sideBMesh
-    type(ESMF_Pointer)             :: sideBMesh(1:num_sideBMesh)
+    type(ESMF_Pointer)             :: sideBMesh(num_sideBMesh)
 
     integer, intent(in) :: num_sideAGridPriority
-    integer             :: sideAGridPriority(1:num_sideAGridPriority)
+    integer             :: sideAGridPriority(num_sideAGridPriority)
     integer, intent(in) :: num_sideAMeshPriority
-    integer             :: sideAMeshPriority(1:num_sideAMeshPriority)
+    integer             :: sideAMeshPriority(num_sideAMeshPriority)
     integer, intent(in) :: num_sideBGridPriority
-    integer             :: sideBGridPriority(1:num_sideBGridPriority)
+    integer             :: sideBGridPriority(num_sideBGridPriority)
     integer, intent(in) :: num_sideBMeshPriority
-    integer             :: sideBMeshPriority(1:num_sideBMeshPriority)
+    integer             :: sideBMeshPriority(num_sideBMeshPriority)
 
     integer, intent(in)            :: num_sideAMaskValues
-    integer(ESMF_KIND_I4),intent(in) :: sideAMaskValues(1:num_sideAMaskValues)
+    integer(ESMF_KIND_I4),intent(in) :: sideAMaskValues(num_sideAMaskValues)
     integer, intent(in)            :: num_sideBMaskValues
-    integer(ESMF_KIND_I4),intent(in) :: sideBMaskValues(1:num_sideBMaskValues)
+    integer(ESMF_KIND_I4),intent(in) :: sideBMaskValues(num_sideBMaskValues)
 
     integer, intent(in) :: storeOverlay
 !    character(len=*),intent(in)    :: name    DON'T WORRY ABOUT NAME RIGHT NOW
     integer, intent(out)           :: rc              
 
     ! Local variables
-    type(ESMF_Grid)             :: localSideAGrid(1:num_sideAGrid)
-    type(ESMF_Mesh)             :: localSideAMesh(1:num_sideAMesh)
-    type(ESMF_Grid)             :: localSideBGrid(1:num_sideBGrid)
-    type(ESMF_Mesh)             :: localSideBMesh(1:num_sideBMesh)
+    type(ESMF_Grid),allocatable :: localSideAGrid(:)
+    type(ESMF_Mesh),allocatable :: localSideAMesh(:)
+    type(ESMF_Grid),allocatable :: localSideBGrid(:)
+    type(ESMF_Mesh),allocatable :: localSideBMesh(:)
     logical :: localStoreOverlay
     integer :: localrc
     integer :: i
@@ -100,12 +100,14 @@
     !! Create ESMF acceptable versions of class arrays !!
 
     ! sideAGrid
+    allocate(localSideAGrid(num_sideAGrid))
     do i=1,num_sideAGrid
        localSideAGrid(i)%this=sideAGrid(i)
        ESMF_INIT_SET_CREATED(localSideAGrid(i))
     enddo
 
     ! sideAMesh
+    allocate(localSideAMesh(num_sideAMesh))
     do i=1,num_sideAMesh
        localSideAMesh(i)=ESMF_MeshCreate(sideAMesh(i), rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -113,12 +115,14 @@
     enddo
 
     ! sideBGrid
+    allocate(localSideBGrid(num_sideBGrid))
     do i=1,num_sideBGrid
        localSideBGrid(i)%this=sideBGrid(i)
        ESMF_INIT_SET_CREATED(localSideBGrid(i))
     enddo
 
     ! sideBMesh
+    allocate(localSideBMesh(num_sideBMesh))
     do i=1,num_sideBMesh
        localSideBMesh(i)=ESMF_MeshCreate(sideBMesh(i), rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -149,6 +153,12 @@
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
     
+    ! Deallocate
+    deallocate(localSideAGrid)
+    deallocate(localSideAMesh)
+    deallocate(localSideBGrid)
+    deallocate(localSideBMesh)
+
     ! return success
     rc = ESMF_SUCCESS
   
