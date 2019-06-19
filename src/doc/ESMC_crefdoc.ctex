@@ -172,7 +172,7 @@
 
 #include "../Infrastructure/Mesh/doc/Mesh_crefdoc.ctex"
 
-#include "../Infrastructure/XGrid/doc/XGrid_crefdoc.ctex"
+%#include "../Infrastructure/XGrid/doc/XGrid_crefdoc.ctex"
 
 #include "../Infrastructure/DistGrid/doc/DistGrid_crefdoc.ctex"
 
