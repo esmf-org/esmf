@@ -98,8 +98,7 @@ typedef struct{
 //  that is spatially disjoint from the {\tt ESMC\_XGrid}. 
 //
 //  This call is {\em collective} across the current VM. For more details please refer to the description 
-//  \ref{sec:xgrid:desc} of the XGrid class. For an example and associated documentation using this method see section 
-//  \ref{sec:xgrid:usage:xgrid_create}
+//  \ref{sec:xgrid:desc} of the XGrid class. 
 //
 //     The arguments are:
 //     \begin{description}
@@ -144,13 +143,13 @@ typedef struct{
 //           Flux contributions at the overlapping region are computed in the order from the Mesh of the
 //           highest priority to the lowest priority.
 //     \item [{[sideAMaskValues]}]
-//           Mask information can be set in the Grid (see~\ref{sec:usage:items}) or Mesh (see~\ref{sec:mesh:mask}) 
+//           Mask information can be set in the Grid (see~\ref{sec:usage:items}) or Mesh
 //           upon which the Field is built. The {\tt sideAMaskValues} argument specifies the values in that 
 //           mask information which indicate a point should be masked out. In other words, a location is masked if and only if the
 //           value for that location in the mask information matches one of the values listed in {\tt sideAMaskValues}.  
 //           If {\tt sideAMaskValues} is not specified, no masking on side A will occur. 
 //     \item [{[sideBMaskValues]}]
-//           Mask information can be set in the Grid (see~\ref{sec:usage:items}) or Mesh (see~\ref{sec:mesh:mask}) 
+//           Mask information can be set in the Grid (see~\ref{sec:usage:items}) or Mesh
 //           upon which the Field is built. The {\tt sideBMaskValues} argument specifies the values in that 
 //           mask information which indicate a point should be masked out. In other words, a location is masked if and only if the
 //           value for that location in the mask information matches one of the values listed in {\tt sideBMaskValues}.  
@@ -380,7 +379,7 @@ ESMC_Mesh ESMC_XGridGetMesh(
 //
 // !DESCRIPTION:
 //
-//  Get the ESMC_Mesh object representing the XGrid. 
+//  Get the ESMC\_Mesh object representing the XGrid. 
 //
 //  The arguments are:
 //  \begin{description}
