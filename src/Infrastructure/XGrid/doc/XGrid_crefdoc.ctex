@@ -77,17 +77,17 @@
 % Use F90 restriction description
 \subsection{Restrictions and Future Work}
 #ifdef STANDALONE
-%\input{XGrid_rest}
+\input{XGrid_rest}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/XGrid/doc/XGrid_rest}
+\input{../Infrastructure/XGrid/doc/XGrid_rest}
 #endif
 
 % Use F90 Design and implementation notes
 \subsection{Design and Implementation Notes}
 #ifdef STANDALONE
-%\input{XGrid_implnotes}
+\input{XGrid_implnotes}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/XGrid/doc/XGrid_implnotes}
+\input{../Infrastructure/XGrid/doc/XGrid_implnotes}
 #endif
 
 \subsection{Class API}
