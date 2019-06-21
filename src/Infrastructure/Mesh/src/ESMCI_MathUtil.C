@@ -2764,5 +2764,73 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
 #undef CLIP_EQUAL_TOL
   }
 
+// Calculate the intersect area between two polygons
+// This method works on both concave and convex polygons.
+// This assumes the polygon is counter-clockwise.
+// tri_ind_p should be of size 3*(num_p-2)
+// tri_ind_q should be of size 3*(num_q-2)
+// td should be the max of size p or size q
+// ti should be the max of num_p, or num_q
+template <class GEOM>
+double calc_poly_intersect_area(int num_p, double *p, int *tri_ind_p, int num_q, double *q, int *tri_ind_q, double *td, int *ti) {
+
+  // Triangulate p
+  int ret_p=triangulate_poly<GEOM>(num_p, p, td, ti, tri_ind_p);  
+  if (ret_p == ESMCI_TP_DEGENERATE_POLY) return 0.0;
+  else if (ret_p == ESMCI_TP_CLOCKWISE_POLY) Throw() << "Can't triangulate polygon.";
+
+  // Triangulate q
+  int ret_q=triangulate_poly<GEOM>(num_q, q, td, ti, tri_ind_q);  
+  if (ret_q == ESMCI_TP_DEGENERATE_POLY) return 0.0;
+  else if (ret_q == ESMCI_TP_CLOCKWISE_POLY) Throw() << "Can't triangulate polygon.";
+
+  // Loop over sets of triangles summing area
+  double area=0.0;
+  for (int p_pos=0,ip=0; ip<num_p-2; ip++) {
+    
+    // Fill p tri
+    double p_tri[3*GEOM::pnt_size];
+    GEOM::copy(GEOM::getPntAt(p_tri,0),GEOM::getPntAt(p,tri_ind_p[p_pos]));
+    GEOM::copy(GEOM::getPntAt(p_tri,1),GEOM::getPntAt(p,tri_ind_p[p_pos+1]));
+    GEOM::copy(GEOM::getPntAt(p_tri,2),GEOM::getPntAt(p,tri_ind_p[p_pos+2]));
+    p_pos += 3;
+
+    for (int q_pos=0,iq=0; iq<num_q-2; iq++) {
+
+      // Fill q tri
+      double q_tri[3*GEOM::pnt_size];
+      GEOM::copy(GEOM::getPntAt(q_tri,0),GEOM::getPntAt(q,tri_ind_q[q_pos]));
+      GEOM::copy(GEOM::getPntAt(q_tri,1),GEOM::getPntAt(q,tri_ind_q[q_pos+1]));
+      GEOM::copy(GEOM::getPntAt(q_tri,2),GEOM::getPntAt(q,tri_ind_q[q_pos+2]));
+      q_pos += 3;
+
+      // Intersect
+      int num_isect;
+      double isect_coords[6*GEOM::pnt_size]; // Intersecting 2 tris can give at most 6 corners
+      GEOM::intersect_convex_polygon(3, p_tri,
+                                     3, q_tri,
+                                     td,
+                                     &num_isect, isect_coords);
+
+      // skip if less than a triangle
+      if (num_isect < 3) continue;
+
+      // Remove 0 len edges
+      GEOM::remove_0len_edges(&num_isect, isect_coords);
+
+      // skip if less than a triangle
+      if (num_isect < 3) continue;
+      
+      // Add area to total
+      area += GEOM::calc_area_polygon(num_isect, isect_coords);
+    }
+  }
+
+  // Output total area
+  return area;
+}
+
+template double calc_poly_intersect_area<GEOM_CART2D>(int num_p, double *p, int *tri_ind_p, int num_q, double *q, int *tri_ind_q, double *td, int *ti);
+template double calc_poly_intersect_area<GEOM_SPH2D3D>(int num_p, double *p, int *tri_ind_p, int num_q, double *q, int *tri_ind_q, double *td, int *ti);
 
 } // namespace
