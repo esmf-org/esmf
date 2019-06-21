@@ -556,6 +556,60 @@ namespace ESMCI {
     grad[1]=grad[1]-src_val*src_grad[1];
  }
 
+  // Check overlap of src cell and nbr polygon
+  double _calc_src_nbr_poly_overlap_area_2D_2D_cart(const MeshObj *src_elem, MEField<> *src_cfield, std::vector<NBR_ELEM> *nbrs) {
+
+    // For nbr poly coords
+#define MAX_NUM_NBRS 100
+    int num_nbr_nodes;
+    double nbr_coords[2*MAX_NUM_NBRS];
+
+    // Error check
+    if (nbrs->size()>MAX_NUM_NBRS) {
+      Throw() << " A source cell contains more neighbors ("<<nbrs->size()<<") than is currently supported in 2nd order conservative weight calculation.";
+    }
+
+    // Load points into polygon array
+    int p=0;
+    for (int i=0; i<nbrs->size(); i++) {
+      NBR_ELEM *nbr=&((*nbrs)[i]);
+
+      nbr_coords[p]  =nbr->cntr[0];
+      nbr_coords[p+1]=nbr->cntr[1];
+      p+=2;
+    }
+    num_nbr_nodes=nbrs->size();
+
+
+    // Get Source elem polygon
+#define  MAX_NUM_SRC_NODES 10
+    int num_src_nodes;
+    double src_coords[2*MAX_NUM_SRC_NODES];
+    double tmp_src_coords[2*MAX_NUM_SRC_NODES];
+
+    // Get src coords
+    get_elem_coords_2D_ccw(src_elem, src_cfield, MAX_NUM_SRC_NODES, tmp_src_coords, &num_src_nodes, src_coords);
+
+    // Get rid of degenerate edges
+    remove_0len_edges2D(&num_src_nodes, src_coords);
+
+    // if intersected element isn't a complete polygon then go to next
+    if (num_src_nodes < 3) {
+      return 0.0;
+    }
+
+    // calculate intersection area
+    int src_tri_ind[3*(MAX_NUM_SRC_NODES-2)];
+    int nbr_tri_ind[3*(MAX_NUM_NBRS-2)];
+    double tmp_coords[2*MAX_NUM_NBRS]; // MAX_NUM_NBRS > MAX_NUM_SRC_NODES
+    int tmp_ints[MAX_NUM_NBRS]; // MAX_NUM_NBRS > MAX_NUM_SRC_NODES
+    return calc_poly_intersect_area<GEOM_CART2D>(num_src_nodes, src_coords, src_tri_ind,
+                                                 num_nbr_nodes, nbr_coords, nbr_tri_ind, tmp_coords, tmp_ints);
+    
+#undef MAX_NUM_SRC_NODES 
+#undef MAX_NUM_NBRS
+  }
+
  /* XMRKX */
 
   // Main Call
@@ -569,6 +623,7 @@ namespace ESMCI {
                                            std::vector<SM_CELL> *sm_cells,
                                            std::vector<NBR_ELEM> *nbrs
                                            ) {
+#define ZERO_TOL 1.0E-16
 
 
     // Create super mesh cells by intersecting src_elem and list of dst_elems
@@ -601,13 +656,16 @@ namespace ESMCI {
     // Put the nbrs into counter clockwise order
    _make_nbr_elems_cntrclk_2D_2D_cart(src_cntr, nbrs);
 
-    // Set gradient info based on number of neighbors
+    // Set gradient info based on criteria
    double src_grad[2];
    if (nbrs->size() < 3) {
-     // Too few neighbors to use Green's, so assume constant grad
+     // Too few neighbors to use Green's, so use constant gradient
+     _set_grad_info_to_0_2D_2D_cart(src_cntr, src_grad, nbrs);
+   } else if (_calc_src_nbr_poly_overlap_area_2D_2D_cart(src_elem, src_cfield, nbrs) <= ZERO_TOL) {
+     // No overlap, so just use constant gradient
      _set_grad_info_to_0_2D_2D_cart(src_cntr, src_grad, nbrs);
    } else {
-     // 3 or more neighbors so use Green's theorem
+     // Passed all criteria, so use Greens to calc gradient
      if (!_set_grad_info_using_greens_2D_2D_cart(src_cntr, src_grad, nbrs, src_elem->get_id())) {
        // If the above doesn't suceed just default to constant
        _set_grad_info_to_0_2D_2D_cart(src_cntr, src_grad, nbrs);
@@ -684,7 +742,9 @@ namespace ESMCI {
       _debug_calc_gradient_2D_2D_cart(src_cntr, src_grad, nbrs, xyz_func_2D_2D_cart, xyz_grad);
       printf("src_elem=%d x+y field grad=%g %g\n",src_elem->get_id(),xyz_grad[0],xyz_grad[1]);
 #endif
-   }
+
+#undef ZERO_TOL
+  }
 
   //////////////////// 2D 3D Spherical ////////////////////////////////////
   /* XMRKX */
@@ -920,6 +980,19 @@ namespace ESMCI {
       p+=3;
     }
 
+    // reject if center not in polygon
+    // static int tot=0;
+    //static int rej=0;
+    
+    // sum number going by
+    //tot++;
+    //    if (!is_pnt_in_poly<GEOM_SPH2D3D>(nbrs->size(), nbr_coords, src_cntr)) {
+    //  rej++;
+    //  printf("tot=%d rej=%d rej/tot=%g\n",tot,rej,((double)rej)/((double)tot));
+    //  return false;
+    // }
+
+
     // Compute area
     double nbr_poly_area=great_circle_area(nbrs->size(), nbr_coords);
     if (nbr_poly_area == 0.0) return false;
@@ -1007,6 +1080,10 @@ namespace ESMCI {
     // Return success
     return true;
   }
+
+
+
+
 
 #if 0
   // This doesn't seem to be a very good approximation. It's possible that
@@ -1328,6 +1405,63 @@ namespace ESMCI {
   }
 
 
+  // Check overlap of src cell and nbr polygon
+  double _calc_src_nbr_poly_overlap_area_2D_3D_sph(const MeshObj *src_elem, MEField<> *src_cfield, std::vector<NBR_ELEM> *nbrs) {
+
+    // For nbr poly coords
+#define MAX_NUM_NBRS 100
+    int num_nbr_nodes;
+    double nbr_coords[3*MAX_NUM_NBRS];
+
+    // Error check
+    if (nbrs->size()>MAX_NUM_NBRS) {
+      Throw() << " A source cell contains more neighbors ("<<nbrs->size()<<") than is currently supported in 2nd order conservative weight calculation.";
+    }
+
+    // Load points into polygon array
+    int p=0;
+    for (int i=0; i<nbrs->size(); i++) {
+      NBR_ELEM *nbr=&((*nbrs)[i]);
+
+      nbr_coords[p]  =nbr->cntr[0];
+      nbr_coords[p+1]=nbr->cntr[1];
+      nbr_coords[p+2]=nbr->cntr[2];
+      p+=3;
+    }
+    num_nbr_nodes=nbrs->size();
+
+
+    // Get Source elem polygon
+#define  MAX_NUM_SRC_NODES 10
+    int num_src_nodes;
+    double src_coords[3*MAX_NUM_SRC_NODES];
+    double tmp_src_coords[3*MAX_NUM_SRC_NODES];
+
+    // Get src coords
+    get_elem_coords_3D_ccw(src_elem, src_cfield, MAX_NUM_SRC_NODES, tmp_src_coords, &num_src_nodes, src_coords);
+
+    // Get rid of degenerate edges
+    remove_0len_edges3D(&num_src_nodes, src_coords);
+
+    // if intersected element isn't a complete polygon then go to next
+    if (num_src_nodes < 3) {
+      return 0.0;
+    }
+
+    // calculate intersection area
+    int src_tri_ind[3*(MAX_NUM_SRC_NODES-2)];
+    int nbr_tri_ind[3*(MAX_NUM_NBRS-2)];
+    double tmp_coords[3*MAX_NUM_NBRS]; // MAX_NUM_NBRS > MAX_NUM_SRC_NODES
+    int tmp_ints[MAX_NUM_NBRS]; // MAX_NUM_NBRS > MAX_NUM_SRC_NODES
+    return calc_poly_intersect_area<GEOM_SPH2D3D>(num_src_nodes, src_coords, src_tri_ind,
+                                                  num_nbr_nodes, nbr_coords, nbr_tri_ind, tmp_coords, tmp_ints);
+
+#undef MAX_NUM_SRC_NODES 
+#undef MAX_NUM_NBRS
+  }
+
+
+
  /* XMRKX */
 
   // Main Call
@@ -1341,6 +1475,7 @@ namespace ESMCI {
                                            std::vector<SM_CELL> *sm_cells,
                                            std::vector<NBR_ELEM> *nbrs
                                         ) {
+#define ZERO_TOL 1.0E-16
 
     // Create super mesh cells by intersecting src_elem and list of dst_elems
 #ifndef USE_NONCNCV_SM
@@ -1389,13 +1524,16 @@ namespace ESMCI {
     }
 #endif
 
-    // Set gradient info based on number of neighbors
+    // Set gradient info based on criteria
     double src_grad[3];
     if (nbrs->size() < 3) {
-      // Too few neighbors to use Green's, so assume constant grad
+      // Too few neighbors to use Green's, so use constant gradient
+      _set_grad_info_to_0(src_cntr, src_grad, nbrs);
+    } else if (_calc_src_nbr_poly_overlap_area_2D_3D_sph(src_elem, src_cfield, nbrs) <= ZERO_TOL) {
+      // No overlap, so just use constant gradient
       _set_grad_info_to_0(src_cntr, src_grad, nbrs);
     } else {
-      // 3 or more neighbors so use Green's theorem
+      // Passed all criteria, so use Greens to calc gradient
       if (!_set_grad_info_using_greens(src_cntr, src_grad, nbrs)) {
         // If the above doesn't suceed just default to constant
         _set_grad_info_to_0(src_cntr, src_grad, nbrs);
@@ -1472,6 +1610,8 @@ namespace ESMCI {
       _debug_calc_gradient(src_cntr, src_grad, nbrs, xyz_func, xyz_grad);
       printf("src_elem=%d x+y+z field grad=%g %g %g\n",src_elem->get_id(),xyz_grad[0],xyz_grad[1],xyz_grad[2]);
 #endif
+
+#undef ZERO_TOL
   }
 
  /* XMRKX */
