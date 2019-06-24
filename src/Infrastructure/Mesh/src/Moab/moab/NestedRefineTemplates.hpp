@@ -1,7 +1,7 @@
 #ifndef TEMPLATES_HPP
 #define TEMPLATES_HPP
 
-#include "NestedRefine.hpp"
+#include "moab/NestedRefine.hpp"
 
 /*
  * This header contains the field values of the refinement patterns for

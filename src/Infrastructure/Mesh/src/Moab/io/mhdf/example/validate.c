@@ -129,7 +129,7 @@ static int dcomp( const void* p1, const void* p2 )
 
 
 
-int VERBOSE = 0;
+int verbose = 0;
 
 int main( int argc, char* argv[] )
 {
@@ -399,7 +399,7 @@ int check_valid_elem_conn( int idx, mhdf_FileHandle file, struct mhdf_FileDesc* 
   iter = buffer;
   for (i = 0; i < count; ++i, iter += len) {
     if (!ids_contained( iter, len, ranges, num_ranges)) {
-      if (VERBOSE)
+      if (verbose)
         printf("Invalid connectivity for element %ld (ID %ld) in %s\n",
           i, i + desc->elems[idx].desc.start_id, desc->elems[idx].handle );
       ++invalid;
@@ -427,7 +427,7 @@ static int check_valid_end_indices( const long* indices, long num_idx, int min_l
   
   for (i = 0; i < num_idx; ++i) {
     if (indices[i] < prev) {
-      if (VERBOSE) {
+      if (verbose) {
         if (start_id > 0)
           printf("Invalid end index %ld for %s %ld (ID %ld).  Prev index is %ld\n", indices[i], name, i, i+start_id, prev );
         else
@@ -436,7 +436,7 @@ static int check_valid_end_indices( const long* indices, long num_idx, int min_l
       ++invalid;
     }
     else if (indices[i] - prev < min_len) {
-      if (VERBOSE) {
+      if (verbose) {
         if (start_id > 0)
           printf("%s %ld (ID %ld) has only %ld values\n", name, i, start_id, indices[i] - prev );
         else
@@ -445,7 +445,7 @@ static int check_valid_end_indices( const long* indices, long num_idx, int min_l
       ++invalid;
     }
     else if (indices[i] >= max_value) {
-      if (VERBOSE) {
+      if (verbose) {
         if (start_id > 0)
           printf("%s %ld (ID %ld) end index exceeds upper bound of %ld\n", name, i, start_id, max_value );
         else
@@ -523,7 +523,7 @@ int check_valid_poly_conn( int idx, mhdf_FileHandle file, struct mhdf_FileDesc* 
     len = indices[i] - prev;
     prev = indices[i];
     if (!ids_contained( iter, len, ranges, num_ranges)) {
-      if (VERBOSE)
+      if (verbose)
         printf("Invalid connectivity for element %ld (ID %ld) in %s\n",
           i, i + first_id, desc->elems[idx].handle );
       ++invalid;
@@ -612,7 +612,7 @@ static int check_valid_adj_list( long start_id, long count, const long* data, lo
     }
     
     if (id < start_id || (id - start_id) >= count) {
-      if (VERBOSE)
+      if (verbose)
         printf("Entry %ld in %s adjacency data has ID %ld outside of group range [%ld,%ld].\n",
           i, name, id, start_id, start_id+count-1);
       ++invalid_id;
@@ -635,7 +635,7 @@ static int check_valid_adj_list( long start_id, long count, const long* data, lo
     }
       
     if (!ids_contained( iter, n, valid_ranges, num_valid_ranges)) {
-      if (VERBOSE)
+      if (verbose)
         printf("Entry %ld in %s adjacency data (ID %ld) has invalid IDs in its adjacency list.\n",
           i, name, id);
     
@@ -783,12 +783,12 @@ static int check_valid_parents_children( long start_id,
     prev = indices[i];
     
     if (!ids_contained( contents+start, n, range, 1)) {
-      if (VERBOSE)
+      if (verbose)
         printf("Set %ld (ID %ld) has invalid %s IDs.\n", i, start_id+i, name );
       ++invalid;
     }
     else if (contains_duplicates( contents+start, n )) {
-      if (VERBOSE)
+      if (verbose)
         printf("Set %ld (ID %ld) %s list contains duplicate IDs.\n", i, start_id+i, name );
       ++invalid_dup;
     }
@@ -928,7 +928,7 @@ static int check_valid_set_contents( struct mhdf_FileDesc* desc,
     
     if (flags[i] & mhdf_SET_RANGE_BIT) {
       if (n%2) {
-        if (VERBOSE)
+        if (verbose)
           printf("Set %ld (ID %ld) has is marked as range-compressed but has odd number of content values.\n", i, start_id+i );
         ++invalid_len;
         continue;
@@ -939,7 +939,7 @@ static int check_valid_set_contents( struct mhdf_FileDesc* desc,
       tmpresult = ids_contained( contents+start, n, ranges, num_ranges);
     }
     if (!tmpresult) {
-      if (VERBOSE)
+      if (verbose)
         printf("Set %ld (ID %ld) has invalid content IDs.\n", i, start_id+i );
       ++invalid_handle;
       continue;
@@ -953,7 +953,7 @@ static int check_valid_set_contents( struct mhdf_FileDesc* desc,
     else
       tmpresult = contains_duplicates( contents+start, n );
     if(tmpresult) {
-      if (VERBOSE)
+      if (verbose)
         printf("Set %ld (ID %ld) is not ordered but contains duplicate handles.\n", i, start_id+i );
       ++invalid_dup;
     }
@@ -1002,7 +1002,7 @@ static int check_valid_tag( int tag_idx, mhdf_FileHandle file, struct mhdf_FileD
   mhdf_Status status;
   const struct mhdf_TagDesc* tag = &(desc->tags[tag_idx]);
   int i, result = 0;
-  long srange[2];
+  long srange[2]={0,0};
   const char* name;
   struct mhdf_EntDesc* group;
   hid_t h5type;
@@ -1211,7 +1211,7 @@ static int check_valid_var_len_tag( int tag_idx, mhdf_FileHandle file, struct mh
     }
     mhdf_closeData( file, handles[2], &status );
     
-    if (check_valid_end_indices( ids, count, 1, 0, num_val, "Varible-length tag", tag->name ))
+    if (check_valid_end_indices( ids, count, 1, 0, num_val, "Variable-length tag", tag->name ))
       ++result;
     free(ids);
   }

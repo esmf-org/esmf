@@ -326,6 +326,9 @@ namespace moab {
       unsigned splitsPerDir;
   
       CandidatePlaneSet planeSet;
+
+      bool spherical;
+      double radius;
     };
                     
 

@@ -6,9 +6,9 @@ ALL: build_here
 ESMF_CXXCOMPILECPPFLAGS += -DIS_BUILDING_MB -DHAVE_VSNPRINTF -DLINUX -DUSE_MPI
 
 SOURCEC = \
-	gs.cpp ParallelMergeMesh.cpp SharedSetData.cpp \
-	ParallelComm.cpp ProcConfig.cpp \
-	ParallelData.cpp ReadParallel.cpp
+  gs.cpp ParallelComm.cpp ParallelData.cpp ParallelMergeMesh.cpp \
+  ParCommGraph.cpp ProcConfig.cpp ReadParallel.cpp SharedSetData.cpp \
+  
 #	WriteHDF5Parallel.cpp
 
 SOURCEF =

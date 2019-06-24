@@ -31,13 +31,16 @@
 #include "moab/FileOptions.hpp"
 #include "FileTokenizer.hpp"
 #include "moab/VtkUtil.hpp"
-
-#define MB_VTK_MATERIAL_SETS
-#ifdef MB_VTK_MATERIAL_SETS
 #include "MBTagConventions.hpp"
+
+// #define MB_VTK_MATERIAL_SETS
+#ifdef MB_VTK_MATERIAL_SETS
 #include <map>
+#endif
 
 namespace moab {
+
+#ifdef MB_VTK_MATERIAL_SETS
 
 class Hash
 {
@@ -90,18 +93,19 @@ public:
 class Modulator : public std::map<Hash, EntityHandle>
 {
 public:
-  Modulator(Interface* iface, std::string tag_name, DataType mb_type, size_t sz, size_t per_elem)
+  Modulator(Interface* iface) : mesh(iface)
+  { }
+
+  ErrorCode initialize(std::string tag_name, DataType mb_type, size_t sz, size_t per_elem)
   {
-    this->mesh = iface;
     std::vector<unsigned char> default_val;
     default_val.resize(sz * per_elem);
-    ErrorCode rval;
-    rval = this->mesh->tag_get_handle(
+    ErrorCode rval = this->mesh->tag_get_handle(
         tag_name.c_str(), per_elem, mb_type, this->tag,
         MB_TAG_SPARSE | MB_TAG_BYTES | MB_TAG_CREAT,
         &default_val[0]
         );
-    MB_CHK_SET_ERR_RET(rval, "can't tag_get_handle");
+    return rval;
   }
 
   void add_entity(EntityHandle ent, const unsigned char* bytes, size_t len)
@@ -1032,28 +1036,37 @@ ErrorCode ReadVtk::vtk_read_tag_data(FileTokenizer& tokens,
 {
   ErrorCode result;
   DataType mb_type;
-  size_t size;
   if (type == 1) {
     mb_type = MB_TYPE_BIT;
-    size = sizeof(bool);
   }
   else if (type >= 2 && type <= 9) {
     mb_type = MB_TYPE_INTEGER;
-    size = sizeof(int);
   }
   else if (type == 10 || type == 11) {
     mb_type = MB_TYPE_DOUBLE;
-    size = sizeof(double);
   }
   else if (type == 12) {
     mb_type = MB_TYPE_INTEGER;
-    size = 4; // Could be 4 or 8, but we don't know. Hope it's 4 because MOAB doesn't support 64-bit ints.
   }
   else
     return MB_FAILURE;
 
 #ifdef MB_VTK_MATERIAL_SETS
-  Modulator materialMap(this->mdbImpl, this->mPartitionTagName, mb_type, size, per_elem);
+  size_t size;
+  if (type == 1) {
+    size = sizeof(bool);
+  }
+  else if (type >= 2 && type <= 9) {
+    size = sizeof(int);
+  }
+  else if (type == 10 || type == 11) {
+    size = sizeof(double);
+  }
+  else /* (type == 12) */ {
+    size = 4; // Could be 4 or 8, but we don't know. Hope it's 4 because MOAB doesn't support 64-bit ints.
+  }
+  Modulator materialMap(this->mdbImpl);
+  result = materialMap.initialize(this->mPartitionTagName, mb_type, size, per_elem);MB_CHK_SET_ERR(result, "MaterialMap tag (" << this->mPartitionTagName << ") creation failed.");
   bool isMaterial =
     size * per_elem <= 4 &&                          // Must have int-sized values (ParallelComm requires it)
     ! this->mPartitionTagName.empty() &&             // Must have a non-empty field name...

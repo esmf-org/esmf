@@ -1,5 +1,5 @@
 /* WriteDamsel.cpp
- * The Damsel library provides mesh-aware parallel I/O; see http://trac.mcs.anl.gov/projects/damsel/wiki for details,
+ * The Damsel library provides mesh-aware parallel I/O; see http://cucis.ece.northwestern.edu/projects/DAMSEL/ for details,
  * though for now that site is restricted to project participants.  Damsel uses a data model that's very similar to
  * that used in MOAB and ITAPS.  It uses the same basic data model concepts of entities, sets, tags, and interface.
  * In theory, we should be able to completely save/restore to/from Damsel any data that can be saved/restored to/from

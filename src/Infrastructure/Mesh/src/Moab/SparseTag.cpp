@@ -27,24 +27,6 @@
 
 namespace moab {
 
-inline
-static ErrorCode not_found(const std::string& /*name*/, EntityHandle /*h*/)
-{
-  // MB_TAG_NOT_FOUND could be a non-error condition, do not call MB_SET_ERR on it
-  // Print warning messages for debugging only
-#if 0
-  if (h)
-    fprintf(stderr, "[Warning]: No sparse tag %s value for %s %lu\n",
-        name.c_str(),
-        CN::EntityTypeName(TYPE_FROM_HANDLE(h)),
-        (unsigned long)ID_FROM_HANDLE(h));
-  else
-    fprintf(stderr, "[Warning]: No sparse tag %s value for root set\n", name.c_str());
-#endif
-
-  return MB_TAG_NOT_FOUND;
-}
-
 SparseTag::SparseTag(const char* name,
                      int size,
                      DataType type,
@@ -117,14 +99,14 @@ ErrorCode SparseTag::get_data(Error* /* error */, EntityHandle entity_handle, vo
     return MB_SUCCESS;
   }
   else
-    return not_found(get_name(), entity_handle);
+    return MB_TAG_NOT_FOUND;
 }
 
 ErrorCode SparseTag::remove_data(Error* /* error */, EntityHandle entity_handle)
 {
   MapType::iterator i = mData.find(entity_handle);
-  if (i == mData.end()) 
-    return not_found(get_name(), entity_handle);
+  if (i == mData.end())
+    return MB_TAG_NOT_FOUND;
 
   mAllocator.destroy(i->second);
   mData.erase(i);
@@ -141,7 +123,8 @@ ErrorCode SparseTag::get_data(const SequenceManager*,
   ErrorCode rval;
   unsigned char* ptr = reinterpret_cast<unsigned char*>(data);
   for (size_t i = 0; i < num_entities; ++i, ptr += get_size()) {
-    rval = get_data(NULL, entities[i], ptr);MB_CHK_ERR(rval);
+    rval = get_data(NULL, entities[i], ptr);
+    if (MB_SUCCESS != rval) return rval;
   }
 
   return MB_SUCCESS;
@@ -156,7 +139,8 @@ ErrorCode SparseTag::get_data(const SequenceManager*,
   unsigned char* ptr = reinterpret_cast<unsigned char*>(data);
   Range::const_iterator i;
   for (i = entities.begin(); i != entities.end(); ++i, ptr += get_size()) {
-    rval = get_data(NULL, *i, ptr);MB_CHK_ERR(rval);
+    rval = get_data(NULL, *i, ptr);
+    if (MB_SUCCESS != rval) return rval;
   }
 
   return MB_SUCCESS;
@@ -181,7 +165,7 @@ ErrorCode SparseTag::get_data(const SequenceManager*,
       *pointers = get_default_value();
     }
     else if (MB_SUCCESS != rval_tmp) {
-      rval = not_found(get_name(), entities[i]);
+      return MB_TAG_NOT_FOUND;
     }
   }
 
@@ -207,7 +191,7 @@ ErrorCode SparseTag::get_data(const SequenceManager*,
       *pointers = get_default_value();
     }
     else if (MB_SUCCESS != rval_tmp) {
-      rval = not_found(get_name(), *i);
+      return MB_TAG_NOT_FOUND;
     }
   }
 
@@ -329,7 +313,9 @@ ErrorCode SparseTag::remove_data(SequenceManager*,
 {
   ErrorCode rval;
   for (size_t i = 0; i < num_entities; ++i) {
-    rval = remove_data(NULL, entities[i]);MB_CHK_ERR(rval);
+    rval = remove_data(NULL, entities[i]);
+    if (MB_SUCCESS != rval)
+      return rval;
   }
 
   return MB_SUCCESS;
@@ -382,7 +368,7 @@ ErrorCode SparseTag::tag_iterate(SequenceManager* seqman,
     // the count can be computed properly
     if (get_default_value() && !allocate)
       ++iter;
-    return not_found(get_name(), *iter);
+    // return not_found(get_name(), *iter);
   }
 
   // Increment iterator and return

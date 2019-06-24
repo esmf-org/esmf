@@ -64,16 +64,17 @@ public:
   static const char *parallelOptsNames[];
   
   enum ParallelActions {PA_READ=0, 
-                        PA_READ_PART, 
-                        PA_BROADCAST, 
-                        PA_DELETE_NONLOCAL,
-                        PA_CHECK_GIDS_SERIAL, 
-                        PA_GET_FILESET_ENTS, 
-                        PA_RESOLVE_SHARED_ENTS,
-                        PA_EXCHANGE_GHOSTS, 
-                        PA_RESOLVE_SHARED_SETS,
-                        PA_AUGMENT_SETS_WITH_GHOSTS,
-                        PA_PRINT_PARALLEL
+                        PA_READ_PART=1,
+                        PA_BROADCAST=2,
+                        PA_DELETE_NONLOCAL=3,
+                        PA_CHECK_GIDS_SERIAL=4,
+                        PA_GET_FILESET_ENTS=5,
+                        PA_RESOLVE_SHARED_ENTS=6,
+                        PA_EXCHANGE_GHOSTS=7,
+                        PA_RESOLVE_SHARED_SETS=8,
+                        PA_AUGMENT_SETS_WITH_GHOSTS=9,
+                        PA_PRINT_PARALLEL=10,
+                        PA_CREATE_TRIVIAL_PARTITION=11
                        };
 
   static const char *ParallelActionsNames[];

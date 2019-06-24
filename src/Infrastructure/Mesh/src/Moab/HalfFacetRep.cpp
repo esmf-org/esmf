@@ -43,8 +43,8 @@ namespace moab {
   }
 
 
-  HalfFacetRep::HalfFacetRep(Core *impl,   ParallelComm *comm, moab::EntityHandle rset)
-    : mb(impl), pcomm(comm), _rset(rset)
+  HalfFacetRep::HalfFacetRep(Core *impl,   ParallelComm *comm, moab::EntityHandle rset, bool filter_ghosts)
+    : thismeshtype(CURVE), mb(impl), pcomm(comm), _rset(rset), _filterghost(filter_ghosts)
   {
     assert(NULL != impl);
     mInitAHFmaps = false;
@@ -198,7 +198,7 @@ namespace moab {
     if (!mInitAHFmaps){
         mInitAHFmaps = true;
 #ifdef MOAB_HAVE_MPI
-        if (pcomm){
+        if (pcomm && _filterghost){
             moab::Range _averts, _aedgs, _afacs, _acels;
             error = mb->get_entities_by_dimension(this->_rset, 0, _averts, true);MB_CHK_ERR(error);
             error = mb->get_entities_by_dimension(this->_rset, 1, _aedgs, true);MB_CHK_ERR(error);
@@ -613,7 +613,7 @@ namespace moab {
 
     //Step 1: Create an index list storing the starting position for each vertex
     int nv = verts.size();
-    int *is_index = new int[nv+1];
+    std::vector<int> is_index(nv+1);
     for (int i =0; i<nv+1; i++)
       is_index[i] = 0;
 
@@ -634,8 +634,8 @@ namespace moab {
       is_index[i+1] = is_index[i] + is_index[i+1];
 
     //Step 2: Define two arrays v2hv_eid, v2hv_lvid storing every half-facet on a vertex
-    EntityHandle *v2hv_map_eid = new EntityHandle[2*edges.size()];
-    int *v2hv_map_lvid = new int[2*edges.size()];
+    std::vector<EntityHandle> v2hv_map_eid(2*edges.size());
+    std::vector<int> v2hv_map_lvid(2*edges.size());
 
     for (Range::iterator eid = edges.begin(); eid != edges.end(); ++eid)
       {
@@ -680,10 +680,6 @@ namespace moab {
               }
           }
       }
-
-    delete [] is_index;
-    delete [] v2hv_map_eid;
-    delete [] v2hv_map_lvid;
 
     return MB_SUCCESS;
   }
@@ -817,7 +813,7 @@ namespace moab {
 
     //Step 1: Create an index list storing the starting position for each vertex
     int nv = _verts.size();
-    int *is_index = new int[nv+1];
+    std::vector<int> is_index(nv+1);
     for (int i =0; i<nv+1; i++)
       is_index[i] = 0;
 
@@ -840,9 +836,9 @@ namespace moab {
        is_index[i+1] = is_index[i] + is_index[i+1];
 
      //Step 2: Define two arrays v2hv_eid, v2hv_lvid storing every half-facet on a vertex
-     EntityHandle * v2nv = new EntityHandle[nepf*nfaces];
-     EntityHandle * v2he_map_fid = new EntityHandle[nepf*nfaces];
-     int * v2he_map_leid = new int[nepf*nfaces];
+     std::vector<EntityHandle> v2nv(nepf*nfaces);
+     std::vector<EntityHandle> v2he_map_fid(nepf*nfaces);
+     std::vector<int> v2he_map_leid(nepf*nfaces);
 
      for (Range::iterator fid = faces.begin(); fid != faces.end(); ++fid)
        {
@@ -930,13 +926,7 @@ namespace moab {
            }
        }
 
-     delete [] is_index;
-     delete [] v2nv;
-     delete [] v2he_map_fid;
-     delete [] v2he_map_leid;
-
      return MB_SUCCESS;
-
   }
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   ErrorCode HalfFacetRep::determine_incident_halfedges( Range &faces)
@@ -1632,7 +1622,7 @@ namespace moab {
 
     //Step 1: Create an index list storing the starting position for each vertex
     int nv = _verts.size();
-    int *is_index = new int[nv+1];
+    std::vector<int> is_index(nv+1);
     for (int i =0; i<nv+1; i++)
       is_index[i] = 0;
 
@@ -1663,10 +1653,10 @@ namespace moab {
        is_index[i+1] = is_index[i] + is_index[i+1];
 
      //Step 2: Define four arrays v2hv_eid, v2hv_lvid storing every half-facet on a vertex
-     EntityHandle * v2oe_v1 = new EntityHandle[is_index[nv]];
-     EntityHandle * v2oe_v2 = new EntityHandle[is_index[nv]];
-     EntityHandle * v2hf_map_cid = new EntityHandle[is_index[nv]];
-     int * v2hf_map_lfid = new int[is_index[nv]];
+     std::vector<EntityHandle> v2oe_v1(is_index[nv]);
+     std::vector<EntityHandle> v2oe_v2(is_index[nv]);
+     std::vector<EntityHandle> v2hf_map_cid(is_index[nv]);
+     std::vector<int> v2hf_map_lfid(is_index[nv]);
 
      for (Range::iterator cid = cells.begin(); cid != cells.end(); ++cid)
        {
@@ -1737,7 +1727,8 @@ namespace moab {
                      lv = k;
                    }
                }
-
+             if (lv<0)
+               MB_SET_ERR(MB_FAILURE, "did not find local vertex ");
              int nidx = lConnMap2D[nvF-3].next[lv];
              int pidx = lConnMap2D[nvF-3].prev[lv];
 
@@ -1762,14 +1753,7 @@ namespace moab {
            }
        }
 
-     delete [] is_index;
-     delete [] v2oe_v1;
-     delete [] v2oe_v2;
-     delete [] v2hf_map_cid;
-     delete [] v2hf_map_lfid;
-
      return MB_SUCCESS;
-
   }
 
 
@@ -1894,13 +1878,14 @@ namespace moab {
         // Local id of vid in the cell and the half-faces incident on it
         int lv = -1;
         for (int i = 0; i< nvpc; ++i){
-            if (conn[i] == vid)
+           if (conn[i] == vid)
               {
                 lv = i;
                 break;
               }
-          };
-
+          }
+        if (lv<0)
+          MB_SET_ERR(MB_FAILURE, "did not find local vertex ");
         int nhf_thisv = lConnMap3D[index].v2hf_num[lv];
         int cidx = ID_FROM_HANDLE(cur_cid)-1;
 
@@ -2018,7 +2003,8 @@ namespace moab {
                 break;
               }
           };
-
+        if (lv<0)
+          MB_SET_ERR(MB_FAILURE, "did not find local vertex ");
         //Number of local half-faces incident on the current vertex
         int nhf_thisv = lConnMap3D[index].v2hf_num[lv];
         int cidx = ID_FROM_HANDLE(cur_cid)-1;
@@ -2152,6 +2138,8 @@ ErrorCode HalfFacetRep::get_up_adjacencies_edg_3d( EntityHandle eid,
 
       //push back new found unchecked incident tets of v_start
       int cidx = ID_FROM_HANDLE(cell_id)-1;
+      if (lv<0)
+        MB_SET_ERR(MB_FAILURE, "did not find local vertex ");
       int nhf_thisv = lConnMap3D[index].v2hf_num[lv];
 
       for (int i = 0; i < nhf_thisv; i++){
@@ -2302,7 +2290,8 @@ ErrorCode HalfFacetRep::get_up_adjacencies_edg_3d( EntityHandle eid,
                   adj_orients->push_back(0);
               }
           }
-
+        if (lv<0)
+          MB_SET_ERR(MB_FAILURE, "did not find local vertex ");
         //push back new found unchecked incident tets of v_start
         int cidx = ID_FROM_HANDLE(cell_id)-1;
         int nhf_thisv = lConnMap3D[index].v2hf_num[lv];
@@ -2632,7 +2621,8 @@ ErrorCode HalfFacetRep::get_up_adjacencies_edg_3d( EntityHandle eid,
         //push back new found unchecked incident tets of v_start
         int cidx = ID_FROM_HANDLE(cell_id)-1;
         int nhf_thisv = lConnMap3D[index].v2hf_num[lv];
-
+        if (lv<0)
+          MB_SET_ERR(MB_FAILURE, "did not find local vertex ");
         for (int i = 0; i < nhf_thisv; i++){
             int ind = lConnMap3D[index].v2hf[lv][i];
             HFacet hf = sibhfs[nfpc*cidx+ind];
@@ -2757,6 +2747,8 @@ ErrorCode HalfFacetRep::get_up_adjacencies_edg_3d( EntityHandle eid,
         else
           {
             // Add other cells that are incident on fid_verts[0]
+            if (locfv0<0 || lv[locfv0]<0)
+              MB_SET_ERR(MB_FAILURE, "did not find local vertex ");
             int nhf_thisv = lConnMap3D[index].v2hf_num[lv[locfv0]];
             int cidx = ID_FROM_HANDLE(cur_cid)-1;
 

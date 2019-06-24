@@ -10,12 +10,12 @@
 
 /* Configuration command along with user-specified options. */
 #ifndef MOAB_CONFIGURE_COMMAND
-#define MOAB_CONFIGURE_COMMAND "./configure "
+#define MOAB_CONFIGURE_COMMAND "./configure  '--enable-shared' '--enable-debug' '--with-mpi=/usr/local' '--with-netcdf=/usr/local' '--prefix=/home/ryan/sandbox/MOAB510'"
 #endif
 
 /* Configuration information. */
 #ifndef MOAB_CONFIGURE_INFO
-#define MOAB_CONFIGURE_INFO "./configure run on Fri Nov  4 14:34:41 MDT 2016"
+#define MOAB_CONFIGURE_INFO "./configure run on Sun Jun 23 09:56:23 MDT 2019"
 #endif
 
 /* Define to alternate name for `main' routine that is called from a `main' in
@@ -50,6 +50,14 @@
 /* Enable use of AHF data-structures for querying adjacency information */
 /* #undef HAVE_AHF */
 
+/* Define if you have a BLAS library. */
+#ifndef MOAB_HAVE_BLAS
+#define MOAB_HAVE_BLAS 1
+#endif
+
+/* Define if cbrt is available. */
+/* #undef HAVE_CBRT */
+
 /* "Define if configured with CCM I/O support." */
 /* #undef HAVE_CCMIO */
 
@@ -77,8 +85,10 @@
 /* "Define if configured with CGNS support." */
 /* #undef HAVE_CGNS */
 
-/* Configure with tool: DAGMC */
-/* #undef HAVE_DAGMC */
+/* Define if clock is available. */
+#ifndef MOAB_HAVE_CLOCK
+#define MOAB_HAVE_CLOCK 1
+#endif
 
 /* "Define if configured with Damsel I/O format support." */
 /* #undef HAVE_DAMSEL */
@@ -91,8 +101,19 @@
 #define MOAB_HAVE_DLFCN_H 1
 #endif
 
+/* Flag indicating whether the library will be compiled with Eigen support */
+/* #undef HAVE_EIGEN */
+
 /* Define if configured with FBiGeom interfaces. */
 /* #undef HAVE_FBIGEOM */
+
+/* Define to 1 if you have the <fcntl.h> header file. */
+#ifndef MOAB_HAVE_FCNTL_H
+#define MOAB_HAVE_FCNTL_H 1
+#endif
+
+/* define if compiler has finite */
+/* #undef MOAB_HAVE_FINITE */
 
 /* Configure with tool: GSETS */
 #ifndef MOAB_HAVE_GSETS
@@ -100,14 +121,13 @@
 #endif
 
 /* Configure with tool: H5MTOOLS */
-#ifndef MOAB_HAVE_H5MTOOLS
-#define MOAB_HAVE_H5MTOOLS 1
-#endif
+/* #undef HAVE_H5MTOOLS */
 
 /* Define if configured with HDF5 support. */
+/* #undef HAVE_HDF5 */
 
 /* Define to 1 if you have the <hdf5.h> header file. */
-
+/* #undef HAVE_HDF5_H */
 
 /* Define if configured with Parallel HDF5 support. */
 /* #undef HAVE_HDF5_PARALLEL */
@@ -117,8 +137,14 @@
 #define MOAB_HAVE_HEXMODOPS 1
 #endif
 
+/* "Define if configured with HYPRE solver support." */
+/* #undef HAVE_HYPRE */
+
 /* Defined if configured with IEEE Floating point support */
 /* #undef HAVE_IEEEFP */
+
+/* MOAB qualified HAVE_IEEEFP_H */
+/* #undef HAVE_IEEEFP_H */
 
 /* Define if configured with iMesh interfaces. */
 #ifndef MOAB_HAVE_IMESH
@@ -135,6 +161,11 @@
 
 /* define if compiler has isfinite */
 /* #undef HAVE_ISFINITE */
+
+/* Define if you have LAPACK library. */
+#ifndef MOAB_HAVE_LAPACK
+#define MOAB_HAVE_LAPACK 1
+#endif
 
 /* Define to 1 if you have the `lmpe' library (-llmpe). */
 /* #undef HAVE_LIBLMPE */
@@ -156,6 +187,11 @@
 /* Configure with tool: MBDEPTH */
 #ifndef MOAB_HAVE_MBDEPTH
 #define MOAB_HAVE_MBDEPTH 1
+#endif
+
+/* Configure with tool: MBHONODES */
+#ifndef MOAB_HAVE_MBHONODES
+#define MOAB_HAVE_MBHONODES 1
 #endif
 
 /* Configure with tool: MBMEM */
@@ -196,6 +232,9 @@
 #define MOAB_HAVE_MBTAGPROP 1
 #endif
 
+/* Configure with tool: MBTEMPEST */
+/* #undef HAVE_MBTEMPEST */
+
 /* Configure with tool: MBUMR */
 #ifndef MOAB_HAVE_MBUMR
 #define MOAB_HAVE_MBUMR 1
@@ -209,11 +248,13 @@
 #define MOAB_HAVE_MEMORY_H 1
 #endif
 
+/* "MOAB configured with Mesquite support" */
+/* #undef HAVE_MESQUITE */
+
 /* Flag indicating whether the library will be compiled with Metis support */
 /* #undef HAVE_METIS */
 
 /* Define if configured with support for parallel computations. */
-/* #undef HAVE_MPI */
 #ifndef MOAB_HAVE_MPI
 #define MOAB_HAVE_MPI 1
 #endif
@@ -238,6 +279,9 @@
 #ifndef MOAB_HAVE_PTRDIFF_T
 #define MOAB_HAVE_PTRDIFF_T 1
 #endif
+
+/* If available, contains the Python version number currently in use. */
+/* #undef HAVE_PYTHON */
 
 /* Configure with tool: REFINER */
 /* #undef HAVE_REFINER */
@@ -265,10 +309,6 @@
 #ifndef MOAB_HAVE_STDINT_H
 #define MOAB_HAVE_STDINT_H 1
 #endif
-
-
-/* define if compiler has finite */
-/* #undef MOAB_HAVE_FINITE */
 
 /* define if compiler has std::isfinite */
 #if defined (ESMF_OS_Darwin) || defined (ESMF_OS_Cygwin) || defined (ESMF_OS_MinGW)
@@ -305,14 +345,43 @@
 #define MOAB_HAVE_STRING_H 1
 #endif
 
+/* Define to 1 if you have the <sys/file.h> header file. */
+#ifndef MOAB_HAVE_SYS_FILE_H
+#define MOAB_HAVE_SYS_FILE_H 1
+#endif
+
+/* MOAB qualified HAVE_SYS_IOCTL_H */
+#ifndef MOAB_HAVE_SYS_IOCTL_H
+#define MOAB_HAVE_SYS_IOCTL_H 1
+#endif
+
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #ifndef MOAB_HAVE_SYS_STAT_H
 #define MOAB_HAVE_SYS_STAT_H 1
 #endif
 
+/* Define to 1 if you have the <sys/time.h> header file. */
+#ifndef MOAB_HAVE_SYS_TIME_H
+#define MOAB_HAVE_SYS_TIME_H 1
+#endif
+
 /* MOAB qualified HAVE_SYS_TYPES_H */
 #ifndef MOAB_HAVE_SYS_TYPES_H
 #define MOAB_HAVE_SYS_TYPES_H 1
+#endif
+
+/* Enable use of TempestRemap library API for computing intersection and
+   remapping for Climate problems */
+/* #undef HAVE_TEMPESTREMAP */
+
+/* MOAB qualified HAVE_TERMIOS_H */
+#ifndef MOAB_HAVE_TERMIOS_H
+#define MOAB_HAVE_TERMIOS_H 1
+#endif
+
+/* Define if times is available. */
+#ifndef MOAB_HAVE_TIMES
+#define MOAB_HAVE_TIMES 1
 #endif
 
 /* Define to 1 if you have the <unistd.h> header file. */
@@ -321,11 +390,14 @@
 #endif
 
 /* Specify if unordered map is available */
-/* #undef MOAB_HAVE_UNORDERED_MAP tr1/unordered_map */
-
+#ifndef MOAB_HAVE_UNORDERED_MAP
+#define MOAB_HAVE_UNORDERED_MAP unordered_map
+#endif
 
 /* Specify if unordered set is available */
-/* #undef MOAB_HAVE_UNORDERED_SET tr1/unordered_set */
+#ifndef MOAB_HAVE_UNORDERED_SET
+#define MOAB_HAVE_UNORDERED_SET unordered_set
+#endif
 
 /* Defined if configured with Valgrind support */
 /* #undef HAVE_VALGRIND */
@@ -333,6 +405,11 @@
 /* Define if vsnprintf is available. */
 #ifndef MOAB_HAVE_VSNPRINTF
 #define MOAB_HAVE_VSNPRINTF 1
+#endif
+
+/* Define if vsprintf is available. */
+#ifndef MOAB_HAVE_VSPRINTF
+#define MOAB_HAVE_VSPRINTF 1
 #endif
 
 /* "Define if configured with VTK I/O library support." */
@@ -344,8 +421,7 @@
 /* "Define if configured with Zoltan library partitioning support." */
 /* #undef HAVE_ZOLTAN */
 
-/* Define to the sub-directory in which libtool stores uninstalled libraries.
-   */
+/* Define to the sub-directory where libtool stores uninstalled libraries. */
 #ifndef MOAB_LT_OBJDIR
 #define MOAB_LT_OBJDIR ".libs/"
 #endif
@@ -376,7 +452,7 @@
 
 /* Define to the full name and version of this package. */
 #ifndef MOAB_PACKAGE_STRING
-#define MOAB_PACKAGE_STRING "MOAB 4.9.2"
+#define MOAB_PACKAGE_STRING "MOAB 5.1.0"
 #endif
 
 /* Define to the one symbol short name of this package. */
@@ -391,7 +467,7 @@
 
 /* Define to the version of this package. */
 #ifndef MOAB_PACKAGE_VERSION
-#define MOAB_PACKAGE_VERSION "4.9.2"
+#define MOAB_PACKAGE_VERSION "5.1.0"
 #endif
 
 /* "Value of C SEEK_CUR" */
@@ -430,31 +506,33 @@
 #endif
 
 /* Unordered map namespace */
-/* #undef MOAB_UNORDERED_MAP_NS tr1 */
+#ifndef MOAB_UNORDERED_MAP_NS
+#define MOAB_UNORDERED_MAP_NS std
+#endif
 
 /* MOAB Version */
 #ifndef MOAB_VERSION
-#define MOAB_VERSION "4.9.2"
+#define MOAB_VERSION "5.1.0"
 #endif
 
 /* MOAB Major Version */
 #ifndef MOAB_VERSION_MAJOR
-#define MOAB_VERSION_MAJOR 4
+#define MOAB_VERSION_MAJOR 5
 #endif
 
 /* MOAB Minor Version */
 #ifndef MOAB_VERSION_MINOR
-#define MOAB_VERSION_MINOR 9
+#define MOAB_VERSION_MINOR 1
 #endif
 
 /* MOAB Patch Level */
 #ifndef MOAB_VERSION_PATCH
-#define MOAB_VERSION_PATCH 2
+#define MOAB_VERSION_PATCH 0
 #endif
 
 /* MOAB Version String */
 #ifndef MOAB_VERSION_STRING
-#define MOAB_VERSION_STRING "MOAB 4.9.2"
+#define MOAB_VERSION_STRING "MOAB 5.1.0"
 #endif
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most

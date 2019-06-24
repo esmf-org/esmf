@@ -1,4 +1,4 @@
-#include "moab/LinearQuad.hpp"
+#include "moab/LocalDiscretization/LinearQuad.hpp"
 #include "moab/Matrix3.hpp"
 #include "moab/Forward.hpp"
 #include <math.h>

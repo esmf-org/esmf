@@ -3,7 +3,7 @@
   /**\brief Shape function space for spectral hexahedron
    */
 
-#include "ElemEvaluator.hpp"
+#include "moab/ElemEvaluator.hpp"
 #include "SpectralFuncs.hpp"
 
 namespace moab 

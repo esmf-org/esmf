@@ -197,7 +197,6 @@ static hid_t get_tag_type( FileHandle* file_ptr,
   return type_id;
 }
 
-
 /** Helper function to write default and mesh values for tag 
  *\param tag_id       The file object upon which to attach the attribute
  *\param attrib_name  The name of the attribute object
@@ -219,7 +218,7 @@ int store_tag_val_in_attrib( hid_t tag_id,
   if (value_size == 1) 
     write_type = type_id;
   else if (H5Tget_class(type_id) == H5T_OPAQUE) {
-    write_type = H5Tcreate( H5T_OPAQUE, abs(value_size) );
+    write_type = H5Tcreate( H5T_OPAQUE, value_size );
   }
   else {
 #if defined(H5Tarray_create_vers) && H5Tarray_create_vers > 1  

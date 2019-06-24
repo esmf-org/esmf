@@ -1,4 +1,4 @@
-#include "moab/LinearTet.hpp"
+#include "moab/LocalDiscretization/LinearTet.hpp"
 #include "moab/Forward.hpp"
 #include <algorithm>
 #include <math.h>
@@ -12,30 +12,28 @@ namespace moab
                                              {0,1,0},
                                              {0,0,1}};
 
-    ErrorCode LinearTet::initFcn(const double *verts, const int /*nverts*/, double *&work) {
+    ErrorCode LinearTet::initFcn(const double *verts, const int nverts, double *&work) {
         // allocate work array as: 
         // work[0..8] = T
         // work[9..17] = Tinv
         // work[18] = detT
         // work[19] = detTinv
-      assert(!work && verts);
-      work = new double[20];
-      Matrix3 *T = reinterpret_cast<Matrix3*>(work),
-          *Tinv = reinterpret_cast<Matrix3*>(work+9);
-      double *detT = work+18, *detTinv = work+19;
-      
-      *T = Matrix3(verts[1*3+0]-verts[0*3+0],verts[2*3+0]-verts[0*3+0],verts[3*3+0]-verts[0*3+0],
-                   verts[1*3+1]-verts[0*3+1],verts[2*3+1]-verts[0*3+1],verts[3*3+1]-verts[0*3+1],
-                   verts[1*3+2]-verts[0*3+2],verts[2*3+2]-verts[0*3+2],verts[3*3+2]-verts[0*3+2]);
-      *Tinv = T->inverse();
-      *detT = T->determinant();
-      *detTinv = (*detT < 1e-12 ? std::numeric_limits<double>::max() : 1.0 / *detT);
+      assert(nverts == 4 && verts);
+      if (!work) work = new double[20];
+
+      Matrix3 J (verts[1*3+0]-verts[0*3+0],verts[2*3+0]-verts[0*3+0],verts[3*3+0]-verts[0*3+0],
+                 verts[1*3+1]-verts[0*3+1],verts[2*3+1]-verts[0*3+1],verts[3*3+1]-verts[0*3+1],
+                 verts[1*3+2]-verts[0*3+2],verts[2*3+2]-verts[0*3+2],verts[3*3+2]-verts[0*3+2]);
+      J.copyto(work);
+      J.inverse().copyto(work+Matrix3::size);
+      work[18] = J.determinant();
+      work[19] = (work[18] < 1e-12 ? std::numeric_limits<double>::max() : 1.0 / work[18]);
 
       return MB_SUCCESS;
     }
 
     ErrorCode LinearTet::evalFcn(const double *params, const double *field, const int /*ndim*/, const int num_tuples, 
-                                 double */*work*/, double *result) {
+                                 double* /*work*/, double *result) {
       assert(params && field && num_tuples > 0);
       std::vector<double> f0(num_tuples);
       std::copy(field, field+num_tuples, f0.begin());
@@ -50,7 +48,7 @@ namespace moab
       return MB_SUCCESS;
     }
 
-    ErrorCode LinearTet::integrateFcn(const double *field, const double */*verts*/, const int nverts, const int /*ndim*/, const int num_tuples,
+    ErrorCode LinearTet::integrateFcn(const double *field, const double* /*verts*/, const int nverts, const int /*ndim*/, const int num_tuples,
                                       double *work, double *result) 
     {
       assert(field && num_tuples > 0);
@@ -104,8 +102,6 @@ namespace moab
 
         // find best initial guess to improve convergence
       CartVect tmp_params[] = {CartVect(-1,-1,-1), CartVect(1,-1,-1), CartVect(-1,1,-1), CartVect(-1,-1,1)};
-      //TODO: RLO replaced this code with same line from 5.0.0 release because it seems like a bug, and ESMF will be
-      // updating to newer version of MOAB soon anyway
       double resl = std::numeric_limits<double>::max();
       CartVect new_pos, tmp_pos;
       ErrorCode rval;
@@ -123,10 +119,12 @@ namespace moab
         // residual is diff between old and new pos; need to minimize that
       CartVect res = new_pos - *cvposn;
       Matrix3 J;
-      rval = (*jacob)(cvparams->array(), verts, nverts, ndim, work, J[0]);
+      rval = (*jacob)(cvparams->array(), verts, nverts, ndim, work, J.array());
+#ifndef NDEBUG
       double det = J.determinant();
       assert(det > std::numeric_limits<double>::epsilon());
-      Matrix3 Ji = J.inverse(1.0/det);
+#endif
+      Matrix3 Ji = J.inverse();
 
       int iters=0;
         // while |res| larger than tol

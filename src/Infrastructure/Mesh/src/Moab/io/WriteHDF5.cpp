@@ -55,27 +55,7 @@
 #error Attempt to compile WriteHDF5 with HDF5 support disabled
 #endif
 
-/* Access HDF5 file handle for debugging
-#include <H5Fpublic.h>
-struct file { uint32_t magic; hid_t handle; };
-*/
-#undef DEBUG
-
 #undef BLOCKED_COORD_IO
-
-#ifdef DEBUG
-/*
-# include <H5Epublic.h>
-  extern "C" herr_t hdf_error_handler(void*)
-  {
-    H5Eprint(stderr);
-    assert(0);
-  }
-*/
-# define myassert(A) assert(A)
-#else
-# define myassert(A)
-#endif
 
 #ifdef MOAB_HAVE_VALGRIND
 #  include <valgrind/memcheck.h>
@@ -95,7 +75,7 @@ namespace moab {
 
 template <typename T> inline 
 void VALGRIND_MAKE_VEC_UNDEFINED(std::vector<T>& v) {
-  (void)VALGRIND_MAKE_MEM_UNDEFINED(&v[0], v.size() * sizeof(T));
+  (void)VALGRIND_MAKE_MEM_UNDEFINED( (T*)&v[0], v.size() * sizeof(T));
 }
 
 #define WRITE_HDF5_BUFFER_SIZE (40 * 1024 * 1024)
@@ -172,7 +152,7 @@ static herr_t handle_hdf5_error(void* data)
 do { \
   if (mhdf_isError(&(A))) { \
     MB_SET_ERR_CONT(mhdf_message(&(A))); \
-    myassert(0); \
+    assert(0); \
     return error(MB_FAILURE); \
   } \
 } while (false)
@@ -181,7 +161,7 @@ do { \
 do { \
   if (mhdf_isError(&(A))) { \
     MB_SET_ERR_CONT(mhdf_message(&(A))); \
-    myassert(0); \
+    assert(0); \
     mhdf_closeData(filePtr, (B), &(A)); \
     return error(MB_FAILURE); \
   } \
@@ -191,7 +171,7 @@ do { \
 do { \
   if (mhdf_isError(&(A))) { \
     MB_SET_ERR_CONT(mhdf_message(&(A))); \
-    myassert(0); \
+    assert(0); \
     mhdf_closeData(filePtr, (B)[0], &(A)); \
     mhdf_closeData(filePtr, (B)[1], &(A)); \
     return error(MB_FAILURE); \
@@ -202,7 +182,7 @@ do { \
 do { \
   if (mhdf_isError(&(A))) { \
     MB_SET_ERR_CONT(mhdf_message(&(A))); \
-    myassert(0); \
+    assert(0); \
     mhdf_closeData(filePtr, (B)[0], &(A)); \
     mhdf_closeData(filePtr, (B)[1], &(A)); \
     mhdf_closeData(filePtr, (B)[2], &(A)); \
@@ -214,7 +194,7 @@ do { \
 do { \
   if (mhdf_isError(&(A))) { \
     MB_SET_ERR_CONT(mhdf_message(&(A))); \
-    myassert(0); \
+    assert(0); \
     mhdf_closeData(filePtr, (B), &(A)); \
     if (C) mhdf_closeData(filePtr, (D), &(A)); \
     return error(MB_FAILURE); \
@@ -234,7 +214,7 @@ do { \
   if (MB_SUCCESS != (A)) { \
     MB_CHK_ERR_CONT((A)); \
     mhdf_closeData(filePtr, (B), &(C)); \
-    myassert(0); \
+    assert(0); \
     return error(A); \
   } \
 } while (false)
@@ -246,7 +226,7 @@ do { \
     mhdf_closeData(filePtr, (B)[0], &(C)); \
     mhdf_closeData(filePtr, (B)[1], &(C)); \
     write_finished(); \
-    myassert(0); \
+    assert(0); \
     return error(A); \
   } \
 } while (false)
@@ -259,7 +239,7 @@ do { \
     mhdf_closeData(filePtr, (B)[1], &(C)); \
     mhdf_closeData(filePtr, (B)[2], &(C)); \
     write_finished(); \
-    myassert(0); \
+    assert(0); \
     return error(A); \
   } \
 } while (false)
@@ -272,7 +252,7 @@ do { \
     if (C) \
       mhdf_closeData(filePtr, (D), &(E)); \
     write_finished(); \
-    myassert(0); \
+    assert(0); \
     return error(A); \
   } \
 } while (false)

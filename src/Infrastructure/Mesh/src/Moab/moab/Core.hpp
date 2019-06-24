@@ -65,7 +65,7 @@ public:
   //!constructor
   Core();
 
-  //! depricated constructor -- values are ignored
+  //! deprecated constructor -- values are ignored
   Core( int rank, int num_cpu );
 
   //!destructor
@@ -258,7 +258,7 @@ public:
           The nodes in 'connectivity' are properly ordered. 
           \param entity_handle EntityHandle to get connectivity of.
           \param connectivity Array in which connectivity of <em>entity_handle</em> is returned.
-          Should contain MeshVertex's.
+          Should contain MBVERTEX's.
           \param num_nodes Number of MeshVertices in array <em>connectivity</em>. 
 
           Example: \code 
@@ -411,19 +411,28 @@ public:
                                                    const bool recursive = false) const;
 
       //! Retrieves all entities in the data base of given type.  
-      /** \param type EntityType of entities desired (ie, MeshHex, MeshEdge, MeshTri, etc )
+      /** \param type EntityType of entities desired (ie, MBHEX, MBEDGE, MBTRI, etc )
           \param entities Range in which entities of EntityType <em>type</em> are returned.
 
           Example: \code
-          EntityType type = MeshTet;
+          EntityType type = MBTET;
           Range entities;
-          get_entities_by_dimension( type, entities ); //get MeshTet type EntityHandles in the database
+          get_entities_by_dimension( type, entities ); //get MBTET type EntityHandles in the database
           \endcode */
     virtual ErrorCode get_entities_by_type( const EntityHandle meshset,
                                               const EntityType type, 
                                               Range &entities,
                                               const bool recursive = false) const;
 
+      //! Retrieves all entities in the data base of given type.  
+      /** \param type EntityType of entities desired (ie, MBHEX, MBEDGE, MBTRI, etc )
+          \param entities Range in which entities of EntityType <em>type</em> are returned.
+
+          Example: \code
+          EntityType type = MBTET;
+          Range entities;
+          get_entities_by_dimension( type, entities ); //get MBTET type EntityHandles in the database
+          \endcode */
     virtual ErrorCode get_entities_by_type( const EntityHandle meshset,
                                               const EntityType type, 
                                               std::vector<EntityHandle> &entities,
@@ -443,7 +452,7 @@ public:
 
       Example: \code
       Range entities;
-      get_entities( entities ); //get MeshTet type EntityHandles in the database
+      get_entities( entities ); //get MBTET type EntityHandles in the database
       \endcode */
     virtual ErrorCode get_entities_by_handle(const EntityHandle meshset,
                                       Range &entities,
@@ -454,7 +463,7 @@ public:
 
       Example: \code
       Range entities;
-      get_entities( entities ); //get MeshTet type EntityHandles in the database
+      get_entities( entities ); //get MBTET type EntityHandles in the database
       \endcode */
     virtual ErrorCode get_entities_by_handle(const EntityHandle meshset,
                                       std::vector<EntityHandle> &entities,
@@ -475,13 +484,13 @@ public:
                                                           const bool recursive = false) const;
 
       //! Retrieves all entities in the data base of given type.  
-      /** \param type EntityType of entities desired (ie, MeshHex, MeshEdge, MeshTri, etc )
+      /** \param type EntityType of entities desired (ie, MBHEX, MBEDGE, MBTRI, etc )
           \param entities Range in which entities of EntityType <em>type</em> are returned.
 
           Example: \code
-          EntityType type = MeshTet;
+          EntityType type = MBTET;
           Range entities;
-          get_entities_by_dimension( type, entities ); //get MeshTet type EntityHandles in the database
+          get_entities_by_dimension( type, entities ); //get MBTET type EntityHandles in the database
           \endcode */
     virtual ErrorCode get_number_entities_by_type(const EntityHandle meshset,
                                                      const EntityType type, 
@@ -502,7 +511,7 @@ public:
 
       Example: \code
       Range entities;
-      get_entities( entities ); //get MeshTet type EntityHandles in the database
+      get_entities( entities ); //get MBTET type EntityHandles in the database
       \endcode */
     virtual ErrorCode get_number_entities_by_handle(const EntityHandle meshset,
                                              int &num_entities,
@@ -510,13 +519,13 @@ public:
 
       //! Creates an element based on the type and connectivity. 
       /** If connectivity vector is not correct for EntityType <em>type</em> (ie, a vector with 
-          3 vertices is passed in to make an MeshQuad), the function returns MB_FAILURE. 
-          \param type Type of element to create. (MeshTet, MeshTri, MeshKnife, etc.) 
+          3 vertices is passed in to make an MBQUAD), the function returns MB_FAILURE.
+          \param type Type of element to create. (MBTET, MBTRI, MBKNIFE, etc.)
           \param connectivity Vector containing connectivity of element to create.
           \param handle EntityHandle representing the newly created element in the database.
 
           Example: \code
-          EntityType type = MeshQuad;
+          EntityType type = MBQUAD;
           std::vector<EntityHandle> connectivity(4);
           quad_conn[0] = vertex0;
           quad_conn[1] = vertex1;

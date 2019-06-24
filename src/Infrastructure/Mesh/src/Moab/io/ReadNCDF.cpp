@@ -1334,7 +1334,6 @@ ErrorCode ReadNCDF::create_ss_elements(int *element_ids,
                                        int ss_seq_id)
 {
   // Determine entity type from element id
-  int i, k;
 
   // If there are dist. factors, create a vector to hold the array
   // and place this array as a tag onto the sideset meshset
@@ -1360,7 +1359,7 @@ ErrorCode ReadNCDF::create_ss_elements(int *element_ids,
 
   int df_index = 0;
   int sense = 0;
-  for (i = 0; i < num_sides; i++) {
+  for (int i = 0; i < num_sides; i++) {
     ExoIIElementType exoii_type;
     ReadBlockData block_data;
     block_data.elemType = EXOII_MAX_ELEM_TYPE;
@@ -1383,7 +1382,7 @@ ErrorCode ReadNCDF::create_ss_elements(int *element_ids,
         return MB_FAILURE;
 
       connectivity.resize(num_side_nodes);
-      for (k = 0; k < num_side_nodes; ++k)
+      for (int k = 0; k < num_side_nodes; ++k)
         connectivity[k] = nodes[side_node_idx[k]];
 
       if (MB_SUCCESS != create_sideset_element(connectivity, subtype, ent_handle, sense))
@@ -1395,7 +1394,7 @@ ErrorCode ReadNCDF::create_ss_elements(int *element_ids,
 
       // Read in distribution factor array
       if (num_dist_factors) {
-        for (k = 0; k < 4; k++)
+        for (int k = 0; k < 4; k++)
           dist_factor_vector.push_back(temp_dist_factor_vector[df_index++]);
       }
     }
@@ -1411,7 +1410,7 @@ ErrorCode ReadNCDF::create_ss_elements(int *element_ids,
         return MB_FAILURE;
 
       connectivity.resize(num_side_nodes);
-      for (k = 0; k < num_side_nodes; ++k)
+      for (int k = 0; k < num_side_nodes; ++k)
         connectivity[k] = nodes[side_node_idx[k]];
 
       if (MB_SUCCESS != create_sideset_element(connectivity, subtype, ent_handle, sense))
@@ -1423,7 +1422,7 @@ ErrorCode ReadNCDF::create_ss_elements(int *element_ids,
 
       // Read in distribution factor array
       if (num_dist_factors) {
-        for (k = 0; k < 3; k++)
+        for (int k = 0; k < 3; k++)
           dist_factor_vector.push_back(temp_dist_factor_vector[df_index++]);
       }
     }
@@ -1439,7 +1438,7 @@ ErrorCode ReadNCDF::create_ss_elements(int *element_ids,
           reverse_entities.push_back(ent_handle);
 
         if (num_dist_factors) {
-          for (k = 0; k < 4; k++)
+          for (int k = 0; k < 4; k++)
             dist_factor_vector.push_back(temp_dist_factor_vector[df_index++]);
         }
 
@@ -1449,7 +1448,7 @@ ErrorCode ReadNCDF::create_ss_elements(int *element_ids,
         reverse_entities.push_back(ent_handle);
 
         if (num_dist_factors) {
-          for (k = 0; k < 4; k++)
+          for (int k = 0; k < 4; k++)
             dist_factor_vector.push_back(temp_dist_factor_vector[df_index++]);
         }
 
@@ -1465,7 +1464,7 @@ ErrorCode ReadNCDF::create_ss_elements(int *element_ids,
           return MB_FAILURE;
 
         connectivity.resize(num_side_nodes);
-        for (k = 0; k < num_side_nodes; ++k)
+        for (int k = 0; k < num_side_nodes; ++k)
           connectivity[k] = nodes[side_node_idx[k]];
 
         if (MB_SUCCESS != create_sideset_element(connectivity, subtype, ent_handle, sense))
@@ -1476,7 +1475,7 @@ ErrorCode ReadNCDF::create_ss_elements(int *element_ids,
           reverse_entities.push_back(ent_handle);
 
         if (num_dist_factors) {
-          for (k = 0; k < 2; k++)
+          for (int k = 0; k < 2; k++)
             dist_factor_vector.push_back(temp_dist_factor_vector[df_index++]);
         }
       }
@@ -1492,7 +1491,7 @@ ErrorCode ReadNCDF::create_ss_elements(int *element_ids,
         return MB_FAILURE;
       
       connectivity.resize(num_side_nodes);
-      for (k = 0; k < num_side_nodes; ++k)
+      for (int k = 0; k < num_side_nodes; ++k)
         connectivity[k] = nodes[side_node_idx[k]];
 
       if (MB_SUCCESS != create_sideset_element(connectivity, subtype, ent_handle, sense))
@@ -1504,7 +1503,7 @@ ErrorCode ReadNCDF::create_ss_elements(int *element_ids,
 
       // Read in distribution factor array
       if (num_dist_factors) {
-        for (k = 0; k < 2; k++)
+        for (int k = 0; k < 2; k++)
           dist_factor_vector.push_back(temp_dist_factor_vector[df_index++]);
       }
     }
@@ -1516,7 +1515,7 @@ ErrorCode ReadNCDF::create_ss_elements(int *element_ids,
         else
           reverse_entities.push_back(ent_handle);
         if (num_dist_factors) {
-          for (k = 0; k < 3; k++)
+          for (int k = 0; k < 3; k++)
             dist_factor_vector.push_back(temp_dist_factor_vector[df_index++]);
         }
       }
@@ -1535,7 +1534,7 @@ ErrorCode ReadNCDF::create_ss_elements(int *element_ids,
           return MB_FAILURE;
 
         connectivity.resize(num_side_nodes);
-        for (k = 0; k < num_side_nodes; ++k)
+        for (int k = 0; k < num_side_nodes; ++k)
           connectivity[k] = nodes[side_node_idx[k]];
 
         if (MB_SUCCESS != create_sideset_element(connectivity, subtype, ent_handle, sense))
@@ -1546,7 +1545,7 @@ ErrorCode ReadNCDF::create_ss_elements(int *element_ids,
           reverse_entities.push_back(ent_handle);
 
         if (num_dist_factors) {
-          for (k = 0; k < 2; k++)
+          for (int k = 0; k < 2; k++)
             dist_factor_vector.push_back(temp_dist_factor_vector[df_index++]);
         }
       }
@@ -1562,6 +1561,10 @@ ErrorCode ReadNCDF::create_sideset_element(const std::vector<EntityHandle>& conn
   // Get adjacent entities
   ErrorCode error = MB_SUCCESS;
   int to_dim = CN::Dimension(type);
+  // for matching purposes , consider only corner nodes
+  // basically, assume everything is matching if the corner nodes are matching, and
+  // the number of total nodes is the same
+  int nb_corner_nodes = CN::VerticesPerEntity(type);
   std::vector<EntityHandle> adj_ent;
   mdbImpl->get_adjacencies(&(connectivity[0]), 1, to_dim, false, adj_ent);
 
@@ -1583,16 +1586,17 @@ ErrorCode ReadNCDF::create_sideset_element(const std::vector<EntityHandle>& conn
 
     // Find a matching node
     std::vector<EntityHandle>::iterator iter;
-    iter = std::find(match_conn.begin(), match_conn.end(), connectivity[0]);
-    if (iter == match_conn.end())
+    std::vector<EntityHandle>::iterator end_corner=match_conn.begin()+nb_corner_nodes;
+    iter = std::find(match_conn.begin(), end_corner, connectivity[0]);
+    if (iter == end_corner)
       continue;
 
     // Rotate to match connectivity
-    std::rotate(match_conn.begin(), iter, match_conn.end());
+    // rotate only corner nodes, ignore the rest from now on
+    std::rotate(match_conn.begin(), iter, end_corner);
 
     bool they_match = true;
-    unsigned int j;
-    for (j = 1; j < connectivity.size(); j++) {
+    for (int j = 1; j < nb_corner_nodes; j++) {
       if (connectivity[j] != match_conn[j]) {
         they_match = false;
         break;
@@ -1604,8 +1608,8 @@ ErrorCode ReadNCDF::create_sideset_element(const std::vector<EntityHandle>& conn
       // Try the opposite sense
       they_match = true;
 
-      unsigned int k = connectivity.size() - 1;
-      for (j = 1; j < connectivity.size(); ) {
+      int k = nb_corner_nodes - 1;
+      for (int j = 1; j < nb_corner_nodes; ) {
         if (connectivity[j] != match_conn[k]) {
           they_match = false;
           break;

@@ -2045,7 +2045,7 @@ ErrorCode ReadHDF5::read_all_set_meta()
 
   if (bcast) {
 #ifdef MOAB_HAVE_MPI
-    int ierr = MPI_Bcast(setMeta, num_sets*4, MPI_LONG, 0, comm);
+    int ierr = MPI_Bcast((void*)setMeta, num_sets*4, MPI_LONG, 0, comm);
     if (MPI_SUCCESS != ierr)
       MB_SET_ERR(MB_FAILURE, "ReadHDF5 Failure");
 #else
@@ -2462,6 +2462,14 @@ ErrorCode ReadHDF5::read_set_data(const Range& set_file_ids,
   size_t count, offset;
 
   int nn = 0;
+#ifdef  MOAB_HAVE_MPI
+  if (nativeParallel && mode==CONTENT && myPcomm->proc_config().proc_size()>1 && data_offsets.empty())
+  {
+    MB_SET_ERR_CONT( "ReadHDF5 Failure: Attempt reading an empty dataset on proc " <<
+        myPcomm->proc_config().proc_rank());
+    MPI_Abort(myPcomm->proc_config().proc_comm(), 1);
+  }
+#endif
   while (!data.done()) {
     dbgOut.printf(3, "Reading chunk %d of %s\n", ++nn, data.get_debug_desc());
     try {
@@ -3337,7 +3345,7 @@ ErrorCode ReadHDF5::read_var_len_tag(Tag tag_handle,
       {
         ErrorCode rval1;
         if (isHandle) {
-          assert(readSize == sizeof(EntityHandle));
+          assert( readSize == sizeof(EntityHandle) );
           rval1 = readHDF5->convert_id_to_handle((EntityHandle*)data, count);MB_CHK_ERR(rval1);
         }
         int n = count;
