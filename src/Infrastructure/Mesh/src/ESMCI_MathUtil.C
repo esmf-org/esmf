@@ -931,13 +931,13 @@ void rot_2D_3D_sph(int num_p, double *p, bool *left_turn, bool *right_turn) {
 
 }
 
-
   // Detect if a point (pnt) is in a polygon (p)
+  // ONLY WORKS FOR CONVEX POLYGONS
   // here the points are 2D and the polygon is counter-clockwise
   // returns true if the point is in the polygon (including on the edge), and
   // false otherwise
 template <class GEOM>
-  bool is_pnt_in_poly(int num_p, double *p, double *pnt) {
+bool is_pnt_in_convex_poly(int num_p, double *p, double *pnt) {
 
   // Loop through polygon
   for (int i=0; i<num_p; i++) {
@@ -968,8 +968,8 @@ template <class GEOM>
 
 // Create instances for supported geometries, otherwise would have to put template
 // in include file
-template bool is_pnt_in_poly<GEOM_CART2D>(int num_p, double *p, double *pnt);
-template bool is_pnt_in_poly<GEOM_SPH2D3D>(int num_p, double *p, double *pnt);
+  template bool is_pnt_in_convex_poly<GEOM_CART2D>(int num_p, double *p, double *pnt);
+  template bool is_pnt_in_convex_poly<GEOM_SPH2D3D>(int num_p, double *p, double *pnt);
 
 // See if any other points in the polygon are in the triangle formed by ind[0], ind[1], ind[2]
 template<class GEOM>
@@ -987,7 +987,7 @@ bool is_ear(int num_p, double *p, int *ind) {
     if (i==ind[0]) continue;
     if (i==ind[1]) continue;
     if (i==ind[2]) continue;
-    if (is_pnt_in_poly<GEOM>(3, tri, GEOM::getPntAt(p,i))) return false;
+    if (is_pnt_in_convex_poly<GEOM>(3, tri, GEOM::getPntAt(p,i))) return false;
   }
 
   return true;
@@ -2832,5 +2832,83 @@ double calc_poly_intersect_area(int num_p, double *p, int *tri_ind_p, int num_q,
 
 template double calc_poly_intersect_area<GEOM_CART2D>(int num_p, double *p, int *tri_ind_p, int num_q, double *q, int *tri_ind_q, double *td, int *ti);
 template double calc_poly_intersect_area<GEOM_SPH2D3D>(int num_p, double *p, int *tri_ind_p, int num_q, double *q, int *tri_ind_q, double *td, int *ti);
+
+  // Detect if a point (pnt) is in a polygon (p)
+  // EVENTUALLY MERGE THIS WITH OTHER is_pnt_in_convex_poly after 8.0.0, 
+  // WHEN BFB ISN'T AS MUCH OF A CONCERN
+  // ONLY WORKS FOR CONVEX POLYGONS
+  // has a tol, the larger the tol, the further outside the poly the point can be
+  // here the points are 2D and the polygon is counter-clockwise
+  // returns true if the point is in the polygon (including on the edge), and
+  // false otherwise
+template <class GEOM>
+bool is_pnt_in_convex_poly_wtol(int num_p, double *p, double *pnt, double tol) {
+
+  // Loop through polygon
+  for (int i=0; i<num_p; i++) {
+    double *pntip0=GEOM::getPntAt(p,i);
+    double *pntip1=GEOM::getPntAt(p,(i+1)%num_p);
+
+    // vector from pntip0 to pnti1
+    double v01[GEOM::pnt_size];
+    GEOM::sub(v01,pntip1,pntip0);
+
+    // vector from pntip0 to pnt
+    double v0p[GEOM::pnt_size];
+    GEOM::sub(v0p,pnt,pntip0);
+
+    // Calc cross product
+    double cross;
+    cross=GEOM::turn(v01,v0p,pntip0);
+
+    //    printf("%d pnt0=%f %f turn=%f\n",i,pntip0[0],pntip0[1],cross);
+
+    // If you have to turn less that parallel with the line, then it's outside 
+    // Using -tol, so that the bigger the tol the more outside the polygon it can be
+    if (cross <= -tol) {
+      return false;
+    }
+  }
+
+  return true;
+}
+  template bool is_pnt_in_convex_poly_wtol<GEOM_CART2D>(int num_p, double *p, double *pnt, double tol);
+  template bool is_pnt_in_convex_poly_wtol<GEOM_SPH2D3D>(int num_p, double *p, double *pnt, double tol);
+
+// Figure out if a point is in a poly. 
+// This method works on both concave and convex polygons.
+// This assumes the polygon is counter-clockwise.
+// tri_ind_p should be of size 3*(num_p-2)
+// td should be the same size as p
+// ti should be of size num_p
+template <class GEOM>
+bool is_pnt_in_polygon(int num_p, double *p, double *pnt, double tol, int *tri_ind_p, double *td, int *ti) {
+
+  // Triangulate p
+  int ret_p=triangulate_poly<GEOM>(num_p, p, td, ti, tri_ind_p);  
+  if (ret_p == ESMCI_TP_DEGENERATE_POLY) return false;
+  else if (ret_p == ESMCI_TP_CLOCKWISE_POLY) Throw() << "Can't triangulate polygon.";
+
+  // Loop over triangles seeing if pnt is inside.
+  for (int p_pos=0,ip=0; ip<num_p-2; ip++) {
+    
+    // Fill p tri
+    double p_tri[3*GEOM::pnt_size];
+    GEOM::copy(GEOM::getPntAt(p_tri,0),GEOM::getPntAt(p,tri_ind_p[p_pos]));
+    GEOM::copy(GEOM::getPntAt(p_tri,1),GEOM::getPntAt(p,tri_ind_p[p_pos+1]));
+    GEOM::copy(GEOM::getPntAt(p_tri,2),GEOM::getPntAt(p,tri_ind_p[p_pos+2]));
+    p_pos += 3;
+
+    // If the point is in the triangle, then it's in the polygon
+    if (is_pnt_in_convex_poly_wtol<GEOM>(3, p_tri, pnt, tol)) return true;
+  }
+
+  // Didn't find point in any triangle so return false
+  return false;
+
+}
+
+  template bool is_pnt_in_polygon<GEOM_CART2D>(int num_p, double *p, double *pnt, double tol, int *tri_ind_p, double *td, int *ti);
+  template bool is_pnt_in_polygon<GEOM_SPH2D3D>(int num_p, double *p, double *pnt, double tol, int *tri_ind_p, double *td, int *ti);
 
 } // namespace
