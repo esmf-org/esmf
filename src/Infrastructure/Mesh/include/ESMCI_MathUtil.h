@@ -308,13 +308,16 @@ template <class TYPE>
 int triangulate_poly(int num_p, double *p, double *td, int *ti, int *tri_ind);
 
 template <class TYPE>
-bool is_pnt_in_poly(int num_p, double *p, double *pnt);
+  bool is_pnt_in_convex_poly(int num_p, double *p, double *pnt);
 
 template <class GEOM>
 double calc_angle(double *v1, double *v2, double *norm);
 
 template <class GEOM>
   double calc_poly_intersect_area(int num_p, double *p, int *tri_ind_p, int num_q, double *q, int *tri_ind_q, double *td, int *ti);
+
+template <class GEOM>
+  bool is_pnt_in_polygon(int num_p, double *p, double *pnt, double tol, int *tri_ind_p, double *td, int *ti);
 
 } // namespace
 
