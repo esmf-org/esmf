@@ -2881,13 +2881,26 @@ bool is_pnt_in_convex_poly_wtol(int num_p, double *p, double *pnt, double tol) {
 // tri_ind_p should be of size 3*(num_p-2)
 // td should be the same size as p
 // ti should be of size num_p
+// if success isn't specified, or is NULL, then throw on error, otherwise return true for a successful run, or false otherwise 
+
 template <class GEOM>
-bool is_pnt_in_polygon(int num_p, double *p, double *pnt, double tol, int *tri_ind_p, double *td, int *ti) {
+bool is_pnt_in_polygon(int num_p, double *p, double *pnt, double tol, int *tri_ind_p, double *td, int *ti, bool *success) {
+
+  // Set success
+  if (success) *success=true;
 
   // Triangulate p
   int ret_p=triangulate_poly<GEOM>(num_p, p, td, ti, tri_ind_p);  
-  if (ret_p == ESMCI_TP_DEGENERATE_POLY) return false;
-  else if (ret_p == ESMCI_TP_CLOCKWISE_POLY) Throw() << "Can't triangulate polygon.";
+  if (ret_p == ESMCI_TP_DEGENERATE_POLY) return false; // There's no poly so something can't be inside it.
+  else if (ret_p == ESMCI_TP_CLOCKWISE_POLY) {
+    if (success) {
+      *success=false;
+      return false;
+    } else {
+      Throw() << "Can't triangulate polygon.";
+    }
+  }
+
 
   // Loop over triangles seeing if pnt is inside.
   for (int p_pos=0,ip=0; ip<num_p-2; ip++) {
@@ -2908,7 +2921,7 @@ bool is_pnt_in_polygon(int num_p, double *p, double *pnt, double tol, int *tri_i
 
 }
 
-  template bool is_pnt_in_polygon<GEOM_CART2D>(int num_p, double *p, double *pnt, double tol, int *tri_ind_p, double *td, int *ti);
-  template bool is_pnt_in_polygon<GEOM_SPH2D3D>(int num_p, double *p, double *pnt, double tol, int *tri_ind_p, double *td, int *ti);
+  template bool is_pnt_in_polygon<GEOM_CART2D>(int num_p, double *p, double *pnt, double tol, int *tri_ind_p, double *td, int *ti, bool *success);
+  template bool is_pnt_in_polygon<GEOM_SPH2D3D>(int num_p, double *p, double *pnt, double tol, int *tri_ind_p, double *td, int *ti, bool * success);
 
 } // namespace

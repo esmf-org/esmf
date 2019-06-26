@@ -317,7 +317,7 @@ template <class GEOM>
   double calc_poly_intersect_area(int num_p, double *p, int *tri_ind_p, int num_q, double *q, int *tri_ind_q, double *td, int *ti);
 
 template <class GEOM>
-  bool is_pnt_in_polygon(int num_p, double *p, double *pnt, double tol, int *tri_ind_p, double *td, int *ti);
+  bool is_pnt_in_polygon(int num_p, double *p, double *pnt, double tol, int *tri_ind_p, double *td, int *ti, bool *success=NULL);
 
 } // namespace
 
