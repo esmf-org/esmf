@@ -2931,7 +2931,7 @@ write(*,*) "NOT Using XGrid"
   if (ABS(dstmassg(1)-srcmassg(1))/srcmassg(1) < 1.0E-14)  csrv = .true.
 
   itrp = .false.
-  if (maxerrorg(1) < 1.0E-2) itrp = .true.
+  if (maxerrorg(1) < 1.5E-2) itrp = .true.
 
   ! Uncomment these calls to see some actual regrid results
   if (localPet == 0) then

@@ -586,8 +586,18 @@ namespace ESMCI {
     int nbr_tri_ind[3*(MAX_NUM_NBRS-2)];
     double tmp_coords[2*MAX_NUM_NBRS]; 
     int tmp_ints[MAX_NUM_NBRS]; 
+    bool success;
 
-    return is_pnt_in_polygon<GEOM_CART2D>(num_nbr_nodes, nbr_coords, src_cntr, 1.0E-14, nbr_tri_ind, tmp_coords, tmp_ints);
+    bool is_in=is_pnt_in_polygon<GEOM_CART2D>(num_nbr_nodes, nbr_coords, src_cntr, 1.0E-14, nbr_tri_ind, tmp_coords, tmp_ints, &success);
+
+    // act based on success
+    if (success) {
+      return is_in;
+    } else {
+      // The nbr polygon should be counter clockwise, if it's so messed up that we can't figure out is_in, then
+      // just use a const grad for now. 
+      return false;
+    }
 
 #undef MAX_NUM_NBRS
   }
@@ -1480,8 +1490,18 @@ namespace ESMCI {
     int nbr_tri_ind[3*(MAX_NUM_NBRS-2)];
     double tmp_coords[3*MAX_NUM_NBRS]; 
     int tmp_ints[MAX_NUM_NBRS]; 
+    bool success;   
 
-    return is_pnt_in_polygon<GEOM_SPH2D3D>(num_nbr_nodes, nbr_coords, src_cntr, 1.0E-14, nbr_tri_ind, tmp_coords, tmp_ints);
+    bool is_in=is_pnt_in_polygon<GEOM_SPH2D3D>(num_nbr_nodes, nbr_coords, src_cntr, 1.0E-14, nbr_tri_ind, tmp_coords, tmp_ints, &success);
+
+    // act based on success
+    if (success) {
+      return is_in;
+    } else {
+      // The nbr polygon should be counter clockwise, if it's so messed up that we can't figure out is_in, then
+      // just use a const grad for now. 
+      return false;
+    }
 
 #undef MAX_NUM_NBRS
   }
