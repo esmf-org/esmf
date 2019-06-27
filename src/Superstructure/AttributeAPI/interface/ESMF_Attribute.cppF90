@@ -2153,16 +2153,76 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_AttributeGet - Get the Attribute count from an ESMF_AttPack
+!
+! !INTERFACE:
+!     ! Private name; call using ESMF_AttributeGet()
+!     subroutine ESMF_AttributeGetCount(<object>, attpack, count, &
+!                                       attcountflag, attnestflag, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     type(ESMF_AttPack),         intent(inout)         :: attpack
+!     integer,                    intent(out)           :: count
+!     type(ESMF_AttGetCountFlag), intent(in),  optional :: attcountflag
+!     type(ESMF_AttNest_Flag),    intent(in),  optional :: attnestflag
+!     integer,                    intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Return the Attribute count for <object>.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Array),       intent(in) :: array
+!     \item type(ESMF\_ArrayBundle), intent(in) :: arraybundle
+!     \item type(ESMF\_CplComp),     intent(in) :: comp
+!     \item type(ESMF\_GridComp),    intent(in) :: comp
+!     \item type(ESMF\_SciComp),     intent(in) :: comp
+!     \item type(ESMF\_DistGrid),    intent(in) :: distgrid
+!     \item type(ESMF\_Field),       intent(in) :: field
+!     \item type(ESMF\_FieldBundle), intent(in) :: fieldbundle
+!     \item type(ESMF\_Grid),        intent(in) :: grid
+!     \item type(ESMF\_State),       intent(in) :: state
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [attpack]
+!           A handle to the Attribute package.
+!     \item [count]
+!           The number of all existing Attributes of the type designated in the
+!           {\it attcountflag}, not just Attribute that have been set.
+!     \item [{[attcountflag]}]
+!           The flag to specify which attribute count to return, the
+!           default is ESMF\_ATTGETCOUNT\_ATTRIBUTE.  This flag is documented
+!           in section \ref{const:attgetcount}.
+!     \item [{[attnestflag]}]
+!           A flag to determine whether to descend the
+!           Attribute hierarchy when looking for this Attribute, the default
+!           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
+!           \ref{const:attnest}.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP!------------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: ESMF_AttributeGet - Get the Attribute count
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeGet()
-!     subroutine ESMF_AttributeGetCount(<object>, count, attcountflag, &
-!                                       attnestflag, rc)
+!     subroutine ESMF_AttributeGetCount(<object>, count, &
+!                                       convention, purpose, attPackInstanceName, &
+!                                       attcountflag, attnestflag, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
 !     integer,                    intent(out)           :: count
+!     character (len=*),          intent(in),  optional :: convention
+!     character (len=*),          intent(in),  optional :: purpose
+!     character (len=*),          intent(in),  optional :: attPackInstanceName
 !     type(ESMF_AttGetCountFlag), intent(in),  optional :: attcountflag
 !     type(ESMF_AttNest_Flag),    intent(in),  optional :: attnestflag
 !     integer,                    intent(out), optional :: rc
@@ -2191,6 +2251,15 @@ contains
 !     \item [count]
 !           The number of all existing Attributes of the type designated in the
 !           {\it attcountflag}, not just Attribute that have been set.
+!     \item [{[convention]}]
+!           The convention of the Attribute package.
+!     \item [{[purpose]}]
+!           The purpose of the Attribute package.
+!     \item [{[attPackInstanceName]}]
+!           The name of an Attribute package instance, specifying which one
+!           of multiple Attribute package instances of the same convention
+!           and purpose, within a nest.  If not specified, defaults to the
+!           first instance.  (Not implemented yet)
 !     \item [{[attcountflag]}]
 !           The flag to specify which attribute count to return, the
 !           default is ESMF\_ATTGETCOUNT\_ATTRIBUTE.  This flag is documented
@@ -2346,26 +2415,28 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeGet - Get Attribute info by index number
+! !IROUTINE: ESMF_AttributeGet - Get Attribute info by index number from an ESMF_AttPack
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeGet()
 !     subroutine ESMF_AttributeGetInfoByNum(<object>, attributeIndex, &
-!       name, attnestflag, typekind, itemcount, rc)
+!       name, attpack, attnestflag, typekind, itemcount, isPresent, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
 !     integer,                  intent(in)            :: attributeIndex
 !     character (len = *),      intent(out)           :: name
+!     type(ESMF_AttPack),       intent(inout)         :: attpack
 !     type(ESMF_AttNest_Flag),  intent(in),  optional :: attnestflag
 !     type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
 !     integer,                  intent(out), optional :: itemCount
+!     logical,                  intent(out), optional :: isPresent
 !     integer,                  intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Returns information associated with the indexed Attribute,
 !     including {\tt name}, {\tt typekind} and {\tt itemCount}.  Keep in
-!     mind that these indexes start from 1, as expected in a Fortran API.
+!     mind that these indices start from 1, as expected in a Fortran API.
 !
 !     Supported values for <object> are:
 !     \begin{description}
@@ -2389,6 +2460,8 @@ contains
 !           The index number of the Attribute to query.
 !     \item [name]
 !           The name of the Attribute.
+!     \item [attpack]
+!           A handle to the Attribute package.
 !     \item [{[attnestflag]}]
 !           A flag to determine whether to descend the
 !           Attribute hierarchy when looking for this Attribute, the default
@@ -2399,6 +2472,85 @@ contains
 !           \ref{const:typekind}.
 !     \item [{[itemCount]}]
 !           The number of items in this Attribute.
+!     \item [{[isPresent]}]
+!           A logical flag to tell if this Attribute is present or not.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeGet - Get Attribute info by index number
+!
+! !INTERFACE:
+!     ! Private name; call using ESMF_AttributeGet()
+!     subroutine ESMF_AttributeGetInfoByNum(<object>, attributeIndex, &
+!       name, convention, purpose, attPackInstanceName, attnestflag, &
+!       typekind, itemcount, isPresent, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     integer,                  intent(in)            :: attributeIndex
+!     character (len = *),      intent(out)           :: name
+!     character (len = *),      intent(in),  optional :: convention
+!     character (len = *),      intent(in),  optional :: purpose
+!     character (len = *),      intent(in),  optional :: attPackInstanceName
+!     type(ESMF_AttNest_Flag),  intent(in),  optional :: attnestflag
+!     type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
+!     integer,                  intent(out), optional :: itemCount
+!     logical,                  intent(out), optional :: isPresent
+!     integer,                  intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Returns information associated with the indexed Attribute,
+!     including {\tt name}, {\tt typekind} and {\tt itemCount}.  Keep in
+!     mind that these indices start from 1, as expected in a Fortran API.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Array),       intent(in) :: array
+!     \item type(ESMF\_ArrayBundle), intent(in) :: arraybundle
+!     \item type(ESMF\_CplComp),     intent(in) :: comp
+!     \item type(ESMF\_GridComp),    intent(in) :: comp
+!     \item type(ESMF\_SciComp),     intent(in) :: comp
+!     \item type(ESMF\_DistGrid),    intent(in) :: distgrid
+!     \item type(ESMF\_Field),       intent(in) :: field
+!     \item type(ESMF\_FieldBundle), intent(in) :: fieldbundle
+!     \item type(ESMF\_Grid),        intent(in) :: grid
+!     \item type(ESMF\_State),       intent(in) :: state
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [attributeIndex]
+!           The index number of the Attribute to query.
+!     \item [name]
+!           The name of the Attribute.
+!     \item [{[convention]}]
+!           The convention of the Attribute package.
+!     \item [{[purpose]}]
+!           The purpose of the Attribute package.
+!     \item [{[attPackInstanceName]}]
+!           The name of an Attribute package instance, specifying which one
+!           of multiple Attribute package instances of the same convention
+!           and purpose, within a nest.  If not specified, defaults to the
+!           first instance.
+!     \item [{[attnestflag]}]
+!           A flag to determine whether to descend the
+!           Attribute hierarchy when looking for this Attribute, the default
+!           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
+!           \ref{const:attnest}.
+!     \item [{[typekind]}]
+!           The typekind of the Attribute. This flag is documented in section
+!           \ref{const:typekind}.
+!     \item [{[itemCount]}]
+!           The number of items in this Attribute.
+!     \item [{[isPresent]}]
+!           A logical flag to tell if this Attribute is present or not.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -8820,6 +8972,86 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 
 #define GetCountMacro(mclass, mthis, mthisfield) \
+!------------------------------------------------------------------------------ @\
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_AttGetCountAttPack" @\
+ @\
+!BOPI @\
+! !IROUTINE: ESMF_AttributeGet - Query the number of Attributes from an ESMF_AttPack@\
+! @\
+! !INTERFACE: @\
+      ! Private name; call using ESMF_AttributeGet()  @\
+      subroutine mclass##AttGetCountAttPack(mthis, attpack, count,  & @\
+                                              attcountflag, attnestflag, rc) @\
+! @\
+! !ARGUMENTS: @\
+      type(mclass), intent(in) :: mthis   @\
+      type(ESMF_AttPack), intent(inout) :: attpack @\
+      integer, intent(out) :: count @\
+      type(ESMF_AttGetCountFlag), intent(in), optional :: attcountflag @\
+      type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag @\
+      integer, intent(out), optional :: rc @\
+ @\
+! @\
+! !DESCRIPTION: @\
+!     Returns the number of Attributes associated with the given object  @\
+!     in the argument {\tt count}. @\
+!  @\
+!     The arguments are: @\
+!     \begin{description} @\
+!     \item [mthis] @\
+!           An ESMF object. @\
+!     \item [attpack] @\
+!           An Attribute package handle containing identifying information. @\
+!     \item [count] @\
+!           The number of Attributes associated with this object. @\
+!     \item [{[attcountflag]}] @\
+!           Flag to determine which Attribute count to return. @\
+!     \item [{[attnestflag]}] @\
+!           A flag to determine whether to descend the @\
+!           Attribute hierarchy when counting Attributes, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
+!     \item [{[rc]}]  @\
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+!     \end{description} @\
+! @\
+! @\
+!EOPI @\
+ @\
+      integer :: localrc  @\
+      type(ESMF_AttGetCountFlag) :: lattcountflag @\
+      type(ESMF_AttNest_Flag) :: lattnestflag @\
+ @\
+      ! Initialize  @\
+      localrc = ESMF_RC_NOT_IMPL @\
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+ @\
+      ! check variables @\
+      ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+      ESMF_INIT_CHECK_DEEP(ESMF_AttributeGetInit, attpack, rc) @\
+ @\
+      if (present(attcountflag)) then @\
+        lattcountflag = attcountflag @\
+      else @\
+        lattcountflag = ESMF_ATTGETCOUNT_ATTRIBUTE @\
+      endif @\
+ @\
+      if (present(attnestflag)) then @\
+        lattnestflag = attnestflag @\
+      else @\
+        lattnestflag = ESMF_ATTNEST_ON @\
+      endif @\
+ @\
+      call c_ESMC_AttributeGetCountAttPack(attpack, count, lattcountflag, & @\
+                                           lattnestflag, localrc) @\
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
+ @\
+      if (present(rc)) rc = ESMF_SUCCESS @\
+ @\
+      end subroutine mclass##AttGetCountAttPack @\
+!------------------------------------------------------------------------------ @\
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_AttGetCount" @\
  @\
@@ -8936,85 +9168,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
       end subroutine mclass##AttGetCount @\
-!------------------------------------------------------------------------------ @\
-^undef  ESMF_METHOD @\
-^define ESMF_METHOD "ESMF_AttGetCountAttPack" @\
- @\
-!BOPI @\
-! !IROUTINE: ESMF_AttributeGet - Query the number of Attributes @\
-! @\
-! !INTERFACE: @\
-      ! Private name; call using ESMF_AttributeGet()  @\
-      subroutine mclass##AttGetCountAttPack(mthis, attpack, count,  & @\
-                                              attcountflag, attnestflag, rc) @\
-! @\
-! !ARGUMENTS: @\
-      type(mclass), intent(in) :: mthis   @\
-      type(ESMF_AttPack), intent(inout) :: attpack @\
-      integer, intent(out) :: count @\
-      type(ESMF_AttGetCountFlag), intent(in), optional :: attcountflag @\
-      type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag @\
-      integer, intent(out), optional :: rc @\
- @\
-! @\
-! !DESCRIPTION: @\
-!     Returns the number of Attributes associated with the given object  @\
-!     in the argument {\tt count}. @\
-!  @\
-!     The arguments are: @\
-!     \begin{description} @\
-!     \item [mthis] @\
-!           An ESMF object. @\
-!     \item [attpack] @\
-!           An Attribute package handle containing identifying information. @\
-!     \item [count] @\
-!           The number of Attributes associated with this object. @\
-!     \item [{[attcountflag]}] @\
-!           Flag to determine which Attribute count to return. @\
-!     \item [{[attnestflag]}] @\
-!           A flag to determine whether to descend the @\
-!           Attribute hierarchy when counting Attributes, @\
-!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
-!           in section \ref{const:attnest}. @\
-!     \item [{[rc]}]  @\
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
-!     \end{description} @\
-! @\
-! @\
-!EOPI @\
- @\
-      integer :: localrc  @\
-      type(ESMF_AttGetCountFlag) :: lattcountflag @\
-      type(ESMF_AttNest_Flag) :: lattnestflag @\
- @\
-      ! Initialize  @\
-      localrc = ESMF_RC_NOT_IMPL @\
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
- @\
-      ! check variables @\
-      ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
-      ESMF_INIT_CHECK_DEEP(ESMF_AttributeGetInit, attpack, rc) @\
- @\
-      if (present(attcountflag)) then @\
-        lattcountflag = attcountflag @\
-      else @\
-        lattcountflag = ESMF_ATTGETCOUNT_ATTRIBUTE @\
-      endif @\
- @\
-      if (present(attnestflag)) then @\
-        lattnestflag = attnestflag @\
-      else @\
-        lattnestflag = ESMF_ATTNEST_ON @\
-      endif @\
- @\
-      call c_ESMC_AttributeGetCountAttPack(attpack, count, lattcountflag, & @\
-                                           lattnestflag, localrc) @\
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
-          ESMF_CONTEXT, rcToReturn=rc)) return @\
- @\
-      if (present(rc)) rc = ESMF_SUCCESS @\
- @\
-      end subroutine mclass##AttGetCountAttPack @\
 
 !------------------------------------------------------------------------------
 
