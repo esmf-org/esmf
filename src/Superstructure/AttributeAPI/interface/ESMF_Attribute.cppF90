@@ -2259,7 +2259,7 @@ contains
 !           The name of an Attribute package instance, specifying which one
 !           of multiple Attribute package instances of the same convention
 !           and purpose, within a nest.  If not specified, defaults to the
-!           first instance.  (Not implemented yet)
+!           first instance.
 !     \item [{[attcountflag]}]
 !           The flag to specify which attribute count to return, the
 !           default is ESMF\_ATTGETCOUNT\_ATTRIBUTE.  This flag is documented
@@ -2394,7 +2394,7 @@ contains
 !           The name of an Attribute package instance, specifying which one
 !           of multiple Attribute package instances of the same convention
 !           and purpose, within a nest.  If not specified, defaults to the
-!           first instance.  (Not implemented yet)
+!           first instance.
 !     \item [{[attnestflag]}]
 !           A flag to determine whether to descend the
 !           Attribute hierarchy when looking for this Attribute, the default
@@ -9094,7 +9094,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The name of an Attribute package instance, specifying which one @\
 !           of multiple Attribute package instances of the same convention @\
 !           and purpose, within a nest.  If not specified, defaults to the @\
-!           first instance.  (Not implemented yet) @\
+!           first instance. @\
 !     \item [{[attcountflag]}] @\
 !           Flag to determine which Attribute count to return. @\
 !     \item [{[attnestflag]}] @\
@@ -9327,7 +9327,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The name of an Attribute package instance, specifying which one @\
 !           of multiple Attribute package instances of the same convention @\
 !           and purpose, within a nest.  If not specified, defaults to the @\
-!           first instance.  (Not implemented yet) @\
+!           first instance. @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
 !           Attribute hierarchy when searching for this Attribute, @\
@@ -9592,7 +9592,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The name of an Attribute package instance, specifying which one @\
 !           of multiple Attribute package instances of the same convention @\
 !           and purpose, within a nest.  If not specified, defaults to the @\
-!           first instance.  (Not implemented yet) @\
+!           first instance. @\
 !     \item [name] @\
 !           Returns the name of the Attribute. @\
 !     \item [{[attnestflag]}] @\
