@@ -459,15 +459,23 @@ module NUOPC_Connector
 
    contains
 
-    subroutine doMirror(providerState, acceptorState, acceptorVM, rc)
+    recursive subroutine doMirror(providerState, acceptorState, acceptorVM, rc)
       type(ESMF_State)           :: providerState
       type(ESMF_State)           :: acceptorState
       type(ESMF_VM), intent(in)  :: acceptorVM       
       integer,       intent(out) :: rc
 
+      integer                :: item, itemCount
       character(ESMF_MAXSTR) :: providerTransferOffer, acceptorTransferOffer
       character(ESMF_MAXSTR) :: acceptorStateName
+      type(ESMF_State)       :: providerNestedState
+      type(ESMF_State)       :: acceptorNestedState
+      character(ESMF_MAXSTR) :: nestedStateName
+      character(ESMF_MAXSTR) :: namespace
+      character(ESMF_MAXSTR) :: cplSet
       integer                :: i, j
+      character(ESMF_MAXSTR), allocatable     :: itemNameList(:)
+      type(ESMF_StateItem_Flag), allocatable  :: itemTypeList(:)
       character(ESMF_MAXSTR), pointer       :: providerStandardNameList(:)
       character(ESMF_MAXSTR), pointer       :: acceptorStandardNameList(:)
       character(ESMF_MAXSTR), pointer       :: providerNamespaceList(:)
@@ -491,19 +499,73 @@ module NUOPC_Connector
       call ESMF_StateGet(acceptorState, name=acceptorStateName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
+
+
+      ! recursively duplicate nested states
+      call ESMF_StateGet(providerState, nestedFlag=.false., &
+        itemCount=itemCount, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+      if (itemCount > 0) then
+        allocate(itemNameList(itemCount))
+        allocate(itemTypeList(itemCount))
+        call ESMF_StateGet(providerState, nestedFlag=.false., &
+          itemNameList=itemNameList, itemTypeList=itemTypeList, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        do item=1, itemCount
+          if (itemTypeList(item) == ESMF_STATEITEM_STATE) then
+            call ESMF_StateGet(providerState, itemName=itemNameList(item), &
+              nestedState=providerNestedState, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call ESMF_StateGet(providerNestedState, name=nestedStateName, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (btest(verbosity,8)) then
+              call ESMF_LogWrite(trim(name)//": cloning nestedState: "// &
+                trim(nestedStateName), ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) &
+                return  ! bail out
+            endif
+            call NUOPC_GetAttribute(providerNestedState, name="Namespace", &
+              value=namespace, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call NUOPC_GetAttribute(providerNestedState, name="CplSet", &
+              value=cplSet, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call NUOPC_AddNestedState(acceptorState, Namespace=namespace, &
+              CplSet=cplSet, nestedStateName=nestedStateName, &
+              nestedState=acceptorNestedState, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call doMirror(providerState=providerNestedState, &
+              acceptorState=acceptorNestedState, acceptorVM=acceptorVM, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
+        enddo
+
+        deallocate(itemNameList)
+        deallocate(itemTypeList)
+      endif
+
       call NUOPC_GetStateMemberLists(providerState, providerStandardNameList, &
         fieldList=providerFieldList, namespaceList=providerNamespaceList, &
-        cplSetList=providerCplSetList, rc=rc)
+        cplSetList=providerCplSetList, nestedFlag=.false., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         
       call NUOPC_GetStateMemberLists(acceptorState, acceptorStandardNameList, &
         fieldList=acceptorFieldList, namespaceList=acceptorNamespaceList, &
-        cplSetList=acceptorCplSetList, rc=rc)
+        cplSetList=acceptorCplSetList, nestedFlag=.false., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      !TODO: does not currently deal with nested states or field bundles
+      !TODO: does not currently deal with field bundles
       
       if (associated(providerStandardNameList)) then
         do i=1, size(providerStandardNameList)

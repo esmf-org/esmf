@@ -1160,7 +1160,8 @@ module NUOPC_Base
 ! !IROUTINE: NUOPC_GetStateMemberLists - Build lists of information of State members
 ! !INTERFACE:
   recursive subroutine NUOPC_GetStateMemberLists(state, StandardNameList, &
-    ConnectedList, NamespaceList, CplSetList, itemNameList, fieldList, rc)
+    ConnectedList, NamespaceList, CplSetList, itemNameList, fieldList, &
+    nestedFlag, rc)
 ! !ARGUMENTS:
     type(ESMF_State),       intent(in)            :: state
     character(ESMF_MAXSTR), pointer, optional     :: StandardNameList(:)
@@ -1169,6 +1170,7 @@ module NUOPC_Base
     character(ESMF_MAXSTR), pointer, optional     :: CplSetList(:)
     character(ESMF_MAXSTR), pointer, optional     :: itemNameList(:)
     type(ESMF_Field),       pointer, optional     :: fieldList(:)
+    logical,                intent(in), optional  :: nestedFlag
     integer,                intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Construct lists containing the StandardNames, field names, and connected 
@@ -1195,6 +1197,9 @@ module NUOPC_Base
 !     If present, return a list of each member name.
 !   \item[{[fieldList]}]
 !     If present, return a list of the member fields.
+!   \item[{[nestedFlag]}]
+!     When set to .true., returns information from nested States (default).
+!     When set to .false., returns information at the current State level only.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1203,6 +1208,7 @@ module NUOPC_Base
   !-----------------------------------------------------------------------------
     ! local variables
     integer           :: localrc
+    logical           :: l_nestedFlag
     integer           :: item, itemCount, fieldCount, stat, i
     type(ESMF_Field)  :: field
     character(ESMF_MAXSTR), allocatable     :: ll_itemNameList(:)
@@ -1218,7 +1224,13 @@ module NUOPC_Base
     character(ESMF_MAXSTR)                  :: cplSet
 
     if (present(rc)) rc = ESMF_SUCCESS
-    
+
+    if (present(nestedFlag)) then
+      l_nestedFlag = nestedFlag
+    else
+      l_nestedFlag = .true.
+    endif
+
     call ESMF_StateGet(state, itemCount=itemCount, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -1241,7 +1253,8 @@ module NUOPC_Base
       do item=1, itemCount
         if (stateitemtypeList(item) == ESMF_STATEITEM_FIELD) then
           fieldCount = fieldCount + 1
-        else if (stateitemtypeList(item) == ESMF_STATEITEM_STATE) then
+        else if ((stateitemtypeList(item) == ESMF_STATEITEM_STATE) .AND. &
+                 (l_nestedFlag)) then
           ! recursively parse the nested state
           nullify(l_StandardNameList)
           call ESMF_StateGet(state, itemName=ll_itemNameList(item), &
@@ -1251,7 +1264,8 @@ module NUOPC_Base
             file=FILENAME, &
             rcToReturn=rc)) &
             return  ! bail out
-          call NUOPC_GetStateMemberLists(nestedState, l_StandardNameList, rc=localrc)
+          call NUOPC_GetStateMemberLists(nestedState, l_StandardNameList, &
+            nestedFlag=l_nestedFlag, rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, &
             file=FILENAME, &
@@ -1428,7 +1442,8 @@ module NUOPC_Base
             fieldList(fieldCount)=field
           endif
           fieldCount = fieldCount + 1
-        else if (stateitemtypeList(item) == ESMF_STATEITEM_STATE) then
+        else if ((stateitemtypeList(item) == ESMF_STATEITEM_STATE) .AND. &
+                 (l_nestedFlag)) then
           ! recursively parse the nested state
           nullify(l_StandardNameList)
           nullify(l_itemNameList)
@@ -1449,7 +1464,8 @@ module NUOPC_Base
             ConnectedList=l_ConnectedList, &
             NamespaceList=l_NamespaceList, &
             CplSetList=l_CplSetList, &
-            fieldList=l_fieldList, rc=localrc)
+            fieldList=l_fieldList, &
+            nestedFlag=l_nestedFlag, rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, &
             file=FILENAME, &
