@@ -321,7 +321,9 @@ bool line_intersect_2D_3D(double *a1, double *a2, double *q1, double *q2, double
   double t,u;
   // BOB Try larger
   //  double epsilon = 1.e-15;
-  double epsilon = 3.e-15;
+  // BOB: Try even larger
+  //double epsilon = 3.e-15;
+  double epsilon = 1.0E-14;
   inbound = -1;
 
   // Load points defining plane into variable (these are supposed to be in counterclockwise order)
@@ -1795,7 +1797,7 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
     int cell_gid=i+offset+1;
 
 #if 0
-    if ((cell_gid == 124796) || (cell_gid == 124797)) {
+    if (cell_gid == 6488) {
       printf("%d# %d BOBXGC s_id=%d d_id=%d cell id=%d node ids=",Par::Rank(),i,
 	     sintd_cells[i]->s_id,sintd_cells[i]->d_id,
 	     cell_gid);

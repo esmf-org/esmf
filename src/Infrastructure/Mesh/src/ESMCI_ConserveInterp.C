@@ -1301,7 +1301,7 @@ void norm_poly3D(int num_p, double *p) {
       *valid=1;
 
 #if 0
-	if (global_src_id==3972) {
+	if (global_src_id==6488) {
 	  printf("BOB: WGT CALC SINTD dst=%d src=%d area=%g\n",global_dst_id,global_src_id,*sintd_area);	
 	  write_3D_poly_to_vtk("sintdelem",global_dst_id,num_sintd_nodes, sintd_coords);
 	}
@@ -1471,11 +1471,10 @@ void norm_poly3D(int num_p, double *p) {
                                                            sintd_nodes, 
                                                            sintd_cells, res_map, zz);
 
-#if 0
-
-	if (global_dst_id == 59955) {
+#if 1
+	if (valid && (global_src_id == 6488)) {
 	  tot += sintd_area;
-          printf("BOB: WGT CALC dst=%d src=%d valid=%d darea=%g sintd_area=%g tot=%g \n",global_dst_id,global_src_id,valid,dst_area,sintd_area,tot);	
+          printf("BOB: WGT CALC dst=%d src=%d valid=%d darea=%g sintd_area=%g tot=%g t/s=%g\n",global_dst_id,global_src_id,valid,dst_area,sintd_area,tot,tot/src_area);	
 	  write_3D_poly_to_vtk("dstelem",global_dst_id, num_dst_nodes, dst_coords);
 	  write_3D_poly_to_vtk("srcelem",global_src_id, num_src_nodes, src_coords);
 	}

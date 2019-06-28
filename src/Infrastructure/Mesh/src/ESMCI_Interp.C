@@ -3106,24 +3106,24 @@ void Interp::operator()(int fpair_num, IWeights &iw, bool set_dst_status, WMat &
      // Only put it in if it's locally owned
      if (!GetAttr(src_elem).is_locally_owned()) continue;
 
-#if 0
-     if (tot > 1.1) {
-       printf("SRC BIG FRAC src_id=%d frac=%f \n",src_elem.get_id(),tot);
+#ifdef BOB_XGRID_DEBUG
+     if (tot > 1.0+1.0E-10) {
+       printf("SRC BIG FRAC src_id=%d frac=%20.17f \n",src_elem.get_id(),tot);
+       num_big_frac++;
      }
 
-     if (tot < 0.9) {
-       printf("SRC SMALL FRAC src_id=%d frac=%f \n",src_elem.get_id(),tot);
+     if (tot < 1.0-1.0E-10) {
+       printf("SRC SMALL FRAC src_id=%d frac=%20.17f \n",src_elem.get_id(),tot);
+       num_little_frac++;
      }
 #endif
-
-     if (tot > 1.1) num_big_frac++;
-     if (tot < (1.0-1.0E-6)) num_little_frac++;
 
      // Since weights with no mask should add up to 1.0
      // fraction is tot
      *frac=tot;
    } // for wi
 
+#ifdef BOB_XGRID_DEBUG
    // Sum 
    int tot_num_big_frac=0;
    MPI_Allreduce(&num_big_frac,&tot_num_big_frac,1,MPI_INT,MPI_SUM,Par::Comm());
@@ -3131,10 +3131,9 @@ void Interp::operator()(int fpair_num, IWeights &iw, bool set_dst_status, WMat &
    int tot_num_little_frac=0;
    MPI_Allreduce(&num_little_frac,&tot_num_little_frac,1,MPI_INT,MPI_SUM,Par::Comm());
 
-#if 0
    if (Par::Rank() == 0) {
-     printf("BOB: num frac >1.1 = %d \n",tot_num_big_frac);
-     printf("BOB: num frac <1.0-1.0E-6 = %d \n",tot_num_little_frac);
+     printf("BOB: num frac >1.0+1.0E-10 = %d \n",tot_num_big_frac);
+     printf("BOB: num frac <1.0-1.0E-10 = %d \n",tot_num_little_frac);
    }
 #endif
 
