@@ -72,6 +72,7 @@ program ESMF_GridCreateUTest
   integer :: petMap2D(2,2,1)
   integer :: petMap2x3(2,3,1)
   real(ESMF_KIND_R8), pointer :: fptr(:,:), fptr1(:,:), fptr2(:,:)
+  real(ESMF_KIND_R4), pointer :: fptr1R4(:,:), fptr2R4(:,:)
   logical:: gridBool
   logical:: isCreated
   type(ESMF_GridStatus_Flag) :: status
@@ -93,6 +94,7 @@ program ESMF_GridCreateUTest
   type(ESMF_DELayout) :: delayout
   integer :: total, s,  decount, localDe
   type(ESMF_Staggerloc) :: staggerLocList(2)
+  type(ESMF_CS_Arguments) :: transformArgument
  
   !-----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
@@ -2783,6 +2785,59 @@ program ESMF_GridCreateUTest
                            exclusiveLBound=exlbnd, exclusiveUBound=exubnd, rc=localrc)
     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
     call ESMF_GridGetCoord(grid, coordDim=2, localDE=lde, farrayPtr=fptr2, &
+                           exclusiveLBound=exlbnd, exclusiveUBound=exubnd, rc=localrc)
+    if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+#if 0
+    print *, "coords from de", lde
+
+    print *, "lower bounds = [", exlbnd(1), ", ", exlbnd(2), "]"
+    print *, "upper bounds = [", exubnd(1), ", ", exubnd(2), "]"
+
+    print *, "["
+    do j = 1, exubnd(1)
+      do i = 1, exubnd(2)
+        print *, "[", fptr1(i,j), ", ", fptr2(i,j), "]"
+      enddo
+    enddo
+    print *, "]"
+#endif
+  enddo
+
+  ! destroy grid
+  call ESMF_GridDestroy(grid, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing GridCreateCubedSphere with SchmidtTransform"
+  write(failMsg, *) "Incorrect result"
+
+  ! create grid with nondefault parameter
+  rc=ESMF_SUCCESS
+
+  transformArgument.stretch_factor = 3.0;
+  transformArgument.target_lat = 0.0; ! in radians
+  transformArgument.target_lat = 1.3; ! in radians
+  grid=ESMF_GridCreateCubedSphere(15, &
+                                  staggerLocList = (/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
+				  coordTypeKind = ESMF_TYPEKIND_R4, &
+				  coordSys = ESMF_COORDSYS_SPH_RAD, &
+                                  transformArgument=transformArgument, &
+                                  rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_GridGet(grid, localDECount=localDECount, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  do lde = 0, localDECount-1
+
+    call ESMF_GridGetCoord(grid, coordDim=1, localDE=lde, farrayPtr=fptr1R4, &
+                           exclusiveLBound=exlbnd, exclusiveUBound=exubnd, rc=localrc)
+    if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+    call ESMF_GridGetCoord(grid, coordDim=2, localDE=lde, farrayPtr=fptr2R4, &
                            exclusiveLBound=exlbnd, exclusiveUBound=exubnd, rc=localrc)
     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 

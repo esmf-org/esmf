@@ -213,7 +213,6 @@ integer,parameter :: ESMF_DIM_ARB = -1
                       ESMF_GRIDMATCH_NONE=ESMF_GridMatch_Flag(1), &
                       ESMF_GRIDMATCH_EXACT=ESMF_GridMatch_Flag(2), &
                       ESMF_GRIDMATCH_ALIAS=ESMF_GridMatch_Flag(3)
-
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC TYPES:
@@ -14411,7 +14410,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         regDecompPTile, decompflagPTile,                        &
         coordSys, coordTypeKind,                                &
         deLabelList, staggerLocList,                            &
-        delayout, indexflag, name, rc)
+        delayout, indexflag, name, transformArgument, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Grid) :: ESMF_GridCreateCubedSphereReg
@@ -14428,6 +14427,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DELayout),            intent(in),  optional :: delayout
     type(ESMF_Index_Flag),          intent(in),  optional :: indexflag
     character(len=*),               intent(in),  optional :: name
+    type(ESMF_CS_Arguments),        intent(in),  optional :: transformArgument
     integer,                        intent(out), optional :: rc
 
 !
@@ -14489,6 +14489,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          defaults to ESMF\_INDEX\_DELOCAL.
 !     \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
+!     \item[{[transformArgument]}]
+!          A data type containing the stretch factor, target longitude, and target latitude
+!          to perform a schmidt transformation on the Cubed-Sphere grid. The
+!          target lat/lon are in radians.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -14767,14 +14771,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          if (docenter .and. docorner) then
             call ESMF_UtilCreateCSCoordsPar(tileSize, lonEdge=lonCornerPtrR4, &
                latEdge=latCornerPtrR4, start=start, count=count, &
-               tile=tile, lonCenter=lonPtrR4, latCenter=latPtrR4)
+               tile=tile, lonCenter=lonPtrR4, latCenter=latPtrR4, &
+	       schmidtTransform=transformArgument)
          elseif (docorner) then
             call ESMF_UtilCreateCSCoordsPar(tileSize, lonEdge=lonCornerPtrR4, &
-              latEdge=latCornerPtrR4, start=start, count=count, tile=tile)
+              latEdge=latCornerPtrR4, start=start, count=count, tile=tile, &
+	       schmidtTransform=transformArgument)
          else
             call ESMF_UtilCreateCSCoordsPar(tileSize, &
                start=start, count=count, &
-               tile=tile, lonCenter=lonPtrR4, latCenter=latPtrR4)
+               tile=tile, lonCenter=lonPtrR4, latCenter=latPtrR4, &
+	       schmidtTransform=transformArgument)
          endif
 
          !call ESMF_VMWtime(endtime, rc=localrc)
@@ -14872,7 +14879,7 @@ end function ESMF_GridCreateCubedSphereReg
         keywordEnforcer,                                        &        
         coordSys, coordTypeKind,                                &
         deLabelList, staggerLocList,                            &
-        delayout, indexflag, name, rc)
+        delayout, indexflag, name, transformArgument, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Grid) :: ESMF_GridCreateCubedSphereIReg
@@ -14889,6 +14896,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DELayout),            intent(in),  optional :: delayout
     type(ESMF_Index_Flag),          intent(in),  optional :: indexflag
     character(len=*),               intent(in),  optional :: name
+    type(ESMF_CS_Arguments),        intent(in),  optional :: transformArgument
     integer,                        intent(out), optional :: rc
 
 !
@@ -14938,6 +14946,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          defaults to ESMF\_INDEX\_DELOCAL.
 !     \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
+!     \item[{[transformArgument]}]
+!          A data type containing the stretch factor, target longitude, and target latitude
+!          to perform a schmidt transformation on the Cubed-Sphere grid. The
+!          target lat/lon are in radians.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -15244,14 +15256,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          if (docenter .and. docorner) then
             call ESMF_UtilCreateCSCoordsPar(tileSize, lonEdge=lonCornerPtrR4, &
                latEdge=latCornerPtrR4, start=start, count=count, &
-               tile=tile, lonCenter=lonPtrR4, latCenter=latPtrR4)
+               tile=tile, lonCenter=lonPtrR4, latCenter=latPtrR4, &
+	       schmidtTransform=transformArgument)
          elseif (docorner) then
             call ESMF_UtilCreateCSCoordsPar(tileSize, lonEdge=lonCornerPtrR4, &
-              latEdge=latCornerPtrR4, start=start, count=count, tile=tile)
+              latEdge=latCornerPtrR4, start=start, count=count, tile=tile, &
+	       schmidtTransform=transformArgument)
          else
             call ESMF_UtilCreateCSCoordsPar(tileSize, &
                start=start, count=count, &
-               tile=tile, lonCenter=lonPtrR4, latCenter=latPtrR4)
+               tile=tile, lonCenter=lonPtrR4, latCenter=latPtrR4, &
+	       schmidtTransform=transformArgument)
          endif
 
          !call ESMF_VMWtime(endtime, rc=localrc)
