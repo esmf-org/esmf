@@ -258,8 +258,10 @@ subroutine ESMF_OutputWeightFile (weightFile, factorList, factorIndexList, rc)
       call ESMF_OutputSimpleWeightFile(weightFile, factorList, factorIndexList, &
                                        rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-        rcToReturn=rc)) return
-      if (present(rc)) rc = localrc
+        rcToReturn=rc)) return ! bail on error
+
+      ! return successfully
+      if (present(rc)) rc = ESMF_SUCCESS
       return
     endif
     !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
