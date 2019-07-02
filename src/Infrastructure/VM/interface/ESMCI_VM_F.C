@@ -1769,9 +1769,12 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     try{
       std::string prefixStr(prefix, prefix_l);
+#if 0
+// Currently the ESMCI side does not support custom Logs. Do not send this down!
       if (ESMC_NOT_PRESENT_FILTER(log) != ESMC_NULL_POINTER)
         ESMCI::VM::logMemInfo(prefixStr, *log);
       else
+#endif
         ESMCI::VM::logMemInfo(prefixStr);
     }catch(int localrc){
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
