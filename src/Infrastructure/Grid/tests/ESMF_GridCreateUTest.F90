@@ -2819,9 +2819,9 @@ program ESMF_GridCreateUTest
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
 
-  transformArgument.stretch_factor = 3.0;
-  transformArgument.target_lat = 0.0; ! in radians
-  transformArgument.target_lat = 1.3; ! in radians
+  transformArgument%stretch_factor = 3.0;
+  transformArgument%target_lat = 0.0; ! in radians
+  transformArgument%target_lat = 1.3; ! in radians
   grid=ESMF_GridCreateCubedSphere(15, &
                                   staggerLocList = (/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
 				  coordTypeKind = ESMF_TYPEKIND_R4, &
