@@ -176,7 +176,7 @@ subroutine ESMF_OutputWeightFile (weightFile, factorList, factorIndexList, rc)
     integer(ESMF_KIND_I4), allocatable, dimension(:,:,:) :: deBlockList
     
     ! ==============================================================================
-    
+
     if (present(rc)) then
       localrc = rc
     else
@@ -259,6 +259,7 @@ subroutine ESMF_OutputWeightFile (weightFile, factorList, factorIndexList, rc)
                                        rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
         rcToReturn=rc)) return
+      if (present(rc)) rc = localrc
       return
     endif
     !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-

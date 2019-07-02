@@ -101,7 +101,7 @@ contains
 ! routine to create the global edges and centers of the cubed-sphere grid
 ! but not the ESMF grid
 subroutine ESMF_UtilCreateCSCoords(npts, LonEdge,LatEdge, start, count, tile, &
-	LonCenter, LatCenter, schmidtTransform)
+  LonCenter, LatCenter, schmidtTransform)
 
 ! !ARGUMENTS:
     integer,           intent(IN)     :: npts
@@ -224,8 +224,8 @@ subroutine ESMF_UtilCreateCSCoords(npts, LonEdge,LatEdge, start, count, tile, &
 
   if (present(schmidtTransform)) then
      do n=1,ntiles
-       call direct_transform(schmidtTransform.stretch_factor,schmidtTransform.target_lon,&
-          schmidtTransform.target_lat,grid_global(:,:,1,n),grid_global(:,:,2,n))
+       call direct_transform(schmidtTransform%stretch_factor,schmidtTransform%target_lon,&
+          schmidtTransform%target_lat,grid_global(:,:,1,n),grid_global(:,:,2,n))
      enddo
   end if
 
@@ -333,8 +333,8 @@ subroutine ESMF_UtilCreateCSCoordsPar(npts, LonEdge,LatEdge, start, count, tile,
        enddo
     enddo
     if (present(schmidtTransform)) then
-     call direct_transform(schmidtTransform.stretch_factor,schmidtTransform.target_lon,&
-          schmidtTransform.target_lat,tile_local(:,:,1),tile_local(:,:,2))
+     call direct_transform(schmidtTransform%stretch_factor,schmidtTransform%target_lon,&
+          schmidtTransform%target_lat,tile_local(:,:,1),tile_local(:,:,2))
     end if
     
     if (present(LonEdge) .and. present(LatEdge)) then
