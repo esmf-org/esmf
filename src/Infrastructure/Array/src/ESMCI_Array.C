@@ -213,9 +213,11 @@ Array::Array(
     }
   }
   localDeToDeMap = new int[ssiLocalDeCount];
-  memcpy(localDeToDeMap, localDeToDeMapArg, ssiLocalDeCount*sizeof(int));
   larrayList = new LocalArray*[ssiLocalDeCount];
-  memcpy(larrayList, larrayListArg, ssiLocalDeCount*sizeof(LocalArray *));
+  if (ssiLocalDeCount){
+    memcpy(localDeToDeMap, localDeToDeMapArg, ssiLocalDeCount*sizeof(int));
+    memcpy(larrayList, larrayListArg, ssiLocalDeCount*sizeof(LocalArray *));
+  }
   // determine the base addresses of the local arrays:
   larrayBaseAddrList = new void*[ssiLocalDeCount];
   for (int i=0; i<ssiLocalDeCount; i++)
@@ -223,30 +225,34 @@ Array::Array(
   // copy the PET-local bound arrays
   int redDimCount = rank - tensorCountArg; // reduced dimCount w/o repl. dims
   exclusiveLBound = new int[redDimCount*ssiLocalDeCount];
-  memcpy(exclusiveLBound, exclusiveLBoundArg,
-    redDimCount*ssiLocalDeCount*sizeof(int));
   exclusiveUBound = new int[redDimCount*ssiLocalDeCount];
-  memcpy(exclusiveUBound, exclusiveUBoundArg,
-    redDimCount*ssiLocalDeCount*sizeof(int));
   computationalLBound = new int[redDimCount*ssiLocalDeCount];
-  memcpy(computationalLBound, computationalLBoundArg,
-    redDimCount*ssiLocalDeCount*sizeof(int));
   computationalUBound = new int[redDimCount*ssiLocalDeCount];
-  memcpy(computationalUBound, computationalUBoundArg,
-    redDimCount*ssiLocalDeCount*sizeof(int));
   totalLBound = new int[redDimCount*ssiLocalDeCount];
-  memcpy(totalLBound, totalLBoundArg,
-    redDimCount*ssiLocalDeCount*sizeof(int));
   totalUBound = new int[redDimCount*ssiLocalDeCount];
-  memcpy(totalUBound, totalUBoundArg,
-    redDimCount*ssiLocalDeCount*sizeof(int));
+  if (redDimCount*ssiLocalDeCount > 0){
+    memcpy(exclusiveLBound, exclusiveLBoundArg,
+      redDimCount*ssiLocalDeCount*sizeof(int));
+    memcpy(exclusiveUBound, exclusiveUBoundArg,
+      redDimCount*ssiLocalDeCount*sizeof(int));
+    memcpy(computationalLBound, computationalLBoundArg,
+      redDimCount*ssiLocalDeCount*sizeof(int));
+    memcpy(computationalUBound, computationalUBoundArg,
+      redDimCount*ssiLocalDeCount*sizeof(int));
+    memcpy(totalLBound, totalLBoundArg,
+      redDimCount*ssiLocalDeCount*sizeof(int));
+    memcpy(totalUBound, totalUBoundArg,
+      redDimCount*ssiLocalDeCount*sizeof(int));
+  }
   // tensor dimensions
   tensorCount = tensorCountArg;
   tensorElementCount = tensorElementCountArg;
   undistLBound = new int[tensorCountArg];
-  memcpy(undistLBound, undistLBoundArray, tensorCountArg * sizeof(int));
   undistUBound = new int[tensorCountArg];
-  memcpy(undistUBound, undistUBoundArray, tensorCountArg * sizeof(int));
+  if (tensorCountArg){
+    memcpy(undistLBound, undistLBoundArray, tensorCountArg * sizeof(int));
+    memcpy(undistUBound, undistUBoundArray, tensorCountArg * sizeof(int));
+  }
   // distgridToArrayMap, arrayToDistGridMap and distgridToPackedArrayMap
   int dimCount = distgrid->getDimCount();
   distgridToArrayMap = new int[dimCount];
@@ -750,8 +756,12 @@ Array *Array::create(
   // figure exclusive region
   vector<int> exclusiveLBoundV(redDimCount*localDeCount);
   vector<int> exclusiveUBoundV(redDimCount*localDeCount);
-  int *exclusiveLBound = &exclusiveLBoundV[0];
-  int *exclusiveUBound = &exclusiveUBoundV[0];
+  int *exclusiveLBound = NULL;  // default safe guard
+  int *exclusiveUBound = NULL;  // default safe guard
+  if (redDimCount*localDeCount > 0){
+    exclusiveLBound = &exclusiveLBoundV[0];
+    exclusiveUBound = &exclusiveUBoundV[0];
+  }
   for (int i=0; i<redDimCount*localDeCount; i++)
     exclusiveLBound[i] = 1; // excl. region starts at (1,1,1...) <- Fortran
   // exlc. region for each DE ends at indexCountPDimPDe of the associated
@@ -796,8 +806,12 @@ Array *Array::create(
   // deal with computationalEdge widths
   vector<int> computationalEdgeLWidthV(redDimCount);
   vector<int> computationalEdgeUWidthV(redDimCount);
-  int *computationalEdgeLWidth = &computationalEdgeLWidthV[0];
-  int *computationalEdgeUWidth = &computationalEdgeUWidthV[0];
+  int *computationalEdgeLWidth = NULL;  // default safe guard
+  int *computationalEdgeUWidth = NULL;  // default safe guard
+  if (redDimCount){
+    computationalEdgeLWidth = &computationalEdgeLWidthV[0];
+    computationalEdgeUWidth = &computationalEdgeUWidthV[0];
+  }
   if (present(computationalEdgeLWidthArg)){
     if (computationalEdgeLWidthArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -837,8 +851,12 @@ Array *Array::create(
   // deal with computational widths
   vector<int> computationalLBoundV(redDimCount*localDeCount);
   vector<int> computationalUBoundV(redDimCount*localDeCount);
-  int *computationalLBound = &computationalLBoundV[0];
-  int *computationalUBound = &computationalUBoundV[0];
+  int *computationalLBound = NULL;  // default safe guard
+  int *computationalUBound = NULL;  // default safe guard
+  if (redDimCount*localDeCount > 0){
+    computationalLBound = &computationalLBoundV[0];
+    computationalUBound = &computationalUBoundV[0];
+  }
   if (present(computationalLWidthArg)){
     if (computationalLWidthArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -856,8 +874,9 @@ Array *Array::create(
           - computationalLWidthArg->array[i];
   }else{
     // set default
-    memcpy(computationalLBound, exclusiveLBound,
-      localDeCount*redDimCount*sizeof(int));
+    if (localDeCount*redDimCount > 0)
+      memcpy(computationalLBound, exclusiveLBound,
+        localDeCount*redDimCount*sizeof(int));
   }
   if (present(computationalUWidthArg)){
     if (computationalUWidthArg->dimCount != 1){
@@ -876,8 +895,9 @@ Array *Array::create(
           + computationalUWidthArg->array[i];
   }else{
     // set default
-    memcpy(computationalUBound, exclusiveUBound,
-      localDeCount*redDimCount*sizeof(int));
+    if (localDeCount*redDimCount > 0)
+      memcpy(computationalUBound, exclusiveUBound,
+        localDeCount*redDimCount*sizeof(int));
   }
   // modify computational bounds on tile edges
   for (int j=0; j<localDeCount; j++){
@@ -907,8 +927,12 @@ Array *Array::create(
   int totalUBoundFlag = 0;  // reset
   vector<int> totalLBoundV(redDimCount*localDeCount);
   vector<int> totalUBoundV(redDimCount*localDeCount);
-  int *totalLBound = &totalLBoundV[0];
-  int *totalUBound = &totalUBoundV[0];
+  int *totalLBound = NULL;  // default safe guard
+  int *totalUBound = NULL;  // default safe guard
+  if (redDimCount*localDeCount > 0){
+    totalLBound = &totalLBoundV[0];
+    totalUBound = &totalUBoundV[0];
+  }
   if (present(totalLWidthArg)){
     totalLBoundFlag = 1;  // set
     if (totalLWidthArg->dimCount != 1){
@@ -1002,7 +1026,9 @@ Array *Array::create(
 
   // allocate LocalArray list that holds all PET-local DEs and adjust elements
   vector<LocalArray *> larrayListV(localDeCount);
-  LocalArray **larrayList = &larrayListV[0];
+  LocalArray **larrayList = NULL; // default safe guard
+  if (larrayListV.size())
+    larrayList = &larrayListV[0];
   vector<int> temp_larrayLBound(rank);
   vector<int> temp_larrayUBound(rank);
   for (int i=0; i<localDeCount; i++){
@@ -1472,8 +1498,12 @@ Array *Array::create(
   // figure exclusive region
   vector<int> exclusiveLBoundV(redDimCount*localDeCount);
   vector<int> exclusiveUBoundV(redDimCount*localDeCount);
-  int *exclusiveLBound = &exclusiveLBoundV[0];
-  int *exclusiveUBound = &exclusiveUBoundV[0];
+  int *exclusiveLBound = NULL;  // default safe guard
+  int *exclusiveUBound = NULL;  // default safe guard
+  if (redDimCount*localDeCount > 0){
+    exclusiveLBound = &exclusiveLBoundV[0];
+    exclusiveUBound = &exclusiveUBoundV[0];
+  }
   for (int i=0; i<redDimCount*localDeCount; i++)
     exclusiveLBound[i] = 1; // excl. region starts at (1,1,1...) <- Fortran
   // exlc. region for each DE ends at indexCountPDimPDe of the associated
@@ -1518,8 +1548,12 @@ Array *Array::create(
   // deal with computationalEdge widths
   vector<int> computationalEdgeLWidthV(redDimCount);
   vector<int> computationalEdgeUWidthV(redDimCount);
-  int *computationalEdgeLWidth = &computationalEdgeLWidthV[0];
-  int *computationalEdgeUWidth = &computationalEdgeUWidthV[0];
+  int *computationalEdgeLWidth = NULL;  // default safe guard
+  int *computationalEdgeUWidth = NULL;  // default safe guard
+  if (redDimCount){
+    computationalEdgeLWidth = &computationalEdgeLWidthV[0];
+    computationalEdgeUWidth = &computationalEdgeUWidthV[0];
+  }
   if (present(computationalEdgeLWidthArg)){
     if (computationalEdgeLWidthArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -1559,8 +1593,12 @@ Array *Array::create(
   // deal with computational widths
   vector<int> computationalLBoundV(redDimCount*localDeCount);
   vector<int> computationalUBoundV(redDimCount*localDeCount);
-  int *computationalLBound = &computationalLBoundV[0];
-  int *computationalUBound = &computationalUBoundV[0];
+  int *computationalLBound = NULL;  // default safe guard
+  int *computationalUBound = NULL;  // default safe guard
+  if (redDimCount*localDeCount > 0){
+    computationalLBound = &computationalLBoundV[0];
+    computationalUBound = &computationalUBoundV[0];
+  }
   if (present(computationalLWidthArg)){
     if (computationalLWidthArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -1578,8 +1616,9 @@ Array *Array::create(
           - computationalLWidthArg->array[i];
   }else{
     // set default
-    memcpy(computationalLBound, exclusiveLBound,
-      localDeCount*redDimCount*sizeof(int));
+    if (localDeCount*redDimCount > 0)
+      memcpy(computationalLBound, exclusiveLBound,
+        localDeCount*redDimCount*sizeof(int));
   }
   if (present(computationalUWidthArg)){
     if (computationalUWidthArg->dimCount != 1){
@@ -1598,8 +1637,9 @@ Array *Array::create(
           + computationalUWidthArg->array[i];
   }else{
     // set default
-    memcpy(computationalUBound, exclusiveUBound,
-      localDeCount*redDimCount*sizeof(int));
+    if (localDeCount*redDimCount > 0)
+      memcpy(computationalUBound, exclusiveUBound,
+        localDeCount*redDimCount*sizeof(int));
   }
   // modify computational bounds on tile edges
   for (int j=0; j<localDeCount; j++){
@@ -1627,8 +1667,12 @@ Array *Array::create(
   // deal with total widths
   vector<int> totalLBoundV(redDimCount*localDeCount);
   vector<int> totalUBoundV(redDimCount*localDeCount);
-  int *totalLBound = &totalLBoundV[0];
-  int *totalUBound = &totalUBoundV[0];
+  int *totalLBound = NULL;  // default safe guard
+  int *totalUBound = NULL;  // default safe guard
+  if (redDimCount*localDeCount > 0){
+    totalLBound = &totalLBoundV[0];
+    totalUBound = &totalUBoundV[0];
+  }
   if (present(totalLWidthArg)){
     if (totalLWidthArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -1981,7 +2025,9 @@ Array *Array::create(
   // call class constructor
   try{
     int vasLocalDeCountArg = localDeCount;
-    LocalArray **larrayList = &larrayListV[0];
+    LocalArray **larrayList = NULL; // default safe guard
+    if (larrayListV.size())
+      larrayList = &larrayListV[0];
     array = new Array(typekind, rank, larrayList, mh, vasLocalDeCountArg,
       ssiLocalDeCountArg, localDeToDeMapArg, distgrid, false,
       exclusiveLBound, exclusiveUBound, computationalLBound,
@@ -2291,26 +2337,30 @@ Array *Array::create(
     // copy the PET-local bound arrays
     int redDimCount = rank - tensorCount;
     arrayOut->localDeToDeMap = new int[ssiLocalDeCount];
-    memcpy(arrayOut->localDeToDeMap, arrayIn->localDeToDeMap,
-      ssiLocalDeCount*sizeof(int));
     arrayOut->exclusiveLBound = new int[redDimCount*ssiLocalDeCount];
-    memcpy(arrayOut->exclusiveLBound, arrayIn->exclusiveLBound,
-      redDimCount*ssiLocalDeCount*sizeof(int));
     arrayOut->exclusiveUBound = new int[redDimCount*ssiLocalDeCount];
-    memcpy(arrayOut->exclusiveUBound, arrayIn->exclusiveUBound,
-      redDimCount*ssiLocalDeCount*sizeof(int));
     arrayOut->computationalLBound = new int[redDimCount*ssiLocalDeCount];
-    memcpy(arrayOut->computationalLBound, arrayIn->computationalLBound,
-      redDimCount*ssiLocalDeCount*sizeof(int));
     arrayOut->computationalUBound = new int[redDimCount*ssiLocalDeCount];
-    memcpy(arrayOut->computationalUBound, arrayIn->computationalUBound,
-      redDimCount*ssiLocalDeCount*sizeof(int));
     arrayOut->totalLBound = new int[redDimCount*ssiLocalDeCount];
-    memcpy(arrayOut->totalLBound, arrayIn->totalLBound,
-      redDimCount*ssiLocalDeCount*sizeof(int));
     arrayOut->totalUBound = new int[redDimCount*ssiLocalDeCount];
-    memcpy(arrayOut->totalUBound, arrayIn->totalUBound,
-      redDimCount*ssiLocalDeCount*sizeof(int));
+    if (ssiLocalDeCount){
+      memcpy(arrayOut->localDeToDeMap, arrayIn->localDeToDeMap,
+        ssiLocalDeCount*sizeof(int));
+      if (redDimCount){
+        memcpy(arrayOut->exclusiveLBound, arrayIn->exclusiveLBound,
+          redDimCount*ssiLocalDeCount*sizeof(int));
+        memcpy(arrayOut->exclusiveUBound, arrayIn->exclusiveUBound,
+          redDimCount*ssiLocalDeCount*sizeof(int));
+        memcpy(arrayOut->computationalLBound, arrayIn->computationalLBound,
+          redDimCount*ssiLocalDeCount*sizeof(int));
+        memcpy(arrayOut->computationalUBound, arrayIn->computationalUBound,
+          redDimCount*ssiLocalDeCount*sizeof(int));
+        memcpy(arrayOut->totalLBound, arrayIn->totalLBound,
+          redDimCount*ssiLocalDeCount*sizeof(int));
+        memcpy(arrayOut->totalUBound, arrayIn->totalUBound,
+          redDimCount*ssiLocalDeCount*sizeof(int));
+      }
+    }
     // copy the PET-local LocalArray pointers
     arrayOut->larrayList = new LocalArray*[ssiLocalDeCount];
     if (rmTensorFlag){
@@ -2380,17 +2430,20 @@ Array *Array::create(
       arrayOut->distgridToArrayMap, dimCount * sizeof(int));
     // contiguous flag
     arrayOut->contiguousFlag = new int[ssiLocalDeCount];
-    memcpy(arrayOut->contiguousFlag, arrayIn->contiguousFlag,
-      ssiLocalDeCount * sizeof(int));
+    if (ssiLocalDeCount)
+      memcpy(arrayOut->contiguousFlag, arrayIn->contiguousFlag,
+        ssiLocalDeCount * sizeof(int));
     // exclusiveElementCountPDe
     int deCount = arrayIn->delayout->getDeCount();
     arrayOut->exclusiveElementCountPDe = new int[deCount];
-    memcpy(arrayOut->exclusiveElementCountPDe,
-      arrayIn->exclusiveElementCountPDe, deCount * sizeof(int));
+    if (deCount)
+      memcpy(arrayOut->exclusiveElementCountPDe,
+        arrayIn->exclusiveElementCountPDe, deCount * sizeof(int));
     // totalElementCountPLocalDe
     arrayOut->totalElementCountPLocalDe = new int[ssiLocalDeCount];
-    memcpy(arrayOut->totalElementCountPLocalDe,
-      arrayIn->totalElementCountPLocalDe, ssiLocalDeCount * sizeof(int));
+    if (ssiLocalDeCount)
+      memcpy(arrayOut->totalElementCountPLocalDe,
+        arrayIn->totalElementCountPLocalDe, ssiLocalDeCount * sizeof(int));
 
     // Set up rim members and fill with canonical seqIndex values
     arrayOut->setRimMembers();
