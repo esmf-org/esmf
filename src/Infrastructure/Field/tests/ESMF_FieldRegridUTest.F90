@@ -19920,6 +19920,8 @@ write(*,*) "LOCALRC=",localrc
    real(ESMF_KIND_R8) :: lat_rad, lon_rad, r
 
   real(ESMF_KIND_R8) :: err, relErr, maxRelErr
+  real(ESMF_KIND_R8) :: totRelErr
+  integer :: numRelErr
   
   integer :: spherical_grid
 
@@ -20212,7 +20214,7 @@ write(*,*) "LOCALRC=",localrc
   enddo    ! lDE
 
   ! Get start time
-  ! call ESMF_VMWtime(beg_time)
+ !  call ESMF_VMWtime(beg_time)
 
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
@@ -20232,8 +20234,12 @@ write(*,*) "LOCALRC=",localrc
   ! Get end time
   !call ESMF_VMWtime(end_time)
 
-  ! output time
-  ! write(*,*) "Store time = ",end_time-beg_time
+
+
+  ! output info
+!  write(*,*) "Src dims=",src_nx,src_ny
+!  write(*,*) "Dst dims=",dst_nx,dst_ny
+!  write(*,*) "Store time = ",end_time-beg_time
 
   ! Do regrid
   call ESMF_FieldRegrid(srcField, dstField, routeHandle, rc=localrc)
@@ -20250,6 +20256,8 @@ write(*,*) "LOCALRC=",localrc
 
   ! Init max
   maxRelErr=0.0
+  totRelErr=0.0
+  numRelErr=0
 
    ! Check error
   do lDE=0,localDECount-1
@@ -20309,6 +20317,10 @@ write(*,*) "LOCALRC=",localrc
         !! Calculate max
         if (relErr > maxRelErr) maxRelErr=relErr
 
+        !! Accumulate avg. info
+        totRelErr=totRelErr+maxRelErr
+        numRelErr = numRelErr+1
+
         !! if error is too big report an error
         if (relErr > 0.002) then
            correct=.false.
@@ -20323,7 +20335,8 @@ write(*,*) "LOCALRC=",localrc
      write(*,*) "Test not correct. Max Rel. Error= ",maxRelErr
   endif
 
-!   write(*,*) "Max Rel. Error= ",maxRelErr
+  !write(*,*) "Max Rel. Error= ",maxRelErr
+  !write(*,*) "Avg Rel. Error= ",totRelErr/REAL(numRelErr)
 
 #if 0
   call ESMF_GridWriteVTK(srcGrid,staggerloc=ESMF_STAGGERLOC_CENTER, &

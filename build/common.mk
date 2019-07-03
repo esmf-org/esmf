@@ -2144,9 +2144,14 @@ export INODE2 = $(word 1, $(shell ls -di $(ESMF_DIR)) )
 
 clobber:
 	@if [ $(INODE1) != $(INODE2) ] ; then \
-	  echo "Must run clobber from ESMF_DIR" ; \
-	  echo "Current directory is `pwd`" ; \
+	  echo "" ; \
+	  echo "Must run distclean or clobber from ESMF_DIR" ; \
+	  echo "" ; \
+	  echo "Current physical directory is `pwd -P`" ; \
 	  echo "ESMF_DIR is $(ESMF_DIR)" ; \
+	  echo "" ; \
+	  echo "If dealing with symlinked directories, make sure that" ; \
+	  echo "ESMF_DIR is assigned the physical location, e.g. via 'pwd -P'." ; \
 	  echo "" ; \
 	  $(MAKE) err ; \
 	fi 

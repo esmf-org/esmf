@@ -4,9 +4,9 @@ All: onedoc
 
 LOCDIR    = src/Infrastructure/XGrid/doc
 
-DVIFILES  = XGrid_refdoc.dvi
-PDFFILES  = XGrid_refdoc.pdf
-HTMLFILES = XGrid_refdoc
+DVIFILES  = XGrid_refdoc.dvi XGrid_crefdoc.dvi
+PDFFILES  = XGrid_refdoc.pdf XGrid_crefdoc.pdf 
+HTMLFILES = XGrid_refdoc XGrid_crefdoc
 
 #
 # Tex Files to make
@@ -36,8 +36,8 @@ REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE) XGrid_desc.tex XGrid_implnotes.tex XGrid_
 include $(ESMF_DIR)/makefile
 
 DIRS = 
-CLEANDIRS   = XGrid_refdoc $(HTMLFILES)
+CLEANDIRS   = XGrid_refdoc XGrid_crefdoc $(HTMLFILES)
 CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
-              XGrid_refdoc.tex $(PDFFILES)
+              XGrid_refdoc.tex XGrid_crefdoc.tex $(PDFFILES)
 CLOBBERDIRS =
 

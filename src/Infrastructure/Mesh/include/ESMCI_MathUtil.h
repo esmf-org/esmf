@@ -242,6 +242,24 @@ struct GEOM_CART2D {
 
   static void sub(double *out, double *a, double *b) {out[0]=a[0]-b[0]; out[1]=a[1]-b[1];}
 
+  static void remove_0len_edges(int *num_p, double *p) {
+    remove_0len_edges2D(num_p, p);
+  }
+
+  static void intersect_convex_polygon(int num_p, double *p,
+                                       int num_q, double *q,
+                                       double *tmp,
+                                       int *num_out, double *out) {
+    intersect_convex_poly2D(num_p, p,
+                            num_q, q,
+                            tmp,
+                            num_out, out);
+  }
+
+  static double calc_area_polygon(int num, double *coords) {
+    return area_of_flat_2D_polygon(num, coords);
+  }   
+
 };
 
 
@@ -262,6 +280,24 @@ struct GEOM_SPH2D3D {
 
   static void sub(double *out, double *a, double *b) {out[0]=a[0]-b[0]; out[1]=a[1]-b[1]; out[2]=a[2]-b[2];}
 
+  static void remove_0len_edges(int *num_p, double *p) {
+    remove_0len_edges3D(num_p, p);
+  }
+
+  static void intersect_convex_polygon(int num_p, double *p,
+                                       int num_q, double *q,
+                                       double *tmp,
+                                       int *num_out, double *out) {
+    intersect_convex_2D_3D_sph_gc_poly(num_p, p,
+                                       num_q, q,
+                                       tmp,
+                                       num_out, out);
+  }
+
+  static double calc_area_polygon(int num, double *coords) {
+    return great_circle_area(num, coords);
+  }
+
 };
 
 
@@ -272,10 +308,16 @@ template <class TYPE>
 int triangulate_poly(int num_p, double *p, double *td, int *ti, int *tri_ind);
 
 template <class TYPE>
-bool is_pnt_in_poly(int num_p, double *p, double *pnt);
+  bool is_pnt_in_convex_poly(int num_p, double *p, double *pnt);
 
 template <class GEOM>
 double calc_angle(double *v1, double *v2, double *norm);
+
+template <class GEOM>
+  double calc_poly_intersect_area(int num_p, double *p, int *tri_ind_p, int num_q, double *q, int *tri_ind_q, double *td, int *ti);
+
+template <class GEOM>
+  bool is_pnt_in_polygon(int num_p, double *p, double *pnt, double tol, int *tri_ind_p, double *td, int *ti, bool *success=NULL);
 
 } // namespace
 

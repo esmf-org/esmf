@@ -29,6 +29,12 @@ namespace ESMCI {
     static MeshCXX* create(int, int, ESMC_CoordSys_Flag, int *);
     static MeshCXX* createFromFile(const char *, int, int *, int *,
                                    const char *, int *, const char *, int *);
+    static MeshCXX* createFromPtr(Mesh *meshp,
+                                  int parametricDim,
+                                  int spatialDim,
+                                  ESMC_CoordSys_Flag coordSys,
+                                  int *rc);
+
     void getLocalCoords(double *, int *, int *, int *);
     void getLocalElemCoords(double *, int *, int *, int *);
     void getConnectivity(double *, int *, int *);
