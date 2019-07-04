@@ -137,7 +137,7 @@ namespace Sacado {
 
       //! Inherit Storage's constructors
       //using Storage::Storage;
-      using ExtenderType::ExtenderType;
+      //using ExtenderType::ExtenderType;
 
       //! Destructor
       ~GeneralFad() = default;
