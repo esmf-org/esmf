@@ -61,7 +61,7 @@ test_esmfmkfile:
 	-@if [ "$(ESMF_TESTESMFMKFILE)" = "ON" ] ; then \
 	  echo " " ; \
 	  echo "**************************************************************" ; \
-	  echo "****** TESTING AGAINST AN EXTERNAL ESMF INSTALLATION! ********" ; \
+	  echo "****** TESTING AGAINST ESMF INSTALLATION AT ESMFMKFILE *******" ; \
 	  echo "ESMF_TESTESMFMKFILE:  $(ESMF_TESTESMFMKFILE)" ; \
 	  echo "ESMFMKFILE:  $(ESMFMKFILE)" ; \
 	  echo "**************************************************************" ; \

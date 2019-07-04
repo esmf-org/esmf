@@ -1686,6 +1686,9 @@ OBJS		= $(OBJSC) $(OBJSF)
 #-------------------------------------------------------------------------------
 
 ifeq ($(ESMF_TESTESMFMKFILE),ON)
+ifeq ("$(wildcard $(ESMFMKFILE))","")
+$(error ESMF_TESTESMFMKFILE=ON, but the file indicated by ESMFMKFILE variable does not exist: $(ESMFMKFILE))
+endif
 include $(ESMFMKFILE)
 ESMFLIB =
 ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Superstructure/ESMFMod/include
@@ -1701,7 +1704,10 @@ ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/DELayout/include
 ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/DistGrid/include
 ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/LocalArray/include
 ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/LogErr/include
+ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/Mesh/include
+ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/PointList/include
 ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/TimeMgr/include
+ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/Trace/include
 ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/Grid/include
 ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/Route/include
 ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/Field/include
