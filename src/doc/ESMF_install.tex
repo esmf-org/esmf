@@ -890,6 +890,16 @@ and you wish to use it, download the corresponding files into the
 Sourceforge site 
 \htmladdnormallink{http://sourceforge.net/projects/esmfcontrib}{http://sourceforge.net/projects/esmfcontrib} for more information.
 
+\item[ESMF\_TESTESMFMKFILE] 
+Possible value: {\tt ON}, {\tt OFF} (default)
+
+Variable specifying whether the {\tt ESMFMKFILE} variable is evaluated to
+determine which ESMF installation is being tested against. If set to the 
+value {\tt ON}, all tests and examples are build against the ESMF installation
+referenced by the {\tt ESMFMKFILE} variable. For {\tt OFF}, the 
+{\tt ESMFMKFILE} variable is ignored and the tests and examples are build
+against the ESMF under {\tt ESMF\_DIR}. This is the default.
+
 \item[ESMF\_TESTEXHAUSTIVE] 
 Possible value: {\tt ON}, {\tt OFF} (default)
 
