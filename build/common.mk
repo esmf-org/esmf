@@ -2318,7 +2318,7 @@ clean_validate:
 #
 # build_apps
 #
-build_apps: reqfile_libesmf reqdir_lib
+build_apps: test_esmfmkfile reqfile_libesmf reqdir_lib
 	cd $(ESMF_DIR)/src/apps; $(MAKE) ACTION=tree_build_apps tree
 	@echo "ESMF apps built successfully."
 # Notice: the cd into "$(ESMF_DIR)/src/apps" before the tree target above
@@ -2343,7 +2343,7 @@ endif
 # Targets for building and running system tests.
 #-------------------------------------------------------------------------------
 
-system_tests: chkdir_tests autobuild_libs dust_system_tests
+system_tests: test_esmfmkfile chkdir_tests autobuild_libs dust_system_tests
 	@if [ -d $(ESMF_STDIR) ] ; then cd $(ESMF_STDIR); fi; \
 	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
 	   if [ -d $(SYSTEM_TEST) ] ; then \
@@ -2370,7 +2370,7 @@ tree_system_tests: tree_build_system_tests tree_run_system_tests
 #
 # system_tests_uni, build and run uni versions of the system tests
 #
-system_tests_uni: chkdir_tests autobuild_libs dust_system_tests
+system_tests_uni: test_esmfmkfile chkdir_tests autobuild_libs dust_system_tests
 	@if [ -d $(ESMF_STDIR) ] ; then cd $(ESMF_STDIR); fi; \
 	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
 	   if [ -d $(SYSTEM_TEST) ] ; then \
@@ -2390,7 +2390,7 @@ tree_system_tests_uni: tree_build_system_tests tree_run_system_tests_uni
 #
 # build_system_tests
 #
-build_system_tests: reqfile_libesmf reqdir_lib chkdir_tests 
+build_system_tests: test_esmfmkfile reqfile_libesmf reqdir_lib chkdir_tests 
 	@if [ -d $(ESMF_STDIR) ] ; then cd $(ESMF_STDIR) ; fi; \
 	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
 	   if [ -d $(SYSTEM_TEST) ] ; then \
@@ -2478,7 +2478,7 @@ dust_system_tests:
 #
 # run_system_tests
 #
-run_system_tests:  reqdir_tests update_sys_tests_flags
+run_system_tests: test_esmfmkfile reqdir_tests update_sys_tests_flags
 	@if [ $(ESMF_DIR) = `pwd` ] ; then \
 	  $(MAKE) dust_system_tests ; \
 	fi
@@ -2511,7 +2511,7 @@ tree_run_system_tests: $(SYSTEM_TESTS_RUN)
 #
 # run_system_tests_uni
 #
-run_system_tests_uni:  reqdir_tests update_sys_tests_flags
+run_system_tests_uni: test_esmfmkfile reqdir_tests update_sys_tests_flags
 	@if [ $(ESMF_DIR) = `pwd` ] ; then \
 	  $(MAKE) dust_system_tests ; \
 	fi
@@ -2621,7 +2621,7 @@ check_system_tests_ml:
 # Targets for building and running use test cases
 #-------------------------------------------------------------------------------
 
-use_test_cases: chkdir_tests
+use_test_cases: test_esmfmkfile chkdir_tests
 	@if [ -d $(ESMF_UTCDIR) ] ; then cd $(ESMF_UTCDIR); fi; \
 	if [ ! $(USE_TEST_CASE)foo = foo ] ; then \
 	   if [ -d $(USE_TEST_CASE) ] ; then \
@@ -2648,7 +2648,7 @@ tree_use_test_cases: tree_build_use_test_cases tree_dry_run_use_test_cases tree_
 #
 # use_test_cases_uni, build and run uni versions of the use test cases
 #
-use_test_cases_uni: chkdir_tests
+use_test_cases_uni: test_esmfmkfile chkdir_tests
 	@if [ -d $(ESMF_UTCDIR) ] ; then cd $(ESMF_UTCDIR); fi; \
 	if [ ! $(USE_TEST_CASE)foo = foo ] ; then \
 	   if [ -d $(USE_TEST_CASE) ] ; then \
@@ -2667,7 +2667,7 @@ tree_use_test_cases_uni: tree_build_use_test_cases tree_dry_run_use_test_cases t
 #
 # build_use_test_cases
 #
-build_use_test_cases: reqfile_libesmf reqdir_lib chkdir_tests
+build_use_test_cases: test_esmfmkfile reqfile_libesmf reqdir_lib chkdir_tests
 	@if [ -d $(ESMF_UTCDIR) ] ; then cd $(ESMF_UTCDIR) ; fi; \
 	if [ ! $(USE_TEST_CASE)foo = foo ] ; then \
 	   if [ -d $(USE_TEST_CASE) ] ; then \
@@ -2739,7 +2739,7 @@ $(ESMF_TESTDIR)/ESMF_%UseTestCaseE : $(USE_TEST_CASES_OBJ_E) $(ESMFLIB) ESMF_%Us
 #
 # run_use_test_cases
 #
-run_use_test_cases:  reqdir_tests
+run_use_test_cases: test_esmfmkfile reqdir_tests
 	@if [ -d $(ESMF_UTCDIR) ] ; then cd $(ESMF_UTCDIR) ; fi; \
 	if [ ! $(USE_TEST_CASE)foo = foo ] ; then \
 	   if [ -d $(USE_TEST_CASE) ] ; then \
@@ -2766,7 +2766,7 @@ tree_run_use_test_cases: tree_dry_run_use_test_cases $(USE_TEST_CASES_RUN)
 #
 # run_use_test_cases_uni
 #
-run_use_test_cases_uni:  reqdir_tests
+run_use_test_cases_uni: test_esmfmkfile reqdir_tests
 	@if [ -d $(ESMF_UTCDIR) ] ; then cd $(ESMF_UTCDIR) ; fi; \
 	if [ ! $(USE_TEST_CASE)foo = foo ] ; then \
 	   if [ -d $(USE_TEST_CASE) ] ; then \
@@ -2787,7 +2787,7 @@ tree_run_use_test_cases_uni: tree_dry_run_use_test_cases $(USE_TEST_CASES_RUN_UN
 #
 # dry_run_use_test_cases
 #
-dry_run_use_test_cases:  
+dry_run_use_test_cases: test_esmfmkfile 
 	@if [ -d $(ESMF_UTCDIR) ] ; then cd $(ESMF_UTCDIR) ; fi; \
         if [ ! $(USE_TEST_CASE)foo = foo ] ; then \
            if [ -d $(USE_TEST_CASE) ] ; then \
@@ -2840,7 +2840,7 @@ check_use_test_cases:
 # all is well (it comes out 128).  if this gets fixed in our code, the dashes
 # can be removed and make can correctly stop on error.
 
-unit_tests: chkdir_tests autobuild_libs dust_unit_tests
+unit_tests: test_esmfmkfile chkdir_tests autobuild_libs dust_unit_tests
 	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
           echo "Cannot run multiprocessor unit tests when ESMF_COMM is mpiuni;" ; \
 	  echo "run unit_tests_uni instead." ; \
@@ -2856,7 +2856,7 @@ tree_unit_tests: tree_build_unit_tests tree_run_unit_tests
 #
 # tests_uni
 #
-unit_tests_uni: chkdir_tests autobuild_libs dust_unit_tests
+unit_tests_uni: test_esmfmkfile chkdir_tests autobuild_libs dust_unit_tests
 	$(MAKE) MULTI="Uniprocessor" config_unit_tests
 	-$(MAKE) ACTION=tree_unit_tests_uni tree
 	$(MAKE) check_unit_tests
@@ -2866,7 +2866,7 @@ tree_unit_tests_uni: tree_build_unit_tests tree_run_unit_tests_uni
 #
 # build_unit_tests
 #
-build_unit_tests: reqfile_libesmf reqdir_lib chkdir_tests verify_exhaustive_flag
+build_unit_tests: test_esmfmkfile reqfile_libesmf reqdir_lib chkdir_tests verify_exhaustive_flag
 	$(MAKE) config_unit_tests 
 	$(MAKE) ACTION=tree_build_unit_tests tree
 	@echo "ESMF unit tests built successfully."
@@ -2912,7 +2912,7 @@ dust_unit_tests: dust_test_harness
 #
 # run_unit_tests
 #
-run_unit_tests:  reqdir_tests verify_exhaustive_flag
+run_unit_tests: test_esmfmkfile reqdir_tests verify_exhaustive_flag
 	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
           echo "Cannot run multiprocessor unit tests when ESMF_COMM is mpiuni;" ; \
 	  echo "run run_unit_tests_uni instead." ; \
@@ -2934,7 +2934,7 @@ tree_run_unit_tests: $(TESTS_RUN)
 #
 # run_unit_tests_uni
 #
-run_unit_tests_uni:  reqdir_tests verify_exhaustive_flag
+run_unit_tests_uni: test_esmfmkfile reqdir_tests verify_exhaustive_flag
 	@if [ $(ESMF_DIR) = `pwd` ] ; then \
 	  $(MAKE) dust_unit_tests ; \
 	fi
@@ -3256,7 +3256,7 @@ err: ; $(error gnumake exiting)
 #
 # examples
 #
-examples: chkdir_examples autobuild_libs dust_examples
+examples: test_esmfmkfile chkdir_examples autobuild_libs dust_examples
 	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
           echo "Cannot run multiprocessor examples when ESMF_COMM is mpiuni;" ; \
 	  echo "run examples_uni instead." ; \
@@ -3273,7 +3273,7 @@ tree_examples: tree_build_examples tree_run_examples
 #
 # examples_uni
 #
-examples_uni: chkdir_examples autobuild_libs dust_examples
+examples_uni: test_esmfmkfile chkdir_examples autobuild_libs dust_examples
 	$(MAKE) MULTI="Uniprocessor" config_examples
 	-$(MAKE) ACTION=tree_examples_uni tree
 	$(MAKE) check_examples
@@ -3283,7 +3283,7 @@ tree_examples_uni: tree_build_examples tree_run_examples_uni
 #
 # build_examples
 #
-build_examples: reqfile_libesmf reqdir_lib chkdir_examples
+build_examples: test_esmfmkfile reqfile_libesmf reqdir_lib chkdir_examples
 	$(MAKE) config_examples
 	$(MAKE) ACTION=tree_build_examples tree
 	@echo "ESMF examples built successfully."
@@ -3316,7 +3316,7 @@ dust_examples:
 #
 # run_examples
 #
-run_examples:  reqdir_examples
+run_examples: test_esmfmkfile reqdir_examples
 	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
           echo "Cannot run multiprocessor examples when ESMF_COMM is mpiuni;" ; \
 	  echo "run run_examples_uni instead." ; \
@@ -3338,7 +3338,7 @@ tree_run_examples: $(EXAMPLES_RUN)
 
 # run_examples_uni
 #
-run_examples_uni:  reqdir_examples
+run_examples_uni: test_esmfmkfile reqdir_examples
 	@if [ $(ESMF_DIR) = `pwd` ] ; then \
 	  $(MAKE) dust_examples ; \
 	fi

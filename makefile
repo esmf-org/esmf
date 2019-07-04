@@ -57,7 +57,17 @@ all:  lib build_unit_tests build_examples build_system_tests
 ifdef ESMF_NETCDF
 pathtype := $(shell $(ESMF_DIR)/scripts/pathtype $(ESMF_NETCDF))
 endif
-script_info:
+test_esmfmkfile:
+	-@if [ "$(ESMF_TESTESMFMKFILE)" = "ON" ] ; then \
+	  echo " " ; \
+	  echo "**************************************************************" ; \
+	  echo "****** TESTING AGAINST AN EXTERNAL ESMF INSTALLATION! ********" ; \
+	  echo "ESMF_TESTESMFMKFILE:  $(ESMF_TESTESMFMKFILE)" ; \
+	  echo "ESMFMKFILE:  $(ESMFMKFILE)" ; \
+	  echo "**************************************************************" ; \
+	  echo "**************************************************************" ; \
+        fi
+script_info: test_esmfmkfile
 	-@echo " "
 	-@echo "--------------------------------------------------------------"
 	-@echo "ESMF_VERSION_STRING:    $(ESMF_VERSION_STRING)"
