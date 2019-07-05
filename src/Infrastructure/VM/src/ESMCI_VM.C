@@ -2755,7 +2755,6 @@ VM *VM::initialize(
     ++vmKeyWidth;               // correction for extra bits
     vmKeyOff = 8 - vmKeyOff;    // number of extra bits in last char
   }
-#define DEBUG
 #ifdef DEBUG
   printf("ESMC_VMInitialize, vmKeyWidth=%d vmKeyOff=%d\n", vmKeyWidth, vmKeyOff);
 #endif
