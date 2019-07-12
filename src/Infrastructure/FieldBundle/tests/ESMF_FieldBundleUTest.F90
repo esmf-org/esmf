@@ -78,6 +78,12 @@
       character(1), pointer :: buffer(:)
       integer :: buffer_len
       integer :: offset, offset_inq
+
+      type(ESMF_Grid)             :: gridxy
+      type(ESMF_FieldBundle)      :: packedFB
+      !real(ESMF_KIND_R8), pointer :: packedPtr(:,:,:,:,:) !fieldIdx,t,z,y,x
+      real(ESMF_KIND_R8), pointer :: packedPtr(:,:,:,:) !fieldIdx,y,x
+      integer                     :: fieldIdx
 #endif
 
 
@@ -2316,6 +2322,49 @@
       call ESMF_FieldBundleDestroy(bundle5, rc=rc)
       write(failMsg, *) "Destroy FieldBundle"
       write(name, *) "Destroy FieldBundle"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      !allocate(packedPtr(10, 3, 30, 40, 50)) ! fieldIdx, time, z, y, x
+      allocate(packedPtr(10, 3, 10, 50)) ! fieldIdx, time, y, x
+      do i = 1, 10
+        write(fieldNameList(i), '(A,I2)') 'field', i
+      enddo
+      gridxy = ESMF_GridCreateNoPeriDim(maxIndex=(/40,50/), regDecomp=(/4,1/), rc=rc)
+      write(failMsg, *) "Create packed FieldBundle"
+      write(name, *) "Create packed FieldBundle"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      fieldIdx = 1
+      packedFB = ESMF_FieldBundleCreate(fieldNameList, packedPtr, gridxy, fieldIdx, &
+        gridToFieldMap=(/3,4/), staggerloc=ESMF_Staggerloc_Center, rc=rc)
+      write(failMsg, *) "Create 2nd packed FieldBundle"
+      write(name, *) "Create 2nd packed FieldBundle"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      deallocate(packedPtr)
+      allocate(packedPtr(3, 10, 50, 10)) ! time, fieldIdx, y, x
+      fieldIdx = 2
+      packedFB = ESMF_FieldBundleCreate(fieldNameList, packedPtr, gridxy, fieldIdx, &
+        gridToFieldMap=(/4,3/), staggerloc=ESMF_Staggerloc_Center, rc=rc)
+      write(failMsg, *) "Create 3rd packed FieldBundle"
+      write(name, *) "Create 3rd packed FieldBundle"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      deallocate(packedPtr)
+      allocate(packedPtr(10, 50, 3, 10)) ! x, y, time, fieldIdx
+      fieldIdx = 4
+      packedFB = ESMF_FieldBundleCreate(fieldNameList, packedPtr, gridxy, fieldIdx, &
+        gridToFieldMap=(/1,2/), staggerloc=ESMF_Staggerloc_Center, rc=rc)
+      write(failMsg, *) "Create 4th packed FieldBundle"
+      write(name, *) "Create 4th packed FieldBundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #endif
 

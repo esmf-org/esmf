@@ -692,7 +692,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       
     endif ! garbageSize /= 0
 
-    ! always deallocate garbageList because it's always associated returning from Container
+    ! always deallocate garbageList because it is always associated returning from Container
     deallocate(garbageList)
 
     ! Return successfully
@@ -1064,12 +1064,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       To create a custom stagger location see section @\
 !       \ref{sec:usage:staggerloc:adv}. The default @\
 !       value is {\tt ESMF\_STAGGERLOC\_CENTER}. @\
+!       All Fields in packed FieldBundle use identical staggerloc setting. @\
 ! \item [{[gridToFieldMap]}] @\
 !       List with number of elements equal to the @\
 !       {\tt grid}|s dimCount. The list elements map each dimension @\
 !       of the {\tt grid} to a dimension in the {\tt farrayPtr} by @\
-!       specifying the appropriate {\tt farrayPtr} dimension index after the packed fieldDim is @\
-!       removed from the {\tt farrayPtr}. The default is to @\
+!       specifying the appropriate {\tt farrayPtr} dimension index. @\
+!       The default is to @\
 !       map all of the {\tt grid}|s dimensions against the lowest dimensions of @\
 !       the {\tt farrayPtr} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../). @\
 !       The values of all {\tt gridToFieldMap} entries must be greater than or equal @\
@@ -1195,9 +1196,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
     encodeName = fieldNameList(1) @\
     do i = 2, size(fieldNameList) @\
-      write(encodeName, "(3A)") encodeName, ":", fieldNameList(i) @\
+      write(encodeName, "(3A)") trim(encodeName), trim(":"), trim(fieldNameList(i)) @\
     enddo @\
- @\
+@\
     ! Create an internal g2f map @\
     if(present(gridToFieldMap)) then @\
       allocate(ig2fmap(size(gridToFieldMap))) @\
@@ -1219,15 +1220,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif @\
       enddo @\
     endif @\
-    print *, ig2fmap @\
-  @\
+@\
     fieldList(1) = ESMF_FieldCreate(grid, farrayPtr, staggerloc=staggerloc, & @\
-    gridToFieldMap=ig2fmap, totalLWidth=totalLWidth, totalUWidth=totalUWidth, name=encodeName, rc=localrc) @\
+      gridToFieldMap=gridToFieldMap, totalLWidth=totalLWidth, totalUWidth=totalUWidth, & @\
+      name=encodeName, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, & @\
       ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
-    deallocate(ig2fmap) @\
+    call ESMF_FieldBundleAdd(ESMF_FieldBundleCreateGridDataPtr##mrank##D##mtypekind, fieldList, & @\
+      multiflag=.false., relaxedflag=.false., rc=localrc) @\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+      ESMF_CONTEXT, rcToReturn=rc)) return @\
+@\
+    ! Return successfully @\
     if (present(rc)) rc = ESMF_SUCCESS @\
 @\
   end function ESMF_FieldBundleCreateGridDataPtr##mrank##D##mtypekind  @\
@@ -2539,7 +2545,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
     if (present(rc)) rc = localrc
 
     call ESMF_IODestroy(io, rc=localrc)
-    ! Log error but don't reset rc
+    ! Log error but donot reset rc
     errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,         &
         ESMF_CONTEXT, rcToReturn=localrc)
 
@@ -3723,7 +3729,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           of more distant points. If not specified, defaults to 2.0.
 !  \item [{[unmappedaction]}]
 !    Specifies what should happen if there are destination points that
-!    can't be mapped to a source cell. Please see Section~\ref{const:unmappedaction} for a 
+!    can not be mapped to a source cell. Please see Section~\ref{const:unmappedaction} for a 
 !           list of valid options. If not specified, {\tt unmappedaction} defaults to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
 !   \item [{[ignoreDegenerate]}]
 !           Ignore degenerate cells when checking the input Grids or Meshes for errors. If this is set to true, then the 
@@ -4466,7 +4472,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       ! Create the geombase around the grid, use the center stagger as a generic stagger here, 
-      ! because the stagger won't really matter in this case
+      ! because the stagger wont really matter in this case
       btype%geombase=ESMF_GeomBaseCreate(grid,ESMF_STAGGERLOC_CENTER,rc=status)
       if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                    ESMF_CONTEXT, rcToReturn=rc))  return
@@ -4544,7 +4550,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       ! Create the geombase around the grid, use the center stagger as a generic stagger here, 
-      ! because the stagger won't really matter in this case
+      ! because the stagger wont really matter in this case
       btype%geombase=ESMF_GeomBaseCreate(mesh,rc=status)
       if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                    ESMF_CONTEXT, rcToReturn=rc))  return
@@ -5833,9 +5839,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !      on the value of {\tt iofmt} as shown below:
 !    \begin{description}
 !    \item[{\tt iofmt} = {\tt ESMF\_IOFMT\_BIN}:]\ All data in the file will
-!      be overwritten with each field's data.
+!      be overwritten with each fields data.
 !    \item[{\tt iofmt} = {\tt ESMF\_IOFMT\_NETCDF, ESMF\_IOFMT\_NETCDF\_64BIT\_OFFSET}:]\ Only the
-!      data corresponding to each field's name will be
+!      data corresponding to each fields name will be
 !      be overwritten. If the {\tt timeslice} option is given, only data for
 !      the given timeslice may be overwritten.
 !      Note that it is always an error to attempt to overwrite a NetCDF
@@ -6031,7 +6037,7 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
     if (present(rc)) rc = localrc
 
     call ESMF_IODestroy(io, rc=localrc)
-    ! Log error but don't reset rc
+    ! Log error but donot reset rc
     errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,         &
         ESMF_CONTEXT, rcToReturn=localrc)
 
@@ -6393,8 +6399,8 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
     ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field, rc)
 
-    ! Don't do anything if fieldbundle already has a geombase
-    ! TODO: we'll check matchness here in the future between field%geombase
+    ! Donot do anything if fieldbundle already has a geombase
+    ! TODO: we will check matchness here in the future between field%geombase
     ! and fieldbundle%geombase
     if(fieldbundle%this%status == ESMF_FBSTATUS_GRIDSET) then
       if(present(rc)) rc = ESMF_SUCCESS

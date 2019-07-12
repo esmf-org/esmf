@@ -24,6 +24,11 @@ program ESMF_FieldBundleCreateEx
     type(ESMF_Field) :: field(10), returnedfield1, returnedfield2, r_fields(3)
     type(ESMF_Field) :: simplefield
     type(ESMF_FieldBundle) :: bundle1, bundle2, bundle3
+    type(ESMF_Grid)             :: gridxy
+    type(ESMF_FieldBundle)      :: packedFB
+    real(ESMF_KIND_R8), pointer :: packedPtr(:,:,:,:) !fieldIdx,y,x
+    integer                     :: fieldDim
+    character(len = ESMF_MAXSTR), dimension(10) :: fieldNameList
 
     integer :: finalrc, result
 
@@ -269,6 +274,43 @@ program ESMF_FieldBundleCreateEx
       print *, fname1
     enddo
 !EOC
+
+!-------------------------------------------------------------------------
+!BOE
+! \subsubsection{Create a packed FieldBundle}
+! \label{sec:fieldbundle:usage:getlist}
+! Create a packed fieldbundle from user supplied 
+! field names and a packed Fortran array pointer that contains
+! the data of the packed fields. 
+!EOE
+  do i = 1, 10
+  write(fieldNameList(i), '(A,I2)') 'field', i
+  enddo
+!BOE
+! Create a 2D grid of 4x1 regular decomposition on 4 PETs, each PET has 10x50 elements
+!EOE
+!BOC
+  gridxy = ESMF_GridCreateNoPeriDim(maxIndex=(/40,50/), regDecomp=(/4,1/), rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!BOE
+! Allocate a packed Fortran array pointer containing 10 packed fields, each field has
+! 3 time slices and uses the 2D grid created. Note that gridToFieldMap uses the position
+! of the grid dimension as elements, 3rd element of the packedPtr is 10, 4th element
+! of the packedPtr is 50.
+!EOE
+!BOC
+  allocate(packedPtr(10, 3, 10, 50)) ! fieldIdx, time, y, x
+  fieldDim = 1
+  packedFB = ESMF_FieldBundleCreate(fieldNameList, packedPtr, gridxy, fieldDim, &
+  gridToFieldMap=(/3,4/), staggerloc=ESMF_Staggerloc_Center, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  deallocate(packedPtr)
+  call ESMF_FieldBundleDestroy(packedFB, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
 !\subsubsection{Destroy a FieldBundle}
