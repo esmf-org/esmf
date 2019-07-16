@@ -59,6 +59,7 @@
       integer :: number, count
       character (len = ESMF_MAXSTR) :: fname1, fname2,fname3
       character(len = ESMF_MAXSTR), dimension(10) :: fieldNameList
+      character(len = ESMF_MAXSTR), allocatable   :: fieldNameListAlloc(:)
       type(ESMF_Field) :: fields(10),fieldTst(2), fields5(10), fields6(10)
       type(ESMF_Grid) :: grid2, gridTst1,gridTst2, grid5
       type(ESMF_LocStream) :: locstreamTst1, locStreamTst2
@@ -1560,19 +1561,6 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !E-X_UTest
-      ! Test Requirement Creating a FieldBundle with ESMF_PACKED_DATA option
-      ! The ESMF_PACKED_DATA option is not implemented and until it is, it
-      ! is correct for the method to return ESMF_RC_NOT_IMPL when it is used.
-      ! Fei: disabled until packing is implemented
-      !write(failMsg, *) "Did not return ESMF_RC_NOT_IMPL"
-      !bundle4 = ESMF_FieldBundleCreate(fieldList=fields(1:3), &
-      !      name="atmosphere data", rc=rc)
-      !write(name, *) "Creating FieldBundle with ESMF_PACKED_DATA"
-      !call ESMF_Test((rc.eq.ESMF_RC_NOT_IMPL), name, failMsg, result, ESMF_SRCLINE)
-      !print *, "rc = ", rc
-      !------------------------------------------------------------------------
-
       !EX_UTest
       !  Verify the getting Field names query from FieldBundle returns ESMF_SUCCESS
       call ESMF_FieldBundleGet(bundle1, fieldnameList=fieldNameList, fieldCount=fieldcount, rc=rc)
@@ -2324,8 +2312,9 @@
       write(name, *) "Destroy FieldBundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+      if(petCount == 4) then
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       !allocate(packedPtr(10, 3, 30, 40, 50)) ! fieldIdx, time, z, y, x
       allocate(packedPtr(10, 3, 10, 50)) ! fieldIdx, time, y, x
       do i = 1, 10
@@ -2337,7 +2326,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       fieldIdx = 1
       packedFB = ESMF_FieldBundleCreate(fieldNameList, packedPtr, gridxy, fieldIdx, &
         gridToFieldMap=(/3,4/), staggerloc=ESMF_Staggerloc_Center, rc=rc)
@@ -2346,7 +2335,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       deallocate(packedPtr)
       allocate(packedPtr(3, 10, 50, 10)) ! time, fieldIdx, y, x
       fieldIdx = 2
@@ -2357,7 +2346,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       deallocate(packedPtr)
       allocate(packedPtr(10, 50, 3, 10)) ! x, y, time, fieldIdx
       fieldIdx = 4
@@ -2366,6 +2355,23 @@
       write(failMsg, *) "Create 4th packed FieldBundle"
       write(name, *) "Create 4th packed FieldBundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only
+      call ESMF_FieldBundleGet(packedFB, fieldCount=fieldcount, rc=rc)
+      write(failMsg, *) "Get fieldCount from packed FieldBundle"
+      write(name, *) "Get fieldCount from packed FieldBundle"
+      call ESMF_Test((fieldCount .eq. 10), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only
+      allocate(fieldNameListAlloc(fieldcount))
+      call ESMF_FieldBundleGet(packedFB, fieldNameList=fieldNameList, rc=rc)
+      write(failMsg, *) "Get fieldNameList from packed FieldBundle"
+      write(name, *) "Get fieldNameList from packed FieldBundle"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+     
+      endif ! Petcount = 4
 #endif
 
       call ESMF_TestEnd(ESMF_SRCLINE)
