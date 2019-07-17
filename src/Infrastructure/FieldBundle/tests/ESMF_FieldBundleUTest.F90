@@ -2370,6 +2370,9 @@
       write(failMsg, *) "Get fieldNameList from packed FieldBundle"
       write(name, *) "Get fieldNameList from packed FieldBundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      deallocate(packedPtr)
+      deallocate(fieldNameListAlloc)
      
       endif ! Petcount = 4
 #endif

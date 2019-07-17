@@ -17,7 +17,8 @@ program ESMF_FieldBundleCreateEx
     implicit none
     
 !   ! Local variables
-    integer :: i, rc, fieldcount
+    type(ESMF_VM)   :: vm
+    integer :: i, rc, fieldcount, petCount
     type(ESMF_Grid) :: grid
     type(ESMF_ArraySpec) :: arrayspec
     character (len = ESMF_MAXSTR) :: bname1, fname1, fname2
@@ -52,6 +53,12 @@ program ESMF_FieldBundleCreateEx
     call ESMF_Initialize(defaultlogfilename="FieldBundleCreateEx.Log", &
                     logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
     
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+    call ESMF_VMGetCurrent(vm=vm, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+    call ESMF_VMGet(vm, petCount=petCount, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !------------------------------------------------------------------------------
@@ -275,6 +282,7 @@ program ESMF_FieldBundleCreateEx
     enddo
 !EOC
 
+  if(petCount == 4) then
 !-------------------------------------------------------------------------
 !BOE
 ! \subsubsection{Create a packed FieldBundle}
@@ -320,6 +328,7 @@ program ESMF_FieldBundleCreateEx
 !can be shared by multiple FieldBundles and States, they are
 !not deleted by this call.
 !EOE
+  endif ! petCount = 4
 
 
 !BOC
