@@ -3,12 +3,23 @@
 Building user applications against an ESMF installation requires that the 
 compiler and linker be able to find the appropriate ESMF header, module and 
 library files. If this procedure has been documented by the installer of the 
-ESMF library on your system then follow the directions given. Otherwise it is up 
-to the user to determine and provide the required compiler and linker flags. 
-Every ESMF installation provides a file named {\tt esmf.mk} that contains the 
-relevant information.
+ESMF library on your system then follow the directions provided.
 
-The location of the {\tt esmf.mk} file should be documented by the party that 
+In the absence of installation specific instructions there are two standard
+methods supported by ESMF to build user code against the installation. The
+first method is based on a GNU makefile fragment that can be included by the
+user code build infrastructure. This method requires that the user application
+also uses the
+\htmladdnormallink{GNU Make}{http://www.gnu.org/software/make/make.html}
+system. The second method is based on 
+\htmladdnormallink{CMake}{https://cmake.org/}.
+
+
+\subsection{esmf.mk method}
+
+Every ESMF installation provides a file named {\tt esmf.mk} that contains the 
+information needed to build a user application gainst the installation. The
+location of the {\tt esmf.mk} file should be documented by the party that
 installed ESMF on the system. We recommend that a single ESMF specific 
 environment variable, {\tt ESMFMKFILE}, be provided by the system that points to 
 the {\tt esmf.mk} file. See section \ref{InstallESMF} for the related discussion 
@@ -120,3 +131,8 @@ esmc_UserApplication:
 ################################################################################
 
 \end{verbatim}
+
+
+\subsection{CMake method}
+
+Section for Ben and Ufuk to fill in.
