@@ -83,7 +83,8 @@
       type(ESMF_Grid)             :: gridxy
       type(ESMF_FieldBundle)      :: packedFB
       !real(ESMF_KIND_R8), pointer :: packedPtr(:,:,:,:,:) !fieldIdx,t,z,y,x
-      real(ESMF_KIND_R8), pointer :: packedPtr(:,:,:,:) !fieldIdx,y,x
+      real(ESMF_KIND_R8), pointer :: packedPtr(:,:,:,:)
+      real(ESMF_KIND_R8), pointer :: packedPtr3D(:,:,:)
       integer                     :: fieldIdx
 #endif
 
@@ -1423,10 +1424,6 @@
       call ESMF_FieldDestroy(fieldTst(2), rc=localrc)
       if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-      ! Get rid of Mesh
-      call ESMF_MeshDestroy(meshTst1, rc=localrc)
-      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
      endif ! if 1 or 4 PETS
 
       write(failMsg, *) "Test not successful"
@@ -2330,6 +2327,7 @@
       fieldIdx = 1
       packedFB = ESMF_FieldBundleCreate(fieldNameList, packedPtr, gridxy, fieldIdx, &
         gridToFieldMap=(/3,4/), staggerloc=ESMF_Staggerloc_Center, rc=rc)
+      call ESMF_FieldBundleDestroy(packedFB, rc=rc)
       write(failMsg, *) "Create 2nd packed FieldBundle"
       write(name, *) "Create 2nd packed FieldBundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -2341,6 +2339,7 @@
       fieldIdx = 2
       packedFB = ESMF_FieldBundleCreate(fieldNameList, packedPtr, gridxy, fieldIdx, &
         gridToFieldMap=(/4,3/), staggerloc=ESMF_Staggerloc_Center, rc=rc)
+      call ESMF_FieldBundleDestroy(packedFB, rc=rc)
       write(failMsg, *) "Create 3rd packed FieldBundle"
       write(name, *) "Create 3rd packed FieldBundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -2366,15 +2365,32 @@
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
       allocate(fieldNameListAlloc(fieldcount))
-      call ESMF_FieldBundleGet(packedFB, fieldNameList=fieldNameList, rc=rc)
+      call ESMF_FieldBundleGet(packedFB, fieldNameList=fieldNameListAlloc, rc=rc)
+      call ESMF_FieldBundleDestroy(packedFB, rc=rc)
       write(failMsg, *) "Get fieldNameList from packed FieldBundle"
       write(name, *) "Get fieldNameList from packed FieldBundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      deallocate(packedPtr)
       deallocate(fieldNameListAlloc)
+
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only
+      deallocate(packedPtr)
+      allocate(packedPtr3D(10, 1, 3)) ! fieldIdx, meshdata, timeslice
+      fieldIdx = 1
+      packedFB = ESMF_FieldBundleCreate(fieldNameList, packedPtr3D, meshTst1, fieldIdx, &
+        gridToFieldMap=(/2/), meshloc=ESMF_MESHLOC_ELEMENT, rc=rc)
+      call ESMF_FieldBundleDestroy(packedFB, rc=rc)
+      write(failMsg, *) "Create packed FieldBundle on Mesh"
+      write(name, *) "Create packed FieldBundle on Mesh"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      deallocate(packedPtr3D)
      
       endif ! Petcount = 4
+      if ((petCount .eq. 1) .or. (petCount .eq. 4)) then
+        call ESMF_MeshDestroy(meshTst1, rc=rc)
+        if (rc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+      endif
 #endif
 
       call ESMF_TestEnd(ESMF_SRCLINE)

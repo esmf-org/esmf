@@ -201,6 +201,7 @@ module ESMF_FieldBundleMod
 !
     module procedure ESMF_FieldBundleCreateDefault
     TypeKindRankInterfaceMacro(FieldBundleCreateGridDataPtr)
+    TypeKindRankInterfaceMacro(FieldBundleCreateMeshDataPtr)
 
 ! !DESCRIPTION:
 ! This interface provides a single entry point for the various
@@ -1183,12 +1184,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
     ! local variables @\
     type(ESMF_FieldBundleType), pointer  :: this @\
-    integer          :: gridDimCount, fieldCount @\
-    type(ESMF_Field) :: fieldList(1) @\
-    integer, allocatable   :: reducedIndices(:) @\
-    integer, allocatable   :: ig2fmap(:) @\
-    character(ESMF_MAXSTR) :: encodeName @\
-    integer          :: i, localrc @\
+    integer                              :: gridDimCount, fieldCount @\
+    type(ESMF_Field)                     :: fieldList(1) @\
+    integer, allocatable                 :: ig2fmap(:) @\
+    character(ESMF_MAXSTR)               :: encodeName @\
+    integer                              :: i, localrc @\
 @\
     if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
     localrc = ESMF_RC_NOT_IMPL @\
@@ -1284,6 +1284,185 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !---------------------------------------------------------------------------- @\
 
 TypeKindRankDeclarationMacro(FieldBundleCreateGridDataPtr)
+
+!----------------------------------------------------------------------------
+
+#define FieldBundleCreateMeshDataPtrDoc() \
+!---------------------------------------------------------------------------- @\
+!BOP @\
+! !IROUTINE: ESMF_FieldBundleCreate - Create a packed FieldBundle from Fortran array pointer and Mesh @\
+! @\
+! !INTERFACE: @\
+! ! Private name; call using ESMF_FieldBundleCreate() @\
+! function ESMF_FieldBundleCreateMesh<rank><type><kind>(fieldNameList, & @\
+!   farrayPtr, Mesh, fieldDim, keywordEnforcer, & @\
+!   meshLoc, gridToFieldMap, name, rc) @\
+! @\
+! !RETURN VALUE: @\
+!   type(ESMF_FieldBundle) :: ESMF_FieldBundleCreateMeshDataPtr<rank><type><kind> @\
+! @\
+! !ARGUMENTS: @\
+!   character(len=*), intent(in)            :: fieldNameList(:) @\
+!   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: farrayPtr @\
+!   type(ESMF_Mesh), intent(in)             :: mesh @\
+!   integer,          intent(in)            :: fieldDim @\
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+!   type(ESMF_MeshLoc), intent(in), optional:: meshloc @\
+!   integer,          intent(in),  optional :: gridToFieldMap(:) @\
+!   integer,          intent(in),  optional :: name @\
+!   integer,          intent(out), optional :: rc @\
+! @\
+! !DESCRIPTION: @\
+! Create a packed FieldBundle from user supplied list of field names, pre-allocated @\
+! Fortran array pointer, and {\tt ESMF\_Mesh} object. @\
+! @\
+! The arguments are: @\
+! \begin{description} @\
+! \item [fieldNameList]  @\
+!   A list of field names for the Fields held by the packed {\tt FieldBundle}. @\
+! \item[farrayPtr] @\
+!   Pre-allocated Fortran array pointer holding the memory of the list of Fields. @\
+! \item [mesh] @\
+!   The {\tt ESMF\_Mesh} object on which the Fields in the packed FieldBundle are built. @\
+! \item [fieldDim] @\
+!   The dimension in the {\tt farrayPtr} that contains the indices of Fields to be packed. @\
+! \item [{[meshloc]}] @\
+!       \begin{sloppypar} @\
+!       The part of the Mesh on which to build the Field. For valid @\
+!       predefined values see Section~\ref{const:meshloc}. @\
+!       If not set, defaults to {\tt ESMF\_MESHLOC\_NODE}. @\
+!       \end{sloppypar} @\
+! \item [{[gridToFieldMap]}] @\
+!       List with number of elements equal to the @\
+!       {\tt mesh}|s dimCount. The list elements map each dimension @\
+!       of the {\tt mesh} to a dimension in the {\tt farrayPtr} by @\
+!       specifying the appropriate {\tt farrayPtr} dimension index. @\
+!       The default is to @\
+!       map all of the {\tt mesh}|s dimensions against the lowest dimensions of @\
+!       the {\tt farrayPtr} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../). @\
+!       The values of all {\tt gridToFieldMap} entries must be greater than or equal @\
+!       to one and smaller than or equal to the {\tt farrayPtr} rank. @\
+!       It is erroneous to specify the same {\tt gridToFieldMap} entry @\
+!       multiple times. The total ungridded dimensions in the {\tt field} @\
+!       are the total {\tt farrayPtr} dimensions less @\
+!       the total (distributed + undistributed) dimensions in @\
+!       the {\tt mesh}.  Ungridded dimensions must be in the same order they are @\
+!       stored in the {\t farrayPtr}.  Permutations of the order of @\
+!       dimensions are handled via individual communication methods.  For example, @\
+!       an undistributed dimension can be remapped to a distributed dimension @\
+!       as part of the {\tt ESMF\_ArrayRedist()} operation. @\
+!       All Fields in packed FieldBundle use identical gridToFieldMap setting. @\
+! \item [{[name]}]  @\
+!       FieldBundle name.  @\
+! \item [{[rc]}]  @\
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+! \end{description} @\
+! @\
+!EOP @\
+!---------------------------------------------------------------------------- @\
+
+#define FieldBundleCreateMeshDataPtrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
+!---------------------------------------------------------------------------- @\
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_FieldBundleCreateMeshDataPtr" @\
+  function ESMF_FieldBundleCreateMeshDataPtr##mrank##D##mtypekind(fieldNameList, & @\
+   farrayPtr, mesh, fieldDim, keywordEnforcer, & @\
+   meshLoc, gridToFieldMap, name, rc) @\
+@\
+ ! return value @\
+    type(ESMF_FieldBundle) :: ESMF_FieldBundleCreateMeshDataPtr##mrank##D##mtypekind @\
+@\
+ !ARGUMENTS: @\
+    character(len=*), intent(in)            :: fieldNameList(:) @\
+    mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farrayPtr @\
+    type(ESMF_Mesh), intent(in)             :: mesh @\
+    integer,          intent(in)            :: fieldDim @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+    type(ESMF_MeshLoc), intent(in), optional:: meshloc @\
+    integer,          intent(in),  optional :: gridToFieldMap(:) @\
+    character(len=*), intent(in),  optional :: name @\
+    integer,          intent(out), optional :: rc @\
+@\
+    ! local variables @\
+    type(ESMF_FieldBundleType), pointer  :: this @\
+    integer          :: gridDimCount, fieldCount @\
+    type(ESMF_Field) :: fieldList(1) @\
+    integer, allocatable   :: ig2fmap(:) @\
+    character(ESMF_MAXSTR) :: encodeName @\
+    integer          :: i, localrc @\
+@\
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+    localrc = ESMF_RC_NOT_IMPL @\
+@\
+    ! Initialize @\
+    nullify(this) @\
+    nullify(ESMF_FieldBundleCreateMeshDataPtr##mrank##D##mtypekind%this) @\
+@\
+    if (size(fieldNameList) /= size(farrayPtr, fieldDim) ) then @\
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & @\
+        msg = " - size of fieldNameList is not equal to size of the fieldCount indicated", & @\
+        ESMF_CONTEXT, rcToReturn=rc) @\
+      return @\
+    endif @\
+    fieldCount = size(fieldNameList) @\
+@\
+    ! Create the internal objects @\
+    allocate(this, stat=localrc) @\
+    if (ESMF_LogFoundAllocError(localrc, & @\
+        msg="- Allocating FieldBundle Type", & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
+@\
+    call ESMF_BaseCreate(this%base, "FieldBundle", name, 0, rc=localrc) @\
+    if (ESMF_LogFoundError(localrc, & @\
+        ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
+@\
+    this%container = ESMF_ContainerCreate(rc=localrc) @\
+    if (ESMF_LogFoundError(localrc, & @\
+        ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
+@\
+    this%status = ESMF_FBSTATUS_EMPTY @\
+@\
+    ! Set up proxy flag @\
+    this%is_proxy = .false. @\
+    this%is_packed = .true. @\
+@\
+    ! Set return value @\
+    ESMF_FieldBundleCreateMeshDataPtr##mrank##D##mtypekind%this => this @\
+@\
+    ! Add reference to this object into ESMF garbage collection table @\
+    ! Only call this in those Create() methods that call Construct() @\
+    call c_ESMC_VMAddFObject(ESMF_FieldBundleCreateMeshDataPtr##mrank##D##mtypekind, ESMF_ID_FIELDBUNDLE%objectID) @\
+@\
+    ! Set init code @\
+    ESMF_INIT_SET_CREATED(ESMF_FieldBundleCreateMeshDataPtr##mrank##D##mtypekind) @\
+@\
+    encodeName = fieldNameList(1) @\
+    do i = 2, size(fieldNameList) @\
+      write(encodeName, "(3A)") trim(encodeName), trim(":"), trim(fieldNameList(i)) @\
+    enddo @\
+@\
+    fieldList(1) = ESMF_FieldCreate(mesh, farrayPtr, meshloc=meshloc, & @\
+      gridToFieldMap=gridToFieldMap, & @\
+      name=encodeName, rc=localrc) @\
+    if (ESMF_LogFoundError(localrc, & @\
+      ESMF_ERR_PASSTHRU, & @\
+      ESMF_CONTEXT, rcToReturn=rc)) return @\
+@\
+    call ESMF_FieldBundleAddListInternal( & @\
+      ESMF_FieldBundleCreateMeshDataPtr##mrank##D##mtypekind, fieldList, & @\
+      multiflag=.false., relaxedflag=.false., rc=localrc) @\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+      ESMF_CONTEXT, rcToReturn=rc)) return @\
+@\
+    ! Return successfully @\
+    if (present(rc)) rc = ESMF_SUCCESS @\
+@\
+  end function ESMF_FieldBundleCreateMeshDataPtr##mrank##D##mtypekind  @\
+!---------------------------------------------------------------------------- @\
+
+TypeKindRankDeclarationMacro(FieldBundleCreateMeshDataPtr)
 
 ! -------------------------- ESMF-public method -------------------------------
 ^undef  ESMF_METHOD
