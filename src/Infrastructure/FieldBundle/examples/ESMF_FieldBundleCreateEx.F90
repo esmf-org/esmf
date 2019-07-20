@@ -336,7 +336,7 @@ program ESMF_FieldBundleCreateEx
 ! 
 ! Due to the verbosity of the MeshCreate process, the code for MeshCreate is
 ! not shown directly, user can either refer to the MeshCreate section
-! \ref{{sec:mesh:usage:meshCreation}
+! \ref{sec:mesh:usage:meshCreation}
 ! or examine the FieldBundleCreate example source code directly.
 !EOE
      ! Setup mesh data depending on PET
