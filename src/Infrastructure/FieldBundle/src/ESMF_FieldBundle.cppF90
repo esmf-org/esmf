@@ -1734,6 +1734,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !         Upon return holds a list of the names of the fields bundled in 
 !         {\tt ESMF\_FieldBundle}. The argument must be allocated to be at least of
 !         size {\tt fieldCount}.
+!   \item [{[isPacked]}]
+!         Upon return holds the information if this FieldBundle is packed. 
 !   \item [{[name]}]
 !         Name of the fieldbundle object.
 !   \item [{[rc]}]
@@ -2248,7 +2250,7 @@ msg="This call does not work with packed FieldBundle.",&
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldBundleGet() @\
 ! function ESMF_FieldBundleGetDataPtr<rank><type><kind>(fieldBundle, & @\
-!   farrayPtr, keywordEnforcer, & @\
+!   localDe, farrayPtr, keywordEnforcer, & @\
 !   rc) @\
 ! @\
 ! !RETURN VALUE: @\
@@ -2256,20 +2258,29 @@ msg="This call does not work with packed FieldBundle.",&
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_FieldBundle), intent(in)                    :: fieldBundle @\
+!   integer, intent(in), optional                         :: localDe
 !   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: farrayPtr @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
 !   integer,          intent(out), optional :: rc @\
 ! @\
 ! !DESCRIPTION: @\
-! Create a packed FieldBundle from user supplied list of field names, pre-allocated @\
-! Fortran array pointer, and {\tt ESMF\_Grid} object. @\
+! Get a Fortran pointer to DE-local memory allocation within packed FieldBundle. 
+! It's erroneous to perform this call on a FieldBundle that's not packed.
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
 ! \item [fieldBundle]  @\
-!   A list of field names for the Fields held by the packed {\tt FieldBundle}. @\
+!   {\tt ESMF\_FieldBundle} object. @\
+! \item [{[localDe]}]  @\
+!   Local DE for which information is requested. [0,..,localDeCount-1]. @\
+!   For localDeCount==1 the localDe argument may be omitted, @\
+!   in which case it will default to localDe=0. In the case where @\
+!   packed FieldBundle is created on a Grid, the number of localDes can @\
+!   be queried from the Grid attached to the FieldBundle. In the case where @\
+!   packed FieldBundle is created on a Mesh, the number of localDes is 1. @\
 ! \item[farrayPtr] @\
-!   Pre-allocated Fortran array pointer holding the memory of the list of Fields. @\
+!   Fortran array pointer which will be pointed at DE-local memory allocation @\
+!   in packed FieldBundle. @\
 ! \item [{[rc]}]  @\
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 ! \end{description} @\
@@ -2282,13 +2293,14 @@ msg="This call does not work with packed FieldBundle.",&
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldBundleGetDataPtr" @\
   subroutine ESMF_FieldBundleGetDataPtr##mrank##D##mtypekind( fieldBundle, & @\
-   farrayPtr, keywordEnforcer, & @\
+   localDe, farrayPtr, keywordEnforcer, & @\
    rc) @\
 @\
  ! return value @\
 @\
  !ARGUMENTS: @\
     type(ESMF_FieldBundle), intent(in)                      :: fieldBundle  @\
+    integer, intent(in), optional                           :: localDe @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farrayPtr @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
     integer,          intent(out), optional :: rc @\
@@ -2318,7 +2330,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
-    call ESMF_FieldGet(l_fieldList(1), farrayPtr = farrayPtr, rc=localrc) @\
+    call ESMF_FieldGet(l_fieldList(1), localDe=localDe, & @\
+      farrayPtr = farrayPtr, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
