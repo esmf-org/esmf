@@ -6736,7 +6736,8 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
       ! Set as created
       ESMF_INIT_SET_CREATED(ESMF_FieldBundleDeserialize)
 
-      call ESMF_FieldBundleAdd(ESMF_FieldBundleDeserialize, flist, multiflag=.true., rc=localrc)
+      call ESMF_FieldBundleAddListInternal(ESMF_FieldBundleDeserialize, &
+        flist, multiflag=.true., rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -6959,18 +6960,32 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
 
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit, fieldbundle, rc)
 
-    call ESMF_FieldBundleGet(fieldbundle, fieldCount=fcount, rc=localrc) 
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc))  return
+    if(.not. fieldbundle%this%is_packed) then
 
-    allocate(flist(fcount), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, msg= "allocating flist", &
-      ESMF_CONTEXT, rcToReturn=rc)) return ! bail out
+      call ESMF_FieldBundleGet(fieldbundle, fieldCount=fcount, rc=localrc) 
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc))  return
 
-    call ESMF_FieldBundleGet(fieldbundle, fieldList=flist, &
-      itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      allocate(flist(fcount), stat=localrc)
+      if (ESMF_LogFoundAllocError(localrc, msg= "allocating flist", &
+        ESMF_CONTEXT, rcToReturn=rc)) return ! bail out
+
+      call ESMF_FieldBundleGet(fieldbundle, fieldList=flist, &
+        itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      fcount = 1
+
+      allocate(flist(fcount), stat=localrc)
+      if (ESMF_LogFoundAllocError(localrc, msg= "allocating flist", &
+        ESMF_CONTEXT, rcToReturn=rc)) return ! bail out
+
+      call ESMF_ContainerGet(fieldbundle%this%container, &
+        itemList=flist, itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     allocate(alist(fcount), stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, msg= "allocating alist", &

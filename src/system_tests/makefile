@@ -25,6 +25,7 @@ DIRS      = ESMF_CompCreate \
             ESMF_ConcurrentComponent \
             ESMF_FieldConcurrentComp \
             ESMF_FieldBundleSMM \
+            ESMF_FieldBundleSMMPacked \
             ESMF_FieldRedist \
             ESMF_FieldRedistBlk2Blk \
             ESMF_FieldRedistBlk2Arb \
