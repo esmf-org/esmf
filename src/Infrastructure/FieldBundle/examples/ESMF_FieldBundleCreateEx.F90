@@ -301,7 +301,8 @@ program ESMF_FieldBundleCreateEx
   write(fieldNameList(i), '(A,I2)') 'field', i
   enddo
 !BOE
-! Create a 2D grid of 4x1 regular decomposition on 4 PETs, each PET has 10x50 elements
+! Create a 2D grid of 4x1 regular decomposition on 4 PETs, each PET has 10x50 elements.
+! The index space of the entire Grid is 40x50.
 !EOE
 !BOC
   gridxy = ESMF_GridCreateNoPeriDim(maxIndex=(/40,50/), regDecomp=(/4,1/), rc=rc)
@@ -315,7 +316,7 @@ program ESMF_FieldBundleCreateEx
 ! of the packedPtr is 50.
 !EOE
 !BOC
-  allocate(packedPtr(10, 3, 10, 50)) ! fieldIdx, time, y, x
+  allocate(packedPtr(10, 3, 10, 50)) ! fieldDim, time, y, x
   fieldDim = 1
   packedFB = ESMF_FieldBundleCreate(fieldNameList, packedPtr, gridxy, fieldDim, &
   gridToFieldMap=(/3,4/), staggerloc=ESMF_Staggerloc_Center, rc=rc)
@@ -335,9 +336,11 @@ program ESMF_FieldBundleCreateEx
 ! the data of the packed fields on a Mesh. 
 ! 
 ! Due to the verbosity of the MeshCreate process, the code for MeshCreate is
-! not shown directly, user can either refer to the MeshCreate section
+! not shown below, user can either refer to the MeshCreate section
 ! \ref{sec:mesh:usage:meshCreation}
-! or examine the FieldBundleCreate example source code directly.
+! or examine the FieldBundleCreate example source code contained
+! in the ESMF source distribution directly.
+! A ESMF Mesh on 4 PETs with one mesh element on each PET is created.
 !EOE
      ! Setup mesh data depending on PET
      if (localPet .eq. 0) then
