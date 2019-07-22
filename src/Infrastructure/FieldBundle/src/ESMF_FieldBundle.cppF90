@@ -2258,7 +2258,7 @@ msg="This call does not work with packed FieldBundle.",&
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_FieldBundle), intent(in)                    :: fieldBundle @\
-!   integer, intent(in), optional                         :: localDe
+!   integer, intent(in), optional                         :: localDe @\
 !   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: farrayPtr @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
 !   integer,          intent(out), optional :: rc @\
