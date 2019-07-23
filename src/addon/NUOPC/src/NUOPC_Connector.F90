@@ -68,6 +68,7 @@ module NUOPC_Connector
     type(type_CplSet), allocatable      :: cplSet(:)
     type(ESMF_VM)                       :: srcVM
     type(ESMF_VM)                       :: dstVM
+    type(ESMF_Clock)                    :: driverClock
   end type
 
   type type_InternalState
@@ -240,6 +241,7 @@ module NUOPC_Connector
     integer                   :: verbosity, diagnostic
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
+    type(type_InternalState)  :: is
 
     rc = ESMF_SUCCESS
 
@@ -291,6 +293,15 @@ module NUOPC_Connector
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! store the incoming clock as driverClock in internal state
+    is%wrap%driverClock = clock
+    
     ! handle diagnostic
     if (btest(diagnostic,2)) then
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
@@ -459,15 +470,23 @@ module NUOPC_Connector
 
    contains
 
-    subroutine doMirror(providerState, acceptorState, acceptorVM, rc)
+    recursive subroutine doMirror(providerState, acceptorState, acceptorVM, rc)
       type(ESMF_State)           :: providerState
       type(ESMF_State)           :: acceptorState
       type(ESMF_VM), intent(in)  :: acceptorVM       
       integer,       intent(out) :: rc
 
+      integer                :: item, itemCount
       character(ESMF_MAXSTR) :: providerTransferOffer, acceptorTransferOffer
       character(ESMF_MAXSTR) :: acceptorStateName
+      type(ESMF_State)       :: providerNestedState
+      type(ESMF_State)       :: acceptorNestedState
+      character(ESMF_MAXSTR) :: nestedStateName
+      character(ESMF_MAXSTR) :: namespace
+      character(ESMF_MAXSTR) :: cplSet
       integer                :: i, j
+      character(ESMF_MAXSTR), allocatable     :: itemNameList(:)
+      type(ESMF_StateItem_Flag), allocatable  :: itemTypeList(:)
       character(ESMF_MAXSTR), pointer       :: providerStandardNameList(:)
       character(ESMF_MAXSTR), pointer       :: acceptorStandardNameList(:)
       character(ESMF_MAXSTR), pointer       :: providerNamespaceList(:)
@@ -491,19 +510,73 @@ module NUOPC_Connector
       call ESMF_StateGet(acceptorState, name=acceptorStateName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
+
+
+      ! recursively duplicate nested states
+      call ESMF_StateGet(providerState, nestedFlag=.false., &
+        itemCount=itemCount, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+      if (itemCount > 0) then
+        allocate(itemNameList(itemCount))
+        allocate(itemTypeList(itemCount))
+        call ESMF_StateGet(providerState, nestedFlag=.false., &
+          itemNameList=itemNameList, itemTypeList=itemTypeList, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        do item=1, itemCount
+          if (itemTypeList(item) == ESMF_STATEITEM_STATE) then
+            call ESMF_StateGet(providerState, itemName=itemNameList(item), &
+              nestedState=providerNestedState, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call ESMF_StateGet(providerNestedState, name=nestedStateName, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (btest(verbosity,8)) then
+              call ESMF_LogWrite(trim(name)//": cloning nestedState: "// &
+                trim(nestedStateName), ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) &
+                return  ! bail out
+            endif
+            call NUOPC_GetAttribute(providerNestedState, name="Namespace", &
+              value=namespace, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call NUOPC_GetAttribute(providerNestedState, name="CplSet", &
+              value=cplSet, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call NUOPC_AddNestedState(acceptorState, Namespace=namespace, &
+              CplSet=cplSet, nestedStateName=nestedStateName, &
+              nestedState=acceptorNestedState, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call doMirror(providerState=providerNestedState, &
+              acceptorState=acceptorNestedState, acceptorVM=acceptorVM, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
+        enddo
+
+        deallocate(itemNameList)
+        deallocate(itemTypeList)
+      endif
+
       call NUOPC_GetStateMemberLists(providerState, providerStandardNameList, &
         fieldList=providerFieldList, namespaceList=providerNamespaceList, &
-        cplSetList=providerCplSetList, rc=rc)
+        cplSetList=providerCplSetList, nestedFlag=.false., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         
       call NUOPC_GetStateMemberLists(acceptorState, acceptorStandardNameList, &
         fieldList=acceptorFieldList, namespaceList=acceptorNamespaceList, &
-        cplSetList=acceptorCplSetList, rc=rc)
+        cplSetList=acceptorCplSetList, nestedFlag=.false., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      !TODO: does not currently deal with nested states or field bundles
+      !TODO: does not currently deal with field bundles
       
       if (associated(providerStandardNameList)) then
         do i=1, size(providerStandardNameList)
@@ -1765,6 +1838,15 @@ module NUOPC_Connector
             ! but don't modify attribute here because if alread shared through
             ! another connection, it must stay shared. Rely on "not shared" 
             ! default.
+            if (btest(verbosity,12)) then
+              write (msgString, '(A)') trim(name)//": "//&
+                "- at least one side does not want to share the Field "// &
+                "-> not shared."
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+            endif
           endif
           ! Look at GeomObject sharing
           call NUOPC_GetAttribute(iField, name="SharePolicyGeomObject", &
@@ -1799,6 +1881,15 @@ module NUOPC_Connector
             ! but don't modify attribute here because if alread shared through
             ! another connection, it must stay shared. Rely on "not shared" 
             ! default.
+            if (btest(verbosity,12)) then
+              write (msgString, '(A)') trim(name)//": "//&
+                "- at least one side does not want to share the GeomObject "// &
+                "-> not shared."
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+            endif
           endif
         endif
 
@@ -3608,7 +3699,17 @@ module NUOPC_Connector
         sharedFlag = .false. ! reset
         if (trim(iShareStatus)=="shared" .and. trim(eShareStatus)=="shared") &
           sharedFlag = .true.
-        if (.not.sharedFlag) then
+        if (sharedFlag) then
+          ! sharing -> do NOT add the import and export Fields to FieldBundles
+          if (btest(verbosity,12)) then
+            write (msgString, '(A)') trim(name)//": "//&
+              "- Field sharing between import and export side: NO remap."
+            call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+          endif
+        else
           ! not sharing -> add the import and export Fields to FieldBundles
           if (btest(verbosity,12)) then
             write (msgString, '(A)') trim(name)//": "//&
@@ -3974,6 +4075,9 @@ module NUOPC_Connector
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
+    ! store the incoming clock as driverClock in internal state
+    is%wrap%driverClock = clock
+
     if (btest(profiling,0)) then
       call ESMF_VMWtime(time)
       write (msgString, *) trim(name)//": Profile 02 time=   ", &
@@ -5576,7 +5680,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
 !
 ! !INTERFACE:
   subroutine NUOPC_ConnectorGet(connector, srcFields, dstFields, rh, state, &
-    CplSet, cplSetList, srcVM, dstVM, rc)
+    CplSet, cplSetList, srcVM, dstVM, driverClock, rc)
 ! !ARGUMENTS:
     type(ESMF_CplComp)                            :: connector
     type(ESMF_FieldBundle), intent(out), optional :: srcFields
@@ -5587,6 +5691,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
     character(ESMF_MAXSTR), pointer,     optional :: cplSetList(:)
     type(ESMF_VM),          intent(out), optional :: srcVM
     type(ESMF_VM),          intent(out), optional :: dstVM
+    type(ESMF_Clock),       intent(out), optional :: driverClock
     integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -5628,6 +5733,9 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
 !     The VM of the source side component.
 !   \item[{[dstVM]}]
 !     The VM of the destination side component.
+!   \item[{[driverClock]}]
+!     The Clock object used by the current RunSequence level to drive this
+!     component.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -5665,6 +5773,9 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     
+    ! driverClock
+    if (present(driverClock)) driverClock = is%wrap%driverClock
+
     ! Get the requested members
     if (present(CplSet)) then
       sIndex=getIndex(value=CplSet, list=is%wrap%cplSetList)

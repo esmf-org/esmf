@@ -1249,6 +1249,7 @@ ESMF_CXXLINKRPATHSTHIRD   += $(ESMF_CXXRPATHPREFIX)$(ESMF_ACC_SOFTWARE_STACK_LIB
 ESMF_F90LINKRPATHSTHIRD   += $(ESMF_F90RPATHPREFIX)$(ESMF_ACC_SOFTWARE_STACK_LIBPATH)
 endif
 endif
+
 #-------------------------------------------------------------------------------
 # NETCDF
 #-------------------------------------------------------------------------------
@@ -1263,19 +1264,30 @@ ifeq ($(pathtype),abs)
 # use the $(ESMF_NETCDF) contents as nc-config
 # but must check if there is also nf-config available
 ESMF_NCCONFIG = $(ESMF_NETCDF)
+ifneq ($(origin ESMF_NFCONFIG), environment) 
 ESMF_NFCONFIG = $(shell $(ESMF_NETCDF) --prefix)/bin/nf-config
 ifneq ($(shell $(ESMF_DIR)/scripts/exists $(ESMF_NFCONFIG)),$(ESMF_NFCONFIG))
 ESMF_NFCONFIG := 
 endif
-ESMF_NETCDF_INCLUDE = $(shell $(ESMF_NCCONFIG) --includedir)
-ifdef ESMF_NFCONFIG
-ESMF_NETCDF_LIBS    = $(shell $(ESMF_NFCONFIG) --flibs)
-else
-ESMF_NETCDF_LIBS    = $(shell $(ESMF_NCCONFIG) --flibs)
+export ESMF_NFCONFIG
 endif
-ESMF_NETCDF_LIBS   += $(shell $(ESMF_NCCONFIG) --libs)
+ifneq ($(origin ESMF_NETCDF_INCLUDE), environment) 
+ESMF_NETCDF_INCLUDE := $(shell $(ESMF_NCCONFIG) --includedir)
+export ESMF_NETCDF_INCLUDE
+endif
+ifneq ($(origin ESMF_NETCDF_LIBS), environment)
+ifdef ESMF_NFCONFIG
+ESMF_NETCDF_LIBS    := $(shell $(ESMF_NFCONFIG) --flibs)
+else
+ESMF_NETCDF_LIBS    := $(shell $(ESMF_NCCONFIG) --flibs)
+endif
+ESMF_NETCDF_CONFIG_LIBS := $(shell $(ESMF_NCCONFIG) --libs)
+ESMF_NETCDF_LIBS   += $(ESMF_NETCDF_CONFIG_LIBS)
+endif
+export ESMF_NETCDF_LIBS
 endif
 
+# Handle the regular case where nc-config comes without absolute path.
 ifeq ($(ESMF_NETCDF),nc-config)
 ESMF_NETCDF_CPATH = $(shell nc-config --prefix)
 ESMF_NETCDF_INCLUDE = $(ESMF_NETCDF_CPATH)/include
@@ -1296,12 +1308,14 @@ endif
 ifeq ($(ESMF_NETCDF),standard)
 ifneq ($(origin ESMF_NETCDF_LIBS), environment)
 ESMF_NETCDF_LIBS = -lnetcdf
+export ESMF_NETCDF_LIBS
 endif
 endif
 
 ifeq ($(ESMF_NETCDF),split)
 ifneq ($(origin ESMF_NETCDF_LIBS), environment)
 ESMF_NETCDF_LIBS = -lnetcdff -lnetcdf
+export ESMF_NETCDF_LIBS
 endif
 endif
 

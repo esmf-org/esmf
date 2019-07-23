@@ -2264,8 +2264,8 @@ msg="This call does not work with packed FieldBundle.",&
 !   integer,          intent(out), optional :: rc @\
 ! @\
 ! !DESCRIPTION: @\
-! Get a Fortran pointer to DE-local memory allocation within packed FieldBundle. 
-! It's erroneous to perform this call on a FieldBundle that's not packed.
+! Get a Fortran pointer to DE-local memory allocation within packed FieldBundle.  @\
+! It's erroneous to perform this call on a FieldBundle that's not packed. @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
