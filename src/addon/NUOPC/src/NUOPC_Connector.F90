@@ -68,6 +68,7 @@ module NUOPC_Connector
     type(type_CplSet), allocatable      :: cplSet(:)
     type(ESMF_VM)                       :: srcVM
     type(ESMF_VM)                       :: dstVM
+    type(ESMF_Clock)                    :: driverClock
   end type
 
   type type_InternalState
@@ -240,6 +241,7 @@ module NUOPC_Connector
     integer                   :: verbosity, diagnostic
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
+    type(type_InternalState)  :: is
 
     rc = ESMF_SUCCESS
 
@@ -291,6 +293,15 @@ module NUOPC_Connector
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! store the incoming clock as driverClock in internal state
+    is%wrap%driverClock = clock
+    
     ! handle diagnostic
     if (btest(diagnostic,2)) then
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
@@ -4064,6 +4075,9 @@ module NUOPC_Connector
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
+    ! store the incoming clock as driverClock in internal state
+    is%wrap%driverClock = clock
+
     if (btest(profiling,0)) then
       call ESMF_VMWtime(time)
       write (msgString, *) trim(name)//": Profile 02 time=   ", &
@@ -5666,7 +5680,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
 !
 ! !INTERFACE:
   subroutine NUOPC_ConnectorGet(connector, srcFields, dstFields, rh, state, &
-    CplSet, cplSetList, srcVM, dstVM, rc)
+    CplSet, cplSetList, srcVM, dstVM, driverClock, rc)
 ! !ARGUMENTS:
     type(ESMF_CplComp)                            :: connector
     type(ESMF_FieldBundle), intent(out), optional :: srcFields
@@ -5677,6 +5691,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
     character(ESMF_MAXSTR), pointer,     optional :: cplSetList(:)
     type(ESMF_VM),          intent(out), optional :: srcVM
     type(ESMF_VM),          intent(out), optional :: dstVM
+    type(ESMF_Clock),       intent(out), optional :: driverClock
     integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -5718,6 +5733,9 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
 !     The VM of the source side component.
 !   \item[{[dstVM]}]
 !     The VM of the destination side component.
+!   \item[{[driverClock]}]
+!     The Clock object used by the current RunSequence level to drive this
+!     component.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -5755,6 +5773,9 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     
+    ! driverClock
+    if (present(driverClock)) driverClock = is%wrap%driverClock
+
     ! Get the requested members
     if (present(CplSet)) then
       sIndex=getIndex(value=CplSet, list=is%wrap%cplSetList)
