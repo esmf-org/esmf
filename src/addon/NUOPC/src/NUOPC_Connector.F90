@@ -1765,6 +1765,15 @@ module NUOPC_Connector
             ! but don't modify attribute here because if alread shared through
             ! another connection, it must stay shared. Rely on "not shared" 
             ! default.
+            if (btest(verbosity,12)) then
+              write (msgString, '(A)') trim(name)//": "//&
+                "- at least one side does not want to share the Field "// &
+                "-> not shared."
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+            endif
           endif
           ! Look at GeomObject sharing
           call NUOPC_GetAttribute(iField, name="SharePolicyGeomObject", &
@@ -1799,6 +1808,15 @@ module NUOPC_Connector
             ! but don't modify attribute here because if alread shared through
             ! another connection, it must stay shared. Rely on "not shared" 
             ! default.
+            if (btest(verbosity,12)) then
+              write (msgString, '(A)') trim(name)//": "//&
+                "- at least one side does not want to share the GeomObject "// &
+                "-> not shared."
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+            endif
           endif
         endif
 
@@ -3608,7 +3626,17 @@ module NUOPC_Connector
         sharedFlag = .false. ! reset
         if (trim(iShareStatus)=="shared" .and. trim(eShareStatus)=="shared") &
           sharedFlag = .true.
-        if (.not.sharedFlag) then
+        if (sharedFlag) then
+          ! sharing -> do NOT add the import and export Fields to FieldBundles
+          if (btest(verbosity,12)) then
+            write (msgString, '(A)') trim(name)//": "//&
+              "- Field sharing between import and export side: NO remap."
+            call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+          endif
+        else
           ! not sharing -> add the import and export Fields to FieldBundles
           if (btest(verbosity,12)) then
             write (msgString, '(A)') trim(name)//": "//&
