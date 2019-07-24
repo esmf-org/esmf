@@ -1965,10 +1965,12 @@ module NUOPC_Connector
     character(ESMF_MAXSTR), pointer :: exportStandardNameList(:)
     type(ESMF_Field),       pointer :: importFieldList(:)
     type(ESMF_Field),       pointer :: exportFieldList(:)
+    type(ESMF_State),       pointer :: importStateList(:)
+    type(ESMF_State),       pointer :: exportStateList(:)
     integer                         :: iMatch, eMatch
     type(ESMF_Field)                :: iField, eField
     type(ESMF_Field)                :: providerField, acceptorField
-    type(ESMF_State)                :: providerState, acceptorState
+    type(ESMF_State)                :: acceptorState
     type(ESMF_GeomType_Flag)        :: geomtype
     type(ESMF_Grid)                 :: grid
     type(ESMF_Mesh)                 :: mesh
@@ -2052,10 +2054,12 @@ module NUOPC_Connector
     nullify(cplSetList)
     nullify(importStandardNameList)
     nullify(importFieldList)
+    nullify(importStateList)
     nullify(importNamespaceList)
     nullify(importCplSetList)
     nullify(exportStandardNameList)
     nullify(exportFieldList)
+    nullify(exportStateList)
     nullify(exportNamespaceList)
     nullify(exportCplSetList)
     
@@ -2120,13 +2124,13 @@ module NUOPC_Connector
     endif
     ! get the importState and exportState std lists
     call NUOPC_GetStateMemberLists(importState, importStandardNameList, &
-      fieldList=importFieldList, namespaceList=importNamespaceList, &
-      cplSetList=importCplSetList, rc=rc)
+      fieldList=importFieldList, stateList=importStateList, &
+      namespaceList=importNamespaceList, cplSetList=importCplSetList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_GetStateMemberLists(exportState, exportStandardNameList, &
-      fieldList=exportFieldList, namespaceList=exportNamespaceList, &
-      cplSetList=exportCplSetList, rc=rc)
+      fieldList=exportFieldList, stateList=exportStateList, &
+      namespaceList=exportNamespaceList, cplSetList=exportCplSetList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -2229,15 +2233,13 @@ module NUOPC_Connector
           .and.(trim(eTransferAction)=="accept")) then
           providerField = iField
           acceptorField = eField
-          providerState = importState
-          acceptorState = exportState
+          acceptorState = exportStateList(eMatch)
           transferDirection = "(import -> export)"
         elseif ((trim(eTransferAction)=="provide") &
           .and.(trim(iTransferAction)=="accept")) then
           providerField = eField
           acceptorField = iField
-          providerState = exportState
-          acceptorState = importState
+          acceptorState = importStateList(iMatch)
           transferDirection = "(import <- export)"
         else  ! both sides "provide"
           ! not a situation that needs handling here
@@ -2793,10 +2795,12 @@ module NUOPC_Connector
     if (associated(cplSetList)) deallocate(cplSetList)
     if (associated(importStandardNameList)) deallocate(importStandardNameList)
     if (associated(importFieldList)) deallocate(importFieldList)
+    if (associated(importStateList)) deallocate(importStateList)
     if (associated(importNamespaceList)) deallocate(importNamespaceList)
     if (associated(importCplSetList)) deallocate(importCplSetList)
     if (associated(exportStandardNameList)) deallocate(exportStandardNameList)
     if (associated(exportFieldList)) deallocate(exportFieldList)
+    if (associated(exportStateList)) deallocate(exportStateList)
     if (associated(exportNamespaceList)) deallocate(exportNamespaceList)
     if (associated(exportCplSetList)) deallocate(exportCplSetList)
     
@@ -2851,6 +2855,8 @@ module NUOPC_Connector
     character(ESMF_MAXSTR), pointer :: exportStandardNameList(:)
     type(ESMF_Field),       pointer :: importFieldList(:)
     type(ESMF_Field),       pointer :: exportFieldList(:)
+    type(ESMF_State),       pointer :: importStateList(:)
+    type(ESMF_State),       pointer :: exportStateList(:)
     integer                         :: iMatch, eMatch
     type(ESMF_Field)                :: iField, eField
     type(ESMF_Field)                :: providerField, acceptorField
@@ -2930,10 +2936,12 @@ module NUOPC_Connector
     nullify(cplSetList)
     nullify(importStandardNameList)
     nullify(importFieldList)
+    nullify(importStateList)
     nullify(importNamespaceList)
     nullify(importCplSetList)
     nullify(exportStandardNameList)
     nullify(exportFieldList)
+    nullify(exportStateList)
     nullify(exportNamespaceList)
     nullify(exportCplSetList)
 
@@ -2998,13 +3006,13 @@ module NUOPC_Connector
     endif
     ! get the importState and exportState std lists
     call NUOPC_GetStateMemberLists(importState, importStandardNameList, &
-      fieldList=importFieldList, namespaceList=importNamespaceList, &
-      cplSetList=importCplSetList, rc=rc)
+      fieldList=importFieldList, stateList=importStateList, &
+      namespaceList=importNamespaceList, cplSetList=importCplSetList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_GetStateMemberLists(exportState, exportStandardNameList, &
-      fieldList=exportFieldList, namespaceList=exportNamespaceList, &
-      cplSetList=exportCplSetList, rc=rc)
+      fieldList=exportFieldList, stateList=exportStateList, &
+      namespaceList=exportNamespaceList, cplSetList=exportCplSetList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -3107,13 +3115,13 @@ module NUOPC_Connector
           .and.(trim(eTransferAction)=="accept")) then
           providerField = iField
           acceptorField = eField
-          acceptorState = exportState
+          acceptorState = exportStateList(eMatch)
           transferDirection = "(import -> export)"
         elseif ((trim(eTransferAction)=="provide") &
           .and.(trim(iTransferAction)=="accept")) then
           providerField = eField
           acceptorField = iField
-          acceptorState = importState
+          acceptorState = importStateList(iMatch)
           transferDirection = "(import <- export)"
         else  ! not a situation that needs handling here
           cycle ! continue with the next i
@@ -3416,10 +3424,12 @@ module NUOPC_Connector
     if (associated(cplSetList)) deallocate(cplSetList)
     if (associated(importStandardNameList)) deallocate(importStandardNameList)
     if (associated(importFieldList)) deallocate(importFieldList)
+    if (associated(importStateList)) deallocate(importStateList)
     if (associated(importNamespaceList)) deallocate(importNamespaceList)
     if (associated(importCplSetList)) deallocate(importCplSetList)
     if (associated(exportStandardNameList)) deallocate(exportStandardNameList)
     if (associated(exportFieldList)) deallocate(exportFieldList)
+    if (associated(exportStateList)) deallocate(exportStateList)
     if (associated(exportNamespaceList)) deallocate(exportNamespaceList)
     if (associated(exportCplSetList)) deallocate(exportCplSetList)
 
