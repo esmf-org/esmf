@@ -1590,7 +1590,13 @@ end function ESMF_MeshCreateFromDG
 
 !
 ! !DESCRIPTION:
-!   Create a Mesh from an ESMF Grid. 
+!   Create an ESMF Mesh from an ESMF Grid. This method creates the elements of 
+!  the Mesh from the cells of the Grid, and the nodes of the Mesh from the corners of 
+!  the Grid. Corresponding locations in the Grid and new Mesh will have the same 
+!  coordinates, sequence indices, masking, and area information.
+!
+!   This method currently only works for 2D Grids. In addition, this method requires 
+!   the input Grid to have coordinates in the corner stagger location.  
 !
 !   \begin{description}
 !   \item [grid]
