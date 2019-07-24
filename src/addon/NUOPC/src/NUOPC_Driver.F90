@@ -6104,7 +6104,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       if (associated(fieldList)) then
         do i=1, size(fieldList)
-          ! Set the SharePolicy attribute
+          ! Set the SharePolicy attributes
+          call NUOPC_SetAttribute(fieldList(i), name="SharePolicyGeomObject", &
+            value="share", rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           call NUOPC_SetAttribute(fieldList(i), name="SharePolicyField", &
             value="share", rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
