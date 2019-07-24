@@ -1161,7 +1161,7 @@ module NUOPC_Base
 ! !INTERFACE:
   recursive subroutine NUOPC_GetStateMemberLists(state, StandardNameList, &
     ConnectedList, NamespaceList, CplSetList, itemNameList, fieldList, &
-    nestedFlag, rc)
+    stateList, nestedFlag, rc)
 ! !ARGUMENTS:
     type(ESMF_State),       intent(in)            :: state
     character(ESMF_MAXSTR), pointer, optional     :: StandardNameList(:)
@@ -1170,6 +1170,7 @@ module NUOPC_Base
     character(ESMF_MAXSTR), pointer, optional     :: CplSetList(:)
     character(ESMF_MAXSTR), pointer, optional     :: itemNameList(:)
     type(ESMF_Field),       pointer, optional     :: fieldList(:)
+    type(ESMF_State),       pointer, optional     :: stateList(:)
     logical,                intent(in), optional  :: nestedFlag
     integer,                intent(out), optional :: rc
 ! !DESCRIPTION:
@@ -1197,6 +1198,9 @@ module NUOPC_Base
 !     If present, return a list of each member name.
 !   \item[{[fieldList]}]
 !     If present, return a list of the member fields.
+!   \item[{[stateList]}]
+!     If present, return a list of the states corresonding to the owner of the
+!     fields returned under {\tt fieldList}.
 !   \item[{[nestedFlag]}]
 !     When set to .true., returns information from nested States (default).
 !     When set to .false., returns information at the current State level only.
@@ -1220,6 +1224,7 @@ module NUOPC_Base
     character(ESMF_MAXSTR), pointer         :: l_NamespaceList(:)
     character(ESMF_MAXSTR), pointer         :: l_CplSetList(:)
     type(ESMF_Field),       pointer         :: l_fieldList(:)
+    type(ESMF_State),       pointer         :: l_stateList(:)
     character(ESMF_MAXSTR)                  :: namespace
     character(ESMF_MAXSTR)                  :: cplSet
 
@@ -1386,6 +1391,24 @@ module NUOPC_Base
         endif
       endif
 
+      if (present(stateList)) then
+        if (associated(stateList)) then
+          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+            msg="stateList must enter unassociated", &
+            line=__LINE__, &
+            file=FILENAME, &
+            rcToReturn=rc)
+          return  ! bail out
+        else
+          allocate(stateList(fieldCount), stat=stat)
+          if (ESMF_LogFoundAllocError(stat, msg="allocating stateList", &
+            line=__LINE__, &
+            file=FILENAME, &
+            rcToReturn=rc)) &
+            return  ! bail out
+        endif
+      endif
+
       fieldCount = 1  ! reset
 
       do item=1, itemCount
@@ -1441,6 +1464,9 @@ module NUOPC_Base
           if (present(fieldList)) then
             fieldList(fieldCount)=field
           endif
+          if (present(stateList)) then
+            stateList(fieldCount)=state
+          endif
           fieldCount = fieldCount + 1
         else if ((stateitemtypeList(item) == ESMF_STATEITEM_STATE) .AND. &
                  (l_nestedFlag)) then
@@ -1451,6 +1477,7 @@ module NUOPC_Base
           nullify(l_NamespaceList)
           nullify(l_CplSetList)
           nullify(l_fieldList)
+          nullify(l_stateList)
           call ESMF_StateGet(state, itemName=ll_itemNameList(item), &
             nestedState=nestedState, rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1465,6 +1492,7 @@ module NUOPC_Base
             NamespaceList=l_NamespaceList, &
             CplSetList=l_CplSetList, &
             fieldList=l_fieldList, &
+            stateList=l_stateList, &
             nestedFlag=l_nestedFlag, rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, &
@@ -1496,6 +1524,9 @@ module NUOPC_Base
               if (present(fieldList)) then
                 fieldList(fieldCount) = l_fieldList(i)
               endif
+              if (present(stateList)) then
+                stateList(fieldCount) = l_stateList(i)
+              endif
               fieldCount = fieldCount + 1
             enddo
             deallocate(l_StandardNameList)
@@ -1504,6 +1535,7 @@ module NUOPC_Base
             deallocate(l_NamespaceList)
             deallocate(l_CplSetList)
             deallocate(l_fieldList)
+            deallocate(l_stateList)
           endif
         endif
       enddo
