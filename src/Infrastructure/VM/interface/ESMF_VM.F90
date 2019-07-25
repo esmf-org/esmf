@@ -4741,7 +4741,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[vm] 
 !        Queried {\tt ESMF\_VM} object.
 !   \item[{[localPet]}]
-!        Upon return this holds the id of the PET that issued this call.
+!        Upon return this holds the local id of the PET that issued this call.
+!        The valid range of {\tt localPet} is $[0..petCount-1]$. A value of $-1$
+!        is returned on PETs that are not active under the specified {\tt vm}.
 !   \item[{[petCount]}]
 !        Upon return this holds the number of PETs running under {\tt vm}.
 !   \item[{[peCount]}]
@@ -4764,6 +4766,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        user-level MPI communications. It is recommended that the user
 !        duplicates the communicator via {\tt MPI\_Comm\_Dup()} in order to
 !        prevent any interference with ESMF communications.
+!        {\tt MPI\_COMM\_NULL} is returned on PETs that are not active
+!        under the specified {\tt vm}.
 !   \item[{[pthreadsEnabledFlag]}]
 !        \begin{description}
 !        \item[{\tt .TRUE.}]
@@ -4821,7 +4825,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       ! Only very specific cases are supported for a NULL this pointer
-      if (present(localPet) .or. present(petCount) .or. present(peCount) .or. &
+      if (present(petCount) .or. present(peCount) .or. &
         present(ssiCount) .or. present(ssiMinPetCount) .or. &
         present(ssiMaxPetCount) .or. present(ssiLocalPetCount) .or. &
         present(pthreadsEnabledFlag) .or. present(openMPEnabledFlag) .or. &
@@ -4830,6 +4834,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           msg="Not a valid pointer to VM", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
+      endif
+      if (present(localPet)) then
+        ! a value of -1 indicates that 
+        localPet = -1
       endif
       if (present(mpiCommunicator)) then
         call c_ESMC_VMGetMpiCommNull(mpiCommunicator, localrc)
