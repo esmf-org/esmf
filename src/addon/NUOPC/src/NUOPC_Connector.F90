@@ -1338,7 +1338,7 @@ module NUOPC_Connector
     character(ESMF_MAXSTR), pointer :: cplList(:), chopStringList(:)
     character(ESMF_MAXSTR), pointer :: cplSetList(:)
     character(ESMF_MAXSTR)          :: cplName
-    integer                         :: cplListSize, i
+    integer                         :: cplListSize, i, localPet
     integer                         :: cplSetListSize
     integer                         :: bondLevel, bondLevelMax
     character(ESMF_MAXSTR), pointer :: importNamespaceList(:)
@@ -1357,10 +1357,13 @@ module NUOPC_Connector
     character(ESMF_MAXSTR)          :: connectionString
     character(ESMF_MAXSTR)          :: name, iString
     character(len=160)              :: msgString
+    character(ESMF_MAXSTR)          :: iTransferAction, eTransferAction
     character(ESMF_MAXSTR)          :: iTransferOffer, eTransferOffer
     character(ESMF_MAXSTR)          :: iSharePolicy, eSharePolicy
     logical                         :: matchE, matchI, acceptFlag
+    type(ESMF_VM)                   :: acceptorVM, providerVM, currentVM
     logical                         :: sharable
+    integer                         :: helperIn, helperOut
     integer                   :: verbosity, profiling, diagnostic
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
@@ -1797,12 +1800,89 @@ module NUOPC_Connector
           endif
         endif
 
-        !TODO: need to access the srcVM and dstVM, and determine if objects are
-        !TODO: sharable between them (e.g. identical petList, or shared mem)
-        !TODO: For now just simply hard-code, which can lead to issues
-        !TODO: See ticket #3614451.
-        sharable = .true.
+        ! Provider and acceptor can share Field and/or GeomObjects if all of the
+        ! provider PETs are also active on the acceptor side. The acceptor side
+        ! might have additional PETs active, which is okay.
+        sharable = .false.  ! initialize
         
+        if (acceptFlag) then
+          ! determine provider and acceptor VM
+          call NUOPC_GetAttribute(iField, name="TransferActionGeomObject", &
+            value=iTransferAction, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call NUOPC_GetAttribute(eField, name="TransferActionGeomObject", &
+            value=eTransferAction, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if ((trim(iTransferAction)=="provide") &
+            .and.(trim(eTransferAction)=="accept")) then
+            call ESMF_FieldGet(iField, vm=providerVM, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call ESMF_FieldGet(eField, vm=acceptorVM, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          elseif ((trim(eTransferAction)=="provide") &
+            .and.(trim(iTransferAction)=="accept")) then
+            call ESMF_FieldGet(eField, vm=providerVM, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call ESMF_FieldGet(iField, vm=acceptorVM, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          else  ! both sides "provide"
+            !TODO: indicate error condition, should never get here
+          endif
+          ! determine whether the provider Field can be accepted by acceptor VM
+          helperIn = 0  ! initialize
+          call ESMF_VMGet(providerVM, localPet=localPet, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (localPet >= 0) then
+            ! this PET is active under the provider VM -> check acceptor VM
+            call ESMF_VMGet(acceptorVM, localPet=localPet, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (localPet >= 0) then
+              ! acceptor does execute on this PET, therefore can share
+            else
+              ! acceptor does NOT execute on this PET, therefore cannot share
+              helperIn = 1  ! indicated that a not sharable situation was found
+            endif
+          endif
+          ! implement a logical OR operation based on REDUCE_SUM
+          call ESMF_VMGetCurrent(currentVM, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call ESMF_VMAllFullReduce(currentVM, sendData=(/helperIn/), &
+            recvData=helperOut, count=1, reduceflag=ESMF_REDUCE_SUM, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          ! now know globally whether this is a sharable situation or not
+          if (helperOut == 0) sharable = .true.
+        endif
+        
+        if (btest(verbosity,12)) then
+          if (sharable) then
+            write (msgString, '(A)') trim(name)//": "//&
+              "- combination of provider and acceptor VM supports "// &
+              "Field and/or GeomObject sharing between them."
+            call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+          else
+            write (msgString, '(A)') trim(name)//": "//&
+              "- combination of provider and acceptor VM does NOT support "// &
+              "Field and/or GeomObject sharing between them."
+            call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+          endif
+        endif
+
         if (acceptFlag .and. sharable) then
           ! One side accepts the other and VMs allow sharing 
           ! Look at GeomObject sharing
@@ -2310,13 +2390,13 @@ module NUOPC_Connector
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
           if (sharedField) then
-            call ESMF_LogWrite(trim(name)//": "//"-> sharing Field", &
+            call ESMF_LogWrite(trim(name)//": "//"-> sharing Field.", &
               ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
               return  ! bail out
           else
-            call ESMF_LogWrite(trim(name)//": "//"-> NOT sharing Field", &
+            call ESMF_LogWrite(trim(name)//": "//"-> NOT sharing Field.", &
               ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
