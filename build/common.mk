@@ -690,8 +690,10 @@ ESMF_SEDDEFAULT             = sed
 # The -E option stops the gcc overcompiler after preprocessing, the -P
 # option prevents putting #line directives in the output, and -x c states
 # to use C-style preprocessing regardless of file name suffix. Option -C
-# does not discard C++-style comments, preventing URL mangling.
-ESMF_CPPDEFAULT             = gcc -E -P -x c -C
+# does not discard C++-style comments, preventing URL mangling. Finally
+# for GCC range 4.8.5-4.9.x, -nostdinc is needed or else standard headers
+# are included that mess up the Fortran source code.
+ESMF_CPPDEFAULT             = gcc -E -P -x c -C -nostdinc
 
 ESMF_RM                     = rm -rf
 ESMF_MV                     = mv -f
