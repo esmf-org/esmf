@@ -108,6 +108,7 @@ module NUOPC_Base
     module procedure NUOPC_RealizeCompleteLS
     module procedure NUOPC_RealizeCompleteM
     module procedure NUOPC_RealizeField
+    module procedure NUOPC_RealizeTransfer
   end interface
   
   interface NUOPC_SetAttribute
@@ -2687,7 +2688,7 @@ module NUOPC_Base
     character(len=*),         intent(in),  optional :: dataFillScheme    
     integer,                  intent(out), optional :: rc
 ! !DESCRIPTION:
-!   \label{NUOPC_RealizeComplete}
+!   \label{NUOPC_RealizeCompleteG}
 !
 !   Realize or remove fields inside of {\tt state} according to {\tt selection}.
 !   All of the fields that are realized are created internally on the same 
@@ -2715,7 +2716,10 @@ module NUOPC_Base
 !   \item[{[typekind]}]
 !     The typekind of the internally created field(s). The valid options are
 !     {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
-!     {\tt ESMF\_TYPEKIND\_R4}, and {\tt ESMF\_TYPEKIND\_R8} (default).
+!     {\tt ESMF\_TYPEKIND\_R4}, and {\tt ESMF\_TYPEKIND\_R8}.
+!     By default use the {\tt typekind} of the partially created field used
+!     during advertise, or {\tt ESMF\_TYPEKIND\_R8}, if the advertised field 
+!     did not have a {\tt typekind} defined.
 !   \item[{[staggerloc]}]
 !     Stagger location of data in grid cells. By default use the same
 !     stagger location as the advertising field, or 
@@ -2951,7 +2955,7 @@ module NUOPC_Base
     character(len=*),         intent(in),  optional :: dataFillScheme    
     integer,                  intent(out), optional :: rc
 ! !DESCRIPTION:
-!   \label{NUOPC_RealizeComplete}
+!   \label{NUOPC_RealizeCompleteLS}
 !
 !   Realize or remove fields inside of {\tt state} according to {\tt selection}.
 !   All of the fields that are realized are created internally on the same 
@@ -2978,7 +2982,10 @@ module NUOPC_Base
 !   \item[{[typekind]}]
 !     The typekind of the internally created field(s). The valid options are
 !     {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
-!     {\tt ESMF\_TYPEKIND\_R4}, and {\tt ESMF\_TYPEKIND\_R8} (default).
+!     {\tt ESMF\_TYPEKIND\_R4}, and {\tt ESMF\_TYPEKIND\_R8}.
+!     By default use the {\tt typekind} of the partially created field used
+!     during advertise, or {\tt ESMF\_TYPEKIND\_R8}, if the advertised field 
+!     did not have a {\tt typekind} defined.
 !   \item[{[selection]}]
 !     Selection of mode of operation:
 !     \begin{itemize}
@@ -3123,7 +3130,7 @@ module NUOPC_Base
     character(len=*),         intent(in),  optional :: dataFillScheme    
     integer,                  intent(out), optional :: rc
 ! !DESCRIPTION:
-!   \label{NUOPC_RealizeComplete}
+!   \label{NUOPC_RealizeCompleteM}
 !
 !   Realize or remove fields inside of {\tt state} according to {\tt selection}.
 !   All of the fields that are realized are created internally on the same 
@@ -3150,7 +3157,10 @@ module NUOPC_Base
 !   \item[{[typekind]}]
 !     The typekind of the internally created field(s). The valid options are
 !     {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
-!     {\tt ESMF\_TYPEKIND\_R4}, and {\tt ESMF\_TYPEKIND\_R8} (default).
+!     {\tt ESMF\_TYPEKIND\_R4}, and {\tt ESMF\_TYPEKIND\_R8}.
+!     By default use the {\tt typekind} of the partially created field used
+!     during advertise, or {\tt ESMF\_TYPEKIND\_R8}, if the advertised field 
+!     did not have a {\tt typekind} defined.
 !   \item[{[meshloc]}]
 !     Location of data in the mesh cell. By default use the same
 !     mesh location as the advertising field, or 
@@ -3429,6 +3439,208 @@ module NUOPC_Base
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_Realize - Realize a previously advertised Field in a State after Transfer of GeomObject
+! !INTERFACE:
+  ! Private name; call using NUOPC_Realize()
+  subroutine NUOPC_RealizeTransfer(state, fieldName, typekind, gridToFieldMap, &
+    ungriddedLBound, ungriddedUBound, field, rc)
+! !ARGUMENTS:
+    type(ESMF_State)                                :: state
+    character(*),             intent(in)            :: fieldName
+    type(ESMF_TypeKind_Flag), intent(in),  optional :: typekind
+    integer, target,          intent(in),  optional :: gridToFieldMap(:)
+    integer, target,          intent(in),  optional :: ungriddedLBound(:)
+    integer, target,          intent(in),  optional :: ungriddedUBound(:)
+    type(ESMF_Field),         intent(out), optional :: field
+    integer,                  intent(out), optional :: rc
+! !DESCRIPTION:
+!   \label{NUOPC_RealizeTransfer}
+!
+!   Realize a field where GeomObject has been set by the NUOPC GeomObject
+!   transfer protocol.
+!
+!   The data of the realized field is left uninitialized by this method.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[state]
+!     The {\tt ESMF\_State} object in which the fields are realized.
+!   \item[fieldName]
+!     The name of the field in {\tt state} to be realized. If {\tt state} does
+!     not contain a field with name {\tt fieldName}, return an error in 
+!     {\tt rc}.
+!   \item[{[typekind]}]
+!     The typekind of the internally created field(s). The valid options are
+!     {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
+!     {\tt ESMF\_TYPEKIND\_R4}, and {\tt ESMF\_TYPEKIND\_R8}.
+!     By default use the {\tt typekind} of the connected provider field.
+!   \item[{[gridToFieldMap]}]
+!     The mapping of grid/mesh dimensions against field dimensions. The argument
+!     is of rank 1 and with a size of dimCount. The elements correspond to the
+!     grid/mesh elements in order, and each entry identifies the field dimension
+!     the respective grid/mesh dimension is associated with.
+!     By default use the {\tt gridToFieldMap} of the connected provider field.
+!   \item[{[ungriddedLBound]}]
+!     Lower bounds of the ungridded dimensions of the field.
+!     By default use the {\tt ungriddedLBound} of the connected provider field.
+!   \item[{[ungriddedUBound]}]
+!     Upper bounds of the ungridded dimensions of the field.
+!     By default use the {\tt ungriddedLBound} of the connected provider field.
+!   \item[{[field]}]
+!     Returns the completed field that was realized by this method.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                         :: localrc
+    type(ESMF_Field)                :: fieldAdv
+    integer                         :: itemCount, stat
+    integer                         :: ulbCount, uubCount
+    logical                         :: isPresent
+    character(len=80)               :: value
+    integer                         :: tk
+    type(ESMF_TypeKind_Flag)        :: tkf
+    integer(ESMF_KIND_I4), pointer  :: l_gridToFieldMap(:)
+    integer(ESMF_KIND_I4), pointer  :: l_ungriddedLBound(:),l_ungriddedUBound(:)
+
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    ! access the advertised field
+    call ESMF_StateGet(state, itemName=fieldName, field=fieldAdv, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    ! TypeKind
+    if (present(typekind)) then
+      tkf = typekind
+    else
+      call ESMF_AttributeGet(fieldAdv, name="TypeKind", &
+        convention="NUOPC", purpose="Instance", &
+        value=tk, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+      tkf=tk  ! convert integer into actual TypeKind_Flag
+    endif
+
+    ! GridToFieldMap
+    if (present(gridToFieldMap)) then
+      l_gridToFieldMap => gridToFieldMap
+    else
+      call ESMF_AttributeGet(fieldAdv, name="GridToFieldMap", &
+        convention="NUOPC", purpose="Instance", &
+        itemCount=itemCount, isPresent=isPresent, &
+        attnestflag=ESMF_ATTNEST_ON, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+      if (.not. isPresent) then
+        call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
+          msg="Cannot realize field "//trim(fieldName)//&
+          " because GridToFieldMap attribute is not present", &
+          line=__LINE__, file=FILENAME, &
+          rcToReturn=rc)
+        return
+      endif
+      allocate(l_gridToFieldMap(itemCount), stat=stat)
+      if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+        msg="Allocation of internal gridToFieldMap failed.", &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_AttributeGet(fieldAdv, &
+        name="GridToFieldMap", valueList=l_gridToFieldMap, &
+        convention="NUOPC", purpose="Instance", &
+        attnestflag=ESMF_ATTNEST_ON, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, &
+        msg="Cannot realize field "//trim(fieldName)// &
+        " because error obtaining GridToFieldMap attribute.", &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+    endif
+
+    ! UngriddedLBound, UngriddedUBound
+    call ESMF_AttributeGet(fieldAdv, name="UngriddedLBound", &
+      convention="NUOPC", purpose="Instance", &
+      itemCount=ulbCount, isPresent=isPresent, &
+      attnestflag=ESMF_ATTNEST_ON, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    if ((isPresent .and. ulbCount > 0) .or. present(ungriddedLBound) &
+      .or. present(ungriddedUBound)) then
+      if (isPresent .and. ulbCount > 0) then
+        call ESMF_AttributeGet(fieldAdv, name="UngriddedUBound", &
+          convention="NUOPC", purpose="Instance", &
+          itemCount=uubCount, isPresent=isPresent, &
+          attnestflag=ESMF_ATTNEST_ON, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME)) return  ! bail out
+        if (.not. isPresent .or. ulbCount /= uubCount) then
+          call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
+            msg="Field "//trim(fieldName)//&
+            " has inconsistent UngriddedLBound/UngriddedUBound attributes",&
+            line=__LINE__, file=FILENAME, &
+            rcToReturn=rc)
+          return
+        endif
+      endif
+      if (present(ungriddedLBound)) then
+        l_ungriddedLBound => ungriddedLBound
+      else
+        allocate(l_ungriddedLBound(ulbCount), stat=stat)
+        if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+          msg="Allocation of internal ungriddedLBound array failed.", &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+        call ESMF_AttributeGet(fieldAdv, &
+          name="UngriddedLBound", valueList=l_ungriddedLBound, &
+          convention="NUOPC", purpose="Instance", &
+          attnestflag=ESMF_ATTNEST_ON, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME)) return  ! bail out
+      endif
+      if (present(ungriddedUBound)) then
+        l_ungriddedUBound => ungriddedUBound
+      else
+        allocate(l_ungriddedUBound(ulbCount), stat=stat)
+        if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+          msg="Allocation of internal ungriddedUBound array failed.", &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+        call ESMF_AttributeGet(fieldAdv, &
+          name="UngriddedUBound", valueList=l_ungriddedUBound, &
+          convention="NUOPC", purpose="Instance", &
+          attnestflag=ESMF_ATTNEST_ON, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME)) return  ! bail out
+      endif
+      ! create field with ungridded dims
+      call ESMF_FieldEmptyComplete(fieldAdv, &
+        gridToFieldMap=l_gridToFieldMap, typekind=tkf, &
+        ungriddedLBound=l_ungriddedLBound, &
+        ungriddedUBound=l_ungriddedUBound, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+      if (.not.present(ungriddedLBound)) deallocate(l_ungriddedLBound)
+      if (.not.present(ungriddedUBound)) deallocate(l_ungriddedUBound)
+    else
+      ! create field with no ungridded dims
+      call ESMF_FieldEmptyComplete(fieldAdv, &
+        gridToFieldMap=l_gridToFieldMap, typekind=tkf, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+    endif
+    if (.not.present(gridToFieldMap)) deallocate(l_gridToFieldMap)
+    
+    ! optionally return the completed field
+    if (present(field)) field = fieldAdv
+
   end subroutine
   !-----------------------------------------------------------------------------
 
