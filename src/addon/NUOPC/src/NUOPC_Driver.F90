@@ -6558,116 +6558,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       if (associated(fieldList)) then
         do i=1, size(fieldList)
-          ! the transferred Grid is already set, allocate memory for data
           
-          ! First see if Field is shared. If so, don't need to do anything
+          ! See if the Field is shared. If so, don't need to do anything
           ! here, because the Connector will have realized the Fields 
-          ! automatically, using reference sharing.
+          ! automatically, using reference sharing. Otherwise realize here.
           
           call NUOPC_GetAttribute(fieldList(i), name="ShareStatusField", &
             value=value, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          if (trim(value)=="not shared") then
           
-            ! TypeKind attribute
-            call ESMF_AttributeGet(fieldList(i), name="TypeKind", &
-              convention="NUOPC", purpose="Instance", &
-              value=tk, rc=rc)
+          if (trim(value)=="not shared") then
+            ! not shared -> must complete the field here
+            call NUOPC_Realize(state, fieldName=itemNameList(i), rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            tkf=tk  ! convert integer into actual TypeKind_Flag
-
-            !TODO: Only Grids work. Also make this work for Mesh and LocStream.
-
-            ! GridToFieldMap attribute
-            call ESMF_AttributeGet(fieldList(i), name="GridToFieldMap", &
-              convention="NUOPC", purpose="Instance", &
-              itemCount=itemCount, isPresent=isPresent, &
-              attnestflag=ESMF_ATTNEST_ON, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            if (.not. isPresent) then
-              call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
-                msg="Cannot realize field "//trim(itemNameList(i))//&
-                " because GridToFieldMap attribute is not present", &
-                line=__LINE__, file=trim(name)//":"//FILENAME, &
-                rcToReturn=rc)
-              return
-            endif
-            allocate(gridToFieldMap(itemCount), stat=stat)
-            if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-              msg="Allocation of internal gridToFieldMap failed.", &
-              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-              return  ! bail out
-            call ESMF_AttributeGet(fieldList(i), &
-              name="GridToFieldMap", valueList=gridToFieldMap, &
-              convention="NUOPC", purpose="Instance", &
-              attnestflag=ESMF_ATTNEST_ON, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, &
-              msg="Cannot realize field "//trim(itemNameList(i))// &
-              " because error obtaining GridToFieldMap attribute.", &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-
-            ! UngriddedLBound, UngriddedUBound attributes
-            call ESMF_AttributeGet(fieldList(i), name="UngriddedLBound", &
-              convention="NUOPC", purpose="Instance", &
-              itemCount=ulbCount, isPresent=isPresent, &
-              attnestflag=ESMF_ATTNEST_ON, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            if (isPresent .and. ulbCount > 0) then           
-              call ESMF_AttributeGet(fieldList(i), name="UngriddedUBound", &
-                convention="NUOPC", purpose="Instance", &
-                itemCount=uubCount, isPresent=isPresent, &
-                attnestflag=ESMF_ATTNEST_ON, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-              if (.not. isPresent .or. ulbCount /= uubCount) then
-                call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
-                  msg="Field "//trim(itemNameList(i))//&
-                  " has inconsistent UngriddedLBound/UngriddedUBound attributes",&
-                  line=__LINE__, file=trim(name)//":"//FILENAME, &
-                  rcToReturn=rc)
-                 return
-              endif
-              allocate(ungriddedLBound(ulbCount), &
-                ungriddedUBound(uubCount), stat=stat)
-              if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-                msg="Allocation of internal ungriddedLBound/ungriddedUBound "//&
-                "failed.", line=__LINE__, &
-                file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-                return  ! bail out
-              call ESMF_AttributeGet(fieldList(i), &
-                name="UngriddedLBound", valueList=ungriddedLBound, &
-                convention="NUOPC", purpose="Instance", &
-                attnestflag=ESMF_ATTNEST_ON, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-              call ESMF_AttributeGet(fieldList(i), &
-                name="UngriddedUBound", valueList=ungriddedUBound, &
-                convention="NUOPC", purpose="Instance", &
-                attnestflag=ESMF_ATTNEST_ON, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-              ! create field with ungridded dims
-              call ESMF_FieldEmptyComplete(fieldList(i), &
-                gridToFieldMap=gridToFieldMap, typekind=tkf, &
-                ungriddedLBound=ungriddedLBound, &
-                ungriddedUBound=ungriddedUBound, &
-                rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-              deallocate(ungriddedLBound, ungriddedUBound)
-            else
-              ! create field with no ungridded dims
-              call ESMF_FieldEmptyComplete(fieldList(i), &
-                gridToFieldMap=gridToFieldMap, typekind=tkf, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            endif
-            deallocate(gridToFieldMap)
           endif
+
         enddo
       endif
       if (associated(fieldList)) deallocate(fieldList)
