@@ -1921,7 +1921,8 @@ module NUOPC_Connector
             if (btest(verbosity,12)) then
               write (msgString, '(A)') trim(name)//": "//&
                 "- at least one side does not want to share the GeomObject "// &
-                "-> not shared."
+                "-> not shared (isharePolicy="//trim(iSharePolicy)//&
+                " & esharePolicy="//trim(eSharePolicy)//")"
               call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -1964,7 +1965,8 @@ module NUOPC_Connector
             if (btest(verbosity,12)) then
               write (msgString, '(A)') trim(name)//": "//&
                 "- at least one side does not want to share the Field "// &
-                "-> not shared."
+                "-> not shared (isharePolicy="//trim(iSharePolicy)//&
+                " & esharePolicy="//trim(eSharePolicy)//")"
               call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
