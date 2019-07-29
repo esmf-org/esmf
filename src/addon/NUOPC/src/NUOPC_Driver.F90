@@ -6437,6 +6437,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                         :: i
     type(ESMF_Field), pointer       :: fieldList(:)
     character(ESMF_MAXSTR), pointer :: itemNameList(:)
+    type(ESMF_State),       pointer :: stateList(:)
     logical                         :: consumerConnected
     character(ESMF_MAXSTR)          :: stateName, fieldName
     character(len=80)               :: value
@@ -6445,8 +6446,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     nullify(fieldList)
     nullify(itemNameList)
+    nullify(stateList)
     call NUOPC_GetStateMemberLists(state, itemNameList=itemNameList, &
-      fieldList=fieldList, rc=rc)
+      fieldList=fieldList, stateList=stateList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (associated(fieldList)) then
@@ -6463,14 +6465,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           call ESMF_FieldGet(fieldList(i), name=fieldName, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            call ESMF_StateRemove(state, (/fieldName/), rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call ESMF_StateRemove(stateList(i), (/fieldName/), rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         endif
       enddo
     endif
     if (associated(fieldList)) deallocate(fieldList)
     if (associated(itemNameList)) deallocate(itemNameList)
+    if (associated(stateList)) deallocate(stateList)
     
   end subroutine
 
@@ -6539,6 +6542,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer                         :: i
       type(ESMF_Field), pointer       :: fieldList(:)
       character(ESMF_MAXSTR), pointer :: itemNameList(:)
+      type(ESMF_State),       pointer :: stateList(:)
       integer                         :: itemCount, stat
       integer                         :: ulbCount, uubCount
       logical                         :: isPresent
@@ -6552,8 +6556,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       nullify(fieldList)
       nullify(itemNameList)
+      nullify(stateList)
       call NUOPC_GetStateMemberLists(state, itemNameList=itemNameList, &
-        fieldList=fieldList, rc=rc)
+        fieldList=fieldList, stateList=stateList, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       if (associated(fieldList)) then
@@ -6570,7 +6575,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           
           if (trim(value)=="not shared") then
             ! not shared -> must complete the field here
-            call NUOPC_Realize(state, fieldName=itemNameList(i), rc=rc)
+            call NUOPC_Realize(stateList(i), fieldName=itemNameList(i), rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           endif
@@ -6579,6 +6584,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
       if (associated(fieldList)) deallocate(fieldList)
       if (associated(itemNameList)) deallocate(itemNameList)
+      if (associated(stateList)) deallocate(stateList)
       
     end subroutine
 
