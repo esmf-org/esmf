@@ -2761,6 +2761,10 @@ module NUOPC_Driver
         return  ! bail out
     endif
 
+    ! initialize the activeClock in case any connectors are executed before
+    ! the RunSequence executed
+    activeClock = internalClock
+    
     ! execute all connectors from driver (parent) to its children
     i=0       ! from parent
     phase=1   ! use phase 1
