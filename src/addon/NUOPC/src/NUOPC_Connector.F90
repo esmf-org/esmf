@@ -6210,13 +6210,14 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
     
     ! early exit if nothing to be done -> this allows calling the method even
     ! if the internal state does not (yet) exist - done for testing
-    if (.not.present(cplSetList) .and. &
-        .not.present(srcFields) .and. &
+    if (.not.present(srcFields) .and. &
         .not.present(dstFields) .and. &
         .not.present(rh) .and. &
         .not.present(state) .and. &
+        .not.present(cplSetList) .and. &
         .not.present(srcVM) .and. &
-        .not.present(dstVM)) return
+        .not.present(dstVM) .and. &
+        .not.present(driverClock)) return
     
     ! query Component for the internal State
     nullify(is%wrap)
