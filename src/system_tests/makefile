@@ -23,8 +23,6 @@ DIRS      = ESMF_CompCreate \
             ESMF_ArrayBundleRedist \
             ESMF_FieldSparseMatMul \
             ESMF_ConcurrentComponent \
-            ESMF_MapperTwoConcurrentComps \
-            ESMF_MapperSimpleTwoConcurrentComps \
             ESMF_FieldConcurrentComp \
             ESMF_FieldBundleSMM \
             ESMF_FieldBundleSMMPacked \
@@ -57,6 +55,12 @@ DIRS      = ESMF_CompCreate \
             ESMF_XGridConcurrent \
             ESMF_XGridSerial \
             ESMF_Trace
+            
+ifeq ($(ESMF_MAPPER),ON)            
+DIRS     += ESMF_MapperTwoConcurrentComps \
+            ESMF_MapperSimpleTwoConcurrentComps
+endif
+            
 # Disabled STests
 #           ESMF_FieldRegridConserv \ cover by Regrid
 #           ESMF_FieldRegridMulti \   cover by Regrid
