@@ -116,5 +116,7 @@ module ESMF
     use ESMF_IO_YAMLMod
     
     use ESMF_IOScripMod, only: ESMF_SparseMatrixWrite
+    use ESMF_MapperMod
+    use ESMF_MapperUtilMod
 
 end module ESMF
