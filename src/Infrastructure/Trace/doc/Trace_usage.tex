@@ -203,7 +203,7 @@ MPI functions can be included in the timing profile to indicate how much time
 is spent inside communication calls.  This can also help to determine load imbalance
 in the system, since large times spent inside MPI may indicate that communication
 between PETs is not tightly synchronized.  This option includes {\em all} MPI calls in
-the application, whether or not they original from the ESMF library.  Here is a partial
+the application, whether or not they originate from the ESMF library.  Here is a partial
 example summary profile that contains MPI times:
 
 \begin{verbatim}
@@ -247,7 +247,6 @@ however on some systems (such as Cray), static linking may be used.
 Note that for either option, ESMF must be built with {\tt ESMF\_TRACE\_BUILD\_LIB=ON},
 which is the default.
 
-
 In {\em dynamically linked applications}, the {\tt LD\_PRELOAD} environment variable
 must be used when executing the MPI application.  This instructs the dynamic
 linker to interpose certain MPI symbols so they can be captured by the ESMF
@@ -271,6 +270,32 @@ An advantage of this approach is that your application does {\em not} need to
 be recompiled. The MPI timing information will be included in the per-PET profiles and/or the summary
 profile, depending on the setting of {\tt ESMF\_RUNTIME\_PROFILE\_OUTPUT}.
 
+In {\em statically linked applications}, the application must be re-linked
+with specific options provided to the linker.  These options instruct the linker
+to wrap the MPI symbols with the ESMF profiling functions. The linking flags that
+must be provided are included in the {\em esmf.mk} Makefile fragment that
+is part of the ESMF installation. These link flags should be imported into
+your application Makefile, and included in the final link command. To do this,
+first import the {\em esmf.mk} file into your application Makefile. The path
+to this file is typically stored in the {\tt ESMFMKFILE} environment variable.
+Then, pass the variables {\tt \$(ESMF\_TRACE\_STATICLINKOPTS)} and
+{\tt \$(ESMF\_TRACE\_STATICLINKLIBS)} to the final linking command.  For example:
+
+\begin{verbatim}
+# import esmf.mk
+include $(ESMFMKFILE)
+
+# other makefile targets here...
+
+# example final link command, with $(ESMF_TRACE_STATICLINKOPTS) and $(ESMF_TRACE_STATICLINKLIBS) added
+myApp: myApp.o driver.o model.o
+	$(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) -o $@ $^ $(ESMF_F90ESMFLINKLIBS) $(ESMF_TRACE_STATICLINKOPTS) $(ESMF_TRACE_STATICLINKLIBS)
+\end{verbatim}
+
+This option will statically wrap all of the MPI functions and include them
+in the profile output.  Execute the application in the normal way
+with the environment variable {\tt ESMF\_RUNTIME\_PROFILE} set to {\tt ON}.
+You will see the MPI functions included in the timing profile.
 
 \subsubsection{Output a Detailed Trace for Analysis}
 
