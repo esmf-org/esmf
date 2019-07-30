@@ -912,8 +912,8 @@ subroutine ESMF_GridspecReadStaggerR8(filename, nx, ny, lon, lat, staggerLoc, st
  
     character(len=*), intent(in)               :: filename
     integer, intent(in)                        :: nx, ny
-    real(ESMF_KIND_R8), pointer                :: lon(:,:)
-    real(ESMF_KIND_R8), pointer                :: lat(:,:)
+    real(ESMF_KIND_R8), TARGET                 :: lon(:,:)
+    real(ESMF_KIND_R8), TARGET                 :: lat(:,:)
     type(ESMF_StaggerLoc)                      :: staggerLoc
     integer, optional, intent(in)              :: start(2)
     integer, optional, intent(in)              :: count(2)
@@ -1098,8 +1098,8 @@ subroutine ESMF_GridspecReadStaggerR4(filename, nx, ny, lon, lat, staggerLoc, st
  
     character(len=*), intent(in)               :: filename
     integer, intent(in)                        :: nx, ny
-    real(ESMF_KIND_R4), pointer                :: lon(:,:)
-    real(ESMF_KIND_R4), pointer                :: lat(:,:)
+    real(ESMF_KIND_R4), TARGET                 :: lon(:,:)
+    real(ESMF_KIND_R4), TARGET                 :: lat(:,:)
     type(ESMF_StaggerLoc)                      :: staggerLoc
     integer, optional, intent(in)              :: start(2)
     integer, optional, intent(in)              :: count(2)

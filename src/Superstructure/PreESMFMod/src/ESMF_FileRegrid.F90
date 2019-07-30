@@ -70,6 +70,7 @@ integer, parameter:: MAX_VARDIMS = 4
 ! - ESMF-public methods:
 
   public ESMF_FileRegrid
+  public CheckVarInfo
 
 ! -------------------------- ESMF-public method -------------------------------
 contains
@@ -1481,7 +1482,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! If it is a Mosaic file, there may be multiple DEs per PET and the data has to be
       ! read in per DE based on tile number
       if (localsrcfiletype == ESMF_FILEFORMAT_MOSAIC) then
-         call ReadMosaicField(srcField, localInputFile, srcMosaic, srcVarRank(i), srcVarDims(1:srcVarRank(i),i), rc=localrc)
+         call ReadMosaicField(srcField, localInputFile, srcMosaic, srcVarRank(i), &
+              srcVarDims(1:srcVarRank(i),i), rc=localrc)
          if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1810,7 +1812,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 ESMF_CONTEXT, rcToReturn=rc)) return
            endif                        
        endif
-    else ! ungridrand == 0
+    else ! ungridrank == 0
        if (localdstfiletype == ESMF_FILEFORMAT_GRIDSPEC .or. &
             localdstfiletype == ESMF_FILEFORMAT_MOSAIC) then
            dstField = ESMF_FieldCreate(dstGrid, arrayspec, &
@@ -1878,7 +1880,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif
     endif
 
-    !! Call regird
+    !! Call regrid
     call ESMF_FieldRegrid(srcField, dstField, routehandle, zeroregion=ESMF_REGION_SELECT, &
                           rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -2078,7 +2080,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
          else
-                    tmpArray=ESMF_ArrayCreate(elementDG, arrayspec, indexflag=ESMF_INDEX_DELOCAL, rc=localrc)
+            tmpArray=ESMF_ArrayCreate(elementDG, arrayspec, indexflag=ESMF_INDEX_DELOCAL, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return

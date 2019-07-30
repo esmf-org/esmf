@@ -17,6 +17,7 @@ program ESMF_RegridApp
   use ESMF_IOScripMod
   use ESMF_IOGridspecMod
   use ESMF_FileRegridMod
+  use ESMF_FileRegridCheckMod
 
   implicit none
 
@@ -46,7 +47,7 @@ program ESMF_RegridApp
   logical            :: srcIsRegional, dstIsRegional, typeSetFlag
   logical            :: useTilePathFlag
   character(len=256) :: argStr
-  logical            :: terminateProg
+  logical            :: terminateProg, checkFlag
   !real(ESMF_KIND_R8) :: starttime, endtime
   type(ESMF_LogKind_Flag) :: msgbuf(1)
   type(ESMF_LogKind_Flag) :: logflag
@@ -71,6 +72,8 @@ program ESMF_RegridApp
 #else
   PetNo = 0
 #endif
+
+  checkFlag = .FALSE.
 
   if (PetNo == 0) then
       logflag = ESMF_LOGKIND_MULTI
@@ -305,6 +308,9 @@ program ESMF_RegridApp
       dstIsRegional = .true.
     endif
 
+    call ESMF_UtilGetArgIndex('--check', argindex=ind, rc=rc)
+    if (ind /= -1) checkFlag = .true.
+
 1110 continue
     commandbuf2(:)=0
     if (terminateProg) then
@@ -457,6 +463,25 @@ program ESMF_RegridApp
   endif
   if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
 
+  ! error checking
+  if (checkFlag) then
+    if (useTilePathFlag) then
+      call ESMF_FileRegridCheck(dstfile, dstvarname, &
+                            dstdatafile=trim(dstdatafile), &
+                            tileFilePath=tilePath, &
+                            regridmethod=methodflag, &
+			    rc = rc)
+      if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
+    else
+      call ESMF_FileRegridCheck(dstfile, dstvarname, &
+                            dstdatafile=trim(dstdatafile), &
+                            tileFilePath=tilePath, &
+                            regridmethod=methodflag, &
+			    rc = rc)
+      if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
+    endif
+  endif
+
   ! Output success
   if (PetNo==0) then
     write(*,*) "Completed file regrid successfully."
@@ -499,6 +524,7 @@ contains
     print *, "                      [-r]"
     print *, "                      [--src_regional]"
     print *, "                      [--dst_regional]"
+    print *, "                      [--check]"
     print *, "                      [--no_log]"
     print *, "                      [--help]"
     print *, "                      [--version]"
@@ -545,13 +571,19 @@ contains
     print *, "--dst_regional   - an optional argument specifying the destination grid is regional"
     print *, "              Without this argument, the dst grids is assumed to be global."
     print *, "              This argument only applies to the GRIDSPEC file"
+    print *, "--check    - Check the regridded fields by comparing the values with"
+    print *, "             a synthetic field calculated based on its coordinates. "
+    print *, "             The mean relative error between the destination field "
+    print *, "             and synthetic field is computed.  The synthetic value is calculated as " 
+    print *, "             data(i,j,k,l)=2.0+(k-1)+2*(l-1)+cos(lat(i,j))**2*cos(2*lon(i,j)), assuming"
+    print *, "             it is a 2D grid " 
     print *, "--no_log    - Turn off the ESMF error log."
     print *, "--help     - Print this help message and exit."
     print *, "--version  - Print ESMF version and license information and exit."
     print *, "-V        - Print ESMF version number and exit."
     print *, ""
     print *, "For questions, comments, or feature requests please send email to:"
-    print *, "esmf_support@cgd.ucar.gov"
+    print *, "esmf_support@cgd.ucar.edu"
     print *, ""
     print *, "Visit http://www.earthsystemmodeling.org/ to find out more about the"
     print *, "Earth System Modeling Framework."
