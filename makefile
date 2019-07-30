@@ -134,6 +134,7 @@ endif
 	-@echo "ESMF_NO_INTEGER_1_BYTE: $(ESMF_NO_INTEGER_1_BYTE)"
 	-@echo "ESMF_NO_INTEGER_2_BYTE: $(ESMF_NO_INTEGER_2_BYTE)"
 	-@echo "ESMF_FORTRANSYMBOLS:    $(ESMF_FORTRANSYMBOLS)"
+	-@echo "ESMF_AUTO_LIB_BUILD:    $(ESMF_AUTO_LIB_BUILD)"
 	-@echo "ESMF_DEFER_LIB_BUILD:   $(ESMF_DEFER_LIB_BUILD)"
 	-@echo "ESMF_SHARED_LIB_BUILD:  $(ESMF_SHARED_LIB_BUILD)"
 	-@echo "ESMF_TRACE_LIB_BUILD:   $(ESMF_TRACE_LIB_BUILD)"
@@ -383,8 +384,17 @@ info_mk: chkdir_lib
 	-@echo "# Please see end of file for options used on this ESMF build" >> $(MKINFO)
 	-@echo "#" >> $(MKINFO)
 	-@echo "" >> $(MKINFO)
-	-@echo "" >> $(MKINFO)
-	-@echo "ESMF_VERSION_STRING=$(ESMF_VERSION_STRING)" >> $(MKINFO)
+	-@echo "#----------------------------------------------" >> $(MKINFO)
+	-@echo "ESMF_VERSION_STRING=$(ESMF_VERSION_STRING)"     >> $(MKINFO)
+ifeq ($(shell $(ESMF_DIR)/scripts/available git),git)
+	@if [ -d $(ESMF_DIR)/.git ] ; then \
+        echo "ESMF_VERSION_STRING_GIT=$(ESMF_VERSION_STRING_GIT)" >> $(MKINFO) ; \
+	else \
+	echo "# Not a Git repository" >> $(MKINFO) ; \
+        echo "ESMF_VERSION_STRING_GIT=NoGit" >> $(MKINFO) ; \
+	fi
+	-@echo "#----------------------------------------------" >> $(MKINFO)
+endif
 	-@echo "" >> $(MKINFO)
 	-@echo "ESMF_VERSION_MAJOR=$(ESMF_VERSION_MAJOR)" >> $(MKINFO)
 	-@echo "ESMF_VERSION_MINOR=$(ESMF_VERSION_MINOR)" >> $(MKINFO)
@@ -482,6 +492,7 @@ endif
 	-@echo "# ESMF_NO_INTEGER_1_BYTE: $(ESMF_NO_INTEGER_1_BYTE)" >> $(MKINFO)
 	-@echo "# ESMF_NO_INTEGER_2_BYTE: $(ESMF_NO_INTEGER_2_BYTE)" >> $(MKINFO)
 	-@echo "# ESMF_FORTRANSYMBOLS: $(ESMF_FORTRANSYMBOLS)" >> $(MKINFO)
+	-@echo "# ESMF_AUTO_LIB_BUILD: $(ESMF_AUTO_LIB_BUILD)" >> $(MKINFO)
 	-@echo "# ESMF_DEFER_LIB_BUILD: $(ESMF_DEFER_LIB_BUILD)" >> $(MKINFO)
 	-@echo "# ESMF_SHARED_LIB_BUILD: $(ESMF_SHARED_LIB_BUILD)" >> $(MKINFO)
 	-@echo "# " >> $(MKINFO)
@@ -508,7 +519,7 @@ endif
           fi; \
          fi
 	-@if [ -n "$(ESMF_ACC_SOFTWARE_STACK)" ] ; then \
-	  echo "#ESMF_ACC_SOFTWARE_STACK:            $(ESMF_ACC_SOFTWARE_STACK)" >> $(MKINFO) ; \
+	  echo "# ESMF_ACC_SOFTWARE_STACK:            $(ESMF_ACC_SOFTWARE_STACK)" >> $(MKINFO) ; \
 	  if [ -n "$(ESMF_ACC_SOFTWARE_STACK_INCLUDE)" ] ; then \
 	    echo "# ESMF_ACC_SOFTWARE_STACK_INCLUDE:    $(ESMF_ACC_SOFTWARE_STACK_INCLUDE)" >> $(MKINFO); \
           fi; \
