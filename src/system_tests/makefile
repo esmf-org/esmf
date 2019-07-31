@@ -56,7 +56,7 @@ DIRS      = ESMF_CompCreate \
             ESMF_XGridSerial \
             ESMF_Trace
             
-ifeq ($(ESMF_MAPPER),ON)            
+ifeq ($(ESMF_MAPPER_BUILD),ON)            
 DIRS     += ESMF_MapperTwoConcurrentComps \
             ESMF_MapperSimpleTwoConcurrentComps
 endif
