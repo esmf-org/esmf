@@ -71,7 +71,7 @@ contains
 ! !IROUTINE: ESMF_FileRegridCheck - Check regridding weights
 ! !INTERFACE:
   subroutine ESMF_FileRegridCheck(dstFile, dstVarName, &
-  	     keywordEnforcer,dstDataFile, tileFilePath, &
+             keywordEnforcer,dstDataFile, tileFilePath, &
              regridmethod, rc)
 
 ! !ARGUMENTS:
@@ -168,7 +168,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(regridmethod)) then
       if (regridmethod == ESMF_REGRIDMETHOD_CONSERVE .or. &
           regridmethod == ESMF_REGRIDMETHOD_CONSERVE_2ND) then
-	  isConserve = .TRUE.
+          isConserve = .TRUE.
       endif
     endif
 #ifdef ESMF_NETCDF
@@ -277,7 +277,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                    localdstFileType, dstMeshVar, dstVarStr, &
                    dstVarRank(i), dstVarDims(:,i), dstDimids, &
                    useDstMask, dstMissingVal, &
-		   vartype=dstVarType, locStr=dstLocStr, rc=localrc)
+                   vartype=dstVarType, locStr=dstLocStr, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
       endif
