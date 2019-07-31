@@ -375,6 +375,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     else
        dstLocStr = 'face'
     endif
+    if (dstLocStr .ne. 'node' .and. dstLocStr .ne. 'face') then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+          msg ="dstLoc is not 'node' nor 'face'", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+    endif
 
     ! by default, variables are located at the center of the grid
     useSrcCorner = .FALSE.
@@ -452,7 +458,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       call ESMF_FileTypeCheck(srcFile, localsrcFileType, varname=srcMeshVar, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
              ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rcToReturn=rc)) return
+             ESMF_CONTEXT, rcToReturn=rc)) then
+           terminateProg = .TRUE.
+           goto 1110
+      endif
       ! Only ESMF_FILEFORMAT_UGRID, ESMF_FIELFORMAT_GRIDSPEC and
       ! ESMF_FILEFORMAT_MOSAIC are supported, return errors otherwise
       if (localsrcFileType /= ESMF_FILEFORMAT_UGRID .and. localsrcFileType /= ESMF_FILEFORMAT_GRIDSPEC &

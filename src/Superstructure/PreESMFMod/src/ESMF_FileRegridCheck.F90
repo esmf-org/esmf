@@ -468,7 +468,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
              enddo   
            enddo
         elseif (dstVarRank(i) == 3) then   
-           print *, 'variable dimension: ', size(fptr3d,1), size(fptr3d,2), size(fptr3d,3)
            do j=1,size(fptr3d,1)
               do k=1,size(fptr3d,2)
                 do l=1,size(fptr3d,3)
@@ -509,7 +508,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
              enddo   
            enddo
          endif
-           print *, 'totalerr/totalcnt:', totalerr, totalcnt
+
            meanerr = totalerr/totalcnt
            
            print *, " "
