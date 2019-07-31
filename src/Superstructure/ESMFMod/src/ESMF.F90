@@ -116,5 +116,12 @@ module ESMF
     use ESMF_IO_YAMLMod
     
     use ESMF_IOScripMod, only: ESMF_SparseMatrixWrite
+    
+#ifdef ESMF_MAPPER
+    use & ! prevent MOD_FUNC from grabbing this dependency during build
+      ESMF_MapperMod
+    use & ! prevent MOD_FUNC from grabbing this dependency during build
+      ESMF_MapperUtilMod
+#endif
 
 end module ESMF

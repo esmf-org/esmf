@@ -1,0 +1,7 @@
+# Run sequence
+runSeq::
+  @1800.0
+    ATM phase1
+    ATM phase2
+  @
+::

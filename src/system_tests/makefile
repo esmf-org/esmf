@@ -55,6 +55,12 @@ DIRS      = ESMF_CompCreate \
             ESMF_XGridConcurrent \
             ESMF_XGridSerial \
             ESMF_Trace
+            
+ifeq ($(ESMF_MAPPER_BUILD),ON)            
+DIRS     += ESMF_MapperTwoConcurrentComps \
+            ESMF_MapperSimpleTwoConcurrentComps
+endif
+            
 # Disabled STests
 #           ESMF_FieldRegridConserv \ cover by Regrid
 #           ESMF_FieldRegridMulti \   cover by Regrid
