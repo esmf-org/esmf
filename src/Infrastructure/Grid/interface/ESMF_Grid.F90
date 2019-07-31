@@ -7259,7 +7259,7 @@ end function ESMF_GridCreateFrmScrip
              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rcToReturn=rc)) return
            enddo
-	 else ! localCoordTypeKind == ESMF_TYPEKIND_R4
+         else ! localCoordTypeKind == ESMF_TYPEKIND_R4
            do localDe = 0,decnt-1
              call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
                   staggerloc=staggerLocList(s), farrayPtr=lonPtrR4, rc=localrc)
@@ -14772,16 +14772,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             call ESMF_UtilCreateCSCoordsPar(tileSize, lonEdge=lonCornerPtrR4, &
                latEdge=latCornerPtrR4, start=start, count=count, &
                tile=tile, lonCenter=lonPtrR4, latCenter=latPtrR4, &
-	       schmidtTransform=transformArgument)
+               schmidtTransform=transformArgument)
          elseif (docorner) then
             call ESMF_UtilCreateCSCoordsPar(tileSize, lonEdge=lonCornerPtrR4, &
               latEdge=latCornerPtrR4, start=start, count=count, tile=tile, &
-	       schmidtTransform=transformArgument)
+              schmidtTransform=transformArgument)
          else
             call ESMF_UtilCreateCSCoordsPar(tileSize, &
                start=start, count=count, &
                tile=tile, lonCenter=lonPtrR4, latCenter=latPtrR4, &
-	       schmidtTransform=transformArgument)
+               schmidtTransform=transformArgument)
          endif
 
          !call ESMF_VMWtime(endtime, rc=localrc)
@@ -15257,16 +15257,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             call ESMF_UtilCreateCSCoordsPar(tileSize, lonEdge=lonCornerPtrR4, &
                latEdge=latCornerPtrR4, start=start, count=count, &
                tile=tile, lonCenter=lonPtrR4, latCenter=latPtrR4, &
-	       schmidtTransform=transformArgument)
+               schmidtTransform=transformArgument)
          elseif (docorner) then
             call ESMF_UtilCreateCSCoordsPar(tileSize, lonEdge=lonCornerPtrR4, &
               latEdge=latCornerPtrR4, start=start, count=count, tile=tile, &
-	       schmidtTransform=transformArgument)
+              schmidtTransform=transformArgument)
          else
             call ESMF_UtilCreateCSCoordsPar(tileSize, &
                start=start, count=count, &
                tile=tile, lonCenter=lonPtrR4, latCenter=latPtrR4, &
-	       schmidtTransform=transformArgument)
+               schmidtTransform=transformArgument)
          endif
 
          !call ESMF_VMWtime(endtime, rc=localrc)
@@ -15843,7 +15843,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          !count(2)=sizej
 
          do s=1, size(staggerLocList)
-	    if (coordTypeKindLocal == ESMF_TYPEKIND_R8) then
+            if (coordTypeKindLocal == ESMF_TYPEKIND_R8) then
               call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
                   staggerloc=staggerLocList(s), farrayPtr=lonPtrR8, rc=localrc)
               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &

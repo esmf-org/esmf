@@ -617,7 +617,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (i==1) then
           if (trim(srcLocStr) .eq. 'node' .and. (localsrcFileType == ESMF_FILEFORMAT_GRIDSPEC .or. &
               localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE .or. &
-	              localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE_2ND)) then
+                      localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE_2ND)) then
               call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
                   msg = " The source variable has to be located at the center of the grid ", &
                   ESMF_CONTEXT, rcToReturn=rc)
@@ -666,7 +666,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                    localdstFileType, dstMeshVar, dstVarStr, &
                    dstVarRank(i), dstVarDims(:,i), dstDimids, &
                    useDstMask, dstMissingVal, &
-		   vartype=dstVarType, locStr=dstLocStr, rc=localrc)
+                   vartype=dstVarType, locStr=dstLocStr, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) then
              terminateProg = .TRUE.
@@ -682,7 +682,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif
 
         if (dstVarExist .and. (.not. ((dstVarType == NF90_FLOAT) .or. &
-	   (dstVarType == NF90_DOUBLE)))) then
+           (dstVarType == NF90_DOUBLE)))) then
             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
                 msg = " The program only supports dst variable of type float or double ", &
                 ESMF_CONTEXT, rcToReturn=rc)
@@ -2510,7 +2510,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            attstr = MeshVar
          elseif (fileType == ESMF_FILEFORMAT_GRIDSPEC .or. &
             fileType == ESMF_FILEFORMAT_MOSAIC) then
-	   !GRIDSPEC, find the coordinate variables using units
+           !GRIDSPEC, find the coordinate variables using units
            !Check if the optional coordinate argument exist
            if (present(coordnames)) then
              ! check if the coordinate variables exist or not
