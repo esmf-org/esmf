@@ -1615,7 +1615,7 @@ endif
 
      grid2D = ESMF_GridCreateMosaic(filename='data/C48_mosaic.nc', &
                 staggerLocList=(/ESMF_STAGGERLOC_EDGE1, ESMF_STAGGERLOC_EDGE2/), &
-		coordTypeKind = ESMF_TYPEKIND_R4, &
+                coordTypeKind = ESMF_TYPEKIND_R4, &
                 tileFilePath='./data/', regDecompPTile=decomptile, rc=rc)
 
 !EOC
