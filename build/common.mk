@@ -2164,7 +2164,7 @@ endif
 # prevent the wildcards from being expanded.)
 
 CLEAN_DEFDIRS = coredir.*
-CLEAN_DEFAULTS = *.o *.$(ESMF_SL_SUFFIX) *.mod *.txt core ESM*.stdout ESM*.Log PET*.Log *ESMF_LogFile
+CLEAN_DEFAULTS = *.o *.$(ESMF_SL_SUFFIX) *.mod core ESM*.stdout ESM*.Log PET*.Log *ESMF_LogFile
 CLEAN_TEXFILES = *.aux *.bbl *.blg *.log *.toc *.dvi *.ps *.ORIG *.out
 
 clean:
