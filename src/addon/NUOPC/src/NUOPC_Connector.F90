@@ -4572,12 +4572,18 @@ module NUOPC_Connector
       ! execute the regrid operation
       if (is%wrap%cplSetCount > 1) then
         do i=1, is%wrap%cplSetCount
-          call ESMF_FieldBundleSMM(is%wrap%cplSet(i)%srcFields, &
-            is%wrap%cplSet(i)%dstFields, &
-            routehandle=is%wrap%cplSet(i)%rh, &
-            termorderflag=is%wrap%cplSet(i)%termOrders, rc=rc)
+          routeHandleIsCreated = ESMF_RouteHandleIsCreated( &
+            is%wrap%cplSet(i)%rh, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (routeHandleIsCreated) then
+            call ESMF_FieldBundleSMM(is%wrap%cplSet(i)%srcFields, &
+              is%wrap%cplSet(i)%dstFields, &
+              routehandle=is%wrap%cplSet(i)%rh, &
+              termorderflag=is%wrap%cplSet(i)%termOrders, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
         enddo
       else
         routeHandleIsCreated = ESMF_RouteHandleIsCreated(is%wrap%rh, rc=rc)
@@ -4814,9 +4820,15 @@ module NUOPC_Connector
       ! release the regrid operation
       if (is%wrap%cplSetCount > 1) then
         do i=1, is%wrap%cplSetCount
-          call ESMF_FieldBundleRegridRelease(is%wrap%cplSet(i)%rh, rc=rc)
+          routeHandleIsCreated = ESMF_RouteHandleIsCreated( &
+            is%wrap%cplSet(i)%rh, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (routeHandleIsCreated) then
+            call ESMF_FieldBundleRegridRelease(is%wrap%cplSet(i)%rh, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
         enddo
       else
         routeHandleIsCreated = ESMF_RouteHandleIsCreated(is%wrap%rh, rc=rc)
