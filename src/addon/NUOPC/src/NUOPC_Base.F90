@@ -3511,6 +3511,8 @@ module NUOPC_Base
     integer(ESMF_KIND_I4), pointer  :: l_gridToFieldMap(:)
     integer(ESMF_KIND_I4), pointer  :: l_ungriddedLBound(:),l_ungriddedUBound(:)
 
+    !TODO: need to consider the total widths
+
     if (present(rc)) rc = ESMF_SUCCESS
     
     ! access the advertised field
