@@ -138,7 +138,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                      :: dstDimids(MAX_VARDIMS)
     integer                      :: dstVarCount
     type(ESMF_MeshLoc)           :: dstmeshloc
-    integer, allocatable         :: dstdims(:)
     real(ESMF_KIND_R8)           :: dstMissingVal
     logical                      :: useDstCorner
     integer                      :: start1, count1, pos1
@@ -173,7 +172,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 #ifdef ESMF_NETCDF
     ! set log to flush after every message
-    call ESMF_LogSet(flush=.true., rc=status)
+     call ESMF_LogSet(flush=.true., rc=status)
     if (ESMF_LogFoundError(status, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, &
@@ -229,253 +228,273 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
              ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
-    ! Parse SrcVarName and dstVarName, store the variable names in array srcVarNames(:)
-    ! and dstVarNames(:), check if the number of variables matches.
+      ! Parse dstVarName, store the variable names in array dstVarNames(:)
       
-    ! Two phase, first find out how many source variables, secondly, store the variable
-    ! names in an array
+      ! Two phase, first find out how many variables, secondly, store the variable
+      ! names in an array
 
-    ! Check if the destination variable count matches with srcVarCount
-    pos1 = index(dstVarName(1:),",")
-    start1 = 1
-    count1=1
-    do while (pos1 > 0)
-       start1 = start1+pos1
-       count1 = count1+1
-       pos1 = index(dstVarName(start1:),",")
-    end do
-    dstVarCount = count1
+      pos1 = index(dstVarName(1:),",")
+      start1 = 1
+      count1=1
+      do while (pos1 > 0)
+        start1 = start1+pos1
+        count1 = count1+1
+        pos1 = index(dstVarName(start1:),",")
+      end do
+      dstVarCount = count1
 
-    allocate(dstVarRank(dstVarCount))
-    allocate(dstVarNames(dstVarCount))
-    allocate(dstVarDims(MAX_VARDIMS, dstVarCount))
+      allocate(dstVarRank(dstVarCount))
+      allocate(dstVarNames(dstVarCount))
+      allocate(dstVarDims(MAX_VARDIMS, dstVarCount))
       
-    pos1 = index(dstVarName(1:),",")
-    start1 = 1
-    count1=1
-    do while (pos1 > 0)
-       dstVarNames(count1) = dstVarName(start1:start1+pos1-2)
-       start1 = start1+pos1
-       pos1 = index(dstVarName(start1:),",")
-       count1 = count1+1
-    end do
-    dstVarNames(count1) = trim(dstVarName(start1:))
+      pos1 = index(dstVarName(1:),",")
+      start1 = 1
+      count1=1
+      do while (pos1 > 0)
+        dstVarNames(count1) = dstVarName(start1:start1+pos1-2)
+        start1 = start1+pos1
+        pos1 = index(dstVarName(start1:),",")
+        count1 = count1+1
+      end do
+      dstVarNames(count1) = trim(dstVarName(start1:))
 
-    do i=1,dstVarCount
-      if (localdstFileType == ESMF_FILEFORMAT_MOSAIC) then
-        dsttempname = trim(dstMosaic%tileDirectory)//trim(localOutputFile)//"."//trim(dstMosaic%tilenames(1))//".nc"
-        call checkVarInfo(trim(dsttempname), trim(dstVarNames(i)), dstVarExist, &
+      do i=1,dstVarCount
+        if (localdstFileType == ESMF_FILEFORMAT_MOSAIC) then
+          dsttempname = trim(dstMosaic%tileDirectory)//trim(localOutputFile)//"."//trim(dstMosaic%tilenames(1))//".nc"
+          call checkVarInfo(trim(dsttempname), trim(dstVarNames(i)), dstVarExist, &
                    localdstFileType, dstMeshVar, dstVarStr, &
                    dstVarRank(i), dstVarDims(:,i), dstDimids, &
                    useDstMask, dstMissingVal, &
                    vartype=dstVarType,  rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-        dstLocStr = 'face'
-      else
-        call checkVarInfo(trim(dstFile), trim(dstVarNames(i)), dstVarExist, &
+          dstLocStr = 'face'
+        else
+          call checkVarInfo(trim(dstFile), trim(dstVarNames(i)), dstVarExist, &
                    localdstFileType, dstMeshVar, dstVarStr, &
                    dstVarRank(i), dstVarDims(:,i), dstDimids, &
                    useDstMask, dstMissingVal, &
                    vartype=dstVarType, locStr=dstLocStr, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-      endif
-      if (i==1) then
-        if (localdstFileType == ESMF_FILEFORMAT_UGRID) then
-           if (dstLocStr .eq. 'node') then     
+        endif
+        if (i==1) then
+          if (localdstFileType == ESMF_FILEFORMAT_UGRID) then
+             if (dstLocStr .eq. 'node') then     
                 useDstCorner = .TRUE.
                 dstmeshloc=ESMF_MESHLOC_NODE
-           else
+             else
                 dstmeshloc=ESMF_MESHLOC_ELEMENT
-           endif 
-        endif
-        dstLocStrSave = dstLocStr
-      else
-         if (trim(dstLocStr) .ne. trim(dstLocStrSave)) then
-            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+             endif 
+          endif
+          dstLocStrSave = dstLocStr
+        else
+          if (trim(dstLocStr) .ne. trim(dstLocStrSave)) then
+             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
                  msg = " All the destination variables have to be on the same stagger location", &
                  ESMF_CONTEXT, rcToReturn=rc)
-            return
-         endif
-      endif
-    
-    ! For each variable, read in the coordinates and the variable value to
-    ! check the error, no need to read src variables, just the destination
-    ! variable and its coordinates
-    ! First create the grid object for the destination grid
-    if (i==1) then
-    ntiles = 1
-    nsize = 1
-    if (localDstFileType == ESMF_FILEFORMAT_GRIDSPEC) then
-        allocate(lonarray2D(dstVarDims(1,1), dstVarDims(2,1)), latarray2D(dstVarDims(1,1), dstVarDims(2,1)))
-        call GridSpecReadCoords(dstFile, dstVarStr, lonarray2D, latarray2D, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-    else if (localDstFileType == ESMF_FILEFORMAT_UGRID) then
-        allocate(lonarray1D(dstVarDims(1,1)),latarray1D(dstVarDims(1,1)))
-        call UGridReadCoords(dstFile, dstMeshVar, dstmeshloc, lonarray1D, &
-            latarray1D, rc=localrc) 
-        if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-    else !Cubed Sphere Mosaic
-        ntiles = dstMosaic%ntiles;
-        nsize = dstMosaic%nx;
-        allocate(lonarray2D(nsize,nsize*ntiles), latarray2D(ntiles*nsize,nsize*ntiles))
-        call MosaicReadCoords(dstMosaic, lonarray2D, latarray2D, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-           ESMF_ERR_PASSTHRU, &
-           ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
-    endif
-
-    if (localdstFiletype /= ESMF_FILEFORMAT_MOSAIC) then
-      if (dstVarRank(i) == 1) then
-         allocate(fptr1d(dstVarDims(1,i)))
-         ! UGRID only, read the variable
-         call ReadVar1D(dstfile, dstVarNames(i), fptr1d, localrc)
-        if (ESMF_LogFoundError(localrc, &
-           ESMF_ERR_PASSTHRU, &
-           ESMF_CONTEXT, rcToReturn=rc)) return
-      else if (dstVarRank(i) == 2) then
-         allocate(fptr2d(dstVarDims(1,i),dstVarDims(2,i)))
-         call readVar2D(dstfile, dstVarNames(i), fptr2d, localrc)
-      else if (dstVarRank(i) == 3) then
-         allocate(fptr3d(dstVarDims(1,i),dstVarDims(2,i), dstVarDims(3,i)))
-         call readVar3D(dstfile, dstVarNames(i), fptr3d, localrc)
-      else if (dstVarRank(i) == 4) then
-         allocate(fptr4d(dstVarDims(1,i), dstVarDims(2,i), dstVarDims(3,i), dstVarDims(4,i)))
-         call readVar4D(dstfile, dstVarNames(i), fptr4d, localrc)
-      endif
-     else
-      dstVarDims(1,i)=ntiles*nsize
-      dstVarDims(2,i)=nsize
-      do j=1,ntiles
-        dsttempname = trim(dstMosaic%tileDirectory)//trim(localOutputFile)//"."//trim(dstMosaic%tilenames(j))//".nc"
-        if (dstVarRank(i) == 2) then
-           if (j==1) allocate(fptr2d(nsize,nsize*ntiles))
-           call readVar2D(dsttempname, dstVarNames(i), fptr2d(:,(j-1)*nsize+1:j*nsize), localrc)
-        else if (dstVarRank(i) == 3) then
-           if (j==1) allocate(fptr3d(nsize, nsize, dstVarDims(3,i)*ntiles))
-           call readVar3D(dsttempname, dstVarNames(i), &
-                fptr3d(:,:,(j-1)*dstVarDims(3,i)+1:j*dstVarDims(3,i)), localrc)
-        else if (dstVarRank(i) == 4) then
-           if (j==1) allocate(fptr4d(ntiles*nsize, nsize, dstVarDims(3,i), dstVarDims(4,i)*ntiles))
-           call readVar4D(dsttempname, dstVarNames(i), &
-                fptr4d(:,:,:,(j-1)*dstVarDims(4,i)+1:j*dstVarDims(4,i)), localrc)
+             return
+          endif
         endif
-      enddo
-     endif
+    
+        ! For each variable, read in the coordinates and the variable value to
+        ! check the error.
+        if (i==1) then
+          ntiles = 1
+          nsize = dstVarDims(1,1)
+          if (localDstFileType == ESMF_FILEFORMAT_GRIDSPEC) then
+            allocate(lonarray2D(dstVarDims(1,1), dstVarDims(2,1)), &
+                   latarray2D(dstVarDims(1,1), dstVarDims(2,1)))
+            call GridSpecReadCoords(dstFile, dstVarStr, lonarray2D, latarray2D, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+               ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+          else if (localDstFileType == ESMF_FILEFORMAT_UGRID) then
+            allocate(lonarray1D(dstVarDims(1,1)),latarray1D(dstVarDims(1,1)))
+            call UGridReadCoords(dstFile, dstMeshVar, dstmeshloc, lonarray1D, &
+              latarray1D, rc=localrc) 
+            if (ESMF_LogFoundError(localrc, &
+               ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+          else !Cubed Sphere Mosaic
+            ! append the coordinates along the latitude dimension (2nd)
+            ntiles = dstMosaic%ntiles;
+            nsize = dstMosaic%nx;
+            allocate(lonarray2D(nsize,nsize*ntiles), latarray2D(nsize,nsize*ntiles))
+            call MosaicReadCoords(dstMosaic, lonarray2D, latarray2D, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          endif
+        endif
 
-     ! Create synthetic fields
-     if (dstVarRank(i) == 1) then       
-       allocate(synfptr1d(dstVarDims(1,i)))
-       !UGRID only
-       do j=1, dstVarDims(1,i)
-         synfptr1d(j)=two+dcos(latarray1D(j))**2*dcos(two*lonarray1D(j))
-       enddo
-     else if (dstVarRank(i) == 2) then  
-       allocate(synfptr2d(size(fptr2d,1),size(fptr2d,2)))
-       if (localdstfiletype == ESMF_FILEFORMAT_UGRID) then
-         do j=1,size(fptr2d,1)
-           do k=1,size(fptr2d,2)
-               synfptr2d(j,k)=two+(k-1)+dcos(latarray1D(j))**2*dcos(two*lonarray1D(j))
-           enddo
-         enddo
-       else
-         do j=1,size(fptr2d,1)
-           do k=1,size(fptr2d,2)
-              synfptr2d(j,k)=two+dcos(latarray2D(j,k))**2*dcos(two*lonarray2D(j,k))
-           enddo
-         enddo
-       endif
-     else if (dstVarRank(i) == 3) then
-       allocate(synfptr3d(size(fptr3d,1),size(fptr3d,2),size(fptr3d,3)))
-       if (localdstfiletype == ESMF_FILEFORMAT_UGRID) then
-         do j=1,size(fptr3d,1)
-           do k=1,size(fptr3d,2)
-             do l=1,size(fptr3d,3)
-               synfptr3d(j,k,l)= two+(k-1)+2*(l-1)+dcos(latarray1D(j))**2*dcos(two*lonarray1D(j))
-             enddo
-           enddo
-         enddo
-       else
-         do j=1,size(fptr3d,1)
-           do k=1,size(fptr3d,2)
-             do tile = 1, ntiles
-               base = two+dcos(latarray2D(j,k+nsize*(tile-1)))**2*dcos(two*lonarray2D(j,k+nsize*(tile-1)))
-               do l=dstVarDims(3,i)*(tile-1)+1, dstVarDims(3,i)*tile
-                 synfptr3d(j,k,l)= base+(l-1)-dstVarDims(3,i)*(tile-1)
-               enddo
-             enddo
-           enddo
-         enddo
-       endif
-     else if (dstVarRank(i) == 4) then
-       allocate(synfptr4d(size(fptr4d,1),size(fptr4d,2),size(fptr4d,3), size(fptr4d,4)))
-       do j=1,size(fptr4d,1)
-         do k=1,size(fptr4d,2)
-           do l=1,size(fptr4d,3)
-             do tile = 1, ntiles
-                base = two+dcos(latarray2D(j,k+nsize*(tile-1)))**2*dcos(two*lonarray2D(j,k+nsize*(tile-1)))+l-1
-                do m=dstVarDims(4,i)*(tile-1)+1, dstVarDims(4,i)*tile
-                  synfptr4d(j,k,l,m)= base+two*(m-dstVarDims(4,i)*(tile-1)-1)
+        if (localdstFiletype /= ESMF_FILEFORMAT_MOSAIC) then
+          if (dstVarRank(i) == 1) then
+            allocate(fptr1d(dstVarDims(1,i)))
+            ! UGRID only, read the variable
+            call ReadVar1D(dstfile, dstVarNames(i), fptr1d, localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          else if (dstVarRank(i) == 2) then
+            allocate(fptr2d(dstVarDims(1,i),dstVarDims(2,i)))
+            call readVar2D(dstfile, dstVarNames(i), fptr2d, localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          else if (dstVarRank(i) == 3) then
+            allocate(fptr3d(dstVarDims(1,i),dstVarDims(2,i), dstVarDims(3,i)))
+            call readVar3D(dstfile, dstVarNames(i), fptr3d, localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          else if (dstVarRank(i) == 4) then
+            allocate(fptr4d(dstVarDims(1,i), dstVarDims(2,i), dstVarDims(3,i), dstVarDims(4,i)))
+            call readVar4D(dstfile, dstVarNames(i), fptr4d, localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          endif
+        else
+          ! Cubed-Sphere multi-tile, append the tiles along its last dimension
+          dstVarDims(1,i)=nsize
+          dstVarDims(2,i)=nsize
+          do j=1,ntiles
+            dsttempname = trim(dstMosaic%tileDirectory)//trim(localOutputFile)//"."//trim(dstMosaic%tilenames(j))//".nc"
+            if (dstVarRank(i) == 2) then
+              if (j==1) allocate(fptr2d(nsize,nsize*ntiles))
+              call readVar2D(dsttempname, dstVarNames(i), fptr2d(:,(j-1)*nsize+1:j*nsize), localrc)
+              if (ESMF_LogFoundError(localrc, &
+                 ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return 
+           else if (dstVarRank(i) == 3) then
+              if (j==1) allocate(fptr3d(nsize, nsize, dstVarDims(3,i)*ntiles))
+              call readVar3D(dsttempname, dstVarNames(i), &
+                 fptr3d(:,:,(j-1)*dstVarDims(3,i)+1:j*dstVarDims(3,i)), localrc)
+              if (ESMF_LogFoundError(localrc, &
+                 ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return 
+            else if (dstVarRank(i) == 4) then
+              if (j==1) allocate(fptr4d(ntiles*nsize, nsize, dstVarDims(3,i), dstVarDims(4,i)*ntiles))
+              call readVar4D(dsttempname, dstVarNames(i), &
+                 fptr4d(:,:,:,(j-1)*dstVarDims(4,i)+1:j*dstVarDims(4,i)), localrc)
+              if (ESMF_LogFoundError(localrc, &
+                 ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return 
+            endif
+          enddo
+        endif
+
+        ! Create synthetic fields
+        ! The formular is 
+        ! data(i,j,k,l)=2.0+cos(lat(i,j))**2*cos(2*lon(i,j))+(k-1)+2*(l-1)
+        ! If it is a cubed-sphere grid, the data from the multiple tiles are appended along the l dimension
+        if (dstVarRank(i) == 1) then       
+          allocate(synfptr1d(dstVarDims(1,i)))
+          !UGRID only
+          do j=1, dstVarDims(1,i)
+            synfptr1d(j)=two+dcos(latarray1D(j))**2*dcos(two*lonarray1D(j))
+          enddo
+        else if (dstVarRank(i) == 2) then  
+          allocate(synfptr2d(size(fptr2d,1),size(fptr2d,2)))
+          if (localdstfiletype == ESMF_FILEFORMAT_UGRID) then
+            do j=1,size(fptr2d,1)
+              do k=1,size(fptr2d,2)
+                 synfptr2d(j,k)=two+(k-1)+dcos(latarray1D(j))**2*dcos(two*lonarray1D(j))
+              enddo
+            enddo
+          else
+            do j=1,size(fptr2d,1)
+              do k=1,size(fptr2d,2)
+                 synfptr2d(j,k)=two+dcos(latarray2D(j,k))**2*dcos(two*lonarray2D(j,k))
+              enddo
+            enddo
+          endif
+        else if (dstVarRank(i) == 3) then
+          allocate(synfptr3d(size(fptr3d,1),size(fptr3d,2),size(fptr3d,3)))
+          if (localdstfiletype == ESMF_FILEFORMAT_UGRID) then
+            do j=1,size(fptr3d,1)
+              do k=1,size(fptr3d,2)
+                do l=1,size(fptr3d,3)
+                  synfptr3d(j,k,l)= two+(k-1)+2*(l-1)+dcos(latarray1D(j))**2*dcos(two*lonarray1D(j))
                 enddo
-             enddo
-           enddo
-         enddo
-       enddo
-     endif
+              enddo
+            enddo
+          else
+            do j=1,size(fptr3d,1)
+              do k=1,size(fptr3d,2)
+                do tile = 1, ntiles
+                  base = two+dcos(latarray2D(j,k+nsize*(tile-1)))**2*dcos(two*lonarray2D(j,k+nsize*(tile-1)))
+                  do l=dstVarDims(3,i)*(tile-1)+1, dstVarDims(3,i)*tile
+                    synfptr3d(j,k,l)= base+(l-1)-dstVarDims(3,i)*(tile-1)
+                  enddo
+                enddo
+              enddo
+            enddo
+          endif
+        else if (dstVarRank(i) == 4) then
+          allocate(synfptr4d(size(fptr4d,1),size(fptr4d,2),size(fptr4d,3), size(fptr4d,4)))
+          do j=1,size(fptr4d,1)
+            do k=1,size(fptr4d,2)
+              do l=1,size(fptr4d,3)
+                do tile = 1, ntiles
+                  base = two+dcos(latarray2D(j,k+nsize*(tile-1)))**2*dcos(two*lonarray2D(j,k+nsize*(tile-1)))+l-1
+                  do m=dstVarDims(4,i)*(tile-1)+1, dstVarDims(4,i)*tile
+                    synfptr4d(j,k,l,m)= base+two*(m-dstVarDims(4,i)*(tile-1)-1)
+                  enddo
+                enddo
+              enddo
+            enddo
+          enddo
+        endif
 
-     !Calculate errors
+        !Calculate maximal and mean relative errors and the min/max value of the destination field
         totalerr = 0
         maxerr = 0
         totalcnt = 0
         mindata = 999.0
         maxdata = 0
         if (dstVarRank(i) == 1) then       
-           do j=1,size(fptr1d,1)
-              if (fptr1d(j) /= dstMissingVal) then
-                if (synfptr1d(j) /= 0) then
-                   relerror = abs(fptr1d(j)-synfptr1d(j))/synfptr1d(j)
+          do j=1,size(fptr1d,1)
+            if (fptr1d(j) /= dstMissingVal) then
+              if (synfptr1d(j) /= 0) then
+                 relerror = abs(fptr1d(j)-synfptr1d(j))/synfptr1d(j)
+              else
+                 relerror = abs(fptr1d(j)-synfptr1d(j))
+              endif
+              totalerr = totalerr+relerror
+              if (relerror > maxerr) maxerr = relerror
+              if (fptr1d(j) > maxdata) maxdata = fptr1d(j)
+              if (fptr1d(j) < mindata) mindata = fptr1d(j)
+              totalcnt = totalcnt+1    
+            endif
+          enddo
+        elseif (dstVarRank(i) == 2) then   
+          do j=1,size(fptr2d,1)
+            do k=1,size(fptr2d,2)
+              if (fptr2d(j,k) /= dstMissingVal) then
+                if (synfptr2d(j,k) /= 0) then
+                   relerror = abs(fptr2d(j,k)-synfptr2d(j,k))/synfptr2d(j,k)
                 else
-                   relerror = abs(fptr1d(j)-synfptr1d(j))
+                   relerror = abs(fptr2d(j,k)-synfptr2d(j,k))
                 endif
                 totalerr = totalerr+relerror
                 if (relerror > maxerr) maxerr = relerror
-                if (fptr1d(j) > maxdata) maxdata = fptr1d(j)
-                if (fptr1d(j) < mindata) mindata = fptr1d(j)
+                if (fptr2d(j,k) > maxdata) maxdata = fptr2d(j,k)
+                if (fptr2d(j,k) < mindata) mindata = fptr2d(j,k)
                 totalcnt = totalcnt+1    
               endif
-           enddo
-        elseif (dstVarRank(i) == 2) then   
-           do j=1,size(fptr2d,1)
-              do k=1,size(fptr2d,2)
-                if (fptr2d(j,k) /= dstMissingVal) then
-                  if (synfptr2d(j,k) /= 0) then
-                    relerror = abs(fptr2d(j,k)-synfptr2d(j,k))/synfptr2d(j,k)
-                  else
-                    relerror = abs(fptr2d(j,k)-synfptr2d(j,k))
-                  endif
-                  totalerr = totalerr+relerror
-                  if (relerror > maxerr) maxerr = relerror
-                  if (fptr2d(j,k) > maxdata) maxdata = fptr2d(j,k)
-                  if (fptr2d(j,k) < mindata) mindata = fptr2d(j,k)
-                  totalcnt = totalcnt+1    
-                endif
-             enddo   
-           enddo
+            enddo   
+          enddo
         elseif (dstVarRank(i) == 3) then   
-           do j=1,size(fptr3d,1)
-              do k=1,size(fptr3d,2)
-                do l=1,size(fptr3d,3)
+          do j=1,size(fptr3d,1)
+            do k=1,size(fptr3d,2)
+              do l=1,size(fptr3d,3)
                 if (fptr3d(j,k,l) /= dstMissingVal) then
                   if (synfptr3d(j,k,l) /= 0) then
-                    relerror = abs(fptr3d(j,k,l)-synfptr3d(j,k,l))/synfptr3d(j,k,l)
+                     relerror = abs(fptr3d(j,k,l)-synfptr3d(j,k,l))/synfptr3d(j,k,l)
                   else
-                    relerror = abs(fptr3d(j,k,l)-synfptr3d(j,k,l))
+                     relerror = abs(fptr3d(j,k,l)-synfptr3d(j,k,l))
                   endif
                   totalerr = totalerr+relerror
                   if (relerror > maxerr) maxerr = relerror
@@ -483,45 +502,46 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                   if (fptr3d(j,k,l) > maxdata) maxdata = fptr3d(j,k,l)
                   if (fptr3d(j,k,l) < mindata) mindata = fptr3d(j,k,l)
                 endif
-                enddo
-             enddo   
-           enddo
+              enddo
+            enddo   
+          enddo
         elseif (dstVarRank(i) == 4) then   
-           do j=1,size(fptr4d,1)
-              do k=1,size(fptr4d,2)
-                do l=1,size(fptr4d,3)
-                  do m=1,size(fptr4d,4)
-                    if (fptr4d(j,k,l,m) /= dstMissingVal) then
-                      if (synfptr4d(j,k,l,m) /= 0) then
-                        relerror = abs(fptr4d(j,k,l,m)-synfptr4d(j,k,l,m))/synfptr4d(j,k,l,m)
-                      else
-                        relerror = abs(fptr4d(j,k,l,m)-synfptr4d(j,k,l,m))
-                      endif
-                      totalerr = totalerr+relerror
-                      if (relerror > maxerr) maxerr = relerror
-                      totalcnt = totalcnt+1    
-                      if (fptr4d(j,k,l,m) > maxdata) maxdata = fptr4d(j,k,l,m)
-                      if (fptr4d(j,k,l,m) < mindata) mindata = fptr4d(j,k,l,m)
+          do j=1,size(fptr4d,1)
+            do k=1,size(fptr4d,2)
+              do l=1,size(fptr4d,3)
+                do m=1,size(fptr4d,4)
+                  if (fptr4d(j,k,l,m) /= dstMissingVal) then
+                    if (synfptr4d(j,k,l,m) /= 0) then
+                       relerror = abs(fptr4d(j,k,l,m)-synfptr4d(j,k,l,m))/synfptr4d(j,k,l,m)
+                    else
+                       relerror = abs(fptr4d(j,k,l,m)-synfptr4d(j,k,l,m))
                     endif
-                  enddo
-               enddo
-             enddo   
-           enddo
-         endif
+                    totalerr = totalerr+relerror
+                    if (relerror > maxerr) maxerr = relerror
+                    totalcnt = totalcnt+1    
+                    if (fptr4d(j,k,l,m) > maxdata) maxdata = fptr4d(j,k,l,m)
+                    if (fptr4d(j,k,l,m) < mindata) mindata = fptr4d(j,k,l,m)
+                  endif
+                enddo
+              enddo
+            enddo   
+          enddo
+        endif
 
-           meanerr = totalerr/totalcnt
-           
-           print *, " "
-           print *, "Variable Name           = ", trim(dstVarNames(i))
-           print *, " "
-           print *, "Value min: ", mindata, "    Value max: ", maxdata
-           print *, "Mean relative error     = ", meanerr
-           print *, "Maximum relative error  = ", maxerr
-           print *, " "
-       enddo
-     endif
-     rc = ESMF_SUCCESS
-     return        
+        meanerr = totalerr/totalcnt
+             
+        print *, " "
+        print *, "Variable Name           = ", trim(dstVarNames(i))
+        print *, " "
+        print *, "Value min: ", mindata, "    Value max: ", maxdata
+        print *, "Mean relative error     = ", meanerr
+        print *, "Maximum relative error  = ", maxerr
+        print *, " "
+      enddo
+      deallocate(dstVarRank, dstVarNames, dstVarDims)
+    endif
+    rc = ESMF_SUCCESS
+    return        
 #else
     call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, &
       msg="- ESMF_NETCDF not defined when lib was compiled", &
@@ -531,6 +551,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   end subroutine ESMF_FileRegridCheck
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "GridSpecReadCoords"
   subroutine GridSpecReadCoords(filename, coordsname, lonarray, latarray, rc)
 
   character(len=*), intent(in) :: filename
@@ -560,7 +582,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     pos = INDEX(coordsname, ' ')
     varnames(1)=coordsname(1:pos-1)
     varnames(2)=coordsname(pos+1:)
-      
     do i=1,2
        ncStatus = nf90_inq_varid(gridid, varnames(i), varid)
        errmsg = 'Coordinate variable '//trim(varnames(i))//' does not exist'
@@ -586,9 +607,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                rc)) return
        enddo
        if (ndims == 1) then 
-            allocate(buffer(dims(1)))
-            ncStatus = nf90_get_var(gridid, varid, buffer)
-            errmsg = 'Read variable failed: '//trim(varnames(i))
+           allocate(buffer(dims(1)))
+           ncStatus = nf90_get_var(gridid, varid, buffer)
+           errmsg = 'Read variable failed: '//trim(varnames(i))
            if (CDFCheckError (ncStatus, &
                ESMF_METHOD, &
                ESMF_SRCLINE,&
@@ -600,26 +621,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
              enddo
            else
              do j=1,size(latarray, 1)
-               lonarray(j,:)=buffer
+               latarray(j,:)=buffer
              enddo
            endif
            deallocate(buffer)
        else
-            if (i==1) then
+           if (i==1) then
                ncStatus = nf90_get_var(gridid, varid, lonarray)
-            else
+           else
                ncStatus = nf90_get_var(gridid, varid, latarray)
-            endif
-            errmsg = 'Read variable failed: '//trim(varnames(i))
+           endif
+           errmsg = 'Read variable failed: '//trim(varnames(i))
            if (CDFCheckError (ncStatus, &
                ESMF_METHOD, &
                ESMF_SRCLINE,&
                errmsg, &
                rc)) return
        endif
-       latarray = latarray*d2r
-       lonarray = lonarray*d2r
     enddo  
+    latarray = latarray*d2r
+    lonarray = lonarray*d2r
     rc = ESMF_SUCCESS
     return
 #else
@@ -630,6 +651,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #endif
   end subroutine GridSpecReadCoords
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "UGridReadCoords"
   subroutine UGridReadCoords(filename, meshvar, meshloc, lonarray, latarray, rc)
 
   character(len=*), intent(in) :: filename
@@ -745,6 +768,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #endif
   end subroutine UGridReadCoords
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "MosaicReadCoords"
   subroutine MosaicReadCoords(mosaic, lonarray, latarray, rc)
 
   type(ESMF_Mosaic)            :: mosaic
@@ -777,6 +802,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
     enddo  
+    latarray = latarray*d2r
+    lonarray = lonarray*d2r
     rc = ESMF_SUCCESS
     return
 #else
@@ -787,6 +814,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #endif
   end subroutine MosaicReadCoords
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ReadVar1D"
   subroutine readVar1D(filename, varname, farray, rc)
 
   character(len=*), intent(in) :: filename
@@ -835,6 +864,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #endif
   end subroutine readVar1D
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ReadVar2D"
   subroutine readVar2D(filename, varname, farray, rc)
 
   character(len=*), intent(in) :: filename
@@ -883,6 +914,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #endif
   end subroutine readVar2D
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ReadVar3D"
   subroutine readVar3D(filename, varname, farray, rc)
 
   character(len=*), intent(in) :: filename
@@ -931,6 +964,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #endif
   end subroutine readVar3D
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ReadVar4D"
   subroutine readVar4D(filename, varname, farray, rc)
 
   character(len=*), intent(in) :: filename
