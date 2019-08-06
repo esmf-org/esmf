@@ -2766,6 +2766,7 @@ module NUOPC_Driver
     activeClock = internalClock
     
     ! execute all connectors from driver (parent) to its children
+    !TODO: see ticket #3614786 about making this connector execution conditional
     i=0       ! from parent
     phase=1   ! use phase 1
     do j=1, is%wrap%modelCount
@@ -2953,6 +2954,7 @@ module NUOPC_Driver
     endif
 
     ! execute all connectors to driver (parent) from its children
+    !TODO: see ticket #3614786 about making this connector execution conditional
     j=0       ! to parent
     phase=1   ! use phase 1
     do i=1, is%wrap%modelCount
