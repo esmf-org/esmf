@@ -3448,7 +3448,7 @@ module NUOPC_Base
 ! !INTERFACE:
   ! Private name; call using NUOPC_Realize()
   subroutine NUOPC_RealizeTransfer(state, fieldName, typekind, gridToFieldMap, &
-    ungriddedLBound, ungriddedUBound, field, rc)
+    ungriddedLBound, ungriddedUBound, totalLWidth, totalUWidth, field, rc)
 ! !ARGUMENTS:
     type(ESMF_State)                                :: state
     character(*),             intent(in)            :: fieldName
@@ -3456,6 +3456,8 @@ module NUOPC_Base
     integer, target,          intent(in),  optional :: gridToFieldMap(:)
     integer, target,          intent(in),  optional :: ungriddedLBound(:)
     integer, target,          intent(in),  optional :: ungriddedUBound(:)
+    integer,                  intent(in),  optional :: totalLWidth(:)
+    integer,                  intent(in),  optional :: totalUWidth(:)
     type(ESMF_Field),         intent(out), optional :: field
     integer,                  intent(out), optional :: rc
 ! !DESCRIPTION:
@@ -3482,15 +3484,44 @@ module NUOPC_Base
 !   \item[{[gridToFieldMap]}]
 !     The mapping of grid/mesh dimensions against field dimensions. The argument
 !     is of rank 1 and with a size of dimCount. The elements correspond to the
-!     grid/mesh elements in order, and each entry identifies the field dimension
-!     the respective grid/mesh dimension is associated with.
+!     grid/mesh elements in order, and associates it with the indicated 
+!     field dimension. Only entries between 1 and the field rank are allowed.
+!     There must be no duplicate entries in {\tt gridToFieldMap}.
 !     By default use the {\tt gridToFieldMap} of the connected provider field.
 !   \item[{[ungriddedLBound]}]
-!     Lower bounds of the ungridded dimensions of the field.
+!     Lower bounds of the ungridded dimensions of the field. The number of
+!     elements defines the number of ungridded dimensions of the field and 
+!     must be consistent with {\tt ungriddedUBound}.
 !     By default use the {\tt ungriddedLBound} of the connected provider field.
 !   \item[{[ungriddedUBound]}]
-!     Upper bounds of the ungridded dimensions of the field.
+!     Upper bounds of the ungridded dimensions of the field. The number of
+!     elements defines the number of ungridded dimensions of the field and 
+!     must be consistent with {\tt ungriddedLBound}.
 !     By default use the {\tt ungriddedLBound} of the connected provider field.
+!   \item[{[totalLWidth]}]
+!     {\em This argument is only supported for fields defined on
+!     {\tt ESMF\_Grid}.}
+!     The number elements outside the lower bound of the exclusive region.
+!     The argument is of rank 1 and with a size of dimCount, the number of
+!     gridded dimensions of the field. The ordering of the dimensions is that
+!     of the field (considering {\tt gridToFieldMap}).
+!     By default a zero vector is used, resulting in no elements outside the
+!     exclusive region.
+!     If the same {\tt totalLWidth} as that of the connected provider field is
+!     desired, the information must first be extracted from the transferred
+!     {\tt TotalLWidth} Attribute and passed in explicitly.
+!   \item[{[totalUWidth]}]
+!     {\em This argument is only supported for fields defined on
+!     {\tt ESMF\_Grid}.}
+!     The number elements outside the upper bound of the exclusive region.
+!     The argument is of rank 1 and with a size of dimCount, the number of
+!     gridded dimensions of the field. The ordering of the dimensions is that
+!     of the field (considering {\tt gridToFieldMap}).
+!     By default a zero vector is used, resulting in no elements outside the
+!     exclusive region.
+!     If the same {\tt totalUWidth} as that of the connected provider field is
+!     desired, the information must first be extracted from the transferred
+!     {\tt totalUWidth} Attribute and passed in explicitly.
 !   \item[{[field]}]
 !     Returns the completed field that was realized by this method.
 !   \item[{[rc]}]
@@ -3510,8 +3541,6 @@ module NUOPC_Base
     type(ESMF_TypeKind_Flag)        :: tkf
     integer(ESMF_KIND_I4), pointer  :: l_gridToFieldMap(:)
     integer(ESMF_KIND_I4), pointer  :: l_ungriddedLBound(:),l_ungriddedUBound(:)
-
-    !TODO: need to consider the total widths
 
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -3626,6 +3655,7 @@ module NUOPC_Base
         gridToFieldMap=l_gridToFieldMap, typekind=tkf, &
         ungriddedLBound=l_ungriddedLBound, &
         ungriddedUBound=l_ungriddedUBound, &
+        totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out
@@ -3634,7 +3664,8 @@ module NUOPC_Base
     else
       ! create field with no ungridded dims
       call ESMF_FieldEmptyComplete(fieldAdv, &
-        gridToFieldMap=l_gridToFieldMap, typekind=tkf, rc=rc)
+        gridToFieldMap=l_gridToFieldMap, typekind=tkf, &
+        totalLWidth=totalLWidth, totalUWidth=totalUWidth, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out
     endif
