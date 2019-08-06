@@ -1593,7 +1593,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-
+           
            call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
            if (ESMF_LogFoundError(localrc, &
                ESMF_ERR_PASSTHRU, &
@@ -1857,36 +1857,34 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (localDeCount > 0) then
-        call ESMF_FieldGet(dstField, array=dstArray, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-           ESMF_ERR_PASSTHRU, &
-           ESMF_CONTEXT, rcToReturn=rc)) return
+      do j=0,localDeCount-1
         !! initialize the destination field with the _FillValue
         if (dstVarRank(i) == 1) then       
-                call ESMF_ArrayGet(dstArray, farrayptr = fptr1d, rc=localrc)
+                call ESMF_FieldGet(dstField, localDe=j, farrayptr = fptr1d, rc=localrc)
                 if (ESMF_LogFoundError(localrc, &
                    ESMF_ERR_PASSTHRU, &
                    ESMF_CONTEXT, rcToReturn=rc)) return
                 fptr1d(:)=dstMissingVal
         else if (dstVarRank(i) == 2) then  
-                call ESMF_ArrayGet(dstArray, farrayptr = fptr2d, rc=localrc)
+                call ESMF_FieldGet(dstField, localDe=j, farrayptr = fptr2d, rc=localrc)
                 if (ESMF_LogFoundError(localrc, &
                    ESMF_ERR_PASSTHRU, &
                    ESMF_CONTEXT, rcToReturn=rc)) return
                 fptr2d(:,:)=dstMissingVal
         else if (dstVarRank(i) == 3) then
-                call ESMF_ArrayGet(dstArray, farrayptr = fptr3d, rc=localrc)
+                call ESMF_FieldGet(dstField, localDe=j, farrayptr = fptr3d, rc=localrc)
                 if (ESMF_LogFoundError(localrc, &
                    ESMF_ERR_PASSTHRU, &
                    ESMF_CONTEXT, rcToReturn=rc)) return
                 fptr3d(:,:,:)=dstMissingVal
         else if (dstVarRank(i) == 4) then
-                call ESMF_ArrayGet(dstArray, farrayptr = fptr4d, rc=localrc)
+                call ESMF_FieldGet(dstField, localDe=j, farrayptr = fptr4d, rc=localrc)
                 if (ESMF_LogFoundError(localrc, &
                    ESMF_ERR_PASSTHRU, &
                    ESMF_CONTEXT, rcToReturn=rc)) return
                 fptr4d(:,:,:,:)=dstMissingVal
         endif
+      enddo
     endif
 
     !! Call regrid
