@@ -136,7 +136,7 @@ contains
     tileCount, minIndexPTile, maxIndexPTile, deToTileMap, indexCountPDe, &
     delayout, deCount, localDeCount, ssiLocalDeCount, localDeToDeMap, &
     localDeList, &    ! DEPRECATED ARGUMENT
-    name, rc)
+    name, vm, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),              intent(in)            :: array
@@ -175,6 +175,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(out), optional :: localDeToDeMap(:)
     integer,                       intent(out), optional :: localDeList(:)     ! DEPRECATED ARGUMENT
     character(len=*),              intent(out), optional :: name
+    type(ESMF_VM),                 intent(out), optional :: vm
     integer,                       intent(out), optional :: rc  
 !         
 ! !STATUS:
@@ -188,7 +189,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !                 better describes the returned information.
 !                 This was pointed out by user request.
 ! \item[8.0.0] Added argument {\tt ssiLocalDeCount} to support DE sharing
-!              between PETs on the same single system image (SSI).
+!              between PETs on the same single system image (SSI).\newline
+!              Added argument {\tt vm} in order to offer information about the
+!              VM on which the Array was created.
 ! \end{description}
 ! \end{itemize}
 !         
@@ -342,6 +345,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \apiDeprecatedArgWithReplacement{localDeToDeMap}
 !   \item [{[name]}]
 !     Name of the Array object.
+!   \item [{[vm}]
+!     The VM on which the Array object was created.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -538,6 +543,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Special call to get name out of Base class
     if (present(name)) then
       call c_ESMC_GetName(array, name, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    
+    ! Special call to get vm out of Base class
+    if (present(vm)) then
+      call c_ESMC_GetVM(array, vm, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
