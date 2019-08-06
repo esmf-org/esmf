@@ -4450,7 +4450,7 @@ module NUOPC_Connector
           if (upE%srcVM==srcVM .and. upE%dstVM==dstVM) then
             createNewPacket = .false. ! no new packet needed
             exit  ! break out of the search loop
-#if 1
+#if 0
 else
 if (upE%srcVM/=srcVM) then
 write(msgString,*) "(upE%srcVM/=srcVM)"
@@ -4479,7 +4479,7 @@ endif
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-#if 1
+#if 0
 write(msgString,*) "srcLocalPetList=", srcLocalPetList
 call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4509,7 +4509,7 @@ if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           if (srcLocalPetList(j)>-1) srcPetCount=srcPetCount+1
           if (dstLocalPetList(j)>-1) dstPetCount=dstPetCount+1
         enddo
-#if 1
+#if 0
 write(msgString,*) "srcPetCount=", srcPetCount, " dstPetCount=", dstPetCount
 call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4531,7 +4531,7 @@ if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         if (ESMF_LogFoundAllocError(stat, msg="allocating sendToPets", &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
         if (k>0) upE%sendToPets(1:k) = auxList(1:k)  ! transfer the elements
-#if 1
+#if 0
 write(msgString,*) "upE%sendToPets=", upE%sendToPets
 call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4548,7 +4548,7 @@ if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             endif
           enddo
         endif
-#if 1
+#if 0
 write(msgString,*) "upE%recvFromPet=", upE%recvFromPet
 call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4662,7 +4662,7 @@ if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           attnestflag=ESMF_ATTNEST_ON, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-#if 1
+#if 0
 write(msgString,*) "filled timestamp buffer for field: ",j,jj,": ", upE%sendBuffer(:,j)
 call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4672,7 +4672,7 @@ if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       ! post all the sends
       bufferPtr => upE%sendBuffer(:,1)
       do i=1, size(upE%sendToPets)
-#if 1
+#if 0
 write(msgString,*) "send buffer: ",upE%sendBuffer
 call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4696,7 +4696,7 @@ if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     upE=>updatePackets
     do while (associated(upE))
       if (upE%recvFromPet > -1) then
-#if 1
+#if 0
 write(msgString,*) "recv buffer: ",upE%recvBuffer
 call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4705,7 +4705,7 @@ if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         ! fill in the reiceived timestamps
         do j=1, upE%fieldCount
           jj = upE%fieldIndex(j)
-#if 1
+#if 0
 write(msgString,*) "update timestamp for field: ",j,jj,": ", upE%recvBuffer(:,j)
 call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
