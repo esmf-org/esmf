@@ -537,6 +537,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         print *, "Mean relative error     = ", meanerr
         print *, "Maximum relative error  = ", maxerr
         print *, " "
+
+        if (dstVarRank(i) == 1) deallocate(fptr1d, synfptr1d)
+        if (dstVarRank(i) == 2) deallocate(fptr2d, synfptr2d)
+        if (dstVarRank(i) == 3) deallocate(fptr3d, synfptr3d)
+        if (dstVarRank(i) == 4) deallocate(fptr4d, synfptr4d)
       enddo
       deallocate(dstVarRank, dstVarNames, dstVarDims)
     endif
