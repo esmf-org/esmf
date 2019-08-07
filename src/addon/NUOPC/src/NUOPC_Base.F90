@@ -3449,7 +3449,8 @@ module NUOPC_Base
   ! Private name; call using NUOPC_Realize()
   subroutine NUOPC_RealizeTransfer(state, fieldName, typekind, gridToFieldMap, &
     ungriddedLBound, ungriddedUBound, totalLWidth, totalUWidth, &
-    realizeOnlyConnected, removeNotConnected, realizeOnlyNotShared, field, rc)
+    realizeOnlyConnected, removeNotConnected, realizeOnlyNotShared, &
+    realizeOnlyNotComplete, field, rc)
 ! !ARGUMENTS:
     type(ESMF_State)                                :: state
     character(*),             intent(in)            :: fieldName
@@ -3462,6 +3463,7 @@ module NUOPC_Base
     logical,                  intent(in),  optional :: realizeOnlyConnected
     logical,                  intent(in),  optional :: removeNotConnected
     logical,                  intent(in),  optional :: realizeOnlyNotShared
+    logical,                  intent(in),  optional :: realizeOnlyNotComplete
     type(ESMF_Field),         intent(out), optional :: field
     integer,                  intent(out), optional :: rc
 ! !DESCRIPTION:
@@ -3537,9 +3539,14 @@ module NUOPC_Base
 !     and a runtime error will be returned otherwise.
 !     The default is {\tt .true.}.
 !   \item[{[realizeOnlyNotShared]}]
-!     If set to {\tt .false.}, realize the specified field irregardless of the
+!     If set to {\tt .false.}, realize the specified field irregardless of its
 !     shared status. If set to {\tt .true.}, only a field that has 
 !     "ShareStatusField" set to "not shared" will be realized.
+!     The default is {\tt .true.}.
+!   \item[{[realizeOnlyNotComplete]}]
+!     If set to {\tt .false.}, realize the specified field irregardless of its
+!     complete status. If set to {\tt .true.}, only a field that has not yet
+!     been completed will be realized.
 !     The default is {\tt .true.}.
 !   \item[{[field]}]
 !     Returns the completed field that was realized by this method. An invalid
@@ -3565,7 +3572,9 @@ module NUOPC_Base
     logical                         :: l_realizeOnlyConnected
     logical                         :: l_removeNotConnected
     logical                         :: l_realizeOnlyNotShared
-    logical                         :: isConnected, isSharedField
+    logical                         :: l_realizeOnlyNotComplete
+    logical                         :: isComplete, isConnected, isSharedField
+    type(ESMF_FieldStatus_Flag)     :: fieldStatus
 
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -3580,6 +3589,10 @@ module NUOPC_Base
     l_realizeOnlyNotShared = .true.   ! defaut
     if (present(realizeOnlyNotShared)) &
       l_realizeOnlyNotShared = realizeOnlyNotShared
+      
+    l_realizeOnlyNotComplete = .true.   ! defaut
+    if (present(realizeOnlyNotComplete)) &
+      l_realizeOnlyNotComplete = realizeOnlyNotComplete
       
     if (present(field)) nullify(field%ftypep)
     
@@ -3596,29 +3609,33 @@ module NUOPC_Base
     ! access the advertised field
     call ESMF_StateGet(state, itemName=fieldName, field=fieldAdv, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME, rcToReturn=rc)) &
-      return  ! bail out
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     
-    ! determine connected and shared status
+    ! determine complete status
+    call ESMF_FieldGet(fieldAdv, status=fieldStatus, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    isComplete=.false. ! initilize
+    if (fieldStatus==ESMF_FIELDSTATUS_COMPLETE) isComplete=.true.
+    ! determine connected status
     isConnected = NUOPC_IsConnected(fieldAdv, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME, rcToReturn=rc)) &
-      return  ! bail out
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    ! determine shared status
     isSharedField = .false. ! initialize
     call NUOPC_GetAttribute(fieldAdv, name="ShareStatusField", &
       value=value, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME, rcToReturn=rc)) &
-      return  ! bail out
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     if (trim(value)=="shared") isSharedField = .true.
     
     ! early return conditions
+    if (l_realizeOnlyNotComplete .and. isComplete) return  ! early return
     if (.not.isConnected) then
       if (l_removeNotConnected) then
         call ESMF_StateRemove(state, (/fieldName/), rc=localrc)
         if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=FILENAME, rcToReturn=rc)) &
-          return  ! bail out
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       endif
       if (l_realizeOnlyConnected) then
         return  ! early return
@@ -3636,7 +3653,7 @@ module NUOPC_Base
         convention="NUOPC", purpose="Instance", &
         value=tk, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME)) return  ! bail out
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       tkf=tk  ! convert integer into actual TypeKind_Flag
     endif
 
@@ -3649,7 +3666,7 @@ module NUOPC_Base
         itemCount=itemCount, isPresent=isPresent, &
         attnestflag=ESMF_ATTNEST_ON, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME)) return  ! bail out
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       if (.not. isPresent) then
         call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
           msg="Cannot realize field "//trim(fieldName)//&
@@ -3670,7 +3687,7 @@ module NUOPC_Base
       if (ESMF_LogFoundError(rcToCheck=localrc, &
         msg="Cannot realize field "//trim(fieldName)// &
         " because error obtaining GridToFieldMap attribute.", &
-        line=__LINE__, file=FILENAME)) return  ! bail out
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     endif
 
     ! UngriddedLBound, UngriddedUBound
@@ -3679,7 +3696,7 @@ module NUOPC_Base
       itemCount=ulbCount, isPresent=isPresent, &
       attnestflag=ESMF_ATTNEST_ON, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     if ((isPresent .and. ulbCount > 0) .or. present(ungriddedLBound) &
       .or. present(ungriddedUBound)) then
       if (isPresent .and. ulbCount > 0) then
@@ -3688,7 +3705,7 @@ module NUOPC_Base
           itemCount=uubCount, isPresent=isPresent, &
           attnestflag=ESMF_ATTNEST_ON, rc=localrc)
         if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=FILENAME)) return  ! bail out
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
         if (.not. isPresent .or. ulbCount /= uubCount) then
           call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
             msg="Field "//trim(fieldName)//&
@@ -3711,7 +3728,7 @@ module NUOPC_Base
           convention="NUOPC", purpose="Instance", &
           attnestflag=ESMF_ATTNEST_ON, rc=localrc)
         if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=FILENAME)) return  ! bail out
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       endif
       if (present(ungriddedUBound)) then
         l_ungriddedUBound => ungriddedUBound
@@ -3726,7 +3743,7 @@ module NUOPC_Base
           convention="NUOPC", purpose="Instance", &
           attnestflag=ESMF_ATTNEST_ON, rc=localrc)
         if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=FILENAME)) return  ! bail out
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       endif
       ! create field with ungridded dims
       call ESMF_FieldEmptyComplete(fieldAdv, &
@@ -3736,7 +3753,7 @@ module NUOPC_Base
         totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
         rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME)) return  ! bail out
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       if (.not.present(ungriddedLBound)) deallocate(l_ungriddedLBound)
       if (.not.present(ungriddedUBound)) deallocate(l_ungriddedUBound)
     else
@@ -3745,7 +3762,7 @@ module NUOPC_Base
         gridToFieldMap=l_gridToFieldMap, typekind=tkf, &
         totalLWidth=totalLWidth, totalUWidth=totalUWidth, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME)) return  ! bail out
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     endif
     if (.not.present(gridToFieldMap)) deallocate(l_gridToFieldMap)
     
