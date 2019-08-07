@@ -16,6 +16,7 @@ system. The second method is based on
 
 
 \subsection{esmf.mk method}
+\label{EsmfMkMethod}
 
 Every ESMF installation provides a file named {\tt esmf.mk} that contains the 
 information needed to build a user application gainst the installation. The
@@ -137,4 +138,12 @@ esmc_UserApplication:
 
 An ESMF CMake find file is located at: \textit{<ESMF source directory>/cmake/FindESMF.cmake}
 
-The find file will parse the \textit{esmf.mk} file created following a successful ESMF build. The module sets \textit{esmf.mk} variables as global CMake variables. Please see the find file's docstring for usage instructions.
+The find file will parse the \textit{esmf.mk} file created following a successful
+ESMF build. (See \ref{EsmfMkMethod} for a description of the \textit{esmf.mk} file.)
+The CMake module sets \textit{esmf.mk} variables as global CMake variables. When
+using the find file, {\tt ESMFMKFILE} must be set to the filepath of \textit{esmf.mk}.
+If this is NOT set, then {\tt ESMF\_FOUND} will always be {\tt FALSE}. If {\tt ESMFMKFILE}
+exists, then {\tt ESMF\_FOUND=TRUE} and all ESMF makefile variables will be set
+in the global scope. Optionally, set {\tt ESMF\_MKGLOBALS} to a string list to
+filter makefile variables. For example, to globally scope only {\tt ESMF\_LIBSDIR}
+and {\tt ESMF\_APPSDIR} variables, use this CMake command in \textit{CMakeLists.txt}: \verb{set(ESMF_MKGLOBALS "LIBSDIR" "APPSDIR")}
