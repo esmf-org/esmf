@@ -3513,9 +3513,6 @@ module NUOPC_Base
 !     of the field (considering {\tt gridToFieldMap}).
 !     By default a zero vector is used, resulting in no elements outside the
 !     exclusive region.
-!     If the same {\tt totalLWidth} as that of the connected provider field is
-!     desired, the information must first be extracted from the transferred
-!     {\tt TotalLWidth} Attribute and passed in explicitly.
 !   \item[{[totalUWidth]}]
 !     {\em This argument is only supported for fields defined on
 !     {\tt ESMF\_Grid}.}
@@ -3525,9 +3522,6 @@ module NUOPC_Base
 !     of the field (considering {\tt gridToFieldMap}).
 !     By default a zero vector is used, resulting in no elements outside the
 !     exclusive region.
-!     If the same {\tt totalUWidth} as that of the connected provider field is
-!     desired, the information must first be extracted from the transferred
-!     {\tt totalUWidth} Attribute and passed in explicitly.
 !   \item[{[realizeOnlyConnected]}]
 !     If set to {\tt .false.}, realize the specified field irregardless of the
 !     connected status. If set to {\tt .true.}, only a connected field will be
