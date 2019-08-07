@@ -2213,6 +2213,7 @@ module NUOPC_Driver
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
         if (present(execFlag)) execFlag = .true. ! at least this model executed
+#if 0
         if (.not.internalflag) then
           ! ensure that Attributes are consistent across all PETs
           !
@@ -2244,6 +2245,7 @@ module NUOPC_Driver
               return  ! bail out
           endif
         endif
+#endif
       endif
     enddo
   end subroutine
