@@ -3623,10 +3623,29 @@ module NUOPC_Connector
     call ESMF_FieldGet(providerField, array=array, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return
+#if 0
     ! obtain the vm from acceptor to create the new field on the same vm
+!-> This way both shared and non-shared fields will be created on the same
+!-> VM (of the acceptor side). However, it also means that if the acceptor side
+!-> covers more PETs than the provider side, those additional PETs will be 
+!-> receivers in the Timestamp propagation - which is undesirable in general
+!-> for shared fields that do not have actual Field instances on those PETs.
     call ESMF_FieldGet(acceptorField, vm=vm, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return
+#else
+    ! obtain the vm from provider to create the new field on the same vm
+!-> This way shared fields will only be receivers of the Timestamp propagation
+!-> on actual PETs. This is typically what you expect for a shared field.
+!-> However, it currently breaks the Timestamp propagation code via 
+!-> UpdatePackets in case there are also non-shared fields handled by the same
+!-> Connector. Those fields are naturally created under the acceptor side VM, 
+!-> because they might actually span the whole acceptor side with 
+!-> redistribution.
+    call ESMF_FieldGet(providerField, vm=vm, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return
+#endif
     !TODO: make sure that this FieldCreate() sets total widths correctly
     if (fieldDimCount - gridDimCount > 0) then
       acceptorField=ESMF_FieldCreate(grid=grid, array=array, &
@@ -3729,10 +3748,29 @@ module NUOPC_Connector
     call ESMF_FieldGet(providerField, array=array, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return
+#if 0
     ! obtain the vm from acceptor to create the new field on the same vm
+!-> This way both shared and non-shared fields will be created on the same
+!-> VM (of the acceptor side). However, it also means that if the acceptor side
+!-> covers more PETs than the provider side, those additional PETs will be 
+!-> receivers in the Timestamp propagation - which is undesirable in general
+!-> for shared fields that do not have actual Field instances on those PETs.
     call ESMF_FieldGet(acceptorField, vm=vm, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return
+#else
+    ! obtain the vm from provider to create the new field on the same vm
+!-> This way shared fields will only be receivers of the Timestamp propagation
+!-> on actual PETs. This is typically what you expect for a shared field.
+!-> However, it currently breaks the Timestamp propagation code via 
+!-> UpdatePackets in case there are also non-shared fields handled by the same
+!-> Connector. Those fields are naturally created under the acceptor side VM, 
+!-> because they might actually span the whole acceptor side with 
+!-> redistribution.
+    call ESMF_FieldGet(providerField, vm=vm, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return
+#endif
     !TODO: make sure that this FieldCreate() sets total widths correctly
     if (fieldDimCount - gridDimCount > 0) then
       acceptorField=ESMF_FieldCreate(mesh=mesh, array=array, &
