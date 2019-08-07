@@ -2698,8 +2698,7 @@ module NUOPC_Connector
             endif
           endif
           ! query additional provider information
-          call ESMF_FieldGet(providerField, mesh=mesh, dimCount=fieldDimCount,&
-            rc=rc)
+          call ESMF_FieldGet(providerField, dimCount=fieldDimCount, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           call ESMF_DistGridGet(providerDG, dimCount=gridDimCount, rc=rc)
@@ -2707,7 +2706,7 @@ module NUOPC_Connector
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           allocate(gridToFieldMap(gridDimCount),stat=stat)
           if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-            msg="Allocation of internal ungriddedLBound failed.", &
+            msg="Allocation of internal gridToFieldMap failed.", &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
           call ESMF_FieldGet(providerField, gridToFieldMap=gridToFieldMap, &
@@ -2862,6 +2861,39 @@ module NUOPC_Connector
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           endif
+          ! query additional provider information
+          call ESMF_FieldGet(providerField, dimCount=fieldDimCount, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call ESMF_DistGridGet(providerDG, dimCount=gridDimCount, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          allocate(gridToFieldMap(gridDimCount),stat=stat)
+          if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+            msg="Allocation of internal gridToFieldMap failed.", &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+          call ESMF_FieldGet(providerField, gridToFieldMap=gridToFieldMap, &
+            rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (fieldDimCount - gridDimCount > 0) then
+            ! query ungridded dim bounds
+            allocate(ungriddedLBound(fieldDimCount-gridDimCount),stat=stat)
+            if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+              msg="Allocation of internal ungriddedLBound failed.", &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+            allocate(ungriddedUBound(fieldDimCount-gridDimCount),stat=stat)
+            if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+              msg="Allocation of internal ungriddedUBound failed.", &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+            call ESMF_FieldGet(providerField, ungriddedLBound=ungriddedLBound, &
+              ungriddedUBound=ungriddedUBound, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
           ! transfer additional provider info in form of attributes
           tk = tkf  ! convert TypeKind_Flag to integer
           call ESMF_AttributeSet(acceptorField, &
@@ -2872,6 +2904,49 @@ module NUOPC_Connector
             line=__LINE__, &
             file=FILENAME)) &
             return  ! bail out
+          ! bring over gridToFieldMap as attributes
+          call ESMF_AttributeSet(acceptorField, &
+            name="GridToFieldMap", valueList=gridToFieldMap, &
+            convention="NUOPC", purpose="Instance", &
+            attnestflag=ESMF_ATTNEST_ON, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+          if (fieldDimCount - gridDimCount > 0) then
+            ! bring over ungridded dim bounds as attributes
+            call ESMF_AttributeSet(acceptorField, &
+              name="UngriddedLBound", valueList=ungriddedLBound, &
+              convention="NUOPC", purpose="Instance", &
+              attnestflag=ESMF_ATTNEST_ON, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+            call ESMF_AttributeSet(acceptorField, &
+              name="UngriddedUBound", valueList=ungriddedUBound, &
+              convention="NUOPC", purpose="Instance", &
+              attnestflag=ESMF_ATTNEST_ON, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+          endif
+          ! clean-up
+          deallocate(gridToFieldMap, stat=rc)
+          if (ESMF_LogFoundDeallocError(rc, &
+            msg="Deallocating gridToFieldMap", &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (fieldDimCount - gridDimCount > 0) then
+            deallocate(ungriddedLBound, stat=rc)
+            if (ESMF_LogFoundDeallocError(rc, &
+              msg="Deallocating ungriddedLBound", &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            deallocate(ungriddedUBound, stat=rc)
+            if (ESMF_LogFoundDeallocError(rc, &
+              msg="Deallocating ungriddedUBound", &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
 
         ! unsupported ESMF_GEOMTYPE
         else
