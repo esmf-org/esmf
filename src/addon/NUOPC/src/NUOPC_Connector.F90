@@ -4508,20 +4508,24 @@ module NUOPC_Connector
       call ESMF_VMGet(srcVM, localPet=srcLocalPet, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+#if 0
       write(msgString,*) "srcLocalPet=", srcLocalPet
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+#endif
       call ESMF_FieldGet(dstFieldList(i), vm=dstVM, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       call ESMF_VMGet(dstVM, localPet=dstLocalPet, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+#if 0
       write(msgString,*) "dstLocalPet=", dstLocalPet
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+#endif
        
       if (.not.createNewPacket) then
         ! some packets exist already -> must check against them for match
@@ -4708,10 +4712,12 @@ if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       endif
     enddo
     
+#if 0
     write(msgString,*) "upCount=", upCount
     call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+#endif
 
     ! clean-up
     deallocate(auxList, stat=stat)
