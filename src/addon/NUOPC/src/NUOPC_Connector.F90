@@ -4508,7 +4508,7 @@ module NUOPC_Connector
       call ESMF_VMGet(srcVM, localPet=srcLocalPet, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-#if 0
+#if 1
       write(msgString,*) "srcLocalPet=", srcLocalPet
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4520,7 +4520,7 @@ module NUOPC_Connector
       call ESMF_VMGet(dstVM, localPet=dstLocalPet, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-#if 0
+#if 1
       write(msgString,*) "dstLocalPet=", dstLocalPet
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4564,7 +4564,7 @@ module NUOPC_Connector
           rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-#if 0
+#if 1
 write(msgString,*) "srcLocalPetList=", srcLocalPetList
 call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4591,7 +4591,7 @@ if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           if (srcLocalPetList(j)>-1) srcPetCount=srcPetCount+1
           if (dstLocalPetList(j)>-1) dstPetCount=dstPetCount+1
         enddo
-#if 0
+#if 1
 write(msgString,*) "creating new UpdatePacket for srcPetCount=", srcPetCount, " dstPetCount=", dstPetCount
 call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4613,7 +4613,7 @@ if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         if (ESMF_LogFoundAllocError(stat, msg="allocating sendToPets", &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
         if (k>0) upE%sendToPets(1:k) = auxList(1:k)  ! transfer the elements
-#if 0
+#if 1
 write(msgString,*) "upE%sendToPets=", upE%sendToPets
 call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4630,7 +4630,7 @@ if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             endif
           enddo
         endif
-#if 0
+#if 1
 write(msgString,*) "upE%recvFromPet=", upE%recvFromPet
 call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4649,7 +4649,7 @@ if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         nullify(upFields(i)%up)
       endif
       
-#if 0
+#if 1
 write(msgString,*) "added in field, now upE%fieldCount=", upE%fieldCount
 call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4712,7 +4712,7 @@ if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       endif
     enddo
     
-#if 0
+#if 1
     write(msgString,*) "upCount=", upCount
     call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
