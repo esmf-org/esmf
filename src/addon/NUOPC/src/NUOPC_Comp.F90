@@ -1368,6 +1368,11 @@ module NUOPC_Comp
     
     ! set Attributes to defaults
     call NUOPC_CompAttributeSet(comp, &
+      name="Kind", value="Connector", &
+      rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    call NUOPC_CompAttributeSet(comp, &
       name="Verbosity", value="0", &
       rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -3307,6 +3312,7 @@ module NUOPC_Comp
     character(ESMF_MAXSTR)    :: name
     integer                   :: phaseIndex
     integer                   :: localrc
+    logical                   :: isPresent, isSet
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -3315,6 +3321,20 @@ module NUOPC_Comp
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
     
+    ! sanity check whether this is a NUOPC derived component or not
+    call NUOPC_CompAttributeGet(comp, name="Kind", isPresent=isPresent, &
+      isSet=isSet, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+    if (.not.isPresent .or. .not.isSet) then
+      ! this does not look like a NUOPC derived component
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="This does not look like a NUOPC derived component. "// &
+          "Make sure NUOPC_CompDerive() is called before specializing.", &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+      return  ! bail out
+    endif
+
     if (present(specPhaseLabel)) then
       ! Figure out the phase index
       call NUOPC_CompSearchPhaseMap(comp, methodflag=ESMF_METHOD_RUN, &
@@ -3376,6 +3396,7 @@ module NUOPC_Comp
     character(ESMF_MAXSTR)    :: name
     integer                   :: phaseIndex
     integer                   :: localrc
+    logical                   :: isPresent, isSet
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -3384,6 +3405,20 @@ module NUOPC_Comp
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
     
+    ! sanity check whether this is a NUOPC derived component or not
+    call NUOPC_CompAttributeGet(comp, name="Kind", isPresent=isPresent, &
+      isSet=isSet, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+    if (.not.isPresent .or. .not.isSet) then
+      ! this does not look like a NUOPC derived component
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="This does not look like a NUOPC derived component. "// &
+          "Make sure NUOPC_CompDerive() is called before specializing.", &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+      return  ! bail out
+    endif
+
     if (present(specPhaseLabel)) then
       ! Figure out the phase index
       call NUOPC_CompSearchPhaseMap(comp, methodflag=ESMF_METHOD_RUN, &
