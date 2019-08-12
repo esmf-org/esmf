@@ -6748,6 +6748,17 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
 !     Connector more convenient. The generic Connector code handles creation
 !     and destruction of {\tt state}, but does {\em not} access it directly 
 !     for information.
+!   \item[{[CplSet]}]
+!     If present, all of the returned information is specific to the specified
+!     coupling set.
+!   \item[{[cplSetList]}]
+!     The list of coupling sets currently known to the Connector. This argument
+!     must enter the call {\em unassociated} or an error is returned. This means
+!     that the user code must explicitly call {\tt nullify()} or use the
+!     {\tt => null()} syntax on the variable passed in as {\tt cplSetList}
+!     argument. On return, the {\tt cplSetList} argument will be associated, 
+!     potentially of size zero. The responsibility for deallocation transfers
+!     to the caller.
 !   \item[{[srcVM]}]
 !     The VM of the source side component.
 !   \item[{[dstVM]}]
@@ -6832,7 +6843,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
           file=FILENAME, &
           rcToReturn=rc)) &
           return  ! bail out
-        cplSetList=is%wrap%cplSetList
+        cplSetList=is%wrap%cplSetList ! copy the elements
       endif
     endif
     
@@ -6899,6 +6910,9 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
 !     responsible for its destruction. Ownership of the new {\tt state} is 
 !     transferred to the Connector and must not be explicitly destroyed by the
 !     user code.
+!   \item[{[CplSet]}]
+!     If present, all of the passed in information is set under the specified
+!     coupling set.
 !   \item[{[srcVM]}]
 !     The VM of the source side component.
 !   \item[{[dstVM]}]
