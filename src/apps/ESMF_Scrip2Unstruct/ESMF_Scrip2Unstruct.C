@@ -68,10 +68,10 @@ int create_esmf(char* filename, char* infilename, int dualflag, size_t nnodes, s
                 int nocenter, int nomask, int noarea, 
                 int orig_grid_rank, int *orig_grid_dims)
 {
-  int ncid2;
+  int ncid1, ncid2;
   int vertdimid, celldimid, vpcdimid,vdimid;
   int vertexid, edgeid, ccoordid, cellid, caid, cmid;
-  int ogr_dimid, ogd_id;
+  int ogr_dimid, ogd_id, areaid, maskid, attid;
   time_t tloc;
   int dims[2];
   int status, fillvalue;
@@ -90,6 +90,10 @@ int create_esmf(char* filename, char* infilename, int dualflag, size_t nnodes, s
   status = nc_create(filename, NC_CLOBBER, &ncid2);
   if (status != NC_NOERR) handle_error(status,__LINE__);
 #endif
+
+  // Open the input file and get the long_name and units attribute from grid_area
+  status = nc_open(infilename, NC_NOWRITE, &ncid1);  
+  if (status != NC_NOERR) handle_error(status,__LINE__);
   
   // define the dimensions
   status = nc_def_dim(ncid2, "nodeCount", nnodes, &vertdimid);
@@ -145,30 +149,46 @@ int create_esmf(char* filename, char* infilename, int dualflag, size_t nnodes, s
     status = nc_def_var(ncid2, "elementArea", NC_DOUBLE, 1, dims, &caid);
     if (status != NC_NOERR) handle_error(status,__LINE__);
     // copy the units and long_name attributes if they exist in the input file
-    //int attid;
-    //status = nc_inq_attid(ncid1, areaid, "units", &attid);
-    //if (status == NC_NOERR) {
-    //  status = nc_copy_att(ncid1, areaid, "units", ncid2, caid);
-    //  if (status != NC_NOERR) handle_error(status,__LINE__);
-    //}    
-    //status = nc_inq_attid(ncid1, areaid, "long_name", &attid);
-    // if (status == NC_NOERR) {
-    //   status = nc_copy_att(ncid1, areaid, "long_name", ncid2, caid);
-    //   if (status != NC_NOERR) handle_error(status,__LINE__);
-    //  }
+    status = nc_inq_varid(ncid1, "grid_area", &areaid);
+    if (status != NC_NOERR) handle_error(status,__LINE__);
+    status = nc_inq_attid(ncid1, areaid, "units", &attid);
+    if (status == NC_NOERR) {
+      status = nc_copy_att(ncid1, areaid, "units", ncid2, caid);
+      if (status != NC_NOERR) handle_error(status,__LINE__);
+    }    
+    status = nc_inq_attid(ncid1, areaid, "_FillValue", &attid);
+    if (status == NC_NOERR) {
+      status = nc_copy_att(ncid1, areaid, "_FillValue", ncid2, caid);
+      if (status != NC_NOERR) handle_error(status,__LINE__);
+    }    
+    status = nc_inq_attid(ncid1, areaid, "long_name", &attid);
+    if (status == NC_NOERR) {
+       status = nc_copy_att(ncid1, areaid, "long_name", ncid2, caid);
+       if (status != NC_NOERR) handle_error(status,__LINE__);
+    }
   }
   if (!nomask && dualflag==0) {
     status = nc_def_var(ncid2, "elementMask", NC_INT, 1, dims, &cmid);
     if (status != NC_NOERR) handle_error(status,__LINE__);
-    // status = nc_copy_att(ncid1, maskid, "_FillValue", ncid2, cmid);
-    // if (status != NC_NOERR) handle_error(status,__LINE__);
+    status = nc_inq_varid(ncid1, "grid_imask", &maskid);
+    if (status != NC_NOERR) handle_error(status,__LINE__);
+    status = nc_inq_attid(ncid1, maskid, "units", &attid);
+    if (status == NC_NOERR) {
+      status = nc_copy_att(ncid1, maskid, "units", ncid2, cmid);
+      if (status != NC_NOERR) handle_error(status,__LINE__);
+    }    
   }
   if (!nomask && dualflag==1) {
     dims[0]=vertdimid;
     status = nc_def_var(ncid2, "nodeMask", NC_INT, 1, dims, &cmid);
     if (status != NC_NOERR) handle_error(status,__LINE__);
-    // status = nc_copy_att(ncid1, maskid, "_FillValue", ncid2, cmid);
-    // if (status != NC_NOERR) handle_error(status,__LINE__);
+    status = nc_inq_varid(ncid1, "grid_imask", &maskid);
+    if (status != NC_NOERR) handle_error(status,__LINE__);
+    status = nc_inq_attid(ncid1, maskid, "units", &attid);
+    if (status == NC_NOERR) {
+      status = nc_copy_att(ncid1, maskid, "units", ncid2, cmid);
+      if (status != NC_NOERR) handle_error(status,__LINE__);
+    }    
   }
   
   // Global Attribute
@@ -185,11 +205,13 @@ int create_esmf(char* filename, char* infilename, int dualflag, size_t nnodes, s
   if (status != NC_NOERR) handle_error(status,__LINE__);
   time(&tloc);
   strbuf1 = ctime(&tloc);
-  strbuf1[strlen(strbuf)-1] = '\0';
+  strbuf1[strlen(strbuf1)-1] = '\0';
   status = nc_put_att_text(ncid2, NC_GLOBAL, "timeGenerated", strlen(strbuf1), strbuf1);
   if (status != NC_NOERR) handle_error(status,__LINE__);
   
   status=nc_close(ncid2);
+  if (status != NC_NOERR) handle_error(status,__LINE__);
+  status = nc_close(ncid1);
   if (status != NC_NOERR) handle_error(status,__LINE__);
 #endif
   return 1;
