@@ -29,6 +29,7 @@ module NUOPC_Comp
   public NUOPC_CompAttributeGet
   public NUOPC_CompAttributeIngest
   public NUOPC_CompAttributeInit
+  public NUOPC_CompAttributeReset
   public NUOPC_CompAttributeSet
   public NUOPC_CompCheckSetClock
   public NUOPC_CompDerive
@@ -75,6 +76,11 @@ module NUOPC_Comp
   interface NUOPC_CompAttributeInit
     module procedure NUOPC_GridCompAttributeInit
     module procedure NUOPC_CplCompAttributeInit
+  end interface
+  !---------------------------------------------
+  interface NUOPC_CompAttributeReset
+    module procedure NUOPC_GridCompAttributeReset
+    module procedure NUOPC_CplCompAttributeReset
   end interface
   !---------------------------------------------
   interface NUOPC_CompAttributeSet
@@ -1384,6 +1390,74 @@ module NUOPC_Comp
   end subroutine
   !-----------------------------------------------------------------------------
 
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_CompAttributeReset - Reset NUOPC GridComp Attributes
+! !INTERFACE:
+  ! Private name; call using NUOPC_CompAttributeReset() 
+  subroutine NUOPC_GridCompAttributeReset(comp, attrList, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp)                       :: comp
+    character(len=*),   intent(in)            :: attrList(:)
+    integer,            intent(out), optional :: rc
+! !DESCRIPTION:
+!   Reset Attributes on the highest level of the standard NUOPC AttPack
+!   hierarchy (convention="NUOPC", purpose="Instance").
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                 :: localrc, i
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    do i=1, size(attrList)
+      call ESMF_AttributeRemove(comp, convention="NUOPC", purpose="Instance", &
+        name=attrList(i), rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    enddo
+    call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="Instance", &
+      attrList=attrList, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      
+  end subroutine
+  !-----------------------------------------------------------------------------
+  
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_CompAttributeReset - Reset NUOPC CplComp Attributes
+! !INTERFACE:
+  ! Private name; call using NUOPC_CompAttributeReset() 
+  subroutine NUOPC_CplCompAttributeReset(comp, attrList, rc)
+! !ARGUMENTS:
+    type(ESMF_CplComp)                        :: comp
+    character(len=*),   intent(in)            :: attrList(:)
+    integer,            intent(out), optional :: rc
+! !DESCRIPTION:
+!   Reset Attributes on the highest level of the standard NUOPC AttPack
+!   hierarchy (convention="NUOPC", purpose="Instance").
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                 :: localrc, i
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    do i=1, size(attrList)
+      call ESMF_AttributeRemove(comp, convention="NUOPC", purpose="Instance", &
+        name=attrList(i), rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    enddo
+    call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="Instance", &
+      attrList=attrList, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      
+  end subroutine
+  !-----------------------------------------------------------------------------
+  
   !-----------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: NUOPC_CompAttributeSet - Set a NUOPC GridComp Attribute

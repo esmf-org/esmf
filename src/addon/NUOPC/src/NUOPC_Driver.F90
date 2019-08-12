@@ -6484,7 +6484,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
 
-#if 0
     call NUOPC_CompAttributeGet(driver, name="HierarchyProtocol", &
       isSet=isSet, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -6493,7 +6492,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     checkImport = .not.isSet  ! by default request checking
     
     if (.not.checkImport) then
-      ! see if HieraryProtocol attribute explicitly requests mirroring
+      ! Check the HierarchyProtocol to make the decision about checking the
+      ! connectedness of fields in the importState. 
+      ! E.g. for explorer application there should be no checking because it is
+      ! the hierarchy driver itself that interacts with the child.
       call NUOPC_CompAttributeGet(driver, name="HierarchyProtocol", &
         value=hierarchyProtocol, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -6501,13 +6503,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (trim(hierarchyProtocol)=="PushUpAllExportsAndUnsatisfiedImports") &
         checkImport = .true.
     endif
-#else
-    !TODO: Think about why there would ever by a reason not to check
-    !TODO: connections on the importState, e.g. HierarchyProtocol
-    !TODO: dependent as suggested in the if-branch above. Eventually remove the
-    !TODO: code in the if-branch above.
-    checkImport = .true.
-#endif
 
     stateIsCreated = ESMF_StateIsCreated(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -6672,18 +6667,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             endif
           enddo
         enddo
-        ! store the cplListNew in CplList attribute of connector
-        call NUOPC_CompAttributeSet(connector, &
-          name="CplList", valueList=cplListNew(1:jjj), rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-          return  ! bail out
-        ! store the cplSetListNew in CplSetList attribute of connector
-        call NUOPC_CompAttributeSet(connector, &
-          name="CplSetList", valueList=cplSetListNew(1:jjj), rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-          return  ! bail out
+        ! store the cplListNew and cplSetListNew in the connector
+        if (jjj==0) then
+          ! special treatment for the case where no elements are left in list
+          call NUOPC_CompAttributeReset(connector, &
+            attrList=(/"CplList"/), rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+          call NUOPC_CompAttributeReset(connector, &
+            attrList=(/"CplSetList"/), rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+        else
+          call NUOPC_CompAttributeSet(connector, &
+            name="CplList", valueList=cplListNew(1:jjj), rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+          call NUOPC_CompAttributeSet(connector, &
+            name="CplSetList", valueList=cplSetListNew(1:jjj), rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+        endif
         ! clean-up
         if (associated(stateStandardNameList)) deallocate(stateStandardNameList)
         if (associated(stateFieldList)) deallocate(stateFieldList)
@@ -6732,12 +6740,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
 #endif
-          if (connected .and. .not.consumerConnected) then
-            ! a connected field in a Driver state that does not have a
-            ! ConsumerConnection needs to be removed from the CplList
-            ! of the respective connector
-            ! 
-          endif
           if (connected .and. .not.producerConnected) then
             ! a connected field in a Driver state must have a ProducerConnection
             ! -> bail with error
@@ -6746,7 +6748,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
               msg="Connected Field in Driver State "//trim(stateName)//&
-              " must have ProducerConnection: "//trim(itemNameList(i)), &
+              " must have ProducerConnection: "//trim(itemNameList(j)), &
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
             return ! bail out
           endif

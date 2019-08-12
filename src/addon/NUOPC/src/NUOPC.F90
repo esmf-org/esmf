@@ -60,6 +60,7 @@ module NUOPC
   public NUOPC_CompAttributeGet           ! method
   public NUOPC_CompAttributeIngest        ! method
   public NUOPC_CompAttributeInit          ! method
+  public NUOPC_CompAttributeReset         ! method
   public NUOPC_CompAttributeSet           ! method
   public NUOPC_CompCheckSetClock          ! method
   public NUOPC_CompDerive                 ! method
