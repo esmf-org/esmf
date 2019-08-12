@@ -65,6 +65,9 @@ module NUOPC_Base
   public NUOPC_SetAttribute               ! method
   public NUOPC_SetTimestamp               ! method
   public NUOPC_UpdateTimestamp            ! method
+  
+  ! internal Utility API
+  public NUOPC_ChopString                 ! method
 
 !==============================================================================
 ! 
@@ -4448,6 +4451,75 @@ module NUOPC_Base
       deallocate(fieldList)
     endif
     
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: NUOPC_ChopString - Chop a string into sub-strings
+! !INTERFACE:
+  subroutine NUOPC_ChopString(string, chopChar, chopStringList, rc)
+! !ARGUMENTS:
+    character(len=*)                              :: string
+    character                                     :: chopChar
+    character(ESMF_MAXSTR), pointer               :: chopStringList(:)
+    integer,                intent(out), optional :: rc
+! !DESCRIPTION:
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[string]
+!   \item[chopChar]
+!   \item[chopStringList]
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer               :: i, j, count
+    integer, allocatable  :: chopPos(:)
+    
+    ! check the incoming pointer
+    if (associated(chopStringList)) then
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="chopStringList must enter unassociated", &
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)
+      return  ! bail out
+    endif
+    
+    ! determine how many times chopChar is found in string
+    count=0 ! reset
+    do i=1, len(trim(string))
+      if (string(i:i)==chopChar) count=count+1
+    enddo
+    
+    ! record positions where chopChar is found in string
+    allocate(chopPos(count))
+    j=1 ! reset
+    do i=1, len(trim(string))
+      if (string(i:i)==chopChar) then
+        chopPos(j)=i
+        j=j+1
+      endif
+    enddo
+    
+    ! chop up the string
+    allocate(chopStringList(count+1))
+    j=1 ! reset
+    do i=1, count
+      chopStringList(i) = string(j:chopPos(i)-1)
+      j=chopPos(i)+1
+    enddo
+    chopStringList(count+1) = trim(string(j:len(string)))
+    deallocate(chopPos)
+    
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
   end subroutine
   !-----------------------------------------------------------------------------
 

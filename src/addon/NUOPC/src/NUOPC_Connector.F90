@@ -853,7 +853,8 @@ module NUOPC_Connector
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
                 return  ! bail out
-              write (msgString,'(A, ": ProductionConnection:", A)') trim(name),&
+              write (msgString,&
+                '(A, ": ProducerConnection (bondLevelMax):", A)') trim(name), &
                 trim(connectionString)
               call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1535,8 +1536,8 @@ module NUOPC_Connector
 
     ! main loop over all entries in the cplList
     do i=1, cplListSize
-      call chopString(cplList(i), chopChar=":", chopStringList=chopStringList, &
-        rc=rc)
+      call NUOPC_ChopString(cplList(i), chopChar=":", &
+        chopStringList=chopStringList, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       cplName = chopStringList(1) ! first part is the standard name of cpl field
@@ -2234,8 +2235,8 @@ module NUOPC_Connector
     
     ! main loop over all entries in the cplList
     do i=1, cplListSize
-      call chopString(cplList(i), chopChar=":", chopStringList=chopStringList, &
-        rc=rc)
+      call NUOPC_ChopString(cplList(i), chopChar=":", &
+        chopStringList=chopStringList, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       cplName = chopStringList(1) ! first part is the standard name of cpl field
@@ -3157,8 +3158,8 @@ module NUOPC_Connector
 
     ! main loop over all entries in the cplList
     do i=1, cplListSize
-      call chopString(cplList(i), chopChar=":", chopStringList=chopStringList, &
-        rc=rc)
+      call NUOPC_ChopString(cplList(i), chopChar=":", &
+        chopStringList=chopStringList, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       cplName = chopStringList(1) ! first part is the standard name of cpl field
@@ -4149,8 +4150,8 @@ module NUOPC_Connector
     
     ! main loop over all entries in the cplList
     do i=1, cplListSize
-      call chopString(cplList(i), chopChar=":", chopStringList=chopStringList, &
-        rc=rc)
+      call NUOPC_ChopString(cplList(i), chopChar=":", &
+        chopStringList=chopStringList, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       cplName = chopStringList(1) ! first part is the standard name of cpl field
@@ -4564,7 +4565,7 @@ module NUOPC_Connector
           rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-#if 1
+#if 0
 write(msgString,*) "srcLocalPetList=", srcLocalPetList
 call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -5760,58 +5761,6 @@ print *, "found match:"// &
     
   !-----------------------------------------------------------------------------
 
-  subroutine chopString(string, chopChar, chopStringList, rc)
-    character(len=*)                              :: string
-    character                                     :: chopChar
-    character(ESMF_MAXSTR), pointer               :: chopStringList(:)
-    integer,                intent(out), optional :: rc
-    ! local variables
-    integer               :: i, j, count
-    integer, allocatable  :: chopPos(:)
-    
-    ! check the incoming pointer
-    if (associated(chopStringList)) then
-      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-        msg="chopStringList must enter unassociated", &
-        line=__LINE__, &
-        file=FILENAME, &
-        rcToReturn=rc)
-      return  ! bail out
-    endif
-    
-    ! determine how many times chopChar is found in string
-    count=0 ! reset
-    do i=1, len(trim(string))
-      if (string(i:i)==chopChar) count=count+1
-    enddo
-    
-    ! record positions where chopChar is found in string
-    allocate(chopPos(count))
-    j=1 ! reset
-    do i=1, len(trim(string))
-      if (string(i:i)==chopChar) then
-        chopPos(j)=i
-        j=j+1
-      endif
-    enddo
-    
-    ! chop up the string
-    allocate(chopStringList(count+1))
-    j=1 ! reset
-    do i=1, count
-      chopStringList(i) = string(j:chopPos(i)-1)
-      j=chopPos(i)+1
-    enddo
-    chopStringList(count+1) = trim(string(j:len(string)))
-    deallocate(chopPos)
-    
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end subroutine
-    
-  !-----------------------------------------------------------------------------
-
   subroutine FieldBundleCplStore(srcFB, dstFB, cplList, rh, termOrders, name, &
     rc)
     ! this method will destroy srcFB/dstFB, and replace with newly created FBs
@@ -6011,8 +5960,8 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
 
       ! chop the cplList entry
-      call chopString(tempString, chopChar=":", chopStringList=chopStringList, &
-        rc=localrc)
+      call NUOPC_ChopString(tempString, chopChar=":", &
+        chopStringList=chopStringList, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
 
@@ -6020,7 +5969,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
       termOrder = ESMF_TERMORDER_FREE ! default
       do j=2, size(chopStringList)
         if (index(chopStringList(j),"termorder=")==1) then
-          call chopString(chopStringList(j), chopChar="=", &
+          call NUOPC_ChopString(chopStringList(j), chopChar="=", &
             chopStringList=chopSubString, rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
@@ -6048,12 +5997,12 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
       allocate(srcMaskValues(0))  ! default
       do j=2, size(chopStringList)
         if (index(chopStringList(j),"srcmaskvalues=")==1) then
-          call chopString(chopStringList(j), chopChar="=", &
+          call NUOPC_ChopString(chopStringList(j), chopChar="=", &
             chopStringList=chopSubString, rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
           if (size(chopSubString)>=2) then
-            call chopString(chopSubString(2), chopChar=",", &
+            call NUOPC_ChopString(chopSubString(2), chopChar=",", &
               chopStringList=chopSubSubString, rc=localrc)
             if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
@@ -6075,12 +6024,12 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
       allocate(dstMaskValues(0))  ! default
       do j=2, size(chopStringList)
         if (index(chopStringList(j),"dstmaskvalues=")==1) then
-          call chopString(chopStringList(j), chopChar="=", &
+          call NUOPC_ChopString(chopStringList(j), chopChar="=", &
             chopStringList=chopSubString, rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
           if (size(chopSubString)>=2) then
-            call chopString(chopSubString(2), chopChar=",", &
+            call NUOPC_ChopString(chopSubString(2), chopChar=",", &
               chopStringList=chopSubSubString, rc=localrc)
             if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
@@ -6103,7 +6052,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
       regridmethod = ESMF_REGRIDMETHOD_BILINEAR ! default
       do j=2, size(chopStringList)
         if (index(chopStringList(j),"remapmethod=")==1) then
-          call chopString(chopStringList(j), chopChar="=", &
+          call NUOPC_ChopString(chopStringList(j), chopChar="=", &
             chopStringList=chopSubString, rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
@@ -6165,7 +6114,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
       regridPoleNPnts = 1 ! default
       do j=2, size(chopStringList)
         if (index(chopStringList(j),"polemethod=")==1) then
-          call chopString(chopStringList(j), chopChar="=", &
+          call NUOPC_ChopString(chopStringList(j), chopChar="=", &
             chopStringList=chopSubString, rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
@@ -6198,7 +6147,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
       unmappedaction = ESMF_UNMAPPEDACTION_IGNORE ! default
       do j=2, size(chopStringList)
         if (index(chopStringList(j),"unmappedaction=")==1) then
-          call chopString(chopStringList(j), chopChar="=", &
+          call NUOPC_ChopString(chopStringList(j), chopChar="=", &
             chopStringList=chopSubString, rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
@@ -6224,7 +6173,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
       srcTermProcessing = -1  ! default -> force auto-tuning
       do j=2, size(chopStringList)
         if (index(chopStringList(j),"srctermprocessing=")==1) then
-          call chopString(chopStringList(j), chopChar="=", &
+          call NUOPC_ChopString(chopStringList(j), chopChar="=", &
             chopStringList=chopSubString, rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
@@ -6240,7 +6189,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
       pipelineDepth = -1  ! default -> force auto-tuning
       do j=2, size(chopStringList)
         if (index(chopStringList(j),"pipelinedepth=")==1) then
-          call chopString(chopStringList(j), chopChar="=", &
+          call NUOPC_ChopString(chopStringList(j), chopChar="=", &
             chopStringList=chopSubString, rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
@@ -6256,7 +6205,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
       dumpWeightsFlag = .false. ! default
       do j=2, size(chopStringList)
         if (index(chopStringList(j),"dumpweights=")==1) then
-          call chopString(chopStringList(j), chopChar="=", &
+          call NUOPC_ChopString(chopStringList(j), chopChar="=", &
             chopStringList=chopSubString, rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out

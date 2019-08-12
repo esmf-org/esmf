@@ -79,6 +79,7 @@ module NUOPC
   public NUOPC_AdjustClock                ! method
   public NUOPC_Advertise                  ! method
   public NUOPC_CheckSetClock              ! method
+  public NUOPC_ChopString                 ! method, internal use only
   public NUOPC_GetAttribute               ! method
   public NUOPC_GetStateMemberLists        ! method
   public NUOPC_GetTimestamp               ! method
