@@ -1179,9 +1179,14 @@ module NUOPC_Base
 !   status of the fields in {\tt state}. Return this information in the
 !   list arguments. Recursively parse through nested States.
 !
-!   All pointer arguments present must enter this method unassociated. On 
-!   return, the deallocation of an associated pointer becomes the responsibility
-!   of the caller.
+!   All pointer arguments present must enter this method unassociated. This
+!   means that the user code must explicitly call {\tt nullify()} or use the
+!   {\tt => null()} syntax on the variables passed in as any of the pointer
+!   arguments. On return, the pointer arguments may either be unassociated or
+!   associated. Consequently the user code must first check the status of any
+!   of the returned pointer arguments via the {\tt associated()} intrinsic
+!   before accessing the argument. The responsibility for deallocation of
+!   associated pointer arguments transfers to the caller.
 !
 !   The arguments are:
 !   \begin{description}
@@ -1189,19 +1194,33 @@ module NUOPC_Base
 !     The {\tt ESMF\_State} object to be queried.
 !   \item[{[StandardNameList]}]
 !     If present, return a list of the "StandardName" attribute of each member.
+!     See the note about pointer arguments in the description section above for
+!     correct usage.
 !   \item[{[ConnectedList]}]
 !     If present, return a list of the "Connected" attribute of each member.
+!     See the note about pointer arguments in the description section above for
+!     correct usage.
 !   \item[{[NamespaceList]}]
 !     If present, return a list of the "Namespace" attribute of each member.
+!     See the note about pointer arguments in the description section above for
+!     correct usage.
 !   \item[{[CplSetList]}]
 !     If present, return a list of the "CplSet" attribute of each member.
+!     See the note about pointer arguments in the description section above for
+!     correct usage.
 !   \item[{[itemNameList]}]
 !     If present, return a list of each member name.
+!     See the note about pointer arguments in the description section above for
+!     correct usage.
 !   \item[{[fieldList]}]
 !     If present, return a list of the member fields.
+!     See the note about pointer arguments in the description section above for
+!     correct usage.
 !   \item[{[stateList]}]
 !     If present, return a list of the states corresonding to the owner of the
 !     fields returned under {\tt fieldList}.
+!     See the note about pointer arguments in the description section above for
+!     correct usage.
 !   \item[{[nestedFlag]}]
 !     When set to .true., returns information from nested States (default).
 !     When set to .false., returns information at the current State level only.
