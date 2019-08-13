@@ -509,14 +509,14 @@ namespace ESMCI {
 
       // Add other donor levels to cnodes in creep_levels[l]
       // (Level 0 is already filled above)
-      for (int dl=1; dl<num_donor_levels; dl++) {
+      //      for (int dl=1; dl<num_donor_levels; dl++) {
 
         // Loop through prev level
-        for (int i=0; i<creep_levels[l].size(); i++) {
+      //  for (int i=0; i<creep_levels[l].size(); i++) {
           //// STOPPED HERE
 
-        } // num creep nodes in level l
-      } //  num_donor_levels - dl
+      // } // num creep nodes in level l
+      //} //  num_donor_levels - dl
     }
 
     // Construct weights from creep information
