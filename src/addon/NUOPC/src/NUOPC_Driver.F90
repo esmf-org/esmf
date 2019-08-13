@@ -6977,9 +6977,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Time)               :: time
     type(ESMF_Field), allocatable :: fieldList(:)
     character(ESMF_MAXSTR)        :: fieldName
-    integer                       :: i
+    integer                       :: i, localPet
     logical                       :: stateIsCreated
     logical                       :: isAtTime
+    type(ESMF_VM)                 :: vm
 
     rc = ESMF_SUCCESS
 
@@ -7011,6 +7012,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
         return  ! bail out
+
+      ! don't count fields that are not actuals on this PET
+      if (.not.isAtTime) then
+        isAtTime = .true. ! reset until actual field is found not at time
+        do i=1, size(fieldList)
+          call ESMF_FieldGet(fieldList(i), vm=vm, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) &
+            return  ! bail out
+          call ESMF_VMGet(vm, localPet=localPet, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) &
+            return  ! bail out
+          if (localPet>-1) then
+            ! an actual object -> not-at-time condition must be counted
+            isAtTime = .false.
+            exit  ! one actual field with not-at-time found enough to break
+          endif
+        enddo
+      endif
+
       if (isAtTime) then
         ! indicate that data initialization is complete 
         ! (breaking out of init-loop)
@@ -7052,7 +7074,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
         return  ! bail out
     endif
-    
+
     if (btest(verbosity,11)) then
       call NUOPC_CompAttributeGet(driver, name="InitializeDataComplete", &
         value=valueString, rc=rc)
