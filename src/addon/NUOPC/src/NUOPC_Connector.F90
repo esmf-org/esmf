@@ -3615,6 +3615,9 @@ module NUOPC_Connector
     type(ESMF_VM)                   :: vm
     character(ESMF_MAXSTR)          :: fieldName
     integer                         :: stat
+    integer                         :: localPet
+    type(ESMF_State)                :: state
+
     ! set RC
     rc = ESMF_SUCCESS
     
@@ -3665,46 +3668,60 @@ module NUOPC_Connector
     call ESMF_FieldGet(providerField, array=array, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return
-#if 0
-    ! obtain the vm from acceptor to create the new field on the same vm
-!-> This way both shared and non-shared fields will be created on the same
-!-> VM (of the acceptor side). However, it also means that if the acceptor side
-!-> covers more PETs than the provider side, those additional PETs will be 
-!-> receivers in the Timestamp propagation - which is undesirable in general
-!-> for shared fields that do not have actual Field instances on those PETs.
-    call ESMF_FieldGet(acceptorField, vm=vm, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return
-#else
-    ! obtain the vm from provider to create the new field on the same vm
-!-> This way shared fields will only be receivers of the Timestamp propagation
-!-> on actual PETs. This is typically what you expect for a shared field.
-!-> However, it currently breaks the Timestamp propagation code via 
-!-> UpdatePackets in case there are also non-shared fields handled by the same
-!-> Connector. Those fields are naturally created under the acceptor side VM, 
-!-> because they might actually span the whole acceptor side with 
-!-> redistribution.
+    ! obtain the vm from provider to create the new field on the provider vm
+    ! This way shared fields will only be send/receive during Timestamp
+    ! propagation on actvive PETs. This is what you expect for a shared field.
     call ESMF_FieldGet(providerField, vm=vm, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return
-#endif
-    !TODO: make sure that this FieldCreate() sets total widths correctly
-    !TODO: difficult to do with current FieldCreate() for multiple DEs/PET
-    if (fieldDimCount - gridDimCount > 0) then
-      acceptorField=ESMF_FieldCreate(grid=grid, array=array, &
-        datacopyflag=ESMF_DATACOPY_REFERENCE, staggerloc=staggerloc, &
-        gridToFieldMap=gridToFieldMap, name=fieldName, vm=vm, &
-        ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
-        rc=rc)
+
+    ! create a helper state needed for reconciliation across Connector VM
+    state = ESMF_StateCreate(rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return
+
+    ! determine active PETs
+    call ESMF_VMGet(vm, localpet=localPet, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    if (localPet>-1) then
+      ! this is an active PET -> create the acceptorField
+      
+      !TODO: make sure that this FieldCreate() sets total widths correctly
+      !TODO: difficult to do with current FieldCreate() for multiple DEs/PET
+      if (fieldDimCount - gridDimCount > 0) then
+        acceptorField=ESMF_FieldCreate(grid=grid, array=array, &
+          datacopyflag=ESMF_DATACOPY_REFERENCE, staggerloc=staggerloc, &
+          gridToFieldMap=gridToFieldMap, name=trim(fieldName), vm=vm, &
+          ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return
+      else
+        acceptorField=ESMF_FieldCreate(grid=grid, array=array, &
+          datacopyflag=ESMF_DATACOPY_REFERENCE, staggerloc=staggerloc, &
+          gridToFieldMap=gridToFieldMap, name=trim(fieldName), vm=vm, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return
+      end if
+      call ESMF_StateAdd(state, (/acceptorField/), rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return
-    else
-      acceptorField=ESMF_FieldCreate(grid=grid, array=array, &
-        datacopyflag=ESMF_DATACOPY_REFERENCE, staggerloc=staggerloc, &
-        gridToFieldMap=gridToFieldMap, name=fieldName, vm=vm, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return
-    end if
+    endif
+  
+    ! reconcile across the entire Connector VM
+    call ESMF_StateReconcile(state, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return
+    call ESMF_StateGet(state, itemName=fieldName, field=acceptorField, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return
+    
+    ! done with the helper state
+    call ESMF_StateDestroy(state, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return
+
     ! clean-up
     deallocate(minIndex, maxIndex, stat=rc)
     if (ESMF_LogFoundDeallocError(rc, &
@@ -3745,6 +3762,9 @@ module NUOPC_Connector
     type(ESMF_VM)                   :: vm
     character(ESMF_MAXSTR)          :: fieldName
     integer                         :: stat
+    integer                         :: localPet
+    type(ESMF_State)                :: state
+
     ! set RC
     rc = ESMF_SUCCESS
     
@@ -3791,46 +3811,60 @@ module NUOPC_Connector
     call ESMF_FieldGet(providerField, array=array, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return
-#if 0
-    ! obtain the vm from acceptor to create the new field on the same vm
-!-> This way both shared and non-shared fields will be created on the same
-!-> VM (of the acceptor side). However, it also means that if the acceptor side
-!-> covers more PETs than the provider side, those additional PETs will be 
-!-> receivers in the Timestamp propagation - which is undesirable in general
-!-> for shared fields that do not have actual Field instances on those PETs.
-    call ESMF_FieldGet(acceptorField, vm=vm, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return
-#else
-    ! obtain the vm from provider to create the new field on the same vm
-!-> This way shared fields will only be receivers of the Timestamp propagation
-!-> on actual PETs. This is typically what you expect for a shared field.
-!-> However, it currently breaks the Timestamp propagation code via 
-!-> UpdatePackets in case there are also non-shared fields handled by the same
-!-> Connector. Those fields are naturally created under the acceptor side VM, 
-!-> because they might actually span the whole acceptor side with 
-!-> redistribution.
+    ! obtain the vm from provider to create the new field on the provider vm
+    ! This way shared fields will only be send/receive during Timestamp
+    ! propagation on actvive PETs. This is what you expect for a shared field.
     call ESMF_FieldGet(providerField, vm=vm, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return
-#endif
-    !TODO: make sure that this FieldCreate() sets total widths correctly
-    !TODO: difficult to do with current FieldCreate() for multiple DEs/PET
-    if (fieldDimCount - gridDimCount > 0) then
-      acceptorField=ESMF_FieldCreate(mesh=mesh, array=array, &
-        datacopyflag=ESMF_DATACOPY_REFERENCE, meshloc=meshloc, &
-        gridToFieldMap=gridToFieldMap, name=fieldName, vm=vm, &
-        ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
-        rc=rc)
+
+    ! create a helper state needed for reconciliation across Connector VM
+    state = ESMF_StateCreate(rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return
+
+    ! determine active PETs
+    call ESMF_VMGet(vm, localpet=localPet, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    if (localPet>-1) then
+      ! this is an active PET -> create the acceptorField
+
+      !TODO: make sure that this FieldCreate() sets total widths correctly
+      !TODO: difficult to do with current FieldCreate() for multiple DEs/PET
+      if (fieldDimCount - gridDimCount > 0) then
+        acceptorField=ESMF_FieldCreate(mesh=mesh, array=array, &
+          datacopyflag=ESMF_DATACOPY_REFERENCE, meshloc=meshloc, &
+          gridToFieldMap=gridToFieldMap, name=fieldName, vm=vm, &
+          ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return
+      else
+        acceptorField=ESMF_FieldCreate(mesh=mesh, array=array, &
+          datacopyflag=ESMF_DATACOPY_REFERENCE, meshloc=meshloc, &
+          gridToFieldMap=gridToFieldMap, name=fieldName, vm=vm, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return
+      end if
+      call ESMF_StateAdd(state, (/acceptorField/), rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return
-    else
-      acceptorField=ESMF_FieldCreate(mesh=mesh, array=array, &
-        datacopyflag=ESMF_DATACOPY_REFERENCE, meshloc=meshloc, &
-        gridToFieldMap=gridToFieldMap, name=fieldName, vm=vm, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return
-    end if
+    endif
+      
+    ! reconcile across the entire Connector VM
+    call ESMF_StateReconcile(state, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return
+    call ESMF_StateGet(state, itemName=fieldName, field=acceptorField, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return
+    
+    ! done with the helper state
+    call ESMF_StateDestroy(state, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return
+      
     ! clean-up
     deallocate(gridToFieldMap, stat=rc)
     if (ESMF_LogFoundDeallocError(rc, &
