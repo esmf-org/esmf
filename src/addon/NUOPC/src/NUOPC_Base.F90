@@ -2132,7 +2132,14 @@ module NUOPC_Base
         rcToReturn=rc)) &
         return  ! bail out
       
-      if (NUOPC_IsAtTimeState.and.present(count)) count = 1
+      if (NUOPC_IsAtTimeState) then
+        if (present(count)) count = 1
+      else
+        if (present(fieldList)) then
+          allocate(fieldList(1))
+          fieldList(1)=field
+        endif
+      endif
     
     else
 
@@ -3362,7 +3369,7 @@ module NUOPC_Base
     integer, parameter      :: attrCount=10
     character(ESMF_MAXSTR)  :: attrList(attrCount)
     character(ESMF_MAXSTR)  :: tempString
-    
+
     if (present(rc)) rc = ESMF_SUCCESS
     
     ! Obtain the advertised Field
@@ -3372,7 +3379,7 @@ module NUOPC_Base
     call ESMF_StateGet(state, itemName=name, field=advertisedField, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-      
+
     ! Test for aliasing
     if (field==advertisedField) then
       ! aliased field means nothing to do here -> early successful exit
