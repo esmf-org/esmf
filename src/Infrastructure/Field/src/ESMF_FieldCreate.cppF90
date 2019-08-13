@@ -917,6 +917,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_GeomType_Flag) :: geomtype
     type(ESMF_Grid) :: grid
     integer :: arbdim
+    type(ESMF_Pointer)                    :: vmThis
+    logical                               :: actualFlag
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -929,6 +931,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       rcpresent = .TRUE.
       rc = ESMF_RC_NOT_IMPL
     endif
+
+    ! Must make sure the local PET is associated with an actual member
+    actualFlag = .true.
+    if (present(vm)) then
+      ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+      call ESMF_VMGetThis(vm, vmThis)
+      if (vmThis == ESMF_NULL_POINTER) then
+        actualFlag = .false.  ! local PET is not for an actual member
+      endif
+    endif
+    
+    if (actualFlag) then
 
     ! check init status of input parameters
     ESMF_INIT_CHECK_DEEP(ESMF_GeomBaseGetInit,geombase,rc)
@@ -1176,22 +1190,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
     endif
+    
+    endif ! - actualFlag
 
     ! Set return values.
     ESMF_FieldCreateGBArray%ftypep => ftype
-
-    ! Add reference to this object into ESMF garbage collection table
-    ! Only call this in those Create() methods that call Construct()
-    call c_ESMC_VMAddFObject(ESMF_FieldCreateGBArray, ESMF_ID_FIELD%objectID)
-
     ESMF_INIT_SET_CREATED(ESMF_FieldCreateGBArray)
 
-    call ESMF_FieldValidate(ESMF_FieldCreateGBArray, rc=localrc)
-    if (ESMF_LogFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) then
-      call ESMF_BaseSetStatus(ftype%base, ESMF_STATUS_INVALID, rc=localrc)
-      return
+    if (actualFlag) then
+      ! Add reference to this object into ESMF garbage collection table
+      ! Only call this in those Create() methods that call Construct()
+      call c_ESMC_VMAddFObject(ESMF_FieldCreateGBArray, ESMF_ID_FIELD%objectID)
+
+      call ESMF_FieldValidate(ESMF_FieldCreateGBArray, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) then
+        call ESMF_BaseSetStatus(ftype%base, ESMF_STATUS_INVALID, rc=localrc)
+        return
+      endif
     endif
 
     if(rcpresent) rc = ESMF_SUCCESS
@@ -2065,6 +2082,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_StaggerLoc) :: localStaggerloc
     type(ESMF_GridDecompType) :: decompType
     type(ESMF_Logical) :: linkChange
+    type(ESMF_Pointer)                    :: vmThis
+    logical                               :: actualFlag
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -2074,6 +2093,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       rc = ESMF_RC_NOT_IMPL
     endif
 
+    ! Must make sure the local PET is associated with an actual member
+    actualFlag = .true.
+    if (present(vm)) then
+      ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+      call ESMF_VMGetThis(vm, vmThis)
+      if (vmThis == ESMF_NULL_POINTER) then
+        actualFlag = .false.  ! local PET is not for an actual member
+      endif
+    endif
+    
+    if (actualFlag) then
     ! check init status of input parameters
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
@@ -2112,12 +2142,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    endif ! - actualFlag
+
     ! Create Field from GeomBase
     ESMF_FieldCreateGridArray=ESMF_FieldCreateGBArray(geombase, array, datacopyflag, &
         gridToFieldMap, ungriddedLBound, ungriddedUBound, totalLWidth, &
         totalUWidth, name=name, vm=vm, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (actualFlag) then
 
     ! remember that geombase was created internally
     ESMF_FieldCreateGridArray%ftypep%geomb_internal = .true.
@@ -2128,6 +2162,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                               grid, linkChange, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc))  return
+
+    endif ! - actualFlag
 
     if (present(rc)) rc = ESMF_SUCCESS
 
