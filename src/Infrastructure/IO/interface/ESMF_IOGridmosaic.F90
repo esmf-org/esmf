@@ -154,6 +154,7 @@ subroutine ESMF_GridspecReadMosaic(filename, mosaic, tileFilePath, rc)
 !   both local indices within the tile with 1-based index.
 !   (i1,j1) is the same point as (i3,j3) and (i2,j2) is the same point as (i4,j4)
 !
+!EOPI
 #ifdef ESMF_NETCDF
 
     integer   :: ncid, varid
@@ -702,7 +703,7 @@ end subroutine ESMF_GridspecQueryTileSize
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridspecReadTile"
 
-!BOP
+!BOPI
 ! !INTERFACE:
 ! Read in a tile file that defines the supergrid of a given tile
 ! A tile file should have a dummy variable that has the standard_name attribute set to "grid_tile_spec".  
@@ -723,6 +724,7 @@ subroutine ESMF_GridspecReadTile(filename, nx, ny, centerLon, centerLat, cornerL
     integer, optional, intent(in)              :: start(2)
     integer, optional, intent(in)              :: count(2)
     integer, optional, intent(out)             :: rc
+!EOPI
 
     integer :: ncid, nvars, attlen, i
     integer :: nx1, ny1
@@ -896,7 +898,7 @@ end subroutine ESMF_GridspecReadTile
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridspecReadStaggerR8"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridspecReadStagger - Read in a tile file that defines the supergrid of a given tile from a GRIDSPEC Tile file..
 
 ! !INTERFACE:
@@ -912,12 +914,13 @@ subroutine ESMF_GridspecReadStaggerR8(filename, nx, ny, lon, lat, staggerLoc, st
  
     character(len=*), intent(in)               :: filename
     integer, intent(in)                        :: nx, ny
-    real(ESMF_KIND_R8), pointer                :: lon(:,:)
-    real(ESMF_KIND_R8), pointer                :: lat(:,:)
+    real(ESMF_KIND_R8), TARGET                 :: lon(:,:)
+    real(ESMF_KIND_R8), TARGET                 :: lat(:,:)
     type(ESMF_StaggerLoc)                      :: staggerLoc
     integer, optional, intent(in)              :: start(2)
     integer, optional, intent(in)              :: count(2)
     integer, optional, intent(out)             :: rc
+!EOPI
 
     integer :: ncid, nvars, attlen, i
     integer :: nx1, ny1
@@ -1082,7 +1085,7 @@ end subroutine ESMF_GridspecReadStaggerR8
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridspecReadStaggerR4"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridspecReadStagger - Read in a tile file that defines the supergrid of a given tile from a GRIDSPEC Tile file..
 
 ! !INTERFACE:
@@ -1098,12 +1101,13 @@ subroutine ESMF_GridspecReadStaggerR4(filename, nx, ny, lon, lat, staggerLoc, st
  
     character(len=*), intent(in)               :: filename
     integer, intent(in)                        :: nx, ny
-    real(ESMF_KIND_R4), pointer                :: lon(:,:)
-    real(ESMF_KIND_R4), pointer                :: lat(:,:)
+    real(ESMF_KIND_R4), TARGET                 :: lon(:,:)
+    real(ESMF_KIND_R4), TARGET                 :: lat(:,:)
     type(ESMF_StaggerLoc)                      :: staggerLoc
     integer, optional, intent(in)              :: start(2)
     integer, optional, intent(in)              :: count(2)
     integer, optional, intent(out)             :: rc
+!EOPI
 
     integer :: ncid, nvars, attlen, i
     integer :: nx1, ny1
@@ -1539,6 +1543,8 @@ subroutine ESMF_MosaicDestroy(mosaic, rc)
  
     type(ESMF_Mosaic), intent(inout)       :: mosaic
     integer, optional, intent(out)         :: rc
+
+!EOPI
 
    ! Only allocated when there is netcdf
 #ifdef ESMF_NETCDF

@@ -41,6 +41,14 @@ module ESMF_NUOPC_UTest_Mod
     rc=ESMF_SUCCESS
     !------------------------------------------------------------------------
     !NEX_UTest
+    write(name, *) "NUOPC_CompSpecialize() for GridComp before Derive() Test"
+    write(failMsg, *) "Did incorrectly return ESMF_SUCCESS"
+    call NUOPC_CompSpecialize(driver, specLabel=driver_label_SetModelServices, &
+      specRoutine=SetModelServices, rc=rc)
+    call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    rc=ESMF_SUCCESS ! re-initialize for the remaining test code
+    !------------------------------------------------------------------------
+    !NEX_UTest
     write(name, *) "NUOPC_CompDerive() for GridComp Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     call NUOPC_CompDerive(driver, driver_routine_SS, rc=rc)

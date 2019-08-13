@@ -1131,7 +1131,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
     elseif (localSrcFileType == ESMF_FILEFORMAT_GRIDSPEC .or. &
-    	   localSrcFileType == ESMF_FILEFORMAT_TILE) then
+           localSrcFileType == ESMF_FILEFORMAT_TILE) then
        if (useSrcCoordVar) then
            if (srcMissingValue) then
               srcGrid = ESMF_GridCreate(srcfile, regDecomp=(/xpart,ypart/), &

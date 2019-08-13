@@ -39,7 +39,19 @@ module NUOPC_Connector
     label_ReleaseRouteHandle = "Connector_ReleaseRH"
   character(*), parameter :: &
     label_Finalize = "Connector_Finalize"
-
+    
+  type type_UpdatePacket
+    integer                             :: srcLocalPet
+    integer                             :: dstLocalPet
+    integer                             :: fieldCount
+    integer, pointer                    :: fieldIndex(:)
+    integer, pointer                    :: sendToPets(:)
+    integer                             :: recvFromPet
+    integer, pointer                    :: sendBuffer(:,:)
+    integer, pointer                    :: recvBuffer(:,:)
+    type(type_UpdatePacket), pointer    :: prev
+  end type
+  
   type type_CplSet
     integer                             :: count
     type(ESMF_FieldBundle)              :: srcFields
@@ -63,6 +75,7 @@ module NUOPC_Connector
     type(ESMF_RouteHandle)              :: rh
     type(ESMF_State)                    :: state
     type(ESMF_TermOrder_Flag), pointer  :: termOrders(:)
+    type(type_UpdatePacket), pointer    :: updatePackets
     integer                             :: cplSetCount
     character(ESMF_MAXSTR), pointer     :: cplSetList(:)
     type(type_CplSet), allocatable      :: cplSet(:)
@@ -2520,52 +2533,40 @@ module NUOPC_Connector
               convention="NUOPC", purpose="Instance", &
               attnestflag=ESMF_ATTNEST_ON, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, &
-              file=FILENAME)) &
-              return  ! bail out
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             gl = staggerloc  ! convert StaggerLoc to integer
             call ESMF_AttributeSet(acceptorField, &
               name="GeomLoc", value=gl, &
               convention="NUOPC", purpose="Instance", &
               attnestflag=ESMF_ATTNEST_ON, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, &
-              file=FILENAME)) &
-              return  ! bail out
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             call ESMF_AttributeSet(acceptorField, &
               name="MinIndex", valueList=minIndex, &
               convention="NUOPC", purpose="Instance", &
               attnestflag=ESMF_ATTNEST_ON, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, &
-              file=FILENAME)) &
-              return  ! bail out
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             call ESMF_AttributeSet(acceptorField, &
               name="MaxIndex", valueList=maxIndex, &
               convention="NUOPC", purpose="Instance", &
               attnestflag=ESMF_ATTNEST_ON, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, &
-              file=FILENAME)) &
-              return  ! bail out
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             ! bring over arbDimCount as attribute
             call ESMF_AttributeSet(acceptorField, &
               name="ArbDimCount", value=arbDimCount, &
               convention="NUOPC", purpose="Instance", &
               attnestflag=ESMF_ATTNEST_ON, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, &
-              file=FILENAME)) &
-              return  ! bail out
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             ! bring over gridToFieldMap as attributes
             call ESMF_AttributeSet(acceptorField, &
               name="GridToFieldMap", valueList=gridToFieldMap, &
               convention="NUOPC", purpose="Instance", &
               attnestflag=ESMF_ATTNEST_ON, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, &
-              file=FILENAME)) &
-              return  ! bail out
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             if (fieldDimCount - gridDimCount > 0) then
               ! bring over ungridded dim bounds as attributes
               call ESMF_AttributeSet(acceptorField, &
@@ -2573,17 +2574,13 @@ module NUOPC_Connector
                 convention="NUOPC", purpose="Instance", &
                 attnestflag=ESMF_ATTNEST_ON, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
               call ESMF_AttributeSet(acceptorField, &
                 name="UngriddedUBound", valueList=ungriddedUBound, &
                 convention="NUOPC", purpose="Instance", &
                 attnestflag=ESMF_ATTNEST_ON, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             endif
           else
             ! sharedField, can create acceptorField here if grid is also shared
@@ -2685,8 +2682,7 @@ module NUOPC_Connector
             endif
           endif
           ! query additional provider information
-          call ESMF_FieldGet(providerField, mesh=mesh, dimCount=fieldDimCount,&
-            rc=rc)
+          call ESMF_FieldGet(providerField, dimCount=fieldDimCount, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           call ESMF_DistGridGet(providerDG, dimCount=gridDimCount, rc=rc)
@@ -2694,7 +2690,7 @@ module NUOPC_Connector
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           allocate(gridToFieldMap(gridDimCount),stat=stat)
           if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-            msg="Allocation of internal ungriddedLBound failed.", &
+            msg="Allocation of internal gridToFieldMap failed.", &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
           call ESMF_FieldGet(providerField, gridToFieldMap=gridToFieldMap, &
@@ -2726,27 +2722,21 @@ module NUOPC_Connector
               convention="NUOPC", purpose="Instance", &
               attnestflag=ESMF_ATTNEST_ON, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, &
-              file=FILENAME)) &
-              return  ! bail out
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             gl = meshloc  ! convert StaggerLoc to integer
             call ESMF_AttributeSet(acceptorField, &
               name="GeomLoc", value=gl, &
               convention="NUOPC", purpose="Instance", &
               attnestflag=ESMF_ATTNEST_ON, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, &
-              file=FILENAME)) &
-              return  ! bail out
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             ! bring over gridToFieldMap as attributes
             call ESMF_AttributeSet(acceptorField, &
               name="GridToFieldMap", valueList=gridToFieldMap, &
               convention="NUOPC", purpose="Instance", &
               attnestflag=ESMF_ATTNEST_ON, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, &
-              file=FILENAME)) &
-              return  ! bail out
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             if (fieldDimCount - gridDimCount > 0) then
               ! bring over ungridded dim bounds as attributes
               call ESMF_AttributeSet(acceptorField, &
@@ -2754,17 +2744,13 @@ module NUOPC_Connector
                 convention="NUOPC", purpose="Instance", &
                 attnestflag=ESMF_ATTNEST_ON, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
               call ESMF_AttributeSet(acceptorField, &
                 name="UngriddedUBound", valueList=ungriddedUBound, &
                 convention="NUOPC", purpose="Instance", &
                 attnestflag=ESMF_ATTNEST_ON, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             endif
           else
             ! sharedField, can create acceptorField here if mesh is also shared
@@ -2849,6 +2835,39 @@ module NUOPC_Connector
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           endif
+          ! query additional provider information
+          call ESMF_FieldGet(providerField, dimCount=fieldDimCount, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call ESMF_DistGridGet(providerDG, dimCount=gridDimCount, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          allocate(gridToFieldMap(gridDimCount),stat=stat)
+          if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+            msg="Allocation of internal gridToFieldMap failed.", &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+          call ESMF_FieldGet(providerField, gridToFieldMap=gridToFieldMap, &
+            rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (fieldDimCount - gridDimCount > 0) then
+            ! query ungridded dim bounds
+            allocate(ungriddedLBound(fieldDimCount-gridDimCount),stat=stat)
+            if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+              msg="Allocation of internal ungriddedLBound failed.", &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+            allocate(ungriddedUBound(fieldDimCount-gridDimCount),stat=stat)
+            if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+              msg="Allocation of internal ungriddedUBound failed.", &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+            call ESMF_FieldGet(providerField, ungriddedLBound=ungriddedLBound, &
+              ungriddedUBound=ungriddedUBound, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
           ! transfer additional provider info in form of attributes
           tk = tkf  ! convert TypeKind_Flag to integer
           call ESMF_AttributeSet(acceptorField, &
@@ -2856,9 +2875,44 @@ module NUOPC_Connector
             convention="NUOPC", purpose="Instance", &
             attnestflag=ESMF_ATTNEST_ON, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, &
-            file=FILENAME)) &
-            return  ! bail out
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          ! bring over gridToFieldMap as attributes
+          call ESMF_AttributeSet(acceptorField, &
+            name="GridToFieldMap", valueList=gridToFieldMap, &
+            convention="NUOPC", purpose="Instance", &
+            attnestflag=ESMF_ATTNEST_ON, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (fieldDimCount - gridDimCount > 0) then
+            ! bring over ungridded dim bounds as attributes
+            call ESMF_AttributeSet(acceptorField, &
+              name="UngriddedLBound", valueList=ungriddedLBound, &
+              convention="NUOPC", purpose="Instance", &
+              attnestflag=ESMF_ATTNEST_ON, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call ESMF_AttributeSet(acceptorField, &
+              name="UngriddedUBound", valueList=ungriddedUBound, &
+              convention="NUOPC", purpose="Instance", &
+              attnestflag=ESMF_ATTNEST_ON, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
+          ! clean-up
+          deallocate(gridToFieldMap, stat=rc)
+          if (ESMF_LogFoundDeallocError(rc, &
+            msg="Deallocating gridToFieldMap", &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (fieldDimCount - gridDimCount > 0) then
+            deallocate(ungriddedLBound, stat=rc)
+            if (ESMF_LogFoundDeallocError(rc, &
+              msg="Deallocating ungriddedLBound", &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            deallocate(ungriddedUBound, stat=rc)
+            if (ESMF_LogFoundDeallocError(rc, &
+              msg="Deallocating ungriddedUBound", &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
 
         ! unsupported ESMF_GEOMTYPE
         else
@@ -3429,7 +3483,7 @@ module NUOPC_Connector
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return
               if (btest(verbosity,12)) then
                 write (msgString, '(A)') trim(name)//": "//&
-                  "- Grid-based acceptorField created and realized, "//&
+                  "- Mesh-based acceptorField created and realized, "//&
                   "reference sharing with providerField"
                 call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -3557,6 +3611,7 @@ module NUOPC_Connector
     integer(ESMF_KIND_I4), pointer  :: gridToFieldMap(:)
     type(ESMF_StaggerLoc)           :: staggerloc
     type(ESMF_Array)                :: array
+    type(ESMF_VM)                   :: vm
     character(ESMF_MAXSTR)          :: fieldName
     integer                         :: stat
     ! set RC
@@ -3609,19 +3664,43 @@ module NUOPC_Connector
     call ESMF_FieldGet(providerField, array=array, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return
+#if 0
+    ! obtain the vm from acceptor to create the new field on the same vm
+!-> This way both shared and non-shared fields will be created on the same
+!-> VM (of the acceptor side). However, it also means that if the acceptor side
+!-> covers more PETs than the provider side, those additional PETs will be 
+!-> receivers in the Timestamp propagation - which is undesirable in general
+!-> for shared fields that do not have actual Field instances on those PETs.
+    call ESMF_FieldGet(acceptorField, vm=vm, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return
+#else
+    ! obtain the vm from provider to create the new field on the same vm
+!-> This way shared fields will only be receivers of the Timestamp propagation
+!-> on actual PETs. This is typically what you expect for a shared field.
+!-> However, it currently breaks the Timestamp propagation code via 
+!-> UpdatePackets in case there are also non-shared fields handled by the same
+!-> Connector. Those fields are naturally created under the acceptor side VM, 
+!-> because they might actually span the whole acceptor side with 
+!-> redistribution.
+    call ESMF_FieldGet(providerField, vm=vm, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return
+#endif
     !TODO: make sure that this FieldCreate() sets total widths correctly
+    !TODO: difficult to do with current FieldCreate() for multiple DEs/PET
     if (fieldDimCount - gridDimCount > 0) then
       acceptorField=ESMF_FieldCreate(grid=grid, array=array, &
         datacopyflag=ESMF_DATACOPY_REFERENCE, staggerloc=staggerloc, &
-        gridToFieldMap=gridToFieldMap, name=fieldName, &
-        ungriddedLBound=ungriddedLBound, &
-        ungriddedUBound=ungriddedUBound, rc=rc)
+        gridToFieldMap=gridToFieldMap, name=fieldName, vm=vm, &
+        ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return
     else
       acceptorField=ESMF_FieldCreate(grid=grid, array=array, &
         datacopyflag=ESMF_DATACOPY_REFERENCE, staggerloc=staggerloc, &
-        gridToFieldMap=gridToFieldMap, name=fieldName, rc=rc)
+        gridToFieldMap=gridToFieldMap, name=fieldName, vm=vm, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return
     end if
@@ -3662,6 +3741,7 @@ module NUOPC_Connector
     integer(ESMF_KIND_I4), pointer  :: gridToFieldMap(:)
     type(ESMF_MeshLoc)              :: meshloc
     type(ESMF_Array)                :: array
+    type(ESMF_VM)                   :: vm
     character(ESMF_MAXSTR)          :: fieldName
     integer                         :: stat
     ! set RC
@@ -3710,20 +3790,43 @@ module NUOPC_Connector
     call ESMF_FieldGet(providerField, array=array, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return
+#if 0
+    ! obtain the vm from acceptor to create the new field on the same vm
+!-> This way both shared and non-shared fields will be created on the same
+!-> VM (of the acceptor side). However, it also means that if the acceptor side
+!-> covers more PETs than the provider side, those additional PETs will be 
+!-> receivers in the Timestamp propagation - which is undesirable in general
+!-> for shared fields that do not have actual Field instances on those PETs.
+    call ESMF_FieldGet(acceptorField, vm=vm, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return
+#else
+    ! obtain the vm from provider to create the new field on the same vm
+!-> This way shared fields will only be receivers of the Timestamp propagation
+!-> on actual PETs. This is typically what you expect for a shared field.
+!-> However, it currently breaks the Timestamp propagation code via 
+!-> UpdatePackets in case there are also non-shared fields handled by the same
+!-> Connector. Those fields are naturally created under the acceptor side VM, 
+!-> because they might actually span the whole acceptor side with 
+!-> redistribution.
+    call ESMF_FieldGet(providerField, vm=vm, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return
+#endif
     !TODO: make sure that this FieldCreate() sets total widths correctly
+    !TODO: difficult to do with current FieldCreate() for multiple DEs/PET
     if (fieldDimCount - gridDimCount > 0) then
       acceptorField=ESMF_FieldCreate(mesh=mesh, array=array, &
         datacopyflag=ESMF_DATACOPY_REFERENCE, meshloc=meshloc, &
-        gridToFieldMap=gridToFieldMap, name=fieldName, &
-        ungriddedLBound=ungriddedLBound, &
-        ungriddedUBound=ungriddedUBound, &
+        gridToFieldMap=gridToFieldMap, name=fieldName, vm=vm, &
+        ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return
     else
       acceptorField=ESMF_FieldCreate(mesh=mesh, array=array, &
         datacopyflag=ESMF_DATACOPY_REFERENCE, meshloc=meshloc, &
-        gridToFieldMap=gridToFieldMap, name=fieldName, rc=rc)
+        gridToFieldMap=gridToFieldMap, name=fieldName, vm=vm, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return
     end if
@@ -4264,6 +4367,13 @@ module NUOPC_Connector
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       endif    
     endif
+    
+    ! build Timestamp update packets
+    !TODO: consider whether CplSet needs extra treatment here or not
+    call BuildUpdatePackets(is%wrap%srcFieldList, is%wrap%dstFieldList, &
+      is%wrap%updatePackets, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     if (btest(verbosity,4)) then
       write (msgString, '(A, ": CplSet List: ")') trim(name)
@@ -4336,6 +4446,437 @@ module NUOPC_Connector
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+  end subroutine
+    
+  !-----------------------------------------------------------------------------
+
+  subroutine BuildUpdatePackets(srcFieldList, dstFieldList, updatePackets, rc)
+    type(ESMF_Field), pointer           :: srcFieldList(:)
+    type(ESMF_Field), pointer           :: dstFieldList(:)
+    type(type_UpdatePacket), pointer    :: updatePackets
+    integer,                intent(out) :: rc
+    ! local variables
+    integer                           :: i, j, k, stat, petCount, localPet
+    integer                           :: srcLocalPet, dstLocalPet, fieldCount
+    integer, allocatable              :: srcLocalPetList(:), dstLocalPetList(:)
+    integer, allocatable              :: auxList(:)
+    integer                           :: srcPetCount, dstPetCount
+    type(ESMF_VM)                     :: vm, srcVM, dstVM
+    character(len=240)                :: msgString
+    logical                           :: createNewPacket
+    logical                           :: mismatch
+    integer                           :: helperIn, helperOut
+    type(type_UpdatePacket), pointer  :: upE, upN, upT
+    integer                           :: upCount
+    type type_upFields
+      type(type_UpdatePacket), pointer  :: up
+    end type
+    type(type_upFields), pointer      :: upFields(:)
+
+    rc = ESMF_SUCCESS
+    
+    nullify(updatePackets)
+    
+    fieldCount = size(srcFieldList)
+    
+    allocate(upFields(fieldCount), stat=stat)
+    if (ESMF_LogFoundAllocError(stat, msg="allocating upFields", &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    
+    call ESMF_VMGetCurrent(vm=vm, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    
+    allocate(srcLocalPetList(petCount), dstLocalPetList(petCount), stat=stat)
+    if (ESMF_LogFoundAllocError(stat, msg="allocating LocalPetLists", &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    
+    allocate(auxList(petCount), stat=stat)
+    if (ESMF_LogFoundAllocError(stat, msg="allocating auxList", &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+    upCount = 0 ! initialize
+    createNewPacket = .true.  ! make sure first valid packet is being added
+    do i=1, fieldCount
+      call ESMF_FieldGet(srcFieldList(i), vm=srcVM, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      call ESMF_VMGet(srcVM, localPet=srcLocalPet, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+#if 0
+      write(msgString,*) "srcLocalPet=", srcLocalPet
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+#endif
+      call ESMF_FieldGet(dstFieldList(i), vm=dstVM, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      call ESMF_VMGet(dstVM, localPet=dstLocalPet, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+#if 0
+      write(msgString,*) "dstLocalPet=", dstLocalPet
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+#endif
+       
+      if (.not.createNewPacket) then
+        ! some packets exist already -> must check against them for match
+        createNewPacket = .true.  ! initialize, might be reset if packet found
+        upE=>updatePackets  ! start with the last packet that was added
+        do while (associated(upE))
+          ! see if this packet has the same src/dstLocalPet pattern combination 
+          mismatch = (upE%srcLocalPet/=srcLocalPet) .or. &
+            (upE%dstLocalPet/=dstLocalPet)
+          helperIn = 0  ! initialize
+          if (mismatch) helperIn=1
+          ! implement a logical OR operation based on REDUCE_SUM
+          call ESMF_VMAllFullReduce(vm, sendData=(/helperIn/), &
+            recvData=helperOut, count=1, reduceflag=ESMF_REDUCE_SUM, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+          ! determine the global match condition
+          if (helperOut == 0) then
+            ! pattern matches on all PETs -> matching UpdatePacket found
+            createNewPacket = .false. ! no new packet needed
+            exit  ! break out of the search loop
+          endif
+          upE=>upE%prev   ! move to previous element
+        enddo
+      endif
+      
+      if (createNewPacket) then
+        ! create a new packet
+        upCount = upCount+1
+        ! AllGather srcLocalPet and dstLocalPet onto each PET
+        call ESMF_VMAllGather(vm, (/srcLocalPet/), srcLocalPetList, count=1, &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        call ESMF_VMAllGather(vm, (/dstLocalPet/), dstLocalPetList, count=1, &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+#if 0
+write(msgString,*) "srcLocalPetList=", srcLocalPetList
+call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+  line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+write(msgString,*) "dstLocalPetList=", dstLocalPetList
+call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+  line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+#endif
+
+        allocate(upE, stat=stat)
+        if (ESMF_LogFoundAllocError(stat, msg="allocating new update packet", &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        upE%prev=>updatePackets  ! link new element to previous list head
+        updatePackets=>upE       ! list head now pointing to new element
+        ! fill the new packet VM information
+        upE%srcLocalPet=srcLocalPet
+        upE%dstLocalPet=dstLocalPet
+        upE%fieldCount = 0 ! initialize
+        ! Determine srcPetCount and dstPetCount
+        srcPetCount = 0 ! initialize
+        dstPetCount = 0 ! initialize
+        do j=1, petCount
+          if (srcLocalPetList(j)>-1) srcPetCount=srcPetCount+1
+          if (dstLocalPetList(j)>-1) dstPetCount=dstPetCount+1
+        enddo
+#if 0
+write(msgString,*) "creating new UpdatePacket for srcPetCount=", srcPetCount, " dstPetCount=", dstPetCount
+call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+  line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+#endif
+        ! Construct local sendToPets
+        k = 0 ! initialize
+        do j=1, petCount
+          if (dstLocalPetList(j)>-1) then
+            ! this PET holds a dstField
+            if (mod(dstLocalPetList(j),srcPetCount)==srcLocalPet) then
+              ! localPet responsible for sending to this destination
+              k = k+1
+              auxList(k) = j-1  ! PETs are basis 0
+            endif
+          endif
+        enddo
+        allocate(upE%sendToPets(k), stat=stat)
+        if (ESMF_LogFoundAllocError(stat, msg="allocating sendToPets", &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        if (k>0) upE%sendToPets(1:k) = auxList(1:k)  ! transfer the elements
+#if 0
+write(msgString,*) "upE%sendToPets=", upE%sendToPets
+call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+  line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+#endif   
+        ! Determine recvFromPet
+        upE%recvFromPet = -1  ! initialize, indicating not receiving any info
+        if (dstLocalPet>-1) then
+          ! localPet holds a dstField
+          do j=1, petCount
+            if (mod(dstLocalPet,srcPetCount)==srcLocalPetList(j)) then
+              ! found PET that localPet is receiving from 
+              upE%recvFromPet = j-1 ! PETs are basis 0
+            endif
+          enddo
+        endif
+#if 0
+write(msgString,*) "upE%recvFromPet=", upE%recvFromPet
+call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+  line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+#endif
+        ! reset flag for next iteration
+        createNewPacket = .false.
+      endif
+      
+      ! either case, new packet or existing packet found, fill in field info
+      if (srcLocalPet>-1 .or. dstLocalPet>-1) then
+        ! upE must be valid
+        upE%fieldCount = upE%fieldCount+1
+        upFields(i)%up => upE  ! keep track of packet for this field index
+      else
+        nullify(upFields(i)%up)
+      endif
+      
+#if 0
+write(msgString,*) "added in field, now upE%fieldCount=", upE%fieldCount
+call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+  line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+#endif
+
+    enddo
+
+    ! traverse all packets and either prepare internal allocations, or delete
+    upCount = 0   ! re-initialize
+    upN=>null()   ! initialize
+    upE=>updatePackets
+    do while (associated(upE))
+      if (upE%fieldCount > 0) then
+        ! this is an interacting packet -> keep
+        upCount = upCount+1
+        ! allocate for the known number of fields handled
+        allocate(upE%fieldIndex(upE%fieldCount), stat=stat)
+        if (ESMF_LogFoundAllocError(stat, msg="allocating upE%fieldIndex", &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        allocate(upE%sendBuffer(10,upE%fieldCount), stat=stat)
+        if (ESMF_LogFoundAllocError(stat, msg="allocating upE%sendBuffer", &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        allocate(upE%recvBuffer(10,upE%fieldCount), stat=stat)
+        if (ESMF_LogFoundAllocError(stat, msg="allocating upE%recvBuffer", &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        ! reset the fieldCount for next loop usage
+        upE%fieldCount = 0
+        ! step to next element
+        upN=>upE
+        upE=>upE%prev
+      else
+        ! this packet has no interactions -> optimize execution by elimination
+        upT=>upE%prev
+        ! unhook upE
+        if (associated(upN)) then
+          upN%prev=>upT
+        else
+          updatePackets=>upT
+        endif
+        ! internal clean-up
+        deallocate(upE%sendToPets, stat=stat)
+        if (ESMF_LogFoundDeallocError(stat, msg="deallocating sendToPets", &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        ! deallocate upE itself
+        deallocate(upE, stat=stat)
+        if (ESMF_LogFoundDeallocError(stat, msg="deallocating upE", &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        ! step to next element
+        upE=>upT
+      endif
+    enddo
+    
+    ! loop through fields one more time and set references inside packets
+    do i=1, fieldCount
+      upE => upFields(i)%up
+      if (associated(upE)) then
+        upE%fieldCount = upE%fieldCount+1
+        upE%fieldIndex(upE%fieldCount) = i
+      endif
+    enddo
+    
+#if 0
+    write(msgString,*) "upCount=", upCount
+    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+#endif
+
+    ! clean-up
+    deallocate(auxList, stat=stat)
+    if (ESMF_LogFoundDeallocError(stat, msg="deallocating auxList", &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    deallocate(srcLocalPetList, dstLocalPetList, stat=stat)
+    if (ESMF_LogFoundDeallocError(stat, msg="deallocating LocalPetLists", &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    deallocate(upFields, stat=stat)
+    if (ESMF_LogFoundDeallocError(stat, msg="deallocating upFields", &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    
+  end subroutine
+    
+  !-----------------------------------------------------------------------------
+
+  subroutine ExecuteUpdatePackets(srcFieldList, dstFieldList, updatePackets, rc)
+    type(ESMF_Field), pointer           :: srcFieldList(:)
+    type(ESMF_Field), pointer           :: dstFieldList(:)
+    type(type_UpdatePacket), pointer    :: updatePackets
+    integer,                intent(out) :: rc
+    ! local variables
+    type(ESMF_VM)                     :: vm
+    type(type_UpdatePacket), pointer  :: upE
+    integer                           :: i, j, jj
+    integer, pointer                  :: bufferPtr(:)
+    character(len=8000)                :: msgString
+    
+    rc = ESMF_SUCCESS
+    
+    call ESMF_VMGetCurrent(vm=vm, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+    ! traverse all packets and post the receives
+    upE=>updatePackets
+    do while (associated(upE))
+      if (upE%recvFromPet > -1) then
+        ! post the receive
+        bufferPtr => upE%recvBuffer(:,1)
+        call ESMF_VMRecv(vm, bufferPtr, size(upE%recvBuffer), &
+          upE%recvFromPet, syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      endif
+      ! step to next element
+      upE=>upE%prev
+    enddo
+    
+    ! traverse all packets, fill the sendBuffer and post the sends
+    upE=>updatePackets
+    do while (associated(upE))
+      if (size(upE%sendToPets)>0) then
+        ! there are messages to be sent -> fill the sendBuffer
+        do j=1, upE%fieldCount
+          jj = upE%fieldIndex(j)
+          call ESMF_AttributeGet(srcFieldList(jj), &
+            name="TimeStamp", valueList=upE%sendBuffer(:,j), &
+            convention="NUOPC", purpose="Instance", &
+            attnestflag=ESMF_ATTNEST_ON, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+#if 0
+write(msgString,*) "filled timestamp buffer for field: ",j,jj,": ", upE%sendBuffer(:,j)
+call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+  line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+#endif
+        enddo
+        ! post all the sends
+        bufferPtr => upE%sendBuffer(:,1)
+        do i=1, size(upE%sendToPets)
+#if 0
+write(msgString,*) "send buffer: ",upE%sendBuffer
+call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+  line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+#endif
+          call ESMF_VMSend(vm, bufferPtr, size(upE%sendBuffer), &
+            upE%sendToPets(i), syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        enddo
+      endif
+      ! step to next element
+      upE=>upE%prev
+    enddo
+
+    ! wait for all outstanding communications the localPet is engaged in
+    call ESMF_VMCommWaitAll(vm, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    
+    ! traverse all packets and fill the received timestamps into fields
+    upE=>updatePackets
+    do while (associated(upE))
+      if (upE%recvFromPet > -1) then
+#if 0
+write(msgString,*) "recv buffer: ",upE%recvBuffer
+call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+  line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+#endif
+        ! fill in the reiceived timestamps
+        do j=1, upE%fieldCount
+          jj = upE%fieldIndex(j)
+#if 0
+write(msgString,*) "update timestamp for field: ",j,jj,": ", upE%recvBuffer(:,j)
+call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+  line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+#endif
+          call ESMF_AttributeSet(dstFieldList(jj), &
+            name="TimeStamp", valueList=upE%recvBuffer(:,j), &
+            convention="NUOPC", purpose="Instance", &
+            attnestflag=ESMF_ATTNEST_ON, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        enddo
+      endif
+      ! step to next element
+      upE=>upE%prev
+    enddo
+
+  end subroutine
+    
+  !-----------------------------------------------------------------------------
+
+  subroutine DestroyUpdatePackets(updatePackets, rc)
+    type(type_UpdatePacket), pointer    :: updatePackets
+    integer,                intent(out) :: rc
+    ! local variables
+    type(type_UpdatePacket), pointer    :: upE
+    integer                             :: stat
+
+    rc = ESMF_SUCCESS
+    
+    ! take down updatePackets
+    do while (associated(updatePackets))
+      upE=>updatePackets
+      updatePackets=>updatePackets%prev
+      ! clean up all allocations inside of upE
+      deallocate(upE%fieldIndex, stat=stat)
+      if (ESMF_LogFoundDeallocError(stat, msg="deallocating fieldIndex", &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      deallocate(upE%sendToPets, stat=stat)
+      if (ESMF_LogFoundDeallocError(stat, msg="deallocating sendToPets", &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      deallocate(upE%sendBuffer, stat=stat)
+      if (ESMF_LogFoundDeallocError(stat, msg="deallocating sendBuffer", &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      deallocate(upE%recvBuffer, stat=stat)
+      if (ESMF_LogFoundDeallocError(stat, msg="deallocating recvBuffer", &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      ! deallocate upE itself
+      deallocate(upE, stat=stat)
+      if (ESMF_LogFoundDeallocError(stat, msg="deallocating upE", &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    enddo
 
   end subroutine
     
@@ -4572,12 +5113,18 @@ module NUOPC_Connector
       ! execute the regrid operation
       if (is%wrap%cplSetCount > 1) then
         do i=1, is%wrap%cplSetCount
-          call ESMF_FieldBundleSMM(is%wrap%cplSet(i)%srcFields, &
-            is%wrap%cplSet(i)%dstFields, &
-            routehandle=is%wrap%cplSet(i)%rh, &
-            termorderflag=is%wrap%cplSet(i)%termOrders, rc=rc)
+          routeHandleIsCreated = ESMF_RouteHandleIsCreated( &
+            is%wrap%cplSet(i)%rh, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (routeHandleIsCreated) then
+            call ESMF_FieldBundleSMM(is%wrap%cplSet(i)%srcFields, &
+              is%wrap%cplSet(i)%dstFields, &
+              routehandle=is%wrap%cplSet(i)%rh, &
+              termorderflag=is%wrap%cplSet(i)%termOrders, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
         enddo
       else
         routeHandleIsCreated = ESMF_RouteHandleIsCreated(is%wrap%rh, rc=rc)
@@ -4617,7 +5164,14 @@ module NUOPC_Connector
     endif
 
     ! Next update the TimeStamp metadata on the export Fields....
-
+#if 1
+    ! execute Timestamp update packets
+    !TODO: consider whether CplSet needs extra treatment here or not
+    call ExecuteUpdatePackets(is%wrap%srcFieldList, is%wrap%dstFieldList, &
+      is%wrap%updatePackets, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#else
     ! get the rootPet attribute out of the importState
     call ESMF_AttributeGet(importState, name="rootVas", value=rootVas, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4691,6 +5245,7 @@ module NUOPC_Connector
         time0=time
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
     endif
+#endif
 
     ! handle diagnostic
     if (btest(diagnostic,6)) then
@@ -4814,9 +5369,15 @@ module NUOPC_Connector
       ! release the regrid operation
       if (is%wrap%cplSetCount > 1) then
         do i=1, is%wrap%cplSetCount
-          call ESMF_FieldBundleRegridRelease(is%wrap%cplSet(i)%rh, rc=rc)
+          routeHandleIsCreated = ESMF_RouteHandleIsCreated( &
+            is%wrap%cplSet(i)%rh, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (routeHandleIsCreated) then
+            call ESMF_FieldBundleRegridRelease(is%wrap%cplSet(i)%rh, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
         enddo
       else
         routeHandleIsCreated = ESMF_RouteHandleIsCreated(is%wrap%rh, rc=rc)
@@ -4854,6 +5415,12 @@ module NUOPC_Connector
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
+
+    ! destroy Timestamp update packets
+    !TODO: consider whether CplSet needs extra treatment here or not
+    call DestroyUpdatePackets(is%wrap%updatePackets, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! deallocate and destroy remaining internal state members
     do i=1, is%wrap%cplSetCount
@@ -6181,6 +6748,17 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
 !     Connector more convenient. The generic Connector code handles creation
 !     and destruction of {\tt state}, but does {\em not} access it directly 
 !     for information.
+!   \item[{[CplSet]}]
+!     If present, all of the returned information is specific to the specified
+!     coupling set.
+!   \item[{[cplSetList]}]
+!     The list of coupling sets currently known to the Connector. This argument
+!     must enter the call {\em unassociated} or an error is returned. This means
+!     that the user code must explicitly call {\tt nullify()} or use the
+!     {\tt => null()} syntax on the variable passed in as {\tt cplSetList}
+!     argument. On return, the {\tt cplSetList} argument will be associated, 
+!     potentially of size zero. The responsibility for deallocation transfers
+!     to the caller.
 !   \item[{[srcVM]}]
 !     The VM of the source side component.
 !   \item[{[dstVM]}]
@@ -6265,7 +6843,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
           file=FILENAME, &
           rcToReturn=rc)) &
           return  ! bail out
-        cplSetList=is%wrap%cplSetList
+        cplSetList=is%wrap%cplSetList ! copy the elements
       endif
     endif
     
@@ -6332,6 +6910,9 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
 !     responsible for its destruction. Ownership of the new {\tt state} is 
 !     transferred to the Connector and must not be explicitly destroyed by the
 !     user code.
+!   \item[{[CplSet]}]
+!     If present, all of the passed in information is set under the specified
+!     coupling set.
 !   \item[{[srcVM]}]
 !     The VM of the source side component.
 !   \item[{[dstVM]}]
@@ -6386,9 +6967,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
       if (sIndex < 1 .OR. sIndex > is%wrap%cplSetCount) then
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg="CplSet does not exist!", &
-          line=__LINE__, &
-          file=FILENAME, &
-          rcToReturn=rc)
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
         return  ! bail out
       endif 
       if (present(srcFields)) is%wrap%cplSet(sIndex)%srcFields = srcFields

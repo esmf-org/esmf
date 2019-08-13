@@ -2214,29 +2214,33 @@ module NUOPC_Driver
           return  ! bail out
         if (present(execFlag)) execFlag = .true. ! at least this model executed
         if (.not.internalflag) then
-          ! ensure that Attributes are consistent across all PETs
-          !
+          ! Ensure that Attributes are consistent across all the PETs of the
+          ! component that just executed.
+
           !TODO: The Update() is only needed if there are child PETs that are 
           !TODO: going to pause for PE-reuse via user level threading. Figure
           !TODO: out how to detect this, and make Update() call conditional.
-          !
+
           !TODO: Should be calling with all master PETs (those processes that go
           !TODO: on to execute child code), for better Update() performance. For
           !TODO: now just call with first PET as root, because that always will
           !TODO: work (because first PET always is passed to child component).
-          !
         
           call ESMF_VMGetCurrent(vm=vm, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           if (associated(is%wrap%modelPetLists(i)%ptr)) then
+            ! use the petList to restrict the number of PETs across which the
+            ! update is synchronizing
             call ESMF_AttributeUpdate(is%wrap%modelComp(i), vm, &
-              rootList=is%wrap%modelPetLists(i)%ptr(1:1), reconcile=.true., &
+              rootList=is%wrap%modelPetLists(i)%ptr(1:1), &
+              petList=is%wrap%modelPetLists(i)%ptr, reconcile=.true., &
               rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
               return  ! bail out
           else
+            ! no petList was specified -> update across all PETs
             call ESMF_AttributeUpdate(is%wrap%modelComp(i), vm, &
               rootList=(/0/), reconcile=.true., rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2766,6 +2770,7 @@ module NUOPC_Driver
     activeClock = internalClock
     
     ! execute all connectors from driver (parent) to its children
+    !TODO: see ticket #3614786 about making this connector execution conditional
     i=0       ! from parent
     phase=1   ! use phase 1
     do j=1, is%wrap%modelCount
@@ -2953,6 +2958,7 @@ module NUOPC_Driver
     endif
 
     ! execute all connectors to driver (parent) from its children
+    !TODO: see ticket #3614786 about making this connector execution conditional
     j=0       ! to parent
     phase=1   ! use phase 1
     do i=1, is%wrap%modelCount

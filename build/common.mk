@@ -184,6 +184,14 @@ ifndef ESMF_NO_INTEGER_2_BYTE
 export ESMF_NO_INTEGER_2_BYTE = default
 endif
 
+ifndef ESMF_MAPPER_BUILD
+export ESMF_MAPPER_BUILD = default
+endif
+
+ifndef ESMF_AUTO_LIB_BUILD
+export ESMF_AUTO_LIB_BUILD = default
+endif
+
 ifndef ESMF_DEFER_LIB_BUILD
 export ESMF_DEFER_LIB_BUILD = default
 endif
@@ -402,6 +410,14 @@ endif
 
 ifneq ($(ESMF_TESTEXHAUSTIVE),ON)
 export ESMF_TESTEXHAUSTIVE = OFF
+endif
+
+ifneq ($(ESMF_MAPPER_BUILD),ON)
+export ESMF_MAPPER_BUILD = OFF
+endif
+
+ifneq ($(ESMF_AUTO_LIB_BUILD),OFF)
+export ESMF_AUTO_LIB_BUILD = ON
 endif
 
 ifneq ($(ESMF_DEFER_LIB_BUILD),OFF)
@@ -1109,6 +1125,13 @@ endif
 #  below here is again common code.  Variables should no longer be overwritten
 #  with =, but should be appended to if neeeded with +=
 #-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+# Mapper
+#-------------------------------------------------------------------------------
+ifeq ($(ESMF_MAPPER_BUILD),ON)
+ESMF_CPPFLAGS             += -DESMF_MAPPER=1
+endif
 
 #-------------------------------------------------------------------------------
 # 3rd Party libraries
@@ -2141,7 +2164,7 @@ endif
 # prevent the wildcards from being expanded.)
 
 CLEAN_DEFDIRS = coredir.*
-CLEAN_DEFAULTS = *.o *.$(ESMF_SL_SUFFIX) *.mod *.txt core ESM*.stdout ESM*.Log PET*.Log *ESMF_LogFile
+CLEAN_DEFAULTS = *.o *.$(ESMF_SL_SUFFIX) *.mod core ESM*.stdout ESM*.Log PET*.Log *ESMF_LogFile
 CLEAN_TEXFILES = *.aux *.bbl *.blg *.log *.toc *.dvi *.ps *.ORIG *.out
 
 clean:

@@ -47,6 +47,7 @@ module ESMF_FieldCreateMod
   use ESMF_ArrayMod
   use ESMF_ArrayGetMod
   use ESMF_ArrayCreateMod
+  use ESMF_VMMod
 
   use ESMF_FieldMod
   use ESMF_FieldEmptyMod
@@ -803,7 +804,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_FieldCreate()
   function ESMF_FieldCreateGBArray(geombase, array, datacopyflag, &
     gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-    totalLWidth, totalUWidth, name, rc)
+    totalLWidth, totalUWidth, name, vm, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Field) :: ESMF_FieldCreateGBArray
@@ -817,7 +818,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(in), optional :: ungriddedUBound(:)
     integer, intent(in), optional :: totalLWidth(:)
     integer, intent(in), optional :: totalUWidth(:)
-    character (len = *), intent(in), optional :: name
+    character (len = *), intent(in),  optional :: name
+    type(ESMF_VM),       intent(in),  optional :: vm
     integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -888,6 +890,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       + {\tt computationalCount}, {\tt exclusiveCount} ).
 ! \item [{[name]}]
 !       Field name.
+! \item[{[vm]}]
+!       If present, the Field object is created on the specified
+!       {\tt ESMF\_VM} object. The default is to create on the VM of the
+!       current component context.
 ! \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -1155,7 +1161,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                          ungriddedUBound=ungriddedUBound, &
                                          totalLWidth=totalLWidth, &
                                          totalUWidth=totalUWidth, &
-                                         name=name, rc=localrc)
+                                         name=name, vm=vm, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1165,7 +1171,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                          localgridToFieldMap, &
                                          ungriddedLBound=ungriddedLBound, &
                                          ungriddedUBound=ungriddedUBound, &
-                                         name=name, rc=localrc)
+                                         name=name, vm=vm, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1936,7 +1942,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_FieldCreate()
   function ESMF_FieldCreateGridArray(grid, array, keywordEnforcer, datacopyflag, &
     staggerloc, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-    totalLWidth, totalUWidth, name, rc)
+    totalLWidth, totalUWidth, name, vm, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Field) :: ESMF_FieldCreateGridArray
@@ -1953,11 +1959,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,               intent(in),  optional :: totalLWidth(:)
     integer,               intent(in),  optional :: totalUWidth(:)
     character (len = *),   intent(in),  optional :: name
+    type(ESMF_VM),         intent(in),  optional :: vm
     integer,               intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.0.0] Added argument {\tt vm} to support object creation on a
+!              different VM than that of the current context.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -2039,6 +2051,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       + {\tt computationalCount}, {\tt exclusiveCount} ).
 ! \item [{[name]}]
 !       Field name.
+! \item[{[vm]}]
+!       If present, the Field object is constructed on the specified
+!       {\tt ESMF\_VM} object. The default is to construct on the VM of the
+!       current component context.
 ! \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -2099,7 +2115,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Create Field from GeomBase
     ESMF_FieldCreateGridArray=ESMF_FieldCreateGBArray(geombase, array, datacopyflag, &
         gridToFieldMap, ungriddedLBound, ungriddedUBound, totalLWidth, &
-        totalUWidth, name, rc=localrc)
+        totalUWidth, name=name, vm=vm, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3569,7 +3585,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   function ESMF_FieldCreateMeshArray(mesh, array, &
     keywordEnforcer, datacopyflag, meshloc, &
     gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-    name, rc)
+    name, vm, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Field) :: ESMF_FieldCreateMeshArray
@@ -3584,6 +3600,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                  intent(in),  optional :: ungriddedLBound(:)
     integer,                  intent(in),  optional :: ungriddedUBound(:)
     character (len = *),      intent(in),  optional :: name
+    type(ESMF_VM),            intent(in),  optional :: vm
     integer,                  intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -3649,6 +3666,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       these ungridded dimensions is the same as their order in the {\tt field}.
 ! \item [{[name]}]
 !       Field name.
+! \item[{[vm]}]
+!       If present, the Field object is constructed on the specified
+!       {\tt ESMF\_VM} object. The default is to construct on the VM of the
+!       current component context.
 ! \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -3677,7 +3698,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Create Field from GeomBase
     ESMF_FieldCreateMeshArray=ESMF_FieldCreateGBArray(geombase, array, &
       datacopyflag, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-      name=name, rc=localrc)
+      name=name, vm=vm, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

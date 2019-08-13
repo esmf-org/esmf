@@ -2,9 +2,9 @@
 #
 # Requires setting ESMFMKFILE to the filepath of esmf.mk. If this is NOT set,
 # then ESMF_FOUND will always be FALSE. If ESMFMKFILE exists, then ESMF_FOUND=TRUE
-# and all ESMK makefile variables will be set in the global scope. Optionally,
+# and all ESMF makefile variables will be set in the global scope. Optionally,
 # set ESMF_MKGLOBALS to a string list to filter makefile variables. For example,
-# to globally scope only ESMF_LIBSDIR and ESMF_APPSDIR variables, use this cmake
+# to globally scope only ESMF_LIBSDIR and ESMF_APPSDIR variables, use this CMake
 # command in CMakeLists.txt:
 #
 #   set(ESMF_MKGLOBALS "LIBSDIR" "APPSDIR")

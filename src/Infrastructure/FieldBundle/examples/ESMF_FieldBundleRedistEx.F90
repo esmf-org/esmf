@@ -214,13 +214,17 @@
 ! and destination Bundle have different memory layout.
 !EOE
 
+!BOC
     allocate(srcfptr(3,5,10), dstfptr(10,5,3))
     srcfptr = lpe
     srcFieldBundle = ESMF_FieldBundleCreate((/'field01', 'field02', 'field03'/), &
       srcfptr, grid, 1, gridToFieldMap=(/2,3/), rc=rc)
+!EOC
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
     dstFieldBundle = ESMF_FieldBundleCreate((/'field01', 'field02', 'field03'/), &
       dstfptr, grid, 3, gridToFieldMap=(/2,1/), rc=rc)
+!EOC
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC

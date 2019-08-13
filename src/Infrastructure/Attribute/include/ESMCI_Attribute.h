@@ -27,6 +27,7 @@
 #include <fstream>
 
 #include "ESMCI_Util.h"
+#include "ESMCI_F90Interface.h"
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -331,7 +332,7 @@ class Attribute
 
     // attribute update
     int AttributeUpdate(VM *vm, const std::vector<ESMC_I4> &rootList,
-                        bool reconcile);
+                        ESMCI::InterArray<int> *petList, bool reconcile);
     int AttributeUpdateBufRecv(char *recvBuf, int localPet, int *offset,
       const int &length);
     int AttributeUpdateBufSend(char *sendBuf, int localPet, int *offset,
@@ -610,6 +611,7 @@ extern "C" {
                                   ESMCI_FortranStrLenArg vlen);
   void FTN_X(c_esmc_attributeupdate)(ESMC_Base **base, ESMCI::VM **vm,
                                   int *rootList, int *count,
+                                  ESMCI::InterArray<int> *petList,
                                   ESMC_Logical *reconcile, int *rc);
   void FTN_X(c_esmc_attributeupdatereset)(ESMC_Base **base, int *rc);
 }

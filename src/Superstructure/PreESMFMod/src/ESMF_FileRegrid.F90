@@ -70,6 +70,7 @@ integer, parameter:: MAX_VARDIMS = 4
 ! - ESMF-public methods:
 
   public ESMF_FileRegrid
+  public CheckVarInfo
 
 ! -------------------------- ESMF-public method -------------------------------
 contains
@@ -374,6 +375,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     else
        dstLocStr = 'face'
     endif
+    if (dstLocStr .ne. 'node' .and. dstLocStr .ne. 'face') then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+          msg ="dstLoc is not 'node' nor 'face'", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+    endif
 
     ! by default, variables are located at the center of the grid
     useSrcCorner = .FALSE.
@@ -451,7 +458,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       call ESMF_FileTypeCheck(srcFile, localsrcFileType, varname=srcMeshVar, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
              ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rcToReturn=rc)) return
+             ESMF_CONTEXT, rcToReturn=rc)) then
+           terminateProg = .TRUE.
+           goto 1110
+      endif
       ! Only ESMF_FILEFORMAT_UGRID, ESMF_FIELFORMAT_GRIDSPEC and
       ! ESMF_FILEFORMAT_MOSAIC are supported, return errors otherwise
       if (localsrcFileType /= ESMF_FILEFORMAT_UGRID .and. localsrcFileType /= ESMF_FILEFORMAT_GRIDSPEC &
@@ -607,7 +617,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (i==1) then
           if (trim(srcLocStr) .eq. 'node' .and. (localsrcFileType == ESMF_FILEFORMAT_GRIDSPEC .or. &
               localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE .or. &
-	              localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE_2ND)) then
+                      localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE_2ND)) then
               call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
                   msg = " The source variable has to be located at the center of the grid ", &
                   ESMF_CONTEXT, rcToReturn=rc)
@@ -656,7 +666,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                    localdstFileType, dstMeshVar, dstVarStr, &
                    dstVarRank(i), dstVarDims(:,i), dstDimids, &
                    useDstMask, dstMissingVal, &
-		   vartype=dstVarType, locStr=dstLocStr, rc=localrc)
+                   vartype=dstVarType, locStr=dstLocStr, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) then
              terminateProg = .TRUE.
@@ -672,7 +682,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif
 
         if (dstVarExist .and. (.not. ((dstVarType == NF90_FLOAT) .or. &
-	   (dstVarType == NF90_DOUBLE)))) then
+           (dstVarType == NF90_DOUBLE)))) then
             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
                 msg = " The program only supports dst variable of type float or double ", &
                 ESMF_CONTEXT, rcToReturn=rc)
@@ -1481,7 +1491,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! If it is a Mosaic file, there may be multiple DEs per PET and the data has to be
       ! read in per DE based on tile number
       if (localsrcfiletype == ESMF_FILEFORMAT_MOSAIC) then
-         call ReadMosaicField(srcField, localInputFile, srcMosaic, srcVarRank(i), srcVarDims(1:srcVarRank(i),i), rc=localrc)
+         call ReadMosaicField(srcField, localInputFile, srcMosaic, srcVarRank(i), &
+              srcVarDims(1:srcVarRank(i),i), rc=localrc)
          if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1582,7 +1593,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-
+           
            call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
            if (ESMF_LogFoundError(localrc, &
                ESMF_ERR_PASSTHRU, &
@@ -1810,7 +1821,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 ESMF_CONTEXT, rcToReturn=rc)) return
            endif                        
        endif
-    else ! ungridrand == 0
+    else ! ungridrank == 0
        if (localdstfiletype == ESMF_FILEFORMAT_GRIDSPEC .or. &
             localdstfiletype == ESMF_FILEFORMAT_MOSAIC) then
            dstField = ESMF_FieldCreate(dstGrid, arrayspec, &
@@ -1846,39 +1857,37 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (localDeCount > 0) then
-        call ESMF_FieldGet(dstField, array=dstArray, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-           ESMF_ERR_PASSTHRU, &
-           ESMF_CONTEXT, rcToReturn=rc)) return
+      do j=0,localDeCount-1
         !! initialize the destination field with the _FillValue
         if (dstVarRank(i) == 1) then       
-                call ESMF_ArrayGet(dstArray, farrayptr = fptr1d, rc=localrc)
+                call ESMF_FieldGet(dstField, localDe=j, farrayptr = fptr1d, rc=localrc)
                 if (ESMF_LogFoundError(localrc, &
                    ESMF_ERR_PASSTHRU, &
                    ESMF_CONTEXT, rcToReturn=rc)) return
                 fptr1d(:)=dstMissingVal
         else if (dstVarRank(i) == 2) then  
-                call ESMF_ArrayGet(dstArray, farrayptr = fptr2d, rc=localrc)
+                call ESMF_FieldGet(dstField, localDe=j, farrayptr = fptr2d, rc=localrc)
                 if (ESMF_LogFoundError(localrc, &
                    ESMF_ERR_PASSTHRU, &
                    ESMF_CONTEXT, rcToReturn=rc)) return
                 fptr2d(:,:)=dstMissingVal
         else if (dstVarRank(i) == 3) then
-                call ESMF_ArrayGet(dstArray, farrayptr = fptr3d, rc=localrc)
+                call ESMF_FieldGet(dstField, localDe=j, farrayptr = fptr3d, rc=localrc)
                 if (ESMF_LogFoundError(localrc, &
                    ESMF_ERR_PASSTHRU, &
                    ESMF_CONTEXT, rcToReturn=rc)) return
                 fptr3d(:,:,:)=dstMissingVal
         else if (dstVarRank(i) == 4) then
-                call ESMF_ArrayGet(dstArray, farrayptr = fptr4d, rc=localrc)
+                call ESMF_FieldGet(dstField, localDe=j, farrayptr = fptr4d, rc=localrc)
                 if (ESMF_LogFoundError(localrc, &
                    ESMF_ERR_PASSTHRU, &
                    ESMF_CONTEXT, rcToReturn=rc)) return
                 fptr4d(:,:,:,:)=dstMissingVal
         endif
+      enddo
     endif
 
-    !! Call regird
+    !! Call regrid
     call ESMF_FieldRegrid(srcField, dstField, routehandle, zeroregion=ESMF_REGION_SELECT, &
                           rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -2078,7 +2087,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
          else
-                    tmpArray=ESMF_ArrayCreate(elementDG, arrayspec, indexflag=ESMF_INDEX_DELOCAL, rc=localrc)
+            tmpArray=ESMF_ArrayCreate(elementDG, arrayspec, indexflag=ESMF_INDEX_DELOCAL, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2499,7 +2508,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            attstr = MeshVar
          elseif (fileType == ESMF_FILEFORMAT_GRIDSPEC .or. &
             fileType == ESMF_FILEFORMAT_MOSAIC) then
-	   !GRIDSPEC, find the coordinate variables using units
+           !GRIDSPEC, find the coordinate variables using units
            !Check if the optional coordinate argument exist
            if (present(coordnames)) then
              ! check if the coordinate variables exist or not
