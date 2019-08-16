@@ -1730,6 +1730,7 @@ $(error ESMF_TESTESMFMKFILE=ON, but the file indicated by ESMFMKFILE variable do
 endif
 include $(ESMFMKFILE)
 ESMFLIB =
+ESMF_LIBDIR = $(ESMF_LIBSDIR)
 ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Superstructure/ESMFMod/include
 ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Superstructure/State/include
 ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/Util/include
@@ -1786,7 +1787,7 @@ else
 ESMF_ENV_PRELOAD = DYLD_INSERT_LIBRARIES
 endif
 
-# MPT implementations do not pick up LD_PRELOAD
+# MPI implementations do not pick up LD_PRELOAD
 # so we pass a small script to each MPI task
 ifneq (,$(findstring mpich,$(ESMF_COMM)))
 ESMF_PRELOAD_SH = $(ESMF_PRELOADSCRIPT)
