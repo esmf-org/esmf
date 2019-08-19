@@ -1731,6 +1731,7 @@ endif
 include $(ESMFMKFILE)
 ESMFLIB =
 ESMF_LIBDIR = $(ESMF_LIBSDIR)
+ESMF_APPSDIR = $(ESMF_BUILD)/apps/apps$(ESMF_BOPT)/$(ESMF_OS).$(ESMF_COMPILER).$(ESMF_ABI).$(ESMF_COMM).$(ESMF_SITE)
 ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Superstructure/WebServices/include
 ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Superstructure/ESMFMod/include
 ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Superstructure/State/include
