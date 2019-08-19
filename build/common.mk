@@ -1382,7 +1382,7 @@ ESMF_PNETCDF_LIBS = -lpnetcdf
 endif
 
 ifeq ($(ESMF_PNETCDF),standard)
-ifneq ($(origin ESMF_NETCDF_LIBS), environment)
+ifneq ($(origin ESMF_PNETCDF_LIBS), environment)
 ESMF_PNETCDF_LIBS = -lpnetcdf
 endif
 endif
