@@ -3990,7 +3990,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_FieldBundleRegridStore(srcFieldBundle, dstFieldBundle, &
        srcMaskValues, dstMaskValues, regridmethod, polemethod, regridPoleNPnts, &
        lineType, normType, extrapMethod, extrapNumSrcPnts, extrapDistExponent, &
-       unmappedaction,  ignoreDegenerate, srcTermProcessing, &
+       extrapNumLevels, unmappedaction, ignoreDegenerate, srcTermProcessing, &
        pipelineDepth, routehandle, rc)
 !
 ! !ARGUMENTS:
@@ -4003,9 +4003,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(in),    optional :: regridPoleNPnts
     type(ESMF_LineType_Flag),      intent(in),    optional :: lineType
     type(ESMF_NormType_Flag),      intent(in),    optional :: normType
-    type(ESMF_ExtrapMethod_Flag),   intent(in),   optional :: extrapMethod
-    integer,                        intent(in),   optional :: extrapNumSrcPnts
-    real,                           intent(in),   optional :: extrapDistExponent
+    type(ESMF_ExtrapMethod_Flag),  intent(in),    optional :: extrapMethod
+    integer,                       intent(in),    optional :: extrapNumSrcPnts
+    real,                          intent(in),    optional :: extrapDistExponent
+    integer,                       intent(in),    optional :: extrapNumLevels
     type(ESMF_UnmappedAction_Flag),intent(in),    optional :: unmappedaction
     logical,                       intent(in),    optional :: ignoreDegenerate 
     integer,                       intent(inout), optional :: srcTermProcessing
@@ -4040,7 +4041,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              {\tt extrapNumSrcPnts} and {\tt extrapDistExponent} are parameters that
 !              allow the user to tune the behavior of the {\tt ESMF\_EXTRAPMETHOD\_NEAREST\_IDAVG} 
 !              method.
-! 
+! \item[8.0.0] Added argument {\tt extrapNumLevels}. For level based extrapolation methods
+!              (e.g. {\tt ESMF\_EXTRAPMETHOD\_CREEP}) this argument allows the user to
+!              set how many levels to extrapolate. 
+!! 
 ! \end{description}
 ! \end{itemize}
 !
@@ -4114,6 +4118,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The exponent to raise the distance to when calculating weights for 
 !           the {\tt ESMF\_EXTRAPMETHOD\_NEAREST\_IDAVG} extrapolation method. A higher value reduces the influence 
 !           of more distant points. If not specified, defaults to 2.0.
+!  \item [{[extrapNumLevels]}] 
+!           The number of levels to output for the extrapolation methods that fill levels
+!           (e.g. {\tt ESMF\_EXTRAPMETHOD\_CREEP}). When a method is used that requires this, then an error will be returned, if it 
+!           is not specified.
 !  \item [{[unmappedaction]}]
 !    Specifies what should happen if there are destination points that
 !    can not be mapped to a source cell. Please see Section~\ref{const:unmappedaction} for a 
@@ -4467,6 +4475,7 @@ call ESMF_LogWrite("must precompute full regridding!", &
             extrapMethod=extrapMethod, &
             extrapNumSrcPnts=extrapNumSrcPnts, &
             extrapDistExponent=extrapDistExponent, &
+            extrapNumLevels=extrapNumLevels, &
             unmappedaction=unmappedaction, &
             srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, &
             routehandle=rhh, &
