@@ -441,7 +441,7 @@ program ESMF_RegridApp
  
   if (useTilePathFlag) then
       call ESMF_FileRegrid(srcfile, dstfile, srcvarname, dstvarname, &
-      	                    dstLoc=dstLoc, &
+                            dstLoc=dstLoc, &
                             regridmethod=methodflag, &
                             srcdatafile=trim(srcdatafile), dstdatafile=trim(dstdatafile), &
                             tileFilePath=tilePath, &
@@ -452,7 +452,7 @@ program ESMF_RegridApp
                             verboseFlag = .true., rc = rc)
   else
       call ESMF_FileRegrid(srcfile, dstfile, srcvarname, dstvarname, &
-      	                    dstLoc=dstLoc, &
+                            dstLoc=dstLoc, &
                             regridmethod=methodflag, &
                             srcdatafile=trim(srcdatafile), dstdatafile=trim(dstdatafile), &
                             polemethod = pole, regridPoleNPnts = poleptrs, &
@@ -470,14 +470,14 @@ program ESMF_RegridApp
                             dstdatafile=trim(dstdatafile), &
                             tileFilePath=tilePath, &
                             regridmethod=methodflag, &
-			    rc = rc)
+                            rc = rc)
       if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
     else
       call ESMF_FileRegridCheck(dstfile, dstvarname, &
                             dstdatafile=trim(dstdatafile), &
                             tileFilePath=tilePath, &
                             regridmethod=methodflag, &
-			    rc = rc)
+                            rc = rc)
       if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
     endif
   endif

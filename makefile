@@ -32,8 +32,11 @@ include $(ESMF_DIR)/build/common.mk
 #-------------------------------------------------------------------------------
 DIRS = src
 
-CLEANDIRS = $(ESMF_LIBDIR) $(ESMF_MODDIR) $(ESMF_OBJDIR) $(ESMF_TESTDIR) \
+CLEANDIRS = $(ESMF_MODDIR) $(ESMF_OBJDIR) $(ESMF_TESTDIR) \
   $(ESMF_EXDIR) $(ESMF_BUILD)/src/include $(ESMF_ETCDIR) $(ESMF_APPSDIR)
+ifneq ($(ESMF_TESTESMFMKFILE),ON)
+CLEANDIRS += $(ESMF_LIBDIR)
+endif
 CLOBBERDIRS = $(ESMF_BUILD)/lib $(ESMF_BUILD)/mod $(ESMF_BUILD)/obj \
 	      $(ESMF_BUILD)/test $(ESMF_BUILD)/quick_start \
               $(ESMF_BUILD)/release $(ESMF_BUILD)/examples \
