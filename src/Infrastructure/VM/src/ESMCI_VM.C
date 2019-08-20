@@ -1377,8 +1377,8 @@ int VM::alltoallvVMId(
       vmBYTE);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) {
-    delete send_vmkeys;
-    delete recv_vmkeys;
+    delete [] send_vmkeys;
+    delete [] recv_vmkeys;
     return rc;
   }
   for (int key=0; key<recv_sum; key++) {
@@ -1388,8 +1388,8 @@ int VM::alltoallvVMId(
 // std::cout << "] = " << (int)recvvmID[key]->vmKey[i] << std::endl;
     }
   }
-  delete send_vmkeys;
-  delete recv_vmkeys;
+  delete [] send_vmkeys;
+  delete [] recv_vmkeys;
 
   // communicate localIDs
   int *send_ids = new int[send_sum];
@@ -1403,15 +1403,15 @@ int VM::alltoallvVMId(
       vmI4);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) {
-    delete send_ids;
-    delete recv_ids;
+    delete [] send_ids;
+    delete [] recv_ids;
     return rc;
   }
   for (int i=0; i<recv_sum; i++) {
     recvvmID[i]->localID = recv_ids[i];
   }
-  delete send_ids;
-  delete recv_ids;
+  delete [] send_ids;
+  delete [] recv_ids;
 
   // return successfully
   rc = ESMF_SUCCESS;
