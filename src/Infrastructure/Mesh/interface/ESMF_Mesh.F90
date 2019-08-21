@@ -1935,8 +1935,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !         The name of the grid file
 !   \item[fileformat]
 !         The file format. The valid options are {\tt ESMF\_FILEFORMAT\_SCRIP}, {\tt ESMF\_FILEFORMAT\_ESMFMESH} and
-!         {\tt ESMF\_FILEFORMAT\_UGRID}. If the file is a SCRIP file, the dimension {\tt grid\_rank} in the file has to
-!         be equal to 1.  Please see Section~\ref{const:fileformatflag} for a detailed description of the options.
+!         {\tt ESMF\_FILEFORMAT\_UGRID}. 
+!         Please see Section~\ref{const:fileformatflag} for a detailed description of the options.
 !   \item[{[convertToDual]}]
 !         if {\tt .true.}, the mesh will be converted to its dual. If not specified,
 !         defaults to {\tt .false.}.
