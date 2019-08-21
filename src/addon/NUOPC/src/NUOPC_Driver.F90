@@ -6435,8 +6435,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
-    ! first deal with the cleanup depending on connected status
-    
     ! query Component for the internal State
     nullify(is%wrap)
     call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
@@ -6444,7 +6442,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
 
-    ! add REMAPMETHOD=redist option to all of the CplList entries for all
+    ! first deal with the cleanup depending on connected status
     ! Connectors to/from driver-self
     do i=1, is%wrap%modelCount
       ! connector to-driver-self
@@ -6478,11 +6476,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     enddo
 
     ! Now go into checking the states wrt connected status...
-    
-    call ESMF_LogWrite("- - - - ", ESMF_LOGMSG_INFO, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-      return  ! bail out
 
     call NUOPC_CompAttributeGet(driver, name="HierarchyProtocol", &
       isSet=isSet, rc=rc)
@@ -6627,7 +6620,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 producerConnected, consumerConnected, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-#if 1
+#if 0
               write(msgString,*) trim(cplName)// &
                 " in CplSet: ", trim(cplSetList(j)), &
                 " connected:", connected, &
@@ -6644,7 +6637,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
                   return  ! bail out
-#if 1
+#if 0
                 
                 write(msgString,*) "removing field: ", trim(fieldName), &
                   " in CplSet: ", trim(cplSetList(j))
@@ -6730,7 +6723,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             consumerConnected, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-#if 1
+#if 0
           write(msgString,*) trim(itemNameList(j))//&
             " connected:", connected, &
             " producerConnected:", producerConnected, &
