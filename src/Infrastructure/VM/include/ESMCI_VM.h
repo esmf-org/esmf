@@ -64,6 +64,7 @@ class VMId {
   int serialize(const char *buffer, int *length, int *offset,
                 const ESMC_InquireFlag &inquireflag);
   int deserialize(const char *buffer, int *offset, bool offsetonly);
+  void log(std::string prefix) const;
   int print () const;
 };
 
