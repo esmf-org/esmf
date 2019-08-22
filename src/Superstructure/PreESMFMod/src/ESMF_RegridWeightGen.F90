@@ -96,7 +96,7 @@ contains
   ! Private name; call using ESMF_RegridWeightGen()
   subroutine ESMF_RegridWeightGenFile(srcFile, dstFile, weightFile, keywordEnforcer, &
     regridmethod, polemethod, regridPoleNPnts, lineType, normType, &
-    extrapMethod, extrapNumSrcPnts, extrapDistExponent, &
+    extrapMethod, extrapNumSrcPnts, extrapDistExponent, extrapNumLevels, &
     unmappedaction, ignoreDegenerate, srcFileType, dstFileType, &
     srcRegionalFlag, dstRegionalFlag, srcMeshname, dstMeshname,  &
     srcMissingvalueFlag, srcMissingvalueVar, &
@@ -123,6 +123,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   type(ESMF_ExtrapMethod_Flag),   intent(in),    optional :: extrapMethod
   integer,                        intent(in),    optional :: extrapNumSrcPnts
   real,                           intent(in),    optional :: extrapDistExponent
+  integer,                      intent(in), optional :: extrapNumLevels
   type(ESMF_UnmappedAction_Flag),intent(in), optional :: unmappedaction
   logical,                      intent(in),  optional :: ignoreDegenerate
   type(ESMF_FileFormat_Flag),   intent(in),  optional :: srcFileType
@@ -724,11 +725,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         srcUseLocStream = .TRUE.
     endif
     ! Use LocStream if the dest file format is SCRIP and the regridmethod is non-conservative
+    ! and we aren't using creep fill extrapolation
     if ((localDstFileType /= ESMF_FILEFORMAT_GRIDSPEC .and. &
          localDstFileType /= ESMF_FILEFORMAT_TILE .and. &
          localDstFileType /= ESMF_FILEFORMAT_MOSAIC) .and. &
         (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE) .and. &
-        (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE_2ND)) then
+        (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE_2ND) .and. &
+        (extrapMethod /= ESMF_EXTRAPMETHOD_CREEP)) then
         dstUseLocStream = .TRUE.
     endif
 
@@ -1003,24 +1006,32 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
       if (present(extrapMethod)) then
          if (extrapMethod%extrapmethod .eq. &
-            ESMF_EXTRAPMETHOD_NONE%extrapmethod) then
-          print *, "  Extrap. Method: none"
+              ESMF_EXTRAPMETHOD_NONE%extrapmethod) then
+            print *, "  Extrap. Method: none"
          else if (extrapMethod%extrapmethod .eq. &
-            ESMF_EXTRAPMETHOD_NEAREST_STOD%extrapmethod) then
-          print *, "  Extrap. Method: neareststod"
+              ESMF_EXTRAPMETHOD_NEAREST_STOD%extrapmethod) then
+            print *, "  Extrap. Method: neareststod"
          else if (extrapMethod%extrapmethod .eq. &
-            ESMF_EXTRAPMETHOD_NEAREST_IDAVG%extrapmethod) then
-          print *, "  Extrap. Method: nearestidavg"
-          if (present(extrapNumSrcPnts)) then
-          print '(a,i0)', "   Extrap. Number of Source Points: ",extrapNumSrcPnts
-          else
-          print '(a,i0)', "   Extrap. Number of Source Points: ",8
-          endif
-          if (present(extrapDistExponent)) then
-          print *, "  Extrap. Dist. Exponent: ",extrapDistExponent
-          else
-          print *, "  Extrap. Dist. Exponent: ",2.0
-         endif
+              ESMF_EXTRAPMETHOD_NEAREST_IDAVG%extrapmethod) then
+            print *, "  Extrap. Method: nearestidavg"
+            if (present(extrapNumSrcPnts)) then
+               print '(a,i0)', "   Extrap. Number of Source Points: ",extrapNumSrcPnts
+            else
+               print '(a,i0)', "   Extrap. Number of Source Points: ",8
+            endif
+            if (present(extrapDistExponent)) then
+               print *, "  Extrap. Dist. Exponent: ",extrapDistExponent
+            else
+               print *, "  Extrap. Dist. Exponent: ",2.0
+            endif
+         else if (extrapMethod%extrapmethod .eq. &
+              ESMF_EXTRAPMETHOD_CREEP%extrapmethod) then
+            print *, "  Extrap. Method: creep"
+            if (present(extrapNumLevels)) then
+               print '(a,i0)', "   Extrap. Number of Levels: ",extrapNumLevels
+            else
+               print *,"   Extrap. Number of Levels: NOT PRESENT?"
+            endif
          else
           print *, "  Extrap. Method: unknown"
          endif
@@ -1450,6 +1461,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               extrapMethod=extrapMethod, &
               extrapNumSrcPnts=extrapNumSrcPnts, &
               extrapDistExponent=extrapDistExponent, &
+              extrapNumLevels=extrapNumLevels, &
               rc=localrc)
       if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -1468,6 +1480,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               extrapMethod=extrapMethod, &
               extrapNumSrcPnts=extrapNumSrcPnts, &
               extrapDistExponent=extrapDistExponent, &
+              extrapNumLevels=extrapNumLevels, &
               rc=localrc)
       if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -1486,6 +1499,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               extrapMethod=extrapMethod, &
               extrapNumSrcPnts=extrapNumSrcPnts, &
               extrapDistExponent=extrapDistExponent, &
+              extrapNumLevels=extrapNumLevels, &
               rc=localrc)
       if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -1503,6 +1517,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               extrapMethod=extrapMethod, &
               extrapNumSrcPnts=extrapNumSrcPnts, &
               extrapDistExponent=extrapDistExponent, &
+              extrapNumLevels=extrapNumLevels, &
               rc=localrc)
       if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -1809,6 +1824,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               extrapMethod=extrapMethod, &
               extrapNumSrcPnts=extrapNumSrcPnts, &
               extrapDistExponent=extrapDistExponent, &
+              extrapNumLevels=extrapNumLevels, &
               rc=localrc)
       if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -1826,6 +1842,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               extrapMethod=extrapMethod, &
               extrapNumSrcPnts=extrapNumSrcPnts, &
               extrapDistExponent=extrapDistExponent, &
+              extrapNumLevels=extrapNumLevels, &
               rc=localrc)
       if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -1843,6 +1860,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               extrapMethod=extrapMethod, &
               extrapNumSrcPnts=extrapNumSrcPnts, &
               extrapDistExponent=extrapDistExponent, &
+              extrapNumLevels=extrapNumLevels, &
               rc=localrc)
       if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -1859,6 +1877,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               extrapMethod=extrapMethod, &
               extrapNumSrcPnts=extrapNumSrcPnts, &
               extrapDistExponent=extrapDistExponent, &
+              extrapNumLevels=extrapNumLevels, &
               rc=localrc)
       if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -1979,7 +1998,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     keywordEnforcer, srcElementDistgrid, dstElementDistgrid, &
     srcNodalDistgrid, dstNodalDistgrid, &
     weightFile, regridmethod, lineType, normType, &
-    extrapMethod, extrapNumSrcPnts, extrapDistExponent, &
+    extrapMethod, extrapNumSrcPnts, extrapDistExponent, extrapNumLevels,&
     unmappedaction, ignoreDegenerate, useUserAreaFlag, &
     largefileFlag, netcdf4fileFlag, &
     weightOnlyFlag, verboseFlag, rc)
@@ -2001,6 +2020,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   type(ESMF_ExtrapMethod_Flag),   intent(in),    optional :: extrapMethod
   integer,                        intent(in),    optional :: extrapNumSrcPnts
   real,                           intent(in),    optional :: extrapDistExponent
+  integer,                      intent(in),  optional :: extrapNumLevels
   type(ESMF_UnmappedAction_Flag),intent(in), optional :: unmappedaction
   logical,                      intent(in),  optional :: ignoreDegenerate
   logical,                      intent(in),  optional :: useUserAreaFlag
@@ -2458,6 +2478,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               extrapMethod=extrapMethod, &
               extrapNumSrcPnts=extrapNumSrcPnts, &
               extrapDistExponent=extrapDistExponent, &
+              extrapNumLevels=extrapNumLevels, &
               rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                ESMF_ERR_PASSTHRU, &
@@ -2476,6 +2497,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               extrapMethod=extrapMethod, &
               extrapNumSrcPnts=extrapNumSrcPnts, &
               extrapDistExponent=extrapDistExponent, &
+              extrapNumLevels=extrapNumLevels, &
               rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                ESMF_ERR_PASSTHRU, &
