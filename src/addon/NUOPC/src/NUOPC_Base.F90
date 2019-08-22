@@ -2007,7 +2007,9 @@ module NUOPC_Base
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Returns {\tt .true.} if {\tt field} has a timestamp attribute
-!   that matches {\tt time}. Otherwise returns {\tt .false.}.
+!   that matches {\tt time}. Otherwise returns {\tt .false.}. On PETs 
+!   with only a proxy instance of the field, {\tt .true.} is returned
+!   regardless of the actual timestamp attribute.
 !
 !   The arguments are:
 !   \begin{description}
@@ -2025,6 +2027,8 @@ module NUOPC_Base
     integer                 :: localrc
     logical                 :: isValid
     type(ESMF_Time)         :: fieldTime
+    type(ESMF_VM)           :: vm
+    integer                 :: localPet
 #ifdef DEBUG
     character(ESMF_MAXSTR)  :: msgString
 #endif
@@ -2032,6 +2036,25 @@ module NUOPC_Base
     NUOPC_IsAtTimeField = .false. ! initialize
     
     if (present(rc)) rc = ESMF_SUCCESS
+    
+    ! See if this is a proxy field instance. If so then successful early return
+    call ESMF_FieldGet(field, vm=vm, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME, &
+      rcToReturn=rc)) &
+      return  ! bail out
+    call ESMF_VMGet(vm, localPet=localPet, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME, &
+      rcToReturn=rc)) &
+      return  ! bail out
+    if (localPet==-1) then
+      ! on PETs with proxy instance always return .true.
+      NUOPC_IsAtTimeField = .true.
+      return
+    endif
     
     call NUOPC_GetTimestamp(field, isValid=isValid, time=fieldTime, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
