@@ -2070,7 +2070,6 @@ module NUOPC_Comp
 !
 ! !DESCRIPTION:
 ! Access information from a GridComp.
-! value.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -2187,7 +2186,6 @@ module NUOPC_Comp
 !
 ! !DESCRIPTION:
 ! Access information from a CplComp.
-! value.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
