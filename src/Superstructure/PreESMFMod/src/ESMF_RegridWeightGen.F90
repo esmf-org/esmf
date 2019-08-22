@@ -378,6 +378,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical            :: localIgnoreDegenerate
     logical            :: srcUseLocStream, dstUseLocStream
     type(ESMF_LocStream) :: srcLocStream, dstLocStream
+    logical            :: usingCreepExtrap
 
 #ifdef ESMF_NETCDF
     !------------------------------------------------------------------------
@@ -724,6 +725,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_DTOS)) then
         srcUseLocStream = .TRUE.
     endif
+
+
+    ! Check if we're using creep fill extrap
+    usingCreepExtrap=.false.
+    if (present(extrapMethod)) then
+       if (extrapMethod == ESMF_EXTRAPMETHOD_CREEP) usingCreepExtrap=.true.
+    endif
+
     ! Use LocStream if the dest file format is SCRIP and the regridmethod is non-conservative
     ! and we aren't using creep fill extrapolation
     if ((localDstFileType /= ESMF_FILEFORMAT_GRIDSPEC .and. &
@@ -731,7 +740,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          localDstFileType /= ESMF_FILEFORMAT_MOSAIC) .and. &
         (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE) .and. &
         (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE_2ND) .and. &
-        (extrapMethod /= ESMF_EXTRAPMETHOD_CREEP)) then
+        .not. usingCreepExtrap) then
         dstUseLocStream = .TRUE.
     endif
 
