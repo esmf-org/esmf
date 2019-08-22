@@ -621,6 +621,14 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
+  write(name, *) "NUOPC_CompAttributeReset() for CplComp Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_CompAttributeReset(cplComp, (/"CplList"/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
   write(name, *) "NUOPC_InitAttributes() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_InitAttributes(field, "sea_surface_temperature", rc=rc)
