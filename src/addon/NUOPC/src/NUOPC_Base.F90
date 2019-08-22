@@ -65,6 +65,9 @@ module NUOPC_Base
   public NUOPC_SetAttribute               ! method
   public NUOPC_SetTimestamp               ! method
   public NUOPC_UpdateTimestamp            ! method
+  
+  ! internal Utility API
+  public NUOPC_ChopString                 ! method
 
 !==============================================================================
 ! 
@@ -2004,7 +2007,9 @@ module NUOPC_Base
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Returns {\tt .true.} if {\tt field} has a timestamp attribute
-!   that matches {\tt time}. Otherwise returns {\tt .false.}.
+!   that matches {\tt time}. Otherwise returns {\tt .false.}. On PETs 
+!   with only a proxy instance of the field, {\tt .true.} is returned
+!   regardless of the actual timestamp attribute.
 !
 !   The arguments are:
 !   \begin{description}
@@ -2022,6 +2027,8 @@ module NUOPC_Base
     integer                 :: localrc
     logical                 :: isValid
     type(ESMF_Time)         :: fieldTime
+    type(ESMF_VM)           :: vm
+    integer                 :: localPet
 #ifdef DEBUG
     character(ESMF_MAXSTR)  :: msgString
 #endif
@@ -2029,6 +2036,25 @@ module NUOPC_Base
     NUOPC_IsAtTimeField = .false. ! initialize
     
     if (present(rc)) rc = ESMF_SUCCESS
+    
+    ! See if this is a proxy field instance. If so then successful early return
+    call ESMF_FieldGet(field, vm=vm, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME, &
+      rcToReturn=rc)) &
+      return  ! bail out
+    call ESMF_VMGet(vm, localPet=localPet, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME, &
+      rcToReturn=rc)) &
+      return  ! bail out
+    if (localPet==-1) then
+      ! on PETs with proxy instance always return .true.
+      NUOPC_IsAtTimeField = .true.
+      return
+    endif
     
     call NUOPC_GetTimestamp(field, isValid=isValid, time=fieldTime, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2148,7 +2174,14 @@ module NUOPC_Base
         rcToReturn=rc)) &
         return  ! bail out
       
-      if (NUOPC_IsAtTimeState.and.present(count)) count = 1
+      if (NUOPC_IsAtTimeState) then
+        if (present(count)) count = 1
+      else
+        if (present(fieldList)) then
+          allocate(fieldList(1))
+          fieldList(1)=field
+        endif
+      endif
     
     else
 
@@ -3378,7 +3411,7 @@ module NUOPC_Base
     integer, parameter      :: attrCount=10
     character(ESMF_MAXSTR)  :: attrList(attrCount)
     character(ESMF_MAXSTR)  :: tempString
-    
+
     if (present(rc)) rc = ESMF_SUCCESS
     
     ! Obtain the advertised Field
@@ -3388,7 +3421,7 @@ module NUOPC_Base
     call ESMF_StateGet(state, itemName=name, field=advertisedField, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-      
+
     ! Test for aliasing
     if (field==advertisedField) then
       ! aliased field means nothing to do here -> early successful exit
@@ -4467,6 +4500,75 @@ module NUOPC_Base
       deallocate(fieldList)
     endif
     
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: NUOPC_ChopString - Chop a string into sub-strings
+! !INTERFACE:
+  subroutine NUOPC_ChopString(string, chopChar, chopStringList, rc)
+! !ARGUMENTS:
+    character(len=*)                              :: string
+    character                                     :: chopChar
+    character(ESMF_MAXSTR), pointer               :: chopStringList(:)
+    integer,                intent(out), optional :: rc
+! !DESCRIPTION:
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[string]
+!   \item[chopChar]
+!   \item[chopStringList]
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer               :: i, j, count
+    integer, allocatable  :: chopPos(:)
+    
+    ! check the incoming pointer
+    if (associated(chopStringList)) then
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="chopStringList must enter unassociated", &
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)
+      return  ! bail out
+    endif
+    
+    ! determine how many times chopChar is found in string
+    count=0 ! reset
+    do i=1, len(trim(string))
+      if (string(i:i)==chopChar) count=count+1
+    enddo
+    
+    ! record positions where chopChar is found in string
+    allocate(chopPos(count))
+    j=1 ! reset
+    do i=1, len(trim(string))
+      if (string(i:i)==chopChar) then
+        chopPos(j)=i
+        j=j+1
+      endif
+    enddo
+    
+    ! chop up the string
+    allocate(chopStringList(count+1))
+    j=1 ! reset
+    do i=1, count
+      chopStringList(i) = string(j:chopPos(i)-1)
+      j=chopPos(i)+1
+    enddo
+    chopStringList(count+1) = trim(string(j:len(string)))
+    deallocate(chopPos)
+    
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
   end subroutine
   !-----------------------------------------------------------------------------
 

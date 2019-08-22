@@ -237,7 +237,7 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MapperSetCompConstraints()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_MapperSetCompConstraints - Set constraints for each component
 
 ! !INTERFACE:
@@ -271,7 +271,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
   !-----------------------------------------------------------------------------    
     integer :: localrc
 
@@ -391,7 +391,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MapperPrint()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_MapperPrint - Print mapper details
 
 ! !INTERFACE:
@@ -413,7 +413,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
   !-----------------------------------------------------------------------------    
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
   end subroutine

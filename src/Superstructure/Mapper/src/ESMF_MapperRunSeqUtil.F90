@@ -153,7 +153,7 @@ end function
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MapperTokenizeRunSeq
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_MapperTokenizeRunSeq - Tokenize the run sequence
 
 ! !INTERFACE:
@@ -178,7 +178,7 @@ end function
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
   !-----------------------------------------------------------------------------    
     character(len=*), parameter :: COMMENT_TOKENSTR = "#"
     character(len=*), parameter :: MISC_EOL_TOKENSTR = "#:"
@@ -281,9 +281,9 @@ end function
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_MapperProcessRunSeq
-!BOP
-! !IROUTINE: ESMF_SeqCodeDbgInfo - Get debug info on the runsequence
+#define ESMF_METHOD "GetSeqCodeDbgInfo
+!BOPI
+! !IROUTINE: GetSeqCodeDbgInfo - Get debug info on the runsequence
 
 ! !INTERFACE:
 subroutine GetSeqCodeDbgInfo(runSeqCode, tokRunSeq, curLine, dbgStr, rc)
@@ -313,7 +313,7 @@ subroutine GetSeqCodeDbgInfo(runSeqCode, tokRunSeq, curLine, dbgStr, rc)
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 
   dbgStr = "Running : " // trim(runSeqCode(curLine))
   if(tokRunSeq%line(curLine)%tok_type == ESMF_TIMELOOP_BEGIN_TOKEN) then
@@ -652,7 +652,7 @@ end subroutine
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MapperProcessRunSeq
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_MapperProcessRunSeq - Process the run sequence
 
 ! !INTERFACE:
@@ -675,7 +675,7 @@ end subroutine
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
   !-----------------------------------------------------------------------------    
   ! Token types
 !  integer, parameter :: ESMF_TIMELOOP_TOKEN = 1,&
