@@ -1448,7 +1448,8 @@ endif
 #-------------------------------------------------------------------------------
 ifeq ($(ESMF_YAMLCPP),internal)
 ESMF_YAMLCPP_PRESENT = TRUE
-ESMF_YAMLCPP_INCLUDE = $(ESMF_DIR)/src/prologue/yaml-cpp/include
+ESMF_CXXCOMPILEPATHS += -I$(ESMF_DIR)/src/prologue/yaml-cpp/include
+ESMF_YAMLCPP_INCLUDE =
 ESMF_YAMLCPP_LIBPATH =
 ESMF_YAMLCPP_LIBS =
 endif
