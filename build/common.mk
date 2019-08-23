@@ -252,6 +252,10 @@ ifndef ESMF_MOAB
 export ESMF_MOAB = default
 endif
 
+ifndef ESMF_YAMLCPP
+export ESMF_YAMLCPP = default
+endif
+
 ifndef ESMF_ACC_SOFTWARE_STACK
 export ESMF_ACC_SOFTWARE_STACK = none
 endif
@@ -460,9 +464,12 @@ ifeq ($(ESMF_ETCDIR),default)
 export ESMF_ETCDIR = $(ESMF_BUILD)/src/etc
 endif
 
-
 ifeq ($(ESMF_MOAB),default)
 export ESMF_MOAB = internal
+endif
+
+ifeq ($(ESMF_YAMLCPP),default)
+export ESMF_YAMLCPP = internal
 endif
 
 #-------------------------------------------------------------------------------
@@ -1439,13 +1446,21 @@ endif
 #-------------------------------------------------------------------------------
 # yaml-cpp C++ YAML API
 #-------------------------------------------------------------------------------
+ifeq ($(ESMF_YAMLCPP),internal)
+ESMF_YAMLCPP_PRESENT = TRUE
+ESMF_YAMLCPP_INCLUDE = $(ESMF_DIR)/src/prologue/yaml-cpp/include
+ESMF_YAMLCPP_LIBPATH =
+ESMF_YAMLCPP_LIBS =
+endif
+
 ifeq ($(ESMF_YAMLCPP),standard)
+ESMF_YAMLCPP_PRESENT = TRUE
 ifneq ($(origin ESMF_YAMLCPP_LIBS), environment)
 ESMF_YAMLCPP_LIBS = -lyaml-cpp
 endif
 endif
 
-ifdef ESMF_YAMLCPP
+ifeq ($(ESMF_YAMLCPP_PRESENT),TRUE)
 ESMF_CPPFLAGS                += -DESMF_YAMLCPP=1 -DESMF_YAML=1
 ifdef ESMF_YAMLCPP_INCLUDE
 ESMF_CXXCOMPILEPATHSTHIRD    += -I$(ESMF_YAMLCPP_INCLUDE)
