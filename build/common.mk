@@ -1688,7 +1688,7 @@ endif
 # Add C++ standard string to compile options if the non-default is chosen.
 # Dependencies requiring a specific C++ standard should update the standard here
 #-------------------------------------------------------------------------------
-ifneq ($(ESMF_YAMLCPP),)
+ifneq ($(ESMF_YAMLCPP),OFF)
 ifeq ($(ESMF_CXXSTD),default)
 ESMF_CXXSTD = 11
 endif
