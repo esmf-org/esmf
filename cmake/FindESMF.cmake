@@ -40,11 +40,11 @@ if (ESMF_FOUND)
             # Extract the variable name
             string(REGEX MATCH "^[^=]+" esmf_varname ${str})
             # Extract the variable's value
-            string(REGEX MATCH "=(.+)$" esmf_vardef ${str})
+            string(REGEX MATCH "=.+$" esmf_vardef ${str})
             # Only for variables with a defined value
             if (esmf_vardef)
                 # Get rid of the assignment string
-                string(REPLACE "=" "" esmf_vardef ${esmf_vardef})
+                string(SUBSTRING ${esmf_vardef} 1 -1 esmf_vardef)
                 # Remove whitespace
                 string(STRIP ${esmf_vardef} esmf_vardef)
                 # A string or single-valued list
