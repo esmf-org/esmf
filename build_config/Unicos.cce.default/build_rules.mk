@@ -51,7 +51,7 @@ ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V
 ############################################################
 # on XT with CCE optimization level must be set explicitely
 #
-ESMF_OPTLEVELDEFAULT  = 2
+#ESMF_OPTLEVELDEFAULT  = 2
 
 ############################################################
 # XT compute nodes do not have support for POSIX IPC (memory mapped files)
