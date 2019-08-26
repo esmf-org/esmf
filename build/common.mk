@@ -863,7 +863,7 @@ endif
 ifeq ($(origin ESMF_CXXCOMPILEOPTS_ENV), environment)
 ESMF_CXXCOMPILEOPTS = $(ESMF_CXXCOMPILEOPTS_ENV)
 endif
-ESMF_CXXCOMPILEOPTS += $(ESMF_CXXOPTFLAG) $(ESMF_SO_CXXCOMPILEOPTS)
+ESMF_CXXCOMPILEOPTS += $(ESMF_CXXSTDFLAG) $(ESMF_CXXOPTFLAG) $(ESMF_SO_CXXCOMPILEOPTS)
 # - make sure environment variable gets prepended _once_
 ifeq ($(origin ESMF_CXXCOMPILEPATHS), environment)
 export ESMF_CXXCOMPILEPATHS_ENV := $(ESMF_CXXCOMPILEPATHS)
@@ -1008,6 +1008,22 @@ ESMF_CPP = $(ESMF_CPPDEFAULT)
 endif
 ifneq ($(origin ESMF_SED), environment)
 ESMF_SED = $(ESMF_SEDDEFAULT)
+endif
+
+#-------------------------------------------------------------------------------
+# Add C++ standard string to compile options if the non-default is chosen.
+# Dependencies requiring a specific C++ standard should update the standard here
+#-------------------------------------------------------------------------------
+ifneq ($(ESMF_YAMLCPP),OFF)
+ifeq ($(ESMF_CXXSTD),default)
+ESMF_CXXSTD = 11
+endif
+endif
+
+ifneq ($(ESMF_CXXSTD),default)
+# Most compilers know the -std=c++XX flag. Overwrite in build_rules.mk if needed.
+ESMF_CXXSTDFLAG         = -std=c++$(ESMF_CXXSTD)
+ESMF_CXXCOMPILECPPFLAGS += -DESMF_CXXSTD=$(ESMF_CXXSTD)
 endif
 
 # - Archive library
@@ -1682,20 +1698,6 @@ endif
 #-------------------------------------------------------------------------------
 ifeq ($(ESMF_TESTWITHTHREADS),ON)
 ESMF_CPPFLAGS       += -DESMF_TESTWITHTHREADS
-endif
-
-#-------------------------------------------------------------------------------
-# Add C++ standard string to compile options if the non-default is chosen.
-# Dependencies requiring a specific C++ standard should update the standard here
-#-------------------------------------------------------------------------------
-ifneq ($(ESMF_YAMLCPP),OFF)
-ifeq ($(ESMF_CXXSTD),default)
-ESMF_CXXSTD = 11
-endif
-endif
-
-ifneq ($(ESMF_CXXSTD),default)
-ESMF_CXXCOMPILEOPTS  += -std=c++$(ESMF_CXXSTD) -DESMF_CXXSTD=$(ESMF_CXXSTD)
 endif
 
 #-------------------------------------------------------------------------------
