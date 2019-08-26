@@ -104,6 +104,13 @@ ESMF_F90COMPILEFIXCPP    = -f fixed -N 132 -F
 ESMF_F90COMPILEFIXNOCPP  = -f fixed -N 132
 
 ############################################################
+# Conditionally switch to C++11 standard
+#
+ifneq ($(ESMF_CXXSTD),default)
+ESMF_CXXSTDFLAG         = -hstd=c++$(ESMF_CXXSTD)
+endif
+
+############################################################
 # Blank out variables to prevent rpath encoding
 #
 ESMF_F90LINKRPATHS      =
