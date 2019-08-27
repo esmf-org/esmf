@@ -3998,13 +3998,6 @@ int Array::print()const{
   // initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  // return with errors for NULL pointer
-  if (this == NULL){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "Not a valid pointer to Array", ESMC_CONTEXT, &rc);
-    return rc;
-  }
-
   // print info about the ESMCI::Array object
   printf("--- ESMCI::Array::print start ---\n");
   ESMC_Print(); // print the Base class info
@@ -4115,13 +4108,6 @@ int Array::validate()const{
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-
-  // check against NULL pointer
-  if (this == ESMC_NULL_POINTER){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-       " - 'this' pointer is NULL.", ESMC_CONTEXT, &rc);
-    return rc;
-  }
 
   // return successfully
   rc = ESMF_SUCCESS;
@@ -4491,13 +4477,6 @@ int Array::gather(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-
-  // return with errors for NULL pointer
-  if (this == NULL){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "Not a valid pointer to Array", ESMC_CONTEXT, &rc);
-    return rc;
-  }
 
   // by default use the currentVM for vm
   if (vm == ESMC_NULL_POINTER){
@@ -4903,13 +4882,6 @@ int Array::scatter(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-
-  // return with errors for NULL pointer
-  if (this == NULL){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "Not a valid pointer to Array", ESMC_CONTEXT, &rc);
-    return rc;
-  }
 
   // by default use the currentVM for vm
   if (vm == ESMC_NULL_POINTER){

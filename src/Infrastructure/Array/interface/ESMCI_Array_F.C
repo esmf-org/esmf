@@ -107,9 +107,9 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
-    ESMCI::VM *opt_vm;
     bool actualFlag = true;
     // deal with optional arguments
+    ESMCI::VM *opt_vm;
     if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER)
       opt_vm = NULL;
     else{
@@ -835,6 +835,9 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_arrayprint()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
+    ESMCI_NULL_CHECK_PRC(*ptr, rc)
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError((*ptr)->print(),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -859,6 +862,9 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_arrayvalidate()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
+    ESMCI_NULL_CHECK_PRC(*ptr, rc)
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError((*ptr)->validate(),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -1271,8 +1277,11 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_arraygather()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-    ESMCI::VM *opt_vm;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(array, rc)
+    ESMCI_NULL_CHECK_PRC(*array, rc)
     // deal with optional arguments
+    ESMCI::VM *opt_vm;
     if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
     else opt_vm = *vm;
     // Call into the actual C++ method wrapped inside LogErr handling
@@ -1289,8 +1298,11 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_arraygathernotroot()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-    ESMCI::VM *opt_vm;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(array, rc)
+    ESMCI_NULL_CHECK_PRC(*array, rc)
     // deal with optional arguments
+    ESMCI::VM *opt_vm;
     if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
     else opt_vm = *vm;
     // Call into the actual C++ method wrapped inside LogErr handling
@@ -1308,8 +1320,11 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_arrayscatter()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-    ESMCI::VM *opt_vm;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(array, rc)
+    ESMCI_NULL_CHECK_PRC(*array, rc)
     // deal with optional arguments
+    ESMCI::VM *opt_vm;
     if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
     else opt_vm = *vm;
     // Call into the actual C++ method wrapped inside LogErr handling
@@ -1326,8 +1341,11 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_arrayscatternotroot()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-    ESMCI::VM *opt_vm;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(array, rc)
+    ESMCI_NULL_CHECK_PRC(*array, rc)
     // deal with optional arguments
+    ESMCI::VM *opt_vm;
     if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
     else opt_vm = *vm;
     // Call into the actual C++ method wrapped inside LogErr handling
