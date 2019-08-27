@@ -832,8 +832,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        ! if (present(extrapNumInputLevels)) then
        !    localExtrapNumInputLevels=extrapNumInputLevels
        ! else     
-           localExtrapNumInputLevels=1
-       ! endif
+        localExtrapNumInputLevels=1
+        ! endif
+
+
+        ! Can use extrapolation with conservative right now
+        if ((lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE) .or. &
+             (lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE_2ND)) then
+           if (localExtrapMethod .ne. ESMF_EXTRAPMETHOD_NONE) then
+              call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
+                   msg=" extrapolation currently not supported with conservative "// &
+                       "regrid methods (the resulting weights wouldn't be "// &
+                       "conservative with the available extrapolation methods).",& 
+                   ESMF_CONTEXT, rcToReturn=rc) 
+              return
+           endif
+        endif
+
 
         ! TODO: If lineType is present then do error checking here
 
@@ -850,6 +865,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         else     
            localNormType=ESMF_NORMTYPE_DSTAREA
         endif
+
 
 
        ! Handle pole method
