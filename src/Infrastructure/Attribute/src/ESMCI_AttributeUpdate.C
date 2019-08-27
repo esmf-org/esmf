@@ -95,13 +95,6 @@ static const int keySize = 4*sizeof(int) + 1;
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  // return with errors for NULL pointer
-  if (this == NULL){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid pointer to an Attribute", ESMC_CONTEXT, &localrc);
-    return ESMF_FAILURE;
-  }
-    
   // query the VM for localPet and petCount
   int localPet = vm->getLocalPet();
   int petCount = vm->getPetCount();

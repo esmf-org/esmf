@@ -1212,7 +1212,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   attpack = AttPackGet(convention, purpose, object, attPackInstanceName,
                    ESMC_ATTNEST_ON);
   if (attpack) {
-    if (attpack->AttributeGet(name)->isSet()) {
+    if (Attribute::isSet(attpack->AttributeGet(name))) {
       attpack->AttributeGet(name)->get(&vv);
       if (vv.size() == 1) {
         if (value.compare(vv.at(0)) == 0) return attpack; // match !
@@ -1682,7 +1682,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   // check attributes defined on this attpack
   for(unsigned int i=0; i<attrList.size(); i++) {
     string name = attrList.at(i)->attrName;
-    if (AttPackGetAttribute(name)->isSet()) return true;
+    if (Attribute::isSet(AttPackGetAttribute(name))) return true;
   }
   // otherwise check for any set attributes on nested attpacks, if requested
   if (inNestedAttPacks) {
@@ -2890,7 +2890,7 @@ if (attrRoot == ESMF_TRUE) {
   unsigned int i;
 
   // check whether this Attribute has been set
-  if (!isSet()) {
+  if (isSet(this)) {
     // not set -> return in a sensible way
     for (i=0; i<count; i++)
       lens[i] = 0;
@@ -3150,7 +3150,7 @@ if (attrRoot == ESMF_TRUE) {
 // !IROUTINE:  isSet - query if an {\tt Attribute} has been set
 //
 // !INTERFACE:
-      bool Attribute::isSet() const {
+      bool Attribute::isSet(const Attribute *attribute) {
 
 // 
 // !RETURN VALUE:
@@ -3165,13 +3165,13 @@ if (attrRoot == ESMF_TRUE) {
 //
 //EOPI
 
-  if (this == NULL) {
-    ESMC_LogDefault.Write("isSet - this == NULL",
+  if (attribute == NULL) {
+    ESMC_LogDefault.Write("isSet - (attribute == NULL)",
           ESMC_LOGMSG_WARN, ESMC_CONTEXT);
     return false;
   }
 
-  if (items > 0 && tk != ESMF_NOKIND)
+  if (attribute->items > 0 && attribute->tk != ESMF_NOKIND)
     return true;  // set
 
   //char msg[ESMF_MAXSTR];

@@ -200,7 +200,7 @@ class Attribute
              ESMC_AttNest_Flag anflag, int *count) const;
 
     // query whether an Attribute is "present" or "set"
-    bool isSet() const;
+    static bool isSet(const Attribute*);
 
     int streamJSON(ESMC_Logical flattenPackList, ESMC_Logical includeUnset, ESMC_Logical includeLinks, std::string &output) const;
     int streamAttributeToJSON(ESMC_Logical flattenPackList, ESMC_Logical includeUnset, ESMC_Logical includeLinks, std::string &output,  int *totalStreamed) const;

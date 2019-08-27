@@ -553,13 +553,6 @@ int ArrayBundle::print()const{
   // initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  // return with errors for NULL pointer
-  if (this == NULL){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "Not a valid pointer to ArrayBundle", ESMC_CONTEXT, &rc);
-    return rc;
-  }
-
   // print info about the ESMCI::ArrayBundle object
   printf("--- ESMCI::ArrayBundle::print start ---\n");
   printf("ArrayBundle: %s\n", getName());

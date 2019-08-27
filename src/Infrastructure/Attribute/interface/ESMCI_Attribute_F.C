@@ -3711,9 +3711,13 @@ extern "C" {
   if (*reconcile == ESMF_TRUE) local_reconcile = true;
   else local_reconcile = false;
 
+  // Get the Attribute
+  ESMCI::Attribute *attr = (*base)->ESMC_BaseGetRoot();
+  // test for NULL pointer via macro before calling any class methods
+  ESMCI_NULL_CHECK_PRC(attr, rc)
+  
   // Update the Attribute
-  status = (*base)->ESMC_BaseGetRoot()->AttributeUpdate(*vm, rootListl,
-    petList, local_reconcile);
+  status = attr->AttributeUpdate(*vm, rootListl, petList, local_reconcile);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 

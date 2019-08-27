@@ -56,6 +56,15 @@
     return;  \
   }
 
+// use this macro to test for NULL pointer in the interface layer
+// -> here assume rcvar is a pointer, and will be returned through argument list
+#define ESMCI_NULL_CHECK_PRC_RETURN_NULL(ptr, rcvar) \
+  if (ptr == NULL){ \
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL, \
+    "Not a valid object pointer", ESMC_CONTEXT, rcvar); \
+    return NULL;  \
+  }
+
 namespace ESMCI{
 
 class LogErr {

@@ -84,6 +84,8 @@ int ESMC_ArrayDestroy(ESMC_Array *array){
   
   // typecast into ESMCI type
   ESMCI::Array *ap = (ESMCI::Array *)(array->ptr);
+  // test for NULL pointer via macro before calling any class methods
+  ESMCI_NULL_CHECK_RC(ap, rc)
 
   // call into ESMCI method  
   localrc = ESMCI::Array::destroy(&ap);
@@ -111,6 +113,8 @@ int ESMC_ArrayPrint(ESMC_Array array){
   
   // typecast into ESMCI type
   ESMCI::Array *ap = (ESMCI::Array *)(array.ptr);
+  // test for NULL pointer via macro before calling any class methods
+  ESMCI_NULL_CHECK_RC(ap, rc)
 
   // call into ESMCI method  
   localrc = ap->print();
@@ -134,6 +138,8 @@ const char *ESMC_ArrayGetName(ESMC_Array array, int *rc){
 
   // typecast into ESMCI type
   ESMCI::Array *ap = (ESMCI::Array *)(array.ptr);
+  // test for NULL pointer via macro before calling any class methods
+  ESMCI_NULL_CHECK_PRC_RETURN_NULL(ap, rc)
 
   // call into ESMCI method 
   const char *name = ap->getName();
@@ -153,15 +159,10 @@ void *ESMC_ArrayGetPtr(ESMC_Array array, int localDe, int *rc){
   // initialize return code; assume routine not implemented
   *rc = ESMC_RC_NOT_IMPL;              // final return code
   
-  // check input
-  if (array.ptr == NULL){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-    "- Not a valid ESMC_Array object", ESMC_CONTEXT, rc);
-    return NULL;  // bail out
-  }
-  
   // typecast into ESMCI type
   ESMCI::Array *ap = (ESMCI::Array *)(array.ptr);
+  // test for NULL pointer via macro before calling any class methods
+  ESMCI_NULL_CHECK_PRC_RETURN_NULL(ap, rc)
 
   // check localDe input
   int localDeCount = ap->getDELayout()->getLocalDeCount();  
@@ -194,6 +195,8 @@ int ESMC_ArraySetLWidth(ESMC_Array array,
  
   // typecast into ESMCI type
   ESMCI::Array *ap = (ESMCI::Array *)(array.ptr);
+  // test for NULL pointer via macro before calling any class methods
+  ESMCI_NULL_CHECK_RC(ap, rc)
  
   // call into ESMCI method
   localrc = ap->setComputationalLWidth(
