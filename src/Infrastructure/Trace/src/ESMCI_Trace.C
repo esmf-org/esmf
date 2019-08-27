@@ -1411,22 +1411,22 @@ namespace ESMCI {
 
             Attribute *attr;
             attr = attrPack->AttPackGetAttribute("InitializePhaseMap", ESMC_ATTNEST_ON);
-            if (attr != NULL && attr->isSet()) {
+            if (attr != NULL && Attribute::isSet(attr)) {
               localrc = attr->get(&IPM);
               if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
             }
             attr = attrPack->AttPackGetAttribute("InternalInitializePhaseMap", ESMC_ATTNEST_ON);
-            if (attr != NULL && attr->isSet()) {
+            if (attr != NULL && Attribute::isSet(attr)) {
               localrc = attr->get(&IIPM);
               if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
             }
             attr = attrPack->AttPackGetAttribute("RunPhaseMap", ESMC_ATTNEST_ON);
-            if (attr != NULL && attr->isSet()) {
+            if (attr != NULL && Attribute::isSet(attr)) {
               localrc = attr->get(&RPM);
               if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
             }
             attr = attrPack->AttPackGetAttribute("FinalizePhaseMap", ESMC_ATTNEST_ON);
-            if (attr != NULL && attr->isSet()) {
+            if (attr != NULL && Attribute::isSet(attr)) {
               localrc = attr->get(&FPM);
               if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
             }
