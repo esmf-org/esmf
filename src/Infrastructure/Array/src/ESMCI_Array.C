@@ -387,6 +387,7 @@ void Array::destruct(bool followCreator, bool noGarbage){
       localrc = cvm->ssishmFree(mh);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+      delete mh;
       mh = NULL;
     }
     if (localDeToDeMap != NULL)
