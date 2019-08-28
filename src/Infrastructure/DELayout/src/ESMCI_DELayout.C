@@ -3544,8 +3544,10 @@ void XXE::streamify(stringstream &streami){
 
   // HEADER
   append(streami, count);                 // number of elements in op-stream
-  append(streami, dataMap.size());        // number of data elements
-  append(streami, bufferInfoList.size()); // number of buffer elements
+  map<void *, unsigned long>::size_type dataMapSize = dataMap.size();
+  append(streami, dataMapSize);           // number of data elements
+  vector<BufferInfo *>::size_type bufferInfoListSize = bufferInfoList.size();
+  append(streami, bufferInfoListSize);    // number of buffer elements
   append(streami, commhandleCount);       // number of commhandles
   append(streami, xxeSubCount);           // number of subs
   for (int i=0; i<10; i++)
