@@ -70,7 +70,8 @@ namespace ESMCI {
 
     MDSS &operator= (const MDSS &rhs) {
       angle=rhs.angle;
-       id=rhs.id;
+      id=rhs.id;
+      return *this;
     }
 
     bool operator< (const MDSS &rhs) const {
