@@ -30,7 +30,7 @@ ifeq ($(ESMF_COMM),mpi)
 # Vendor MPI -----------------------------------------------
 ESMF_F90LINKLIBS       += 
 ESMF_CXXLINKLIBS       += 
-ESMF_MPIRUNDEFAULT      = mpirun.unicos
+ESMF_MPIRUNDEFAULT      = mpirun.srun
 ESMF_MPIMPMDRUNDEFAULT  =
 else
 ifeq ($(ESMF_COMM),user)
