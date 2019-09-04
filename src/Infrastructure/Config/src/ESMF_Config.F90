@@ -1006,11 +1006,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !     Determine whether label exists from current position onward
 !     -----------------------------------------------------------
-!     ptr = max(config%cptr%next_line, 1)
       ptr = max(config%cptr%next_line-1, 1)
       i = index_ ( config%cptr%buffer(ptr:config%cptr%nbuf ), EOL//label) + 1
 
-      !! NOTE: to be fixed !! breaks empty sections
       if ( i .eq. 1 ) then
          config%cptr%this_line = BLK // EOL
          if (present (isPresent)) then
