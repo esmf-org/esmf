@@ -235,7 +235,7 @@ int main(void){
   //Presence of a non-present label in the loaded resource file
   strcpy(name, "ConfigFindLabel in Section presence Unit test");
   strcpy(failMsg, "Did not return present");
-  ESMC_Test(!present, name, failMsg, &result, __FILE__, __LINE__,0);
+  ESMC_Test(present, name, failMsg, &result, __FILE__, __LINE__,0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
@@ -254,7 +254,7 @@ int main(void){
   //Presence of a non-present label in the loaded resource file
   strcpy(name, "ConfigFindNextLabel in Section presence Unit test");
   strcpy(failMsg, "Did not return present");
-  ESMC_Test(!present, name, failMsg, &result, __FILE__, __LINE__,0);
+  ESMC_Test(present, name, failMsg, &result, __FILE__, __LINE__,0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
