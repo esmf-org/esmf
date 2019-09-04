@@ -34,12 +34,11 @@ int main(void){
   const char* fileName2= "ESMF_Resource_File_Sample2.rc";  // file name
   char name[80];
   char failMsg[80];
-  char label1[80];
-  char label2[80];
   int linecount, colcount;
   int result = 0;
   int rc = ESMF_RC_NOT_IMPL;
   int unique = 0;
+  int present = 0;
 
   //----------------------------------------------------------------------------
   ESMC_TestStart(__FILE__, __LINE__, 0);
@@ -223,6 +222,44 @@ int main(void){
   //----------------------------------------------------------------------------
   //EX_UTest
   //Destroy Config from section object
+  strcpy(name, "ConfigFindLabel in Section with Table Unit test");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  const char* label1="section_table_token:";
+  present = 0;
+  rc = ESMC_ConfigFindLabel(cfs, label1, &present);
+  ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__,0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  //Presence of a non-present label in the loaded resource file
+  strcpy(name, "ConfigFindLabel in Section presence Unit test");
+  strcpy(failMsg, "Did not return present");
+  ESMC_Test(!present, name, failMsg, &result, __FILE__, __LINE__,0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  //Destroy Config from section object
+  strcpy(name, "ConfigFindNextLabel in Section with Table Unit test");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  const char* label2="section_data_values:";
+  present = 0;
+  rc = ESMC_ConfigFindNextLabel(cfs, label2, &present);
+  ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__,0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  //Presence of a non-present label in the loaded resource file
+  strcpy(name, "ConfigFindNextLabel in Section presence Unit test");
+  strcpy(failMsg, "Did not return present");
+  ESMC_Test(!present, name, failMsg, &result, __FILE__, __LINE__,0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  //Destroy Config from section object
   strcpy(name, "ConfigDestroy from Section with Table Unit test");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_ConfigDestroy(&cfs);
@@ -234,7 +271,7 @@ int main(void){
   //NEX_UTest
   //Find a label in the loaded resource file
   const char* label="Number_of_Members:";
-  int present;
+  present = 0;
   strcpy(name, "ConfigFindLabel Unit test");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_ConfigFindLabel(cf, label, &present);
