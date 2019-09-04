@@ -68,6 +68,7 @@ program ESMF_GridCreateEx
 
       ! for Cubed Sphere test
       integer, allocatable :: decomptile(:,:)
+      type(ESMF_CubedSphereTransform_Args):: transformArgs
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -1377,6 +1378,7 @@ endif
 !A total of 16 DEs are used.
 !
 !In this example, both the center and corner coordinates will be added to the grid.
+!EOE
 
 !BOC
      ! Set up decomposition for each tile
@@ -1391,6 +1393,47 @@ endif
      ! Create cubed sphere grid
      grid2D = ESMF_GridCreateCubedSphere(tileSize=45, regDecompPTile=decomptile, &
                  staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), rc=rc)
+!EOC
+     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+     ! Get rid of Grid
+     call ESMF_GridDestroy(grid2D, rc=rc)
+     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!BOE
+!\subsubsection{Create a six-tile cubed sphere Grid and apply Schmidt transform}
+!\label{sec:usage:cubedspherewttransform}
+!
+!This example creates the same cubed sphere grid with the same regular
+!decomposition as in \ref{sec:usage:cubedsphere} with a few differences.
+!First, the coordinates of the grid are of type {\tt ESMF\_TYPEKIND\_R4}
+!instead of the default {\tt ESMF\_TYPEKIND\_R8}. Secondly, the coordinate
+!system is {\tt ESMF\_COORDSYS\_SPH\_RAD} instead of the default {\tt ESMF\_COORDSYS\_SPH\_DEG}.
+!Lastly, the grid was then
+!transformed using Schmidt Transformation algorithm on an arbitrary
+!target point and a streatching factor.  An optional argument {\tt TransformArgs} of 
+!type {\tt ESMF\_CubedSphereTransform\_Args} is used to pass the Schmidt
+!Transform arguments.  {\tt ESMF\_CubedSphereTransform\_Args} is defined as
+!follows:
+!\begin{verbatim}
+!   type ESMF_CubedSphereTransform_Args
+!      real(ESMF_KIND_R4) :: stretch_factor, target_lat, target_lon
+!   end type
+!\end{verbatim}
+!
+! Note {\tt target\_lat} and {\tt target\_lon} are in radians.
+!EOE
+ 
+!BOC
+     transformArgs%stretch_factor = 0.5;
+     transformArgs%target_lat = 0.0; ! in radians
+     transformArgs%target_lat = 1.3; ! in radians
+     grid2D = ESMF_GridCreateCubedSphere(tileSize=45, regDecompPTile=decomptile, &
+                 staggerLocList = (/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
+                 coordTypeKind = ESMF_TYPEKIND_R4, &
+                 coordSys = ESMF_COORDSYS_SPH_RAD, &
+                 transformArgs=transformArgs, &
+                 rc=rc)
+
 !EOC
      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
      ! Get rid of Grid
