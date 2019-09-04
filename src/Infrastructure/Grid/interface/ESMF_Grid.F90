@@ -5291,7 +5291,7 @@ subroutine convert_corner_arrays_to_1D(isSphere,dim1,dim2,cornerX2D,cornerY2D,co
 
     ! Doesn't match anyone
     TopCorner=i
-    
+
     ! Exit the loop
     exit
  enddo
@@ -5378,7 +5378,7 @@ subroutine convert_corner_arrays_to_1D(isSphere,dim1,dim2,cornerX2D,cornerY2D,co
     endif
 
  enddo
-  
+
   ! Make sure we found a corner
   if (BtmCorner == -1) then
      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, msg="- Bad corner array in SCRIP file", &
@@ -14490,8 +14490,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          {\tt ESMF\_Grid} name.
 !     \item[{[transformArgs]}]
 !          A data type containing the stretch factor, target longitude, and target latitude
-!          to perform a schmidt transformation on the Cubed-Sphere grid. The
-!          target lat/lon are in radians.
+!          to perform a Schmidt transformation on the Cubed-Sphere grid. See section
+!          \ref{sec:usage:cubedspherewttransform} for details.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -14947,8 +14947,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          {\tt ESMF\_Grid} name.
 !     \item[{[transformArgs]}]
 !          A data type containing the stretch factor, target longitude, and target latitude
-!          to perform a schmidt transformation on the Cubed-Sphere grid. The
-!          target lat/lon are in radians.
+!          to perform a Schmidt transformation on the Cubed-Sphere grid. See section
+!          \ref{sec:usage:cubedspherewttransform} for details.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
