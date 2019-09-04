@@ -1848,9 +1848,9 @@ ESMF_TRACE_WRAPPERS_MPI += mpi_wait_ mpi_wait__ mpi_waitall_ mpi_waitall__
 ESMF_TRACE_WRAPPERS_MPI += mpi_waitany_ mpi_waitany__
 
 COMMA := ,
-ESMF_TRACE_STATICLINKOPTS := -static -Wl,--wrap=c_esmftrace_notify_wrappers -Wl,--wrap=c_esmftrace_isinitialized
-ESMF_TRACE_STATICLINKOPTS += $(addprefix -Wl$(COMMA)--wrap=, $(ESMF_TRACE_WRAPPERS_IO))
-ESMF_TRACE_STATICLINKOPTS += $(addprefix -Wl$(COMMA)--wrap=, $(ESMF_TRACE_WRAPPERS_MPI))
+ESMF_TRACE_STATICLINKOPTS += $(foreach fun,c_esmftrace_notify_wrappers c_esmftrace_isinitialized,-Wl$(COMMA)-alias$(COMMA)_$(fun)$(COMMA)__wrap_$(fun))
+ESMF_TRACE_STATICLINKOPTS += $(foreach fun,$(ESMF_TRACE_WRAPPERS_IO),-Wl$(COMMA)-alias$(COMMA)_$(fun)$(COMMA)__wrap_$(fun))
+ESMF_TRACE_STATICLINKOPTS += $(foreach fun,$(ESMF_TRACE_WRAPPERS_MPI),-Wl$(COMMA)-alias$(COMMA)_$(fun)$(COMMA)__wrap_$(fun))
 
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
