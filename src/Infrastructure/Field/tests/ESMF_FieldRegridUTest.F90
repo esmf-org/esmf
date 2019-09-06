@@ -27375,7 +27375,7 @@ write(*,*) "LOCALRC=",localrc
   !-------------------------------------------------------------------
   do i=1,numLocationsOnThisPet
      x(i)=(i-1)*360.0/numLocationsOnThisPet
-     y(i)=0.0
+     y(i)=REAL(localPet,ESMF_KIND_R8)
   enddo
 
 
@@ -27470,7 +27470,7 @@ write(*,*) "LOCALRC=",localrc
   !setting the coordinates with offset 
   do i=1,numLocationsOnThisPet
      x(i)=(i-1)*360.0/numLocationsOnThisPet+0.001
-     y(i)=0.0
+     y(i)=REAL(localPet,ESMF_KIND_R8)
   enddo
 
 
@@ -27735,7 +27735,7 @@ write(*,*) "LOCALRC=",localrc
   !-------------------------------------------------------------------
   do i=1,numLocationsOnThisPet
      x(i)=(i-1)*360.0/numLocationsOnThisPet
-     y(i)=0.0
+     y(i)=REAL(localPet,ESMF_KIND_R8)
      z(i)=(i-1)*20.0/numLocationsOnThisPet
   enddo
 
@@ -27852,7 +27852,7 @@ write(*,*) "LOCALRC=",localrc
   !setting the coordinates with offset 
   do i=1,numLocationsOnThisPet
      x(i)=(i-1)*360.0/numLocationsOnThisPet+0.001
-     y(i)=0.0
+     y(i)=REAL(localPet,ESMF_KIND_R8)
      z(i)=(i-1)*20.0/numLocationsOnThisPet
   enddo
 
