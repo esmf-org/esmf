@@ -1,0 +1,21 @@
+# Run sequence
+runSeq::
+  @1800.0
+    MED MedPhase_prep_ocn
+    MED -> OCN :remapMethod=redist
+    OCN
+    @600.0
+      MED MedPhase_prep_ice
+      MED MedPhase_prep_atm
+      MED -> ATM :remapMethod=redist
+      MED -> ICE :remapMethod=redist
+      ATM
+      ICE
+      ATM -> MED :remapMethod=redist
+      ICE -> MED :remapMethod=redist
+      MED MedPhase_atm_ocn_flux
+      MED MedPhase_accum_fast
+    @
+    OCN -> MED :remapMethod=redist
+  @
+::

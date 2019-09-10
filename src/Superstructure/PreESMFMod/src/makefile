@@ -3,7 +3,7 @@
 ALL: build_here 
 
 SOURCEC	  = 
-SOURCEF	  = ESMF_RegridWeightGenCheck.F90 ESMF_RegridWeightGen.F90 ESMF_FileRegrid.F90
+SOURCEF	  = ESMF_RegridWeightGenCheck.F90 ESMF_RegridWeightGen.F90 ESMF_FileRegrid.F90 ESMF_FileRegridCheck.F90
 
 # list all .h files which should be copied to common include dir
 STOREH	  = 

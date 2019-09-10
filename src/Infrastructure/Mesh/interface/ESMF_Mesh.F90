@@ -1590,7 +1590,13 @@ end function ESMF_MeshCreateFromDG
 
 !
 ! !DESCRIPTION:
-!   Create a Mesh from an ESMF Grid. 
+!   Create an ESMF Mesh from an ESMF Grid. This method creates the elements of 
+!  the Mesh from the cells of the Grid, and the nodes of the Mesh from the corners of 
+!  the Grid. Corresponding locations in the Grid and new Mesh will have the same 
+!  coordinates, sequence indices, masking, and area information.
+!
+!   This method currently only works for 2D Grids. In addition, this method requires 
+!   the input Grid to have coordinates in the corner stagger location.  
 !
 !   \begin{description}
 !   \item [grid]
@@ -1929,8 +1935,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !         The name of the grid file
 !   \item[fileformat]
 !         The file format. The valid options are {\tt ESMF\_FILEFORMAT\_SCRIP}, {\tt ESMF\_FILEFORMAT\_ESMFMESH} and
-!         {\tt ESMF\_FILEFORMAT\_UGRID}. If the file is a SCRIP file, the dimension {\tt grid\_rank} in the file has to
-!         be equal to 1.  Please see Section~\ref{const:fileformatflag} for a detailed description of the options.
+!         {\tt ESMF\_FILEFORMAT\_UGRID}. 
+!         Please see Section~\ref{const:fileformatflag} for a detailed description of the options.
 !   \item[{[convertToDual]}]
 !         if {\tt .true.}, the mesh will be converted to its dual. If not specified,
 !         defaults to {\tt .false.}.

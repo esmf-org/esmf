@@ -17,13 +17,25 @@ program ESMF_FieldBundleCreateEx
     implicit none
     
 !   ! Local variables
-    integer :: i, rc, fieldcount
+    type(ESMF_VM)   :: vm
+    integer :: i, rc, fieldcount, petCount, localPet
     type(ESMF_Grid) :: grid
     type(ESMF_ArraySpec) :: arrayspec
     character (len = ESMF_MAXSTR) :: bname1, fname1, fname2
     type(ESMF_Field) :: field(10), returnedfield1, returnedfield2, r_fields(3)
     type(ESMF_Field) :: simplefield
     type(ESMF_FieldBundle) :: bundle1, bundle2, bundle3
+    type(ESMF_Grid)             :: gridxy
+    type(ESMF_FieldBundle)      :: packedFB
+    real(ESMF_KIND_R8), pointer :: packedPtr(:,:,:,:)
+    real(ESMF_KIND_R8), pointer :: packedPtr3D(:,:,:)
+    integer                     :: fieldDim
+    character(len = ESMF_MAXSTR), dimension(10) :: fieldNameList
+    type(ESMF_Mesh) :: meshEx
+    integer, pointer :: nodeIds(:),nodeOwners(:)
+    real(ESMF_KIND_R8), pointer :: nodeCoords(:)
+    integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
+    integer :: numNodes, numElems
 
     integer :: finalrc, result
 
@@ -47,6 +59,12 @@ program ESMF_FieldBundleCreateEx
     call ESMF_Initialize(defaultlogfilename="FieldBundleCreateEx.Log", &
                     logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
     
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+    call ESMF_VMGetCurrent(vm=vm, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+    call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !------------------------------------------------------------------------------
@@ -270,6 +288,233 @@ program ESMF_FieldBundleCreateEx
     enddo
 !EOC
 
+  if(petCount == 4) then
+!-------------------------------------------------------------------------
+!BOE
+! \subsubsection{Create a packed FieldBundle on a Grid}
+! \label{sec:fieldbundle:usage:packedFBGrid}
+! Create a packed fieldbundle from user supplied 
+! field names and a packed Fortran array pointer that contains
+! the data of the packed fields on a Grid. 
+!EOE
+  do i = 1, 10
+  write(fieldNameList(i), '(A,I2)') 'field', i
+  enddo
+!BOE
+! Create a 2D grid of 4x1 regular decomposition on 4 PETs, each PET has 10x50 elements.
+! The index space of the entire Grid is 40x50.
+!EOE
+!BOC
+  gridxy = ESMF_GridCreateNoPeriDim(maxIndex=(/40,50/), regDecomp=(/4,1/), rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!BOE
+! Allocate a packed Fortran array pointer containing 10 packed fields, each field has
+! 3 time slices and uses the 2D grid created. Note that gridToFieldMap uses the position
+! of the grid dimension as elements, 3rd element of the packedPtr is 10, 4th element
+! of the packedPtr is 50.
+!EOE
+!BOC
+  allocate(packedPtr(10, 3, 10, 50)) ! fieldDim, time, y, x
+  fieldDim = 1
+  packedFB = ESMF_FieldBundleCreate(fieldNameList, packedPtr, gridxy, fieldDim, &
+  gridToFieldMap=(/3,4/), staggerloc=ESMF_Staggerloc_Center, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  deallocate(packedPtr)
+  call ESMF_FieldBundleDestroy(packedFB, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!-------------------------------------------------------------------------
+!BOE
+! \subsubsection{Create a packed FieldBundle on a Mesh}
+! \label{sec:fieldbundle:usage:packedFBMesh}
+! Similarly we could create a packed fieldbundle from user supplied 
+! field names and a packed Fortran array pointer that contains
+! the data of the packed fields on a Mesh. 
+! 
+! Due to the verbosity of the MeshCreate process, the code for MeshCreate is
+! not shown below, user can either refer to the MeshCreate section
+! \ref{sec:mesh:usage:meshCreation}
+! or examine the FieldBundleCreate example source code contained
+! in the ESMF source distribution directly.
+! A ESMF Mesh on 4 PETs with one mesh element on each PET is created.
+!EOE
+     ! Setup mesh data depending on PET
+     if (localPet .eq. 0) then
+        ! Fill in node data
+        numNodes=4
+
+       !! node ids
+       allocate(nodeIds(numNodes))
+       nodeIds=(/1,2,4,5/) 
+
+       !! node Coords
+       allocate(nodeCoords(numNodes*2))
+       nodeCoords=(/0.0,0.0, &
+                    1.0,0.0, &
+                    0.0,1.0, &
+                    1.0,1.0/)
+
+       !! node owners
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0,0,0,0/) ! everything on proc 0
+
+       ! Fill in elem data
+       numElems=1
+
+       !! elem ids
+       allocate(elemIds(numElems))
+       elemIds=(/1/) 
+
+       !! elem type
+       allocate(elemTypes(numElems))
+       elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+       !! elem conn
+       allocate(elemConn(numElems*4))
+       elemConn=(/1,2,4,3/)
+     else if (localPet .eq. 1) then
+        ! Fill in node data
+        numNodes=4
+
+       !! node ids
+       allocate(nodeIds(numNodes))
+       nodeIds=(/2,3,5,6/) 
+
+       !! node Coords
+       allocate(nodeCoords(numNodes*2))
+       nodeCoords=(/1.0,0.0, &
+                    2.0,0.0, &
+                    1.0,1.0, &
+                    2.0,1.0/)
+
+       !! node owners
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0,1,0,1/) 
+
+       ! Fill in elem data
+       numElems=1
+
+       !! elem ids
+       allocate(elemIds(numElems))
+       elemIds=(/2/) 
+
+       !! elem type
+       allocate(elemTypes(numElems))
+       elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+       !! elem conn
+       allocate(elemConn(numElems*4))
+       elemConn=(/1,2,4,3/)
+     else if (localPet .eq. 2) then
+        ! Fill in node data
+        numNodes=4
+
+       !! node ids
+       allocate(nodeIds(numNodes))
+       nodeIds=(/4,5,7,8/) 
+
+       !! node Coords
+       allocate(nodeCoords(numNodes*2))
+       nodeCoords=(/0.0,1.0, &
+                    1.0,1.0, &
+                    0.0,2.0, &
+                    1.0,2.0/)
+
+       !! node owners
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0,0,2,2/) 
+
+       ! Fill in elem data
+       numElems=1
+
+       !! elem ids
+       allocate(elemIds(numElems))
+       elemIds=(/3/) 
+
+       !! elem type
+       allocate(elemTypes(numElems))
+       elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+       !! elem conn
+       allocate(elemConn(numElems*4))
+       elemConn=(/1,2,4,3/)  
+     else 
+        ! Fill in node data
+        numNodes=4
+
+       !! node ids
+       allocate(nodeIds(numNodes))
+       nodeIds=(/5,6,8,9/) 
+
+       !! node Coords
+       allocate(nodeCoords(numNodes*2))
+       nodeCoords=(/1.0,1.0, &
+                    2.0,1.0, &
+                    1.0,2.0, &
+                    2.0,2.0/)
+
+       !! node owners
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0,1,2,3/) 
+
+       ! Fill in elem data
+       numElems=1
+
+       !! elem ids
+       allocate(elemIds(numElems))
+       elemIds=(/4/) 
+
+       !! elem type
+       allocate(elemTypes(numElems))
+       elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+       !! elem conn
+       allocate(elemConn(numElems*4))
+       elemConn=(/1,2,4,3/)  
+     endif
+
+    ! Create Mesh structure in 1 step
+    meshEx=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+         nodeIds=nodeIds, nodeCoords=nodeCoords, &
+         nodeOwners=nodeOwners, elementIds=elemIds,&
+         elementTypes=elemTypes, elementConn=elemConn, &
+         rc=rc)
+    if (rc.ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+    ! deallocate node data
+    deallocate(nodeIds)
+    deallocate(nodeCoords)
+    deallocate(nodeOwners)
+
+    ! deallocate elem data
+    deallocate(elemIds)
+    deallocate(elemTypes)
+    deallocate(elemConn)
+!BOE
+! Allocate the packed Fortran array pointer, the first dimension
+! is fieldDim; second dimension is the data associated with mesh element,
+! since there is only one mesh element on each processor in this example,
+! the allocation is 1; last dimension is the time dimension which contains
+! 3 time slices.
+!EOE
+!BOC
+      allocate(packedPtr3D(10, 1, 3))
+      fieldDim = 1
+      packedFB = ESMF_FieldBundleCreate(fieldNameList, packedPtr3D, meshEx, fieldDim, &
+        gridToFieldMap=(/2/), meshloc=ESMF_MESHLOC_ELEMENT, rc=rc)
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      call ESMF_FieldBundleDestroy(packedFB, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      deallocate(packedPtr3D)
+      call ESMF_MeshDestroy(meshEx, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
 !BOE
 !\subsubsection{Destroy a FieldBundle}
 !
@@ -278,6 +523,7 @@ program ESMF_FieldBundleCreateEx
 !can be shared by multiple FieldBundles and States, they are
 !not deleted by this call.
 !EOE
+  endif ! petCount = 4
 
 
 !BOC

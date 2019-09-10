@@ -51,8 +51,8 @@ namespace ESMCI {
 
 class VMId {
   public:
-  char *vmKey;    // bit-pattern that identifies VM VAS context
-  int localID;    // local ID of the VM within VAS context
+  unsigned char *vmKey;   // bit-pattern that identifies VM VAS context
+  int localID;            // local ID of the VM within VAS context
 
   public:
   VMId() { vmKey=NULL; localID=0; }
@@ -64,6 +64,7 @@ class VMId {
   int serialize(const char *buffer, int *length, int *offset,
                 const ESMC_InquireFlag &inquireflag);
   int deserialize(const char *buffer, int *offset, bool offsetonly);
+  void log(std::string prefix) const;
   int print () const;
 };
 

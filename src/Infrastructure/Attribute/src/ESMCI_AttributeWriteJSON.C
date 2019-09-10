@@ -248,7 +248,7 @@ namespace ESMCI {
 
                         Attribute *cur = attrVector.at(i);
 
-                        if (cur->isSet()) {
+                        if (isSet(cur)) {
                                 string val;
                                 int attrCount = -1;
 

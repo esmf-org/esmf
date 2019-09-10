@@ -17,6 +17,7 @@ program ESMF_RegridApp
   use ESMF_IOScripMod
   use ESMF_IOGridspecMod
   use ESMF_FileRegridMod
+  use ESMF_FileRegridCheckMod
 
   implicit none
 
@@ -29,20 +30,24 @@ program ESMF_RegridApp
   integer            :: PetNo, PetCnt
   character(ESMF_MAXPATHLEN) :: srcfile, dstfile
   character(ESMF_MAXPATHLEN) :: srcvarname, dstvarname
+  character(ESMF_MAXPATHLEN) :: srcdatafile, dstdatafile
+  character(ESMF_MAXPATHLEN) :: tilePath, dstLoc
   character(ESMF_MAXPATHLEN) :: cwd
   character(len=40)  :: method, flag
   type(ESMF_PoleMethod_Flag) :: pole
+  integer            :: length
   integer            :: poleptrs
   type(ESMF_RegridMethod_Flag) :: methodflag
-  character(len=ESMF_MAXPATHLEN) :: commandbuf1(4)
-  integer            :: commandbuf2(7)
+  character(len=ESMF_MAXPATHLEN) :: commandbuf1(8)
+  integer            :: commandbuf2(6)
   integer            :: ind, pos
-  logical            :: ignoreUnmapped, userAreaFlag
+  logical            :: ignoreUnmapped
   logical            :: ignoreDegenerate
   type(ESMF_UnmappedAction_Flag) :: unmappedaction
   logical            :: srcIsRegional, dstIsRegional, typeSetFlag
+  logical            :: useTilePathFlag
   character(len=256) :: argStr
-  logical            :: terminateProg
+  logical            :: terminateProg, checkFlag
   !real(ESMF_KIND_R8) :: starttime, endtime
   type(ESMF_LogKind_Flag) :: msgbuf(1)
   type(ESMF_LogKind_Flag) :: logflag
@@ -67,6 +72,8 @@ program ESMF_RegridApp
 #else
   PetNo = 0
 #endif
+
+  checkFlag = .FALSE.
 
   if (PetNo == 0) then
       logflag = ESMF_LOGKIND_MULTI
@@ -163,6 +170,47 @@ program ESMF_RegridApp
       call ESMF_UtilGetArg(ind+1, argvalue=dstvarname)
     endif
 
+    dstLoc = 'face'
+    call ESMF_UtilGetArgIndex('--dst_loc', argindex=ind, rc=rc)
+    ! the --dst_loc is used if the file format is UGRID, the destination var is not
+    ! defined and the regrid method is not conservative
+    if (ind /= -1) then
+      call ESMF_UtilGetArg(ind+1, argvalue=argStr)         
+      if (trim(argStr) .eq. 'corner') then
+         dstLoc = 'node'
+      elseif (trim(argStr) .eq. 'center') then
+         dstLoc = 'face'
+      else
+          write(*,*)
+          print *, 'ERROR: Unknown --dst_loc: must be either center or corner'
+          print *, "Use the --help argument to see an explanation of usage."
+          call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      endif
+    endif
+    srcdatafile = ' '
+    call ESMF_UtilGetArgIndex('--srcdatafile', argindex=ind, rc=rc)
+    if (ind /= -1) then
+      call ESMF_UtilGetArg(ind+1, argvalue=srcdatafile)
+    endif
+
+    dstdatafile=' '
+    call ESMF_UtilGetArgIndex('--dstdatafile', argindex=ind, rc=rc)
+    if (ind /= -1) then
+      call ESMF_UtilGetArg(ind+1, argvalue=dstdatafile)
+    endif
+
+    ! --tilefile_path to specify alternative tile file path
+    call ESMF_UtilGetArgIndex('--tilefile_path', argindex=ind, rc=rc)
+    if (ind /= -1) then
+      call ESMF_UtilGetArg(ind+1, argvalue=tilePath)         
+      length=len_trim(tilePath)
+      if (tilePath(length:length) /= '/') tilePath(length+1:length+1)='/'
+      useTilePathFlag = .true.
+    else
+      tilePath=' '
+      useTilePathFlag = .false.
+    endif
+
     call ESMF_UtilGetArgIndex('-m', argindex=ind, rc=rc)
     if (ind == -1) call ESMF_UtilGetArgIndex('--method', argindex=ind, rc=rc)
     if (ind == -1) then
@@ -172,13 +220,14 @@ program ESMF_RegridApp
       call ESMF_UtilGetArg(ind+1, argvalue=method)
             if ((trim(method) .ne. 'bilinear') .and. &
           (trim(method) .ne. 'conserve') .and. &
-                (trim(method) .ne. 'patch')    .and. &
+          (trim(method) .ne. 'conserve2nd') .and. &
+          (trim(method) .ne. 'patch')    .and. &
           (trim(method) .ne. 'nearestdtos')   .and. &
           (trim(method) .ne. 'neareststod')) then
         write(*,*)
         print *, 'ERROR: The interpolation method "', trim(method), '" is not supported'
-        print *, '  The supported methods are "bilinear", "patch", "conserve", "neareststod"'
-        print *, '  and "nearestdtos"'
+        print *, '  The supported methods are "bilinear", "patch", "conserve", "conserve2nd",'
+        print *, '  "neareststod" and "nearestdtos"'
         print *, "Use the --help argument to see an explanation of usage."
         call ESMF_Finalize(endflag=ESMF_END_ABORT)
       endif
@@ -189,6 +238,7 @@ program ESMF_RegridApp
     if (ind == -1) call ESMF_UtilGetArgIndex('--pole', argindex=ind, rc=rc)
     if (ind == -1) then
       if ((trim(method) .eq. 'conserve') .or.    &
+          (trim(method) .eq. 'conserve2nd') .or. &
           (trim(method) .eq. 'nearestdtos') .or. &
           (trim(method) .eq. 'neareststod')) then
         ! print *, 'Use default pole: None'
@@ -212,10 +262,10 @@ program ESMF_RegridApp
         read(flag,'(i4)') poleptrs
         pole = ESMF_POLEMETHOD_NPNTAVG
       endif
-      if ((method .eq. 'conserve') .and. &
+      if ((method .eq. 'conserve' .or. method .eq. 'conserve2nd') .and. &
           (pole .ne. ESMF_POLEMETHOD_NONE)) then
         write(*,*)
-        print *, 'ERROR: Conserve method only works with no pole.'
+        print *, 'ERROR: Conserve methods only work with no pole.'
         print *, "Use the --help argument to see an explanation of usage."
         call ESMF_Finalize(endflag=ESMF_END_ABORT)
       endif
@@ -258,21 +308,8 @@ program ESMF_RegridApp
       dstIsRegional = .true.
     endif
 
-    ! --user_area - to use user-defined area for the cell
-    call ESMF_UtilGetArgIndex('--user_areas', argindex=ind, rc=rc)
-    if (ind /= -1) then
-      userAreaFlag = .true.
-    else
-      userAreaFlag = .false.
-    endif
-
-    ! user area only needed for conservative regridding
-    if (userAreaFlag .and. (method .ne. 'conserve')) then
-      write(*,*)
-      print *, 'WARNING: --user_areas is only needed in conservative remapping'
-      print *, '       The flag is ignored'
-      userAreaFlag = .false.
-    endif
+    call ESMF_UtilGetArgIndex('--check', argindex=ind, rc=rc)
+    if (ind /= -1) checkFlag = .true.
 
 1110 continue
     commandbuf2(:)=0
@@ -281,14 +318,14 @@ program ESMF_RegridApp
     else
       if (method .eq. 'patch') commandbuf2(1)=1
       if (method .eq. 'conserve') commandbuf2(1)=2
-      if (method .eq. 'neareststod') commandbuf2(1)=3
-      if (method .eq. 'nearestdtos') commandbuf2(1)=4
+      if (method .eq. 'conserve2nd') commandbuf2(1)=3
+      if (method .eq. 'neareststod') commandbuf2(1)=4
+      if (method .eq. 'nearestdtos') commandbuf2(1)=5
       commandbuf2(2)=poleptrs
       if (srcIsRegional) commandbuf2(3) = 1
       if (dstIsRegional) commandbuf2(4) = 1
       if (ignoreUnmapped) commandbuf2(5) = 1
-      if (userAreaFlag)   commandbuf2(6) = 1
-      if (ignoreDegenerate) commandbuf2(7) = 1
+      if (ignoreDegenerate) commandbuf2(6) = 1
     endif
 
     call ESMF_VMBroadcast(vm, commandbuf2, size (commandbuf2), 0, rc=rc)
@@ -303,6 +340,10 @@ program ESMF_RegridApp
     commandbuf1(2)=dstfile
     commandbuf1(3)=srcvarname
     commandbuf1(4)=dstvarname
+    commandbuf1(5)=srcdatafile
+    commandbuf1(6)=dstdatafile
+    commandbuf1(7)=tilePath
+    commandbuf1(8)=dstLoc
 
     ! Broadcast the command line arguments to all the PETs
     call ESMF_VMBroadcast(vm, commandbuf1, len (commandbuf1)*size (commandbuf1), 0, rc=rc)
@@ -323,6 +364,8 @@ program ESMF_RegridApp
     else if (commandbuf2(1)==2) then
       method = 'conserve'
     else if (commandbuf2(1)==3) then
+      method = 'conserve2nd'
+    else if (commandbuf2(1)==4) then
       method = 'neareststod'
     else
       method = 'nearestdtos'
@@ -354,12 +397,6 @@ program ESMF_RegridApp
     endif
 
     if (commandbuf2(6) == 1) then
-      userAreaFlag=.true.
-    else
-      userAreaFlag=.false.
-    endif
-
-    if (commandbuf2(7) == 1) then
       ignoreDegenerate=.true.
     else
       ignoreDegenerate=.false.
@@ -371,12 +408,23 @@ program ESMF_RegridApp
     dstfile = commandbuf1(2)
     srcvarname = commandbuf1(3)
     dstvarname = commandbuf1(4)
+    srcdatafile = commandbuf1(5)
+    dstdatafile = commandbuf1(6)
+    tilePath = commandbuf1(7)
+    dstLoc = commandbuf1(8)
+    if (tilePath .eq. ' ') then
+       useTilePathFlag = .FALSE.
+    else
+       useTilePathFlag = .TRUE.
+    endif
   endif
 
   if (trim(method) .eq. 'bilinear') then
     methodflag = ESMF_REGRIDMETHOD_BILINEAR
   else if (trim(method) .eq. 'conserve') then
     methodflag = ESMF_REGRIDMETHOD_CONSERVE
+  else if (trim(method) .eq. 'conserve2nd') then
+    methodflag = ESMF_REGRIDMETHOD_CONSERVE_2ND
   else if (trim(method) .eq. 'patch') then
     methodflag = ESMF_REGRIDMETHOD_PATCH
   else if (trim(method) .eq. 'neareststod') then
@@ -390,17 +438,49 @@ program ESMF_RegridApp
   else
     unmappedaction = ESMF_UNMAPPEDACTION_ERROR
   endif
-
-  call ESMF_FileRegrid(srcfile, dstfile, srcvarname, dstvarname, &
-                                    regridmethod=methodflag, &
+ 
+  if (useTilePathFlag) then
+      call ESMF_FileRegrid(srcfile, dstfile, srcvarname, dstvarname, &
+                            dstLoc=dstLoc, &
+                            regridmethod=methodflag, &
+                            srcdatafile=trim(srcdatafile), dstdatafile=trim(dstdatafile), &
+                            tileFilePath=tilePath, &
                             polemethod = pole, regridPoleNPnts = poleptrs, &
                             unmappedaction = unmappedaction, &
                             ignoreDegenerate = ignoreDegenerate, &
                             srcRegionalFlag = srcIsRegional, dstRegionalFlag = dstIsRegional, &
-! BOB: Not in interface??   useUserAreaFlag = userAreaFlag, &
                             verboseFlag = .true., rc = rc)
-
+  else
+      call ESMF_FileRegrid(srcfile, dstfile, srcvarname, dstvarname, &
+                            dstLoc=dstLoc, &
+                            regridmethod=methodflag, &
+                            srcdatafile=trim(srcdatafile), dstdatafile=trim(dstdatafile), &
+                            polemethod = pole, regridPoleNPnts = poleptrs, &
+                            unmappedaction = unmappedaction, &
+                            ignoreDegenerate = ignoreDegenerate, &
+                            srcRegionalFlag = srcIsRegional, dstRegionalFlag = dstIsRegional, &
+                            verboseFlag = .true., rc = rc)
+  endif
   if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
+
+  ! error checking
+  if (checkFlag) then
+    if (useTilePathFlag) then
+      call ESMF_FileRegridCheck(dstfile, dstvarname, &
+                            dstdatafile=trim(dstdatafile), &
+                            tileFilePath=tilePath, &
+                            regridmethod=methodflag, &
+                            rc = rc)
+      if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
+    else
+      call ESMF_FileRegridCheck(dstfile, dstvarname, &
+                            dstdatafile=trim(dstdatafile), &
+                            tileFilePath=tilePath, &
+                            regridmethod=methodflag, &
+                            rc = rc)
+      if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
+    endif
+  endif
 
   ! Output success
   if (PetNo==0) then
@@ -430,58 +510,80 @@ contains
   subroutine PrintUsage()
     print *, "Usage: ESMF_Regrid"
     print *, "                      --source|-s src_grid_filename"
-    print *, "                  --destination|-d dst_grid_filename"
-    print *, "                      --src_var src_varname"
-    print *, "                      --dst_var  dst_varname"
-    print *, "                      [--method|-m bilinear|patch|neareststod|nearestdtos|conserve]"
+    print *, "                      --destination|-d dst_grid_filename"
+    print *, "                      --src_var varname1[,varname2,...]"
+    print *, "                      --dst_var  varname1[,varname2,...]"
+    print *, "                      [--srcdatafile]"
+    print *, "                      [--dstdatafile]"
+    print *, "                      [--tilefile_path tile_file_path]"
+    print *, "                      [--dst_loc center|corner]"
+    print *, "                      [--method|-m bilinear|patch|neareststod|nearestdtos|conserve|conserve2nd]"
     print *, "                      [--pole|-p all|none|teeth|<N>]"
     print *, "                      [--ignore_unmapped|-i]"
     print *, "                      [--ignore_degenerate]"
     print *, "                      [-r]"
     print *, "                      [--src_regional]"
     print *, "                      [--dst_regional]"
-    print *, "                      [--user_areas]"
+    print *, "                      [--check]"
     print *, "                      [--no_log]"
     print *, "                      [--help]"
     print *, "                      [--version]"
     print *, "                      [-V]"
     print *, "where"
     print *, "--source or -s - a required argument specifying the source grid file"
-    print *, "                 name"
+    print *, "              name"
     print *, "--destination or -d - a required argument specifying the destination grid"
-    print *, "                      file name"
-    print *, "--src_var  - a required argument specifying the variable name to be regridded in"
-    print *, "                 the source grid file"
-    print *, "--dst_var  - a required argument specifying the destination variable name in the "
-    print *, "                  destination grid file"
+    print *, "              file name"
+    print *, "--src_var  - a required argument specifying the variable names to be regridded"
+    print *, "              in the source grid file.  If more than one, separated them with" 
+    print *, "              comma."
+    print *, "--dst_var  - a required argument specifying the destination variable name in"
+    print *, "              the destination grid file.  If more than one, separated them with"
+    print *, "              comma.  The number of dst_vars has to be the same as the number"
+    print *, "              of src_var"
+    print *, "--srcdatafile - If the source grid is of type MOSAIC, the data is stored "
+    print *, "              in separated files, one per tile. srcdatafile is the prefix of"
+    print *, "              the source data file.  The filename is srcdatafile.tilename.nc,"
+    print *, "              where tilename is the tile name defined in the source grid file"
+    print *, "--dstdatafile - If the destination grid is of type MOSAIC, the data is stored"
+    print *, "              in separated files, one per tile. dstdatafile is the prefix of"
+    print *, "              the destination data file.  The filename is srcdatafile.tilename.nc,"
+    print *, "               where tilename is the tile name defined in the destination grid file"
+    print *, "--tilefile_path - The alternative file path for the tile files and mosaic data files"
+    print *, "              when either srcFile or dstFile is a GRIDSPEC MOSAIC grid.  The path"
+    print *, "              can be either relative or absolute.  If it is relative, it is"
+    print *, "              relative to the working directory.  When specified, the gridlocation"
+    print *, "              variable defined in the Mosaic file will be ignored."
     print *, "--method or -m - an optional argument specifying which interpolation method is"
-    print *, "                 used.  The default method is bilinear"
+    print *, "              used.  The default method is bilinear"
     print *, "--pole or -p - an optional argument indicating what to do with the pole."
-    print *, "                 The default value is all"
+    print *, "              The default value is all"
     print *, "--ignore_unmapped or -i - ignore unmapped destination points. If not specified,"
-    print *, "                          the default is to stop with an error."
+    print *, "              the default is to stop with an error."
     print *, "--ignore_degenerate - ignore degenerate cells in the input grids. If not specified,"
-    print *, "                          the default is to stop with an error."
-    print *, "-r         - an optional argument specifying the source and destination grids"
-    print *, "             are regional grids.  Without this argument, the grids are assumed"
-    print *, "             to be global. This argument only applies to the GRIDSPEC file"
+    print *, "              the default is to stop with an error."
+    print *, "-r          - an optional argument specifying the source and destination grids"
+    print *, "              are regional grids.  Without this argument, the grids are assumed"
+    print *, "              to be global. This argument only applies to the GRIDSPEC file"
     print *, "--src_regional   - an optional argument specifying the source grid is regional."
-    print *, "             Without this argument, the src grids is assumed to be global. This "
-    print *, "             argument only applies to the GRIDSPEC file"
+    print *, "              Without this argument, the src grids is assumed to be global. This "
+    print *, "              argument only applies to the GRIDSPEC file"
     print *, "--dst_regional   - an optional argument specifying the destination grid is regional"
-    print *, "             Without this argument, the dst grids is assumed to be global."
-    print *, "             This argument only applies to the GRIDSPEC file"
-    print *, "--user_areas  - an optional argument specifying that the conservation is adjusted to"
-    print *, "             hold for the user areas provided in the grid files.  If not specified,"
-    print *, "             then the conservation will hold for the ESMF calculated (great circle)"
-    print *, "             areas."
+    print *, "              Without this argument, the dst grids is assumed to be global."
+    print *, "              This argument only applies to the GRIDSPEC file"
+    print *, "--check    - Check the regridded fields by comparing the values with"
+    print *, "             a synthetic field calculated based on its coordinates. "
+    print *, "             The mean relative error between the destination field "
+    print *, "             and synthetic field is computed.  The synthetic value is calculated as " 
+    print *, "             data(i,j,k,l)=2.0+(k-1)+2*(l-1)+cos(lat(i,j))**2*cos(2*lon(i,j)), assuming"
+    print *, "             it is a 2D grid " 
     print *, "--no_log    - Turn off the ESMF error log."
     print *, "--help     - Print this help message and exit."
     print *, "--version  - Print ESMF version and license information and exit."
     print *, "-V        - Print ESMF version number and exit."
     print *, ""
     print *, "For questions, comments, or feature requests please send email to:"
-    print *, "esmf_support@list.woc.noaa.gov"
+    print *, "esmf_support@cgd.ucar.edu"
     print *, ""
     print *, "Visit http://www.earthsystemmodeling.org/ to find out more about the"
     print *, "Earth System Modeling Framework."

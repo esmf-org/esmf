@@ -74,9 +74,10 @@ static const int keySize = 4*sizeof(int) + 1;
 //    {\tt ESMF\_SUCCESS} or error code on failure.
 //
 // !ARGUMENTS:
-      VM *vm,                        // the VM
-      const vector<ESMC_I4> &roots,  // the rootList
-      bool reconcile) {              // reconcile flag
+      VM *vm,                         // the VM
+      const vector<ESMC_I4> &roots,   // the rootList
+      ESMCI::InterArray<int> *petList,// the petList
+      bool reconcile) {               // reconcile flag
 //
 // !DESCRIPTION:
 //    Update an {\tt Attribute} hierarchy with a later version of itself.  
@@ -94,13 +95,6 @@ static const int keySize = 4*sizeof(int) + 1;
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  // return with errors for NULL pointer
-  if (this == NULL){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid pointer to an Attribute", ESMC_CONTEXT, &localrc);
-    return ESMF_FAILURE;
-  }
-    
   // query the VM for localPet and petCount
   int localPet = vm->getLocalPet();
   int petCount = vm->getPetCount();
@@ -115,9 +109,17 @@ static const int keySize = 4*sizeof(int) + 1;
   // make the roots and nonroots vectors
   vector<ESMC_I4> nonroots;
   vector<ESMC_I4>::const_iterator it;
-  for(i=0; i<petCount; ++i) {
-    it = find(roots.begin(), roots.end(), i);
-    if(it == roots.end()) nonroots.push_back(i);
+  if (present(petList)){
+    for(i=0; i<petList->extent[0]; ++i) {
+      int ii=petList->array[i];
+      it = find(roots.begin(), roots.end(), ii);
+      if(it == roots.end()) nonroots.push_back(ii);
+    }
+  }else{
+    for(i=0; i<petCount; ++i) {
+      it = find(roots.begin(), roots.end(), i);
+      if(it == roots.end()) nonroots.push_back(i);
+    }
   }
 
 #ifdef DEBUG_PRINT_RUN
@@ -1035,9 +1037,8 @@ static const int keySize = 4*sizeof(int) + 1;
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
   
-  // query the VM for localPet and petCount
+  // query the VM for localPet
   int localPet = vm->getLocalPet();
-  int petCount = vm->getPetCount();
 
   // prepare for comms
   VMK::commhandle **commh = new VMK::commhandle*;
@@ -1050,13 +1051,11 @@ static const int keySize = 4*sizeof(int) + 1;
     
   // No, I am receiving
   if (itSend == roots.end()) {
-    // find this PET in nonroots, bail if it is not present
+    // find this PET in nonroots, if not then clean exit
     itNR = find(nonroots.begin(), nonroots.end(), localPet);
     if (itNR == nonroots.end()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      " - AttributeUpdate - PET not in nonroots vector", ESMC_CONTEXT, &localrc);
-      delete commh;
-      return ESMF_FAILURE;
+      // PET was not in petList -> exit successfully
+      return ESMF_SUCCESS;
     }
 
   int floorID=floor(static_cast<double> (distance(nonroots.begin(), itNR))/static_cast<double> (roots.size()));
@@ -1309,7 +1308,7 @@ attprint(msg, true, fp);
   recvBuf = new char[length];
   sendBuf = new char[length];
 
-  // query the VM for localPet and petCount
+  // query the VM for localPet
   int localPet = vm->getLocalPet();
 
   // identify myself

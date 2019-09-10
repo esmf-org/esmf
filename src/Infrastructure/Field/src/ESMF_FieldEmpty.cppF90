@@ -1183,7 +1183,7 @@ end subroutine ESMF_FieldEmptyCompTK
 ! !INTERFACE:
   subroutine ESMF_FieldConstructIANewArray(ftype, geombase, array, datacopyflag, &
     gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-    totalLWidth, totalUWidth, name, rc)
+    totalLWidth, totalUWidth, name, vm, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_FieldType), pointer :: ftype
@@ -1196,6 +1196,7 @@ end subroutine ESMF_FieldEmptyCompTK
     integer, intent(in),optional :: totalLWidth(:)
     integer, intent(in),optional :: totalUWidth(:)
     character (len=*), intent(in), optional :: name
+    type(ESMF_VM), intent(in), optional :: vm
     integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1270,6 +1271,10 @@ end subroutine ESMF_FieldEmptyCompTK
 !       + {\tt computationalCount}, {\tt exclusiveCount} ).
 ! \item [{[name]}]
 !       Field name.
+! \item[{[vm]}]
+!       If present, the Field object is constructed on the specified
+!       {\tt ESMF\_VM} object. The default is to construct on the VM of the
+!       current component context.
 ! \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -1284,9 +1289,9 @@ end subroutine ESMF_FieldEmptyCompTK
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
+    
     ! Construct a default name if one is not given
-    call ESMF_BaseCreate(ftype%base, "Field", name, 0, rc=localrc)
+    call ESMF_BaseCreate(ftype%base, "Field", name, 0, vm=vm, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

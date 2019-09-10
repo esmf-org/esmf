@@ -2214,29 +2214,33 @@ module NUOPC_Driver
           return  ! bail out
         if (present(execFlag)) execFlag = .true. ! at least this model executed
         if (.not.internalflag) then
-          ! ensure that Attributes are consistent across all PETs
-          !
+          ! Ensure that Attributes are consistent across all the PETs of the
+          ! component that just executed.
+
           !TODO: The Update() is only needed if there are child PETs that are 
           !TODO: going to pause for PE-reuse via user level threading. Figure
           !TODO: out how to detect this, and make Update() call conditional.
-          !
+
           !TODO: Should be calling with all master PETs (those processes that go
           !TODO: on to execute child code), for better Update() performance. For
           !TODO: now just call with first PET as root, because that always will
           !TODO: work (because first PET always is passed to child component).
-          !
         
           call ESMF_VMGetCurrent(vm=vm, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           if (associated(is%wrap%modelPetLists(i)%ptr)) then
+            ! use the petList to restrict the number of PETs across which the
+            ! update is synchronizing
             call ESMF_AttributeUpdate(is%wrap%modelComp(i), vm, &
-              rootList=is%wrap%modelPetLists(i)%ptr(1:1), reconcile=.true., &
+              rootList=is%wrap%modelPetLists(i)%ptr(1:1), &
+              petList=is%wrap%modelPetLists(i)%ptr, reconcile=.true., &
               rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
               return  ! bail out
           else
+            ! no petList was specified -> update across all PETs
             call ESMF_AttributeUpdate(is%wrap%modelComp(i), vm, &
               rootList=(/0/), reconcile=.true., rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2761,7 +2765,12 @@ module NUOPC_Driver
         return  ! bail out
     endif
 
+    ! initialize the activeClock in case any connectors are executed before
+    ! the RunSequence executed
+    activeClock = internalClock
+    
     ! execute all connectors from driver (parent) to its children
+    !TODO: see ticket #3614786 about making this connector execution conditional
     i=0       ! from parent
     phase=1   ! use phase 1
     do j=1, is%wrap%modelCount
@@ -2949,6 +2958,7 @@ module NUOPC_Driver
     endif
 
     ! execute all connectors to driver (parent) from its children
+    !TODO: see ticket #3614786 about making this connector execution conditional
     j=0       ! to parent
     phase=1   ! use phase 1
     do i=1, is%wrap%modelCount
@@ -6008,6 +6018,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(ESMF_MAXSTR)    :: name
     integer                   :: verbosity
     logical                   :: stateIsCreated
+    logical                   :: isSet, setSharePolicy
+    character(len=80)         :: hierarchyProtocol
 
     rc = ESMF_SUCCESS
     
@@ -6021,6 +6033,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+    call NUOPC_CompAttributeGet(driver, name="HierarchyProtocol", &
+      isSet=isSet, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    setSharePolicy = .not.isSet  ! by default request checking
+
+    if (.not.setSharePolicy) then
+      ! see if HieraryProtocol attribute explicitly requests mirroring
+      call NUOPC_CompAttributeGet(driver, name="HierarchyProtocol", &
+        value=hierarchyProtocol, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      if (trim(hierarchyProtocol)=="PushUpAllExportsAndUnsatisfiedImports") &
+        setSharePolicy = .true.
+    endif
+
     stateIsCreated = ESMF_StateIsCreated(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -6031,6 +6060,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         value="transferNone", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      if (setSharePolicy) then
+        ! set the SharePolicy on all the Fields in the state
+        call setSharePolicies(importState, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      endif
     endif
     
     stateIsCreated = ESMF_StateIsCreated(exportState, rc=rc)
@@ -6043,12 +6078,59 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         value="transferNone", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      if (setSharePolicy) then
+        ! set the SharePolicy on all the Fields in the state
+        call setSharePolicies(exportState, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      endif
     endif
 
     ! extro
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+  contains
+  
+    !---------------------------------------------------------------------------
+
+    recursive subroutine setSharePolicies(state, rc)
+      type(ESMF_State)     :: state
+      integer, intent(out) :: rc
+      
+      ! local variables    
+      integer                         :: i
+      type(ESMF_Field), pointer       :: fieldList(:)
+      character(ESMF_MAXSTR), pointer :: itemNameList(:)
+
+      rc = ESMF_SUCCESS
+
+      nullify(fieldList)
+      nullify(itemNameList)
+      call NUOPC_GetStateMemberLists(state, itemNameList=itemNameList, &
+        fieldList=fieldList, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      if (associated(fieldList)) then
+        do i=1, size(fieldList)
+          ! Set the SharePolicy attributes
+          call NUOPC_SetAttribute(fieldList(i), name="SharePolicyGeomObject", &
+            value="share", rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call NUOPC_SetAttribute(fieldList(i), name="SharePolicyField", &
+            value="share", rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        enddo
+      endif
+      if (associated(fieldList)) deallocate(fieldList)
+      if (associated(itemNameList)) deallocate(itemNameList)
+      
+    end subroutine
+
+    !---------------------------------------------------------------------------
 
   end subroutine
 
@@ -6097,6 +6179,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! add REMAPMETHOD=redist option to all of the CplList entries for all
     ! Connectors to/from driver-self
     do i=1, is%wrap%modelCount
+      ! connector to-driver-self
       connector = is%wrap%connectorComp(i,0)
       areServicesSet = &
         NUOPC_CompAreServicesSet(connector, rc=rc)
@@ -6104,13 +6187,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
       if (areServicesSet) then
-        call addCplListOption(connector, ":REMAPMETHOD=redist", rc=rc)
+        call modifyCplList(connector, exportState, ":REMAPMETHOD=redist", rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
       endif
     enddo
     do i=1, is%wrap%modelCount
+      ! connector from-driver-self
       connector = is%wrap%connectorComp(0,i)
       areServicesSet = &
         NUOPC_CompAreServicesSet(connector, rc=rc)
@@ -6118,7 +6202,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
       if (areServicesSet) then
-        call addCplListOption(connector, ":REMAPMETHOD=redist", rc=rc)
+        call modifyCplList(connector, importState, ":REMAPMETHOD=redist", rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
@@ -6163,6 +6247,126 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   contains
   
+    !---------------------------------------------------------------------------
+
+    recursive subroutine modifyCplList(connector, state, appendString, rc)
+      type(ESMF_CplComp)              :: connector
+      type(ESMF_State)                :: state ! driver state connector interacts
+      character(len=*)                :: appendString
+      integer, intent(out)            :: rc
+      ! local variables
+      integer                         :: j, jj, stat
+      integer                         :: cplListSize, cplSetListSize
+      character(len=160), allocatable :: cplList(:), cplSetList(:)
+      character(ESMF_MAXSTR), pointer :: chopStringList(:)
+      character(ESMF_MAXSTR)          :: cplName
+      character(ESMF_MAXSTR), pointer :: stateStandardNameList(:)
+      type(ESMF_Field),       pointer :: stateFieldList(:)
+      character(ESMF_MAXSTR), pointer :: stateCplSetList(:)
+      logical                         :: match, connected
+      logical                         :: producerConnected, consumerConnected
+      character(ESMF_MAXSTR)          :: msgString
+      
+      ! get the cplList Attribute
+      call NUOPC_CompAttributeGet(connector, name="CplList", &
+        itemCount=cplListSize, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      ! get the cplSetList Attribute
+      call NUOPC_CompAttributeGet(connector, name="CplSetList", &
+        itemCount=cplSetListSize, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      ! check the cplSetList size
+      if (cplListSize /= cplSetListSize) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="Bad internal error - CplSetList size must match CplList size!",&
+          line=__LINE__, file=trim(name)//":"//FILENAME, &
+          rcToReturn=rc)
+        return  ! bail out
+      endif
+      if (cplListSize>0) then
+        ! there are entries in the cplList
+        allocate(cplList(cplListSize), stat=stat)
+        if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+          msg="Allocation of internal cplList() failed.", &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+        call NUOPC_CompAttributeGet(connector, name="CplList", &
+          valueList=cplList, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        allocate(cplSetList(cplSetListSize), stat=stat)
+        if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+          msg="Allocation of internal cplList() failed.", &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+        call NUOPC_CompAttributeGet(connector, name="CplSetList", &
+          valueList=cplSetList, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        ! get the state std lists
+        nullify(stateStandardNameList)
+        nullify(stateFieldList)
+        nullify(stateCplSetList)
+        call NUOPC_GetStateMemberLists(state, stateStandardNameList, &
+          fieldList=stateFieldList, cplSetList=stateCplSetList, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        ! go through all of the entries in the cplList
+        nullify(chopStringList)
+        do j=1, cplListSize
+          call NUOPC_ChopString(cplList(j), chopChar=":", &
+            chopStringList=chopStringList, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          cplName = chopStringList(1) ! first part is the standard name
+          deallocate(chopStringList)
+          ! look for the associated field in the state
+          do jj=1, size(stateFieldList)
+            ! must consider cplSet
+            if (.NOT.(cplSetList(j).EQ.stateCplSetList(jj))) cycle
+            match = NUOPC_FieldDictionaryMatchSyno( &
+              stateStandardNameList(jj), cplName, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (match) then
+              ! inspect the connected status of the associated field
+              call checkConnection(stateFieldList(jj), connected, &
+                producerConnected, consumerConnected, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#if 0
+              write(msgString,*) trim(cplName)//&
+                " connected:", connected, &
+                " producerConnected:", producerConnected, &
+                " consumerConnected:", consumerConnected
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+#endif
+            endif
+          enddo
+          ! set remapping to redist
+          cplList(j) = trim(cplList(j))//trim(appendString)
+        enddo
+        ! store the modified cplList in CplList attribute of connector
+        call NUOPC_CompAttributeSet(connector, &
+          name="CplList", valueList=cplList, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+        ! clean-up
+        if (associated(stateStandardNameList)) deallocate(stateStandardNameList)
+        if (associated(stateFieldList)) deallocate(stateFieldList)
+        if (associated(stateCplSetList)) deallocate(stateCplSetList)
+        deallocate(cplList, cplSetList)
+      endif
+    end subroutine
+
+    !---------------------------------------------------------------------------
+
     recursive subroutine addCplListOption(connector, appendString, rc)
       type(ESMF_CplComp)              :: connector
       character(len=*)                :: appendString
@@ -6184,7 +6388,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           return  ! bail out
         ! go through all of the entries in the cplList and add options
         do j=1, cplListSize
-          ! switch remapping to redist
+          ! set remapping options
           cplList(j) = trim(cplList(j))//trim(appendString)
         enddo
         ! store the modified cplList in CplList attribute of connector
@@ -6212,8 +6416,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(ESMF_MAXSTR)    :: name
     integer                   :: verbosity
     logical                   :: stateIsCreated
-    logical                   :: isSet, checkImportProducer
+    logical                   :: isSet, checkImport
     character(len=80)         :: hierarchyProtocol
+    logical                   :: areServicesSet
+    type(ESMF_CplComp)        :: connector
+    integer                   :: i
+    type(type_InternalState)  :: is
 
     rc = ESMF_SUCCESS
 
@@ -6226,31 +6434,76 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+    ! first deal with the cleanup depending on connected status
+    ! Connectors to/from driver-self
+    do i=1, is%wrap%modelCount
+      ! connector to-driver-self
+      connector = is%wrap%connectorComp(i,0)
+      areServicesSet = &
+        NUOPC_CompAreServicesSet(connector, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      if (areServicesSet) then
+        call cleanupCplList(connector, exportState, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      endif
+    enddo
+    do i=1, is%wrap%modelCount
+      ! connector from-driver-self
+      connector = is%wrap%connectorComp(0,i)
+      areServicesSet = &
+        NUOPC_CompAreServicesSet(connector, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      if (areServicesSet) then
+        call cleanupCplList(connector, importState, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      endif
+    enddo
+
+    ! Now go into checking the states wrt connected status...
 
     call NUOPC_CompAttributeGet(driver, name="HierarchyProtocol", &
       isSet=isSet, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
-    checkImportProducer = .not.isSet  ! by default request checking
+    checkImport = .not.isSet  ! by default request checking
     
-    if (.not.checkImportProducer) then
-      ! see if HieraryProtocol attribute explicitly requests mirroring
+    if (.not.checkImport) then
+      ! Check the HierarchyProtocol to make the decision about checking the
+      ! connectedness of fields in the importState. 
+      ! E.g. for explorer application there should be no checking because it is
+      ! the hierarchy driver itself that interacts with the child.
       call NUOPC_CompAttributeGet(driver, name="HierarchyProtocol", &
         value=hierarchyProtocol, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       if (trim(hierarchyProtocol)=="PushUpAllExportsAndUnsatisfiedImports") &
-        checkImportProducer = .true.
+        checkImport = .true.
     endif
 
     stateIsCreated = ESMF_StateIsCreated(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-    if (checkImportProducer.and.stateIsCreated) then
-      ! - check that all connected fields in importState have producer
-      call checkProducerConnection(importState, rc=rc)
+    if (checkImport.and.stateIsCreated) then
+      ! - check all connected fields in importState
+      call checkConnections(importState, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -6260,8 +6513,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     if (stateIsCreated) then
-      ! - check that all connected fields in exportState have producer
-      call checkProducerConnection(exportState, rc=rc)
+      ! - check all connected fields in exportState
+      call checkConnections(exportState, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -6275,17 +6528,186 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   
     !---------------------------------------------------------------------------
 
-    recursive subroutine checkProducerConnection(state, rc)
+    recursive subroutine cleanupCplList(connector, state, rc)
+      type(ESMF_CplComp)              :: connector
+      type(ESMF_State)                :: state ! driver state connector interacts
+      integer, intent(out)            :: rc
+      ! local variables
+      integer                         :: j, jj, jjj, stat
+      integer                         :: cplListSize, cplSetListSize
+      character(len=160), allocatable :: cplList(:), cplSetList(:)
+      character(len=160), allocatable :: cplListNew(:), cplSetListNew(:)
+      character(ESMF_MAXSTR), pointer :: chopStringList(:)
+      character(ESMF_MAXSTR)          :: cplName, fieldName
+      character(ESMF_MAXSTR), pointer :: stateStandardNameList(:)
+      type(ESMF_Field),       pointer :: stateFieldList(:)
+      type(ESMF_State),       pointer :: stateStateList(:)
+      character(ESMF_MAXSTR), pointer :: stateCplSetList(:)
+      logical                         :: match, connected
+      logical                         :: producerConnected, consumerConnected
+      character(ESMF_MAXSTR)          :: msgString
+      
+      ! get the cplList Attribute
+      call NUOPC_CompAttributeGet(connector, name="CplList", &
+        itemCount=cplListSize, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      ! get the cplSetList Attribute
+      call NUOPC_CompAttributeGet(connector, name="CplSetList", &
+        itemCount=cplSetListSize, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      ! check the cplSetList size
+      if (cplListSize /= cplSetListSize) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="Bad internal error - CplSetList size must match CplList size!",&
+          line=__LINE__, file=trim(name)//":"//FILENAME, &
+          rcToReturn=rc)
+        return  ! bail out
+      endif
+      if (cplListSize>0) then
+        ! there are entries in the cplList
+        allocate(cplList(cplListSize), cplListNew(cplListSize), stat=stat)
+        if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+          msg="Allocation of internal cplList() failed.", &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+        call NUOPC_CompAttributeGet(connector, name="CplList", &
+          valueList=cplList, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        allocate(cplSetList(cplSetListSize), cplSetListNew(cplSetListSize), &
+          stat=stat)
+        if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+          msg="Allocation of internal cplList() failed.", &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+        call NUOPC_CompAttributeGet(connector, name="CplSetList", &
+          valueList=cplSetList, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        ! get the state std lists
+        nullify(stateStandardNameList)
+        nullify(stateFieldList)
+        nullify(stateStateList)
+        nullify(stateCplSetList)
+        call NUOPC_GetStateMemberLists(state, stateStandardNameList, &
+          fieldList=stateFieldList, stateList=stateStateList, &
+          cplSetList=stateCplSetList, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        ! go through all of the entries in the cplList
+        nullify(chopStringList)
+        jjj=0 ! initialize
+        do j=1, cplListSize
+          call NUOPC_ChopString(cplList(j), chopChar=":", &
+            chopStringList=chopStringList, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          cplName = chopStringList(1) ! first part is the standard name
+          deallocate(chopStringList)
+          ! look for the associated field in the state
+          do jj=1, size(stateFieldList)
+            ! must consider cplSet
+            if (.NOT.(cplSetList(j).EQ.stateCplSetList(jj))) cycle
+            match = NUOPC_FieldDictionaryMatchSyno( &
+              stateStandardNameList(jj), cplName, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (match) then
+              ! inspect the connected status of the associated field
+              call checkConnection(stateFieldList(jj), connected, &
+                producerConnected, consumerConnected, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#if 0
+              write(msgString,*) trim(cplName)// &
+                " in CplSet: ", trim(cplSetList(j)), &
+                " connected:", connected, &
+                " producerConnected:", producerConnected, &
+                " consumerConnected:", consumerConnected
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+#endif
+              if (connected.and. .not.consumerConnected) then
+                ! remove the field from the state
+                call ESMF_FieldGet(stateFieldList(jj), name=fieldName, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                  return  ! bail out
+#if 0
+                
+                write(msgString,*) "removing field: ", trim(fieldName), &
+                  " in CplSet: ", trim(cplSetList(j))
+                call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                  return  ! bail out
+#endif
+                call ESMF_StateRemove(stateStateList(jj), &
+                  itemNameList=(/fieldName/), rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                  return  ! bail out
+              else
+                ! copy the CplList and CplSetList entries to new lists
+                jjj = jjj+1
+                cplListNew(jjj) = cplList(j)
+                cplSetListNew(jjj) = cplSetList(j)
+              endif
+            endif
+          enddo
+        enddo
+        ! store the cplListNew and cplSetListNew in the connector
+        if (jjj==0) then
+          ! special treatment for the case where no elements are left in list
+          call NUOPC_CompAttributeReset(connector, &
+            attrList=(/"CplList"/), rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+          call NUOPC_CompAttributeReset(connector, &
+            attrList=(/"CplSetList"/), rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+        else
+          call NUOPC_CompAttributeSet(connector, &
+            name="CplList", valueList=cplListNew(1:jjj), rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+          call NUOPC_CompAttributeSet(connector, &
+            name="CplSetList", valueList=cplSetListNew(1:jjj), rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+        endif
+        ! clean-up
+        if (associated(stateStandardNameList)) deallocate(stateStandardNameList)
+        if (associated(stateFieldList)) deallocate(stateFieldList)
+        if (associated(stateStateList)) deallocate(stateStateList)
+        if (associated(stateCplSetList)) deallocate(stateCplSetList)
+        deallocate(cplList, cplSetList)
+        deallocate(cplListNew, cplSetListNew)
+      endif
+    end subroutine
+
+    !---------------------------------------------------------------------------
+
+    recursive subroutine checkConnections(state, rc)
       type(ESMF_State)     :: state
       integer, intent(out) :: rc
       
       ! local variables    
-      integer                         :: i
+      integer                         :: j
       type(ESMF_Field), pointer       :: fieldList(:)
       character(ESMF_MAXSTR), pointer :: itemNameList(:)
       logical                         :: connected
       logical                         :: producerConnected, consumerConnected
-      character(ESMF_MAXSTR)          :: stateName
+      character(ESMF_MAXSTR)          :: stateName, msgString
 
       rc = ESMF_SUCCESS
 
@@ -6296,19 +6718,30 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       if (associated(fieldList)) then
-        do i=1, size(fieldList)
-          call checkConnections(fieldList(i), connected, producerConnected, &
+        do j=1, size(fieldList)
+          call checkConnection(fieldList(j), connected, producerConnected, &
             consumerConnected, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#if 0
+          write(msgString,*) trim(itemNameList(j))//&
+            " connected:", connected, &
+            " producerConnected:", producerConnected, &
+            " consumerConnected:", consumerConnected
+          call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+#endif
           if (connected .and. .not.producerConnected) then
             ! a connected field in a Driver state must have a ProducerConnection
+            ! -> bail with error
             call ESMF_StateGet(state, name=stateName, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
               msg="Connected Field in Driver State "//trim(stateName)//&
-              " must have ProducerConnection: "//trim(itemNameList(i)), &
+              " must have ProducerConnection: "//trim(itemNameList(j)), &
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
             return ! bail out
           endif
@@ -6320,40 +6753,40 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end subroutine
 
     !---------------------------------------------------------------------------
-
-    recursive subroutine checkConnections(field, connected, producerConnected, &
-      consumerConnected, rc)
-      type(ESMF_Field), intent(in)  :: field
-      logical, intent(out)          :: connected
-      logical, intent(out)          :: producerConnected
-      logical, intent(out)          :: consumerConnected
-      integer, intent(out)          :: rc
-      ! local variables
-      character(len=80)             :: value
-      
-      rc = ESMF_SUCCESS
-      
-      call NUOPC_GetAttribute(field, name="Connected", &
-        value=value, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      connected = (value=="true")
-      call NUOPC_GetAttribute(field, name="ProducerConnection", &
-        value=value, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      producerConnected = (value/="open")
-      call NUOPC_GetAttribute(field, name="ConsumerConnection", &
-        value=value, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      consumerConnected = (value/="open")
-    end subroutine
     
-    !---------------------------------------------------------------------------
-
   end subroutine
   
+  !-----------------------------------------------------------------------------
+
+  recursive subroutine checkConnection(field, connected, producerConnected, &
+    consumerConnected, rc)
+    type(ESMF_Field), intent(in)  :: field
+    logical, intent(out)          :: connected
+    logical, intent(out)          :: producerConnected
+    logical, intent(out)          :: consumerConnected
+    integer, intent(out)          :: rc
+    ! local variables
+    character(len=80)             :: value
+    
+    rc = ESMF_SUCCESS
+    
+    call NUOPC_GetAttribute(field, name="Connected", &
+      value=value, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    connected = (value=="true")
+    call NUOPC_GetAttribute(field, name="ProducerConnection", &
+      value=value, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    producerConnected = (value/="open")
+    call NUOPC_GetAttribute(field, name="ConsumerConnection", &
+      value=value, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    consumerConnected = (value/="open")
+  end subroutine
+
   !-----------------------------------------------------------------------------
 
   recursive subroutine rmFieldsWoConsumerConnection(state, name, rc)
@@ -6365,6 +6798,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                         :: i
     type(ESMF_Field), pointer       :: fieldList(:)
     character(ESMF_MAXSTR), pointer :: itemNameList(:)
+    type(ESMF_State),       pointer :: stateList(:)
     logical                         :: consumerConnected
     character(ESMF_MAXSTR)          :: stateName, fieldName
     character(len=80)               :: value
@@ -6373,8 +6807,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     nullify(fieldList)
     nullify(itemNameList)
+    nullify(stateList)
     call NUOPC_GetStateMemberLists(state, itemNameList=itemNameList, &
-      fieldList=fieldList, rc=rc)
+      fieldList=fieldList, stateList=stateList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (associated(fieldList)) then
@@ -6391,14 +6826,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           call ESMF_FieldGet(fieldList(i), name=fieldName, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            call ESMF_StateRemove(state, (/fieldName/), rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call ESMF_StateRemove(stateList(i), (/fieldName/), rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         endif
       enddo
     endif
     if (associated(fieldList)) deallocate(fieldList)
     if (associated(itemNameList)) deallocate(itemNameList)
+    if (associated(stateList)) deallocate(stateList)
     
   end subroutine
 
@@ -6467,6 +6903,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer                         :: i
       type(ESMF_Field), pointer       :: fieldList(:)
       character(ESMF_MAXSTR), pointer :: itemNameList(:)
+      type(ESMF_State),       pointer :: stateList(:)
       integer                         :: itemCount, stat
       integer                         :: ulbCount, uubCount
       logical                         :: isPresent
@@ -6474,119 +6911,41 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer(ESMF_KIND_I4), pointer  :: gridToFieldMap(:)
       integer                         :: tk
       type(ESMF_TypeKind_Flag)        :: tkf
-      
+      character(len=80)               :: value
+
       rc = ESMF_SUCCESS
 
       nullify(fieldList)
       nullify(itemNameList)
+      nullify(stateList)
       call NUOPC_GetStateMemberLists(state, itemNameList=itemNameList, &
-        fieldList=fieldList, rc=rc)
+        fieldList=fieldList, stateList=stateList, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       if (associated(fieldList)) then
         do i=1, size(fieldList)
-          ! the transferred Grid is already set, allocate memory for data
-          !TODO: Only Grids work. Also make this work for Mesh and LocStream.
-
-          ! TypeKind attribute
-          call ESMF_AttributeGet(fieldList(i), name="TypeKind", &
-            convention="NUOPC", purpose="Instance", &
-            value=tk, rc=rc)
+          
+          ! See if the Field is shared. If so, don't need to do anything
+          ! here, because the Connector will have realized the Fields 
+          ! automatically, using reference sharing. Otherwise realize here.
+          
+          call NUOPC_GetAttribute(fieldList(i), name="ShareStatusField", &
+            value=value, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          tkf=tk  ! convert integer into actual TypeKind_Flag
-
-          ! GridToFieldMap attribute
-          call ESMF_AttributeGet(fieldList(i), name="GridToFieldMap", &
-            convention="NUOPC", purpose="Instance", &
-            itemCount=itemCount, isPresent=isPresent, &
-            attnestflag=ESMF_ATTNEST_ON, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          if (.not. isPresent) then
-            call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
-              msg="Cannot realize field "//trim(itemNameList(i))//&
-              " because GridToFieldMap attribute is not present", &
-              line=__LINE__, file=trim(name)//":"//FILENAME, &
-              rcToReturn=rc)
-            return
-          endif
-          allocate(gridToFieldMap(itemCount), stat=stat)
-          if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-            msg="Allocation of internal gridToFieldMap failed.", &
-            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-            return  ! bail out
-          call ESMF_AttributeGet(fieldList(i), &
-            name="GridToFieldMap", valueList=gridToFieldMap, &
-            convention="NUOPC", purpose="Instance", &
-            attnestflag=ESMF_ATTNEST_ON, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, &
-            msg="Cannot realize field "//trim(itemNameList(i))// &
-            " because error obtaining GridToFieldMap attribute.", &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-
-          ! UngriddedLBound, UngriddedUBound attributes
-          call ESMF_AttributeGet(fieldList(i), name="UngriddedLBound", &
-            convention="NUOPC", purpose="Instance", &
-            itemCount=ulbCount, isPresent=isPresent, &
-            attnestflag=ESMF_ATTNEST_ON, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          if (isPresent .and. ulbCount > 0) then           
-            call ESMF_AttributeGet(fieldList(i), name="UngriddedUBound", &
-              convention="NUOPC", purpose="Instance", &
-              itemCount=uubCount, isPresent=isPresent, &
-              attnestflag=ESMF_ATTNEST_ON, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            if (.not. isPresent .or. ulbCount /= uubCount) then
-              call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
-                msg="Field "//trim(itemNameList(i))//&
-                " has inconsistent UngriddedLBound/UngriddedUBound attributes",&
-                line=__LINE__, file=trim(name)//":"//FILENAME, &
-                rcToReturn=rc)
-               return
-            endif
-            allocate(ungriddedLBound(ulbCount), &
-              ungriddedUBound(uubCount), stat=stat)
-            if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-              msg="Allocation of internal ungriddedLBound/ungriddedUBound "//&
-              "failed.", line=__LINE__, &
-              file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-              return  ! bail out
-            call ESMF_AttributeGet(fieldList(i), &
-              name="UngriddedLBound", valueList=ungriddedLBound, &
-              convention="NUOPC", purpose="Instance", &
-              attnestflag=ESMF_ATTNEST_ON, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            call ESMF_AttributeGet(fieldList(i), &
-              name="UngriddedUBound", valueList=ungriddedUBound, &
-              convention="NUOPC", purpose="Instance", &
-              attnestflag=ESMF_ATTNEST_ON, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            ! create field with ungridded dims
-            call ESMF_FieldEmptyComplete(fieldList(i), &
-              gridToFieldMap=gridToFieldMap, typekind=tkf, &
-              ungriddedLBound=ungriddedLBound, &
-              ungriddedUBound=ungriddedUBound, &
-              rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            deallocate(ungriddedLBound, ungriddedUBound)
-          else
-            ! create field with no ungridded dims
-            call ESMF_FieldEmptyComplete(fieldList(i), &
-              gridToFieldMap=gridToFieldMap, typekind=tkf, rc=rc)
+          
+          if (trim(value)=="not shared") then
+            ! not shared -> must complete the field here
+            call NUOPC_Realize(stateList(i), fieldName=itemNameList(i), rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           endif
-          deallocate(gridToFieldMap)
+
         enddo
       endif
       if (associated(fieldList)) deallocate(fieldList)
       if (associated(itemNameList)) deallocate(itemNameList)
+      if (associated(stateList)) deallocate(stateList)
       
     end subroutine
 
@@ -6645,6 +7004,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
         return  ! bail out
+
       if (isAtTime) then
         ! indicate that data initialization is complete 
         ! (breaking out of init-loop)
@@ -6686,7 +7046,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
         return  ! bail out
     endif
-    
+
     if (btest(verbosity,11)) then
       call NUOPC_CompAttributeGet(driver, name="InitializeDataComplete", &
         value=valueString, rc=rc)

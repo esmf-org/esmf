@@ -13,11 +13,16 @@ interpolation weight matrix to produce values on the destination grid. This is i
 
 The {\tt ESMF\_RegridWeightGen} application described in Section~\ref{sec:ESMF_RegridWeightGen} 
 performs the first stage of the regridding process - generate the interpolation weight matrix. 
-This tool not only calculates the interpolation weights, it also applies the weights to a variable 
+This tool not only calculates the interpolation weights, it also applies the
+weights to a list of variables 
 stored in the source grid file and produces the interpolated values on the destination grid. 
-The interpolated output variable is written out to the destination grid file.  This tool only
-supports two CF compliant file formats: the GRIDSPEC Tile grid file format(~\ref{sec:fileformat:gridspec}) for
-a logically rectangular grid and the UGRID file format(~\ref{sec:fileformat:ugrid}) for unstructured grid.  
+The interpolated output variable is written out to the destination grid file.  This tool 
+supports three CF compliant file formats: the CF Single Tile grid file format(~\ref{sec:fileformat:gridspec}) for
+a logically rectangular grid, the UGRID file
+format(~\ref{sec:fileformat:ugrid}) for unstructured grid and the GRIDSPEC
+Mosaic file format(~\ref{sec:fileformat:mosaic}) for cubed-sphere grid.  For
+the GRIDSPEC Mosaic file format, the data are stored in seperate data files,
+one file per tile.   
 The SCRIP format(~\ref{sec:fileformat:scrip}) and the ESMF unstructured grid format(~\ref{sec:fileformat:esmf}) are not supported because there is no way to define a variable field using these two formats. Currently, the tool only works with 2D grids, the support for the 3D grid will be 
 made available in the future release.  The variable array can be up to four dimensions.  The
 variable type is currently limited to single or double precision real numbers.  The support for 
@@ -106,10 +111,64 @@ variables:
 There are three variables defined in the above UGRID file - {\tt zeta} on the node of the mesh, {\tt ua} and
 {\tt va} on the face of the mesh.  All three variables have one extra time dimension.  
 
+The GRIDSPEC MOSAIC file(~\ref{sec:fileformat:mosaic}) can be identified by a dummy variable with {\tt
+  standard\_name} attribute set to {\tt grid\_mosaic\_spec}.  The data for a
+GRIDSPEC Mosaic file are stored in seperate files, one tile per file.  The
+name of the data file is not specified in the mosaic file.  Therefore,
+additional optional argument {\tt --srcdatafile} or {\tt --dstdatafile} is
+required to provide the prefix of the datafile.  The datafile is also a CF
+compliant NetCDF file.  The complete name of the datafile is
+constructed by appending the tilename (defined in the Mosaic file in a
+variable specified by the {\tt children} attribute of the dummy variable).
+For instance, if the prefix of the datafile is {\tt mosaicdata}, then the
+datafile names are {\tt mosaicdata.tile1.nc}, {\tt mosaicdata.tile2.nc},
+etc...  using the mosaic file example in \ref{sec:fileformat:mosaic}.  The
+path of the datafile is defined by {\tt gridlocation} variable, similar to the
+tile files.  To overwrite it, an optional argument {\tt tilefile\_path} can be
+specified.  
+
+Following is an example GRIDSPEC MOSAIC datafile:
+
+\begin{verbatim}
+netcdf mosaictest.tile1 {
+dimensions:
+     grid_yt = 48 ;
+     grid_xt = 48 ;
+     time = UNLIMITED ; // (12 currently)
+variables:
+     float area_land(grid_yt, grid_xt) ;
+        area_land:long_name = "area in the grid cell" ;
+        area_land:units = "m2" ;
+     float evap_land(time, grid_yt, grid_xt) ;
+        evap_land:long_name = "vapor flux up from land" ;
+        evap_land:units = "kg/(m2 s)" ;
+        evap_land:coordinates = "geolon_t geolat_t" ;
+     double geolat_t(grid_yt, grid_xt) ;
+        geolat_t:long_name = "latitude of grid cell centers" ;
+        geolat_t:units = "degrees_N" ;
+     double geolon_t(grid_yt, grid_xt) ;
+        geolon_t:long_name = "longitude of grid cell centers" ;
+        geolon_t:units = "degrees_E" ;
+     double time(time) ;
+        time:long_name = "time" ;
+        time:units = "days since 1900-01-01 00:00:00" ;
+}
+\end{verbatim}
+
+This is a database for the C48 Cubed Sphere grid defined in
+\ref{sec:fileformat:mosaic}.  Note currently we assume that the data are
+located at the center stagger of the grid.  The coordinate variables {\tt
+  geolon\_t} and {\tt geolat\_t} should be identical to the center coordinates
+defined in the corresponding tile files. They are not used to create the
+multi-tile grid.  For this application, they are only used to construct the
+analytic field to check the correctness of the regridding results if {\tt
+  --check} argument is given. 
+
 If the variable specified for the destination file does not already exist in the file, the file type is determined as follows:  
 First search for a variable that has a {\tt cf\_role} attribute of value {\tt mesh\_topology}.  If successful,
 the file is a UGRID file.  The destination variable will be created on the nodes if the regrid method is 
-non-conservative and the source variable is located on the nodes.  Otherwise, the destination variable will be created
+non-conservative and an optional argument {\tt dst\_loc} is set to {\tt
+  corner}.  Otherwise, the destination variable will be created
 on the face.  If the destination file is not a UGRID file, check if there is a variable with its {\tt units} attribute set to {\tt degrees\_east} and another variable with it's {\tt units} attribute set to {\tt degrees\_west}.  If such a pair is found, 
 the file is a GRIDSPEC file and the above two variables will be used as the coordinate variables for the 
 variable to be created.  If more than one pair of coordinate variables are found in the file, the application 
@@ -122,7 +181,7 @@ source variable.   If the destination varialbe does not exist in the destination
 new variable will be created with the same type and matching dimensions as the source variable.
 All the attributes of the source variable will be copied to the destination variable except those
 related to the grid definition (i.e. {\tt coordinates} attribute if the destination file is in  
-GRIDSPEC format or {\tt mesh} and {\tt location} attributes if the destination file is in UGRID format.
+GRIDSPEC or MOSAIC format or {\tt mesh} and {\tt location} attributes if the destination file is in UGRID format.
 
 Additional rules beyond the CF convention are adopted to determine whether there is a time dimension defined
 in the source and destination files.  In this application, only a dimension with a name {\tt time} is 
@@ -135,7 +194,7 @@ or if the {\tt units} attribute of the {\tt time} variable match in two input fi
 file does not have a {\tt time} dimension, it will be created.  UNLIMITED time dimension is allowed in the
 source file, but the {\tt time} dimension created in the destination file is not UNLIMITED.
 
-This application requires the NetCDF library to read the grid files and write out the interpolated variable.  To compile ESMF with
+This application requires the NetCDF library to read the grid files and write out the interpolated variables.  To compile ESMF with
 the NetCDF library, please refer to the "Third Party Libraries" Section in the ESMF User's Guide for more information.
 
 Internally this application uses the ESMF public API to perform regridding.
@@ -152,11 +211,25 @@ input grids.  Currently, only the 2D unstructured grid is supported.
 If the application performs a conservative regridding, the variable has to be defined on the face of the mesh cells, i.e., its {\tt location} attribute has to be set to {\tt face}.  Otherwise, the variable has to be 
 defined on the node and its ({\tt location} attribute is set to {\tt node}).
 
+If a source or a destination grid is a Cubed Sphere grid defined in GRIDSPEC
+MOSAIC file format, {\tt
+  ESMF\_GridCreateMosaic()}(~\ref{API:GridCreateMosaicReg}) will be used to create a multi-tile ESMF\_Grid
+object from the file.  The coordinates at the center and the corner stagger in
+the tile files will be stored in the grid.  The data has to be located at the
+center stagger of the grid.
+ 
 Similar to {\tt ESMF\_RegridWeightGen} application (Section~\ref{sec:ESMF_RegridWeightGen}), this application supports
-bilinear, patch, nearest neighbor, or first-order conservative interpolation. The descriptions of different 
+bilinear, patch, nearest neighbor, first-order and second-order conservative interpolation. The descriptions of different 
 interpolation methods can be found at Section~\ref{sec:regrid} and Section~\ref{sec:ESMF_RegridWeightGen}. 
 It also supports different pole methods for non-conservative interpolation and allows user to choose to 
 ignore the errors when some of the destination points cannot be mapped by any source points. 
+
+If the optional argument {\tt --check} is given, the interpolated fields will
+be checked agaist a synthetic field defined as follows:
+
+\begin{verbatim}
+   
+\end{verbatim}
 
 \subsection{Usage}\label{sec:fileregridusage}
 
@@ -168,15 +241,20 @@ as follows:
 ESMF_Regrid  
         --source|-s src_grid_filename
         --destination|-d dst_grid_filename
-	--src_var var_name
-	--dst_var var_name
-        [--method|-m bilinear|patch|nearestdtos|neareststod|conserve]
+	--src_var var_name[,var_name,..]
+	--dst_var var_name[,var_name,..]
+        [--srcdatafile]
+        [--dstdatafile]
+        [--tilefile_path filepath]
+        [--dst_loc center|corner]
+        [--method|-m bilinear|patch|nearestdtos|neareststod|conserve|conserve2nd]
         [--pole|-p none|all|teeth|1|2|..]
         [--ignore_unmapped|-i]
         [--ignore_degenerate]
         [-r]
         [--src_regional]
         [--dst_regional]
+        [--check]
         [--no_log]
 	[--help]
         [--version]
@@ -188,12 +266,41 @@ where
   --destination or -d - a required argument specifying the destination
                         grid file name
 
-  -- src_var          - a required argument specifying the name of the variable 
-                        in the src grid file to be interpolated from
+  --src_var           - a required argument specifying the variable names 
+                        in the src grid file to be interpolated from.  If more
+                        than one, separated them with comma.
 
-  -- dst_var          - a required argument specifying the name of the variable 
-                        to be interpolated to.  The variable may or may not 
-                        exist in the destination grid file
+  --dst_var           - a required argument specifying the variable names 
+                        to be interpolated to.  If more than one, separated 
+                        them with comma. The variable may or may not 
+                        exist in the destination grid file.
+
+  --srcdatafile       - If the source grid is a GRIDSPEC MOSAIC grid, the data 
+                        is stored in separate files, one per tile. srcdatafile
+                        is the prefix of the source data file.  The filename
+                        is srcdatafile.tilename.nc, where tilename is the tile 
+                        name defined in the MOSAIC file.
+
+  --srcdatafile       - If the destination grid is a GRIDSPEC MOSAIC grid, the data 
+                        is stored in separate files, one per tile. dstdatafile
+                        is the prefix of the destination data file.  The filename
+                        is dstdatafile.tilename.nc, where tilename is the tile 
+                        name defined in the MOSAIC file.
+
+  --tilefile_path    - the alternative file path for the tile files and the
+                        data files when either the source or the destination grid
+                        is a GRIDSPEC MOSAIC grid.  The path can be either relative
+                        or absolute.  If it is relative, it is relative to the
+                        working directory.  When specified, the gridlocation variable
+                        defined in the Mosaic file will be ignored. 
+
+    --dst_loc         - an optional argument that specifies whether the destination
+                        variable is located at the center or the corner of the grid
+                        if the destination variable does not exist in the destination
+                        grid file. This flag is only required for non-conservative
+                        regridding when the destination grid is in UGRID format.
+                        For all other cases, only the center location is supported
+                        that is also the default value if this argument is not specified.
 
   --method or -m      - an optional argument specifying which interpolation
                         method is used. The value can be one of the following:
@@ -259,6 +366,18 @@ where
 
     --dst_regional    - an optional argument specifying that the destination
                         is a regional grid and the source is a global grid.
+
+    --check           - Check the correctness of the interpolated destination 
+                        variables against an analytic field. The source variable 
+                        has to be synthetically constructed using the same analytic
+                        method in order to perform meaningful comparison.
+                        The analytic field is calculated based on the coordinate
+                        of the data point.  The formular is as follows:
+                        data(i,j,k,l)=2.0+cos(lat(i,j))**2*cos(2.0*lon(i,j))+(k-1)+2*(l-1)
+                        The data field can be up to four dimensional with the
+                        first two dimension been longitude and latitude.
+                        The mean relative error between the destination and 
+                        analytic field is computed.
 
      --no_log         - Turn off the ESMF error log.
 

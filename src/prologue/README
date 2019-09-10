@@ -1,23 +1,11 @@
+The prologue directory has two purposes:
 
-
-This directory should contain very basic sanity tests which
-must be passed before anything else in the framework is even
-attempted to be compiled or run.
-
-This might include, but is not limited to:
-
-interlanguage issues - passing back and forth strings
-                     - ensuring word sizes in F90 and C++ match
-                     - ensuring a F90 program calling C++ can be linked
-                     - ensuring a C++ program calling F90 can be linked
-
-MPI - that the proper mpi interfaces are available and executables
-      which use them can be linked
-
-threading - that a program using threads can be linked
-
-LAPACK - that a program calling LAPACK can be linked
-
-netCDF - that a program calling netCDF can be linked
+(1) It contains 3rd party software packages that are kept inside of the ESMF
+    source tree for easier maintenance. These sources are typically activated
+    by setting the respective ESMF_* build environment variable to "internal".
+    
+(2) The "test" subdirectory contains very basic sanity tests which must be
+    passed before any other tests in the framework are even attempted to be
+    compiled or run.
 
 

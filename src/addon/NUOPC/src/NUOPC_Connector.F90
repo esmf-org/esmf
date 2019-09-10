@@ -39,7 +39,19 @@ module NUOPC_Connector
     label_ReleaseRouteHandle = "Connector_ReleaseRH"
   character(*), parameter :: &
     label_Finalize = "Connector_Finalize"
-
+    
+  type type_UpdatePacket
+    integer                             :: srcLocalPet
+    integer                             :: dstLocalPet
+    integer                             :: fieldCount
+    integer, pointer                    :: fieldIndex(:)
+    integer, pointer                    :: sendToPets(:)
+    integer                             :: recvFromPet
+    integer, pointer                    :: sendBuffer(:,:)
+    integer, pointer                    :: recvBuffer(:,:)
+    type(type_UpdatePacket), pointer    :: prev
+  end type
+  
   type type_CplSet
     integer                             :: count
     type(ESMF_FieldBundle)              :: srcFields
@@ -63,11 +75,13 @@ module NUOPC_Connector
     type(ESMF_RouteHandle)              :: rh
     type(ESMF_State)                    :: state
     type(ESMF_TermOrder_Flag), pointer  :: termOrders(:)
+    type(type_UpdatePacket), pointer    :: updatePackets
     integer                             :: cplSetCount
     character(ESMF_MAXSTR), pointer     :: cplSetList(:)
     type(type_CplSet), allocatable      :: cplSet(:)
     type(ESMF_VM)                       :: srcVM
     type(ESMF_VM)                       :: dstVM
+    type(ESMF_Clock)                    :: driverClock
   end type
 
   type type_InternalState
@@ -240,6 +254,7 @@ module NUOPC_Connector
     integer                   :: verbosity, diagnostic
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
+    type(type_InternalState)  :: is
 
     rc = ESMF_SUCCESS
 
@@ -291,6 +306,15 @@ module NUOPC_Connector
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! store the incoming clock as driverClock in internal state
+    is%wrap%driverClock = clock
+    
     ! handle diagnostic
     if (btest(diagnostic,2)) then
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
@@ -459,15 +483,23 @@ module NUOPC_Connector
 
    contains
 
-    subroutine doMirror(providerState, acceptorState, acceptorVM, rc)
+    recursive subroutine doMirror(providerState, acceptorState, acceptorVM, rc)
       type(ESMF_State)           :: providerState
       type(ESMF_State)           :: acceptorState
       type(ESMF_VM), intent(in)  :: acceptorVM       
       integer,       intent(out) :: rc
 
+      integer                :: item, itemCount
       character(ESMF_MAXSTR) :: providerTransferOffer, acceptorTransferOffer
       character(ESMF_MAXSTR) :: acceptorStateName
+      type(ESMF_State)       :: providerNestedState
+      type(ESMF_State)       :: acceptorNestedState
+      character(ESMF_MAXSTR) :: nestedStateName
+      character(ESMF_MAXSTR) :: namespace
+      character(ESMF_MAXSTR) :: cplSet
       integer                :: i, j
+      character(ESMF_MAXSTR), allocatable     :: itemNameList(:)
+      type(ESMF_StateItem_Flag), allocatable  :: itemTypeList(:)
       character(ESMF_MAXSTR), pointer       :: providerStandardNameList(:)
       character(ESMF_MAXSTR), pointer       :: acceptorStandardNameList(:)
       character(ESMF_MAXSTR), pointer       :: providerNamespaceList(:)
@@ -491,19 +523,73 @@ module NUOPC_Connector
       call ESMF_StateGet(acceptorState, name=acceptorStateName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
+
+
+      ! recursively duplicate nested states
+      call ESMF_StateGet(providerState, nestedFlag=.false., &
+        itemCount=itemCount, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+      if (itemCount > 0) then
+        allocate(itemNameList(itemCount))
+        allocate(itemTypeList(itemCount))
+        call ESMF_StateGet(providerState, nestedFlag=.false., &
+          itemNameList=itemNameList, itemTypeList=itemTypeList, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        do item=1, itemCount
+          if (itemTypeList(item) == ESMF_STATEITEM_STATE) then
+            call ESMF_StateGet(providerState, itemName=itemNameList(item), &
+              nestedState=providerNestedState, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call ESMF_StateGet(providerNestedState, name=nestedStateName, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (btest(verbosity,8)) then
+              call ESMF_LogWrite(trim(name)//": cloning nestedState: "// &
+                trim(nestedStateName), ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) &
+                return  ! bail out
+            endif
+            call NUOPC_GetAttribute(providerNestedState, name="Namespace", &
+              value=namespace, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call NUOPC_GetAttribute(providerNestedState, name="CplSet", &
+              value=cplSet, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call NUOPC_AddNestedState(acceptorState, Namespace=namespace, &
+              CplSet=cplSet, nestedStateName=nestedStateName, &
+              nestedState=acceptorNestedState, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call doMirror(providerState=providerNestedState, &
+              acceptorState=acceptorNestedState, acceptorVM=acceptorVM, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
+        enddo
+
+        deallocate(itemNameList)
+        deallocate(itemTypeList)
+      endif
+
       call NUOPC_GetStateMemberLists(providerState, providerStandardNameList, &
         fieldList=providerFieldList, namespaceList=providerNamespaceList, &
-        cplSetList=providerCplSetList, rc=rc)
+        cplSetList=providerCplSetList, nestedFlag=.false., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         
       call NUOPC_GetStateMemberLists(acceptorState, acceptorStandardNameList, &
         fieldList=acceptorFieldList, namespaceList=acceptorNamespaceList, &
-        cplSetList=acceptorCplSetList, rc=rc)
+        cplSetList=acceptorCplSetList, nestedFlag=.false., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      !TODO: does not currently deal with nested states or field bundles
+      !TODO: does not currently deal with field bundles
       
       if (associated(providerStandardNameList)) then
         do i=1, size(providerStandardNameList)
@@ -767,7 +853,8 @@ module NUOPC_Connector
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
                 return  ! bail out
-              write (msgString,'(A, ": ProductionConnection:", A)') trim(name),&
+              write (msgString,&
+                '(A, ": ProducerConnection (bondLevelMax):", A)') trim(name), &
                 trim(connectionString)
               call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1265,7 +1352,7 @@ module NUOPC_Connector
     character(ESMF_MAXSTR), pointer :: cplList(:), chopStringList(:)
     character(ESMF_MAXSTR), pointer :: cplSetList(:)
     character(ESMF_MAXSTR)          :: cplName
-    integer                         :: cplListSize, i
+    integer                         :: cplListSize, i, localPet
     integer                         :: cplSetListSize
     integer                         :: bondLevel, bondLevelMax
     character(ESMF_MAXSTR), pointer :: importNamespaceList(:)
@@ -1284,10 +1371,13 @@ module NUOPC_Connector
     character(ESMF_MAXSTR)          :: connectionString
     character(ESMF_MAXSTR)          :: name, iString
     character(len=160)              :: msgString
+    character(ESMF_MAXSTR)          :: iTransferAction, eTransferAction
     character(ESMF_MAXSTR)          :: iTransferOffer, eTransferOffer
     character(ESMF_MAXSTR)          :: iSharePolicy, eSharePolicy
     logical                         :: matchE, matchI, acceptFlag
+    type(ESMF_VM)                   :: acceptorVM, providerVM, currentVM
     logical                         :: sharable
+    integer                         :: helperIn, helperOut
     integer                   :: verbosity, profiling, diagnostic
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
@@ -1446,8 +1536,8 @@ module NUOPC_Connector
 
     ! main loop over all entries in the cplList
     do i=1, cplListSize
-      call chopString(cplList(i), chopChar=":", chopStringList=chopStringList, &
-        rc=rc)
+      call NUOPC_ChopString(cplList(i), chopChar=":", &
+        chopStringList=chopStringList, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       cplName = chopStringList(1) ! first part is the standard name of cpl field
@@ -1724,48 +1814,91 @@ module NUOPC_Connector
           endif
         endif
 
-        !TODO: need to access the srcVM and dstVM, and determine if objects are
-        !TODO: sharable between them (e.g. identical petList, or shared mem)
-        !TODO: For now just simply hard-code, which can lead to issues
-        !TODO: See ticket #3614451.
-        sharable = .true.
+        ! Provider and acceptor can share Field and/or GeomObjects if all of the
+        ! provider PETs are also active on the acceptor side. The acceptor side
+        ! might have additional PETs active, which is okay.
+        sharable = .false.  ! initialize
         
+        if (acceptFlag) then
+          ! determine provider and acceptor VM
+          call NUOPC_GetAttribute(iField, name="TransferActionGeomObject", &
+            value=iTransferAction, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call NUOPC_GetAttribute(eField, name="TransferActionGeomObject", &
+            value=eTransferAction, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if ((trim(iTransferAction)=="provide") &
+            .and.(trim(eTransferAction)=="accept")) then
+            call ESMF_FieldGet(iField, vm=providerVM, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call ESMF_FieldGet(eField, vm=acceptorVM, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          elseif ((trim(eTransferAction)=="provide") &
+            .and.(trim(iTransferAction)=="accept")) then
+            call ESMF_FieldGet(eField, vm=providerVM, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call ESMF_FieldGet(iField, vm=acceptorVM, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          else  ! both sides "provide"
+            !TODO: indicate error condition, should never get here
+          endif
+          ! determine whether the provider Field can be accepted by acceptor VM
+          helperIn = 0  ! initialize
+          call ESMF_VMGet(providerVM, localPet=localPet, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (localPet >= 0) then
+            ! this PET is active under the provider VM -> check acceptor VM
+            call ESMF_VMGet(acceptorVM, localPet=localPet, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (localPet >= 0) then
+              ! acceptor does execute on this PET, therefore can share
+            else
+              ! acceptor does NOT execute on this PET, therefore cannot share
+              helperIn = 1  ! indicated that a not sharable situation was found
+            endif
+          endif
+          ! implement a logical OR operation based on REDUCE_SUM
+          call ESMF_VMGetCurrent(currentVM, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call ESMF_VMAllFullReduce(currentVM, sendData=(/helperIn/), &
+            recvData=helperOut, count=1, reduceflag=ESMF_REDUCE_SUM, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          ! now know globally whether this is a sharable situation or not
+          if (helperOut == 0) sharable = .true.
+        endif
+        
+        if (btest(verbosity,12)) then
+          if (sharable) then
+            write (msgString, '(A)') trim(name)//": "//&
+              "- combination of provider and acceptor VM supports "// &
+              "Field and/or GeomObject sharing between them."
+            call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+          else
+            write (msgString, '(A)') trim(name)//": "//&
+              "- combination of provider and acceptor VM does NOT support "// &
+              "Field and/or GeomObject sharing between them."
+            call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+          endif
+        endif
+
         if (acceptFlag .and. sharable) then
           ! One side accepts the other and VMs allow sharing 
-          ! Look at Field sharing
-          call NUOPC_GetAttribute(iField, name="SharePolicyField", &
-            value=iSharePolicy, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          call NUOPC_GetAttribute(eField, name="SharePolicyField", &
-            value=eSharePolicy, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          if (trim(iSharePolicy)=="share" .and. trim(eSharePolicy)=="share") &
-            then
-            ! both sides want to share -> shared
-            call NUOPC_SetAttribute(iField, &
-              name="ShareStatusField", value="shared", rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            call NUOPC_SetAttribute(eField, &
-              name="ShareStatusField", value="shared", rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            if (btest(verbosity,12)) then
-              write (msgString, '(A)') trim(name)//": "//&
-                "- both sides want to share the Field -> shared."
-              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-                return  ! bail out
-            endif
-          else
-            ! at least one side does not want to share -> not shared
-            ! but don't modify attribute here because if alread shared through
-            ! another connection, it must stay shared. Rely on "not shared" 
-            ! default.
-          endif
           ! Look at GeomObject sharing
           call NUOPC_GetAttribute(iField, name="SharePolicyGeomObject", &
             value=iSharePolicy, rc=rc)
@@ -1799,6 +1932,60 @@ module NUOPC_Connector
             ! but don't modify attribute here because if alread shared through
             ! another connection, it must stay shared. Rely on "not shared" 
             ! default.
+            if (btest(verbosity,12)) then
+              write (msgString, '(A)') trim(name)//": "//&
+                "- at least one side does not want to share the GeomObject "// &
+                "-> not shared (isharePolicy="//trim(iSharePolicy)//&
+                " & esharePolicy="//trim(eSharePolicy)//")"
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+            endif
+          endif
+          ! Look at Field sharing
+          call NUOPC_GetAttribute(iField, name="SharePolicyField", &
+            value=iSharePolicy, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call NUOPC_GetAttribute(eField, name="SharePolicyField", &
+            value=eSharePolicy, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (trim(iSharePolicy)=="share" .and. trim(eSharePolicy)=="share") &
+            then
+            ! both sides want to share -> shared
+            call NUOPC_SetAttribute(iField, &
+              name="ShareStatusField", value="shared", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call NUOPC_SetAttribute(eField, &
+              name="ShareStatusField", value="shared", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (btest(verbosity,12)) then
+              write (msgString, '(A)') trim(name)//": "//&
+                "- both sides want to share the Field -> shared."
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+            endif
+          else
+            ! at least one side does not want to share -> not shared
+            ! but don't modify attribute here because if alread shared through
+            ! another connection, it must stay shared. Rely on "not shared" 
+            ! default.
+            if (btest(verbosity,12)) then
+              write (msgString, '(A)') trim(name)//": "//&
+                "- at least one side does not want to share the Field "// &
+                "-> not shared (isharePolicy="//trim(iSharePolicy)//&
+                " & esharePolicy="//trim(eSharePolicy)//")"
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+            endif
           endif
         endif
 
@@ -1874,10 +2061,12 @@ module NUOPC_Connector
     character(ESMF_MAXSTR), pointer :: exportStandardNameList(:)
     type(ESMF_Field),       pointer :: importFieldList(:)
     type(ESMF_Field),       pointer :: exportFieldList(:)
+    type(ESMF_State),       pointer :: importStateList(:)
+    type(ESMF_State),       pointer :: exportStateList(:)
     integer                         :: iMatch, eMatch
     type(ESMF_Field)                :: iField, eField
     type(ESMF_Field)                :: providerField, acceptorField
-    type(ESMF_State)                :: providerState, acceptorState
+    type(ESMF_State)                :: acceptorState
     type(ESMF_GeomType_Flag)        :: geomtype
     type(ESMF_Grid)                 :: grid
     type(ESMF_Mesh)                 :: mesh
@@ -1903,7 +2092,7 @@ module NUOPC_Connector
     logical                         :: matchE, matchI
     integer                         :: dimCount
     integer, allocatable            :: minIndex(:), maxIndex(:)
-    logical                         :: sharedFlag
+    logical                         :: sharedField, sharedGeom
     type(ESMF_Array)                :: array
     integer                         :: verbosity, profiling, diagnostic
     type(ESMF_Time)                 :: currTime
@@ -1961,10 +2150,12 @@ module NUOPC_Connector
     nullify(cplSetList)
     nullify(importStandardNameList)
     nullify(importFieldList)
+    nullify(importStateList)
     nullify(importNamespaceList)
     nullify(importCplSetList)
     nullify(exportStandardNameList)
     nullify(exportFieldList)
+    nullify(exportStateList)
     nullify(exportNamespaceList)
     nullify(exportCplSetList)
     
@@ -2029,13 +2220,13 @@ module NUOPC_Connector
     endif
     ! get the importState and exportState std lists
     call NUOPC_GetStateMemberLists(importState, importStandardNameList, &
-      fieldList=importFieldList, namespaceList=importNamespaceList, &
-      cplSetList=importCplSetList, rc=rc)
+      fieldList=importFieldList, stateList=importStateList, &
+      namespaceList=importNamespaceList, cplSetList=importCplSetList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_GetStateMemberLists(exportState, exportStandardNameList, &
-      fieldList=exportFieldList, namespaceList=exportNamespaceList, &
-      cplSetList=exportCplSetList, rc=rc)
+      fieldList=exportFieldList, stateList=exportStateList, &
+      namespaceList=exportNamespaceList, cplSetList=exportCplSetList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -2044,8 +2235,8 @@ module NUOPC_Connector
     
     ! main loop over all entries in the cplList
     do i=1, cplListSize
-      call chopString(cplList(i), chopChar=":", chopStringList=chopStringList, &
-        rc=rc)
+      call NUOPC_ChopString(cplList(i), chopChar=":", &
+        chopStringList=chopStringList, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       cplName = chopStringList(1) ! first part is the standard name of cpl field
@@ -2138,29 +2329,22 @@ module NUOPC_Connector
           .and.(trim(eTransferAction)=="accept")) then
           providerField = iField
           acceptorField = eField
-          providerState = importState
-          acceptorState = exportState
+          acceptorState = exportStateList(eMatch)
           transferDirection = "(import -> export)"
         elseif ((trim(eTransferAction)=="provide") &
           .and.(trim(iTransferAction)=="accept")) then
           providerField = eField
           acceptorField = iField
-          providerState = exportState
-          acceptorState = importState
+          acceptorState = importStateList(iMatch)
           transferDirection = "(import <- export)"
         else  ! both sides "provide"
           ! not a situation that needs handling here
           cycle ! continue with the next i
         endif
         
-        call NUOPC_GetAttribute(iField, name="ShareStatusField", &
-          value=iShareStatusF, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-        call NUOPC_GetAttribute(eField, name="ShareStatusField", &
-          value=eShareStatusF, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        ! there is transfer: provider -> acceptor
+        ! determine if there is any sharing of GeomObject and/or Field
+        
         call NUOPC_GetAttribute(iField, name="ShareStatusGeomObject", &
           value=iShareStatusG, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2169,20 +2353,21 @@ module NUOPC_Connector
           value=eShareStatusG, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        call NUOPC_GetAttribute(iField, name="ShareStatusField", &
+          value=iShareStatusF, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        call NUOPC_GetAttribute(eField, name="ShareStatusField", &
+          value=eShareStatusF, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+        sharedGeom = &
+          (trim(iShareStatusG)=="shared" .and. trim(eShareStatusG)=="shared")
+        sharedField = &
+          (trim(iShareStatusF)=="shared" .and. trim(eShareStatusF)=="shared")
 
         if (btest(verbosity,12)) then
-          write (msgString, '(A)') trim(name)//": "//&
-            "- import ShareStatusField="//trim(iShareStatusF)
-          call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-            return  ! bail out
-          write (msgString, '(A)') trim(name)//": "//&
-            "- export ShareStatusField="//trim(eShareStatusF)
-          call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-            return  ! bail out
           write (msgString, '(A)') trim(name)//": "//&
             "- import ShareStatusGeomObject="//trim(iShareStatusG)
           call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
@@ -2195,12 +2380,46 @@ module NUOPC_Connector
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
+          if (sharedGeom) then
+            call ESMF_LogWrite(trim(name)//": "//"-> sharing GeomObject", &
+              ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+          else
+            call ESMF_LogWrite(trim(name)//": "//"-> NOT sharing GeomObject", &
+              ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+          endif
+          write (msgString, '(A)') trim(name)//": "//&
+            "- import ShareStatusField="//trim(iShareStatusF)
+          call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+          write (msgString, '(A)') trim(name)//": "//&
+            "- export ShareStatusField="//trim(eShareStatusF)
+          call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+          if (sharedField) then
+            call ESMF_LogWrite(trim(name)//": "//"-> sharing Field.", &
+              ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+          else
+            call ESMF_LogWrite(trim(name)//": "//"-> NOT sharing Field.", &
+              ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+          endif
         endif
 
-        sharedFlag = .false. ! reset
-        if (trim(iShareStatusF)=="shared" .and. trim(eShareStatusF)=="shared") &
-          sharedFlag = .true.
-          
         ! transfer the underlying DistGrid from provider to acceptor
         ! or share the providerField or providerGeomObject with the acceptor
         call ESMF_FieldGet(providerField, geomtype=geomtype, typekind=tkf, &
@@ -2214,8 +2433,14 @@ module NUOPC_Connector
             rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          if (.not.sharedFlag) then
-            ! not shared -> must transfer
+          if (sharedGeom) then
+            ! set the shared Grid on the acceptor side
+            call ESMF_FieldEmptySet(acceptorField, grid=grid, &
+              staggerloc=staggerloc, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return
+          else
+            ! not shared GeomObject > must transfer
             call ESMF_GridGet(grid, distgrid=providerDG, name=geomobjname, &
               dimCount=dimCount, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2224,7 +2449,7 @@ module NUOPC_Connector
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             if (btest(verbosity,11)) then
-              call ESMF_LogWrite(trim(name)//": transferring underlying "// &
+              call ESMF_LogWrite(trim(name)//": - transferring underlying "// &
                 "DistGrid "//trim(transferDirection)//" for Grid: "&
                 //trim(geomobjname), ESMF_LOGMSG_INFO, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2235,7 +2460,7 @@ module NUOPC_Connector
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             if (btest(verbosity,11)) then
               call ESMF_LogWrite(trim(name)//&
-                ": done creating acceptorDG from providerDG", &
+                ": - done creating acceptorDG from providerDG", &
                 ESMF_LOGMSG_INFO, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -2253,7 +2478,7 @@ module NUOPC_Connector
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             if (btest(verbosity,11)) then
               call ESMF_LogWrite(trim(name)//&
-                ": done transferring underlying DistGrid", &
+                ": - done transferring underlying DistGrid", &
                 ESMF_LOGMSG_INFO, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -2301,7 +2526,7 @@ module NUOPC_Connector
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           endif
-          if (.not.sharedFlag) then
+          if (.not.sharedField) then
             ! transfer additional provider info in form of attributes
             tk = tkf  ! convert TypeKind_Flag to integer
             call ESMF_AttributeSet(acceptorField, &
@@ -2309,52 +2534,40 @@ module NUOPC_Connector
               convention="NUOPC", purpose="Instance", &
               attnestflag=ESMF_ATTNEST_ON, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, &
-              file=FILENAME)) &
-              return  ! bail out
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             gl = staggerloc  ! convert StaggerLoc to integer
             call ESMF_AttributeSet(acceptorField, &
               name="GeomLoc", value=gl, &
               convention="NUOPC", purpose="Instance", &
               attnestflag=ESMF_ATTNEST_ON, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, &
-              file=FILENAME)) &
-              return  ! bail out
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             call ESMF_AttributeSet(acceptorField, &
               name="MinIndex", valueList=minIndex, &
               convention="NUOPC", purpose="Instance", &
               attnestflag=ESMF_ATTNEST_ON, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, &
-              file=FILENAME)) &
-              return  ! bail out
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             call ESMF_AttributeSet(acceptorField, &
               name="MaxIndex", valueList=maxIndex, &
               convention="NUOPC", purpose="Instance", &
               attnestflag=ESMF_ATTNEST_ON, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, &
-              file=FILENAME)) &
-              return  ! bail out
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             ! bring over arbDimCount as attribute
             call ESMF_AttributeSet(acceptorField, &
               name="ArbDimCount", value=arbDimCount, &
               convention="NUOPC", purpose="Instance", &
               attnestflag=ESMF_ATTNEST_ON, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, &
-              file=FILENAME)) &
-              return  ! bail out
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             ! bring over gridToFieldMap as attributes
             call ESMF_AttributeSet(acceptorField, &
               name="GridToFieldMap", valueList=gridToFieldMap, &
               convention="NUOPC", purpose="Instance", &
               attnestflag=ESMF_ATTNEST_ON, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, &
-              file=FILENAME)) &
-              return  ! bail out
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             if (fieldDimCount - gridDimCount > 0) then
               ! bring over ungridded dim bounds as attributes
               call ESMF_AttributeSet(acceptorField, &
@@ -2362,52 +2575,41 @@ module NUOPC_Connector
                 convention="NUOPC", purpose="Instance", &
                 attnestflag=ESMF_ATTNEST_ON, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
               call ESMF_AttributeSet(acceptorField, &
                 name="UngriddedUBound", valueList=ungriddedUBound, &
                 convention="NUOPC", purpose="Instance", &
                 attnestflag=ESMF_ATTNEST_ON, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             endif
           else
-            ! shared:
-            ! obtain the array from provider to be shared with acceptor
-            call ESMF_FieldGet(providerField, array=array, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            ! accceptor fieldName to remain unchanged
-            call ESMF_FieldGet(acceptorField, name=fieldName, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            !TODO: make sure that this FieldCreate() sets total widths correctly
-            if (fieldDimCount - gridDimCount > 0) then
-              acceptorField=ESMF_FieldCreate(grid=grid, array=array, &
-                datacopyflag=ESMF_DATACOPY_REFERENCE, staggerloc=staggerloc, &
-                gridToFieldMap=gridToFieldMap, name=fieldName, &
-                ungriddedLBound=ungriddedLBound, &
-                ungriddedUBound=ungriddedUBound, rc=rc)
+            ! sharedField, can create acceptorField here if grid is also shared
+            if (sharedGeom) then
+              call ShareFieldWithGrid(acceptorField, providerField, name=name, &
+                rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            else
-              acceptorField=ESMF_FieldCreate(grid=grid, array=array, &
-                datacopyflag=ESMF_DATACOPY_REFERENCE, staggerloc=staggerloc, &
-                gridToFieldMap=gridToFieldMap, name=fieldName, rc=rc)
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return
+              ! replace the old acceptorField in acceptorState by realizing
+              call NUOPC_Realize(acceptorState, acceptorField, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            end if
-            call NUOPC_Realize(acceptorState, acceptorField, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            ! reset the TransferActionGeomObject for this completed field
-            call NUOPC_SetAttribute(acceptorField, &
-              name="TransferActionGeomObject", value="complete", rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return
+              ! reset the TransferActionGeomObject for this completed field
+              ! to prevent handling of the same field in the next phase
+              call NUOPC_SetAttribute(acceptorField, &
+                name="TransferActionGeomObject", value="complete", rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return
+              if (btest(verbosity,12)) then
+                write (msgString, '(A)') trim(name)//": "//&
+                  "- Grid-based acceptorField created and realized, "//&
+                  "reference sharing with providerField"
+                call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                  return  ! bail out
+               endif
+            endif
           endif
           
           ! clean-up
@@ -2435,8 +2637,14 @@ module NUOPC_Connector
           call ESMF_FieldGet(providerField, mesh=mesh, meshloc=meshloc, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          if (.not.sharedFlag) then
-            ! not shared -> must transfer
+          if (sharedGeom) then
+            ! set the shared Mesh on the acceptor side
+            call ESMF_FieldEmptySet(acceptorField, mesh=mesh, meshloc=meshloc, &
+              rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          else
+            ! not sharedGeom -> must transfer
             call ESMF_MeshGet(mesh, elementDistgrid=providerDG, &
               nodalDistgrid=providerDG_nodal, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2446,8 +2654,8 @@ module NUOPC_Connector
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             if (btest(verbosity,11)) then
               call ESMF_LogWrite(trim(name)//&
-                ": transferring underlying DistGrid "//trim(transferDirection)&
-                //" for Mesh", ESMF_LOGMSG_INFO, rc=rc)
+                ": - transferring underlying DistGrid "//&
+                trim(transferDirection)//" for Mesh", ESMF_LOGMSG_INFO, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             endif
@@ -2468,15 +2676,14 @@ module NUOPC_Connector
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             if (btest(verbosity,11)) then
               call ESMF_LogWrite(trim(name)//&
-                ": done transferring underlying DistGrid", &
+                ": - done transferring underlying DistGrid", &
                 ESMF_LOGMSG_INFO, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             endif
           endif
           ! query additional provider information
-          call ESMF_FieldGet(providerField, mesh=mesh, dimCount=fieldDimCount,&
-            rc=rc)
+          call ESMF_FieldGet(providerField, dimCount=fieldDimCount, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           call ESMF_DistGridGet(providerDG, dimCount=gridDimCount, rc=rc)
@@ -2484,7 +2691,7 @@ module NUOPC_Connector
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           allocate(gridToFieldMap(gridDimCount),stat=stat)
           if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-            msg="Allocation of internal ungriddedLBound failed.", &
+            msg="Allocation of internal gridToFieldMap failed.", &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
           call ESMF_FieldGet(providerField, gridToFieldMap=gridToFieldMap, &
@@ -2508,7 +2715,7 @@ module NUOPC_Connector
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           endif
-          if (.not.sharedFlag) then
+          if (.not.sharedField) then
             ! transfer additional provider info in form of attributes
             tk = tkf  ! convert TypeKind_Flag to integer
             call ESMF_AttributeSet(acceptorField, &
@@ -2516,27 +2723,21 @@ module NUOPC_Connector
               convention="NUOPC", purpose="Instance", &
               attnestflag=ESMF_ATTNEST_ON, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, &
-              file=FILENAME)) &
-              return  ! bail out
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             gl = meshloc  ! convert StaggerLoc to integer
             call ESMF_AttributeSet(acceptorField, &
               name="GeomLoc", value=gl, &
               convention="NUOPC", purpose="Instance", &
               attnestflag=ESMF_ATTNEST_ON, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, &
-              file=FILENAME)) &
-              return  ! bail out
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             ! bring over gridToFieldMap as attributes
             call ESMF_AttributeSet(acceptorField, &
               name="GridToFieldMap", valueList=gridToFieldMap, &
               convention="NUOPC", purpose="Instance", &
               attnestflag=ESMF_ATTNEST_ON, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, &
-              file=FILENAME)) &
-              return  ! bail out
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             if (fieldDimCount - gridDimCount > 0) then
               ! bring over ungridded dim bounds as attributes
               call ESMF_AttributeSet(acceptorField, &
@@ -2544,53 +2745,41 @@ module NUOPC_Connector
                 convention="NUOPC", purpose="Instance", &
                 attnestflag=ESMF_ATTNEST_ON, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
               call ESMF_AttributeSet(acceptorField, &
                 name="UngriddedUBound", valueList=ungriddedUBound, &
                 convention="NUOPC", purpose="Instance", &
                 attnestflag=ESMF_ATTNEST_ON, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             endif
           else
-            ! shared:
-            ! obtain the array from provider to be shared with acceptor
-            call ESMF_FieldGet(providerField, array=array, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            ! accceptor fieldName to remain unchanged
-            call ESMF_FieldGet(acceptorField, name=fieldName, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            !TODO: make sure that this FieldCreate() sets total widths correctly
-            if (fieldDimCount - gridDimCount > 0) then
-              acceptorField=ESMF_FieldCreate(mesh=mesh, array=array, &
-                datacopyflag=ESMF_DATACOPY_REFERENCE, meshloc=meshloc, &
-                gridToFieldMap=gridToFieldMap, name=fieldName, &
-                ungriddedLBound=ungriddedLBound, &
-                ungriddedUBound=ungriddedUBound, &
+            ! sharedField, can create acceptorField here if mesh is also shared
+            if (sharedGeom) then
+              call ShareFieldWithMesh(acceptorField, providerField, name=name, &
                 rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            else
-              acceptorField=ESMF_FieldCreate(mesh=mesh, array=array, &
-                datacopyflag=ESMF_DATACOPY_REFERENCE, meshloc=meshloc, &
-                gridToFieldMap=gridToFieldMap, name=fieldName, rc=rc)
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return
+              ! replace the old acceptorField in acceptorState by realizing
+              call NUOPC_Realize(acceptorState, acceptorField, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            end if
-            call NUOPC_Realize(acceptorState, acceptorField, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            ! reset the TransferActionGeomObject for this completed field
-            call NUOPC_SetAttribute(acceptorField, &
-              name="TransferActionGeomObject", value="complete", rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return
+              ! reset the TransferActionGeomObject for this completed field
+              ! to prevent handling of the same field in the next phase
+              call NUOPC_SetAttribute(acceptorField, &
+                name="TransferActionGeomObject", value="complete", rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return
+              if (btest(verbosity,12)) then
+                write (msgString, '(A)') trim(name)//": "//&
+                  "- Mesh-based acceptorField created and realized, "//&
+                  "reference sharing with providerField"
+                call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                  return  ! bail out
+               endif
+            endif
           endif
 
           ! clean-up
@@ -2611,6 +2800,7 @@ module NUOPC_Connector
 
         ! ESMF_GEOMTYPE_LOCSTREAM
         elseif (geomtype==ESMF_GEOMTYPE_LOCSTREAM) then
+          !TODO: consider sharedGeom and sharedField
           call ESMF_FieldGet(providerField, locstream=locstream, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -2623,7 +2813,7 @@ module NUOPC_Connector
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           if (btest(verbosity,11)) then
             call ESMF_LogWrite(trim(name)//&
-              ": transferring underlying DistGrid "//trim(transferDirection)&
+              ": - transferring underlying DistGrid "//trim(transferDirection)&
               //" for LocStream", ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -2641,8 +2831,41 @@ module NUOPC_Connector
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           if (btest(verbosity,11)) then
             call ESMF_LogWrite(trim(name)//&
-              ": done transferring underlying DistGrid", &
+              ": - done transferring underlying DistGrid", &
               ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
+          ! query additional provider information
+          call ESMF_FieldGet(providerField, dimCount=fieldDimCount, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call ESMF_DistGridGet(providerDG, dimCount=gridDimCount, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          allocate(gridToFieldMap(gridDimCount),stat=stat)
+          if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+            msg="Allocation of internal gridToFieldMap failed.", &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+          call ESMF_FieldGet(providerField, gridToFieldMap=gridToFieldMap, &
+            rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (fieldDimCount - gridDimCount > 0) then
+            ! query ungridded dim bounds
+            allocate(ungriddedLBound(fieldDimCount-gridDimCount),stat=stat)
+            if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+              msg="Allocation of internal ungriddedLBound failed.", &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+            allocate(ungriddedUBound(fieldDimCount-gridDimCount),stat=stat)
+            if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+              msg="Allocation of internal ungriddedUBound failed.", &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+            call ESMF_FieldGet(providerField, ungriddedLBound=ungriddedLBound, &
+              ungriddedUBound=ungriddedUBound, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           endif
@@ -2653,9 +2876,44 @@ module NUOPC_Connector
             convention="NUOPC", purpose="Instance", &
             attnestflag=ESMF_ATTNEST_ON, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, &
-            file=FILENAME)) &
-            return  ! bail out
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          ! bring over gridToFieldMap as attributes
+          call ESMF_AttributeSet(acceptorField, &
+            name="GridToFieldMap", valueList=gridToFieldMap, &
+            convention="NUOPC", purpose="Instance", &
+            attnestflag=ESMF_ATTNEST_ON, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (fieldDimCount - gridDimCount > 0) then
+            ! bring over ungridded dim bounds as attributes
+            call ESMF_AttributeSet(acceptorField, &
+              name="UngriddedLBound", valueList=ungriddedLBound, &
+              convention="NUOPC", purpose="Instance", &
+              attnestflag=ESMF_ATTNEST_ON, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call ESMF_AttributeSet(acceptorField, &
+              name="UngriddedUBound", valueList=ungriddedUBound, &
+              convention="NUOPC", purpose="Instance", &
+              attnestflag=ESMF_ATTNEST_ON, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
+          ! clean-up
+          deallocate(gridToFieldMap, stat=rc)
+          if (ESMF_LogFoundDeallocError(rc, &
+            msg="Deallocating gridToFieldMap", &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (fieldDimCount - gridDimCount > 0) then
+            deallocate(ungriddedLBound, stat=rc)
+            if (ESMF_LogFoundDeallocError(rc, &
+              msg="Deallocating ungriddedLBound", &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            deallocate(ungriddedUBound, stat=rc)
+            if (ESMF_LogFoundDeallocError(rc, &
+              msg="Deallocating ungriddedUBound", &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
 
         ! unsupported ESMF_GEOMTYPE
         else
@@ -2674,10 +2932,12 @@ module NUOPC_Connector
     if (associated(cplSetList)) deallocate(cplSetList)
     if (associated(importStandardNameList)) deallocate(importStandardNameList)
     if (associated(importFieldList)) deallocate(importFieldList)
+    if (associated(importStateList)) deallocate(importStateList)
     if (associated(importNamespaceList)) deallocate(importNamespaceList)
     if (associated(importCplSetList)) deallocate(importCplSetList)
     if (associated(exportStandardNameList)) deallocate(exportStandardNameList)
     if (associated(exportFieldList)) deallocate(exportFieldList)
+    if (associated(exportStateList)) deallocate(exportStateList)
     if (associated(exportNamespaceList)) deallocate(exportNamespaceList)
     if (associated(exportCplSetList)) deallocate(exportCplSetList)
     
@@ -2732,9 +2992,12 @@ module NUOPC_Connector
     character(ESMF_MAXSTR), pointer :: exportStandardNameList(:)
     type(ESMF_Field),       pointer :: importFieldList(:)
     type(ESMF_Field),       pointer :: exportFieldList(:)
+    type(ESMF_State),       pointer :: importStateList(:)
+    type(ESMF_State),       pointer :: exportStateList(:)
     integer                         :: iMatch, eMatch
     type(ESMF_Field)                :: iField, eField
     type(ESMF_Field)                :: providerField, acceptorField
+    type(ESMF_State)                :: acceptorState
     type(ESMF_GeomType_Flag)        :: geomtype
     type(ESMF_Grid)                 :: providerGrid, acceptorGrid
     type(ESMF_Mesh)                 :: providerMesh, acceptorMesh
@@ -2751,7 +3014,10 @@ module NUOPC_Connector
     character(len=160)              :: msgString
     character(ESMF_MAXSTR)          :: geomobjname
     character(ESMF_MAXSTR)          :: iTransferAction, eTransferAction
+    character(ESMF_MAXSTR)          :: iShareStatusF, eShareStatusF
+    character(ESMF_MAXSTR)          :: iShareStatusG, eShareStatusG
     logical                         :: matchE, matchI
+    logical                         :: sharedField, sharedGeom
     integer                         :: verbosity, profiling, diagnostic
     type(ESMF_Time)                 :: currTime
     character(len=40)               :: currTimeString
@@ -2807,10 +3073,12 @@ module NUOPC_Connector
     nullify(cplSetList)
     nullify(importStandardNameList)
     nullify(importFieldList)
+    nullify(importStateList)
     nullify(importNamespaceList)
     nullify(importCplSetList)
     nullify(exportStandardNameList)
     nullify(exportFieldList)
+    nullify(exportStateList)
     nullify(exportNamespaceList)
     nullify(exportCplSetList)
 
@@ -2875,13 +3143,13 @@ module NUOPC_Connector
     endif
     ! get the importState and exportState std lists
     call NUOPC_GetStateMemberLists(importState, importStandardNameList, &
-      fieldList=importFieldList, namespaceList=importNamespaceList, &
-      cplSetList=importCplSetList, rc=rc)
+      fieldList=importFieldList, stateList=importStateList, &
+      namespaceList=importNamespaceList, cplSetList=importCplSetList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_GetStateMemberLists(exportState, exportStandardNameList, &
-      fieldList=exportFieldList, namespaceList=exportNamespaceList, &
-      cplSetList=exportCplSetList, rc=rc)
+      fieldList=exportFieldList, stateList=exportStateList, &
+      namespaceList=exportNamespaceList, cplSetList=exportCplSetList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -2890,8 +3158,8 @@ module NUOPC_Connector
 
     ! main loop over all entries in the cplList
     do i=1, cplListSize
-      call chopString(cplList(i), chopChar=":", chopStringList=chopStringList, &
-        rc=rc)
+      call NUOPC_ChopString(cplList(i), chopChar=":", &
+        chopStringList=chopStringList, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       cplName = chopStringList(1) ! first part is the standard name of cpl field
@@ -2984,168 +3252,293 @@ module NUOPC_Connector
           .and.(trim(eTransferAction)=="accept")) then
           providerField = iField
           acceptorField = eField
+          acceptorState = exportStateList(eMatch)
           transferDirection = "(import -> export)"
         elseif ((trim(eTransferAction)=="provide") &
           .and.(trim(iTransferAction)=="accept")) then
           providerField = eField
           acceptorField = iField
+          acceptorState = importStateList(iMatch)
           transferDirection = "(import <- export)"
         else  ! not a situation that needs handling here
           cycle ! continue with the next i
         endif
 
-        ! transfer the underlying Grid/Mesh/LocStream from provider to acceptor
-        call ESMF_FieldGet(providerField, geomtype=geomtype, rc=rc)
+        ! there is transfer: provider -> acceptor
+        ! determine if there is any sharing of GeomObject and/or Field
+        
+        call NUOPC_GetAttribute(iField, name="ShareStatusGeomObject", &
+          value=iShareStatusG, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-        if (geomtype==ESMF_GEOMTYPE_GRID) then
-          if (btest(verbosity,11)) then
-            call ESMF_LogWrite(trim(name)//&
-              ": transferring the full Grid with coordinates "//&
-              trim(transferDirection), ESMF_LOGMSG_INFO, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          endif
-          call ESMF_FieldGet(providerField, grid=providerGrid, &
-            staggerloc=staggerloc, rc=rc)
+        call NUOPC_GetAttribute(eField, name="ShareStatusGeomObject", &
+          value=eShareStatusG, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        call NUOPC_GetAttribute(iField, name="ShareStatusField", &
+          value=iShareStatusF, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        call NUOPC_GetAttribute(eField, name="ShareStatusField", &
+          value=eShareStatusF, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+        sharedGeom = &
+          (trim(iShareStatusG)=="shared" .and. trim(eShareStatusG)=="shared")
+        sharedField = &
+          (trim(iShareStatusF)=="shared" .and. trim(eShareStatusF)=="shared")
+
+        if (btest(verbosity,12)) then
+          write (msgString, '(A)') trim(name)//": "//&
+            "- import ShareStatusGeomObject="//trim(iShareStatusG)
+          call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          call ESMF_GridGet(providerGrid, name=geomobjname, rc=rc)
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+          write (msgString, '(A)') trim(name)//": "//&
+            "- export ShareStatusGeomObject="//trim(eShareStatusG)
+          call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          call ESMF_FieldGet(acceptorField, grid=acceptorGrid, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          call ESMF_GridGet(acceptorGrid, distgrid=distgrid, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          acceptorGrid = ESMF_GridCreate(providerGrid, distgrid, &
-            name=geomobjname, copyAttributes=.TRUE.,rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          call ESMF_FieldEmptySet(acceptorField, grid=acceptorGrid, &
-            staggerloc=staggerloc, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          if (btest(verbosity,11)) then
-            call ESMF_LogWrite(trim(name)//&
-              ": done transferring the full Grid with coordinates", &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+          if (sharedGeom) then
+            call ESMF_LogWrite(trim(name)//": "//"-> sharing GeomObject", &
               ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          endif
-        elseif (geomtype==ESMF_GEOMTYPE_MESH) then
-          if (btest(verbosity,11)) then
-            call ESMF_LogWrite(trim(name)//&
-              ": transferring the full Mesh with coordinates "//&
-              trim(transferDirection), ESMF_LOGMSG_INFO, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          endif
-          call ESMF_FieldGet(providerField, mesh=providerMesh, &
-            meshloc=meshloc, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out            
-          call ESMF_MeshGet(providerMesh, isMemFreed=meshNoConnections, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          call ESMF_FieldGet(acceptorField, mesh=acceptorMesh, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          call ESMF_MeshGet(acceptorMesh, nodalDistgridIsPresent=isPresentNDG, &
-            elementDistgridIsPresent=isPresentEDG, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          if (isPresentNDG.and.isPresentEDG) then
-            ! get and use both DistGrids
-            call ESMF_MeshGet(acceptorMesh, nodalDistgrid=nDistgrid, &
-              elementDistgrid=eDistgrid, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            acceptorMesh = ESMF_MeshCreate(providerMesh, &
-              nodalDistgrid=nDistgrid, elementDistgrid=eDistgrid, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          elseif (isPresentNDG.and. .not.isPresentEDG) then
-            ! only use Node DistGrids
-            call ESMF_MeshGet(acceptorMesh, nodalDistgrid=nDistgrid, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            acceptorMesh = ESMF_MeshCreate(providerMesh, &
-              nodalDistgrid=nDistgrid, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          elseif (isPresentEDG.and. .not.isPresentNDG) then
-            ! only use Element DistGrids
-            call ESMF_MeshGet(acceptorMesh, elementDistgrid=eDistgrid, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            acceptorMesh = ESMF_MeshCreate(providerMesh, &
-              elementDistgrid=eDistgrid, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
           else
-            ! cannot create Mesh without a DistGrid -> error out
+            call ESMF_LogWrite(trim(name)//": "//"-> NOT sharing GeomObject", &
+              ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+          endif
+          write (msgString, '(A)') trim(name)//": "//&
+            "- import ShareStatusField="//trim(iShareStatusF)
+          call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+          write (msgString, '(A)') trim(name)//": "//&
+            "- export ShareStatusField="//trim(eShareStatusF)
+          call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+          if (sharedField) then
+            call ESMF_LogWrite(trim(name)//": "//"-> sharing Field", &
+              ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+          else
+            call ESMF_LogWrite(trim(name)//": "//"-> NOT sharing Field", &
+              ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+          endif
+        endif
+
+        if (.not.sharedGeom) then
+          ! transfer the underlying Grid/Mesh/LocStream from provider to acceptor
+          call ESMF_FieldGet(providerField, geomtype=geomtype, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (geomtype==ESMF_GEOMTYPE_GRID) then
+            if (btest(verbosity,11)) then
+              call ESMF_LogWrite(trim(name)//&
+                ": - transferring the full Grid with coordinates "//&
+                trim(transferDirection), ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            endif
+            call ESMF_FieldGet(providerField, grid=providerGrid, &
+              staggerloc=staggerloc, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call ESMF_GridGet(providerGrid, name=geomobjname, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call ESMF_FieldGet(acceptorField, grid=acceptorGrid, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call ESMF_GridGet(acceptorGrid, distgrid=distgrid, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            acceptorGrid = ESMF_GridCreate(providerGrid, distgrid, &
+              name=geomobjname, copyAttributes=.TRUE.,rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call ESMF_FieldEmptySet(acceptorField, grid=acceptorGrid, &
+              staggerloc=staggerloc, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (btest(verbosity,11)) then
+              call ESMF_LogWrite(trim(name)//&
+                ": - done transferring the full Grid with coordinates", &
+                ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            endif
+            if (sharedField) then
+              ! sharedField, can now be created because grid is complete
+              call ShareFieldWithGrid(acceptorField, providerField, name=name, &
+                rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return
+              ! replace the old acceptorField in acceptorState by realizing
+              call NUOPC_Realize(acceptorState, acceptorField, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return
+              if (btest(verbosity,12)) then
+                write (msgString, '(A)') trim(name)//": "//&
+                  "- Grid-based acceptorField created and realized, "//&
+                  "reference sharing with providerField"
+                call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                  return  ! bail out
+               endif
+            endif
+          elseif (geomtype==ESMF_GEOMTYPE_MESH) then
+            if (btest(verbosity,11)) then
+              call ESMF_LogWrite(trim(name)//&
+                ": - transferring the full Mesh with coordinates "//&
+                trim(transferDirection), ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            endif
+            call ESMF_FieldGet(providerField, mesh=providerMesh, &
+              meshloc=meshloc, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out            
+            call ESMF_MeshGet(providerMesh, isMemFreed=meshNoConnections, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call ESMF_FieldGet(acceptorField, mesh=acceptorMesh, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call ESMF_MeshGet(acceptorMesh, nodalDistgridIsPresent=isPresentNDG, &
+              elementDistgridIsPresent=isPresentEDG, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (isPresentNDG.and.isPresentEDG) then
+              ! get and use both DistGrids
+              call ESMF_MeshGet(acceptorMesh, nodalDistgrid=nDistgrid, &
+                elementDistgrid=eDistgrid, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              acceptorMesh = ESMF_MeshCreate(providerMesh, &
+                nodalDistgrid=nDistgrid, elementDistgrid=eDistgrid, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            elseif (isPresentNDG.and. .not.isPresentEDG) then
+              ! only use Node DistGrids
+              call ESMF_MeshGet(acceptorMesh, nodalDistgrid=nDistgrid, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              acceptorMesh = ESMF_MeshCreate(providerMesh, &
+                nodalDistgrid=nDistgrid, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            elseif (isPresentEDG.and. .not.isPresentNDG) then
+              ! only use Element DistGrids
+              call ESMF_MeshGet(acceptorMesh, elementDistgrid=eDistgrid, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              acceptorMesh = ESMF_MeshCreate(providerMesh, &
+                elementDistgrid=eDistgrid, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            else
+              ! cannot create Mesh without a DistGrid -> error out
+              call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+                msg="Acceptor side must define nodal or element DistGrid.", &
+                line=__LINE__, file=trim(name)//":"//FILENAME, &
+                rcToReturn=rc)
+              return  ! bail out
+            endif
+            call ESMF_FieldEmptySet(acceptorField, mesh=acceptorMesh, &
+              meshloc=meshloc, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (btest(verbosity,11)) then
+              call ESMF_LogWrite(trim(name)//&
+                ": - done transferring the full Mesh with coordinates", &
+                ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            endif
+            if (sharedField) then
+              ! sharedField, can now be created because mesh is complete
+              call ShareFieldWithMesh(acceptorField, providerField, name=name, &
+                rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return
+              ! replace the old acceptorField in acceptorState by realizing
+              call NUOPC_Realize(acceptorState, acceptorField, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return
+              if (btest(verbosity,12)) then
+                write (msgString, '(A)') trim(name)//": "//&
+                  "- Mesh-based acceptorField created and realized, "//&
+                  "reference sharing with providerField"
+                call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                  return  ! bail out
+               endif
+            endif
+          elseif (geomtype==ESMF_GEOMTYPE_LOCSTREAM) then
+            if (btest(verbosity,11)) then
+              call ESMF_LogWrite(trim(name)//&
+                ": - transferring the full LocStream with coordinates "//&
+                trim(transferDirection), ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            endif
+            call ESMF_FieldGet(providerField, locstream=providerLocstream, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call ESMF_LocStreamGet(providerLocstream, name=geomobjname, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call ESMF_FieldGet(acceptorField, locstream=acceptorLocstream, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call ESMF_LocStreamGet(acceptorLocstream, distgrid=distgrid, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            acceptorLocstream = ESMF_LocStreamCreate(providerLocstream, &
+              distgrid=distgrid, name=geomobjname, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call ESMF_FieldEmptySet(acceptorField, locstream=acceptorLocstream, &
+              rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (btest(verbosity,11)) then
+              call ESMF_LogWrite(trim(name)//&
+                ": - done transferring the full LocStream with coordinates", &
+                ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            endif
+            if (sharedField) then
+              !TODO: sharedField, can now be created because mesh is complete
+            endif
+          else
             call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-              msg="Acceptor side must define nodal or element DistGrid.", &
+              msg="Provided GeomType must be Grid, Mesh, or LocStream.", &
               line=__LINE__, file=trim(name)//":"//FILENAME, &
               rcToReturn=rc)
             return  ! bail out
           endif
-          call ESMF_FieldEmptySet(acceptorField, mesh=acceptorMesh, &
-            meshloc=meshloc, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          if (btest(verbosity,11)) then
-            call ESMF_LogWrite(trim(name)//&
-              ": done transferring the full Mesh with coordinates", &
-              ESMF_LOGMSG_INFO, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          endif
-        elseif (geomtype==ESMF_GEOMTYPE_LOCSTREAM) then
-          if (btest(verbosity,11)) then
-            call ESMF_LogWrite(trim(name)//&
-              ": transferring the full LocStream with coordinates "//&
-              trim(transferDirection), ESMF_LOGMSG_INFO, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          endif
-          call ESMF_FieldGet(providerField, locstream=providerLocstream, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          call ESMF_LocStreamGet(providerLocstream, name=geomobjname, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          call ESMF_FieldGet(acceptorField, locstream=acceptorLocstream, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          call ESMF_LocStreamGet(acceptorLocstream, distgrid=distgrid, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          acceptorLocstream = ESMF_LocStreamCreate(providerLocstream, &
-            distgrid=distgrid, name=geomobjname, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          call ESMF_FieldEmptySet(acceptorField, locstream=acceptorLocstream, &
-            rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          if (btest(verbosity,11)) then
-            call ESMF_LogWrite(trim(name)//&
-              ": done transferring the full LocStream with coordinates", &
-              ESMF_LOGMSG_INFO, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          endif
-        else
-          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-            msg="Provided GeomType must be Grid, Mesh, or LocStream.", &
-            line=__LINE__, file=trim(name)//":"//FILENAME, &
-            rcToReturn=rc)
-          return  ! bail out
         endif
-          
+        
         ! Need to reset the TransferOffer and TransferAction
         ! attributes on the acceptorField, just in case this Field interacts on
         ! multiple levels of a component hierarchy.
@@ -3168,10 +3561,12 @@ module NUOPC_Connector
     if (associated(cplSetList)) deallocate(cplSetList)
     if (associated(importStandardNameList)) deallocate(importStandardNameList)
     if (associated(importFieldList)) deallocate(importFieldList)
+    if (associated(importStateList)) deallocate(importStateList)
     if (associated(importNamespaceList)) deallocate(importNamespaceList)
     if (associated(importCplSetList)) deallocate(importCplSetList)
     if (associated(exportStandardNameList)) deallocate(exportStandardNameList)
     if (associated(exportFieldList)) deallocate(exportFieldList)
+    if (associated(exportStateList)) deallocate(exportStateList)
     if (associated(exportNamespaceList)) deallocate(exportNamespaceList)
     if (associated(exportCplSetList)) deallocate(exportCplSetList)
 
@@ -3200,6 +3595,292 @@ module NUOPC_Connector
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+  end subroutine
+
+  !-----------------------------------------------------------------------------
+
+  subroutine ShareFieldWithGrid(acceptorField, providerField, name, rc)
+    type(ESMF_Field), intent(inout) :: acceptorField
+    type(ESMF_Field), intent(in)    :: providerField
+    character(*),     intent(in)    :: name
+    integer,          intent(out)   :: rc
+    ! local variables
+    type(ESMF_Grid)                 :: grid
+    integer                         :: fieldDimCount, gridDimCount
+    integer, allocatable            :: minIndex(:), maxIndex(:)
+    integer(ESMF_KIND_I4), pointer  :: ungriddedLBound(:), ungriddedUBound(:)
+    integer(ESMF_KIND_I4), pointer  :: gridToFieldMap(:)
+    type(ESMF_StaggerLoc)           :: staggerloc
+    type(ESMF_Array)                :: array
+    type(ESMF_VM)                   :: vm
+    character(ESMF_MAXSTR)          :: fieldName
+    integer                         :: stat
+    integer                         :: localPet
+    type(ESMF_State)                :: state
+
+    ! set RC
+    rc = ESMF_SUCCESS
+    
+    ! queries
+    call ESMF_FieldGet(acceptorField, grid=grid, name=fieldName, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return
+    call ESMF_FieldGet(providerField, staggerloc=staggerloc, &
+      dimCount=fieldDimCount, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    call ESMF_GridGet(grid, dimCount=gridDimCount, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    allocate(minIndex(gridDimCount), maxIndex(gridDimCount), stat=rc)
+    if (ESMF_LogFoundAllocError(rc, msg="Allocating minIndex, maxIndex", &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    call ESMF_GridGetIndex(grid, tileNo=1, &  !TODO: support tileCount>1!!
+      minIndex=minIndex, maxIndex=maxIndex, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    allocate(gridToFieldMap(gridDimCount),stat=stat)
+    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+      msg="Allocation of internal gridToFieldMap failed.", &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    call ESMF_FieldGet(providerField, gridToFieldMap=gridToFieldMap, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    if (fieldDimCount - gridDimCount > 0) then
+      ! query ungridded dim bounds
+      allocate(ungriddedLBound(fieldDimCount-gridDimCount),stat=stat)
+      if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+        msg="Allocation of internal ungriddedLBound failed.", &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      allocate(ungriddedUBound(fieldDimCount-gridDimCount),stat=stat)
+      if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+        msg="Allocation of internal ungriddedUBound failed.", &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_FieldGet(providerField, ungriddedLBound=ungriddedLBound, &
+        ungriddedUBound=ungriddedUBound, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    ! obtain the array from provider to be shared with acceptor
+    call ESMF_FieldGet(providerField, array=array, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return
+    ! obtain the vm from provider to create the new field on the provider vm
+    ! This way shared fields will only be send/receive during Timestamp
+    ! propagation on actvive PETs. This is what you expect for a shared field.
+    call ESMF_FieldGet(providerField, vm=vm, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return
+
+    ! create a helper state needed for reconciliation across Connector VM
+    state = ESMF_StateCreate(rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return
+
+    ! determine active PETs
+    call ESMF_VMGet(vm, localpet=localPet, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    if (localPet>-1) then
+      ! this is an active PET -> create the acceptorField
+      
+      !TODO: make sure that this FieldCreate() sets total widths correctly
+      !TODO: difficult to do with current FieldCreate() for multiple DEs/PET
+      if (fieldDimCount - gridDimCount > 0) then
+        acceptorField=ESMF_FieldCreate(grid=grid, array=array, &
+          datacopyflag=ESMF_DATACOPY_REFERENCE, staggerloc=staggerloc, &
+          gridToFieldMap=gridToFieldMap, name=trim(fieldName), vm=vm, &
+          ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return
+      else
+        acceptorField=ESMF_FieldCreate(grid=grid, array=array, &
+          datacopyflag=ESMF_DATACOPY_REFERENCE, staggerloc=staggerloc, &
+          gridToFieldMap=gridToFieldMap, name=trim(fieldName), vm=vm, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return
+      end if
+      call ESMF_StateAdd(state, (/acceptorField/), rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return
+    endif
+  
+    ! reconcile across the entire Connector VM
+    call ESMF_StateReconcile(state, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return
+    call ESMF_StateGet(state, itemName=fieldName, field=acceptorField, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return
+    
+    ! done with the helper state
+    call ESMF_StateDestroy(state, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return
+
+    ! clean-up
+    deallocate(minIndex, maxIndex, stat=rc)
+    if (ESMF_LogFoundDeallocError(rc, &
+      msg="Deallocating minIndex, maxIndex", &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    deallocate(gridToFieldMap, stat=rc)
+    if (ESMF_LogFoundDeallocError(rc, &
+      msg="Deallocating gridToFieldMap", &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    if (fieldDimCount - gridDimCount > 0) then
+      deallocate(ungriddedLBound, stat=rc)
+      if (ESMF_LogFoundDeallocError(rc, &
+        msg="Deallocating ungriddedLBound", &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      deallocate(ungriddedUBound, stat=rc)
+      if (ESMF_LogFoundDeallocError(rc, &
+        msg="Deallocating ungriddedUBound", &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    
+  end subroutine
+
+  !-----------------------------------------------------------------------------
+
+  subroutine ShareFieldWithMesh(acceptorField, providerField, name, rc)
+    type(ESMF_Field), intent(inout) :: acceptorField
+    type(ESMF_Field), intent(in)    :: providerField
+    character(*),     intent(in)    :: name
+    integer,          intent(out)   :: rc
+    ! local variables
+    type(ESMF_Mesh)                 :: mesh
+    type(ESMF_DistGrid)             :: distgrid
+    integer                         :: fieldDimCount, gridDimCount
+    integer(ESMF_KIND_I4), pointer  :: ungriddedLBound(:), ungriddedUBound(:)
+    integer(ESMF_KIND_I4), pointer  :: gridToFieldMap(:)
+    type(ESMF_MeshLoc)              :: meshloc
+    type(ESMF_Array)                :: array
+    type(ESMF_VM)                   :: vm
+    character(ESMF_MAXSTR)          :: fieldName
+    integer                         :: stat
+    integer                         :: localPet
+    type(ESMF_State)                :: state
+
+    ! set RC
+    rc = ESMF_SUCCESS
+    
+    ! queries
+    call ESMF_FieldGet(acceptorField, mesh=mesh, name=fieldName, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return
+    call ESMF_FieldGet(providerField, meshloc=meshloc, &
+      dimCount=fieldDimCount, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    call ESMF_MeshGet(mesh, elementDistgrid=distgrid, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    call ESMF_DistGridGet(distgrid, dimCount=gridDimCount, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    allocate(gridToFieldMap(gridDimCount),stat=stat)
+    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+      msg="Allocation of internal gridToFieldMap failed.", &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    call ESMF_FieldGet(providerField, gridToFieldMap=gridToFieldMap, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    if (fieldDimCount - gridDimCount > 0) then
+      ! query ungridded dim bounds
+      allocate(ungriddedLBound(fieldDimCount-gridDimCount),stat=stat)
+      if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+        msg="Allocation of internal ungriddedLBound failed.", &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      allocate(ungriddedUBound(fieldDimCount-gridDimCount),stat=stat)
+      if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+        msg="Allocation of internal ungriddedUBound failed.", &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_FieldGet(providerField, ungriddedLBound=ungriddedLBound, &
+        ungriddedUBound=ungriddedUBound, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    ! obtain the array from provider to be shared with acceptor
+    call ESMF_FieldGet(providerField, array=array, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return
+    ! obtain the vm from provider to create the new field on the provider vm
+    ! This way shared fields will only be send/receive during Timestamp
+    ! propagation on actvive PETs. This is what you expect for a shared field.
+    call ESMF_FieldGet(providerField, vm=vm, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return
+
+    ! create a helper state needed for reconciliation across Connector VM
+    state = ESMF_StateCreate(rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return
+
+    ! determine active PETs
+    call ESMF_VMGet(vm, localpet=localPet, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    if (localPet>-1) then
+      ! this is an active PET -> create the acceptorField
+
+      !TODO: make sure that this FieldCreate() sets total widths correctly
+      !TODO: difficult to do with current FieldCreate() for multiple DEs/PET
+      if (fieldDimCount - gridDimCount > 0) then
+        acceptorField=ESMF_FieldCreate(mesh=mesh, array=array, &
+          datacopyflag=ESMF_DATACOPY_REFERENCE, meshloc=meshloc, &
+          gridToFieldMap=gridToFieldMap, name=fieldName, vm=vm, &
+          ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return
+      else
+        acceptorField=ESMF_FieldCreate(mesh=mesh, array=array, &
+          datacopyflag=ESMF_DATACOPY_REFERENCE, meshloc=meshloc, &
+          gridToFieldMap=gridToFieldMap, name=fieldName, vm=vm, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return
+      end if
+      call ESMF_StateAdd(state, (/acceptorField/), rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return
+    endif
+      
+    ! reconcile across the entire Connector VM
+    call ESMF_StateReconcile(state, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return
+    call ESMF_StateGet(state, itemName=fieldName, field=acceptorField, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return
+    
+    ! done with the helper state
+    call ESMF_StateDestroy(state, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return
+      
+    ! clean-up
+    deallocate(gridToFieldMap, stat=rc)
+    if (ESMF_LogFoundDeallocError(rc, &
+      msg="Deallocating gridToFieldMap", &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    if (fieldDimCount - gridDimCount > 0) then
+      deallocate(ungriddedLBound, stat=rc)
+      if (ESMF_LogFoundDeallocError(rc, &
+        msg="Deallocating ungriddedLBound", &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      deallocate(ungriddedUBound, stat=rc)
+      if (ESMF_LogFoundDeallocError(rc, &
+        msg="Deallocating ungriddedUBound", &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    
   end subroutine
 
   !-----------------------------------------------------------------------------
@@ -3503,8 +4184,8 @@ module NUOPC_Connector
     
     ! main loop over all entries in the cplList
     do i=1, cplListSize
-      call chopString(cplList(i), chopChar=":", chopStringList=chopStringList, &
-        rc=rc)
+      call NUOPC_ChopString(cplList(i), chopChar=":", &
+        chopStringList=chopStringList, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       cplName = chopStringList(1) ! first part is the standard name of cpl field
@@ -3608,7 +4289,17 @@ module NUOPC_Connector
         sharedFlag = .false. ! reset
         if (trim(iShareStatus)=="shared" .and. trim(eShareStatus)=="shared") &
           sharedFlag = .true.
-        if (.not.sharedFlag) then
+        if (sharedFlag) then
+          ! sharing -> do NOT add the import and export Fields to FieldBundles
+          if (btest(verbosity,12)) then
+            write (msgString, '(A)') trim(name)//": "//&
+              "- Field sharing between import and export side: NO remap."
+            call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+          endif
+        else
           ! not sharing -> add the import and export Fields to FieldBundles
           if (btest(verbosity,12)) then
             write (msgString, '(A)') trim(name)//": "//&
@@ -3711,6 +4402,13 @@ module NUOPC_Connector
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       endif    
     endif
+    
+    ! build Timestamp update packets
+    !TODO: consider whether CplSet needs extra treatment here or not
+    call BuildUpdatePackets(is%wrap%srcFieldList, is%wrap%dstFieldList, &
+      is%wrap%updatePackets, verbosity, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     if (btest(verbosity,4)) then
       write (msgString, '(A, ": CplSet List: ")') trim(name)
@@ -3783,6 +4481,413 @@ module NUOPC_Connector
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+  end subroutine
+    
+  !-----------------------------------------------------------------------------
+
+  subroutine BuildUpdatePackets(srcFieldList, dstFieldList, updatePackets, &
+    verbosity, rc)
+    type(ESMF_Field), pointer           :: srcFieldList(:)
+    type(ESMF_Field), pointer           :: dstFieldList(:)
+    type(type_UpdatePacket), pointer    :: updatePackets
+    integer,                intent(in)  :: verbosity
+    integer,                intent(out) :: rc
+    ! local variables
+    integer                           :: i, j, k, stat, petCount, localPet
+    integer                           :: srcLocalPet, dstLocalPet, fieldCount
+    integer, allocatable              :: srcLocalPetList(:), dstLocalPetList(:)
+    integer, allocatable              :: auxList(:)
+    integer                           :: srcPetCount, dstPetCount
+    type(ESMF_VM)                     :: vm, srcVM, dstVM
+    character(ESMF_MAXSTR)            :: fieldName
+    character(len=240)                :: msgString
+    logical                           :: createNewPacket
+    logical                           :: mismatch
+    integer                           :: helperIn, helperOut
+    type(type_UpdatePacket), pointer  :: upE, upN, upT
+    integer                           :: upCount
+    type type_upFields
+      type(type_UpdatePacket), pointer  :: up
+    end type
+    type(type_upFields), pointer      :: upFields(:)
+
+    rc = ESMF_SUCCESS
+    
+    nullify(updatePackets)
+    
+    fieldCount = size(srcFieldList)
+    
+    allocate(upFields(fieldCount), stat=stat)
+    if (ESMF_LogFoundAllocError(stat, msg="allocating upFields", &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    
+    call ESMF_VMGetCurrent(vm=vm, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    
+    allocate(srcLocalPetList(petCount), dstLocalPetList(petCount), stat=stat)
+    if (ESMF_LogFoundAllocError(stat, msg="allocating LocalPetLists", &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    
+    allocate(auxList(petCount), stat=stat)
+    if (ESMF_LogFoundAllocError(stat, msg="allocating auxList", &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+    upCount = 0 ! initialize
+    createNewPacket = .true.  ! make sure first valid packet is being added
+    do i=1, fieldCount
+      call ESMF_FieldGet(srcFieldList(i), vm=srcVM, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      call ESMF_VMGet(srcVM, localPet=srcLocalPet, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      if (btest(verbosity,12)) then
+        call ESMF_FieldGet(srcFieldList(i), name=fieldName, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        write(msgString,*) "BuildUpdatePackets: "//trim(fieldName)//&
+          ", srcLocalPet=", srcLocalPet
+        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      endif
+      call ESMF_FieldGet(dstFieldList(i), vm=dstVM, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      call ESMF_VMGet(dstVM, localPet=dstLocalPet, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      if (btest(verbosity,12)) then
+        call ESMF_FieldGet(dstFieldList(i), name=fieldName, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        write(msgString,*) "BuildUpdatePackets: "//trim(fieldName)//&
+          ", dstLocalPet=", dstLocalPet
+        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      endif       
+      if (.not.createNewPacket) then
+        ! some packets exist already -> must check against them for match
+        createNewPacket = .true.  ! initialize, might be reset if packet found
+        upE=>updatePackets  ! start with the last packet that was added
+        do while (associated(upE))
+          ! see if this packet has the same src/dstLocalPet pattern combination 
+          mismatch = (upE%srcLocalPet/=srcLocalPet) .or. &
+            (upE%dstLocalPet/=dstLocalPet)
+          helperIn = 0  ! initialize
+          if (mismatch) helperIn=1
+          ! implement a logical OR operation based on REDUCE_SUM
+          call ESMF_VMAllFullReduce(vm, sendData=(/helperIn/), &
+            recvData=helperOut, count=1, reduceflag=ESMF_REDUCE_SUM, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+          ! determine the global match condition
+          if (helperOut == 0) then
+            ! pattern matches on all PETs -> matching UpdatePacket found
+            createNewPacket = .false. ! no new packet needed
+            exit  ! break out of the search loop
+          endif
+          upE=>upE%prev   ! move to previous element
+        enddo
+      endif
+      
+      if (createNewPacket) then
+        ! create a new packet
+        upCount = upCount+1
+        ! AllGather srcLocalPet and dstLocalPet onto each PET
+        call ESMF_VMAllGather(vm, (/srcLocalPet/), srcLocalPetList, count=1, &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        call ESMF_VMAllGather(vm, (/dstLocalPet/), dstLocalPetList, count=1, &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        allocate(upE, stat=stat)
+        if (ESMF_LogFoundAllocError(stat, msg="allocating new update packet", &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        upE%prev=>updatePackets  ! link new element to previous list head
+        updatePackets=>upE       ! list head now pointing to new element
+        ! fill the new packet VM information
+        upE%srcLocalPet=srcLocalPet
+        upE%dstLocalPet=dstLocalPet
+        upE%fieldCount = 0 ! initialize
+        ! Determine srcPetCount and dstPetCount
+        srcPetCount = 0 ! initialize
+        dstPetCount = 0 ! initialize
+        do j=1, petCount
+          if (srcLocalPetList(j)>-1) srcPetCount=srcPetCount+1
+          if (dstLocalPetList(j)>-1) dstPetCount=dstPetCount+1
+        enddo
+        if (btest(verbosity,12)) then
+          write(msgString,*) "creating new UpdatePacket for srcPetCount=", &
+            srcPetCount, " dstPetCount=", dstPetCount
+          call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        endif
+        ! Construct local sendToPets
+        k = 0 ! initialize
+        do j=1, petCount
+          if (dstLocalPetList(j)>-1) then
+            ! this PET holds a dstField
+            if (mod(dstLocalPetList(j),srcPetCount)==srcLocalPet) then
+              ! localPet responsible for sending to this destination
+              k = k+1
+              auxList(k) = j-1  ! PETs are basis 0
+            endif
+          endif
+        enddo
+        allocate(upE%sendToPets(k), stat=stat)
+        if (ESMF_LogFoundAllocError(stat, msg="allocating sendToPets", &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        if (k>0) upE%sendToPets(1:k) = auxList(1:k)  ! transfer the elements
+        if (btest(verbosity,12)) then
+          write(msgString,*) "upE%sendToPets=", upE%sendToPets
+          call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        endif   
+        ! Determine recvFromPet
+        upE%recvFromPet = -1  ! initialize, indicating not receiving any info
+        if (dstLocalPet>-1) then
+          ! localPet holds a dstField
+          do j=1, petCount
+            if (mod(dstLocalPet,srcPetCount)==srcLocalPetList(j)) then
+              ! found PET that localPet is receiving from 
+              upE%recvFromPet = j-1 ! PETs are basis 0
+            endif
+          enddo
+        endif
+        if (btest(verbosity,12)) then
+          write(msgString,*) "upE%recvFromPet=", upE%recvFromPet
+          call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        endif
+        ! reset flag for next iteration
+        createNewPacket = .false.
+      endif
+      
+      ! either case, new packet or existing packet found, fill in field info
+      if (srcLocalPet>-1 .or. dstLocalPet>-1) then
+        ! upE must be valid
+        upE%fieldCount = upE%fieldCount+1
+        upFields(i)%up => upE  ! keep track of packet for this field index
+      else
+        nullify(upFields(i)%up)
+      endif
+      
+      if (btest(verbosity,12)) then
+        write(msgString,*) "after field add, now upE%fieldCount=", upE%fieldCount
+        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      endif
+
+    enddo
+
+    ! traverse all packets and either prepare internal allocations, or delete
+    upCount = 0   ! re-initialize
+    upN=>null()   ! initialize
+    upE=>updatePackets
+    do while (associated(upE))
+      if (upE%fieldCount > 0) then
+        ! this is an interacting packet -> keep
+        upCount = upCount+1
+        ! allocate for the known number of fields handled
+        allocate(upE%fieldIndex(upE%fieldCount), stat=stat)
+        if (ESMF_LogFoundAllocError(stat, msg="allocating upE%fieldIndex", &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        allocate(upE%sendBuffer(10,upE%fieldCount), stat=stat)
+        if (ESMF_LogFoundAllocError(stat, msg="allocating upE%sendBuffer", &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        allocate(upE%recvBuffer(10,upE%fieldCount), stat=stat)
+        if (ESMF_LogFoundAllocError(stat, msg="allocating upE%recvBuffer", &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        ! reset the fieldCount for next loop usage
+        upE%fieldCount = 0
+        ! step to next element
+        upN=>upE
+        upE=>upE%prev
+      else
+        ! this packet has no interactions -> optimize execution by elimination
+        upT=>upE%prev
+        ! unhook upE
+        if (associated(upN)) then
+          upN%prev=>upT
+        else
+          updatePackets=>upT
+        endif
+        ! internal clean-up
+        deallocate(upE%sendToPets, stat=stat)
+        if (ESMF_LogFoundDeallocError(stat, msg="deallocating sendToPets", &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        ! deallocate upE itself
+        deallocate(upE, stat=stat)
+        if (ESMF_LogFoundDeallocError(stat, msg="deallocating upE", &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        ! step to next element
+        upE=>upT
+      endif
+    enddo
+    
+    ! loop through fields one more time and set references inside packets
+    do i=1, fieldCount
+      upE => upFields(i)%up
+      if (associated(upE)) then
+        upE%fieldCount = upE%fieldCount+1
+        upE%fieldIndex(upE%fieldCount) = i
+      endif
+    enddo
+    
+    if (btest(verbosity,12)) then
+      write(msgString,*) "BuildUpdatePackets: final UpdatePacket count=", &
+        upCount
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    endif
+
+    ! clean-up
+    deallocate(auxList, stat=stat)
+    if (ESMF_LogFoundDeallocError(stat, msg="deallocating auxList", &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    deallocate(srcLocalPetList, dstLocalPetList, stat=stat)
+    if (ESMF_LogFoundDeallocError(stat, msg="deallocating LocalPetLists", &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    deallocate(upFields, stat=stat)
+    if (ESMF_LogFoundDeallocError(stat, msg="deallocating upFields", &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    
+  end subroutine
+    
+  !-----------------------------------------------------------------------------
+
+  subroutine ExecuteUpdatePackets(srcFieldList, dstFieldList, updatePackets, rc)
+    type(ESMF_Field), pointer           :: srcFieldList(:)
+    type(ESMF_Field), pointer           :: dstFieldList(:)
+    type(type_UpdatePacket), pointer    :: updatePackets
+    integer,                intent(out) :: rc
+    ! local variables
+    type(ESMF_VM)                     :: vm
+    type(type_UpdatePacket), pointer  :: upE
+    integer                           :: i, j, jj
+    integer, pointer                  :: bufferPtr(:)
+    
+    rc = ESMF_SUCCESS
+    
+    call ESMF_VMGetCurrent(vm=vm, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+    ! traverse all packets and post the receives
+    upE=>updatePackets
+    do while (associated(upE))
+      if (upE%recvFromPet > -1) then
+        ! post the receive
+        bufferPtr => upE%recvBuffer(:,1)
+        call ESMF_VMRecv(vm, bufferPtr, size(upE%recvBuffer), &
+          upE%recvFromPet, syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      endif
+      ! step to next element
+      upE=>upE%prev
+    enddo
+    
+    ! traverse all packets, fill the sendBuffer and post the sends
+    upE=>updatePackets
+    do while (associated(upE))
+      if (size(upE%sendToPets)>0) then
+        ! there are messages to be sent -> fill the sendBuffer
+        do j=1, upE%fieldCount
+          jj = upE%fieldIndex(j)
+          call ESMF_AttributeGet(srcFieldList(jj), &
+            name="TimeStamp", valueList=upE%sendBuffer(:,j), &
+            convention="NUOPC", purpose="Instance", &
+            attnestflag=ESMF_ATTNEST_ON, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        enddo
+        ! post all the sends
+        bufferPtr => upE%sendBuffer(:,1)
+        do i=1, size(upE%sendToPets)
+          call ESMF_VMSend(vm, bufferPtr, size(upE%sendBuffer), &
+            upE%sendToPets(i), syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        enddo
+      endif
+      ! step to next element
+      upE=>upE%prev
+    enddo
+
+    ! wait for all outstanding communications the localPet is engaged in
+    call ESMF_VMCommWaitAll(vm, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    
+    ! traverse all packets and fill the received timestamps into fields
+    upE=>updatePackets
+    do while (associated(upE))
+      if (upE%recvFromPet > -1) then
+        ! fill in the reiceived timestamps
+        do j=1, upE%fieldCount
+          jj = upE%fieldIndex(j)
+          call ESMF_AttributeSet(dstFieldList(jj), &
+            name="TimeStamp", valueList=upE%recvBuffer(:,j), &
+            convention="NUOPC", purpose="Instance", &
+            attnestflag=ESMF_ATTNEST_ON, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        enddo
+      endif
+      ! step to next element
+      upE=>upE%prev
+    enddo
+
+  end subroutine
+    
+  !-----------------------------------------------------------------------------
+
+  subroutine DestroyUpdatePackets(updatePackets, rc)
+    type(type_UpdatePacket), pointer    :: updatePackets
+    integer,                intent(out) :: rc
+    ! local variables
+    type(type_UpdatePacket), pointer    :: upE
+    integer                             :: stat
+
+    rc = ESMF_SUCCESS
+    
+    ! take down updatePackets
+    do while (associated(updatePackets))
+      upE=>updatePackets
+      updatePackets=>updatePackets%prev
+      ! clean up all allocations inside of upE
+      deallocate(upE%fieldIndex, stat=stat)
+      if (ESMF_LogFoundDeallocError(stat, msg="deallocating fieldIndex", &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      deallocate(upE%sendToPets, stat=stat)
+      if (ESMF_LogFoundDeallocError(stat, msg="deallocating sendToPets", &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      deallocate(upE%sendBuffer, stat=stat)
+      if (ESMF_LogFoundDeallocError(stat, msg="deallocating sendBuffer", &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      deallocate(upE%recvBuffer, stat=stat)
+      if (ESMF_LogFoundDeallocError(stat, msg="deallocating recvBuffer", &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      ! deallocate upE itself
+      deallocate(upE, stat=stat)
+      if (ESMF_LogFoundDeallocError(stat, msg="deallocating upE", &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    enddo
 
   end subroutine
     
@@ -3974,6 +5079,9 @@ module NUOPC_Connector
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
+    ! store the incoming clock as driverClock in internal state
+    is%wrap%driverClock = clock
+
     if (btest(profiling,0)) then
       call ESMF_VMWtime(time)
       write (msgString, *) trim(name)//": Profile 02 time=   ", &
@@ -4016,12 +5124,18 @@ module NUOPC_Connector
       ! execute the regrid operation
       if (is%wrap%cplSetCount > 1) then
         do i=1, is%wrap%cplSetCount
-          call ESMF_FieldBundleSMM(is%wrap%cplSet(i)%srcFields, &
-            is%wrap%cplSet(i)%dstFields, &
-            routehandle=is%wrap%cplSet(i)%rh, &
-            termorderflag=is%wrap%cplSet(i)%termOrders, rc=rc)
+          routeHandleIsCreated = ESMF_RouteHandleIsCreated( &
+            is%wrap%cplSet(i)%rh, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (routeHandleIsCreated) then
+            call ESMF_FieldBundleSMM(is%wrap%cplSet(i)%srcFields, &
+              is%wrap%cplSet(i)%dstFields, &
+              routehandle=is%wrap%cplSet(i)%rh, &
+              termorderflag=is%wrap%cplSet(i)%termOrders, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
         enddo
       else
         routeHandleIsCreated = ESMF_RouteHandleIsCreated(is%wrap%rh, rc=rc)
@@ -4061,80 +5175,10 @@ module NUOPC_Connector
     endif
 
     ! Next update the TimeStamp metadata on the export Fields....
-
-    ! get the rootPet attribute out of the importState
-    call ESMF_AttributeGet(importState, name="rootVas", value=rootVas, rc=rc)
+    call ExecuteUpdatePackets(is%wrap%srcFieldList, is%wrap%dstFieldList, &
+      is%wrap%updatePackets, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
-    ! handle profiling
-    if (btest(profiling,0)) then
-      call ESMF_VMWtime(time)
-      write (msgString, *) trim(name)//": Profile 06 time=   ", &
-        time-time0, time-timeBase
-        time0=time
-      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
-    endif
-
-    call ESMF_CplCompGet(connector, vm=vm, petCount=petCount, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
-    ! handle profiling
-    if (btest(profiling,0)) then
-      call ESMF_VMWtime(time)
-      write (msgString, *) trim(name)//": Profile 07 time=   ", &
-        time-time0, time-timeBase
-        time0=time
-      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
-    endif
-    
-    do rootPet=0, petCount-1
-      call ESMF_VMGet(vm, rootPet, vas=vas, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      if (vas == rootVas) exit
-    enddo
-    
-    ! handle profiling
-    if (btest(profiling,0)) then
-      call ESMF_VMWtime(time)
-      write (msgString, *) trim(name)//": Profile 08 time=   ", &
-        time-time0, time-timeBase
-        time0=time
-      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
-    endif
-
-    !TODO: bail out if rootPet not found
-
-    ! hand coded, specific AttributeUpdate
-    call NUOPC_UpdateTimestamp(is%wrap%srcFieldList, rootPet=rootPet, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-
-    ! handle profiling
-    if (btest(profiling,0)) then
-      call ESMF_VMWtime(time)
-      write (msgString, *) trim(name)//": Profile 09 time=   ", &
-        time-time0, time-timeBase
-        time0=time
-      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
-    endif
-
-    ! update the timestamp on all of the dst fields to that on the src side
-    call NUOPC_UpdateTimestamp(is%wrap%srcFieldList, is%wrap%dstFieldList, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-
-    ! handle profiling
-    if (btest(profiling,0)) then
-      call ESMF_VMWtime(time)
-      write (msgString, *) trim(name)//": Profile 10 time=   ", &
-        time-time0, time-timeBase
-        time0=time
-      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
-    endif
 
     ! handle diagnostic
     if (btest(diagnostic,6)) then
@@ -4258,9 +5302,15 @@ module NUOPC_Connector
       ! release the regrid operation
       if (is%wrap%cplSetCount > 1) then
         do i=1, is%wrap%cplSetCount
-          call ESMF_FieldBundleRegridRelease(is%wrap%cplSet(i)%rh, rc=rc)
+          routeHandleIsCreated = ESMF_RouteHandleIsCreated( &
+            is%wrap%cplSet(i)%rh, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (routeHandleIsCreated) then
+            call ESMF_FieldBundleRegridRelease(is%wrap%cplSet(i)%rh, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
         enddo
       else
         routeHandleIsCreated = ESMF_RouteHandleIsCreated(is%wrap%rh, rc=rc)
@@ -4298,6 +5348,12 @@ module NUOPC_Connector
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
+
+    ! destroy Timestamp update packets
+    !TODO: consider whether CplSet needs extra treatment here or not
+    call DestroyUpdatePackets(is%wrap%updatePackets, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! deallocate and destroy remaining internal state members
     do i=1, is%wrap%cplSetCount
@@ -4637,58 +5693,6 @@ print *, "found match:"// &
     
   !-----------------------------------------------------------------------------
 
-  subroutine chopString(string, chopChar, chopStringList, rc)
-    character(len=*)                              :: string
-    character                                     :: chopChar
-    character(ESMF_MAXSTR), pointer               :: chopStringList(:)
-    integer,                intent(out), optional :: rc
-    ! local variables
-    integer               :: i, j, count
-    integer, allocatable  :: chopPos(:)
-    
-    ! check the incoming pointer
-    if (associated(chopStringList)) then
-      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-        msg="chopStringList must enter unassociated", &
-        line=__LINE__, &
-        file=FILENAME, &
-        rcToReturn=rc)
-      return  ! bail out
-    endif
-    
-    ! determine how many times chopChar is found in string
-    count=0 ! reset
-    do i=1, len(trim(string))
-      if (string(i:i)==chopChar) count=count+1
-    enddo
-    
-    ! record positions where chopChar is found in string
-    allocate(chopPos(count))
-    j=1 ! reset
-    do i=1, len(trim(string))
-      if (string(i:i)==chopChar) then
-        chopPos(j)=i
-        j=j+1
-      endif
-    enddo
-    
-    ! chop up the string
-    allocate(chopStringList(count+1))
-    j=1 ! reset
-    do i=1, count
-      chopStringList(i) = string(j:chopPos(i)-1)
-      j=chopPos(i)+1
-    enddo
-    chopStringList(count+1) = trim(string(j:len(string)))
-    deallocate(chopPos)
-    
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end subroutine
-    
-  !-----------------------------------------------------------------------------
-
   subroutine FieldBundleCplStore(srcFB, dstFB, cplList, rh, termOrders, name, &
     rc)
     ! this method will destroy srcFB/dstFB, and replace with newly created FBs
@@ -4888,8 +5892,8 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
 
       ! chop the cplList entry
-      call chopString(tempString, chopChar=":", chopStringList=chopStringList, &
-        rc=localrc)
+      call NUOPC_ChopString(tempString, chopChar=":", &
+        chopStringList=chopStringList, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
 
@@ -4897,7 +5901,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
       termOrder = ESMF_TERMORDER_FREE ! default
       do j=2, size(chopStringList)
         if (index(chopStringList(j),"termorder=")==1) then
-          call chopString(chopStringList(j), chopChar="=", &
+          call NUOPC_ChopString(chopStringList(j), chopChar="=", &
             chopStringList=chopSubString, rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
@@ -4925,12 +5929,12 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
       allocate(srcMaskValues(0))  ! default
       do j=2, size(chopStringList)
         if (index(chopStringList(j),"srcmaskvalues=")==1) then
-          call chopString(chopStringList(j), chopChar="=", &
+          call NUOPC_ChopString(chopStringList(j), chopChar="=", &
             chopStringList=chopSubString, rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
           if (size(chopSubString)>=2) then
-            call chopString(chopSubString(2), chopChar=",", &
+            call NUOPC_ChopString(chopSubString(2), chopChar=",", &
               chopStringList=chopSubSubString, rc=localrc)
             if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
@@ -4952,12 +5956,12 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
       allocate(dstMaskValues(0))  ! default
       do j=2, size(chopStringList)
         if (index(chopStringList(j),"dstmaskvalues=")==1) then
-          call chopString(chopStringList(j), chopChar="=", &
+          call NUOPC_ChopString(chopStringList(j), chopChar="=", &
             chopStringList=chopSubString, rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
           if (size(chopSubString)>=2) then
-            call chopString(chopSubString(2), chopChar=",", &
+            call NUOPC_ChopString(chopSubString(2), chopChar=",", &
               chopStringList=chopSubSubString, rc=localrc)
             if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
@@ -4980,7 +5984,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
       regridmethod = ESMF_REGRIDMETHOD_BILINEAR ! default
       do j=2, size(chopStringList)
         if (index(chopStringList(j),"remapmethod=")==1) then
-          call chopString(chopStringList(j), chopChar="=", &
+          call NUOPC_ChopString(chopStringList(j), chopChar="=", &
             chopStringList=chopSubString, rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
@@ -5042,7 +6046,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
       regridPoleNPnts = 1 ! default
       do j=2, size(chopStringList)
         if (index(chopStringList(j),"polemethod=")==1) then
-          call chopString(chopStringList(j), chopChar="=", &
+          call NUOPC_ChopString(chopStringList(j), chopChar="=", &
             chopStringList=chopSubString, rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
@@ -5075,7 +6079,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
       unmappedaction = ESMF_UNMAPPEDACTION_IGNORE ! default
       do j=2, size(chopStringList)
         if (index(chopStringList(j),"unmappedaction=")==1) then
-          call chopString(chopStringList(j), chopChar="=", &
+          call NUOPC_ChopString(chopStringList(j), chopChar="=", &
             chopStringList=chopSubString, rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
@@ -5101,7 +6105,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
       srcTermProcessing = -1  ! default -> force auto-tuning
       do j=2, size(chopStringList)
         if (index(chopStringList(j),"srctermprocessing=")==1) then
-          call chopString(chopStringList(j), chopChar="=", &
+          call NUOPC_ChopString(chopStringList(j), chopChar="=", &
             chopStringList=chopSubString, rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
@@ -5117,7 +6121,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
       pipelineDepth = -1  ! default -> force auto-tuning
       do j=2, size(chopStringList)
         if (index(chopStringList(j),"pipelinedepth=")==1) then
-          call chopString(chopStringList(j), chopChar="=", &
+          call NUOPC_ChopString(chopStringList(j), chopChar="=", &
             chopStringList=chopSubString, rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
@@ -5133,7 +6137,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
       dumpWeightsFlag = .false. ! default
       do j=2, size(chopStringList)
         if (index(chopStringList(j),"dumpweights=")==1) then
-          call chopString(chopStringList(j), chopChar="=", &
+          call NUOPC_ChopString(chopStringList(j), chopChar="=", &
             chopStringList=chopSubString, rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
@@ -5576,7 +6580,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
 !
 ! !INTERFACE:
   subroutine NUOPC_ConnectorGet(connector, srcFields, dstFields, rh, state, &
-    CplSet, cplSetList, srcVM, dstVM, rc)
+    CplSet, cplSetList, srcVM, dstVM, driverClock, rc)
 ! !ARGUMENTS:
     type(ESMF_CplComp)                            :: connector
     type(ESMF_FieldBundle), intent(out), optional :: srcFields
@@ -5587,6 +6591,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
     character(ESMF_MAXSTR), pointer,     optional :: cplSetList(:)
     type(ESMF_VM),          intent(out), optional :: srcVM
     type(ESMF_VM),          intent(out), optional :: dstVM
+    type(ESMF_Clock),       intent(out), optional :: driverClock
     integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -5624,10 +6629,24 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
 !     Connector more convenient. The generic Connector code handles creation
 !     and destruction of {\tt state}, but does {\em not} access it directly 
 !     for information.
+!   \item[{[CplSet]}]
+!     If present, all of the returned information is specific to the specified
+!     coupling set.
+!   \item[{[cplSetList]}]
+!     The list of coupling sets currently known to the Connector. This argument
+!     must enter the call {\em unassociated} or an error is returned. This means
+!     that the user code must explicitly call {\tt nullify()} or use the
+!     {\tt => null()} syntax on the variable passed in as {\tt cplSetList}
+!     argument. On return, the {\tt cplSetList} argument will be associated, 
+!     potentially of size zero. The responsibility for deallocation transfers
+!     to the caller.
 !   \item[{[srcVM]}]
 !     The VM of the source side component.
 !   \item[{[dstVM]}]
 !     The VM of the destination side component.
+!   \item[{[driverClock]}]
+!     The Clock object used by the current RunSequence level to drive this
+!     component.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -5650,13 +6669,14 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
     
     ! early exit if nothing to be done -> this allows calling the method even
     ! if the internal state does not (yet) exist - done for testing
-    if (.not.present(cplSetList) .and. &
-        .not.present(srcFields) .and. &
+    if (.not.present(srcFields) .and. &
         .not.present(dstFields) .and. &
         .not.present(rh) .and. &
         .not.present(state) .and. &
+        .not.present(cplSetList) .and. &
         .not.present(srcVM) .and. &
-        .not.present(dstVM)) return
+        .not.present(dstVM) .and. &
+        .not.present(driverClock)) return
     
     ! query Component for the internal State
     nullify(is%wrap)
@@ -5665,6 +6685,9 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     
+    ! driverClock
+    if (present(driverClock)) driverClock = is%wrap%driverClock
+
     ! Get the requested members
     if (present(CplSet)) then
       sIndex=getIndex(value=CplSet, list=is%wrap%cplSetList)
@@ -5701,7 +6724,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
           file=FILENAME, &
           rcToReturn=rc)) &
           return  ! bail out
-        cplSetList=is%wrap%cplSetList
+        cplSetList=is%wrap%cplSetList ! copy the elements
       endif
     endif
     
@@ -5768,6 +6791,9 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
 !     responsible for its destruction. Ownership of the new {\tt state} is 
 !     transferred to the Connector and must not be explicitly destroyed by the
 !     user code.
+!   \item[{[CplSet]}]
+!     If present, all of the passed in information is set under the specified
+!     coupling set.
 !   \item[{[srcVM]}]
 !     The VM of the source side component.
 !   \item[{[dstVM]}]
@@ -5822,9 +6848,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
       if (sIndex < 1 .OR. sIndex > is%wrap%cplSetCount) then
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg="CplSet does not exist!", &
-          line=__LINE__, &
-          file=FILENAME, &
-          rcToReturn=rc)
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
         return  ! bail out
       endif 
       if (present(srcFields)) is%wrap%cplSet(sIndex)%srcFields = srcFields

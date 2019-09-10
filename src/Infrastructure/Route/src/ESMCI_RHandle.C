@@ -1030,7 +1030,7 @@ int RouteHandle::write(
     stringstream *xxeStreami = new stringstream;  // explicit mem management
     xxe->streamify(*xxeStreami);
     // copy the contents of xxeStreami into a contiguous string
-    string writeStreamiStr = xxeStreami->str();
+    string writeStreamiStr(xxeStreami->str());
     unsigned long writeStreamiSize = (unsigned long)writeStreamiStr.size();
     delete xxeStreami;  // garbage collection
     
@@ -1080,6 +1080,7 @@ int RouteHandle::write(
       if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
       // write petCount many dummy displacements to finish header
       displacements = new unsigned long[petCount];
+      memset(displacements, 0, petCount*sizeof(unsigned long)); // fill w/ zero
       localrc = MPI_File_write(fh, displacements, petCount, MPI_UNSIGNED_LONG,
         MPI_STATUS_IGNORE);
       if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;

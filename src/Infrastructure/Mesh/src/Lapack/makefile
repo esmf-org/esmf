@@ -17,7 +17,7 @@ SOURCEF  = \
 SOURCEH  =
 
 # List all .h files which should be copied to common include dir
-STOREH	  = ESMF_LapackBlas.inc
+STOREH	  =
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))

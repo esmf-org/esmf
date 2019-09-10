@@ -232,7 +232,7 @@ int Attribute::AttributeWriteCIMmodelComp(
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
     attr = attpack->AttPackGetAttribute("ShortName", ESMC_ATTNEST_ON);
-    if (attr->isSet()) {
+    if (isSet(attr)) {
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -240,7 +240,7 @@ int Attribute::AttributeWriteCIMmodelComp(
             return ESMF_FAILURE;}
         value = valuevector.at(0);
         attr = attpack->AttPackGetAttribute("Version", ESMC_ATTNEST_ON);
-        if (attr->isSet()) {
+        if (isSet(attr)) {
             localrc = attr->get(&valuevector);
             if (valuevector.size() > 1) {
                 ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -272,7 +272,7 @@ int Attribute::AttributeWriteCIMmodelComp(
                               ESMC_LOGMSG_WARN, ESMC_CONTEXT);
     }
     attr = attpack->AttPackGetAttribute("LongName", ESMC_ATTNEST_ON);
-    if (attr->isSet()) {
+    if (isSet(attr)) {
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -289,7 +289,7 @@ int Attribute::AttributeWriteCIMmodelComp(
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     }
     attr = attpack->AttPackGetAttribute("Description", ESMC_ATTNEST_ON);
-    if (attr->isSet()) {
+    if (isSet(attr)) {
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -361,7 +361,7 @@ int Attribute::AttributeWriteCIMmodelComp(
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
     attr = attpack->AttPackGetAttribute("ReleaseDate", ESMC_ATTNEST_ON);
-    if (attr->isSet()) {
+    if (isSet(attr)) {
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -383,7 +383,7 @@ int Attribute::AttributeWriteCIMmodelComp(
 
     // <onlineResource>
     attr = attpack->AttPackGetAttribute("URL", ESMC_ATTNEST_ON);
-    if (attr->isSet()) {
+    if (isSet(attr)) {
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -450,7 +450,7 @@ int Attribute::AttributeWriteCIMmodelComp(
     }
 
     attr = attpack->AttPackGetAttribute("SimulationNumberOfProcessingElements", ESMC_ATTNEST_ON);
-    if (attr->isSet()) {
+    if (isSet(attr)) {
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -470,7 +470,7 @@ int Attribute::AttributeWriteCIMmodelComp(
     }
 
     attr = attpack->AttPackGetAttribute("ModelType", ESMC_ATTNEST_ON);
-    if (attr->isSet()) {
+    if (isSet(attr)) {
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -514,7 +514,7 @@ int Attribute::AttributeWriteCIMmodelComp(
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
     attr = attpack->AttPackGetAttribute("MetadataVersion", ESMC_ATTNEST_ON);
-    if (attr->isSet()) {
+    if (isSet(attr)) {
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -561,8 +561,8 @@ int Attribute::AttributeWriteCIMmodelComp(
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
     // <documentGenealogy>
-    if (attpack->AttPackGetAttribute("PreviousVersionDescription", ESMC_ATTNEST_ON)->isSet() ||
-        attpack->AttPackGetAttribute("PreviousVersion", ESMC_ATTNEST_ON)->isSet()) {
+    if (isSet(attpack->AttPackGetAttribute("PreviousVersionDescription", ESMC_ATTNEST_ON)) ||
+        isSet(attpack->AttPackGetAttribute("PreviousVersion", ESMC_ATTNEST_ON))) {
 
         localrc = io_xml->writeStartElement("documentGenealogy", "", indent, 0);
         localrc = io_xml->writeStartElement("relationship", "", ++indent, 0);
@@ -577,7 +577,7 @@ int Attribute::AttributeWriteCIMmodelComp(
         //       bug was reported in Jira ticket #2692 8/31/11.
 
         attr = attpack->AttPackGetAttribute("PreviousVersionDescription", ESMC_ATTNEST_ON);
-        if (attr->isSet()) {
+        if (isSet(attr)) {
             localrc = attr->get(&valuevector);
             if (valuevector.size() > 1) {
                 ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -594,7 +594,7 @@ int Attribute::AttributeWriteCIMmodelComp(
         }
 
         attr = attpack->AttPackGetAttribute("PreviousVersion", ESMC_ATTNEST_ON);
-        if (attr->isSet()) {
+        if (isSet(attr)) {
             localrc = attr->get(&valuevector);
             if (valuevector.size() > 1) {
                 ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -675,7 +675,7 @@ int Attribute::AttributeWriteCIMsimRun(
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
     attr = attpack->AttPackGetAttribute("SimulationRationale", ESMC_ATTNEST_ON);
-    if (attr->isSet()) {
+    if (isSet(attr)) {
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -691,7 +691,7 @@ int Attribute::AttributeWriteCIMsimRun(
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     }
     attr = attpack->AttPackGetAttribute("SimulationProjectName", ESMC_ATTNEST_ON);
-    if (attr->isSet()) {
+    if (isSet(attr)) {
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -714,7 +714,7 @@ int Attribute::AttributeWriteCIMsimRun(
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     }
     attr = attpack->AttPackGetAttribute("SimulationShortName", ESMC_ATTNEST_ON);
-    if (attr->isSet()) {
+    if (isSet(attr)) {
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -740,7 +740,7 @@ int Attribute::AttributeWriteCIMsimRun(
                               ESMC_LOGMSG_WARN, ESMC_CONTEXT);
     }
     attr = attpack->AttPackGetAttribute("SimulationLongName", ESMC_ATTNEST_ON);
-    if (attr->isSet()) {
+    if (isSet(attr)) {
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -785,7 +785,7 @@ int Attribute::AttributeWriteCIMsimRun(
     localrc = io_xml->writeStartElement("dateRange", "", 2, 0);
     localrc = io_xml->writeStartElement("closedDateRange", "", 3, 0);
     attr = attpack->AttPackGetAttribute("SimulationDuration", ESMC_ATTNEST_ON);
-    if (attr->isSet()) {
+    if (isSet(attr)) {
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -801,7 +801,7 @@ int Attribute::AttributeWriteCIMsimRun(
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     }
     attr = attpack->AttPackGetAttribute("SimulationEndDate", ESMC_ATTNEST_ON);
-    if (attr->isSet()) {
+    if (isSet(attr)) {
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -817,7 +817,7 @@ int Attribute::AttributeWriteCIMsimRun(
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     }
     attr = attpack->AttPackGetAttribute("SimulationStartDate", ESMC_ATTNEST_ON);
-    if (attr->isSet()) {
+    if (isSet(attr)) {
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -854,7 +854,7 @@ int Attribute::AttributeWriteCIMsimRun(
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
     attr = attpack->AttPackGetAttribute("MetadataVersion", ESMC_ATTNEST_ON);
-    if (attr->isSet()) {
+    if (isSet(attr)) {
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -872,7 +872,7 @@ int Attribute::AttributeWriteCIMsimRun(
         localrc = io_xml->writeElement("documentVersion", "1.0", 2, 0);
     }
     attr = attpack->AttPackGetAttribute("SimulationEnsembleID", ESMC_ATTNEST_ON);
-    if (attr->isSet()) {
+    if (isSet(attr)) {
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -950,7 +950,7 @@ int Attribute::AttributeWriteCIMplatform(
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
     attr = attpack->AttPackGetAttribute("MachineName", ESMC_ATTNEST_ON);
-    if (attr->isSet()) {
+    if (isSet(attr)) {
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -965,7 +965,7 @@ int Attribute::AttributeWriteCIMplatform(
                               ESMC_LOGMSG_WARN, ESMC_CONTEXT);
     }
     attr = attpack->AttPackGetAttribute("CompilerName", ESMC_ATTNEST_ON);
-    if (attr->isSet()) {
+    if (isSet(attr)) {
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -1000,7 +1000,7 @@ int Attribute::AttributeWriteCIMplatform(
     }
 
     attr = attpack->AttPackGetAttribute("MachineDescription", ESMC_ATTNEST_ON);
-    if (attr->isSet()) {
+    if (isSet(attr)) {
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -1030,7 +1030,7 @@ int Attribute::AttributeWriteCIMplatform(
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     }
     attr = attpack->AttPackGetAttribute("MachineSystem", ESMC_ATTNEST_ON);
-    if (attr->isSet()) {
+    if (isSet(attr)) {
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -1046,7 +1046,7 @@ int Attribute::AttributeWriteCIMplatform(
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     }
     attr = attpack->AttPackGetAttribute("MachineOperatingSystem", ESMC_ATTNEST_ON);
-    if (attr->isSet()) {
+    if (isSet(attr)) {
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -1064,7 +1064,7 @@ int Attribute::AttributeWriteCIMplatform(
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     }
     attr = attpack->AttPackGetAttribute("MachineVendor", ESMC_ATTNEST_ON);
-    if (attr->isSet()) {
+    if (isSet(attr)) {
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -1082,7 +1082,7 @@ int Attribute::AttributeWriteCIMplatform(
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     }
     attr = attpack->AttPackGetAttribute("MachineInterconnectType", ESMC_ATTNEST_ON);
-    if (attr->isSet()) {
+    if (isSet(attr)) {
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -1100,7 +1100,7 @@ int Attribute::AttributeWriteCIMplatform(
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     }
     attr = attpack->AttPackGetAttribute("MachineMaximumProcessors", ESMC_ATTNEST_ON);
-    if (attr->isSet()) {
+    if (isSet(attr)) {
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -1117,7 +1117,7 @@ int Attribute::AttributeWriteCIMplatform(
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     }
     attr = attpack->AttPackGetAttribute("MachineCoresPerProcessor", ESMC_ATTNEST_ON);
-    if (attr->isSet()) {
+    if (isSet(attr)) {
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -1134,7 +1134,7 @@ int Attribute::AttributeWriteCIMplatform(
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     }
     attr = attpack->AttPackGetAttribute("MachineProcessorType", ESMC_ATTNEST_ON);
-    if (attr->isSet()) {
+    if (isSet(attr)) {
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -1155,14 +1155,14 @@ int Attribute::AttributeWriteCIMplatform(
     localrc = io_xml->writeEndElement("machine", 3);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
-    if (attpack->AttPackGetAttribute("CompilerName", ESMC_ATTNEST_ON)->isSet() ||
-        attpack->AttPackGetAttribute("CompilerVersion", ESMC_ATTNEST_ON)->isSet()) {
+    if (isSet(attpack->AttPackGetAttribute("CompilerName", ESMC_ATTNEST_ON)) ||
+        isSet(attpack->AttPackGetAttribute("CompilerVersion", ESMC_ATTNEST_ON))) {
 
         localrc = io_xml->writeStartElement("compiler", "", 3, 0);
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
         attr = attpack->AttPackGetAttribute("CompilerName", ESMC_ATTNEST_ON);
-        if (attr->isSet()) {
+        if (isSet(attr)) {
             localrc = attr->get(&valuevector);
             if (valuevector.size() > 1) {
                 ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -1186,7 +1186,7 @@ int Attribute::AttributeWriteCIMplatform(
                                   ESMC_LOGMSG_WARN, ESMC_CONTEXT);
         }
         attr = attpack->AttPackGetAttribute("CompilerVersion", ESMC_ATTNEST_ON);
-        if (attr->isSet()) {
+        if (isSet(attr)) {
             localrc = attr->get(&valuevector);
             if (valuevector.size() > 1) {
                 ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -1234,7 +1234,7 @@ int Attribute::AttributeWriteCIMplatform(
                              attPackInstanceName, ESMC_ATTNEST_ON);
     if (attpackMain == NULL) return ESMF_SUCCESS;  // if package not found, return
     attr = attpackMain->AttPackGetAttribute("MetadataVersion", ESMC_ATTNEST_ON);
-    if (attr->isSet()) {
+    if (isSet(attr)) {
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -1317,12 +1317,13 @@ int Attribute::AttributeWriteCIMRP(
     // responsibleParty header
     localrc = io_xml->writeStartElement("responsibleParty", "", indent++, 0);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
-    if (AttPackGetAttribute("Name", ESMC_ATTNEST_ON)->isSet()) {
+    if (isSet(AttPackGetAttribute("Name", ESMC_ATTNEST_ON))) {
         // first, determine name type:  individual, organization, or position.
         //   first choice is the setting of the NameType attribute ...
         nameType = "gmd:individualName";  // default
         attr = AttPackGetAttribute("NameType", ESMC_ATTNEST_ON);
-        if (attr->isSet()) {
+        Attribute *attr2 = AttPackGetAttribute("ResponsiblePartyRole", ESMC_ATTNEST_ON);
+        if (isSet(attr)) {
             localrc = attr->get(&valuevector);
             if (valuevector.size() > 1) {
                 ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -1344,7 +1345,8 @@ int Attribute::AttributeWriteCIMRP(
                                       ESMC_LOGMSG_WARN, ESMC_CONTEXT);
             }
             // ... otherwise guess based on the role ...
-        } else if ((attr = AttPackGetAttribute("ResponsiblePartyRole", ESMC_ATTNEST_ON))->isSet()) {
+        } else if (isSet(attr2)) {
+            attr = attr2;
             localrc = attr->get(&valuevector);
             if (valuevector.size() > 1) {
                 ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -1398,9 +1400,9 @@ int Attribute::AttributeWriteCIMRP(
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     }
 
-    if (AttPackGetAttribute("PhysicalAddress", ESMC_ATTNEST_ON)->isSet() ||
-        AttPackGetAttribute("EmailAddress", ESMC_ATTNEST_ON)->isSet() ||
-        AttPackGetAttribute("URL", ESMC_ATTNEST_ON)->isSet()) {
+    if (isSet(AttPackGetAttribute("PhysicalAddress", ESMC_ATTNEST_ON)) ||
+        isSet(AttPackGetAttribute("EmailAddress", ESMC_ATTNEST_ON)) ||
+        isSet(AttPackGetAttribute("URL", ESMC_ATTNEST_ON))) {
 
         // contactInfo header
         localrc = io_xml->writeStartElement("gmd:contactInfo", "", indent, 0);
@@ -1408,8 +1410,8 @@ int Attribute::AttributeWriteCIMRP(
         localrc = io_xml->writeStartElement("gmd:CI_Contact", "", ++indent, 0);
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
-        if (AttPackGetAttribute("PhysicalAddress", ESMC_ATTNEST_ON)->isSet() ||
-            AttPackGetAttribute("EmailAddress", ESMC_ATTNEST_ON)->isSet()) {
+        if (isSet(AttPackGetAttribute("PhysicalAddress", ESMC_ATTNEST_ON)) ||
+            isSet(AttPackGetAttribute("EmailAddress", ESMC_ATTNEST_ON))) {
 
             // address header
             localrc = io_xml->writeStartElement("gmd:address", "", ++indent, 0);
@@ -1417,7 +1419,7 @@ int Attribute::AttributeWriteCIMRP(
             localrc = io_xml->writeStartElement("gmd:CI_Address", "", ++indent, 0);
             ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
             attr = AttPackGetAttribute("PhysicalAddress", ESMC_ATTNEST_ON);
-            if (attr->isSet()) {
+            if (isSet(attr)) {
                 localrc = attr->get(&valuevector);
                 if (valuevector.size() > 1) {
                     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -1440,7 +1442,7 @@ int Attribute::AttributeWriteCIMRP(
             }
 
             attr = AttPackGetAttribute("EmailAddress", ESMC_ATTNEST_ON);
-            if (attr->isSet()) {
+            if (isSet(attr)) {
                 localrc = attr->get(&valuevector);
                 if (valuevector.size() > 1) {
                     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -1482,7 +1484,7 @@ int Attribute::AttributeWriteCIMRP(
         } // end if PhysicalAddress or EmailAddress
 
         attr = AttPackGetAttribute("URL", ESMC_ATTNEST_ON);
-        if (attr->isSet()) {
+        if (isSet(attr)) {
             localrc = attr->get(&valuevector);
             if (valuevector.size() > 1) {
                 ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -1520,7 +1522,7 @@ int Attribute::AttributeWriteCIMRP(
     } // end if PhysicalAddress, EmailAddress or URL
 
     attr = AttPackGetAttribute("ResponsiblePartyRole", ESMC_ATTNEST_ON);
-    if (attr->isSet()) {
+    if (isSet(attr)) {
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -1556,7 +1558,8 @@ int Attribute::AttributeWriteCIMRP(
 
     // use "Abbreviation" attribute if set ...
     attr = AttPackGetAttribute("Abbreviation", ESMC_ATTNEST_ON);
-    if (attr->isSet()) {
+    Attribute *attr2 = AttPackGetAttribute("Name", ESMC_ATTNEST_ON);
+    if (isSet(attr)) {
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -1571,7 +1574,8 @@ int Attribute::AttributeWriteCIMRP(
         localrc = io_xml->writeComment(
                 "   to ESG: Not ingested yet.", indent+1);
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
-    } else if ((attr = AttPackGetAttribute("Name", ESMC_ATTNEST_ON))->isSet()) {
+    } else if (isSet(attr2)) {
+        attr = attr2;
         // ... otherwise get initials from "Name"
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
@@ -1652,7 +1656,7 @@ int Attribute::AttributeWriteCIMCP(
     for(int i=0; i<attpack->attrList.size(); i++) {
         string name = attpack->attrList.at(i)->attrName;
         attr = attpack->AttPackGetAttribute(name, ESMC_ATTNEST_ON);
-        if (attr->isSet()) {
+        if (isSet(attr)) {
             localrc = attr->get(&valuevector);
 
             // Custom, user-defined general component properties
@@ -1757,17 +1761,17 @@ int Attribute::AttributeWriteCIMCPfield(
             }
 
             // skip if no ESMF/General, CF/Extended, or CF/general  attributes set
-            if (attpack->AttPackGetAttribute("Intent", ESMC_ATTNEST_ON)->isSet() &&
-                attpack->AttPackGetAttribute("ShortName", ESMC_ATTNEST_ON)->isSet() &&
-                attpack->AttPackGetAttribute("LongName", ESMC_ATTNEST_ON)->isSet() &&
-                attpack->AttPackGetAttribute("Units", ESMC_ATTNEST_ON)->isSet() &&
-                attpack->AttPackGetAttribute("StandardName", ESMC_ATTNEST_ON)->isSet()) {
+            if (isSet(attpack->AttPackGetAttribute("Intent", ESMC_ATTNEST_ON)) &&
+                isSet(attpack->AttPackGetAttribute("ShortName", ESMC_ATTNEST_ON)) &&
+                isSet(attpack->AttPackGetAttribute("LongName", ESMC_ATTNEST_ON)) &&
+                isSet(attpack->AttPackGetAttribute("Units", ESMC_ATTNEST_ON)) &&
+                isSet(attpack->AttPackGetAttribute("StandardName", ESMC_ATTNEST_ON))) {
                 continue;
             }
 
             // found CIM/Inputs package, now write its set attributes
             attr = attpack->AttPackGetAttribute("Intent", ESMC_ATTNEST_ON);
-            if (attr->isSet()) {
+            if (isSet(attr)) {
                 localrc = attr->get(&valuevector);
                 if (valuevector.size() > 1) {
                     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -1804,7 +1808,7 @@ int Attribute::AttributeWriteCIMCPfield(
                 ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
             }
             attr = attpack->AttPackGetAttribute("ShortName", ESMC_ATTNEST_ON);
-            if (attr->isSet()) {
+            if (isSet(attr)) {
                 localrc = attr->get(&valuevector);
                 if (valuevector.size() > 1) {
                     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -1830,7 +1834,7 @@ int Attribute::AttributeWriteCIMCPfield(
                                       ESMC_LOGMSG_WARN, ESMC_CONTEXT);
             }
             attr = attpack->AttPackGetAttribute("LongName", ESMC_ATTNEST_ON);
-            if (attr->isSet()) {
+            if (isSet(attr)) {
                 localrc = attr->get(&valuevector);
                 if (valuevector.size() > 1) {
                     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -1847,7 +1851,7 @@ int Attribute::AttributeWriteCIMCPfield(
                 ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
             }
             attr = attpack->AttPackGetAttribute("Units", ESMC_ATTNEST_ON);
-            if (attr->isSet()) {
+            if (isSet(attr)) {
                 localrc = attr->get(&valuevector);
                 if (valuevector.size() > 1) {
                     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -1872,7 +1876,7 @@ int Attribute::AttributeWriteCIMCPfield(
                 ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
             }
             attr = attpack->AttPackGetAttribute("StandardName", ESMC_ATTNEST_ON);
-            if (attr->isSet()) {
+            if (isSet(attr)) {
                 localrc = attr->get(&valuevector);
                 if (valuevector.size() > 1) {
                     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -1954,7 +1958,7 @@ int Attribute::AttributeWriteCIMcitation(
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
     attr = AttPackGetAttribute("ShortTitle", ESMC_ATTNEST_ON);
-    if (attr->isSet()) {
+    if (isSet(attr)) {
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -1982,7 +1986,7 @@ int Attribute::AttributeWriteCIMcitation(
                               ESMC_LOGMSG_WARN, ESMC_CONTEXT);
     }
     attr = AttPackGetAttribute("Date", ESMC_ATTNEST_ON);
-    if (attr->isSet()) {
+    if (isSet(attr)) {
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -2027,7 +2031,7 @@ int Attribute::AttributeWriteCIMcitation(
                               ESMC_LOGMSG_WARN, ESMC_CONTEXT);
     }
     attr = AttPackGetAttribute("PresentationForm", ESMC_ATTNEST_ON);
-    if (attr->isSet()) {
+    if (isSet(attr)) {
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -2051,7 +2055,7 @@ int Attribute::AttributeWriteCIMcitation(
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     }
     attr = AttPackGetAttribute("DOI", ESMC_ATTNEST_ON);
-    if (attr->isSet()) {
+    if (isSet(attr)) {
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -2073,11 +2077,11 @@ int Attribute::AttributeWriteCIMcitation(
         localrc = io_xml->writeEndElement("gmd:otherCitationDetails", --indent);
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     }
-    if (AttPackGetAttribute("LongTitle", ESMC_ATTNEST_ON)->isSet() ||
-        AttPackGetAttribute("URL", ESMC_ATTNEST_ON)->isSet()) {
+    if (isSet(AttPackGetAttribute("LongTitle", ESMC_ATTNEST_ON)) ||
+        isSet(AttPackGetAttribute("URL", ESMC_ATTNEST_ON))) {
         value.clear();
         attr = AttPackGetAttribute("LongTitle", ESMC_ATTNEST_ON);
-        if (attr->isSet()) {
+        if (isSet(attr)) {
             localrc = attr->get(&valuevector);
             if (valuevector.size() > 1) {
                 ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -2090,7 +2094,7 @@ int Attribute::AttributeWriteCIMcitation(
         // CI_Citation_Type to add a place for citation URL, append it to
         // LongTitle.
         attr = AttPackGetAttribute("URL", ESMC_ATTNEST_ON);
-        if (attr->isSet()) {
+        if (isSet(attr)) {
             localrc = attr->get(&valuevector);
             if (valuevector.size() > 1) {
                 ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -2168,7 +2172,7 @@ int Attribute::AttributeWriteCIMcitation(
 
       // otherwise, write it out ...
       attr = attpack->AttPackGetAttribute("CouplingPurpose", ESMC_ATTNEST_ON);
-      if (attr->isSet()) {
+      if (isSet(attr)) {
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -2213,7 +2217,7 @@ int Attribute::AttributeWriteCIMcitation(
           ESMC_LOGMSG_WARN, ESMC_CONTEXT);
       }
       attr = attpack->AttPackGetAttribute("Frequency", ESMC_ATTNEST_ON);
-      if (attr->isSet()) {
+      if (isSet(attr)) {
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -2254,11 +2258,11 @@ int Attribute::AttributeWriteCIMcitation(
         localrc = io_xml->writeEndElement("timeProfile", 4);
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       }
-      if (attpack->AttPackGetAttribute("SpatialRegriddingMethod", ESMC_ATTNEST_ON)->isSet() ||
-          attpack->AttPackGetAttribute("SpatialRegriddingDimension", ESMC_ATTNEST_ON)->isSet()) {
+      if (isSet(attpack->AttPackGetAttribute("SpatialRegriddingMethod", ESMC_ATTNEST_ON)) ||
+          isSet(attpack->AttPackGetAttribute("SpatialRegriddingDimension", ESMC_ATTNEST_ON))) {
 
         attr = attpack->AttPackGetAttribute("Frequency", ESMC_ATTNEST_ON);
-        if (attr->isSet()) {
+        if (isSet(attr)) {
           localrc = attr->get(&valuevector);
           if (valuevector.size() > 1) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -2282,7 +2286,7 @@ int Attribute::AttributeWriteCIMcitation(
           localrc = io_xml->writeStartElement("spatialRegridding", "", 4, 0);
         }
         attr = attpack->AttPackGetAttribute("SpatialRegriddingMethod", ESMC_ATTNEST_ON);
-        if (attr->isSet()) {
+        if (isSet(attr)) {
           localrc = attr->get(&value2vector);
           if (value2vector.size() > 1) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -2314,7 +2318,7 @@ int Attribute::AttributeWriteCIMcitation(
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       }
       attr = attpack->AttPackGetAttribute("TimeTransformationType", ESMC_ATTNEST_ON);
-      if (attr->isSet()) {
+      if (isSet(attr)) {
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -2329,7 +2333,7 @@ int Attribute::AttributeWriteCIMcitation(
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       }
       attr = attpack->AttPackGetAttribute("CouplingSource", ESMC_ATTNEST_ON);
-      if (attr->isSet()) {
+      if (isSet(attr)) {
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -2353,7 +2357,7 @@ int Attribute::AttributeWriteCIMcitation(
           ESMC_LOGMSG_WARN, ESMC_CONTEXT);
       }
       attr = attpack->AttPackGetAttribute("CouplingTarget", ESMC_ATTNEST_ON);
-      if (attr->isSet()) {
+      if (isSet(attr)) {
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -2377,7 +2381,7 @@ int Attribute::AttributeWriteCIMcitation(
           ESMC_LOGMSG_WARN, ESMC_CONTEXT);
       }
       attr = attpack->AttPackGetAttribute("ShortName", ESMC_ATTNEST_ON);
-      if (attr->isSet()) {
+      if (isSet(attr)) {
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -2452,7 +2456,7 @@ int Attribute::AttributeWriteCIMinput(
 
             // otherwise, write it out ...
             attr = attpack->AttPackGetAttribute("CouplingPurpose", ESMC_ATTNEST_ON);
-            if (attr->isSet()) {
+            if (isSet(attr)) {
                 localrc = attr->get(&valuevector);
                 if (valuevector.size() > 1) {
                     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -2507,7 +2511,7 @@ int Attribute::AttributeWriteCIMinput(
                                       ESMC_LOGMSG_WARN, ESMC_CONTEXT);
             }
             attr = attpack->AttPackGetAttribute("Description", ESMC_ATTNEST_ON);
-            if (attr->isSet()) {
+            if (isSet(attr)) {
                 localrc = attr->get(&valuevector);
                 if (valuevector.size() > 1) {
                     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -2540,7 +2544,7 @@ int Attribute::AttributeWriteCIMinput(
             ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
             attr = attpack->AttPackGetAttribute("Frequency", ESMC_ATTNEST_ON);
-            if (attr->isSet()) {
+            if (isSet(attr)) {
                 localrc = attr->get(&valuevector);
                 if (valuevector.size() > 1) {
                     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -2586,11 +2590,11 @@ int Attribute::AttributeWriteCIMinput(
                 localrc = io_xml->writeEndElement("timeProfile", 3);
                 ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
             }
-            if (attpack->AttPackGetAttribute("SpatialRegriddingMethod", ESMC_ATTNEST_ON)->isSet() ||
-                attpack->AttPackGetAttribute("SpatialRegriddingDimension", ESMC_ATTNEST_ON)->isSet()) {
+            if (isSet(attpack->AttPackGetAttribute("SpatialRegriddingMethod", ESMC_ATTNEST_ON)) ||
+                isSet(attpack->AttPackGetAttribute("SpatialRegriddingDimension", ESMC_ATTNEST_ON))) {
 
                 attr = attpack->AttPackGetAttribute("SpatialRegriddingDimension", ESMC_ATTNEST_ON);
-                if (attr->isSet()) {
+                if (isSet(attr)) {
                     localrc = attr->get(&valuevector);
                     if (valuevector.size() > 1) {
                         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -2622,7 +2626,7 @@ int Attribute::AttributeWriteCIMinput(
                     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
                 }
                 attr = attpack->AttPackGetAttribute("SpatialRegriddingMethod", ESMC_ATTNEST_ON);
-                if (attr->isSet()) {
+                if (isSet(attr)) {
                     localrc = attr->get(&value2vector);
                     if (value2vector.size() > 1) {
                         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -2662,7 +2666,7 @@ int Attribute::AttributeWriteCIMinput(
                 ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
             }
             attr = attpack->AttPackGetAttribute("TimeTransformationType", ESMC_ATTNEST_ON);
-            if (attr->isSet()) {
+            if (isSet(attr)) {
                 localrc = attr->get(&valuevector);
                 if (valuevector.size() > 1) {
                     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -2684,7 +2688,7 @@ int Attribute::AttributeWriteCIMinput(
                 ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
             }
             attr = attpack->AttPackGetAttribute("CouplingSource", ESMC_ATTNEST_ON);
-            if (attr->isSet()) {
+            if (isSet(attr)) {
                 localrc = attr->get(&valuevector);
                 if (valuevector.size() > 1) {
                     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -2751,7 +2755,7 @@ int Attribute::AttributeWriteCIMinput(
                                       ESMC_LOGMSG_WARN, ESMC_CONTEXT);
             }
             attr = attpack->AttPackGetAttribute("CouplingTarget", ESMC_ATTNEST_ON);
-            if (attr->isSet()) {
+            if (isSet(attr)) {
                 localrc = attr->get(&valuevector);
                 if (valuevector.size() > 1) {
                     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -2810,7 +2814,7 @@ int Attribute::AttributeWriteCIMinput(
                                       ESMC_LOGMSG_WARN, ESMC_CONTEXT);
             }
             attr = attpack->AttPackGetAttribute("ShortName", ESMC_ATTNEST_ON);
-            if (attr->isSet()) {
+            if (isSet(attr)) {
                 localrc = attr->get(&valuevector);
                 if (valuevector.size() > 1) {
                     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,

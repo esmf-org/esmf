@@ -2694,6 +2694,23 @@ static GeomRend::DstConfig get_dst_config(int imethod) {
   }
 }
 
+// Fill a pointlist with outside status 
+static void _fill_pl_with_outside_status(PointList &pl, WMat &status) {
+
+  // Loop through setting an outside status for every id in pointlist
+    for(int i=0; i<pl.get_curr_num_pts(); i++) {
+
+      // Set col info
+      WMat::Entry col(ESMC_REGRID_STATUS_OUTSIDE,
+                      0, 0.0, 0);
+      
+      // Set row info
+      WMat::Entry row(pl.get_id(i), 0, 0.0, 0);
+
+      // Put weights into weight matrix
+      status.InsertRowMergeSingle(row, col);
+    }
+}
 
 Interp::Interp(Mesh *src, PointList *srcplist, Mesh *dest, PointList *dstplist, Mesh *midmesh,
                bool freeze_src_, int imethod,
@@ -2751,6 +2768,28 @@ interp_method(imethod)
 
 
     grend.Build(srcF.size(), &srcF[0], dstF.size(), &dstF[0], &zz, midmesh==0? true:false);
+
+    // Check grend status, if it's not complete
+    if (grend.status != GEOMREND_STATUS_COMPLETE) {
+      if (grend.status == GEOMREND_STATUS_NO_DST) {
+        // Nothing to do, so just leave, but catch in interp weight calc
+        return;
+      } else if (grend.status == GEOMREND_STATUS_DST_BUT_NO_SRC) {
+
+        // Act depending on unmapped action
+        if (unmappedaction==ESMCI_UNMAPPEDACTION_ERROR) {
+          Throw() << "No suitable source locations found for regridding (it could be that the source is empty, completely masked, or completely disjoint from the destination)."; 
+        } else {
+          // Fill dst status for cases where there's a pointlist (i.e. non-conservative methods)
+          // (Conservative is done during Interp() weight calc. phase)
+          if (set_dst_status && dstplist) { 
+            _fill_pl_with_outside_status(*dstplist, dst_status);
+          }
+          return;
+        } 
+      }
+    }
+
 
     if (has_nearest_dst_to_src) {
       Throw() << "unable to proceed with interpolation method dst_to_src";
@@ -2828,6 +2867,39 @@ Interp::~Interp() {
   DestroySearchResult(sres);
 }
 
+
+// Set masked status 
+static void _set_mesh_masked_elem_status(Mesh &mesh, WMat &status) {
+
+    // Get elem mask pointer
+    MEField<> *mptr = mesh.GetField("elem_mask");
+
+    // If mask field exists, then mark masked dst elems
+    if (mptr != NULL) {
+      MeshDB::const_iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+      for (; ei != ee; ++ei) {
+        const MeshObj &elem=*ei;
+
+        // Get mask value
+        double *m=mptr->data(*ei);
+        
+        // If masked, then mark
+        if (*m > 0.5) {
+          // Set col info
+          IWeights::Entry col(0,ESMC_REGRID_STATUS_DST_MASKED,
+                              1.0, 0);
+
+          // Set row info
+          IWeights::Entry row(elem.get_id(), 0, 0.0, 0);
+
+          // Put status entry into matrix
+          status.InsertRowMergeSingle(row, col);
+        }
+      }
+    }
+}
+
+
 /*
  * There is an ASSUMPTION here that the field is nodal, both sides
  */
@@ -2837,6 +2909,66 @@ void Interp::operator()(int fpair_num, IWeights &iw, bool set_dst_status, WMat &
   IWeights src_frac,dst_frac; // Use IW to get out source and dst frac and to migrate it to the correct procs
                               // eventually make a dedicated class for migrating values associated with mesh
 
+  // Check grend status first
+  if (is_parallel) {
+    if (grend.status != GEOMREND_STATUS_COMPLETE) {
+      if (grend.status == GEOMREND_STATUS_NO_DST) {
+
+        // If this is conserve set src fracs to 0.0, but otherwise leave, because
+        // there is no destination mesh.
+        if (has_cnsrv) {
+
+          // get frac pointer for source mesh
+          MEField<> *selem_frac=srcmesh->GetField("elem_frac");
+          if (!selem_frac) Throw() << "Meshes involved in Conservative interp should have frac field";
+          
+          // Set everything to 0.0 because there is no dst, so no overlap with dst.
+          Mesh::iterator sei=srcmesh->elem_begin(),see=srcmesh->elem_end();
+          for (;sei!=see; sei++) {
+            MeshObj &elem = *sei;
+            double *f=selem_frac->data(elem);
+            *f=0.0;
+          }
+        }
+
+        return;
+      } else if (grend.status == GEOMREND_STATUS_DST_BUT_NO_SRC) {
+
+        // Fill dst status and fracs for conservative cases, and then leave
+        // (Non-conservative is done during Inter() object construction)
+        if (set_dst_status && has_cnsrv) {
+          _set_mesh_masked_elem_status(*dstmesh, dst_status);
+
+          // get frac pointer for destination mesh
+          MEField<> *delem_frac=dstmesh->GetField("elem_frac");
+          if (!delem_frac) Throw() << "Meshes involved in Conservative interp should have frac field";
+
+          // Set everything to 0.0 because there is no overlap
+          Mesh::iterator dei=dstmesh->elem_begin(),dee=dstmesh->elem_end();
+          for (;dei!=dee; dei++) {
+            MeshObj &elem = *dei;
+            double *f=delem_frac->data(elem);
+            *f=0.0;
+          }
+
+          // get frac pointer for source mesh
+          MEField<> *selem_frac=srcmesh->GetField("elem_frac");
+          if (!selem_frac) Throw() << "Meshes involved in Conservative interp should have frac field";
+
+          // Set everything to 0.0 because there is no overlap
+          Mesh::iterator sei=srcmesh->elem_begin(),see=srcmesh->elem_end();
+          for (;sei!=see; sei++) {
+            MeshObj &elem = *sei;
+            double *f=selem_frac->data(elem);
+            *f=0.0;
+          }
+        }
+        return;
+      }
+    }
+  }
+
+  // Calculate weights
   if (is_parallel) mat_transfer_parallel(fpair_num, iw, src_frac, dst_frac, set_dst_status, dst_status);
   else mat_transfer_serial(fpair_num, iw, src_frac, dst_frac, set_dst_status, dst_status);
 

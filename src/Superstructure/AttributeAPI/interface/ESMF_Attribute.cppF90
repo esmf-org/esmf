@@ -58,6 +58,7 @@ module ESMF_AttributeMod
   use ESMF_UtilTypesMod     ! ESMF utility types
   use ESMF_InitMacrosMod    ! ESMF initializer macros
   use ESMF_LogErrMod        ! ESMF error handling
+  use ESMF_F90InterfaceMod        ! ESMF F90-C++ interface helper
   use ESMF_ArrayMod
   use ESMF_ArrayBundleMod
   use ESMF_CompMod
@@ -9385,9 +9386,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpack, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
-                                attnestflag=lattnestflag, rc=localrc) @\
+                                attnestflag=lattnestflag, & @\
+                                isPresent=isPresent, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
+        if (present(isPresent)) then @\
+          if (.not.isPresent) then @\
+            ! exit successfully @\
+            if (present(rc)) rc = ESMF_SUCCESS @\
+          endif @\
+        endif @\
         call c_ESMC_AttPackIsPresentAtt(mthisfield, name, attpack, & @\
           lisPresent, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
@@ -12555,12 +12563,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeUpdate() @\
-      subroutine mclass##AttUpdate(mthis, vm, rootList, reconcile, rc) @\
+      subroutine mclass##AttUpdate(mthis, vm, rootList, petList, reconcile, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis @\
       type(ESMF_VM), intent(in) :: vm @\
       integer, dimension(:), intent(in) :: rootList @\
+      integer, dimension(:), intent(in), optional :: petList @\
       logical, intent(in), optional :: reconcile @\
       integer, intent(out), optional :: rc    @\
  @\
@@ -12577,6 +12586,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      should be updated. @\
 !     \item [rootList] @\
 !      The list of PETs that are to be used to as the source of the update. @\
+!     \item [{[petList]}] @\
+!      The list of PETs under {\tt vm} that participate in the update. This @\
+!      list must include the PETs in {\tt rootList}. By default use all PETs @\
+!      of the VM. @\
 !     \item [{[reconcile]}] @\
 !      A logical flag used to indicate whether to use reconcile behavior or @\
 !      normal update behavior. If {\tt reconcile} is set to {\tt ESMF\_TRUE} @\
@@ -12591,8 +12604,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! @\
 !EOPI @\
  @\
-      integer :: localrc, count                           ! Error status @\
+      integer :: localrc, count                    ! Error status @\
       type(ESMF_Logical) :: local_reconcile @\
+      type(ESMF_InterArray) :: l_petList @\
  @\
       ! Initialize return code; assume failure until success is certain @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
@@ -12606,10 +12620,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       else @\
         local_reconcile = ESMF_FALSE @\
       endif @\
+      ! petList @\
+      l_petList = ESMF_InterArrayCreate(petList, rc=localrc) @\
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       count = size(rootList) @\
       call c_ESMC_AttributeUpdate(mthisfield, vm, rootList, count, & @\
-                                  local_reconcile, localrc) @\
+        l_petList, local_reconcile, localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\

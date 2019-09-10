@@ -194,9 +194,10 @@ module ESMF_VMMod
   public ESMF_VMPlanMinThreads
   public ESMF_VMIdCompare
   public ESMF_VMIdCopy
-  public ESMF_VMIdPrint
   public ESMF_VMIdCreate
   public ESMF_VMIdDestroy
+  public ESMF_VMIdLog
+  public ESMF_VMIdPrint
   public ESMF_VMSendVMId
   public ESMF_VMRecvVMId
   public ESMF_VMBcastVMId
@@ -4741,7 +4742,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[vm] 
 !        Queried {\tt ESMF\_VM} object.
 !   \item[{[localPet]}]
-!        Upon return this holds the id of the PET that issued this call.
+!        Upon return this holds the local id of the PET that issued this call.
+!        The valid range of {\tt localPet} is $[0..petCount-1]$. A value of $-1$
+!        is returned on PETs that are not active under the specified {\tt vm}.
 !   \item[{[petCount]}]
 !        Upon return this holds the number of PETs running under {\tt vm}.
 !   \item[{[peCount]}]
@@ -4764,6 +4767,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        user-level MPI communications. It is recommended that the user
 !        duplicates the communicator via {\tt MPI\_Comm\_Dup()} in order to
 !        prevent any interference with ESMF communications.
+!        {\tt MPI\_COMM\_NULL} is returned on PETs that are not active
+!        under the specified {\tt vm}.
 !   \item[{[pthreadsEnabledFlag]}]
 !        \begin{description}
 !        \item[{\tt .TRUE.}]
@@ -4821,7 +4826,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       ! Only very specific cases are supported for a NULL this pointer
-      if (present(localPet) .or. present(petCount) .or. present(peCount) .or. &
+      if (present(petCount) .or. present(peCount) .or. &
         present(ssiCount) .or. present(ssiMinPetCount) .or. &
         present(ssiMaxPetCount) .or. present(ssiLocalPetCount) .or. &
         present(pthreadsEnabledFlag) .or. present(openMPEnabledFlag) .or. &
@@ -4830,6 +4835,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           msg="Not a valid pointer to VM", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
+      endif
+      if (present(localPet)) then
+        ! a value of -1 indicates that 
+        localPet = -1
       endif
       if (present(mpiCommunicator)) then
         call c_ESMC_VMGetMpiCommNull(mpiCommunicator, localrc)
@@ -4934,6 +4943,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
 ! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMGetGlobal()"
 !BOP
 ! !IROUTINE: ESMF_VMGetGlobal - Get Global VM
 
@@ -4996,6 +5007,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
 ! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMGetCurrent()"
 !BOP
 ! !IROUTINE: ESMF_VMGetCurrent - Get Current VM
 
@@ -5071,6 +5084,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
 ! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMGetCurrentID()"
 !BOPI
 ! !IROUTINE: ESMF_VMGetCurrentID - Get Current VMId
 
@@ -5113,6 +5128,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
 ! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMGetCurrentGarbageInfo()"
 !BOPI
 ! !IROUTINE: ESMF_VMGetCurrentGarbageInfo - Get Current VMId
 
@@ -5163,6 +5180,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
 ! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMGetMemInfo()"
 !BOPI
 ! !IROUTINE: ESMF_VMGetMemInfo - Get memory info for this PET
 
@@ -5247,6 +5266,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
 ! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMLogCurrentGarbageInfo()"
 !BOPI
 ! !IROUTINE: ESMF_VMLogCurrentGarbageInfo - Log garbage collection info
 
@@ -5262,6 +5283,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   The arguments are:
 !   \begin{description}
+!   \item [{[prefix]}]
+!     String to prefix the memory info message. Default is no prefix.
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -5287,6 +5310,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
 ! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMLogMemInfo()"
 !BOPI
 ! !IROUTINE: ESMF_VMLogMemInfo - Log memory info for this PET
 
@@ -5333,6 +5358,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
 ! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMGetVMId()"
 !BOPI
 ! !IROUTINE: ESMF_VMGetVMId - Get VMId
 
@@ -9297,6 +9324,53 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMIdCopy
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMIdLog()"
+!BOPI
+! !IROUTINE: ESMF_VMIdLog - Log an ESMF_VMId object
+
+! !INTERFACE:
+  subroutine ESMF_VMIdLog(vmId, prefix, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VMId),      intent(in)              :: vmId
+    character (len=*),    intent(in),   optional  :: prefix
+    integer,              intent(out),  optional  :: rc           
+!
+! !DESCRIPTION:
+!   Write an ESMF_VMId object to the default Log.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vmId] 
+!     ESMF_VMId object
+!   \item [{[prefix]}]
+!     String to prefix the memory info message. Default is no prefix.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Call into the C++ interface
+    call c_ESMC_VMIdLog(vmId, prefix, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMIdLog
 !------------------------------------------------------------------------------
 
 

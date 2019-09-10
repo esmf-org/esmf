@@ -96,6 +96,12 @@ public:
   const std::vector<MEField<>*> &GetDstRendFields() { return dst_rend_Fields; }
   const std::vector<_field*> &GetDstRendfields() { return dst_rend_fields; }
 
+#define GEOMREND_STATUS_UNINIT 0
+#define GEOMREND_STATUS_COMPLETE 1
+#define GEOMREND_STATUS_NO_DST 2
+#define GEOMREND_STATUS_DST_BUT_NO_SRC 3
+  int status;
+
 private:
   GeomRend(const GeomRend &rhs);
   GeomRend &operator=(const GeomRend &rhs);

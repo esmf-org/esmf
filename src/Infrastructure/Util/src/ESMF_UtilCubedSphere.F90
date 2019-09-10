@@ -18,6 +18,15 @@ module ESMF_UtilCubedSphereMod
   implicit none
   private
 
+!------------------------------------------------------------------------------
+! ! ESMF_CubedSphereTransform_Args
+!
+!------------------------------------------------------------------------------
+  type ESMF_CubedSphereTransform_Args
+! private
+    real(ESMF_KIND_R4) :: stretch_factor, target_lat, target_lon
+  end type
+
   real :: csFac = -999
   real,  parameter:: pi = 3.1415926
   real,  parameter:: radius = 6371.0
@@ -83,6 +92,7 @@ module ESMF_UtilCubedSphereMod
   real :: deglon_start = -30., deglon_stop = 30., &  ! boundaries of latlon patch
           deglat_start = -30., deglat_stop = 30.
 
+  public :: ESMF_CubedSphereTransform_Args
   public :: ESMF_UtilCreateCSCoords
   public :: ESMF_UtilCreateCSCoordsPar
 
@@ -90,7 +100,8 @@ contains
 
 ! routine to create the global edges and centers of the cubed-sphere grid
 ! but not the ESMF grid
-subroutine ESMF_UtilCreateCSCoords(npts, LonEdge,LatEdge, start, count, tile, LonCenter, LatCenter)
+subroutine ESMF_UtilCreateCSCoords(npts, LonEdge,LatEdge, start, count, tile, &
+  LonCenter, LatCenter, schmidtTransform)
 
 ! !ARGUMENTS:
     integer,           intent(IN)     :: npts
@@ -102,6 +113,7 @@ subroutine ESMF_UtilCreateCSCoords(npts, LonEdge,LatEdge, start, count, tile, Lo
     integer, optional, intent(in)     :: tile
     real(ESMF_KIND_R4), optional, intent(inout) :: LonCenter(:,:)
     real(ESMF_KIND_R4), optional, intent(inout) :: LatCenter(:,:)
+    type(ESMF_CubedSphereTransform_Args), optional, intent(in)    :: schmidtTransform
 
 ! ErrLog variables
 !-----------------
@@ -138,7 +150,7 @@ subroutine ESMF_UtilCreateCSCoords(npts, LonEdge,LatEdge, start, count, tile, Lo
 ! Shift the corner away from Japan
 !---------------------------------
 ! This will result in the corner close to east coast of China
-             grid_global(i,j,1,n) = grid_global(i,j,1,n) - pi/18.
+             if (.not.present(schmidtTransform)) grid_global(i,j,1,n) = grid_global(i,j,1,n) - pi/18.
              if ( grid_global(i,j,1,n) < 0. )              &
                 grid_global(i,j,1,n) = grid_global(i,j,1,n) + 2.*pi
              if (ABS(grid_global(i,j,1,n)) < 1.e-10) grid_global(i,j,1,n) = 0.0
@@ -210,6 +222,13 @@ subroutine ESMF_UtilCreateCSCoords(npts, LonEdge,LatEdge, start, count, tile, Lo
   endif
 #endif
 
+  if (present(schmidtTransform)) then
+     do n=1,ntiles
+       call direct_transform(schmidtTransform%stretch_factor,schmidtTransform%target_lon,&
+          schmidtTransform%target_lat,grid_global(:,:,1,n),grid_global(:,:,2,n))
+     enddo
+  end if
+
   if (present(LonEdge) .and. present(LatEdge)) then
     do n=1,ntiles
        do j=1,npts+1
@@ -260,7 +279,8 @@ subroutine ESMF_UtilCreateCSCoords(npts, LonEdge,LatEdge, start, count, tile, Lo
 end subroutine ESMF_UtilCreateCSCoords
 
 
-subroutine ESMF_UtilCreateCSCoordsPar(npts, LonEdge,LatEdge, start, count, tile, LonCenter, LatCenter)
+subroutine ESMF_UtilCreateCSCoordsPar(npts, LonEdge,LatEdge, start, count, tile, &
+     LonCenter, LatCenter, schmidtTransform)
 
 ! !ARGUMENTS:
     integer,           intent(IN)     :: npts
@@ -272,6 +292,7 @@ subroutine ESMF_UtilCreateCSCoordsPar(npts, LonEdge,LatEdge, start, count, tile,
     integer, optional, intent(in)     :: tile
     real(ESMF_KIND_R4), optional, intent(inout) :: LonCenter(:,:)
     real(ESMF_KIND_R4), optional, intent(inout) :: LatCenter(:,:)
+    type(ESMF_CubedSphereTransform_Args), optional, intent(in) :: schmidtTransform
 
  integer                      :: STATUS
 
@@ -304,13 +325,17 @@ subroutine ESMF_UtilCreateCSCoordsPar(npts, LonEdge,LatEdge, start, count, tile,
     ! fix the values in the local tile
     do j=1,count(2)+1
        do i=1,count(1)+1
-           tile_local(i,j,1) = tile_local(i,j,1) - pi/18.
+           if (.not.present(schmidtTransform)) tile_local(i,j,1) = tile_local(i,j,1) - pi/18.
            if ( tile_local(i,j,1) < 0. )              &
                 tile_local(i,j,1) = tile_local(i,j,1) + 2.*pi
            if (ABS(tile_local(i,j,1)) < 1.e-10) tile_local(i,j,1) = 0.0
            if (ABS(tile_local(i,j,2)) < 1.e-10) tile_local(i,j,2) = 0.0
        enddo
     enddo
+    if (present(schmidtTransform)) then
+     call direct_transform(schmidtTransform%stretch_factor,schmidtTransform%target_lon,&
+          schmidtTransform%target_lat,tile_local(:,:,1),tile_local(:,:,2))
+    end if
     
     if (present(LonEdge) .and. present(LatEdge)) then
        shapLon=shape(LonEdge)
@@ -1116,6 +1141,54 @@ subroutine ESMF_UtilCreateCSCoordsPar(npts, LonEdge,LatEdge, start, count, tile,
       call cart_to_latlon(1, ec, e2(1), e2(2))
 
  end subroutine cell_center2
+
+  subroutine direct_transform(stretch_factor, lon_p, lat_p, lon, lat)
+    real(ESMF_KIND_R4),    intent(in):: stretch_factor !< Stretching factor
+    real(ESMF_KIND_R4),    intent(in):: lon_p, lat_p   !< center location of the target face, radian
+!  0 <= lon <= 2*pi ;    -pi/2 <= lat <= pi/2
+    real(ESMF_KIND_R4), intent(inout) :: lon(:,:), lat(:,:)
+!
+    real(ESMF_KIND_R4)  :: lat_t, sin_p, cos_p, sin_lat, cos_lat, sin_o, p2, two_pi
+    real(ESMF_KIND_R4)  :: c2p1, c2m1
+    integer:: i, j
+
+    p2 = 0.5d0*pi
+    two_pi = 2.d0*pi
+
+    c2p1 = 1.d0 + stretch_factor*stretch_factor
+    c2m1 = 1.d0 - stretch_factor*stretch_factor
+
+    sin_p = sin(lat_p)
+    cos_p = cos(lat_p)
+
+    do j=1,size(lon,2)
+       do i=1,size(lon,1)
+          if ( abs(c2m1) > 1.d-7 ) then
+               sin_lat = sin(lat(i,j))
+               lat_t = asin( (c2m1+c2p1*sin_lat)/(c2p1+c2m1*sin_lat) )
+          else         ! no stretching
+               lat_t = lat(i,j)
+          endif
+          sin_lat = sin(lat_t)
+          cos_lat = cos(lat_t)
+            sin_o = -(sin_p*sin_lat + cos_p*cos_lat*cos(lon(i,j)))
+          if ( (1.-abs(sin_o)) < 1.d-7 ) then    ! poles
+               lon(i,j) = 0.d0
+               lat(i,j) = sign( p2, sin_o )
+          else
+               lat(i,j) = asin( sin_o )
+               lon(i,j) = lon_p + atan2( -cos_lat*sin(lon(i,j)),   &
+                          -sin_lat*cos_p+cos_lat*sin_p*cos(lon(i,j)))
+               if ( lon(i,j) < 0.d0 ) then
+                    lon(i,j) = lon(i,j) + two_pi
+               elseif( lon(i,j) >= two_pi ) then
+                    lon(i,j) = lon(i,j) - two_pi
+               endif
+          endif
+       enddo
+    enddo
+
+  end subroutine direct_transform
 
 end module ESMF_UtilCubedSphereMod
 

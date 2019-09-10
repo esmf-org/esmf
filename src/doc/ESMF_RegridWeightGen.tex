@@ -275,9 +275,10 @@ ESMF_RegridWeightGen
         [--pole|-p none|all|teeth|1|2|..]
         [--line_type|-l cartesian|greatcircle]
         [--norm_type dstarea|fracarea]
-        [--extrap_method none|neareststod|nearestidavg]
+        [--extrap_method none|neareststod|nearestidavg|creep]
         [--extrap_num_src_pnts <N>]
         [--extrap_dist_exponent <P>]
+        [--extrap_num_levels <L>]
         [--ignore_unmapped|-i]
         [--ignore_degenerate]
         [-r]
@@ -404,6 +405,9 @@ where:
                              the distance should be raised to when the 
                              extrapolation method is nearestidavg. If not specified, 
                              the default is 2.0.
+
+    --extrap_num_levels - an optional argument specifying how many levels should
+                          be filled for level based extrapolation methods (e.g. creep).
 
     --ignore_unmapped
            or

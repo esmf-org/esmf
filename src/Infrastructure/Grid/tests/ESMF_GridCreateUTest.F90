@@ -72,6 +72,7 @@ program ESMF_GridCreateUTest
   integer :: petMap2D(2,2,1)
   integer :: petMap2x3(2,3,1)
   real(ESMF_KIND_R8), pointer :: fptr(:,:), fptr1(:,:), fptr2(:,:)
+  real(ESMF_KIND_R4), pointer :: fptr1R4(:,:), fptr2R4(:,:)
   logical:: gridBool
   logical:: isCreated
   type(ESMF_GridStatus_Flag) :: status
@@ -93,6 +94,7 @@ program ESMF_GridCreateUTest
   type(ESMF_DELayout) :: delayout
   integer :: total, s,  decount, localDe
   type(ESMF_Staggerloc) :: staggerLocList(2)
+  type(ESMF_CubedSphereTransform_Args) :: transformArgs
  
   !-----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
@@ -2809,6 +2811,59 @@ program ESMF_GridCreateUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing GridCreateCubedSphere with SchmidtTransform"
+  write(failMsg, *) "Incorrect result"
+
+  ! create grid with nondefault parameter
+  rc=ESMF_SUCCESS
+
+  transformArgs%stretch_factor = 3.0;
+  transformArgs%target_lat = 0.0; ! in radians
+  transformArgs%target_lat = 1.3; ! in radians
+  grid=ESMF_GridCreateCubedSphere(15, &
+                                  staggerLocList = (/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
+                                  coordTypeKind = ESMF_TYPEKIND_R4, &
+                                  coordSys = ESMF_COORDSYS_SPH_RAD, &
+                                  transformArgs=transformArgs, &
+                                  rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_GridGet(grid, localDECount=localDECount, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  do lde = 0, localDECount-1
+
+    call ESMF_GridGetCoord(grid, coordDim=1, localDE=lde, farrayPtr=fptr1R4, &
+                           exclusiveLBound=exlbnd, exclusiveUBound=exubnd, rc=localrc)
+    if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+    call ESMF_GridGetCoord(grid, coordDim=2, localDE=lde, farrayPtr=fptr2R4, &
+                           exclusiveLBound=exlbnd, exclusiveUBound=exubnd, rc=localrc)
+    if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+#if 0
+    print *, "coords from de", lde
+
+    print *, "lower bounds = [", exlbnd(1), ", ", exlbnd(2), "]"
+    print *, "upper bounds = [", exubnd(1), ", ", exubnd(2), "]"
+
+    print *, "["
+    do j = 1, exubnd(1)
+      do i = 1, exubnd(2)
+        print *, "[", fptr1(i,j), ", ", fptr2(i,j), "]"
+      enddo
+    enddo
+    print *, "]"
+#endif
+  enddo
+
+  ! destroy grid
+  call ESMF_GridDestroy(grid, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
@@ -2876,7 +2931,7 @@ program ESMF_GridCreateUTest
   ! Create cubed sphere grid with coordTypeKind == ESMF_TYPEKIND_R4
   grid = ESMF_GridCreateMosaic(filename='data/C48_mosaic.nc', &
                 staggerLocList= staggerLocList, &
-		coordTypeKind = ESMF_TYPEKIND_R4, &
+                coordTypeKind = ESMF_TYPEKIND_R4, &
                 tileFilePath='./data/', rc=localrc)
 
 #ifndef ESMF_NETCDF
@@ -2897,7 +2952,7 @@ program ESMF_GridCreateUTest
   ! Create cubed sphere grid with coordTypeKind == ESMF_TYPEKIND_R8
   grid2 = ESMF_GridCreateMosaic(filename='data/C48_mosaic.nc', &
                 staggerLocList= staggerLocList, &
-		coordTypeKind = ESMF_TYPEKIND_R8, &
+                coordTypeKind = ESMF_TYPEKIND_R8, &
                 tileFilePath='./data/', rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
   do s = 1, 2
@@ -2922,17 +2977,17 @@ program ESMF_GridCreateUTest
       latDiff = abs(latPtrR8-latPtrR4)
 
       ! Find the max/min/mean errors
-      ! lonmin = minval(lonDiff)	  
+      ! lonmin = minval(lonDiff)
       ! latmin = minval(latDiff)
-      ! lonmax = maxval(lonDiff)	  
+      ! lonmax = maxval(lonDiff)
       ! latmax = maxval(latDiff)
       allocate(mean(size(lonDiff,2)))
       do  j=1, size(lonDiff,2)
-      	 mean(j) = sum(lonDiff(:,j))
+         mean(j) = sum(lonDiff(:,j))
       enddo
       lonmean = sum(mean)/total
       do j=1, size(latDiff,2)
-      	 mean(j) = sum(latDiff(:,j))
+         mean(j) = sum(latDiff(:,j))
       enddo
       latmean = sum(mean)/total
       
@@ -3000,11 +3055,11 @@ program ESMF_GridCreateUTest
       ! Find the mean errors
       allocate(mean(size(lonDiff,2)))
       do  j=1, size(lonDiff,2)
-      	 mean(j) = sum(lonDiff(:,j))
+         mean(j) = sum(lonDiff(:,j))
       enddo
       lonmean = sum(mean)/total
       do j=1, size(latDiff,2)
-      	 mean(j) = sum(latDiff(:,j))
+         mean(j) = sum(latDiff(:,j))
       enddo
       latmean = sum(mean)/total
       

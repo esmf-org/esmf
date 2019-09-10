@@ -377,6 +377,9 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_arraybundleprint()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
+    ESMCI_NULL_CHECK_PRC(*ptr, rc)
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError((*ptr)->print(),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,

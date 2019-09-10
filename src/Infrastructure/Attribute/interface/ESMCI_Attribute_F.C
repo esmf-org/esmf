@@ -3672,6 +3672,7 @@ extern "C" {
       ESMCI::VM **vm,           // in - VM that this Attribute lives on
       int *rootList,            // in - root PET list
       int *count,               // in - count of rootList
+      ESMCI::InterArray<int> *petList,  // in - list of participating PETs
       ESMC_Logical *reconcile,  // in - reconcile flag
       int *rc) {                // in - return code
 // 
@@ -3710,8 +3711,13 @@ extern "C" {
   if (*reconcile == ESMF_TRUE) local_reconcile = true;
   else local_reconcile = false;
 
+  // Get the Attribute
+  ESMCI::Attribute *attr = (*base)->ESMC_BaseGetRoot();
+  // test for NULL pointer via macro before calling any class methods
+  ESMCI_NULL_CHECK_PRC(attr, rc)
+  
   // Update the Attribute
-  status = (*base)->ESMC_BaseGetRoot()->AttributeUpdate(*vm, rootListl, local_reconcile);
+  status = attr->AttributeUpdate(*vm, rootListl, petList, local_reconcile);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -3756,7 +3762,7 @@ extern "C" {
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 
-}  // end c_ESMC_AttributeUpdate
+}  // end c_ESMC_AttributeUpdateReset
 
 //-----------------------------------------------------------------------------
 //BOP
