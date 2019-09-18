@@ -223,3 +223,9 @@ ESMF_CXXLINKLIBS += -lU77 $(shell $(ESMF_DIR)/scripts/libs.absoft $(ESMF_F90COMP
 # Blank out shared library options
 #
 ESMF_SL_LIBS_TO_MAKE  =
+
+############################################################
+# Static builds on Darwin do not support trace lib due to missing linker option
+ifeq ($(ESMF_SHARED_LIB_BUILD),OFF)
+ESMF_TRACE_LIB_BUILD = OFF
+endif

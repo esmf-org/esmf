@@ -153,3 +153,9 @@ ESMF_CXXLINKLIBS += -lxlf90_r -lxlfmath
 # Blank out shared library options
 #
 ESMF_SL_LIBS_TO_MAKE  =
+
+############################################################
+# Static builds on Darwin do not support trace lib due to missing linker option
+ifeq ($(ESMF_SHARED_LIB_BUILD),OFF)
+ESMF_TRACE_LIB_BUILD = OFF
+endif
