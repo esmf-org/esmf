@@ -1045,6 +1045,8 @@ int RouteHandle::write(
     // make sure that if file existed before, size is reset
     localrc = MPI_File_set_size(fh, 0);
     if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+    localrc = MPI_Barrier(comm);
+    if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
 #endif
   
     // write the file header
