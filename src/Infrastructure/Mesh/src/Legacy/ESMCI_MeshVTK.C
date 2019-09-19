@@ -144,9 +144,6 @@ static void append_data_from_Array(iter ni, iter ne, std::map<MeshObj::id_type, 
   // Get localDE lower bound
   int lbound=(array->getComputationalLBound())[localDE]; // (assumes array rank is 1)
 
-  printf("BOB: array lbound=%d\n",lbound);
-
-
   // Loop writing out data in Array that corresponds to nodes
   for (; ni != ne; ++ni) {
     const MeshObj &obj=*ni;
@@ -174,7 +171,6 @@ static void append_data_from_Array(iter ni, iter ne, std::map<MeshObj::id_type, 
     // Get data
     T d;
     localArray->getDataInternal(&index, &d);
-    printf("id=%d index=%d data=%f\n",obj.get_id(),index,d);
 
     // Write data
     out << d << " ";
@@ -191,8 +187,6 @@ static void write_data_from_Array(iter ni, iter ne, std::map<MeshObj::id_type, i
   // Get Array data type
   ESMC_TypeKind_Flag typekind=array->getTypekind();
     
-  printf("BOB: HERE! tk=%d \n",typekind);
-
   // Output based on type
   if (typekind == ESMC_TYPEKIND_R8) {
     out << "SCALARS " << vname << " double 1" << std::endl;
