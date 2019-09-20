@@ -644,13 +644,19 @@ structured :class:`~ESMF.api.grid.Grid` from a file.  These include ``is_sphere`
 the grid is spherical or regional, ``add_corner_stagger`` to add the corner
 stagger information to the :class:`~ESMF.api.grid.Grid` for conservative regridding, and
 ``add_user_area`` to specify whether to read in the cell area from the
-NetCDF file or to calculate them.  Also, for :class:`~ESMF.api.constants.FileFormat.GRIDSPEC` formated files
+NetCDF file or to calculate them.  
+
+For :class:`~ESMF.api.constants.FileFormat.GRIDSPEC` formated files
 there is the ``add_mask`` optional argument
 to add a mask held by the NetCDF variable indicated in optional
 argument, ``varname``, and the ``coord_names`` argument to specify the longitude
 and latitude variable names in :class:`~ESMF.api.constants.FileFormat.GRIDSPEC` file containing multiple sets of
-coordinates. The mask generated for a :class:`~ESMF.api.grid.Grid` created from 
-file will have 0 for the masked values and 1 for the unmasked values.
+coordinates. 
+
+For :class:`~ESMF.api.constants.FileFormat.SCRIP` formated files the integer array grid_imask is used to mask out grid cells which should not participate in the regridding. 
+
+The mask generated for a :class:`~ESMF.api.grid.Grid` created from 
+file (any format) will have 0 for the masked values and 1 for the unmasked values.
 
 
 ----------
