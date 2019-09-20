@@ -2317,6 +2317,15 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
 
 /* XMRKX */
 
+
+
+  // Set cartesian distance tol
+  // Assuming some accuracy for the trig functions, then the correpsonding accuracy for
+  // the cartesian distance would scale with radius, so scale the cart_dist_tol with radius. 
+  double pnt_radius=MU_LEN_VEC3D(pnt_xyz); 
+  if (pnt_radius <= 0.0) pnt_radius=1.0; // If the radius is 0.0, the just use 1.0
+  const double cart_dist_tol=1.0E-11*pnt_radius;
+
   // Loop over guesses
   bool p_out_valid=false;
   for (int guess=0; guess<NUM_GUESS; guess++) {
@@ -2389,6 +2398,7 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
 #ifdef ESMF_REGRID_DEBUG_MAP_NODE
       if (mathutil_debug) {
         printf("%d p_dist =%E   cart_dist=%E\n",i,len_delta_p,MU_LEN_VEC3D(f));
+        printf("%d  cart_dist_tol=%E\n",i,cart_dist_tol);
       }
 #endif
 
@@ -2397,7 +2407,8 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
       // If we're close enough in p-space dist. to be significantly
       // within 1.0E-10 mapping tol and reasonably close in actual Cart. dist.
       // then exit.
-      if ((len_delta_p < 1.0E-11) && (cart_dist_at_p < 1.0E-11)) {
+      //      if ((len_delta_p < 1.0E-11) && (cart_dist_at_p < 1.0E-11)) {
+      if ((len_delta_p < 1.0E-11) && (cart_dist_at_p < cart_dist_tol)) {
 #ifdef ESMF_REGRID_DEBUG_MAP_NODE
         if (mathutil_debug) {
           printf("%d Within tols so exiting...\n",i);

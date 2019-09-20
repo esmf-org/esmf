@@ -236,3 +236,9 @@ ESMF_CXXLINKLIBS += $(shell $(ESMF_F90COMPILER) -print-file-name=libf95.a)
 # Shared library options
 ESMF_SL_LIBOPTS  += -dynamiclib $(ESMF_CXXLINKOPTS)
 ESMF_SL_LIBLIBS  += $(ESMF_F90LINKPATHS) $(ESMF_F90LINKLIBS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKLIBS)
+
+############################################################
+# Static builds on Darwin do not support trace lib due to missing linker option
+ifeq ($(ESMF_SHARED_LIB_BUILD),OFF)
+ESMF_TRACE_LIB_BUILD = OFF
+endif
