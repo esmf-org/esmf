@@ -160,7 +160,7 @@
               varname = trim(attvalue)
             endif
             rc=ESMF_SUCCESS
-            return
+            goto 1000
           endif
         endif
         ! check if it is CFGRID
@@ -170,7 +170,7 @@
           ncStatus=nf90_get_att(gridid, i, 'units', attvalue)
           if (ncStatus /= nf90_noerror) then
             print '("NetCDF error: ", A)', trim(nf90_strerror(ncStatus))
-            return
+            goto 1000
           endif
           if (attvalue(len:len) .eq. achar(0)) len = len-1
           if (len >= 6 .and. (attvalue(1:6) .eq. "degree")) then
@@ -214,20 +214,27 @@
      if (foundlon .and. foundlat) then
          filetype = ESMF_FILEFORMAT_GRIDSPEC
          rc=ESMF_SUCCESS
-         return
+         goto 1000
      endif
 
      if (foundscriplon .and. foundscriplat) then
          filetype = ESMF_FILEFORMAT_SCRIP
          rc=ESMF_SUCCESS
-         return
+         goto 1000
      endif
 
      if (foundesmfcoord .and. foundesmfconn) then
          filetype = ESMF_FILEFORMAT_ESMFMESH
          rc=ESMF_SUCCESS
-         return
+         goto 1000
      endif
+
+1000 continue
+     ncStatus = nf90_close(gridid)
+     if (CDFCheckError (ncStatus, &
+        ESMF_METHOD,  &
+        ESMF_SRCLINE, errmsg, &
+        rc)) return
 
      return
 #else
