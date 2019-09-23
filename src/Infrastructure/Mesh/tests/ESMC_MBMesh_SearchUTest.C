@@ -144,10 +144,6 @@ bool search_gen(MBMesh *mesh, PointList *pl, std::vector<double*> &cv, bool cart
                      10E-8, sr, false, dst_status, NULL, NULL);
   rc = ESMF_SUCCESS;
 
-  strcpy(name, "Search between a Mesh and a PointList");
-  strcpy(failMsg, "Mesh to PointList search failed");
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-
   // print out search results - elem id with destination id
   rc = ESMF_SUCCESS;
 
@@ -245,6 +241,8 @@ int main(int argc, char *argv[]) {
 
   bool cart = true;
 
+  //----------------------------------------------------------------------------
+  //NEX_UTest
   strcpy(name, "Simple mesh search");
   strcpy(failMsg, "Search results did not validate");
   ESMC_Test((search_gen(mesh_quad, pl_quad, cv, cart)), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -265,6 +263,8 @@ int main(int argc, char *argv[]) {
 
   cart = true;
   
+  //----------------------------------------------------------------------------
+  //NEX_UTest
   strcpy(name, "Triangles mesh search");
   strcpy(failMsg, "Search results did not validate");
   ESMC_Test((search_gen(mesh_tri, pl_tri, cv, cart)), name, failMsg, &result, __FILE__, __LINE__, 0);
