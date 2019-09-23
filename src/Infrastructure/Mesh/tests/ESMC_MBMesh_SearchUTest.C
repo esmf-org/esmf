@@ -58,6 +58,7 @@ bool compare(const double *c1, double *c2) {
   return pass;
 }
 
+// this subroutine is just used for debugging
 bool pcoords(MBMesh *mesh) {
   int rc = ESMF_RC_NOT_IMPL;
   char name[80];
@@ -117,6 +118,7 @@ bool pcoords(MBMesh *mesh) {
 */
   }
 
+  // this ESMC_Test call is just used for debugging
   strcpy(name, "Return parametric coordinates of a point in a cell");
   strcpy(failMsg, "Could not return parametric coordinates of a point in a cell");
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
