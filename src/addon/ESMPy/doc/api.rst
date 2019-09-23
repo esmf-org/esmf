@@ -650,10 +650,10 @@ For :class:`~ESMF.api.constants.FileFormat.GRIDSPEC` formated files
 there is the ``add_mask`` optional argument
 to add a mask held by the NetCDF variable indicated in optional
 argument, ``varname``, and the ``coord_names`` argument to specify the longitude
-and latitude variable names in :class:`~ESMF.api.constants.FileFormat.GRIDSPEC` file containing multiple sets of
+and latitude variable names in a :class:`~ESMF.api.constants.FileFormat.GRIDSPEC` file containing multiple sets of
 coordinates. 
 
-For :class:`~ESMF.api.constants.FileFormat.SCRIP` formated files the integer array grid_imask is used to mask out grid cells which should not participate in the regridding. 
+For :class:`~ESMF.api.constants.FileFormat.SCRIP` formated files the integer array ``grid_imask`` is used to mask out grid cells which should not participate in the regridding. 
 
 The mask generated for a :class:`~ESMF.api.grid.Grid` created from 
 file (any format) will have 0 for the masked values and 1 for the unmasked values.
