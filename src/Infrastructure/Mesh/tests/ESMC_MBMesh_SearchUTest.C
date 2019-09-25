@@ -251,7 +251,7 @@ int main(int argc, char *argv[]) {
 #else
   strcpy(name, "Simple mesh search");
   strcpy(failMsg, "Search results did not validate");
-  ESMC_Test(ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 #endif
 
 #if defined ESMF_MOAB
@@ -273,7 +273,7 @@ int main(int argc, char *argv[]) {
 #else
   strcpy(name, "Triangles mesh search");
   strcpy(failMsg, "Search results did not validate");
-  ESMC_Test(ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 #endif
 
 #if defined ESMF_MOAB
