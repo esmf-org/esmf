@@ -4726,7 +4726,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[8.0.0] Added arguments {\tt ssiCount}, {\tt ssiMinPetCount}, 
 !   {\tt ssiMaxPetCount}, and {\tt ssiLocalPetCount} to provide access 
 !   to information about how the VM is mapped across the single system images
-!   (SSI) -- typically synonymous to nodes -- of the compute environment. This
+!   (SSIs) -- typically synonymous to nodes -- of the compute environment. This
 !   information is useful when constructing custom petLists. \newline
 !   Added argument {\tt ssiSharedMemoryEnabledFlag} that allows the user to 
 !   query whether ESMF was compiled with support for shared memory 
