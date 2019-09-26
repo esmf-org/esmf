@@ -625,7 +625,7 @@ If two points are equally close, then the point with the smallest sequence index
 If there is at least one unmasked source point, then this method is expected to fill all unmapped points. 
 
 \subsubsection{Extrapolation methods: inverse distance weighted average}\label{sec:extrapolation:nearestidavg}
-In inverse distance weighted average extrapolation ({\tt ESMF\_EXTRAPMETHOD\_NEAREST\_STOD}) each unmapped 
+In inverse distance weighted average extrapolation ({\tt ESMF\_EXTRAPMETHOD\_NEAREST\_IDAVG}) each unmapped 
 destination point is the weighted average of the closest N source points. The weight is 
 the reciprocal of the distance of the source point from the destination point raised to a power P.
 All the weights contributing to one destination point are normalized so that they sum to 1.0. 
