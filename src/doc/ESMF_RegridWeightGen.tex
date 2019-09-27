@@ -387,7 +387,7 @@ where:
                         neareststod  - nearest source to destination. Each
                                        unmapped destination location is mapped 
                                        to the closest source location. This 
-                                       extrapolation method not supported with 
+                                       extrapolation method is not supported with 
                                        conservative regrid methods (e.g. conserve).
         
                         nearestidavg - inverse distance weighted average. 
@@ -400,9 +400,21 @@ where:
                                        they sum to 1.0. The user can choose N and P by
                                        using --extrap_num_src_pnts and 
                                        --extrap_dist_exponent, but defaults are 
-                                       also provided. This extrapolation method not 
+                                       also provided. This extrapolation method is not 
                                        supported with conservative regrid methods
                                        (e.g. conserve).
+
+                        creep        - creep fill. 
+                                       Here unmapped destination points are filled by 
+                                       moving values from mapped locations to neighboring 
+                                       unmapped locations. The value filled into a 
+                                       new location is the average of its already filled
+                                       neighbors' values. This process is repeated for 
+                                       the number of levels indicated by the 
+                                       --extrap_num_levels flag. This extrapolation
+                                       method is not supported with conservative 
+                                       regrid methods (e.g. conserve).
+                                       
 
     --extrap_num_src_pnts - an optional argument specifying how many source points
                             should be used when the extrapolation method is 
@@ -513,7 +525,7 @@ where:
                         corner - Regrid using the corner location of each grid cell. 
 
 
-    --dst_loc      - an optional argument that specifies whether to use the 
+    --dst_loc         - an optional argument that specifies whether to use the 
                         center coordinates or corner coordinates to do the regridding.
                         Currently, this flag is only required for non-conservative
                         regridding when the destination grid is an unstructured grid in 
@@ -529,11 +541,11 @@ where:
                         Whichever areas the conservation holds for are output
                         to the weight file.
 
-     --weight_only    - an Optional argument specifying that the output weight file only 
+     --weight_only    - an optional argument specifying that the output weight file only 
                         contains the weights and the source and destination grid's indices.
 
      --check          - Check that the generated weights produce reasonable 
-                         regridded fields. This is done by calling ESMF_Regrid() 
+                        regridded fields. This is done by calling ESMF_Regrid() 
                         on an analytic source field using the weights generated 
                         by this application.  The mean relative error between 
                         the destination and analytic field is computed, as well 
@@ -1449,4 +1461,4 @@ the weights {\tt S}, the source grid indices {\tt col} and destination grid indi
 \subsection{ESMF\_RegridWeightGenCheck}\label{sec:regridweightgencheck}
 
 The ESMF\_RegridWeightGen application is used in the
-\htmladdnormallink{ESMF\_RegridWeightGenCheck external demo}{http://www.earthsystemmodeling.org/users/code_examples/external_demos/external_demos.shtml} to generate interpolation weights.  These weights are then tested by using them for a regridding operation and then comparing them against an analytic function on the destination grid.  This external demo is also used to regression test ESMF regridding, and it is run nightly on over 90 combinations of structured and unstructured, regional and global grids, and regridding methods.
+\htmladdnormallink{ESMF\_RegridWeightGenCheck external demo}{http://www.earthsystemmodeling.org/users/code_examples/external_demos/external_demos.shtml} to generate interpolation weights.  These weights are then tested by using them for a regridding operation and then comparing them against an analytic function on the destination grid.  This external demo is also used to regression test ESMF regridding, and it is run nightly on over 150 combinations of structured and unstructured, regional and global grids, and regridding methods.
