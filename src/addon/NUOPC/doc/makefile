@@ -29,7 +29,7 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 # These lists almost certainly will not be an exhaustive list of 
 # all of the dependent files, but even a partial listing  will be helpful.
 #
-REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE) NUOPC_desc.tex NUOPC_implnotes.tex NUOPC_GenericComponents.tex NUOPC_FieldDictionary.tex NUOPC_PhaseMaps.tex NUOPC_IPD.tex NUOPC_FieldPairing.tex NUOPC_Namespaces.tex NUOPC_ConnectionOptions.tex NUOPC_DataDepInit.tex NUOPC_TransferGeom.tex NUOPC_Timekeeping.tex NUOPC_Metadata.tex NUOPC_DriverComponent_metadata.tex NUOPC_ModelComponent_metadata.tex NUOPC_MediatorComponent_metadata.tex NUOPC_ConnectorComponent_metadata.tex NUOPC_State_metadata.tex NUOPC_Field_metadata.tex NUOPC_StandardComponentDep.tex NUOPC_Compliance.tex NUOPC_ComplianceChecker.tex NUOPC_ComponentExplorer.tex NUOPC_FieldMirror.tex
+REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE) NUOPC_desc.tex NUOPC_implnotes.tex NUOPC_GenericComponents.tex NUOPC_FieldDictionary.tex NUOPC_PhaseMaps.tex NUOPC_IPD.tex NUOPC_FieldPairing.tex NUOPC_Namespaces.tex NUOPC_ConnectionOptions.tex NUOPC_DataDepInit.tex NUOPC_TransferGeom.tex NUOPC_Timekeeping.tex NUOPC_Metadata.tex NUOPC_DriverComponent_metadata.tex NUOPC_ModelComponent_metadata.tex NUOPC_MediatorComponent_metadata.tex NUOPC_ConnectorComponent_metadata.tex NUOPC_State_metadata.tex NUOPC_Field_metadata.tex NUOPC_StandardComponentDep.tex NUOPC_Compliance.tex NUOPC_ComplianceChecker.tex NUOPC_ComponentExplorer.tex NUOPC_Sharing.tex NUOPC_FieldMirror.tex NUOPC_ComponentHierarchies.tex
 
 REFDOC_DEP_FILES += NUOPC_Driver_manual_fapi.tex NUOPC_ModelBase_manual_fapi.tex NUOPC_Model_manual_fapi.tex NUOPC_Mediator_manual_fapi.tex NUOPC_Connector_manual_fapi.tex
 
