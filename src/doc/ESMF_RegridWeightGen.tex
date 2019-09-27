@@ -103,8 +103,15 @@ The regridding application provides the argument "\verb+--+src\_missingvalue" or
 "\verb+--+dst\_missingvalue" for users to specify the variable name from where the mask can be
 constructed.
 
+\subsubsection{Extrapolation}\label{sec:rwg_extrap}
+The {\tt ESMF\_RegridWeightGen} application supports a number of kinds of extrapolation to fill in points not mapped by the regrid method. 
+Please see the sections starting with section~\ref{sec:extrapolation:overview} for a description of these methods. When using the application
+an extrapolation method is specified by using the "\verb+--+extrap\_method" flag. For the inverse distance weighted average method (nearestidavg),
+the number of source locations is specified using the "\verb+--+extrap\_num\_src\_pnts" flag, and the distance exponent is specified using 
+the "\verb+--+extrap\_dist\_exponent" flag. For the creep fill method (creep), the number of creep levels is specified using the "\verb+--+extrap\_num\_levels" flag.
+
 \subsubsection{Unmapped destination points}\label{sec:rwg_unmapped}
-If a destination point can't be mapped because it falls outside the unmasked source grid, then the default behavior of the application is to stop with an error. By specifying "-i" or the equivalent "\verb+--+ignore\_unmapped " the user can cause the application to ignore unmapped destination points. In this case, the output matrix won't contain entries for the unmapped destination points. Note that the unmapped point detection doesn't
+If a destination point can't be mapped, then the default behavior of the application is to stop with an error. By specifying "-i" or the equivalent "\verb+--+ignore\_unmapped " the user can cause the application to ignore unmapped destination points. In this case, the output matrix won't contain entries for the unmapped destination points. Note that the unmapped point detection doesn't
 currently work for nearest destination to source method ("-m nearestdtos"), so when using that method it  is as if ``-i'' is always on.
 
 \subsubsection{Line type}\label{sec:rwg_linetype}
