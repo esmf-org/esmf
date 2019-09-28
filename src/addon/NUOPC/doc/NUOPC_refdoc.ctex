@@ -186,6 +186,13 @@
 \input{../addon/NUOPC/doc/NUOPC_TransferGeom}
 #endif
 
+\subsubsection{Field and Grid/Mesh/LocStream Reference Sharing}
+#ifdef STANDALONE
+\input{NUOPC_Sharing}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_Sharing}
+#endif
+
 \subsubsection{Field Mirroring}
 #ifdef STANDALONE
 \input{NUOPC_FieldMirror}
@@ -198,6 +205,13 @@
 \input{NUOPC_Timekeeping}
 #elif defined(CONSTITUENT)
 \input{../addon/NUOPC/doc/NUOPC_Timekeeping}
+#endif
+
+\subsection{Component Hierarchies}
+#ifdef STANDALONE
+\input{NUOPC_ComponentHierarchies}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_ComponentHierarchies}
 #endif
 
 \newpage
