@@ -105,7 +105,7 @@ REQUIREMENTS:
 
 The following packages are *required* to work with ESMPy:
 
--- ESMF installation - http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_7_1_0r/ESMF_usrdoc
+-- ESMF installation - http://www.earthsystemmodeling.org/esmf_releases/non_public/ESMF_8_0_0/ESMF_usrdoc
 -- python - http://python.org/
 -- numpy - http://numpy.scipy.org/
 
@@ -261,7 +261,7 @@ example code, and details of the API (Application Programming Interface).
 
 For more information on the ESMF_RegridWeightGen application, see the ESMF
 Reference Manual:
-http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_7_1_0r/ESMF_refdoc/node3.html
+http://www.earthsystemmodeling.org/esmf_releases/non_public/ESMF_8_0_0/ESMF_refdoc/node3.html
 
 Contributions from ESMF users are available at:
         http://sourceforge.net/projects/esmfcontrib

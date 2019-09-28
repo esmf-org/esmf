@@ -979,10 +979,10 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     rc = ESMF_RC_NOT_IMPL
 
     call C_F_POINTER(factorList, factorListFPtr, [numfac])
-    deallocate(factorListFPtr)
+    ! deallocate(factorListFPtr)
 
     call C_F_POINTER(factorIndexList, factorIndexListFPtr, [2, numfac])
-    deallocate(factorIndexListFPtr)
+    ! deallocate(factorIndexListFPtr)
 
     rc = ESMF_SUCCESS
 
