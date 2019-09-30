@@ -3,6 +3,7 @@
 """
 The Regrid API
 """
+from ESMF.api import constants
 from ESMF.api.field import *
 
 
@@ -102,6 +103,11 @@ class Regrid(object):
                  ignore_degenerate=None, create_rh=None, src_frac_field=None,
                  dst_frac_field=None, factors=False):
 
+        # Confirm the ESMF compiler will suport in-memory factor retrieval
+        if factors and not constants._ESMF_USE_INMEM_FACTORS:
+            raise RuntimeError("in-memory factors only supported with GNU (gfortran)")
+
+
         # Routehandle storage
         self._routehandle = 0
 
@@ -122,7 +128,6 @@ class Regrid(object):
 
         # Write weights to file if requested.
         if filename is not None:
-            import ESMF.api.constants as constants
             if constants._ESMF_COMM == constants._ESMF_COMM_MPIUNI:
                 msg = "Regrid(filename) requires PIO and does not work if ESMF has " \
                       "not been built with MPI support"
