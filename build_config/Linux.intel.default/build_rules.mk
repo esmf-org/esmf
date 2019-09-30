@@ -30,7 +30,7 @@ ifeq ($(ESMF_COMM),mpi)
 # Vendor MPI -----------------------------------------------
 ESMF_F90LINKLIBS       += -lmpi -lmpi++
 ESMF_CXXLINKLIBS       += -lmpi -lmpi++
-intel/17.0.1ESMF_MPIRUNDEFAULT      = mpiexec_mpt $(ESMF_MPILAUNCHOPTIONS)
+ESMF_MPIRUNDEFAULT      = mpiexec_mpt $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec_mpt $(ESMF_MPILAUNCHOPTIONS)
 else
 ifeq ($(ESMF_COMM),mpt)

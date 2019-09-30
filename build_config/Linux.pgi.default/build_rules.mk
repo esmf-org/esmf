@@ -41,8 +41,8 @@ else
 ifeq ($(ESMF_COMM),mpt)
 # MPT with compiler wrappers -------------------------------
 ESMF_F90DEFAULT         = mpif90
-ESMF_CXXDEFAULT         = mpicxx
 ESMF_F90LINKLIBS       += -lmpi++
+ESMF_CXXDEFAULT         = mpicxx
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 # Under ticket #3614573 found that MPT has issues. One of the following macros
