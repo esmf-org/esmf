@@ -133,6 +133,25 @@ esmc_UserApplication:
 
 \end{verbatim}
 
+Notice that the {\tt ESMF\_F90LINKPATHS}, {\tt ESMF\_F90LINKRPATHS}, 
+{\tt ESMF\_CXXLINKPATHS}, and {\tt ESMF\_CXXLINKRPATHS} variables used in the
+linking targets might contain paths to the specific compiler version, MPI
+implementation, and 3rd party libraries (see section \ref{sec:ThirdParty})
+used when building ESMF. The paths are explicitly included in order to 
+simplify the process of writing an application build system that is consistent
+with the ESMF library that isused.
+
+There are, however, situations where it is
+desirable to let the application decide what compiler version, MPI version, 
+and/or 3rd party library verson (e.g. NetCDF) to use. To this end {\tt esmf.mk}
+defines an alternative set of variables: {\tt ESMF\_F90ESMFLINKPATHS}, 
+{\tt ESMF\_F90ESMFLINKRPATHS}, {\tt ESMF\_CXXESMFLINKPATHS}, and 
+{\tt ESMF\_CXXESMFLINKRPATHS}. These variables only encode the precise path to
+the ESMF library, and do not specify where to find the compiler, MPI, and/or 
+3rd party libraries. When using these variables, it becomes the responsibility
+of the application build system to ensure the required libraries can be found
+by the linker, and are compatible with the ESMF installation.
+
 
 \subsection{CMake method}
 
