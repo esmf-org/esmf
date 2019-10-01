@@ -43,6 +43,7 @@ module ESMF_FileRegridMod
   use ESMF_FieldGatherMod
   use ESMF_FieldSMMMod
   use ESMF_FieldRegridMod
+  use ESMF_FieldRedistMod
   use ESMF_FieldPrMod
   use ESMF_FieldWrMod
   use ESMF_IOScripMod
@@ -225,9 +226,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R8), pointer :: dstFrac(:), srcFrac(:)
     integer            :: regridScheme
     integer            :: i,j, k,l, i1, ii, bigFac, xpets, ypets, xpart, ypart, xdim, ydim
-    logical            :: wasCompacted
-    integer(ESMF_KIND_I4), pointer:: compactedFactorIndexList(:,:)
-    real(ESMF_KIND_R8), pointer :: compactedFactorList(:)
     type(ESMF_UnmappedAction_Flag) :: localUnmappedaction
     character(len=256) :: argStr
     logical            :: useSrcCoordVar, useDstCoordVar
@@ -276,7 +274,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer            :: offset, offset1, localDeCount
     type(ESMF_Mosaic)  :: srcMosaic, dstMosaic
     character(ESMF_MAXPATHLEN) :: srctempname, dsttempname
-
+    type(ESMF_RouteHandle) :: rh
+    type(ESMF_Array)   :: arrayPet0
+  
 #ifdef ESMF_NETCDF
     !------------------------------------------------------------------------
     ! get global vm information
@@ -1292,7 +1292,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
       if (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE .and. &
-             localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE_2ND) then
+          localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE_2ND) then
         dstIsLocStream = .TRUE.
         if (useDstMask) then
            dstLocStream = ESMF_LocStreamCreate(dstfile, &
@@ -1636,6 +1636,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
              ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
 
+         ! Create an array with everything on PET0
+         distgrid = ESMF_DistGridCreate((/1/),(/totalcount/), regDecomp=(/1/), &
+              rc = rc)
+         if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
+         arrayPet0 = ESMF_ArrayCreate(distgrid, ESMF_TYPEKIND_R8, rc=localrc)
+         if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
+         call ESMF_ArrayRedistStore(arrayPet0, tmpArray, routehandle=rh, rc=localrc)
+         if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
+
          !! Read in the variable in PET 0 and redistribute it, read one 2D slice at a time to save memory
          if (PetNo==0) then
            ! Open the grid and mosaic files
@@ -1664,6 +1676,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                  msg=errmsg, ESMF_CONTEXT, rcToReturn=rc)
               return
            endif
+
            if (srcVarRank(i)==1) then
               ncStatus = nf90_get_var(gridid, varid, varbuffer)
               if (CDFCheckError (ncStatus, &
@@ -1671,10 +1684,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                  ESMF_SRCLINE,&
                  errmsg, &
                  rc)) return
-              call ESMF_ArrayScatter(srcArray, varbuffer, 0, rc=localrc)
+              call RedistOnlyFromPet0(arrayPet0,srcArray,rh,buffer=varbuffer,rc=localrc)
               if (ESMF_LogFoundError(localrc, &
-                 ESMF_ERR_PASSTHRU, &
-                 ESMF_CONTEXT, rcToReturn=rc)) return
+                    ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc)) return
            else if (srcVarRank(i)==2) then
               call ESMF_ArrayGet(srcArray, farrayPtr=fptr2d, rc=localrc)
               do j=1,ubnd(1)
@@ -1688,11 +1701,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                     ESMF_SRCLINE,&
                     errmsg, &
                     rc)) return
-                call ESMF_ArrayScatter(tmpArray, varbuffer, 0, rc=localrc)
-                if (ESMF_LogFoundError(localrc, &
+                 call RedistOnlyFromPet0(arrayPet0,tmpArray,rh,buffer=varbuffer,rc=localrc)
+                 if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc)) return
-                fptr2d(:,j)=tmpfptr
+                 fptr2d(:,j)=tmpfptr
               enddo
            else if (srcVarRank(i)==3) then
               call ESMF_ArrayGet(srcArray, farrayPtr=fptr3d, rc=localrc)
@@ -1709,10 +1722,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                        ESMF_SRCLINE,&
                        errmsg, &
                        rc)) return
-                   call ESMF_ArrayScatter(tmpArray, varbuffer, 0, rc=localrc)
+                   call RedistOnlyFromPet0(arrayPet0,tmpArray,rh,buffer=varbuffer, rc=localrc)
                    if (ESMF_LogFoundError(localrc, &
-                      ESMF_ERR_PASSTHRU, &
-                      ESMF_CONTEXT, rcToReturn=rc)) return
+                        ESMF_ERR_PASSTHRU, &
+                        ESMF_CONTEXT, rcToReturn=rc)) return
                    fptr3d(:,k,j)=tmpfptr
                 enddo
               enddo
@@ -1731,15 +1744,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                rc)) return
          else  !! non-root
            if (srcVarRank(i) == 1) then
-              call ESMF_ArrayScatter(srcArray,varbuffer, 0, rc=localrc)            
+              call RedistOnlyFromPet0(arrayPet0, srcArray,rh, rc=localrc)
               if (ESMF_LogFoundError(localrc, &
-                 ESMF_ERR_PASSTHRU, &
-                 ESMF_CONTEXT, rcToReturn=rc)) return
+                    ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc)) return
               !! copy the data to the actual srcField
            else if (srcVarRank(i)==2) then
               call ESMF_ArrayGet(srcArray, farrayPtr=fptr2d, rc=localrc)
               do j=1,ubnd(1)
-                 call ESMF_ArrayScatter(tmpArray,varbuffer, 0, rc=localrc)                 
+                 call RedistOnlyFromPet0(arrayPet0,tmpArray,rh, rc=localrc)
                  if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1749,7 +1762,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               call ESMF_ArrayGet(srcArray, farrayPtr=fptr3d, rc=localrc)
               do k=1,ubnd(1)
                 do j=1,ubnd(2)
-                   call ESMF_ArrayScatter(tmpArray, varbuffer, 0, rc=localrc)
+                   call RedistOnlyFromPet0(arrayPet0,tmpArray,rh, rc=localrc)
                    if (ESMF_LogFoundError(localrc, &
                       ESMF_ERR_PASSTHRU, &
                       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1762,9 +1775,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                   ESMF_CONTEXT, rcToReturn=rc)
               return
            endif
-           call ESMF_ArrayDestroy(tmpArray)
+           call ESMF_ArrayDestroy(tmpArray, rc=localrc)
+           if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
          endif
+         call ESMF_ArrayRedistRelease(routehandle=rh, rc=localrc)
+         if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
+         call ESMF_ArrayDestroy(arrayPet0, rc=localrc)
+         if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
       endif
+
       !! Construct the destination field
       !! First check if the undistributed grid dimensions match with the source variable
       if ((dstVarRank(i) - dstRank) /= ungridrank) then
@@ -3213,6 +3235,39 @@ subroutine WriteMosaicField(field, inputfile, mosaic, rank, dims, rc)
      return
 #endif
    end subroutine WriteMosaicField
+
+!------------------------------------------------------------------------------
+!
+!  Using ESMF_ArrayRedist to distribute data from Pet #0
+!
+#undef  ESMF_METHOD
+#define ESMF_METHOD "RedistOnlyFromPet0"
+subroutine RedistOnlyFromPet0(arrayPet0, array, rh, buffer, rc)
+
+  type(ESMF_Array), intent(inout)    :: arrayPet0
+  type(ESMF_Array), intent(inout)    :: array
+  type(ESMF_RouteHandle), intent(inout) :: rh
+  real(ESMF_KIND_R8),pointer, optional:: buffer(:)
+  integer, intent(out),     optional :: rc
+
+  real(ESMF_KIND_R8), pointer :: fptr1d(:)
+  integer                     :: localrc
+
+  if (present(rc)) rc=ESMF_SUCCESS
+  
+   ! Set the value at PET0 only   
+   if (present(buffer)) then
+      call ESMF_ArrayGet(arrayPet0, localDe=0, farrayPtr=fptr1d, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
+      fptr1d = buffer
+   endif
+   call ESMF_ArrayRedist(arrayPet0, array, rh, rc=localrc)
+   if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
+
+   return
+end subroutine RedistOnlyFromPet0
 
 #if 0
 !------------------------------------------------------------------------------
