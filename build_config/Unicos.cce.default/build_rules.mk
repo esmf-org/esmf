@@ -31,7 +31,7 @@ ifeq ($(ESMF_COMM),mpi)
 # Vendor MPI -----------------------------------------------
 ESMF_F90LINKLIBS       += 
 ESMF_CXXLINKLIBS       += 
-ESMF_MPIRUNDEFAULT      = mpirun.unicos
+ESMF_MPIRUNDEFAULT      = mpirun.srun
 ESMF_MPIMPMDRUNDEFAULT  =
 else
 ifeq ($(ESMF_COMM),user)
@@ -51,7 +51,7 @@ ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V
 ############################################################
 # on XT with CCE optimization level must be set explicitely
 #
-ESMF_OPTLEVELDEFAULT  = 2
+#ESMF_OPTLEVELDEFAULT  = 2
 
 ############################################################
 # XT compute nodes do not have support for POSIX IPC (memory mapped files)
@@ -102,6 +102,13 @@ ESMF_F90COMPILEFREECPP   = -f free -N 255 -F
 ESMF_F90COMPILEFREENOCPP = -f free -N 255
 ESMF_F90COMPILEFIXCPP    = -f fixed -N 132 -F
 ESMF_F90COMPILEFIXNOCPP  = -f fixed -N 132
+
+############################################################
+# Conditionally switch to C++11 standard
+#
+ifneq ($(ESMF_CXXSTD),default)
+ESMF_CXXSTDFLAG         = -hstd=c++$(ESMF_CXXSTD)
+endif
 
 ############################################################
 # Blank out variables to prevent rpath encoding

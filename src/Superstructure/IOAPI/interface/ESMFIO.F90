@@ -1199,7 +1199,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ncStatus = nf90_create(trim(fullName), NF90_CLOBBER, ncid)
     if (ESMF_LogFoundNetCDFError(ncerrToCheck=ncStatus, &
-      msg="Error opening NetCDF data set: "//trim(fileName), &
+      msg="Error opening NetCDF data set: "//trim(fullName), &
       ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
     allocate(dimIds(dimCount, 0:staggerlocCount-1), stat=localrc)
@@ -1288,7 +1288,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ncStatus = nf90_enddef(ncid)
     if (ESMF_LogFoundNetCDFError(ncerrToCheck=ncStatus, &
-      msg="Error defining NetCDF data set: "//trim(fileName), &
+      msg="Error defining NetCDF data set: "//trim(fullName), &
       ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
     deallocate(dimIds, stat=localrc)
@@ -1357,7 +1357,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ncStatus = nf90_open(trim(fullName), NF90_NOWRITE, is % IO % IOLayout(de) % ncid)
       if (ESMF_LogFoundNetCDFError(ncerrToCheck=ncStatus, &
-        msg="Error opening NetCDF data set: "//trim(fileName), &
+        msg="Error opening NetCDF data set: "//trim(fullName), &
         ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
     end if

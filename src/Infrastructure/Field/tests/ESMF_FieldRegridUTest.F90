@@ -125,7 +125,7 @@
       !EX_UTest
       ! Test 3D regrid
       write(failMsg, *) "Test unsuccessful"
-       write(name, *) "3D Regrid"
+      write(name, *) "Bilinear regrid between 3D Cart. Grids"
 
       ! initialize 
       rc=ESMF_SUCCESS
@@ -138,6 +138,87 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
+      ! Test 3D regrid
+      write(failMsg, *) "Test unsuccessful"
+      write(name, *) "Nearest STOD regrid between 3D Cart. Grids"
+
+      ! initialize 
+      rc=ESMF_SUCCESS
+      
+      ! do test
+      call test_regrid3D_STOD(rc)
+
+      ! return result
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test 3D regrid
+      write(failMsg, *) "Test unsuccessful"
+      write(name, *) "Nearest DTOS regrid between 3D Cart. Grids"
+
+      ! initialize 
+      rc=ESMF_SUCCESS
+      
+      ! do test
+      call test_regrid3D_DTOS(rc)
+
+      ! return result
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test 3D regrid
+      write(failMsg, *) "Test unsuccessful"
+      write(name, *) "Bilinear regrid between 3D Cart. Meshes"
+
+      ! initialize 
+      rc=ESMF_SUCCESS
+      
+      ! do test
+      call test_regrid3DCartMeshToMesh(rc)
+
+      ! return result
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test 3D regrid
+      write(failMsg, *) "Test unsuccessful"
+      write(name, *) "Nearest STOD regrid between 3D Cart. Meshes"
+
+      ! initialize 
+      rc=ESMF_SUCCESS
+      
+      ! do test
+      call test_STOD_3DCartMeshToMesh(rc)
+
+      ! return result
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test 3D regrid
+      write(failMsg, *) "Test unsuccessful"
+      write(name, *) "Nearest DTOS regrid between 3D Cart. Meshes"
+
+      ! initialize 
+      rc=ESMF_SUCCESS
+      
+      ! do test
+      call test_DTOS_3DCartMeshToMesh(rc)
+
+      ! return result
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+
+      !------------------------------------------------------------------------
+      !EX_UTest
       ! Test regrid with masks
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Regrid with destination masks"
@@ -147,6 +228,36 @@
       
        ! do test
        call test_regridDstMask(rc)
+ 
+      ! return result
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test regrid with masks
+      write(failMsg, *) "Test unsuccessful"
+      write(name, *) "Regrid with completely masked destination"
+
+      ! initialize 
+      rc=ESMF_SUCCESS
+      
+       ! do test
+       call test_regridAllDstMask(rc)
+ 
+      ! return result
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test regrid with masks
+      write(failMsg, *) "Test unsuccessful"
+      write(name, *) "Regrid with source and destination disjoint"
+
+      ! initialize 
+      rc=ESMF_SUCCESS
+      
+       ! do test
+       call test_regridDisjointSD(rc)
  
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -316,6 +427,23 @@
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test regrid with masks
+      write(failMsg, *) "Test unsuccessful"
+      write(name, *) "Regrid from Mesh to Mesh using Patch"
+
+      ! initialize 
+      rc=ESMF_SUCCESS
+        
+      ! do test
+      call test_regridMeshToMeshPatch(rc)
+
+      ! return result
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
  
       !------------------------------------------------------------------------
       !EX_UTest
@@ -381,6 +509,37 @@
  
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+       !EX_UTest
+      ! Test regrid with masks
+       write(failMsg, *) "Test unsuccessful"
+      write(name, *) "Nearest STOD between two 3D Spherical Global Grids"
+
+      ! initialize 
+      rc=ESMF_SUCCESS
+ 
+      ! do test
+      call test_STODGridToGridSph3D(rc)
+ 
+      ! return result
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+       !EX_UTest
+      ! Test regrid with masks
+       write(failMsg, *) "Test unsuccessful"
+      write(name, *) "Nearest DTOS between two 3D Spherical Global Grids"
+
+      ! initialize 
+      rc=ESMF_SUCCESS
+ 
+      ! do test
+      call test_DTOSGridToGridSph3D(rc)
+ 
+      ! return result
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -563,6 +722,22 @@
       !------------------------------------------------------------------------
 
 
+      !------------------------------------------------------------------------
+       !EX_UTest
+      ! Test regrid with masks
+      write(failMsg, *) "Test unsuccessful"
+      write(name, *) "Regrid from Mesh to Mesh with NEAREST_DTOS interp."
+
+      ! initialize 
+      rc=ESMF_SUCCESS
+      
+       ! do test
+      call test_regridNearestDTOSMeshToMesh(rc)
+ 
+      ! return result
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
 
 
       !------------------------------------------------------------------------
@@ -743,6 +918,67 @@
 
 
       !------------------------------------------------------------------------
+       !EX_UTest
+      ! Test regrid using Location Streams
+      write(failMsg, *) "Test unsuccessful"
+       write(name, *) "Regrid from 2D Cart LocStream to LocStream with Nearest STOD"
+
+      ! initialize 
+      rc=ESMF_SUCCESS
+       
+      ! do test
+      call test_Nearest2DCartLSToLS(ESMF_REGRIDMETHOD_NEAREST_STOD,rc)
+
+      ! return result
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+       !EX_UTest
+      ! Test regrid using Location Streams
+      write(failMsg, *) "Test unsuccessful"
+       write(name, *) "Regrid from 2D Cart LocStream to LocStream with Nearest DTOS"
+
+      ! initialize 
+      rc=ESMF_SUCCESS
+       
+      ! do test
+      call test_Nearest2DCartLSToLS(ESMF_REGRIDMETHOD_NEAREST_DTOS,rc)
+
+      ! return result
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+
+      !------------------------------------------------------------------------
+       !EX_UTest
+      ! Test regrid using Location Streams
+      write(failMsg, *) "Test unsuccessful"
+       write(name, *) "Regrid from 3D Cart LocStream to LocStream with Nearest STOD"
+
+      ! initialize 
+      rc=ESMF_SUCCESS
+       
+      ! do test
+      call test_Nearest3DCartLSToLS(ESMF_REGRIDMETHOD_NEAREST_STOD,rc)
+
+      ! return result
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+       !EX_UTest
+      ! Test regrid using Location Streams
+      write(failMsg, *) "Test unsuccessful"
+       write(name, *) "Regrid from 3D Cart LocStream to LocStream with Nearest DTOS"
+
+      ! initialize 
+      rc=ESMF_SUCCESS
+       
+      ! do test
+      call test_Nearest3DCartLSToLS(ESMF_REGRIDMETHOD_NEAREST_DTOS,rc)
+
+      ! return result
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
       !EX_UTest
       ! Test regrid locstream with clustering to mesh using nearest neighbor
       write(failMsg, *) "Test unsuccessful"
@@ -840,6 +1076,23 @@
 
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+
+       !------------------------------------------------------------------------
+       !EX_UTest
+      ! Test regrid mesh to locstream with mask using patch
+      write(failMsg, *) "Test unsuccessful"
+      write(name, *) "Patch regridding from Mesh to LocStream with mask using Bilinear"
+
+      ! initialize
+      rc=ESMF_SUCCESS
+
+      ! do test
+      call test_PatchMeshToLocStreamMask(rc)
+
+      ! return result
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -1001,6 +1254,25 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
+
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+
+      write(failMsg, *) "Test unsuccessful"
+      write(name, *) "Test creep fill on mesh"
+
+      ! initialize 
+      rc=ESMF_SUCCESS
+      
+      ! do test
+      call test_mesh_extrap_creep(rc)
+
+      ! return result
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -2000,6 +2272,953 @@ write(*,*) "LOCALRC=",localrc
   endif
 
       end subroutine test_regrid3D
+
+
+
+      subroutine test_regrid3D_STOD(rc)
+        integer, intent(out)  :: rc
+  logical :: correct
+  integer :: localrc
+  type(ESMF_Grid) :: gridA
+  type(ESMF_Grid) :: gridB
+  type(ESMF_Field) :: srcFieldA
+  type(ESMF_Field) :: dstFieldA
+  type(ESMF_Field) :: fieldB
+  type(ESMF_Field) :: errorField
+  type(ESMF_Array) :: arrayB
+  type(ESMF_Array) :: errorArray
+  type(ESMF_Array) :: lonArrayA
+  type(ESMF_Array) :: srcArrayA, dstArrayA
+  type(ESMF_RouteHandle) :: routeHandle
+  type(ESMF_RouteHandle) :: routeHandle1
+  type(ESMF_ArraySpec) :: arrayspec
+  type(ESMF_VM) :: vm
+  real(ESMF_KIND_R8), pointer :: farrayPtrXC(:,:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtrYC(:,:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtrZC(:,:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtr(:,:,:),farrayPtr2(:,:,:),errorfarrayPtr(:,:,:)
+  integer :: clbnd(3),cubnd(3)
+  integer :: fclbnd(3),fcubnd(3)
+  integer :: i1,i2,i3, index(3)
+  integer :: lDE, localDECount
+  real(ESMF_KIND_R8) :: coord(3)
+  character(len=ESMF_MAXSTR) :: string
+  integer A_nx, A_ny, A_nz, B_nx, B_ny, B_nz
+  integer num_arrays
+
+  real(ESMF_KIND_R8) :: A_minx,A_miny,A_minz
+  real(ESMF_KIND_R8) :: A_maxx,A_maxy,A_maxz
+  real(ESMF_KIND_R8) :: B_minx,B_miny,B_minz
+  real(ESMF_KIND_R8) :: B_maxx,B_maxy,B_maxz
+  
+  integer :: spherical_grid
+
+  integer, pointer :: larrayList(:)
+  integer :: localPet, petCount
+
+  ! result code
+  integer :: finalrc
+  
+  ! init success flag
+  correct=.true.
+
+  rc=ESMF_SUCCESS
+
+  ! get pet info
+  call ESMF_VMGetGlobal(vm, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! Establish the resolution of the grids
+  ! (Make the grids the same, because that's an easy way to test if nearest neighbor is correct)
+  ! (Slightly different nearest neighbor is tested elsewhere)
+  B_nx = 10
+  B_ny = 10
+  B_nz = 10
+
+  A_nx = 10
+  A_ny = 10
+  A_nz = 10
+
+  ! Establish the coordinates of the grids
+  B_minx = 0.0
+  B_miny = 0.0
+  B_minz = 0.0
+
+  B_maxx = 10.0
+  B_maxy = 10.0
+  B_maxz = 10.0
+
+  A_minx = 0.0
+  A_miny = 0.0
+  A_minz = 0.0
+
+  A_maxx = 10.0
+  A_maxy = 10.0
+  A_maxz = 10.0
+
+  ! setup source grid
+  gridA=ESMF_GridCreateNoPeriDim(minIndex=(/1,1,1/),maxIndex=(/A_nx,A_ny,A_nz/),regDecomp=(/petCount,1,1/), &
+                              coordSys=ESMF_COORDSYS_CART, indexflag=ESMF_INDEX_GLOBAL, &
+                              rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  ! setup dest. grid
+  gridB=ESMF_GridCreateNoPeriDim(minIndex=(/1,1,1/),maxIndex=(/B_nx,B_ny,B_nz/),regDecomp=(/1,1,petCount/), &
+                              coordSys=ESMF_COORDSYS_CART, indexflag=ESMF_INDEX_GLOBAL, &
+                              rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  ! Create source/destination fields
+  call ESMF_ArraySpecSet(arrayspec, 3, ESMF_TYPEKIND_R8, rc=rc)
+
+   srcFieldA = ESMF_FieldCreate(gridA, arrayspec, &
+                         staggerloc=ESMF_STAGGERLOC_CENTER, name="source", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+   dstFieldA = ESMF_FieldCreate(gridA, arrayspec, &
+                         staggerloc=ESMF_STAGGERLOC_CENTER, name="source", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+   errorField = ESMF_FieldCreate(gridA, arrayspec, &
+                         staggerloc=ESMF_STAGGERLOC_CENTER, name="source", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+   fieldB = ESMF_FieldCreate(gridB, arrayspec, &
+                         staggerloc=ESMF_STAGGERLOC_CENTER, name="dest", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  ! Allocate coordinates
+  call ESMF_GridAddCoord(gridA, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  call ESMF_GridAddCoord(gridB, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  ! Get number of local DEs
+  call ESMF_GridGet(gridA, localDECount=localDECount, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  ! Get arrays
+  ! arrayB
+  call ESMF_FieldGet(fieldB, array=arrayB, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  ! srcArrayA
+  call ESMF_FieldGet(srcFieldA, array=srcArrayA, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  ! dstArrayA
+  call ESMF_FieldGet(dstFieldA, array=dstArrayA, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  ! errorArray
+  call ESMF_FieldGet(errorField, array=errorArray, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  ! Write results to a mesh
+  num_arrays = 1
+
+  ! Construct 3D Grid A
+  ! (Get memory and set coords for src)
+  do lDE=0,localDECount-1
+ 
+     !! get coord 1
+     call ESMF_GridGetCoord(gridA, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     call ESMF_GridGetCoord(gridA, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrYC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     call ESMF_GridGetCoord(gridA, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=3, &
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrZC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     ! get src pointer
+     call ESMF_FieldGet(srcFieldA, lDE, farrayPtr,  rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     ! get src destination Field pointer
+     call ESMF_FieldGet(dstFieldA, lDE, farrayPtr2,   rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     !! set coords, interpolated function
+     do i1=clbnd(1),cubnd(1)
+     do i2=clbnd(2),cubnd(2)
+     do i3=clbnd(3),cubnd(3)
+        ! Set source coordinates
+        farrayPtrXC(i1,i2,i3) = ((A_maxx-A_minx)*REAL(i1-1)/REAL(A_nx-1))+A_minx
+        farrayPtrYC(i1,i2,i3) = ((A_maxy-A_miny)*REAL(i2-1)/REAL(A_ny-1))+A_miny
+        farrayPtrZC(i1,i2,i3) = ((A_maxz-A_minz)*REAL(i3-1)/REAL(A_nz-1))+A_minz
+
+        ! set src data
+        ! (something  smooth, that varies everywhere)
+        farrayPtr(i1,i2,i3) = farrayPtrXC(i1,i2,i3)+farrayPtrYC(i1,i2,i3)+farrayPtrZC(i1,i2,i3)+15.0
+
+        ! initialize src destination field
+        farrayPtr2(i1,i2,i3)=0.0
+
+     enddo
+     enddo
+     enddo
+
+  enddo    ! lDE
+
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  ! Destination grid
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  ! Get memory and set coords for dst
+  do lDE=0,localDECount-1
+ 
+     !! get coords
+     call ESMF_GridGetCoord(gridB, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     call ESMF_GridGetCoord(gridB, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrYC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     call ESMF_GridGetCoord(gridB, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=3, &
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrZC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+   
+     call ESMF_FieldGet(fieldB, lDE, farrayPtr, computationalLBound=fclbnd, &
+                             computationalUBound=fcubnd,  rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     !! set coords
+     do i1=clbnd(1),cubnd(1)
+     do i2=clbnd(2),cubnd(2)
+     do i3=clbnd(3),cubnd(3)
+        ! Set source coordinates
+        farrayPtrXC(i1,i2,i3) = ((B_maxx-B_minx)*REAL(i1-1)/REAL(B_nx-1))+B_minx
+        farrayPtrYC(i1,i2,i3) = ((B_maxy-B_miny)*REAL(i2-1)/REAL(B_ny-1))+B_miny
+        farrayPtrZC(i1,i2,i3) = ((B_maxz-B_minz)*REAL(i3-1)/REAL(B_nz-1))+B_minz
+
+        ! initialize destination field
+        farrayPtr(i1,i2,i3)=0.0
+
+     enddo
+     enddo
+     enddo
+
+  enddo    ! lDE
+
+
+  !!! Regrid forward from the A grid to the B grid
+  ! Regrid store
+  call ESMF_FieldRegridStore(srcFieldA, dstField=fieldB, &
+          routeHandle=routeHandle, &
+          regridmethod=ESMF_REGRIDMETHOD_NEAREST_STOD, &
+          rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+
+  ! Do regrid
+  call ESMF_FieldRegrid(srcFieldA, fieldB, routeHandle, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  call ESMF_FieldRegridRelease(routeHandle, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  !!!!!!!! Regrid back from the B grid to the A grid
+  ! Regrid store
+  call ESMF_FieldRegridStore(fieldB, dstField=dstFieldA, &
+          routeHandle=routeHandle, &
+          regridmethod=ESMF_REGRIDMETHOD_NEAREST_STOD, &
+          rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+
+  ! Do regrid
+  call ESMF_FieldRegrid(fieldB, dstFieldA, routeHandle, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  call ESMF_FieldRegridRelease(routeHandle, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  ! Check if the values are close
+  do lDE=0,localDECount-1
+
+     ! get src Field
+     call ESMF_FieldGet(srcFieldA, lDE, farrayPtr, computationalLBound=clbnd, &
+                             computationalUBound=cubnd,  rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+
+     ! get src destination Field
+     call ESMF_FieldGet(dstFieldA, lDE, farrayPtr2,  rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+
+     ! get src Field
+     call ESMF_FieldGet(errorField, lDE, errorfarrayPtr,  rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+
+     !! check relative error
+     do i1=clbnd(1),cubnd(1)
+     do i2=clbnd(2),cubnd(2)
+     do i3=clbnd(3),cubnd(3)
+        if (farrayPtr(i1,i2,i3) .ne. 0.0) then
+           errorfarrayPtr(i1,i2,i3)=ABS((farrayPtr(i1,i2,i3) - farrayPtr2(i1,i2,i3))/farrayPtr(i1,i2,i3))
+        else
+           errorfarrayPtr(i1,i2,i3)=(farrayPtr(i1,i2,i3) - farrayPtr2(i1,i2,i3))
+        endif
+        if (ABS(errorfarrayPtr(i1,i2,i3)) .gt. 0.001) then
+            correct=.false. 
+        endif
+
+     enddo
+     enddo
+     enddo
+
+  enddo    ! lDE
+
+
+  ! Uncomment these calls to see some actual regrid results
+  spherical_grid = 0
+!  call ESMF_MeshIO(vm, gridA, ESMF_STAGGERLOC_CENTER, &
+!               "srcmesh", srcArrayA, dstArrayA, errorArray, rc=localrc, &
+!               spherical=spherical_grid)
+!  call ESMF_MeshIO(vm, gridB, ESMF_STAGGERLOC_CENTER, &
+!               "dstmesh", arrayB, rc=localrc, &
+!               spherical=spherical_grid)
+
+
+  ! Destroy the Fields
+   call ESMF_FieldDestroy(srcFieldA, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+   call ESMF_FieldDestroy(dstFieldA, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+
+   call ESMF_FieldDestroy(errorField, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+   call ESMF_FieldDestroy(fieldB, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+
+  ! Free the grids
+  call ESMF_GridDestroy(gridA, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  call ESMF_GridDestroy(gridB, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+
+  ! return answer based on correct flag
+  if (correct) then
+    rc=ESMF_SUCCESS
+  else
+    rc=ESMF_FAILURE
+  endif
+
+      end subroutine test_regrid3D_STOD
+
+      subroutine test_regrid3D_DTOS(rc)
+        integer, intent(out)  :: rc
+  logical :: correct
+  integer :: localrc
+  type(ESMF_Grid) :: gridA
+  type(ESMF_Grid) :: gridB
+  type(ESMF_Field) :: srcFieldA
+  type(ESMF_Field) :: dstFieldA
+  type(ESMF_Field) :: fieldB
+  type(ESMF_Field) :: errorField
+  type(ESMF_Array) :: arrayB
+  type(ESMF_Array) :: errorArray
+  type(ESMF_Array) :: lonArrayA
+  type(ESMF_Array) :: srcArrayA, dstArrayA
+  type(ESMF_RouteHandle) :: routeHandle
+  type(ESMF_RouteHandle) :: routeHandle1
+  type(ESMF_ArraySpec) :: arrayspec
+  type(ESMF_VM) :: vm
+  real(ESMF_KIND_R8), pointer :: farrayPtrXC(:,:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtrYC(:,:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtrZC(:,:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtr(:,:,:),farrayPtr2(:,:,:),errorfarrayPtr(:,:,:)
+  integer :: clbnd(3),cubnd(3)
+  integer :: fclbnd(3),fcubnd(3)
+  integer :: i1,i2,i3, index(3)
+  integer :: lDE, localDECount
+  real(ESMF_KIND_R8) :: coord(3)
+  character(len=ESMF_MAXSTR) :: string
+  integer A_nx, A_ny, A_nz, B_nx, B_ny, B_nz
+  integer num_arrays
+
+  real(ESMF_KIND_R8) :: A_minx,A_miny,A_minz
+  real(ESMF_KIND_R8) :: A_maxx,A_maxy,A_maxz
+  real(ESMF_KIND_R8) :: B_minx,B_miny,B_minz
+  real(ESMF_KIND_R8) :: B_maxx,B_maxy,B_maxz
+  
+  integer :: spherical_grid
+
+  integer, pointer :: larrayList(:)
+  integer :: localPet, petCount
+
+  ! result code
+  integer :: finalrc
+  
+  ! init success flag
+  correct=.true.
+
+  rc=ESMF_SUCCESS
+
+  ! get pet info
+  call ESMF_VMGetGlobal(vm, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! Establish the resolution of the grids
+  ! (Make the grids the same, because that's an easy way to test if nearest neighbor is correct)
+  ! (Slightly different nearest neighbor is tested elsewhere)
+  B_nx = 10
+  B_ny = 10
+  B_nz = 10
+
+  A_nx = 10
+  A_ny = 10
+  A_nz = 10
+
+  ! Establish the coordinates of the grids
+  B_minx = 0.0
+  B_miny = 0.0
+  B_minz = 0.0
+
+  B_maxx = 10.0
+  B_maxy = 10.0
+  B_maxz = 10.0
+
+  A_minx = 0.0
+  A_miny = 0.0
+  A_minz = 0.0
+
+  A_maxx = 10.0
+  A_maxy = 10.0
+  A_maxz = 10.0
+
+  ! setup source grid
+  gridA=ESMF_GridCreateNoPeriDim(minIndex=(/1,1,1/),maxIndex=(/A_nx,A_ny,A_nz/),regDecomp=(/petCount,1,1/), &
+                              coordSys=ESMF_COORDSYS_CART, indexflag=ESMF_INDEX_GLOBAL, &
+                              rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  ! setup dest. grid
+  gridB=ESMF_GridCreateNoPeriDim(minIndex=(/1,1,1/),maxIndex=(/B_nx,B_ny,B_nz/),regDecomp=(/1,1,petCount/), &
+                              coordSys=ESMF_COORDSYS_CART, indexflag=ESMF_INDEX_GLOBAL, &
+                              rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  ! Create source/destination fields
+  call ESMF_ArraySpecSet(arrayspec, 3, ESMF_TYPEKIND_R8, rc=rc)
+
+   srcFieldA = ESMF_FieldCreate(gridA, arrayspec, &
+                         staggerloc=ESMF_STAGGERLOC_CENTER, name="source", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+   dstFieldA = ESMF_FieldCreate(gridA, arrayspec, &
+                         staggerloc=ESMF_STAGGERLOC_CENTER, name="source", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+   errorField = ESMF_FieldCreate(gridA, arrayspec, &
+                         staggerloc=ESMF_STAGGERLOC_CENTER, name="source", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+   fieldB = ESMF_FieldCreate(gridB, arrayspec, &
+                         staggerloc=ESMF_STAGGERLOC_CENTER, name="dest", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  ! Allocate coordinates
+  call ESMF_GridAddCoord(gridA, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  call ESMF_GridAddCoord(gridB, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  ! Get number of local DEs
+  call ESMF_GridGet(gridA, localDECount=localDECount, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  ! Get arrays
+  ! arrayB
+  call ESMF_FieldGet(fieldB, array=arrayB, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  ! srcArrayA
+  call ESMF_FieldGet(srcFieldA, array=srcArrayA, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  ! dstArrayA
+  call ESMF_FieldGet(dstFieldA, array=dstArrayA, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  ! errorArray
+  call ESMF_FieldGet(errorField, array=errorArray, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  ! Write results to a mesh
+  num_arrays = 1
+
+  ! Construct 3D Grid A
+  ! (Get memory and set coords for src)
+  do lDE=0,localDECount-1
+ 
+     !! get coord 1
+     call ESMF_GridGetCoord(gridA, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     call ESMF_GridGetCoord(gridA, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrYC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     call ESMF_GridGetCoord(gridA, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=3, &
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrZC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     ! get src pointer
+     call ESMF_FieldGet(srcFieldA, lDE, farrayPtr,  rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     ! get src destination Field pointer
+     call ESMF_FieldGet(dstFieldA, lDE, farrayPtr2,   rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     !! set coords, interpolated function
+     do i1=clbnd(1),cubnd(1)
+     do i2=clbnd(2),cubnd(2)
+     do i3=clbnd(3),cubnd(3)
+        ! Set source coordinates
+        farrayPtrXC(i1,i2,i3) = ((A_maxx-A_minx)*REAL(i1-1)/REAL(A_nx-1))+A_minx
+        farrayPtrYC(i1,i2,i3) = ((A_maxy-A_miny)*REAL(i2-1)/REAL(A_ny-1))+A_miny
+        farrayPtrZC(i1,i2,i3) = ((A_maxz-A_minz)*REAL(i3-1)/REAL(A_nz-1))+A_minz
+
+        ! set src data
+        ! (something  smooth, that varies everywhere)
+        farrayPtr(i1,i2,i3) = farrayPtrXC(i1,i2,i3)+farrayPtrYC(i1,i2,i3)+farrayPtrZC(i1,i2,i3)+15.0
+
+        ! initialize src destination field
+        farrayPtr2(i1,i2,i3)=0.0
+
+     enddo
+     enddo
+     enddo
+
+  enddo    ! lDE
+
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  ! Destination grid
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  ! Get memory and set coords for dst
+  do lDE=0,localDECount-1
+ 
+     !! get coords
+     call ESMF_GridGetCoord(gridB, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     call ESMF_GridGetCoord(gridB, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrYC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     call ESMF_GridGetCoord(gridB, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=3, &
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrZC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+   
+     call ESMF_FieldGet(fieldB, lDE, farrayPtr, computationalLBound=fclbnd, &
+                             computationalUBound=fcubnd,  rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     !! set coords
+     do i1=clbnd(1),cubnd(1)
+     do i2=clbnd(2),cubnd(2)
+     do i3=clbnd(3),cubnd(3)
+        ! Set source coordinates
+        farrayPtrXC(i1,i2,i3) = ((B_maxx-B_minx)*REAL(i1-1)/REAL(B_nx-1))+B_minx
+        farrayPtrYC(i1,i2,i3) = ((B_maxy-B_miny)*REAL(i2-1)/REAL(B_ny-1))+B_miny
+        farrayPtrZC(i1,i2,i3) = ((B_maxz-B_minz)*REAL(i3-1)/REAL(B_nz-1))+B_minz
+
+        ! initialize destination field
+        farrayPtr(i1,i2,i3)=0.0
+
+     enddo
+     enddo
+     enddo
+
+  enddo    ! lDE
+
+
+  !!! Regrid forward from the A grid to the B grid
+  ! Regrid store
+  call ESMF_FieldRegridStore(srcFieldA, dstField=fieldB, &
+          routeHandle=routeHandle, &
+          regridmethod=ESMF_REGRIDMETHOD_NEAREST_DTOS, &
+          rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+
+  ! Do regrid
+  call ESMF_FieldRegrid(srcFieldA, fieldB, routeHandle, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  call ESMF_FieldRegridRelease(routeHandle, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  !!!!!!!! Regrid back from the B grid to the A grid
+  ! Regrid store
+  call ESMF_FieldRegridStore(fieldB, dstField=dstFieldA, &
+          routeHandle=routeHandle, &
+          regridmethod=ESMF_REGRIDMETHOD_NEAREST_DTOS, &
+          rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+
+  ! Do regrid
+  call ESMF_FieldRegrid(fieldB, dstFieldA, routeHandle, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  call ESMF_FieldRegridRelease(routeHandle, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  ! Check if the values are close
+  do lDE=0,localDECount-1
+
+     ! get src Field
+     call ESMF_FieldGet(srcFieldA, lDE, farrayPtr, computationalLBound=clbnd, &
+                             computationalUBound=cubnd,  rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+
+     ! get src destination Field
+     call ESMF_FieldGet(dstFieldA, lDE, farrayPtr2,  rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+
+     ! get src Field
+     call ESMF_FieldGet(errorField, lDE, errorfarrayPtr,  rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+
+     !! check relative error
+     do i1=clbnd(1),cubnd(1)
+     do i2=clbnd(2),cubnd(2)
+     do i3=clbnd(3),cubnd(3)
+        if (farrayPtr(i1,i2,i3) .ne. 0.0) then
+           errorfarrayPtr(i1,i2,i3)=ABS((farrayPtr(i1,i2,i3) - farrayPtr2(i1,i2,i3))/farrayPtr(i1,i2,i3))
+        else
+           errorfarrayPtr(i1,i2,i3)=(farrayPtr(i1,i2,i3) - farrayPtr2(i1,i2,i3))
+        endif
+        if (ABS(errorfarrayPtr(i1,i2,i3)) .gt. 0.001) then
+            correct=.false. 
+        endif
+
+     enddo
+     enddo
+     enddo
+
+  enddo    ! lDE
+
+
+  ! Uncomment these calls to see some actual regrid results
+  spherical_grid = 0
+!  call ESMF_MeshIO(vm, gridA, ESMF_STAGGERLOC_CENTER, &
+!               "srcmesh", srcArrayA, dstArrayA, errorArray, rc=localrc, &
+!               spherical=spherical_grid)
+!  call ESMF_MeshIO(vm, gridB, ESMF_STAGGERLOC_CENTER, &
+!               "dstmesh", arrayB, rc=localrc, &
+!               spherical=spherical_grid)
+
+
+  ! Destroy the Fields
+   call ESMF_FieldDestroy(srcFieldA, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+   call ESMF_FieldDestroy(dstFieldA, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+
+   call ESMF_FieldDestroy(errorField, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+   call ESMF_FieldDestroy(fieldB, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+
+  ! Free the grids
+  call ESMF_GridDestroy(gridA, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  call ESMF_GridDestroy(gridB, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+
+  ! return answer based on correct flag
+  if (correct) then
+    rc=ESMF_SUCCESS
+  else
+    rc=ESMF_FAILURE
+  endif
+
+      end subroutine test_regrid3D_DTOS
+
 
 
       subroutine test_regridDstMask(rc)
@@ -3789,6 +5008,410 @@ write(*,*) "LOCALRC=",localrc
   endif
 
  end subroutine test_regridSphDstMask
+
+ subroutine test_regridAllDstMask(rc)
+        integer, intent(out)  :: rc
+  logical :: correct
+  integer :: localrc
+  type(ESMF_Grid) :: gridA
+  type(ESMF_Grid) :: gridB
+  type(ESMF_Field) :: srcFieldA
+  type(ESMF_Field) :: fieldB
+  type(ESMF_Field) :: fieldBPatch
+  type(ESMF_Array) :: arrayB
+  type(ESMF_Array) :: arrayBPAtch
+  type(ESMF_Array) :: lonArrayA
+  type(ESMF_Array) :: srcArrayA
+  type(ESMF_RouteHandle) :: routeHandle
+  type(ESMF_RouteHandle) :: routeHandlePatch
+  type(ESMF_ArraySpec) :: arrayspec
+  type(ESMF_VM) :: vm
+  integer(ESMF_KIND_I4), pointer :: maskB(:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtrXC(:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtrYC(:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtr(:,:),farrayPtr2(:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtrPatch(:,:)
+  integer :: clbnd(2),cubnd(2)
+  integer :: fclbnd(2),fcubnd(2)
+  integer :: i1,i2,i3, index(2)
+  integer :: lDE, localDECount
+  real(ESMF_KIND_R8) :: coord(2)
+  character(len=ESMF_MAXSTR) :: string
+  integer A_nx, A_ny, B_nx, B_ny
+  integer num_arrays
+  real(ESMF_KIND_R8) :: dx,dy
+
+  real(ESMF_KIND_R8) :: A_dx, A_dy
+  real(ESMF_KIND_R8) :: B_dx, B_dy
+  
+  integer :: spherical_grid
+
+  integer, pointer :: larrayList(:)
+  integer :: localPet, petCount
+
+  ! result code
+  integer :: finalrc
+  
+  ! init success flag
+  correct=.true.
+
+  rc=ESMF_SUCCESS
+
+  ! get pet info
+  call ESMF_VMGetGlobal(vm, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! Establish the resolution of the grids
+  A_nx = 10
+  A_ny = 10
+
+  A_dx=360.0/A_nx
+  A_dy=180.0/A_ny
+
+  B_nx = 21
+  B_ny = 21
+
+  B_dx=360.0/B_nx
+  B_dy=180.0/B_ny
+
+
+  ! setup source grid
+  gridA=ESMF_GridCreate1PeriDim(minIndex=(/1,1/),maxIndex=(/A_nx,A_ny/),regDecomp=(/petCount,1/), &
+                              coordSys=ESMF_COORDSYS_SPH_DEG, indexflag=ESMF_INDEX_GLOBAL, &
+                              rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  ! setup dest. grid
+  gridB=ESMF_GridCreate1PeriDim(minIndex=(/1,1/),maxIndex=(/B_nx,B_ny/),regDecomp=(/1,petCount/), &
+                                coordSys=ESMF_COORDSYS_SPH_DEG, indexflag=ESMF_INDEX_GLOBAL, &
+                              rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  ! Create source/destination fields
+  call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=rc)
+
+   srcFieldA = ESMF_FieldCreate(gridA, arrayspec, &
+                         staggerloc=ESMF_STAGGERLOC_CENTER, name="source", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+   fieldB = ESMF_FieldCreate(gridB, arrayspec, &
+                         staggerloc=ESMF_STAGGERLOC_CENTER, name="dest", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+   fieldBPatch = ESMF_FieldCreate(gridB, arrayspec, &
+                         staggerloc=ESMF_STAGGERLOC_CENTER, name="dest", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  ! Allocate coordinates
+  call ESMF_GridAddCoord(gridA, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  call ESMF_GridAddCoord(gridB, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  ! Allocate Masks
+  call ESMF_GridAddItem(gridB, staggerloc=ESMF_STAGGERLOC_CENTER, &
+         itemflag=ESMF_GRIDITEM_MASK, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  ! Get number of local DEs
+  call ESMF_GridGet(gridA, localDECount=localDECount, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  ! Get arrays
+  ! arrayB
+  call ESMF_FieldGet(fieldB, array=arrayB, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  ! arrayBPatch
+  call ESMF_FieldGet(fieldBPatch, array=arrayBPatch, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+ 
+  ! srcArrayA
+  call ESMF_FieldGet(srcFieldA, array=srcArrayA, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  ! Write results to a mesh
+  num_arrays = 1
+
+  ! Construct 3D Grid A
+  ! (Get memory and set coords for src)
+  do lDE=0,localDECount-1
+ 
+     !! get coord 1
+     call ESMF_GridGetCoord(gridA, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     call ESMF_GridGetCoord(gridA, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrYC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     ! get src pointer
+     call ESMF_FieldGet(srcFieldA, lDE, farrayPtr,  rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+
+     !! set coords, interpolated function
+     do i1=clbnd(1),cubnd(1)
+      do i2=clbnd(2),cubnd(2)
+
+        ! Set source coordinates as 0 to 360
+        farrayPtrXC(i1,i2) = REAL(i1-1)*A_dx
+        farrayPtrYC(i1,i2) = -90. + (REAL(i2-1)*A_dy + 0.5*A_dy)
+
+        ! Set source data
+        farrayPtr(i1,i2) = 20.0 
+
+     enddo
+     enddo
+
+  enddo    ! lDE
+
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  ! Destination grid
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  ! Get memory and set coords for dst
+  do lDE=0,localDECount-1
+ 
+     !! get coords
+     call ESMF_GridGetCoord(gridB, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     call ESMF_GridGetCoord(gridB, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrYC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     call ESMF_GridGetItem(gridB, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, &
+                           itemflag=ESMF_GRIDITEM_MASK, farrayPtr=maskB, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+         return
+     endif
+
+     call ESMF_FieldGet(fieldB, lDE, farrayPtr, computationalLBound=fclbnd, &
+                             computationalUBound=fcubnd,  rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     call ESMF_FieldGet(fieldBPatch, lDE, farrayPtrPatch,  rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+
+     !! set coords
+     do i1=clbnd(1),cubnd(1)
+     do i2=clbnd(2),cubnd(2)
+
+      ! Set source coordinates as 0 to 360
+        farrayPtrXC(i1,i2) = REAL(i1-1)*B_dx
+        farrayPtrYC(i1,i2) = -90. + (REAL(i2-1)*B_dy + 0.5*B_dy)
+
+        ! set entire grid as masked
+        maskB(i1,i2) = 2
+        farrayPtr(i1,i2) = -1000.0 
+  
+     enddo
+      enddo
+
+  enddo    ! lDE
+
+
+  !!! Regrid forward from the A grid to the B grid
+  ! Regrid store
+  call ESMF_FieldRegridStore(srcFieldA, &
+          dstField=fieldB, dstMaskValues=(/2/), &
+!          unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
+          routeHandle=routeHandle, &
+          regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
+          rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  ! Do regrid
+  call ESMF_FieldRegrid(srcFieldA, fieldB, routeHandle, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  call ESMF_FieldRegridRelease(routeHandle, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+
+  ! Check if we're using any of the bad source points
+   do lDE=0,localDECount-1
+
+     call ESMF_FieldGet(fieldB, lDE, farrayPtr, computationalLBound=clbnd, &
+                             computationalUBound=cubnd,  rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     call ESMF_FieldGet(fieldBPatch, lDE, farrayPtrPatch,  rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+
+     !! make sure we're not using any bad points
+     do i1=clbnd(1),cubnd(1)
+     do i2=clbnd(2),cubnd(2)
+        ! if working mask values should be unchanged
+        if (maskB(i1,i2) == 2) then
+          if (farrayPtr(i1,i2) /= -1000) then
+            correct=.false.
+          endif
+        endif
+     enddo
+     enddo
+
+  enddo    ! lDE
+
+   ! Uncomment these calls to see some actual regrid results
+#if 0
+  spherical_grid = 1
+  call ESMF_MeshIO(vm, gridA, ESMF_STAGGERLOC_CENTER, &
+               "srcmesh", srcArrayA, rc=localrc, &
+               spherical=spherical_grid)
+
+#ifdef ESMF_LAPACK
+  call ESMF_MeshIO(vm, gridB, ESMF_STAGGERLOC_CENTER, &
+               "dstmesh", arrayB, arrayBPatch, rc=localrc, &
+               spherical=spherical_grid)
+#else
+  call ESMF_MeshIO(vm, gridB, ESMF_STAGGERLOC_CENTER, &
+               "dstmesh", arrayB, rc=localrc, &
+               spherical=spherical_grid)
+#endif
+
+
+
+#endif
+
+  ! Destroy the Fields
+   call ESMF_FieldDestroy(srcFieldA, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+   call ESMF_FieldDestroy(fieldB, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+
+   call ESMF_FieldDestroy(fieldBPatch, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+ 
+  ! Free the grids
+  call ESMF_GridDestroy(gridA, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  call ESMF_GridDestroy(gridB, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  ! return answer based on correct flag
+  if (correct) then
+    rc=ESMF_SUCCESS
+  else
+    rc=ESMF_FAILURE
+  endif
+
+ end subroutine test_regridAllDstMask
+
+
 
 
       subroutine test_regridCnr(rc)
@@ -6419,6 +8042,3159 @@ write(*,*) "LOCALRC=",localrc
   endif
 
  end subroutine test_regridMeshToMesh
+
+
+
+ subroutine test_regridMeshToMeshPatch(rc)
+        integer, intent(out)  :: rc
+  logical :: correct
+  integer :: localrc
+  type(ESMF_Mesh) :: dstMesh
+  type(ESMF_Mesh) :: srcMesh
+  type(ESMF_Field) :: srcField
+  type(ESMF_Field) :: dstField
+  type(ESMF_Array) :: dstArray
+  type(ESMF_Array) :: lonArrayA
+  type(ESMF_Array) :: srcArrayA
+  type(ESMF_RouteHandle) :: routeHandle
+  type(ESMF_ArraySpec) :: arrayspec
+  type(ESMF_VM) :: vm
+  real(ESMF_KIND_R8), pointer :: farrayPtrXC(:,:), farrayPtr1D(:)
+  real(ESMF_KIND_R8), pointer :: farrayPtrYC(:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtr(:,:),farrayPtr2(:,:)
+  integer :: clbnd(2),cubnd(2)
+  integer :: fclbnd(2),fcubnd(2)
+  integer :: i1,i2,i3, index(2)
+  integer :: lDE, localDECount
+  real(ESMF_KIND_R8) :: coord(2)
+  character(len=ESMF_MAXSTR) :: string
+  real(ESMF_KIND_R8) :: dx,dy
+  
+  real(ESMF_KIND_R8) :: x,y
+  
+  integer :: spherical_grid
+
+  integer, pointer :: larrayList(:)
+  integer :: localPet, petCount
+
+  integer, pointer :: nodeIds(:),nodeOwners(:)
+  real(ESMF_KIND_R8), pointer :: nodeCoords(:)
+  integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
+  integer :: numNodes, numElems
+  integer :: numQuadElems,numTriElems, numTotElems
+
+  ! result code
+  integer :: finalrc
+  
+  ! init success flag
+  correct=.true.
+
+  rc=ESMF_SUCCESS
+
+  ! get pet info
+  call ESMF_VMGetGlobal(vm, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! If we don't have 1 or 4 PETS then exit successfully
+  if ((petCount .ne. 1) .and. (petCount .ne. 4)) then
+    print*,'ERROR:  test must be run using exactly 1 or 4 PETS - detected ',petCount
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  ! Setup Src Mesh
+  if (petCount .eq. 1) then
+     ! Set number of nodes
+     numNodes=9
+
+     ! Allocate and fill the node id array.
+     allocate(nodeIds(numNodes))
+     nodeIds=(/100,20,30,40,50,60,70,80,90/) 
+
+     ! Allocate and fill node coordinate array.
+     ! Since this is a 2D Mesh the size is 2x the
+     ! number of nodes.
+     allocate(nodeCoords(2*numNodes))
+     nodeCoords=(/-0.1,-0.1, & ! node id 1
+                   1.0,-0.1, & ! node id 2
+                   2.1,-0.1, & ! node id 3
+                  -0.1, 1.0, & ! node id 4
+                   1.0, 1.0, & ! node id 5
+                   2.1, 1.0, & ! node id 6
+                  -0.1, 2.1, & ! node id 7
+                   1.0, 2.1, & ! node id 8
+                   2.1, 2.1 /) ! node id 9
+
+     ! Allocate and fill the node owner array.
+     ! Since this Mesh is all on PET 0, it's just set to all 0.
+     allocate(nodeOwners(numNodes))
+     nodeOwners=0 ! everything on PET 0
+
+     ! Set the number of each type of element, plus the total number.
+     numQuadElems=3
+     numTriElems=2
+     numTotElems=numQuadElems+numTriElems
+
+     ! Allocate and fill the element id array.
+     allocate(elemIds(numTotElems))
+     elemIds=(/1,2,3,4,5/) 
+
+
+     ! Allocate and fill the element topology type array.
+     allocate(elemTypes(numTotElems))
+     elemTypes=(/ESMF_MESHELEMTYPE_QUAD, & ! elem id 1
+                 ESMF_MESHELEMTYPE_TRI,  & ! elem id 2
+                 ESMF_MESHELEMTYPE_TRI,  & ! elem id 3
+                 ESMF_MESHELEMTYPE_QUAD, & ! elem id 4
+                 ESMF_MESHELEMTYPE_QUAD/)  ! elem id 5
+
+
+     ! Allocate and fill the element connection type array.
+     ! Note that entries in this array refer to the 
+     ! positions in the nodeIds, etc. arrays and that
+     ! the order and number of entries for each element
+     ! reflects that given in the Mesh options 
+     ! section for the corresponding entry
+     ! in the elemTypes array.
+     allocate(elemConn(4*numQuadElems+3*numTriElems))
+     elemConn=(/1,2,5,4, &  ! elem id 1
+                2,3,5,   &  ! elem id 2
+                3,6,5,   &  ! elem id 3
+                4,5,8,7, &  ! elem id 4
+                5,6,9,8/)   ! elem id 5
+
+
+ else if (petCount .eq. 4) then
+     ! Setup mesh data depending on PET
+    if (localPET .eq. 0) then !!! This part only for PET 0
+       ! Set number of nodes
+       numNodes=4
+
+       ! Allocate and fill the node id array.
+       allocate(nodeIds(numNodes))
+       nodeIds=(/100,20,40,50/) 
+
+       ! Allocate and fill node coordinate array.
+       ! Since this is a 2D Mesh the size is 2x the
+       ! number of nodes.
+       allocate(nodeCoords(2*numNodes))
+       nodeCoords=(/-0.1, -0.1, & ! node id 1
+                     1.0, -0.1, & ! node id 2
+                    -0.1,  1.0, & ! node id 4
+                     1.0,  1.0 /) ! node id 5
+
+       ! Allocate and fill the node owner array.
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0, & ! node id 1
+                    0, & ! node id 2
+                    0, & ! node id 4
+                    0/)  ! node id 5
+
+       ! Set the number of each type of element, plus the total number.
+       numQuadElems=1
+       numTriElems=0
+       numTotElems=numQuadElems+numTriElems
+
+       ! Allocate and fill the element id array.
+       allocate(elemIds(numTotElems))
+       elemIds=(/1/) 
+
+       ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numTotElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! elem id 1
+
+       ! Allocate and fill the element connection type array.
+       ! Note that entry are local indices
+       allocate(elemConn(4*numQuadElems+3*numTriElems))
+       elemConn=(/1,2,4,3/) ! elem id 1
+
+     else if (localPET .eq. 1) then !!! This part only for PET 1
+       ! Set number of nodes
+       numNodes=4
+
+       ! Allocate and fill the node id array.
+       allocate(nodeIds(numNodes))
+       nodeIds=(/20,30,50,60/) 
+
+       ! Allocate and fill node coordinate array.
+       ! Since this is a 2D Mesh the size is 2x the
+       ! number of nodes.
+       allocate(nodeCoords(2*numNodes))
+       nodeCoords=(/1.0,-0.1, & ! node id 2
+                    2.1,-0.1, & ! node id 3
+                    1.0, 1.0, & ! node id 5
+                    2.1, 1.0 /) ! node id 6
+
+       ! Allocate and fill the node owner array.
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0, & ! node id 2
+                    1, & ! node id 3
+                    0, & ! node id 5
+                    1/)  ! node id 6
+
+       ! Set the number of each type of element, plus the total number.
+       numQuadElems=0
+       numTriElems=2
+       numTotElems=numQuadElems+numTriElems
+
+       ! Allocate and fill the element id array.
+       allocate(elemIds(numTotElems))
+       elemIds=(/2,3/) 
+
+       ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numTotElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_TRI, & ! elem id 2
+                   ESMF_MESHELEMTYPE_TRI/)  ! elem id 3
+
+       ! Allocate and fill the element connection type array.
+       allocate(elemConn(4*numQuadElems+3*numTriElems))
+       elemConn=(/1,2,3, & ! elem id 2
+                  2,4,3/)  ! elem id 3
+
+    else if (localPET .eq. 2) then !!! This part only for PET 2
+        ! Set number of nodes
+        numNodes=4
+
+        ! Allocate and fill the node id array.
+        allocate(nodeIds(numNodes))
+        nodeIds=(/40,50,70,80/) 
+
+        ! Allocate and fill node coordinate array.
+        ! Since this is a 2D Mesh the size is 2x the
+        ! number of nodes.
+        allocate(nodeCoords(2*numNodes))
+        nodeCoords=(/-0.1,1.0, & ! node id 4
+                      1.0,1.0, & ! node id 5
+                     -0.1,2.1, & ! node id 7
+                      1.0,2.1 /) ! node id 8
+
+        ! Allocate and fill the node owner array.
+        ! Since this Mesh is all on PET 0, it's just set to all 0.
+        allocate(nodeOwners(numNodes))
+        nodeOwners=(/0, & ! node id 4
+                     0, & ! node id 5
+                     2, & ! node id 7
+                     2/)  ! node id 8
+
+        ! Set the number of each type of element, plus the total number.
+        numQuadElems=1
+        numTriElems=0
+        numTotElems=numQuadElems+numTriElems
+
+        ! Allocate and fill the element id array.
+        allocate(elemIds(numTotElems))
+        elemIds=(/4/) 
+
+        ! Allocate and fill the element topology type array.
+        allocate(elemTypes(numTotElems))
+        elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! elem id 4
+
+        ! Allocate and fill the element connection type array.
+        allocate(elemConn(4*numQuadElems+3*numTriElems))
+        elemConn=(/1,2,4,3/) ! elem id 4
+
+     else if (localPET .eq. 3) then !!! This part only for PET 3
+        ! Set number of nodes
+        numNodes=4
+
+        ! Allocate and fill the node id array.
+        allocate(nodeIds(numNodes))
+        nodeIds=(/50,60,80,90/) 
+
+        ! Allocate and fill node coordinate array.
+        ! Since this is a 2D Mesh the size is 2x the
+        ! number of nodes.
+        allocate(nodeCoords(2*numNodes))
+        nodeCoords=(/1.0,1.0, &  ! node id 5
+                     2.1,1.0, &  ! node id 6
+                     1.0,2.1, &  ! node id 8
+                     2.1,2.1 /)  ! node id 9
+
+        ! Allocate and fill the node owner array.
+        allocate(nodeOwners(numNodes))
+        nodeOwners=(/0, & ! node id 5
+                     1, & ! node id 6
+                     2, & ! node id 8
+                     3/)  ! node id 9
+ 
+        ! Set the number of each type of element, plus the total number.
+        numQuadElems=1
+        numTriElems=0
+        numTotElems=numQuadElems+numTriElems
+
+        ! Allocate and fill the element id array.
+        allocate(elemIds(numTotElems))
+        elemIds=(/5/)  
+
+        ! Allocate and fill the element topology type array.
+        allocate(elemTypes(numTotElems))
+        elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! elem id 5
+
+        ! Allocate and fill the element connection type array.
+        allocate(elemConn(4*numQuadElems+3*numTriElems))
+        elemConn=(/1,2,4,3/) ! elem id 5
+       endif
+    endif
+
+   ! Create Mesh structure in 1 step
+   srcMesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+        coordSys=ESMF_COORDSYS_CART, &
+         nodeIds=nodeIds, nodeCoords=nodeCoords, &
+         nodeOwners=nodeOwners, elementIds=elemIds,&
+         elementTypes=elemTypes, elementConn=elemConn, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+       rc=ESMF_FAILURE
+       return
+   endif
+
+  ! Create source field
+  call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
+
+   srcField = ESMF_FieldCreate(srcMesh, arrayspec, &
+                        name="source", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  
+  ! Load test data into the source Field
+  ! Should only be 1 localDE
+  call ESMF_FieldGet(srcField, 0, farrayPtr1D,  rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+  endif
+
+
+  ! set interpolated function
+  i2=1
+  do i1=1,numNodes
+
+     if (nodeOwners(i1) .eq. localPet) then
+        ! Get coordinates
+        x=nodeCoords(2*i1-1)
+        y=nodeCoords(2*i1)
+
+        ! Set source function
+        farrayPtr1D(i2) = 20.0+x+y
+
+        ! Advance to next owner
+        i2=i2+1
+     endif
+  enddo
+
+
+   ! deallocate node data
+   deallocate(nodeIds)
+   deallocate(nodeCoords)
+   deallocate(nodeOwners)
+
+   ! deallocate elem data
+   deallocate(elemIds)
+   deallocate(elemTypes)
+   deallocate(elemConn)
+
+
+  ! Create Dest Mesh
+  if (petCount .eq. 1) then
+     ! Set number of nodes
+     numNodes=9
+
+     ! Allocate and fill the node id array.
+     allocate(nodeIds(numNodes))
+     nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+
+     ! Allocate and fill node coordinate array.
+     ! Since this is a 2D Mesh the size is 2x the
+     ! number of nodes.
+     allocate(nodeCoords(2*numNodes))
+     nodeCoords=(/0.0,0.0, & ! node id 1
+                  1.0,0.0, & ! node id 2
+                  2.0,0.0, & ! node id 3
+                  0.0,1.0, & ! node id 4
+                  1.0,1.0, & ! node id 5
+                  2.0,1.0, & ! node id 6
+                  0.0,2.0, & ! node id 7
+                  1.0,2.0, & ! node id 8
+                  2.0,2.0 /) ! node id 9
+
+     ! Allocate and fill the node owner array.
+     ! Since this Mesh is all on PET 0, it's just set to all 0.
+     allocate(nodeOwners(numNodes))
+     nodeOwners=0 ! everything on PET 0
+
+     ! Set the number of each type of element, plus the total number.
+     numQuadElems=3
+     numTriElems=2
+     numTotElems=numQuadElems+numTriElems
+
+     ! Allocate and fill the element id array.
+     allocate(elemIds(numTotElems))
+     elemIds=(/1,2,3,4,5/) 
+
+
+     ! Allocate and fill the element topology type array.
+     allocate(elemTypes(numTotElems))
+     elemTypes=(/ESMF_MESHELEMTYPE_QUAD, & ! elem id 1
+                 ESMF_MESHELEMTYPE_TRI,  & ! elem id 2
+                 ESMF_MESHELEMTYPE_TRI,  & ! elem id 3
+                 ESMF_MESHELEMTYPE_QUAD, & ! elem id 4
+                 ESMF_MESHELEMTYPE_QUAD/)  ! elem id 5
+
+
+     ! Allocate and fill the element connection type array.
+     ! Note that entries in this array refer to the 
+     ! positions in the nodeIds, etc. arrays and that
+     ! the order and number of entries for each element
+     ! reflects that given in the Mesh options 
+     ! section for the corresponding entry
+     ! in the elemTypes array.
+     allocate(elemConn(4*numQuadElems+3*numTriElems))
+     elemConn=(/1,2,5,4, &  ! elem id 1
+                2,3,5,   &  ! elem id 2
+                3,6,5,   &  ! elem id 3
+                4,5,8,7, &  ! elem id 4
+                5,6,9,8/)   ! elem id 5
+
+
+ else if (petCount .eq. 4) then
+     ! Setup mesh data depending on PET
+    if (localPET .eq. 0) then !!! This part only for PET 0
+       ! Set number of nodes
+       numNodes=4
+
+       ! Allocate and fill the node id array.
+       allocate(nodeIds(numNodes))
+       nodeIds=(/1,2,4,5/) 
+
+       ! Allocate and fill node coordinate array.
+       ! Since this is a 2D Mesh the size is 2x the
+       ! number of nodes.
+       allocate(nodeCoords(2*numNodes))
+       nodeCoords=(/0.0,0.0, & ! node id 1
+                    1.0,0.0, & ! node id 2
+                    0.0,1.0, & ! node id 4
+                    1.0,1.0 /) ! node id 5
+
+       ! Allocate and fill the node owner array.
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0, & ! node id 1
+                    0, & ! node id 2
+                    0, & ! node id 4
+                    0/)  ! node id 5
+
+       ! Set the number of each type of element, plus the total number.
+       numQuadElems=1
+       numTriElems=0
+       numTotElems=numQuadElems+numTriElems
+
+       ! Allocate and fill the element id array.
+       allocate(elemIds(numTotElems))
+       elemIds=(/1/) 
+
+       ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numTotElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! elem id 1
+
+       ! Allocate and fill the element connection type array.
+       ! Note that entry are local indices
+       allocate(elemConn(4*numQuadElems+3*numTriElems))
+       elemConn=(/1,2,4,3/) ! elem id 1
+
+     else if (localPET .eq. 1) then !!! This part only for PET 1
+       ! Set number of nodes
+       numNodes=4
+
+       ! Allocate and fill the node id array.
+       allocate(nodeIds(numNodes))
+       nodeIds=(/2,3,5,6/) 
+
+       ! Allocate and fill node coordinate array.
+       ! Since this is a 2D Mesh the size is 2x the
+       ! number of nodes.
+       allocate(nodeCoords(2*numNodes))
+       nodeCoords=(/1.0,0.0, & ! node id 2
+                    2.0,0.0, & ! node id 3
+                    1.0,1.0, & ! node id 5
+                    2.0,1.0 /) ! node id 6
+
+       ! Allocate and fill the node owner array.
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0, & ! node id 2
+                    1, & ! node id 3
+                    0, & ! node id 5
+                    1/)  ! node id 6
+
+       ! Set the number of each type of element, plus the total number.
+       numQuadElems=0
+       numTriElems=2
+       numTotElems=numQuadElems+numTriElems
+
+       ! Allocate and fill the element id array.
+       allocate(elemIds(numTotElems))
+       elemIds=(/2,3/) 
+
+       ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numTotElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_TRI, & ! elem id 2
+                   ESMF_MESHELEMTYPE_TRI/)  ! elem id 3
+
+       ! Allocate and fill the element connection type array.
+       allocate(elemConn(4*numQuadElems+3*numTriElems))
+       elemConn=(/1,2,3, & ! elem id 2
+                  2,4,3/)  ! elem id 3
+
+    else if (localPET .eq. 2) then !!! This part only for PET 2
+        ! Set number of nodes
+        numNodes=4
+
+        ! Allocate and fill the node id array.
+        allocate(nodeIds(numNodes))
+        nodeIds=(/4,5,7,8/) 
+
+        ! Allocate and fill node coordinate array.
+        ! Since this is a 2D Mesh the size is 2x the
+        ! number of nodes.
+        allocate(nodeCoords(2*numNodes))
+        nodeCoords=(/0.0,1.0, & ! node id 4
+                     1.0,1.0, & ! node id 5
+                     0.0,2.0, & ! node id 7
+                     1.0,2.0 /) ! node id 8
+
+        ! Allocate and fill the node owner array.
+        ! Since this Mesh is all on PET 0, it's just set to all 0.
+        allocate(nodeOwners(numNodes))
+        nodeOwners=(/0, & ! node id 4
+                     0, & ! node id 5
+                     2, & ! node id 7
+                     2/)  ! node id 8
+
+        ! Set the number of each type of element, plus the total number.
+        numQuadElems=1
+        numTriElems=0
+        numTotElems=numQuadElems+numTriElems
+
+        ! Allocate and fill the element id array.
+        allocate(elemIds(numTotElems))
+        elemIds=(/4/) 
+
+        ! Allocate and fill the element topology type array.
+        allocate(elemTypes(numTotElems))
+        elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! elem id 4
+
+        ! Allocate and fill the element connection type array.
+        allocate(elemConn(4*numQuadElems+3*numTriElems))
+        elemConn=(/1,2,4,3/) ! elem id 4
+
+     else if (localPET .eq. 3) then !!! This part only for PET 3
+        ! Set number of nodes
+        numNodes=4
+
+        ! Allocate and fill the node id array.
+        allocate(nodeIds(numNodes))
+        nodeIds=(/5,6,8,9/) 
+
+        ! Allocate and fill node coordinate array.
+        ! Since this is a 2D Mesh the size is 2x the
+        ! number of nodes.
+        allocate(nodeCoords(2*numNodes))
+        nodeCoords=(/1.0,1.0, &  ! node id 5
+                     2.0,1.0, &  ! node id 6
+                     1.0,2.0, &  ! node id 8
+                     2.0,2.0 /)  ! node id 9
+
+        ! Allocate and fill the node owner array.
+        allocate(nodeOwners(numNodes))
+        nodeOwners=(/0, & ! node id 5
+                     1, & ! node id 6
+                     2, & ! node id 8
+                     3/)  ! node id 9
+ 
+        ! Set the number of each type of element, plus the total number.
+        numQuadElems=1
+        numTriElems=0
+        numTotElems=numQuadElems+numTriElems
+
+        ! Allocate and fill the element id array.
+        allocate(elemIds(numTotElems))
+        elemIds=(/5/)  
+
+        ! Allocate and fill the element topology type array.
+        allocate(elemTypes(numTotElems))
+        elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! elem id 5
+
+        ! Allocate and fill the element connection type array.
+        allocate(elemConn(4*numQuadElems+3*numTriElems))
+        elemConn=(/1,2,4,3/) ! elem id 5
+       endif
+   endif
+
+
+  ! Create Mesh structure in 1 step
+  dstMesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+       coordSys=ESMF_COORDSYS_CART, &
+         nodeIds=nodeIds, nodeCoords=nodeCoords, &
+         nodeOwners=nodeOwners, elementIds=elemIds,&
+         elementTypes=elemTypes, elementConn=elemConn, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+         rc=ESMF_FAILURE
+         return
+     endif
+
+  
+  ! Create dest field
+  call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
+
+   dstField = ESMF_FieldCreate(dstMesh, arrayspec, &
+                        name="source", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  
+  ! clear destination Field
+  ! Should only be 1 localDE
+  call ESMF_FieldGet(dstField, 0, farrayPtr1D,  rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+  endif
+
+  farrayPtr1D=0.0
+
+
+
+  !!! Regrid forward from the A grid to the B grid
+  ! Regrid store
+  call ESMF_FieldRegridStore( &
+          srcField, &
+          dstField=dstField, &
+          routeHandle=routeHandle, &
+          regridmethod=ESMF_REGRIDMETHOD_PATCH, &
+          rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  ! Do regrid
+  call ESMF_FieldRegrid(srcField, dstField, routeHandle, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  call ESMF_FieldRegridRelease(routeHandle, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  ! Check destination field
+  ! Should only be 1 localDE
+  call ESMF_FieldGet(dstField, 0, farrayPtr1D,  rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+  endif
+
+  ! loop through nodes and make sure interpolated values are reasonable
+  i2=1
+  do i1=1,numNodes
+
+     if (nodeOwners(i1) .eq. localPet) then
+        ! Get coordinates
+        x=nodeCoords(2*i1-1)
+        y=nodeCoords(2*i1)
+
+        !! if error is too big report an error
+        if ( abs( farrayPtr1D(i2)-(x+y+20.0) ) > 0.0001) then
+          print *, abs( farrayPtr1D(i2)-(x+y+20.0) ), x, y, farrayPtr1D(i2), (x+y+20.0)
+           correct=.false.
+        endif
+
+        ! Advance to next owner
+        i2=i2+1
+     endif
+  enddo
+
+
+   ! deallocate node data
+   deallocate(nodeIds)
+   deallocate(nodeCoords)
+   deallocate(nodeOwners)
+
+   ! deallocate elem data
+   deallocate(elemIds)
+   deallocate(elemTypes)
+   deallocate(elemConn)
+
+
+
+  ! Uncomment these calls to see some actual regrid results
+#if 0
+  spherical_grid = 0
+  call ESMF_MeshIO(vm, dstMesh, ESMF_STAGGERLOC_EDGE1, &
+               "srcmesh", srcArrayA, rc=localrc, &
+               spherical=spherical_grid)
+  call ESMF_MeshIO(vm, srcGrid, ESMF_STAGGERLOC_CENTER, &
+               "dstmesh", dstArray, rc=localrc, &
+               spherical=spherical_grid)
+#endif
+
+  ! Destroy the Fields
+   call ESMF_FieldDestroy(srcField, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+   call ESMF_FieldDestroy(dstField, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+
+  ! Free the grids
+  call ESMF_MeshDestroy(dstMesh, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  call ESMF_MeshDestroy(srcMesh, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+
+  ! return answer based on correct flag
+  if (correct) then
+    rc=ESMF_SUCCESS
+  else
+    rc=ESMF_FAILURE
+  endif
+
+ end subroutine test_regridMeshToMeshPatch
+
+
+ subroutine test_regrid3DCartMeshToMesh(rc)
+        integer, intent(out)  :: rc
+  logical :: correct
+  integer :: localrc
+  type(ESMF_Mesh) :: dstMesh
+  type(ESMF_Mesh) :: srcMesh
+  type(ESMF_Field) :: srcField
+  type(ESMF_Field) :: dstField
+  type(ESMF_Array) :: dstArray
+  type(ESMF_Array) :: lonArrayA
+  type(ESMF_Array) :: srcArrayA
+  type(ESMF_RouteHandle) :: routeHandle
+  type(ESMF_ArraySpec) :: arrayspec
+  type(ESMF_VM) :: vm
+  real(ESMF_KIND_R8), pointer :: farrayPtrXC(:,:), farrayPtr1D(:)
+  real(ESMF_KIND_R8), pointer :: farrayPtrYC(:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtr(:,:),farrayPtr2(:,:)
+  integer :: clbnd(2),cubnd(2)
+  integer :: fclbnd(2),fcubnd(2)
+  integer :: i1,i2,i3, index(2)
+  integer :: lDE, localDECount
+  real(ESMF_KIND_R8) :: coord(2)
+  character(len=ESMF_MAXSTR) :: string
+  real(ESMF_KIND_R8) :: dx,dy
+  
+  real(ESMF_KIND_R8) :: x,y,z
+  
+  integer :: spherical_grid
+
+  integer, pointer :: larrayList(:)
+  integer :: localPet, petCount
+
+  integer, pointer :: nodeIds(:),nodeOwners(:)
+  real(ESMF_KIND_R8), pointer :: nodeCoords(:)
+  integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
+  integer :: numNodes, numElems
+  integer :: numQuadElems,numTriElems, numTotElems
+
+  ! result code
+  integer :: finalrc
+  
+  ! init success flag
+  correct=.true.
+
+  rc=ESMF_SUCCESS
+
+  ! get pet info
+  call ESMF_VMGetGlobal(vm, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! If we don't have 1 or 4 PETS then exit successfully
+  if ((petCount .ne. 1) .and. (petCount .ne. 4)) then
+    print*,'ERROR:  test must be run using exactly 1 or 4 PETS - detected ',petCount
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  ! setup source Mesh
+  if (petCount .eq. 1) then
+     ! Set number of nodes
+     numNodes=18
+
+     ! Allocate and fill the node id array.
+     allocate(nodeIds(numNodes))
+     nodeIds=(/1,2,3,4,5,6,7,8,9, &
+               10,11,12,13,14,15,16,17,18/) 
+
+     ! Allocate and fill node coordinate array.
+     ! Since this is a 3D Mesh the size is 3x the
+     ! number of nodes.
+     allocate(nodeCoords(3*numNodes))
+     nodeCoords=(/-0.25,-0.25,-0.25, & ! node id 1
+                  1.0,-0.25,-0.25, & ! node id 2
+                  2.3,-0.25,-0.25, & ! node id 3
+                  -0.25,1.0,-0.25, & ! node id 4
+                  1.0,1.0,-0.25, & ! node id 5
+                  2.3,1.0,-0.25, & ! node id 6
+                  -0.25,2.3,-0.25, & ! node id 7
+                  1.0,2.3,-0.25, & ! node id 8
+                  2.3,2.3,-0.25, & ! node id 9
+                  -0.25,-0.25,1.0, & ! node id 10
+                  1.0,-0.25,1.0, & ! node id 11
+                  2.3,-0.25,1.0, & ! node id 12
+                  -0.25,1.0,1.0, & ! node id 13
+                  1.0,1.0,1.0, & ! node id 14
+                  2.3,1.0,1.0, & ! node id 15
+                  -0.25,2.3,1.0, & ! node id 16
+                  1.0,2.3,1.0, & ! node id 17
+                  2.3,2.3,1.0 /) ! node id 18
+
+     ! Allocate and fill the node owner array.
+     ! Since this Mesh is all on PET 0, it's just set to all 0.
+     allocate(nodeOwners(numNodes))
+     nodeOwners=0 ! everything on PET 0
+
+     ! Set the number of each type of element, plus the total number.
+     numElems=4
+
+     ! Allocate and fill the element id array.
+     allocate(elemIds(numElems))
+     elemIds=(/1,2,3,4/) 
+
+     ! Allocate and fill the element topology type array.
+     allocate(elemTypes(numElems))
+     elemTypes=ESMF_MESHELEMTYPE_HEX
+                 
+
+     ! Allocate and fill the element connection type array.
+     ! Note that entries in this array refer to the 
+     ! positions in the nodeIds, etc. arrays and that
+     ! the order and number of entries for each element
+     ! reflects that given in the Mesh options 
+     ! section for the corresponding entry
+     ! in the elemTypes array.
+     allocate(elemConn(8*numElems))
+     elemConn=(/1,2,5,4,10,11,14,13, &  ! elem id 1
+                2,3,6,5,11,12,15,14, &  ! elem id 2
+                4,5,8,7,13,14,17,16,   &  ! elem id 3
+                5,6,9,8,14,15,18,17/)  ! elem id 4
+
+ else if (petCount .eq. 4) then
+     ! Setup mesh data depending on PET
+    if (localPET .eq. 0) then !!! This part only for PET 0
+       ! Set number of nodes
+       numNodes=8
+
+       ! Allocate and fill the node id array.
+       allocate(nodeIds(numNodes))
+       nodeIds=(/1,2,4,5,10,11,13,14/) 
+
+       ! Allocate and fill node coordinate array.
+       ! Since this is a 2D Mesh the size is 2x the
+       ! number of nodes.
+       allocate(nodeCoords(3*numNodes))
+       nodeCoords=(/-0.25,-0.25,-0.25, & ! node id 1
+                    1.0,-0.25,-0.25, & ! node id 2
+                    -0.25,1.0,-0.25, & ! node id 4
+                    1.0,1.0,-0.25, & ! node id 5
+                    -0.25,-0.25,1.0, & ! node id 10
+                    1.0,-0.25,1.0, & ! node id 11
+                    -0.25,1.0,1.0, & ! node id 13
+                    1.0,1.0,1.0 /) ! node id 14
+
+
+       ! Allocate and fill the node owner array.
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0, & ! node id 1
+                    0, & ! node id 2
+                    0, & ! node id 4
+                    0, & ! node id 5
+                    0, & ! node id 10
+                    0, & ! node id 11
+                    0, & ! node id 13
+                    0/)  ! node id 14
+
+       ! Set the number of each type of element, plus the total number.
+       numElems=1
+
+       ! Allocate and fill the element id array.
+       allocate(elemIds(numElems))
+       elemIds=(/1/) 
+
+       ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_HEX/) ! elem id 1
+
+       ! Allocate and fill the element connection type array.
+       ! Note that entry are local indices
+       allocate(elemConn(8*numElems))
+       elemConn=(/1,2,4,3,5,6,8,7/) ! elem id 1
+
+     else if (localPET .eq. 1) then !!! This part only for PET 1
+       ! Set number of nodes
+       numNodes=8
+
+       ! Allocate and fill the node id array.
+       allocate(nodeIds(numNodes))
+       nodeIds=(/2,3,5,6,11,12,14,15/) 
+
+       ! Allocate and fill node coordinate array.
+       ! Since this is a 3D Mesh the size is 2x the
+       ! number of nodes.
+       allocate(nodeCoords(3*numNodes))
+       nodeCoords=(/1.0,-0.25,-0.25, & ! node id 2
+                    2.3,-0.25,-0.25, & ! node id 3
+                    1.0,1.0,-0.25, & ! node id 5
+                    2.3,1.0,-0.25, & ! node id 6
+                    1.0,-0.25,1.0, & ! node id 11
+                    2.3,-0.25,1.0, & ! node id 12
+                    1.0,1.0,1.0, & ! node id 14
+                    2.3,1.0,1.0/) ! node id 15
+
+       ! Allocate and fill the node owner array.
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0, & ! node id 2
+                    1, & ! node id 3
+                    0, & ! node id 5
+                    1, & ! node id 6
+                    0, & ! node id 11
+                    1, & ! node id 12
+                    0, & ! node id 14
+                    1/)  ! node id 15
+
+       ! Set the number of each type of element, plus the total number.
+       numElems=1
+
+       ! Allocate and fill the element id array.
+       allocate(elemIds(numElems))
+       elemIds=(/2/) 
+
+       ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_HEX/) ! elem id 1
+
+       ! Allocate and fill the element connection type array.
+       ! Note that entry are local indices
+       allocate(elemConn(8*numElems))
+       elemConn=(/1,2,4,3,5,6,8,7/) ! elem id 1
+
+    else if (localPET .eq. 2) then !!! This part only for PET 2
+        ! Set number of nodes
+        numNodes=8
+
+        ! Allocate and fill the node id array.
+        allocate(nodeIds(numNodes))
+        nodeIds=(/4,5,7,8,13,14,16,17/) 
+
+        ! Allocate and fill node coordinate array.
+        ! Since this is a 3D Mesh the size is 2x the
+        ! number of nodes.
+        allocate(nodeCoords(3*numNodes))
+        nodeCoords=(/-0.25,1.0,-0.25, & ! node id 4
+                     1.0,1.0,-0.25, & ! node id 5
+                     -0.25,2.3,-0.25, & ! node id 7
+                     1.0,2.3,-0.25, & ! node id 8
+                     -0.25,1.0,1.0, & ! node id 13
+                     1.0,1.0,1.0, & ! node id 14
+                     -0.25,2.3,1.0, & ! node id 16
+                     1.0,2.3,1.0/) ! node id 17
+
+
+        ! Allocate and fill the node owner array.
+        ! Since this Mesh is all on PET 0, it's just set to all 0.
+        allocate(nodeOwners(numNodes))
+        nodeOwners=(/0, & ! node id 4
+                     0, & ! node id 5
+                     2, & ! node id 7
+                     2, & ! node id 8
+                     0, & ! node id 13
+                     0, & ! node id 14
+                     2, & ! node id 16
+                     2/)  ! node id 17
+       ! Set the number of each type of element, plus the total number.
+       numElems=1
+
+       ! Allocate and fill the element id array.
+       allocate(elemIds(numElems))
+       elemIds=(/3/) 
+
+       ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_HEX/) ! elem id 1
+
+       ! Allocate and fill the element connection type array.
+       ! Note that entry are local indices
+       allocate(elemConn(8*numElems))
+       elemConn=(/1,2,4,3,5,6,8,7/) ! elem id 1
+
+
+     else if (localPET .eq. 3) then !!! This part only for PET 3
+        ! Set number of nodes
+        numNodes=8
+
+        ! Allocate and fill the node id array.
+        allocate(nodeIds(numNodes))
+        nodeIds=(/5,6,8,9,14,15,17,18/) 
+
+        ! Allocate and fill node coordinate array.
+        ! Since this is a 3D Mesh the size is 2x the
+        ! number of nodes.
+        allocate(nodeCoords(3*numNodes))
+        nodeCoords=(/1.0,1.0,-0.25, &  ! node id 5
+                     2.3,1.0,-0.25, &  ! node id 6
+                     1.0,2.3,-0.25, &  ! node id 8
+                     2.3,2.3,-0.25, &  ! node id 9
+                     1.0,1.0,1.0, &  ! node id 14
+                     2.3,1.0,1.0, &  ! node id 15
+                     1.0,2.3,1.0, &  ! node id 17
+                     2.3,2.3,1.0/)  ! node id 18
+
+        ! Allocate and fill the node owner array.
+        allocate(nodeOwners(numNodes))
+        nodeOwners=(/0, & ! node id 5
+                     1, & ! node id 6
+                     2, & ! node id 8
+                     3, & ! node id 9
+                     0, & ! node id 14
+                     1, & ! node id 15
+                     2, & ! node id 17
+                     3/)  ! node id 18
+ 
+       ! Set the number of each type of element, plus the total number.
+       numElems=1
+
+       ! Allocate and fill the element id array.
+       allocate(elemIds(numElems))
+       elemIds=(/4/) 
+
+       ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_HEX/) ! elem id 1
+
+       ! Allocate and fill the element connection type array.
+       ! Note that entry are local indices
+       allocate(elemConn(8*numElems))
+       elemConn=(/1,2,4,3,5,6,8,7/) ! elem id 1
+
+       endif
+    endif
+
+   ! Create Mesh structure in 1 step
+   srcMesh=ESMF_MeshCreate(parametricDim=3,spatialDim=3, &
+        coordSys=ESMF_COORDSYS_CART, &
+         nodeIds=nodeIds, nodeCoords=nodeCoords, &
+         nodeOwners=nodeOwners, elementIds=elemIds,&
+         elementTypes=elemTypes, elementConn=elemConn, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+       rc=ESMF_FAILURE
+       return
+   endif
+
+  ! Create source field
+  call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
+
+   srcField = ESMF_FieldCreate(srcMesh, arrayspec, &
+                        name="source", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  
+  ! Load test data into the source Field
+  ! Should only be 1 localDE
+  call ESMF_FieldGet(srcField, 0, farrayPtr1D,  rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+  endif
+
+
+  ! set interpolated function
+  i2=1
+  do i1=1,numNodes
+
+     if (nodeOwners(i1) .eq. localPet) then
+        ! Get coordinates
+        x=nodeCoords(3*i1-2)
+        y=nodeCoords(3*i1-1)
+        z=nodeCoords(3*i1)
+
+        ! Set source function
+        farrayPtr1D(i2) = 20.0+x+y+z
+
+        ! Advance to next owner
+        i2=i2+1
+     endif
+  enddo
+
+
+   ! deallocate node data
+   deallocate(nodeIds)
+   deallocate(nodeCoords)
+   deallocate(nodeOwners)
+
+   ! deallocate elem data
+   deallocate(elemIds)
+   deallocate(elemTypes)
+   deallocate(elemConn)
+
+
+  ! Create Dest Mesh
+  if (petCount .eq. 1) then
+     ! Set number of nodes
+     numNodes=18
+
+     ! Allocate and fill the node id array.
+     allocate(nodeIds(numNodes))
+     nodeIds=(/1,2,3,4,5,6,7,8,9, &
+               10,11,12,13,14,15,16,17,18/) 
+
+     ! Allocate and fill node coordinate array.
+     ! Since this is a 3D Mesh the size is 3x the
+     ! number of nodes.
+     allocate(nodeCoords(3*numNodes))
+     nodeCoords=(/0.0,0.0,0.0, & ! node id 1
+                  1.0,0.0,0.0, & ! node id 2
+                  2.0,0.0,0.0, & ! node id 3
+                  0.0,1.0,0.0, & ! node id 4
+                  1.0,1.0,0.0, & ! node id 5
+                  2.0,1.0,0.0, & ! node id 6
+                  0.0,2.0,0.0, & ! node id 7
+                  1.0,2.0,0.0, & ! node id 8
+                  2.0,2.0,0.0, & ! node id 9
+                  0.0,0.0,1.0, & ! node id 10
+                  1.0,0.0,1.0, & ! node id 11
+                  2.0,0.0,1.0, & ! node id 12
+                  0.0,1.0,1.0, & ! node id 13
+                  1.0,1.0,1.0, & ! node id 14
+                  2.0,1.0,1.0, & ! node id 15
+                  0.0,2.0,1.0, & ! node id 16
+                  1.0,2.0,1.0, & ! node id 17
+                  2.0,2.0,1.0 /) ! node id 18
+
+     ! Allocate and fill the node owner array.
+     ! Since this Mesh is all on PET 0, it's just set to all 0.
+     allocate(nodeOwners(numNodes))
+     nodeOwners=0 ! everything on PET 0
+
+     ! Set the number of each type of element, plus the total number.
+     numElems=4
+
+     ! Allocate and fill the element id array.
+     allocate(elemIds(numElems))
+     elemIds=(/1,2,3,4/) 
+
+     ! Allocate and fill the element topology type array.
+     allocate(elemTypes(numElems))
+     elemTypes=ESMF_MESHELEMTYPE_HEX
+                 
+
+     ! Allocate and fill the element connection type array.
+     ! Note that entries in this array refer to the 
+     ! positions in the nodeIds, etc. arrays and that
+     ! the order and number of entries for each element
+     ! reflects that given in the Mesh options 
+     ! section for the corresponding entry
+     ! in the elemTypes array.
+     allocate(elemConn(8*numElems))
+     elemConn=(/1,2,5,4,10,11,14,13, &  ! elem id 1
+                2,3,6,5,11,12,15,14, &  ! elem id 2
+                4,5,8,7,13,14,17,16,   &  ! elem id 3
+                5,6,9,8,14,15,18,17/)  ! elem id 4
+
+ else if (petCount .eq. 4) then
+     ! Setup mesh data depending on PET
+    if (localPET .eq. 0) then !!! This part only for PET 0
+       ! Set number of nodes
+       numNodes=8
+
+       ! Allocate and fill the node id array.
+       allocate(nodeIds(numNodes))
+       nodeIds=(/1,2,4,5,10,11,13,14/) 
+
+       ! Allocate and fill node coordinate array.
+       ! Since this is a 2D Mesh the size is 2x the
+       ! number of nodes.
+       allocate(nodeCoords(3*numNodes))
+       nodeCoords=(/0.0,0.0,0.0, & ! node id 1
+                    1.0,0.0,0.0, & ! node id 2
+                    0.0,1.0,0.0, & ! node id 4
+                    1.0,1.0,0.0, & ! node id 5
+                    0.0,0.0,1.0, & ! node id 10
+                    1.0,0.0,1.0, & ! node id 11
+                    0.0,1.0,1.0, & ! node id 13
+                    1.0,1.0,1.0 /) ! node id 14
+
+
+       ! Allocate and fill the node owner array.
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0, & ! node id 1
+                    0, & ! node id 2
+                    0, & ! node id 4
+                    0, & ! node id 5
+                    0, & ! node id 10
+                    0, & ! node id 11
+                    0, & ! node id 13
+                    0/)  ! node id 14
+
+       ! Set the number of each type of element, plus the total number.
+       numElems=1
+
+       ! Allocate and fill the element id array.
+       allocate(elemIds(numElems))
+       elemIds=(/1/) 
+
+       ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_HEX/) ! elem id 1
+
+       ! Allocate and fill the element connection type array.
+       ! Note that entry are local indices
+       allocate(elemConn(8*numElems))
+       elemConn=(/1,2,4,3,5,6,8,7/) ! elem id 1
+
+     else if (localPET .eq. 1) then !!! This part only for PET 1
+       ! Set number of nodes
+       numNodes=8
+
+       ! Allocate and fill the node id array.
+       allocate(nodeIds(numNodes))
+       nodeIds=(/2,3,5,6,11,12,14,15/) 
+
+       ! Allocate and fill node coordinate array.
+       ! Since this is a 3D Mesh the size is 2x the
+       ! number of nodes.
+       allocate(nodeCoords(3*numNodes))
+       nodeCoords=(/1.0,0.0,0.0, & ! node id 2
+                    2.0,0.0,0.0, & ! node id 3
+                    1.0,1.0,0.0, & ! node id 5
+                    2.0,1.0,0.0, & ! node id 6
+                    1.0,0.0,1.0, & ! node id 11
+                    2.0,0.0,1.0, & ! node id 12
+                    1.0,1.0,1.0, & ! node id 14
+                    2.0,1.0,1.0/) ! node id 15
+
+       ! Allocate and fill the node owner array.
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0, & ! node id 2
+                    1, & ! node id 3
+                    0, & ! node id 5
+                    1, & ! node id 6
+                    0, & ! node id 11
+                    1, & ! node id 12
+                    0, & ! node id 14
+                    1/)  ! node id 15
+
+       ! Set the number of each type of element, plus the total number.
+       numElems=1
+
+       ! Allocate and fill the element id array.
+       allocate(elemIds(numElems))
+       elemIds=(/2/) 
+
+       ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_HEX/) ! elem id 1
+
+       ! Allocate and fill the element connection type array.
+       ! Note that entry are local indices
+       allocate(elemConn(8*numElems))
+       elemConn=(/1,2,4,3,5,6,8,7/) ! elem id 1
+
+    else if (localPET .eq. 2) then !!! This part only for PET 2
+        ! Set number of nodes
+        numNodes=8
+
+        ! Allocate and fill the node id array.
+        allocate(nodeIds(numNodes))
+        nodeIds=(/4,5,7,8,13,14,16,17/) 
+
+        ! Allocate and fill node coordinate array.
+        ! Since this is a 3D Mesh the size is 2x the
+        ! number of nodes.
+        allocate(nodeCoords(3*numNodes))
+        nodeCoords=(/0.0,1.0,0.0, & ! node id 4
+                     1.0,1.0,0.0, & ! node id 5
+                     0.0,2.0,0.0, & ! node id 7
+                     1.0,2.0,0.0, & ! node id 8
+                     0.0,1.0,1.0, & ! node id 13
+                     1.0,1.0,1.0, & ! node id 14
+                     0.0,2.0,1.0, & ! node id 16
+                     1.0,2.0,1.0/) ! node id 17
+
+
+        ! Allocate and fill the node owner array.
+        ! Since this Mesh is all on PET 0, it's just set to all 0.
+        allocate(nodeOwners(numNodes))
+        nodeOwners=(/0, & ! node id 4
+                     0, & ! node id 5
+                     2, & ! node id 7
+                     2, & ! node id 8
+                     0, & ! node id 13
+                     0, & ! node id 14
+                     2, & ! node id 16
+                     2/)  ! node id 17
+       ! Set the number of each type of element, plus the total number.
+       numElems=1
+
+       ! Allocate and fill the element id array.
+       allocate(elemIds(numElems))
+       elemIds=(/3/) 
+
+       ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_HEX/) ! elem id 1
+
+       ! Allocate and fill the element connection type array.
+       ! Note that entry are local indices
+       allocate(elemConn(8*numElems))
+       elemConn=(/1,2,4,3,5,6,8,7/) ! elem id 1
+
+
+     else if (localPET .eq. 3) then !!! This part only for PET 3
+        ! Set number of nodes
+        numNodes=8
+
+        ! Allocate and fill the node id array.
+        allocate(nodeIds(numNodes))
+        nodeIds=(/5,6,8,9,14,15,17,18/) 
+
+        ! Allocate and fill node coordinate array.
+        ! Since this is a 3D Mesh the size is 2x the
+        ! number of nodes.
+        allocate(nodeCoords(3*numNodes))
+        nodeCoords=(/1.0,1.0,0.0, &  ! node id 5
+                     2.0,1.0,0.0, &  ! node id 6
+                     1.0,2.0,0.0, &  ! node id 8
+                     2.0,2.0,0.0, &  ! node id 9
+                     1.0,1.0,1.0, &  ! node id 14
+                     2.0,1.0,1.0, &  ! node id 15
+                     1.0,2.0,1.0, &  ! node id 17
+                     2.0,2.0,1.0/)  ! node id 18
+
+        ! Allocate and fill the node owner array.
+        allocate(nodeOwners(numNodes))
+        nodeOwners=(/0, & ! node id 5
+                     1, & ! node id 6
+                     2, & ! node id 8
+                     3, & ! node id 9
+                     0, & ! node id 14
+                     1, & ! node id 15
+                     2, & ! node id 17
+                     3/)  ! node id 18
+ 
+       ! Set the number of each type of element, plus the total number.
+       numElems=1
+
+       ! Allocate and fill the element id array.
+       allocate(elemIds(numElems))
+       elemIds=(/4/) 
+
+       ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_HEX/) ! elem id 1
+
+       ! Allocate and fill the element connection type array.
+       ! Note that entry are local indices
+       allocate(elemConn(8*numElems))
+       elemConn=(/1,2,4,3,5,6,8,7/) ! elem id 1
+
+       endif
+    endif
+
+   ! Create Mesh structure in 1 step
+   dstMesh=ESMF_MeshCreate(parametricDim=3,spatialDim=3, &
+        coordSys=ESMF_COORDSYS_CART, &
+         nodeIds=nodeIds, nodeCoords=nodeCoords, &
+         nodeOwners=nodeOwners, elementIds=elemIds,&
+         elementTypes=elemTypes, elementConn=elemConn, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+       rc=ESMF_FAILURE
+       return
+   endif
+
+  
+  ! Create dest field
+  call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
+
+   dstField = ESMF_FieldCreate(dstMesh, arrayspec, &
+                        name="source", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  
+  ! clear destination Field
+  ! Should only be 1 localDE
+  call ESMF_FieldGet(dstField, 0, farrayPtr1D,  rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+  endif
+
+  farrayPtr1D=0.0
+
+
+  !!! Regrid forward from the A grid to the B grid
+  ! Regrid store
+  call ESMF_FieldRegridStore( &
+          srcField, &
+          dstField=dstField, &
+          routeHandle=routeHandle, &
+          regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
+          rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  ! Do regrid
+  call ESMF_FieldRegrid(srcField, dstField, routeHandle, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  call ESMF_FieldRegridRelease(routeHandle, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  ! Check destination field
+  ! Should only be 1 localDE
+  call ESMF_FieldGet(dstField, 0, farrayPtr1D,  rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+  endif
+
+  ! loop through nodes and make sure interpolated values are reasonable
+  i2=1
+  do i1=1,numNodes
+
+     if (nodeOwners(i1) .eq. localPet) then
+        ! Get coordinates
+        x=nodeCoords(3*i1-2)
+        y=nodeCoords(3*i1-1)
+        z=nodeCoords(3*i1)
+
+        !! if error is too big report an error
+        if ( abs( farrayPtr1D(i2)-(x+y+z+20.0) ) > 0.0001) then
+          print *, abs( farrayPtr1D(i2)-(x+y+z+20.0) ), x, y, z, farrayPtr1D(i2), (x+y+z+20.0)
+           correct=.false.
+        endif
+
+        ! Advance to next owner
+        i2=i2+1
+     endif
+  enddo
+
+
+   ! deallocate node data
+   deallocate(nodeIds)
+   deallocate(nodeCoords)
+   deallocate(nodeOwners)
+
+   ! deallocate elem data
+   deallocate(elemIds)
+   deallocate(elemTypes)
+   deallocate(elemConn)
+
+
+
+  ! Uncomment these calls to see some actual regrid results
+#if 0
+  spherical_grid = 0
+  call ESMF_MeshIO(vm, dstMesh, ESMF_STAGGERLOC_EDGE1, &
+               "srcmesh", srcArrayA, rc=localrc, &
+               spherical=spherical_grid)
+  call ESMF_MeshIO(vm, srcGrid, ESMF_STAGGERLOC_CENTER, &
+               "dstmesh", dstArray, rc=localrc, &
+               spherical=spherical_grid)
+#endif
+
+  ! Destroy the Fields
+   call ESMF_FieldDestroy(srcField, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+   call ESMF_FieldDestroy(dstField, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+
+  ! Free the grids
+  call ESMF_MeshDestroy(dstMesh, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  call ESMF_MeshDestroy(srcMesh, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+
+  ! return answer based on correct flag
+  if (correct) then
+    rc=ESMF_SUCCESS
+  else
+    rc=ESMF_FAILURE
+  endif
+
+ end subroutine test_regrid3DCartMeshToMesh
+
+
+ subroutine test_STOD_3DCartMeshToMesh(rc)
+        integer, intent(out)  :: rc
+  logical :: correct
+  integer :: localrc
+  type(ESMF_Mesh) :: dstMesh
+  type(ESMF_Mesh) :: srcMesh
+  type(ESMF_Field) :: srcField
+  type(ESMF_Field) :: dstField
+  type(ESMF_Array) :: dstArray
+  type(ESMF_Array) :: lonArrayA
+  type(ESMF_Array) :: srcArrayA
+  type(ESMF_RouteHandle) :: routeHandle
+  type(ESMF_ArraySpec) :: arrayspec
+  type(ESMF_VM) :: vm
+  real(ESMF_KIND_R8), pointer :: farrayPtrXC(:,:), farrayPtr1D(:)
+  real(ESMF_KIND_R8), pointer :: farrayPtrYC(:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtr(:,:),farrayPtr2(:,:)
+  integer :: clbnd(2),cubnd(2)
+  integer :: fclbnd(2),fcubnd(2)
+  integer :: i1,i2,i3, index(2)
+  integer :: lDE, localDECount
+  real(ESMF_KIND_R8) :: coord(2)
+  character(len=ESMF_MAXSTR) :: string
+  real(ESMF_KIND_R8) :: dx,dy
+  
+  real(ESMF_KIND_R8) :: x,y,z
+  
+  integer :: spherical_grid
+
+  integer, pointer :: larrayList(:)
+  integer :: localPet, petCount
+
+  integer, pointer :: nodeIds(:),nodeOwners(:)
+  real(ESMF_KIND_R8), pointer :: nodeCoords(:)
+  integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
+  integer :: numNodes, numElems
+  integer :: numQuadElems,numTriElems, numTotElems
+
+  ! result code
+  integer :: finalrc
+  
+  ! init success flag
+  correct=.true.
+
+  rc=ESMF_SUCCESS
+
+  ! get pet info
+  call ESMF_VMGetGlobal(vm, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! If we don't have 1 or 4 PETS then exit successfully
+  if ((petCount .ne. 1) .and. (petCount .ne. 4)) then
+    print*,'ERROR:  test must be run using exactly 1 or 4 PETS - detected ',petCount
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  ! setup source Mesh
+  if (petCount .eq. 1) then
+     ! Set number of nodes
+     numNodes=18
+
+     ! Allocate and fill the node id array.
+     allocate(nodeIds(numNodes))
+     nodeIds=(/1,2,3,4,5,6,7,8,9, &
+               10,11,12,13,14,15,16,17,18/) 
+
+     ! Allocate and fill node coordinate array.
+     ! Since this is a 3D Mesh the size is 3x the
+     ! number of nodes.
+     allocate(nodeCoords(3*numNodes))
+     nodeCoords=(/0.0,0.0,0.0, & ! node id 1
+                  1.0,0.0,0.0, & ! node id 2
+                  2.0,0.0,0.0, & ! node id 3
+                  0.0,1.0,0.0, & ! node id 4
+                  1.0,1.0,0.0, & ! node id 5
+                  2.0,1.0,0.0, & ! node id 6
+                  0.0,2.0,0.0, & ! node id 7
+                  1.0,2.0,0.0, & ! node id 8
+                  2.0,2.0,0.0, & ! node id 9
+                  0.0,0.0,1.0, & ! node id 10
+                  1.0,0.0,1.0, & ! node id 11
+                  2.0,0.0,1.0, & ! node id 12
+                  0.0,1.0,1.0, & ! node id 13
+                  1.0,1.0,1.0, & ! node id 14
+                  2.0,1.0,1.0, & ! node id 15
+                  0.0,2.0,1.0, & ! node id 16
+                  1.0,2.0,1.0, & ! node id 17
+                  2.0,2.0,1.0 /) ! node id 18
+
+     ! Allocate and fill the node owner array.
+     ! Since this Mesh is all on PET 0, it's just set to all 0.
+     allocate(nodeOwners(numNodes))
+     nodeOwners=0 ! everything on PET 0
+
+     ! Set the number of each type of element, plus the total number.
+     numElems=4
+
+     ! Allocate and fill the element id array.
+     allocate(elemIds(numElems))
+     elemIds=(/1,2,3,4/) 
+
+     ! Allocate and fill the element topology type array.
+     allocate(elemTypes(numElems))
+     elemTypes=ESMF_MESHELEMTYPE_HEX
+                 
+
+     ! Allocate and fill the element connection type array.
+     ! Note that entries in this array refer to the 
+     ! positions in the nodeIds, etc. arrays and that
+     ! the order and number of entries for each element
+     ! reflects that given in the Mesh options 
+     ! section for the corresponding entry
+     ! in the elemTypes array.
+     allocate(elemConn(8*numElems))
+     elemConn=(/1,2,5,4,10,11,14,13, &  ! elem id 1
+                2,3,6,5,11,12,15,14, &  ! elem id 2
+                4,5,8,7,13,14,17,16,   &  ! elem id 3
+                5,6,9,8,14,15,18,17/)  ! elem id 4
+
+ else if (petCount .eq. 4) then
+     ! Setup mesh data depending on PET
+    if (localPET .eq. 0) then !!! This part only for PET 0
+       ! Set number of nodes
+       numNodes=8
+
+       ! Allocate and fill the node id array.
+       allocate(nodeIds(numNodes))
+       nodeIds=(/1,2,4,5,10,11,13,14/) 
+
+       ! Allocate and fill node coordinate array.
+       ! Since this is a 2D Mesh the size is 2x the
+       ! number of nodes.
+       allocate(nodeCoords(3*numNodes))
+       nodeCoords=(/0.0,0.0,0.0, & ! node id 1
+                    1.0,0.0,0.0, & ! node id 2
+                    0.0,1.0,0.0, & ! node id 4
+                    1.0,1.0,0.0, & ! node id 5
+                    0.0,0.0,1.0, & ! node id 10
+                    1.0,0.0,1.0, & ! node id 11
+                    0.0,1.0,1.0, & ! node id 13
+                    1.0,1.0,1.0 /) ! node id 14
+
+
+       ! Allocate and fill the node owner array.
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0, & ! node id 1
+                    0, & ! node id 2
+                    0, & ! node id 4
+                    0, & ! node id 5
+                    0, & ! node id 10
+                    0, & ! node id 11
+                    0, & ! node id 13
+                    0/)  ! node id 14
+
+       ! Set the number of each type of element, plus the total number.
+       numElems=1
+
+       ! Allocate and fill the element id array.
+       allocate(elemIds(numElems))
+       elemIds=(/1/) 
+
+       ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_HEX/) ! elem id 1
+
+       ! Allocate and fill the element connection type array.
+       ! Note that entry are local indices
+       allocate(elemConn(8*numElems))
+       elemConn=(/1,2,4,3,5,6,8,7/) ! elem id 1
+
+     else if (localPET .eq. 1) then !!! This part only for PET 1
+       ! Set number of nodes
+       numNodes=8
+
+       ! Allocate and fill the node id array.
+       allocate(nodeIds(numNodes))
+       nodeIds=(/2,3,5,6,11,12,14,15/) 
+
+       ! Allocate and fill node coordinate array.
+       ! Since this is a 3D Mesh the size is 2x the
+       ! number of nodes.
+       allocate(nodeCoords(3*numNodes))
+       nodeCoords=(/1.0,0.0,0.0, & ! node id 2
+                    2.0,0.0,0.0, & ! node id 3
+                    1.0,1.0,0.0, & ! node id 5
+                    2.0,1.0,0.0, & ! node id 6
+                    1.0,0.0,1.0, & ! node id 11
+                    2.0,0.0,1.0, & ! node id 12
+                    1.0,1.0,1.0, & ! node id 14
+                    2.0,1.0,1.0/) ! node id 15
+
+       ! Allocate and fill the node owner array.
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0, & ! node id 2
+                    1, & ! node id 3
+                    0, & ! node id 5
+                    1, & ! node id 6
+                    0, & ! node id 11
+                    1, & ! node id 12
+                    0, & ! node id 14
+                    1/)  ! node id 15
+
+       ! Set the number of each type of element, plus the total number.
+       numElems=1
+
+       ! Allocate and fill the element id array.
+       allocate(elemIds(numElems))
+       elemIds=(/2/) 
+
+       ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_HEX/) ! elem id 1
+
+       ! Allocate and fill the element connection type array.
+       ! Note that entry are local indices
+       allocate(elemConn(8*numElems))
+       elemConn=(/1,2,4,3,5,6,8,7/) ! elem id 1
+
+    else if (localPET .eq. 2) then !!! This part only for PET 2
+        ! Set number of nodes
+        numNodes=8
+
+        ! Allocate and fill the node id array.
+        allocate(nodeIds(numNodes))
+        nodeIds=(/4,5,7,8,13,14,16,17/) 
+
+        ! Allocate and fill node coordinate array.
+        ! Since this is a 3D Mesh the size is 2x the
+        ! number of nodes.
+        allocate(nodeCoords(3*numNodes))
+        nodeCoords=(/0.0,1.0,0.0, & ! node id 4
+                     1.0,1.0,0.0, & ! node id 5
+                     0.0,2.0,0.0, & ! node id 7
+                     1.0,2.0,0.0, & ! node id 8
+                     0.0,1.0,1.0, & ! node id 13
+                     1.0,1.0,1.0, & ! node id 14
+                     0.0,2.0,1.0, & ! node id 16
+                     1.0,2.0,1.0/) ! node id 17
+
+
+        ! Allocate and fill the node owner array.
+        ! Since this Mesh is all on PET 0, it's just set to all 0.
+        allocate(nodeOwners(numNodes))
+        nodeOwners=(/0, & ! node id 4
+                     0, & ! node id 5
+                     2, & ! node id 7
+                     2, & ! node id 8
+                     0, & ! node id 13
+                     0, & ! node id 14
+                     2, & ! node id 16
+                     2/)  ! node id 17
+       ! Set the number of each type of element, plus the total number.
+       numElems=1
+
+       ! Allocate and fill the element id array.
+       allocate(elemIds(numElems))
+       elemIds=(/3/) 
+
+       ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_HEX/) ! elem id 1
+
+       ! Allocate and fill the element connection type array.
+       ! Note that entry are local indices
+       allocate(elemConn(8*numElems))
+       elemConn=(/1,2,4,3,5,6,8,7/) ! elem id 1
+
+
+     else if (localPET .eq. 3) then !!! This part only for PET 3
+        ! Set number of nodes
+        numNodes=8
+
+        ! Allocate and fill the node id array.
+        allocate(nodeIds(numNodes))
+        nodeIds=(/5,6,8,9,14,15,17,18/) 
+
+        ! Allocate and fill node coordinate array.
+        ! Since this is a 3D Mesh the size is 2x the
+        ! number of nodes.
+        allocate(nodeCoords(3*numNodes))
+        nodeCoords=(/1.0,1.0,0.0, &  ! node id 5
+                     2.0,1.0,0.0, &  ! node id 6
+                     1.0,2.0,0.0, &  ! node id 8
+                     2.0,2.0,0.0, &  ! node id 9
+                     1.0,1.0,1.0, &  ! node id 14
+                     2.0,1.0,1.0, &  ! node id 15
+                     1.0,2.0,1.0, &  ! node id 17
+                     2.0,2.0,1.0/)  ! node id 18
+
+        ! Allocate and fill the node owner array.
+        allocate(nodeOwners(numNodes))
+        nodeOwners=(/0, & ! node id 5
+                     1, & ! node id 6
+                     2, & ! node id 8
+                     3, & ! node id 9
+                     0, & ! node id 14
+                     1, & ! node id 15
+                     2, & ! node id 17
+                     3/)  ! node id 18
+ 
+       ! Set the number of each type of element, plus the total number.
+       numElems=1
+
+       ! Allocate and fill the element id array.
+       allocate(elemIds(numElems))
+       elemIds=(/4/) 
+
+       ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_HEX/) ! elem id 1
+
+       ! Allocate and fill the element connection type array.
+       ! Note that entry are local indices
+       allocate(elemConn(8*numElems))
+       elemConn=(/1,2,4,3,5,6,8,7/) ! elem id 1
+
+       endif
+    endif
+
+   ! Create Mesh structure in 1 step
+   srcMesh=ESMF_MeshCreate(parametricDim=3,spatialDim=3, &
+        coordSys=ESMF_COORDSYS_CART, &
+         nodeIds=nodeIds, nodeCoords=nodeCoords, &
+         nodeOwners=nodeOwners, elementIds=elemIds,&
+         elementTypes=elemTypes, elementConn=elemConn, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+       rc=ESMF_FAILURE
+       return
+   endif
+
+  ! Create source field
+  call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
+
+   srcField = ESMF_FieldCreate(srcMesh, arrayspec, &
+                        name="source", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  
+  ! Load test data into the source Field
+  ! Should only be 1 localDE
+  call ESMF_FieldGet(srcField, 0, farrayPtr1D,  rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+  endif
+
+
+  ! set interpolated function
+  i2=1
+  do i1=1,numNodes
+
+     if (nodeOwners(i1) .eq. localPet) then
+        ! Get coordinates
+        x=nodeCoords(3*i1-2)
+        y=nodeCoords(3*i1-1)
+        z=nodeCoords(3*i1)
+
+        ! Set source function
+        farrayPtr1D(i2) = 20.0+x+y+z
+
+        ! Advance to next owner
+        i2=i2+1
+     endif
+  enddo
+
+
+   ! deallocate node data
+   deallocate(nodeIds)
+   deallocate(nodeCoords)
+   deallocate(nodeOwners)
+
+   ! deallocate elem data
+   deallocate(elemIds)
+   deallocate(elemTypes)
+   deallocate(elemConn)
+
+
+  ! Create Dest Mesh
+  if (petCount .eq. 1) then
+     ! Set number of nodes
+     numNodes=18
+
+     ! Allocate and fill the node id array.
+     allocate(nodeIds(numNodes))
+     nodeIds=(/1,2,3,4,5,6,7,8,9, &
+               10,11,12,13,14,15,16,17,18/) 
+
+     ! Allocate and fill node coordinate array.
+     ! Since this is a 3D Mesh the size is 3x the
+     ! number of nodes.
+     allocate(nodeCoords(3*numNodes))
+     nodeCoords=(/0.0,0.0,0.0, & ! node id 1
+                  1.0,0.0,0.0, & ! node id 2
+                  2.0,0.0,0.0, & ! node id 3
+                  0.0,1.0,0.0, & ! node id 4
+                  1.0,1.0,0.0, & ! node id 5
+                  2.0,1.0,0.0, & ! node id 6
+                  0.0,2.0,0.0, & ! node id 7
+                  1.0,2.0,0.0, & ! node id 8
+                  2.0,2.0,0.0, & ! node id 9
+                  0.0,0.0,1.0, & ! node id 10
+                  1.0,0.0,1.0, & ! node id 11
+                  2.0,0.0,1.0, & ! node id 12
+                  0.0,1.0,1.0, & ! node id 13
+                  1.0,1.0,1.0, & ! node id 14
+                  2.0,1.0,1.0, & ! node id 15
+                  0.0,2.0,1.0, & ! node id 16
+                  1.0,2.0,1.0, & ! node id 17
+                  2.0,2.0,1.0 /) ! node id 18
+
+     ! Allocate and fill the node owner array.
+     ! Since this Mesh is all on PET 0, it's just set to all 0.
+     allocate(nodeOwners(numNodes))
+     nodeOwners=0 ! everything on PET 0
+
+     ! Set the number of each type of element, plus the total number.
+     numElems=4
+
+     ! Allocate and fill the element id array.
+     allocate(elemIds(numElems))
+     elemIds=(/1,2,3,4/) 
+
+     ! Allocate and fill the element topology type array.
+     allocate(elemTypes(numElems))
+     elemTypes=ESMF_MESHELEMTYPE_HEX
+                 
+
+     ! Allocate and fill the element connection type array.
+     ! Note that entries in this array refer to the 
+     ! positions in the nodeIds, etc. arrays and that
+     ! the order and number of entries for each element
+     ! reflects that given in the Mesh options 
+     ! section for the corresponding entry
+     ! in the elemTypes array.
+     allocate(elemConn(8*numElems))
+     elemConn=(/1,2,5,4,10,11,14,13, &  ! elem id 1
+                2,3,6,5,11,12,15,14, &  ! elem id 2
+                4,5,8,7,13,14,17,16,   &  ! elem id 3
+                5,6,9,8,14,15,18,17/)  ! elem id 4
+
+ else if (petCount .eq. 4) then
+     ! Setup mesh data depending on PET
+    if (localPET .eq. 0) then !!! This part only for PET 0
+       ! Set number of nodes
+       numNodes=8
+
+       ! Allocate and fill the node id array.
+       allocate(nodeIds(numNodes))
+       nodeIds=(/1,2,4,5,10,11,13,14/) 
+
+       ! Allocate and fill node coordinate array.
+       ! Since this is a 2D Mesh the size is 2x the
+       ! number of nodes.
+       allocate(nodeCoords(3*numNodes))
+       nodeCoords=(/0.0,0.0,0.0, & ! node id 1
+                    1.0,0.0,0.0, & ! node id 2
+                    0.0,1.0,0.0, & ! node id 4
+                    1.0,1.0,0.0, & ! node id 5
+                    0.0,0.0,1.0, & ! node id 10
+                    1.0,0.0,1.0, & ! node id 11
+                    0.0,1.0,1.0, & ! node id 13
+                    1.0,1.0,1.0 /) ! node id 14
+
+
+       ! Allocate and fill the node owner array.
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0, & ! node id 1
+                    0, & ! node id 2
+                    0, & ! node id 4
+                    0, & ! node id 5
+                    0, & ! node id 10
+                    0, & ! node id 11
+                    0, & ! node id 13
+                    0/)  ! node id 14
+
+       ! Set the number of each type of element, plus the total number.
+       numElems=1
+
+       ! Allocate and fill the element id array.
+       allocate(elemIds(numElems))
+       elemIds=(/1/) 
+
+       ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_HEX/) ! elem id 1
+
+       ! Allocate and fill the element connection type array.
+       ! Note that entry are local indices
+       allocate(elemConn(8*numElems))
+       elemConn=(/1,2,4,3,5,6,8,7/) ! elem id 1
+
+     else if (localPET .eq. 1) then !!! This part only for PET 1
+       ! Set number of nodes
+       numNodes=8
+
+       ! Allocate and fill the node id array.
+       allocate(nodeIds(numNodes))
+       nodeIds=(/2,3,5,6,11,12,14,15/) 
+
+       ! Allocate and fill node coordinate array.
+       ! Since this is a 3D Mesh the size is 2x the
+       ! number of nodes.
+       allocate(nodeCoords(3*numNodes))
+       nodeCoords=(/1.0,0.0,0.0, & ! node id 2
+                    2.0,0.0,0.0, & ! node id 3
+                    1.0,1.0,0.0, & ! node id 5
+                    2.0,1.0,0.0, & ! node id 6
+                    1.0,0.0,1.0, & ! node id 11
+                    2.0,0.0,1.0, & ! node id 12
+                    1.0,1.0,1.0, & ! node id 14
+                    2.0,1.0,1.0/) ! node id 15
+
+       ! Allocate and fill the node owner array.
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0, & ! node id 2
+                    1, & ! node id 3
+                    0, & ! node id 5
+                    1, & ! node id 6
+                    0, & ! node id 11
+                    1, & ! node id 12
+                    0, & ! node id 14
+                    1/)  ! node id 15
+
+       ! Set the number of each type of element, plus the total number.
+       numElems=1
+
+       ! Allocate and fill the element id array.
+       allocate(elemIds(numElems))
+       elemIds=(/2/) 
+
+       ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_HEX/) ! elem id 1
+
+       ! Allocate and fill the element connection type array.
+       ! Note that entry are local indices
+       allocate(elemConn(8*numElems))
+       elemConn=(/1,2,4,3,5,6,8,7/) ! elem id 1
+
+    else if (localPET .eq. 2) then !!! This part only for PET 2
+        ! Set number of nodes
+        numNodes=8
+
+        ! Allocate and fill the node id array.
+        allocate(nodeIds(numNodes))
+        nodeIds=(/4,5,7,8,13,14,16,17/) 
+
+        ! Allocate and fill node coordinate array.
+        ! Since this is a 3D Mesh the size is 2x the
+        ! number of nodes.
+        allocate(nodeCoords(3*numNodes))
+        nodeCoords=(/0.0,1.0,0.0, & ! node id 4
+                     1.0,1.0,0.0, & ! node id 5
+                     0.0,2.0,0.0, & ! node id 7
+                     1.0,2.0,0.0, & ! node id 8
+                     0.0,1.0,1.0, & ! node id 13
+                     1.0,1.0,1.0, & ! node id 14
+                     0.0,2.0,1.0, & ! node id 16
+                     1.0,2.0,1.0/) ! node id 17
+
+
+        ! Allocate and fill the node owner array.
+        ! Since this Mesh is all on PET 0, it's just set to all 0.
+        allocate(nodeOwners(numNodes))
+        nodeOwners=(/0, & ! node id 4
+                     0, & ! node id 5
+                     2, & ! node id 7
+                     2, & ! node id 8
+                     0, & ! node id 13
+                     0, & ! node id 14
+                     2, & ! node id 16
+                     2/)  ! node id 17
+       ! Set the number of each type of element, plus the total number.
+       numElems=1
+
+       ! Allocate and fill the element id array.
+       allocate(elemIds(numElems))
+       elemIds=(/3/) 
+
+       ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_HEX/) ! elem id 1
+
+       ! Allocate and fill the element connection type array.
+       ! Note that entry are local indices
+       allocate(elemConn(8*numElems))
+       elemConn=(/1,2,4,3,5,6,8,7/) ! elem id 1
+
+
+     else if (localPET .eq. 3) then !!! This part only for PET 3
+        ! Set number of nodes
+        numNodes=8
+
+        ! Allocate and fill the node id array.
+        allocate(nodeIds(numNodes))
+        nodeIds=(/5,6,8,9,14,15,17,18/) 
+
+        ! Allocate and fill node coordinate array.
+        ! Since this is a 3D Mesh the size is 2x the
+        ! number of nodes.
+        allocate(nodeCoords(3*numNodes))
+        nodeCoords=(/1.0,1.0,0.0, &  ! node id 5
+                     2.0,1.0,0.0, &  ! node id 6
+                     1.0,2.0,0.0, &  ! node id 8
+                     2.0,2.0,0.0, &  ! node id 9
+                     1.0,1.0,1.0, &  ! node id 14
+                     2.0,1.0,1.0, &  ! node id 15
+                     1.0,2.0,1.0, &  ! node id 17
+                     2.0,2.0,1.0/)  ! node id 18
+
+        ! Allocate and fill the node owner array.
+        allocate(nodeOwners(numNodes))
+        nodeOwners=(/0, & ! node id 5
+                     1, & ! node id 6
+                     2, & ! node id 8
+                     3, & ! node id 9
+                     0, & ! node id 14
+                     1, & ! node id 15
+                     2, & ! node id 17
+                     3/)  ! node id 18
+ 
+       ! Set the number of each type of element, plus the total number.
+       numElems=1
+
+       ! Allocate and fill the element id array.
+       allocate(elemIds(numElems))
+       elemIds=(/4/) 
+
+       ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_HEX/) ! elem id 1
+
+       ! Allocate and fill the element connection type array.
+       ! Note that entry are local indices
+       allocate(elemConn(8*numElems))
+       elemConn=(/1,2,4,3,5,6,8,7/) ! elem id 1
+
+       endif
+    endif
+
+   ! Create Mesh structure in 1 step
+   dstMesh=ESMF_MeshCreate(parametricDim=3,spatialDim=3, &
+        coordSys=ESMF_COORDSYS_CART, &
+         nodeIds=nodeIds, nodeCoords=nodeCoords, &
+         nodeOwners=nodeOwners, elementIds=elemIds,&
+         elementTypes=elemTypes, elementConn=elemConn, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+       rc=ESMF_FAILURE
+       return
+   endif
+
+  
+  ! Create dest field
+  call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
+
+   dstField = ESMF_FieldCreate(dstMesh, arrayspec, &
+                        name="source", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  
+  ! clear destination Field
+  ! Should only be 1 localDE
+  call ESMF_FieldGet(dstField, 0, farrayPtr1D,  rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+  endif
+
+  farrayPtr1D=0.0
+
+
+  !!! Regrid forward from the A grid to the B grid
+  ! Regrid store
+  call ESMF_FieldRegridStore( &
+          srcField, &
+          dstField=dstField, &
+          routeHandle=routeHandle, &
+          regridmethod=ESMF_REGRIDMETHOD_NEAREST_STOD, &
+          rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  ! Do regrid
+  call ESMF_FieldRegrid(srcField, dstField, routeHandle, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  call ESMF_FieldRegridRelease(routeHandle, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  ! Check destination field
+  ! Should only be 1 localDE
+  call ESMF_FieldGet(dstField, 0, farrayPtr1D,  rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+  endif
+
+  ! loop through nodes and make sure interpolated values are reasonable
+  i2=1
+  do i1=1,numNodes
+
+     if (nodeOwners(i1) .eq. localPet) then
+        ! Get coordinates
+        x=nodeCoords(3*i1-2)
+        y=nodeCoords(3*i1-1)
+        z=nodeCoords(3*i1)
+
+        !! if error is too big report an error
+        if ( abs( farrayPtr1D(i2)-(x+y+z+20.0) ) > 0.0001) then
+          print *, abs( farrayPtr1D(i2)-(x+y+z+20.0) ), x, y, z, farrayPtr1D(i2), (x+y+z+20.0)
+           correct=.false.
+        endif
+
+        ! Advance to next owner
+        i2=i2+1
+     endif
+  enddo
+
+
+   ! deallocate node data
+   deallocate(nodeIds)
+   deallocate(nodeCoords)
+   deallocate(nodeOwners)
+
+   ! deallocate elem data
+   deallocate(elemIds)
+   deallocate(elemTypes)
+   deallocate(elemConn)
+
+
+
+  ! Uncomment these calls to see some actual regrid results
+#if 0
+  spherical_grid = 0
+  call ESMF_MeshIO(vm, dstMesh, ESMF_STAGGERLOC_EDGE1, &
+               "srcmesh", srcArrayA, rc=localrc, &
+               spherical=spherical_grid)
+  call ESMF_MeshIO(vm, srcGrid, ESMF_STAGGERLOC_CENTER, &
+               "dstmesh", dstArray, rc=localrc, &
+               spherical=spherical_grid)
+#endif
+
+  ! Destroy the Fields
+   call ESMF_FieldDestroy(srcField, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+   call ESMF_FieldDestroy(dstField, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+
+  ! Free the grids
+  call ESMF_MeshDestroy(dstMesh, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  call ESMF_MeshDestroy(srcMesh, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+
+  ! return answer based on correct flag
+  if (correct) then
+    rc=ESMF_SUCCESS
+  else
+    rc=ESMF_FAILURE
+  endif
+
+ end subroutine test_STOD_3DCartMeshToMesh
+
+ subroutine test_DTOS_3DCartMeshToMesh(rc)
+        integer, intent(out)  :: rc
+  logical :: correct
+  integer :: localrc
+  type(ESMF_Mesh) :: dstMesh
+  type(ESMF_Mesh) :: srcMesh
+  type(ESMF_Field) :: srcField
+  type(ESMF_Field) :: dstField
+  type(ESMF_Array) :: dstArray
+  type(ESMF_Array) :: lonArrayA
+  type(ESMF_Array) :: srcArrayA
+  type(ESMF_RouteHandle) :: routeHandle
+  type(ESMF_ArraySpec) :: arrayspec
+  type(ESMF_VM) :: vm
+  real(ESMF_KIND_R8), pointer :: farrayPtrXC(:,:), farrayPtr1D(:)
+  real(ESMF_KIND_R8), pointer :: farrayPtrYC(:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtr(:,:),farrayPtr2(:,:)
+  integer :: clbnd(2),cubnd(2)
+  integer :: fclbnd(2),fcubnd(2)
+  integer :: i1,i2,i3, index(2)
+  integer :: lDE, localDECount
+  real(ESMF_KIND_R8) :: coord(2)
+  character(len=ESMF_MAXSTR) :: string
+  real(ESMF_KIND_R8) :: dx,dy
+  
+  real(ESMF_KIND_R8) :: x,y,z
+  
+  integer :: spherical_grid
+
+  integer, pointer :: larrayList(:)
+  integer :: localPet, petCount
+
+  integer, pointer :: nodeIds(:),nodeOwners(:)
+  real(ESMF_KIND_R8), pointer :: nodeCoords(:)
+  integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
+  integer :: numNodes, numElems
+  integer :: numQuadElems,numTriElems, numTotElems
+
+  ! result code
+  integer :: finalrc
+  
+  ! init success flag
+  correct=.true.
+
+  rc=ESMF_SUCCESS
+
+  ! get pet info
+  call ESMF_VMGetGlobal(vm, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! If we don't have 1 or 4 PETS then exit successfully
+  if ((petCount .ne. 1) .and. (petCount .ne. 4)) then
+    print*,'ERROR:  test must be run using exactly 1 or 4 PETS - detected ',petCount
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  ! setup source Mesh
+  if (petCount .eq. 1) then
+     ! Set number of nodes
+     numNodes=18
+
+     ! Allocate and fill the node id array.
+     allocate(nodeIds(numNodes))
+     nodeIds=(/1,2,3,4,5,6,7,8,9, &
+               10,11,12,13,14,15,16,17,18/) 
+
+     ! Allocate and fill node coordinate array.
+     ! Since this is a 3D Mesh the size is 3x the
+     ! number of nodes.
+     allocate(nodeCoords(3*numNodes))
+     nodeCoords=(/0.0,0.0,0.0, & ! node id 1
+                  1.0,0.0,0.0, & ! node id 2
+                  2.0,0.0,0.0, & ! node id 3
+                  0.0,1.0,0.0, & ! node id 4
+                  1.0,1.0,0.0, & ! node id 5
+                  2.0,1.0,0.0, & ! node id 6
+                  0.0,2.0,0.0, & ! node id 7
+                  1.0,2.0,0.0, & ! node id 8
+                  2.0,2.0,0.0, & ! node id 9
+                  0.0,0.0,1.0, & ! node id 10
+                  1.0,0.0,1.0, & ! node id 11
+                  2.0,0.0,1.0, & ! node id 12
+                  0.0,1.0,1.0, & ! node id 13
+                  1.0,1.0,1.0, & ! node id 14
+                  2.0,1.0,1.0, & ! node id 15
+                  0.0,2.0,1.0, & ! node id 16
+                  1.0,2.0,1.0, & ! node id 17
+                  2.0,2.0,1.0 /) ! node id 18
+
+     ! Allocate and fill the node owner array.
+     ! Since this Mesh is all on PET 0, it's just set to all 0.
+     allocate(nodeOwners(numNodes))
+     nodeOwners=0 ! everything on PET 0
+
+     ! Set the number of each type of element, plus the total number.
+     numElems=4
+
+     ! Allocate and fill the element id array.
+     allocate(elemIds(numElems))
+     elemIds=(/1,2,3,4/) 
+
+     ! Allocate and fill the element topology type array.
+     allocate(elemTypes(numElems))
+     elemTypes=ESMF_MESHELEMTYPE_HEX
+                 
+
+     ! Allocate and fill the element connection type array.
+     ! Note that entries in this array refer to the 
+     ! positions in the nodeIds, etc. arrays and that
+     ! the order and number of entries for each element
+     ! reflects that given in the Mesh options 
+     ! section for the corresponding entry
+     ! in the elemTypes array.
+     allocate(elemConn(8*numElems))
+     elemConn=(/1,2,5,4,10,11,14,13, &  ! elem id 1
+                2,3,6,5,11,12,15,14, &  ! elem id 2
+                4,5,8,7,13,14,17,16,   &  ! elem id 3
+                5,6,9,8,14,15,18,17/)  ! elem id 4
+
+ else if (petCount .eq. 4) then
+     ! Setup mesh data depending on PET
+    if (localPET .eq. 0) then !!! This part only for PET 0
+       ! Set number of nodes
+       numNodes=8
+
+       ! Allocate and fill the node id array.
+       allocate(nodeIds(numNodes))
+       nodeIds=(/1,2,4,5,10,11,13,14/) 
+
+       ! Allocate and fill node coordinate array.
+       ! Since this is a 2D Mesh the size is 2x the
+       ! number of nodes.
+       allocate(nodeCoords(3*numNodes))
+       nodeCoords=(/0.0,0.0,0.0, & ! node id 1
+                    1.0,0.0,0.0, & ! node id 2
+                    0.0,1.0,0.0, & ! node id 4
+                    1.0,1.0,0.0, & ! node id 5
+                    0.0,0.0,1.0, & ! node id 10
+                    1.0,0.0,1.0, & ! node id 11
+                    0.0,1.0,1.0, & ! node id 13
+                    1.0,1.0,1.0 /) ! node id 14
+
+
+       ! Allocate and fill the node owner array.
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0, & ! node id 1
+                    0, & ! node id 2
+                    0, & ! node id 4
+                    0, & ! node id 5
+                    0, & ! node id 10
+                    0, & ! node id 11
+                    0, & ! node id 13
+                    0/)  ! node id 14
+
+       ! Set the number of each type of element, plus the total number.
+       numElems=1
+
+       ! Allocate and fill the element id array.
+       allocate(elemIds(numElems))
+       elemIds=(/1/) 
+
+       ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_HEX/) ! elem id 1
+
+       ! Allocate and fill the element connection type array.
+       ! Note that entry are local indices
+       allocate(elemConn(8*numElems))
+       elemConn=(/1,2,4,3,5,6,8,7/) ! elem id 1
+
+     else if (localPET .eq. 1) then !!! This part only for PET 1
+       ! Set number of nodes
+       numNodes=8
+
+       ! Allocate and fill the node id array.
+       allocate(nodeIds(numNodes))
+       nodeIds=(/2,3,5,6,11,12,14,15/) 
+
+       ! Allocate and fill node coordinate array.
+       ! Since this is a 3D Mesh the size is 2x the
+       ! number of nodes.
+       allocate(nodeCoords(3*numNodes))
+       nodeCoords=(/1.0,0.0,0.0, & ! node id 2
+                    2.0,0.0,0.0, & ! node id 3
+                    1.0,1.0,0.0, & ! node id 5
+                    2.0,1.0,0.0, & ! node id 6
+                    1.0,0.0,1.0, & ! node id 11
+                    2.0,0.0,1.0, & ! node id 12
+                    1.0,1.0,1.0, & ! node id 14
+                    2.0,1.0,1.0/) ! node id 15
+
+       ! Allocate and fill the node owner array.
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0, & ! node id 2
+                    1, & ! node id 3
+                    0, & ! node id 5
+                    1, & ! node id 6
+                    0, & ! node id 11
+                    1, & ! node id 12
+                    0, & ! node id 14
+                    1/)  ! node id 15
+
+       ! Set the number of each type of element, plus the total number.
+       numElems=1
+
+       ! Allocate and fill the element id array.
+       allocate(elemIds(numElems))
+       elemIds=(/2/) 
+
+       ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_HEX/) ! elem id 1
+
+       ! Allocate and fill the element connection type array.
+       ! Note that entry are local indices
+       allocate(elemConn(8*numElems))
+       elemConn=(/1,2,4,3,5,6,8,7/) ! elem id 1
+
+    else if (localPET .eq. 2) then !!! This part only for PET 2
+        ! Set number of nodes
+        numNodes=8
+
+        ! Allocate and fill the node id array.
+        allocate(nodeIds(numNodes))
+        nodeIds=(/4,5,7,8,13,14,16,17/) 
+
+        ! Allocate and fill node coordinate array.
+        ! Since this is a 3D Mesh the size is 2x the
+        ! number of nodes.
+        allocate(nodeCoords(3*numNodes))
+        nodeCoords=(/0.0,1.0,0.0, & ! node id 4
+                     1.0,1.0,0.0, & ! node id 5
+                     0.0,2.0,0.0, & ! node id 7
+                     1.0,2.0,0.0, & ! node id 8
+                     0.0,1.0,1.0, & ! node id 13
+                     1.0,1.0,1.0, & ! node id 14
+                     0.0,2.0,1.0, & ! node id 16
+                     1.0,2.0,1.0/) ! node id 17
+
+
+        ! Allocate and fill the node owner array.
+        ! Since this Mesh is all on PET 0, it's just set to all 0.
+        allocate(nodeOwners(numNodes))
+        nodeOwners=(/0, & ! node id 4
+                     0, & ! node id 5
+                     2, & ! node id 7
+                     2, & ! node id 8
+                     0, & ! node id 13
+                     0, & ! node id 14
+                     2, & ! node id 16
+                     2/)  ! node id 17
+       ! Set the number of each type of element, plus the total number.
+       numElems=1
+
+       ! Allocate and fill the element id array.
+       allocate(elemIds(numElems))
+       elemIds=(/3/) 
+
+       ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_HEX/) ! elem id 1
+
+       ! Allocate and fill the element connection type array.
+       ! Note that entry are local indices
+       allocate(elemConn(8*numElems))
+       elemConn=(/1,2,4,3,5,6,8,7/) ! elem id 1
+
+
+     else if (localPET .eq. 3) then !!! This part only for PET 3
+        ! Set number of nodes
+        numNodes=8
+
+        ! Allocate and fill the node id array.
+        allocate(nodeIds(numNodes))
+        nodeIds=(/5,6,8,9,14,15,17,18/) 
+
+        ! Allocate and fill node coordinate array.
+        ! Since this is a 3D Mesh the size is 2x the
+        ! number of nodes.
+        allocate(nodeCoords(3*numNodes))
+        nodeCoords=(/1.0,1.0,0.0, &  ! node id 5
+                     2.0,1.0,0.0, &  ! node id 6
+                     1.0,2.0,0.0, &  ! node id 8
+                     2.0,2.0,0.0, &  ! node id 9
+                     1.0,1.0,1.0, &  ! node id 14
+                     2.0,1.0,1.0, &  ! node id 15
+                     1.0,2.0,1.0, &  ! node id 17
+                     2.0,2.0,1.0/)  ! node id 18
+
+        ! Allocate and fill the node owner array.
+        allocate(nodeOwners(numNodes))
+        nodeOwners=(/0, & ! node id 5
+                     1, & ! node id 6
+                     2, & ! node id 8
+                     3, & ! node id 9
+                     0, & ! node id 14
+                     1, & ! node id 15
+                     2, & ! node id 17
+                     3/)  ! node id 18
+ 
+       ! Set the number of each type of element, plus the total number.
+       numElems=1
+
+       ! Allocate and fill the element id array.
+       allocate(elemIds(numElems))
+       elemIds=(/4/) 
+
+       ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_HEX/) ! elem id 1
+
+       ! Allocate and fill the element connection type array.
+       ! Note that entry are local indices
+       allocate(elemConn(8*numElems))
+       elemConn=(/1,2,4,3,5,6,8,7/) ! elem id 1
+
+       endif
+    endif
+
+   ! Create Mesh structure in 1 step
+   srcMesh=ESMF_MeshCreate(parametricDim=3,spatialDim=3, &
+        coordSys=ESMF_COORDSYS_CART, &
+         nodeIds=nodeIds, nodeCoords=nodeCoords, &
+         nodeOwners=nodeOwners, elementIds=elemIds,&
+         elementTypes=elemTypes, elementConn=elemConn, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+       rc=ESMF_FAILURE
+       return
+   endif
+
+  ! Create source field
+  call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
+
+   srcField = ESMF_FieldCreate(srcMesh, arrayspec, &
+                        name="source", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  
+  ! Load test data into the source Field
+  ! Should only be 1 localDE
+  call ESMF_FieldGet(srcField, 0, farrayPtr1D,  rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+  endif
+
+
+  ! set interpolated function
+  i2=1
+  do i1=1,numNodes
+
+     if (nodeOwners(i1) .eq. localPet) then
+        ! Get coordinates
+        x=nodeCoords(3*i1-2)
+        y=nodeCoords(3*i1-1)
+        z=nodeCoords(3*i1)
+
+        ! Set source function
+        farrayPtr1D(i2) = 20.0+x+y+z
+
+        ! Advance to next owner
+        i2=i2+1
+     endif
+  enddo
+
+
+   ! deallocate node data
+   deallocate(nodeIds)
+   deallocate(nodeCoords)
+   deallocate(nodeOwners)
+
+   ! deallocate elem data
+   deallocate(elemIds)
+   deallocate(elemTypes)
+   deallocate(elemConn)
+
+
+  ! Create Dest Mesh
+  if (petCount .eq. 1) then
+     ! Set number of nodes
+     numNodes=18
+
+     ! Allocate and fill the node id array.
+     allocate(nodeIds(numNodes))
+     nodeIds=(/1,2,3,4,5,6,7,8,9, &
+               10,11,12,13,14,15,16,17,18/) 
+
+     ! Allocate and fill node coordinate array.
+     ! Since this is a 3D Mesh the size is 3x the
+     ! number of nodes.
+     allocate(nodeCoords(3*numNodes))
+     nodeCoords=(/0.0,0.0,0.0, & ! node id 1
+                  1.0,0.0,0.0, & ! node id 2
+                  2.0,0.0,0.0, & ! node id 3
+                  0.0,1.0,0.0, & ! node id 4
+                  1.0,1.0,0.0, & ! node id 5
+                  2.0,1.0,0.0, & ! node id 6
+                  0.0,2.0,0.0, & ! node id 7
+                  1.0,2.0,0.0, & ! node id 8
+                  2.0,2.0,0.0, & ! node id 9
+                  0.0,0.0,1.0, & ! node id 10
+                  1.0,0.0,1.0, & ! node id 11
+                  2.0,0.0,1.0, & ! node id 12
+                  0.0,1.0,1.0, & ! node id 13
+                  1.0,1.0,1.0, & ! node id 14
+                  2.0,1.0,1.0, & ! node id 15
+                  0.0,2.0,1.0, & ! node id 16
+                  1.0,2.0,1.0, & ! node id 17
+                  2.0,2.0,1.0 /) ! node id 18
+
+     ! Allocate and fill the node owner array.
+     ! Since this Mesh is all on PET 0, it's just set to all 0.
+     allocate(nodeOwners(numNodes))
+     nodeOwners=0 ! everything on PET 0
+
+     ! Set the number of each type of element, plus the total number.
+     numElems=4
+
+     ! Allocate and fill the element id array.
+     allocate(elemIds(numElems))
+     elemIds=(/1,2,3,4/) 
+
+     ! Allocate and fill the element topology type array.
+     allocate(elemTypes(numElems))
+     elemTypes=ESMF_MESHELEMTYPE_HEX
+                 
+
+     ! Allocate and fill the element connection type array.
+     ! Note that entries in this array refer to the 
+     ! positions in the nodeIds, etc. arrays and that
+     ! the order and number of entries for each element
+     ! reflects that given in the Mesh options 
+     ! section for the corresponding entry
+     ! in the elemTypes array.
+     allocate(elemConn(8*numElems))
+     elemConn=(/1,2,5,4,10,11,14,13, &  ! elem id 1
+                2,3,6,5,11,12,15,14, &  ! elem id 2
+                4,5,8,7,13,14,17,16,   &  ! elem id 3
+                5,6,9,8,14,15,18,17/)  ! elem id 4
+
+ else if (petCount .eq. 4) then
+     ! Setup mesh data depending on PET
+    if (localPET .eq. 0) then !!! This part only for PET 0
+       ! Set number of nodes
+       numNodes=8
+
+       ! Allocate and fill the node id array.
+       allocate(nodeIds(numNodes))
+       nodeIds=(/1,2,4,5,10,11,13,14/) 
+
+       ! Allocate and fill node coordinate array.
+       ! Since this is a 2D Mesh the size is 2x the
+       ! number of nodes.
+       allocate(nodeCoords(3*numNodes))
+       nodeCoords=(/0.0,0.0,0.0, & ! node id 1
+                    1.0,0.0,0.0, & ! node id 2
+                    0.0,1.0,0.0, & ! node id 4
+                    1.0,1.0,0.0, & ! node id 5
+                    0.0,0.0,1.0, & ! node id 10
+                    1.0,0.0,1.0, & ! node id 11
+                    0.0,1.0,1.0, & ! node id 13
+                    1.0,1.0,1.0 /) ! node id 14
+
+
+       ! Allocate and fill the node owner array.
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0, & ! node id 1
+                    0, & ! node id 2
+                    0, & ! node id 4
+                    0, & ! node id 5
+                    0, & ! node id 10
+                    0, & ! node id 11
+                    0, & ! node id 13
+                    0/)  ! node id 14
+
+       ! Set the number of each type of element, plus the total number.
+       numElems=1
+
+       ! Allocate and fill the element id array.
+       allocate(elemIds(numElems))
+       elemIds=(/1/) 
+
+       ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_HEX/) ! elem id 1
+
+       ! Allocate and fill the element connection type array.
+       ! Note that entry are local indices
+       allocate(elemConn(8*numElems))
+       elemConn=(/1,2,4,3,5,6,8,7/) ! elem id 1
+
+     else if (localPET .eq. 1) then !!! This part only for PET 1
+       ! Set number of nodes
+       numNodes=8
+
+       ! Allocate and fill the node id array.
+       allocate(nodeIds(numNodes))
+       nodeIds=(/2,3,5,6,11,12,14,15/) 
+
+       ! Allocate and fill node coordinate array.
+       ! Since this is a 3D Mesh the size is 2x the
+       ! number of nodes.
+       allocate(nodeCoords(3*numNodes))
+       nodeCoords=(/1.0,0.0,0.0, & ! node id 2
+                    2.0,0.0,0.0, & ! node id 3
+                    1.0,1.0,0.0, & ! node id 5
+                    2.0,1.0,0.0, & ! node id 6
+                    1.0,0.0,1.0, & ! node id 11
+                    2.0,0.0,1.0, & ! node id 12
+                    1.0,1.0,1.0, & ! node id 14
+                    2.0,1.0,1.0/) ! node id 15
+
+       ! Allocate and fill the node owner array.
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0, & ! node id 2
+                    1, & ! node id 3
+                    0, & ! node id 5
+                    1, & ! node id 6
+                    0, & ! node id 11
+                    1, & ! node id 12
+                    0, & ! node id 14
+                    1/)  ! node id 15
+
+       ! Set the number of each type of element, plus the total number.
+       numElems=1
+
+       ! Allocate and fill the element id array.
+       allocate(elemIds(numElems))
+       elemIds=(/2/) 
+
+       ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_HEX/) ! elem id 1
+
+       ! Allocate and fill the element connection type array.
+       ! Note that entry are local indices
+       allocate(elemConn(8*numElems))
+       elemConn=(/1,2,4,3,5,6,8,7/) ! elem id 1
+
+    else if (localPET .eq. 2) then !!! This part only for PET 2
+        ! Set number of nodes
+        numNodes=8
+
+        ! Allocate and fill the node id array.
+        allocate(nodeIds(numNodes))
+        nodeIds=(/4,5,7,8,13,14,16,17/) 
+
+        ! Allocate and fill node coordinate array.
+        ! Since this is a 3D Mesh the size is 2x the
+        ! number of nodes.
+        allocate(nodeCoords(3*numNodes))
+        nodeCoords=(/0.0,1.0,0.0, & ! node id 4
+                     1.0,1.0,0.0, & ! node id 5
+                     0.0,2.0,0.0, & ! node id 7
+                     1.0,2.0,0.0, & ! node id 8
+                     0.0,1.0,1.0, & ! node id 13
+                     1.0,1.0,1.0, & ! node id 14
+                     0.0,2.0,1.0, & ! node id 16
+                     1.0,2.0,1.0/) ! node id 17
+
+
+        ! Allocate and fill the node owner array.
+        ! Since this Mesh is all on PET 0, it's just set to all 0.
+        allocate(nodeOwners(numNodes))
+        nodeOwners=(/0, & ! node id 4
+                     0, & ! node id 5
+                     2, & ! node id 7
+                     2, & ! node id 8
+                     0, & ! node id 13
+                     0, & ! node id 14
+                     2, & ! node id 16
+                     2/)  ! node id 17
+       ! Set the number of each type of element, plus the total number.
+       numElems=1
+
+       ! Allocate and fill the element id array.
+       allocate(elemIds(numElems))
+       elemIds=(/3/) 
+
+       ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_HEX/) ! elem id 1
+
+       ! Allocate and fill the element connection type array.
+       ! Note that entry are local indices
+       allocate(elemConn(8*numElems))
+       elemConn=(/1,2,4,3,5,6,8,7/) ! elem id 1
+
+
+     else if (localPET .eq. 3) then !!! This part only for PET 3
+        ! Set number of nodes
+        numNodes=8
+
+        ! Allocate and fill the node id array.
+        allocate(nodeIds(numNodes))
+        nodeIds=(/5,6,8,9,14,15,17,18/) 
+
+        ! Allocate and fill node coordinate array.
+        ! Since this is a 3D Mesh the size is 2x the
+        ! number of nodes.
+        allocate(nodeCoords(3*numNodes))
+        nodeCoords=(/1.0,1.0,0.0, &  ! node id 5
+                     2.0,1.0,0.0, &  ! node id 6
+                     1.0,2.0,0.0, &  ! node id 8
+                     2.0,2.0,0.0, &  ! node id 9
+                     1.0,1.0,1.0, &  ! node id 14
+                     2.0,1.0,1.0, &  ! node id 15
+                     1.0,2.0,1.0, &  ! node id 17
+                     2.0,2.0,1.0/)  ! node id 18
+
+        ! Allocate and fill the node owner array.
+        allocate(nodeOwners(numNodes))
+        nodeOwners=(/0, & ! node id 5
+                     1, & ! node id 6
+                     2, & ! node id 8
+                     3, & ! node id 9
+                     0, & ! node id 14
+                     1, & ! node id 15
+                     2, & ! node id 17
+                     3/)  ! node id 18
+ 
+       ! Set the number of each type of element, plus the total number.
+       numElems=1
+
+       ! Allocate and fill the element id array.
+       allocate(elemIds(numElems))
+       elemIds=(/4/) 
+
+       ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_HEX/) ! elem id 1
+
+       ! Allocate and fill the element connection type array.
+       ! Note that entry are local indices
+       allocate(elemConn(8*numElems))
+       elemConn=(/1,2,4,3,5,6,8,7/) ! elem id 1
+
+       endif
+    endif
+
+   ! Create Mesh structure in 1 step
+   dstMesh=ESMF_MeshCreate(parametricDim=3,spatialDim=3, &
+        coordSys=ESMF_COORDSYS_CART, &
+         nodeIds=nodeIds, nodeCoords=nodeCoords, &
+         nodeOwners=nodeOwners, elementIds=elemIds,&
+         elementTypes=elemTypes, elementConn=elemConn, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+       rc=ESMF_FAILURE
+       return
+   endif
+
+  
+  ! Create dest field
+  call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
+
+   dstField = ESMF_FieldCreate(dstMesh, arrayspec, &
+                        name="source", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  
+  ! clear destination Field
+  ! Should only be 1 localDE
+  call ESMF_FieldGet(dstField, 0, farrayPtr1D,  rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+  endif
+
+  farrayPtr1D=0.0
+
+
+  !!! Regrid forward from the A grid to the B grid
+  ! Regrid store
+  call ESMF_FieldRegridStore( &
+          srcField, &
+          dstField=dstField, &
+          routeHandle=routeHandle, &
+          regridmethod=ESMF_REGRIDMETHOD_NEAREST_DTOS, &
+          rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  ! Do regrid
+  call ESMF_FieldRegrid(srcField, dstField, routeHandle, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  call ESMF_FieldRegridRelease(routeHandle, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  ! Check destination field
+  ! Should only be 1 localDE
+  call ESMF_FieldGet(dstField, 0, farrayPtr1D,  rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+  endif
+
+  ! loop through nodes and make sure interpolated values are reasonable
+  i2=1
+  do i1=1,numNodes
+
+     if (nodeOwners(i1) .eq. localPet) then
+        ! Get coordinates
+        x=nodeCoords(3*i1-2)
+        y=nodeCoords(3*i1-1)
+        z=nodeCoords(3*i1)
+
+        !! if error is too big report an error
+        if ( abs( farrayPtr1D(i2)-(x+y+z+20.0) ) > 0.0001) then
+          print *, abs( farrayPtr1D(i2)-(x+y+z+20.0) ), x, y, z, farrayPtr1D(i2), (x+y+z+20.0)
+           correct=.false.
+        endif
+
+        ! Advance to next owner
+        i2=i2+1
+     endif
+  enddo
+
+
+   ! deallocate node data
+   deallocate(nodeIds)
+   deallocate(nodeCoords)
+   deallocate(nodeOwners)
+
+   ! deallocate elem data
+   deallocate(elemIds)
+   deallocate(elemTypes)
+   deallocate(elemConn)
+
+
+
+  ! Uncomment these calls to see some actual regrid results
+#if 0
+  spherical_grid = 0
+  call ESMF_MeshIO(vm, dstMesh, ESMF_STAGGERLOC_EDGE1, &
+               "srcmesh", srcArrayA, rc=localrc, &
+               spherical=spherical_grid)
+  call ESMF_MeshIO(vm, srcGrid, ESMF_STAGGERLOC_CENTER, &
+               "dstmesh", dstArray, rc=localrc, &
+               spherical=spherical_grid)
+#endif
+
+  ! Destroy the Fields
+   call ESMF_FieldDestroy(srcField, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+   call ESMF_FieldDestroy(dstField, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+
+  ! Free the grids
+  call ESMF_MeshDestroy(dstMesh, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  call ESMF_MeshDestroy(srcMesh, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+
+  ! return answer based on correct flag
+  if (correct) then
+    rc=ESMF_SUCCESS
+  else
+    rc=ESMF_FAILURE
+  endif
+
+ end subroutine test_DTOS_3DCartMeshToMesh
+
+
 
 
  subroutine test_regridMeshToGrid3D(rc)
@@ -9588,7 +14364,7 @@ write(*,*) "LOCALRC=",localrc
 
 
   !!! Regrid forward from the A grid to the B grid
-  ! Regrid store
+  ! Regrid store<
   ! NOTE THAT THE FOLLOWING METHOD USES ARGUMENTS THAT ARE DEPRECATED. 
   ! Please use (factorList, factorIndexList) instead of (weights, indices)  
   ! See test_RegridMatrixFactor() for an example of their use. 
@@ -14538,6 +19314,746 @@ write(*,*) "LOCALRC=",localrc
 
  end subroutine test_regridNearestMeshToMesh
 
+ subroutine test_regridNearestDTOSMeshToMesh(rc)
+        integer, intent(out)  :: rc
+  logical :: correct
+  integer :: localrc
+  type(ESMF_Mesh) :: dstMesh
+  type(ESMF_Mesh) :: srcMesh
+  type(ESMF_Field) :: srcField
+  type(ESMF_Field) :: dstField
+  type(ESMF_Array) :: dstArray
+  type(ESMF_Array) :: lonArrayA
+  type(ESMF_Array) :: srcArrayA
+  type(ESMF_RouteHandle) :: routeHandle
+  type(ESMF_ArraySpec) :: arrayspec
+  type(ESMF_VM) :: vm
+  real(ESMF_KIND_R8), pointer :: farrayPtrXC(:,:), farrayPtr1D(:)
+  real(ESMF_KIND_R8), pointer :: farrayPtrYC(:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtr(:,:),farrayPtr2(:,:)
+  integer :: clbnd(2),cubnd(2)
+  integer :: fclbnd(2),fcubnd(2)
+  integer :: i1,i2,i3, index(2)
+  integer :: lDE, localDECount
+  real(ESMF_KIND_R8) :: coord(2)
+  character(len=ESMF_MAXSTR) :: string
+  real(ESMF_KIND_R8) :: dx,dy
+  
+  real(ESMF_KIND_R8) :: x,y
+  
+  integer :: spherical_grid
+
+  integer, pointer :: larrayList(:)
+  integer :: localPet, petCount
+
+  integer, pointer :: nodeIds(:),nodeOwners(:)
+  real(ESMF_KIND_R8), pointer :: nodeCoords(:)
+  integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
+  integer :: numNodes, numElems
+  integer :: numQuadElems,numTriElems, numTotElems
+
+  ! result code
+  integer :: finalrc
+  
+  ! init success flag
+  correct=.true.
+
+  rc=ESMF_SUCCESS
+
+  ! get pet info
+  call ESMF_VMGetGlobal(vm, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! If we don't have 1 or 4 PETS then exit successfully
+  if ((petCount .ne. 1) .and. (petCount .ne. 4)) then
+    print*,'ERROR:  test must be run using exactly 1 or 4 PETS - detected ',petCount
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  ! Setup Src Mesh
+  if (petCount .eq. 1) then
+     ! Set number of nodes
+     numNodes=9
+
+     ! Allocate and fill the node id array.
+     allocate(nodeIds(numNodes))
+     nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+
+     ! Allocate and fill node coordinate array.
+     ! Since this is a 2D Mesh the size is 2x the
+     ! number of nodes.
+     allocate(nodeCoords(2*numNodes))
+     nodeCoords=(/-0.0,-0.0, & ! node id 1
+                   1.0,-0.0, & ! node id 2
+                   2.0,-0.0, & ! node id 3
+                  -0.0, 1.0, & ! node id 4
+                   1.0, 1.0, & ! node id 5
+                   2.0, 1.0, & ! node id 6
+                  -0.0, 2.0, & ! node id 7
+                   1.0, 2.0, & ! node id 8
+                   2.0, 2.0 /) ! node id 9
+
+     ! Allocate and fill the node owner array.
+     ! Since this Mesh is all on PET 0, it's just set to all 0.
+     allocate(nodeOwners(numNodes))
+     nodeOwners=0 ! everything on PET 0
+
+     ! Set the number of each type of element, plus the total number.
+     numQuadElems=3
+     numTriElems=2
+     numTotElems=numQuadElems+numTriElems
+
+     ! Allocate and fill the element id array.
+     allocate(elemIds(numTotElems))
+     elemIds=(/1,2,3,4,5/) 
+
+
+     ! Allocate and fill the element topology type array.
+     allocate(elemTypes(numTotElems))
+     elemTypes=(/ESMF_MESHELEMTYPE_QUAD, & ! elem id 1
+                 ESMF_MESHELEMTYPE_TRI,  & ! elem id 2
+                 ESMF_MESHELEMTYPE_TRI,  & ! elem id 3
+                 ESMF_MESHELEMTYPE_QUAD, & ! elem id 4
+                 ESMF_MESHELEMTYPE_QUAD/)  ! elem id 5
+
+
+     ! Allocate and fill the element connection type array.
+     ! Note that entries in this array refer to the 
+     ! positions in the nodeIds, etc. arrays and that
+     ! the order and number of entries for each element
+     ! reflects that given in the Mesh options 
+     ! section for the corresponding entry
+     ! in the elemTypes array.
+     allocate(elemConn(4*numQuadElems+3*numTriElems))
+     elemConn=(/1,2,5,4, &  ! elem id 1
+                2,3,5,   &  ! elem id 2
+                3,6,5,   &  ! elem id 3
+                4,5,8,7, &  ! elem id 4
+                5,6,9,8/)   ! elem id 5
+
+
+ else if (petCount .eq. 4) then
+     ! Setup mesh data depending on PET
+    if (localPET .eq. 0) then !!! This part only for PET 0
+       ! Set number of nodes
+       numNodes=4
+
+       ! Allocate and fill the node id array.
+       allocate(nodeIds(numNodes))
+       nodeIds=(/1,2,4,5/) 
+
+       ! Allocate and fill node coordinate array.
+       ! Since this is a 2D Mesh the size is 2x the
+       ! number of nodes.
+       allocate(nodeCoords(2*numNodes))
+       nodeCoords=(/-0.0, -0.0, & ! node id 1
+                     1.0, -0.0, & ! node id 2
+                    -0.0,  1.0, & ! node id 4
+                     1.0,  1.0 /) ! node id 5
+
+       ! Allocate and fill the node owner array.
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0, & ! node id 1
+                    0, & ! node id 2
+                    0, & ! node id 4
+                    0/)  ! node id 5
+
+       ! Set the number of each type of element, plus the total number.
+       numQuadElems=1
+       numTriElems=0
+       numTotElems=numQuadElems+numTriElems
+
+       ! Allocate and fill the element id array.
+       allocate(elemIds(numTotElems))
+       elemIds=(/1/) 
+
+       ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numTotElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! elem id 1
+
+       ! Allocate and fill the element connection type array.
+       ! Note that entry are local indices
+       allocate(elemConn(4*numQuadElems+3*numTriElems))
+       elemConn=(/1,2,4,3/) ! elem id 1
+
+     else if (localPET .eq. 1) then !!! This part only for PET 1
+       ! Set number of nodes
+       numNodes=4
+
+       ! Allocate and fill the node id array.
+       allocate(nodeIds(numNodes))
+       nodeIds=(/2,3,5,6/) 
+
+       ! Allocate and fill node coordinate array.
+       ! Since this is a 2D Mesh the size is 2x the
+       ! number of nodes.
+       allocate(nodeCoords(2*numNodes))
+       nodeCoords=(/1.0,-0.0, & ! node id 2
+                    2.0,-0.0, & ! node id 3
+                    1.0, 1.0, & ! node id 5
+                    2.0, 1.0 /) ! node id 6
+
+       ! Allocate and fill the node owner array.
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0, & ! node id 2
+                    1, & ! node id 3
+                    0, & ! node id 5
+                    1/)  ! node id 6
+
+       ! Set the number of each type of element, plus the total number.
+       numQuadElems=0
+       numTriElems=2
+       numTotElems=numQuadElems+numTriElems
+
+       ! Allocate and fill the element id array.
+       allocate(elemIds(numTotElems))
+       elemIds=(/2,3/) 
+
+       ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numTotElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_TRI, & ! elem id 2
+                   ESMF_MESHELEMTYPE_TRI/)  ! elem id 3
+
+       ! Allocate and fill the element connection type array.
+       allocate(elemConn(4*numQuadElems+3*numTriElems))
+       elemConn=(/1,2,3, & ! elem id 2
+                  2,4,3/)  ! elem id 3
+
+    else if (localPET .eq. 2) then !!! This part only for PET 2
+        ! Set number of nodes
+        numNodes=4
+
+        ! Allocate and fill the node id array.
+        allocate(nodeIds(numNodes))
+        nodeIds=(/4,5,7,8/) 
+
+        ! Allocate and fill node coordinate array.
+        ! Since this is a 2D Mesh the size is 2x the
+        ! number of nodes.
+        allocate(nodeCoords(2*numNodes))
+        nodeCoords=(/-0.0,1.0, & ! node id 4
+                      1.0,1.0, & ! node id 5
+                     -0.0,2.0, & ! node id 7
+                      1.0,2.0 /) ! node id 8
+
+        ! Allocate and fill the node owner array.
+        ! Since this Mesh is all on PET 0, it's just set to all 0.
+        allocate(nodeOwners(numNodes))
+        nodeOwners=(/0, & ! node id 4
+                     0, & ! node id 5
+                     2, & ! node id 7
+                     2/)  ! node id 8
+
+        ! Set the number of each type of element, plus the total number.
+        numQuadElems=1
+        numTriElems=0
+        numTotElems=numQuadElems+numTriElems
+
+        ! Allocate and fill the element id array.
+        allocate(elemIds(numTotElems))
+        elemIds=(/4/) 
+
+        ! Allocate and fill the element topology type array.
+        allocate(elemTypes(numTotElems))
+        elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! elem id 4
+
+        ! Allocate and fill the element connection type array.
+        allocate(elemConn(4*numQuadElems+3*numTriElems))
+        elemConn=(/1,2,4,3/) ! elem id 4
+
+     else if (localPET .eq. 3) then !!! This part only for PET 3
+        ! Set number of nodes
+        numNodes=4
+
+        ! Allocate and fill the node id array.
+        allocate(nodeIds(numNodes))
+        nodeIds=(/5,6,8,9/) 
+
+        ! Allocate and fill node coordinate array.
+        ! Since this is a 2D Mesh the size is 2x the
+        ! number of nodes.
+        allocate(nodeCoords(2*numNodes))
+        nodeCoords=(/1.0,1.0, &  ! node id 5
+                     2.0,1.0, &  ! node id 6
+                     1.0,2.0, &  ! node id 8
+                     2.0,2.0 /)  ! node id 9
+
+        ! Allocate and fill the node owner array.
+        allocate(nodeOwners(numNodes))
+        nodeOwners=(/0, & ! node id 5
+                     1, & ! node id 6
+                     2, & ! node id 8
+                     3/)  ! node id 9
+ 
+        ! Set the number of each type of element, plus the total number.
+        numQuadElems=1
+        numTriElems=0
+        numTotElems=numQuadElems+numTriElems
+
+        ! Allocate and fill the element id array.
+        allocate(elemIds(numTotElems))
+        elemIds=(/5/)  
+
+        ! Allocate and fill the element topology type array.
+        allocate(elemTypes(numTotElems))
+        elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! elem id 5
+
+        ! Allocate and fill the element connection type array.
+        allocate(elemConn(4*numQuadElems+3*numTriElems))
+        elemConn=(/1,2,4,3/) ! elem id 5
+       endif
+    endif
+
+   ! Create Mesh structure in 1 step
+   srcMesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+        coordSys=ESMF_COORDSYS_CART, &
+         nodeIds=nodeIds, nodeCoords=nodeCoords, &
+         nodeOwners=nodeOwners, elementIds=elemIds,&
+         elementTypes=elemTypes, elementConn=elemConn, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+       rc=ESMF_FAILURE
+       return
+   endif
+
+  ! Create source field
+  call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
+
+   srcField = ESMF_FieldCreate(srcMesh, arrayspec, &
+                        name="source", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  
+  ! Load test data into the source Field
+  ! Should only be 1 localDE
+  call ESMF_FieldGet(srcField, 0, farrayPtr1D,  rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+  endif
+
+
+  ! set interpolated function
+  i2=1
+  do i1=1,numNodes
+
+     if (nodeOwners(i1) .eq. localPet) then
+        ! Get coordinates
+        x=nodeCoords(2*i1-1)
+        y=nodeCoords(2*i1)
+
+        ! Set source function
+        farrayPtr1D(i2) = 20.0+x+y
+
+        ! Advance to next owner
+        i2=i2+1
+     endif
+  enddo
+
+
+   ! deallocate node data
+   deallocate(nodeIds)
+   deallocate(nodeCoords)
+   deallocate(nodeOwners)
+
+   ! deallocate elem data
+   deallocate(elemIds)
+   deallocate(elemTypes)
+   deallocate(elemConn)
+
+
+  ! Create Dest Mesh
+  if (petCount .eq. 1) then
+     ! Set number of nodes
+     numNodes=9
+
+     ! Allocate and fill the node id array.
+     allocate(nodeIds(numNodes))
+     nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+
+     ! Allocate and fill node coordinate array.
+     ! Since this is a 2D Mesh the size is 2x the
+     ! number of nodes.
+     allocate(nodeCoords(2*numNodes))
+     nodeCoords=(/0.0,0.0, & ! node id 1
+                  1.0,0.0, & ! node id 2
+                  2.0,0.0, & ! node id 3
+                  0.0,1.0, & ! node id 4
+                  1.0,1.0, & ! node id 5
+                  2.0,1.0, & ! node id 6
+                  0.0,2.0, & ! node id 7
+                  1.0,2.0, & ! node id 8
+                  2.0,2.0 /) ! node id 9
+
+     ! Allocate and fill the node owner array.
+     ! Since this Mesh is all on PET 0, it's just set to all 0.
+     allocate(nodeOwners(numNodes))
+     nodeOwners=0 ! everything on PET 0
+
+     ! Set the number of each type of element, plus the total number.
+     numQuadElems=3
+     numTriElems=2
+     numTotElems=numQuadElems+numTriElems
+
+     ! Allocate and fill the element id array.
+     allocate(elemIds(numTotElems))
+     elemIds=(/1,2,3,4,5/) 
+
+
+     ! Allocate and fill the element topology type array.
+     allocate(elemTypes(numTotElems))
+     elemTypes=(/ESMF_MESHELEMTYPE_QUAD, & ! elem id 1
+                 ESMF_MESHELEMTYPE_TRI,  & ! elem id 2
+                 ESMF_MESHELEMTYPE_TRI,  & ! elem id 3
+                 ESMF_MESHELEMTYPE_QUAD, & ! elem id 4
+                 ESMF_MESHELEMTYPE_QUAD/)  ! elem id 5
+
+
+     ! Allocate and fill the element connection type array.
+     ! Note that entries in this array refer to the 
+     ! positions in the nodeIds, etc. arrays and that
+     ! the order and number of entries for each element
+     ! reflects that given in the Mesh options 
+     ! section for the corresponding entry
+     ! in the elemTypes array.
+     allocate(elemConn(4*numQuadElems+3*numTriElems))
+     elemConn=(/1,2,5,4, &  ! elem id 1
+                2,3,5,   &  ! elem id 2
+                3,6,5,   &  ! elem id 3
+                4,5,8,7, &  ! elem id 4
+                5,6,9,8/)   ! elem id 5
+
+
+ else if (petCount .eq. 4) then
+     ! Setup mesh data depending on PET
+    if (localPET .eq. 0) then !!! This part only for PET 0
+       ! Set number of nodes
+       numNodes=4
+
+       ! Allocate and fill the node id array.
+       allocate(nodeIds(numNodes))
+       nodeIds=(/1,2,4,5/) 
+
+       ! Allocate and fill node coordinate array.
+       ! Since this is a 2D Mesh the size is 2x the
+       ! number of nodes.
+       allocate(nodeCoords(2*numNodes))
+       nodeCoords=(/0.0,0.0, & ! node id 1
+                    1.0,0.0, & ! node id 2
+                    0.0,1.0, & ! node id 4
+                    1.0,1.0 /) ! node id 5
+
+       ! Allocate and fill the node owner array.
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0, & ! node id 1
+                    0, & ! node id 2
+                    0, & ! node id 4
+                    0/)  ! node id 5
+
+       ! Set the number of each type of element, plus the total number.
+       numQuadElems=1
+       numTriElems=0
+       numTotElems=numQuadElems+numTriElems
+
+       ! Allocate and fill the element id array.
+       allocate(elemIds(numTotElems))
+       elemIds=(/1/) 
+
+       ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numTotElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! elem id 1
+
+       ! Allocate and fill the element connection type array.
+       ! Note that entry are local indices
+       allocate(elemConn(4*numQuadElems+3*numTriElems))
+       elemConn=(/1,2,4,3/) ! elem id 1
+
+     else if (localPET .eq. 1) then !!! This part only for PET 1
+       ! Set number of nodes
+       numNodes=4
+
+       ! Allocate and fill the node id array.
+       allocate(nodeIds(numNodes))
+       nodeIds=(/2,3,5,6/) 
+
+       ! Allocate and fill node coordinate array.
+       ! Since this is a 2D Mesh the size is 2x the
+       ! number of nodes.
+       allocate(nodeCoords(2*numNodes))
+       nodeCoords=(/1.0,0.0, & ! node id 2
+                    2.0,0.0, & ! node id 3
+                    1.0,1.0, & ! node id 5
+                    2.0,1.0 /) ! node id 6
+
+       ! Allocate and fill the node owner array.
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0, & ! node id 2
+                    1, & ! node id 3
+                    0, & ! node id 5
+                    1/)  ! node id 6
+
+       ! Set the number of each type of element, plus the total number.
+       numQuadElems=0
+       numTriElems=2
+       numTotElems=numQuadElems+numTriElems
+
+       ! Allocate and fill the element id array.
+       allocate(elemIds(numTotElems))
+       elemIds=(/2,3/) 
+
+       ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numTotElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_TRI, & ! elem id 2
+                   ESMF_MESHELEMTYPE_TRI/)  ! elem id 3
+
+       ! Allocate and fill the element connection type array.
+       allocate(elemConn(4*numQuadElems+3*numTriElems))
+       elemConn=(/1,2,3, & ! elem id 2
+                  2,4,3/)  ! elem id 3
+
+    else if (localPET .eq. 2) then !!! This part only for PET 2
+        ! Set number of nodes
+        numNodes=4
+
+        ! Allocate and fill the node id array.
+        allocate(nodeIds(numNodes))
+        nodeIds=(/4,5,7,8/) 
+
+        ! Allocate and fill node coordinate array.
+        ! Since this is a 2D Mesh the size is 2x the
+        ! number of nodes.
+        allocate(nodeCoords(2*numNodes))
+        nodeCoords=(/0.0,1.0, & ! node id 4
+                     1.0,1.0, & ! node id 5
+                     0.0,2.0, & ! node id 7
+                     1.0,2.0 /) ! node id 8
+
+        ! Allocate and fill the node owner array.
+        ! Since this Mesh is all on PET 0, it's just set to all 0.
+        allocate(nodeOwners(numNodes))
+        nodeOwners=(/0, & ! node id 4
+                     0, & ! node id 5
+                     2, & ! node id 7
+                     2/)  ! node id 8
+
+        ! Set the number of each type of element, plus the total number.
+        numQuadElems=1
+        numTriElems=0
+        numTotElems=numQuadElems+numTriElems
+
+        ! Allocate and fill the element id array.
+        allocate(elemIds(numTotElems))
+        elemIds=(/4/) 
+
+        ! Allocate and fill the element topology type array.
+        allocate(elemTypes(numTotElems))
+        elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! elem id 4
+
+        ! Allocate and fill the element connection type array.
+        allocate(elemConn(4*numQuadElems+3*numTriElems))
+        elemConn=(/1,2,4,3/) ! elem id 4
+
+     else if (localPET .eq. 3) then !!! This part only for PET 3
+        ! Set number of nodes
+        numNodes=4
+
+        ! Allocate and fill the node id array.
+        allocate(nodeIds(numNodes))
+        nodeIds=(/5,6,8,9/) 
+
+        ! Allocate and fill node coordinate array.
+        ! Since this is a 2D Mesh the size is 2x the
+        ! number of nodes.
+        allocate(nodeCoords(2*numNodes))
+        nodeCoords=(/1.0,1.0, &  ! node id 5
+                     2.0,1.0, &  ! node id 6
+                     1.0,2.0, &  ! node id 8
+                     2.0,2.0 /)  ! node id 9
+
+        ! Allocate and fill the node owner array.
+        allocate(nodeOwners(numNodes))
+        nodeOwners=(/0, & ! node id 5
+                     1, & ! node id 6
+                     2, & ! node id 8
+                     3/)  ! node id 9
+ 
+        ! Set the number of each type of element, plus the total number.
+        numQuadElems=1
+        numTriElems=0
+        numTotElems=numQuadElems+numTriElems
+
+        ! Allocate and fill the element id array.
+        allocate(elemIds(numTotElems))
+        elemIds=(/5/)  
+
+        ! Allocate and fill the element topology type array.
+        allocate(elemTypes(numTotElems))
+        elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! elem id 5
+
+        ! Allocate and fill the element connection type array.
+        allocate(elemConn(4*numQuadElems+3*numTriElems))
+        elemConn=(/1,2,4,3/) ! elem id 5
+       endif
+   endif
+
+
+  ! Create Mesh structure in 1 step
+  dstMesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+       coordSys=ESMF_COORDSYS_CART, &
+         nodeIds=nodeIds, nodeCoords=nodeCoords, &
+         nodeOwners=nodeOwners, elementIds=elemIds,&
+         elementTypes=elemTypes, elementConn=elemConn, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+         rc=ESMF_FAILURE
+         return
+     endif
+
+  
+  ! Create dest field
+  call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
+
+   dstField = ESMF_FieldCreate(dstMesh, arrayspec, &
+                        name="source", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  
+  ! clear destination Field
+  ! Should only be 1 localDE
+  call ESMF_FieldGet(dstField, 0, farrayPtr1D,  rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+  endif
+
+  farrayPtr1D=0.0
+
+
+
+  !!! Regrid forward from the A grid to the B grid
+  ! Regrid store
+  call ESMF_FieldRegridStore( &
+          srcField, &
+          dstField=dstField, &
+          routeHandle=routeHandle, &
+          regridmethod=ESMF_REGRIDMETHOD_NEAREST_DTOS, &
+          rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  ! Do regrid
+  call ESMF_FieldRegrid(srcField, dstField, routeHandle, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  call ESMF_FieldRegridRelease(routeHandle, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  ! Check destination field
+  ! Should only be 1 localDE
+  call ESMF_FieldGet(dstField, 0, farrayPtr1D,  rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+  endif
+
+  ! loop through nodes and make sure interpolated values are reasonable
+  i2=1
+  do i1=1,numNodes
+
+     if (nodeOwners(i1) .eq. localPet) then
+        ! Get coordinates
+        x=nodeCoords(2*i1-1)
+        y=nodeCoords(2*i1)
+
+        !! if error is too big report an error
+        if ( abs( farrayPtr1D(i2)-(x+y+20.0) ) > 0.0001) then
+           correct=.false.
+           write(*,*) localPet,nodeIds(i1),"::",farrayPtr1D(i2),(x+y+20.0)
+        endif
+
+        ! Advance to next owner
+        i2=i2+1
+     endif
+  enddo
+
+
+   ! deallocate node data
+   deallocate(nodeIds)
+   deallocate(nodeCoords)
+   deallocate(nodeOwners)
+
+   ! deallocate elem data
+   deallocate(elemIds)
+   deallocate(elemTypes)
+   deallocate(elemConn)
+
+
+
+
+#if 0
+   call ESMF_MeshWrite(srcMesh,"srcMesh")
+
+   call ESMF_MeshWrite(dstMesh,"dstMesh")
+#endif
+
+  ! Destroy the Fields
+   call ESMF_FieldDestroy(srcField, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+   call ESMF_FieldDestroy(dstField, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+
+  ! Free the grids
+  call ESMF_MeshDestroy(dstMesh, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  call ESMF_MeshDestroy(srcMesh, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+
+  ! return answer based on correct flag
+  if (correct) then
+    rc=ESMF_SUCCESS
+  else
+    rc=ESMF_FAILURE
+  endif
+
+ end subroutine test_regridNearestDTOSMeshToMesh
+
 
  subroutine test_regrid2TileDG(rc)
    integer, intent(out)  :: rc
@@ -19232,10 +24748,7 @@ write(*,*) "LOCALRC=",localrc
     return
   endif
 
-
- ! XMRKX
-
-  ! Establish the resolution of the grids
+ ! Establish the resolution of the grids
   dst_nx = 10
   dst_ny = 10
   dst_nz = 5
@@ -19581,8 +25094,6 @@ write(*,*) "LOCALRC=",localrc
    deallocate(elemConn)
 
 
- ! XMRKX
-
   ! setup dest. grid
   dstGrid=ESMF_GridCreateNoPeriDim(minIndex=(/1,1,1/),maxIndex=(/dst_nx,dst_ny,dst_nz/), &
               coordSys=ESMF_COORDSYS_SPH_DEG, regDecomp=(/2,2,1/), indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
@@ -19920,6 +25431,8 @@ write(*,*) "LOCALRC=",localrc
    real(ESMF_KIND_R8) :: lat_rad, lon_rad, r
 
   real(ESMF_KIND_R8) :: err, relErr, maxRelErr
+  real(ESMF_KIND_R8) :: totRelErr
+  integer :: numRelErr
   
   integer :: spherical_grid
 
@@ -19937,8 +25450,6 @@ write(*,*) "LOCALRC=",localrc
   correct=.true.
 
   rc=ESMF_SUCCESS
-
- ! XMRKX
 
   ! Init Grid resolutions
   src_nx=60
@@ -20212,7 +25723,7 @@ write(*,*) "LOCALRC=",localrc
   enddo    ! lDE
 
   ! Get start time
-  ! call ESMF_VMWtime(beg_time)
+ !  call ESMF_VMWtime(beg_time)
 
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
@@ -20232,8 +25743,12 @@ write(*,*) "LOCALRC=",localrc
   ! Get end time
   !call ESMF_VMWtime(end_time)
 
-  ! output time
-  ! write(*,*) "Store time = ",end_time-beg_time
+
+
+  ! output info
+!  write(*,*) "Src dims=",src_nx,src_ny
+!  write(*,*) "Dst dims=",dst_nx,dst_ny
+!  write(*,*) "Store time = ",end_time-beg_time
 
   ! Do regrid
   call ESMF_FieldRegrid(srcField, dstField, routeHandle, rc=localrc)
@@ -20250,6 +25765,8 @@ write(*,*) "LOCALRC=",localrc
 
   ! Init max
   maxRelErr=0.0
+  totRelErr=0.0
+  numRelErr=0
 
    ! Check error
   do lDE=0,localDECount-1
@@ -20309,6 +25826,10 @@ write(*,*) "LOCALRC=",localrc
         !! Calculate max
         if (relErr > maxRelErr) maxRelErr=relErr
 
+        !! Accumulate avg. info
+        totRelErr=totRelErr+maxRelErr
+        numRelErr = numRelErr+1
+
         !! if error is too big report an error
         if (relErr > 0.002) then
            correct=.false.
@@ -20323,7 +25844,8 @@ write(*,*) "LOCALRC=",localrc
      write(*,*) "Test not correct. Max Rel. Error= ",maxRelErr
   endif
 
-!   write(*,*) "Max Rel. Error= ",maxRelErr
+  !write(*,*) "Max Rel. Error= ",maxRelErr
+  !write(*,*) "Avg Rel. Error= ",totRelErr/REAL(numRelErr)
 
 #if 0
   call ESMF_GridWriteVTK(srcGrid,staggerloc=ESMF_STAGGERLOC_CENTER, &
@@ -20376,6 +25898,1020 @@ write(*,*) "LOCALRC=",localrc
 
  end subroutine test_regridGridToGridSph3D
 
+ subroutine test_STODGridToGridSph3D(rc)
+  integer, intent(out)  :: rc
+  logical :: correct
+  integer :: localrc
+  type(ESMF_Grid) :: srcGrid
+  type(ESMF_Grid) :: dstGrid
+  type(ESMF_Field) :: srcField
+  type(ESMF_Field) :: dstField
+  type(ESMF_Field) :: xdstField
+  type(ESMF_Array) :: dstArray
+  type(ESMF_Array) :: xdstArray
+   type(ESMF_Array) :: lonArrayA
+  type(ESMF_Array) :: srcArrayA
+  type(ESMF_RouteHandle) :: routeHandle
+  type(ESMF_ArraySpec) :: arrayspec
+  type(ESMF_VM) :: vm
+  real(ESMF_KIND_R8), pointer :: farrayPtrXC(:,:,:), farrayPtr1D(:)
+  real(ESMF_KIND_R8), pointer :: farrayPtrYC(:,:,:),farrayPtrZC(:,:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtr(:,:,:),farrayPtr2(:,:,:)
+  real(ESMF_KIND_R8), pointer :: xfarrayPtr(:,:,:)
+  integer :: clbnd(3),cubnd(3)
+  integer :: fclbnd(3),fcubnd(3)
+  integer :: i1,i2,i3, index(3)
+  integer :: lDE, localDECount
+  real(ESMF_KIND_R8) :: coord(3)
+  character(len=ESMF_MAXSTR) :: string
+  integer dst_nx,dst_ny,dst_nz
+  integer src_nx,src_ny,src_nz
+  integer num_arrays
+  real(ESMF_KIND_R8) :: dst_dx,dst_dy
+  real(ESMF_KIND_R8) :: dst_minr, dst_maxr
+  real(ESMF_KIND_R8) :: src_dx,src_dy
+  real(ESMF_KIND_R8) :: src_minr, src_maxr
+  
+  real(ESMF_KIND_R8) :: dst_minx,dst_miny,dst_minz
+  real(ESMF_KIND_R8) :: dst_maxx,dst_maxy,dst_maxz
+
+  real(ESMF_KIND_R8) :: x,y,z
+   real(ESMF_KIND_R8) :: lat_rad, lon_rad, r
+
+  real(ESMF_KIND_R8) :: err, relErr, maxRelErr
+  real(ESMF_KIND_R8) :: totRelErr
+  integer :: numRelErr
+  
+  integer :: spherical_grid
+
+  integer :: localPet, petCount
+  real(ESMF_KIND_R8) :: beg_time, end_time  
+
+  ! result code
+  integer :: finalrc
+  
+  ! degree to rad conversion
+  real(ESMF_KIND_R8),parameter :: &
+     DEG2RAD = 3.141592653589793_ESMF_KIND_R8/180.0_ESMF_KIND_R8
+
+  ! init success flag
+  correct=.true.
+
+  rc=ESMF_SUCCESS
+
+  ! Init Grid resolutions
+  ! (Make the same, because that's an easy way to test NEAREST STOD)
+  src_nx=60
+  src_ny=60
+  src_nz=14
+  src_minr=0.9
+  src_maxr=2.1
+
+  dst_nx=60
+  dst_ny=60
+  dst_nz=14
+  dst_minr=0.9
+  dst_maxr=2.1
+
+  ! get pet info
+  call ESMF_VMGetGlobal(vm, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+  ! Setup Src Grid
+  srcGrid=ESMF_GridCreate1PeriDim(minIndex=(/1,1,1/),maxIndex=(/src_nx,src_ny,src_nz/), &
+              coordSys=ESMF_COORDSYS_SPH_DEG, regDecomp=(/petCount,1,1/), indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+   endif
+  
+  ! Add center stagger
+  call ESMF_GridAddCoord(srcGrid, staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  ! Create source field
+  call ESMF_ArraySpecSet(arrayspec, 3, ESMF_TYPEKIND_R8, rc=rc)
+
+   srcField = ESMF_FieldCreate(srcGrid, arrayspec, &
+                        name="source", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  ! Src grid
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  ! Init some stuff for convenience
+  src_dx = 360./src_nx
+     src_dy = 180./src_ny
+
+  ! Get number of local DEs
+  call ESMF_GridGet(srcGrid, localDECount=localDECount, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  ! Get memory and set coords for dst
+  do lDE=0,localDECount-1
+  
+     !! get coords
+     call ESMF_GridGetCoord(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER_VCENTER, coordDim=1, &
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     call ESMF_GridGetCoord(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER_VCENTER, coordDim=2, &
+                            farrayPtr=farrayPtrYC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+      call ESMF_GridGetCoord(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER_VCENTER, coordDim=3, &
+                            farrayPtr=farrayPtrZC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+
+     call ESMF_FieldGet(srcField, lDE, farrayPtr, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     !! set coords
+     do i1=clbnd(1),cubnd(1)
+     do i2=clbnd(2),cubnd(2)
+     do i3=clbnd(3),cubnd(3)
+
+        ! Set coordinates
+        farrayPtrXC(i1,i2,i3) = REAL(i1-1)*src_dx
+        farrayPtrYC(i1,i2,i3) = -90. + (REAL(i2-1)*src_dy + 0.5*src_dy)
+        farrayPtrZC(i1,i2,i3) = ((src_maxr-src_minr)*REAL(i3-1)/REAL(src_nz-1))+src_minr
+
+        ! Compute Lat/Lon in rad
+        lon_rad = DEG2RAD*farrayPtrXC(i1,i2,i3)
+        lat_rad = DEG2RAD*(90.-farrayPtrYC(i1,i2,i3))
+         r=farrayPtrZC(i1,i2,i3)
+
+        ! initialize source field
+        farrayPtr(i1,i2,i3)= r*5.0+2.0+ cos(lon_rad)**2.*cos(2.*lat_rad) 
+        !farrayPtr(i1,i2,i3)= 2.0+r*5.0+ cos(lat_rad)**2.*cos(2.*lon_rad) 
+        !farrayPtr(i1,i2,i3)= 1.0
+     enddo
+     enddo
+     enddo
+
+  enddo    ! lDE
+
+
+
+  ! Setup Dst Grid
+  dstGrid=ESMF_GridCreate1PeriDim(minIndex=(/1,1,1/),maxIndex=(/dst_nx,dst_ny,dst_nz/), &
+              coordSys=ESMF_COORDSYS_SPH_DEG, regDecomp=(/1,petCount,1/), indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+   endif
+
+  ! Create source/destination fields
+  call ESMF_ArraySpecSet(arrayspec, 3, ESMF_TYPEKIND_R8, rc=rc)
+
+   dstField = ESMF_FieldCreate(dstGrid, arrayspec, &
+                         staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, name="dest", rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  ! Exact destination field
+  xdstField = ESMF_FieldCreate(dstGrid, arrayspec, &
+                         staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, name="dest", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  call ESMF_GridAddCoord(dstGrid, staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  ! Get arrays
+  ! dstArray
+  call ESMF_FieldGet(dstField, array=dstArray, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+   endif
+
+  call ESMF_FieldGet(xdstField, array=xdstArray, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  ! srcArrayA
+  call ESMF_FieldGet(srcField, array=srcArrayA, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  ! Destination grid
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  ! Init some stuff for convenience
+  dst_dx = 360./dst_nx
+  dst_dy = 180./dst_ny
+
+  ! Get number of local DEs
+   call ESMF_GridGet(dstGrid, localDECount=localDECount, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+    return
+  endif
+
+
+  ! Get memory and set coords for dst
+  do lDE=0,localDECount-1
+ 
+     !! get coords
+     call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER_VCENTER, coordDim=1, &
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER_VCENTER, coordDim=2, &
+                            farrayPtr=farrayPtrYC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER_VCENTER, coordDim=3, &
+                            farrayPtr=farrayPtrZC, rc=localrc)
+        if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+
+     call ESMF_FieldGet(dstField, lDE, farrayPtr, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     call ESMF_FieldGet(xdstField, lDE, xfarrayPtr, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     !! set coords
+     do i1=clbnd(1),cubnd(1)
+     do i2=clbnd(2),cubnd(2)
+     do i3=clbnd(3),cubnd(3)
+
+        ! Set coordinates
+        farrayPtrXC(i1,i2,i3) = REAL(i1-1)*dst_dx
+        farrayPtrYC(i1,i2,i3) = -90. + (REAL(i2-1)*dst_dy + 0.5*dst_dy)
+        farrayPtrZC(i1,i2,i3) = ((dst_maxr-dst_minr)*REAL(i3-1)/REAL(dst_nz-1))+dst_minr
+ 
+        ! Compute Lat/Lon in rad
+        lon_rad = DEG2RAD*farrayPtrXC(i1,i2,i3)
+        lat_rad = DEG2RAD*(90.-farrayPtrYC(i1,i2,i3))
+        r=farrayPtrZC(i1,i2,i3)
+
+        ! initialize exact destination field
+        !xfarrayPtr(i1,i2,i3)=r*(2. + cos(lon_rad)**2.*cos(2.*lat_rad))
+        !xfarrayPtr(i1,i2,i3)=r*5.0+2. + cos(lon_rad)**2.*cos(2.*lat_rad)
+        !xfarrayPtr(i1,i2,i3)= 1.0+r*0.01+ cos(lat_rad)**2.*cos(2.*lon_rad) 
+        xfarrayPtr(i1,i2,i3)= r*5.0+2.0+ cos(lon_rad)**2.*cos(2.*lat_rad) 
+         !xfarrayPtr(i1,i2,i3)= 1.0
+        !xfarrayPtr(i1,i2,i3)=r
+
+        ! Initialize destination field
+        farrayPtr(i1,i2,i3)=0.0
+
+     enddo
+     enddo
+     enddo
+
+  enddo    ! lDE
+
+  ! Get start time
+ !  call ESMF_VMWtime(beg_time)
+
+  !!! Regrid forward from the A grid to the B grid
+  ! Regrid store
+  call ESMF_FieldRegridStore( &
+          srcField, &
+          dstField=dstField, &
+          routeHandle=routeHandle, &
+          unmappedAction=ESMF_UNMAPPEDACTION_IGNORE, &
+          regridmethod=ESMF_REGRIDMETHOD_NEAREST_STOD, &
+          rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  ! Get end time
+  !call ESMF_VMWtime(end_time)
+
+
+
+  ! output info
+!  write(*,*) "Src dims=",src_nx,src_ny
+!  write(*,*) "Dst dims=",dst_nx,dst_ny
+!  write(*,*) "Store time = ",end_time-beg_time
+
+  ! Do regrid
+  call ESMF_FieldRegrid(srcField, dstField, routeHandle, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  call ESMF_FieldRegridRelease(routeHandle, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  ! Init max
+  maxRelErr=0.0
+  totRelErr=0.0
+  numRelErr=0
+
+   ! Check error
+  do lDE=0,localDECount-1
+
+
+     !! get coords
+     call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
+                            farrayPtr=farrayPtrXC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
+                            farrayPtr=farrayPtrYC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=3, &
+                            farrayPtr=farrayPtrZC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+
+      call ESMF_FieldGet(dstField, lDE, farrayPtr, computationalLBound=clbnd, &
+                             computationalUBound=cubnd,  rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     call ESMF_FieldGet(xdstField, lDE, xfarrayPtr, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+   
+     !! check error
+     do i1=clbnd(1),cubnd(1)
+     do i2=clbnd(2),cubnd(2)
+     do i3=clbnd(3),cubnd(3)
+
+        ! Calculate error
+        err=abs(farrayPtr(i1,i2,i3)-xfarrayPtr(i1,i2,i3))
+
+        ! Calculate relative error
+        if (xfarrayPtr(i1,i2,i3) .ne. 0.0) then
+           relErr=err/xfarrayPtr(i1,i2,i3)
+        else
+           relErr=err
+        endif
+ 
+        !! Calculate max
+        if (relErr > maxRelErr) maxRelErr=relErr
+
+        !! Accumulate avg. info
+        totRelErr=totRelErr+maxRelErr
+        numRelErr = numRelErr+1
+
+        !! if error is too big report an error
+        if (relErr > 0.002) then
+           correct=.false.
+        endif
+     enddo
+     enddo
+     enddo
+
+  enddo    ! lDE
+
+  if (.not. correct) then
+     write(*,*) "Test not correct. Max Rel. Error= ",maxRelErr
+  endif
+
+  !write(*,*) "Max Rel. Error= ",maxRelErr
+  !write(*,*) "Avg Rel. Error= ",totRelErr/REAL(numRelErr)
+
+#if 0
+  call ESMF_GridWriteVTK(srcGrid,staggerloc=ESMF_STAGGERLOC_CENTER, &
+       filename="srcGrid", &
+       rc=localrc)
+
+  call ESMF_GridWriteVTK(dstGrid,staggerloc=ESMF_STAGGERLOC_CENTER, &
+       filename="dstGrid", array1=dstArray, array2=xdstArray, &
+       rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+  endif
+#endif
+
+  ! Destroy the Fields
+   call ESMF_FieldDestroy(srcField, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+   call ESMF_FieldDestroy(dstField, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+
+  ! Free the grids
+  call ESMF_GridDestroy(srcGrid, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  call ESMF_GridDestroy(dstGrid, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+
+  ! return answer based on correct flag
+  if (correct) then
+    rc=ESMF_SUCCESS
+  else
+    rc=ESMF_FAILURE
+  endif
+
+ end subroutine test_STODGridToGridSph3D
+
+
+ subroutine test_DTOSGridToGridSph3D(rc)
+  integer, intent(out)  :: rc
+  logical :: correct
+  integer :: localrc
+  type(ESMF_Grid) :: srcGrid
+  type(ESMF_Grid) :: dstGrid
+  type(ESMF_Field) :: srcField
+  type(ESMF_Field) :: dstField
+  type(ESMF_Field) :: xdstField
+  type(ESMF_Array) :: dstArray
+  type(ESMF_Array) :: xdstArray
+   type(ESMF_Array) :: lonArrayA
+  type(ESMF_Array) :: srcArrayA
+  type(ESMF_RouteHandle) :: routeHandle
+  type(ESMF_ArraySpec) :: arrayspec
+  type(ESMF_VM) :: vm
+  real(ESMF_KIND_R8), pointer :: farrayPtrXC(:,:,:), farrayPtr1D(:)
+  real(ESMF_KIND_R8), pointer :: farrayPtrYC(:,:,:),farrayPtrZC(:,:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtr(:,:,:),farrayPtr2(:,:,:)
+  real(ESMF_KIND_R8), pointer :: xfarrayPtr(:,:,:)
+  integer :: clbnd(3),cubnd(3)
+  integer :: fclbnd(3),fcubnd(3)
+  integer :: i1,i2,i3, index(3)
+  integer :: lDE, localDECount
+  real(ESMF_KIND_R8) :: coord(3)
+  character(len=ESMF_MAXSTR) :: string
+  integer dst_nx,dst_ny,dst_nz
+  integer src_nx,src_ny,src_nz
+  integer num_arrays
+  real(ESMF_KIND_R8) :: dst_dx,dst_dy
+  real(ESMF_KIND_R8) :: dst_minr, dst_maxr
+  real(ESMF_KIND_R8) :: src_dx,src_dy
+  real(ESMF_KIND_R8) :: src_minr, src_maxr
+  
+  real(ESMF_KIND_R8) :: dst_minx,dst_miny,dst_minz
+  real(ESMF_KIND_R8) :: dst_maxx,dst_maxy,dst_maxz
+
+  real(ESMF_KIND_R8) :: x,y,z
+   real(ESMF_KIND_R8) :: lat_rad, lon_rad, r
+
+  real(ESMF_KIND_R8) :: err, relErr, maxRelErr
+  real(ESMF_KIND_R8) :: totRelErr
+  integer :: numRelErr
+  
+  integer :: spherical_grid
+
+  integer :: localPet, petCount
+  real(ESMF_KIND_R8) :: beg_time, end_time  
+
+  ! result code
+  integer :: finalrc
+  
+  ! degree to rad conversion
+  real(ESMF_KIND_R8),parameter :: &
+     DEG2RAD = 3.141592653589793_ESMF_KIND_R8/180.0_ESMF_KIND_R8
+
+  ! init success flag
+  correct=.true.
+
+  rc=ESMF_SUCCESS
+
+  ! Init Grid resolutions
+  ! (Make the same, because that's an easy way to test NEAREST DTOS)
+  src_nx=60
+  src_ny=60
+  src_nz=14
+  src_minr=0.9
+  src_maxr=2.1
+
+  dst_nx=60
+  dst_ny=60
+  dst_nz=14
+  dst_minr=0.9
+  dst_maxr=2.1
+
+  ! get pet info
+  call ESMF_VMGetGlobal(vm, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+  ! Setup Src Grid
+  srcGrid=ESMF_GridCreate1PeriDim(minIndex=(/1,1,1/),maxIndex=(/src_nx,src_ny,src_nz/), &
+              coordSys=ESMF_COORDSYS_SPH_DEG, regDecomp=(/petCount,1,1/), indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+   endif
+  
+  ! Add center stagger
+  call ESMF_GridAddCoord(srcGrid, staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  ! Create source field
+  call ESMF_ArraySpecSet(arrayspec, 3, ESMF_TYPEKIND_R8, rc=rc)
+
+   srcField = ESMF_FieldCreate(srcGrid, arrayspec, &
+                        name="source", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  ! Src grid
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  ! Init some stuff for convenience
+  src_dx = 360./src_nx
+     src_dy = 180./src_ny
+
+  ! Get number of local DEs
+  call ESMF_GridGet(srcGrid, localDECount=localDECount, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  ! Get memory and set coords for dst
+  do lDE=0,localDECount-1
+  
+     !! get coords
+     call ESMF_GridGetCoord(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER_VCENTER, coordDim=1, &
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     call ESMF_GridGetCoord(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER_VCENTER, coordDim=2, &
+                            farrayPtr=farrayPtrYC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+      call ESMF_GridGetCoord(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER_VCENTER, coordDim=3, &
+                            farrayPtr=farrayPtrZC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+
+     call ESMF_FieldGet(srcField, lDE, farrayPtr, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     !! set coords
+     do i1=clbnd(1),cubnd(1)
+     do i2=clbnd(2),cubnd(2)
+     do i3=clbnd(3),cubnd(3)
+
+        ! Set coordinates
+        farrayPtrXC(i1,i2,i3) = REAL(i1-1)*src_dx
+        farrayPtrYC(i1,i2,i3) = -90. + (REAL(i2-1)*src_dy + 0.5*src_dy)
+        farrayPtrZC(i1,i2,i3) = ((src_maxr-src_minr)*REAL(i3-1)/REAL(src_nz-1))+src_minr
+
+        ! Compute Lat/Lon in rad
+        lon_rad = DEG2RAD*farrayPtrXC(i1,i2,i3)
+        lat_rad = DEG2RAD*(90.-farrayPtrYC(i1,i2,i3))
+         r=farrayPtrZC(i1,i2,i3)
+
+        ! initialize source field
+        farrayPtr(i1,i2,i3)= r*5.0+2.0+ cos(lon_rad)**2.*cos(2.*lat_rad) 
+        !farrayPtr(i1,i2,i3)= 2.0+r*5.0+ cos(lat_rad)**2.*cos(2.*lon_rad) 
+        !farrayPtr(i1,i2,i3)= 1.0
+     enddo
+     enddo
+     enddo
+
+  enddo    ! lDE
+
+
+
+  ! Setup Dst Grid
+  dstGrid=ESMF_GridCreate1PeriDim(minIndex=(/1,1,1/),maxIndex=(/dst_nx,dst_ny,dst_nz/), &
+              coordSys=ESMF_COORDSYS_SPH_DEG, regDecomp=(/1,petCount,1/), indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+   endif
+
+  ! Create source/destination fields
+  call ESMF_ArraySpecSet(arrayspec, 3, ESMF_TYPEKIND_R8, rc=rc)
+
+   dstField = ESMF_FieldCreate(dstGrid, arrayspec, &
+                         staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, name="dest", rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  ! Exact destination field
+  xdstField = ESMF_FieldCreate(dstGrid, arrayspec, &
+                         staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, name="dest", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  call ESMF_GridAddCoord(dstGrid, staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  ! Get arrays
+  ! dstArray
+  call ESMF_FieldGet(dstField, array=dstArray, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+   endif
+
+  call ESMF_FieldGet(xdstField, array=xdstArray, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  ! srcArrayA
+  call ESMF_FieldGet(srcField, array=srcArrayA, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  ! Destination grid
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  ! Init some stuff for convenience
+  dst_dx = 360./dst_nx
+  dst_dy = 180./dst_ny
+
+  ! Get number of local DEs
+   call ESMF_GridGet(dstGrid, localDECount=localDECount, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+    return
+  endif
+
+
+  ! Get memory and set coords for dst
+  do lDE=0,localDECount-1
+ 
+     !! get coords
+     call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER_VCENTER, coordDim=1, &
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER_VCENTER, coordDim=2, &
+                            farrayPtr=farrayPtrYC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER_VCENTER, coordDim=3, &
+                            farrayPtr=farrayPtrZC, rc=localrc)
+        if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+
+     call ESMF_FieldGet(dstField, lDE, farrayPtr, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     call ESMF_FieldGet(xdstField, lDE, xfarrayPtr, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     !! set coords
+     do i1=clbnd(1),cubnd(1)
+     do i2=clbnd(2),cubnd(2)
+     do i3=clbnd(3),cubnd(3)
+
+        ! Set coordinates
+        farrayPtrXC(i1,i2,i3) = REAL(i1-1)*dst_dx
+        farrayPtrYC(i1,i2,i3) = -90. + (REAL(i2-1)*dst_dy + 0.5*dst_dy)
+        farrayPtrZC(i1,i2,i3) = ((dst_maxr-dst_minr)*REAL(i3-1)/REAL(dst_nz-1))+dst_minr
+ 
+        ! Compute Lat/Lon in rad
+        lon_rad = DEG2RAD*farrayPtrXC(i1,i2,i3)
+        lat_rad = DEG2RAD*(90.-farrayPtrYC(i1,i2,i3))
+        r=farrayPtrZC(i1,i2,i3)
+
+        ! initialize exact destination field
+        !xfarrayPtr(i1,i2,i3)=r*(2. + cos(lon_rad)**2.*cos(2.*lat_rad))
+        !xfarrayPtr(i1,i2,i3)=r*5.0+2. + cos(lon_rad)**2.*cos(2.*lat_rad)
+        !xfarrayPtr(i1,i2,i3)= 1.0+r*0.01+ cos(lat_rad)**2.*cos(2.*lon_rad) 
+        xfarrayPtr(i1,i2,i3)= r*5.0+2.0+ cos(lon_rad)**2.*cos(2.*lat_rad) 
+         !xfarrayPtr(i1,i2,i3)= 1.0
+        !xfarrayPtr(i1,i2,i3)=r
+
+        ! Initialize destination field
+        farrayPtr(i1,i2,i3)=0.0
+
+     enddo
+     enddo
+     enddo
+
+  enddo    ! lDE
+
+  ! Get start time
+ !  call ESMF_VMWtime(beg_time)
+
+  !!! Regrid forward from the A grid to the B grid
+  ! Regrid store
+  call ESMF_FieldRegridStore( &
+          srcField, &
+          dstField=dstField, &
+          routeHandle=routeHandle, &
+          unmappedAction=ESMF_UNMAPPEDACTION_IGNORE, &
+          regridmethod=ESMF_REGRIDMETHOD_NEAREST_DTOS, &
+          rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  ! Get end time
+  !call ESMF_VMWtime(end_time)
+
+
+
+  ! output info
+!  write(*,*) "Src dims=",src_nx,src_ny
+!  write(*,*) "Dst dims=",dst_nx,dst_ny
+!  write(*,*) "Store time = ",end_time-beg_time
+
+  ! Do regrid
+  call ESMF_FieldRegrid(srcField, dstField, routeHandle, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  call ESMF_FieldRegridRelease(routeHandle, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  ! Init max
+  maxRelErr=0.0
+  totRelErr=0.0
+  numRelErr=0
+
+   ! Check error
+  do lDE=0,localDECount-1
+
+
+     !! get coords
+     call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
+                            farrayPtr=farrayPtrXC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
+                            farrayPtr=farrayPtrYC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=3, &
+                            farrayPtr=farrayPtrZC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+
+      call ESMF_FieldGet(dstField, lDE, farrayPtr, computationalLBound=clbnd, &
+                             computationalUBound=cubnd,  rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     call ESMF_FieldGet(xdstField, lDE, xfarrayPtr, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+   
+     !! check error
+     do i1=clbnd(1),cubnd(1)
+     do i2=clbnd(2),cubnd(2)
+     do i3=clbnd(3),cubnd(3)
+
+        ! Calculate error
+        err=abs(farrayPtr(i1,i2,i3)-xfarrayPtr(i1,i2,i3))
+
+        ! Calculate relative error
+        if (xfarrayPtr(i1,i2,i3) .ne. 0.0) then
+           relErr=err/xfarrayPtr(i1,i2,i3)
+        else
+           relErr=err
+        endif
+ 
+        !! Calculate max
+        if (relErr > maxRelErr) maxRelErr=relErr
+
+        !! Accumulate avg. info
+        totRelErr=totRelErr+maxRelErr
+        numRelErr = numRelErr+1
+
+        !! if error is too big report an error
+        if (relErr > 0.002) then
+           correct=.false.
+        endif
+     enddo
+     enddo
+     enddo
+
+  enddo    ! lDE
+
+  if (.not. correct) then
+     write(*,*) "Test not correct. Max Rel. Error= ",maxRelErr
+  endif
+
+  !write(*,*) "Max Rel. Error= ",maxRelErr
+  !write(*,*) "Avg Rel. Error= ",totRelErr/REAL(numRelErr)
+
+#if 0
+  call ESMF_GridWriteVTK(srcGrid,staggerloc=ESMF_STAGGERLOC_CENTER, &
+       filename="srcGrid", &
+       rc=localrc)
+
+  call ESMF_GridWriteVTK(dstGrid,staggerloc=ESMF_STAGGERLOC_CENTER, &
+       filename="dstGrid", array1=dstArray, array2=xdstArray, &
+       rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+  endif
+#endif
+
+  ! Destroy the Fields
+   call ESMF_FieldDestroy(srcField, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+   call ESMF_FieldDestroy(dstField, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+
+  ! Free the grids
+  call ESMF_GridDestroy(srcGrid, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  call ESMF_GridDestroy(dstGrid, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+
+  ! return answer based on correct flag
+  if (correct) then
+    rc=ESMF_SUCCESS
+  else
+    rc=ESMF_FAILURE
+  endif
+
+ end subroutine test_DTOSGridToGridSph3D
 
  subroutine test_regridNearestLocStreamToLocStream(rc)
   integer, intent(out)  :: rc
@@ -20715,6 +27251,727 @@ write(*,*) "LOCALRC=",localrc
 
  end subroutine test_regridNearestLocStreamToLocStream
 
+ subroutine test_Nearest2DCartLSToLS(regridMethod,rc)
+  type(ESMF_RegridMethod_Flag),intent(in) :: regridMethod
+  integer, intent(out)  :: rc
+  logical :: correct
+  integer :: localrc
+  
+
+  type(ESMF_Field) :: srcField
+  type(ESMF_Field) :: dstField
+  type(ESMF_RouteHandle) :: routeHandle
+  type(ESMF_ArraySpec) :: arrayspec
+  type(ESMF_VM) :: vm
+
+  real(ESMF_KIND_R8), pointer :: x(:),y(:)
+  real(ESMF_KIND_R8), pointer :: temperature(:)
+  real(ESMF_KIND_R8), pointer :: farrayPtr1D(:)
+  integer :: numLocationsOnThisPet,i
+  type(ESMF_LocStream) :: srcLocStream,dstLocStream
+
+  integer :: localPet, petCount
+
+  ! init success flag
+  correct=.true.
+
+  rc=ESMF_SUCCESS
+
+  ! get global VM
+  call ESMF_VMGetGlobal(vm, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! If we don't have 1 or 4 PETS then exit successfully
+  if ((petCount .ne. 1) .and. (petCount .ne. 4)) then
+    print*,'ERROR:  test must be run using exactly 1 or 4 PETS - detected ',petCount
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  ! Setup Src LocStream
+  numLocationsOnThisPet=6
+
+  !-------------------------------------------------------------------
+  ! Allocate and set example Field data
+  !-------------------------------------------------------------------
+  allocate(temperature(numLocationsOnThisPet))
+
+  do i=1,numLocationsOnThisPet
+    temperature(i)=80.0+i
+  enddo
+
+
+  !-------------------------------------------------------------------
+  ! Create the LocStream:  Allocate space for the LocStream object,
+  ! define the number and distribution of the locations.
+  !-------------------------------------------------------------------
+  srcLocStream=ESMF_LocStreamCreate(name="Equatorial Measurements", &
+                                   localCount=numLocationsOnThisPet, &
+                                   coordSys=ESMF_COORDSYS_CART, &
+                                   rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    print*,'ERROR:  trouble creating locStream'
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  !-------------------------------------------------------------------
+  ! Add key data (internally allocating memory).
+  !-------------------------------------------------------------------
+  call ESMF_LocStreamAddKey(srcLocStream,                 &
+                            keyName="ESMF:Y",           &
+                            KeyTypeKind=ESMF_TYPEKIND_R8, &
+                            keyUnits="Units",           &
+                            keyLongName="Latitude", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    print*,'ERROR:  trouble adding LocStream key for Lat'
+    rc=ESMF_FAILURE
+    return
+  endif
+  call ESMF_LocStreamAddKey(srcLocStream,                 &
+                            keyName="ESMF:X",           &
+                            KeyTypeKind=ESMF_TYPEKIND_R8, &
+                            keyUnits="Units",           &
+                            keyLongName="Longitude", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    print*,'ERROR:  trouble adding LocStream key for Lon'
+    rc=ESMF_FAILURE
+    return
+  endif
+  !-------------------------------------------------------------------
+  ! Get key data.
+  !-------------------------------------------------------------------
+  call ESMF_LocStreamGetKey(srcLocStream,                 &
+                            localDE=0,                    &
+                            keyName="ESMF:Y",           &
+                            farray=y,                   &
+                            rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    print*,'ERROR:  trouble getting LocStream key for Latitude'
+    rc=ESMF_FAILURE
+    return
+  endif
+  call ESMF_LocStreamGetKey(srcLocStream,                 &
+                            localDE=0,                    &
+                            keyName="ESMF:X",           &
+                            farray=x,                   &
+                            rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    print*,'ERROR:  trouble getting LocStream key for Longitude'
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  !-------------------------------------------------------------------
+  ! Set key data.
+  !-------------------------------------------------------------------
+  do i=1,numLocationsOnThisPet
+     x(i)=(i-1)*360.0/numLocationsOnThisPet
+     y(i)=REAL(localPet,ESMF_KIND_R8)
+  enddo
+
+
+  !-------------------------------------------------------------------
+  ! Create a Field on the Location Stream. In this case the
+  ! Field is created from a user array, but any of the other
+  ! Field create methods (e.g. from ArraySpec) would also apply.
+  !-------------------------------------------------------------------
+  srcField=ESMF_FieldCreate(srcLocStream,   &
+                                     temperature, &
+                                     name="temperature", &
+                                     rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    print*,'ERROR:  trouble creating field on locStream'
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  ! setup Dst locStream
+
+  !-------------------------------------------------------------------
+  ! Create the LocStream:  Allocate space for the LocStream object,
+  ! define the number and distribution of the locations.
+  !-------------------------------------------------------------------
+  dstLocStream=ESMF_LocStreamCreate(name="Equatorial Measurements", &
+                                   localCount=numLocationsOnThisPet, &
+                                   coordSys=ESMF_COORDSYS_CART, &
+                                   rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    print*,'ERROR:  trouble creating locStream'
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  !-------------------------------------------------------------------
+  ! Add key data (internally allocating memory).
+  !-------------------------------------------------------------------
+  call ESMF_LocStreamAddKey(dstLocStream,                 &
+                            keyName="ESMF:Y",           &
+                            KeyTypeKind=ESMF_TYPEKIND_R8, &
+                            keyUnits="Units",           &
+                            keyLongName="Latitude", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    print*,'ERROR:  trouble adding LocStream key for Lat'
+    rc=ESMF_FAILURE
+    return
+  endif
+  call ESMF_LocStreamAddKey(dstLocStream,                 &
+                            keyName="ESMF:X",           &
+                            KeyTypeKind=ESMF_TYPEKIND_R8, &
+                            keyUnits="Units",           &
+                            keyLongName="Longitude", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    print*,'ERROR:  trouble adding LocStream key for Lon'
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+
+  !-------------------------------------------------------------------
+  ! Get key data.
+  !-------------------------------------------------------------------
+  call ESMF_LocStreamGetKey(dstLocStream,                 &
+                            localDE=0,                    &
+                            keyName="ESMF:Y",           &
+                            farray=y,                   &
+                            rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    print*,'ERROR:  trouble getting LocStream key for Latitude'
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  call ESMF_LocStreamGetKey(dstLocStream,                 &
+                            localDE=0,                    &
+                            keyName="ESMF:X",           &
+                            farray=x,                   &
+                            rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    print*,'ERROR:  trouble getting LocStream key for Longitude'
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  !-------------------------------------------------------------------
+  ! Set key data.
+  !-------------------------------------------------------------------
+  !setting the coordinates with offset 
+  do i=1,numLocationsOnThisPet
+     x(i)=(i-1)*360.0/numLocationsOnThisPet+0.001
+     y(i)=REAL(localPet,ESMF_KIND_R8)
+  enddo
+
+
+  !-------------------------------------------------------------------
+  ! Create a Field on the Location Stream. In this case the
+  ! Field is created from a user array, but any of the other
+  ! Field create methods (e.g. from ArraySpec) would also apply.
+  !-------------------------------------------------------------------
+
+
+  ! Create dest field
+   call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
+
+   dstField = ESMF_FieldCreate(dstLocStream, arrayspec, &
+                        name="dest", rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+   ! clear destination Field
+   ! Should only be 1 localDE
+   call ESMF_FieldGet(dstField, 0, farrayPtr1D,  rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+   endif
+
+   farrayPtr1D=0.0
+
+
+  rc=ESMF_SUCCESS
+
+
+  !!! Regrid forward from one locstream to another
+  ! Regrid store
+  call ESMF_FieldRegridStore( &
+          srcField, &
+          dstField=dstField, &
+          routeHandle=routeHandle, &
+          regridmethod=regridmethod, &
+          rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+
+
+  ! Do regrid
+  call ESMF_FieldRegrid(srcField, dstField, routeHandle, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  call ESMF_FieldRegridRelease(routeHandle, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+
+   !check error
+   call ESMF_FieldGet(dstField, 0, farrayPtr1D,  rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+   endif
+
+  ! loop through nodes and make sure interpolated values are reasonable
+  ! interpolated point should always map to same index
+  do i=1,numLocationsOnThisPet
+    if ( abs( farrayPtr1D(i)-temperature(i) ) > 0.0001) then
+      correct=.false.
+      write(*,*) localPet,i,"::",farrayPtr1D(i),temperature(i)
+    endif
+  enddo
+
+  deallocate(temperature)
+
+  ! Destroy the Fields
+   call ESMF_FieldDestroy(srcField, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+   call ESMF_FieldDestroy(dstField, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+  !destroy locStream objects
+  call ESMF_LocStreamDestroy(srcLocStream, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      print*,'ERROR:  trouble destroying location stream'
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  call ESMF_LocStreamDestroy(dstLocStream, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      print*,'ERROR:  trouble destroying location stream'
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  ! return answer based on correct flag
+  if (correct) then
+    rc=ESMF_SUCCESS
+  else
+    rc=ESMF_FAILURE
+  endif
+
+
+ end subroutine test_Nearest2DCartLSToLS
+
+
+ subroutine test_Nearest3DCartLSToLS(regridMethod,rc)
+  type(ESMF_RegridMethod_Flag),intent(in) :: regridMethod
+  integer, intent(out)  :: rc
+  logical :: correct
+  integer :: localrc
+  
+
+  type(ESMF_Field) :: srcField
+  type(ESMF_Field) :: dstField
+  type(ESMF_RouteHandle) :: routeHandle
+  type(ESMF_ArraySpec) :: arrayspec
+  type(ESMF_VM) :: vm
+
+  real(ESMF_KIND_R8), pointer :: x(:),y(:),z(:)
+  real(ESMF_KIND_R8), pointer :: temperature(:)
+  real(ESMF_KIND_R8), pointer :: farrayPtr1D(:)
+  integer :: numLocationsOnThisPet,i
+  type(ESMF_LocStream) :: srcLocStream,dstLocStream
+
+  integer :: localPet, petCount
+
+  ! init success flag
+  correct=.true.
+
+  rc=ESMF_SUCCESS
+
+  ! get global VM
+  call ESMF_VMGetGlobal(vm, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! If we don't have 1 or 4 PETS then exit successfully
+  if ((petCount .ne. 1) .and. (petCount .ne. 4)) then
+    print*,'ERROR:  test must be run using exactly 1 or 4 PETS - detected ',petCount
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  ! Setup Src LocStream
+  numLocationsOnThisPet=6
+
+  !-------------------------------------------------------------------
+  ! Allocate and set example Field data
+  !-------------------------------------------------------------------
+  allocate(temperature(numLocationsOnThisPet))
+
+  do i=1,numLocationsOnThisPet
+    temperature(i)=80.0+i
+  enddo
+
+
+  !-------------------------------------------------------------------
+  ! Create the LocStream:  Allocate space for the LocStream object,
+  ! define the number and distribution of the locations.
+  !-------------------------------------------------------------------
+  srcLocStream=ESMF_LocStreamCreate(name="Equatorial Measurements", &
+                                   localCount=numLocationsOnThisPet, &
+                                   coordSys=ESMF_COORDSYS_CART, &
+                                   rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    print*,'ERROR:  trouble creating locStream'
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  !-------------------------------------------------------------------
+  ! Add key data (internally allocating memory).
+  !-------------------------------------------------------------------
+  call ESMF_LocStreamAddKey(srcLocStream,                 &
+                            keyName="ESMF:Z",           &
+                            KeyTypeKind=ESMF_TYPEKIND_R8, &
+                            keyUnits="Units",           &
+                            keyLongName="Longitude", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    print*,'ERROR:  trouble adding LocStream key for Lon'
+    rc=ESMF_FAILURE
+    return
+  endif
+  call ESMF_LocStreamAddKey(srcLocStream,                 &
+                            keyName="ESMF:Y",           &
+                            KeyTypeKind=ESMF_TYPEKIND_R8, &
+                            keyUnits="Units",           &
+                            keyLongName="Latitude", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    print*,'ERROR:  trouble adding LocStream key for Lat'
+    rc=ESMF_FAILURE
+    return
+  endif
+  call ESMF_LocStreamAddKey(srcLocStream,                 &
+                            keyName="ESMF:X",           &
+                            KeyTypeKind=ESMF_TYPEKIND_R8, &
+                            keyUnits="Units",           &
+                            keyLongName="Longitude", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    print*,'ERROR:  trouble adding LocStream key for Lon'
+    rc=ESMF_FAILURE
+    return
+  endif
+  !-------------------------------------------------------------------
+  ! Get key data.
+  !-------------------------------------------------------------------
+  call ESMF_LocStreamGetKey(srcLocStream,                 &
+                            localDE=0,                    &
+                            keyName="ESMF:Z",           &
+                            farray=z,                   &
+                            rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    print*,'ERROR:  trouble getting LocStream key for Latitude'
+    rc=ESMF_FAILURE
+    return
+  endif
+  call ESMF_LocStreamGetKey(srcLocStream,                 &
+                            localDE=0,                    &
+                            keyName="ESMF:Y",           &
+                            farray=y,                   &
+                            rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    print*,'ERROR:  trouble getting LocStream key for Latitude'
+    rc=ESMF_FAILURE
+    return
+  endif
+  call ESMF_LocStreamGetKey(srcLocStream,                 &
+                            localDE=0,                    &
+                            keyName="ESMF:X",           &
+                            farray=x,                   &
+                            rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    print*,'ERROR:  trouble getting LocStream key for Longitude'
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  !-------------------------------------------------------------------
+  ! Set key data.
+  !-------------------------------------------------------------------
+  do i=1,numLocationsOnThisPet
+     x(i)=(i-1)*360.0/numLocationsOnThisPet
+     y(i)=REAL(localPet,ESMF_KIND_R8)
+     z(i)=(i-1)*20.0/numLocationsOnThisPet
+  enddo
+
+
+  !-------------------------------------------------------------------
+  ! Create a Field on the Location Stream. In this case the
+  ! Field is created from a user array, but any of the other
+  ! Field create methods (e.g. from ArraySpec) would also apply.
+  !-------------------------------------------------------------------
+  srcField=ESMF_FieldCreate(srcLocStream,   &
+                                     temperature, &
+                                     name="temperature", &
+                                     rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    print*,'ERROR:  trouble creating field on locStream'
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  ! setup Dst locStream
+
+  !-------------------------------------------------------------------
+  ! Create the LocStream:  Allocate space for the LocStream object,
+  ! define the number and distribution of the locations.
+  !-------------------------------------------------------------------
+  dstLocStream=ESMF_LocStreamCreate(name="Equatorial Measurements", &
+                                   localCount=numLocationsOnThisPet, &
+                                   coordSys=ESMF_COORDSYS_CART, &
+                                   rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    print*,'ERROR:  trouble creating locStream'
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  !-------------------------------------------------------------------
+  ! Add key data (internally allocating memory).
+  !-------------------------------------------------------------------
+  call ESMF_LocStreamAddKey(dstLocStream,                 &
+                            keyName="ESMF:Z",           &
+                            KeyTypeKind=ESMF_TYPEKIND_R8, &
+                            keyUnits="Units",           &
+                            keyLongName="Latitude", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    print*,'ERROR:  trouble adding LocStream key for Lat'
+    rc=ESMF_FAILURE
+    return
+  endif
+  call ESMF_LocStreamAddKey(dstLocStream,                 &
+                            keyName="ESMF:Y",           &
+                            KeyTypeKind=ESMF_TYPEKIND_R8, &
+                            keyUnits="Units",           &
+                            keyLongName="Latitude", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    print*,'ERROR:  trouble adding LocStream key for Lat'
+    rc=ESMF_FAILURE
+    return
+  endif
+  call ESMF_LocStreamAddKey(dstLocStream,                 &
+                            keyName="ESMF:X",           &
+                            KeyTypeKind=ESMF_TYPEKIND_R8, &
+                            keyUnits="Units",           &
+                            keyLongName="Longitude", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    print*,'ERROR:  trouble adding LocStream key for Lon'
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+
+  !-------------------------------------------------------------------
+  ! Get key data.
+  !-------------------------------------------------------------------
+   call ESMF_LocStreamGetKey(dstLocStream,                 &
+                            localDE=0,                    &
+                            keyName="ESMF:Z",           &
+                            farray=z,                   &
+                            rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    print*,'ERROR:  trouble getting LocStream key for Latitude'
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  call ESMF_LocStreamGetKey(dstLocStream,                 &
+                            localDE=0,                    &
+                            keyName="ESMF:Y",           &
+                            farray=y,                   &
+                            rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    print*,'ERROR:  trouble getting LocStream key for Latitude'
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  call ESMF_LocStreamGetKey(dstLocStream,                 &
+                            localDE=0,                    &
+                            keyName="ESMF:X",           &
+                            farray=x,                   &
+                            rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    print*,'ERROR:  trouble getting LocStream key for Longitude'
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  !-------------------------------------------------------------------
+  ! Set key data.
+  !-------------------------------------------------------------------
+  !setting the coordinates with offset 
+  do i=1,numLocationsOnThisPet
+     x(i)=(i-1)*360.0/numLocationsOnThisPet+0.001
+     y(i)=REAL(localPet,ESMF_KIND_R8)
+     z(i)=(i-1)*20.0/numLocationsOnThisPet
+  enddo
+
+
+  !-------------------------------------------------------------------
+  ! Create a Field on the Location Stream. In this case the
+  ! Field is created from a user array, but any of the other
+  ! Field create methods (e.g. from ArraySpec) would also apply.
+  !-------------------------------------------------------------------
+
+
+  ! Create dest field
+   call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
+
+   dstField = ESMF_FieldCreate(dstLocStream, arrayspec, &
+                        name="dest", rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+   ! clear destination Field
+   ! Should only be 1 localDE
+   call ESMF_FieldGet(dstField, 0, farrayPtr1D,  rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+   endif
+
+   farrayPtr1D=0.0
+
+
+  rc=ESMF_SUCCESS
+
+
+  !!! Regrid forward from one locstream to another
+  ! Regrid store
+  call ESMF_FieldRegridStore( &
+          srcField, &
+          dstField=dstField, &
+          routeHandle=routeHandle, &
+          regridmethod=regridmethod, &
+          rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+
+
+  ! Do regrid
+  call ESMF_FieldRegrid(srcField, dstField, routeHandle, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  call ESMF_FieldRegridRelease(routeHandle, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+
+   !check error
+   call ESMF_FieldGet(dstField, 0, farrayPtr1D,  rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+   endif
+
+  ! loop through nodes and make sure interpolated values are reasonable
+  ! interpolated point should always map to same index
+  do i=1,numLocationsOnThisPet
+    if ( abs( farrayPtr1D(i)-temperature(i) ) > 0.0001) then
+      correct=.false.
+      write(*,*) localPet,i,"::",farrayPtr1D(i),temperature(i)
+    endif
+  enddo
+
+  deallocate(temperature)
+
+  ! Destroy the Fields
+   call ESMF_FieldDestroy(srcField, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+   call ESMF_FieldDestroy(dstField, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+  !destroy locStream objects
+  call ESMF_LocStreamDestroy(srcLocStream, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      print*,'ERROR:  trouble destroying location stream'
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  call ESMF_LocStreamDestroy(dstLocStream, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      print*,'ERROR:  trouble destroying location stream'
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  ! return answer based on correct flag
+  if (correct) then
+    rc=ESMF_SUCCESS
+  else
+    rc=ESMF_FAILURE
+  endif
+
+
+ end subroutine test_Nearest3DCartLSToLS
 
  subroutine test_regridNearestLocStream_wClusterToMesh(rc)
         integer, intent(out)  :: rc
@@ -23724,6 +30981,669 @@ write(*,*) "LOCALRC=",localrc
 
  end subroutine test_regridMeshToLocStreamMask
 
+
+ subroutine test_PatchMeshToLocStreamMask(rc)
+  integer, intent(out)  :: rc
+  logical :: correct
+  integer :: localrc
+  type(ESMF_Mesh) :: srcMesh
+  type(ESMF_Field) :: srcField
+  type(ESMF_Field) :: dstField
+  type(ESMF_Array) :: dstArray
+  type(ESMF_RouteHandle) :: routeHandle
+  type(ESMF_ArraySpec) :: arrayspec
+  type(ESMF_VM) :: vm
+  real(ESMF_KIND_R8), pointer :: farrayPtrXC(:,:), farrayPtr1D(:)
+  real(ESMF_KIND_R8), pointer :: farrayPtrYC(:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtr(:,:),farrayPtr2(:,:)
+  integer :: i1,i2,i3, index(2)
+  integer :: lDE, localDECount
+  integer :: cl,cu
+  
+  real(ESMF_KIND_R8) :: x,y
+
+  integer :: localPet, petCount
+
+  integer, allocatable :: nodeIds(:),nodeOwners(:)
+  real(ESMF_KIND_R8), allocatable :: nodeCoords(:)
+  integer, allocatable :: elemIds(:),elemTypes(:),elemConn(:)
+  integer :: numNodes, numElems
+  integer :: numQuadElems,numTriElems, numTotElems
+
+  type(ESMF_LocStream) :: dstLocStream
+  integer :: numLocationsOnThisPet
+  real(ESMF_KIND_R8), pointer :: Xarray(:),Yarray(:)
+  integer(ESMF_KIND_I4) :: maskValues(2)
+  integer(ESMF_KIND_I4), pointer :: maskArray(:)
+  
+  ! init success flag
+  correct=.true.
+
+  rc=ESMF_SUCCESS
+
+  ! get pet info
+  call ESMF_VMGetGlobal(vm, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! If we don't have 1 or 4 PETS then exit successfully
+  if ((petCount .ne. 1) .and. (petCount .ne. 4)) then
+    print*,'ERROR:  test must be run using exactly 1 or 4 PETS - detected ',petCount
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  ! Setup Src Mesh
+  if (petCount .eq. 1) then
+     ! Set number of nodes
+     numNodes=9
+
+     ! Allocate and fill the node id array.
+     allocate(nodeIds(numNodes))
+     nodeIds=(/100,20,30,40,50,60,70,80,90/) 
+
+     ! Allocate and fill node coordinate array.
+     ! Since this is a 2D Mesh the size is 2x the
+     ! number of nodes.
+     allocate(nodeCoords(2*numNodes))
+     nodeCoords=(/-0.1,-0.1, & ! node id 1
+                   1.0,-0.1, & ! node id 2
+                   2.1,-0.1, & ! node id 3
+                  -0.1, 1.0, & ! node id 4
+                   1.0, 1.0, & ! node id 5
+                   2.1, 1.0, & ! node id 6
+                  -0.1, 2.1, & ! node id 7
+                   1.0, 2.1, & ! node id 8
+                   2.1, 2.1 /) ! node id 9
+
+     ! Allocate and fill the node owner array.
+     ! Since this Mesh is all on PET 0, it's just set to all 0.
+     allocate(nodeOwners(numNodes))
+     nodeOwners=0 ! everything on PET 0
+
+     ! Set the number of each type of element, plus the total number.
+     numQuadElems=3
+     numTriElems=2
+     numTotElems=numQuadElems+numTriElems
+
+     ! Allocate and fill the element id array.
+     allocate(elemIds(numTotElems))
+     elemIds=(/1,2,3,4,5/) 
+
+
+     ! Allocate and fill the element topology type array.
+     allocate(elemTypes(numTotElems))
+     elemTypes=(/ESMF_MESHELEMTYPE_QUAD, & ! elem id 1
+                 ESMF_MESHELEMTYPE_TRI,  & ! elem id 2
+                 ESMF_MESHELEMTYPE_TRI,  & ! elem id 3
+                 ESMF_MESHELEMTYPE_QUAD, & ! elem id 4
+                 ESMF_MESHELEMTYPE_QUAD/)  ! elem id 5
+
+
+     ! Allocate and fill the element connection type array.
+     ! Note that entries in this array refer to the 
+     ! positions in the nodeIds, etc. arrays and that
+     ! the order and number of entries for each element
+     ! reflects that given in the Mesh options 
+     ! section for the corresponding entry
+     ! in the elemTypes array.
+     allocate(elemConn(4*numQuadElems+3*numTriElems))
+     elemConn=(/1,2,5,4, &  ! elem id 1
+                2,3,5,   &  ! elem id 2
+                3,6,5,   &  ! elem id 3
+                4,5,8,7, &  ! elem id 4
+                5,6,9,8/)   ! elem id 5
+
+
+ else if (petCount .eq. 4) then
+     ! Setup mesh data depending on PET
+    if (localPET .eq. 0) then !!! This part only for PET 0
+       ! Set number of nodes
+       numNodes=4
+
+       ! Allocate and fill the node id array.
+       allocate(nodeIds(numNodes))
+       nodeIds=(/100,20,40,50/) 
+
+       ! Allocate and fill node coordinate array.
+       ! Since this is a 2D Mesh the size is 2x the
+       ! number of nodes.
+       allocate(nodeCoords(2*numNodes))
+       nodeCoords=(/-0.1, -0.1, & ! node id 1
+                     1.0, -0.1, & ! node id 2
+                    -0.1,  1.0, & ! node id 4
+                     1.0,  1.0 /) ! node id 5
+
+       ! Allocate and fill the node owner array.
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0, & ! node id 1
+                    0, & ! node id 2
+                    0, & ! node id 4
+                    0/)  ! node id 5
+
+       ! Set the number of each type of element, plus the total number.
+       numQuadElems=1
+       numTriElems=0
+       numTotElems=numQuadElems+numTriElems
+
+       ! Allocate and fill the element id array.
+       allocate(elemIds(numTotElems))
+       elemIds=(/1/) 
+
+       ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numTotElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! elem id 1
+
+       ! Allocate and fill the element connection type array.
+       ! Note that entry are local indices
+       allocate(elemConn(4*numQuadElems+3*numTriElems))
+       elemConn=(/1,2,4,3/) ! elem id 1
+
+     else if (localPET .eq. 1) then !!! This part only for PET 1
+       ! Set number of nodes
+       numNodes=4
+
+       ! Allocate and fill the node id array.
+       allocate(nodeIds(numNodes))
+       nodeIds=(/20,30,50,60/) 
+
+       ! Allocate and fill node coordinate array.
+       ! Since this is a 2D Mesh the size is 2x the
+       ! number of nodes.
+       allocate(nodeCoords(2*numNodes))
+       nodeCoords=(/1.0,-0.1, & ! node id 2
+                    2.1,-0.1, & ! node id 3
+                    1.0, 1.0, & ! node id 5
+                    2.1, 1.0 /) ! node id 6
+
+       ! Allocate and fill the node owner array.
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0, & ! node id 2
+                    1, & ! node id 3
+                    0, & ! node id 5
+                    1/)  ! node id 6
+
+       ! Set the number of each type of element, plus the total number.
+       numQuadElems=0
+       numTriElems=2
+       numTotElems=numQuadElems+numTriElems
+
+       ! Allocate and fill the element id array.
+       allocate(elemIds(numTotElems))
+       elemIds=(/2,3/) 
+
+       ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numTotElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_TRI, & ! elem id 2
+                   ESMF_MESHELEMTYPE_TRI/)  ! elem id 3
+
+       ! Allocate and fill the element connection type array.
+       allocate(elemConn(4*numQuadElems+3*numTriElems))
+       elemConn=(/1,2,3, & ! elem id 2
+                  2,4,3/)  ! elem id 3
+
+    else if (localPET .eq. 2) then !!! This part only for PET 2
+        ! Set number of nodes
+        numNodes=4
+
+        ! Allocate and fill the node id array.
+        allocate(nodeIds(numNodes))
+        nodeIds=(/40,50,70,80/) 
+
+        ! Allocate and fill node coordinate array.
+        ! Since this is a 2D Mesh the size is 2x the
+        ! number of nodes.
+        allocate(nodeCoords(2*numNodes))
+        nodeCoords=(/-0.1,1.0, & ! node id 4
+                      1.0,1.0, & ! node id 5
+                     -0.1,2.1, & ! node id 7
+                      1.0,2.1 /) ! node id 8
+
+        ! Allocate and fill the node owner array.
+        ! Since this Mesh is all on PET 0, it's just set to all 0.
+        allocate(nodeOwners(numNodes))
+        nodeOwners=(/0, & ! node id 4
+                     0, & ! node id 5
+                     2, & ! node id 7
+                     2/)  ! node id 8
+
+        ! Set the number of each type of element, plus the total number.
+        numQuadElems=1
+        numTriElems=0
+        numTotElems=numQuadElems+numTriElems
+
+        ! Allocate and fill the element id array.
+        allocate(elemIds(numTotElems))
+        elemIds=(/4/) 
+
+        ! Allocate and fill the element topology type array.
+        allocate(elemTypes(numTotElems))
+        elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! elem id 4
+
+        ! Allocate and fill the element connection type array.
+        allocate(elemConn(4*numQuadElems+3*numTriElems))
+        elemConn=(/1,2,4,3/) ! elem id 4
+
+     else if (localPET .eq. 3) then !!! This part only for PET 3
+        ! Set number of nodes
+        numNodes=4
+
+        ! Allocate and fill the node id array.
+        allocate(nodeIds(numNodes))
+        nodeIds=(/50,60,80,90/) 
+
+        ! Allocate and fill node coordinate array.
+        ! Since this is a 2D Mesh the size is 2x the
+        ! number of nodes.
+        allocate(nodeCoords(2*numNodes))
+        nodeCoords=(/1.0,1.0, &  ! node id 5
+                     2.1,1.0, &  ! node id 6
+                     1.0,2.1, &  ! node id 8
+                     2.1,2.1 /)  ! node id 9
+
+        ! Allocate and fill the node owner array.
+        allocate(nodeOwners(numNodes))
+        nodeOwners=(/0, & ! node id 5
+                     1, & ! node id 6
+                     2, & ! node id 8
+                     3/)  ! node id 9
+ 
+        ! Set the number of each type of element, plus the total number.
+        numQuadElems=1
+        numTriElems=0
+        numTotElems=numQuadElems+numTriElems
+
+        ! Allocate and fill the element id array.
+        allocate(elemIds(numTotElems))
+        elemIds=(/5/)  
+
+        ! Allocate and fill the element topology type array.
+        allocate(elemTypes(numTotElems))
+        elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! elem id 5
+
+        ! Allocate and fill the element connection type array.
+        allocate(elemConn(4*numQuadElems+3*numTriElems))
+        elemConn=(/1,2,4,3/) ! elem id 5
+       endif
+    endif
+
+   ! Create Mesh structure in 1 step
+   srcMesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+        coordSys=ESMF_COORDSYS_CART, &
+         nodeIds=nodeIds, nodeCoords=nodeCoords, &
+         nodeOwners=nodeOwners, elementIds=elemIds,&
+         elementTypes=elemTypes, elementConn=elemConn, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+       rc=ESMF_FAILURE
+       return
+   endif
+
+  ! Create source field
+  call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
+
+   srcField = ESMF_FieldCreate(srcMesh, arrayspec, &
+                        name="source", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  
+  ! Load test data into the source Field
+  ! Should only be 1 localDE
+  call ESMF_FieldGet(srcField, 0, farrayPtr1D,  rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+  endif
+
+
+  ! set interpolated function
+  i2=1
+  do i1=1,numNodes
+
+     if (nodeOwners(i1) .eq. localPet) then
+        ! Get coordinates
+        x=nodeCoords(2*i1-1)
+        y=nodeCoords(2*i1)
+
+        ! Set source function
+        farrayPtr1D(i2) = 20.0+x+y
+
+        ! Advance to next owner
+        i2=i2+1
+     endif
+  enddo
+
+
+   ! deallocate node data
+   deallocate(nodeIds)
+   deallocate(nodeCoords)
+   deallocate(nodeOwners)
+
+   ! deallocate elem data
+   deallocate(elemIds)
+   deallocate(elemTypes)
+   deallocate(elemConn)
+
+
+  ! Setup Dst LocStream
+  if (petCount .eq. 1) then
+    numLocationsOnThisPet=11
+    cl=1
+    cu=11
+  else
+    if (localpet .eq. 0) then
+      numLocationsOnThisPet=3
+      cl=1
+      cu=3
+    else if (localpet .eq. 1) then
+      numLocationsOnThisPet=3
+      cl=4
+      cu=6
+    else if (localpet .eq. 2) then
+      numLocationsOnThisPet=5
+      cl=7
+      cu=11
+    else if (localpet .eq. 3) then
+      numLocationsOnThisPet=0
+      cl=12
+      cu=11
+    endif
+  endif
+
+  !-------------------------------------------------------------------
+  ! Create the LocStream:  Allocate space for the LocStream object,
+  ! define the number and distribution of the locations.
+  !-------------------------------------------------------------------
+  dstLocStream=ESMF_LocStreamCreate(name="Equatorial Measurements", &
+                                   localCount=numLocationsOnThisPet, &
+                                   coordSys=ESMF_COORDSYS_CART, &
+                                   indexflag=ESMF_INDEX_GLOBAL, &
+                                   rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    print*,'ERROR:  trouble creating locStream'
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  !-------------------------------------------------------------------
+  ! Add key data (internally allocating memory).
+  !-------------------------------------------------------------------
+  call ESMF_LocStreamAddKey(dstLocStream,                    &
+                            keyName="ESMF:Y",                &
+                            KeyTypeKind=ESMF_TYPEKIND_R8, &
+                            keyUnits="Units",           &
+                            keyLongName="Ydimension", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    print*,'ERROR:  trouble adding LocStream key for Y'
+    rc=ESMF_FAILURE
+    return
+  endif
+  call ESMF_LocStreamAddKey(dstLocStream,                    &
+                            keyName="ESMF:X",                &
+                            KeyTypeKind=ESMF_TYPEKIND_R8, &
+                            keyUnits="Units",           &
+                            keyLongName="Xdimension", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    print*,'ERROR:  trouble adding LocStream key for X'
+    rc=ESMF_FAILURE
+    return
+  endif
+  call ESMF_LocStreamAddKey(dstLocStream,                    &
+                            keyName="ESMF:Mask",                &
+                            KeyTypeKind=ESMF_TYPEKIND_I4, &
+                            keyUnits="none",           &
+                            keyLongName="mask values", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    print*,'ERROR:  trouble adding LocStream key for Mask'
+    rc=ESMF_FAILURE
+    return
+  endif
+  !-------------------------------------------------------------------
+  ! Get key data.
+  !-------------------------------------------------------------------
+  call ESMF_LocStreamGetKey(dstLocStream,                    &
+                            keyName="ESMF:Y",                &
+                            farray=Yarray,                   &
+                            rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    print*,'ERROR:  trouble getting LocStream key for Y coordinate'
+    rc=ESMF_FAILURE
+    return
+  endif
+  call ESMF_LocStreamGetKey(dstLocStream,                    &
+                            keyName="ESMF:X",                &
+                            farray=Xarray,                   &
+                            rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    print*,'ERROR:  trouble getting LocStream key for X coordinate'
+    rc=ESMF_FAILURE
+    return
+  endif
+  call ESMF_LocStreamGetKey(dstLocStream,                    &
+                            keyName="ESMF:Mask",                &
+                            farray=maskArray,                   &
+                            rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    print*,'ERROR:  trouble getting LocStream key for Mask'
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  !-------------------------------------------------------------------
+  ! Set key data.
+  !-------------------------------------------------------------------
+  if (petCount .eq. 1) then
+    Xarray(1)=0.0
+    Xarray(2)=0.5
+    Xarray(3)=1.0
+    Xarray(4)=2.0
+    Xarray(5)=0.0
+    Xarray(6)=1.0
+    Xarray(7)=2.0
+    Xarray(8)=0.0
+    Xarray(9)=1.0
+    Xarray(10)=1.5
+    Xarray(11)=2.0
+
+    Yarray(1)=0.0
+    Yarray(2)=0.5
+    Yarray(3)=0.0
+    Yarray(4)=0.0
+    Yarray(5)=1.0
+    Yarray(6)=1.0
+    Yarray(7)=1.0
+    Yarray(8)=2.0
+    Yarray(9)=2.0
+    Yarray(10)=1.5
+    Yarray(11)=2.0
+
+    maskArray(1)=0
+    maskArray(2)=1
+    maskArray(3)=0
+    maskArray(4)=0
+    maskArray(5)=0
+    maskArray(6)=0
+    maskArray(7)=0
+    maskArray(8)=0
+    maskArray(9)=0
+    maskArray(10)=2
+    maskArray(11)=0
+  else
+    if (localpet .eq. 0) then
+      Xarray(1)=0.0
+      Xarray(2)=0.5
+      Xarray(3)=1.0
+
+      Yarray(1)=0.0
+      Yarray(2)=0.5
+      Yarray(3)=0.0
+
+      maskArray(1)=0
+      maskArray(2)=1
+      maskArray(3)=0
+    else if (localpet .eq. 1) then
+      Xarray(4)=2.0
+      Xarray(5)=0.0
+      Xarray(6)=1.0
+
+      Yarray(4)=0.0
+      Yarray(5)=1.0
+      Yarray(6)=1.0
+
+      maskArray(4)=0
+      maskArray(5)=0
+      maskArray(6)=0
+    else if (localpet .eq. 2) then
+      Xarray(7)=2.0
+      Xarray(8)=0.0
+      Xarray(9)=1.0
+      Xarray(10)=1.5
+      Xarray(11)=2.0
+
+      Yarray(7)=1.0
+      Yarray(8)=2.0
+      Yarray(9)=2.0
+      Yarray(10)=1.5
+      Yarray(11)=2.0
+
+      maskArray(7)=0
+      maskArray(8)=0
+      maskArray(9)=0
+      maskArray(10)=2
+      maskArray(11)=0
+!    else if (localpet .eq. 3) then
+    endif
+  endif
+
+
+  ! Create dest field
+  call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
+
+  dstField = ESMF_FieldCreate(dstLocStream, arrayspec, &
+                        name="dest", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    print*,'ERROR:  trouble creating field on locStream'
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  
+  ! clear destination Field
+  ! Should only be 1 localDE
+  call ESMF_FieldGet(dstField, 0, farrayPtr1D,  rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+  endif
+
+  farrayPtr1D=0.0
+
+
+
+  !!! Regrid forward from the mesh to the locstream
+  ! Regrid store
+  call ESMF_FieldRegridStore( &
+          srcField, &
+          dstField=dstField, dstMaskValues=(/1,2/), &
+          routeHandle=routeHandle, &
+          regridmethod=ESMF_REGRIDMETHOD_PATCH, &
+          rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  ! Do regrid
+  call ESMF_FieldRegrid(srcField, dstField, routeHandle, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  call ESMF_FieldRegridRelease(routeHandle, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  ! Check destination field
+  ! Should only be 1 localDE
+  call ESMF_FieldGet(dstField, 0, farrayPtr1D,  rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+  endif
+
+  ! loop through nodes and make sure interpolated values are reasonable
+  do i1=cl,cu
+
+        if (maskArray(i1) .gt. 0) then
+          if ( abs( farrayPtr1D(i1) ) > 0.0001) then
+            correct=.false.
+          endif
+        else
+          ! Get coordinates
+          x=Xarray(i1)
+          y=Yarray(i1)
+
+          if ( abs( farrayPtr1D(i1)-(x+y+20.0) ) > 0.0001) then
+             print*,'ERROR: expecting ',x+y+20.0,'  got ',abs(farrayPtr1d(i1))
+             correct=.false.
+          endif
+        endif
+  enddo
+
+
+  ! Destroy the Fields
+   call ESMF_FieldDestroy(srcField, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+   call ESMF_FieldDestroy(dstField, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+
+  ! Free the grids
+  call ESMF_LocStreamDestroy(dstLocStream, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+  endif
+
+  call ESMF_MeshDestroy(srcMesh, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+
+  ! return answer based on correct flag
+  if (correct) then
+    rc=ESMF_SUCCESS
+  else
+    rc=ESMF_FAILURE
+  endif
+
+ end subroutine test_PatchMeshToLocStreamMask
+
+
+
   subroutine test_regridGridToGML(rc)
   integer, intent(out)  :: rc
   logical :: correct
@@ -24773,7 +32693,6 @@ write(*,*) "LOCALRC=",localrc
      return
   endif
 
- ! XMRKX
 
   ! Setup Src Mesh
 
@@ -26431,7 +34350,7 @@ write(*,*) "LOCALRC=",localrc
      enddo
 
   enddo    ! lDE
- ! XMRKX
+
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
@@ -29589,7 +37508,7 @@ write(*,*) "LOCALRC=",localrc
 
 end subroutine test_regridSMMArbGrid
 
- ! XMRKX
+
  subroutine test_regrid_extrap_nearstod(rc)
   integer, intent(out)  :: rc
   logical :: correct
@@ -29864,7 +37783,7 @@ end subroutine test_regridSMMArbGrid
      return
   endif
 #endif
- ! XMRKX
+
   !!! Regrid forward from the src grid to the dst grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
@@ -30009,7 +37928,6 @@ end subroutine test_regridSMMArbGrid
  end subroutine test_regrid_extrap_nearstod
 
 
- ! XMRKX
  subroutine test_regrid_extrap_near_npnts(rc)
   integer, intent(out)  :: rc
   logical :: correct
@@ -30281,7 +38199,7 @@ end subroutine test_regridSMMArbGrid
      return
   endif
 #endif
- ! XMRKX
+
   !!! Regrid forward from the src grid to the dst grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
@@ -31630,7 +39548,6 @@ end subroutine test_regridSMMArbGrid
  end subroutine test_regrid_w_gtom
 
 
- ! XMRKX
  subroutine test_regrid_extrap_creep(rc)
   integer, intent(out)  :: rc
   logical :: correct
@@ -31942,8 +39859,6 @@ end subroutine test_regridSMMArbGrid
 #endif
 
 
-
- ! XMRKX
   !!! Regrid forward from the src grid to the dst grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
@@ -32103,6 +40018,1641 @@ end subroutine test_regridSMMArbGrid
   endif
 
  end subroutine test_regrid_extrap_creep
+
+ subroutine test_mesh_extrap_creep(rc)
+
+        integer, intent(out)  :: rc
+  logical :: correct
+  integer :: localrc
+  type(ESMF_Mesh) :: dstMesh
+  type(ESMF_Mesh) :: srcMesh
+  type(ESMF_Field) :: srcField
+  type(ESMF_Field) :: dstField, regridStatusField
+  type(ESMF_Array) :: dstArray
+  type(ESMF_Array) :: lonArrayA
+  type(ESMF_Array) :: srcArrayA
+  type(ESMF_RouteHandle) :: routeHandle
+  type(ESMF_ArraySpec) :: arrayspec
+  type(ESMF_VM) :: vm
+  real(ESMF_KIND_R8), pointer :: farrayPtrXC(:,:), farrayPtr1D(:)
+  real(ESMF_KIND_R8), pointer :: farrayPtrYC(:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtr(:,:),farrayPtr2(:,:)
+  integer(ESMF_KIND_I4), pointer :: statusPtr(:)
+  integer :: clbnd(1),cubnd(1)
+  integer :: fclbnd(2),fcubnd(2)
+  integer :: i1,i2,i3, index(2)
+  integer :: lDE, localDECount
+  real(ESMF_KIND_R8) :: coord(2)
+  character(len=ESMF_MAXSTR) :: string
+  real(ESMF_KIND_R8) :: dx,dy
+   
+  real(ESMF_KIND_R8) :: x,y
+  
+  integer :: spherical_grid
+
+  integer, pointer :: larrayList(:)
+  integer :: localPet, petCount
+
+  integer, pointer :: nodeIds(:),nodeOwners(:),nodeMask(:)
+  real(ESMF_KIND_R8), pointer :: nodeCoords(:)
+  integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
+  integer :: numNodes, numElems
+  integer :: numQuadElems,numTriElems, numTotElems
+
+  ! result code
+  integer :: finalrc
+  
+  ! init success flag
+  correct=.true.
+
+  rc=ESMF_SUCCESS
+
+  ! get pet info
+  call ESMF_VMGetGlobal(vm, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! If we don't have 1 or 4 PETS then exit successfully
+  if ((petCount .ne. 1) .and. (petCount .ne. 4)) then
+    print*,'ERROR:  test must be run using exactly 1 or 4 PETS - detected ',petCount
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  ! Setup Src Mesh
+  if (petCount .eq. 1) then
+     ! Set number of nodes
+     numNodes=9
+
+     ! Allocate and fill the node id array.
+     allocate(nodeIds(numNodes))
+      nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+
+     ! Allocate and fill node coordinate array.
+     ! Since this is a 2D Mesh the size is 2x the
+     ! number of nodes.
+     allocate(nodeCoords(2*numNodes))
+     nodeCoords=(/0.5,0.5, & ! node id 1
+                   1.0,0.5, & ! node id 2
+                   2.1,0.5, & ! node id 3
+                  0.5, 1.0, & ! node id 4
+                   1.0, 1.0, & ! node id 5
+                   2.1, 1.0, & ! node id 6
+                  0.5, 2.1, & ! node id 7
+                   1.0, 2.1, & ! node id 8
+                   2.1, 2.1 /) ! node id 9
+
+     ! Allocate and fill the node owner array.
+     ! Since this Mesh is all on PET 0, it's just set to all 0.
+     allocate(nodeOwners(numNodes))
+     nodeOwners=0 ! everything on PET 0
+
+     ! Allocate and fill the node mask array.
+     ! Mask out node 9
+     allocate(nodeMask(numNodes))
+     nodeMask=(/0,0,0,0,0,0,0,0,0/) 
+
+
+     ! Set the number of each type of element, plus the total number.
+     numQuadElems=3
+     numTriElems=2
+     numTotElems=numQuadElems+numTriElems
+
+     ! Allocate and fill the element id array.
+     allocate(elemIds(numTotElems))
+     elemIds=(/1,2,3,4,5/) 
+
+
+     ! Allocate and fill the element topology type array.
+     allocate(elemTypes(numTotElems))
+     elemTypes=(/ESMF_MESHELEMTYPE_QUAD, & ! elem id 1
+                 ESMF_MESHELEMTYPE_TRI,  & ! elem id 2
+                 ESMF_MESHELEMTYPE_TRI,  & ! elem id 3
+                 ESMF_MESHELEMTYPE_QUAD, & ! elem id 4
+                 ESMF_MESHELEMTYPE_QUAD/)  ! elem id 5
+
+
+     ! Allocate and fill the element connection type array.
+     ! Note that entries in this array refer to the 
+     ! positions in the nodeIds, etc. arrays and that
+      ! the order and number of entries for each element
+     ! reflects that given in the Mesh options 
+     ! section for the corresponding entry
+     ! in the elemTypes array.
+     allocate(elemConn(4*numQuadElems+3*numTriElems))
+     elemConn=(/1,2,5,4, &  ! elem id 1
+                2,3,5,   &  ! elem id 2
+                3,6,5,   &  ! elem id 3
+                4,5,8,7, &  ! elem id 4
+                5,6,9,8/)   ! elem id 5
+
+
+ else if (petCount .eq. 4) then
+     ! Setup mesh data depending on PET
+    if (localPET .eq. 0) then !!! This part only for PET 0
+       ! Set number of nodes
+       numNodes=4
+
+       ! Allocate and fill the node id array.
+       allocate(nodeIds(numNodes))
+       nodeIds=(/1,2,4,5/) 
+
+       ! Allocate and fill node coordinate array.
+       ! Since this is a 2D Mesh the size is 2x the
+       ! number of nodes.
+       allocate(nodeCoords(2*numNodes))
+       nodeCoords=(/0.5, 0.5, & ! node id 1
+                     1.0, 0.5, & ! node id 2
+                    0.5,  1.0, & ! node id 4
+                     1.0,  1.0 /) ! node id 5
+
+       ! Allocate and fill the node owner array.
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0, & ! node id 1
+                    0, & ! node id 2
+                    0, & ! node id 4
+                    0/)  ! node id 5
+
+       ! Allocate and fill the node mask array.
+       allocate(nodeMask(numNodes))
+       nodeMask=(/0, & ! node id 1
+                  0, & ! node id 2
+                  0, & ! node id 4
+                  0/)  ! node id 5
+
+       ! Set the number of each type of element, plus the total number.
+       numQuadElems=1
+       numTriElems=0
+       numTotElems=numQuadElems+numTriElems
+ 
+       ! Allocate and fill the element id array.
+       allocate(elemIds(numTotElems))
+       elemIds=(/1/) 
+
+       ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numTotElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! elem id 1
+
+       ! Allocate and fill the element connection type array.
+       ! Note that entry are local indices
+       allocate(elemConn(4*numQuadElems+3*numTriElems))
+       elemConn=(/1,2,4,3/) ! elem id 1
+
+     else if (localPET .eq. 1) then !!! This part only for PET 1
+       ! Set number of nodes
+       numNodes=4
+
+       ! Allocate and fill the node id array.
+       allocate(nodeIds(numNodes))
+       nodeIds=(/2,3,5,6/) 
+
+       ! Allocate and fill node coordinate array.
+       ! Since this is a 2D Mesh the size is 2x the
+       ! number of nodes.
+       allocate(nodeCoords(2*numNodes))
+       nodeCoords=(/1.0,0.5, & ! node id 2
+                    2.1,0.5, & ! node id 3
+                    1.0, 1.0, & ! node id 5
+                    2.1, 1.0 /) ! node id 6
+
+       ! Allocate and fill the node owner array.
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0, & ! node id 2
+                    1, & ! node id 3
+                    0, & ! node id 5
+                    1/)  ! node id 6
+
+       ! Allocate and fill the node mask array.
+       allocate(nodeMask(numNodes))
+       nodeMask=(/0, & ! node id 2
+                  0, & ! node id 3
+                  0, & ! node id 5
+                  0/)  ! node id 6
+
+       ! Set the number of each type of element, plus the total number.
+       numQuadElems=0
+       numTriElems=2
+       numTotElems=numQuadElems+numTriElems
+ 
+       ! Allocate and fill the element id array.
+       allocate(elemIds(numTotElems))
+       elemIds=(/2,3/) 
+
+       ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numTotElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_TRI, & ! elem id 2
+                   ESMF_MESHELEMTYPE_TRI/)  ! elem id 3
+
+       ! Allocate and fill the element connection type array.
+       allocate(elemConn(4*numQuadElems+3*numTriElems))
+       elemConn=(/1,2,3, & ! elem id 2
+                  2,4,3/)  ! elem id 3
+
+    else if (localPET .eq. 2) then !!! This part only for PET 2
+        ! Set number of nodes
+        numNodes=4
+
+        ! Allocate and fill the node id array.
+        allocate(nodeIds(numNodes))
+        nodeIds=(/4,5,7,8/) 
+
+        ! Allocate and fill node coordinate array.
+        ! Since this is a 2D Mesh the size is 2x the
+        ! number of nodes.
+        allocate(nodeCoords(2*numNodes))
+        nodeCoords=(/0.5,1.0, & ! node id 4
+                      1.0,1.0, & ! node id 5
+                     0.5,2.1, & ! node id 7
+                      1.0,2.1 /) ! node id 8
+
+        ! Allocate and fill the node owner array.
+        allocate(nodeOwners(numNodes))
+        nodeOwners=(/0, & ! node id 4
+                     0, & ! node id 5
+                     2, & ! node id 7
+                     2/)  ! node id 8
+
+        ! Allocate and fill the node mask array.
+        allocate(nodeMask(numNodes))
+        nodeMask=(/0, & ! node id 4
+                   0, & ! node id 5
+                   0, & ! node id 7
+                   0/)  ! node id 8
+
+        ! Set the number of each type of element, plus the total number.
+        numQuadElems=1
+        numTriElems=0
+         numTotElems=numQuadElems+numTriElems
+
+        ! Allocate and fill the element id array.
+        allocate(elemIds(numTotElems))
+        elemIds=(/4/) 
+
+        ! Allocate and fill the element topology type array.
+        allocate(elemTypes(numTotElems))
+        elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! elem id 4
+
+        ! Allocate and fill the element connection type array.
+        allocate(elemConn(4*numQuadElems+3*numTriElems))
+        elemConn=(/1,2,4,3/) ! elem id 4
+
+     else if (localPET .eq. 3) then !!! This part only for PET 3
+        ! Set number of nodes
+        numNodes=4
+
+        ! Allocate and fill the node id array.
+        allocate(nodeIds(numNodes))
+        nodeIds=(/5,6,8,9/) 
+
+        ! Allocate and fill node coordinate array.
+        ! Since this is a 2D Mesh the size is 2x the
+        ! number of nodes.
+        allocate(nodeCoords(2*numNodes))
+        nodeCoords=(/1.0,1.0, &  ! node id 5
+                     2.1,1.0, &  ! node id 6
+                     1.0,2.1, &  ! node id 8
+                     2.1,2.1 /)  ! node id 9
+
+        ! Allocate and fill the node owner array.
+        allocate(nodeOwners(numNodes))
+        nodeOwners=(/0, & ! node id 5
+                     1, & ! node id 6
+                     2, & ! node id 8
+                     3/)  ! node id 9
+
+        ! Allocate and fill the node mask array.
+        allocate(nodeMask(numNodes))
+        nodeMask=(/0, & ! node id 5
+                   0, & ! node id 6
+                   0, & ! node id 8
+                   0/)  ! node id 9
+ 
+        ! Set the number of each type of element, plus the total number.
+        numQuadElems=1
+        numTriElems=0
+        numTotElems=numQuadElems+numTriElems
+ 
+        ! Allocate and fill the element id array.
+        allocate(elemIds(numTotElems))
+        elemIds=(/5/)  
+
+        ! Allocate and fill the element topology type array.
+        allocate(elemTypes(numTotElems))
+        elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! elem id 5
+
+        ! Allocate and fill the element connection type array.
+        allocate(elemConn(4*numQuadElems+3*numTriElems))
+        elemConn=(/1,2,4,3/) ! elem id 5
+       endif
+    endif
+
+   ! Create Mesh structure in 1 step
+   srcMesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+        coordSys=ESMF_COORDSYS_CART, &
+         nodeIds=nodeIds, nodeCoords=nodeCoords, &
+         nodeOwners=nodeOwners, nodeMask=nodeMask, &
+         elementIds=elemIds, elementTypes=elemTypes, &
+         elementConn=elemConn, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+       rc=ESMF_FAILURE
+       return
+   endif
+
+  ! Create source field
+  call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
+
+   srcField = ESMF_FieldCreate(srcMesh, arrayspec, &
+                        name="source", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+   ! deallocate node data
+   deallocate(nodeIds)
+   deallocate(nodeCoords)
+   deallocate(nodeOwners)
+   deallocate(nodeMask)
+
+   ! deallocate elem data
+   deallocate(elemIds)
+   deallocate(elemTypes)
+   deallocate(elemConn)
+
+
+  ! Get src Field pointer
+  call ESMF_FieldGet(srcField, 0, farrayPtr1D, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+  endif
+
+  ! Set source field to all 10.0
+  farrayPtr1D=10.0
+
+
+  ! Create Dest Mesh
+  if (petCount .eq. 1) then
+     ! Set number of nodes
+     numNodes=9
+
+     ! Allocate and fill the node id array.
+     allocate(nodeIds(numNodes))
+     nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+
+     ! Allocate and fill node coordinate array.
+     ! Since this is a 2D Mesh the size is 2x the
+     ! number of nodes.
+     allocate(nodeCoords(2*numNodes))
+     nodeCoords=(/-0.5,-0.5, & ! node id 1  Put outside the src grid
+                   1.0,0.0, & ! node id 2
+                   2.0,0.0, & ! node id 3
+                   0.0,1.0, & ! node id 4
+                    1.0,1.0, & ! node id 5
+                   2.0,1.0, & ! node id 6
+                   0.0,2.0, & ! node id 7
+                   1.0,2.0, & ! node id 8
+                   2.0,2.0 /) ! node id 9
+
+     ! Allocate and fill the node owner array.
+     ! Since this Mesh is all on PET 0, it's just set to all 0.
+     allocate(nodeOwners(numNodes))
+     nodeOwners=0 ! everything on PET 0
+
+     ! Allocate and fill the node mask array.
+     ! (Mask point sticking out of src grid and point
+     !  uncovered by masked src point)
+     allocate(nodeMask(numNodes))
+     nodeMask=(/0,0,0,2,0,0,0,0,0/) 
+
+     ! Set the number of each type of element, plus the total number.
+     numQuadElems=3
+     numTriElems=2
+     numTotElems=numQuadElems+numTriElems
+
+     ! Allocate and fill the element id array.
+     allocate(elemIds(numTotElems))
+     elemIds=(/1,2,3,4,5/) 
+
+
+     ! Allocate and fill the element topology type array.
+     allocate(elemTypes(numTotElems))
+     elemTypes=(/ESMF_MESHELEMTYPE_QUAD, & ! elem id 1
+                 ESMF_MESHELEMTYPE_TRI,  & ! elem id 2
+                 ESMF_MESHELEMTYPE_TRI,  & ! elem id 3
+                 ESMF_MESHELEMTYPE_QUAD, & ! elem id 4
+                 ESMF_MESHELEMTYPE_QUAD/)  ! elem id 5
+
+
+     ! Allocate and fill the element connection type array.
+     ! Note that entries in this array refer to the 
+     ! positions in the nodeIds, etc. arrays and that
+     ! the order and number of entries for each element
+     ! reflects that given in the Mesh options 
+     ! section for the corresponding entry
+     ! in the elemTypes array.
+     allocate(elemConn(4*numQuadElems+3*numTriElems))
+     elemConn=(/1,2,5,4, &  ! elem id 1
+                2,3,5,   &  ! elem id 2
+                3,6,5,   &  ! elem id 3
+                4,5,8,7, &  ! elem id 4
+                5,6,9,8/)   ! elem id 5
+ 
+
+ else if (petCount .eq. 4) then
+     ! Setup mesh data depending on PET
+     if (localPET .eq. 0) then !!! This part only for PET 0
+       ! Set number of nodes
+       numNodes=4
+
+       ! Allocate and fill the node id array.
+       allocate(nodeIds(numNodes))
+       nodeIds=(/1,2,4,5/) 
+
+       ! Allocate and fill node coordinate array.
+       ! Since this is a 2D Mesh the size is 2x the
+       ! number of nodes.
+       allocate(nodeCoords(2*numNodes))
+       nodeCoords=(/-0.5,-0.5, & ! node id 1 Put outside src grid
+                     1.0, 0.0, & ! node id 2
+                     0.0, 1.0, & ! node id 4
+                     1.0, 1.0 /) ! node id 5
+
+       ! Allocate and fill the node owner array.
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0, & ! node id 1
+                    0, & ! node id 2
+                    0, & ! node id 4
+                    0/)  ! node id 5
+
+       ! Allocate and fill the node Mask array.
+       allocate(nodeMask(numNodes))
+       nodeMask=(/0, & ! node id 1
+                  0, & ! node id 2
+                  2, & ! node id 4
+                  0/)  ! node id 5
+
+       ! Set the number of each type of element, plus the total number.
+       numQuadElems=1
+       numTriElems=0
+       numTotElems=numQuadElems+numTriElems
+
+       ! Allocate and fill the element id array.
+       allocate(elemIds(numTotElems))
+       elemIds=(/1/) 
+
+       ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numTotElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! elem id 1
+
+       ! Allocate and fill the element connection type array.
+        ! Note that entry are local indices
+       allocate(elemConn(4*numQuadElems+3*numTriElems))
+       elemConn=(/1,2,4,3/) ! elem id 1
+
+     else if (localPET .eq. 1) then !!! This part only for PET 1
+       ! Set number of nodes
+       numNodes=4
+
+       ! Allocate and fill the node id array.
+       allocate(nodeIds(numNodes))
+       nodeIds=(/2,3,5,6/) 
+
+       ! Allocate and fill node coordinate array.
+       ! Since this is a 2D Mesh the size is 2x the
+       ! number of nodes.
+       allocate(nodeCoords(2*numNodes))
+       nodeCoords=(/1.0,0.0, & ! node id 2
+                    2.0,0.0, & ! node id 3
+                    1.0,1.0, & ! node id 5
+                    2.0,1.0 /) ! node id 6
+
+       ! Allocate and fill the node owner array.
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0, & ! node id 2
+                    1, & ! node id 3
+                    0, & ! node id 5
+                    1/)  ! node id 6
+
+       ! Allocate and fill the node mask array.
+       allocate(nodeMask(numNodes))
+       nodeMask=(/0, & ! node id 2
+                  0, & ! node id 3
+                  0, & ! node id 5
+                  0/)  ! node id 6
+
+       ! Set the number of each type of element, plus the total number.
+       numQuadElems=0
+       numTriElems=2
+       numTotElems=numQuadElems+numTriElems
+
+       ! Allocate and fill the element id array.
+       allocate(elemIds(numTotElems))
+       elemIds=(/2,3/) 
+
+       ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numTotElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_TRI, & ! elem id 2
+                   ESMF_MESHELEMTYPE_TRI/)  ! elem id 3
+
+        ! Allocate and fill the element connection type array.
+       allocate(elemConn(4*numQuadElems+3*numTriElems))
+       elemConn=(/1,2,3, & ! elem id 2
+                  2,4,3/)  ! elem id 3
+
+    else if (localPET .eq. 2) then !!! This part only for PET 2
+        ! Set number of nodes
+        numNodes=4
+
+        ! Allocate and fill the node id array.
+        allocate(nodeIds(numNodes))
+        nodeIds=(/4,5,7,8/) 
+
+        ! Allocate and fill node coordinate array.
+        ! Since this is a 2D Mesh the size is 2x the
+        ! number of nodes.
+        allocate(nodeCoords(2*numNodes))
+        nodeCoords=(/0.0,1.0, & ! node id 4
+                     1.0,1.0, & ! node id 5
+                     0.0,2.0, & ! node id 7
+                     1.0,2.0 /) ! node id 8
+
+        ! Allocate and fill the node owner array.
+        allocate(nodeOwners(numNodes))
+        nodeOwners=(/0, & ! node id 4
+                     0, & ! node id 5
+                     2, & ! node id 7
+                     2/)  ! node id 8
+
+        ! Allocate and fill the node mask array.
+        allocate(nodeMask(numNodes))
+        nodeMask=(/2, & ! node id 4
+                   0, & ! node id 5
+                   0, & ! node id 7
+                   0/)  ! node id 8
+
+        ! Set the number of each type of element, plus the total number.
+        numQuadElems=1
+        numTriElems=0
+        numTotElems=numQuadElems+numTriElems
+
+        ! Allocate and fill the element id array.
+        allocate(elemIds(numTotElems))
+        elemIds=(/4/) 
+
+        ! Allocate and fill the element topology type array.
+        allocate(elemTypes(numTotElems))
+        elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! elem id 4
+
+         ! Allocate and fill the element connection type array.
+        allocate(elemConn(4*numQuadElems+3*numTriElems))
+        elemConn=(/1,2,4,3/) ! elem id 4
+
+     else if (localPET .eq. 3) then !!! This part only for PET 3
+        ! Set number of nodes
+        numNodes=4
+
+        ! Allocate and fill the node id array.
+        allocate(nodeIds(numNodes))
+        nodeIds=(/5,6,8,9/) 
+
+        ! Allocate and fill node coordinate array.
+        ! Since this is a 2D Mesh the size is 2x the
+        ! number of nodes.
+        allocate(nodeCoords(2*numNodes))
+        nodeCoords=(/1.0,1.0, &  ! node id 5
+                     2.0,1.0, &  ! node id 6
+                     1.0,2.0, &  ! node id 8
+                     2.0,2.0 /)  ! node id 9
+
+        ! Allocate and fill the node owner array.
+        allocate(nodeOwners(numNodes))
+        nodeOwners=(/0, & ! node id 5
+                     1, & ! node id 6
+                     2, & ! node id 8
+                     3/)  ! node id 9
+
+        ! Allocate and fill the node Mask array.
+        allocate(nodeMask(numNodes))
+        nodeMask=(/0, & ! node id 5
+                   0, & ! node id 6
+                   0, & ! node id 8
+                   0/)  ! node id 9  (Mask out point uncovered by masked src)
+
+
+        ! Set the number of each type of element, plus the total number.
+        numQuadElems=1
+        numTriElems=0
+        numTotElems=numQuadElems+numTriElems
+
+        ! Allocate and fill the element id array.
+        allocate(elemIds(numTotElems))
+        elemIds=(/5/)  
+
+        ! Allocate and fill the element topology type array.
+        allocate(elemTypes(numTotElems))
+        elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! elem id 5
+
+         ! Allocate and fill the element connection type array.
+        allocate(elemConn(4*numQuadElems+3*numTriElems))
+        elemConn=(/1,2,4,3/) ! elem id 5
+       endif
+   endif
+
+
+  ! Create Mesh structure in 1 step
+  dstMesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+        coordSys=ESMF_COORDSYS_CART, &
+         nodeIds=nodeIds, nodeCoords=nodeCoords, &
+         nodeOwners=nodeOwners, nodeMask=nodeMask, &
+         elementIds=elemIds, elementTypes=elemTypes, &
+         elementConn=elemConn, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+         rc=ESMF_FAILURE
+         return
+     endif
+
+
+   ! deallocate node data
+   deallocate(nodeIds)
+   deallocate(nodeCoords)
+   deallocate(nodeOwners)
+
+   ! deallocate elem data
+   deallocate(elemIds)
+   deallocate(elemTypes)
+   deallocate(elemConn)
+
+
+   ! Debug output
+   !   call ESMF_MeshWrite(srcMesh,"srcMesh",rc=localrc)
+   !   call ESMF_MeshWrite(dstMesh,"dstMesh",rc=localrc)
+   
+
+   ! Create dest field
+   call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
+
+   dstField = ESMF_FieldCreate(dstMesh, arrayspec, &
+                        name="dest", rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+   ! Get Dst Field pointer
+   call ESMF_FieldGet(dstField, 0, farrayPtr1D, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+   
+   ! Set dst field to all 0.0
+   farrayPtr1D=0.0
+
+  ! Create regrid status field
+  regridStatusField=ESMF_FieldCreate(dstMesh, ESMF_TYPEKIND_I4, &
+                        name="regrid status", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  ! Regrid store
+  call ESMF_FieldRegridStore( &
+          srcField, &
+          dstField=dstField, &
+          routeHandle=routeHandle, &
+          regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
+          dstStatusField=regridStatusField, &
+          extrapMethod=ESMF_EXTRAPMETHOD_CREEP, &
+          extrapNumLevels=3, &
+          unmappedAction=ESMF_UNMAPPEDACTION_IGNORE, &
+          rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  call ESMF_FieldRegridRelease(routeHandle, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+ 
+  ! Check destination field
+  ! Should only be 1 localDE
+  call ESMF_FieldGet(regridStatusField, 0, statusPtr,  rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+  endif
+
+! XMRKX !
+!  write(*,*) localPet," Status Field=",statusPtr
+
+  ! Check status
+  correct=.true.
+  if (PetCount .eq. 1) then
+     if (statusPtr(1) .ne. ESMF_REGRIDSTATUS_EXMAPPED) correct=.false.
+     if (statusPtr(2) .ne. ESMF_REGRIDSTATUS_EXMAPPED) correct=.false.
+     if (statusPtr(3) .ne. ESMF_REGRIDSTATUS_EXMAPPED) correct=.false.
+     if (statusPtr(4) .ne. ESMF_REGRIDSTATUS_EXMAPPED) correct=.false.
+     if (statusPtr(5) .ne. ESMF_REGRIDSTATUS_MAPPED) correct=.false.
+     if (statusPtr(6) .ne. ESMF_REGRIDSTATUS_MAPPED) correct=.false.
+     if (statusPtr(7) .ne. ESMF_REGRIDSTATUS_EXMAPPED) correct=.false.
+     if (statusPtr(8) .ne. ESMF_REGRIDSTATUS_MAPPED) correct=.false.
+     if (statusPtr(9) .ne. ESMF_REGRIDSTATUS_MAPPED) correct=.false.
+
+ else if (petCount .eq. 4) then
+     if (localPET .eq. 0) then !!! This part only for PET 0
+
+        ! Check status for  nodeIds=(/1,2,4,5/) 
+        if (statusPtr(1) .ne. ESMF_REGRIDSTATUS_EXMAPPED) correct=.false.
+        if (statusPtr(2) .ne. ESMF_REGRIDSTATUS_EXMAPPED) correct=.false.
+        if (statusPtr(3) .ne. ESMF_REGRIDSTATUS_EXMAPPED) correct=.false.
+        if (statusPtr(4) .ne. ESMF_REGRIDSTATUS_MAPPED) correct=.false.
+
+     else if (localPET .eq. 1) then !!! This part only for PET 1
+
+       ! Check status for nodeIds=(/X,3,X,6/) 
+       if (statusPtr(1) .ne. ESMF_REGRIDSTATUS_EXMAPPED) correct=.false.
+       if (statusPtr(2) .ne. ESMF_REGRIDSTATUS_MAPPED) correct=.false.
+
+    else if (localPET .eq. 2) then !!! This part only for PET 2
+
+        ! Check status for nodeIds=(/X,X,7,8/) 
+       if (statusPtr(1) .ne. ESMF_REGRIDSTATUS_EXMAPPED) correct=.false.
+       if (statusPtr(2) .ne. ESMF_REGRIDSTATUS_MAPPED) correct=.false.
+
+     else if (localPET .eq. 3) then !!! This part only for PET 3
+
+        ! Check status for nodeIds=(/X,X,X,9/) 
+        if (statusPtr(1) .ne. ESMF_REGRIDSTATUS_MAPPED) correct=.false.
+        
+     endif
+  endif
+
+  ! Check dst Field
+  ! (Since we're extrapolating it should all be filled)
+  ! Get Dst Field pointer
+  call ESMF_FieldGet(dstField, 0, farrayPtr1D, computationalLBound=clbnd, &
+                             computationalUBound=cubnd,  rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+  endif
+
+  ! Make sure dst field is close to 10.0
+  do i1=clbnd(1),cubnd(1)
+     if (abs(farrayPtr1D(i1)-10.0) > 1.0E-10)  correct=.false. 
+  enddo
+  
+
+  ! Destroy the Fields
+   call ESMF_FieldDestroy(srcField, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+   call ESMF_FieldDestroy(dstField, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+   call ESMF_FieldDestroy(regridStatusField, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+  ! Free the Meshes
+  call ESMF_MeshDestroy(dstMesh, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  call ESMF_MeshDestroy(srcMesh, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+
+  ! return answer based on correct flag
+  if (correct) then
+    rc=ESMF_SUCCESS
+  else
+    rc=ESMF_FAILURE
+  endif
+
+ end subroutine test_mesh_extrap_creep
+
+ subroutine test_regridDisjointSD(rc)
+        integer, intent(out)  :: rc
+  logical :: correct
+  integer :: localrc
+  type(ESMF_Mesh) :: dstMesh
+  type(ESMF_Mesh) :: srcMesh
+  type(ESMF_Field) :: srcField
+  type(ESMF_Field) :: dstField, regridStatusField
+  type(ESMF_Array) :: dstArray
+  type(ESMF_Array) :: lonArrayA
+  type(ESMF_Array) :: srcArrayA
+  type(ESMF_RouteHandle) :: routeHandle
+  type(ESMF_ArraySpec) :: arrayspec
+  type(ESMF_VM) :: vm
+  real(ESMF_KIND_R8), pointer :: farrayPtrXC(:,:), farrayPtr1D(:)
+  real(ESMF_KIND_R8), pointer :: farrayPtrYC(:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtr(:,:),farrayPtr2(:,:)
+  integer(ESMF_KIND_I4), pointer :: statusPtr(:)
+  integer :: clbnd(2),cubnd(2)
+  integer :: fclbnd(2),fcubnd(2)
+  integer :: i1,i2,i3, index(2)
+  integer :: lDE, localDECount
+  real(ESMF_KIND_R8) :: coord(2)
+  character(len=ESMF_MAXSTR) :: string
+  real(ESMF_KIND_R8) :: dx,dy
+   
+  real(ESMF_KIND_R8) :: x,y
+  
+  integer :: spherical_grid
+
+  integer, pointer :: larrayList(:)
+  integer :: localPet, petCount
+
+  integer, pointer :: nodeIds(:),nodeOwners(:),nodeMask(:)
+  real(ESMF_KIND_R8), pointer :: nodeCoords(:)
+  integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
+  integer :: numNodes, numElems
+  integer :: numQuadElems,numTriElems, numTotElems
+
+  ! result code
+  integer :: finalrc
+  
+  ! init success flag
+  correct=.true.
+
+  rc=ESMF_SUCCESS
+
+  ! get pet info
+  call ESMF_VMGetGlobal(vm, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! If we don't have 1 or 4 PETS then exit successfully
+  if ((petCount .ne. 1) .and. (petCount .ne. 4)) then
+    print*,'ERROR:  test must be run using exactly 1 or 4 PETS - detected ',petCount
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  ! Setup Src Mesh
+  if (petCount .eq. 1) then
+     ! Set number of nodes
+     numNodes=9
+
+     ! Allocate and fill the node id array.
+     allocate(nodeIds(numNodes))
+      nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+
+     ! Allocate and fill node coordinate array.
+     ! Since this is a 2D Mesh the size is 2x the
+     ! number of nodes.
+     allocate(nodeCoords(2*numNodes))
+     nodeCoords=(/2.9,2.9, & ! node id 1
+                   4.0,2.9, & ! node id 2
+                   5.1,2.9, & ! node id 3
+                   2.9, 4.0, & ! node id 4
+                   4.0, 4.0, & ! node id 5
+                   5.1, 4.0, & ! node id 6
+                   2.9, 5.1, & ! node id 7
+                   4.0, 5.1, & ! node id 8
+                   5.1, 5.1 /) ! node id 9
+
+     ! Allocate and fill the node owner array.
+     ! Since this Mesh is all on PET 0, it's just set to all 0.
+     allocate(nodeOwners(numNodes))
+     nodeOwners=0 ! everything on PET 0
+
+     ! Allocate and fill the node mask array.
+     ! Mask out node 9
+     allocate(nodeMask(numNodes))
+     nodeMask=(/0,0,0,0,0,0,0,0,1/) 
+
+
+     ! Set the number of each type of element, plus the total number.
+     numQuadElems=3
+     numTriElems=2
+     numTotElems=numQuadElems+numTriElems
+
+     ! Allocate and fill the element id array.
+     allocate(elemIds(numTotElems))
+     elemIds=(/1,2,3,4,5/) 
+
+
+     ! Allocate and fill the element topology type array.
+     allocate(elemTypes(numTotElems))
+     elemTypes=(/ESMF_MESHELEMTYPE_QUAD, & ! elem id 1
+                 ESMF_MESHELEMTYPE_TRI,  & ! elem id 2
+                 ESMF_MESHELEMTYPE_TRI,  & ! elem id 3
+                 ESMF_MESHELEMTYPE_QUAD, & ! elem id 4
+                 ESMF_MESHELEMTYPE_QUAD/)  ! elem id 5
+
+
+     ! Allocate and fill the element connection type array.
+     ! Note that entries in this array refer to the 
+     ! positions in the nodeIds, etc. arrays and that
+      ! the order and number of entries for each element
+     ! reflects that given in the Mesh options 
+     ! section for the corresponding entry
+     ! in the elemTypes array.
+     allocate(elemConn(4*numQuadElems+3*numTriElems))
+     elemConn=(/1,2,5,4, &  ! elem id 1
+                2,3,5,   &  ! elem id 2
+                3,6,5,   &  ! elem id 3
+                4,5,8,7, &  ! elem id 4
+                5,6,9,8/)   ! elem id 5
+
+
+ else if (petCount .eq. 4) then
+     ! Setup mesh data depending on PET
+    if (localPET .eq. 0) then !!! This part only for PET 0
+       ! Set number of nodes
+       numNodes=4
+
+       ! Allocate and fill the node id array.
+       allocate(nodeIds(numNodes))
+       nodeIds=(/1,2,4,5/) 
+
+       ! Allocate and fill node coordinate array.
+       ! Since this is a 2D Mesh the size is 2x the
+       ! number of nodes.
+       allocate(nodeCoords(2*numNodes))
+       nodeCoords=(/2.9, 2.9, & ! node id 1
+                    4.0, 2.9, & ! node id 2
+                    2.9, 4.0, & ! node id 4
+                    4.0, 4.0 /) ! node id 5
+
+       ! Allocate and fill the node owner array.
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0, & ! node id 1
+                    0, & ! node id 2
+                    0, & ! node id 4
+                    0/)  ! node id 5
+
+       ! Allocate and fill the node mask array.
+       allocate(nodeMask(numNodes))
+       nodeMask=(/0, & ! node id 1
+                  0, & ! node id 2
+                  0, & ! node id 4
+                  0/)  ! node id 5
+
+       ! Set the number of each type of element, plus the total number.
+       numQuadElems=1
+       numTriElems=0
+       numTotElems=numQuadElems+numTriElems
+ 
+       ! Allocate and fill the element id array.
+       allocate(elemIds(numTotElems))
+       elemIds=(/1/) 
+
+       ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numTotElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! elem id 1
+
+       ! Allocate and fill the element connection type array.
+       ! Note that entry are local indices
+       allocate(elemConn(4*numQuadElems+3*numTriElems))
+       elemConn=(/1,2,4,3/) ! elem id 1
+
+     else if (localPET .eq. 1) then !!! This part only for PET 1
+       ! Set number of nodes
+       numNodes=4
+
+       ! Allocate and fill the node id array.
+       allocate(nodeIds(numNodes))
+       nodeIds=(/2,3,5,6/) 
+
+       ! Allocate and fill node coordinate array.
+       ! Since this is a 2D Mesh the size is 2x the
+       ! number of nodes.
+       allocate(nodeCoords(2*numNodes))
+       nodeCoords=(/4.0, 2.9, & ! node id 2
+                    5.1, 2.9, & ! node id 3
+                    4.0, 4.0, & ! node id 5
+                    5.1, 4.0 /) ! node id 6
+
+       ! Allocate and fill the node owner array.
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0, & ! node id 2
+                    1, & ! node id 3
+                    0, & ! node id 5
+                    1/)  ! node id 6
+
+       ! Allocate and fill the node mask array.
+       allocate(nodeMask(numNodes))
+       nodeMask=(/0, & ! node id 2
+                  0, & ! node id 3
+                  0, & ! node id 5
+                  0/)  ! node id 6
+
+       ! Set the number of each type of element, plus the total number.
+       numQuadElems=0
+       numTriElems=2
+       numTotElems=numQuadElems+numTriElems
+ 
+       ! Allocate and fill the element id array.
+       allocate(elemIds(numTotElems))
+       elemIds=(/2,3/) 
+
+       ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numTotElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_TRI, & ! elem id 2
+                   ESMF_MESHELEMTYPE_TRI/)  ! elem id 3
+
+       ! Allocate and fill the element connection type array.
+       allocate(elemConn(4*numQuadElems+3*numTriElems))
+       elemConn=(/1,2,3, & ! elem id 2
+                  2,4,3/)  ! elem id 3
+
+    else if (localPET .eq. 2) then !!! This part only for PET 2
+        ! Set number of nodes
+        numNodes=4
+
+        ! Allocate and fill the node id array.
+        allocate(nodeIds(numNodes))
+        nodeIds=(/4,5,7,8/) 
+
+        ! Allocate and fill node coordinate array.
+        ! Since this is a 2D Mesh the size is 2x the
+        ! number of nodes.
+        allocate(nodeCoords(2*numNodes))
+        nodeCoords=(/2.9,4.0, & ! node id 4
+                     4.0,4.0, & ! node id 5
+                     2.9,5.1, & ! node id 7
+                     4.0,5.1 /) ! node id 8
+
+        ! Allocate and fill the node owner array.
+        allocate(nodeOwners(numNodes))
+        nodeOwners=(/0, & ! node id 4
+                     0, & ! node id 5
+                     2, & ! node id 7
+                     2/)  ! node id 8
+
+        ! Allocate and fill the node mask array.
+        allocate(nodeMask(numNodes))
+        nodeMask=(/0, & ! node id 4
+                   0, & ! node id 5
+                   0, & ! node id 7
+                   0/)  ! node id 8
+
+        ! Set the number of each type of element, plus the total number.
+        numQuadElems=1
+        numTriElems=0
+         numTotElems=numQuadElems+numTriElems
+
+        ! Allocate and fill the element id array.
+        allocate(elemIds(numTotElems))
+        elemIds=(/4/) 
+
+        ! Allocate and fill the element topology type array.
+        allocate(elemTypes(numTotElems))
+        elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! elem id 4
+
+        ! Allocate and fill the element connection type array.
+        allocate(elemConn(4*numQuadElems+3*numTriElems))
+        elemConn=(/1,2,4,3/) ! elem id 4
+
+     else if (localPET .eq. 3) then !!! This part only for PET 3
+        ! Set number of nodes
+        numNodes=4
+
+        ! Allocate and fill the node id array.
+        allocate(nodeIds(numNodes))
+        nodeIds=(/5,6,8,9/) 
+
+        ! Allocate and fill node coordinate array.
+        ! Since this is a 2D Mesh the size is 2x the
+        ! number of nodes.
+        allocate(nodeCoords(2*numNodes))
+        nodeCoords=(/4.0,4.0, &  ! node id 5
+                     5.1,4.0, &  ! node id 6
+                     4.0,5.1, &  ! node id 8
+                     5.1,5.1 /)  ! node id 9
+
+        ! Allocate and fill the node owner array.
+        allocate(nodeOwners(numNodes))
+        nodeOwners=(/0, & ! node id 5
+                     1, & ! node id 6
+                     2, & ! node id 8
+                     3/)  ! node id 9
+
+        ! Allocate and fill the node mask array.
+        allocate(nodeMask(numNodes))
+        nodeMask=(/0, & ! node id 5
+                   0, & ! node id 6
+                   0, & ! node id 8
+                   1/)  ! node id 9
+ 
+        ! Set the number of each type of element, plus the total number.
+        numQuadElems=1
+        numTriElems=0
+        numTotElems=numQuadElems+numTriElems
+ 
+        ! Allocate and fill the element id array.
+        allocate(elemIds(numTotElems))
+        elemIds=(/5/)  
+
+        ! Allocate and fill the element topology type array.
+        allocate(elemTypes(numTotElems))
+        elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! elem id 5
+
+        ! Allocate and fill the element connection type array.
+        allocate(elemConn(4*numQuadElems+3*numTriElems))
+        elemConn=(/1,2,4,3/) ! elem id 5
+       endif
+    endif
+
+   ! Create Mesh structure in 1 step
+   srcMesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+         nodeIds=nodeIds, nodeCoords=nodeCoords, &
+         nodeOwners=nodeOwners, nodeMask=nodeMask, &
+         elementIds=elemIds, elementTypes=elemTypes, &
+         elementConn=elemConn, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+       rc=ESMF_FAILURE
+       return
+   endif
+
+  ! Create source field
+  call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
+
+   srcField = ESMF_FieldCreate(srcMesh, arrayspec, &
+                        name="source", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+   ! deallocate node data
+   deallocate(nodeIds)
+   deallocate(nodeCoords)
+   deallocate(nodeOwners)
+   deallocate(nodeMask)
+
+   ! deallocate elem data
+   deallocate(elemIds)
+   deallocate(elemTypes)
+   deallocate(elemConn)
+
+
+  ! Create Dest Mesh
+  if (petCount .eq. 1) then
+     ! Set number of nodes
+     numNodes=9
+
+     ! Allocate and fill the node id array.
+     allocate(nodeIds(numNodes))
+     nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+
+     ! Allocate and fill node coordinate array.
+     ! Since this is a 2D Mesh the size is 2x the
+     ! number of nodes.
+     allocate(nodeCoords(2*numNodes))
+     nodeCoords=(/-0.5,-0.5, & ! node id 1  Put outside the src grid
+                   1.0,0.0, & ! node id 2
+                   2.0,0.0, & ! node id 3
+                   0.0,1.0, & ! node id 4
+                    1.0,1.0, & ! node id 5
+                   2.0,1.0, & ! node id 6
+                   0.0,2.0, & ! node id 7
+                   1.0,2.0, & ! node id 8
+                   2.0,2.0 /) ! node id 9
+
+     ! Allocate and fill the node owner array.
+     ! Since this Mesh is all on PET 0, it's just set to all 0.
+     allocate(nodeOwners(numNodes))
+     nodeOwners=0 ! everything on PET 0
+
+     ! Allocate and fill the node mask array.
+     ! (Mask point sticking out of src grid and point
+     !  uncovered by masked src point)
+     allocate(nodeMask(numNodes))
+     nodeMask=(/0,0,0,2,0,0,0,0,0/) 
+
+     ! Set the number of each type of element, plus the total number.
+     numQuadElems=3
+     numTriElems=2
+     numTotElems=numQuadElems+numTriElems
+
+     ! Allocate and fill the element id array.
+     allocate(elemIds(numTotElems))
+     elemIds=(/1,2,3,4,5/) 
+
+
+     ! Allocate and fill the element topology type array.
+     allocate(elemTypes(numTotElems))
+     elemTypes=(/ESMF_MESHELEMTYPE_QUAD, & ! elem id 1
+                 ESMF_MESHELEMTYPE_TRI,  & ! elem id 2
+                 ESMF_MESHELEMTYPE_TRI,  & ! elem id 3
+                 ESMF_MESHELEMTYPE_QUAD, & ! elem id 4
+                 ESMF_MESHELEMTYPE_QUAD/)  ! elem id 5
+
+
+     ! Allocate and fill the element connection type array.
+     ! Note that entries in this array refer to the 
+     ! positions in the nodeIds, etc. arrays and that
+     ! the order and number of entries for each element
+     ! reflects that given in the Mesh options 
+     ! section for the corresponding entry
+     ! in the elemTypes array.
+     allocate(elemConn(4*numQuadElems+3*numTriElems))
+     elemConn=(/1,2,5,4, &  ! elem id 1
+                2,3,5,   &  ! elem id 2
+                3,6,5,   &  ! elem id 3
+                4,5,8,7, &  ! elem id 4
+                5,6,9,8/)   ! elem id 5
+ 
+
+ else if (petCount .eq. 4) then
+     ! Setup mesh data depending on PET
+     if (localPET .eq. 0) then !!! This part only for PET 0
+       ! Set number of nodes
+       numNodes=4
+
+       ! Allocate and fill the node id array.
+       allocate(nodeIds(numNodes))
+       nodeIds=(/1,2,4,5/) 
+
+       ! Allocate and fill node coordinate array.
+       ! Since this is a 2D Mesh the size is 2x the
+       ! number of nodes.
+       allocate(nodeCoords(2*numNodes))
+       nodeCoords=(/-0.5,-0.5, & ! node id 1 Put outside src grid
+                     1.0, 0.0, & ! node id 2
+                     0.0, 1.0, & ! node id 4
+                     1.0, 1.0 /) ! node id 5
+
+       ! Allocate and fill the node owner array.
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0, & ! node id 1
+                    0, & ! node id 2
+                    0, & ! node id 4
+                    0/)  ! node id 5
+
+       ! Allocate and fill the node Mask array.
+       allocate(nodeMask(numNodes))
+       nodeMask=(/0, & ! node id 1
+                  0, & ! node id 2
+                  2, & ! node id 4
+                  0/)  ! node id 5
+
+       ! Set the number of each type of element, plus the total number.
+       numQuadElems=1
+       numTriElems=0
+       numTotElems=numQuadElems+numTriElems
+
+       ! Allocate and fill the element id array.
+       allocate(elemIds(numTotElems))
+       elemIds=(/1/) 
+
+       ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numTotElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! elem id 1
+
+       ! Allocate and fill the element connection type array.
+        ! Note that entry are local indices
+       allocate(elemConn(4*numQuadElems+3*numTriElems))
+       elemConn=(/1,2,4,3/) ! elem id 1
+
+     else if (localPET .eq. 1) then !!! This part only for PET 1
+       ! Set number of nodes
+       numNodes=4
+
+       ! Allocate and fill the node id array.
+       allocate(nodeIds(numNodes))
+       nodeIds=(/2,3,5,6/) 
+
+       ! Allocate and fill node coordinate array.
+       ! Since this is a 2D Mesh the size is 2x the
+       ! number of nodes.
+       allocate(nodeCoords(2*numNodes))
+       nodeCoords=(/1.0,0.0, & ! node id 2
+                    2.0,0.0, & ! node id 3
+                    1.0,1.0, & ! node id 5
+                    2.0,1.0 /) ! node id 6
+
+       ! Allocate and fill the node owner array.
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0, & ! node id 2
+                    1, & ! node id 3
+                    0, & ! node id 5
+                    1/)  ! node id 6
+
+       ! Allocate and fill the node mask array.
+       allocate(nodeMask(numNodes))
+       nodeMask=(/0, & ! node id 2
+                  0, & ! node id 3
+                  0, & ! node id 5
+                  0/)  ! node id 6
+
+       ! Set the number of each type of element, plus the total number.
+       numQuadElems=0
+       numTriElems=2
+       numTotElems=numQuadElems+numTriElems
+
+       ! Allocate and fill the element id array.
+       allocate(elemIds(numTotElems))
+       elemIds=(/2,3/) 
+
+       ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numTotElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_TRI, & ! elem id 2
+                   ESMF_MESHELEMTYPE_TRI/)  ! elem id 3
+
+        ! Allocate and fill the element connection type array.
+       allocate(elemConn(4*numQuadElems+3*numTriElems))
+       elemConn=(/1,2,3, & ! elem id 2
+                  2,4,3/)  ! elem id 3
+
+    else if (localPET .eq. 2) then !!! This part only for PET 2
+        ! Set number of nodes
+        numNodes=4
+
+        ! Allocate and fill the node id array.
+        allocate(nodeIds(numNodes))
+        nodeIds=(/4,5,7,8/) 
+
+        ! Allocate and fill node coordinate array.
+        ! Since this is a 2D Mesh the size is 2x the
+        ! number of nodes.
+        allocate(nodeCoords(2*numNodes))
+        nodeCoords=(/0.0,1.0, & ! node id 4
+                     1.0,1.0, & ! node id 5
+                     0.0,2.0, & ! node id 7
+                     1.0,2.0 /) ! node id 8
+
+        ! Allocate and fill the node owner array.
+        allocate(nodeOwners(numNodes))
+        nodeOwners=(/0, & ! node id 4
+                     0, & ! node id 5
+                     2, & ! node id 7
+                     2/)  ! node id 8
+
+        ! Allocate and fill the node mask array.
+        allocate(nodeMask(numNodes))
+        nodeMask=(/2, & ! node id 4
+                   0, & ! node id 5
+                   0, & ! node id 7
+                   0/)  ! node id 8
+
+        ! Set the number of each type of element, plus the total number.
+        numQuadElems=1
+        numTriElems=0
+        numTotElems=numQuadElems+numTriElems
+
+        ! Allocate and fill the element id array.
+        allocate(elemIds(numTotElems))
+        elemIds=(/4/) 
+
+        ! Allocate and fill the element topology type array.
+        allocate(elemTypes(numTotElems))
+        elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! elem id 4
+
+         ! Allocate and fill the element connection type array.
+        allocate(elemConn(4*numQuadElems+3*numTriElems))
+        elemConn=(/1,2,4,3/) ! elem id 4
+
+     else if (localPET .eq. 3) then !!! This part only for PET 3
+        ! Set number of nodes
+        numNodes=4
+
+        ! Allocate and fill the node id array.
+        allocate(nodeIds(numNodes))
+        nodeIds=(/5,6,8,9/) 
+
+        ! Allocate and fill node coordinate array.
+        ! Since this is a 2D Mesh the size is 2x the
+        ! number of nodes.
+        allocate(nodeCoords(2*numNodes))
+        nodeCoords=(/1.0,1.0, &  ! node id 5
+                     2.0,1.0, &  ! node id 6
+                     1.0,2.0, &  ! node id 8
+                     2.0,2.0 /)  ! node id 9
+
+        ! Allocate and fill the node owner array.
+        allocate(nodeOwners(numNodes))
+        nodeOwners=(/0, & ! node id 5
+                     1, & ! node id 6
+                     2, & ! node id 8
+                     3/)  ! node id 9
+
+        ! Allocate and fill the node Mask array.
+        allocate(nodeMask(numNodes))
+        nodeMask=(/0, & ! node id 5
+                   0, & ! node id 6
+                   0, & ! node id 8
+                   0/)  ! node id 9  (Mask out point uncovered by masked src)
+
+
+        ! Set the number of each type of element, plus the total number.
+        numQuadElems=1
+        numTriElems=0
+        numTotElems=numQuadElems+numTriElems
+
+        ! Allocate and fill the element id array.
+        allocate(elemIds(numTotElems))
+        elemIds=(/5/)  
+
+        ! Allocate and fill the element topology type array.
+        allocate(elemTypes(numTotElems))
+        elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! elem id 5
+
+         ! Allocate and fill the element connection type array.
+        allocate(elemConn(4*numQuadElems+3*numTriElems))
+        elemConn=(/1,2,4,3/) ! elem id 5
+       endif
+   endif
+
+
+  ! Create Mesh structure in 1 step
+  dstMesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+         nodeIds=nodeIds, nodeCoords=nodeCoords, &
+         nodeOwners=nodeOwners, nodeMask=nodeMask, &
+         elementIds=elemIds, elementTypes=elemTypes, &
+         elementConn=elemConn, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+         rc=ESMF_FAILURE
+         return
+     endif
+
+
+   ! deallocate node data
+   deallocate(nodeIds)
+   deallocate(nodeCoords)
+   deallocate(nodeOwners)
+
+   ! deallocate elem data
+   deallocate(elemIds)
+   deallocate(elemTypes)
+   deallocate(elemConn)
+
+
+  
+  ! Create dest field
+  call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
+
+   dstField = ESMF_FieldCreate(dstMesh, arrayspec, &
+                        name="dest", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  ! Create regrid status field
+  regridStatusField=ESMF_FieldCreate(dstMesh, ESMF_TYPEKIND_I4, &
+                        name="regrid status", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  ! Regrid store
+  call ESMF_FieldRegridStore( &
+          srcField, &
+          srcMaskValues=(/1/), &
+          dstField=dstField, &
+          dstMaskValues=(/2/), &
+          routeHandle=routeHandle, &
+          regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
+          dstStatusField=regridStatusField, &
+          unmappedAction=ESMF_UNMAPPEDACTION_IGNORE, &
+          rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  call ESMF_FieldRegridRelease(routeHandle, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+ 
+  ! Check destination field
+  ! Should only be 1 localDE
+  call ESMF_FieldGet(regridStatusField, 0, statusPtr,  rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+  endif
+
+!  write(*,*) localPet," Status Field=",statusPtr
+
+  ! Check status
+  correct=.true.
+  if (PetCount .eq. 1) then
+     if (statusPtr(1) .ne. ESMF_REGRIDSTATUS_OUTSIDE) correct=.false.
+     if (statusPtr(2) .ne. ESMF_REGRIDSTATUS_OUTSIDE) correct=.false.
+     if (statusPtr(3) .ne. ESMF_REGRIDSTATUS_OUTSIDE) correct=.false.
+     if (statusPtr(4) .ne. ESMF_REGRIDSTATUS_DSTMASKED) correct=.false.
+     if (statusPtr(5) .ne. ESMF_REGRIDSTATUS_OUTSIDE) correct=.false.
+     if (statusPtr(6) .ne. ESMF_REGRIDSTATUS_OUTSIDE) correct=.false.
+     if (statusPtr(7) .ne. ESMF_REGRIDSTATUS_OUTSIDE) correct=.false.
+     if (statusPtr(8) .ne. ESMF_REGRIDSTATUS_OUTSIDE) correct=.false.
+     if (statusPtr(9) .ne. ESMF_REGRIDSTATUS_OUTSIDE) correct=.false.
+
+ else if (petCount .eq. 4) then
+     if (localPET .eq. 0) then !!! This part only for PET 0
+
+        ! Check status for  nodeIds=(/1,2,4,5/) 
+        if (statusPtr(1) .ne. ESMF_REGRIDSTATUS_OUTSIDE) correct=.false.
+        if (statusPtr(2) .ne. ESMF_REGRIDSTATUS_OUTSIDE) correct=.false.
+        if (statusPtr(3) .ne. ESMF_REGRIDSTATUS_DSTMASKED) correct=.false.
+        if (statusPtr(4) .ne. ESMF_REGRIDSTATUS_OUTSIDE) correct=.false.
+
+     else if (localPET .eq. 1) then !!! This part only for PET 1
+
+       ! Check status for nodeIds=(/X,3,X,6/) 
+       if (statusPtr(1) .ne. ESMF_REGRIDSTATUS_OUTSIDE) correct=.false.
+       if (statusPtr(2) .ne. ESMF_REGRIDSTATUS_OUTSIDE) correct=.false.
+
+    else if (localPET .eq. 2) then !!! This part only for PET 2
+
+        ! Check status for nodeIds=(/X,X,7,8/) 
+       if (statusPtr(1) .ne. ESMF_REGRIDSTATUS_OUTSIDE) correct=.false.
+       if (statusPtr(2) .ne. ESMF_REGRIDSTATUS_OUTSIDE) correct=.false.
+
+     else if (localPET .eq. 3) then !!! This part only for PET 3
+
+        ! Check status for nodeIds=(/X,X,X,9/) 
+        if (statusPtr(1) .ne. ESMF_REGRIDSTATUS_OUTSIDE) correct=.false.
+        
+     endif
+  endif
+
+
+  ! Destroy the Fields
+   call ESMF_FieldDestroy(srcField, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+   call ESMF_FieldDestroy(dstField, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+   call ESMF_FieldDestroy(regridStatusField, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+  ! Free the Meshes
+  call ESMF_MeshDestroy(dstMesh, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  call ESMF_MeshDestroy(srcMesh, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+
+  ! return answer based on correct flag
+  if (correct) then
+    rc=ESMF_SUCCESS
+  else
+    rc=ESMF_FAILURE
+  endif
+
+ end subroutine test_regridDisjointSD
+
 
 
 end program ESMF_FieldRegridUTest

@@ -354,173 +354,6 @@ namespace ESMCI {
     }
   }
 
-
-#ifdef USE_NONCNCV_SM
-  void _calc_centroid2D(int num_p, double *p, double *cntr) {
-
-    // Init
-    cntr[0]=0.0;
-    cntr[1]=0.0;
-
-    // Sum
-    for (int i=0; i<num_p; i++) {
-      double *pnt=p+2*i;
-
-      cntr[0] += pnt[0];
-      cntr[1] += pnt[1];
-    }
-
-    // Compute average
-    MU_DIV_BY_SCALAR_VEC2D(cntr,cntr,((double)num_p));
-  }
-
-
-  void create_sm_cells_2D_2D_cart(const MeshObj *src_elem, MEField<> *src_cfield,
-                                 std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> * dst_mask_field,
-                                 double *src_elem_area,
-                                 std::vector<int> *valid,
-                                 std::vector<double> *sintd_areas_out, std::vector<double> *dst_areas_out,
-                                 std::vector<int> *tmp_valid, std::vector<double> *tmp_sintd_areas_out, std::vector<double> *tmp_dst_areas_out,
-                                 std::vector<SM_CELL> *sm_cells
-                                 ) {
-
-
-// Maximum size for a supported polygon
-// Since the elements are of a small
-// limited size. Fixed sized buffers seem
-// the best way to handle them
-
-#define  MAX_NUM_POLY_NODES 40
-#define  MAX_NUM_POLY_COORDS_2D (2*MAX_NUM_POLY_NODES)
-
-    // Declaration for src polygon
-    int num_src_nodes;
-    double src_coords[MAX_NUM_POLY_COORDS_2D];
-    double tmp_coords[MAX_NUM_POLY_COORDS_2D];
-
-    // Get src coords
-    get_elem_coords_2D_ccw(src_elem, src_cfield, MAX_NUM_POLY_NODES, tmp_coords, &num_src_nodes, src_coords);
-
-    // Init output to invalid in case we return early
-    *src_elem_area=0.0;
-    for (int i=0; i<dst_elems.size(); i++) {
-      (*valid)[i]=0;
-      (*sintd_areas_out)[i]=0.0;
-      (*dst_areas_out)[i]=0.0;
-    }
-
-    // if no nodes then exit
-    if (num_src_nodes < 1) return;
-
-    // Get rid of degenerate edges
-    remove_0len_edges2D(&num_src_nodes, src_coords);
-
-    // If less than a triangle leave because it won't results in weights
-    // Decision about returning error for degeneracy is made above this subroutine
-    if (num_src_nodes < 3) return;
-
-    // If a smashed quad leave because it won't results in weights
-    // Decision about returning error for degeneracy is made above this subroutine
-    if (is_smashed_quad2D(num_src_nodes, src_coords)) return;
-
-    // calculate dst area
-    double src_area=area_of_flat_2D_polygon(num_src_nodes, src_coords);
-
-    // If src area is 0.0 invalidate everything and leave because it won't results in weights
-    // Decision about returning error for degeneracy is made above this subroutine
-    if (src_area == 0.0) return;
-
-    // Output src_elem_area
-    *src_elem_area=src_area;
-
-    // Declaration for dst polygon
-    int num_dst_nodes;
-    double dst_coords[MAX_NUM_POLY_COORDS_2D];
-
-    // Declaration for intersection polygon
-    int num_sintd_nodes;
-    double sintd_coords[MAX_NUM_POLY_COORDS_2D];
-
-    // Loop intersecting and computing areas of intersection
-    for (int i=0; i<dst_elems.size(); i++) {
-      const MeshObj *dst_elem = dst_elems[i];
-
-      // Skip masked dst elem
-      if (dst_mask_field) {
-        double *msk=dst_mask_field->data(*dst_elem);
-        if (*msk>0.5) {
-          continue;
-        }
-      }
-
-      // Get dst coords
-      get_elem_coords_2D_ccw(dst_elem, dst_cfield, MAX_NUM_POLY_NODES, tmp_coords, &num_dst_nodes, dst_coords);
-
-      // if no nodes then go to next
-      if (num_dst_nodes < 1) continue;
-
-      // Get rid of degenerate edges
-      remove_0len_edges2D(&num_dst_nodes, dst_coords);
-
-      // if less than a triangle skip
-      if (num_dst_nodes < 3) continue;
-
-      // if a smashed quad skip
-      if (is_smashed_quad2D(num_dst_nodes, dst_coords)) continue;
-
-      // calculate dst area
-      double dst_area=area_of_flat_2D_polygon(num_dst_nodes, dst_coords);
-
-      // if destination area is 0.0, invalidate and go to next
-      if (dst_area == 0.0) continue;
-
-      // Make sure that we aren't going to go over size of tmp buffers
-      if ((num_src_nodes + num_dst_nodes) > MAX_NUM_POLY_NODES) {
-        Throw() << " src and dst poly size too big for temp buffer";
-      }
-
-      // Intersect src with dst element
-      intersect_convex_poly2D(num_dst_nodes, dst_coords,
-                              num_src_nodes, src_coords,
-                              tmp_coords,
-                              &num_sintd_nodes, sintd_coords);
-
-
-      // Get rid of degenerate edges
-      remove_0len_edges2D(&num_sintd_nodes, sintd_coords);
-
-      // if intersected element isn't a complete polygon then go to next
-      if (num_sintd_nodes < 3) continue;
-
-      // calculate intersection area
-      double sintd_area=area_of_flat_2D_polygon(num_sintd_nodes, sintd_coords);
-
-      // Valid, so set output variables
-      (*valid)[i]=1;
-      (*sintd_areas_out)[i]=sintd_area;
-      (*dst_areas_out)[i]=dst_area;
-
-      // Declare temporary supermesh cell info structure
-      SM_CELL tmp_smc;
-
-      // Add destination cell index
-      tmp_smc.dst_index=i;
-
-      // Add area to supermesh cell info
-      tmp_smc.area=sintd_area;
-
-      // Add centroid to supermesh cell info
-      _calc_centroid2D(num_sintd_nodes, sintd_coords, tmp_smc.cntr);
-
-      // Add to list
-      sm_cells->push_back(tmp_smc);
-    }
-
-#undef  MAX_NUM_POLY_NODES
-#undef  MAX_NUM_POLY_COORDS_2D
-   }
-#endif
-
   double const_func_2D_2D_cart(double *coords) {
     return 1.0;
   }
@@ -556,6 +389,110 @@ namespace ESMCI {
     grad[1]=grad[1]-src_val*src_grad[1];
  }
 
+
+  bool _is_src_cntr_in_nbr_poly_2D_2D_cart(double *src_cntr, std::vector<NBR_ELEM> *nbrs) {
+
+    // For nbr poly coords
+#define MAX_NUM_NBRS 100
+    int num_nbr_nodes;
+    double nbr_coords[2*MAX_NUM_NBRS];
+
+    // Error check
+    if (nbrs->size()>MAX_NUM_NBRS) {
+      Throw() << " A source cell contains more neighbors ("<<nbrs->size()<<") than is currently supported in 2nd order conservative weight calculation.";
+    }
+
+    // Load points into polygon array
+    int p=0;
+    for (int i=0; i<nbrs->size(); i++) {
+      NBR_ELEM *nbr=&((*nbrs)[i]);
+
+      nbr_coords[p]  =nbr->cntr[0];
+      nbr_coords[p+1]=nbr->cntr[1];
+      p+=2;
+    }
+    num_nbr_nodes=nbrs->size();
+
+
+    // See if the point in the the nbr polygon
+    // Use 1.0E-14 tol, so that points in line will still pass if there's a bit of numerical wiggle
+    int nbr_tri_ind[3*(MAX_NUM_NBRS-2)];
+    double tmp_coords[2*MAX_NUM_NBRS]; 
+    int tmp_ints[MAX_NUM_NBRS]; 
+    bool success;
+
+    bool is_in=is_pnt_in_polygon<GEOM_CART2D>(num_nbr_nodes, nbr_coords, src_cntr, 1.0E-14, nbr_tri_ind, tmp_coords, tmp_ints, &success);
+
+    // act based on success
+    if (success) {
+      return is_in;
+    } else {
+      // The nbr polygon should be counter clockwise, if it's so messed up that we can't figure out is_in, then
+      // just use a const grad for now. 
+      return false;
+    }
+
+#undef MAX_NUM_NBRS
+  }
+
+
+  // NOT USING RIGHT NOW, BUT KEPT JUST IN CASE
+#if 0
+  // Check overlap of src cell and nbr polygon
+  double _calc_src_nbr_poly_overlap_area_2D_2D_cart(const MeshObj *src_elem, MEField<> *src_cfield, std::vector<NBR_ELEM> *nbrs) {
+
+    // For nbr poly coords
+#define MAX_NUM_NBRS 100
+    int num_nbr_nodes;
+    double nbr_coords[2*MAX_NUM_NBRS];
+
+    // Error check
+    if (nbrs->size()>MAX_NUM_NBRS) {
+      Throw() << " A source cell contains more neighbors ("<<nbrs->size()<<") than is currently supported in 2nd order conservative weight calculation.";
+    }
+
+    // Load points into polygon array
+    int p=0;
+    for (int i=0; i<nbrs->size(); i++) {
+      NBR_ELEM *nbr=&((*nbrs)[i]);
+
+      nbr_coords[p]  =nbr->cntr[0];
+      nbr_coords[p+1]=nbr->cntr[1];
+      p+=2;
+    }
+    num_nbr_nodes=nbrs->size();
+
+
+    // Get Source elem polygon
+#define  MAX_NUM_SRC_NODES 10
+    int num_src_nodes;
+    double src_coords[2*MAX_NUM_SRC_NODES];
+    double tmp_src_coords[2*MAX_NUM_SRC_NODES];
+
+    // Get src coords
+    get_elem_coords_2D_ccw(src_elem, src_cfield, MAX_NUM_SRC_NODES, tmp_src_coords, &num_src_nodes, src_coords);
+
+    // Get rid of degenerate edges
+    remove_0len_edges2D(&num_src_nodes, src_coords);
+
+    // if intersected element isn't a complete polygon then go to next
+    if (num_src_nodes < 3) {
+      return 0.0;
+    }
+
+    // calculate intersection area
+    int src_tri_ind[3*(MAX_NUM_SRC_NODES-2)];
+    int nbr_tri_ind[3*(MAX_NUM_NBRS-2)];
+    double tmp_coords[2*MAX_NUM_NBRS]; // MAX_NUM_NBRS > MAX_NUM_SRC_NODES
+    int tmp_ints[MAX_NUM_NBRS]; // MAX_NUM_NBRS > MAX_NUM_SRC_NODES
+    return calc_poly_intersect_area<GEOM_CART2D>(num_src_nodes, src_coords, src_tri_ind,
+                                                 num_nbr_nodes, nbr_coords, nbr_tri_ind, tmp_coords, tmp_ints);
+    
+#undef MAX_NUM_SRC_NODES 
+#undef MAX_NUM_NBRS
+  }
+#endif
+
  /* XMRKX */
 
   // Main Call
@@ -570,23 +507,13 @@ namespace ESMCI {
                                            std::vector<NBR_ELEM> *nbrs
                                            ) {
 
-
     // Create super mesh cells by intersecting src_elem and list of dst_elems
-#ifndef USE_NONCNCV_SM
     create_SM_cells_2D_2D_cart(src_elem, src_cfield,
                               dst_elems, dst_cfield, dst_mask_field, dst_frac2_field,
                               src_elem_area,
                               valid, sintd_areas_out, dst_areas_out,
                               tmp_valid, tmp_sintd_areas_out, tmp_dst_areas_out,
                               sm_cells);
-#else
-    create_sm_cells_2D_2D_cart(src_elem, src_cfield,
-                              dst_elems, dst_cfield, dst_mask_field,
-                              src_elem_area,
-                              valid, sintd_areas_out, dst_areas_out,
-                              tmp_valid, tmp_sintd_areas_out, tmp_dst_areas_out,
-                              sm_cells);
-#endif
 
     // If there are no sm cells then leave
     if (sm_cells->empty()) return;
@@ -601,13 +528,16 @@ namespace ESMCI {
     // Put the nbrs into counter clockwise order
    _make_nbr_elems_cntrclk_2D_2D_cart(src_cntr, nbrs);
 
-    // Set gradient info based on number of neighbors
+    // Set gradient info based on criteria
    double src_grad[2];
    if (nbrs->size() < 3) {
-     // Too few neighbors to use Green's, so assume constant grad
+     // Too few neighbors to use Green's, so use constant gradient
      _set_grad_info_to_0_2D_2D_cart(src_cntr, src_grad, nbrs);
+   } else if (!_is_src_cntr_in_nbr_poly_2D_2D_cart(src_cntr, nbrs)) {
+       // src center is not inside nbrs, so just use constant 
+       _set_grad_info_to_0_2D_2D_cart(src_cntr, src_grad, nbrs);
    } else {
-     // 3 or more neighbors so use Green's theorem
+     // Passed all criteria, so use Greens to calc gradient
      if (!_set_grad_info_using_greens_2D_2D_cart(src_cntr, src_grad, nbrs, src_elem->get_id())) {
        // If the above doesn't suceed just default to constant
        _set_grad_info_to_0_2D_2D_cart(src_cntr, src_grad, nbrs);
@@ -684,7 +614,7 @@ namespace ESMCI {
       _debug_calc_gradient_2D_2D_cart(src_cntr, src_grad, nbrs, xyz_func_2D_2D_cart, xyz_grad);
       printf("src_elem=%d x+y field grad=%g %g\n",src_elem->get_id(),xyz_grad[0],xyz_grad[1]);
 #endif
-   }
+  }
 
   //////////////////// 2D 3D Spherical ////////////////////////////////////
   /* XMRKX */
@@ -920,6 +850,33 @@ namespace ESMCI {
       p+=3;
     }
 
+
+    // reject if center not in polygon
+//      static int tot=0;
+//     static int rej=0;
+    
+//     // sum number going by
+//     tot++;
+//     if (!is_pnt_in_poly<GEOM_SPH2D3D>(nbrs->size(), nbr_coords, src_cntr)) {
+//       rej++;
+//       printf("tot=%d rej=%d rej/tot=%g\n",tot,rej,((double)rej)/((double)tot));
+//       return false;
+//     }
+
+
+//     // reject if nbr < 180
+//     static int tot=0;
+//     static int rej=0;
+    
+//     //sum number going by
+//     tot++;
+//     if ((*nbrs)[nbrs->size()-1].angle < ((M_PI/2.0)-1.0E-10)) {
+//      rej++;
+//      printf("tot=%d rej=%d rej/tot=%g\n",tot,rej,((double)rej)/((double)tot));
+//      return false;
+//     }
+
+
     // Compute area
     double nbr_poly_area=great_circle_area(nbrs->size(), nbr_coords);
     if (nbr_poly_area == 0.0) return false;
@@ -1007,6 +964,10 @@ namespace ESMCI {
     // Return success
     return true;
   }
+
+
+
+
 
 #if 0
   // This doesn't seem to be a very good approximation. It's possible that
@@ -1114,181 +1075,6 @@ namespace ESMCI {
     }
   }
 
- /* XMRKX */
-#ifdef USE_NONCNCV_SM
-  void _calc_centroid3D(int num_p, double *p, double *cntr) {
-
-    // Init
-    cntr[0]=0.0;
-    cntr[1]=0.0;
-    cntr[2]=0.0;
-
-    // Sum
-    for (int i=0; i<num_p; i++) {
-      double *pnt=p+3*i;
-
-      cntr[0] += pnt[0];
-      cntr[1] += pnt[1];
-      cntr[2] += pnt[2];
-    }
-
-    // Compute average
-    MU_DIV_BY_SCALAR_VEC3D(cntr,cntr,((double)num_p));
-
-    // Project to sphere surface
-    double len=MU_LEN_VEC3D(cntr);
-    if (len == 0.0) Throw() << "Distance from center to point on sphere unexpectedly 0.0";
-    double div_len=1.0/len;
-    MU_MULT_BY_SCALAR_VEC3D(cntr,cntr,div_len);
-  }
-
-
-  void create_sm_cells_2D_3D_sph(const MeshObj *src_elem, MEField<> *src_cfield,
-                                 std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> * dst_mask_field,
-                                 double *src_elem_area,
-                                 std::vector<int> *valid,
-                                 std::vector<double> *sintd_areas_out, std::vector<double> *dst_areas_out,
-                                 std::vector<int> *tmp_valid, std::vector<double> *tmp_sintd_areas_out, std::vector<double> *tmp_dst_areas_out,
-                                 std::vector<SM_CELL> *sm_cells
-                                 ) {
-
-// Maximum size for a supported polygon
-// Since the elements are of a small
-// limited size. Fixed sized buffers seem
-// the best way to handle them
-#define  MAX_NUM_POLY_NODES 40
-#define  MAX_NUM_POLY_COORDS_3D (3*MAX_NUM_POLY_NODES)
-
-    // Declaration for src polygon
-    int num_src_nodes;
-    double src_coords[MAX_NUM_POLY_COORDS_3D];
-    double tmp_coords[MAX_NUM_POLY_COORDS_3D];
-
-    // Get src coords
-    get_elem_coords_3D_ccw(src_elem, src_cfield, MAX_NUM_POLY_NODES, tmp_coords, &num_src_nodes, src_coords);
-
-    // Init output to invalid in case we return early
-    *src_elem_area=0.0;
-    for (int i=0; i<dst_elems.size(); i++) {
-      (*valid)[i]=0;
-      (*sintd_areas_out)[i]=0.0;
-      (*dst_areas_out)[i]=0.0;
-    }
-
-    // if no nodes then exit
-    if (num_src_nodes<1) return;
-
-    // Get rid of degenerate edges
-    remove_0len_edges3D(&num_src_nodes, src_coords);
-
-    // If less than a triangle leave because it won't results in weights
-     // Decision about returning error for degeneracy is made above this subroutine
-    if (num_src_nodes<3) return;
-
-    // If a smashed quad leave because it won't results in weights
-    // Decision about returning error for degeneracy is made above this subroutine
-    if (is_smashed_quad3D(num_src_nodes, src_coords)) return;
-
-    // calculate src area
-    double src_area=great_circle_area(num_src_nodes, src_coords);
-
-
-    // If src area is 0.0 leave because it won't results in weights
-    // Decision about returning error for degeneracy is made above this subroutine
-    if (src_area == 0.0) return;
-
-    // Output src_elem_area
-    *src_elem_area=src_area;
-
-    /// Loop over destination elements
-    // Declaration for dst polygon
-    int num_dst_nodes;
-    double dst_coords[MAX_NUM_POLY_COORDS_3D];
-
-    // Declaration for intersection polygon
-    int num_sintd_nodes;
-    double sintd_coords[MAX_NUM_POLY_COORDS_3D];
-
-    // Loop intersecting and computing areas of intersection
-    for (int i=0; i<dst_elems.size(); i++) {
-       const MeshObj *dst_elem = dst_elems[i];
-
-       // Skip masked dst elem
-       if (dst_mask_field) {
-         double *msk=dst_mask_field->data(*dst_elem);
-         if (*msk>0.5) {
-           continue;
-         }
-       }
-
-       // Get dst coords
-       get_elem_coords_3D_ccw(dst_elem, dst_cfield, MAX_NUM_POLY_NODES, tmp_coords, &num_dst_nodes, dst_coords);
-
-
-      // if no nodes then go to next
-      if (num_dst_nodes<1) continue;
-
-      // Get rid of degenerate edges
-      remove_0len_edges3D(&num_dst_nodes, dst_coords);
-
-      // if less than a triangle skip
-      if (num_dst_nodes<3) continue;
-
-      // if a smashed quad skip
-      if (is_smashed_quad3D(num_dst_nodes, dst_coords)) continue;
-
-      // calculate dst area
-     double dst_area=great_circle_area(num_dst_nodes, dst_coords);
-
-     // if destination area is 0.0, skip
-     if (dst_area==0.0)  continue;
-
-     // Make sure that we aren't going to go over size of tmp buffers
-     if ((num_src_nodes + num_dst_nodes) > MAX_NUM_POLY_NODES) {
-       Throw() << " src and dst poly size too big for temp buffer";
-     }
-
-     // Intersect src with dst element
-     intersect_convex_2D_3D_sph_gc_poly(num_dst_nodes, dst_coords,
-                                        num_src_nodes, src_coords,
-                                        tmp_coords,
-                                        &num_sintd_nodes, sintd_coords);
-
-      // Get rid of degenerate edges
-      remove_0len_edges3D(&num_sintd_nodes, sintd_coords);
-
-      // if intersected element isn't a complete polygon then skip
-      if (num_sintd_nodes < 3) continue;
-
-      // calculate intersection area
-      double sintd_area=great_circle_area(num_sintd_nodes, sintd_coords);
-
-      // Valid, so set output variables
-      (*valid)[i]=1;
-      (*sintd_areas_out)[i]=sintd_area;
-      (*dst_areas_out)[i]=dst_area;
-
-      // Declare temporary supermesh cell info structure
-      SM_CELL tmp_smc;
-
-      // Add destination cell index
-      tmp_smc.dst_index=i;
-
-      // Add area to supermesh cell info
-      tmp_smc.area=sintd_area;
-
-      // Add centroid to supermesh cell info
-      _calc_centroid3D(num_sintd_nodes, sintd_coords, tmp_smc.cntr);
-
-      // Add to list
-      sm_cells->push_back(tmp_smc);
-    }
-
-#undef  MAX_NUM_POLY_NODES
-#undef  MAX_NUM_POLY_COORDS_3D
-   }
-#endif
-
   double const_func(double *coords) {
     return 1.0;
   }
@@ -1328,6 +1114,116 @@ namespace ESMCI {
   }
 
 
+  bool _is_src_cntr_in_nbr_poly_2D_3D_sph(double *src_cntr, std::vector<NBR_ELEM> *nbrs) {
+
+    // For nbr poly coords
+#define MAX_NUM_NBRS 100
+    int num_nbr_nodes;
+    double nbr_coords[3*MAX_NUM_NBRS];
+
+    // Error check
+    if (nbrs->size()>MAX_NUM_NBRS) {
+      Throw() << " A source cell contains more neighbors ("<<nbrs->size()<<") than is currently supported in 2nd order conservative weight calculation.";
+    }
+
+    // Load points into polygon array
+    int p=0;
+    for (int i=0; i<nbrs->size(); i++) {
+      NBR_ELEM *nbr=&((*nbrs)[i]);
+
+      nbr_coords[p]  =nbr->cntr[0];
+      nbr_coords[p+1]=nbr->cntr[1];
+      nbr_coords[p+2]=nbr->cntr[2];
+      p+=3;
+    }
+    num_nbr_nodes=nbrs->size();
+
+
+    // See if the point in the the nbr polygon
+    // Use 1.0E-14 tol, so that points in line will still pass if there's a bit of numerical wiggle
+    int nbr_tri_ind[3*(MAX_NUM_NBRS-2)];
+    double tmp_coords[3*MAX_NUM_NBRS]; 
+    int tmp_ints[MAX_NUM_NBRS]; 
+    bool success;   
+
+    bool is_in=is_pnt_in_polygon<GEOM_SPH2D3D>(num_nbr_nodes, nbr_coords, src_cntr, 1.0E-14, nbr_tri_ind, tmp_coords, tmp_ints, &success);
+
+    // act based on success
+    if (success) {
+      return is_in;
+    } else {
+      // The nbr polygon should be counter clockwise, if it's so messed up that we can't figure out is_in, then
+      // just use a const grad for now. 
+      return false;
+    }
+
+#undef MAX_NUM_NBRS
+  }
+
+  // NOT USING RIGHT NOW, BUT KEPT JUST IN CASE
+#if 0
+  double _calc_src_nbr_poly_overlap_area_2D_3D_sph(const MeshObj *src_elem, MEField<> *src_cfield, std::vector<NBR_ELEM> *nbrs) {
+
+    // For nbr poly coords
+#define MAX_NUM_NBRS 100
+    int num_nbr_nodes;
+    double nbr_coords[3*MAX_NUM_NBRS];
+
+    // Error check
+    if (nbrs->size()>MAX_NUM_NBRS) {
+      Throw() << " A source cell contains more neighbors ("<<nbrs->size()<<") than is currently supported in 2nd order conservative weight calculation.";
+    }
+
+    // Load points into polygon array
+    int p=0;
+    for (int i=0; i<nbrs->size(); i++) {
+      NBR_ELEM *nbr=&((*nbrs)[i]);
+
+      nbr_coords[p]  =nbr->cntr[0];
+      nbr_coords[p+1]=nbr->cntr[1];
+      nbr_coords[p+2]=nbr->cntr[2];
+      p+=3;
+    }
+    num_nbr_nodes=nbrs->size();
+
+
+    // Get Source elem polygon
+#define  MAX_NUM_SRC_NODES 10
+    int num_src_nodes;
+    double src_coords[3*MAX_NUM_SRC_NODES];
+    double tmp_src_coords[3*MAX_NUM_SRC_NODES];
+
+    // Get src coords
+    get_elem_coords_3D_ccw(src_elem, src_cfield, MAX_NUM_SRC_NODES, tmp_src_coords, &num_src_nodes, src_coords);
+
+    // Get rid of degenerate edges
+    remove_0len_edges3D(&num_src_nodes, src_coords);
+
+    // if intersected element isn't a complete polygon then go to next
+    if (num_src_nodes < 3) {
+      return 0.0;
+    }
+
+    // calculate intersection area
+    int src_tri_ind[3*(MAX_NUM_SRC_NODES-2)];
+    int nbr_tri_ind[3*(MAX_NUM_NBRS-2)];
+    double tmp_coords[3*MAX_NUM_NBRS]; // MAX_NUM_NBRS > MAX_NUM_SRC_NODES
+    int tmp_ints[MAX_NUM_NBRS]; // MAX_NUM_NBRS > MAX_NUM_SRC_NODES
+    double int_area=calc_poly_intersect_area<GEOM_SPH2D3D>(num_src_nodes, src_coords, src_tri_ind,
+                                                  num_nbr_nodes, nbr_coords, nbr_tri_ind, tmp_coords, tmp_ints);
+    
+    // src_area
+    double src_area=great_circle_area(num_src_nodes, src_coords);
+
+    if (src_area==0.0) return 0.0;
+
+    return int_area/src_area;
+
+#undef MAX_NUM_SRC_NODES 
+#undef MAX_NUM_NBRS
+  }
+#endif
+
  /* XMRKX */
 
   // Main Call
@@ -1341,24 +1237,13 @@ namespace ESMCI {
                                            std::vector<SM_CELL> *sm_cells,
                                            std::vector<NBR_ELEM> *nbrs
                                         ) {
-
     // Create super mesh cells by intersecting src_elem and list of dst_elems
-#ifndef USE_NONCNCV_SM
     create_SM_cells_2D_3D_sph(src_elem, src_cfield,
                               dst_elems, dst_cfield, dst_mask_field, dst_frac2_field,
                               src_elem_area,
                               valid, sintd_areas_out, dst_areas_out,
                               tmp_valid, tmp_sintd_areas_out, tmp_dst_areas_out,
                               sm_cells);
-#else
-    create_sm_cells_2D_3D_sph(src_elem, src_cfield,
-                              dst_elems, dst_cfield, dst_mask_field,
-                              src_elem_area,
-                              valid, sintd_areas_out, dst_areas_out,
-                              tmp_valid, tmp_sintd_areas_out, tmp_dst_areas_out,
-                              sm_cells);
-#endif
-
 
     // If there are no sm cells then leave
     if (sm_cells->empty()) return;
@@ -1389,13 +1274,16 @@ namespace ESMCI {
     }
 #endif
 
-    // Set gradient info based on number of neighbors
+    // Set gradient info based on criteria
     double src_grad[3];
     if (nbrs->size() < 3) {
-      // Too few neighbors to use Green's, so assume constant grad
+      // Too few neighbors to use Green's, so use constant gradient
+      _set_grad_info_to_0(src_cntr, src_grad, nbrs);
+    } else if (!_is_src_cntr_in_nbr_poly_2D_3D_sph(src_cntr, nbrs)) {
+      // src center is not inside nbrs, so just use constant
       _set_grad_info_to_0(src_cntr, src_grad, nbrs);
     } else {
-      // 3 or more neighbors so use Green's theorem
+      // Passed all criteria, so use Greens to calc gradient
       if (!_set_grad_info_using_greens(src_cntr, src_grad, nbrs)) {
         // If the above doesn't suceed just default to constant
         _set_grad_info_to_0(src_cntr, src_grad, nbrs);
@@ -1472,6 +1360,7 @@ namespace ESMCI {
       _debug_calc_gradient(src_cntr, src_grad, nbrs, xyz_func, xyz_grad);
       printf("src_elem=%d x+y+z field grad=%g %g %g\n",src_elem->get_id(),xyz_grad[0],xyz_grad[1],xyz_grad[2]);
 #endif
+
   }
 
  /* XMRKX */

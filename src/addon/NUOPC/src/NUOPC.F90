@@ -60,6 +60,7 @@ module NUOPC
   public NUOPC_CompAttributeGet           ! method
   public NUOPC_CompAttributeIngest        ! method
   public NUOPC_CompAttributeInit          ! method
+  public NUOPC_CompAttributeReset         ! method
   public NUOPC_CompAttributeSet           ! method
   public NUOPC_CompCheckSetClock          ! method
   public NUOPC_CompDerive                 ! method
@@ -79,6 +80,7 @@ module NUOPC
   public NUOPC_AdjustClock                ! method
   public NUOPC_Advertise                  ! method
   public NUOPC_CheckSetClock              ! method
+  public NUOPC_ChopString                 ! method, internal use only
   public NUOPC_GetAttribute               ! method
   public NUOPC_GetStateMemberLists        ! method
   public NUOPC_GetTimestamp               ! method

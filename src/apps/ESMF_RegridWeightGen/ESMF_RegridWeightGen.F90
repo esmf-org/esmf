@@ -32,15 +32,17 @@ program ESMF_RegridWeightGenApp
   type(ESMF_VM)      :: vm
   integer            :: PetNo, PetCnt
   character(ESMF_MAXPATHLEN) :: srcfile, dstfile, wgtfile
-  character(ESMF_MAXPATHLEN) :: srcmeshname, dstmeshname
   character(ESMF_MAXPATHLEN) :: cwd
   character(ESMF_MAXPATHLEN) :: tilePath
   character(len=40)  :: method, flag, lineTypeStr
+  character(len=MAXNAMELEN) :: srcmeshname, dstmeshname
   character(len=MAXNAMELEN)  :: extrapMethodStr
   character(len=MAXNAMELEN)  :: extrapNumSrcPntsStr
   integer :: extrap_num_src_pnts
   character(len=MAXNAMELEN)  :: extrapDistExponentStr
   real :: extrap_dist_exponent
+  integer :: extrapNumLevels
+  character(len=MAXNAMELEN)  :: extrapNumLevelsStr
   type(ESMF_LineType_Flag) :: lineType
   type(ESMF_PoleMethod_Flag) :: pole
    integer            :: poleptrs
@@ -49,7 +51,7 @@ program ESMF_RegridWeightGenApp
   type(ESMF_ExtrapMethod_Flag) :: extrapMethodFlag
   character(len=ESMF_MAXPATHLEN) :: commandbuf1(4)
   character(len=MAXNAMELEN)  :: commandbuf3(9)
-  integer            :: commandbuf2(23)
+  integer            :: commandbuf2(24)
   integer            :: ind, pos
   logical            :: largeFileFlag
   logical            :: netcdf4FileFlag
@@ -73,6 +75,8 @@ program ESMF_RegridWeightGenApp
   logical            :: useSrcCorner, useDstCorner
   logical            :: useTilePathFlag
   integer            :: meshdim
+
+
   
   terminateProg = .false.
   
@@ -232,6 +236,7 @@ program ESMF_RegridWeightGenApp
       call ESMF_UtilGetArg(ind+1, argvalue=extrapMethodStr)
       if ((trim(extrapMethodStr) .ne. 'none') .and. &
            (trim(extrapMethodStr) .ne. 'nearestidavg') .and. &
+           (trim(extrapMethodStr) .ne. 'creep') .and. &
            (trim(extrapMethodStr) .ne. 'neareststod')) then
         write(*,*)
         print *, 'ERROR: The extrap. method "', trim(extrapMethodStr), '" is not supported'
@@ -257,6 +262,25 @@ program ESMF_RegridWeightGenApp
        extrapDistExponentStr='2.0'
     else
       call ESMF_UtilGetArg(ind+1, argvalue=extrapDistExponentStr)
+    endif
+
+   ! If creep is the extrap method, get the number of levels
+    extrapNumLevels=-1  ! Init just in case
+    if (trim(extrapMethodStr) .eq. 'creep') then
+       ! Get number of levels index
+       call ESMF_UtilGetArgIndex('--extrap_num_levels', argindex=ind, rc=rc)
+
+       ! Act based on index
+       if (ind == -1) then
+          write(*,*)
+          print *, "ERROR: When extrapmethod creep is specified, then the user must also specify the number of creep levels."
+          print *, "       This can be done using the argument: --extrap_num_levels"
+          print *, "Use the --help argument to see an explanation of usage."
+          call ESMF_Finalize(endflag=ESMF_END_ABORT)
+       else
+          call ESMF_UtilGetArg(ind+1, argvalue=extrapNumLevelsStr)
+          read(extrapNumLevelsStr,'(i4)') extrapNumLevels
+       endif
     endif
 
 
@@ -737,7 +761,9 @@ program ESMF_RegridWeightGenApp
       if (extrapMethodStr .eq. 'none') commandbuf2(22)=1
       if (extrapMethodStr .eq. 'neareststod') commandbuf2(22)=2
       if (extrapMethodStr .eq. 'nearestidavg') commandbuf2(22)=3
+      if (extrapMethodStr .eq. 'creep') commandbuf2(22)=4
       commandbuf2(23)=extrap_num_src_pnts
+      commandbuf2(24)=extrapNumLevels
     endif 
 
 
@@ -769,7 +795,7 @@ program ESMF_RegridWeightGenApp
     if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
 
   else
-    call ESMF_VMBroadcast(vm, commandbuf2, size (commandbuf2), 0, rc=rc)
+    call ESMF_VMBroadcast(vm, commandbuf2, size(commandbuf2), 0, rc=rc)
     if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
 
     if (commandbuf2(1) == -9999) then
@@ -891,11 +917,14 @@ program ESMF_RegridWeightGenApp
       extrapMethodStr = 'neareststod'
     else if (commandbuf2(22)==3) then
       extrapMethodStr = 'nearestidavg'
+    else if (commandbuf2(22)==4) then
+      extrapMethodStr = 'creep'
     else
       method = 'none'
     endif
 
     extrap_num_src_pnts=commandbuf2(23)
+    extrapNumLevels=commandbuf2(24)
 
     call ESMF_VMBroadcast(vm, commandbuf1, len(commandbuf1)*size(commandbuf1), 0, rc=rc)
     if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
@@ -955,6 +984,8 @@ program ESMF_RegridWeightGenApp
      extrapMethodFlag=ESMF_EXTRAPMETHOD_NEAREST_STOD
   else if (trim(extrapMethodStr) .eq. 'nearestidavg') then
      extrapMethodFlag=ESMF_EXTRAPMETHOD_NEAREST_IDAVG
+  else if (trim(extrapMethodStr) .eq. 'creep') then
+     extrapMethodFlag=ESMF_EXTRAPMETHOD_CREEP
   else 
      extrapMethodFlag=ESMF_EXTRAPMETHOD_NONE
   endif
@@ -966,6 +997,7 @@ program ESMF_RegridWeightGenApp
   write(*,*) "extrapmethod=",extrapMethodflag%extrapmethod
   write(*,*) "extrap_num_src_pnts=",extrap_num_src_pnts
   write(*,*) "extrap_dist_exponent=",extrap_dist_exponent
+  write(*,*) "extrapNumLevels=",extrapNumLevels
 #endif
 
   if (useTilePathFlag) then
@@ -978,6 +1010,7 @@ program ESMF_RegridWeightGenApp
                             extrapMethod=extrapMethodFlag, &
                             extrapNumSrcPnts=extrap_num_src_pnts, &
                             extrapDistExponent=extrap_dist_exponent, &
+                            extrapNumLevels=extrapNumLevels, &
                             srcRegionalFlag = srcIsRegional, dstRegionalFlag = dstIsRegional, &
                             srcMeshname = srcMeshname, dstMeshname = dstMeshname, &
                             srcMissingvalueFlag = srcMissingValue, srcMissingvalueVar = srcVarName, &
@@ -1001,6 +1034,7 @@ program ESMF_RegridWeightGenApp
                             extrapMethod=extrapMethodFlag, &
                             extrapNumSrcPnts=extrap_num_src_pnts, &
                             extrapDistExponent=extrap_dist_exponent, &
+                            extrapNumLevels=extrapNumLevels, &
                             srcRegionalFlag = srcIsRegional, dstRegionalFlag = dstIsRegional, &
                             srcMeshname = srcMeshname, dstMeshname = dstMeshname, &
                             srcMissingvalueFlag = srcMissingValue, srcMissingvalueVar = srcVarName, &
@@ -1059,9 +1093,10 @@ contains
     print *, "                      [--pole|-p all|none|teeth|<N>]"
     print *, "                      [--line_type|-l cartesian|greatcircle]"
     print *, "                      [--norm_type dstarea|fracarea]"
-    print *, "                      [--extrap_method none|neareststod|nearestidavg]"
+    print *, "                      [--extrap_method none|neareststod|nearestidavg|creep]"
     print *, "                      [--extrap_num_src_pnts <N>]"
     print *, "                      [--extrap_dist_exponent <P>]"
+    print *, "                      [--extrap_num_levels <L>]"
     print *, "                      [--ignore_unmapped|-i]"
     print *, "                      [--ignore_degenerate]"
     print *, "                      [-r]"
@@ -1107,6 +1142,8 @@ contains
     print *, "                be used when the extrapolation method is nearestidavg. The default is 8."
     print *, "--extrap_dist_exponent - an optional argument specifying the exponent that the distance should"
     print *, "                be raised to when the extrapolation method is nearestidavg. The default is 2.0."
+    print *, "--extrap_num_levels - an optional argument specifying how many levels should"
+    print *, "                be filled for level based extrapolation methods (e.g. creep)."
     print *, "--ignore_unmapped or -i - ignore unmapped destination points. If not specified,"
     print *, "                          the default is to stop with an error."
     print *, "--ignore_degenerate - ignore degenerate cells in the input grids. If not specified,"
@@ -1160,7 +1197,7 @@ contains
     print *, "            MOSAIC."
     print *, "--no_log    - Turn off the ESMF logs."
     print *, "--check    - Check that the generated weights produce reasonable regridded fields.  This"
-    print *, "             is done by calling ESMF_Regrid() on an analytic source field using the weights"
+    print *, "             is done by calling ESMF_FieldRegrid() on an analytic source field using the weights"
     print *, "             generated by this application.  The mean relative error between the destination"
     print *, "             and analytic field is computed, as well as the relative error between the mass" 
     print *, "             of the source and destination fields in the conservative case."
@@ -1169,7 +1206,7 @@ contains
     print *, "-V        - Print ESMF version number and exit."
     print *, ""
     print *, "For questions, comments, or feature requests please send email to:"
-    print *, "esmf_support@list.woc.noaa.gov"
+    print *, "esmf_support@cgd.ucar.edu"
     print *, ""
     print *, "Visit http://www.earthsystemmodeling.org/ to find out more about the"
     print *, "Earth System Modeling Framework."

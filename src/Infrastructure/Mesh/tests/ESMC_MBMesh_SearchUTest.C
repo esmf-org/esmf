@@ -58,6 +58,7 @@ bool compare(const double *c1, double *c2) {
   return pass;
 }
 
+// this subroutine is just used for debugging
 bool pcoords(MBMesh *mesh) {
   int rc = ESMF_RC_NOT_IMPL;
   char name[80];
@@ -117,6 +118,7 @@ bool pcoords(MBMesh *mesh) {
 */
   }
 
+  // this ESMC_Test call is just used for debugging
   strcpy(name, "Return parametric coordinates of a point in a cell");
   strcpy(failMsg, "Could not return parametric coordinates of a point in a cell");
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -143,10 +145,6 @@ bool search_gen(MBMesh *mesh, PointList *pl, std::vector<double*> &cv, bool cart
   MBMesh_Search_EToP(mesh, pl, ESMCI_UNMAPPEDACTION_IGNORE, &map_type,
                      10E-8, sr, false, dst_status, NULL, NULL);
   rc = ESMF_SUCCESS;
-
-  strcpy(name, "Search between a Mesh and a PointList");
-  strcpy(failMsg, "Mesh to PointList search failed");
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   // print out search results - elem id with destination id
   rc = ESMF_SUCCESS;
@@ -245,13 +243,15 @@ int main(int argc, char *argv[]) {
 
   bool cart = true;
 
+  //----------------------------------------------------------------------------
+  //NEX_UTest
   strcpy(name, "Simple mesh search");
   strcpy(failMsg, "Search results did not validate");
   ESMC_Test((search_gen(mesh_quad, pl_quad, cv, cart)), name, failMsg, &result, __FILE__, __LINE__, 0);
 #else
   strcpy(name, "Simple mesh search");
   strcpy(failMsg, "Search results did not validate");
-  ESMC_Test(ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 #endif
 
 #if defined ESMF_MOAB
@@ -265,13 +265,15 @@ int main(int argc, char *argv[]) {
 
   cart = true;
   
+  //----------------------------------------------------------------------------
+  //NEX_UTest
   strcpy(name, "Triangles mesh search");
   strcpy(failMsg, "Search results did not validate");
   ESMC_Test((search_gen(mesh_tri, pl_tri, cv, cart)), name, failMsg, &result, __FILE__, __LINE__, 0);
 #else
   strcpy(name, "Triangles mesh search");
   strcpy(failMsg, "Search results did not validate");
-  ESMC_Test(ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 #endif
 
 #if defined ESMF_MOAB

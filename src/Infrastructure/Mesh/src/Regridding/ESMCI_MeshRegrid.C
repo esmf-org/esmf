@@ -764,6 +764,11 @@ static void _create_pointlist_of_points_not_in_wmat(PointList *pointlist, WMat &
      // do it in the source, then we will have to do something different here
      _dst_merge_creep_wts_into_regrid_wts(*dstmesh, extrap_wts, wts);
 
+     // If status was requested merge that too
+     if (set_dst_status) {
+       dst_status.MergeReplace(extrap_dst_status);
+     }
+
      return;
    }
 

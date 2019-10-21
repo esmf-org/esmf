@@ -119,6 +119,33 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Member incrementor. Defaults to 1.
 !   \item[{[step]}]
 !     Step incrementor. Defaults to 1.
+!   \item[{[param1I4]}]
+!     Optional parameter of typekind I4.
+!     The default depends on the specified {\tt dataFillScheme}.
+!   \item[{[param2I4]}]
+!     Optional parameter of typekind I4.
+!     The default depends on the specified {\tt dataFillScheme}.
+!   \item[{[param3I4]}]
+!     Optional parameter of typekind I4.
+!     The default depends on the specified {\tt dataFillScheme}.
+!   \item[{[param1R4]}]
+!     Optional parameter of typekind R4.
+!     The default depends on the specified {\tt dataFillScheme}.
+!   \item[{[param2R4]}]
+!     Optional parameter of typekind R4.
+!     The default depends on the specified {\tt dataFillScheme}.
+!   \item[{[param3R4]}]
+!     Optional parameter of typekind R4.
+!     The default depends on the specified {\tt dataFillScheme}.
+!   \item[{[param1R8]}]
+!     Optional parameter of typekind R8.
+!     The default depends on the specified {\tt dataFillScheme}.
+!   \item[{[param2R8]}]
+!     Optional parameter of typekind R8.
+!     The default depends on the specified {\tt dataFillScheme}.
+!   \item[{[param3R8]}]
+!     Optional parameter of typekind R8.
+!     The default depends on the specified {\tt dataFillScheme}.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}

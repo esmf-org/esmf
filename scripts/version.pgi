@@ -4,5 +4,5 @@
 # the numeric version number triplet.
 VIND=$1
 shift 1
-VNUM=`$* 2>&1 | grep -E '(pgf90|pgfortran|pgCC|pgc\+\+) ' | cut -f2 -d' ' | tr '\.\-' '  '`
+VNUM=`$* 2>&1 | grep -E '(^pgf90|^pgfortran|^pgCC|^pgc\+\+) ' | cut -f2 -d' ' | tr '\.\-' '  '`
 echo `echo $VNUM | cut -d' ' -f$VIND`

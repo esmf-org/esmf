@@ -14,7 +14,7 @@
 \newcommand{\sreq}[1]{\subsection{\hspace{.2in}#1}}
 \newcommand{\ssreq}[1]{\subsubsection{\hspace{.2in}#1}}
 \newcommand{\mytitle}{\longname \docmttype ~~}
-\newcommand{\myversion}{Version 8.0.0 beta snapshot}
+\newcommand{\myversion}{Version 8.1.0 beta snapshot}
 
 \newenvironment
 {reqlist}
@@ -83,6 +83,7 @@
 %\section{Quick Start}
 \input{ESMF_quickstart}
 
+\newpage
 %\section{ESMF Technical Overview}
 \input{ESMF_techoverview}
 

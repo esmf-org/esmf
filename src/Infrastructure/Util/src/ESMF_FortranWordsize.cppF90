@@ -242,7 +242,7 @@ subroutine f_esmf_fortranudtpointercopy(dst, src)
   
   type (wrapper):: dst
   type (wrapper):: src
-  dst%udt => src%udt      ! pointer association copies the dope vector
+  dst%udt => src%udt      ! pointer association copies the dope vect.
 end subroutine
 
 

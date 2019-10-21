@@ -113,16 +113,19 @@ to a numeric value between 0 and 4 to select a specific optimization level.
 
 \item[ESMF\_COMM]
 On systems with a vendor-supplied MPI communications library, the vendor library 
-is chosen by default for communications and {\tt ESMF\_COMM} need not be set.
-For other systems (e.g. Linux or Darwin) where a multitude of MPI implementations are
-available, {\tt ESMF\_COMM} must be set to indicate which implementation is
-used to build the ESMF library. Set {\tt ESMF\_COMM} according to your situation
-to: {\tt mpich, mpich2, mpich3, lam, openmpi} or {\tt intelmpi}. {\tt ESMF\_COMM} may
-also be set to {\tt user} indicating that the user will set all the required
-flags using advanced ESMF environment variables.  Some individual MPI builds may create
-additional libraries that need to be linked in, such as the legacy C++ bindings.
-These may be specified via the {\tt ESMF\_CXXLINKLIBS} and {\tt ESMF\_F90LINKLIBS}
-environment variables.
+is chosen by default for communications. On these systems {\tt ESMF\_COMM} is
+set to {\tt mpi}, signaling to the ESMF build system to use the vendor MPI
+implementation.
+For other systems (e.g. Linux or Darwin) where a multitude of MPI
+implementations are available, {\tt ESMF\_COMM} must be set to indicate which
+implementation is used to build the ESMF library. Set {\tt ESMF\_COMM} according
+to your situation to: {\tt mpt, mpich, mpich2, mpich3, mvapich2, lam, openmpi}
+or {\tt intelmpi}. {\tt ESMF\_COMM} may also be set to {\tt user} indicating 
+that the user will set all the required flags using advanced ESMF environment
+variables.  Some individual MPI builds may create additional libraries that 
+need to be linked in, such as the legacy C++ bindings. These may be specified 
+via the {\tt ESMF\_CXXLINKLIBS} and {\tt ESMF\_F90LINKLIBS} environment
+variables.
 
 Alternatively, ESMF comes with a single-processor MPI-bypass library which is
 the default for Linux and Darwin systems. To force the use of this bypass

@@ -197,6 +197,79 @@
         call ESMF_FieldDestroy(dstField(i), rc=rc)
         if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     enddo
+
+!BOE
+! \subsubsection{Redistribute data from a packed source FieldBundle to a packed destination FieldBundle}
+! \label{sec:fieldbundle:usage:redist_packed}
+!
+! The {\tt ESMF\_FieldBundleRedist} interface can be used to redistribute data from
+! source FieldBundle to destination FieldBundle when both Bundles are packed with same
+! number of fields.  
+!
+! In this example, we first create two packed FieldBundles, a source FieldBundle and a destination
+! FieldBundle. Then we use {\tt ESMF\_FieldBundleRedist} to
+! redistribute data from source FieldBundle to destination FieldBundle.
+!
+! The same Grid is used where the source and destination packed FieldBundle are built upon. Source
+! and destination Bundle have different memory layout.
+!EOE
+
+!BOC
+    allocate(srcfptr(3,5,10), dstfptr(10,5,3))
+    srcfptr = lpe
+    srcFieldBundle = ESMF_FieldBundleCreate((/'field01', 'field02', 'field03'/), &
+      srcfptr, grid, 1, gridToFieldMap=(/2,3/), rc=rc)
+!EOC
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+    dstFieldBundle = ESMF_FieldBundleCreate((/'field01', 'field02', 'field03'/), &
+      dstfptr, grid, 3, gridToFieldMap=(/2,1/), rc=rc)
+!EOC
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!BOC
+    ! perform redist
+    call ESMF_FieldBundleRedistStore(srcFieldBundle, dstFieldBundle, &
+         routehandle, rc=rc)
+!EOC
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!BOC
+    call ESMF_FieldBundleRedist(srcFieldBundle, dstFieldBundle, &
+         routehandle, rc=rc)
+!EOC
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+    call ESMF_FieldBundleGet(dstFieldBundle, localDe=0, farrayPtr=fptr, &
+      rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+    ! verify redist
+    do k = 1, 3
+        do j = lbound(fptr,2), ubound(fptr,2)
+            do i = lbound(fptr, 1), ubound(fptr, 1)
+               if(fptr(i,j,k) .ne. lpe) rc = ESMF_FAILURE
+            enddo
+        enddo
+        if (rc /= ESMF_SUCCESS) then
+          call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
+            msg="Validation check failed!", &
+            ESMF_CONTEXT)
+          call ESMF_Finalize(endflag=ESMF_END_ABORT)
+        endif
+    enddo
+
+    ! release route handle
+    call ESMF_FieldRedistRelease(routehandle, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+    call ESMF_FieldBundleDestroy(srcFieldBundle, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    call ESMF_FieldBundleDestroy(dstFieldBundle, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    deallocate(srcfptr, dstfptr)
+
+    ! Release the Grid and Distgrid
     call ESMF_GridDestroy(grid, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     call ESMF_DistGridDestroy(distgrid, rc=rc)

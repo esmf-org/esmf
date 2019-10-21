@@ -13,91 +13,119 @@ fully supported. The second table lists all possible combinations which are
 included in the build system.
 
 \vspace{1ex}
-{\bf Fully tested combinations}: (See \htmladdnormallink{https://www.earthsystemcog.org/projects/esmf/platforms\_7\_1\_0r}{https://www.earthsystemcog.org/projects/esmf/platforms\_7\_1\_0r} for the most up-to-date table of supported combinations.)
+{\bf Fully tested combinations}: (See \htmladdnormallink{https://www.earthsystemcog.org/projects/esmf/platforms\_8\_0\_0}{https://www.earthsystemcog.org/projects/esmf/platforms\_8\_0\_0} for the most up-to-date table of supported combinations.)
 \vspace{1ex}
 
 \begin{longtable}{lllllll}
   &{\bfseries\footnotesize ESMF\_OS} &{\bfseries\footnotesize ESMF\_COMPILER} & {\bfseries\footnotesize ESMF\_COMM} & {\bfseries\footnotesize ESMF\_ABI} &
   {\bfseries\footnotesize F90 compiler} & {\bfseries\footnotesize C++ compiler} \\
 
-%Edison
-Cray XC30             &\tt Unicos &\tt gfortran     &\tt mpi \footnotesize (cray-mpich/7.6.2) &\tt 64     & ftn/gfortran \footnotesize 7.1.0    & CC/g++  \footnotesize 7.1.0       \\
-Cray XC30             &\tt Unicos &\tt intel        &\tt mpi \footnotesize (cray-mpich/7.6.2) &\tt 64     & ftn/ifort \footnotesize 18.0.1.163  & CC/icpc \footnotesize 18.0.1.163  \\
+%Hera 
+Cray Compute   &\tt Linux  &\tt gfortran     &\tt mpiuni,            &\tt 64 & gfortran \footnotesize 4.8.4        & g++   \footnotesize 4.8.5         \\
+Cluster        &           &                 &\tt intelmpi \footnotesize (2018.0.4)&       &                                     &                                   \\
+Cray Compute   &\tt Linux  &\tt intel        &\tt intelmpi \footnotesize (2018.0.4)&\tt 64 & ifort    \footnotesize 18.0.5.274   & icpc  \footnotesize 18.0.5.274    \\
+Cluster        &           &                 &                       &       &                                     &                                   \\
+Cray Compute   &\tt Linux  &\tt pgi          &\tt mpiuni             &\tt 64 & pgf90    \footnotesize 18.10-1 	   & pgc++ \footnotesize 18.10-1       \\
+Cluster        &           &                 &\tt intelmpi \footnotesize (2018.0.4)&       &                                     &                                   \\
 %Cori
-Cray XC40             &\tt Unicos &\tt gfortran     &\tt mpi \footnotesize (cray-mpich/7.6.2) &\tt 64     & ftn/gfortran \footnotesize 5.2.0    & CC/g++  \footnotesize 5.2.0       \\
+Cray XC30      &\tt Unicos &\tt intel        &\tt mpi \footnotesize (cray-mpich/7.7.6) &\tt 64     & ftn/ifort \footnotesize 19.0.3.199  & CC/icpc \footnotesize 19.0.3.199  \\
 %Gaea
-Cray XE6              &\tt Unicos &\tt gfortran     &\tt mpi \footnotesize (cray-mpich/7.4.0) &\tt 64     & ftn/gfortran \footnotesize 5.3.0    & CC/g++  \footnotesize 5.3.0       \\
-Cray XE6              &\tt Unicos &\tt intel        &\tt mpi \footnotesize (cray-mpich/7.4.0) &\tt 64     & ftn/ifort \footnotesize 16.0.3.210  & CC/icpc \footnotesize 16.0.3.210  \\
-%Titan
-Cray XK7              &\tt Unicos &\tt gfortran     &\tt mpi \footnotesize (cray-mpich/7.6.3) &\tt 64     & ftn/gfortran \footnotesize 4.9.3    & CC/g++  \footnotesize 4.9.3       \\
-Cray XK7              &\tt Unicos &\tt intel        &\tt mpi \footnotesize (cray-mpich/7.6.3) &\tt 64     & ftn/ifort \footnotesize 17.0.4.196  & CC/icpc \footnotesize 17.0.4.196  \\
-Cray XK7              &\tt Unicos &\tt pgi          &\tt mpi \footnotesize (cray-mpich/7.5.2) &\tt 64     & ftn/pgf90 \footnotesize 16.10-0     & CC/pgc++ \footnotesize 16.10-0    \\
-%Eris
-Mac Xeon (64)         &\tt Darwin &\tt gfortran     &\tt mpiuni           &\tt 64           & gfortran \footnotesize 6.1.0        & g++ \footnotesize 6.1.0(clang-602.0.49) \\
-Mac Xeon (64)         &\tt Darwin &\tt gfortran     &\tt openmpi (1.8)    &\tt 64           & gfortran \footnotesize 4.9.2        & g++ \footnotesize 4.9.2           \\
-Mac Xeon (64)         &\tt Darwin &\tt \footnotesize gfortranclang&\tt mpiuni           &\tt 64           & gfortran \footnotesize 6.1.0        & g++ \footnotesize 6.1.0(clang-602.0.49) \\
-Mac Xeon (64)         &\tt Darwin &\tt intel        &\tt mpiuni           &\tt 64           & ifort \footnotesize 15.0.5.222      & icpc \footnotesize 15.0.5.222     \\
-Mac Xeon (64)         &\tt Darwin &\tt nag          &\tt mpiuni           &\tt 64           & nagfor \footnotesize 6.1(Tozai)     & g++ \footnotesize 6.1.0(clang-602.0.49) \\
-%Haumea
-Mac Xeon (64)         &\tt Darwin &\tt gfortran     &\tt mpich2 (1.2)     &\tt 64           & gfortran \footnotesize 4.5.3        & g++ \footnotesize 4.5.3           \\
-                      &           &                 &\tt mvapich2 (1.4.0) &                 &                                     &                                   \\
-Mac Xeon (64)         &\tt Darwin &\tt nag          &\tt mpiuni           &\tt 64           & nagfor \footnotesize 5.3(854)       & g++ \footnotesize 4.2.1           \\
-%Pluto
-PC Xeon (64)          &\tt Linux  &\tt g95          &\tt mpiuni           &\tt 64           & g95 \footnotesize 0.92(4.0.3)       & g++  \footnotesize 4.4.0          \\
-                      &           &                 &\tt mpich2 (1.5)     &                 &                                     &                                   \\
-                      &           &                 &\tt mvapich2 (1.4)   &                 &                                     &                                   \\
-                      &           &                 &\tt openmpi (1.4.3)  &                 &                                     &                                   \\
-PC Xeon (64)          &\tt Linux  &\tt gfortran     &\tt mpich2 (1.2.1)   &\tt 64           & gfortran \footnotesize 4.7.2        & g++  \footnotesize 4.7.2          \\
-                      &           &                 &\tt mvapich2 (1.4)   &                 &                                     &                                   \\
-                      &           &                 &\tt openmpi (1.4.3)  &                 &                                     &                                   \\
-%NESII-WIN1
-PC Xeon (64)          &\tt Cygwin &\tt gfortran     &\tt mpiuni           &\tt 64           & gfortran \footnotesize 6.4.0        & g++  \footnotesize 6.4.0          \\
-                      &           &                 &\tt openmpi (1.10.7-1)  &              &                                     &                                   \\
-%Bebop
-PC Xeon (64)          &\tt Linux  &\tt nag          &\tt mpiuni           &\tt 64           & nagfor \footnotesize 6.1(Tozai)     & g++  \footnotesize 4.8.5          \\
-Cluster               &           &                 &                     &                 &                                     &                                   \\
-PC Xeon (64)          &\tt Linux  &\tt pgi          &\tt mpiuni           &\tt 64           & pgf90 \footnotesize 17.4-0          & pgc++  \footnotesize 17.4-0       \\
-Cluster               &           &                 &                     &                 &                                     &                                   \\
-%Discover
-PC Xeon (64)          &\tt Linux  &\tt gfortran     &\tt mvapich2 (1.9)   &\tt 64           & gfortran \footnotesize 4.8.1        & g++ \footnotesize 4.8.1           \\
-Cluster               &           &                 &\tt openmpi (1.7.2)  &                 &                                     &                                   \\
-PC Xeon (64)          &\tt Linux  &\tt intel        &\tt mpiuni           &\tt 64           & ifort \footnotesize 12.1.0.233      & icpc \footnotesize 12.1.0.233     \\
-Cluster               &           &                 &                     &                 &                                     &                                   \\
-PC Xeon (64)          &\tt Linux  &\tt intel        &\tt intelmpi (5.1.3) &\tt 64           & ifort \footnotesize 17.0.2.174      & icpc \footnotesize 17.0.2.174     \\
-Cluster               &           &                 &                     &                 &                                     &                                   \\
-PC Xeon (64)          &\tt Linux  &\tt intel        &\tt mvapich2 (2.3b)  &\tt 64           & ifort \footnotesize 17.0.4.196      & icpc \footnotesize 17.0.4.196     \\
-Cluster               &           &                 &                     &                 &                                     &                                   \\
-PC Xeon (64)          &\tt Linux  &\tt intel        &\tt openmpi (1.7.2)  &\tt 64           & ifort \footnotesize 13.1.3.192      & icpc \footnotesize 13.1.3.192     \\
-Cluster               &           &                 &                     &                 &                                     &                                   \\
-PC Xeon (64)          &\tt Linux  &\tt nag          &\tt mpiuni           &\tt 64           & nagfor \footnotesize 6.2(Chiyoda)   & g++  \footnotesize 4.3.4          \\
-Cluster               &           &                 &                     &                 &                                     &                                   \\
-PC Xeon (64)          &\tt Linux  &\tt pgi          &\tt openmpi (1.7.3)  &\tt 64           & pgf90 \footnotesize 14.1-0          & pgc++ \footnotesize 14.1-0        \\
-Cluster               &           &                 &                     &                 &                                     &                                   \\
-PC Xeon (64)          &\tt Linux  &\tt pgi          &\tt mvapich2 (2.0b)  &\tt 64           & pgf90 \footnotesize 14.1-0          & pgc++ \footnotesize 14.1-0        \\
-Cluster               &           &                 &                     &                 &                                     &                                   \\
-%Jet
-PC Xeon (64)          &\tt Linux  &\tt intel        &\tt mpiuni           &\tt 64           & ifort \footnotesize 12.1.4.319      & icpc \footnotesize 12.1.4.319     \\
-Cluster               &           &                 &                     &                 &                                     &                                   \\
-PC Xeon (64)          &\tt Linux  &\tt pgi          &\tt mpiuni           &\tt 64           & pgf90 \footnotesize 15.3-0          & pgc++ \footnotesize 15.3-0        \\
-Cluster               &           &                 &                     &                 &                                     &                                   \\
-%Cheyenne
-SGI ICE XA            &\tt Linux  &\tt gfortran     &\tt mpich3 (3.2)     &\tt 64           & gfortran \footnotesize 6.3.0        & g++ \footnotesize 6.3.0           \\
-Cluster               &           &                 &                     &                 &                                     &                                   \\
+Cray XE6       &\tt Unicos &\tt gfortran     &\tt mpi \footnotesize (cray-mpich/7.7.3) &\tt 64     & ftn/gfortran \footnotesize 5.3.0    & CC/g++  \footnotesize 5.3.0       \\
+Cray XE6       &\tt Unicos &\tt intel        &\tt mpi \footnotesize (cray-mpich/7.7.3) &\tt 64     & ftn/ifort \footnotesize 16.0.3.210  & CC/icpc \footnotesize 16.0.3.210  \\
+Cray XE6       &\tt Unicos &\tt pgi          &\tt mpi \footnotesize (cray-mpich/7.7.3) &\tt 64     & ftn/pgf90 \footnotesize 16.5-0      & CC/pgc++\footnotesize 16.5-0      \\
 %Electra
-SGI ICE X             &\tt Linux  &\tt gfortran     &\tt mpiuni           &\tt 64           & gfortran \footnotesize 6.2.0        & g++ \footnotesize 6.2.0           \\
-Cluster               &           &                 &\tt mpi (mpt/2.14r19)&                 &                                     &                                   \\
-SGI ICE X             &\tt Linux  &\tt intel        &\tt mpiuni           &\tt 64           & ifort \footnotesize 15.0.3.187      & icpc \footnotesize 15.0.3.187     \\
-Cluster               &           &                 &\tt mpi (mpt/2.12r26)&                 &                                     &                                   \\
+HPE/SGI ICE X  &\tt Linux  &\tt gfortran     &\tt mpiuni           &\tt 64           & gfortran \footnotesize 6.2.0        & g++ \footnotesize 6.2.0          \\
+               &           &                 &\tt mpi \footnotesize (mpt/2.14r19)&                 &                                     &                                  \\
+HPE/SGI ICE X  &\tt Linux  &\tt intel        &\tt mpiuni           &\tt 64           & ifort \footnotesize 15.0.3.187      & icpc \footnotesize 15.0.3.187    \\
+               &           &                 &\tt mpi \footnotesize (mpt/2.12r26)&                 &                                     &                                  \\
+HPE/SGI ICE X  &\tt Linux  &\tt pgi          &\tt mpiuni           &\tt 64           & pgf90 \footnotesize 17.1-0          & pgc++ \footnotesize 17.1-0       \\
 %Pleiades
-SGI ICE X             &\tt Linux  &\tt gfortran     &\tt mpiuni           &\tt 64           & gfortran \footnotesize 6.2.0        & g++ \footnotesize 6.2.0           \\
-Cluster               &           &                 &\tt mpi (mpt/2.14r19)&                 &                                     &                                   \\
-SGI ICE X             &\tt Linux  &\tt intel        &\tt mpiuni           &\tt 64           & ifort \footnotesize 15.0.3.187      & icpc \footnotesize 15.0.3.187     \\
-Cluster               &           &                 &\tt mpi (mpt/2.12r26)&                 &                                     &                                   \\
-%Theia
-SGI ICE X             &\tt Linux  &\tt intel        &\tt intelmpi (5.1.2.150)&\tt 64        & ifort \footnotesize 15.0.1.133      & icpc \footnotesize 5.0.1.133      \\
-Cluster               &           &                 &                     &                 &                                     &                                   \\
-SGI ICE X             &\tt Linux  &\tt pgi          &\tt mvapich2 (2.1a)  &\tt 64           & pgf90 \footnotesize 16.5-0          & pgc++ \footnotesize 16.5-0        \\
-Cluster               &           &                 &                     &                 &                                     &                                   
+HPE/SGI ICE X  &\tt Linux  &\tt gfortran     &\tt mpiuni           &\tt 64           & gfortran \footnotesize 6.2.0        & g++ \footnotesize 6.2.0          \\
+               &           &                 &\tt mpi \footnotesize (mpt/2.14r19)&                 &                                     &                                  \\
+HPE/SGI ICE X  &\tt Linux  &\tt intel        &\tt mpiuni           &\tt 64           & ifort \footnotesize 18.0.3.222      & icpc \footnotesize 18.0.3.222    \\
+               &           &                 &\tt mpi \footnotesize (mpt/2.15r20)&                 &                                     &                                  \\
+HPE/SGI ICE X  &\tt Linux  &\tt pgi          &\tt mpiuni           &\tt 64           & pgf90 \footnotesize 17.1-0          & pgc++ \footnotesize 17.1-0       \\
+               &           &                 &\tt mpi \footnotesize (mpt/2.17r13)&                 &                                     &                                  \\
+%Cheyenne
+HPE/SGI ICE XA &\tt Linux  &\tt gfortran     &\tt mpich3 \footnotesize (3.2)     &\tt 64           & gfortran \footnotesize 6.3.0        & g++ \footnotesize 6.3.0          \\
+Cluster        &           &                 &                     &                 &                                     &                                  \\
+HPE/SGI ICE XA &\tt Linux  &\tt gfortran     &\tt mpich3 \footnotesize (3.2)     &\tt 64           & gfortran \footnotesize 7.2.0        & g++ \footnotesize 7.2.0          \\
+Cluster        &           &                 &                     &                 &                                     &                                  \\
+HPE/SGI ICE XA &\tt Linux  &\tt gfortran     &\tt openmpi \footnotesize (3.1.0)  &\tt 64           & gfortran \footnotesize 8.1.0        & g++ \footnotesize 8.1.0          \\
+Cluster        &           &                 &                     &                 &                                     &                                  \\
+HPE/SGI ICE XA &\tt Linux  &\tt gfortran     &\tt mpt \footnotesize (2.19)       &\tt 64           & gfortran \footnotesize 9.1.0        & g++ \footnotesize 9.1.0          \\
+Cluster        &           &                 &                     &                 &                                     &                                  \\
+HPE/SGI ICE XA &\tt Linux  &\tt intel        &\tt mpt \footnotesize (2.19),      &\tt 64           & ifort \footnotesize 18.0.5.274      & g++ \footnotesize 18.0.5.274     \\
+Cluster        &           &                 &\tt openmpi \footnotesize (3.1.4)  &                 &                                     &                                  \\
+               &           &                 &\tt intelmpi \footnotesize (2018.4.274)  &           &                                     &                                  \\
+HPE/SGI ICE XA &\tt Linux  &\tt intel        &\tt mpt \footnotesize (2.19)       &\tt 64           & ifort \footnotesize 19.0.2.187      & g++ \footnotesize 19.0.2.187     \\
+Cluster        &           &                 &                     &                 &                                     &                                  \\
+%Summitdev
+IBM Power      &\tt Linux  &\tt gfortran     &\tt mpiuni           &\tt 64           & gfortran \footnotesize 4.8.5        & g++ \footnotesize 4.8.5 \\
+IBM Power      &\tt Linux  &\tt pgi          &\tt mpiuni           &\tt 64           & pgf90 \footnotesize 19.7-0          & g++ \footnotesize 19.7-0 \\
+%Eris
+Mac Xeon       &\tt Darwin &\tt gfortran     &\tt mpiuni           &\tt 64           & gfortran \footnotesize 6.1.0        & g++ \footnotesize 6.1.0 \\
+Mac Xeon       &\tt Darwin &\tt gfortran     &\tt openmpi \footnotesize (1.8)    &\tt 64           & gfortran \footnotesize 4.9.2        & g++ \footnotesize 4.9.2           \\
+Mac Xeon       &\tt Darwin &\tt \footnotesize gfortranclang&\tt mpiuni           &\tt 64           & gfortran \footnotesize 6.1.0        & clang \footnotesize 1000.10.44.4  \\
+%Catania
+Mac Xeon       &\tt Darwin &\tt gfortran     &\tt mpiuni           &\tt 64           & gfortran \footnotesize 9.2.0        & g++ \footnotesize 9.2.0 \\
+%Rutgers
+Mac Xeon       &\tt Darwin &\tt gfortran     &\tt mpiuni,          &\tt 64           & gfortran \footnotesize 7.3.0        & g++ \footnotesize 7.3.0 \\
+               &           &                 &\tt openmpi \footnotesize (2.1.5),&    &                                     &                                  \\
+               &           &                 &\tt openmpi \footnotesize (3.1.3)&     &                                     &                                  \\
+Mac Xeon       &\tt Darwin &\tt \footnotesize gfortranclang&\tt mpiuni           &\tt 64   & gfortran \footnotesize 7.3.0  & clang \footnotesize 902.0.39.2   \\
+Mac Xeon       &\tt Darwin &\tt intel        &\tt mpiuni,          &\tt 64           & ifort \footnotesize 18.0.2.164      & ifort \footnotesize 18.0.2.164   \\
+               &           &                 &\tt openmpi \footnotesize (2.1.5)&     &                                     &                                  \\
+%Linux-regtest2
+PC Xeon        &\tt Linux  &\tt gfortran     &\tt mpiuni,          &\tt 64           & gfortran \footnotesize 4.8.5        & g++ \footnotesize 4.8.5           \\
+               &           &                 &\tt mpich3 \footnotesize (3.2.1) &     &                                     &                                   \\
+PC Xeon        &\tt Linux  &\tt gfortran     &\tt mpiuni,          &\tt 64           & gfortran \footnotesize 7.3.0        & g++ \footnotesize 7.3.0           \\
+               &           &                 &\tt mpich3 \footnotesize (3.2.1) &     &                                     &                                   \\
+%Marktest
+PC Xeon        &\tt Linux  &\tt gfortran     &\tt mpich3 \footnotesize (3.2.1)&\tt 64& gfortran \footnotesize 4.8.5        & g++ \footnotesize 4.8.5           \\
+PC Xeon        &\tt Linux  &\tt gfortran     &\tt openmpi \footnotesize (3.1.1),&\tt 64& gfortran \footnotesize 8.1.0      & g++ \footnotesize 8.1.0           \\
+               &           &                 &\tt mpich3 \footnotesize (3.2.1) &     &                                     &                                   \\
+%Bebop
+PC Xeon        &\tt Linux  &\tt gfortran     &\tt mvapich2 \footnotesize (2.3a), &\tt 64 & gfortran \footnotesize 7.1.0    & g++  \footnotesize 7.1.0          \\
+Cluster        &           &                 &\tt mpich3 \footnotesize (3.2),    &                 &                                     &                     \\
+               &           &                 &\tt openmpi \footnotesize (2.1.1), &                 &                                     &                     \\
+               &           &                 &\tt intelmpi \footnotesize (2018.4.274)  &           &                                     &                     \\
+PC Xeon        &\tt Linux  &\tt intel        &\tt mvapich2 \footnotesize (2.3) , &\tt 64 & ifort \footnotesize 18.0.5.274   & icpc  \footnotesize 18.0.5.274   \\
+Cluster        &           &                 &\tt openmpi \footnotesize (3.1.3), &                 &                                     &                     \\
+               &           &                 &\tt intelmpi \footnotesize (2018.4.274)  &           &                                     &                     \\
+%Discover
+PC Xeon        &\tt Linux  &\tt gfortran     &\tt mpiuni,   &\tt 64             & gfortran \footnotesize 4.8.1        & g++ \footnotesize 4.8.1                \\
+Cluster        &           &                 &\tt mvapich2 \footnotesize (1.9),  &                 &                                     &                     \\
+               &           &                 &\tt openmpi \footnotesize(1.7.2)  &                 &                                     &                      \\
+PC Xeon        &\tt Linux  &\tt gfortran     &\tt mpiuni,   &\tt 64             & gfortran \footnotesize 4.9.2        & g++ \footnotesize 4.9.2                \\
+Cluster        &           &                 &\tt mvapich2 \footnotesize (2.1),  &                 &                                     &                     \\
+PC Xeon        &\tt Linux  &\tt intel        &\tt intelmpi \footnotesize (5.0.3.048) &\tt 64 & ifort \footnotesize 15.0.2.164 & icpc \footnotesize 15.0.2.164  \\
+Cluster        &           &                 &                     &                 &                                     &                                   \\
+PC Xeon        &\tt Linux  &\tt intel        &\tt mpiuni,  &\tt 64           & ifort \footnotesize 17.0.4.196      & icpc \footnotesize 17.0.4.196             \\
+Cluster        &           &                 &\tt mvapich2 \footnotesize (2.3b)  &                 &                                     &                     \\
+PC Xeon        &\tt Linux  &\tt intel        &\tt mvapich2 \footnotesize (2.3b)  &\tt 64 & ifort \footnotesize 17.0.4.196  & icpc \footnotesize 17.0.4.196     \\
+Cluster        &           &                 &                     &                 &                                     &                                   \\
+PC Xeon        &\tt Linux  &\tt intel        &\tt intelmpi \footnotesize (5.1.2.150) &\tt 64 & ifort \footnotesize 18.0.1.163  & icpc \footnotesize 18.0.1.163 \\
+Cluster        &           &                 &                     &                 &                                     &                                   \\
+PC Xeon        &\tt Linux  &\tt intel        &\tt openmpi \footnotesize (3.1.1)  &\tt 64 & ifort \footnotesize 18.0.3.222  & icpc \footnotesize 18.0.3.222     \\
+Cluster        &           &                 &                     &                 &                                     &                                   \\
+PC Xeon        &\tt Linux  &\tt intel        &\tt mpiuni,           &\tt 64           & ifort \footnotesize 18.0.5.274     & icpc \footnotesize 18.0.5.274     \\
+Cluster        &           &                 &\tt intelmpi \footnotesize (18.0.5.274) &                 &                  &                                   \\
+PC Xeon        &\tt Linux  &\tt nag          &\tt mpiuni           &\tt 64           & nagfor \footnotesize 6.2            & g++  \footnotesize 4.8.1          \\
+Cluster        &           &                 &                     &                 &                                     &                                   \\
+PC Xeon        &\tt Linux  &\tt pgi          &\tt mvapich2 \footnotesize (2.0b)  &\tt 64 & pgf90 \footnotesize 14.1-0      & pgc++ \footnotesize 14.1-0        \\
+Cluster        &           &                 &                     &                 &                                     &                                   \\
+PC Xeon        &\tt Linux  &\tt pgi          &\tt mpiuni,          &\tt 64           & pgf90 \footnotesize 17.5-0          & pgc++ \footnotesize 17.5-0        \\
+Cluster        &           &                 &\tt openmpi \footnotesize (2.1.1)&     &                                     &                                   \\
+PC Xeon        &\tt Linux  &\tt pgi          &\tt openmpi \footnotesize (2.1.1)&\tt 64& pgf90 \footnotesize 17.7-0         & pgc++ \footnotesize 17.7-0        \\
+Cluster        &           &                 &                     &                 &                                     &                                   \\
+PC Xeon        &\tt Linux  &\tt pgi          &\tt openmpi \footnotesize (3.1.1)&\tt 64& pgf90 \footnotesize 18.5-0         & pgc++ \footnotesize 18.5-0        \\
+Cluster        &           &                 &                     &                 &                                     &                                   \\
+%Jet
+PC Xeon        &\tt Linux  &\tt intel        &\tt intelmpi \footnotesize (2018.4.274)&\tt 64& ifort \footnotesize 18.0.5.274 & icpc \footnotesize 18.0.5.274   \\
+Cluster        &           &                 &                     &                 &                                     &                                   \\
+PC Xeon        &\tt Linux  &\tt pgi          &\tt mpiuni           &\tt 64           & pgf90 \footnotesize 18.10-1         & pgc++ \footnotesize 18.10-1       \\
+Cluster        &           &                 &\tt mvapich2 \footnotesize (2.3) &     &                                     &                                   
 \end{longtable}
 
 \vspace{1ex}
@@ -133,36 +161,36 @@ Linux   &\tt g95         &\footnotesize \tt {\bf mpiuni},mpich,mpich2,mpich3,mva
         &                &                              &\tt x86\_64\_32, \\
         &                &                              &\tt x86\_64\_small, \\
         &                &                              &\tt x86\_64\_medium \\
-Linux   &\tt gfortran    &\footnotesize \tt {\bf mpiuni},mpi,mpich,mpich2,mpich3,mvapich2,lam,openmpi,user &\tt 32, 64, \\
-        &                &                              &\tt ia64\_64, \\
+Linux   &\tt gfortran    &\footnotesize \tt {\bf mpiuni},mpi,mpt,mpich,mpich2,mpich3,mvapich2, &\tt 32, 64, \\
+        &                &\footnotesize \tt intelmpi,lam,openmpi,user                          &\tt ia64\_64, \\
         &                &                              &\tt x86\_64\_32, \\
         &                &                              &\tt x86\_64\_small, \\
         &                &                              &\tt x86\_64\_medium \\
-Linux   &\tt gfortranclang &\footnotesize \tt {\bf mpiuni},mpi,mpich,mpich2,mpich3,mvapich2,lam,openmpi,user &\tt 32, 64, \\
-        &                &                              &\tt ia64\_64, \\
+Linux   &\tt gfortranclang &\footnotesize \tt {\bf mpiuni},mpi,mpt,mpich,mpich2,mpich3,mvapich2, &\tt 32, 64, \\
+        &                & \footnotesize \tt lam,openmpi,user                                    &\tt ia64\_64, \\
         &                &                              &\tt x86\_64\_32, \\
         &                &                              &\tt x86\_64\_small, \\
         &                &                              &\tt x86\_64\_medium \\
-Linux   &\tt intel       &\footnotesize \tt {\bf mpiuni},mpi,mpich,mpich2,mpich3,mvapich2,intelmpi,scalimpi,&\tt 32, 64, \\
-        &                &\footnotesize \tt lam,openmpi,user          &\tt ia64\_64, \\
+Linux   &\tt intel       &\footnotesize \tt {\bf mpiuni},mpi,mpt,mpich,mpich2,mpich3,mvapich2, &\tt 32, 64, \\
+        &                &\footnotesize \tt intelmpi,scalimpi,lam,openmpi,user                 &\tt ia64\_64, \\
         &                &                              &\tt x86\_64\_32, \\
         &                &                              &\tt x86\_64\_small, \\
         &                &                              &\tt x86\_64\_medium, \\
         &                &                              &\tt mic \\
-Linux   &\tt intelgcc    &\footnotesize \tt {\bf mpiuni},mpi,mpich,mpich2,mpich3,mvapich2,intelmpi,lam,&\tt 32, 64, \\
-        &                &\footnotesize \tt openmpi,user              &\tt ia64\_64, \\
+Linux   &\tt intelgcc    &\footnotesize \tt {\bf mpiuni},mpi,mpt,mpich,mpich2,mpich3,mvapich2, &\tt 32, 64, \\
+        &                &\footnotesize \tt intelmpi,lam,openmpi,user                          &\tt ia64\_64, \\
         &                &                              &\tt x86\_64\_32, \\
         &                &                              &\tt x86\_64\_small, \\
         &                &                              &\tt x86\_64\_medium \\
-Linux   &\tt lahey       &\footnotesize \tt {\bf mpiuni},mpich,mpich2,mpich3,mvapich2,lam,openmpi,user &\tt 32 \\
-Linux   &\tt nag         &\footnotesize \tt {\bf mpiuni},mpich,mpich2,mpich3,mvapich2,lam,openmpi,user &\tt 32 \\
-Linux   &\tt nagintel    &\footnotesize \tt {\bf mpiuni},mpich,mpich2,mpich3,lam,openmpi,user &\tt 32 \\
+Linux   &\tt lahey       &\footnotesize \tt {\bf mpiuni},mpich,mpich2,mpich3,mvapich2,lam,openmpi,user &\tt 32, 64 \\
+Linux   &\tt nag         &\footnotesize \tt {\bf mpiuni},mpich,mpich2,mpich3,mvapich2,lam,openmpi,user &\tt 32, 64 \\
+Linux   &\tt nagintel    &\footnotesize \tt {\bf mpiuni},mpich,mpich2,mpich3,lam,openmpi,user &\tt 32, 64 \\
 Linux   &\tt pathscale   &\footnotesize \tt {\bf mpiuni},mpich,mpich2,mpich3,lam,openmpi,user &\tt 32, 64, \\
         &                &                              &\tt x86\_64\_32, \\
         &                &                              &\tt x86\_64\_small, \\
         &                &                              &\tt x86\_64\_medium \\
-Linux   &\tt pgi         &\footnotesize \tt {\bf mpiuni},mpi,mpich,mpich2,mpich3,mvapich,mvapich2 &\tt 32, 64, \\
-        &                &\footnotesize \tt scalimpi,lam,openmpi,user &\tt x86\_64\_32, \\
+Linux   &\tt pgi         &\footnotesize \tt {\bf mpiuni},mpi,mpt,mpich,mpich2,mpich3,mvapich,mvapich2 &\tt 32, 64, \\
+        &                &\footnotesize \tt intelmpi,scalimpi,lam,openmpi,user &\tt x86\_64\_32, \\
         &                &                              &\tt x86\_64\_small, \\
         &                &                              &\tt x86\_64\_medium \\
 Linux   &\tt pgigcc      &\footnotesize \tt {\bf mpiuni},mpich,mpich2,mpich3,lam,openmpi,user &\tt 32 \\

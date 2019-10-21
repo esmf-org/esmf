@@ -97,6 +97,7 @@ module ESMF_FieldBundleMod
     type(ESMF_Container)         :: container ! internal storage implementation
     type(ESMF_FieldBundleStatus) :: status    ! status of this FieldBundle
     logical                      :: is_proxy  ! true if this is a proxy FB
+    logical                      :: is_packed ! true if this is a packed FB
     ESMF_INIT_DECLARE
   end type
 
@@ -200,6 +201,7 @@ module ESMF_FieldBundleMod
 !
     module procedure ESMF_FieldBundleCreateDefault
     TypeKindRankInterfaceMacro(FieldBundleCreateGridDataPtr)
+    TypeKindRankInterfaceMacro(FieldBundleCreateMeshDataPtr)
 
 ! !DESCRIPTION:
 ! This interface provides a single entry point for the various
@@ -222,6 +224,7 @@ module ESMF_FieldBundleMod
     module procedure ESMF_FieldBundleGetItem
     module procedure ESMF_FieldBundleGetList
     module procedure ESMF_FieldBundleGetIndex
+    TypeKindRankInterfaceMacro(FieldBundleGetDataPtr)
 !EOPI
 
   end interface
@@ -563,10 +566,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer                       :: localrc      ! local return code
-    integer                       :: fieldCount, i, j, addedIndex, garbageSize
-    type(ESMF_Logical)            :: linkChange
-    type(ESMF_Field), pointer     :: garbageList(:), addedList(:)
-    logical                       :: isGarbage
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -574,6 +573,41 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit, fieldbundle, rc)
+
+    ! Cannot add Field to a packed FieldBundle
+    if(fieldbundle%this%is_packed) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
+        msg = " - Fields cannot be added to packed FieldBundle after it is created.", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+
+    call ESMF_FieldBundleAddListInternal(fieldbundle, fieldList, &
+      multiflag=multiflag, relaxedflag = relaxedflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    end subroutine ESMF_FieldBundleAddList
+
+    ! Private name; call using ESMF_FieldBundleAdd()   
+    subroutine ESMF_FieldBundleAddListInternal(fieldbundle, fieldList, &
+      multiflag, relaxedflag, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_FieldBundle), intent(inout)         :: fieldbundle
+    type(ESMF_Field),       intent(in)            :: fieldList(:)
+    logical,                intent(in),  optional :: multiflag
+    logical,                intent(in),  optional :: relaxedflag
+    integer,                intent(out), optional :: rc
+
+    integer                       :: localrc      ! local return code
+    integer                       :: fieldCount, i, j, addedIndex, garbageSize
+    type(ESMF_Logical)            :: linkChange
+    type(ESMF_Field), pointer     :: garbageList(:), addedList(:)
+    logical                       :: isGarbage
 
     ! Determine the number of FieldList elements
     fieldCount = size(fieldList)
@@ -692,13 +726,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       
     endif ! garbageSize /= 0
 
-    ! always deallocate garbageList because it's always associated returning from Container
+    ! always deallocate garbageList because it is always associated returning from Container
     deallocate(garbageList)
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
   
-  end subroutine ESMF_FieldBundleAddList
+  end subroutine ESMF_FieldBundleAddListInternal
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
@@ -818,6 +852,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit, fieldbundle, rc)
+
+    ! Cannot add Field to a packed FieldBundle
+    if(fieldbundle%this%is_packed) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
+        msg = " - Fields cannot be added to packed FieldBundle after it is created.", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
     
     ! Determine the number of FieldList elements
     fieldCount = size(fieldList)
@@ -986,6 +1028,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Set up proxy flag
     this%is_proxy = .false.
+    this%is_packed = .false.
 
     ! Set return value
     ESMF_FieldBundleCreateDefault%this => this
@@ -1064,12 +1107,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       To create a custom stagger location see section @\
 !       \ref{sec:usage:staggerloc:adv}. The default @\
 !       value is {\tt ESMF\_STAGGERLOC\_CENTER}. @\
+!       All Fields in packed FieldBundle use identical staggerloc setting. @\
 ! \item [{[gridToFieldMap]}] @\
 !       List with number of elements equal to the @\
 !       {\tt grid}|s dimCount. The list elements map each dimension @\
 !       of the {\tt grid} to a dimension in the {\tt farrayPtr} by @\
-!       specifying the appropriate {\tt farrayPtr} dimension index after the packed fieldDim is @\
-!       removed from the {\tt farrayPtr}. The default is to @\
+!       specifying the appropriate {\tt farrayPtr} dimension index. @\
+!       The default is to @\
 !       map all of the {\tt grid}|s dimensions against the lowest dimensions of @\
 !       the {\tt farrayPtr} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../). @\
 !       The values of all {\tt gridToFieldMap} entries must be greater than or equal @\
@@ -1140,12 +1184,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
     ! local variables @\
     type(ESMF_FieldBundleType), pointer  :: this @\
-    integer          :: gridDimCount, fieldCount @\
-    type(ESMF_Field) :: fieldList(1) @\
-    integer, allocatable   :: reducedIndices(:) @\
-    integer, allocatable   :: ig2fmap(:) @\
-    character(ESMF_MAXSTR) :: encodeName @\
-    integer          :: i, localrc @\
+    integer                              :: gridDimCount, fieldCount @\
+    type(ESMF_Field)                     :: fieldList(1) @\
+    integer, allocatable                 :: ig2fmap(:) @\
+    character(ESMF_MAXSTR)               :: encodeName @\
+    integer                              :: i, localrc @\
 @\
     if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
     localrc = ESMF_RC_NOT_IMPL @\
@@ -1182,6 +1225,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
     ! Set up proxy flag @\
     this%is_proxy = .false. @\
+    this%is_packed = .true. @\
 @\
     ! Set return value @\
     ESMF_FieldBundleCreateGridDataPtr##mrank##D##mtypekind%this => this @\
@@ -1195,9 +1239,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
     encodeName = fieldNameList(1) @\
     do i = 2, size(fieldNameList) @\
-      write(encodeName, "(3A)") encodeName, ":", fieldNameList(i) @\
+      write(encodeName, "(3A)") trim(encodeName), trim(":"), trim(fieldNameList(i)) @\
     enddo @\
- @\
+@\
     ! Create an internal g2f map @\
     if(present(gridToFieldMap)) then @\
       allocate(ig2fmap(size(gridToFieldMap))) @\
@@ -1219,21 +1263,206 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif @\
       enddo @\
     endif @\
-    print *, ig2fmap @\
-  @\
+@\
     fieldList(1) = ESMF_FieldCreate(grid, farrayPtr, staggerloc=staggerloc, & @\
-    gridToFieldMap=ig2fmap, totalLWidth=totalLWidth, totalUWidth=totalUWidth, name=encodeName, rc=localrc) @\
+      gridToFieldMap=gridToFieldMap, totalLWidth=totalLWidth, totalUWidth=totalUWidth, & @\
+      name=encodeName, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, & @\
       ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
-    deallocate(ig2fmap) @\
+    call ESMF_FieldBundleAddListInternal( & @\
+      ESMF_FieldBundleCreateGridDataPtr##mrank##D##mtypekind, fieldList, & @\
+      multiflag=.false., relaxedflag=.false., rc=localrc) @\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+      ESMF_CONTEXT, rcToReturn=rc)) return @\
+@\
+    ! Return successfully @\
     if (present(rc)) rc = ESMF_SUCCESS @\
 @\
   end function ESMF_FieldBundleCreateGridDataPtr##mrank##D##mtypekind  @\
 !---------------------------------------------------------------------------- @\
 
 TypeKindRankDeclarationMacro(FieldBundleCreateGridDataPtr)
+
+!----------------------------------------------------------------------------
+
+#define FieldBundleCreateMeshDataPtrDoc() \
+!---------------------------------------------------------------------------- @\
+!BOP @\
+! !IROUTINE: ESMF_FieldBundleCreate - Create a packed FieldBundle from Fortran array pointer and Mesh @\
+! @\
+! !INTERFACE: @\
+! ! Private name; call using ESMF_FieldBundleCreate() @\
+! function ESMF_FieldBundleCreateMesh<rank><type><kind>(fieldNameList, & @\
+!   farrayPtr, Mesh, fieldDim, keywordEnforcer, & @\
+!   meshLoc, gridToFieldMap, name, rc) @\
+! @\
+! !RETURN VALUE: @\
+!   type(ESMF_FieldBundle) :: ESMF_FieldBundleCreateMeshDataPtr<rank><type><kind> @\
+! @\
+! !ARGUMENTS: @\
+!   character(len=*), intent(in)            :: fieldNameList(:) @\
+!   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: farrayPtr @\
+!   type(ESMF_Mesh), intent(in)             :: mesh @\
+!   integer,          intent(in)            :: fieldDim @\
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+!   type(ESMF_MeshLoc), intent(in), optional:: meshloc @\
+!   integer,          intent(in),  optional :: gridToFieldMap(:) @\
+!   integer,          intent(in),  optional :: name @\
+!   integer,          intent(out), optional :: rc @\
+! @\
+! !DESCRIPTION: @\
+! Create a packed FieldBundle from user supplied list of field names, pre-allocated @\
+! Fortran array pointer, and {\tt ESMF\_Mesh} object. @\
+! @\
+! The arguments are: @\
+! \begin{description} @\
+! \item [fieldNameList]  @\
+!   A list of field names for the Fields held by the packed {\tt FieldBundle}. @\
+! \item[farrayPtr] @\
+!   Pre-allocated Fortran array pointer holding the memory of the list of Fields. @\
+! \item [mesh] @\
+!   The {\tt ESMF\_Mesh} object on which the Fields in the packed FieldBundle are built. @\
+! \item [fieldDim] @\
+!   The dimension in the {\tt farrayPtr} that contains the indices of Fields to be packed. @\
+! \item [{[meshloc]}] @\
+!       \begin{sloppypar} @\
+!       The part of the Mesh on which to build the Field. For valid @\
+!       predefined values see Section~\ref{const:meshloc}. @\
+!       If not set, defaults to {\tt ESMF\_MESHLOC\_NODE}. @\
+!       \end{sloppypar} @\
+! \item [{[gridToFieldMap]}] @\
+!       List with number of elements equal to the @\
+!       {\tt mesh}|s dimCount. The list elements map each dimension @\
+!       of the {\tt mesh} to a dimension in the {\tt farrayPtr} by @\
+!       specifying the appropriate {\tt farrayPtr} dimension index. @\
+!       The default is to @\
+!       map all of the {\tt mesh}|s dimensions against the lowest dimensions of @\
+!       the {\tt farrayPtr} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../). @\
+!       The values of all {\tt gridToFieldMap} entries must be greater than or equal @\
+!       to one and smaller than or equal to the {\tt farrayPtr} rank. @\
+!       It is erroneous to specify the same {\tt gridToFieldMap} entry @\
+!       multiple times. The total ungridded dimensions in the {\tt field} @\
+!       are the total {\tt farrayPtr} dimensions less @\
+!       the total (distributed + undistributed) dimensions in @\
+!       the {\tt mesh}.  Ungridded dimensions must be in the same order they are @\
+!       stored in the {\t farrayPtr}.  Permutations of the order of @\
+!       dimensions are handled via individual communication methods.  For example, @\
+!       an undistributed dimension can be remapped to a distributed dimension @\
+!       as part of the {\tt ESMF\_ArrayRedist()} operation. @\
+!       All Fields in packed FieldBundle use identical gridToFieldMap setting. @\
+! \item [{[name]}]  @\
+!       FieldBundle name.  @\
+! \item [{[rc]}]  @\
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+! \end{description} @\
+! @\
+!EOP @\
+!---------------------------------------------------------------------------- @\
+
+#define FieldBundleCreateMeshDataPtrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
+!---------------------------------------------------------------------------- @\
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_FieldBundleCreateMeshDataPtr" @\
+  function ESMF_FieldBundleCreateMeshDataPtr##mrank##D##mtypekind(fieldNameList, & @\
+   farrayPtr, mesh, fieldDim, keywordEnforcer, & @\
+   meshLoc, gridToFieldMap, name, rc) @\
+@\
+ ! return value @\
+    type(ESMF_FieldBundle) :: ESMF_FieldBundleCreateMeshDataPtr##mrank##D##mtypekind @\
+@\
+ !ARGUMENTS: @\
+    character(len=*), intent(in)            :: fieldNameList(:) @\
+    mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farrayPtr @\
+    type(ESMF_Mesh), intent(in)             :: mesh @\
+    integer,          intent(in)            :: fieldDim @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+    type(ESMF_MeshLoc), intent(in), optional:: meshloc @\
+    integer,          intent(in),  optional :: gridToFieldMap(:) @\
+    character(len=*), intent(in),  optional :: name @\
+    integer,          intent(out), optional :: rc @\
+@\
+    ! local variables @\
+    type(ESMF_FieldBundleType), pointer  :: this @\
+    integer          :: gridDimCount, fieldCount @\
+    type(ESMF_Field) :: fieldList(1) @\
+    integer, allocatable   :: ig2fmap(:) @\
+    character(ESMF_MAXSTR) :: encodeName @\
+    integer          :: i, localrc @\
+@\
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+    localrc = ESMF_RC_NOT_IMPL @\
+@\
+    ! Initialize @\
+    nullify(this) @\
+    nullify(ESMF_FieldBundleCreateMeshDataPtr##mrank##D##mtypekind%this) @\
+@\
+    if (size(fieldNameList) /= size(farrayPtr, fieldDim) ) then @\
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & @\
+        msg = " - size of fieldNameList is not equal to size of the fieldCount indicated", & @\
+        ESMF_CONTEXT, rcToReturn=rc) @\
+      return @\
+    endif @\
+    fieldCount = size(fieldNameList) @\
+@\
+    ! Create the internal objects @\
+    allocate(this, stat=localrc) @\
+    if (ESMF_LogFoundAllocError(localrc, & @\
+        msg="- Allocating FieldBundle Type", & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
+@\
+    call ESMF_BaseCreate(this%base, "FieldBundle", name, 0, rc=localrc) @\
+    if (ESMF_LogFoundError(localrc, & @\
+        ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
+@\
+    this%container = ESMF_ContainerCreate(rc=localrc) @\
+    if (ESMF_LogFoundError(localrc, & @\
+        ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
+@\
+    this%status = ESMF_FBSTATUS_EMPTY @\
+@\
+    ! Set up proxy flag @\
+    this%is_proxy = .false. @\
+    this%is_packed = .true. @\
+@\
+    ! Set return value @\
+    ESMF_FieldBundleCreateMeshDataPtr##mrank##D##mtypekind%this => this @\
+@\
+    ! Add reference to this object into ESMF garbage collection table @\
+    ! Only call this in those Create() methods that call Construct() @\
+    call c_ESMC_VMAddFObject(ESMF_FieldBundleCreateMeshDataPtr##mrank##D##mtypekind, ESMF_ID_FIELDBUNDLE%objectID) @\
+@\
+    ! Set init code @\
+    ESMF_INIT_SET_CREATED(ESMF_FieldBundleCreateMeshDataPtr##mrank##D##mtypekind) @\
+@\
+    encodeName = fieldNameList(1) @\
+    do i = 2, size(fieldNameList) @\
+      write(encodeName, "(3A)") trim(encodeName), trim(":"), trim(fieldNameList(i)) @\
+    enddo @\
+@\
+    fieldList(1) = ESMF_FieldCreate(mesh, farrayPtr, meshloc=meshloc, & @\
+      gridToFieldMap=gridToFieldMap, & @\
+      name=encodeName, rc=localrc) @\
+    if (ESMF_LogFoundError(localrc, & @\
+      ESMF_ERR_PASSTHRU, & @\
+      ESMF_CONTEXT, rcToReturn=rc)) return @\
+@\
+    call ESMF_FieldBundleAddListInternal( & @\
+      ESMF_FieldBundleCreateMeshDataPtr##mrank##D##mtypekind, fieldList, & @\
+      multiflag=.false., relaxedflag=.false., rc=localrc) @\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+      ESMF_CONTEXT, rcToReturn=rc)) return @\
+@\
+    ! Return successfully @\
+    if (present(rc)) rc = ESMF_SUCCESS @\
+@\
+  end function ESMF_FieldBundleCreateMeshDataPtr##mrank##D##mtypekind  @\
+!---------------------------------------------------------------------------- @\
+
+TypeKindRankDeclarationMacro(FieldBundleCreateMeshDataPtr)
 
 ! -------------------------- ESMF-public method -------------------------------
 ^undef  ESMF_METHOD
@@ -1444,7 +1673,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Private name; call using ESMF_FieldBundleGet()   
     subroutine ESMF_FieldBundleGetListAll(fieldbundle, keywordEnforcer, &
       itemorderflag, geomtype, grid, locstream, mesh, xgrid, &
-      fieldCount, fieldList, fieldNameList, name, rc)
+      fieldCount, fieldList, fieldNameList, isPacked, name, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_FieldBundle),    intent(in)            :: fieldbundle
@@ -1458,6 +1687,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                   intent(out), optional :: fieldCount
     type(ESMF_Field),          intent(out), optional :: fieldList(:)
     character(len=*),          intent(out), optional :: fieldNameList(:)
+    logical,                   intent(out), optional :: isPacked
     character(len=*),          intent(out), optional :: name
     integer,                   intent(out), optional :: rc
 !
@@ -1469,6 +1699,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[6.1.0] Added argument {\tt itemorderflag}.
 !              The new argument gives the user control over the order in which
 !              the items are returned.
+! \item[8.0.0] Added argument {\tt isPacked}.
+!              The new argument allows the user to query if this is a packed FieldBundle.
 ! \end{description}
 ! \end{itemize}
 !
@@ -1504,6 +1736,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !         Upon return holds a list of the names of the fields bundled in 
 !         {\tt ESMF\_FieldBundle}. The argument must be allocated to be at least of
 !         size {\tt fieldCount}.
+!   \item [{[isPacked]}]
+!         Upon return holds the information if this FieldBundle is packed. 
 !   \item [{[name]}]
 !         Name of the fieldbundle object.
 !   \item [{[rc]}]
@@ -1518,6 +1752,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_FieldBundleType), pointer     :: this
     type(ESMF_GeomType_Flag)           :: l_geomtype
     type(ESMF_ItemOrder_Flag)          :: l_itemorderflag
+    character(len=ESMF_MAXSTR)          :: packedName
+    character(len=ESMF_MAXSTR), pointer :: fieldNameListPtr(:)
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1622,7 +1858,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     if(present(fieldList)) then
-      if(size(fieldList) .lt. l_fieldCount) then
+      if(size(fieldList) .lt. l_fieldCount .and. (.not. fieldbundle%this%is_packed)) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
           msg = " - Input fieldList size is too small", &
           ESMF_CONTEXT, rcToReturn=rc)
@@ -1633,7 +1869,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Special call to get name out of Base class
     if (present(fieldNameList)) then
-      if(size(fieldNameList) .lt. l_fieldCount) then
+      if(size(fieldNameList) .lt. l_fieldCount .and. (.not. fieldbundle%this%is_packed)) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
           msg = " - Input fieldNameList size is too small", &
           ESMF_CONTEXT, rcToReturn=rc)
@@ -1645,8 +1881,45 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return
       enddo
     endif
+
+    ! If fieldbundle is not packed, evaluate the results 
+    if(fieldbundle%this%is_packed) then
+      if(l_fieldCount .ne. 1) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
+          msg = " - Inconsistent fieldCount from internal container when fieldbundle is packed.", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+      call ESMF_FieldGet(l_fieldList(1), name=packedName, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      call decodeName(packedName, ':', l_fieldCount, fieldNameListPtr)
+      if(present(fieldCount)) fieldCount = l_fieldCount
+      if(present(fieldList)) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
+          msg = " - Field within packed FieldBundle cannot be retrieved directly. Query the data pointer directly.", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+      if (present(fieldNameList)) then
+        if(size(fieldNameList) .lt. l_fieldCount) then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
+            msg = " - Input fieldNameList size is too small", &
+            ESMF_CONTEXT, rcToReturn=rc)
+          return
+        endif
+        do i = 1, l_fieldCount
+          fieldNameList(i) = fieldNameListPtr(i)
+        enddo
+      endif
+      if(associated(fieldNameListPtr)) deallocate(fieldNameListPtr)
+    endif
   
     deallocate(l_fieldList)
+
+    if (present(isPacked)) then
+      isPacked = fieldbundle%this%is_packed
+    endif
 
     if (present(name)) then
         call ESMF_GetName(fieldbundle%this%base, name, localrc)
@@ -1717,6 +1990,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit, fieldbundle, rc)
+
+    if(fieldbundle%this%is_packed) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+msg="This call does not work with packed FieldBundle.",&
+          ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
     
     if (present(fieldCount)) then
       call ESMF_ContainerGet(fieldbundle%this%container, &
@@ -1822,6 +2102,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit, fieldbundle, rc)
+
+    if(fieldbundle%this%is_packed) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+msg="This call does not work with packed FieldBundle.",&
+          ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
     
     nullify(l_fieldList)
     ! Check size
@@ -1912,6 +2199,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit, fieldbundle, rc)
 
+    if(fieldbundle%this%is_packed) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+msg="This call does not work with packed FieldBundle.",&
+          ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+
     nullify(l_fieldList)
     
     ! Call into the container
@@ -1949,6 +2243,107 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   
   end subroutine ESMF_FieldBundleGetIndex
 !------------------------------------------------------------------------------
+
+#define FieldBundleGetDataPtrDoc() \
+!---------------------------------------------------------------------------- @\
+!BOP @\
+! !IROUTINE: ESMF_FieldBundleGet - Get Fortran array pointer from a packed FieldBundle @\
+! @\
+! !INTERFACE: @\
+! ! Private name; call using ESMF_FieldBundleGet() @\
+! function ESMF_FieldBundleGetDataPtr<rank><type><kind>(fieldBundle, & @\
+!   localDe, farrayPtr, keywordEnforcer, & @\
+!   rc) @\
+! @\
+! !RETURN VALUE: @\
+!   type(ESMF_FieldBundle) :: ESMF_FieldBundleGetDataPtr<rank><type><kind> @\
+! @\
+! !ARGUMENTS: @\
+!   type(ESMF_FieldBundle), intent(in)                    :: fieldBundle @\
+!   integer, intent(in), optional                         :: localDe @\
+!   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: farrayPtr @\
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+!   integer,          intent(out), optional :: rc @\
+! @\
+! !DESCRIPTION: @\
+! Get a Fortran pointer to DE-local memory allocation within packed FieldBundle.  @\
+! It's erroneous to perform this call on a FieldBundle that's not packed. @\
+! @\
+! The arguments are: @\
+! \begin{description} @\
+! \item [fieldBundle]  @\
+!   {\tt ESMF\_FieldBundle} object. @\
+! \item [{[localDe]}]  @\
+!   Local DE for which information is requested. [0,..,localDeCount-1]. @\
+!   For localDeCount==1 the localDe argument may be omitted, @\
+!   in which case it will default to localDe=0. In the case where @\
+!   packed FieldBundle is created on a Grid, the number of localDes can @\
+!   be queried from the Grid attached to the FieldBundle. In the case where @\
+!   packed FieldBundle is created on a Mesh, the number of localDes is 1. @\
+! \item[farrayPtr] @\
+!   Fortran array pointer which will be pointed at DE-local memory allocation @\
+!   in packed FieldBundle. @\
+! \item [{[rc]}]  @\
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+! \end{description} @\
+! @\
+!EOP @\
+!---------------------------------------------------------------------------- @\
+
+#define FieldBundleGetDataPtrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
+!---------------------------------------------------------------------------- @\
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_FieldBundleGetDataPtr" @\
+  subroutine ESMF_FieldBundleGetDataPtr##mrank##D##mtypekind( fieldBundle, & @\
+   localDe, farrayPtr, keywordEnforcer, & @\
+   rc) @\
+@\
+ ! return value @\
+@\
+ !ARGUMENTS: @\
+    type(ESMF_FieldBundle), intent(in)                      :: fieldBundle  @\
+    integer, intent(in), optional                           :: localDe @\
+    mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farrayPtr @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+    integer,          intent(out), optional :: rc @\
+@\
+    ! local variables @\
+    type(ESMF_FieldBundleType), pointer  :: this @\
+    type(ESMF_Field), pointer     :: l_fieldList(:) @\
+    integer          :: localrc @\
+@\
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+    localrc = ESMF_RC_NOT_IMPL @\
+@\
+    ! Check init status of arguments @\
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit, fieldbundle, rc) @\
+@\
+    if(.not. FieldBundle%this%is_packed) then @\
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, & @\
+        msg = "this call only works with packed FieldBundle.",& @\
+        ESMF_CONTEXT, rcToReturn=rc) @\
+      return @\
+    endif @\
+@\
+    nullify(l_fieldList)@\
+@\
+    call ESMF_ContainerGet(fieldbundle%this%container, & @\
+      itemorderflag=ESMF_ITEMORDER_ADDORDER, itemList=l_fieldList, rc=localrc) @\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+      ESMF_CONTEXT, rcToReturn=rc)) return @\
+@\
+    call ESMF_FieldGet(l_fieldList(1), localDe=localDe, & @\
+      farrayPtr = farrayPtr, rc=localrc) @\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+      ESMF_CONTEXT, rcToReturn=rc)) return @\
+@\
+    ! Return successfully @\
+    if (present(rc)) rc = ESMF_SUCCESS @\
+@\
+  end subroutine ESMF_FieldBundleGetDataPtr##mrank##D##mtypekind  @\
+!---------------------------------------------------------------------------- @\
+
+TypeKindRankDeclarationMacro(FieldBundleGetDataPtr)
 
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
@@ -2539,7 +2934,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
     if (present(rc)) rc = localrc
 
     call ESMF_IODestroy(io, rc=localrc)
-    ! Log error but don't reset rc
+    ! Log error but donot reset rc
     errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,         &
         ESMF_CONTEXT, rcToReturn=localrc)
 
@@ -3597,7 +3992,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_FieldBundleRegridStore(srcFieldBundle, dstFieldBundle, &
        srcMaskValues, dstMaskValues, regridmethod, polemethod, regridPoleNPnts, &
        lineType, normType, extrapMethod, extrapNumSrcPnts, extrapDistExponent, &
-       unmappedaction,  ignoreDegenerate, srcTermProcessing, &
+       extrapNumLevels, unmappedaction, ignoreDegenerate, srcTermProcessing, &
        pipelineDepth, routehandle, rc)
 !
 ! !ARGUMENTS:
@@ -3610,9 +4005,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(in),    optional :: regridPoleNPnts
     type(ESMF_LineType_Flag),      intent(in),    optional :: lineType
     type(ESMF_NormType_Flag),      intent(in),    optional :: normType
-    type(ESMF_ExtrapMethod_Flag),   intent(in),   optional :: extrapMethod
-    integer,                        intent(in),   optional :: extrapNumSrcPnts
-    real,                           intent(in),   optional :: extrapDistExponent
+    type(ESMF_ExtrapMethod_Flag),  intent(in),    optional :: extrapMethod
+    integer,                       intent(in),    optional :: extrapNumSrcPnts
+    real,                          intent(in),    optional :: extrapDistExponent
+    integer,                       intent(in),    optional :: extrapNumLevels
     type(ESMF_UnmappedAction_Flag),intent(in),    optional :: unmappedaction
     logical,                       intent(in),    optional :: ignoreDegenerate 
     integer,                       intent(inout), optional :: srcTermProcessing
@@ -3647,7 +4043,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              {\tt extrapNumSrcPnts} and {\tt extrapDistExponent} are parameters that
 !              allow the user to tune the behavior of the {\tt ESMF\_EXTRAPMETHOD\_NEAREST\_IDAVG} 
 !              method.
-! 
+! \item[8.0.0] Added argument {\tt extrapNumLevels}. For level based extrapolation methods
+!              (e.g. {\tt ESMF\_EXTRAPMETHOD\_CREEP}) this argument allows the user to
+!              set how many levels to extrapolate. 
+!! 
 ! \end{description}
 ! \end{itemize}
 !
@@ -3721,9 +4120,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The exponent to raise the distance to when calculating weights for 
 !           the {\tt ESMF\_EXTRAPMETHOD\_NEAREST\_IDAVG} extrapolation method. A higher value reduces the influence 
 !           of more distant points. If not specified, defaults to 2.0.
+!  \item [{[extrapNumLevels]}] 
+!           The number of levels to output for the extrapolation methods that fill levels
+!           (e.g. {\tt ESMF\_EXTRAPMETHOD\_CREEP}). When a method is used that requires this, then an error will be returned, if it 
+!           is not specified.
 !  \item [{[unmappedaction]}]
 !    Specifies what should happen if there are destination points that
-!    can't be mapped to a source cell. Please see Section~\ref{const:unmappedaction} for a 
+!    can not be mapped to a source cell. Please see Section~\ref{const:unmappedaction} for a 
 !           list of valid options. If not specified, {\tt unmappedaction} defaults to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
 !   \item [{[ignoreDegenerate]}]
 !           Ignore degenerate cells when checking the input Grids or Meshes for errors. If this is set to true, then the 
@@ -4074,6 +4477,7 @@ call ESMF_LogWrite("must precompute full regridding!", &
             extrapMethod=extrapMethod, &
             extrapNumSrcPnts=extrapNumSrcPnts, &
             extrapDistExponent=extrapDistExponent, &
+            extrapNumLevels=extrapNumLevels, &
             unmappedaction=unmappedaction, &
             srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, &
             routehandle=rhh, &
@@ -4466,7 +4870,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       ! Create the geombase around the grid, use the center stagger as a generic stagger here, 
-      ! because the stagger won't really matter in this case
+      ! because the stagger wont really matter in this case
       btype%geombase=ESMF_GeomBaseCreate(grid,ESMF_STAGGERLOC_CENTER,rc=status)
       if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                    ESMF_CONTEXT, rcToReturn=rc))  return
@@ -4544,7 +4948,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       ! Create the geombase around the grid, use the center stagger as a generic stagger here, 
-      ! because the stagger won't really matter in this case
+      ! because the stagger wont really matter in this case
       btype%geombase=ESMF_GeomBaseCreate(mesh,rc=status)
       if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                    ESMF_CONTEXT, rcToReturn=rc))  return
@@ -5833,9 +6237,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !      on the value of {\tt iofmt} as shown below:
 !    \begin{description}
 !    \item[{\tt iofmt} = {\tt ESMF\_IOFMT\_BIN}:]\ All data in the file will
-!      be overwritten with each field's data.
+!      be overwritten with each fields data.
 !    \item[{\tt iofmt} = {\tt ESMF\_IOFMT\_NETCDF, ESMF\_IOFMT\_NETCDF\_64BIT\_OFFSET}:]\ Only the
-!      data corresponding to each field's name will be
+!      data corresponding to each fields name will be
 !      be overwritten. If the {\tt timeslice} option is given, only data for
 !      the given timeslice may be overwritten.
 !      Note that it is always an error to attempt to overwrite a NetCDF
@@ -6031,7 +6435,7 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
     if (present(rc)) rc = localrc
 
     call ESMF_IODestroy(io, rc=localrc)
-    ! Log error but don't reset rc
+    ! Log error but donot reset rc
     errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,         &
         ESMF_CONTEXT, rcToReturn=localrc)
 
@@ -6100,7 +6504,7 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
 !EOPI
 
       integer :: localrc                     ! Error status
-      integer :: i, fieldCount
+      integer :: i, fieldCount, packedVal
       type(ESMF_FieldBundleType), pointer :: bp   ! fieldbundle type
       type(ESMF_AttReconcileFlag) :: lattreconflag
       type(ESMF_InquireFlag) :: linquireflag
@@ -6145,6 +6549,15 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
          ESMF_CONTEXT, rcToReturn=rc)) return
 
       call c_ESMC_FieldBundleSerialize(bp%status, fieldCount, &
+                                 buffer, length, offset, linquireflag, localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      packedVal = 0
+      if(bp%is_packed) packedVal = 1
+
+      call c_ESMC_FieldBundleSerialize(bp%status, packedVal, &
                                  buffer, length, offset, linquireflag, localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
@@ -6218,7 +6631,7 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
 !EOPI
 
       integer :: localrc, status             ! Error status, allocation status
-      integer :: i, fieldCount
+      integer :: i, fieldCount, packedVal
       type(ESMF_FieldBundleType), pointer :: bp   ! fieldbundle type
       type(ESMF_AttReconcileFlag) :: lattreconflag
       type(ESMF_Grid) :: grid
@@ -6272,6 +6685,15 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
+
+      call c_ESMC_FieldBundleDeserialize(bp%status, packedVal, &
+                                 buffer, offset, localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      bp%is_packed = .false.
+      if(packedVal == 1) bp%is_packed = .true.
 
       if(bp%status == ESMF_FBSTATUS_GRIDSET) then
         bp%geombase = ESMF_GeomBaseDeserialize(buffer, offset, &
@@ -6338,7 +6760,8 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
       ! Set as created
       ESMF_INIT_SET_CREATED(ESMF_FieldBundleDeserialize)
 
-      call ESMF_FieldBundleAdd(ESMF_FieldBundleDeserialize, flist, multiflag=.true., rc=localrc)
+      call ESMF_FieldBundleAddListInternal(ESMF_FieldBundleDeserialize, &
+        flist, multiflag=.true., rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -6393,8 +6816,8 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
     ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field, rc)
 
-    ! Don't do anything if fieldbundle already has a geombase
-    ! TODO: we'll check matchness here in the future between field%geombase
+    ! Donot do anything if fieldbundle already has a geombase
+    ! TODO: we will check matchness here in the future between field%geombase
     ! and fieldbundle%geombase
     if(fieldbundle%this%status == ESMF_FBSTATUS_GRIDSET) then
       if(present(rc)) rc = ESMF_SUCCESS
@@ -6561,18 +6984,32 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
 
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit, fieldbundle, rc)
 
-    call ESMF_FieldBundleGet(fieldbundle, fieldCount=fcount, rc=localrc) 
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc))  return
+    if(.not. fieldbundle%this%is_packed) then
 
-    allocate(flist(fcount), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, msg= "allocating flist", &
-      ESMF_CONTEXT, rcToReturn=rc)) return ! bail out
+      call ESMF_FieldBundleGet(fieldbundle, fieldCount=fcount, rc=localrc) 
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc))  return
 
-    call ESMF_FieldBundleGet(fieldbundle, fieldList=flist, &
-      itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      allocate(flist(fcount), stat=localrc)
+      if (ESMF_LogFoundAllocError(localrc, msg= "allocating flist", &
+        ESMF_CONTEXT, rcToReturn=rc)) return ! bail out
+
+      call ESMF_FieldBundleGet(fieldbundle, fieldList=flist, &
+        itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      fcount = 1
+
+      allocate(flist(fcount), stat=localrc)
+      if (ESMF_LogFoundAllocError(localrc, msg= "allocating flist", &
+        ESMF_CONTEXT, rcToReturn=rc)) return ! bail out
+
+      call ESMF_ContainerGet(fieldbundle%this%container, &
+        itemList=flist, itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     allocate(alist(fcount), stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, msg= "allocating alist", &
@@ -6637,18 +7074,61 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
     end function ESMF_FieldBundleGetInit
 !------------------------------------------------------------------------------
 
-function ESMF_FieldBundleStatusEQ(sf1, sf2)
- logical ESMF_FieldBundleStatusEQ
- type(ESMF_FieldBundleStatus), intent(in) :: sf1, sf2
+    function ESMF_FieldBundleStatusEQ(sf1, sf2)
+     logical ESMF_FieldBundleStatusEQ
+     type(ESMF_FieldBundleStatus), intent(in) :: sf1, sf2
 
- ESMF_FieldBundleStatusEQ = (sf1%status == sf2%status)
-end function
+     ESMF_FieldBundleStatusEQ = (sf1%status == sf2%status)
+    end function
 
-function ESMF_FieldBundleStatusNE(sf1, sf2)
- logical ESMF_FieldBundleStatusNE
- type(ESMF_FieldBundleStatus), intent(in) :: sf1, sf2
+    function ESMF_FieldBundleStatusNE(sf1, sf2)
+     logical ESMF_FieldBundleStatusNE
+     type(ESMF_FieldBundleStatus), intent(in) :: sf1, sf2
 
- ESMF_FieldBundleStatusNE = (sf1%status /= sf2%status)
-end function
+     ESMF_FieldBundleStatusNE = (sf1%status /= sf2%status)
+    end function
+
+    subroutine decodeName(string, delimiter, decodeCount, strArray) 
+      ! splitstring splits a string to an array of 
+      ! substrings based on a selected delimiter 
+      ! note any facing space/blank in substrings will be removed 
+      ! Credit to Mohammad from comp.lang.fortran with slight modification
+
+      character(len=ESMF_MAXSTR), intent(in) :: string
+      character,                  intent(in) :: delimiter
+      integer,                    intent(out):: decodeCount
+      character(len=ESMF_MAXSTR), pointer    :: strarray(:) 
+
+      ! Local Variables
+      integer   :: n, m, p 
+      integer   :: i, idx 
+      character(len=ESMF_MAXSTR):: strtmp 
+
+
+      ! 0. remove initial blanks if any 
+      strtmp=trim (adjustl(string) ) 
+
+      ! 1. count the number substrings separated by delimiter 
+      i = 1
+      n = count( [ (strtmp(i:i), i=1, len_trim(strtmp)) ] == delimiter) 
+      ! 4. allocate the output string array 
+      allocate(strarray(n+1)) 
+      decodeCount = n+1
+
+      m=1 
+      do i=1, n 
+          idx=index(strtmp(m:),delimiter) 
+          strarray(i) = adjustl( strtmp(m:m+idx-2) ) 
+          m = m + idx 
+      end do 
+      strarray(n+1)=adjustl(strtmp(m:) ) 
+
+      ! 6. pring the results 
+      !print*, '"'//string//'"' 
+      !print *, 'nvalues=', n+1 
+      !print '(a)', strarray(1:n+1) 
+      !print*,'----------------------' 
+
+    end subroutine decodeName 
 
 end module ESMF_FieldBundleMod

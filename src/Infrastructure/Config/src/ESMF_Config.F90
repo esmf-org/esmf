@@ -595,12 +595,12 @@
 
 
 
-!
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigCreateEmpty"
 !BOP
 !
-! !IROUTINE: ESMF_ConfigCreateEmpty - Instantiate a Config object
+! !IROUTINE: ESMF_ConfigCreate - Instantiate a Config object
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ConfigCreate()
@@ -662,11 +662,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     end function ESMF_ConfigCreateEmpty
 
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigCreateFromSection"
 !BOP
 !
-! !IROUTINE: ESMF_ConfigCreateFromSection - Instantiate a new Config object from a Config section
+! !IROUTINE: ESMF_ConfigCreate - Instantiate a new Config object from a Config section
 !
 ! !INTERFACE:
     ! Private name; call using ESMF_ConfigCreate()
@@ -771,7 +772,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     end function ESMF_ConfigCreateFromSection
 
-
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigDestroy"
 !BOP
@@ -842,6 +843,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
      end subroutine ESMF_ConfigDestroy
 
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigFindLabel"
 !BOP
@@ -950,6 +952,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       
     end subroutine ESMF_ConfigFindLabel
 
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigFindNextLabel"
 !BOP
@@ -1003,11 +1006,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !     Determine whether label exists from current position onward
 !     -----------------------------------------------------------
-!     ptr = max(config%cptr%next_line, 1)
       ptr = max(config%cptr%next_line-1, 1)
       i = index_ ( config%cptr%buffer(ptr:config%cptr%nbuf ), EOL//label) + 1
 
-      !! NOTE: to be fixed !! breaks empty sections
       if ( i .eq. 1 ) then
          config%cptr%this_line = BLK // EOL
          if (present (isPresent)) then
@@ -1150,6 +1151,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \end{description}
 !EOP -------------------------------------------------------------------
 
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigGetString"
 !BOPI
@@ -1286,9 +1288,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
       
     end subroutine ESMF_ConfigGetString
-    
-    
 
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigGetStrings"
 !BOPI
@@ -1399,7 +1400,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     end subroutine ESMF_ConfigGetStrings
 
-
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigGetFloatR4"
 !BOPI
@@ -1492,8 +1493,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     end subroutine ESMF_ConfigGetFloatR4
 
-
-
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigGetFloatR8"
 !BOPI
@@ -1586,8 +1586,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     end subroutine ESMF_ConfigGetFloatR8
 
-
-
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigGetFloatsR4"
 !BOPI
@@ -1690,6 +1689,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     end subroutine ESMF_ConfigGetFloatsR4
 
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigGetFloatsR8"
 !BOPI 
@@ -1791,6 +1791,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     end subroutine ESMF_ConfigGetFloatsR8
 
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigGetIntI4"
 !BOPI
@@ -1889,6 +1890,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       
     end subroutine ESMF_ConfigGetIntI4
 
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigGetIntI8"
 !BOPI
@@ -1987,7 +1989,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       
     end subroutine ESMF_ConfigGetIntI8
 
-
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigGetIntsI4"
 !BOPI
@@ -2089,8 +2091,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     end subroutine ESMF_ConfigGetIntsI4
 
-
-
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigGetIntsI8"
 !BOPI
@@ -2190,6 +2191,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       return
     end subroutine ESMF_ConfigGetIntsI8
 
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigGetLogical"
 !BOPI
@@ -2301,6 +2303,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       
     end subroutine ESMF_ConfigGetLogical
 
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigGetLogicals"
 !BOPI
@@ -2403,6 +2406,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     end subroutine ESMF_ConfigGetLogicals
 
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigGetChar"
 !BOP
@@ -2485,6 +2489,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     end subroutine ESMF_ConfigGetChar
 
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigGetDim"
 !BOP
@@ -2591,6 +2596,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     end subroutine ESMF_ConfigGetDim
     
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigGetLen"
 !BOP
@@ -2713,8 +2719,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   end function
 !------------------------------------------------------------------------------
 
-
-
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigLoadFile"
 !BOP
@@ -2788,7 +2793,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     end subroutine ESMF_ConfigLoadFile
 
-
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigLoadFile_1proc_"
 !BOPI -------------------------------------------------------------------
@@ -2898,6 +2903,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     end subroutine ESMF_ConfigLoadFile_1proc_
 
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigNextLine"
 !BOP
@@ -2982,6 +2988,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     end subroutine ESMF_ConfigNextLine
 
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigParseAttributes"
 !BOPI
@@ -3092,7 +3099,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     end subroutine ESMF_ConfigParseAttributes
 
-
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigPrint"
 !BOP
@@ -3197,6 +3204,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP -------------------------------------------------------------------
 
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigSetIntI4"
 !BOPI
@@ -3361,6 +3369,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       return
     end subroutine ESMF_ConfigSetIntI4
 
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigSetCurrentAttrUsed"
 !BOPI
@@ -3409,6 +3418,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     end subroutine ESMF_ConfigSetCurrentAttrUsed
 
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigValidate"
 !BOP

@@ -1817,7 +1817,14 @@ void ESMCI_GridToMeshCell(const Grid &grid_,
  // The Grid needs to have corner coordinates
  if (!grid->hasCoordStaggerLoc(ESMCI_STAGGERLOC_CORNER)) {
    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-            "- Grid being used in Regrid call does not contain coordinates at corner staggerloc ", ESMC_CONTEXT, &localrc);
+    "To use this method the Grid must contain coordinates at corner staggerloc.", ESMC_CONTEXT, &localrc);
+   throw localrc;
+ }
+
+ // The Grid currently can't be arbitrarily distributed
+ if (grid->getDecompType() != ESMC_GRID_NONARBITRARY) {
+   ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    "To use this method the Grid can't be arbitrarily distributed.", ESMC_CONTEXT, &localrc);
    throw localrc;
  }
 
@@ -1832,7 +1839,7 @@ void ESMCI_GridToMeshCell(const Grid &grid_,
 
  // Only supporting 2D right now
  if (dimCount != 2) {
-   Throw() << "Currently only supports 2D Grids";
+   Throw() << "This method currently only supports 2D Grids";
  }
 
  // *** Set some meta-data ***

@@ -365,7 +365,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                     extrapNumSrcPnts, &
                     extrapDistExponent, &
                     extrapNumLevels, &
-                    extrapNumInputLevels, &
                     unmappedaction, ignoreDegenerate, &
                     srcTermProcessing, & 
                     pipeLineDepth, &
@@ -392,7 +391,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                        intent(in),    optional :: extrapNumSrcPnts
       real(ESMF_KIND_R4),             intent(in),    optional :: extrapDistExponent
       integer,                        intent(in),    optional :: extrapNumLevels
-      integer,                        intent(in),    optional :: extrapNumInputLevels
       type(ESMF_UnmappedAction_Flag), intent(in),    optional :: unmappedaction
       logical,                        intent(in),    optional :: ignoreDegenerate
       integer,                        intent(inout), optional :: srcTermProcessing
@@ -444,6 +442,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              {\tt extrapNumSrcPnts} and {\tt extrapDistExponent} are parameters that
 !              allow the user to tune the behavior of the {\tt ESMF\_EXTRAPMETHOD\_NEAREST\_IDAVG} 
 !              method.
+! \item[8.0.0] Added argument {\tt extrapNumLevels}. For level based extrapolation methods
+!              (e.g. {\tt ESMF\_EXTRAPMETHOD\_CREEP}) this argument allows the user to
+!              set how many levels to extrapolate. 
+!              
 ! \end{description}
 ! \end{itemize}
 !
@@ -537,9 +539,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The number of levels to output for the extrapolation methods that fill levels
 !           (e.g. {\tt ESMF\_EXTRAPMETHOD\_CREEP}). When a method is used that requires this, then an error will be returned, if it 
 !           is not specified.
-!     \item [{[extrapNumInputLevels]}] 
-!           The number of levels to use as input for the extrapolation methods that use levels
-!           (e.g. {\tt ESMF\_EXTRAPMETHOD\_CREEP}). If not specified, defaults to 1.
 !     \item [{[unmappedaction]}]
 !           Specifies what should happen if there are destination points that
 !           can't be mapped to a source cell. Please see Section~\ref{const:unmappedaction} for a 
@@ -602,7 +601,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     parameter is determined internally using the auto-tuning scheme. In this
 !     case the {\tt pipelineDepth} argument is re-set to the internally
 !     determined value on return. Auto-tuning is also used if the optional 
-  !     {\tt pipelineDepth} argument is omitted.
+!     {\tt pipelineDepth} argument is omitted.
 !     \item [{[routehandle]}]
 !           The communication handle that implements the regrid operation and that can be used later in 
 !           the {\tt ESMF\_FieldRegrid()} call. The {\tt routehandle} is optional so that if the 
@@ -823,12 +822,33 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            endif
         endif
 
-        ! Handle optional extrapNumInputLevels
-        if (present(extrapNumInputLevels)) then
-           localExtrapNumInputLevels=extrapNumInputLevels
-        else     
-           localExtrapNumInputLevels=1
+        ! THIS ISN'T BEING USED RIGHT NOW SO TAKE OUT OF INTERFACE AND SET TO 1
+        ! DOC FOR WHEN WE PUT IT BACK:
+!        \item [{[extrapNumInputLevels]}] 
+!            The number of levels to use as input for the extrapolation methods that use levels
+!            (e.g. {\tt ESMF\_EXTRAPMETHOD\_CREEP}). If not specified, defaults to 1.
+   
+       ! Handle optional extrapNumInputLevels
+       ! if (present(extrapNumInputLevels)) then
+       !    localExtrapNumInputLevels=extrapNumInputLevels
+       ! else     
+        localExtrapNumInputLevels=1
+        ! endif
+
+
+        ! Can use extrapolation with conservative right now
+        if ((lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE) .or. &
+             (lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE_2ND)) then
+           if (localExtrapMethod .ne. ESMF_EXTRAPMETHOD_NONE) then
+              call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
+                   msg=" extrapolation currently not supported with conservative "// &
+                       "regrid methods (the resulting weights wouldn't be "// &
+                       "conservative with the available extrapolation methods).",& 
+                   ESMF_CONTEXT, rcToReturn=rc) 
+              return
+           endif
         endif
+
 
         ! TODO: If lineType is present then do error checking here
 
@@ -845,6 +865,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         else     
            localNormType=ESMF_NORMTYPE_DSTAREA
         endif
+
 
 
        ! Handle pole method

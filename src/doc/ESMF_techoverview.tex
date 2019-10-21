@@ -4,6 +4,8 @@
 \label{sec:Use}
 \input{ESMF_use}
 
+\newpage
+
 \section{Using Bundled ESMF Applications}
 \label{sec:Apps}
 \input{ESMF_apps}
@@ -31,9 +33,13 @@ port the ESMF software to new platforms.
 \section{Validating an ESMF Build}
 \label{sec:TechOver2}
 
-This section goes into more detail about how to run the tests, which are
-included with the ESMF software, to validate an ESMF build.
+The following subsections go into more detail about how to run the tests and
+examples included with the ESMF software. This is the recommended method of
+regression testing ESMF, and is routinely used during library code development.
+Running the regression tests against an existing ESMF installation is also 
+supported, and offers a general way to validate a pre-installed ESMF library.
 
 \input{ESMF_testing}
 \input{ESMF_examples}
+\input{ESMF_esmfmkfiletesting}
 

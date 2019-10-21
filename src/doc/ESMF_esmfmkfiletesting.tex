@@ -1,0 +1,48 @@
+% $Id$
+
+\subsection{Validating an existing ESMF installation}
+\label{esmfmkfiletesting}
+
+It is becoming increasingly common to find pre-installed ESMF libraries on 
+professionally maintained HPC systems. Often multiple versions of ESMF are
+available via environment modules. Before using such a third-party ESMF 
+installation, a user may want ot validate that it is working correctly. System
+administrators also often need a simple method to re-validate an existing
+ESMF installation, e.g. after a system update. ESMF offers a simple way to
+build and run the full regression suite against an existing installation.
+
+A second ESMF source tree is used to run full regression tests against an
+existing ESMF installation. To support this, the second source tree must be
+of the exact same version as the ESMF installation to be tested. The two
+critical environment variables used are {\tt ESMF\_TESTESMFMKFILE}, and 
+{\tt ESMFMKFILE}. The following bullets outline the procedure:
+
+\begin{itemize}
+
+\item Check out the same version of ESMF as the installation to be validated.
+
+\item Change into the root directory of the checked out directory tree, and
+      set the {\tt ESMF\_DIR} environment variable to the current working
+      directory.
+
+\item Set the {\tt ESMFMKFILE} environment variable to point to the 
+      {\tt esmf.mk} file of the installation to be validated. If the ESMF
+      installation is available via the {\tt module} command, {\tt ESMFMKFILE} 
+      will typically be set when loading the module.
+      
+\item Set the {\tt ESMF\_TESTESMFMKFILE} environment variable to {\tt ON}.
+
+\item Set the {\tt ESMF\_COMPILER}, {\tt ESMF\_COMM}, and {\tt ESMF\_BOPT}
+      environment variables to match the values from the {\tt esmf.mk} file.
+      
+\item Make sure the build environment is set up properly to match the 
+      ESMF installation to be validated. On systems using the {\tt module}
+      command, this means loading the correct modules.
+      
+\end{itemize}
+
+At this point all of the test targets discussed in sections \ref{testing} and
+\ref{examples} are available. The build targets use the test
+and example sources under the local (secondary) source tree, but compile and
+link against the ESMF library pointed to by {\tt ESMFMKFILE}. A fully 
+functional installation is expected to pass all regression tests.

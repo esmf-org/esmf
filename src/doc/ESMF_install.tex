@@ -138,7 +138,7 @@ of the desired NetCDF library and associated header files:
 {\tt "standard"}, {\it <userstring>}.
 
 \begin{description}
-\item[{\it not set}] (default) NetCDF-dependent features will be disabled.
+\item[{\it not set} (default)] NetCDF-dependent features will be disabled.
 The {\tt ESMF\_NETCDF\_INCLUDE}, {\tt ESMF\_NETCDF\_LIBPATH}, and
 {\tt ESMF\_NETCDF\_LIBS} environment variables will be ignored.
 
@@ -209,7 +209,7 @@ When defined, enables the use of Parallel-NetCDF.
 
 \begin{description}
 \begin{sloppypar}
-\item[{\it not set}] (default) PNETCDF-dependent features will be disabled.
+\item[{\it not set} (default)] PNETCDF-dependent features will be disabled.
 The {\tt ESMF\_PNETCDF\_INCLUDE}, {\tt ESMF\_PNETCDF\_LIBPATH}, and
 {\tt ESMF\_PNETCDF\_LIBS} environment variables will be ignored.
 \end{sloppypar}
@@ -261,17 +261,18 @@ support the integrated PIO code depends on {\tt ESMF\_PNETCDF}
 being enabled.
 
 \begin{description}
-\item[ESMF\_PIO] Possible value: {\it not set} (default), {\tt "internal"}.
+\item[ESMF\_PIO] Possible value: {\it not set} (default), {\tt "internal"},
+{\tt "OFF"}.
 
 \begin{description}
-\item[{\it not set}] (default) PIO-dependent features will be enabled on platforms where
+\item[{\it not set} (default)] PIO-dependent features will be enabled on platforms where
 certain Fortran-2003 C Interoperability features are available.  Most currently supported
 compilers support these features.
 
-\item[{\tt "OFF"}] Disables PIO-dependent code.
-
 \item[{\tt "internal"}] PIO-dependent features will be enabled and will use the 
 PIO library that is included and built with ESMF.  
+
+\item[{\tt "OFF"}] Disables PIO-dependent code.
 
 \end{description}
 
@@ -294,7 +295,7 @@ of the desired accelerator software stacks and associated header files:
 {\tt "intelmic"}, {\tt "openmp4"}.
 
 \begin{description}
-\item[{\it not set}] (default) All accelerator software stack related features
+\item[{\it not set} (default)] All accelerator software stack related features
  will be disabled.
 The {\tt ESMF\_ACC\_SOFTWARE\_STACK\_INCLUDE}, 
 {\tt ESMF\_ACC\_SOFTWARE\_STACK\_LIBPATH}, and
@@ -369,7 +370,7 @@ desired XERCES C++ library and associated header files:
 {\it <userstring>}.
 
 \begin{description}
-\item[{\it not set}] (default) XERCES-dependent features will be disabled.
+\item[{\it not set} (default)] XERCES-dependent features will be disabled.
 The {\tt ESMF\_XERCES\_INCLUDE}, {\tt ESMF\_XERCES\_LIBPATH}, and
 {\tt ESMF\_XERCES\_LIBS} environment variables will be ignored.
 
@@ -412,27 +413,35 @@ may be added to ESMF through the open-source
 a YAML parser and emitter written in C++ that implements
 \htmladdnormallink{YAML Version 1.2 specifications}{http://yaml.org/spec/1.2/spec.html}.
 
-The following environment variables enable, and specify the name and location of the
-desired yaml-cpp C++ library and associated header files:
+ESMF includes the option to build the yaml-cpp from sources kept inside the
+ESMF source tree, or to link against an external build of the yaml-cpp library.
+The following environment variables control the details of how ESMF interacts
+with yaml-cpp:
 
 \begin{description}
 
-\item[ESMF\_YAMLCPP] Possible values: {\it not set} (default), {\tt "standard"},
-{\it <userstring>}.
+\item[ESMF\_YAMLCPP] Possible values: {\it "internal"} (default), {\tt "OFF"},
+{\tt "standard"}, {\it <userstring>}.
 
 \begin{description}
-\item[{\it not set}] (default) YAML support will be disabled.
+\item[{\it "internal"} (default)] The YAML-dependent code inside of ESMF will 
+be enabled.
+The yaml-cpp sources included with ESMF will be used to provide YAML support.
 The {\tt ESMF\_YAMLCPP\_INCLUDE}, {\tt ESMF\_YAMLCPP\_LIBPATH}, and
-{\tt ESMF\_YAMLCPP\_LIBS} environment variables will be ignored.
+{\tt ESMF\_YAMLCPP\_LIBS} environment variables will be ignored. 
 
-\item[{\tt "standard"}] {\tt ESMF\_YAMLCPP\_LIBS} will be set to
-{\tt "-lyaml-cpp"} if not set.  The {\tt ESMF\_YAMLCPP\_INCLUDE} and
-{\tt ESMF\_YAMLCPP\_LIBPATH} environment variables will also be used,
-if defined.
+\item[{\tt "OFF"}] Disables YAML-dependent code.
 
-\item[{\it <userstring>}] If set, {\tt ESMF\_YAMLCPP\_INCLUDE},
-{\tt ESMF\_YAMLCPP\_LIBPATH}, and {\tt ESMF\_YAMLCPP\_LIBS} environment
-variables will be used, if defined.
+\item[{\tt "standard"}] The YAML-dependent code inside of ESMF will 
+be enabled.
+{\tt ESMF\_YAMLCPP\_LIBS} will be set to {\tt "-lyaml-cpp"} if not set. 
+The {\tt ESMF\_YAMLCPP\_INCLUDE} and {\tt ESMF\_YAMLCPP\_LIBPATH} environment
+variables will also be used, if defined.
+
+\item[{\it <userstring>}] The YAML-dependent code inside of ESMF will 
+be enabled.
+If set, {\tt ESMF\_YAMLCPP\_INCLUDE}, {\tt ESMF\_YAMLCPP\_LIBPATH}, and 
+{\tt ESMF\_YAMLCPP\_LIBS} environment variables will be used.
 \end{description}
 
 \item[ESMF\_YAMLCPP\_INCLUDE] Typical value: {\tt /usr/local/include}
@@ -498,20 +507,23 @@ to a numeric value between 0 and 4 to select a specific optimization level.
 Possible value: {\em system-dependent}
 
 On systems with a vendor-supplied MPI communications library, the vendor library 
-is chosen by default for communications and {\tt ESMF\_COMM} need not be set.
-For other systems (e.g. Linux or Darwin) where a multitude of MPI implementations are
-available, {\tt ESMF\_COMM} must be set to indicate which implementation is
-used to build the ESMF library. Set {\tt ESMF\_COMM} according to your situation
-to: {\tt mpich, mpich2, mpich3, lam, openmpi} or {\tt intelmpi}. {\tt ESMF\_COMM} may
-also be set to {\tt user} indicating that the user will set all the required
-flags using advanced ESMF environment variables.  Some individual MPI builds may create
-additional libraries that need to be linked in, such as the legacy C++ bindings.
-These may be specified via the {\tt ESMF\_CXXLINKLIBS} and {\tt ESMF\_F90LINKLIBS}
-environment variables.
+is chosen by default for communications. On these systems {\tt ESMF\_COMM} is
+set to {\tt mpi}, signaling to the ESMF build system to use the vendor MPI
+implementation.
+For other systems (e.g. Linux or Darwin) where a multitude of MPI
+implementations are available, {\tt ESMF\_COMM} must be set to indicate which
+implementation is used to build the ESMF library. Set {\tt ESMF\_COMM} according
+to your situation to: {\tt mpt, mpich, mpich2, mpich3, mvapich2, lam, openmpi}
+or {\tt intelmpi}. {\tt ESMF\_COMM} may also be set to {\tt user} indicating 
+that the user will set all the required flags using advanced ESMF environment
+variables.  Some individual MPI builds may create additional libraries that 
+need to be linked in, such as the legacy C++ bindings. These may be specified 
+via the {\tt ESMF\_CXXLINKLIBS} and {\tt ESMF\_F90LINKLIBS} environment
+variables.
 
 Alternatively, ESMF comes with a single-processor MPI-bypass library which is
 the default for Linux and Darwin systems. To force the use of this bypass
-library set {\tt ESMF\_COMM} equal to "mpiuni".
+library set {\tt ESMF\_COMM} equal to {\tt mpiuni}.
 
 \item[ESMF\_COMPILER]
 Possible value: {\em system-dependent}
@@ -889,6 +901,16 @@ and you wish to use it, download the corresponding files into the
 (which corresponds to the last part of the directory name).  See the 
 Sourceforge site 
 \htmladdnormallink{http://sourceforge.net/projects/esmfcontrib}{http://sourceforge.net/projects/esmfcontrib} for more information.
+
+\item[ESMF\_TESTESMFMKFILE] 
+Possible value: {\tt ON}, {\tt OFF} (default)
+
+Variable specifying whether the {\tt ESMFMKFILE} variable is evaluated to
+determine which ESMF installation is being tested against. If set to the 
+value {\tt ON}, all tests and examples are build against the ESMF installation
+referenced by the {\tt ESMFMKFILE} variable. For {\tt OFF}, the 
+{\tt ESMFMKFILE} variable is ignored and the tests and examples are build
+against the ESMF under {\tt ESMF\_DIR}. This is the default.
 
 \item[ESMF\_TESTEXHAUSTIVE] 
 Possible value: {\tt ON}, {\tt OFF} (default)

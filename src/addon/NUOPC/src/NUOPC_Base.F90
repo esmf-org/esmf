@@ -65,6 +65,9 @@ module NUOPC_Base
   public NUOPC_SetAttribute               ! method
   public NUOPC_SetTimestamp               ! method
   public NUOPC_UpdateTimestamp            ! method
+  
+  ! internal Utility API
+  public NUOPC_ChopString                 ! method
 
 !==============================================================================
 ! 
@@ -108,6 +111,7 @@ module NUOPC_Base
     module procedure NUOPC_RealizeCompleteLS
     module procedure NUOPC_RealizeCompleteM
     module procedure NUOPC_RealizeField
+    module procedure NUOPC_RealizeTransfer
   end interface
   
   interface NUOPC_SetAttribute
@@ -1160,7 +1164,8 @@ module NUOPC_Base
 ! !IROUTINE: NUOPC_GetStateMemberLists - Build lists of information of State members
 ! !INTERFACE:
   recursive subroutine NUOPC_GetStateMemberLists(state, StandardNameList, &
-    ConnectedList, NamespaceList, CplSetList, itemNameList, fieldList, rc)
+    ConnectedList, NamespaceList, CplSetList, itemNameList, fieldList, &
+    stateList, nestedFlag, rc)
 ! !ARGUMENTS:
     type(ESMF_State),       intent(in)            :: state
     character(ESMF_MAXSTR), pointer, optional     :: StandardNameList(:)
@@ -1169,15 +1174,22 @@ module NUOPC_Base
     character(ESMF_MAXSTR), pointer, optional     :: CplSetList(:)
     character(ESMF_MAXSTR), pointer, optional     :: itemNameList(:)
     type(ESMF_Field),       pointer, optional     :: fieldList(:)
+    type(ESMF_State),       pointer, optional     :: stateList(:)
+    logical,                intent(in), optional  :: nestedFlag
     integer,                intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Construct lists containing the StandardNames, field names, and connected 
 !   status of the fields in {\tt state}. Return this information in the
 !   list arguments. Recursively parse through nested States.
 !
-!   All pointer arguments present must enter this method unassociated. On 
-!   return, the deallocation of an associated pointer becomes the responsibility
-!   of the caller.
+!   All pointer arguments present must enter this method unassociated. This
+!   means that the user code must explicitly call {\tt nullify()} or use the
+!   {\tt => null()} syntax on the variables passed in as any of the pointer
+!   arguments. On return, the pointer arguments may either be unassociated or
+!   associated. Consequently the user code must first check the status of any
+!   of the returned pointer arguments via the {\tt associated()} intrinsic
+!   before accessing the argument. The responsibility for deallocation of
+!   associated pointer arguments transfers to the caller.
 !
 !   The arguments are:
 !   \begin{description}
@@ -1185,16 +1197,36 @@ module NUOPC_Base
 !     The {\tt ESMF\_State} object to be queried.
 !   \item[{[StandardNameList]}]
 !     If present, return a list of the "StandardName" attribute of each member.
+!     See the note about pointer arguments in the description section above for
+!     correct usage.
 !   \item[{[ConnectedList]}]
 !     If present, return a list of the "Connected" attribute of each member.
+!     See the note about pointer arguments in the description section above for
+!     correct usage.
 !   \item[{[NamespaceList]}]
 !     If present, return a list of the "Namespace" attribute of each member.
+!     See the note about pointer arguments in the description section above for
+!     correct usage.
 !   \item[{[CplSetList]}]
 !     If present, return a list of the "CplSet" attribute of each member.
+!     See the note about pointer arguments in the description section above for
+!     correct usage.
 !   \item[{[itemNameList]}]
 !     If present, return a list of each member name.
+!     See the note about pointer arguments in the description section above for
+!     correct usage.
 !   \item[{[fieldList]}]
 !     If present, return a list of the member fields.
+!     See the note about pointer arguments in the description section above for
+!     correct usage.
+!   \item[{[stateList]}]
+!     If present, return a list of the states corresonding to the owner of the
+!     fields returned under {\tt fieldList}.
+!     See the note about pointer arguments in the description section above for
+!     correct usage.
+!   \item[{[nestedFlag]}]
+!     When set to .true., returns information from nested States (default).
+!     When set to .false., returns information at the current State level only.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1203,6 +1235,7 @@ module NUOPC_Base
   !-----------------------------------------------------------------------------
     ! local variables
     integer           :: localrc
+    logical           :: l_nestedFlag
     integer           :: item, itemCount, fieldCount, stat, i
     type(ESMF_Field)  :: field
     character(ESMF_MAXSTR), allocatable     :: ll_itemNameList(:)
@@ -1214,11 +1247,18 @@ module NUOPC_Base
     character(ESMF_MAXSTR), pointer         :: l_NamespaceList(:)
     character(ESMF_MAXSTR), pointer         :: l_CplSetList(:)
     type(ESMF_Field),       pointer         :: l_fieldList(:)
+    type(ESMF_State),       pointer         :: l_stateList(:)
     character(ESMF_MAXSTR)                  :: namespace
     character(ESMF_MAXSTR)                  :: cplSet
 
     if (present(rc)) rc = ESMF_SUCCESS
-    
+
+    if (present(nestedFlag)) then
+      l_nestedFlag = nestedFlag
+    else
+      l_nestedFlag = .true.
+    endif
+
     call ESMF_StateGet(state, itemCount=itemCount, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -1241,7 +1281,8 @@ module NUOPC_Base
       do item=1, itemCount
         if (stateitemtypeList(item) == ESMF_STATEITEM_FIELD) then
           fieldCount = fieldCount + 1
-        else if (stateitemtypeList(item) == ESMF_STATEITEM_STATE) then
+        else if ((stateitemtypeList(item) == ESMF_STATEITEM_STATE) .AND. &
+                 (l_nestedFlag)) then
           ! recursively parse the nested state
           nullify(l_StandardNameList)
           call ESMF_StateGet(state, itemName=ll_itemNameList(item), &
@@ -1251,7 +1292,8 @@ module NUOPC_Base
             file=FILENAME, &
             rcToReturn=rc)) &
             return  ! bail out
-          call NUOPC_GetStateMemberLists(nestedState, l_StandardNameList, rc=localrc)
+          call NUOPC_GetStateMemberLists(nestedState, l_StandardNameList, &
+            nestedFlag=l_nestedFlag, rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, &
             file=FILENAME, &
@@ -1372,6 +1414,24 @@ module NUOPC_Base
         endif
       endif
 
+      if (present(stateList)) then
+        if (associated(stateList)) then
+          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+            msg="stateList must enter unassociated", &
+            line=__LINE__, &
+            file=FILENAME, &
+            rcToReturn=rc)
+          return  ! bail out
+        else
+          allocate(stateList(fieldCount), stat=stat)
+          if (ESMF_LogFoundAllocError(stat, msg="allocating stateList", &
+            line=__LINE__, &
+            file=FILENAME, &
+            rcToReturn=rc)) &
+            return  ! bail out
+        endif
+      endif
+
       fieldCount = 1  ! reset
 
       do item=1, itemCount
@@ -1427,8 +1487,12 @@ module NUOPC_Base
           if (present(fieldList)) then
             fieldList(fieldCount)=field
           endif
+          if (present(stateList)) then
+            stateList(fieldCount)=state
+          endif
           fieldCount = fieldCount + 1
-        else if (stateitemtypeList(item) == ESMF_STATEITEM_STATE) then
+        else if ((stateitemtypeList(item) == ESMF_STATEITEM_STATE) .AND. &
+                 (l_nestedFlag)) then
           ! recursively parse the nested state
           nullify(l_StandardNameList)
           nullify(l_itemNameList)
@@ -1436,6 +1500,7 @@ module NUOPC_Base
           nullify(l_NamespaceList)
           nullify(l_CplSetList)
           nullify(l_fieldList)
+          nullify(l_stateList)
           call ESMF_StateGet(state, itemName=ll_itemNameList(item), &
             nestedState=nestedState, rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1449,7 +1514,9 @@ module NUOPC_Base
             ConnectedList=l_ConnectedList, &
             NamespaceList=l_NamespaceList, &
             CplSetList=l_CplSetList, &
-            fieldList=l_fieldList, rc=localrc)
+            fieldList=l_fieldList, &
+            stateList=l_stateList, &
+            nestedFlag=l_nestedFlag, rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, &
             file=FILENAME, &
@@ -1480,6 +1547,9 @@ module NUOPC_Base
               if (present(fieldList)) then
                 fieldList(fieldCount) = l_fieldList(i)
               endif
+              if (present(stateList)) then
+                stateList(fieldCount) = l_stateList(i)
+              endif
               fieldCount = fieldCount + 1
             enddo
             deallocate(l_StandardNameList)
@@ -1488,6 +1558,7 @@ module NUOPC_Base
             deallocate(l_NamespaceList)
             deallocate(l_CplSetList)
             deallocate(l_fieldList)
+            deallocate(l_stateList)
           endif
         endif
       enddo
@@ -1936,7 +2007,9 @@ module NUOPC_Base
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Returns {\tt .true.} if {\tt field} has a timestamp attribute
-!   that matches {\tt time}. Otherwise returns {\tt .false.}.
+!   that matches {\tt time}. Otherwise returns {\tt .false.}. On PETs 
+!   with only a proxy instance of the field, {\tt .true.} is returned
+!   regardless of the actual timestamp attribute.
 !
 !   The arguments are:
 !   \begin{description}
@@ -1954,6 +2027,8 @@ module NUOPC_Base
     integer                 :: localrc
     logical                 :: isValid
     type(ESMF_Time)         :: fieldTime
+    type(ESMF_VM)           :: vm
+    integer                 :: localPet
 #ifdef DEBUG
     character(ESMF_MAXSTR)  :: msgString
 #endif
@@ -1961,6 +2036,25 @@ module NUOPC_Base
     NUOPC_IsAtTimeField = .false. ! initialize
     
     if (present(rc)) rc = ESMF_SUCCESS
+    
+    ! See if this is a proxy field instance. If so then successful early return
+    call ESMF_FieldGet(field, vm=vm, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME, &
+      rcToReturn=rc)) &
+      return  ! bail out
+    call ESMF_VMGet(vm, localPet=localPet, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME, &
+      rcToReturn=rc)) &
+      return  ! bail out
+    if (localPet==-1) then
+      ! on PETs with proxy instance always return .true.
+      NUOPC_IsAtTimeField = .true.
+      return
+    endif
     
     call NUOPC_GetTimestamp(field, isValid=isValid, time=fieldTime, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2080,7 +2174,14 @@ module NUOPC_Base
         rcToReturn=rc)) &
         return  ! bail out
       
-      if (NUOPC_IsAtTimeState.and.present(count)) count = 1
+      if (NUOPC_IsAtTimeState) then
+        if (present(count)) count = 1
+      else
+        if (present(fieldList)) then
+          allocate(fieldList(1))
+          fieldList(1)=field
+        endif
+      endif
     
     else
 
@@ -2639,7 +2740,7 @@ module NUOPC_Base
     character(len=*),         intent(in),  optional :: dataFillScheme    
     integer,                  intent(out), optional :: rc
 ! !DESCRIPTION:
-!   \label{NUOPC_RealizeComplete}
+!   \label{NUOPC_RealizeCompleteG}
 !
 !   Realize or remove fields inside of {\tt state} according to {\tt selection}.
 !   All of the fields that are realized are created internally on the same 
@@ -2667,7 +2768,10 @@ module NUOPC_Base
 !   \item[{[typekind]}]
 !     The typekind of the internally created field(s). The valid options are
 !     {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
-!     {\tt ESMF\_TYPEKIND\_R4}, and {\tt ESMF\_TYPEKIND\_R8} (default).
+!     {\tt ESMF\_TYPEKIND\_R4}, and {\tt ESMF\_TYPEKIND\_R8}.
+!     By default use the {\tt typekind} of the partially created field used
+!     during advertise, or {\tt ESMF\_TYPEKIND\_R8}, if the advertised field 
+!     did not have a {\tt typekind} defined.
 !   \item[{[staggerloc]}]
 !     Stagger location of data in grid cells. By default use the same
 !     stagger location as the advertising field, or 
@@ -2903,7 +3007,7 @@ module NUOPC_Base
     character(len=*),         intent(in),  optional :: dataFillScheme    
     integer,                  intent(out), optional :: rc
 ! !DESCRIPTION:
-!   \label{NUOPC_RealizeComplete}
+!   \label{NUOPC_RealizeCompleteLS}
 !
 !   Realize or remove fields inside of {\tt state} according to {\tt selection}.
 !   All of the fields that are realized are created internally on the same 
@@ -2930,7 +3034,10 @@ module NUOPC_Base
 !   \item[{[typekind]}]
 !     The typekind of the internally created field(s). The valid options are
 !     {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
-!     {\tt ESMF\_TYPEKIND\_R4}, and {\tt ESMF\_TYPEKIND\_R8} (default).
+!     {\tt ESMF\_TYPEKIND\_R4}, and {\tt ESMF\_TYPEKIND\_R8}.
+!     By default use the {\tt typekind} of the partially created field used
+!     during advertise, or {\tt ESMF\_TYPEKIND\_R8}, if the advertised field 
+!     did not have a {\tt typekind} defined.
 !   \item[{[selection]}]
 !     Selection of mode of operation:
 !     \begin{itemize}
@@ -3075,7 +3182,7 @@ module NUOPC_Base
     character(len=*),         intent(in),  optional :: dataFillScheme    
     integer,                  intent(out), optional :: rc
 ! !DESCRIPTION:
-!   \label{NUOPC_RealizeComplete}
+!   \label{NUOPC_RealizeCompleteM}
 !
 !   Realize or remove fields inside of {\tt state} according to {\tt selection}.
 !   All of the fields that are realized are created internally on the same 
@@ -3102,7 +3209,10 @@ module NUOPC_Base
 !   \item[{[typekind]}]
 !     The typekind of the internally created field(s). The valid options are
 !     {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
-!     {\tt ESMF\_TYPEKIND\_R4}, and {\tt ESMF\_TYPEKIND\_R8} (default).
+!     {\tt ESMF\_TYPEKIND\_R4}, and {\tt ESMF\_TYPEKIND\_R8}.
+!     By default use the {\tt typekind} of the partially created field used
+!     during advertise, or {\tt ESMF\_TYPEKIND\_R8}, if the advertised field 
+!     did not have a {\tt typekind} defined.
 !   \item[{[meshloc]}]
 !     Location of data in the mesh cell. By default use the same
 !     mesh location as the advertising field, or 
@@ -3301,7 +3411,7 @@ module NUOPC_Base
     integer, parameter      :: attrCount=10
     character(ESMF_MAXSTR)  :: attrList(attrCount)
     character(ESMF_MAXSTR)  :: tempString
-    
+
     if (present(rc)) rc = ESMF_SUCCESS
     
     ! Obtain the advertised Field
@@ -3311,7 +3421,7 @@ module NUOPC_Base
     call ESMF_StateGet(state, itemName=name, field=advertisedField, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-      
+
     ! Test for aliasing
     if (field==advertisedField) then
       ! aliased field means nothing to do here -> early successful exit
@@ -3381,6 +3491,330 @@ module NUOPC_Base
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_Realize - Realize a previously advertised Field in a State after Transfer of GeomObject
+! !INTERFACE:
+  ! Private name; call using NUOPC_Realize()
+  subroutine NUOPC_RealizeTransfer(state, fieldName, typekind, gridToFieldMap, &
+    ungriddedLBound, ungriddedUBound, totalLWidth, totalUWidth, &
+    realizeOnlyConnected, removeNotConnected, realizeOnlyNotShared, &
+    realizeOnlyNotComplete, field, rc)
+! !ARGUMENTS:
+    type(ESMF_State)                                :: state
+    character(*),             intent(in)            :: fieldName
+    type(ESMF_TypeKind_Flag), intent(in),  optional :: typekind
+    integer, target,          intent(in),  optional :: gridToFieldMap(:)
+    integer, target,          intent(in),  optional :: ungriddedLBound(:)
+    integer, target,          intent(in),  optional :: ungriddedUBound(:)
+    integer,                  intent(in),  optional :: totalLWidth(:)
+    integer,                  intent(in),  optional :: totalUWidth(:)
+    logical,                  intent(in),  optional :: realizeOnlyConnected
+    logical,                  intent(in),  optional :: removeNotConnected
+    logical,                  intent(in),  optional :: realizeOnlyNotShared
+    logical,                  intent(in),  optional :: realizeOnlyNotComplete
+    type(ESMF_Field),         intent(out), optional :: field
+    integer,                  intent(out), optional :: rc
+! !DESCRIPTION:
+!   \label{NUOPC_RealizeTransfer}
+!
+!   Realize a field where GeomObject has been set by the NUOPC GeomObject
+!   transfer protocol.
+!
+!   The data of the realized field is left uninitialized by this method.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[state]
+!     The {\tt ESMF\_State} object in which the field is realized.
+!   \item[fieldName]
+!     The name of the field in {\tt state} to be realized. If {\tt state} does
+!     not contain a field with name {\tt fieldName}, return an error in 
+!     {\tt rc}.
+!   \item[{[typekind]}]
+!     The typekind of the internally created field(s). The valid options are
+!     {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
+!     {\tt ESMF\_TYPEKIND\_R4}, and {\tt ESMF\_TYPEKIND\_R8}.
+!     By default use the {\tt typekind} of the connected provider field.
+!   \item[{[gridToFieldMap]}]
+!     The mapping of grid/mesh dimensions against field dimensions. The argument
+!     is of rank 1 and with a size of dimCount. The elements correspond to the
+!     grid/mesh elements in order, and associates it with the indicated 
+!     field dimension. Only entries between 1 and the field rank are allowed.
+!     There must be no duplicate entries in {\tt gridToFieldMap}.
+!     By default use the {\tt gridToFieldMap} of the connected provider field.
+!   \item[{[ungriddedLBound]}]
+!     Lower bounds of the ungridded dimensions of the field. The number of
+!     elements defines the number of ungridded dimensions of the field and 
+!     must be consistent with {\tt ungriddedUBound}.
+!     By default use the {\tt ungriddedLBound} of the connected provider field.
+!   \item[{[ungriddedUBound]}]
+!     Upper bounds of the ungridded dimensions of the field. The number of
+!     elements defines the number of ungridded dimensions of the field and 
+!     must be consistent with {\tt ungriddedLBound}.
+!     By default use the {\tt ungriddedLBound} of the connected provider field.
+!   \item[{[totalLWidth]}]
+!     {\em This argument is only supported for fields defined on
+!     {\tt ESMF\_Grid}.}
+!     The number elements outside the lower bound of the exclusive region.
+!     The argument is of rank 1 and with a size of dimCount, the number of
+!     gridded dimensions of the field. The ordering of the dimensions is that
+!     of the field (considering {\tt gridToFieldMap}).
+!     By default a zero vector is used, resulting in no elements outside the
+!     exclusive region.
+!   \item[{[totalUWidth]}]
+!     {\em This argument is only supported for fields defined on
+!     {\tt ESMF\_Grid}.}
+!     The number elements outside the upper bound of the exclusive region.
+!     The argument is of rank 1 and with a size of dimCount, the number of
+!     gridded dimensions of the field. The ordering of the dimensions is that
+!     of the field (considering {\tt gridToFieldMap}).
+!     By default a zero vector is used, resulting in no elements outside the
+!     exclusive region.
+!   \item[{[realizeOnlyConnected]}]
+!     If set to {\tt .false.}, realize the specified field irregardless of the
+!     connected status. If set to {\tt .true.}, only a connected field will be
+!     realized. The default is {\tt .true.}.
+!   \item[{[removeNotConnected]}]
+!     If set to {\tt .false.}, do not remove a field from the state due to its
+!     connected status. If set to {\tt .true.}, remove the field if it is not
+!     connected. This requires {\tt realizeOnlyConnected} to be {\tt .true.},
+!     and a runtime error will be returned otherwise.
+!     The default is {\tt .true.}.
+!   \item[{[realizeOnlyNotShared]}]
+!     If set to {\tt .false.}, realize the specified field irregardless of its
+!     shared status. If set to {\tt .true.}, only a field that has 
+!     "ShareStatusField" set to "not shared" will be realized.
+!     The default is {\tt .true.}.
+!   \item[{[realizeOnlyNotComplete]}]
+!     If set to {\tt .false.}, realize the specified field irregardless of its
+!     complete status. If set to {\tt .true.}, only a field that has not yet
+!     been completed will be realized.
+!     The default is {\tt .true.}.
+!   \item[{[field]}]
+!     Returns the completed field that was realized by this method. An invalid
+!     field object will be returned if the conditions were such that the field
+!     was  not realized.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                         :: localrc
+    type(ESMF_Field)                :: fieldAdv
+    integer                         :: itemCount, stat
+    integer                         :: ulbCount, uubCount
+    logical                         :: isPresent
+    character(len=80)               :: value
+    integer                         :: tk
+    type(ESMF_TypeKind_Flag)        :: tkf
+    integer(ESMF_KIND_I4), pointer  :: l_gridToFieldMap(:)
+    integer(ESMF_KIND_I4), pointer  :: l_ungriddedLBound(:),l_ungriddedUBound(:)
+    logical                         :: l_realizeOnlyConnected
+    logical                         :: l_removeNotConnected
+    logical                         :: l_realizeOnlyNotShared
+    logical                         :: l_realizeOnlyNotComplete
+    logical                         :: isComplete, isConnected, isSharedField
+    type(ESMF_FieldStatus_Flag)     :: fieldStatus
+
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    l_realizeOnlyConnected = .true.   ! defaut
+    if (present(realizeOnlyConnected)) &
+      l_realizeOnlyConnected = realizeOnlyConnected
+    
+    l_removeNotConnected = .true.   ! defaut
+    if (present(removeNotConnected)) &
+      l_removeNotConnected = removeNotConnected
+    
+    l_realizeOnlyNotShared = .true.   ! defaut
+    if (present(realizeOnlyNotShared)) &
+      l_realizeOnlyNotShared = realizeOnlyNotShared
+      
+    l_realizeOnlyNotComplete = .true.   ! defaut
+    if (present(realizeOnlyNotComplete)) &
+      l_realizeOnlyNotComplete = realizeOnlyNotComplete
+      
+    if (present(field)) nullify(field%ftypep)
+    
+    ! flag inconsistent input settings
+    if (l_removeNotConnected .and. .not.l_realizeOnlyConnected) then
+      call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
+        msg="Cannot have removeNotConnected active, but realizeOnlyConnected"//&
+          " inactive.", &
+        line=__LINE__, file=FILENAME, &
+        rcToReturn=rc)
+      return  ! bail out
+    endif
+    
+    ! access the advertised field
+    call ESMF_StateGet(state, itemName=fieldName, field=fieldAdv, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    
+    ! determine complete status
+    call ESMF_FieldGet(fieldAdv, status=fieldStatus, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    isComplete=.false. ! initilize
+    if (fieldStatus==ESMF_FIELDSTATUS_COMPLETE) isComplete=.true.
+    ! determine connected status
+    isConnected = NUOPC_IsConnected(fieldAdv, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    ! determine shared status
+    isSharedField = .false. ! initialize
+    call NUOPC_GetAttribute(fieldAdv, name="ShareStatusField", &
+      value=value, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    if (trim(value)=="shared") isSharedField = .true.
+    
+    ! early return conditions
+    if (l_realizeOnlyNotComplete .and. isComplete) return  ! early return
+    if (.not.isConnected) then
+      if (l_removeNotConnected) then
+        call ESMF_StateRemove(state, (/fieldName/), rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      endif
+      if (l_realizeOnlyConnected) then
+        return  ! early return
+      endif
+    endif
+    if (l_realizeOnlyNotShared .and. isSharedField) then
+      return  ! early return
+    endif
+    
+    ! TypeKind
+    if (present(typekind)) then
+      tkf = typekind
+    else
+      call ESMF_AttributeGet(fieldAdv, name="TypeKind", &
+        convention="NUOPC", purpose="Instance", &
+        value=tk, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      tkf=tk  ! convert integer into actual TypeKind_Flag
+    endif
+
+    ! GridToFieldMap
+    if (present(gridToFieldMap)) then
+      l_gridToFieldMap => gridToFieldMap
+    else
+      call ESMF_AttributeGet(fieldAdv, name="GridToFieldMap", &
+        convention="NUOPC", purpose="Instance", &
+        itemCount=itemCount, isPresent=isPresent, &
+        attnestflag=ESMF_ATTNEST_ON, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      if (.not. isPresent) then
+        call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
+          msg="Cannot realize field "//trim(fieldName)//&
+          " because GridToFieldMap attribute is not present", &
+          line=__LINE__, file=FILENAME, &
+          rcToReturn=rc)
+        return
+      endif
+      allocate(l_gridToFieldMap(itemCount), stat=stat)
+      if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+        msg="Allocation of internal gridToFieldMap failed.", &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_AttributeGet(fieldAdv, &
+        name="GridToFieldMap", valueList=l_gridToFieldMap, &
+        convention="NUOPC", purpose="Instance", &
+        attnestflag=ESMF_ATTNEST_ON, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, &
+        msg="Cannot realize field "//trim(fieldName)// &
+        " because error obtaining GridToFieldMap attribute.", &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    endif
+
+    ! UngriddedLBound, UngriddedUBound
+    call ESMF_AttributeGet(fieldAdv, name="UngriddedLBound", &
+      convention="NUOPC", purpose="Instance", &
+      itemCount=ulbCount, isPresent=isPresent, &
+      attnestflag=ESMF_ATTNEST_ON, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    if ((isPresent .and. ulbCount > 0) .or. present(ungriddedLBound) &
+      .or. present(ungriddedUBound)) then
+      if (isPresent .and. ulbCount > 0) then
+        call ESMF_AttributeGet(fieldAdv, name="UngriddedUBound", &
+          convention="NUOPC", purpose="Instance", &
+          itemCount=uubCount, isPresent=isPresent, &
+          attnestflag=ESMF_ATTNEST_ON, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        if (.not. isPresent .or. ulbCount /= uubCount) then
+          call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
+            msg="Field "//trim(fieldName)//&
+            " has inconsistent UngriddedLBound/UngriddedUBound attributes",&
+            line=__LINE__, file=FILENAME, &
+            rcToReturn=rc)
+          return
+        endif
+      endif
+      if (present(ungriddedLBound)) then
+        l_ungriddedLBound => ungriddedLBound
+      else
+        allocate(l_ungriddedLBound(ulbCount), stat=stat)
+        if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+          msg="Allocation of internal ungriddedLBound array failed.", &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+        call ESMF_AttributeGet(fieldAdv, &
+          name="UngriddedLBound", valueList=l_ungriddedLBound, &
+          convention="NUOPC", purpose="Instance", &
+          attnestflag=ESMF_ATTNEST_ON, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      endif
+      if (present(ungriddedUBound)) then
+        l_ungriddedUBound => ungriddedUBound
+      else
+        allocate(l_ungriddedUBound(ulbCount), stat=stat)
+        if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+          msg="Allocation of internal ungriddedUBound array failed.", &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+        call ESMF_AttributeGet(fieldAdv, &
+          name="UngriddedUBound", valueList=l_ungriddedUBound, &
+          convention="NUOPC", purpose="Instance", &
+          attnestflag=ESMF_ATTNEST_ON, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      endif
+      ! create field with ungridded dims
+      call ESMF_FieldEmptyComplete(fieldAdv, &
+        gridToFieldMap=l_gridToFieldMap, typekind=tkf, &
+        ungriddedLBound=l_ungriddedLBound, &
+        ungriddedUBound=l_ungriddedUBound, &
+        totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
+        rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      if (.not.present(ungriddedLBound)) deallocate(l_ungriddedLBound)
+      if (.not.present(ungriddedUBound)) deallocate(l_ungriddedUBound)
+    else
+      ! create field with no ungridded dims
+      call ESMF_FieldEmptyComplete(fieldAdv, &
+        gridToFieldMap=l_gridToFieldMap, typekind=tkf, &
+        totalLWidth=totalLWidth, totalUWidth=totalUWidth, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    endif
+    if (.not.present(gridToFieldMap)) deallocate(l_gridToFieldMap)
+    
+    ! optionally return the completed field
+    if (present(field)) field = fieldAdv
+
   end subroutine
   !-----------------------------------------------------------------------------
 
@@ -4066,6 +4500,75 @@ module NUOPC_Base
       deallocate(fieldList)
     endif
     
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: NUOPC_ChopString - Chop a string into sub-strings
+! !INTERFACE:
+  subroutine NUOPC_ChopString(string, chopChar, chopStringList, rc)
+! !ARGUMENTS:
+    character(len=*)                              :: string
+    character                                     :: chopChar
+    character(ESMF_MAXSTR), pointer               :: chopStringList(:)
+    integer,                intent(out), optional :: rc
+! !DESCRIPTION:
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[string]
+!   \item[chopChar]
+!   \item[chopStringList]
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer               :: i, j, count
+    integer, allocatable  :: chopPos(:)
+    
+    ! check the incoming pointer
+    if (associated(chopStringList)) then
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="chopStringList must enter unassociated", &
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)
+      return  ! bail out
+    endif
+    
+    ! determine how many times chopChar is found in string
+    count=0 ! reset
+    do i=1, len(trim(string))
+      if (string(i:i)==chopChar) count=count+1
+    enddo
+    
+    ! record positions where chopChar is found in string
+    allocate(chopPos(count))
+    j=1 ! reset
+    do i=1, len(trim(string))
+      if (string(i:i)==chopChar) then
+        chopPos(j)=i
+        j=j+1
+      endif
+    enddo
+    
+    ! chop up the string
+    allocate(chopStringList(count+1))
+    j=1 ! reset
+    do i=1, count
+      chopStringList(i) = string(j:chopPos(i)-1)
+      j=chopPos(i)+1
+    enddo
+    chopStringList(count+1) = trim(string(j:len(string)))
+    deallocate(chopPos)
+    
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
   end subroutine
   !-----------------------------------------------------------------------------
 

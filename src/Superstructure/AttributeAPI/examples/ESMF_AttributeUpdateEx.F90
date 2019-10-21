@@ -247,21 +247,27 @@ implicit none
 
 
     call ESMF_AttributeLink(gridcomp1, c1exp, rc=rc)
-
 !EOC
-     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!BOC
+
+
+    call ESMF_AttributeLinkRemove(gridcomp1, c1exp, rc=rc)
+!EOC
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
 ! Now the individual Components will be run.  First we will initialize the two
 ! gridded Components, then we will initialize the coupler Component.
 ! During each of these Component initialize routines Attribute
 ! packages will be added, and the Attributes set.  The Attribute
-! hierarchies will also be linked.  As the gridded Components will
-! be running on exclusive portions of the VM, the Attributes will need to
-! be made available across the VM using an {\tt ESMF\_StateReconcile()}
-! call in the coupler Component.  The majority of the work
-! with Attributes will take place in this portion of the
-! model run, as metadata rarely needs to be changed during run time.
+! hierarchies will also be linked (unlinking also demonstrated).  As the
+! gridded Components will be running on exclusive portions of the VM, the
+! Attributes will need to be made available across the VM using an
+! {\tt ESMF\_StateReconcile()} call in the coupler Component.  The majority of
+! the work with Attributes will take place in this portion of the model run, as
+! metadata rarely needs to be changed during run time.
 !
 ! What
 ! follows are the calls from the driver code that run the initialize, run, and finalize routines

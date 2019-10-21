@@ -5,7 +5,7 @@ PATHEXE=`which $1`
 if [ $? != 0 ]; then
   echo unknown PGI compiler: $1; exit 1
 fi
-PGEXERC=`$1 -dryrun 2>&1 | grep "\/\.pg" | head -1 | cut -f3 -d" "`
+PGEXERC=`$1 -dryrun 2>&1 | grep "pg[[:graph:]]*rc" | head -1 | cut -f3 -d" "`
 PGBINDIR=`dirname $PGEXERC`
 if [ $PGBINDIR/pgc++ = $PATHEXE ]; then
   $PGBINDIR/pgc++ -V

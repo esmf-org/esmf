@@ -1,4 +1,4 @@
 #!/bin/sh
-# this script expects the icpc command (or a wrapper to icpc, e.g. mpiCC)
+# this script expects the ifort command (or a wrapper to ifort, e.g. mpif90)
 # and returns the required libraries to link against
-$1 -shared-intel -dryrun $ESMF_DIR/scripts/hello.f90 2>&1 | grep " \-l" | grep -v "\-l*mpi*" | grep -v "\-lc" | sed 's/\\//g' | xargs
+$1 -shared-intel -dryrun $ESMF_DIR/scripts/hello.f90 2>&1 | grep " \-l" | grep -v "\-l*mpi*" | grep -v "\-lc" | grep -v "netcdf" | grep -v "hdf" | sed 's/\\//g' | xargs
