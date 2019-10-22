@@ -67,7 +67,7 @@ resources, enable logging, and control garbage collection.
 Resource Allocation
 ~~~~~~~~~~~~~~~~~~~
 
-The ESMF Virtual Machine (VM) `ESMF Virtual Machine (VM) <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_7_1_0r/ESMF_refdoc/node6.html#SECTION060120000000000000000>`_
+The ESMF Virtual Machine (VM) `ESMF Virtual Machine (VM) <http://www.earthsystemmodeling.org/esmf_releases/non_public/ESMF_8_0_0/ESMF_refdoc/node6.html#SECTION060120000000000000000>`_
 is created at the beginning of each ESMPy execution, and contains information 
 about the topology and characteristics of the underlying computer. The VM 
 allocates computational resources in the form of 
@@ -137,7 +137,7 @@ The :class:`~ESMF.api.grid.Grid` is used to represent the geometry and discretiz
 rectangular physical grids. The :class:`~ESMF.api.grid.Grid` can also hold information that can used in
 calculations involving the :class:`~ESMF.api.grid.Grid`, like a mask or the cell areas. The ESMF reference
 manual has an in-depth description of the 
-`Grid class <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_7_1_0r/ESMF_refdoc/node5.html#SECTION05080000000000000000>`_.
+`Grid class <http://www.earthsystemmodeling.org/esmf_releases/non_public/ESMF_8_0_0/ESMF_refdoc/node5.html#SECTION05080000000000000000>`_.
 
 ++++++++++
 Staggering
@@ -306,7 +306,7 @@ Mesh
 
 A :class:`~ESMF.api.mesh.Mesh` is an object for representing unstructured grids. The ESMF reference
 manual has an in-depth description of the 
-`Mesh class <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_7_1_0r/ESMF_refdoc/node5.html#SECTION050100000000000000000>`_.
+`Mesh class <http://www.earthsystemmodeling.org/esmf_releases/non_public/ESMF_8_0_0/ESMF_refdoc/node5.html#SECTION050100000000000000000>`_.
 
 A :class:`~ESMF.api.mesh.Mesh` is constructed of *nodes* and *elements*. A node, also known as a vertex 
 or corner, is a part of a :class:`~ESMF.api.mesh.Mesh` which represents a single point. An element, 
@@ -523,7 +523,7 @@ data points. For example, in the data assimilation world, :class:`LocStreams <ES
 to represent a set of observations. The values of the data points are stored
 within a :class:`~ESMF.api.field.Field` created using the :class:`~ESMF.api.locstream.LocStream`. The ESMF reference
 manual has an in-depth description of the 
-`LocStream class <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_7_1_0r/ESMF_refdoc/node5.html#SECTION05090000000000000000>`_.
+`LocStream class <http://www.earthsystemmodeling.org/esmf_releases/non_public/ESMF_8_0_0/ESMF_refdoc/node5.html#SECTION05090000000000000000>`_.
 
 The locations are generally described using Cartesian (x, y, z), or
 (lat, lon, radius) coordinates. The coordinates are stored using constructs
@@ -580,7 +580,7 @@ This file format is used by the :class:`~ESMF.api.constants.FileFormat.SCRIP` :c
 work with that package should also work here.  :class:`~ESMF.api.constants.FileFormat.SCRIP` format files are
 capable of storing either 2D logically rectangular grids or 2D
 unstructured grids.  More information can be found in the ESMF reference
-manual section on the `SCRIP Grid File Format <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_7_1_0r/ESMF_refdoc/node3.html#SECTION03024000000000000000>`_.
+manual section on the `SCRIP Grid File Format <http://www.earthsystemmodeling.org/esmf_releases/non_public/ESMF_8_0_0/ESMF_refdoc/node3.html#SECTION03028100000000000000>`_.
 
 ++++++++
 ESMFMESH
@@ -592,7 +592,7 @@ This format is more compatible than the :class:`~ESMF.api.constants.FileFormat.S
 used to create a :class:`~ESMF.api.mesh.Mesh` object, so less conversion needs to be done to
 create a :class:`~ESMF.api.mesh.Mesh`. The :class:`~ESMF.api.constants.FileFormat.ESMFMESH` format is thus more efficient than :class:`~ESMF.api.constants.FileFormat.SCRIP` when
 used with ESMPy.  More information can be found in the ESMF reference
-manual section on the `ESMF Unstructured Grid File Format <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_7_1_0r/ESMF_refdoc/node3.html#SECTION03025000000000000000>`_.
+manual section on the `ESMF Unstructured Grid File Format <http://www.earthsystemmodeling.org/esmf_releases/non_public/ESMF_8_0_0/ESMF_refdoc/node3.html#SECTION03028200000000000000>`_.
 
 ++++++++
 GRIDSPEC
@@ -604,7 +604,7 @@ conventions for the representation of gridded data for Earth System
 Models.  ESMPy supports NetCDF files that follow the CF :class:`~ESMF.api.constants.FileFormat.GRIDSPEC`
 convention to support logically rectangular lat/lon grids.  More
 information can be found in the ESMF reference manual section on the
-`CF Convention GRIDSPEC File Format <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_7_1_0r/ESMF_refdoc/node3.html#SECTION03026000000000000000>`_.
+`CF Convention GRIDSPEC File Format <http://www.earthsystemmodeling.org/esmf_releases/non_public/ESMF_8_0_0/ESMF_refdoc/node3.html#SECTION03028300000000000000>`_.
 
 +++++
 UGRID
@@ -615,7 +615,7 @@ UGRID
 conventions for the unstructured grid data model.  ESMPy support
 NetCDF files that follow the CF :class:`~ESMF.api.constants.FileFormat.UGRID` convention for unstructured grids.
 More information can be found in the ESMF reference manual section on
-the `CF Convention UGRID File Format <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_7_1_0r/ESMF_refdoc/node3.html#SECTION03027000000000000000>`_.
+the `CF Convention UGRID File Format <http://www.earthsystemmodeling.org/esmf_releases/non_public/ESMF_8_0_0/ESMF_refdoc/node3.html#SECTION03028400000000000000>`_.
 
 ~~~~~~~~~~~~~~~~
 Meshes from File
@@ -644,13 +644,19 @@ structured :class:`~ESMF.api.grid.Grid` from a file.  These include ``is_sphere`
 the grid is spherical or regional, ``add_corner_stagger`` to add the corner
 stagger information to the :class:`~ESMF.api.grid.Grid` for conservative regridding, and
 ``add_user_area`` to specify whether to read in the cell area from the
-NetCDF file or to calculate them.  Also, for :class:`~ESMF.api.constants.FileFormat.GRIDSPEC` formated files
+NetCDF file or to calculate them.  
+
+For :class:`~ESMF.api.constants.FileFormat.GRIDSPEC` formated files
 there is the ``add_mask`` optional argument
 to add a mask held by the NetCDF variable indicated in optional
 argument, ``varname``, and the ``coord_names`` argument to specify the longitude
-and latitude variable names in :class:`~ESMF.api.constants.FileFormat.GRIDSPEC` file containing multiple sets of
-coordinates. The mask generated for a :class:`~ESMF.api.grid.Grid` created from 
-file will have 0 for the masked values and 1 for the unmasked values.
+and latitude variable names in a :class:`~ESMF.api.constants.FileFormat.GRIDSPEC` file containing multiple sets of
+coordinates. 
+
+For :class:`~ESMF.api.constants.FileFormat.SCRIP` formated files the integer array ``grid_imask`` is used to mask out grid cells which should not participate in the regridding. 
+
+The mask generated for a :class:`~ESMF.api.grid.Grid` created from 
+file (any format) will have 0 for the masked values and 1 for the unmasked values.
 
 
 ----------
@@ -665,17 +671,17 @@ and an ESMF documentation reference.
 ======================================================  ===============================================  ===============================
 Class                                                   Description                                      Link
 ======================================================  ===============================================  ===============================
-:class:`~ESMF.api.constants.RegridMethod.BILINEAR`      Linear regridding in two dimensions              `Bilinear <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_7_1_0r/ESMF_refdoc/node5.html#SECTION05012100000000000000>`_
-:class:`~ESMF.api.constants.RegridMethod.PATCH`         Higher-order least squares method                `Higher-order patch <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_7_1_0r/ESMF_refdoc/node5.html#SECTION05012200000000000000>`_
-:class:`~ESMF.api.constants.RegridMethod.NEAREST_STOD`  Nearest source point used for each destination   `Nearest source to destination <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_7_1_0r/ESMF_refdoc/node5.html#SECTION05012300000000000000>`_
-:class:`~ESMF.api.constants.RegridMethod.NEAREST_DTOS`  Nearest destination point used for each source   `Nearest destination to source <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_7_1_0r/ESMF_refdoc/node5.html#SECTION05012400000000000000>`_
-:class:`~ESMF.api.constants.RegridMethod.CONSERVE`      First-order conservative                         `First-order conservative <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_7_1_0r/ESMF_refdoc/node5.html#SECTION05012500000000000000>`_
-:class:`~ESMF.api.constants.RegridMethod.CONSERVE_2ND`  Second-order conservative                        `Second-order conservative <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_7_1_0r/ESMF_refdoc/node5.html#SECTION05012600000000000000>`_
-See conservative options above.                         Conservation equations                           `Conservation <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_7_1_0r/ESMF_refdoc/node5.html#SECTION05012700000000000000>`_
-:class:`~ESMF.api.constants.NormType`                   Normalization options for integral conservation  `Normalization options <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_7_1_0r/ESMF_refdoc/node5.html#SECTION05012800000000000000>`_
-:class:`~ESMF.api.constants.LineType`                   Line types for spherical and Cartesian space     `Great circle cells <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_7_1_0r/ESMF_refdoc/node5.html#SECTION05012900000000000000>`_
-:class:`~ESMF.api.constants.UnmappedAction`             Unmapped destination point handling options      `Unmapped destination points <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_7_1_0r/ESMF_refdoc/node5.html#SECTION05013100000000000000>`_
-:class:`~ESMF.api.constants.CoordSys`                   Spherical grids and pole handling                `Spherical grids and poles <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_7_1_0r/ESMF_refdoc/node5.html#SECTION05013200000000000000>`_
+:class:`~ESMF.api.constants.RegridMethod.BILINEAR`      Linear regridding in two dimensions              `Bilinear <http://www.earthsystemmodeling.org/esmf_releases/non_public/ESMF_8_0_0/ESMF_refdoc/node5.html#SECTION05012100000000000000>`_
+:class:`~ESMF.api.constants.RegridMethod.PATCH`         Higher-order least squares method                `Higher-order patch <http://www.earthsystemmodeling.org/esmf_releases/non_public/ESMF_8_0_0/ESMF_refdoc/node5.html#SECTION05012200000000000000>`_
+:class:`~ESMF.api.constants.RegridMethod.NEAREST_STOD`  Nearest source point used for each destination   `Nearest source to destination <http://www.earthsystemmodeling.org/esmf_releases/non_public/ESMF_8_0_0/ESMF_refdoc/node5.html#SECTION05012300000000000000>`_
+:class:`~ESMF.api.constants.RegridMethod.NEAREST_DTOS`  Nearest destination point used for each source   `Nearest destination to source <http://www.earthsystemmodeling.org/esmf_releases/non_public/ESMF_8_0_0/ESMF_refdoc/node5.html#SECTION05012400000000000000>`_
+:class:`~ESMF.api.constants.RegridMethod.CONSERVE`      First-order conservative                         `First-order conservative <http://www.earthsystemmodeling.org/esmf_releases/non_public/ESMF_8_0_0/ESMF_refdoc/node5.html#SECTION05012500000000000000>`_
+:class:`~ESMF.api.constants.RegridMethod.CONSERVE_2ND`  Second-order conservative                        `Second-order conservative <http://www.earthsystemmodeling.org/esmf_releases/non_public/ESMF_8_0_0/ESMF_refdoc/node5.html#SECTION05012600000000000000>`_
+See conservative options above.                         Conservation equations                           `Conservation <http://www.earthsystemmodeling.org/esmf_releases/non_public/ESMF_8_0_0/ESMF_refdoc/node5.html#SECTION05012700000000000000>`_
+:class:`~ESMF.api.constants.NormType`                   Normalization options for integral conservation  `Normalization options <http://www.earthsystemmodeling.org/esmf_releases/non_public/ESMF_8_0_0/ESMF_refdoc/node5.html#SECTION05012800000000000000>`_
+:class:`~ESMF.api.constants.LineType`                   Line types for spherical and Cartesian space     `Great circle cells <http://www.earthsystemmodeling.org/esmf_releases/non_public/ESMF_8_0_0/ESMF_refdoc/node5.html#SECTION05012900000000000000>`_
+:class:`~ESMF.api.constants.UnmappedAction`             Unmapped destination point handling options      `Unmapped destination points <http://www.earthsystemmodeling.org/esmf_releases/non_public/ESMF_8_0_0/ESMF_refdoc/node5.html#SECTION050121500000000000000>`_
+:class:`~ESMF.api.constants.CoordSys`                   Spherical grids and pole handling                `Spherical grids and poles <http://www.earthsystemmodeling.org/esmf_releases/non_public/ESMF_8_0_0/ESMF_refdoc/node5.html#SECTION050121600000000000000>`_
 ======================================================  ===============================================  ===============================
 
 -------

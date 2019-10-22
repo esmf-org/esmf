@@ -184,6 +184,14 @@ ifndef ESMF_NO_INTEGER_2_BYTE
 export ESMF_NO_INTEGER_2_BYTE = default
 endif
 
+ifndef ESMF_MAPPER_BUILD
+export ESMF_MAPPER_BUILD = default
+endif
+
+ifndef ESMF_AUTO_LIB_BUILD
+export ESMF_AUTO_LIB_BUILD = default
+endif
+
 ifndef ESMF_DEFER_LIB_BUILD
 export ESMF_DEFER_LIB_BUILD = default
 endif
@@ -242,6 +250,10 @@ endif
 
 ifndef ESMF_MOAB
 export ESMF_MOAB = default
+endif
+
+ifndef ESMF_YAMLCPP
+export ESMF_YAMLCPP = default
 endif
 
 ifndef ESMF_ACC_SOFTWARE_STACK
@@ -404,6 +416,14 @@ ifneq ($(ESMF_TESTEXHAUSTIVE),ON)
 export ESMF_TESTEXHAUSTIVE = OFF
 endif
 
+ifneq ($(ESMF_MAPPER_BUILD),ON)
+export ESMF_MAPPER_BUILD = OFF
+endif
+
+ifneq ($(ESMF_AUTO_LIB_BUILD),OFF)
+export ESMF_AUTO_LIB_BUILD = ON
+endif
+
 ifneq ($(ESMF_DEFER_LIB_BUILD),OFF)
 export ESMF_DEFER_LIB_BUILD = ON
 endif
@@ -444,9 +464,12 @@ ifeq ($(ESMF_ETCDIR),default)
 export ESMF_ETCDIR = $(ESMF_BUILD)/src/etc
 endif
 
-
 ifeq ($(ESMF_MOAB),default)
 export ESMF_MOAB = internal
+endif
+
+ifeq ($(ESMF_YAMLCPP),default)
+export ESMF_YAMLCPP = internal
 endif
 
 #-------------------------------------------------------------------------------
@@ -712,8 +735,10 @@ ESMF_SEDDEFAULT             = sed
 # The -E option stops the gcc overcompiler after preprocessing, the -P
 # option prevents putting #line directives in the output, and -x c states
 # to use C-style preprocessing regardless of file name suffix. Option -C
-# does not discard C++-style comments, preventing URL mangling.
-ESMF_CPPDEFAULT             = gcc -E -P -x c -C
+# does not discard C++-style comments, preventing URL mangling. Finally
+# for GCC range 4.8.5-4.9.x, -nostdinc is needed or else standard headers
+# are included that mess up the Fortran source code.
+ESMF_CPPDEFAULT             = gcc -E -P -x c -C -nostdinc
 
 ESMF_RM                     = rm -rf
 ESMF_MV                     = mv -f
@@ -838,7 +863,7 @@ endif
 ifeq ($(origin ESMF_CXXCOMPILEOPTS_ENV), environment)
 ESMF_CXXCOMPILEOPTS = $(ESMF_CXXCOMPILEOPTS_ENV)
 endif
-ESMF_CXXCOMPILEOPTS += $(ESMF_CXXOPTFLAG) $(ESMF_SO_CXXCOMPILEOPTS)
+ESMF_CXXCOMPILEOPTS += $(ESMF_CXXSTDFLAG) $(ESMF_CXXOPTFLAG) $(ESMF_SO_CXXCOMPILEOPTS)
 # - make sure environment variable gets prepended _once_
 ifeq ($(origin ESMF_CXXCOMPILEPATHS), environment)
 export ESMF_CXXCOMPILEPATHS_ENV := $(ESMF_CXXCOMPILEPATHS)
@@ -985,6 +1010,22 @@ ifneq ($(origin ESMF_SED), environment)
 ESMF_SED = $(ESMF_SEDDEFAULT)
 endif
 
+#-------------------------------------------------------------------------------
+# Add C++ standard string to compile options if the non-default is chosen.
+# Dependencies requiring a specific C++ standard should update the standard here
+#-------------------------------------------------------------------------------
+ifneq ($(ESMF_YAMLCPP),OFF)
+ifeq ($(ESMF_CXXSTD),default)
+ESMF_CXXSTD = 11
+endif
+endif
+
+ifneq ($(ESMF_CXXSTD),default)
+# Most compilers know the -std=c++XX flag. Overwrite in build_rules.mk if needed.
+ESMF_CXXSTDFLAG         = -std=c++$(ESMF_CXXSTD)
+ESMF_CXXCOMPILECPPFLAGS += -DESMF_CXXSTD=$(ESMF_CXXSTD)
+endif
+
 # - Archive library
 ESMF_LIB_SUFFIX       = a
 ifeq ($(ESMF_OS),MinGW)
@@ -1107,6 +1148,13 @@ endif
 #  below here is again common code.  Variables should no longer be overwritten
 #  with =, but should be appended to if neeeded with +=
 #-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+# Mapper
+#-------------------------------------------------------------------------------
+ifeq ($(ESMF_MAPPER_BUILD),ON)
+ESMF_CPPFLAGS             += -DESMF_MAPPER=1
+endif
 
 #-------------------------------------------------------------------------------
 # 3rd Party libraries
@@ -1249,6 +1297,7 @@ ESMF_CXXLINKRPATHSTHIRD   += $(ESMF_CXXRPATHPREFIX)$(ESMF_ACC_SOFTWARE_STACK_LIB
 ESMF_F90LINKRPATHSTHIRD   += $(ESMF_F90RPATHPREFIX)$(ESMF_ACC_SOFTWARE_STACK_LIBPATH)
 endif
 endif
+
 #-------------------------------------------------------------------------------
 # NETCDF
 #-------------------------------------------------------------------------------
@@ -1263,19 +1312,30 @@ ifeq ($(pathtype),abs)
 # use the $(ESMF_NETCDF) contents as nc-config
 # but must check if there is also nf-config available
 ESMF_NCCONFIG = $(ESMF_NETCDF)
+ifneq ($(origin ESMF_NFCONFIG), environment) 
 ESMF_NFCONFIG = $(shell $(ESMF_NETCDF) --prefix)/bin/nf-config
 ifneq ($(shell $(ESMF_DIR)/scripts/exists $(ESMF_NFCONFIG)),$(ESMF_NFCONFIG))
 ESMF_NFCONFIG := 
 endif
-ESMF_NETCDF_INCLUDE = $(shell $(ESMF_NCCONFIG) --includedir)
-ifdef ESMF_NFCONFIG
-ESMF_NETCDF_LIBS    = $(shell $(ESMF_NFCONFIG) --flibs)
-else
-ESMF_NETCDF_LIBS    = $(shell $(ESMF_NCCONFIG) --flibs)
+export ESMF_NFCONFIG
 endif
-ESMF_NETCDF_LIBS   += $(shell $(ESMF_NCCONFIG) --libs)
+ifneq ($(origin ESMF_NETCDF_INCLUDE), environment) 
+ESMF_NETCDF_INCLUDE := $(shell $(ESMF_NCCONFIG) --includedir)
+export ESMF_NETCDF_INCLUDE
+endif
+ifneq ($(origin ESMF_NETCDF_LIBS), environment)
+ifdef ESMF_NFCONFIG
+ESMF_NETCDF_LIBS    := $(shell $(ESMF_NFCONFIG) --flibs)
+else
+ESMF_NETCDF_LIBS    := $(shell $(ESMF_NCCONFIG) --flibs)
+endif
+ESMF_NETCDF_CONFIG_LIBS := $(shell $(ESMF_NCCONFIG) --libs)
+ESMF_NETCDF_LIBS   += $(ESMF_NETCDF_CONFIG_LIBS)
+endif
+export ESMF_NETCDF_LIBS
 endif
 
+# Handle the regular case where nc-config comes without absolute path.
 ifeq ($(ESMF_NETCDF),nc-config)
 ESMF_NETCDF_CPATH = $(shell nc-config --prefix)
 ESMF_NETCDF_INCLUDE = $(ESMF_NETCDF_CPATH)/include
@@ -1296,12 +1356,14 @@ endif
 ifeq ($(ESMF_NETCDF),standard)
 ifneq ($(origin ESMF_NETCDF_LIBS), environment)
 ESMF_NETCDF_LIBS = -lnetcdf
+export ESMF_NETCDF_LIBS
 endif
 endif
 
 ifeq ($(ESMF_NETCDF),split)
 ifneq ($(origin ESMF_NETCDF_LIBS), environment)
 ESMF_NETCDF_LIBS = -lnetcdff -lnetcdf
+export ESMF_NETCDF_LIBS
 endif
 endif
 
@@ -1343,7 +1405,7 @@ ESMF_PNETCDF_LIBS = -lpnetcdf
 endif
 
 ifeq ($(ESMF_PNETCDF),standard)
-ifneq ($(origin ESMF_NETCDF_LIBS), environment)
+ifneq ($(origin ESMF_PNETCDF_LIBS), environment)
 ESMF_PNETCDF_LIBS = -lpnetcdf
 endif
 endif
@@ -1400,13 +1462,22 @@ endif
 #-------------------------------------------------------------------------------
 # yaml-cpp C++ YAML API
 #-------------------------------------------------------------------------------
+ifeq ($(ESMF_YAMLCPP),internal)
+ESMF_YAMLCPP_PRESENT = TRUE
+ESMF_CXXCOMPILEPATHS += -I$(ESMF_DIR)/src/prologue/yaml-cpp/include
+ESMF_YAMLCPP_INCLUDE =
+ESMF_YAMLCPP_LIBPATH =
+ESMF_YAMLCPP_LIBS =
+endif
+
 ifeq ($(ESMF_YAMLCPP),standard)
+ESMF_YAMLCPP_PRESENT = TRUE
 ifneq ($(origin ESMF_YAMLCPP_LIBS), environment)
 ESMF_YAMLCPP_LIBS = -lyaml-cpp
 endif
 endif
 
-ifdef ESMF_YAMLCPP
+ifeq ($(ESMF_YAMLCPP_PRESENT),TRUE)
 ESMF_CPPFLAGS                += -DESMF_YAMLCPP=1 -DESMF_YAML=1
 ifdef ESMF_YAMLCPP_INCLUDE
 ESMF_CXXCOMPILEPATHSTHIRD    += -I$(ESMF_YAMLCPP_INCLUDE)
@@ -1630,20 +1701,6 @@ ESMF_CPPFLAGS       += -DESMF_TESTWITHTHREADS
 endif
 
 #-------------------------------------------------------------------------------
-# Add C++ standard string to compile options if the non-default is chosen.
-# Dependencies requiring a specific C++ standard should update the standard here
-#-------------------------------------------------------------------------------
-ifneq ($(ESMF_YAMLCPP),)
-ifeq ($(ESMF_CXXSTD),default)
-ESMF_CXXSTD = 11
-endif
-endif
-
-ifneq ($(ESMF_CXXSTD),default)
-ESMF_CXXCOMPILEOPTS  += -std=c++$(ESMF_CXXSTD) -DESMF_CXXSTD=$(ESMF_CXXSTD)
-endif
-
-#-------------------------------------------------------------------------------
 # Add ESMF_ABISTRING to preprocessor flags
 #-------------------------------------------------------------------------------
 
@@ -1691,6 +1748,9 @@ $(error ESMF_TESTESMFMKFILE=ON, but the file indicated by ESMFMKFILE variable do
 endif
 include $(ESMFMKFILE)
 ESMFLIB =
+ESMF_LIBDIR = $(ESMF_LIBSDIR)
+ESMF_APPSDIR = $(ESMF_BUILD)/apps/apps$(ESMF_BOPT)/$(ESMF_OS).$(ESMF_COMPILER).$(ESMF_ABI).$(ESMF_COMM).$(ESMF_SITE)
+ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Superstructure/WebServices/include
 ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Superstructure/ESMFMod/include
 ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Superstructure/State/include
 ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/Util/include
@@ -1747,7 +1807,7 @@ else
 ESMF_ENV_PRELOAD = DYLD_INSERT_LIBRARIES
 endif
 
-# MPT implementations do not pick up LD_PRELOAD
+# MPI implementations do not pick up LD_PRELOAD
 # so we pass a small script to each MPI task
 ifneq (,$(findstring mpich,$(ESMF_COMM)))
 ESMF_PRELOAD_SH = $(ESMF_PRELOADSCRIPT)
@@ -2125,7 +2185,7 @@ endif
 # prevent the wildcards from being expanded.)
 
 CLEAN_DEFDIRS = coredir.*
-CLEAN_DEFAULTS = *.o *.$(ESMF_SL_SUFFIX) *.mod *.txt core ESM*.stdout ESM*.Log PET*.Log *ESMF_LogFile
+CLEAN_DEFAULTS = *.o *.$(ESMF_SL_SUFFIX) *.mod core ESM*.stdout ESM*.Log PET*.Log *ESMF_LogFile
 CLEAN_TEXFILES = *.aux *.bbl *.blg *.log *.toc *.dvi *.ps *.ORIG *.out
 
 clean:

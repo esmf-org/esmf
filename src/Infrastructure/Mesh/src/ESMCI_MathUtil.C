@@ -156,7 +156,8 @@ bool intersect_quad_with_line(const double *q, const double *l1, const double *l
   X[2]=0.0;
 
   // Do multiple iterations, exiting inside loop if solution is good enough
- for (int i=0; i<100; i++) {
+  bool converged=false;
+  for (int i=0; i<100; i++) {
 
     // Calculate Value of function at X
     F[0]=X[0]*X[1]*A[0]+X[0]*B[0]+X[1]*C[0]+X[2]*D[0]+E[0];
@@ -164,7 +165,10 @@ bool intersect_quad_with_line(const double *q, const double *l1, const double *l
     F[2]=X[0]*X[1]*A[2]+X[0]*B[2]+X[1]*C[2]+X[2]*D[2]+E[2];
 
     // If we're close enough to 0.0 then exit
-     if (F[0]*F[0]+F[1]*F[1]+F[2]*F[2] < 1.0E-20) break;
+    if (F[0]*F[0]+F[1]*F[1]+F[2]*F[2] < 1.0E-20) {
+      converged=true;
+      break;
+    }
 
     // Construct Jacobian
     J[0]=A[0]*X[1]+B[0]; J[1]=A[0]*X[0]+C[0]; J[2]=D[0];
@@ -185,24 +189,27 @@ bool intersect_quad_with_line(const double *q, const double *l1, const double *l
     X[2] = X[2] - delta_X[2];
   }
 
- // If not finite then return as not mapped
- if (!MU_IS_FINITE(X[0]) ||
-     !MU_IS_FINITE(X[1]) ||
-     !MU_IS_FINITE(X[2])) {
+  // If it didn't converge to a solution, then report that and leave
+  if (!converged) return false;
 
-   return false;
- }
+  // If not finite then return as not mapped
+  if (!MU_IS_FINITE(X[0]) ||
+      !MU_IS_FINITE(X[1]) ||
+      !MU_IS_FINITE(X[2])) {    
+    return false;
+  }
+
   // Get answer out
- if (rotate_cntr_clk==0) {
-   p[0]=X[0];
-   p[1]=X[1];
- } else if (rotate_cntr_clk==1) {
-   p[0]=X[1];
-   p[1]=1.0-X[0];
- } else if (rotate_cntr_clk==2) {
-   p[0]=1.0-X[0];
-   p[1]=1.0-X[1];
- }
+  if (rotate_cntr_clk==0) {
+    p[0]=X[0];
+    p[1]=X[1];
+  } else if (rotate_cntr_clk==1) {
+    p[0]=X[1];
+    p[1]=1.0-X[0];
+  } else if (rotate_cntr_clk==2) {
+    p[0]=1.0-X[0];
+    p[1]=1.0-X[1];
+  }
 
   *t=X[2];
 
@@ -2541,6 +2548,15 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
 
 /* XMRKX */
 
+
+
+  // Set cartesian distance tol
+  // Assuming some accuracy for the trig functions, then the correpsonding accuracy for
+  // the cartesian distance would scale with radius, so scale the cart_dist_tol with radius. 
+  double pnt_radius=MU_LEN_VEC3D(pnt_xyz); 
+  if (pnt_radius <= 0.0) pnt_radius=1.0; // If the radius is 0.0, the just use 1.0
+  const double cart_dist_tol=1.0E-11*pnt_radius;
+
   // Loop over guesses
   bool p_out_valid=false;
   for (int guess=0; guess<NUM_GUESS; guess++) {
@@ -2613,6 +2629,7 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
 #ifdef ESMF_REGRID_DEBUG_MAP_NODE
       if (mathutil_debug) {
         printf("%d p_dist =%E   cart_dist=%E\n",i,len_delta_p,MU_LEN_VEC3D(f));
+        printf("%d  cart_dist_tol=%E\n",i,cart_dist_tol);
       }
 #endif
 
@@ -2621,7 +2638,8 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
       // If we're close enough in p-space dist. to be significantly
       // within 1.0E-10 mapping tol and reasonably close in actual Cart. dist.
       // then exit.
-      if ((len_delta_p < 1.0E-11) && (cart_dist_at_p < 1.0E-11)) {
+      //      if ((len_delta_p < 1.0E-11) && (cart_dist_at_p < 1.0E-11)) {
+      if ((len_delta_p < 1.0E-11) && (cart_dist_at_p < cart_dist_tol)) {
 #ifdef ESMF_REGRID_DEBUG_MAP_NODE
         if (mathutil_debug) {
           printf("%d Within tols so exiting...\n",i);

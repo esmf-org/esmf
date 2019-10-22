@@ -135,12 +135,17 @@ class TestRegrid(TestBase):
 
             keywords = dict(deep_copy=[False, True], as_dict=[False, True])
             for k in self.iter_product_keywords(keywords):
-
-                rh = Regrid(srcfield, dstfield,
-                            regrid_method=RegridMethod.BILINEAR,
-                            line_type=LineType.CART, factors=True,
-                            create_rh=False,
-                            unmapped_action=UnmappedAction.IGNORE)
+                try:
+                    rh = Regrid(srcfield, dstfield,
+                                regrid_method=RegridMethod.BILINEAR,
+                                line_type=LineType.CART, factors=True,
+                                create_rh=False,
+                                unmapped_action=UnmappedAction.IGNORE)
+                except RuntimeError:
+                    if constants._ESMF_USE_INMEM_FACTORS:
+                        raise
+                    else:
+                        raise SkipTest("compiler does not support in-memory weights")
                 _ = rh(srcfield, dstfield)
 
                 fl, fil, fdict = [None] * 3  # Reset at each loop

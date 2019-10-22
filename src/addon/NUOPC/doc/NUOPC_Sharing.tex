@@ -1,0 +1,23 @@
+% $Id$
+%
+
+\label{Sharing}
+
+For coupling scenarios with a very high coupling frequency, or for situations where large data volumes are exchanged (e.g. 3D volumetric fields), it can be necessary for fields and geom objects (Grid, Mesh, and LocStreams) to share their data via references. Reference sharing greatly reduces the coupling cost compared to local or remote copies.
+
+In the current implementation, in order for NUOPC components to be coupled via reference sharing, they must only have data defined (i.e. have DEs) on PETs that are part of both components. Further, the distribution of data across the PETs must be identical for both components. If these conditions are met, and both sides of the connection indicate that they are willing to participate in reference sharing, the NUOPC Connector will handle technical details. The Connector will provide fields to the components that reference the exact same data allocations in memory. Notice however that once reference sharing is active, the NUOPC Layer cannot protect against components violating the data access conventions. Specifically fields in the importState are not to be modified by the component. Reference sharing requires a higher level of "trust" between the components. NUOPC therefore requires that both sides of a connection agree to reference sharing.
+
+A component uses the {\tt SharePolicyField} and {\tt SharePolicyGeomObject} attributes on each field to indicate whether it is willing to reference share the data of a field, and/or the geom object on which the field is built. A setting of {\tt share} indicates a component's willingness to share, while {\tt not share} indicates the opposite. The share policy attributes are automatically set when a field is advertised via the {\tt NUOPC\_Advertise()} method. By default this method sets both share policies to {\tt not share}.
+
+When a Connector negotiates the connections between two components, it first considers the transfer offer attributes (i.e. {\tt TransferOfferGeomObject}) on both sides for each field to determine the {\tt TransferActionGeomObject} attribute for both side. The details of this protocol are outline in section \ref{TransferGeom}. There are two cases to consider for each field that are relevant for reference sharing:
+
+The simple case is where the Connector determines that for a specific field both sides must provide the field and geom object. This is indicated by {\tt TransferActionGeomObject} being set to {\tt provide} on both sides. For this case the {\tt ShareStatusField} and {\tt ShareStatusGeomObject} attributes are automatically set to {\tt not shared} for all the fields, preventing any reference sharing.
+
+The more interesting case is where one side of the connection receives the {\tt TransferActionGeomObject} on a field set to {\tt provide}, while the other side receives {\tt accept}. In this case, the next step is for the Connector to take the {\tt SharePolicyField} and {\tt SharePolicyGeomObject} attributes on both sides into consideration. For each of the two attributes separately, if one side indicates {\tt not share}, both sides will receive the associated ShareStatus set to {\tt not shared}. However, if both sides of the connection indicate a SharePolicy of {\tt share}, the Connector must further inspect the petLists to see if reference sharing is possible for the specific field. Under the current implementation a field is sharable with another component if all the PETs on which the field holds DEs are also in the other component's petList. If this condition is not met for the specific field, then the associated ShareStatus is set to {\tt not shared}. Otherwise the ShareStatus is set to {\tt shared}
+
+During later phases of the Initialization protocol the Connector performs different operations, depending on how the {\tt TransferActionGeomObject}, {\tt ShareStatusField}, and {\tt ShareStatusGeomObject} attributes were set as per the above protocol:
+\begin{itemize}
+\item For a field that has {\tt ShareStatusGeomObject} equal to {\tt share}, the geom object provided by the provider component will be made available to the acceptor component.
+\item For a field that has {\tt ShareStatusField} equal to {\tt share}, the Connector realizes the field for the acceptor component using the data allocation reference provided by the field of the provider component.
+\end{itemize}
+

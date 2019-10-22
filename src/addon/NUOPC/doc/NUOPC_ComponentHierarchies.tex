@@ -1,0 +1,18 @@
+% $Id$
+%
+
+\label{ComponentHierarchy}
+
+The NUOPC Layer supports component hierarchies. The key feature to support this capability is the ability for a generic {\tt NUOPC\_Driver} to add another {\tt NUOPC\_Driver} component as a child, and to drive it much like a {\tt NUOPC\_Model} component. The standard Initialize Phase Definitions (IPDs), as documented under section \ref{IPD}, are used to define the interaction upward and downward the hierarchy tree.
+
+In the current implementation a driver interacts upward with its parent driver using IPDv02. This allows for data-dependencies during initialize to be resolved throughout the entire component hierarchy. The implementation is based on a sweep algorithm that continues up and down the hierarchy until either all data-dependencies have been resolved, or a dead-lock situation has been detected and flagged.
+
+Along the downward direction, the interaction of a driver with its children currently supports up to IPDv05. This allows a driver to mirror its child components' fields, and to transfer or share geom objects and fields up the component hierarchy. All of the interactions of a driver with its child components are handled by explicit {\tt NUOPC\_Connector} instances. These instances are automatically added by the driver when needed.
+
+The detailed behavior of a {\tt NUOPC\_Driver} component within a component hierarchy depends on the setting of the {\tt HierarchyProtocol} attribute on the driver component itself. Section \ref{DriverCompMeta} lists all of the driver attributes defined by NUOPC. By default the {\tt HierarchyProtocol} attribute is unset. For unset {\tt HierarchyProtocol} or when set to {\tt PushUpAllExportsAndUnsatisfiedImports}, the driver component pushes all the fields from its children exportStates into its own exportState, and all unsatisfied fields in its children importStates into its own importState. This is done using the standard Field Mirroring protocol discussed under \ref{FieldMirror}. Further the driver sets the {\tt SharePolicyGeomObject}, and 
+{\tt SharePolicyField} to {\tt share} for all the fields it mirrors. This triggers the reference share protocol as described in section \ref{Sharing}.
+
+When the {\tt HierarchyProtocol} is set to {\tt Explorer}, the driver component still mirrors the fields from its child components' import- and exportStates, as was done for the default, however, the share policies will not be set. This protocol option is used by the NUOPC ComponentExplorer to connect to user provided components.
+
+Finally, for a setting of {\tt HierarchyProtocol} to {\tt ConnectProvidedFields}, the driver does not modify its own import- and exportState. Instead connections are made only between fields that have been added to the driver states externally. This is useful for the situation where a {\tt NUOPC\_Driver} component is called directly via ESMF component method from a level that is outside of NUOPC. In this situation, field and/or geom object sharing must be activated explicitly if desired.
+

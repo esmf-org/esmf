@@ -17,7 +17,7 @@
 \addtolength{\oddsidemargin}{-.75in}
 \newcommand{\mytitle}{\Large {\bf NUOPC Layer Reference}}
 \newcommand{\myauthors}{\large {\it Content Standards Committee (CSC) Members}}
-\newcommand{\myversion}{ESMF v8.0.0 beta snapshot}
+\newcommand{\myversion}{ESMF 8.1.0 beta snapshot}
 % set a standard paragraph style
 \setlength{\parskip}{0pt}
 \setlength{\parindent}{0pt}
@@ -186,6 +186,13 @@
 \input{../addon/NUOPC/doc/NUOPC_TransferGeom}
 #endif
 
+\subsubsection{Field and Grid/Mesh/LocStream Reference Sharing}
+#ifdef STANDALONE
+\input{NUOPC_Sharing}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_Sharing}
+#endif
+
 \subsubsection{Field Mirroring}
 #ifdef STANDALONE
 \input{NUOPC_FieldMirror}
@@ -198,6 +205,13 @@
 \input{NUOPC_Timekeeping}
 #elif defined(CONSTITUENT)
 \input{../addon/NUOPC/doc/NUOPC_Timekeeping}
+#endif
+
+\subsection{Component Hierarchies}
+#ifdef STANDALONE
+\input{NUOPC_ComponentHierarchies}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_ComponentHierarchies}
 #endif
 
 \newpage

@@ -1659,6 +1659,22 @@ subroutine MultPar_SingleLine_Vf
 
       !-----------------------------------------------------------------------
       !EX_UTest
+      ! Config Section Find Next Label section_data_values Test
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Config Section Find Next Label section_data_values Test"
+      call ESMF_ConfigFindNextLabel(cf2, label='section_data_values:', isPresent=success, rc=rc)
+      success = success .and. (rc.eq.ESMF_SUCCESS)
+      call ESMF_Test(success, name, failMsg, result, ESMF_SRCLINE)
+
+      counter_total = counter_total + 1
+      if (success) then
+        counter_success = counter_success + 1
+      else
+        print *, trim(name) // ' ERROR: rc = ', rc
+      end if
+
+      !-----------------------------------------------------------------------
+      !EX_UTest
       ! Config Section Get Attribute section_data_num Test
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Config Section Get Attribute section_data_num Test"

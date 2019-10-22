@@ -196,7 +196,8 @@ static void GetObject(void *user, int numGlobalIds, int numLids, int numObjs,
                      freeze_src(freeze_src_),
                      srcplist_rend(NULL),
                      dstplist_rend(NULL),
-                     on_sph(_on_sph)
+                     on_sph(_on_sph),
+                     status(GEOMREND_STATUS_UNINIT)
 {
 
   if (_srcplist != NULL) {
@@ -1516,6 +1517,7 @@ void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF,
 
   if(freeze_src) {
     Build_Merge(nsrcF, srcF, ndstF, dstF, zzp);
+    status=GEOMREND_STATUS_COMPLETE;
     return;
   }
 
@@ -1534,17 +1536,47 @@ void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF,
   ZoltanUD zud(sdim, src_coordField_ptr, dst_coordField_ptr, srcplist, dstplist, iter_is_obj);
 
   // Gather the destination points.  Also get a min/max
+  int num_dst_local=0;
   double cmin[3], cmax[3];
-
-  if (dstplist != NULL)
+  if (dstplist != NULL)  {
     build_dest_plist(cmin, cmax, dstplist);
-  else
+    num_dst_local=dstplist->get_curr_num_pts(); 
+  } else {
     build_dest(cmin, cmax, zud);
+    num_dst_local=zud.dstObj.size();
+  }
 
   BBox dstBound = BBoxParUnion(BBox(sdim, cmin, cmax));
 
-  if (srcplist == NULL)
+  // Get src mesh (within dst bounding box)
+  int num_src_local=0;
+  if (srcplist == NULL) {
     build_src(dstBound, zud);
+    num_src_local = zud.srcObj.size();
+  } else {
+    num_src_local=srcplist->get_curr_num_pts(); 
+  }
+
+  // Compute global sums
+  int local[2];
+  int global_tot[2];
+  local[0]=num_dst_local;
+  local[1]=num_src_local;
+  MPI_Allreduce(local,global_tot,2,MPI_INT,MPI_SUM,Par::Comm());
+
+  // Leave if there are no destination points
+  if (global_tot[0] == 0) {
+    status=GEOMREND_STATUS_NO_DST;
+    std::vector<MeshObj*>().swap(zud.dstObj);
+    std::vector<MeshObj*>().swap(zud.srcObj);
+    return;
+  } else if (global_tot[1] == 0) {
+    status=GEOMREND_STATUS_DST_BUT_NO_SRC;
+    std::vector<MeshObj*>().swap(zud.dstObj);
+    std::vector<MeshObj*>().swap(zud.srcObj);
+    return;
+  }
+
 
   float ver;
   int rc = Zoltan_Initialize(0, NULL, &ver);
@@ -1664,6 +1696,9 @@ void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF,
   if(free_zz){
     Zoltan_Destroy(&zz);
   }
+
+  // Set status before leaving
+  status=GEOMREND_STATUS_COMPLETE;
 }
 
 } // namespace ESMCI

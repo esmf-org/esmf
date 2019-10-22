@@ -85,7 +85,7 @@ endif
 DIRS	  = Legacy Regridding Zoltan
 ifeq ($(ESMF_LAPACK),internal)
 DIRS	 += Lapack BLAS
-STOREH   += ESMF_LapackBlas.inc
+STOREH   +=
 endif
 ifeq ($(ESMF_MOAB),internal)
 DIRS     += Moab

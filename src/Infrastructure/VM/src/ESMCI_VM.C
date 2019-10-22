@@ -379,6 +379,65 @@ int VMId::set(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMId::log()"
+//BOPI
+// !IROUTINE:  ESMCI::VMId::log
+//
+// !INTERFACE:
+void VMId::log(
+//
+// !ARGUMENTS:
+//
+  std::string prefix
+  )const{
+//
+// !DESCRIPTION:
+//   Log the VMId.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  char digits[64];
+  char msg[256];
+  std::stringstream info;
+  info << "  vmKeyWidth = " << vmKeyWidth;
+  sprintf(msg, "%s - VMId: %s", prefix.c_str(), info.str().c_str());
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  info.str(""); // clear info
+  info << "  vmKey=0x";
+  int bitmap=0;
+  int k=0;
+  for (int i=0; i<vmKeyWidth; i++){
+    bitmap |= vmKey[i];
+    bitmap = bitmap << 8;
+    ++k;
+    if (k==4){
+      sprintf(digits, "%X", bitmap);
+      info << digits;
+      bitmap=0;
+      k=0;
+    }
+  }
+  if (k!=0){
+    bitmap = bitmap << (3-k)*8;
+    sprintf(digits, "%X", bitmap);
+    info << digits;
+  }
+  sprintf(msg, "%s - VMId: %s", prefix.c_str(), info.str().c_str());
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  info.str(""); // clear info
+  info << "  localID = " << localID;
+  sprintf(msg, "%s - VMId: %s", prefix.c_str(), info.str().c_str());
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::VMId::print()"
 //BOPI
 // !IROUTINE:  ESMCI::VMId::print
@@ -1377,8 +1436,8 @@ int VM::alltoallvVMId(
       vmBYTE);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) {
-    delete send_vmkeys;
-    delete recv_vmkeys;
+    delete [] send_vmkeys;
+    delete [] recv_vmkeys;
     return rc;
   }
   for (int key=0; key<recv_sum; key++) {
@@ -1388,8 +1447,8 @@ int VM::alltoallvVMId(
 // std::cout << "] = " << (int)recvvmID[key]->vmKey[i] << std::endl;
     }
   }
-  delete send_vmkeys;
-  delete recv_vmkeys;
+  delete [] send_vmkeys;
+  delete [] recv_vmkeys;
 
   // communicate localIDs
   int *send_ids = new int[send_sum];
@@ -1403,15 +1462,15 @@ int VM::alltoallvVMId(
       vmI4);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) {
-    delete send_ids;
-    delete recv_ids;
+    delete [] send_ids;
+    delete [] recv_ids;
     return rc;
   }
   for (int i=0; i<recv_sum; i++) {
     recvvmID[i]->localID = recv_ids[i];
   }
-  delete send_ids;
-  delete recv_ids;
+  delete [] send_ids;
+  delete [] recv_ids;
 
   // return successfully
   rc = ESMF_SUCCESS;
@@ -2755,7 +2814,6 @@ VM *VM::initialize(
     ++vmKeyWidth;               // correction for extra bits
     vmKeyOff = 8 - vmKeyOff;    // number of extra bits in last char
   }
-#define DEBUG
 #ifdef DEBUG
   printf("ESMC_VMInitialize, vmKeyWidth=%d vmKeyOff=%d\n", vmKeyWidth, vmKeyOff);
 #endif

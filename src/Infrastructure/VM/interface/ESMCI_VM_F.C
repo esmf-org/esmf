@@ -1494,6 +1494,35 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS; // TODO: finish error handling
   }
 
+  void FTN_X(c_esmc_vmidlog)(ESMCI::VMId **vmid, char *prefix, int *rc,
+    ESMCI_FortranStrLenArg prefix_l){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmidlog()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vmid, rc)
+    ESMCI_NULL_CHECK_PRC(*vmid, rc)
+    try{
+      std::string prefixStr(prefix, prefix_l);
+      (*vmid)->log(prefixStr);
+    }catch(int localrc){
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc))
+        return; // bail out
+    }catch(std::exception &x){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, x.what(), ESMC_CONTEXT,
+        rc);
+      return; // bail out
+    }catch(...){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception", 
+        ESMC_CONTEXT, rc);
+      return;
+    }
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
   void FTN_X(c_esmc_vmidprint)(ESMCI::VMId **vmid, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmidprint()"
@@ -1502,7 +1531,7 @@ extern "C" {
     // test for NULL pointer via macro before calling any class methods
     ESMCI_NULL_CHECK_PRC(vmid, rc)
     ESMCI_NULL_CHECK_PRC(*vmid, rc)
-    int localrc = (*vmid)->ESMCI::VMId::print();
+    int localrc = (*vmid)->print();
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return;
     // Flush before crossing language interface to ensure correct output order
@@ -1765,7 +1794,7 @@ extern "C" {
   void FTN_X(c_esmc_vmlogmeminfo)(char *prefix, ESMCI::LogErr **log, int *rc,
     ESMCI_FortranStrLenArg prefix_l){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_vmgetmeminfo()"
+#define ESMC_METHOD "c_esmc_vmlogmeminfo()"
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     try{
       std::string prefixStr(prefix, prefix_l);

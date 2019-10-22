@@ -41,6 +41,14 @@ module ESMF_NUOPC_UTest_Mod
     rc=ESMF_SUCCESS
     !------------------------------------------------------------------------
     !NEX_UTest
+    write(name, *) "NUOPC_CompSpecialize() for GridComp before Derive() Test"
+    write(failMsg, *) "Did incorrectly return ESMF_SUCCESS"
+    call NUOPC_CompSpecialize(driver, specLabel=driver_label_SetModelServices, &
+      specRoutine=SetModelServices, rc=rc)
+    call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    rc=ESMF_SUCCESS ! re-initialize for the remaining test code
+    !------------------------------------------------------------------------
+    !NEX_UTest
     write(name, *) "NUOPC_CompDerive() for GridComp Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     call NUOPC_CompDerive(driver, driver_routine_SS, rc=rc)
@@ -179,6 +187,7 @@ program ESMF_NUOPC_UTest
   !LOCAL VARIABLES:
   type(ESMF_VM)           :: vm
   integer                 :: petCount, localPet, slotCount
+  character(ESMF_MAXSTR)  :: compName, valueString
   type(ESMF_Time)         :: startTime, stopTime
   type(ESMF_TimeInterval) :: timeStep
   type(ESMF_Clock)        :: clockA, clockB, clockC
@@ -282,6 +291,33 @@ program ESMF_NUOPC_UTest
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   if (urc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_CompGet() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_CompGet(gridComp, name=compName, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_CompAttributeGet() for GridComp Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_CompAttributeGet(gridComp, name="Verbosity", value=valueString, &
+    rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "ESMF_UtilString2Int() for Verbosity Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  valueInt = ESMF_UtilString2Int(valueString, &
+    specialStringList=(/"max ", "high", "low ", "off "/), &
+    specialValueList=(/255, 128, 32, 0/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "NUOPC_DriverGetComp() Test"
@@ -580,6 +616,14 @@ program ESMF_NUOPC_UTest
   write(name, *) "NUOPC_CompAttributeGet() for CplComp Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_CompAttributeGet(cplComp, name="CplList", isSet=isSet, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_CompAttributeReset() for CplComp Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_CompAttributeReset(cplComp, (/"CplList"/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 

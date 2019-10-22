@@ -95,7 +95,7 @@ module ESMF_InfoMod
 !===============================================================================
 
 ! -------------------------- ESMF-public method -------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_InfoAssignment(=) - Info assignment
 !
 ! !INTERFACE:
@@ -119,12 +119,12 @@ module ESMF_InfoMod
 !     The {\tt ESMF\_Info} object on the right hand side of the assignment.
 !   \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_InfoOperator(==) - Info equality operator
 !
 ! !INTERFACE:
@@ -155,7 +155,7 @@ module ESMF_InfoMod
 !     operation.
 !   \end{description}
 !
-!EOP
+!EOPI
     module procedure ESMF_InfoEQ
 
   end interface
@@ -163,7 +163,7 @@ module ESMF_InfoMod
 
 
 ! -------------------------- ESMF-public method -------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_InfoOperator(/=) - Info not equal operator
 !
 ! !INTERFACE:
@@ -194,7 +194,7 @@ module ESMF_InfoMod
 !     operation.
 !   \end{description}
 !
-!EOP
+!EOPI
     module procedure ESMF_InfoNE
 
   end interface
@@ -306,7 +306,7 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoCreate"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_InfoCreate - Create an Info object
 !
 ! !INTERFACE:
@@ -329,7 +329,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                       :: localrc         ! local error status
 
@@ -354,7 +354,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoDestroy"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_InfoDestroy - Release resources associated with an Info object
 !
 ! !INTERFACE:
@@ -398,7 +398,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer :: localrc                       ! local error status
 
@@ -432,7 +432,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoIsCreated()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_InfoIsCreated - Check whether an Info object has been created
 
 ! !INTERFACE:
@@ -458,7 +458,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
   !-----------------------------------------------------------------------------
     ESMF_InfoIsCreated = .false.   ! initialize
     if (present(rc)) rc = ESMF_SUCCESS

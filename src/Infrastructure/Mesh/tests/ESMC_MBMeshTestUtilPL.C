@@ -122,6 +122,9 @@ PointList* create_pointlist(std::vector<double*> *cv, int &rc) {
 
   rc = ESMF_RC_NOT_IMPL;
 
+  // clean out the cv list first in case it is being reused
+  cv->clear();
+
   double *c = new double[2];
   c[0] = 0.0; c[1] = 0.0;
   cv->push_back(c);
@@ -231,6 +234,9 @@ PointList* create_pointlist_for_quad(std::vector<double*> *cv, int &rc) {
   //
 
   rc = ESMF_RC_NOT_IMPL;
+
+  // clean out the cv list first in case it is being reused
+  cv->clear();
 
   double *c = new double[2];
   c[0] = 0.5; c[1] = 0.5;
@@ -804,6 +810,9 @@ PointList* create_pointlist_for_quad_sph(std::vector<double*> *cv, int &rc) {
 
   double pi = 3.14159;
 
+  // clean out the cv list first in case it is being reused
+  cv->clear();
+
   double *c = new double[3];
   c[0] = pi/20; c[1] = pi/20; c[2] = 1;
   cv->push_back(c);
@@ -865,6 +874,9 @@ PointList* create_pointlist_for_tri(std::vector<double*> *cv, int &rc) {
   //       0.25      0.75      1.25     1.75
 
   rc = ESMF_RC_NOT_IMPL;
+
+  // clean out the cv list first in case it is being reused
+  cv->clear();
 
   double *c = new double[2];
   c[0] = 0.25; c[1] = 0.5;
@@ -944,6 +956,9 @@ PointList* create_pointlist_for_tri_sph(std::vector<double*> *cv, int &rc) {
   rc = ESMF_RC_NOT_IMPL;
 
   double pi = 3.14159;
+
+  // clean out the cv list first in case it is being reused
+  cv->clear();
 
   double *c = new double[3];
   c[0] = pi/40; c[1] = pi/20; c[2] = 1;
@@ -1034,6 +1049,9 @@ PointList* create_pointlist_for_tet(std::vector<double*> *cv, int &rc) {
   //
 
   rc = ESMF_RC_NOT_IMPL;
+
+  // clean out the cv list first in case it is being reused
+  cv->clear();
 
   double *c = new double[3];
   c[0] = 0.5; c[1] = 0.5; c[2] = 0.5;

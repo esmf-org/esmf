@@ -254,3 +254,9 @@ ESMF_F90LINKOPTS          += -Wl,-no_compact_unwind
 #
 ESMF_SL_LIBOPTS  += -dynamiclib
 ESMF_SL_LIBLIBS  += $(ESMF_F90LINKPATHS) $(ESMF_F90LINKLIBS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKLIBS)
+
+############################################################
+# Static builds on Darwin do not support trace lib due to missing linker option
+ifeq ($(ESMF_SHARED_LIB_BUILD),OFF)
+ESMF_TRACE_LIB_BUILD = OFF
+endif

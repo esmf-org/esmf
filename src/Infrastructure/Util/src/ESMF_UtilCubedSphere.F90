@@ -19,10 +19,10 @@ module ESMF_UtilCubedSphereMod
   private
 
 !------------------------------------------------------------------------------
-! ! ESMF_CS_Arguments
+! ! ESMF_CubedSphereTransform_Args
 !
 !------------------------------------------------------------------------------
-  type ESMF_CS_Arguments
+  type ESMF_CubedSphereTransform_Args
 ! private
     real(ESMF_KIND_R4) :: stretch_factor, target_lat, target_lon
   end type
@@ -92,7 +92,7 @@ module ESMF_UtilCubedSphereMod
   real :: deglon_start = -30., deglon_stop = 30., &  ! boundaries of latlon patch
           deglat_start = -30., deglat_stop = 30.
 
-  public :: ESMF_CS_Arguments
+  public :: ESMF_CubedSphereTransform_Args
   public :: ESMF_UtilCreateCSCoords
   public :: ESMF_UtilCreateCSCoordsPar
 
@@ -113,7 +113,7 @@ subroutine ESMF_UtilCreateCSCoords(npts, LonEdge,LatEdge, start, count, tile, &
     integer, optional, intent(in)     :: tile
     real(ESMF_KIND_R4), optional, intent(inout) :: LonCenter(:,:)
     real(ESMF_KIND_R4), optional, intent(inout) :: LatCenter(:,:)
-    type(ESMF_CS_Arguments), optional, intent(in)    :: schmidtTransform
+    type(ESMF_CubedSphereTransform_Args), optional, intent(in)    :: schmidtTransform
 
 ! ErrLog variables
 !-----------------
@@ -292,7 +292,7 @@ subroutine ESMF_UtilCreateCSCoordsPar(npts, LonEdge,LatEdge, start, count, tile,
     integer, optional, intent(in)     :: tile
     real(ESMF_KIND_R4), optional, intent(inout) :: LonCenter(:,:)
     real(ESMF_KIND_R4), optional, intent(inout) :: LatCenter(:,:)
-    type(ESMF_CS_Arguments), optional, intent(in) :: schmidtTransform
+    type(ESMF_CubedSphereTransform_Args), optional, intent(in) :: schmidtTransform
 
  integer                      :: STATUS
 

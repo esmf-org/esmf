@@ -311,7 +311,7 @@ namespace ESMCI {
   static void _replace_src_ids_in_cols_with_their_weights(std::vector<IWeights::Entry> &cols, WMat &wts, 
                                                           std::vector<IWeights::Entry> &new_cols);
   static void _propagate_level_to_other_procs(Mesh &mesh, vector<CreepNode *> &level, map<int,CreepNode> &creep_map);
-
+  static void _convert_creep_levels_to_dst_status(int num_creep_levels, vector <CreepNode *> *creep_levels, WMat &dst_status);
 
   /* XMRKX */
   // Creep unmasked points creep_level levels into masked points yielding wts. 
@@ -503,32 +503,37 @@ namespace ESMCI {
       }
 
       // Debug output level
-      char new_filename[1000];
-      sprintf(new_filename,"creep_%dlevel",l);
+      // char new_filename[1000];
+      //sprintf(new_filename,"creep_%dlevel",l);
       //_write_level(new_filename,mesh, creep_levels[l]);
 
       // Add other donor levels to cnodes in creep_levels[l]
       // (Level 0 is already filled above)
-      for (int dl=1; dl<num_donor_levels; dl++) {
+      //      for (int dl=1; dl<num_donor_levels; dl++) {
 
         // Loop through prev level
-        for (int i=0; i<creep_levels[l].size(); i++) {
+      //  for (int i=0; i<creep_levels[l].size(); i++) {
           //// STOPPED HERE
 
-        } // num creep nodes in level l
-      } //  num_donor_levels - dl
+      // } // num creep nodes in level l
+      //} //  num_donor_levels - dl
     }
 
     // Construct weights from creep information
     _convert_creep_levels_to_weights(num_creep_levels, creep_levels, wts);
-      
+
+    // Set destination status (if asked to)
+    if (set_dst_status) {
+      _convert_creep_levels_to_dst_status(num_creep_levels, creep_levels, dst_status);
+    }
+
     // Get rid of levels structure
     if (creep_levels != NULL) delete [] creep_levels;
   }
 
 
 // Construct weights from creep information
-static void _convert_creep_levels_to_weights(int num_creep_levels, vector <CreepNode *> *creep_levels, WMat &wts) {
+  static void _convert_creep_levels_to_weights(int num_creep_levels, vector <CreepNode *> *creep_levels, WMat &wts) {
 
   // Put these outside loop, so it doesn't keep allocating memory every time
   std::vector<IWeights::Entry> cols;
@@ -756,6 +761,38 @@ static void _convert_creep_levels_to_weights(int num_creep_levels, vector <Creep
 #endif
 
   }
+
+// Construct weights from creep information
+  static void _convert_creep_levels_to_dst_status(int num_creep_levels, vector <CreepNode *> *creep_levels, WMat &dst_status) {
+
+    // Put these outside loop, so it doesn't keep allocating memory every time
+    std::vector<IWeights::Entry> cols;
+
+    // make sure there is at least one level
+    if (num_creep_levels < 2) return;
+
+    // Iterate through creep levels
+    for (int l=1; l<num_creep_levels; l++) {
+
+      // Loop through levels
+      for (int i=0; i<creep_levels[l].size(); i++) {
+
+        // Get creep node
+        CreepNode *cnode=creep_levels[l][i];      
+        
+        // Set row info (i.e. the destination id associated with the above weight)
+        IWeights::Entry row(cnode->node->get_id(), 0, 0.0, 0);
+      
+        // Set col info
+        WMat::Entry col(ESMC_REGRID_STATUS_EXTRAP_MAPPED, 0, 0.0, 0);
+        
+        // Put info into status matrix
+        dst_status.InsertRowMergeSingle(row, col);
+      }
+    }
+  }
+
+
 
 
   //////////

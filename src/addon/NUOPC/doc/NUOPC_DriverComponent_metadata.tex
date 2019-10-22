@@ -49,6 +49,6 @@ is {\em not} part of the Attribute name!
      {\tt Nestling} & Integer value enumerating siblings within the same generation.& 0, 1, 2, ...\\ \hline
      {\tt Initialize\-DataComplete} & String value indicating whether all initialize data dependencies have been satisfied.& false, true\\ \hline
      {\tt Initialize\-DataProgress} & String value indicating whether progress is being made resolving initialize data dependencies.& false, true\\ \hline
-     {\tt HierarchyProtocol} & String value specifying the hierarchy protocol.& "PushUpAllExportsAndUnsatisfiedImports" for field mirroring and connecting, "ConnectProvidedFields" to only connect provided fields (no mirroring), {\em All other values currently disable the hierarchy protocol.}\\ \hline
+     {\tt HierarchyProtocol} & String value specifying the hierarchy protocol.& "PushUpAllExportsAndUnsatisfiedImports" - activates field mirroring of all exports and unsatisfied imports. By default use reference sharing for the mirrored fields and geom objects. This is the default behavior without having {\tt HierarchyProtocol} set. "ConnectProvidedFields"- no field mirroring, only connect to externally provided fields in the import- and exportStates. "Explorer" - like the default, but do not use reference sharing. {\em All other values currently disable the hierarchy protocol.}\\ \hline
      \hline
 \end{longtable}

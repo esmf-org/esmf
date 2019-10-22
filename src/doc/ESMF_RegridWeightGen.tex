@@ -103,8 +103,15 @@ The regridding application provides the argument "\verb+--+src\_missingvalue" or
 "\verb+--+dst\_missingvalue" for users to specify the variable name from where the mask can be
 constructed.
 
+\subsubsection{Extrapolation}\label{sec:rwg_extrap}
+The {\tt ESMF\_RegridWeightGen} application supports a number of kinds of extrapolation to fill in points not mapped by the regrid method. 
+Please see the sections starting with section~\ref{sec:extrapolation:overview} for a description of these methods. When using the application
+an extrapolation method is specified by using the "\verb+--+extrap\_method" flag. For the inverse distance weighted average method (nearestidavg),
+the number of source locations is specified using the "\verb+--+extrap\_num\_src\_pnts" flag, and the distance exponent is specified using 
+the "\verb+--+extrap\_dist\_exponent" flag. For the creep fill method (creep), the number of creep levels is specified using the "\verb+--+extrap\_num\_levels" flag.
+
 \subsubsection{Unmapped destination points}\label{sec:rwg_unmapped}
-If a destination point can't be mapped because it falls outside the unmasked source grid, then the default behavior of the application is to stop with an error. By specifying "-i" or the equivalent "\verb+--+ignore\_unmapped " the user can cause the application to ignore unmapped destination points. In this case, the output matrix won't contain entries for the unmapped destination points. Note that the unmapped point detection doesn't
+If a destination point can't be mapped, then the default behavior of the application is to stop with an error. By specifying "-i" or the equivalent "\verb+--+ignore\_unmapped " the user can cause the application to ignore unmapped destination points. In this case, the output matrix won't contain entries for the unmapped destination points. Note that the unmapped point detection doesn't
 currently work for nearest destination to source method ("-m nearestdtos"), so when using that method it  is as if ``-i'' is always on.
 
 \subsubsection{Line type}\label{sec:rwg_linetype}
@@ -275,9 +282,10 @@ ESMF_RegridWeightGen
         [--pole|-p none|all|teeth|1|2|..]
         [--line_type|-l cartesian|greatcircle]
         [--norm_type dstarea|fracarea]
-        [--extrap_method none|neareststod|nearestidavg]
+        [--extrap_method none|neareststod|nearestidavg|creep]
         [--extrap_num_src_pnts <N>]
         [--extrap_dist_exponent <P>]
+        [--extrap_num_levels <L>]
         [--ignore_unmapped|-i]
         [--ignore_degenerate]
         [-r]
@@ -379,7 +387,7 @@ where:
                         neareststod  - nearest source to destination. Each
                                        unmapped destination location is mapped 
                                        to the closest source location. This 
-                                       extrapolation method not supported with 
+                                       extrapolation method is not supported with 
                                        conservative regrid methods (e.g. conserve).
         
                         nearestidavg - inverse distance weighted average. 
@@ -392,9 +400,21 @@ where:
                                        they sum to 1.0. The user can choose N and P by
                                        using --extrap_num_src_pnts and 
                                        --extrap_dist_exponent, but defaults are 
-                                       also provided. This extrapolation method not 
+                                       also provided. This extrapolation method is not 
                                        supported with conservative regrid methods
                                        (e.g. conserve).
+
+                        creep        - creep fill. 
+                                       Here unmapped destination points are filled by 
+                                       moving values from mapped locations to neighboring 
+                                       unmapped locations. The value filled into a 
+                                       new location is the average of its already filled
+                                       neighbors' values. This process is repeated for 
+                                       the number of levels indicated by the 
+                                       --extrap_num_levels flag. This extrapolation
+                                       method is not supported with conservative 
+                                       regrid methods (e.g. conserve).
+                                       
 
     --extrap_num_src_pnts - an optional argument specifying how many source points
                             should be used when the extrapolation method is 
@@ -404,6 +424,9 @@ where:
                              the distance should be raised to when the 
                              extrapolation method is nearestidavg. If not specified, 
                              the default is 2.0.
+
+    --extrap_num_levels - an optional argument specifying how many levels should
+                          be filled for level based extrapolation methods (e.g. creep).
 
     --ignore_unmapped
            or
@@ -502,7 +525,7 @@ where:
                         corner - Regrid using the corner location of each grid cell. 
 
 
-    --dst_loc      - an optional argument that specifies whether to use the 
+    --dst_loc         - an optional argument that specifies whether to use the 
                         center coordinates or corner coordinates to do the regridding.
                         Currently, this flag is only required for non-conservative
                         regridding when the destination grid is an unstructured grid in 
@@ -518,11 +541,11 @@ where:
                         Whichever areas the conservation holds for are output
                         to the weight file.
 
-     --weight_only    - an Optional argument specifying that the output weight file only 
+     --weight_only    - an optional argument specifying that the output weight file only 
                         contains the weights and the source and destination grid's indices.
 
      --check          - Check that the generated weights produce reasonable 
-                         regridded fields. This is done by calling ESMF_Regrid() 
+                        regridded fields. This is done by calling ESMF_Regrid() 
                         on an analytic source field using the weights generated 
                         by this application.  The mean relative error between 
                         the destination and analytic field is computed, as well 
@@ -1438,4 +1461,4 @@ the weights {\tt S}, the source grid indices {\tt col} and destination grid indi
 \subsection{ESMF\_RegridWeightGenCheck}\label{sec:regridweightgencheck}
 
 The ESMF\_RegridWeightGen application is used in the
-\htmladdnormallink{ESMF\_RegridWeightGenCheck external demo}{http://www.earthsystemmodeling.org/users/code_examples/external_demos/external_demos.shtml} to generate interpolation weights.  These weights are then tested by using them for a regridding operation and then comparing them against an analytic function on the destination grid.  This external demo is also used to regression test ESMF regridding, and it is run nightly on over 90 combinations of structured and unstructured, regional and global grids, and regridding methods.
+\htmladdnormallink{ESMF\_RegridWeightGenCheck external demo}{http://www.earthsystemmodeling.org/users/code_examples/external_demos/external_demos.shtml} to generate interpolation weights.  These weights are then tested by using them for a regridding operation and then comparing them against an analytic function on the destination grid.  This external demo is also used to regression test ESMF regridding, and it is run nightly on over 150 combinations of structured and unstructured, regional and global grids, and regridding methods.

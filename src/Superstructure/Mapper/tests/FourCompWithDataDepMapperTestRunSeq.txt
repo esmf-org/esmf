@@ -1,0 +1,11 @@
+# Run sequence
+runSeq::
+  @1800.0
+    comp0
+    comp0 -> comp1
+    comp1
+    comp2
+    comp2 -> comp3
+    comp3
+  @
+::

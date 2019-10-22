@@ -13,7 +13,7 @@ We are planning to increase the number of validity checks available
 for FieldBundles as soon as possible.  We also will
 be working on print options.
 
-\item{\bf Packed data not supported.}
+\item{\bf Packed data has limited supported.}
 One of the options that we are currently working on for FieldBundles is
 packing.  Packing means that the data from all the
 Fields that comprise the FieldBundle are manipulated collectively.
@@ -22,9 +22,14 @@ destroying the original Field data.  Packing is being designed to
 facilitate optimized regridding, data communication, and I/O operations.
 This will reduce the latency overhead of the communication.  
 
+{\bf CAUTION:} For communication methods, the undistributed dimension representing
+the number of fields must have identical size between source and destination packed
+data. Communication methods do not permute the order of fields in the source
+and destination packed FieldBundle.
+
 \item{\bf Interleaving Fields within a FieldBundle.}
 Data locality is important for performance on some computing
-platforms.  An interleave option will allow the user to create
+platforms.  An interleave option will be added to allow the user to create
 a packed FieldBundle in which Fields are either concatenated in memory
 or in which Field elements are interleaved.
 

@@ -36,13 +36,14 @@ else
 ifeq ($(ESMF_COMM),mpt)
 # MPT with compiler wrappers -------------------------------
 ESMF_F90DEFAULT         = mpif90
+ESMF_F90LINKLIBS       += -lmpi++
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 # Under ticket #3614573 found that MPT has issues. One of the following macros
 # must be set!
-ESMF_CXXCOMPILEOPTS    += -DMUST_USE_BLOCKING_SEND
-#ESMF_CXXCOMPILEOPTS    += -DMUST_NOTUSE_MALLOC_TRIM
+#ESMF_CXXCOMPILEOPTS    += -DMUST_USE_BLOCKING_SEND
+ESMF_CXXCOMPILEOPTS    += -DMUST_NOTUSE_MALLOC_TRIM
 else
 ifeq ($(ESMF_COMM),mpich)
 # Mpich ----------------------------------------------------
@@ -77,6 +78,13 @@ ifeq ($(ESMF_COMM),mvapich2)
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_CXXLINKLIBS       += $(shell $(ESMF_DIR)/scripts/libs.mvapich2f90)
+ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
+ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
+else
+ifeq ($(ESMF_COMM),intelmpi)
+# IntelMPI -------------------------------------------------
+ESMF_F90DEFAULT         = mpifc
+ESMF_CXXDEFAULT         = mpigxx
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
@@ -119,6 +127,7 @@ endif
 endif
 endif
 endif
+endif
 
 ############################################################
 # Print compiler version string
@@ -129,8 +138,13 @@ ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} --version
 ############################################################
 # Special debug flags
 #
+# Activate to turn on UBSan:
+#ESMF_LINKOPTFLAG_G      += -fsanitize=undefined
+# Also set environment variable UBSAN_OPTIONS="print_stacktrace=1"
+# for stacktrace at runtime.
+#
 ESMF_F90OPTFLAG_G       += -Wall -Wextra -Wconversion -Wno-unused -Wno-unused-dummy-argument -fbacktrace -fimplicit-none -fcheck=array-temps,bounds,do,mem,recursion
-ESMF_CXXOPTFLAG_G       += -Wall -Wextra -Wno-unused -fcheck-data-deps
+ESMF_CXXOPTFLAG_G       += -Wall -Wextra -Wno-unused $(ESMF_LINKOPTFLAG_G)
 
 ############################################################
 # Fortran symbol convention

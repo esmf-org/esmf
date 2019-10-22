@@ -3,12 +3,24 @@
 Building user applications against an ESMF installation requires that the 
 compiler and linker be able to find the appropriate ESMF header, module and 
 library files. If this procedure has been documented by the installer of the 
-ESMF library on your system then follow the directions given. Otherwise it is up 
-to the user to determine and provide the required compiler and linker flags. 
-Every ESMF installation provides a file named {\tt esmf.mk} that contains the 
-relevant information.
+ESMF library on your system then follow the directions provided.
 
-The location of the {\tt esmf.mk} file should be documented by the party that 
+In the absence of installation specific instructions there are two standard
+methods supported by ESMF to build user code against the installation. The
+first method is based on a GNU makefile fragment that can be included by the
+user code build infrastructure. This method requires that the user application
+also uses the
+\htmladdnormallink{GNU Make}{http://www.gnu.org/software/make/make.html}
+system. The second method is based on 
+\htmladdnormallink{CMake}{https://cmake.org/}.
+
+
+\subsection{esmf.mk method}
+\label{sec:EsmfMkMethod}
+
+Every ESMF installation provides a file named {\tt esmf.mk} that contains the 
+information needed to build a user application gainst the installation. The
+location of the {\tt esmf.mk} file should be documented by the party that
 installed ESMF on the system. We recommend that a single ESMF specific 
 environment variable, {\tt ESMFMKFILE}, be provided by the system that points to 
 the {\tt esmf.mk} file. See section \ref{InstallESMF} for the related discussion 
@@ -120,3 +132,38 @@ esmc_UserApplication:
 ################################################################################
 
 \end{verbatim}
+
+Notice that the {\tt ESMF\_F90LINKPATHS}, {\tt ESMF\_F90LINKRPATHS}, 
+{\tt ESMF\_CXXLINKPATHS}, and {\tt ESMF\_CXXLINKRPATHS} variables used in the
+linking targets might contain paths to the specific compiler version, MPI
+implementation, and 3rd party libraries (see section \ref{sec:ThirdParty})
+used when building ESMF. The paths are explicitly included in order to 
+simplify the process of writing an application build system that is consistent
+with the ESMF library that is used.
+
+There are, however, situations where it is
+desirable to let the application decide what compiler version, MPI version, 
+and/or 3rd party library verson (e.g. NetCDF) to use. To this end, {\tt esmf.mk}
+defines an alternative set of variables: {\tt ESMF\_F90ESMFLINKPATHS}, 
+{\tt ESMF\_F90ESMFLINKRPATHS}, {\tt ESMF\_CXXESMFLINKPATHS}, and 
+{\tt ESMF\_CXXESMFLINKRPATHS}. These variables only encode the precise path to
+the ESMF library, and do not specify where to find the compiler, MPI, and/or 
+3rd party libraries. When using this alternative set of variables, it becomes
+the responsibility of the application build system to ensure the required
+libraries can be found by the linker, and are compatible with the ESMF
+installation.
+
+
+\subsection{CMake method}
+
+An ESMF CMake find file is located at: \textit{<ESMF source directory>/cmake/FindESMF.cmake}
+
+The find file will parse the \textit{esmf.mk} file created following a successful
+ESMF build. (See \ref{sec:EsmfMkMethod} for a description of the \textit{esmf.mk} file.)
+The CMake module sets \textit{esmf.mk} variables as global CMake variables. When
+using the find file, {\tt ESMFMKFILE} must be set to the filepath of \textit{esmf.mk}.
+If this is NOT set, then {\tt ESMF\_FOUND} will always be {\tt FALSE}. If {\tt ESMFMKFILE}
+exists, then {\tt ESMF\_FOUND=TRUE} and all ESMF makefile variables will be set
+in the global scope. Optionally, set {\tt ESMF\_MKGLOBALS} to a string list to
+filter makefile variables. For example, to globally scope only {\tt ESMF\_LIBSDIR}
+and {\tt ESMF\_APPSDIR} variables, use this CMake command in \textit{CMakeLists.txt}: \verb|set(ESMF_MKGLOBALS "LIBSDIR" "APPSDIR")|

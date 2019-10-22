@@ -160,13 +160,8 @@ extern "C" void FTN_X(c_esmc_meshwritevtk)(MeshCap **meshpp, char *fname,
   int num_nodeArrays;
   ESMCI::Array *nodeArrays[MAX_NUM_NODE_ARRAYS];
 
-  printf("BOB: nodeArray1 = %d\n",nodeArray1);
-
-
   int n=0;
   if (ESMC_NOT_PRESENT_FILTER(nodeArray1) != ESMC_NULL_POINTER) {
-    printf("BOB: nodeArray1 found!\n");
-
     nodeArrays[n]=*nodeArray1;
     n++;
   }

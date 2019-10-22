@@ -292,13 +292,14 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_distgridget)(ESMCI::DistGrid **ptr,
-    int *dimCount, int *tileCount, int *deCount,
+    int *dimCount, int *tileCount, int *deCount, int *localDeCount,
     ESMCI::InterArray<int> *minIndexPDimPTile,
     ESMCI::InterArray<int> *maxIndexPDimPTile,
     ESMCI::InterArray<int> *elementCountPTile,
     ESMCI::InterArray<int> *minIndexPDimPDe,
     ESMCI::InterArray<int> *maxIndexPDimPDe,
     ESMCI::InterArray<int> *elementCountPDe,
+    ESMCI::InterArray<int> *localDeToDeMap,
     ESMCI::InterArray<int> *tileListPDe,
     ESMCI::InterArray<int> *indexCountPDimPDe,
     ESMCI::InterArray<int> *collocationPDim,
@@ -321,6 +322,8 @@ extern "C" {
       *tileCount = (*ptr)->getTileCount();
     if (ESMC_NOT_PRESENT_FILTER(deCount) != ESMC_NULL_POINTER)
       *deCount = (*ptr)->getDELayout()->getDeCount();
+    if (ESMC_NOT_PRESENT_FILTER(localDeCount) != ESMC_NULL_POINTER)
+      *localDeCount = (*ptr)->getDELayout()->getLocalDeCount();
     if (ESMC_NOT_PRESENT_FILTER(dimCount) != ESMC_NULL_POINTER)
       *dimCount = (*ptr)->getDimCount();
     if (ESMC_NOT_PRESENT_FILTER(connectionCount) != ESMC_NULL_POINTER)
@@ -504,6 +507,24 @@ extern "C" {
       for (int i=0; i<deCount; i++)
         (elementCountPDe)->array[i] = (int)(access[i]); // explicit type cast
 #endif
+    }
+    // fill localDeToDeMap
+    if (present(localDeToDeMap)){
+      // localDeToDeMap was provided -> do some error checking
+      if ((localDeToDeMap)->dimCount != 1){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+          "localDeToDeMap array must be of rank 1", ESMC_CONTEXT, rc);
+        return;
+      }
+      if ((localDeToDeMap)->extent[0] < (*ptr)->getDELayout()->getLocalDeCount()){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+          "1st dim of localDeToDeMap array must be of size 'localDeCount'",
+          ESMC_CONTEXT, rc);
+        return;
+      }
+      // fill in values
+      memcpy((localDeToDeMap)->array, (*ptr)->getDELayout()->getLocalDeToDeMap(),
+        sizeof(int)*(*ptr)->getDELayout()->getLocalDeCount());
     }
     // fill tileListPDe
     if (present(tileListPDe)){

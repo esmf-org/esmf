@@ -42,6 +42,7 @@ with open(esmfmk, 'r') as MKFILE:
     esmfcomm = None
     esmfversion = None
     netcdf = [False, False]
+    use_inmem_factors = False
     
     for line in MKFILE:
         if 'ESMF_LIBSDIR' in line:
@@ -59,6 +60,9 @@ with open(esmfmk, 'r') as MKFILE:
         elif 'ESMF_VERSION_STRING=' in line:
             esmfversion = line.split("=")[1]
             esmfversion = esmfversion.rstrip('\n')
+        elif 'ESMF_COMPILER' in line:
+            if "gfortran" in line:
+                use_inmem_factors = True
 
 if not libsdir:
     raise ValueError("ESMF_LIBSDIR not found!")
@@ -106,6 +110,12 @@ except:
         constants._ESMF_MPIRUN = "aprun"
     else:
         constants._ESMF_MPIRUN = "mpiexec"
+
+# in-memory factors only supported on the GNU stack given inability to
+# deallocate Fortran pointers associated using c_f_pointer in other compilers.
+# some compilers may support this, but only the GNU stack is guaranteed at this
+# point.
+constants._ESMF_USE_INMEM_FACTORS = use_inmem_factors
 
 #### SHARED LIBRARY ###########################################################
 

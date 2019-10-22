@@ -1,0 +1,12 @@
+# Run sequence
+runSeq::
+  @1800.0
+    ATM
+    ICE
+    ATM -> MED
+    ICE -> MED
+    MED
+    MED -> OCN
+    OCN
+  @
+::
