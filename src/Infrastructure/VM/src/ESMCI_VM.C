@@ -262,14 +262,13 @@ int VMId::deserialize(const char *buffer, int *offset, bool offsetonly) {
   if (r!=0) *offset += 8-r;  // alignment
 
   ip = (int *)(buffer + *offset);
-  int keywidth = *ip++;
   if (!offsetonly)
     localID = *ip;
   ip++;
   cp = (char *)ip;
   if (!offsetonly) {
     if (vmKey) {
-      memcpy (vmKey, cp, keywidth);
+      memcpy (vmKey, cp, vmKeyWidth);
     } else {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
           "Null vmKey encountered when deserializing a VMId object",
@@ -277,7 +276,7 @@ int VMId::deserialize(const char *buffer, int *offset, bool offsetonly) {
       return localrc;
     }
   }
-  cp += keywidth;
+  cp += vmKeyWidth;
 
   // update offset to point to past the current obj
   *offset = (cp - buffer);
@@ -322,7 +321,7 @@ int VMId::get(
   // Initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;
   *localID = this->localID;
-  if (key_len < ESMCI::vmKeyWidth) {
+  if (key_len < vmKeyWidth) {
     localrc = ESMC_RC_ARG_SIZE;
     return localrc;
   }
@@ -364,7 +363,7 @@ int VMId::set(
   // Initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;
   this->localID = localID;
-  if (key_len < ESMCI::vmKeyWidth) {
+  if (key_len < vmKeyWidth) {
     localrc = ESMC_RC_ARG_SIZE;
     return localrc;
   }
@@ -521,32 +520,36 @@ int VMId::serialize(
   int r=*offset%8;
   if (r!=0) *offset += 8-r;  // alignment
 
-  int fixedpart = 2*sizeof (int) + vmKeyWidth;
-  if (inquireflag == ESMF_INQUIREONLY) {
-    *offset += fixedpart;
-  } else {
+  int fixedpart = sizeof(int) + vmKeyWidth;
+  if (inquireflag != ESMF_INQUIREONLY){
     if ((*length - *offset) < fixedpart) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-          "Buffer too short to serialize a VMId object",
-          ESMC_CONTEXT, &localrc);
+        "Buffer too short to serialize a VMId object",
+        ESMC_CONTEXT, &localrc);
       return localrc;
     }
-    ip = (int *)(buffer + *offset);
-    *ip++ = vmKeyWidth;
+  }
+  
+  ip = (int *)(buffer + *offset);
+  if (inquireflag != ESMF_INQUIREONLY)
     *ip++ = localID;
-    cp = (char *) ip;
+  else
+    ip += 1;
+  
+  cp = (char *) ip;
+  if (inquireflag != ESMF_INQUIREONLY){
     if (vmKey == NULL) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-          "Null vmKey when serializing a VMId object",
-          ESMC_CONTEXT, &localrc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      "Null vmKey when serializing a VMId object",
+      ESMC_CONTEXT, &localrc);
       return localrc;
     }
     memcpy (cp, vmKey, vmKeyWidth);
-    cp += vmKeyWidth;
-
-    // update offset to point to past the current obj
-    *offset = (cp - buffer);
   }
+  cp += vmKeyWidth;
+
+  // update offset to point to past the current obj
+  *offset = (cp - buffer);
 
   // return successfully
   rc = ESMF_SUCCESS;
@@ -761,7 +764,7 @@ void VMIdGet(
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
   int localrc = ESMC_RC_NOT_IMPL;
   *localID = vmID->localID;
-  if (key_len < ESMCI::vmKeyWidth) {
+  if (key_len < vmKeyWidth) {
     if (rc != NULL) *rc = ESMC_RC_ARG_SIZE;
     return;
   }
@@ -805,7 +808,7 @@ void VMIdSet(
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
   int localrc = ESMC_RC_NOT_IMPL;
   vmID->localID = localID;
-  if (key_len < ESMCI::vmKeyWidth) {
+  if (key_len < vmKeyWidth) {
     if (rc != NULL) *rc = ESMC_RC_ARG_SIZE;
     return;
   }
