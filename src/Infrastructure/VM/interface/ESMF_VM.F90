@@ -4490,8 +4490,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        Contiguous data array for data to be received. Only the {\tt recvData}
 !        array specified by the {\tt rootPet} will be used by this method.
 !   \item[recvCounts] 
-!        Number of {\tt recvData} elements to be received from corresponding
-!        source PET.
+!        An integer array (of length group size, specified in VM object) containing 
+!        number of {\tt recvData} elements to be received from corresponding
+!        source PET. This argument is significant only at rootPet.
 !   \item[recvOffsets] 
 !        Offsets in units of elements in {\tt recvData} marking the start of
 !        element sequence to be received from source PET.

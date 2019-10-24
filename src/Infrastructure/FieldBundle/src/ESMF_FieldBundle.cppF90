@@ -1699,6 +1699,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[6.1.0] Added argument {\tt itemorderflag}.
 !              The new argument gives the user control over the order in which
 !              the items are returned.
+! \item[8.0.0] Added argument {\tt isPacked}.
+!              The new argument allows the user to query if this is a packed FieldBundle.
 ! \end{description}
 ! \end{itemize}
 !

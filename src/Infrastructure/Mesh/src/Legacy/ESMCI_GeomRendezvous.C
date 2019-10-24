@@ -958,6 +958,10 @@ void GeomRend::prep_meshes() {
     srcmesh_rend.set_spatial_dimension(srcmesh->spatial_dim());
     srcmesh_rend.set_parametric_dimension(srcmesh->parametric_dim());
 
+    // Set temp. XGrid info
+    srcmesh_rend.side=srcmesh->side;
+    srcmesh_rend.ind=srcmesh->ind;
+
     // Contexts
     srcmesh_rend.AssumeContexts(*srcmesh);
 
@@ -992,6 +996,24 @@ void GeomRend::prep_meshes() {
        MeshObj::ELEMENT, src_elem_frac2->GetContext(), src_elem_frac2->dim());
     }
 
+    MEField<> *side1_mesh_ind= srcmesh->GetField("side1_mesh_ind");
+    if (side1_mesh_ind != NULL) {
+      srcmesh_rend.RegisterField("side1_mesh_ind", 
+				 side1_mesh_ind->GetMEFamily(),
+				 MeshObj::ELEMENT, 
+				 side1_mesh_ind->GetContext(), 
+				 side1_mesh_ind->dim());
+    }
+
+    MEField<> *side2_mesh_ind= srcmesh->GetField("side2_mesh_ind");
+    if (side2_mesh_ind != NULL) {
+      srcmesh_rend.RegisterField("side2_mesh_ind", 
+				 side2_mesh_ind->GetMEFamily(),
+				 MeshObj::ELEMENT, 
+				 side2_mesh_ind->GetContext(), 
+				 side2_mesh_ind->dim());
+    }
+
   }
   }
 
@@ -1002,6 +1024,10 @@ void GeomRend::prep_meshes() {
   // Mesh dims
   dstmesh_rend.set_spatial_dimension(dstmesh->spatial_dim());
   dstmesh_rend.set_parametric_dimension(dstmesh->parametric_dim());
+
+  // Set temp. XGrid info
+  dstmesh_rend.side=dstmesh->side;
+  dstmesh_rend.ind=dstmesh->ind;
 
   // Contexts
   dstmesh_rend.AssumeContexts(*dstmesh);
@@ -1031,6 +1057,24 @@ void GeomRend::prep_meshes() {
     if (dst_elem_frac2 != NULL) {
       dstmesh_rend.RegisterField("elem_frac2", dst_elem_frac2->GetMEFamily(),
                                  MeshObj::ELEMENT, dst_elem_frac2->GetContext(), dst_elem_frac2->dim());
+    }
+
+    MEField<> *side1_mesh_ind= dstmesh->GetField("side1_mesh_ind");
+    if (side1_mesh_ind != NULL) {
+      dstmesh_rend.RegisterField("side1_mesh_ind", 
+				 side1_mesh_ind->GetMEFamily(),
+				 MeshObj::ELEMENT, 
+				 side1_mesh_ind->GetContext(), 
+				 side1_mesh_ind->dim());
+    }
+
+    MEField<> *side2_mesh_ind= dstmesh->GetField("side2_mesh_ind");
+    if (side2_mesh_ind != NULL) {
+      dstmesh_rend.RegisterField("side2_mesh_ind", 
+				 side2_mesh_ind->GetMEFamily(),
+				 MeshObj::ELEMENT, 
+				 side2_mesh_ind->GetContext(), 
+				 side2_mesh_ind->dim());
     }
 
   } else {
@@ -1079,7 +1123,7 @@ void GeomRend::src_migrate_meshes() {
 
     // Now send the fields
     int num_snd=0;
-    MEField<> *snd[5],*rcv[5];
+    MEField<> *snd[7],*rcv[7];
 
     MEField<> *sc = srcmesh->GetCoordField();
     MEField<> *sc_r = srcmesh_rend.GetCoordField();
@@ -1133,6 +1177,30 @@ void GeomRend::src_migrate_meshes() {
       num_snd++;
     }
 
+
+    // Do side1 mesh index
+    MEField<> *s1mi = srcmesh->GetField("side1_mesh_ind");
+    if (s1mi != NULL) {
+      MEField<> *s1mi_r = srcmesh_rend.GetField("side1_mesh_ind");
+      
+      // load mask fields
+      snd[num_snd]=s1mi;
+      rcv[num_snd]=s1mi_r;
+      num_snd++;            
+    }
+
+    // Do side2 mesh index
+    MEField<> *s2mi = srcmesh->GetField("side2_mesh_ind");
+    if (s2mi != NULL) {
+      MEField<> *s2mi_r = srcmesh_rend.GetField("side2_mesh_ind");
+      
+      // load mask fields
+      snd[num_snd]=s2mi;
+      rcv[num_snd]=s2mi_r;
+      num_snd++;            
+    }
+
+
     // For the actual mesh
     srcComm.SendFields(num_snd, snd, rcv);
 
@@ -1165,7 +1233,7 @@ void GeomRend::dst_migrate_meshes() {
 
   if (iter_is_obj) {
     int num_snd=0;
-    MEField<> *snd[5],*rcv[5];
+    MEField<> *snd[7],*rcv[7];
 
     MEField<> *dc = dstmesh->GetCoordField();
     MEField<> *dc_r = dstmesh_rend.GetCoordField();
@@ -1217,6 +1285,28 @@ void GeomRend::dst_migrate_meshes() {
       snd[num_snd]=def;
       rcv[num_snd]=def_r;
       num_snd++;
+    }
+
+    // Do side1 mesh index
+    MEField<> *s1mi = dstmesh->GetField("side1_mesh_ind");
+    if (s1mi != NULL) {
+      MEField<> *s1mi_r = dstmesh_rend.GetField("side1_mesh_ind");
+      
+      // load mask fields
+      snd[num_snd]=s1mi;
+      rcv[num_snd]=s1mi_r;
+      num_snd++;            
+    }
+
+    // Do side2 mesh index
+    MEField<> *s2mi = dstmesh->GetField("side2_mesh_ind");
+    if (s2mi != NULL) {
+      MEField<> *s2mi_r = dstmesh_rend.GetField("side2_mesh_ind");
+      
+      // load mask fields
+      snd[num_snd]=s2mi;
+      rcv[num_snd]=s2mi_r;
+      num_snd++;            
     }
 
      dstComm.SendFields(num_snd, snd, rcv);

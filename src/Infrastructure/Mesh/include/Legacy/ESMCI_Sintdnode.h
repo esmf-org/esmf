@@ -123,11 +123,21 @@ class sintd_node_equal{
 
 // sintd_cell represents the intersection cell
 class sintd_cell {
+
   private:
     // nodes enclosing this cell
     double area;
     std::vector<sintd_node *> nodes;
   public:
+
+    // Index in Xgrid of Mesh
+    int side1_mesh_ind;
+    int side2_mesh_ind;
+
+#ifdef BOB_XGRID_DEBUG
+    int s_id, d_id; // DEBUG
+#endif
+
     sintd_cell(double _area, const std::vector<sintd_node *> & _nodes) : 
       area(_area), nodes(_nodes) {}
 
