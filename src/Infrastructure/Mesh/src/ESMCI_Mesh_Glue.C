@@ -5247,7 +5247,7 @@ void ESMCI_MeshFitOnVM(Mesh **meshpp,
 
      // Describe mapping of current PET
      int new_vm_rank=-1; // if there is no pet, set to -1
-     if (ESMC_NOT_PRESENT_FILTER(new_vm) != ESMC_NULL_POINTER) {
+     if ((ESMC_NOT_PRESENT_FILTER(new_vm) != ESMC_NULL_POINTER) && *new_vm) {
        new_vm_rank=(*new_vm)->getLocalPet();
      }
 
@@ -5344,7 +5344,7 @@ void ESMCI_MeshFitOnVM(Mesh **meshpp,
   // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
-} // meshcreate
+} // ESMCI_MeshFitOnVM
 
 
 void ESMCI_meshcreate_easy_elems(Mesh **meshpp,
