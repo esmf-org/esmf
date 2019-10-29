@@ -19,16 +19,17 @@
 !   original parent PETs. OpenMP threading is used by comp2 to utilize the
 !   available PEs.
 !
-!   The parent, i.e. the application level, creates a Array with 1DE/PET. The
-!   Array is created specifying argument pinflag=ESMF_PIN_DE_TO_SSI. This allows
-!   DEs to be shared between PETs that are executing on the same SSI. The parent
-!   level passes the Array into comp1 via the exportState, and into comp2 via
-!   the importState.
+!   The comp1 Initialize() method creates an Array with 1DE/PET. The
+!   Array is created specifying the pinflag argument. For ESMF_PIN_DE_TO_SSI
+!   or ESMF_PIN_DE_TO_SSI_CONTIG the allocation allows DEs to be shared between
+!   PETs that are executing on the same SSI. The comp1 passes the Array back
+!   to the parent level via the exportState. The parent level passes the same
+!   state into comp2 as importState.
 !
 !   The comp1 initializes the data in the Array, each PET accessing its one
-!   localDe. Then comp2 compares the data stored in the Array to the analytic
-!   solution. It does so accessing all the DEs from the reduced number of PETs
-!   via sharing across SSI shared memory.
+!   localDe, during the Run() method. Then comp2 compares the data stored in the
+!   Array to the analytic solution. It does so accessing all the DEs from the
+!   reduced number of PETs via DE sharing across SSI shared memory.
 !
 !-------------------------------------------------------------------------
 !\begin{verbatim}
@@ -48,14 +49,11 @@ program ESMF_ArraySharedDeSSISTest
   implicit none
 
   ! Local variables
-  integer             :: localPet, petCount, userrc, localrc, rc=ESMF_SUCCESS
+  integer             :: localPet, userrc, localrc, rc=ESMF_SUCCESS
   type(ESMF_VM)       :: vm
   type(ESMF_State)    :: state
   type(ESMF_GridComp) :: comp1, comp2
-  type(ESMF_DistGrid) :: distgrid
   type(ESMF_Array)    :: array
-  logical             :: ssiSharedMemoryEnabled
-  type(ESMF_Pin_Flag) :: pinflag
 
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
@@ -99,8 +97,7 @@ program ESMF_ArraySharedDeSSISTest
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   ! Get number of PETs we are running with
-  call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, &
-    ssiSharedMemoryEnabledFlag=ssiSharedMemoryEnabled, rc=localrc)
+  call ESMF_VMGet(vm, localPet=localPet, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
@@ -123,34 +120,6 @@ program ESMF_ArraySharedDeSSISTest
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   
-  ! Create DistGrid and Array that support sharing of DEs on the same SSI
-  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/10000,12000/), &
-    regDecomp=(/petCount,1/), rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-  if (ssiSharedMemoryEnabled) then
-    ! requires support for SSI shared memory
-#if 0
-    pinflag=ESMF_PIN_DE_TO_SSI        ! non-contiguous across DEs on SSI okay
-#else
-    pinflag=ESMF_PIN_DE_TO_SSI_CONTIG ! request contigous memory across DEs
-#endif
-  else
-    pinflag=ESMF_PIN_DE_TO_PET
-  endif
-  array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
-    indexflag=ESMF_INDEX_GLOBAL, name="MyArray", pinflag=pinflag, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-  
-  ! Add the Array to the State
-  call ESMF_StateAdd(state, (/array/), rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 ! SetVM and SetServices section
@@ -195,6 +164,21 @@ program ESMF_ArraySharedDeSSISTest
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
+! Init section
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+  
+  call ESMF_GridCompInitialize(comp1, exportState=state, userRc=userrc,&
+    rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+  if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+    
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
 ! Run section
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -209,6 +193,10 @@ program ESMF_ArraySharedDeSSISTest
     
   ! Because DEs are shared across PETs on the same SSI, must call ArraySync()
   ! before comp2 gets to access the Array.
+  call ESMF_StateGet(state, "MyArray", array, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   call ESMF_ArraySync(array, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
@@ -238,16 +226,6 @@ program ESMF_ArraySharedDeSSISTest
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   call ESMF_StateDestroy(state, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-
-  call ESMF_ArrayDestroy(array, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-
-  call ESMF_DistGridDestroy(distgrid, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
