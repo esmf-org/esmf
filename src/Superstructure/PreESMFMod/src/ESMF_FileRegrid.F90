@@ -3113,7 +3113,7 @@ subroutine WriteMosaicField(field, inputfile, mosaic, rank, dims, rc)
     type(ESMF_DistGrid) :: distgrid
     type(ESMF_Array) :: array
     type(ESMF_VM) :: vm
-    integer       :: PetNo, PetCnt, localroot(1)
+    integer       :: PetNo, PetCnt, localroot
     type(ESMF_StaggerLoc)         :: staggerloc
     character(len=ESMF_MAXPATHLEN):: fileName
     character(len=MAXNAMELEN):: fieldName
@@ -3226,8 +3226,14 @@ subroutine WriteMosaicField(field, inputfile, mosaic, rank, dims, rc)
                allocate(sndrcvbuffer(sndcount))
                sndrcvbuffer=reshape(fptr4d, (/sndcount/)) 
             endif
-            localroot = findloc(tilenos, tile)-1
-	    if (PetNo == localroot(1)) then
+            ! Find the first PET that owns the same tile
+	    do i=1, PetCnt
+               if (tilenos(i)==tile) then
+                  localroot = i-1
+                  exit
+               endif
+            enddo
+	    if (PetNo == localroot) then
               ! gather all the data from the PETs that own the tile before writing it out
               if (rank==2) then
                  allocate(buff2d(dims(1),dims(2)))
@@ -3329,7 +3335,7 @@ subroutine WriteMosaicField(field, inputfile, mosaic, rank, dims, rc)
             else 
                ! If I am not a rootpet of a tile, just send my data to the rootpet
                ! get the fortran pointer from the field 
-               call ESMF_VMSend(vm, sndrcvbuffer, sndcount, localroot(1), rc=localrc)
+               call ESMF_VMSend(vm, sndrcvbuffer, sndcount, localroot, rc=localrc)
                if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
                deallocate(sndrcvbuffer)
