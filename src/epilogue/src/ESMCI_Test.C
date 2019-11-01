@@ -468,6 +468,8 @@ int TestStart(
       fprintf(stderr, "%s\n", msgbuf);
     return(rc);
   }
+  
+  ESMC_LogSet(1);
 
   // Get test start time
 #if !defined (ESMF_OS_MinGW)
