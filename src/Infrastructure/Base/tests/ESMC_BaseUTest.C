@@ -68,8 +68,9 @@ void testSerializeDeserialize(int& rc, char failMsg[]) {
     lognprint(logmsg, TO_STDOUT);
 
     // Test will pass in but segfault in parallel during finalize -------------
-    ESMC_Base base_src(1);
-    ESMC_Base base_dst(-1);
+    ESMC_Base *base_src = new ESMC_Base(1);
+    ESMC_Base *base_dst = new ESMC_Base(-1);
+    
     // ------------------------------------------------------------------------
     // Test will segfault in serial and probably parallel during deserialize --
 //    ESMC_Base base_src;
@@ -79,7 +80,7 @@ void testSerializeDeserialize(int& rc, char failMsg[]) {
     int length = 0;
     int offset = 0;
 
-    rc = base_src.ESMC_Serialize(nullbuffer, &length, &offset, arflag, ESMF_INQUIREONLY);
+    rc = base_src->ESMC_Serialize(nullbuffer, &length, &offset, arflag, ESMF_INQUIREONLY);
     if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                       &rc))
       return;
@@ -94,7 +95,7 @@ void testSerializeDeserialize(int& rc, char failMsg[]) {
     length = inquire_offset + shift;
     char buffer[length];
     offset = shift;
-    rc = base_src.ESMC_Serialize(buffer, &length, &offset, arflag,
+    rc = base_src->ESMC_Serialize(buffer, &length, &offset, arflag,
                                  ESMF_NOINQUIRE);
     if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return;
 
@@ -107,7 +108,7 @@ void testSerializeDeserialize(int& rc, char failMsg[]) {
     }
 
     offset = shift;
-    rc = base_dst.ESMC_Deserialize(buffer, &offset, arflag);
+    rc = base_dst->ESMC_Deserialize(buffer, &offset, arflag);
     if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return;
   }
 
