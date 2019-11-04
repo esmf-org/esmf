@@ -888,49 +888,48 @@ if (time_diff < zero) stop 1
       ! Write a log file with message filtering
       write (failMsg, *) 'Could not write a log file with filtering'
       write (name, *) ' Creating a log file with message filtering'
-      ESMF_BLOCK(msg_filter_test)
-        ! Make sure we start with a clean log
-        call ESMF_UtilIOUnitGet (unit=log8unit, rc=rc)
-        if (rc /= ESMF_SUCCESS) exit msg_filter_test
 
-        open (log8unit, file=trim (my_pet_char) // '.logAllow',  &
-            status='unknown', iostat=ioerr)
-        if (ioerr /= 0) then
-            rc = ESMF_FAILURE
-            exit msg_filter_test
-        end if
+      ! Make sure we start with a clean log
+      call ESMF_UtilIOUnitGet (unit=log8unit, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-        close (log8unit, status='delete', iostat=ioerr)
-        if (ioerr /= 0) then
-            rc = ESMF_FAILURE
-            exit msg_filter_test
-        end if
+      open (log8unit, file=trim (my_pet_char) // '.logAllow',  &
+          status='unknown', iostat=ioerr)
+      if (ioerr /= 0) then
+          rc = ESMF_FAILURE
+          if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      end if
 
-        ! Write some messages
-        call ESMF_LogOpen (log8, filename='logAllow', rc=rc)
-        if (rc /= ESMF_SUCCESS) exit msg_filter_test
+      close (log8unit, status='delete', iostat=ioerr)
+      if (ioerr /= 0) then
+          rc = ESMF_FAILURE
+          if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      end if
 
-        call ESMF_LogSet (log=log8,  &
-            logmsgList=(/ ESMF_LOGMSG_INFO /),  &
-            rc=rc)
-        if (rc /= ESMF_SUCCESS) exit msg_filter_test
+      ! Write some messages
+      call ESMF_LogOpen (log8, filename='logAllow', rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-        call ESMF_LogWrite (log=log8,  &
-            logmsgFlag=ESMF_LOGMSG_INFO, msg='should be in log', rc=rc)
-        if (rc /= ESMF_SUCCESS) exit msg_filter_test
+      call ESMF_LogSet (log=log8,  &
+          logmsgList=(/ ESMF_LOGMSG_INFO /),  &
+          rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-        call ESMF_LogWrite (log=log8,  &
-            logmsgFlag=ESMF_LOGMSG_WARNING, msg='should NOT be in log', rc=rc)
-        if (rc /= ESMF_SUCCESS) exit msg_filter_test
+      call ESMF_LogWrite (log=log8,  &
+          logmsgFlag=ESMF_LOGMSG_INFO, msg='should be in log', rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-        call ESMF_LogWrite (log=log8,  &
-            logmsgFlag=ESMF_LOGMSG_ERROR, msg='should NOT be in log', rc=rc)
-        if (rc /= ESMF_SUCCESS) exit msg_filter_test
+      call ESMF_LogWrite (log=log8,  &
+          logmsgFlag=ESMF_LOGMSG_WARNING, msg='should NOT be in log', rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-        call ESMF_LogClose (log8, rc=rc)
-        if (rc /= ESMF_SUCCESS) exit msg_filter_test
+      call ESMF_LogWrite (log=log8,  &
+          logmsgFlag=ESMF_LOGMSG_ERROR, msg='should NOT be in log', rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-      ESMF_ENDBLOCK(msg_filter_test)
+      call ESMF_LogClose (log8, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
       call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -1313,21 +1312,17 @@ if (time_diff < zero) stop 1
       write (filename,'(a,i4.4,a)') 'on_error_log', my_pet,'.Log'
       pet_filename = my_pet_char // '.' // filename(:len_trim (filename))
 
-      ESMF_BLOCK(open_moe_log1)
+      call ESMF_UtilIOUnitGet (unit=moe_unit, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-        call ESMF_UtilIOUnitGet (unit=moe_unit, rc=rc)
-        if (rc /= ESMF_SUCCESS) exit open_moe_log1
+      ! If there is an existing Log file, delete it.
+      open (moe_unit, file=pet_filename, status='old', iostat=ioerr)
+      if (ioerr == 0) then
+        close (moe_unit, status='delete')
+      end if
 
-        ! If there is an existing Log file, delete it.
-        open (moe_unit, file=pet_filename, status='old', iostat=ioerr)
-        if (ioerr == 0) then
-          close (moe_unit, status='delete')
-        end if
+      call ESMF_LogOpen(log_moe, filename, logkindflag=ESMF_LOGKIND_MULTI_ON_ERROR, rc=rc)
 
-        call ESMF_LogOpen(log_moe, filename, logkindflag=ESMF_LOGKIND_MULTI_ON_ERROR, rc=rc)
-
-      ESMF_ENDBLOCK(open_moe_log1)
-        
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -1355,16 +1350,12 @@ if (time_diff < zero) stop 1
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Test for non-existant ESMF_LOGKIND_MULTI_ON_ERROR log test"
 
-      ESMF_BLOCK(open_moe_log2)
+      call ESMF_UtilIOUnitGet (unit=moe_unit, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-        call ESMF_UtilIOUnitGet (unit=moe_unit, rc=rc)
-        if (rc /= ESMF_SUCCESS) exit open_moe_log2
-
-        ! Open should fail
-        open (moe_unit, file=pet_filename, status='old', iostat=ioerr)
-        rc = merge (ESMF_SUCCESS, ESMF_FAILURE, ioerr /= 0)
-
-      ESMF_ENDBLOCK(open_moe_log2)
+      ! Open should fail
+      open (moe_unit, file=pet_filename, status='old', iostat=ioerr)
+      rc = merge (ESMF_SUCCESS, ESMF_FAILURE, ioerr /= 0)
 
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -1374,21 +1365,17 @@ if (time_diff < zero) stop 1
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Open Log with ESMF_LOGKIND_MULTI_ON_ERROR test"
 
-      ESMF_BLOCK(open_moe_log3)
+      call ESMF_UtilIOUnitGet (unit=moe_unit, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-        call ESMF_UtilIOUnitGet (unit=moe_unit, rc=rc)
-        if (rc /= ESMF_SUCCESS) exit open_moe_log3
+      ! If there is an existing Log file, delete it.
+      open (moe_unit, file=pet_filename, status='old', iostat=ioerr)
+      if (ioerr == 0) then
+        close (moe_unit, status='delete')
+      end if
 
-        ! If there is an existing Log file, delete it.
-        open (moe_unit, file=pet_filename, status='old', iostat=ioerr)
-        if (ioerr == 0) then
-          close (moe_unit, status='delete')
-        end if
+      call ESMF_LogOpen(log_moe, filename, logkindflag=ESMF_LOGKIND_MULTI_ON_ERROR, rc=rc)
 
-        call ESMF_LogOpen(log_moe, filename, logkindflag=ESMF_LOGKIND_MULTI_ON_ERROR, rc=rc)
-
-      ESMF_ENDBLOCK(open_moe_log3)
-        
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -1436,19 +1423,15 @@ if (time_diff < zero) stop 1
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Test for ESMF_LOGKIND_MULTI_ON_ERROR log test"
 
-      ESMF_BLOCK(open_moe_log4)
+      call ESMF_UtilIOUnitGet (unit=moe_unit, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-        call ESMF_UtilIOUnitGet (unit=moe_unit, rc=rc)
-        if (rc /= ESMF_SUCCESS) exit open_moe_log4
-
-        ! If there is an existing Log file, delete it.
-        open (moe_unit, file=pet_filename, status='old', iostat=ioerr)
-        rc = merge (ESMF_SUCCESS, ESMF_FAILURE, ioerr == 0)
-        if (ioerr == 0) then
-          ! close (moe_unit, status='delete')
-        end if
-
-      ESMF_ENDBLOCK(open_moe_log4)
+      ! If there is an existing Log file, delete it.
+      open (moe_unit, file=pet_filename, status='old', iostat=ioerr)
+      rc = merge (ESMF_SUCCESS, ESMF_FAILURE, ioerr == 0)
+      if (ioerr == 0) then
+        ! close (moe_unit, status='delete')
+      end if
 
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
