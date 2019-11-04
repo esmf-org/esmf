@@ -34,7 +34,7 @@ int main(void){
   char failMsg[80];
   int result = 0;
   int rc;
-  bool flush;
+  int flush;
 
   const char *msg = "C LogErr Write Message";
   int msgtype = ESMC_LOGMSG_INFO;
