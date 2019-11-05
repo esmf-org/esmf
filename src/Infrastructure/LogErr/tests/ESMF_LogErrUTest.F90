@@ -54,7 +54,7 @@
       !LOCAL VARIABLES:
       type(ESMF_Log) :: log1, log5, log7, log_moe
       type(ESMF_LogKind_Flag) :: logkindflag
-      character(ESMF_MAXPATHLEN) :: filename
+      character(ESMF_MAXPATHLEN) :: filename, defaultLogFileName
       character(4) :: my_pet_char
       integer :: my_pet, num_pets
       character(1) :: pet_char
@@ -635,10 +635,10 @@
       ! Test getting default Log file name
       write (name, *) "LogGet get default Log file name"
       write (failMsg, *) "Did not return ESMF_SUCCESS"
-      call ESMF_LogGet (fileName=filename, rc=rc)
+      call ESMF_LogGet (fileName=defaultLogFileName, rc=rc)
       call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
-      print *, 'default Log file name = ', trim (fileName)
+      print *, 'default Log file name = ', trim (defaultLogFileName)
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -1321,7 +1321,8 @@ if (time_diff < zero) stop 1
         close (moe_unit, status='delete')
       end if
 
-      call ESMF_LogOpen(log_moe, filename, logkindflag=ESMF_LOGKIND_MULTI_ON_ERROR, rc=rc)
+      call ESMF_LogOpen(log_moe, filename, &
+        logkindflag=ESMF_LOGKIND_MULTI_ON_ERROR, rc=rc)
 
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -1331,8 +1332,8 @@ if (time_diff < zero) stop 1
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Write non-ERROR messages with ESMF_LOGKIND_MULTI_ON_ERROR test"
 
-      call ESMF_LogWrite(log=log_moe, msg="INFO test Msg",logmsgFlag=ESMF_LOGMSG_INFO, &
-                         rc=rc)
+      call ESMF_LogWrite(log=log_moe, msg="INFO test Msg", &
+        logmsgFlag=ESMF_LOGMSG_INFO, rc=rc)
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -1361,20 +1362,12 @@ if (time_diff < zero) stop 1
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Test opening a Log with ESMF_LOGKIND_MULTI_ON_ERROR
+      ! Open log
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Open Log with ESMF_LOGKIND_MULTI_ON_ERROR test"
+      write(name, *) "Open log with ESMF_LOGKIND_MULTI_ON_ERROR test"
 
-      call ESMF_UtilIOUnitGet (unit=moe_unit, rc=rc)
-      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-      ! If there is an existing Log file, delete it.
-      open (moe_unit, file=pet_filename, status='old', iostat=ioerr)
-      if (ioerr == 0) then
-        close (moe_unit, status='delete')
-      end if
-
-      call ESMF_LogOpen(log_moe, filename, logkindflag=ESMF_LOGKIND_MULTI_ON_ERROR, rc=rc)
+      call ESMF_LogOpen(log_moe, filename, &
+        logkindflag=ESMF_LOGKIND_MULTI_ON_ERROR, rc=rc)
 
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -1384,8 +1377,8 @@ if (time_diff < zero) stop 1
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Write non-ERROR message with ESMF_LOGKIND_MULTI_ON_ERROR test"
 
-      call ESMF_LogWrite(log=log_moe, msg="INFO test Msg",logmsgFlag=ESMF_LOGMSG_INFO, &
-                         rc=rc)
+      call ESMF_LogWrite(log=log_moe, msg="INFO test Msg", &
+        logmsgFlag=ESMF_LOGMSG_INFO, rc=rc)
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -1394,8 +1387,8 @@ if (time_diff < zero) stop 1
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Write ERROR message with ESMF_LOGKIND_MULTI_ON_ERROR test"
 
-      call ESMF_LogWrite(log=log_moe, msg="ERROR test Msg",logmsgFlag=ESMF_LOGMSG_ERROR, &
-                         rc=rc)
+      call ESMF_LogWrite(log=log_moe, msg="ERROR test Msg", &
+        logmsgFlag=ESMF_LOGMSG_ERROR, rc=rc)
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -1404,8 +1397,8 @@ if (time_diff < zero) stop 1
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Write non-ERROR message with ESMF_LOGKIND_MULTI_ON_ERROR test"
 
-      call ESMF_LogWrite(log=log_moe, msg="INFO test Msg",logmsgFlag=ESMF_LOGMSG_INFO, &
-                         rc=rc)
+      call ESMF_LogWrite(log=log_moe, msg="INFO test Msg", &
+        logmsgFlag=ESMF_LOGMSG_INFO, rc=rc)
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -1421,7 +1414,7 @@ if (time_diff < zero) stop 1
       !EX_UTest
       ! Test for log - which should exist
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Test for ESMF_LOGKIND_MULTI_ON_ERROR log test"
+      write(name, *) "Test for existant ESMF_LOGKIND_MULTI_ON_ERROR log test"
 
       call ESMF_UtilIOUnitGet (unit=moe_unit, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -1432,8 +1425,75 @@ if (time_diff < zero) stop 1
       if (ioerr == 0) then
         ! close (moe_unit, status='delete')
       end if
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Close default log
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Close default log test"
+
+      call ESMF_LogClose (rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Re-Open default log with ESMF_LOGKIND_MULTI_ON_ERROR
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Open default log with ESMF_LOGKIND_MULTI_ON_ERROR test"
+
+      call ESMF_LogOpen(defaultLogFileName, &
+        logkindflag=ESMF_LOGKIND_MULTI_ON_ERROR, rc=rc)
 
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Write non-ERROR message to default log
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Write non-ERROR message with ESMF_LOGKIND_MULTI_ON_ERROR test"
+
+      call ESMF_LogWrite(msg="INFO test Msg", &
+        logmsgFlag=ESMF_LOGMSG_INFO, rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Write ERROR message from C to default log
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Write ERROR message from C with ESMF_LOGKIND_MULTI_ON_ERROR test"
+
+      call c_error(rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      ! Now that the default log should be active again, ensure the 3 suppressed
+      ! Log messages from the above ESMF_Test() calls are explicitly added here.
+      ! If everything works as it should, the PASS counts in the default log
+      ! will be good. If the counts are off, then there was an issue detected!
+      call ESMF_LogWrite(&
+        msg="PASS  Close default log test, ESMF_LogErrUTest.F90, line xxx", &
+        logmsgFlag=ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      call ESMF_LogWrite(&
+        msg="PASS  Open default log with ESMF_LOGKIND_MULTI_ON_ERROR test, ESMF_LogErrUTest.F90, line xxx", &
+        logmsgFlag=ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      call ESMF_LogWrite(&
+        msg="PASS  Write non-ERROR message with ESMF_LOGKIND_MULTI_ON_ERROR test, ESMF_LogErrUTest.F90, line xxx", &
+        logmsgFlag=ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Write non-ERROR message to default log
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Write non-ERROR message with ESMF_LOGKIND_MULTI_ON_ERROR test"
+
+      call ESMF_LogWrite(msg="INFO test Msg", &
+        logmsgFlag=ESMF_LOGMSG_INFO, rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
 
 #endif
 100   continue

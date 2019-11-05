@@ -69,7 +69,7 @@ type ESMF_LogMsg_Flag
     integer      :: mtype
 end type
 
-!     ! Msg Types
+!     ! Msg Types -  keep in sync with ESMC_LogMsgType_Flag
 type(ESMF_LogMsg_Flag), parameter           :: &
     ESMF_LOGMSG_INFO  =   ESMF_LogMsg_Flag(1), &
     ESMF_LOGMSG_WARNING = ESMF_LogMsg_Flag(2), &
@@ -120,7 +120,7 @@ type ESMF_LogKind_Flag
     integer      :: ftype
 end type
 
-!     ! Log Types
+!     ! Log Types - keep in sync with ESMC_LogKind_Flag
 type(ESMF_LogKind_Flag), parameter :: &
     ESMF_LOGKIND_SINGLE = ESMF_LogKind_Flag(1), &
     ESMF_LOGKIND_MULTI = ESMF_LogKind_Flag(2),  &
@@ -1905,13 +1905,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   endif
 
-    !TODO: this is really strange because every time ESMF_LogOpen() is called
-    !TODO: the _default_ Log on the C side is initialized, odd, isn't it? *gjt*
+  !TODO: this is really strange because every time ESMF_LogOpen() is called
+  !TODO: the _default_ Log on the C side is initialized, odd, isn't it? *gjt*
+  
+  !TODO: an attempt to at least only call the initialize for default log...
+  
+  if (log%logTableIndex == ESMF_LogDefault%logTableIndex) then
+    ! this is the default log
     call c_ESMC_LogInitialize(filename,alog%petNumber,alog%logkindflag,rc2)
-    if (present(rc)) then
-        rc=ESMF_SUCCESS
-    endif
+    !TODO: this is so messed up, why is rc2 not looked at, or passed back???
+  endif
 
+  if (present(rc)) rc=ESMF_SUCCESS
+  
 end subroutine ESMF_LogOpen
 
 !--------------------------------------------------------------------------
@@ -1967,7 +1973,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     rc=ESMF_FAILURE
   endif
 
-  call ESMF_LogOpen (ESMF_LogDefault, filename, appendflag=appendflag, logkindflag=logkindflag, rc=localrc)
+  call ESMF_LogOpen (ESMF_LogDefault, filename, appendflag=appendflag, &
+    logkindflag=logkindflag, rc=localrc)
   if (localrc /= ESMF_SUCCESS) then
     call ESMF_LogRc2Msg (localrc, msg=errmsg, msglen=errmsg_len)
     write (ESMF_UtilIOStderr,*) ESMF_METHOD, ': ', errmsg(:errmsg_len)
@@ -2599,7 +2606,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (alog%logkindflag /= ESMF_LOGKIND_NONE) then
 
         if (alog%deferredOpenFlag) then
-          if (logmsgFlag == ESMF_LOGMSG_ERROR) then
+          if (local_logmsgflag == ESMF_LOGMSG_ERROR) then
             call ESMF_LogOpenFile (alog, rc=localrc)
             if (localrc /= ESMF_SUCCESS) then
               if (present (rc)) then
