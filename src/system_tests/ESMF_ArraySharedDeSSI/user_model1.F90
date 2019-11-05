@@ -73,11 +73,64 @@ module user_model1
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Register the callback routines.
+    call ESMF_GridCompSetEntryPoint(comp, methodflag=ESMF_METHOD_INITIALIZE, &
+      userRoutine=user1_init, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_GridCompSetEntryPoint(comp, methodflag=ESMF_METHOD_RUN, &
       userRoutine=user1_run, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
   end subroutine
+
+!-------------------------------------------------------------------------
+!   !  The Init routine where memory is allocated.
+!   !
+ 
+  subroutine user1_init(comp, importState, exportState, clock, rc)
+    type(ESMF_GridComp) :: comp
+    type(ESMF_State) :: importState, exportState
+    type(ESMF_Clock) :: clock
+    integer, intent(out) :: rc
+
+    ! Local variables
+    type(ESMF_VM)       :: vm
+    type(ESMF_DistGrid) :: distgrid
+    type(ESMF_Array)    :: array
+    logical             :: ssiSharedMemoryEnabled
+    type(ESMF_Pin_Flag) :: pinflag
+  
+    ! Initialize return code
+    rc = ESMF_SUCCESS
+
+    ! Create DistGrid and Array that support sharing of DEs across the same SSI
+    distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/10000,12000/), &
+      rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    call ESMF_GridCompGet(comp, vm=vm, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_VMGet(vm, ssiSharedMemoryEnabledFlag=ssiSharedMemoryEnabled, &
+      rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    if (ssiSharedMemoryEnabled) then
+      ! requires support for SSI shared memory
+#if 0
+      pinflag=ESMF_PIN_DE_TO_SSI        ! non-contiguous across DEs on SSI okay
+#else
+      pinflag=ESMF_PIN_DE_TO_SSI_CONTIG ! request contigous memory across DEs
+#endif
+    else
+      pinflag=ESMF_PIN_DE_TO_PET
+    endif
+    array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
+      indexflag=ESMF_INDEX_GLOBAL, name="MyArray", pinflag=pinflag, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+  
+    ! Add the Array to the State
+    call ESMF_StateAdd(exportState, (/array/), rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+  end subroutine user1_init
 
 !-------------------------------------------------------------------------
 !   !  The Run routine where data is computed.
