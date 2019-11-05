@@ -149,6 +149,10 @@ void build_range(bool ghosting = false);
 // Delete the range of the spec (only if objects not used or children of others)
 void delete_domain(); 
 
+// Change the proc numbers in the CommRel this is useful when 
+// fitting a commrel into a new VM.
+void map_proc_numbers(int num_procs, int *proc_map);
+
 // For an element (or side) domain CommRel (range need not be built yet), build the
 // domain side object for the dependents, i.e. nodes.  Names this the same as
 // parent, but adds "_dep".

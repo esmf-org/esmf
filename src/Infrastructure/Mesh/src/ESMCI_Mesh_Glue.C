@@ -5266,66 +5266,8 @@ void ESMCI_MeshFitOnVM(Mesh **meshpp,
      }
 #endif
 
-
-     // Loop through nodes changing owners to owners in new VM
-     MeshDB::iterator ni = mesh->node_begin_all(), ne = mesh->node_end_all();
-     for (; ni != ne; ++ni) {
-       MeshObj &node=*ni;
-
-       // Get original owner
-       UInt orig_owner=node.get_owner();
-
-       // Error check owner
-       if ((orig_owner < 0) || (orig_owner > curr_vm_size-1)) {
-         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_OUTOFRANGE,
-                                          " mesh node owner rank outside current vm",
-                                          ESMC_CONTEXT, &localrc)) throw localrc;
-       }
-
-       // map to new owner rank in new vm
-       int new_owner=rank_map[orig_owner];
-
-       // Make sure that the new one is ok
-       if (new_owner < 0) {
-         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_OUTOFRANGE,
-                                          " mesh node owner outside of new vm",
-                                          ESMC_CONTEXT, &localrc)) throw localrc;
-       }
-
-       // Set new owner
-       node.set_owner((UInt)new_owner);
-     }
-
-
-     // Loop through elems changing owners to owners in new VM
-     MeshDB::iterator ei = mesh->elem_begin_all(), ee = mesh->elem_end_all();
-     for (; ei != ee; ++ei) {
-       MeshObj &elem=*ei;
-
-       // Get original owner
-       UInt orig_owner=elem.get_owner();
-
-       // Error check owner
-       if ((orig_owner < 0) || (orig_owner > curr_vm_size-1)) {
-         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_OUTOFRANGE,
-                                          " mesh element owner rank outside current vm",
-                                          ESMC_CONTEXT, &localrc)) throw localrc;
-       }
-
-       // map to new owner rank in new vm
-       int new_owner=rank_map[orig_owner];
-
-       // Make sure that the new one is ok
-       if (new_owner < 0) {
-         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_OUTOFRANGE,
-                                          " mesh element owner outside of new vm",
-                                          ESMC_CONTEXT, &localrc)) throw localrc;
-       }
-
-       // Set new owner
-       elem.set_owner((UInt)new_owner);
-     }
-
+     // Change proc numbers in mesh
+     mesh->map_proc_numbers(curr_vm_size, rank_map);
 
     // Free map
     delete [] rank_map;

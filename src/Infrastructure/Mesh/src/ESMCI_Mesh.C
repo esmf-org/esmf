@@ -1572,6 +1572,7 @@ void Mesh::ProxyCommit(int numSetsArg,
 
 void Mesh::CreateGhost() {
   if (sghost) return; // must already be scratched
+
   sghost = new CommReg("_ghost", *this, *this);
 
   std::vector<CommRel::CommNode> selem;
@@ -1597,6 +1598,11 @@ void Mesh::CreateGhost() {
         std::vector<UInt> nprocs;
         MeshObjConn::get_node_sharing(node, GetSymNodeRel(), nprocs);
         for (UInt i = 0; i < nprocs.size(); i++) {
+
+          // DEBUG
+          //if (nprocs[i] > Par::Size()) {
+          //  printf("%d# CG Bad node proc=%d size=%d\n",Par::Rank(),nprocs[i],Par::Size());
+          //}
 
           // Add the elements (if not already present)
           for (UInt e = 0; e < elem.size(); e++) {
@@ -1667,7 +1673,7 @@ void Mesh::RemoveGhost() {
    for (; fi != fe; ++fi) {
      fields.push_back(&*fi);
    }
-   
+
    // Send Fields
    if (fields.size() > 0) {
      sghost->SendFields(fields.size(), &fields[0], &fields[0]);
@@ -2003,6 +2009,68 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
 
  }
 
+ // Change the proc numbers in a mesh to correspond to a different set. This isn't to 
+ // merge procs into one another, but to map them to different number. E.g. if they 
+ // are being switched to a different VM or MPI_COMM.
+ void Mesh::map_proc_numbers(int num_procs, int *proc_map) {
+
+     // Loop through nodes changing owners to owners in new VM
+     MeshDB::iterator ni = this->node_begin_all(), ne = this->node_end_all();
+     for (; ni != ne; ++ni) {
+       MeshObj &node=*ni;
+
+       // Get original owner
+       UInt orig_owner=node.get_owner();
+
+       // Error check owner
+       if ((orig_owner < 0) || (orig_owner > num_procs-1)) {
+         Throw()<<" mesh node owner rank outside current vm";
+       }
+
+       // map to new owner rank in new vm
+       int new_owner=proc_map[orig_owner];
+
+       // Make sure that the new one is ok
+       if (new_owner < 0) {
+         Throw()<<" mesh node owner outside of new vm";
+       }
+
+       // Set new owner
+       node.set_owner((UInt)new_owner);
+     }
+
+
+     // Loop through elems changing owners to owners in new VM
+     MeshDB::iterator ei = this->elem_begin_all(), ee = this->elem_end_all();
+     for (; ei != ee; ++ei) {
+       MeshObj &elem=*ei;
+
+       // Get original owner
+       UInt orig_owner=elem.get_owner();
+
+       // Error check owner
+       if ((orig_owner < 0) || (orig_owner > num_procs-1)) {
+         Throw()<<" mesh element owner rank outside current vm";
+       }
+
+       // map to new owner rank in new vm
+       int new_owner=proc_map[orig_owner];
+
+       // Make sure that the new one is ok
+       if (new_owner < 0) {
+         Throw()<<" mesh element owner outside of new vm";
+       }
+
+       // Set new owner
+       elem.set_owner((UInt)new_owner);
+     }
+
+     // Change CommReg
+     CommReg::map_proc_numbers(num_procs, proc_map);
+
+     // Remove ghosting, because it would be wrong now that procs have changed.
+     RemoveGhost();
+ }
 
 
 } // namespace
