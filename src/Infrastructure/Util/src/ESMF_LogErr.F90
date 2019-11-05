@@ -941,6 +941,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (present (log)) then
           write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
               ": ESMF_Log not open -- cannot ESMF_LogFlush()."
+          call ESMF_UtilIOUnitFlush(ESMF_UtilIOStderr, rc=rc)
           if (present (rc))  &
             rc=ESMF_RC_FILE_OPEN
         else
@@ -994,6 +995,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (memstat /= 0) then
             write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
                 ": Deallocation error."
+            call ESMF_UtilIOUnitFlush(ESMF_UtilIOStderr, rc=rc)
             localrc = ESMF_RC_MEM_DEALLOCATE
             if (present (rc)) then
               rc = localrc
@@ -1012,6 +1014,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       call ESMF_UtilIOUnitFlush (alog%unitNumber, rc=localrc2)
       if (localrc2 /= ESMF_SUCCESS) then
         write (ESMF_UtilIOStderr,*) 'unit flush failed, rc =', localrc2
+        call ESMF_UtilIOUnitFlush(ESMF_UtilIOStderr, rc=rc)
         localrc = localrc2
       end if
 
@@ -1830,6 +1833,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
           ": This ESMF_Log is already open with file '", &
           trim(ESMF_LogTable(log%logTableIndex)%nameLogErrFile), "'"
+      call ESMF_UtilIOUnitFlush(ESMF_UtilIOStderr, rc=rc)
       if (present(rc)) then
         rc=ESMF_RC_FILE_OPEN
       endif
@@ -1874,6 +1878,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (len_trim (filename) > ESMF_MAXPATHLEN-4) then
             write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
                 ": Filename exceeded", ESMF_MAXPATHLEN, " characters."
+            call ESMF_UtilIOUnitFlush(ESMF_UtilIOStderr, rc=rc)
             if (present(rc)) then
                 rc = ESMF_RC_LONG_STR
             endif
@@ -1884,6 +1889,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (len_trim (filename) > ESMF_MAXPATHLEN-4) then
             write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
                 ": Filename exceeded", ESMF_MAXPATHLEN, " characters."
+            call ESMF_UtilIOUnitFlush(ESMF_UtilIOStderr, rc=rc)
             if (present(rc)) then
                 rc = ESMF_RC_LONG_STR
             endif
@@ -1971,6 +1977,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   if (localrc /= ESMF_SUCCESS) then
     call ESMF_LogRc2Msg (localrc, msg=errmsg, msglen=errmsg_len)
     write (ESMF_UtilIOStderr,*) ESMF_METHOD, ': ', errmsg(:errmsg_len)
+    call ESMF_UtilIOUnitFlush(ESMF_UtilIOStderr, rc=rc)
   end if
 
   if (present (rc)) then
@@ -2047,10 +2054,11 @@ end subroutine ESMF_LogOpenDefault
 
     ! if unable to open file then error out
     if (alog%FileIsOpen /= ESMF_TRUE) then
-      rc=ESMF_RC_FILE_UNEXPECTED
       write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
           ': error opening file: ', trim (alog%nameLogErrFile),  &
           ', iostat =', iostat
+      call ESMF_UtilIOUnitFlush(ESMF_UtilIOStderr, rc=rc)
+      rc=ESMF_RC_FILE_UNEXPECTED
       return
     endif
 
@@ -2062,6 +2070,7 @@ end subroutine ESMF_LogOpenDefault
     if (memstat /= 0) then
       write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
           ': Allocation of buffer failed.'
+      call ESMF_UtilIOUnitFlush(ESMF_UtilIOStderr, rc=rc)
       rc = ESMF_RC_MEM_ALLOCATE
       return
     endif
@@ -2226,6 +2235,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (alog%FileIsOpen /= ESMF_TRUE .and. .not. isDefault) then
         write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
             ": ESMF_Log not open -- cannot ESMF_LogSet()."
+        call ESMF_UtilIOUnitFlush(ESMF_UtilIOStderr, rc=rc)
         if (present (rc)) rc = ESMF_RC_CANNOT_SET
         return
       endif
@@ -2581,11 +2591,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     case (2)
       write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
           ": Deprecated: Use logmsgFlag instead of logmsgList."
+      call ESMF_UtilIOUnitFlush(ESMF_UtilIOStderr, rc=rc)
       local_logmsgflag = logmsgList
 
     case (3)
       write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
           ": Do not specify both logmsgFlag and logmsgList.  Use logmsgFlag."
+      call ESMF_UtilIOUnitFlush(ESMF_UtilIOStderr, rc=rc)
       if (present(rc)) then
         rc=ESMF_RC_ARG_INCOMP
       end if
@@ -2619,6 +2631,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (alog%FileIsOpen /= ESMF_TRUE) then
           write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
               ": ESMF_Log not open -- cannot ESMF_LogWrite().  Log message = ", trim (msg)
+          call ESMF_UtilIOUnitFlush(ESMF_UtilIOStderr, rc=rc)
           if (present(rc)) rc=ESMF_FAILURE
           return
         endif
@@ -2722,6 +2735,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     else
       write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
           ": ESMF_Log not open -- cannot ESMF_LogWrite().  Log message = ", trim (msg)
+      call ESMF_UtilIOUnitFlush(ESMF_UtilIOStderr, rc=rc)
       if (present (rc)) then
         rc = localrc
       end if
