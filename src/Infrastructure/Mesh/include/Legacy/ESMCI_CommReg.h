@@ -74,6 +74,8 @@ void CommPrint(std::ostream &);
 
 void clear();
 
+void map_proc_numbers(int num_procs, int *proc_map);
+
 private:
 CommRel node_rel;
 CommRel edge_rel;
