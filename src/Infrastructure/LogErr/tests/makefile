@@ -38,19 +38,31 @@ CLOBBERDIRS =
 DIRS        = 
 
 #
-# LogErr
+# ESMC_LogErr
 #
+
 RUN_ESMC_LogErrUTest:
 	$(MAKE) TNAME=LogErr NP=4 ctest
 
 RUN_ESMC_LogErrUTestUNI:
 	$(MAKE) TNAME=LogErr NP=1 ctest
 
+#
+# ESMC_LogErrPerf
+#
+
 RUN_ESMC_LogErrPerfUTest:
 	$(MAKE) TNAME=LogErrPerf NP=4 ctest
 
 RUN_ESMC_LogErrPerfUTestUNI:
 	$(MAKE) TNAME=LogErrPerf NP=1 ctest
+
+#
+# ESMF_LogErr
+#
+
+ESMF_UTEST_LogErr_OBJS = ESMCI_TestError.o
+ESMF_LogErrUTest.o : ESMCI_TestError.o
 
 RUN_ESMF_LogErrUTest:
 	# remove log files of previous test runs
@@ -61,6 +73,10 @@ RUN_ESMF_LogErrUTestUNI:
 	# remove log files of previous test runs
 	rm -f $(ESMF_TESTDIR)/*Log_Test_File* $(ESMF_TESTDIR)/Single_Log_File
 	$(MAKE) TNAME=LogErr NP=1 ftest
+
+#
+# ESMC_LogErrPerf
+#
 
 RUN_ESMF_LogErrPerfUTest:
 	$(MAKE) TNAME=LogErrPerf NP=4 ftest

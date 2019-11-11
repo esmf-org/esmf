@@ -3113,13 +3113,17 @@ subroutine WriteMosaicField(field, inputfile, mosaic, rank, dims, rc)
     type(ESMF_DistGrid) :: distgrid
     type(ESMF_Array) :: array
     type(ESMF_VM) :: vm
-    integer       :: PetNo
+    integer       :: PetNo, PetCnt, localroot
     type(ESMF_StaggerLoc)         :: staggerloc
     character(len=ESMF_MAXPATHLEN):: fileName
     character(len=MAXNAMELEN):: fieldName
     real(ESMF_KIND_R8), pointer   :: fptr2d(:,:), fptr3d(:,:,:), fptr4d(:,:,:,:)
-    integer :: start2(2), count2(2), start3(3), count3(3), start4(4), count4(4)
+    real(ESMF_KIND_R8), allocatable   :: buff2d(:,:), buff3d(:,:,:), buff4d(:,:,:,:)
+    real(ESMF_KIND_R8), allocatable   :: sndrcvbuffer(:)
+    integer :: sndcount, rcvcount, xsize, ysize
+    integer, allocatable :: tilenos(:), denos(:), tilearray(:)
     integer :: lncid, varId, ncStatus
+    integer :: i, j, i1, i2, i3, i4, tiles(2)
 
 #ifdef ESMF_NETCDF
     rc = ESMF_FAILURE
@@ -3127,16 +3131,11 @@ subroutine WriteMosaicField(field, inputfile, mosaic, rank, dims, rc)
      call ESMF_VMGetCurrent(vm, rc=localrc)
      if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
-     call ESMF_VMGet(vm, localPet = PetNo, rc=localrc)
+     call ESMF_VMGet(vm, petCount = PetCnt, localPet = PetNo, rc=localrc)
      if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
      call ESMF_FieldGet(field, grid=grid, &
         staggerloc=staggerloc, localDeCount=localDeCount, rc=localrc)
-
-     if (localDeCount == 0) then
-        rc = ESMF_SUCCESS
-        return
-     endif
 
        ! -- get domain decomposition
       call ESMF_GridGet(grid, staggerloc, distgrid=distgrid, rc=localrc)
@@ -3170,61 +3169,229 @@ subroutine WriteMosaicField(field, inputfile, mosaic, rank, dims, rc)
       if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
-      do localDe = 0, localDeCount-1
-        de   = localDeToDeMap(localDe+1) + 1
-        tile = deToTileMap(de)
-
-        filename = trim(mosaic%tileDirectory)//trim(inputfile)//"."//trim(mosaic%tilenames(tile))//".nc"
-        ncStatus = nf90_open(path=trim(fileName), mode=NF90_WRITE, ncid=lncid)
-        if (ESMF_LogFoundNetCDFError(ncerrToCheck=ncStatus, &
-             msg="Error opening file "//trim(fileName), &
-             ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
-
-         ncStatus = nf90_inq_varid(lncid, trim(fieldName), varId)
-         if (ESMF_LogFoundNetCDFError(ncerrToCheck=ncStatus, &
-              msg="Error inquiring variable "//trim(fieldName)//" in "//trim(fileName), &
-              ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
-
-        if (rank==2) then
-             start2(:)=minIndexPDe(:,de)
-             count2(:)=maxIndexPDe(:,de)-minIndexPDe(:,de)+1
-             call ESMF_FieldGet(field, localDe=localDe, farrayPtr=fptr2d, &
-                      rc=localrc)
-!                      exclusiveLBound=elb, exclusiveUBound=eub, rc=localrc)
-             ncStatus = nf90_put_var(lncid, varId, fptr2d, start=start2, count=count2)
-             if (ESMF_LogFoundNetCDFError(ncerrToCheck=ncStatus, &
-                 msg="Error reading "//trim(fieldName)//" in "//trim(fileName), &
-                 ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
-        elseif (rank==3) then
-             start3(1:2)=minIndexPDe(:,de)
-             count3(1:2)=maxIndexPDe(:,de)-minIndexPDe(:,de)+1
-             start3(3) = 1
-             count3(3) = dims(3)
-              call ESMF_FieldGet(field, localDe=localDe, farrayPtr=fptr3d, &
-                      rc=localrc)
-!                      exclusiveLBound=elb, exclusiveUBound=eub, rc=localrc)
-             ncStatus = nf90_put_var(lncid, varId, fptr3d, start=start3, count=count3)
-             if (ESMF_LogFoundNetCDFError(ncerrToCheck=ncStatus, &
-                 msg="Error reading "//trim(fieldName)//" in "//trim(fileName), &
-                 ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
-        elseif (rank==4) then
-             start4(1:2)=minIndexPDe(:,de)
-             count4(1:2)=maxIndexPDe(:,de)-minIndexPDe(:,de)+1
-             start4(3:4) = 1
-             count4(3:4) = dims(3:4)
-              call ESMF_FieldGet(field, localDe=localDe, farrayPtr=fptr4d, &
-                      rc=localrc)
-             ncStatus = nf90_put_var(lncid, varId, fptr4d, start=start4, count=count4)
-             if (ESMF_LogFoundNetCDFError(ncerrToCheck=ncStatus, &
-                 msg="Error reading "//trim(fieldName)//" in "//trim(fileName), &
-                 ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
+      ! only write out to file if iamroot is true
+      if (deCount >= 12) then 
+      ! More than one PETs per tile, need to gather data to one PET to write
+      ! out to file, in this case, each PET's localDeCount is always <= 1
+         if (localDeCount > 1) then
+            call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
+                 msg="- localDeCount should not be more than 1 ", &
+                 ESMF_CONTEXT, rcToReturn=rc)
          endif
-      enddo
-        
-      ncStatus = nf90_close(lncid)
-      if (ESMF_LogFoundNetCDFError(ncerrToCheck=ncStatus, &
-        msg="Error closing NetCDF data set", &
-        ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
+         if (localDeCount > 0) then
+            de   = localDeToDeMap(1) + 1
+            tile = deToTileMap(de)
+         else
+            de = -1
+            tile = -1
+         endif
+         allocate(tilearray(PetCnt*2))
+         tiles(1) = de
+         tiles(2) = tile
+         call ESMF_VMAllGather(vm, tiles, tilearray, 2, rc=localrc)
+         if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
+         allocate(tilenos(PetCnt), denos(PetCnt))
+         do i=1,PetCnt
+	    tilenos(i)=tilearray(i*2)
+            denos(i) = tilearray(i*2-1)
+         enddo
+         deallocate(tilearray)
+         ! Find the root of my local tile
+	 localDe = 0
+         if (tile > 0) then
+            ! get the fortran pointer from my own field first 
+            if (rank==2) then
+               call ESMF_FieldGet(field, localDe=localDe, farrayPtr=fptr2d, &
+                    rc=localrc)
+               if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
+               sndcount = size(fptr2d,1)*size(fptr2d,2)
+               allocate(sndrcvbuffer(sndcount))
+               sndrcvbuffer=reshape(fptr2d, (/sndcount/))
+            elseif (rank==3) then
+               call ESMF_FieldGet(field, localDe=localDe, farrayPtr=fptr3d, &
+                    rc=localrc)
+               if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
+               sndcount = size(fptr3d,1)*size(fptr3d,2)*dims(3)
+               allocate(sndrcvbuffer(sndcount))
+               sndrcvbuffer=reshape(fptr3d, (/sndcount/))
+            elseif (rank==4) then
+               call ESMF_FieldGet(field, localDe=localDe, farrayPtr=fptr4d, &
+                    rc=localrc)
+               if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
+               sndcount = size(fptr4d,1)*size(fptr4d,2)*dims(3)*dims(4)
+               allocate(sndrcvbuffer(sndcount))
+               sndrcvbuffer=reshape(fptr4d, (/sndcount/)) 
+            endif
+            ! Find the first PET that owns the same tile
+	    do i=1, PetCnt
+               if (tilenos(i)==tile) then
+                  localroot = i-1
+                  exit
+               endif
+            enddo
+	    if (PetNo == localroot) then
+              ! gather all the data from the PETs that own the tile before writing it out
+              if (rank==2) then
+                 allocate(buff2d(dims(1),dims(2)))
+              elseif (rank==3) then
+                 allocate(buff3d(dims(1),dims(2),dims(3)))
+              elseif (rank==4) then
+                 allocate(buff4d(dims(1),dims(2),dims(3),dims(4)))
+              endif
+              do i=PetNo+1, PetCnt
+                 if (tilenos(i)==tile) then
+                    !allocate array to receive the data
+                    !Receive the data from PetNo
+                    xsize = maxIndexPDe(1,denos(i))-minIndexPDe(1,denos(i))+1
+                    ysize = maxIndexPDe(2,denos(i))-minIndexPDe(2,denos(i))+1
+                    if (i /= PetNo+1) then 
+                       if (rank==2) then
+                          rcvcount = xsize*ysize
+                       elseif (rank==3) then
+                          rcvcount = xsize*ysize*dims(3)
+                       elseif (rank==4) then
+                          rcvcount = xsize*ysize*dims(3)*dims(4)
+                       endif
+                       ! Get the data from other PETs that own the same tile
+                       allocate(sndrcvbuffer(rcvcount))
+                       call ESMF_VMRecv(vm, sndrcvbuffer, rcvcount, i-1, rc=localrc)
+                       if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
+                            ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
+                    endif
+                    ! Put the block of data into the big array
+                    if (rank==2) then
+                       j=1
+                       do i2=minIndexPDe(2,denos(i)),maxIndexPDe(2,denos(i))
+                          do i1=minIndexPDe(1,denos(i)),maxIndexPDe(1,denos(i))
+                             buff2d(i1,i2)=sndrcvbuffer(j)
+                             j=j+1
+                          enddo
+                       enddo
+                    elseif (rank==3) then
+                       j=1
+                       do i3 = 1, dims(3)
+                          do i2=minIndexPDe(2,denos(i)),maxIndexPDe(2,denos(i))
+                             do i1=minIndexPDe(1,denos(i)),maxIndexPDe(1,denos(i))
+                                buff3d(i1,i2,i3)=sndrcvbuffer(j)
+                                j=j+1
+                             enddo
+                          enddo
+                       enddo
+                    elseif (rank==4) then
+                       j=1
+                       do i4 = 1, dims(4)
+                          do i3 = 1, dims(3)
+                             do i2=minIndexPDe(2,denos(i)),maxIndexPDe(2,denos(i))
+                                do i1=minIndexPDe(1,denos(i)),maxIndexPDe(1,denos(i))
+                                   buff4d(i1,i2,i3,i4)=sndrcvbuffer(j)
+                                   j=j+1
+                                enddo
+                             enddo
+                          enddo
+                       enddo
+                    endif
+		    deallocate(sndrcvbuffer)
+                 endif
+              enddo
+              ! write it out
+              filename = trim(mosaic%tileDirectory)//trim(inputfile)//"."//trim(mosaic%tilenames(tile))//".nc"
+              ncStatus = nf90_open(path=trim(fileName), mode=NF90_WRITE, ncid=lncid)
+              if (ESMF_LogFoundNetCDFError(ncerrToCheck=ncStatus, &
+                   msg="Error opening file "//trim(fileName), &
+                   ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
+
+              ncStatus = nf90_inq_varid(lncid, trim(fieldName), varId)
+              if (ESMF_LogFoundNetCDFError(ncerrToCheck=ncStatus, &
+                   msg="Error inquiring variable "//trim(fieldName)//" in "//trim(fileName), &
+                   ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
+
+              if (rank==2) then 
+                 ncStatus = nf90_put_var(lncid, varId, buff2d)
+                 if (ESMF_LogFoundNetCDFError(ncerrToCheck=ncStatus, &
+                      msg="Error reading "//trim(fieldName)//" in "//trim(fileName), &
+                      ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
+                 deallocate(buff2d)
+              elseif (rank==3) then
+                 ncStatus = nf90_put_var(lncid, varId, buff3d)
+                 if (ESMF_LogFoundNetCDFError(ncerrToCheck=ncStatus, &
+                      msg="Error reading "//trim(fieldName)//" in "//trim(fileName), &
+                      ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
+                 deallocate(buff3d)
+              elseif (rank==4) then
+                 ncStatus = nf90_put_var(lncid, varId, buff4d)
+                 if (ESMF_LogFoundNetCDFError(ncerrToCheck=ncStatus, &
+                      msg="Error reading "//trim(fieldName)//" in "//trim(fileName), &
+                      ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
+                 deallocate(buff4d)
+              endif
+              ncStatus = nf90_close(lncid)
+              if (ESMF_LogFoundNetCDFError(ncerrToCheck=ncStatus, &
+                   msg="Error closing NetCDF data set", &
+                   ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
+            else 
+               ! If I am not a rootpet of a tile, just send my data to the rootpet
+               ! get the fortran pointer from the field 
+               call ESMF_VMSend(vm, sndrcvbuffer, sndcount, localroot, rc=localrc)
+               if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
+               deallocate(sndrcvbuffer)
+            endif
+         endif
+         deallocate(tilenos, denos)
+      else !deCount < 12
+         do localDe = 0, localDeCount-1
+            de   = localDeToDeMap(localDe+1) + 1
+            tile = deToTileMap(de)
+            
+            filename = trim(mosaic%tileDirectory)//trim(inputfile)//"."//trim(mosaic%tilenames(tile))//".nc"
+            ncStatus = nf90_open(path=trim(fileName), mode=NF90_WRITE, ncid=lncid)
+            if (ESMF_LogFoundNetCDFError(ncerrToCheck=ncStatus, &
+                 msg="Error opening file "//trim(fileName), &
+                 ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
+
+            ncStatus = nf90_inq_varid(lncid, trim(fieldName), varId)
+            if (ESMF_LogFoundNetCDFError(ncerrToCheck=ncStatus, &
+                 msg="Error inquiring variable "//trim(fieldName)//" in "//trim(fileName), &
+                 ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
+
+            if (rank==2) then
+               call ESMF_FieldGet(field, localDe=localDe, farrayPtr=fptr2d, &
+                    rc=localrc)
+               if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
+               ncStatus = nf90_put_var(lncid, varId, fptr2d)
+               if (ESMF_LogFoundNetCDFError(ncerrToCheck=ncStatus, &
+                    msg="Error reading "//trim(fieldName)//" in "//trim(fileName), &
+                    ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
+            elseif (rank==3) then
+               call ESMF_FieldGet(field, localDe=localDe, farrayPtr=fptr3d, &
+                    rc=localrc)
+               if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
+               ncStatus = nf90_put_var(lncid, varId, fptr3d)
+               if (ESMF_LogFoundNetCDFError(ncerrToCheck=ncStatus, &
+                    msg="Error reading "//trim(fieldName)//" in "//trim(fileName), &
+                    ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
+            elseif (rank==4) then
+               call ESMF_FieldGet(field, localDe=localDe, farrayPtr=fptr4d, &
+                    rc=localrc)
+               if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
+               ncStatus = nf90_put_var(lncid, varId, fptr4d)
+               if (ESMF_LogFoundNetCDFError(ncerrToCheck=ncStatus, &
+                    msg="Error reading "//trim(fieldName)//" in "//trim(fileName), &
+                    ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
+            endif
+            ncStatus = nf90_close(lncid)
+            if (ESMF_LogFoundNetCDFError(ncerrToCheck=ncStatus, &
+                 msg="Error closing NetCDF data set", &
+                 ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
+         enddo
+      endif
       
       rc=ESMF_SUCCESS
       return

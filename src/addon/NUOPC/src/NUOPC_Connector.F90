@@ -3023,6 +3023,7 @@ module NUOPC_Connector
     character(len=40)               :: currTimeString
     character(len=40)               :: transferDirection
     logical                         :: isPresentNDG, isPresentEDG
+    type(ESMF_VM)                   :: vm
 
     rc = ESMF_SUCCESS
 
@@ -3418,7 +3419,7 @@ module NUOPC_Connector
             call ESMF_MeshGet(providerMesh, isMemFreed=meshNoConnections, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            call ESMF_FieldGet(acceptorField, mesh=acceptorMesh, rc=rc)
+            call ESMF_FieldGet(acceptorField, mesh=acceptorMesh, vm=vm, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             call ESMF_MeshGet(acceptorMesh, nodalDistgridIsPresent=isPresentNDG, &
@@ -3432,7 +3433,7 @@ module NUOPC_Connector
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
               acceptorMesh = ESMF_MeshCreate(providerMesh, &
-                nodalDistgrid=nDistgrid, elementDistgrid=eDistgrid, rc=rc)
+                nodalDistgrid=nDistgrid, elementDistgrid=eDistgrid, vm=vm, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             elseif (isPresentNDG.and. .not.isPresentEDG) then
@@ -3441,7 +3442,7 @@ module NUOPC_Connector
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
               acceptorMesh = ESMF_MeshCreate(providerMesh, &
-                nodalDistgrid=nDistgrid, rc=rc)
+                nodalDistgrid=nDistgrid, vm=vm, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             elseif (isPresentEDG.and. .not.isPresentNDG) then
@@ -3450,7 +3451,7 @@ module NUOPC_Connector
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
               acceptorMesh = ESMF_MeshCreate(providerMesh, &
-                elementDistgrid=eDistgrid, rc=rc)
+                elementDistgrid=eDistgrid, vm=vm, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             else
