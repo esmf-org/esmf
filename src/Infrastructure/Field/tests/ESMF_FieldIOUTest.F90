@@ -680,6 +680,7 @@ program ESMF_FieldIOUTest
       call ESMF_Finalize(endflag=ESMF_END_ABORT)
 #else
     if (rc/=ESMF_RC_LIB_NOT_PRESENT) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    rc = ESMF_SUCCESS
 #endif
     ! Next time through the loop, write to same file
     statusFlag = ESMF_FILESTATUS_OLD
