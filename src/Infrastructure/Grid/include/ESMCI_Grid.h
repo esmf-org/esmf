@@ -266,10 +266,10 @@ template <class TYPE>
                                ESMC_IndexFlag *indexflag,
                                int *rc);
   static Grid* create1peridim(ESMC_InterArrayInt *maxIndex, 
+                              ESMC_InterArrayInt *polekindflag,
                               int *periodicDim, int *poleDim,
                               ESMC_CoordSys_Flag *coordSys,
                               ESMC_TypeKind_Flag *coordTypeKind, 
-                              ESMC_PoleKind_Flag *poleKind,
                               ESMC_IndexFlag *indexflag,
                               int *rc);
   static Grid* createcubedsphere(int *tilesize,
