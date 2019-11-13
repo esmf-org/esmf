@@ -44,7 +44,7 @@ int main(void){
 
   int dimcount = 2;
   int *maxIndex;
-  ESMC_InterArrayInt i_maxIndex;
+  ESMC_InterArrayInt i_maxIndex, i_pkf;
   int p;
   bool pass;
   int elbnd[dimcount],eubnd[dimcount];
@@ -202,7 +202,7 @@ int main(void){
 
   strcpy(name, "GridCreate");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  grid_1p = ESMC_GridCreate1PeriDim(&i_maxIndex, NULL, NULL, &coordsys, &typekind, NULL, NULL, &rc);
+  grid_1p = ESMC_GridCreate1PeriDim(&i_maxIndex, NULL, NULL, NULL, &coordsys, &typekind, NULL, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -216,8 +216,8 @@ int main(void){
   strcpy(name, "GridCreate_periodicDim_1");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   int periodicDim = 1;
-  grid_1p_pdim1 = ESMC_GridCreate1PeriDim(&i_maxIndex, &periodicDim, NULL, 
-                                          &coordsys, &typekind, NULL, NULL, &rc);
+  grid_1p_pdim1 = ESMC_GridCreate1PeriDim(&i_maxIndex, NULL, &periodicDim, NULL, 
+                                          &coordsys, &typekind, NULL, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   if (rc == ESMF_SUCCESS) {
@@ -238,8 +238,8 @@ int main(void){
   // both parameters.
   periodicDim = 2;
   int poleDim = 1;
-  grid_1p_pdim2 = ESMC_GridCreate1PeriDim(&i_maxIndex, &periodicDim, &poleDim,
-                                          &coordsys, &typekind, NULL, NULL, &rc);
+  grid_1p_pdim2 = ESMC_GridCreate1PeriDim(&i_maxIndex, NULL, &periodicDim, &poleDim,
+                                          &coordsys, &typekind, NULL, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   if (rc == ESMF_SUCCESS) {
@@ -745,12 +745,12 @@ int main(void){
 
   strcpy(name, "GridCreate");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  ESMC_PoleKind_Flag polekind[2];
+  int polekind[2];
   polekind[0] = ESMC_POLEKIND_MONOPOLE;
   polekind[1] = ESMC_POLEKIND_BIPOLE;
-  ESMC_PoleKind_Flag *pkptr = polekind;
-  grid_tripole = ESMC_GridCreate1PeriDim(&i_maxIndex, NULL, NULL, &coordsys, 
-                                         &typekind, pkptr, NULL, &rc);
+  rc = ESMC_InterArrayIntSet(&i_pkf, polekind, 2);
+  grid_tripole = ESMC_GridCreate1PeriDim(&i_maxIndex, &i_pkf, NULL, NULL, &coordsys, 
+                                         &typekind, NULL, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   // free memory
   free(maxIndex);

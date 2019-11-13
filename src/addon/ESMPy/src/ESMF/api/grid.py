@@ -49,6 +49,12 @@ class Grid(object):
 
     *OPTIONAL:*
 
+    :param PoleKind pole_kind: Two item list which specifies the type of
+        connection which occurs at the pole. The first value specifies the
+        connection that occurs at the minimum end of the pole dimension. 
+        The second value specifies the connection that occurs at the maximum 
+        end of the pole dimension.
+        If ``None``, defaults to :attr:`~ESMF.api.constants.PoleKind.MONOPOLE`.
     :param int num_peri_dims: The number of periodic dimensions, either ``0``
         or ``1``. If ``None``, defaults to ``0``.
     :param int periodic_dim: The periodic dimension: ``0``, ``1`` or ``2``.
@@ -131,6 +137,7 @@ class Grid(object):
 
     @initialize
     def __init__(self, max_index=None,
+                 pole_kind=None,
                  num_peri_dims=0,
                  periodic_dim=None,
                  pole_dim=None,
@@ -166,6 +173,11 @@ class Grid(object):
                 self._max_index = np.array(max_index, dtype=np.int32)
             else:
                 self._max_index = max_index
+            if pole_kind is not None:
+                if pole_kind.dtype is not np.int32:
+                    self._pole_kind = np.array(pole_kind, dtype=np.int32)
+                else:
+                    self._pole_kind = pole_kind
             # raise warnings on all from file args
             if filename is not None:
                 warnings.warn("filename is only used for grids created from file, this argument will be ignored.")
@@ -210,6 +222,8 @@ class Grid(object):
             #raise errors for all in-memory grid options
             if max_index is not None:
                 warnings.warn("max_index is only used for grids created in memory, this argument will be ignored.")
+            if pole_kind is not None:
+                warnings.warn("pole_kind is only used for grids created in memory, this argument will be ignored.")
             if num_peri_dims is not 0:
                 warnings.warn("num_peri_dims is only used for grids created in memory, this argument will be ignored.")
             if periodic_dim is not None:
@@ -240,6 +254,8 @@ class Grid(object):
             #raise errors for all in-memory grid options
             if max_index is not None:
                 warnings.warn("max_index is only used for grids created in memory, this argument will be ignored.")
+            if pole_kind is not None:
+                warnings.warn("pole_kind is only used for grids created in memory, this argument will be ignored.")
             if num_peri_dims is not 0:
                 warnings.warn("num_peri_dims is only used for grids created in memory, this argument will be ignored.")
             if periodic_dim is not None:
@@ -387,6 +403,7 @@ class Grid(object):
                                                        coordTypeKind=coord_typekind)
             elif (self.num_peri_dims == 1):
                 self._struct = ESMP_GridCreate1PeriDim(self.max_index,
+                                                      polekindflag=pole_kind,
                                                       periodicDim=periodic_dim,
                                                       poleDim=pole_dim,
                                                       coordSys=coord_sys,
@@ -505,6 +522,7 @@ class Grid(object):
                   "    num_peri_dims = %r"
                   "    periodic_dim = %r"
                   "    pole_dim = %r"
+                  "    pole_kind = %r"
                   "    coord_sys = %r"
                   "    staggerloc = %r"
                   "    lower bounds = %r"
@@ -519,6 +537,7 @@ class Grid(object):
                    self.num_peri_dims,
                    self.periodic_dim,
                    self.pole_dim,
+                   self.pole_kind,
                    self.coord_sys,
                    self.staggerloc,
                    self.lower_bounds,
@@ -697,6 +716,16 @@ class Grid(object):
         """
 
         return self._pole_dim
+
+    @property
+    def pole_kind(self):
+        """
+        :rtype: A numpy array with as many values as the
+            :class:`~ESMF.api.grid.Grid` has poles.
+        :return: The number of connections at each pole of the :class:`~ESMF.api.grid.Grid`.
+        """
+
+        return self._pole_kind
 
     @property
     def rank(self):

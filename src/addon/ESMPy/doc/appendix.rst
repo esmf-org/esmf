@@ -31,6 +31,7 @@ Named Constants
     MeshElemType
     MeshLoc
     NormType
+    PoleKind
     PoleMethod
     Region
     RegridMethod
