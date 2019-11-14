@@ -70,11 +70,12 @@ void FTN_X(f_esmf_gridcreatenoperidim)(ESMCI::Grid **grid,
     ESMC_IndexFlag *indexflag, int *rc);
 
 void FTN_X(f_esmf_gridcreate1peridim)(ESMCI::Grid **grid,
-    int *maxIndex, int *len1, int *periodicDim, int *pd_present,
-    int *poleDim, int *pld_present,
-    ESMC_CoordSys_Flag *coordSys, int *cs_present,
-    ESMC_TypeKind_Flag *coordTypeKind, int *ctk_present,
-    ESMC_PoleKind_Flag *poleKind, int *pk_present, int *pksize,
+    int *maxIndex, int *len1, 
+    int *poleKind, int *len2,
+    int *periodicDim,
+    int *poleDim,
+    ESMC_CoordSys_Flag *coordSys,
+    ESMC_TypeKind_Flag *coordTypeKind,
     ESMC_IndexFlag *indexflag, int *rc);
 
 void FTN_X(f_esmf_gridcreatecubedsphere)(ESMCI::Grid **grid,
@@ -277,11 +278,11 @@ int setDefaultsLUA(int dimCount,
 //
 // !ARGUMENTS:
     ESMC_InterArrayInt *maxIndex, 
+    ESMC_InterArrayInt *polekindflag,
     int *periodicDim,
     int *poleDim,
     ESMC_CoordSys_Flag *coordSys,
     ESMC_TypeKind_Flag *coordTypeKind,
-    ESMC_PoleKind_Flag *poleKind,
     ESMC_IndexFlag *indexflag,
     int *rc) {           // out - return code
 //
@@ -296,14 +297,8 @@ int setDefaultsLUA(int dimCount,
     int localrc = ESMC_RC_NOT_IMPL;
     if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
 
-    int cs_present, ctk_present, pk_present, pd_present, pld_present;
-    cs_present = 0;
-    ctk_present = 0;
-    pk_present = 0;
-    pd_present = 0;
-    pld_present = 0;
-
-    int pksize = 2;
+    int *pkfArray;
+    int pkfLen;
 
     ESMCI::InterArray<int> *mi = (ESMCI::InterArray<int> *)maxIndex;
   
@@ -313,33 +308,46 @@ int setDefaultsLUA(int dimCount,
        return ESMC_NULL_POINTER;
     }
 
+    ESMCI::InterArray<int> *pkf = (ESMCI::InterArray<int> *)polekindflag;
+    if (pkf != NULL) {
+      if(pkf->dimCount != 1){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+          "- polekindflag array must be of rank 1", ESMC_CONTEXT, rc);
+          return ESMC_NULL_POINTER;
+      }
+
+      if(pkf->extent[0] != 2){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+          "- polekindflag array must hold 2 values", ESMC_CONTEXT, rc);
+          return ESMC_NULL_POINTER;
+      }
+      pkfArray = pkf->array;
+      pkfLen = pkf->extent[0];
+    } else {
+      pkfArray = NULL;
+      pkfLen = 0;
+    }
+
+
     // handle the optional arguments
-    if (coordSys != NULL)
-      cs_present = 1;
-    if (coordTypeKind != NULL)
-      ctk_present = 1; 
-    if (poleKind != NULL)
-      pk_present = 1; 
     int periodicDimLoc = 1;
     if (periodicDim != NULL) {
-      pd_present = 1;
       periodicDimLoc = *periodicDim;
     }
     int poleDimLoc = 2;
     if (poleDim != NULL) {
-      pld_present = 1;
       poleDimLoc = *poleDim;
     }
     // allocate the grid object
     Grid *grid;
   
     FTN_X(f_esmf_gridcreate1peridim)(&grid,
-                                     mi->array, &mi->extent[0], 
-                                     &periodicDimLoc, &pd_present,
-                                     &poleDimLoc, &pld_present,
-                                     coordSys, &cs_present,
-                                     coordTypeKind, &ctk_present,
-                                     poleKind, &pk_present, &pksize,
+                                     mi->array, &mi->extent[0],
+                                     pkfArray, &pkfLen, 
+                                     &periodicDimLoc, 
+                                     &poleDimLoc, 
+                                     coordSys, 
+                                     coordTypeKind, 
                                      indexflag, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return grid;

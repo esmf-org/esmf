@@ -52,13 +52,14 @@ void create_grid(ESMC_Grid &grid, double max_x_in, double max_y_in)
 
   ESMC_CoordSys_Flag coordsys = ESMC_COORDSYS_CART;
   ESMC_TypeKind_Flag typekind = ESMC_TYPEKIND_R8;
-  ESMC_PoleKind_Flag polekind[2];
+  ESMC_InterArrayInt i_pkr;
+  int polekind[2];
   polekind[0] = ESMC_POLEKIND_MONOPOLE;
   polekind[1] = ESMC_POLEKIND_BIPOLE;
-  ESMC_PoleKind_Flag *pkptr = polekind;
+  ESMC_InterArrayIntSet(&i_pkr, polekind, 2);
 
-  grid = ESMC_GridCreate1PeriDim(&i_maxIndex, NULL, NULL, &coordsys, &typekind,
-                                 pkptr, NULL, NULL);
+  grid = ESMC_GridCreate1PeriDim(&i_maxIndex, &i_pkr, NULL, NULL, &coordsys, &typekind,
+                                 NULL, NULL);
 
   // free memory
   free(maxIndex);

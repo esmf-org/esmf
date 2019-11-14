@@ -929,52 +929,105 @@ void MeshCap::meshserialize(char *buffer, int *length, int *offset,
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::meshserialize()"
 
+  int localrc;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  // Calc Size
+  int size = 1*sizeof(int);
+  
+  // TODO: verify length > vars.
+  if (*inquireflag != ESMF_INQUIREONLY) {
+    if ((*length - *offset) < size) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "Buffer too short to add Mesh object", ESMC_CONTEXT, rc);
+       return;
+    }
+  }
+  
+  // Save integers
+  int *ip= (int *)(buffer + *offset);
+  if (*inquireflag != ESMF_INQUIREONLY) {
+    *ip++ = static_cast<int> (is_esmf_mesh);
+  }
+  
+  // Adjust offset
+  *offset += size;
 
    // Call into func. depending on mesh type
   if (is_esmf_mesh) {
     ESMCI_meshserialize(&mesh,
                         buffer, length, offset,
-                        inquireflag, rc,
+                        inquireflag, &localrc,
                         buffer_l);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return;
   } else {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-       "- this functionality is not currently supported using MOAB",
-                                  ESMC_CONTEXT, rc);
-    return;
+#if defined ESMF_MOAB
+    MBMesh_serialize(&mbmesh, buffer, length, offset, inquireflag, &localrc, 
+                     buffer_l);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return;
+#else
+   if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+      "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
+#endif
   }
 
+  if (rc!=NULL) *rc=ESMF_SUCCESS;
 }
 
 MeshCap *MeshCap::meshdeserialize(char *buffer, int *offset, int *rc,
-                              ESMCI_FortranStrLenArg buffer_l){
+                                  ESMCI_FortranStrLenArg buffer_l){
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::meshdeserialize()"
 
-  // For now assume that this is an esmf mesh
-  bool is_esmf_mesh=true;
-
   Mesh *mesh;
-  if (is_esmf_mesh) {
-    int localrc;
+  void *mbmesh;
+  int localrc;
+  int local_is_esmf_mesh = 1;
 
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+  
+  // Get pointer
+  int *ip= (int *)(buffer + *offset);
+  
+  // Get values
+  local_is_esmf_mesh=*ip++;
+
+  // Adjust offset
+  *offset += sizeof(int);
+
+printf("MeshCap::deserialize is_esmf_mesh = %d\n", local_is_esmf_mesh);
+
+  if (local_is_esmf_mesh) {
     ESMCI_meshdeserialize(&mesh,
                           buffer, offset, &localrc,
                           buffer_l);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return NULL;
   } else {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-           "- this functionality is not currently supported using MOAB",
-                                  ESMC_CONTEXT, rc);
-    return NULL;
+#if defined ESMF_MOAB
+    MBMesh_deserialize(&mbmesh, buffer, offset, &localrc, buffer_l);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return NULL;
+#else
+   if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+      "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return NULL;
+#endif
   }
 
   // Create MeshCap
   MeshCap *mc=new MeshCap();
 
   // Set member variables
-  mc->is_esmf_mesh=is_esmf_mesh;
+  mc->is_esmf_mesh=static_cast<bool> (local_is_esmf_mesh);
   mc->mesh=mesh;
+  mc->mbmesh=mbmesh;
+
+  if (rc!=NULL) *rc=ESMF_SUCCESS;
 
   // Output new MeshCap
   return mc;

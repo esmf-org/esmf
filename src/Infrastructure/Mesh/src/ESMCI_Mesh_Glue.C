@@ -2051,6 +2051,9 @@ void ESMCI_meshinfoserialize(int *intMeshFreed,
      // Adjust offset
     *offset += size;
 
+// printf("infoserialize offset = %d ispresentNDG = %d ispresent EDG = %d\n", 
+  // *offset, *intIsPresentNDG, *intIsPresentEDG);
+
     // return success
     if (localrc) *localrc = ESMF_SUCCESS;
 
@@ -2084,6 +2087,9 @@ void ESMCI_meshinfodeserialize(int *intMeshFreed,
 
     // Adjust offset
     *offset += 5*sizeof(int);
+
+// printf("infoDEserialize offset = %d ispresentNDG = %d ispresent EDG = %d\n", 
+  // *offset, *intIsPresentNDG, *intIsPresentEDG);
 
     // return success
     if (localrc) *localrc = ESMF_SUCCESS;

@@ -84,6 +84,12 @@ void MBMesh_getlocalcoords(void **meshpp, double *ncoords,
 void MBMesh_getlocalelemcoords(void **meshpp, double *ecoords,
                                int *_orig_sdim, int *rc);
 
+void MBMesh_serialize(void **mbmpp, char *buffer, int *length, 
+                      int *offset, ESMC_InquireFlag *inquireflag, int *rc,
+                      ESMCI_FortranStrLenArg buffer_l);
+
+void MBMesh_deserialize(void **mbmpp, char *buffer, int *offset, int *rc,
+                        ESMCI_FortranStrLenArg buffer_l);
 
 void MBMesh_turnonelemmask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg,  int *rc);
 void MBMesh_turnoffelemmask(void **mbmpp, int *rc);

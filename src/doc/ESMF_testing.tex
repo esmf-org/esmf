@@ -34,7 +34,7 @@ $(ESMF_MPIRUN) -np N application
 and that the output of the application arrives at the calling shell via 
 {\tt stdout} and {\tt stderr}.
 
-On systems that allow direct launching of MPI application via a suitable
+First, on systems that allow direct launching of MPI application via a suitable
 {\tt mpirun} facility, ESMF can use it directly. This is the ESMF default for
 all those configurations that come with a suitable {\tt mpirun}. In these
 cases the {\tt ESMF\_MPIRUN} environment variable does not need to be set by
@@ -48,7 +48,7 @@ interactive POE access on IBM machines and {\tt aprun}, as well as
 {\tt yod} on Cray machines. The ESMF configurations will access the
 appropriate wrapper scripts by default if necessary.
 
-Finally, there are those systems that utilize batch software to access the
+Secondly, there are those systems that utilize batch software to access the
 parallel execution environment. One option is to execute the ESMF test targets
 from within a batch session, either interactively or from within a script. In 
 this case the batch software does not add any additional complexity for ESMF.
@@ -60,9 +60,9 @@ on the front-end machine, and have ESMF access the batch software each time it
 needs to launch an application. In fact, on IBM systems this is often the only
 working option, because the integrated POE system will execute each application
 on the exact same number of processes specified during batch access, regardless
-of how many ways parallel a specific application needs to be run.
+of how many ways in parallel a specific application needs to be run.
 
-Two modes of operation need to be considered for the ESMF batch access. First,
+Two modes of operation need to be considered in the case of the ESMF batch access. First,
 if interactive batch access is available, it is straightforward to write an
 {\tt mpirun} script that fulfills the ESMF requirements outlined above. The
 ESMF {\tt ./scripts} directory contains several scripts that access various
@@ -132,16 +132,6 @@ for the platform of interest. Each test report contains the output of
 {\tt gmake info}, which lists the settings of the {\tt ESMF\_MPIxxx} 
 environment variables.
 \end{sloppypar}
-
-Furthermore, the {\tt esmfcontrib} repository on SourceForge hosts a 
-{\tt scripts} module that contains scripts that were customized to certain
-user environments. These scripts are not generic enough to be included in the
-ESMF distribution, but users faced with the need to customize a script to their
-environment may find the script collection on {\tt esmfcontrib} a valuable
-resource. Please refer to
-\htmladdnormallink{http://sourceforge.net/projects/esmfcontrib}
-{http://sourceforge.net/projects/esmfcontrib} on how to access 
-{\tt esmfcontrib}, and the {\tt scripts} module in particular.
 
 \subsubsection{Running ESMF unit tests}
 
