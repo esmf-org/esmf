@@ -166,7 +166,7 @@ program ESMF_MeshEx
 
 !BOE
 !\subsubsection{Create a small single PET Mesh in one step}\label{sec:mesh:1pet1step}
-!
+!\begin{minipage}{\linewidth} 
 !\begin{verbatim}
 !
 ! 
@@ -187,6 +187,7 @@ program ESMF_MeshEx
 !       (Everything owned by PET 0) 
 !
 !\end{verbatim}
+!\end{minipage}
 !
 ! This example is intended to illustrate the creation of a small Mesh on one PET. The reason for starting with a single PET
 ! case is so that the user can start to familiarize themselves with the concepts of Mesh creation without the added complication of 
@@ -445,7 +446,7 @@ program ESMF_MeshEx
 !BOE
 !\subsubsection{Create a small Mesh on 4 PETs in one step}
 !\label{sec:mesh:4pet1step}
-!
+!\begin{minipage}{\linewidth} 
 !\begin{verbatim}
 !
 !  2.0   7 ------- 8        [8] ------ 9          
@@ -473,6 +474,7 @@ program ESMF_MeshEx
 !              Element Id labels in centers
 !
 !\end{verbatim}
+!\end{minipage}
 ! 
 ! This example is intended to illustrate the creation of a small Mesh on multiple PETs. This example creates the same small 2D Mesh as the 
 ! previous two examples (See Section~\ref{sec:mesh:1pet1step} for a diagram), however, in this case the Mesh is broken up across 4 PETs. 
@@ -701,7 +703,7 @@ program ESMF_MeshEx
 
 !BOE
 !\subsubsection{Create a copy of a Mesh with a new distribution}
-!
+!\begin{minipage}{\linewidth} 
 !\begin{verbatim}
 !
 !  2.0   7 -------[8]               8 ------- 9          
@@ -729,6 +731,7 @@ program ESMF_MeshEx
 !              Element Id labels in centers
 !
 !\end{verbatim}
+!\end{minipage}
 !
 ! This example demonstrates the creation of a new Mesh which is a copy of an existing Mesh
 ! with a new distribution of the original Mesh's nodes and elements. To create the new Mesh 
@@ -832,7 +835,7 @@ program ESMF_MeshEx
 !BOE
 !\subsubsection{Create a small Mesh of all one element type on 4 PETs using easy element method}
 !\label{sec:mesh:4pet1stepee1type}
-!
+!\begin{minipage}{\linewidth} 
 !\begin{verbatim}
 !
 !  2.0   * ------- *         * ------- *          
@@ -859,6 +862,7 @@ program ESMF_MeshEx
 !           Element Id labels in centers
 !
 !\end{verbatim}
+!\end{minipage}
 ! 
 ! This example is intended to illustrate the creation of a small Mesh on multiple PETs using the easy element creation interface. 
 ! Here the Mesh consists of only one type of element, so we can use a slightly more convenient interface. In this interface the user
@@ -966,7 +970,7 @@ program ESMF_MeshEx
 !BOE
 !\subsubsection{Create a small Mesh of multiple element types on 4 PETs using easy element method}
 !\label{sec:mesh:4pet1stepee}
-!
+!\begin{minipage}{\linewidth} 
 !\begin{verbatim}
 !
 !  2.0   * ------- *         * ------- *          
@@ -993,6 +997,7 @@ program ESMF_MeshEx
 !           Element Id labels in centers
 !
 !\end{verbatim}
+!\end{minipage}
 ! 
 ! This example is intended to illustrate the creation of a small Mesh on multiple PETs using the easy element creation interface. 
 ! In this example, the Mesh being created contains elements of multiple types.
@@ -1371,7 +1376,7 @@ endif ! 1 proc
 
 
 !BOE
-!\subsubsection{Mesh Halo}
+!\subsubsection{Mesh Halo Communication}
 !\label{sec:mesh:halo}
 !\begin{minipage}{\linewidth} 
 !\begin{verbatim}
@@ -1649,7 +1654,7 @@ endif ! 1 proc
 
   ! Create an ESMF Array with a halo region from a node DistGrid.
   array=ESMF_ArrayCreate(nodeDistgrid, typekind=ESMF_TYPEKIND_R8, &
-       haloSeqIndexList=halolist, rc=localrc)
+       haloSeqIndexList=haloSeqIndexList, rc=localrc)
 
 !EOC
 
