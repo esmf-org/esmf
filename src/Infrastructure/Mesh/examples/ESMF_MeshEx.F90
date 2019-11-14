@@ -55,11 +55,18 @@ program ESMF_MeshEx
   integer, allocatable :: elemTypes(:)
   integer, allocatable :: elemConn(:)
 
+  integer(ESMF_KIND_I4), allocatable:: haloSeqIndexList(:)
+
   real(ESMF_KIND_R8), allocatable :: elemCornerCoords2(:,:)
   real(ESMF_KIND_R8), allocatable :: elemCornerCoords3(:,:,:)
+  real(ESMF_KIND_R8), pointer :: tstdata(:)
 
   type(ESMF_ArraySpec) :: arrayspec
   type(ESMF_Field)  ::  field
+  type(ESMF_RouteHandle) :: haloHandle
+  type(ESMF_Array):: array
+
+  integer :: i,j
 
   character(ESMF_MAXSTR) :: testname
   character(ESMF_MAXSTR) :: failMsg
@@ -477,7 +484,7 @@ program ESMF_MeshEx
 !
 !EOE
 
-  ! Only do this if we have 1 processor
+  ! Only do this if we have 4 processors
   if (petCount .eq. 4) then
 
 !BOC
@@ -1363,15 +1370,427 @@ endif ! 1 proc
 !EOE
 
 
+!BOE
+!\subsubsection{Mesh Halo}
+!\label{sec:mesh:halo}
+!\begin{minipage}{\linewidth} 
+!\begin{verbatim}
+!
+!  2.0   7 ------- 8        [8] ------ 9          
+!        |         |         |         |
+!        |    4    |         |    5    |
+!        |         |         |         |
+!  1.0  [4] ----- [5]       [5] ----- [6]
+!        
+!       0.0       1.0       1.0       2.0
+!
+!           PET 2               PET 3
+!
+!
+!  1.0   4 ------- 5        [5] ------ 6
+!        |         |         |  \   3  |
+!        |    1    |         |    \    |
+!        |         |         | 2    \  |
+!  0.0   1 ------- 2        [2] ------ 3
+!
+!       0.0       1.0       1.0      2.0 
+! 
+!           PET 0               PET 1
+!
+!            Node Id labels at corners
+!           Element Id labels in centers
+!
+!\end{verbatim}
+!\end{minipage}
+! 
+! This section illustrates the process of setting up halo communication for a Field built on the nodes of a Mesh.
+! The Mesh used in this example is the one that was created in section~\ref{sec:mesh:4pet1step}. The diagram for 
+! that Mesh is repeated above for convenience's sake. The halo method used here is the one described in 
+! section~\ref{Array:ArbHalo}, but made more specific to the case of a Mesh. 
+! This example shows how to set up haloing for nodes which are owned by another processor (e.g. the node with id
+! 5 on PET 1 above). However, it could be expanded to halo other nodes simply by including them in the 
+! halo arrays below on the PET where their values are needed. 
+! 
+! The first step in setting up the halo communication is to create arrays containing 
+! the ids of the haloed nodes on the PETs where they 
+! are needed. 
+!
+! The following illustrates that for the Mesh diagramed above. 
+! 
+!EOE
+
+  ! Only do this if we have 4 processors
+  if (petCount .eq. 4) then
+
+!BOC
+
+  ! Create halo lists based on PET id.
+  if (localPET .eq. 0) then !!! This part only for PET 0
+
+    ! Allocate and fill the halo list.
+    allocate(haloSeqIndexList(0))  ! There are no haloed points on PET 0
+
+  else if (localPET .eq. 1) then !!! This part only for PET 1
+
+    ! Allocate and fill the halo list.
+    allocate(haloSeqIndexList(2)) 
+    haloSeqIndexList=(/2,5/)
+
+  else if (localPET .eq. 2) then !!! This part only for PET 2
+
+    ! Allocate and fill the halo list.
+    allocate(haloSeqIndexList(2)) 
+    haloSeqIndexList=(/4,5/)
+
+  else if (localPET .eq. 3) then !!! This part only for PET 3
+
+    ! Allocate and fill the halo list.
+    allocate(haloSeqIndexList(3)) 
+    haloSeqIndexList=(/5,6,8/)
+
+  endif
+!EOC
+
+  endif !endif 4 PETs
+
+!BOE
+!
+! The next step is to create an ESMF Array with a halo region to hold the data being haloed. 
+!
+!EOE
+
+  ! Only do this if we have 4 processors
+  if (petCount .eq. 4) then
+
+ ! Create Mesh based on PET id
+ ! Break up what's being set by PET
+ if (localPET .eq. 0) then !!! This part only for PET 0
+    ! Set number of nodes
+     numNodes=4
+
+    ! Allocate and fill the node id array.
+    allocate(nodeIds(numNodes))
+    nodeIds=(/1,2,4,5/) 
+
+    ! Allocate and fill node coordinate array.
+    ! Since this is a 2D Mesh the size is 2x the
+    ! number of nodes.
+    allocate(nodeCoords(2*numNodes))
+    nodeCoords=(/0.0,0.0, & ! node id 1
+                 1.0,0.0, & ! node id 2
+                 0.0,1.0, & ! node id 4
+                 1.0,1.0 /) ! node id 5
+
+    ! Allocate and fill the node owner array.
+    allocate(nodeOwners(numNodes))
+    nodeOwners=(/0, & ! node id 1
+                 0, & ! node id 2
+                 0, & ! node id 4
+                 0/)  ! node id 5
+
+    ! Set the number of each type of element, plus the total number.
+    numQuadElems=1
+    numTriElems=0
+    numTotElems=numQuadElems+numTriElems
+
+    ! Allocate and fill the element id array.
+    allocate(elemIds(numTotElems))
+    elemIds=(/1/) 
+
+    ! Allocate and fill the element topology type array.
+    allocate(elemTypes(numTotElems))
+    elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! elem id 1
+
+    ! Allocate and fill the element connection type array.
+    ! Note that entry are local indices
+    allocate(elemConn(4*numQuadElems+3*numTriElems))
+    elemConn=(/1,2,4,3/) ! elem id 1
+
+  else if (localPET .eq. 1) then !!! This part only for PET 1
+    ! Set number of nodes
+     numNodes=4
+
+    ! Allocate and fill the node id array.
+    allocate(nodeIds(numNodes))
+    nodeIds=(/2,3,5,6/) 
+
+    ! Allocate and fill node coordinate array.
+    ! Since this is a 2D Mesh the size is 2x the
+    ! number of nodes.
+    allocate(nodeCoords(2*numNodes))
+    nodeCoords=(/1.0,0.0, & ! node id 2
+                 2.0,0.0, & ! node id 3
+                 1.0,1.0, & ! node id 5
+                 2.0,1.0 /) ! node id 6
+
+    ! Allocate and fill the node owner array.
+    allocate(nodeOwners(numNodes))
+    nodeOwners=(/0, & ! node id 2
+                 1, & ! node id 3
+                 0, & ! node id 5
+                 1/)  ! node id 6
+
+    ! Set the number of each type of element, plus the total number.
+    numQuadElems=0
+    numTriElems=2
+    numTotElems=numQuadElems+numTriElems
+
+    ! Allocate and fill the element id array.
+    allocate(elemIds(numTotElems))
+    elemIds=(/2,3/) 
+
+    ! Allocate and fill the element topology type array.
+    allocate(elemTypes(numTotElems))
+    elemTypes=(/ESMF_MESHELEMTYPE_TRI, & ! elem id 2
+                ESMF_MESHELEMTYPE_TRI/)  ! elem id 3
+
+    ! Allocate and fill the element connection type array.
+    allocate(elemConn(4*numQuadElems+3*numTriElems))
+    elemConn=(/1,2,3, & ! elem id 2
+               2,4,3/)  ! elem id 3
+
+  else if (localPET .eq. 2) then !!! This part only for PET 2
+    ! Set number of nodes
+     numNodes=4
+
+    ! Allocate and fill the node id array.
+    allocate(nodeIds(numNodes))
+    nodeIds=(/4,5,7,8/) 
+
+    ! Allocate and fill node coordinate array.
+    ! Since this is a 2D Mesh the size is 2x the
+    ! number of nodes.
+    allocate(nodeCoords(2*numNodes))
+    nodeCoords=(/0.0,1.0, & ! node id 4
+                 1.0,1.0, & ! node id 5
+                 0.0,2.0, & ! node id 7
+                 1.0,2.0 /) ! node id 8
+
+    ! Allocate and fill the node owner array.
+    ! Since this Mesh is all on PET 0, it's just set to all 0.
+    allocate(nodeOwners(numNodes))
+    nodeOwners=(/0, & ! node id 4
+                 0, & ! node id 5
+                 2, & ! node id 7
+                 2/)  ! node id 8
+
+    ! Set the number of each type of element, plus the total number.
+    numQuadElems=1
+    numTriElems=0
+    numTotElems=numQuadElems+numTriElems
+
+    ! Allocate and fill the element id array.
+    allocate(elemIds(numTotElems))
+    elemIds=(/4/) 
+
+    ! Allocate and fill the element topology type array.
+    allocate(elemTypes(numTotElems))
+    elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! elem id 4
+
+    ! Allocate and fill the element connection type array.
+    allocate(elemConn(4*numQuadElems+3*numTriElems))
+    elemConn=(/1,2,4,3/) ! elem id 4
+
+  else if (localPET .eq. 3) then !!! This part only for PET 3
+    ! Set number of nodes
+     numNodes=4
+
+    ! Allocate and fill the node id array.
+    allocate(nodeIds(numNodes))
+    nodeIds=(/5,6,8,9/) 
+
+    ! Allocate and fill node coordinate array.
+    ! Since this is a 2D Mesh the size is 2x the
+    ! number of nodes.
+    allocate(nodeCoords(2*numNodes))
+    nodeCoords=(/1.0,1.0, &  ! node id 5
+                 2.0,1.0, &  ! node id 6
+                 1.0,2.0, &  ! node id 8
+                 2.0,2.0 /)  ! node id 9
+
+    ! Allocate and fill the node owner array.
+    allocate(nodeOwners(numNodes))
+    nodeOwners=(/0, & ! node id 5
+                 1, & ! node id 6
+                 2, & ! node id 8
+                 3/)  ! node id 9
+
+    ! Set the number of each type of element, plus the total number.
+    numQuadElems=1
+    numTriElems=0
+    numTotElems=numQuadElems+numTriElems
+
+    ! Allocate and fill the element id array.
+    allocate(elemIds(numTotElems))
+    elemIds=(/5/)  
+
+    ! Allocate and fill the element topology type array.
+    allocate(elemTypes(numTotElems))
+    elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! elem id 5
+
+    ! Allocate and fill the element connection type array.
+    allocate(elemConn(4*numQuadElems+3*numTriElems))
+    elemConn=(/1,2,4,3/) ! elem id 5
+  endif
+
+  
+  ! Create Mesh structure in 1 step
+  mesh=ESMF_MeshCreate(parametricDim=2, spatialDim=2, &
+         coordSys=ESMF_COORDSYS_CART, &
+         nodeIds=nodeIds, nodeCoords=nodeCoords, &
+         nodeOwners=nodeOwners, elementIds=elemIds,&
+         elementTypes=elemTypes, elementConn=elemConn, &
+         rc=localrc)
+
+!BOC
+
+  ! Get node DistGrid from the Mesh. 
+  call ESMF_MeshGet(mesh, nodalDistgrid=nodeDistgrid, rc=localrc)
+
+  ! Create an ESMF Array with a halo region from a node DistGrid.
+  array=ESMF_ArrayCreate(nodeDistgrid, typekind=ESMF_TYPEKIND_R8, &
+       haloSeqIndexList=halolist, rc=localrc)
+
+!EOC
+
+endif ! endif there are 4 PETs
+
+!BOE
+!
+! Note that currently the halo data is stored at the end of the Array data on each PET in the order specified
+! by the haloSeqIndexList argument (e.g. for PET 3 the halo information will be in the order 5,6,8 
+! at the end of the piece of array on PET 3). This means that if the halo information needs to be in the order of    
+! nodes specified when you create the Mesh, then the nodes owned by another processor need to 
+! be at the end of the node information when the Mesh is created (e.g. when creating
+! the piece of the Mesh on PET 3, then nodes 5,6,8 would need to be at the end of the node information lists).
+!
+!   At this point haloing could be done on the ESMF Array by using the {\tt ESMF\_ArrayHaloStore()} call
+! followed by {\tt ESMF\_ArrayHalo()}. However, in this example we wrap the Array in an ESMF Field. 
+! This allows it to be used in Field specific calls (e.g. {\tt ESMF\_FieldRegridStore()}) as well
+! as for haloing. 
+
+!EOE 
+
+  ! Only do this if we have 4 processors
+  if (petCount .eq. 4) then
+
+!BOC
+
+  ! Wrap the ESMF Array in a Field created on the nodes of the Mesh. 
+  field=ESMF_FieldCreate(mesh, array=array, &
+       meshLoc=ESMF_MESHLOC_NODE, rc=localrc)
+
+!EOC
+
+  ! Pull out memory and set for testing
+  call ESMF_FieldGet(field, farrayPtr=tstdata, rc=localrc)
+
+  ! Set owned Node data to the node id
+  j=1
+  do i=1,numNodes
+     if (nodeOwners(i) .eq. localPET) then
+        tstdata(j)=REAL(nodeIds(i),ESMF_KIND_R8)
+        j=j+1
+     endif
+  enddo
+
+
+  ! After the creation we are through with the arrays, so they may be
+  ! deallocated.
+  deallocate(nodeIds)
+  deallocate(nodeCoords)
+  deallocate(nodeOwners)
+  deallocate(elemIds)
+  deallocate(elemTypes)
+  deallocate(elemConn)
+
+  endif ! if petCount .eq. 4 
+
+!BOE
+!
+! We can now proceed with haloing the Field by using the {\tt ESMF\_FieldHaloStore()} call to 
+! create a RouteHandle, and then the {\tt ESMF\_FieldHalo()} call to apply the RouteHandle. Note 
+! that once the RouteHandle has been created it can be applied repeatedly to redo the halo 
+! communication as data changes in the Field. 
+!
+!EOE 
+
+  ! Only do this if we have 4 processors
+  if (petCount .eq. 4) then
+
+!BOC
+
+  ! Create the RouteHandle for the halo communication.
+  call ESMF_FieldHaloStore(field, routehandle=haloHandle, rc=localrc)
+
+  ! Can repeatedly do halo as data in field changes.
+  ! do t=...
+ 
+    ! Data set in non-halo field locations. 
+
+    ! Do the halo communication.
+    call ESMF_FieldHalo(field, routehandle=haloHandle, rc=localrc)
+
+    ! Halo locations now filled in field.
+
+  ! enddo 
+
+  ! After its last use the RouteHandle can be released.
+  call ESMF_FieldHaloRelease(haloHandle, rc=localrc)
+!EOC
+
+  ! Check Halo data
+  if (localPET .eq. 0) then !!! This part only for PET 0
+
+   ! No halo info
+
+  else if (localPET .eq. 1) then !!! This part only for PET 1
+
+     ! haloSeqIndexList=(/2,5/)
+     if (NINT(tstdata(3)) .ne. 2) rc=ESMF_FAILURE
+     if (NINT(tstdata(4)) .ne. 5) rc=ESMF_FAILURE
+
+  else if (localPET .eq. 2) then !!! This part only for PET 2
+
+     ! haloSeqIndexList=(/4,5/)
+    if (NINT(tstdata(3)) .ne. 4) rc=ESMF_FAILURE
+    if (NINT(tstdata(4)) .ne. 5) rc=ESMF_FAILURE
+
+  else if (localPET .eq. 3) then !!! This part only for PET 3
+
+     ! haloSeqIndexList=(/5,6,8/)
+    if (NINT(tstdata(2)) .ne. 5) rc=ESMF_FAILURE
+    if (NINT(tstdata(3)) .ne. 6) rc=ESMF_FAILURE
+    if (NINT(tstdata(4)) .ne. 8) rc=ESMF_FAILURE
+
+  endif
+
+!BOC
+  ! The Field can now be destroyed.
+  call ESMF_FieldDestroy(field, rc=localrc)
+
+  ! The Array can now be destroyed.
+  call ESMF_ArrayDestroy(array, rc=localrc)
+!EOC
+
+  ! Destroy the mesh
+  call ESMF_MeshDestroy(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  endif ! endif there are 4 PETs
+
 
 10   continue
+
+  ! set finalrc
+  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
   ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
   ! file that the scripts grep for.
   call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
 
   call ESMF_Finalize(rc=rc)
 
-  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
   if (finalrc==ESMF_SUCCESS) then
     print *, "PASS: ESMF_MeshEx.F90"
   else
