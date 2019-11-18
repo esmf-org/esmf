@@ -165,6 +165,17 @@ class OptionalPtr(object):
                 paramptr = ptr(ct.c_void_p(param))
                 return paramptr
 
+# this class allows optional arguments to be passed in place of pointers
+class OptionalInterfaceInt(object):
+        @classmethod
+        def from_param(cls, param):
+            if param is None:
+                return None
+            else:
+                ptr = ct.POINTER(ESMP_InterfaceInt)
+                paramptr = ptr(ESMP_InterfaceInt(param))
+                return paramptr
+
 class Py3Char(object):
     @classmethod
     def from_param(cls, param):
@@ -447,7 +458,7 @@ def ESMP_LogSet(flush):
 #TODO: InterfaceInt should be passed by value when ticket 3613642 is resolved
 _ESMF.ESMC_GridCreate1PeriDim.restype = ESMP_GridStruct
 _ESMF.ESMC_GridCreate1PeriDim.argtypes = [ct.POINTER(ESMP_InterfaceInt),
-                                          OptionalNamedConstant,
+                                          OptionalInterfaceInt,
                                           OptionalNamedConstant,
                                           OptionalNamedConstant,
                                           OptionalNamedConstant,
@@ -455,14 +466,15 @@ _ESMF.ESMC_GridCreate1PeriDim.argtypes = [ct.POINTER(ESMP_InterfaceInt),
                                           OptionalNamedConstant,
                                           ct.POINTER(ct.c_int)]
 
-def ESMP_GridCreate1PeriDim(maxIndex, periodicDim=None, poleDim=None,
-                            coordSys=None, coordTypeKind=None):
+def ESMP_GridCreate1PeriDim(maxIndex, polekindflag=None, periodicDim=None, 
+                            poleDim=None, coordSys=None, coordTypeKind=None):
     """
     Preconditions: ESMP has been initialized.\n
     Postconditions: An ESMP_Grid has been created.\n
     Arguments:\n
         :RETURN: ESMP_Grid    :: grid\n
         Numpy.array(dtype=int32) :: maxIndex\n
+        Numpy.array(dtype=int32) :: polekindflag\n
         integer (optional) :: periodicDim\n
         integer (optional) :: poleDim\n
         CoordSys (optional)   :: coordSys\n
@@ -486,6 +498,15 @@ def ESMP_GridCreate1PeriDim(maxIndex, periodicDim=None, poleDim=None,
     # set up the max index interface int
     maxIndex_i = ESMP_InterfaceInt(maxIndex)
 
+    #InterfaceInt requires int32 type numpy arrays
+    if polekindflag is not None:
+        if (polekindflag.dtype != np.int32):
+            raise TypeError('polekindflag must have dtype=int32')
+
+        # must be size 2
+        if (len(polekindflag) != 2):
+            raise TypeError('polekindflag must only have 2 entries')
+
     # reset the periodic_dim and pole_dim to be 1 based for ESMF
     if periodicDim is not None:
         periodicDim += 1
@@ -496,9 +517,10 @@ def ESMP_GridCreate1PeriDim(maxIndex, periodicDim=None, poleDim=None,
     indexflag = 1
 
     # create the ESMF Grid and retrieve a ctypes pointer to it
-    gridstruct = _ESMF.ESMC_GridCreate1PeriDim(ct.byref(maxIndex_i),
+    gridstruct = _ESMF.ESMC_GridCreate1PeriDim(ct.byref(maxIndex_i), 
+                                               polekindflag,
                                                periodicDim, poleDim, coordSys,
-                                               coordTypeKind, None, indexflag,
+                                               coordTypeKind, indexflag,
                                                ct.byref(lrc))
 
     # check the return code from ESMF

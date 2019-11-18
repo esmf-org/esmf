@@ -99,11 +99,11 @@ ESMC_Grid ESMC_GridCreateNoPeriDim(
 // !INTERFACE:
 ESMC_Grid ESMC_GridCreate1PeriDim(
   ESMC_InterArrayInt *maxIndex,           // in
+  ESMC_InterArrayInt *polekindflag,       // in
   int *periodicDim,                       // in
   int *poleDim,                           // in
   enum ESMC_CoordSys_Flag *coordSys,      // in
   enum ESMC_TypeKind_Flag *coordTypeKind, // in
-  enum ESMC_PoleKind_Flag *poleKind,      // in
   enum ESMC_IndexFlag *indexflag,         // in
   int *rc                                 // out
 );
@@ -118,6 +118,12 @@ ESMC_Grid ESMC_GridCreate1PeriDim(
 //  \begin{description}
 //  \item[maxIndex]
 //      The upper extent of the grid array.
+//  \item[polekindflag]
+//      Two item array which specifies the type of connection which occurs at the
+//      pole. polekindflag(1) the connection that occurs at the minimum end of the
+//      index dimension. polekindflag(2) the connection that occurs at the maximum
+//      end of the index dimension. If not specified, the default is
+//      ESMF\_POLETYPE\_MONOPOLE for both.
 //  \item[periodicDim]
 //      The periodic dimension.  If not specified, defaults to 1.
 //  \item[poleDim]
@@ -129,12 +135,6 @@ ESMC_Grid ESMC_GridCreate1PeriDim(
 //  \item[coordTypeKind]
 //      The type/kind of the grid coordinate data.  If not specified then the
 //      type/kind will be 8 byte reals.
-//  \item[poleKind]
-//      Two item array which specifies the type of connection which occurs at the
-//      pole. polekindflag(1) the connection that occurs at the minimum end of the
-//      index dimension. polekindflag(2) the connection that occurs at the maximum
-//      end of the index dimension. If not specified, the default is
-//      ESMF\_POLETYPE\_MONOPOLE for both.
 //  \item[indexflag]
 //      Indicates the indexing scheme to be used in the new Grid. If not present,
 //      defaults to ESMC\_INDEX\_DELOCAL.

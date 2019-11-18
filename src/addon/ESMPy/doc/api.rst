@@ -47,6 +47,7 @@ Named constants                                             Description
 :class:`MeshElemType<ESMF.api.constants.MeshElemType>`      Specify the type of the :class:`~ESMF.api.mesh.Mesh` elements
 :class:`MeshLoc<ESMF.api.constants.MeshLoc>`                Specify a nodal or elemental :class:`~ESMF.api.mesh.Mesh`
 :class:`NormType<ESMF.api.constants.NormType>`              Specify the type of normalization to use for conservative regridding weights
+:class:`PoleKind<ESMF.api.constants.PoleKind>`              Specify the type of connection that appears at the poles of the :class:`~ESMF.api.grid.Grid`
 :class:`PoleMethod<ESMF.api.constants.PoleMethod>`          Specify which type of artificial pole to construct on the source :class:`~ESMF.api.grid.Grid` for regridding
 :class:`Region<ESMF.api.constants.Region>`                  Specify various regions in the data layout of
 :class:`RegridMethod<ESMF.api.constants.RegridMethod>`      Specify which interpolation method to use regridding
