@@ -3324,16 +3324,24 @@ int DistGrid::construct(
     // mark in tileListPDe DEs that have no elements as not being on any tile
     if (elementCountPDe[i]==0) tileListPDe[i]=0;  // tiles are base 1
   }
-  // see if indexTK requires auto selection of typekind
+  // check for correct indexTK selection, conditionally choose automatically
+  ESMC_I8 totalElementCount = 0;  // reset
+  for (int i=0; i<tileCount; i++)
+    totalElementCount += elementCountPTile[i];
   if (indexTK == ESMF_NOKIND){
     // auto selection of the correct typekind
-    indexTK = ESMC_TYPEKIND_I4;  // default to 32-bit (signed i.e. 31-bit)
-    ESMC_I8 totalElementCount = 0;  // reset
-    for (int i=0; i<tileCount; i++)
-      totalElementCount += elementCountPTile[i];
+    indexTK = ESMC_TYPEKIND_I4;  // default to 32-bit (signed i.e. eff. 31-bit)
     if (totalElementCount > 2147483647L){
       // above the I4 limit -> go to I8
       indexTK = ESMC_TYPEKIND_I8;
+    }
+  }else if (indexTK == ESMC_TYPEKIND_I4){
+    if (totalElementCount > 2147483647L){
+      // above the I4 limit -> bail with error condition
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+        "The total number of elements is above the I4 indexTK limit",
+        ESMC_CONTEXT, &rc);
+      return rc;
     }
   }
   // complete sequence index collocation by default
