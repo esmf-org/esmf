@@ -49,12 +49,6 @@ class Grid(object):
 
     *OPTIONAL:*
 
-    :param PoleKind pole_kind: Two item list which specifies the type of
-        connection which occurs at the pole. The first value specifies the
-        connection that occurs at the minimum end of the pole dimension. 
-        The second value specifies the connection that occurs at the maximum 
-        end of the pole dimension.
-        If ``None``, defaults to :attr:`~ESMF.api.constants.PoleKind.MONOPOLE`.
     :param int num_peri_dims: The number of periodic dimensions, either ``0``
         or ``1``. If ``None``, defaults to ``0``.
     :param int periodic_dim: The periodic dimension: ``0``, ``1`` or ``2``.
@@ -73,7 +67,13 @@ class Grid(object):
     :param StaggerLoc staggerloc: The stagger location of the coordinate values.
         If ``None``, defaults to :attr:`~ESMF.api.constants.StaggerLoc.CENTER`
         in 2D and :attr:`~ESMF.api.constants.StaggerLoc.CENTER_VCENTER` in 3D.
-
+    :param PoleKind pole_kind: Two item list which specifies the type of
+        connection which occurs at the pole. The first value specifies the
+        connection that occurs at the minimum end of the pole dimension. 
+        The second value specifies the connection that occurs at the maximum 
+        end of the pole dimension.
+        If ``None``, defaults to :attr:`~ESMF.api.constants.PoleKind.MONOPOLE`.
+    
     **Created from file:**
 
     *REQUIRED:*
@@ -137,13 +137,13 @@ class Grid(object):
 
     @initialize
     def __init__(self, max_index=None,
-                 pole_kind=None,
                  num_peri_dims=0,
                  periodic_dim=None,
                  pole_dim=None,
                  coord_sys=None,
                  coord_typekind=None,
                  staggerloc=None,
+                 pole_kind=None,
                  filename=None,
                  filetype=None,
                  reg_decomp=None,
@@ -222,8 +222,6 @@ class Grid(object):
             #raise errors for all in-memory grid options
             if max_index is not None:
                 warnings.warn("max_index is only used for grids created in memory, this argument will be ignored.")
-            if pole_kind is not None:
-                warnings.warn("pole_kind is only used for grids created in memory, this argument will be ignored.")
             if num_peri_dims is not 0:
                 warnings.warn("num_peri_dims is only used for grids created in memory, this argument will be ignored.")
             if periodic_dim is not None:
@@ -253,40 +251,40 @@ class Grid(object):
             self._decount = 6
             #raise errors for all in-memory grid options
             if max_index is not None:
-                warnings.warn("max_index is only used for grids created in memory, this argument will be ignored.")
+                warnings.warn("max_index is not used to create a cubed sphere grid, this argument will be ignored.")
             if pole_kind is not None:
-                warnings.warn("pole_kind is only used for grids created in memory, this argument will be ignored.")
+                warnings.warn("pole_kind is not used to create a cubed sphere grid, this argument will be ignored.")
             if num_peri_dims is not 0:
-                warnings.warn("num_peri_dims is only used for grids created in memory, this argument will be ignored.")
+                warnings.warn("num_peri_dims is not used to create a cubed sphere grid, this argument will be ignored.")
             if periodic_dim is not None:
-                warnings.warn("periodic_dim is only used for grids created in memory, this argument will be ignored.")
+                warnings.warn("periodic_dim is not used to create a cubed sphere grid, this argument will be ignored.")
             if pole_dim is not None:
-                warnings.warn("pole_dim is only used for grids created in memory, this argument will be ignored.")
+                warnings.warn("pole_dim is not used to create a cubed sphere grid, this argument will be ignored.")
             if coord_sys is not None:
-                warnings.warn("coord_sys is only used for grids created in memory, this argument will be ignored.")
+                warnings.warn("coord_sys is not used to create a cubed sphere grid, this argument will be ignored.")
             if coord_typekind is not None:
-                warnings.warn("coord_typekind is only used for grids created in memory, this argument will be ignored.")
+                warnings.warn("coord_typekind is not used to create a cubed sphere grid, this argument will be ignored.")
             if staggerloc is not None:
-                warnings.warn("staggerloc is only used for grids created in memory, this argument will be ignored.")
+                warnings.warn("staggerloc is not used to create a cubed sphere grid, this argument will be ignored.")
             # raise warnings on all from file args
             if filename is not None:
-                warnings.warn("filename is only used for grids created from file, this argument will be ignored.")
+                warnings.warn("filename is not used to create a cubed sphere grid, this argument will be ignored.")
             if filetype is not None:
-                warnings.warn("filetype is only used for grids created from file, this argument will be ignored.")
+                warnings.warn("filetype is not used to create a cubed sphere grid, this argument will be ignored.")
             if reg_decomp is not None:
-                warnings.warn("reg_decomp is only used for grids created from file, this argument will be ignored.")
+                warnings.warn("reg_decomp is not used to create a cubed sphere grid, this argument will be ignored.")
             if decompflag is not None:
-                warnings.warn("decompflag is only used for grids created from file, this argument will be ignored.")
+                warnings.warn("decompflag is not used to create a cubed sphere grid, this argument will be ignored.")
             if is_sphere is not None:
-                warnings.warn("is_sphere is only used for grids created from file, this argument will be ignored.")
+                warnings.warn("is_sphere is not used to create a cubed sphere grid, this argument will be ignored.")
             if add_user_area is not None:
-                warnings.warn("add_user_area is only used for grids created from file, this argument will be ignored.")
+                warnings.warn("add_user_area is not used to create a cubed sphere grid, this argument will be ignored.")
             if add_mask is not None:
-                warnings.warn("add_mask is only used for grids created from file, this argument will be ignored.")
+                warnings.warn("add_mask is not used to create a cubed sphere grid, this argument will be ignored.")
             if varname is not None:
-                warnings.warn("varname is only used for grids created from file, this argument will be ignored.")
+                warnings.warn("varname is not used to create a cubed sphere grid, this argument will be ignored.")
             if coord_names:
-                warnings.warn("coord_names is only used for grids created from file, this argument will be ignored.")
+                warnings.warn("coord_names is not used to create a cubed sphere grid, this argument will be ignored.")
 
         # ctypes stuff
         self._struct = None
@@ -340,6 +338,7 @@ class Grid(object):
                                                   reg_decomp,
                                                   decompflag=decompflag,
                                                   isSphere=is_sphere,
+                                                  polekindflag=pole_kind,
                                                   addCornerStagger=add_corner_stagger,
                                                   addUserArea=add_user_area,
                                                   addMask=add_mask, 
@@ -354,6 +353,9 @@ class Grid(object):
             # stagger is not required for from-file grids, but we need to
             # correctly allocate the space
             staggerloc = [StaggerLoc.CENTER]
+            
+            print self._rank
+            print self._ndims
 
             # add corner, this assumes 2D grids right?
             if add_corner_stagger:
