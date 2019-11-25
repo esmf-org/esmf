@@ -229,10 +229,8 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_gridcreatefromfile"
   subroutine f_esmf_gridcreatefromfile(gridp, filename, fileTypeFlag, &
-      regDecomp, rdpresent, decompflag, dfpresent, &
-      isSphere, ispresent, addCornerStagger, acspresent, &
-      addUserArea, auapresent, indexflag, addMask, ampresent, varname, vnpresent, &
-      coordNames, cnpresent, rc)
+      regDecomp, decompflag, isSphere, polekindflag, len1, addCornerStagger, &
+      addUserArea, indexflag, addMask, varname, coordNames, rc)
 
     use ESMF_UtilTypesMod
     use ESMF_LogErrMod
@@ -245,25 +243,19 @@
     ! arguments
     type(ESMF_Pointer)                     :: gridp
     character(len=*), intent(in)           :: filename
-    type(ESMF_FileFormat_Flag), intent(in) :: fileTypeFlag
-    integer                                :: regDecomp(2)
-    integer                                :: rdpresent
-    type(ESMF_Decomp_Flag)                 :: decompflag(2)
-    integer                                :: dfpresent
-    logical                                :: isSphere
-    integer                                :: ispresent
-    logical                                :: addCornerStagger
-    integer                                :: acspresent
-    logical                                :: addUserArea
-    integer                                :: auapresent
-    type(ESMF_Index_Flag)                  :: indexflag
-    logical                                :: addMask
-    integer                                :: ampresent
-    character(len=*)                       :: varname
-    integer                                :: vnpresent
-    character(len=*)                       :: coordNames(2)
-    integer                                :: cnpresent
-    integer, intent(out)                   :: rc
+    type(ESMF_FileFormat_Flag), optional   :: fileTypeFlag
+    integer, optional                      :: regDecomp(2)
+    type(ESMF_Decomp_Flag), optional       :: decompflag(2)
+    logical, optional                      :: isSphere
+    type(ESMF_PoleKind_Flag), optional     :: polekindflag(1:len1)
+    integer                                :: len1
+    logical, optional                      :: addCornerStagger
+    logical, optional                      :: addUserArea
+    type(ESMF_Index_Flag), optional        :: indexflag
+    logical, optional                      :: addMask
+    character(len=*), optional             :: varname
+    character(len=*), optional             :: coordNames(2)
+    integer, intent(out), optional         :: rc
   
     type(ESMF_Grid)                     :: grid
     logical                             :: isSphere_loc
@@ -277,222 +269,40 @@
     rc = ESMF_RC_NOT_IMPL
 
     ! Set reasonable defaults for optional arguments
-    if (ispresent == 0) then
-       isSphere_loc = .true.
-    else
+    isSphere_loc = .true.
+    if(present(isSphere)) then
        isSphere_loc = isSphere
     endif
-    if (acspresent == 0) then
-       addCornerStagger_loc = .false.
-    else
+    
+    addCornerStagger_loc = .false.
+    if(present(addCornerStagger)) then
        addCornerStagger_loc = addCornerStagger
     endif
-    if (auapresent == 0) then 
-       addUserArea_loc = .false.
-    else
+    
+    addUserArea_loc = .false.
+    if(present(addUserArea)) then
        addUserArea_loc = addUserArea
     endif
-    if (ampresent == 0) then
-       addMask_loc = .false.
-    else
+    
+    addMask_loc = .false.
+    if(present(addMask)) then
        addMask_loc = addMask
     endif
     
-    if (rdpresent == 0) then
-        ! regDecomp not present
-        if (dfpresent == 0) then
-            ! decompflag not present
-            if (vnpresent == 0 .and. cnpresent == 0) then
-               !print *,'v=0,c=0'
-           grid = ESMF_GridCreate(filename, fileTypeFlag, &
-                                      isSphere=isSphere_loc, &
-                                  addCornerStagger=addCornerStagger_loc, &
-                                      addUserArea=addUserArea_loc, &
-                                      indexflag=indexflag, rc=rc)
-               if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
-                                      ESMF_CONTEXT, rcToReturn=rc)) return
-            elseif (vnpresent == 0 .and. cnpresent == 1) then
-               !print *,'v=0,c=1'
-               grid = ESMF_GridCreate(filename, fileTypeFlag, &
-                                      isSphere=isSphere_loc, &
-                                      addCornerStagger=addCornerStagger_loc, &
-                                      addUserArea=addUserArea_loc, &
-                                      coordNames=coordNames, &
-                                      indexflag=indexflag, rc=rc)
-               if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
-                                      ESMF_CONTEXT, rcToReturn=rc)) return
-            elseif (vnpresent == 1 .and. cnpresent == 0) then
-               !print *,'v=1,c=0'
-               grid = ESMF_GridCreate(filename, fileTypeFlag, &
-                                      isSphere=isSphere_loc, &
-                                      addCornerStagger=addCornerStagger_loc, &
-                                      addUserArea=addUserArea_loc, &
-                                      addMask=addMask_loc, varname=varname, &
-                                      indexflag=indexflag, rc=rc)
-               if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
-                                      ESMF_CONTEXT, rcToReturn=rc)) return
-            elseif (vnpresent == 1 .and. cnpresent == 1) then
-               !print *,'v=1,c=1'
-               grid = ESMF_GridCreate(filename, fileTypeFlag, &
-                                      isSphere=isSphere_loc, &
-                                      addCornerStagger=addCornerStagger_loc, &
-                                      addUserArea=addUserArea_loc, &
-                                      addMask=addMask_loc, varname=varname, &
-                                      coordNames=coordNames, &
-                                      indexflag=indexflag, rc=rc)
-               if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
-                                      ESMF_CONTEXT, rcToReturn=rc)) return
-            endif
-        else
-            ! decompflag present
-            if (vnpresent == 0 .and. cnpresent == 0) then
-               !print *,'v=0,c=0'
-           grid = ESMF_GridCreate(filename, fileTypeFlag, &
-                                    decompflag=decompflag, &
-                    isSphere=isSphere_loc, &
-                              addCornerStagger=addCornerStagger_loc, &
-                                  addUserArea=addUserArea_loc, &
-                                  indexflag=indexflag, rc=rc)
-            if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
-                                   ESMF_CONTEXT, rcToReturn=rc)) return
-            elseif (vnpresent == 0 .and. cnpresent == 1) then
-               !print *,'v=0,c=1'
-               grid = ESMF_GridCreate(filename, fileTypeFlag, &
-                                        decompflag=decompflag, &
-                                      isSphere=isSphere_loc, &
-                                      addCornerStagger=addCornerStagger_loc, &
-                                      addUserArea=addUserArea_loc, &
-                                      indexflag=indexflag, &
-                                      coordNames=coordNames, rc=rc)
-               if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
-                                      ESMF_CONTEXT, rcToReturn=rc)) return
-            elseif (vnpresent == 1 .and. cnpresent == 0) then
-               !print *,'v=1,c=0'
-               grid = ESMF_GridCreate(filename, fileTypeFlag, &
-                                        decompflag=decompflag, &
-                                      isSphere=isSphere_loc, &
-                                      addCornerStagger=addCornerStagger_loc, &
-                                      addUserArea=addUserArea_loc, &
-                                      indexflag=indexflag, &
-                                      addMask=addMask_loc, varname=varname, rc=rc)
-               if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
-                                      ESMF_CONTEXT, rcToReturn=rc)) return
-            elseif (vnpresent == 1 .and. cnpresent == 1) then
-               !print *,'v=1,c=1'
-               grid = ESMF_GridCreate(filename, fileTypeFlag, &
-                                      decompflag=decompflag, &
-                                      isSphere=isSphere_loc, &
-                                      addCornerStagger=addCornerStagger_loc, &
-                                      addUserArea=addUserArea_loc, &
-                                      indexflag=indexflag, &
-                                      addMask=addMask_loc, varname=varname, &
-                                      coordNames=coordNames, rc=rc)
-               if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
-                                      ESMF_CONTEXT, rcToReturn=rc)) return
-            endif
-        endif
-    else
-        ! regDecomp present
-        if (dfpresent == 0) then
-            ! decompflag not present
-            if (vnpresent == 0 .and. cnpresent == 0) then
-               !print *,'v=0,c=0'
-           grid = ESMF_GridCreate(filename, fileTypeFlag, &
-                                      regDecomp=regDecomp, &
-                                      isSphere=isSphere_loc, &
-                                  addCornerStagger=addCornerStagger_loc, &
-                                      addUserArea=addUserArea_loc, &
-                                      indexflag=indexflag, rc=rc)
-               if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
-                                      ESMF_CONTEXT, rcToReturn=rc)) return
-            elseif (vnpresent == 0 .and. cnpresent == 1) then
-               !print *,'v=0,c=1'
-               grid = ESMF_GridCreate(filename, fileTypeFlag, &
-                                      regDecomp=regDecomp, &
-                                      isSphere=isSphere_loc, &
-                                      addCornerStagger=addCornerStagger_loc, &
-                                      addUserArea=addUserArea_loc, &
-                                      coordNames=coordNames, &
-                                      indexflag=indexflag, rc=rc)
-               if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
-                                      ESMF_CONTEXT, rcToReturn=rc)) return
-            elseif (vnpresent == 1 .and. cnpresent == 0) then
-               !print *,'v=1,c=0'
-               grid = ESMF_GridCreate(filename, fileTypeFlag, &
-                                      regDecomp=regDecomp, &
-                                      isSphere=isSphere_loc, &
-                                      addCornerStagger=addCornerStagger_loc, &
-                                      addUserArea=addUserArea_loc, &
-                                      addMask=addMask_loc, varname=varname, &
-                                      indexflag=indexflag, rc=rc)
-               if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
-                                      ESMF_CONTEXT, rcToReturn=rc)) return
-            elseif (vnpresent == 1 .and. cnpresent == 1) then
-               !print *,'v=1,c=1'
-               grid = ESMF_GridCreate(filename, fileTypeFlag, &
-                                      regDecomp=regDecomp, &
-                                      isSphere=isSphere_loc, &
-                                      addCornerStagger=addCornerStagger_loc, &
-                                      addUserArea=addUserArea_loc, &
-                                      addMask=addMask_loc, varname=varname, &
-                                      coordNames=coordNames, &
-                                      indexflag=indexflag, rc=rc)
-               if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
-                                      ESMF_CONTEXT, rcToReturn=rc)) return
-            endif
-        else
-            ! decompflag present
-            if (vnpresent == 0 .and. cnpresent == 0) then
-               !print *,'v=0,c=0'
-           grid = ESMF_GridCreate(filename, fileTypeFlag, &
-                                  regDecomp=regDecomp, &
-                                    decompflag=decompflag, &
-                      isSphere=isSphere_loc, &
-                              addCornerStagger=addCornerStagger_loc, &
-                                  addUserArea=addUserArea_loc, &
-                                  indexflag=indexflag, rc=rc)
-            if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
-                                   ESMF_CONTEXT, rcToReturn=rc)) return
-            elseif (vnpresent == 0 .and. cnpresent == 1) then
-               !print *,'v=0,c=1'
-               grid = ESMF_GridCreate(filename, fileTypeFlag, &
-                                      regDecomp=regDecomp, &
-                                        decompflag=decompflag, &
-                                      isSphere=isSphere_loc, &
-                                      addCornerStagger=addCornerStagger_loc, &
-                                      addUserArea=addUserArea_loc, &
-                                      indexflag=indexflag, &
-                                      coordNames=coordNames, rc=rc)
-               if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
-                                      ESMF_CONTEXT, rcToReturn=rc)) return
-            elseif (vnpresent == 1 .and. cnpresent == 0) then
-               !print *,'v=1,c=0'
-               grid = ESMF_GridCreate(filename, fileTypeFlag, &
-                                      regDecomp=regDecomp, &
-                                        decompflag=decompflag, &
-                                      isSphere=isSphere_loc, &
-                                      addCornerStagger=addCornerStagger_loc, &
-                                      addUserArea=addUserArea_loc, &
-                                      indexflag=indexflag, &
-                                      addMask=addMask_loc, varname=varname, rc=rc)
-               if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
-                                      ESMF_CONTEXT, rcToReturn=rc)) return
-            elseif (vnpresent == 1 .and. cnpresent == 1) then
-               !print *,'v=1,c=1'
-               grid = ESMF_GridCreate(filename, fileTypeFlag, &
-                                      regDecomp=regDecomp, &
-                                      decompflag=decompflag, &
-                                      isSphere=isSphere_loc, &
-                                      addCornerStagger=addCornerStagger_loc, &
-                                      addUserArea=addUserArea_loc, &
-                                      indexflag=indexflag, &
-                                      addMask=addMask_loc, varname=varname, &
-                                      coordNames=coordNames, rc=rc)
-               if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
-                                      ESMF_CONTEXT, rcToReturn=rc)) return
-            endif
-        endif
-    endif
+    grid = ESMF_GridCreate(filename, fileTypeFlag, &
+                           regDecomp=regDecomp, &
+                           decompflag=decompflag, &
+                           isSphere=isSphere_loc, &
+                           polekindflag=polekindflag, &
+                           addCornerStagger=addCornerStagger_loc, &
+                           addUserArea=addUserArea_loc, &
+                           indexflag=indexflag, &
+                           addMask=addMask_loc, &
+                           varname=varname, &
+                           coordNames=coordNames, &
+                           rc=rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+                           ESMF_CONTEXT, rcToReturn=rc)) return
 
     gridp = grid%this
   

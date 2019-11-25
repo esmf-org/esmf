@@ -200,7 +200,7 @@ class TestGrid(TestBase):
         for a in testcases:
             try:
                 grid = Grid(np.array([12, 12]),
-                            pole_kind=a.pole_kind,
+                            pole_kind=np.array(a.pole_kind),
                             num_peri_dims=a.periodic[0],
                             periodic_dim=a.periodic[1],
                             pole_dim=a.periodic[2],
