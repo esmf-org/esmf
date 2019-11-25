@@ -1513,6 +1513,18 @@ print *, "indexTK=", indexTK
 
   !------------------------------------------------------------------------
   !EX_UTest
+  write(name, *) "Verify tileCount"
+  write(failMsg, *) "Wrong result"
+  call ESMF_Test((tileCount==1), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "Verify localDeCount"
+  write(failMsg, *) "Wrong result"
+  call ESMF_Test((localDeCount==1), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !EX_UTest
   write(name, *) "DistGridGet() - elementCountPTile(:)"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   allocate(elementCountPTile(tileCount))
@@ -1528,6 +1540,15 @@ print *, "elementCountPTile=", elementCountPTile
   call ESMF_Test((elementCountPTile(1)==2048000000), name, failMsg, result, ESMF_SRCLINE)
 
   deallocate(elementCountPTile)
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "DistGridGet() - elementCount"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridGet(distgrid, localDe=0, elementCount=elementCount, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+print *, "elementCount(on localDe)=", elementCount
 
   !------------------------------------------------------------------------
   !EX_UTest
@@ -1799,6 +1820,79 @@ print *, "elementCountPTileI8=", elementCountPTileI8
   call ESMF_DistGridDestroy(distgrid, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "DistGridCreate() - canonical seqIndices below 32-bit limit"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/160000,128/), &
+    rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+ 
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "DistGridGet() - indexTK"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridGet(distgrid, dimCount=dimCount, tileCount=tileCount, &
+    deCount=deCount, connectionCount=connectionCount, &
+    localDeCount=localDeCount, regDecompFlag=regDecompFlag, delayout=delayout, &
+    indexTK=indexTK, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+print *, "indexTK=", indexTK
+  
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "Verify indexTK"
+  write(failMsg, *) "Wrong result"
+  call ESMF_Test((indexTK==ESMF_TYPEKIND_I4), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "Verify tileCount"
+  write(failMsg, *) "Wrong result"
+  call ESMF_Test((tileCount==1), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "Verify localDeCount"
+  write(failMsg, *) "Wrong result"
+  call ESMF_Test((localDeCount==1), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "DistGridGet() - elementCount"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridGet(distgrid, localDe=0, elementCount=elementCount, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+print *, "elementCount(on localDe)=", elementCount
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "DistGridGet() - seqIndexList"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+call ESMF_VMLogMemInfo("bef allocating space for seqIndices", rc=rc)
+  allocate(seqIndexList(elementCount))
+call ESMF_VMLogMemInfo("bef filling of canonical seqIndices", rc=rc)
+  call ESMF_DistGridGet(distgrid, localDe=0, seqIndexList=seqIndexList, rc=rc)
+call ESMF_VMLogMemInfo("aft filling of canonical seqIndices", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  deallocate(seqIndexList)
+call ESMF_VMLogMemInfo("aft deallocation of      seqIndices", rc=rc)
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "Destroy test DistGrid"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+
 
 #endif
 

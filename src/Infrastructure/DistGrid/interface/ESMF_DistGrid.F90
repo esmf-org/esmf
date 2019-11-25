@@ -3302,16 +3302,17 @@ integer(ESMF_KIND_I8),target, intent(out), optional :: elementCountPDeI8(:)
 ! \item\apiStatusCompatibleVersion{5.2.0r}
 ! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
-! \item[7.0.0] Added argument {\tt deCount} to simplify access to this variable.
-! \item[7.0.0] Added arguments {\tt connectionCount} and {\tt connectionList}
-!    to provide user access to the explicitly defined connections in a DistGrid.
+! \item[7.0.0] Added argument {\tt deCount} to simplify access to this 
+!              variable. \newline
+!              Added arguments {\tt connectionCount} and {\tt connectionList}
+!              to provide user access to the explicitly defined connections in
+!              a DistGrid.
 ! \item[8.0.0] Added arguments {\tt localDeCount} and {\tt localDeToDeMap}
 !              to simplify access to these variables.
 ! \item[8.1.0] Added argument {\tt indexTK} to allow query of the sequence index
 !              typekind.\newline
 !              Added arguments {\tt elementCountPTileI8} and
-!              {\tt elementCountPDeI8} to provide 64-bit access to these
-!              parameter.
+!              {\tt elementCountPDeI8} to provide 64-bit access.
 ! \end{description}
 ! \end{itemize}
 !         
@@ -3342,6 +3343,8 @@ integer(ESMF_KIND_I8),target, intent(out), optional :: elementCountPDeI8(:)
 !   \item[{[elementCountPTile]}]
 !     Number of elements in the exclusive region per tile. Must enter
 !     allocated with {\tt shape(elementCountPTile) == (/tileCount/)}.
+!     An error will be returned if any of the counts goes above the 32-bit
+!     limit.
 !   \item[{[elementCountPTileI8]}]
 !     Same as {\tt elementCountPTile}, but of 64-bit integer kind.
 !   \item[{[minIndexPDe]}]
@@ -3353,6 +3356,8 @@ integer(ESMF_KIND_I8),target, intent(out), optional :: elementCountPDeI8(:)
 !   \item[{[elementCountPDe]}]
 !     Number of elements in the exclusive region per DE. Must enter
 !     allocated with {\tt shape(elementCountPDe) == (/deCount/)}.
+!     An error will be returned if any of the counts goes above the 32-bit
+!     limit.
 !   \item[{[elementCountPDeI8]}]
 !     Same as {\tt elementCountPDe}, but of 64-bit integer kind.
 !   \item[{[localDeToDeMap]}]
@@ -3624,19 +3629,22 @@ integer(ESMF_KIND_I8),target, intent(out), optional :: elementCountPDeI8(:)
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridGet()
   subroutine ESMF_DistGridGetPLocalDe(distgrid, localDe, keywordEnforcer, &
-    de, tile, collocation, arbSeqIndexFlag, seqIndexList, elementCount, rc)
+    de, tile, collocation, arbSeqIndexFlag, seqIndexList, seqIndexListI8, &
+    elementCount, elementCountI8, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_DistGrid),    intent(in)            :: distgrid
-    integer,                intent(in)            :: localDe
+    type(ESMF_DistGrid),      intent(in)            :: distgrid
+    integer,                  intent(in)            :: localDe
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                intent(out), optional :: de
-    integer,                intent(out), optional :: tile
-    integer,                intent(in),  optional :: collocation
-    logical,                intent(out), optional :: arbSeqIndexFlag
-    integer,        target, intent(out), optional :: seqIndexList(:)
-    integer,                intent(out), optional :: elementCount
-    integer,                intent(out), optional :: rc
+    integer,                  intent(out), optional :: de
+    integer,                  intent(out), optional :: tile
+    integer,                  intent(in),  optional :: collocation
+    logical,                  intent(out), optional :: arbSeqIndexFlag
+    integer,        target,   intent(out), optional :: seqIndexList(:)
+integer(ESMF_KIND_I8),target, intent(out), optional :: seqIndexListI8(:)
+    integer,                  intent(out), optional :: elementCount
+    integer,                  intent(out), optional :: elementCountI8
+    integer,                  intent(out), optional :: rc
 !         
 ! !STATUS:
 ! \begin{itemize}
@@ -3644,6 +3652,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
 ! \item[8.0.0] Added arguments {\tt de} and {\tt tile} to simplify usage.
+! \item[8.1.0] Added arguments {\tt seqIndexListI8} and
+!              {\tt elementCountI8} to provide 64-bit access.
 ! \end{description}
 ! \end{itemize}
 !
@@ -3668,14 +3678,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     is associated with arbitrary sequence indices. For {\tt .false.},
 !     canoncial sequence indices are used.
 !   \item[{[seqIndexList]}]
-!     \begin{sloppypar}
 !     The sequence indices associated with the {\tt localDe}. This argument must
 !     enter allocated with a size equal to 
 !     {\tt elementCountPDe(localDeToDeMap(localDe))}.
-!     \end{sloppypar}
+!     An error will be returned if any of the sequence indices are above the
+!     32-bit limit.
+!   \item[{[seqIndexListI8]}]
+!     Same as {\tt seqIndexList}, but of 64-bit integer kind.
 !   \item[{[elementCount]}]
 !     Number of elements in the localDe, i.e. identical to
 !     elementCountPDe(localDeToDeMap(localDe)).
+!     An error will be returned if the count is above the 32-bit limit.
+!   \item[{[elementCountI8]}]
+!     Same as {\tt elementCount}, but of 64-bit integer kind.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -3685,6 +3700,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer               :: localrc            ! local return code
     type(ESMF_Logical)    :: arbSeqIndexFlagAux ! helper variable
     type(ESMF_InterArray) :: seqIndexListAux    ! helper variable
+    type(ESMF_InterArray) :: seqIndexListI8Aux  ! helper variable
     integer               :: localDeCount, deCount
     integer, allocatable  :: localDeToDeMap(:), deToTileMap(:)
 
@@ -3733,10 +3749,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     seqIndexListAux = ESMF_InterArrayCreate(seqIndexList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    seqIndexListI8Aux = &
+      ESMF_InterArrayCreate(farray1DI8=seqIndexListI8, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DistGridGetPLocalDe(distgrid, localDe, collocation, &
-      arbSeqIndexFlagAux, seqIndexListAux, elementCount, localrc)
+      arbSeqIndexFlagAux, seqIndexListAux, seqIndexListI8Aux, &
+      elementCount, elementCountI8, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
@@ -3746,6 +3767,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     ! garbage collection
     call ESMF_InterArrayDestroy(seqIndexListAux, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterArrayDestroy(seqIndexListI8Aux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

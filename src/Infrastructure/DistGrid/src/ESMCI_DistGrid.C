@@ -3512,7 +3512,7 @@ template<typename T> int DistGrid::fillSeqIndexList(
 // !DESCRIPTION:
 //    Fill the seqIndexList argument. Providing this InterArray based 
 //    method is required for efficient filling of arrays that come through
-//    the Fortran API, without having to do an extra copy. It can also leveraged
+//    the Fortran API, without having to do an extra copy. It is also leveraged
 //    by the overloaded vector<int> based interface.
 //
 //EOPI
@@ -3566,6 +3566,11 @@ template<typename T> int DistGrid::fillSeqIndexList(
           "Unsupported DistGrid indexTK", ESMC_CONTEXT, &rc);
         return rc;
       }
+      //TODO: Implement support for different type T here than indexTK, but
+      //TODO: then use loop to fill the values, and implement checks in case
+      //TODO: there is overflow during the assignment. Most efficient of course
+      //TODO: is to pull out sequence indices of the native type. Mention this
+      //TODO: in the documentation section of the API above!
       if (sizeof(T) != sizeOfType){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "Type mismatch.",
@@ -3583,31 +3588,21 @@ template<typename T> int DistGrid::fillSeqIndexList(
           ESMC_CONTEXT, &rc);
         return rc;
       }
+      int de = delayout->getLocalDeToDeMap()[localDe];
       // TODO: must consider collocation subspace here!!!
-      // TODO: use MultiDimIndexLoop class for the following multi-dim loop
-      int *ii = new int[dimCount];     // index tuple basis 0
-      const int *iiEnd = getIndexCountPDimPDe() + dimCount *
-        delayout->getLocalDeToDeMap()[localDe];
-      // reset counters
+      vector<int> sizes(dimCount);
+      for (int i=0; i<dimCount; i++)
+        sizes[i]=indexCountPDimPDe[de*dimCount+i];
+      MultiDimIndexLoop multiDimIndexLoop(sizes);
+      vector<T> seqIndex;
       int index = 0;
-      for (int j=0; j<dimCount; j++)
-        ii[j] = 0;  // reset
-      // loop over all elements in exclusive region for localDe
-      while(ii[dimCount-1] < iiEnd[dimCount-1]){
-        vector<T> seqIndex;
-        getSequenceIndexLocalDe(localDe, ii, seqIndex);
-        (seqIndexList)->array[index] = seqIndex[0];
-        ++index;
-        // multi-dim index increment
-        ++ii[0];
-        for (int j=0; j<dimCount-1; j++){
-          if (ii[j] == iiEnd[j]){
-            ii[j] = 0;  // reset
-            ++ii[j+1];
-          }
-        }
+      while(multiDimIndexLoop.isWithin()){
+        getSequenceIndexLocalDe(localDe, multiDimIndexLoop.getIndexTuple(),
+          seqIndex);
+        (seqIndexList)->array[index++] = seqIndex[0];
+        seqIndex.clear();
+        multiDimIndexLoop.next();
       }
-      delete [] ii;
     }
   }
   

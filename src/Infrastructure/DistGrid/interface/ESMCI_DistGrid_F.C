@@ -687,7 +687,9 @@ extern "C" {
 
   void FTN_X(c_esmc_distgridgetplocalde)(ESMCI::DistGrid **ptr,
     int *localDeArg, int *collocationArg, ESMC_Logical *arbSeqIndexFlag,
-    ESMCI::InterArray<int> *seqIndexList, int *elementCount, int *rc){
+    ESMCI::InterArray<int> *seqIndexList, 
+    ESMCI::InterArray<ESMC_I8> *seqIndexListI8, 
+    int *elementCount, ESMC_I8 *elementCountI8, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridgetplocalde()"
     // Initialize return code; assume routine not implemented
@@ -727,8 +729,8 @@ extern "C" {
       collocation = collocationTable[0]; // default to first collocation 
       collIndex = 0;
     }
-    const int *arbSeqIndexList =
-      (const int *)(*ptr)->getArbSeqIndexList(localDe, collocation, &localrc);
+    void const *arbSeqIndexList =
+      (*ptr)->getArbSeqIndexList(localDe, collocation, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc))) return;
     if (ESMC_NOT_PRESENT_FILTER(arbSeqIndexFlag) != ESMC_NULL_POINTER){  
@@ -741,12 +743,17 @@ extern "C" {
     localrc = (*ptr)->fillSeqIndexList(seqIndexList, localDe, collocation);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc))) return;
+    // fill seqIndexListI8
+    localrc = (*ptr)->fillSeqIndexList(seqIndexListI8, localDe, collocation);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc))) return;
     // set elementCount
-    if (ESMC_NOT_PRESENT_FILTER(elementCount) != ESMC_NULL_POINTER){
-      int *const *elementCountPCollPLocalDe =
-        (*ptr)->getElementCountPCollPLocalDe();
+    int *const *elementCountPCollPLocalDe =
+      (*ptr)->getElementCountPCollPLocalDe();
+    if (ESMC_NOT_PRESENT_FILTER(elementCount) != ESMC_NULL_POINTER)
       *elementCount = elementCountPCollPLocalDe[collIndex][localDe];
-    }
+    if (ESMC_NOT_PRESENT_FILTER(elementCountI8) != ESMC_NULL_POINTER)
+      *elementCountI8 = (ESMC_I8)elementCountPCollPLocalDe[collIndex][localDe];
     // return successfully
     if (ESMC_NOT_PRESENT_FILTER(rc)) *rc = ESMF_SUCCESS;
   }
