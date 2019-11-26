@@ -6488,7 +6488,7 @@ template<typename T> int DistGrid::setArbSeqIndex(
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::DistGrid::setArbSeqIndex()"
 //BOPI
-// !IROUTINE:  ESMCI::DistGrid::unsetArbSeqIndex
+// !IROUTINE:  ESMCI::DistGrid::setArbSeqIndex
 //
 // !INTERFACE:
 //
@@ -6504,7 +6504,7 @@ int DistGrid::setArbSeqIndex(
   ){
 //
 // !DESCRIPTION:
-//    Unset the array of arbitrary indices
+//    Set the array of arbitrary indices to the incoming pointer.
 //
 //EOPI
 //-----------------------------------------------------------------------------
