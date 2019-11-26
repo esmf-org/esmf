@@ -3593,14 +3593,25 @@ template<typename T> int DistGrid::fillSeqIndexList(
       vector<int> sizes(dimCount);
       for (int i=0; i<dimCount; i++)
         sizes[i]=indexCountPDimPDe[de*dimCount+i];
-      MultiDimIndexLoop multiDimIndexLoop(sizes);
-      vector<T> seqIndex;
+      MultiDimIndexLoop multiDimIndexLoop(sizes, true, this, localDe);
       int index = 0;
       while(multiDimIndexLoop.isWithin()){
-        getSequenceIndexLocalDe(localDe, multiDimIndexLoop.getIndexTuple(),
-          seqIndex);
-        (seqIndexList)->array[index++] = seqIndex[0];
-        seqIndex.clear();
+        try{
+          seqIndexList->array[index++]= multiDimIndexLoop.getSequenceIndex<T>();
+        }catch(int catchrc){
+          // catch standard ESMF return code
+          ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, &rc);
+          return rc;
+        }catch(exception &x){
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+          x.what(), ESMC_CONTEXT, &rc);
+          return rc;
+        }catch(...){
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+          "Caught exception", ESMC_CONTEXT, &rc);
+          return rc;
+        }
         multiDimIndexLoop.next();
       }
     }
@@ -6563,8 +6574,12 @@ int DistGrid::setArbSeqIndex(
     indexTupleWatchStart.resize(0);
     indexTupleWatchEnd.resize(0);
     skipBlockedRegionFlag = false; // initialize
+    seqIndex=NULL;
+    distgrid=NULL;
+    localDe=-1;
   }
-  MultiDimIndexLoop::MultiDimIndexLoop(vector<int> const &sizes){
+  MultiDimIndexLoop::MultiDimIndexLoop(vector<int> const &sizes,
+    bool seqIndexEnabled, DistGrid const *distgridArg, int localDeArg){
     indexTupleEnd = sizes;
     // default initialize rest
     int rank = sizes.size();
@@ -6582,7 +6597,53 @@ int DistGrid::setArbSeqIndex(
       indexTupleWatchStart[i] = indexTupleWatchEnd[i] = 0;  // reset
     }
     skipBlockedRegionFlag = false; // initialize
+    seqIndex=NULL;  // default
+    distgrid=NULL;  // default
+    localDe=-1;     // default
     adjust();
+    // deal with seqIndex support
+    if (seqIndexEnabled){
+      int localrc = ESMC_RC_NOT_IMPL;
+      if (distgridArg==NULL){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+          "distgridArg must not be NULL for seqIndexEnabled=.true.",
+          ESMC_CONTEXT, &localrc);
+        throw localrc;  // bail out with exception
+      }
+      distgrid = distgridArg;
+      if (localDeArg<0 || 
+        localDeArg >= distgrid->getDELayout()->getLocalDeCount()){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "A valid localDeArg is needed for seqIndexEnabled=.true.",
+          ESMC_CONTEXT, &localrc);
+        throw localrc;  // bail out with exception
+      }
+      localDe=localDeArg;
+      // prepare seqIndex member for iteration
+      if (distgrid->getIndexTK()==ESMC_TYPEKIND_I4){
+        seqIndex = (void *) new ESMC_I4;
+        vector<ESMC_I4> seqIndexList;
+        localrc = distgrid->getSequenceIndexLocalDe(localDe, getIndexTuple(),
+          seqIndexList);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+        if (seqIndexList.size()>0)
+          *(ESMC_I4*)seqIndex = seqIndexList[0];
+        else
+          *(ESMC_I4*)seqIndex = -1;
+      }else if (distgrid->getIndexTK()==ESMC_TYPEKIND_I8){
+        seqIndex = (void *) new ESMC_I8;
+        vector<ESMC_I8> seqIndexList;
+        localrc = distgrid->getSequenceIndexLocalDe(localDe, getIndexTuple(),
+          seqIndexList);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+        if (seqIndexList.size()>0)
+          *(ESMC_I8*)seqIndex = seqIndexList[0];
+        else
+          *(ESMC_I8*)seqIndex = -1;
+      }
+    }
   }
   MultiDimIndexLoop::MultiDimIndexLoop(vector<int> const &offsets,
     vector<int> const &sizes){
@@ -6605,6 +6666,9 @@ int DistGrid::setArbSeqIndex(
       indexTupleWatchStart[i] = indexTupleWatchEnd[i] = 0;  // reset
     }
     skipBlockedRegionFlag = false; // initialize
+    seqIndex=NULL;  // default
+    distgrid=NULL;  // default
+    localDe=-1;     // default
     adjust();
   }
   void MultiDimIndexLoop::setSkipDim(int dim){
@@ -6733,7 +6797,42 @@ int DistGrid::setArbSeqIndex(
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
     }
 #endif
-    
+    // update seqIndex if active
+    if (seqIndex){
+      int localrc = ESMC_RC_NOT_IMPL;
+      if (adjusted){
+        // must re-compute seqIndex from index tuple
+        if (distgrid->getIndexTK()==ESMC_TYPEKIND_I4){
+          vector<ESMC_I4> seqIndexList;
+          localrc = distgrid->getSequenceIndexLocalDe(localDe, getIndexTuple(),
+            seqIndexList);
+          if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+            ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+          if (seqIndexList.size()>0)
+            *(ESMC_I4*)seqIndex = seqIndexList[0];
+          else
+            *(ESMC_I4*)seqIndex = -1;
+        }else if (distgrid->getIndexTK()==ESMC_TYPEKIND_I8){
+          vector<ESMC_I8> seqIndexList;
+          localrc = distgrid->getSequenceIndexLocalDe(localDe, getIndexTuple(),
+            seqIndexList);
+          if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+            ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+          if (seqIndexList.size()>0)
+            *(ESMC_I8*)seqIndex = seqIndexList[0];
+          else
+            *(ESMC_I8*)seqIndex = -1;
+        }
+      }else{
+        // optimize by simple seqIndex increment
+        if (distgrid->getIndexTK()==ESMC_TYPEKIND_I4){
+          (*(ESMC_I4*)seqIndex)++;
+        }else if (distgrid->getIndexTK()==ESMC_TYPEKIND_I8){
+          (*(ESMC_I8*)seqIndex)++;
+        }
+      }
+    }
+    // return
     return adjusted;
   }
   bool MultiDimIndexLoop::next(){

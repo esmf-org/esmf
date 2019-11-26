@@ -268,11 +268,39 @@ namespace ESMCI {
     std::vector<int> indexTupleWatchStart; // watched region
     std::vector<int> indexTupleWatchEnd;   // watched region
     bool skipBlockedRegionFlag;
+    void *seqIndex;                   // sequence index of current iterator
+    DistGrid const *distgrid;         // DistGrid for sequence index optimiz.
+    int localDe;                      // for sequence index look up optimization
    public:
     MultiDimIndexLoop();
-    MultiDimIndexLoop(std::vector<int> const &sizes);
+    MultiDimIndexLoop(std::vector<int> const &sizes,
+      bool seqIndexEnabled=false, const DistGrid *distgrid=NULL, int localDe=-1);
     MultiDimIndexLoop(std::vector<int> const &offsets,
       std::vector<int> const &sizes);
+    ~MultiDimIndexLoop(){
+      if (seqIndex){
+        if (distgrid->getIndexTK()==ESMC_TYPEKIND_I4)
+          delete (ESMC_I4*) seqIndex;
+        else if (distgrid->getIndexTK()==ESMC_TYPEKIND_I8)
+          delete (ESMC_I8*) seqIndex;
+      }
+    }
+    template<typename T> T getSequenceIndex()const{
+      if (seqIndex){
+        T tempSeqIndex;
+        ESMC_I8 controlSeqIndex;
+        if (distgrid->getIndexTK()==ESMC_TYPEKIND_I4){
+          tempSeqIndex = (T)(*(ESMC_I4*)seqIndex);
+          controlSeqIndex = (ESMC_I8)(*(ESMC_I4*)seqIndex);
+        }else if (distgrid->getIndexTK()==ESMC_TYPEKIND_I8){
+          tempSeqIndex = (T)(*(ESMC_I8*)seqIndex);
+          controlSeqIndex = (ESMC_I8)(*(ESMC_I8*)seqIndex);
+        }
+        if ((ESMC_I8)tempSeqIndex == controlSeqIndex)
+          return tempSeqIndex;  // no truncation detected, okay to return
+      }
+      throw ESMC_RC_ARG_BAD;
+    }
     void setSkipDim(int dim);
     void setBlockStart(std::vector<int> const &blockStart);
     void setBlockEnd(std::vector<int> const &blockEnd);

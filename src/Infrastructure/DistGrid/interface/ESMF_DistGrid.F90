@@ -3652,8 +3652,8 @@ integer(ESMF_KIND_I8),target, intent(out), optional :: seqIndexListI8(:)
 ! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
 ! \item[8.0.0] Added arguments {\tt de} and {\tt tile} to simplify usage.
-! \item[8.1.0] Added arguments {\tt seqIndexListI8} and
-!              {\tt elementCountI8} to provide 64-bit access.
+! \item[8.1.0] Added arguments {\tt seqIndexListI8} and {\tt elementCountI8}
+!              to provide 64-bit access.
 ! \end{description}
 ! \end{itemize}
 !
