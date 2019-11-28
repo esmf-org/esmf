@@ -3640,7 +3640,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                  intent(out), optional :: tile
     integer,                  intent(in),  optional :: collocation
     logical,                  intent(out), optional :: arbSeqIndexFlag
-    integer,        target,   intent(out), optional :: seqIndexList(:)
+    integer,          target, intent(out), optional :: seqIndexList(:)
 integer(ESMF_KIND_I8),target, intent(out), optional :: seqIndexListI8(:)
     integer,                  intent(out), optional :: elementCount
     integer,                  intent(out), optional :: elementCountI8
@@ -4101,15 +4101,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridSet()
   subroutine ESMF_DistGridSetPLocalDe(distgrid, localDe, collocation, &
-    keywordEnforcer, seqIndexList, rc)
+    keywordEnforcer, seqIndexList, seqIndexListI8, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_DistGrid),    intent(inout)         :: distgrid
-    integer,                intent(in)            :: localDe
+    type(ESMF_DistGrid),      intent(inout)         :: distgrid
+    integer,                  intent(in)            :: localDe
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                intent(in),  optional :: collocation
-    integer,        target, intent(in),  optional :: seqIndexList(:)
-    integer,                intent(out), optional :: rc
+    integer,                  intent(in),  optional :: collocation
+    integer,          target, intent(in),  optional :: seqIndexList(:)
+integer(ESMF_KIND_I8),target, intent(in),  optional :: seqIndexListI8(:)
+    integer,                  intent(out), optional :: rc
 !         
 ! !DESCRIPTION:
 !   Set DistGrid information for a specific local DE.
@@ -4124,19 +4125,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Collocation for which information is set. Default to first
 !     collocation in {\tt collocation} list.
 !   \item[{[seqIndexList]}]
-!     \begin{sloppypar}
-!     List of sequence indices for the elements on {\tt localDe}, with
-!     {\tt shape(seqIndexList) == (/elementCountPDe(localDeToDeMap(localDe))/)}.
-!     \end{sloppypar}
+!     Sequence indices for the elements on {\tt localDe}. The {\tt seqIndexList}
+!     must provide exactly {\tt elementCountPDe(localDeToDeMap(localDe)} many
+!     entries. When this argument is present, the {\tt indexTK} of
+!     {\tt distgrid} will be set to {\tt ESMF\_TYPEKIND\_I4}.
+!     This argument is mutually exclusive with {\tt seqIndexListI8}. Only one
+!     or the other must be provided. An error will be returned otherwise.
+!   \item[{[seqIndexListI8]}]
+!     Same as {\tt seqIndexList}, but of 64-bit integer kind.
+!     When this argument is present, the {\tt indexTK} of
+!     {\tt distgrid} will be set to {\tt ESMF\_TYPEKIND\_I8}.
+!     This argument is mutually exclusive with {\tt seqIndexList}. Only one
+!     or the other must be provided. An error will be returned otherwise.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOP
 !------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
     integer               :: localrc            ! local return code
     type(ESMF_InterArray) :: seqIndexListAux    ! helper variable
+    integer               :: collocationAux     ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -4145,16 +4154,43 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
     
-    seqIndexListAux = ESMF_InterArrayCreate(seqIndexList, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    ! deal with optional arguments
+    collocationAux = 1  ! default
+    if (present(collocation)) collocationAux = collocation
 
-    ! call into the C++ interface, which will sort out optional arguments
-!    call c_ESMC_DistGridSetPLocalDe(distgrid, localDe, collocation, &
-!      seqIndexListAux, localrc)
-!    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-!      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present(seqIndexList) .and. present(seqIndexListI8)) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+        msg="Only one of the 'seqIndexList' or 'seqIndexListI8' arguments" //&
+          " must be specified at the same time", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+
+    if (present(seqIndexList)) then
+      ! prepare seqIndexList
+      seqIndexListAux = ESMF_InterArrayCreate(seqIndexList, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! call into the C++ interface
+      call c_ESMC_DistGridSetArbSeqIndex(distgrid, seqIndexListAux, localDe, &
+        collocationAux, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
       
+    if (present(seqIndexListI8)) then
+      ! prepare seqIndexList
+      seqIndexListAux = ESMF_InterArrayCreate(farray1DI8=seqIndexListI8, &
+        rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! call into the C++ interface
+      call c_ESMC_DistGridSetArbSeqIndexI8(distgrid, seqIndexListAux, localDe, &
+        collocationAux, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
     ! garbage collection
     call ESMF_InterArrayDestroy(seqIndexListAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &

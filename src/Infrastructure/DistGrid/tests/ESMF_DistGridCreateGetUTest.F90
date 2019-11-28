@@ -68,6 +68,7 @@ program ESMF_DistGridCreateGetUTest
   type(ESMF_Decomp_Flag), allocatable:: decompflagPTile(:,:)
   integer, allocatable:: indexCountPDe(:,:), localDeToDeMap(:)
   integer, allocatable:: indexList(:), seqIndexList(:)
+  integer(ESMF_KIND_I8), allocatable:: seqIndexListI8(:)  
   integer, allocatable:: deBlockList(:,:,:)
   integer, allocatable:: arbSeqIndexList(:)
   integer, allocatable:: collocation(:)
@@ -1827,9 +1828,11 @@ print *, "elementCountPTileI8=", elementCountPTileI8
   !EX_UTest
   write(name, *) "DistGridCreate() - canonical seqIndices below 32-bit limit"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/160000,128/), &
+call ESMF_VMLogMemInfo("bef ESMF_DistGridCreate()", rc=rc)
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/1600000,128/), &
     rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+call ESMF_VMLogMemInfo("aft ESMF_DistGridCreate()", rc=rc)
  
   !------------------------------------------------------------------------
   !EX_UTest
@@ -1874,25 +1877,54 @@ print *, "elementCount(on localDe)=", elementCount
   !EX_UTest
   write(name, *) "DistGridGet() - seqIndexList"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-call ESMF_VMLogMemInfo("bef allocating space for seqIndices", rc=rc)
+call ESMF_VMLogMemInfo("bef allocating space for seqIndexList", rc=rc)
   allocate(seqIndexList(elementCount))
-call ESMF_VMLogMemInfo("bef filling of canonical seqIndices", rc=rc)
+call ESMF_VMLogMemInfo("bef filling of canonical seqIndexList", rc=rc)
   call ESMF_DistGridGet(distgrid, localDe=0, seqIndexList=seqIndexList, rc=rc)
-call ESMF_VMLogMemInfo("aft filling of canonical seqIndices", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+call ESMF_VMLogMemInfo("aft filling of canonical seqIndexList", rc=rc)
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "DistGridSet() - seqIndexListI8"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  allocate(seqIndexListI8(elementCount))
+  do i=1, elementCount
+    seqIndexListI8(i) = seqIndexList(i)*10  ! make up some scaled seqIndex of I8
+  enddo
+call ESMF_VMLogMemInfo("bef setting arbitary seqIndexListI8 in DistGrid", rc=rc)
+  call ESMF_DistGridSet(distgrid, localDe=0, seqIndexListI8=seqIndexListI8, &
+    rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+call ESMF_VMLogMemInfo("aft setting arbitary seqIndexListI8 in DistGrid", rc=rc)
 
   deallocate(seqIndexList)
-call ESMF_VMLogMemInfo("aft deallocation of      seqIndices", rc=rc)
+  deallocate(seqIndexListI8)
+call ESMF_VMLogMemInfo("aft deallocation of seqIndexList+seqIndexListI8", rc=rc)
+  
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "DistGridGet() - seqIndexList"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+call ESMF_VMLogMemInfo("bef allocating space for seqIndexList", rc=rc)
+  allocate(seqIndexList(elementCount))
+call ESMF_VMLogMemInfo("bef filling of canonical seqIndexList", rc=rc)
+  call ESMF_DistGridGet(distgrid, localDe=0, seqIndexList=seqIndexList, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+call ESMF_VMLogMemInfo("aft filling of canonical seqIndexList", rc=rc)
+
+  deallocate(seqIndexList)
+call ESMF_VMLogMemInfo("aft deallocation of      seqIndexList", rc=rc)
 
   !------------------------------------------------------------------------
   !EX_UTest
   write(name, *) "Destroy test DistGrid"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  call ESMF_DistGridDestroy(distgrid, noGarbage=.true., rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
-
+call ESMF_VMLogMemInfo("aft ESMF_DistGridDestroy()", rc=rc)
 
 #endif
 

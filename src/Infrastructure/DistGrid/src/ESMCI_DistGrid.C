@@ -60,6 +60,12 @@ namespace ESMCI {
 //
 //-----------------------------------------------------------------------------
 
+template int DistGrid::setArbSeqIndex<ESMC_I4>(vector<ESMC_I4> &arbSeqIndex, 
+  int localDe, int collocation);
+
+template int DistGrid::setArbSeqIndex<ESMC_I8>(vector<ESMC_I8> &arbSeqIndex, 
+  int localDe, int collocation);
+
 template int DistGrid::setArbSeqIndex<ESMC_I4>(InterArray<ESMC_I4> *arbSeqIndex, 
   int localDe, int collocation);
 
@@ -79,6 +85,12 @@ template int DistGrid::getSequenceIndexTileRelative<ESMC_I4>(int tile,
 
 template int DistGrid::getSequenceIndexTileRelative<ESMC_I8>(int tile,
     int const *index, ESMC_I8 *seqIndex)const;
+
+template int DistGrid::fillSeqIndexList<ESMC_I4>(vector<ESMC_I4> &seqIndexList,
+  int localDe, int collocation) const;
+
+template int DistGrid::fillSeqIndexList<ESMC_I8>(vector<ESMC_I8> &seqIndexList,
+  int localDe, int collocation) const;
 
 template int DistGrid::fillSeqIndexList<ESMC_I4>(
     InterArray<ESMC_I4> *seqIndexList, int localDe, int collocation) const;
@@ -3504,16 +3516,82 @@ template<typename T> int DistGrid::fillSeqIndexList(
 //
 // !ARGUMENTS:
 //
+  vector<T> &seqIndexList,      // in
+  int localDe,                  // in  - local DE = {0, ..., localDeCount-1}
+  int collocation               // in  -
+  )const{
+//
+// !DESCRIPTION:
+//    Fill the seqIndexList argument. The sequence indices are cast to the
+//    requested type T. There are checks in place to error out in case an
+//    overflow condition is detected during the cast. The most efficient way
+//    to call is with the same typekind (indexTK) of the DistGrid.
+//    
+//    If the size of seqIndexList does not match it will automatically
+//    resized by this method.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  int i;
+  for (i=0; i<diffCollocationCount; i++)
+    if (collocationTable[i]==collocation) break;
+  if (i==diffCollocationCount){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+      "specified collocation not valid", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+  int collIndex = i;
+
+  unsigned int elementCount = elementCountPCollPLocalDe[collIndex][localDe];
+  
+  if (seqIndexList.size() != elementCount)
+    seqIndexList.resize(elementCount);
+  
+  InterArray<T> *seqIndexListAux = new InterArray<T>(seqIndexList);
+  localrc = fillSeqIndexList(seqIndexListAux, localDe, collocation);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
+  delete seqIndexListAux;
+    
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::DistGrid::fillSeqIndexList()"
+//BOPI
+// !IROUTINE:  ESMCI::DistGrid::fillSeqIndexList
+//
+// !INTERFACE:
+//
+template<typename T> int DistGrid::fillSeqIndexList(
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
   InterArray<T> *seqIndexList,    // in
   int localDe,                    // in  - local DE = {0, ..., localDeCount-1}
   int collocation                 // in  -
   )const{
 //
 // !DESCRIPTION:
-//    Fill the seqIndexList argument. Providing this InterArray based 
-//    method is required for efficient filling of arrays that come through
-//    the Fortran API, without having to do an extra copy. It is also leveraged
-//    by the overloaded vector<int> based interface.
+//    Fill the seqIndexList argument. The sequence indices are cast to the
+//    requested type T. There are checks in place to error out in case an
+//    overflow condition is detected during the cast. The most efficient way
+//    to call is with the same typekind (indexTK) of the DistGrid.
+//    
+//    This InterArray based method is required for efficient filling of arrays
+//    that come through the Fortran API, without having to do an extra copy. 
+//    It is also leveraged by the overloaded vector<T> based interface.
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -3566,19 +3644,74 @@ template<typename T> int DistGrid::fillSeqIndexList(
           "Unsupported DistGrid indexTK", ESMC_CONTEXT, &rc);
         return rc;
       }
-      //TODO: Implement support for different type T here than indexTK, but
-      //TODO: then use loop to fill the values, and implement checks in case
-      //TODO: there is overflow during the assignment. Most efficient of course
-      //TODO: is to pull out sequence indices of the native type. Mention this
-      //TODO: in the documentation section of the API above!
-      if (sizeof(T) != sizeOfType){
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "Type mismatch.",
-          ESMC_CONTEXT, &rc);
-        return rc;
+      // Fill the outgoing array with sequence indices
+      if (sizeof(T) == sizeOfType){
+        // same typekind requested as intenally stored -> memcpy()
+        memcpy((seqIndexList)->array, arbSeqIndexList,
+          sizeOfType * elementCountPCollPLocalDe[collIndex][localDe]);
+      }else if (sizeof(T) > sizeOfType){
+        // casting from smaller to larger type -> don't need overflow check
+        if (indexTK == ESMC_TYPEKIND_I1){
+          for (int j=0; j<elementCountPCollPLocalDe[collIndex][localDe]; j++)
+            seqIndexList->array[j] = (T)((ESMC_I1*)arbSeqIndexList)[j];
+        }else if (indexTK == ESMC_TYPEKIND_I2){
+          for (int j=0; j<elementCountPCollPLocalDe[collIndex][localDe]; j++)
+            seqIndexList->array[j] = (T)((ESMC_I2*)arbSeqIndexList)[j];
+        }else if (indexTK == ESMC_TYPEKIND_I4){
+          for (int j=0; j<elementCountPCollPLocalDe[collIndex][localDe]; j++)
+            seqIndexList->array[j] = (T)((ESMC_I4*)arbSeqIndexList)[j];
+        }else if (indexTK == ESMC_TYPEKIND_I8){
+          for (int j=0; j<elementCountPCollPLocalDe[collIndex][localDe]; j++)
+            seqIndexList->array[j] = (T)((ESMC_I8*)arbSeqIndexList)[j];
+        }
+      }else if (sizeof(T) < sizeOfType){
+        // casting from larger to smaller type -> need overflow check
+        if (indexTK == ESMC_TYPEKIND_I1){
+          for (int j=0; j<elementCountPCollPLocalDe[collIndex][localDe]; j++){
+            seqIndexList->array[j] = (T)((ESMC_I1*)arbSeqIndexList)[j];
+            if ((ESMC_I1)seqIndexList->array[j]
+              != ((ESMC_I1*)arbSeqIndexList)[j]){
+              // error condition
+              ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                "Overflow detected during assignment", ESMC_CONTEXT, &rc);
+              return rc;
+            }
+          }
+        }else if (indexTK == ESMC_TYPEKIND_I2){
+          for (int j=0; j<elementCountPCollPLocalDe[collIndex][localDe]; j++){
+            seqIndexList->array[j] = (T)((ESMC_I2*)arbSeqIndexList)[j];
+            if ((ESMC_I2)seqIndexList->array[j]
+              != ((ESMC_I2*)arbSeqIndexList)[j]){
+              // error condition
+              ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                "Overflow detected during assignment", ESMC_CONTEXT, &rc);
+              return rc;
+            }
+          }
+        }else if (indexTK == ESMC_TYPEKIND_I4){
+          for (int j=0; j<elementCountPCollPLocalDe[collIndex][localDe]; j++){
+            seqIndexList->array[j] = (T)((ESMC_I4*)arbSeqIndexList)[j];
+            if ((ESMC_I4)seqIndexList->array[j]
+              != ((ESMC_I4*)arbSeqIndexList)[j]){
+              // error condition
+              ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                "Overflow detected during assignment", ESMC_CONTEXT, &rc);
+              return rc;
+            }
+          }
+        }else if (indexTK == ESMC_TYPEKIND_I8){
+          for (int j=0; j<elementCountPCollPLocalDe[collIndex][localDe]; j++){
+            seqIndexList->array[j] = (T)((ESMC_I8*)arbSeqIndexList)[j];
+            if ((ESMC_I8)seqIndexList->array[j]
+              != ((ESMC_I8*)arbSeqIndexList)[j]){
+              // error condition
+              ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                "Overflow detected during assignment", ESMC_CONTEXT, &rc);
+              return rc;
+            }
+          }
+        }
       }
-      memcpy((seqIndexList)->array, arbSeqIndexList,
-        sizeOfType * elementCountPCollPLocalDe[collIndex][localDe]);
     }else{
       // default seq indices -> generate on the fly and fill in
       if ((seqIndexList)->extent[0] <
@@ -3617,63 +3750,6 @@ template<typename T> int DistGrid::fillSeqIndexList(
     }
   }
   
-  // return successfully
-  rc = ESMF_SUCCESS;
-  return rc;
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::DistGrid::fillSeqIndexList()"
-//BOPI
-// !IROUTINE:  ESMCI::DistGrid::fillSeqIndexList
-//
-// !INTERFACE:
-//
-int DistGrid::fillSeqIndexList(
-// !RETURN VALUE:
-//    int return code
-//
-// !ARGUMENTS:
-//
-  vector<int> &seqIndexList,    // in
-  int localDe,                  // in  - local DE = {0, ..., localDeCount-1}
-  int collocation               // in  -
-  )const{
-//
-// !DESCRIPTION:
-//    Fill the seqIndexList argument. If the size of seqIndexList does not
-//    match it will automatically resized by this method.
-//
-//EOPI
-//-----------------------------------------------------------------------------
-  // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
-  int i;
-  for (i=0; i<diffCollocationCount; i++)
-    if (collocationTable[i]==collocation) break;
-  if (i==diffCollocationCount){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-      "specified collocation not valid", ESMC_CONTEXT, &rc);
-    return rc;
-  }
-  int collIndex = i;
-
-  unsigned int elementCount = elementCountPCollPLocalDe[collIndex][localDe];
-  
-  if (seqIndexList.size() != elementCount)
-    seqIndexList.resize(elementCount);
-  
-  InterArray<int> *seqIndexListAux = new InterArray<int>(seqIndexList);
-  localrc = fillSeqIndexList(seqIndexListAux, localDe, collocation);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-    &rc)) return rc;
-  delete seqIndexListAux;
-    
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -6362,13 +6438,65 @@ template<typename T> int DistGrid::setArbSeqIndex(
 //
 // !ARGUMENTS:
 //
+  vector<T> &arbSeqIndex,       // in
+  int localDe,                  // in  - local DE = {0, ..., localDeCount-1}
+  int collocation               // in
+  ){
+//
+// !DESCRIPTION:
+//    Set the array of arbitrary indices for localDe and collocation. The 
+//    indexTK of the DistGrid object might be changed. It is set to the 
+//    typekind of the incoming type T.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+#define DEBUGPRINTS____disable
+#ifdef DEBUGPRINTS
+  char msg[160];
+  sprintf(msg, "setArbSeqIndex: localDe=%d, collocation=%d", localDe, 
+    collocation);
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+#endif
+  
+  InterArray<T> arbSeqIndexInter(arbSeqIndex);
+  localrc = setArbSeqIndex(&arbSeqIndexInter, localDe, 1);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    ESMC_CONTEXT, &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+  
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::DistGrid::setArbSeqIndex()"
+//BOPI
+// !IROUTINE:  ESMCI::DistGrid::setArbSeqIndex
+//
+// !INTERFACE:
+//
+template<typename T> int DistGrid::setArbSeqIndex(
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
   InterArray<T> *arbSeqIndex,   // in
   int localDe,                  // in  - local DE = {0, ..., localDeCount-1}
   int collocation               // in
   ){
 //
 // !DESCRIPTION:
-//    Set the array of arbitrary indices
+//    Set the array of arbitrary indices for localDe and collocation. The 
+//    indexTK of the DistGrid object might be changed. It is set to the 
+//    typekind of the incoming type T.
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -6427,7 +6555,7 @@ template<typename T> int DistGrid::setArbSeqIndex(
     return rc;
   }
 
-  // potentially delete previous index list
+  // delete potentially existing previous arbSeqIndexListPCollPLocalDe[][] alloc
   if (arbSeqIndexListPCollPLocalDe[collocationIndex][localDe]){
     if (indexTK == ESMC_TYPEKIND_I1){
       ESMC_I1 *ptr = 
@@ -6453,24 +6581,24 @@ template<typename T> int DistGrid::setArbSeqIndex(
     }
   }
 
-  // set arbSeqIndexListPCollPLocalDe[][]
-  unsigned int sizeOfType;
-  if (indexTK == ESMC_TYPEKIND_I1){
+  // allocate memory for arbSeqIndexListPCollPLocalDe[][] and set indexTK
+  unsigned int sizeOfType = sizeof(T);
+  if (sizeOfType == sizeof(ESMC_I1)){
     arbSeqIndexListPCollPLocalDe[collocationIndex][localDe]
       = (void *)(new ESMC_I1[arbSeqIndex->extent[0]]);
-    sizeOfType = sizeof(ESMC_I1);
-  }else if (indexTK == ESMC_TYPEKIND_I2){
+    indexTK = ESMC_TYPEKIND_I1;
+  }else if (sizeOfType == sizeof(ESMC_I2)){
     arbSeqIndexListPCollPLocalDe[collocationIndex][localDe]
       = (void *)(new ESMC_I2[arbSeqIndex->extent[0]]);
-    sizeOfType = sizeof(ESMC_I2);
-  }else if (indexTK == ESMC_TYPEKIND_I4){
+    indexTK = ESMC_TYPEKIND_I2;
+  }else if (sizeOfType == sizeof(ESMC_I4)){
     arbSeqIndexListPCollPLocalDe[collocationIndex][localDe]
       = (void *)(new ESMC_I4[arbSeqIndex->extent[0]]);
-    sizeOfType = sizeof(ESMC_I4);
-  }else if (indexTK == ESMC_TYPEKIND_I8){
+    indexTK = ESMC_TYPEKIND_I4;
+  }else if (sizeOfType == sizeof(ESMC_I8)){
     arbSeqIndexListPCollPLocalDe[collocationIndex][localDe]
       = (void *)(new ESMC_I8[arbSeqIndex->extent[0]]);
-    sizeOfType = sizeof(ESMC_I8);
+    indexTK = ESMC_TYPEKIND_I8;
   }else{
     // error condition, indexTK not supported
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -6478,15 +6606,6 @@ template<typename T> int DistGrid::setArbSeqIndex(
     return rc;
   }
   
-  // check for type mismatch
-  if (sizeOfType != sizeof(T)){
-    // error condition, indexTK not supported
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "Mismatch of DistGrid indexTK and typekind of provided sequence indices",
-      ESMC_CONTEXT, &rc);
-    return rc;
-  }
-
   // copy the provided arbSeqIndex array into the DistGrid
   memcpy(arbSeqIndexListPCollPLocalDe[collocationIndex][localDe],
     arbSeqIndex->array, sizeOfType*arbSeqIndex->extent[0]);
@@ -6577,6 +6696,7 @@ int DistGrid::setArbSeqIndex(
     seqIndex=NULL;
     distgrid=NULL;
     localDe=-1;
+    arbSeq=false;
   }
   MultiDimIndexLoop::MultiDimIndexLoop(vector<int> const &sizes,
     bool seqIndexEnabled, DistGrid const *distgridArg, int localDeArg){
@@ -6600,6 +6720,7 @@ int DistGrid::setArbSeqIndex(
     seqIndex=NULL;  // default
     distgrid=NULL;  // default
     localDe=-1;     // default
+    arbSeq=false;   // default
     adjust();
     // deal with seqIndex support
     if (seqIndexEnabled){
@@ -6619,6 +6740,10 @@ int DistGrid::setArbSeqIndex(
         throw localrc;  // bail out with exception
       }
       localDe=localDeArg;
+      // check for arbitary sequence indices
+      if (distgrid->getArbSeqIndexList(localDe, 1, &localrc)) arbSeq=true;
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
       // prepare seqIndex member for iteration
       if (distgrid->getIndexTK()==ESMC_TYPEKIND_I4){
         seqIndex = (void *) new ESMC_I4;
@@ -6669,6 +6794,7 @@ int DistGrid::setArbSeqIndex(
     seqIndex=NULL;  // default
     distgrid=NULL;  // default
     localDe=-1;     // default
+    arbSeq=false;   // default
     adjust();
   }
   void MultiDimIndexLoop::setSkipDim(int dim){
@@ -6800,7 +6926,7 @@ int DistGrid::setArbSeqIndex(
     // update seqIndex if active
     if (seqIndex){
       int localrc = ESMC_RC_NOT_IMPL;
-      if (adjusted){
+      if (adjusted||arbSeq){
         // must re-compute seqIndex from index tuple
         if (distgrid->getIndexTK()==ESMC_TYPEKIND_I4){
           vector<ESMC_I4> seqIndexList;
