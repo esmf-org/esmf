@@ -353,9 +353,6 @@ class Grid(object):
             # stagger is not required for from-file grids, but we need to
             # correctly allocate the space
             staggerloc = [StaggerLoc.CENTER]
-            
-            print self._rank
-            print self._ndims
 
             # add corner, this assumes 2D grids right?
             if add_corner_stagger:

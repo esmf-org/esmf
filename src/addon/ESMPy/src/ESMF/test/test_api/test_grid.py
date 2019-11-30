@@ -180,13 +180,13 @@ class TestGrid(TestBase):
     def test_grid_create_2d(self):
         keywords = dict(
             # periodic specifies all valid combos of [pole_kind, num_peri_dims, periodic_dim, pole_dim]
-            pole_kind=[[PoleKind.None,PoleKind.None], 
-                      [PoleKind.None,PoleKind.MONOPOLE],
-                      [PoleKind.None,PoleKind.BIPOLE],
-                      [PoleKind.MONOPOLE,PoleKind.None],
-                      [PoleKind.BIPOLE,PoleKind.None],
-                      [PoleKind.MONOPOLE,PoleKind.BIPOLE],
-                      [PoleKind.BIPOLE,PoleKind.MONOPOLE]],
+            pole_kind=[[PoleKind.NONE, PoleKind.NONE],
+                      [PoleKind.NONE, PoleKind.MONOPOLE],
+                      [PoleKind.NONE, PoleKind.BIPOLE],
+                      [PoleKind.MONOPOLE, PoleKind.NONE],
+                      [PoleKind.BIPOLE, PoleKind.NONE],
+                      [PoleKind.MONOPOLE, PoleKind.BIPOLE],
+                      [PoleKind.BIPOLE, PoleKind.MONOPOLE]],
             periodic=[[None, None, None], [None, None, 0], [None, None, 1],
                       [0, None, None], [0, None, 0], [0, None, 1],
                       [1, None, None], [1, 0, 1], [1, 1, 0]],
