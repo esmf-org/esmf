@@ -615,7 +615,7 @@ namespace ESMCI {
             }
           }
         }else{
-          // opimize by simple index seqIndex increment
+          // optimize by simple seqIndex increment
           if (firstDimDecompFlag){
             // increment the decompSeqIndex
             if (indexTK==ESMC_TYPEKIND_I4)
