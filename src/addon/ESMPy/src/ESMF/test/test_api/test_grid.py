@@ -13,6 +13,8 @@ import os
 import inspect
 
 class TestGrid(TestBase):
+    
+    Manager(debug=True)
 
     def examine_grid_attributes(self, grid):
         # ~~~~~~~~~~~~~~~~~~~~~~  STAGGER LOCATIONS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -434,6 +436,7 @@ class TestGrid(TestBase):
             esmfdir = os.path.dirname(inspect.getfile(ESMF))
             grid = Grid(filename=os.path.join(esmfdir, "test/data/T42_grid.nc"),
                         filetype=FileFormat.SCRIP,
+                        pole_kind=[PoleKind.MONOPOLE, PoleKind.BIPOLE],
                         reg_decomp=reg_decomp)
         except:
             raise NameError('grid_create_from_file_scrip failed!')
