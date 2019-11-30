@@ -6652,6 +6652,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         return
     endif
 
+#if DEBUG_POLEKIND
+    if(present(polekindflag)) then
+      print *, "ESMF_GridCreateFrmScrip", polekindflag(1), polekindflag(2), localIsSphere
+    endif
+#endif    
     ! Create Grid based on the input distgrid
     if (localIsSphere) then
        grid=ESMF_GridCreate1PeriDim(minIndex=(/1,1/), maxIndex=dims, &
@@ -9182,6 +9187,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+#if DEBUG_POLEKIND
+    if(present(polekindflag)) then
+      print *, "GridCreate1PeriDim", polekindflag(1), polekindflag(2)
+    endif
+#endif
+    
     ! Get IndexSpace
     call GetIndexSpaceReg(minIndex, maxIndex, &
           dimCount, minIndexLocal, maxIndexLocal,  rc=localrc)
@@ -30033,7 +30044,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer :: widthIndex(ESMF_MAXDIM)
        integer :: localrc
 
-
+#if DEBUG_POLEKIND
+    if(present(polekindflag)) then
+      print *, "Setup1PeriodicConn", polekindflag(1), polekindflag(2)
+    endif
+#endif
+    
        ! Error check input
        if (present(periodicDim)) then
           if (periodicDim .gt. dimCount) then

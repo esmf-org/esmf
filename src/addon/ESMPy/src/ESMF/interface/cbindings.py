@@ -706,15 +706,14 @@ def ESMP_GridCreateFromFile(filename, fileTypeFlag, regDecomp,
 
     #InterfaceInt requires int32 type numpy arrays
     # must be size 2
+    #InterfaceInt requires int32 type numpy arrays
     if polekindflag is not None:
+        if (polekindflag.dtype != np.int32):
+            raise TypeError('polekindflag must have dtype=int32')
+
+        # must be size 2
         if (len(polekindflag) != 2):
             raise TypeError('polekindflag must only have 2 entries')
-
-        if (type(polekindflag[0]) != constants.PoleKind):
-            raise TypeError('polekindflag must be a list of ESMF.PoleKind values')
-        else:
-            polekindflag = np.array(polekindflag, dtype=np.int32)
-
 
     gridstruct = _ESMF.ESMC_GridCreateFromFile(filename, fileTypeFlag,
                                                None, decompflag,

@@ -217,6 +217,11 @@ class Grid(object):
                 raise GridArgumentError("must supply either max_index for an in-memory grid or filename and filetype for a from-file grid")
             if (filetype != FileFormat.SCRIP) and (filetype != FileFormat.GRIDSPEC):
                 raise GridArgumentError("filetype must be SCRIP or GRIDSPEC for Grid objects")
+            if pole_kind is not None:
+                if pole_kind.dtype is not np.int32:
+                    self._pole_kind = np.array(pole_kind, dtype=np.int32)
+                else:
+                    self._pole_kind = pole_kind
             # set the from_file flag to True
             from_file = True
             #raise errors for all in-memory grid options
