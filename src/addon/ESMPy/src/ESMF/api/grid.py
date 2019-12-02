@@ -173,11 +173,6 @@ class Grid(object):
                 self._max_index = np.array(max_index, dtype=np.int32)
             else:
                 self._max_index = max_index
-            if pole_kind is not None:
-                if pole_kind.dtype is not np.int32:
-                    self._pole_kind = np.array(pole_kind, dtype=np.int32)
-                else:
-                    self._pole_kind = pole_kind
             # raise warnings on all from file args
             if filename is not None:
                 warnings.warn("filename is only used for grids created from file, this argument will be ignored.")
@@ -217,11 +212,6 @@ class Grid(object):
                 raise GridArgumentError("must supply either max_index for an in-memory grid or filename and filetype for a from-file grid")
             if (filetype != FileFormat.SCRIP) and (filetype != FileFormat.GRIDSPEC):
                 raise GridArgumentError("filetype must be SCRIP or GRIDSPEC for Grid objects")
-            if pole_kind is not None:
-                if pole_kind.dtype is not np.int32:
-                    self._pole_kind = np.array(pole_kind, dtype=np.int32)
-                else:
-                    self._pole_kind = pole_kind
             # set the from_file flag to True
             from_file = True
             #raise errors for all in-memory grid options
@@ -311,6 +301,19 @@ class Grid(object):
             self._num_peri_dims = 0
         else:
             self._num_peri_dims = num_peri_dims
+
+        if pole_kind is not None:
+            if (len(pole_kind) != 2):
+                raise TypeError('pole_kind must be of length 2')
+            if (type(pole_kind) == tuple):
+                pole_kind = np.array(pole_kind, dtype=np.int32)
+            elif (type(pole_kind) == list):
+                pole_kind = np.array(pole_kind, dtype=np.int32)
+            elif (type(pole_kind) == np.ndarray):
+                pole_kind = np.array(pole_kind, dtype=np.int32)
+            else:
+                raise TypeError('pole_kind is not a recognized type, please use a list, tuple or numpy array')
+            self._pole_kind = pole_kind
 
         # size, type and rank of the grid for bookeeping of coordinates 
         self._size = [None]
