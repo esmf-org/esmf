@@ -501,11 +501,7 @@ def ESMP_GridCreate1PeriDim(maxIndex, polekindflag=None, periodicDim=None,
     #InterfaceInt requires int32 type numpy arrays
     if polekindflag is not None:
         if (polekindflag.dtype != np.int32):
-            raise TypeError('polekindflag must have dtype=int32')
-
-        # must be size 2
-        if (len(polekindflag) != 2):
-            raise TypeError('polekindflag must only have 2 entries')
+            raise TypeError('pole_kind must have dtype=int32')
 
     # reset the periodic_dim and pole_dim to be 1 based for ESMF
     if periodicDim is not None:
@@ -705,15 +701,9 @@ def ESMP_GridCreateFromFile(filename, fileTypeFlag, regDecomp,
     indexflag = 1
 
     #InterfaceInt requires int32 type numpy arrays
-    # must be size 2
-    #InterfaceInt requires int32 type numpy arrays
     if polekindflag is not None:
         if (polekindflag.dtype != np.int32):
-            raise TypeError('polekindflag must have dtype=int32')
-
-        # must be size 2
-        if (len(polekindflag) != 2):
-            raise TypeError('polekindflag must only have 2 entries')
+            raise TypeError('pole_kind must have dtype=int32')
 
     gridstruct = _ESMF.ESMC_GridCreateFromFile(filename, fileTypeFlag,
                                                None, decompflag,
