@@ -719,6 +719,9 @@ void VMK::construct(void *ssarg){
     }
   }
   mpi_c = sarg->mpi_c;
+#if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
+  mpi_c_ssi = sarg->mpi_c_ssi;
+#endif  
   pth_mutex2 = sarg->pth_mutex2;
   pth_mutex = sarg->pth_mutex;
   pth_finish_count = sarg->pth_finish_count;

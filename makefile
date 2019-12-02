@@ -619,7 +619,7 @@ install_apps:
 
 # Ranlib on the libraries
 ranlib:
-	$(ESMF_RANLIB) $(wildcard $(ESMF_LIBDIR)/lib*.$(ESMF_LIB_SUFFIX))
+	$(ESMF_RANLIB) $(wildcard $(ESMF_LIBDIR)/libesmf*.$(ESMF_LIB_SUFFIX))
 
 # Deletes ESMF libraries
 deletelibs: chkopts_basic
@@ -656,11 +656,7 @@ ifeq ($(ESMF_TRACE_BUILD_SHARED),ON)
 	$(MAKE) ESMF_PRELOADDIR=$(ESMF_INSTALL_LIBDIR_ABSPATH) build_preload_script
 endif
 endif
-ifneq ($(ESMF_OS),Cygwin)
-	$(ESMF_RANLIB) $(ESMF_INSTALL_LIBDIR_ABSPATH)/lib*.$(ESMF_LIB_SUFFIX)
-else
-	$(ESMF_RANLIB) $(ESMF_INSTALL_LIBDIR_ABSPATH)/libesmf.$(ESMF_LIB_SUFFIX)
-endif
+	$(ESMF_RANLIB) $(ESMF_INSTALL_LIBDIR_ABSPATH)/libesmf*.$(ESMF_LIB_SUFFIX)
 	$(MAKE) install_apps
 	mkdir -p $(ESMF_INSTALL_DOCDIR_ABSPATH)
 	@if [ -d $(ESMF_DOCDIR) ]; then \

@@ -661,15 +661,11 @@ static const char *const version = "$Id$";
     cp += ESMF_MAXSTR;
     memcpy(className, cp, ESMF_MAXSTR);
     cp += ESMF_MAXSTR;
-    ip = (int *)cp;
-    cp = (char *)ip;
-
+    
     // update offset to point to past the current obj
     *offset = (cp - buffer);
 
     // Update the offset
-    if (*offset%8 != 0)
-      *offset += 8 - *offset%8;
     localrc = vmID_remote->create();
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, &localrc)) return localrc;
@@ -684,8 +680,6 @@ static const char *const version = "$Id$";
 
     // Deserialize the Attribute hierarchy
     if (attreconflag == ESMC_ATTRECONCILE_ON) {
-      if (*offset%8 != 0)
-        *offset += 8 - *offset%8;
       localrc = root->ESMC_Deserialize(buffer,offset);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, 
             ESMC_CONTEXT, &localrc)) return localrc;
@@ -752,9 +746,6 @@ static const char *const version = "$Id$";
     objname = cp;
     cp += 3*ESMF_MAXSTR;
 
-    ip = (int*)cp;
-    cp = (char *)ip;
-
     offset_local = (cp - buffer);
 
 #if 1
@@ -765,8 +756,6 @@ static const char *const version = "$Id$";
 #endif
 
     // Turn on full deserialize for inquiries.
-    if (offset_local%8 != 0)
-      offset_local += 8 - offset_local%8;
 // std::cout << ESMC_METHOD << ": calling vmID deserialize inquiry at offset: " << offset_local << std::endl;
     vmID->deserialize (buffer, &offset_local, false);
 
@@ -974,16 +963,11 @@ static const char *const version = "$Id$";
       memcpy(cp, className, ESMF_MAXSTR);
       cp += ESMF_MAXSTR;
 
-      ip = (int *)cp;
-      cp = (char *)ip;
-
       // update the offset before calling vmID and Attribute serialize
       *offset = (cp - buffer);
     }
 
     // serialize vmID for inquiries when deserializing proxy objects
-    if (*offset%8 != 0)
-      *offset += 8 - *offset%8;
 // std::cout << ESMC_METHOD << ": serializing vmID at offset: " << *offset << std::endl;
     localrc = vmID->serialize (buffer, length, offset, inquireflag);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
@@ -991,8 +975,6 @@ static const char *const version = "$Id$";
 
     // Serialize the Attribute hierarchy
     if (attreconflag == ESMC_ATTRECONCILE_ON) {
-      if (*offset%8 != 0)
-        *offset += 8 - *offset%8;
       localrc = root->ESMC_Serialize(buffer,length,offset, inquireflag);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, 
             ESMC_CONTEXT, &localrc)) return localrc;

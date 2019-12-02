@@ -586,12 +586,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!   Create a new {\tt ESMF\_RouteHandle} object from a file.
+!   Create a new {\tt ESMF\_RouteHandle} object from a file. This method must
+!   be called from a VM context that holds exactly as many PETs as were used
+!   when generating the file.
 !
 !   The arguments are:
 !   \begin{description}
 !   \item[fileName]
-!     The name of the RouteHandle file.
+!     The name of the RouteHandle file to be read in.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1260,7 +1262,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !   Write the RouteHandle to file. The generated file can then be used to
-!   re-create the same RouteHandle through via the 
+!   re-create the same RouteHandle, on the same number of PETs, using the 
 !   {\tt ESMF\_RouteHandleCreate(fileName=...)} method.
 !
 !   The arguments are:

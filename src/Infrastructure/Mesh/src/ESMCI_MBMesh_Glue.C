@@ -165,6 +165,7 @@ void MBMesh_create(void **mbmpp,
     mbmp->pdim=*pdim;
     mbmp->sdim=cart_sdim;
     mbmp->orig_sdim=*sdim;
+    mbmp->coordsys=*coordSys;
 
     // Output mesh
     *mbmpp=(void *)mbmp;
@@ -2879,6 +2880,166 @@ void MBMesh_getlocalcoords(void **mbmpp, double *ncoords, int *_orig_sdim, int *
   // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
+}
+
+void MBMesh_serialize(void **mbmpp, char *buffer, int *length, 
+                      int *offset, ESMC_InquireFlag *inquireflag, int *rc,
+                      ESMCI_FortranStrLenArg buffer_l) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "mbmesh_serialize()"
+
+  try {
+
+    // Initialize the parallel environment for mesh (if not already done)
+    {
+      int localrc;
+      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception
+    }
+
+    int *ip;
+
+
+    // Initialize return code; assume routine not implemented
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+    // Get Moab Mesh wrapper
+    MBMesh *mbmp=*((MBMesh **)mbmpp);
+
+    //Get MOAB Mesh
+    Interface *mesh=mbmp->mesh;
+
+// printf("%d# MBMesh_serialize - 0\n", Par::Rank());
+
+    // Calc Size
+    int size = 4*sizeof(int);
+
+    // TODO: verify length > vars.
+    if (*inquireflag != ESMF_INQUIREONLY) {
+      if ((*length - *offset) < size) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "Buffer too short to add Mesh object", ESMC_CONTEXT, rc);
+         return;
+      }
+    }
+    
+// printf("%d# MBMesh_serialize - 1\n", Par::Rank());
+
+    // Save integers
+    ip= (int *)(buffer + *offset);
+    if (*inquireflag != ESMF_INQUIREONLY) {
+      *ip++ = mbmp->sdim;
+      *ip++ = mbmp->pdim;
+      *ip++ = mbmp->orig_sdim;
+      *ip++ = mbmp->coordsys;
+    }
+    
+// printf("%d# MBMesh_serialize - 2\n", Par::Rank());
+
+    // Adjust offset
+    *offset += size;
+
+// printf("%d# MBMesh_serialize - 3\n", Par::Rank());
+
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                           "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
+// printf("%d# MBMesh_serialize - 4\n", Par::Rank());
+
+  if (rc!=NULL) *rc=ESMF_SUCCESS;
+
+}
+
+void MBMesh_deserialize(void **mbmpp, char *buffer, int *offset, int *rc,
+                        ESMCI_FortranStrLenArg buffer_l) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "mbmesh_deserialize()"
+
+  try {
+
+    // Initialize the parallel environment for mesh (if not already done)
+    {
+      int localrc;
+      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception
+    }
+
+// printf("%d# MBMesh_deserialize - 0\n", Par::Rank());
+
+    int localrc;
+    int *ip;
+    int localsize = 0;
+
+    // Initialize return code; assume routine not implemented
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+    // Get pointer
+    ip= (int *)(buffer + *offset);
+
+    // Get values
+    int sdim=*ip++;
+    localsize++;
+    int pdim=*ip++;
+    localsize++;
+    int orig_sdim=*ip++;
+    localsize++;
+    ESMC_CoordSys_Flag coordsys=static_cast<ESMC_CoordSys_Flag> (*ip++);
+    localsize++;
+
+    // Adjust offset
+    *offset += localsize*sizeof(int);
+
+    MBMesh_create(mbmpp, &pdim, &sdim, &coordsys, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      return;
+
+// printf("%d# MBMesh_deserialize - 1\n", Par::Rank());
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                           "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
+// printf("%d# MBMesh_deserialize - 2\n", Par::Rank());
+
+  if (rc!=NULL) *rc=ESMF_SUCCESS;
 }
 
 
@@ -5810,6 +5971,7 @@ void ESMCI_meshcreatedual(Mesh **src_meshpp, Mesh **output_meshpp, int *rc) {
 
   if (rc!=NULL) *rc=ESMF_SUCCESS;
 }
+
 
 
 #endif

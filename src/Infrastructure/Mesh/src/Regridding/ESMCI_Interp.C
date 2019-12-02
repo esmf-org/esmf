@@ -1792,6 +1792,34 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
   MEField<> *src_area_field = srcmesh.GetField("elem_area");
 
 
+  // Get src and dst side fields
+  MEField<> *dst_side_field=dstmesh.GetField("side1_mesh_ind");
+  if (!dst_side_field) dst_side_field=dstmesh.GetField("side2_mesh_ind");
+
+  MEField<> *src_side_field=srcmesh.GetField("side1_mesh_ind");
+  if (!src_side_field) src_side_field=srcmesh.GetField("side2_mesh_ind");
+
+  // Figure out interpolation to XGrid information
+  MEField<> *src_xgrid_ind_field=NULL;
+  MEField<> *dst_xgrid_ind_field=NULL;
+  int other_side_ind=0;
+  if (srcmesh.side == 3) {
+    if (dstmesh.side==1) {
+      src_xgrid_ind_field=srcmesh.GetField("side1_mesh_ind");
+    } else if (dstmesh.side==2) {
+      src_xgrid_ind_field=srcmesh.GetField("side2_mesh_ind");
+    }    
+    other_side_ind=dstmesh.ind;
+  } else if (dstmesh.side == 3) {
+    if (srcmesh.side==1) {
+      dst_xgrid_ind_field=dstmesh.GetField("side1_mesh_ind");
+    } else if (srcmesh.side==2) {
+      dst_xgrid_ind_field=dstmesh.GetField("side2_mesh_ind");
+    }
+    other_side_ind=srcmesh.ind;
+  }
+
+
   // determine if we should use the dst_frac variable
   bool use_dst_frac=false;
   if (dst_area_field || src_area_field) use_dst_frac=true;
@@ -1865,6 +1893,19 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
       if (src_frac2 == 0.0) continue;
     }
 
+    // If src is an exchange grid then skip parts that 
+    // don't involve current meshes
+    if (src_xgrid_ind_field) {
+      // Get side information from xgrid
+      double *src_xgrid_ind_dbl=src_xgrid_ind_field->data(*sr.elem);
+
+      // Convert to int rounding in case of floating point fuzziness
+      int src_xgrid_ind=static_cast<int>(*src_xgrid_ind_dbl+0.5);
+      
+      // If this cell of the exchange grid doesn't match the current mesh, skip
+      if (src_xgrid_ind != other_side_ind) continue;
+    }
+
     // Declare src_elem_area
     double src_elem_area;
 
@@ -1875,7 +1916,7 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
                                      sr.elems,dst_cfield,dst_mask_field, dst_frac2_field,
                                      &src_elem_area, &valid, &wgts, &areas, &dst_areas,
                                      &tmp_valid, &tmp_areas, &tmp_dst_areas,
-                                      midmesh, &tmp_nodes, &tmp_cells, 0, zz);
+				     midmesh, &tmp_nodes, &tmp_cells, 0, zz, src_side_field, dst_side_field);
 
     // Invalidate masked destination elements
     if (dst_mask_field) {
@@ -1899,6 +1940,22 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
       }
     }
 
+    // If dst is an exchange grid then skip parts that 
+    // don't involve current meshes
+    if (dst_xgrid_ind_field) {
+      for (int i=0; i<sr.elems.size(); i++) {
+        const MeshObj &dst_elem = *sr.elems[i];
+
+        // Get side information from xgrid
+        double *dst_xgrid_ind_dbl=dst_xgrid_ind_field->data(dst_elem);
+
+        // Convert to int rounding in case of floating point fuzziness
+        int dst_xgrid_ind=static_cast<int>(*dst_xgrid_ind_dbl+0.5);
+      
+        // If this cell of the exchange grid doesn't match the current mesh, skip
+        if (dst_xgrid_ind != other_side_ind) valid[i]=0;
+      }
+    }
 
     // Set status for src masked cells, and then leave
     if (src_elem_masked) {
@@ -2007,36 +2064,101 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
           src_user_area_adj=*area/src_elem_area;
       }
 
+      // If not XGrid do old way
+      // TODO: after release merge these together
+      if ((srcmesh.side != 3) && (dstmesh.side !=3)) {
+        // Put weights into row column and then add
+        for (int i=0; i<sr.elems.size(); i++) {
+          if (valid[i]==1) {
+            
+            // Calculate dest user area adjustment
+            double dst_user_area_adj=1.0;
+            if (dst_area_field) {
+              const MeshObj &dst_elem = *(sr.elems[i]);
+              double *area=dst_area_field->data(dst_elem);
+              if (*area==0.0) Throw() << "0.0 user area in destination grid";
+              dst_user_area_adj=dst_areas[i]/(*area);
+            }
+            
+            // Set col info
+            IWeights::Entry col(sr.elem->get_id(), 0,
+                                src_user_area_adj*dst_user_area_adj*src_frac2*wgts[i], 0);
 
-      // Put weights into row column and then add
-       for (int i=0; i<sr.elems.size(); i++) {
-        if (valid[i]==1) {
-
-          // Calculate dest user area adjustment
-          double dst_user_area_adj=1.0;
-          if (dst_area_field) {
-             const MeshObj &dst_elem = *(sr.elems[i]);
-            double *area=dst_area_field->data(dst_elem);
-            if (*area==0.0) Throw() << "0.0 user area in destination grid";
-            dst_user_area_adj=dst_areas[i]/(*area);
+            // Set row info
+            IWeights::Entry row(sr.elems[i]->get_id(), 0, 0.0, 0);
+            
+            // Put weights into weight matrix
+            iw.InsertRowMergeSingle(row, col);
           }
-
-          // Set col info
-          IWeights::Entry col(sr.elem->get_id(), 0,
-                              src_user_area_adj*dst_user_area_adj*src_frac2*wgts[i], 0);
-
-          // Set row info
-          IWeights::Entry row(sr.elems[i]->get_id(), 0, 0.0, 0);
-
-          // Put weights into weight matrix
-          iw.InsertRowMergeSingle(row, col);
         }
-      }
+      } else { // If XGrid do new way
+                // Adjust weights by user area
+          if (src_area_field || dst_area_field) {
+            for (int i=0; i<sr.elems.size(); i++) {
+              if (valid[i]==1) {
+                
+                // Calculate dest user area adjustment
+                double dst_user_area_adj=1.0;
+                if (dst_area_field) {
+                  const MeshObj &dst_elem = *(sr.elems[i]);
+                  double *area=dst_area_field->data(dst_elem);
+                  if (*area==0.0) Throw() << "0.0 user area in destination grid. elem id="<<dst_elem.get_id();
+                  dst_user_area_adj=dst_areas[i]/(*area);
+                }
+                
+                // Multiply weights by user area adjustment
+                wgts[i] *= src_user_area_adj*dst_user_area_adj;
+              }
+            }
+          }
+           
+          // Adjust weights by merge fraction if source is an XGrid.
+          // (Don't need to do if the destination is an XGrid, because
+          //  each Xgrid cell is entirely contained in one source grid cell).
+          if (srcmesh.side==3) { 
+            if(dst_frac2_field){
+              for (int i=0; i<sr.elems.size(); i++) {
+                if (valid[i]==1) {
+                  const MeshObj &dst_elem = *sr.elems[i];
+                  
+                  // Calculate adjustment
+                  double mrg_adjustment=1.0;
+                  double *dst_frac2=dst_frac2_field->data(dst_elem);
+                  // Adjust unless too small (and calc. likely to be inaccurate)
+                  if (*dst_frac2 > 1.0E-15) mrg_adjustment=1.0/(*dst_frac2);
+                  else mrg_adjustment=0.0;
+                  
+              // Multiply weights by mrg adjustment
+                  wgts[i] *= mrg_adjustment;
+                }
+              }
+            }
+          }
+          
+          // Put weights into row column and then add
+          for (int i=0; i<sr.elems.size(); i++) {
+            
+            if (valid[i]==1) {
+              
+              // Set col info
+              IWeights::Entry col(sr.elem->get_id(), 0, 
+                                  wgts[i], 0);
+              
+              // Set row info
+              IWeights::Entry row(sr.elems[i]->get_id(), 0, 0.0, 0);
+              
+              // Put weights into weight matrix
+              iw.InsertRowMergeSingle(row, col);  
+            }
+          }           
+        }
     } // not generating mid mesh, need to compute weights
   } // for searchresult
 
-  if(midmesh != 0)
-    compute_midmesh(sintd_nodes, sintd_cells, 2, 3, midmesh);
+
+  if(midmesh != 0) {
+    compute_midmesh(sintd_nodes, sintd_cells, 2, 3, midmesh,3);
+  }
 
 }
 
@@ -3111,6 +3233,10 @@ void Interp::operator()(int fpair_num, IWeights &iw, bool set_dst_status, WMat &
    }
 
    // Go through weights calculating and setting frac
+#ifdef BOB_XGRID_DEBUG
+   int num_big_frac=0;
+   int num_little_frac=0;
+#endif
    WMat::WeightMap::iterator wi = src_frac.begin_row(), we = src_frac.end_row();
    for (; wi != we; ++wi) {
      const WMat::Entry &w = wi->first;
@@ -3141,10 +3267,36 @@ void Interp::operator()(int fpair_num, IWeights &iw, bool set_dst_status, WMat &
      // Only put it in if it's locally owned
      if (!GetAttr(src_elem).is_locally_owned()) continue;
 
+#ifdef BOB_XGRID_DEBUG
+     if (tot > 1.0+1.0E-10) {
+       printf("SRC BIG FRAC src_id=%d frac=%20.17f \n",src_elem.get_id(),tot);
+       num_big_frac++;
+     }
+
+     if (tot < 1.0-1.0E-10) {
+       printf("SRC SMALL FRAC src_id=%d frac=%20.17f \n",src_elem.get_id(),tot);
+       num_little_frac++;
+     }
+#endif
+
      // Since weights with no mask should add up to 1.0
      // fraction is tot
      *frac=tot;
    } // for wi
+
+#ifdef BOB_XGRID_DEBUG
+   // Sum 
+   int tot_num_big_frac=0;
+   MPI_Allreduce(&num_big_frac,&tot_num_big_frac,1,MPI_INT,MPI_SUM,Par::Comm());
+
+   int tot_num_little_frac=0;
+   MPI_Allreduce(&num_little_frac,&tot_num_little_frac,1,MPI_INT,MPI_SUM,Par::Comm());
+
+   if (Par::Rank() == 0) {
+     printf("BOB: num frac >1.0+1.0E-10 = %d \n",tot_num_big_frac);
+     printf("BOB: num frac <1.0-1.0E-10 = %d \n",tot_num_little_frac);
+   }
+#endif
 
   }
 

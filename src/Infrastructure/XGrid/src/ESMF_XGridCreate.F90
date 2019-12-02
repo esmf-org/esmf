@@ -370,7 +370,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
     integer                       :: localElemCount, sdim, pdim
     type(ESMF_XGridGeomType_Flag), allocatable :: xggt_a(:), xggt_b(:)
     integer :: tileCount
-    
+    integer :: side
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -776,6 +776,15 @@ function ESMF_XGridCreate(keywordEnforcer, &
            ESMF_CONTEXT, rcToReturn=rc) 
         return
       endif
+
+      ! Set temp xgrid info in mesh
+      side=1
+      call c_esmc_meshsetxgridinfo(meshAt(i), side, i, localrc)
+      if (ESMF_LogFoundError(localrc, &
+           ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Merge meshes
       if(i == 1) meshA = meshAt(i)
       if(i .ge. 2) then
         ! call into mesh merge with priority taken into account
@@ -856,6 +865,14 @@ function ESMF_XGridCreate(keywordEnforcer, &
         return
       endif
 
+      ! Set temp xgrid info in mesh
+      side=2
+      call c_esmc_meshsetxgridinfo(meshBt(i), side, i, localrc)
+      if (ESMF_LogFoundError(localrc, &
+           ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Merge meshes
       if( i == 1) meshB = meshBt(i)
       ! call into mesh merge with priority taken into account
       ! meshBt is truncated(if necessary) and concatenated onto meshB 
@@ -1058,8 +1075,11 @@ function ESMF_XGridCreate(keywordEnforcer, &
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
              ESMF_CONTEXT, rcToReturn=rc)) return
       endif
+
+
       
       ! Now the reverse direction
+#ifndef BOB_XGRID_DEBUG
       call c_esmc_xgridregrid_create(mesh, meshAt(i), &
         tmpmesh, compute_midmesh, &
         ESMF_REGRIDMETHOD_CONSERVE, &
@@ -1069,6 +1089,9 @@ function ESMF_XGridCreate(keywordEnforcer, &
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
+#else
+      nentries=0
+#endif
       allocate(xgtype%sparseMatX2A(i)%factorIndexList(2,nentries))
       allocate(xgtype%sparseMatX2A(i)%factorList(nentries))
       if(nentries .ge. 1) then
@@ -1091,6 +1114,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
 
     ! now do the B side
     do i = 1, ngrid_b
+#ifndef BOB_XGRID_DEBUG
       call c_esmc_xgridregrid_create(meshBt(i), mesh, &
         tmpmesh, compute_midmesh, &
         ESMF_REGRIDMETHOD_CONSERVE, &
@@ -1100,6 +1124,9 @@ function ESMF_XGridCreate(keywordEnforcer, &
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
+#else
+      nentries=0
+#endif
       allocate(xgtype%sparseMatB2X(i)%factorIndexList(2,nentries))
       allocate(xgtype%sparseMatB2X(i)%factorList(nentries))
       if(nentries .ge. 1) then
@@ -1120,6 +1147,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
       endif
     
       ! Now the reverse direction
+#ifndef BOB_XGRID_DEBUG
       call c_esmc_xgridregrid_create(mesh, meshBt(i), &
         tmpmesh, compute_midmesh, &
         ESMF_REGRIDMETHOD_CONSERVE, &
@@ -1129,6 +1157,9 @@ function ESMF_XGridCreate(keywordEnforcer, &
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
+#else
+      nentries=0
+#endif
       allocate(xgtype%sparseMatX2B(i)%factorIndexList(2,nentries))
       allocate(xgtype%sparseMatX2B(i)%factorList(nentries))
       if(nentries .ge. 1) then
@@ -1171,7 +1202,9 @@ function ESMF_XGridCreate(keywordEnforcer, &
       xgtype%mesh = mesh
 
      !! Debug output of xgrid mesh
-     ! call ESMF_MeshWrite(mesh, "xgrid_mesh")
+#ifdef BOB_XGRID_DEBUG
+      call ESMF_MeshWrite(mesh, "xgrid_mid_mesh")
+#endif
 
     else
       call ESMF_MeshDestroy(mesh, rc=localrc)

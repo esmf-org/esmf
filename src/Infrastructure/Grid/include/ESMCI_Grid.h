@@ -266,10 +266,10 @@ template <class TYPE>
                                ESMC_IndexFlag *indexflag,
                                int *rc);
   static Grid* create1peridim(ESMC_InterArrayInt *maxIndex, 
+                              ESMC_InterArrayInt *polekindflag,
                               int *periodicDim, int *poleDim,
                               ESMC_CoordSys_Flag *coordSys,
                               ESMC_TypeKind_Flag *coordTypeKind, 
-                              ESMC_PoleKind_Flag *poleKind,
                               ESMC_IndexFlag *indexflag,
                               int *rc);
   static Grid* createcubedsphere(int *tilesize,
@@ -282,7 +282,8 @@ template <class TYPE>
                                  int *rc);
   static Grid* createfromfile(const char *filename, int fileTypeFlag, 
                               int *regDecomp, int *decompflag,
-                              int *isSphere, int *addCornerStagger,
+                              int *isSphere, ESMC_InterArrayInt *polekindflag,
+                              int *addCornerStagger,
                               int *addUserArea, ESMC_IndexFlag *indexflag,
                               int *addMask, const char *varname,
                               const char **coordNames, int *rc);

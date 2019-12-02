@@ -48,11 +48,6 @@ Eventually these macros can be rewritten or replaced using the F2008
 block/end block statements.
 #endif
 
-#if defined (_FROM_FORTRAN)
-#define ESMF_BLOCK(ESMF_BLOCK_LABEL) ESMF_BLOCK_LABEL: do
-#define ESMF_ENDBLOCK(ESMF_BLOCK_LABEL) if (.true.) exit ESMF_BLOCK_LABEL; end do ESMF_BLOCK_LABEL
-#endif
-
 #ifdef OMPI_MAJOR_VERSION
 #if (OMPI_MAJOR_VERSION < 3)
 #if 0

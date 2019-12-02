@@ -105,11 +105,14 @@ enum ESMC_LineType_Flag { ESMC_LINETYPE_CART=0,
 enum ESMC_Logical { ESMF_TRUE=1,
                     ESMF_FALSE };
 
+// keep in sync with ESMF_LogKind_Flag
 enum ESMC_LogKind_Flag{
-                ESMC_LOGKIND_SINGLE=1,
-                ESMC_LOGKIND_MULTI =2,
-                ESMC_LOGKIND_NONE  =3 };
+                ESMC_LOGKIND_SINGLE         =1,
+                ESMC_LOGKIND_MULTI          =2,
+                ESMC_LOGKIND_MULTI_ON_ERROR =3,
+                ESMC_LOGKIND_NONE           =4 };
 
+// keep in sync with ESMF_LogMsg_Flag
 enum ESMC_LogMsgType_Flag{
                 ESMC_LOGMSG_INFO =1,
                 ESMC_LOGMSG_WARN =2,

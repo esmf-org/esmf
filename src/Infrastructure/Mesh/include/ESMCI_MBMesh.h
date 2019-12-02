@@ -18,6 +18,7 @@
 using namespace moab;
 #endif
 
+#include "ESMCI_CoordSys.h"
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
 
@@ -36,6 +37,8 @@ namespace ESMCI {
   public:
     int sdim, pdim; // dimensions MAYBE I SHOULD NAME THESE MORE SIMILAR TO WHAT IN OTHER MESH
     int orig_sdim;
+    ESMC_CoordSys_Flag coordsys;
+
     Interface *mesh; // Moab mesh  MAYBE I SHOULD NAME ThIS SOMETHING ELSE????
 
     int num_verts;

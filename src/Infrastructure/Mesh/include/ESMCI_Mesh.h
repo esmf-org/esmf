@@ -112,6 +112,9 @@ void build_sym_comm_rel(UInt obj_type);
 
 void proxy_build_sym_comm_rel(UInt obj_type);
 
+void map_proc_numbers(int num_procs, int *proc_map);
+
+
 /*
  * When shared objects are marked to delete, we must find a new owner
  * for the shared object (on a proc that will keep it around)..  This
@@ -133,6 +136,10 @@ void resolve_cspec_delete_owners(UInt obj_type);
 
  // Save original dimension
  int orig_spatial_dim;
+
+ // Temp XGrid info
+ int side; // 1=A, 2=B, 3= middle
+ int ind; // which number grid on the side
 
   private:
 void assign_new_ids();

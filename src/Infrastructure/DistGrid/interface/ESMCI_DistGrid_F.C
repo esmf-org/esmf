@@ -105,12 +105,14 @@ extern "C" {
     ESMCI::InterArray<int> *regDecompLastExtra,
     ESMCI::InterArray<int> *deLabelList, ESMC_IndexFlag *indexflag, 
     ESMCI::InterArray<int> *connectionList,
-    ESMCI::DELayout **delayout, ESMCI::VM **vm, int *rc){
+    ESMCI::DELayout **delayout, ESMCI::VM **vm, ESMC_TypeKind_Flag *indexTK,
+    int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridcreaterd()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
+    ESMC_TypeKind_Flag opt_indexTK;
     // deal with optional arguments
     ESMCI::DELayout *opt_delayout;
     if (ESMC_NOT_PRESENT_FILTER(delayout) == ESMC_NULL_POINTER) 
@@ -130,6 +132,9 @@ extern "C" {
     printf("c_esmc_distgridcreaterd(): opt_delayout=%p, opt_vm=%p, "
       "actualFlag=%d\n", opt_delayout, opt_vm, actualFlag);
 #endif
+    if (ESMC_NOT_PRESENT_FILTER(indexTK) == ESMC_NULL_POINTER) 
+      opt_indexTK = ESMF_NOKIND;
+    else opt_indexTK = *indexTK;
     if (actualFlag){
       // on PETs with actual members call into C++
       // test for NULL pointer via macro before calling any class methods
@@ -137,7 +142,7 @@ extern "C" {
       *ptr = ESMCI::DistGrid::create(minIndex, maxIndex, regDecomp,
         decompflag, *decompflagCount, regDecompFirstExtra, regDecompLastExtra,
         deLabelList, ESMC_NOT_PRESENT_FILTER(indexflag),
-        connectionList, opt_delayout, opt_vm, &localrc);
+        connectionList, opt_delayout, opt_vm, &localrc, opt_indexTK);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc))) return; // bail out
     }
@@ -154,7 +159,8 @@ extern "C" {
     ESMCI::InterArray<int> *regDecompLastExtra,
     ESMCI::InterArray<int> *deLabelList, ESMC_IndexFlag *indexflag, 
     ESMCI::InterArray<int> *connectionList,
-    ESMCI::DELayout **delayout, ESMCI::VM **vm, int *rc){
+    ESMCI::DELayout **delayout, ESMCI::VM **vm, ESMC_TypeKind_Flag *indexTK,
+    int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridcreaterdt()"
     // Initialize return code; assume routine not implemented
@@ -162,19 +168,23 @@ extern "C" {
     int localrc = ESMC_RC_NOT_IMPL;
     ESMCI::DELayout *opt_delayout;
     ESMCI::VM *opt_vm;
+    ESMC_TypeKind_Flag opt_indexTK;
     // deal with optional arguments
     if (ESMC_NOT_PRESENT_FILTER(delayout) == ESMC_NULL_POINTER) 
       opt_delayout = NULL;
     else opt_delayout = *delayout;
     if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
     else opt_vm = *vm;
+    if (ESMC_NOT_PRESENT_FILTER(indexTK) == ESMC_NULL_POINTER) 
+      opt_indexTK = ESMF_NOKIND;
+    else opt_indexTK = *indexTK;
     // test for NULL pointer via macro before calling any class methods
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     *ptr = ESMCI::DistGrid::create(minIndex, maxIndex, regDecomp,
       decompflag, *decompflagCount1, *decompflagCount2, 
       regDecompFirstExtra, regDecompLastExtra, deLabelList, 
       ESMC_NOT_PRESENT_FILTER(indexflag), connectionList,
-      opt_delayout, opt_vm, &localrc);
+      opt_delayout, opt_vm, &localrc, opt_indexTK);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
   }
@@ -296,9 +306,11 @@ extern "C" {
     ESMCI::InterArray<int> *minIndexPDimPTile,
     ESMCI::InterArray<int> *maxIndexPDimPTile,
     ESMCI::InterArray<int> *elementCountPTile,
+    ESMCI::InterArray<ESMC_I8> *elementCountPTileI8,
     ESMCI::InterArray<int> *minIndexPDimPDe,
     ESMCI::InterArray<int> *maxIndexPDimPDe,
     ESMCI::InterArray<int> *elementCountPDe,
+    ESMCI::InterArray<ESMC_I8> *elementCountPDeI8,
     ESMCI::InterArray<int> *localDeToDeMap,
     ESMCI::InterArray<int> *tileListPDe,
     ESMCI::InterArray<int> *indexCountPDimPDe,
@@ -306,6 +318,7 @@ extern "C" {
     ESMC_Logical *regDecompFlag, 
     int *connectionCount,
     ESMCI::InterArray<int> *connectionList,
+    ESMC_TypeKind_Flag *indexTK,
     ESMCI::DELayout **delayout, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridget()"
@@ -334,6 +347,8 @@ extern "C" {
       else
         *regDecompFlag = ESMF_FALSE;
     }
+    if (ESMC_NOT_PRESENT_FILTER(indexTK) != ESMC_NULL_POINTER)
+      *indexTK = (*ptr)->getIndexTK();
     // fill minIndexPDimPTile
     if (present(minIndexPDimPTile)){
       // minIndexPDimPTile was provided -> do some error checking
@@ -397,29 +412,51 @@ extern "C" {
           sizeof(int)*(*ptr)->getDimCount());
     }
     // fill elementCountPTile
-    if (present(elementCountPTile)){
-      // elementCountPTile was provided -> do some error checking
-      if ((elementCountPTile)->dimCount != 1){
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "elementCountPTile array must be of rank 1", ESMC_CONTEXT, rc);
-        return;
-      }
-      if ((elementCountPTile)->extent[0] < (*ptr)->getTileCount()){
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "1st dim of elementCountPTile array must be of size 'tileCount'",
-          ESMC_CONTEXT, rc);
-        return;
-      }
-      // fill in values
-#ifdef TYPESMATCH
-      memcpy((elementCountPTile)->array, (*ptr)->getElementCountPTile(),
-        sizeof(int)*(*ptr)->getTileCount());
-#else
+    if (present(elementCountPTile) || present(elementCountPTileI8)){
+      // access the internal information
       int tileCount = (*ptr)->getTileCount();
       const ESMC_I8 *access = (*ptr)->getElementCountPTile();
-      for (int i=0; i<tileCount; i++)
-        (elementCountPTile)->array[i] = (int)(access[i]); // explicit type cast
-#endif
+      if (present(elementCountPTile)){
+        // elementCountPTile was provided -> do some error checking
+        if ((elementCountPTile)->dimCount != 1){
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+            "elementCountPTile array must be of rank 1", ESMC_CONTEXT, rc);
+          return;
+        }
+        if ((elementCountPTile)->extent[0] < (*ptr)->getTileCount()){
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+            "1st dim of elementCountPTile array must be of size 'tileCount'",
+            ESMC_CONTEXT, rc);
+          return;
+        }
+        // fill in values
+        for (int i=0; i<tileCount; i++){
+          // explicit type cast I8 -> I4, with overflow check
+          (elementCountPTile)->array[i] = (int)(access[i]);
+          if ((ESMC_I8)(elementCountPTile)->array[i] != (access[i])){
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+              "Overflow detected in elementCountPTile after I8 -> I4 cast",
+              ESMC_CONTEXT, rc);
+            return;
+          }
+        }
+      }
+      if (present(elementCountPTileI8)){
+        // elementCountPTileI8 was provided -> do some error checking
+        if ((elementCountPTileI8)->dimCount != 1){
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+            "elementCountPTileI8 array must be of rank 1", ESMC_CONTEXT, rc);
+          return;
+        }
+        if ((elementCountPTileI8)->extent[0] < (*ptr)->getTileCount()){
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+            "1st dim of elementCountPTileI8 array must be of size 'tileCount'",
+            ESMC_CONTEXT, rc);
+          return;
+        }
+        // fill in values
+        memcpy((elementCountPTileI8)->array, access, sizeof(ESMC_I8)*tileCount);
+      }
     }
     // fill minIndexPDimPDe
     if (present(minIndexPDimPDe)){
@@ -484,29 +521,51 @@ extern "C" {
           sizeof(int)*(*ptr)->getDimCount());
     }
     // fill elementCountPDe
-    if (present(elementCountPDe)){
-      // elementCountPDe was provided -> do some error checking
-      if ((elementCountPDe)->dimCount != 1){
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "elementCountPDe array must be of rank 1", ESMC_CONTEXT, rc);
-        return;
-      }
-      if ((elementCountPDe)->extent[0] < (*ptr)->getDELayout()->getDeCount()){
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "1st dim of elementCountPDe array must be of size 'deCount'",
-          ESMC_CONTEXT, rc);
-        return;
-      }
-      // fill in values
-#ifdef TYPESMATCH
-      memcpy((elementCountPDe)->array, (*ptr)->getElementCountPDe(),
-        sizeof(int)*(*ptr)->getDELayout()->getDeCount());
-#else
+    if (present(elementCountPDe) || present(elementCountPDeI8)){
+      // access the internal information
       int deCount = (*ptr)->getDELayout()->getDeCount();
       const ESMC_I8 *access = (*ptr)->getElementCountPDe();
-      for (int i=0; i<deCount; i++)
-        (elementCountPDe)->array[i] = (int)(access[i]); // explicit type cast
-#endif
+      if (present(elementCountPDe)){
+        // elementCountPDe was provided -> do some error checking
+        if ((elementCountPDe)->dimCount != 1){
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+            "elementCountPDe array must be of rank 1", ESMC_CONTEXT, rc);
+          return;
+        }
+        if ((elementCountPDe)->extent[0] < (*ptr)->getDELayout()->getDeCount()){
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+            "1st dim of elementCountPDe array must be of size 'deCount'",
+            ESMC_CONTEXT, rc);
+          return;
+        }
+        // fill in values
+        for (int i=0; i<deCount; i++){
+          // explicit type cast I8 -> I4, with overflow check
+          (elementCountPDe)->array[i] = (int)(access[i]);
+          if ((ESMC_I8)(elementCountPDe)->array[i] != (access[i])){
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+              "Overflow detected in elementCountPDe after I8 -> I4 cast",
+              ESMC_CONTEXT, rc);
+            return;
+          }
+        }
+      }
+      if (present(elementCountPDeI8)){
+        // elementCountPDeI8 was provided -> do some error checking
+        if ((elementCountPDeI8)->dimCount != 1){
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+            "elementCountPDeI8 array must be of rank 1", ESMC_CONTEXT, rc);
+          return;
+        }
+        if ((elementCountPDeI8)->extent[0] < (*ptr)->getDELayout()->getDeCount()){
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+            "1st dim of elementCountPDeI8 array must be of size 'deCount'",
+            ESMC_CONTEXT, rc);
+          return;
+        }
+        // fill in values
+        memcpy((elementCountPDeI8)->array, access, sizeof(ESMC_I8)*deCount);
+      }
     }
     // fill localDeToDeMap
     if (present(localDeToDeMap)){
@@ -628,7 +687,9 @@ extern "C" {
 
   void FTN_X(c_esmc_distgridgetplocalde)(ESMCI::DistGrid **ptr,
     int *localDeArg, int *collocationArg, ESMC_Logical *arbSeqIndexFlag,
-    ESMCI::InterArray<int> *seqIndexList, int *elementCount, int *rc){
+    ESMCI::InterArray<int> *seqIndexList, 
+    ESMCI::InterArray<ESMC_I8> *seqIndexListI8, 
+    int *elementCount, ESMC_I8 *elementCountI8, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridgetplocalde()"
     // Initialize return code; assume routine not implemented
@@ -668,8 +729,8 @@ extern "C" {
       collocation = collocationTable[0]; // default to first collocation 
       collIndex = 0;
     }
-    const int *arbSeqIndexList =
-      (const int *)(*ptr)->getArbSeqIndexList(localDe, collocation, &localrc);
+    void const *arbSeqIndexList =
+      (*ptr)->getArbSeqIndexList(localDe, collocation, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc))) return;
     if (ESMC_NOT_PRESENT_FILTER(arbSeqIndexFlag) != ESMC_NULL_POINTER){  
@@ -682,12 +743,17 @@ extern "C" {
     localrc = (*ptr)->fillSeqIndexList(seqIndexList, localDe, collocation);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc))) return;
+    // fill seqIndexListI8
+    localrc = (*ptr)->fillSeqIndexList(seqIndexListI8, localDe, collocation);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc))) return;
     // set elementCount
-    if (ESMC_NOT_PRESENT_FILTER(elementCount) != ESMC_NULL_POINTER){
-      int *const *elementCountPCollPLocalDe =
-        (*ptr)->getElementCountPCollPLocalDe();
+    int *const *elementCountPCollPLocalDe =
+      (*ptr)->getElementCountPCollPLocalDe();
+    if (ESMC_NOT_PRESENT_FILTER(elementCount) != ESMC_NULL_POINTER)
       *elementCount = elementCountPCollPLocalDe[collIndex][localDe];
-    }
+    if (ESMC_NOT_PRESENT_FILTER(elementCountI8) != ESMC_NULL_POINTER)
+      *elementCountI8 = (ESMC_I8)elementCountPCollPLocalDe[collIndex][localDe];
     // return successfully
     if (ESMC_NOT_PRESENT_FILTER(rc)) *rc = ESMF_SUCCESS;
   }

@@ -13,6 +13,8 @@ import os
 import inspect
 
 class TestGrid(TestBase):
+    
+    Manager(debug=True)
 
     def examine_grid_attributes(self, grid):
         # ~~~~~~~~~~~~~~~~~~~~~~  STAGGER LOCATIONS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -179,7 +181,14 @@ class TestGrid(TestBase):
     @attr('slow')
     def test_grid_create_2d(self):
         keywords = dict(
-            # periodic specifies all valid combos of [num_peri_dims, periodic_dim, pole_dim]
+            # periodic specifies all valid combos of [pole_kind, num_peri_dims, periodic_dim, pole_dim]
+            pole_kind=[[PoleKind.NONE, PoleKind.NONE],
+                      [PoleKind.NONE, PoleKind.MONOPOLE],
+                      [PoleKind.NONE, PoleKind.BIPOLE],
+                      [PoleKind.MONOPOLE, PoleKind.NONE],
+                      [PoleKind.BIPOLE, PoleKind.NONE],
+                      [PoleKind.MONOPOLE, PoleKind.BIPOLE],
+                      [PoleKind.BIPOLE, PoleKind.MONOPOLE]],
             periodic=[[None, None, None], [None, None, 0], [None, None, 1],
                       [0, None, None], [0, None, 0], [0, None, 1],
                       [1, None, None], [1, 0, 1], [1, 1, 0]],
@@ -193,6 +202,7 @@ class TestGrid(TestBase):
         for a in testcases:
             try:
                 grid = Grid(np.array([12, 12]),
+                            pole_kind=np.array(a.pole_kind),
                             num_peri_dims=a.periodic[0],
                             periodic_dim=a.periodic[1],
                             pole_dim=a.periodic[2],
@@ -426,6 +436,7 @@ class TestGrid(TestBase):
             esmfdir = os.path.dirname(inspect.getfile(ESMF))
             grid = Grid(filename=os.path.join(esmfdir, "test/data/T42_grid.nc"),
                         filetype=FileFormat.SCRIP,
+                        pole_kind=[PoleKind.MONOPOLE, PoleKind.BIPOLE],
                         reg_decomp=reg_decomp)
         except:
             raise NameError('grid_create_from_file_scrip failed!')
