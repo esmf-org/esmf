@@ -227,7 +227,8 @@ ESMC_Grid ESMC_GridCreateCubedSphere(
 // !INTERFACE:
 ESMC_Grid ESMC_GridCreateFromFile(const char *filename, int fileTypeFlag, 
                   int *regDecomp, int *decompflag,
-                  int *isSphere, int *addCornerStagger,
+                  int *isSphere, ESMC_InterArrayInt *polekindflag,
+                  int *addCornerStagger,
                   int *addUserArea, enum ESMC_IndexFlag *indexflag,
                   int *addMask, const char *varname,
                   const char **coordNames, int *rc);
@@ -259,6 +260,12 @@ ESMC_Grid ESMC_GridCreateFromFile(const char *filename, int fileTypeFlag,
 //      possible options. 
 // \item[{[isSphere]}]
 //      Set to 1 for a spherical grid, or 0 for regional. Defaults to 1.
+//  \item[polekindflag]
+//      Two item array which specifies the type of connection which occurs at the
+//      pole. polekindflag(1) the connection that occurs at the minimum end of the
+//      index dimension. polekindflag(2) the connection that occurs at the maximum
+//      end of the index dimension. If not specified, the default is
+//      ESMF\_POLETYPE\_MONOPOLE for both.
 // \item[{[addCornerStagger]}]
 //      Set to 1 to use the information in the grid file to add the Corner stagger to 
 //      the Grid. The coordinates for the corner stagger are required for conservative
