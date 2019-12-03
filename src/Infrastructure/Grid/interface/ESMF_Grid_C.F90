@@ -247,8 +247,8 @@
     integer, optional                      :: regDecomp(2)
     type(ESMF_Decomp_Flag), optional       :: decompflag(2)
     logical, optional                      :: isSphere
-    type(ESMF_PoleKind_Flag), optional     :: polekindflag(1:len1)
     integer                                :: len1
+    type(ESMF_PoleKind_Flag), optional     :: polekindflag(1:len1)
     logical, optional                      :: addCornerStagger
     logical, optional                      :: addUserArea
     type(ESMF_Index_Flag), optional        :: indexflag
