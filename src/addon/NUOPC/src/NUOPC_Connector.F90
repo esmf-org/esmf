@@ -1054,6 +1054,11 @@ module NUOPC_Connector
               getBondLevel(importNamespaceList(i), exportNamespaceList(j), &
                 importCplSetList(i), exportCplSetList(j))
               
+            if (bondLevel == -1) cycle  ! break out and look for next match
+                       
+            ! Getting to this place in the double loop means that the 
+            ! standard name match has a connection that supports the match.
+            
             if (btest(verbosity,9)) then
               write (msgString,'(A, ": ", A30, I3, "): ", A60)') trim(name), &
                 "importStandardNameList(i=", i, importStandardNameList(i)
@@ -1098,11 +1103,6 @@ module NUOPC_Connector
                 return  ! bail out
             endif
 
-            if (bondLevel == -1) cycle  ! break out and look for next match
-                       
-            ! Getting to this place in the double loop means that the 
-            ! standard name match has a connection that supports the match.
-            
             ! -> look at the current ProducerConnection entry to see what to do
             field = exportFieldList(j)
             call NUOPC_GetAttribute(field, name="ProducerConnection", &
@@ -1153,8 +1153,8 @@ module NUOPC_Connector
                 cplList(count) = importStandardNameList(i)
                 cplSetList(count) = importCplSetList(i)
                 if (btest(verbosity,10)) then
-                  write (msgString, '(A, ": added cplList(", I3, ")=", A, '//&
-                    '", cplSet(", I3, ")=", A)') &
+                  write (msgString, '(A, ": => added cplList(", I3, ")=", A, '//&
+                    '", cplSetList(", I3, ")=", A)') &
                     trim(name), count, trim(cplList(count)), &
                     count, trim(cplSetList(count))
                   call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
@@ -1546,7 +1546,8 @@ module NUOPC_Connector
       if (btest(verbosity,11).or.btest(verbosity,12)) then
         write (iString,'(I4)') i
         write (msgString, '(A)') trim(name)//": handle "// &
-          "cplList("//trim(adjustl(iString))//"): "//trim(cplName)
+          "cplList("//trim(adjustl(iString))//"): "//trim(cplName)//&
+          ", cplSetList("//trim(adjustl(iString))//"): "//trim(cplSetList(i))
         call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -1814,12 +1815,12 @@ module NUOPC_Connector
           endif
         endif
 
-        ! Provider and acceptor can share Field and/or GeomObjects if all of the
-        ! provider PETs are also active on the acceptor side. The acceptor side
-        ! might have additional PETs active, which is okay.
-        sharable = .false.  ! initialize
-        
         if (acceptFlag) then
+          ! Provider and acceptor can share Field and/or GeomObjects if all of
+          ! the provider PETs are also active on the acceptor side. The acceptor
+          ! side might have additional PETs active, which is okay.
+          sharable = .false.  ! initialize
+
           ! determine provider and acceptor VM
           call NUOPC_GetAttribute(iField, name="TransferActionGeomObject", &
             value=iTransferAction, rc=rc)
@@ -1875,116 +1876,116 @@ module NUOPC_Connector
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           ! now know globally whether this is a sharable situation or not
           if (helperOut == 0) sharable = .true.
-        endif
         
-        if (btest(verbosity,12)) then
-          if (sharable) then
-            write (msgString, '(A)') trim(name)//": "//&
-              "- combination of provider and acceptor VM supports "// &
-              "Field and/or GeomObject sharing between them."
-            call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-              return  ! bail out
-          else
-            write (msgString, '(A)') trim(name)//": "//&
-              "- combination of provider and acceptor VM does NOT support "// &
-              "Field and/or GeomObject sharing between them."
-            call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-              return  ! bail out
+          if (btest(verbosity,12)) then
+            if (sharable) then
+              write (msgString, '(A)') trim(name)//": "//&
+                "- combination of provider and acceptor VM supports "// &
+                "Field and/or GeomObject sharing between them."
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+            else
+              write (msgString, '(A)') trim(name)//": "//&
+                "- combination of provider and acceptor VM does NOT support "// &
+                "Field and/or GeomObject sharing between them."
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+            endif
           endif
-        endif
 
-        if (acceptFlag .and. sharable) then
-          ! One side accepts the other and VMs allow sharing 
-          ! Look at GeomObject sharing
-          call NUOPC_GetAttribute(iField, name="SharePolicyGeomObject", &
-            value=iSharePolicy, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          call NUOPC_GetAttribute(eField, name="SharePolicyGeomObject", &
-            value=eSharePolicy, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          if (trim(iSharePolicy)=="share" .and. trim(eSharePolicy)=="share") &
-            then
-            ! both sides want to share -> shared
-            call NUOPC_SetAttribute(iField, &
-              name="ShareStatusGeomObject", value="shared", rc=rc)
+          if (sharable) then
+            ! One side accepts the other and VMs allow sharing 
+            ! Look at GeomObject sharing
+            call NUOPC_GetAttribute(iField, name="SharePolicyGeomObject", &
+              value=iSharePolicy, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            call NUOPC_SetAttribute(eField, &
-              name="ShareStatusGeomObject", value="shared", rc=rc)
+            call NUOPC_GetAttribute(eField, name="SharePolicyGeomObject", &
+              value=eSharePolicy, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            if (btest(verbosity,12)) then
-              write (msgString, '(A)') trim(name)//": "//&
-                "- both sides want to share the GeomObject -> shared."
-              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+            if (trim(iSharePolicy)=="share" .and. trim(eSharePolicy)=="share") &
+              then
+              ! both sides want to share -> shared
+              call NUOPC_SetAttribute(iField, &
+                name="ShareStatusGeomObject", value="shared", rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-                return  ! bail out
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              call NUOPC_SetAttribute(eField, &
+                name="ShareStatusGeomObject", value="shared", rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              if (btest(verbosity,12)) then
+                write (msgString, '(A)') trim(name)//": "//&
+                  "- both sides want to share the GeomObject -> shared."
+                call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                  return  ! bail out
+              endif
+            else
+              ! at least one side does not want to share -> not shared
+              ! but don't modify attribute here because if alread shared through
+              ! another connection, it must stay shared. Rely on "not shared" 
+              ! default.
+              if (btest(verbosity,12)) then
+                write (msgString, '(A)') trim(name)//": "//&
+                  "- at least one side does not want to share the GeomObject "// &
+                  "-> not shared (isharePolicy="//trim(iSharePolicy)//&
+                  " & esharePolicy="//trim(eSharePolicy)//")"
+                call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                  return  ! bail out
+              endif
             endif
-          else
-            ! at least one side does not want to share -> not shared
-            ! but don't modify attribute here because if alread shared through
-            ! another connection, it must stay shared. Rely on "not shared" 
-            ! default.
-            if (btest(verbosity,12)) then
-              write (msgString, '(A)') trim(name)//": "//&
-                "- at least one side does not want to share the GeomObject "// &
-                "-> not shared (isharePolicy="//trim(iSharePolicy)//&
-                " & esharePolicy="//trim(eSharePolicy)//")"
-              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-                return  ! bail out
-            endif
-          endif
-          ! Look at Field sharing
-          call NUOPC_GetAttribute(iField, name="SharePolicyField", &
-            value=iSharePolicy, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          call NUOPC_GetAttribute(eField, name="SharePolicyField", &
-            value=eSharePolicy, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          if (trim(iSharePolicy)=="share" .and. trim(eSharePolicy)=="share") &
-            then
-            ! both sides want to share -> shared
-            call NUOPC_SetAttribute(iField, &
-              name="ShareStatusField", value="shared", rc=rc)
+            ! Look at Field sharing
+            call NUOPC_GetAttribute(iField, name="SharePolicyField", &
+              value=iSharePolicy, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            call NUOPC_SetAttribute(eField, &
-              name="ShareStatusField", value="shared", rc=rc)
+            call NUOPC_GetAttribute(eField, name="SharePolicyField", &
+              value=eSharePolicy, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            if (btest(verbosity,12)) then
-              write (msgString, '(A)') trim(name)//": "//&
-                "- both sides want to share the Field -> shared."
-              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+            if (trim(iSharePolicy)=="share" .and. trim(eSharePolicy)=="share") &
+              then
+              ! both sides want to share -> shared
+              call NUOPC_SetAttribute(iField, &
+                name="ShareStatusField", value="shared", rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-                return  ! bail out
-            endif
-          else
-            ! at least one side does not want to share -> not shared
-            ! but don't modify attribute here because if alread shared through
-            ! another connection, it must stay shared. Rely on "not shared" 
-            ! default.
-            if (btest(verbosity,12)) then
-              write (msgString, '(A)') trim(name)//": "//&
-                "- at least one side does not want to share the Field "// &
-                "-> not shared (isharePolicy="//trim(iSharePolicy)//&
-                " & esharePolicy="//trim(eSharePolicy)//")"
-              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              call NUOPC_SetAttribute(eField, &
+                name="ShareStatusField", value="shared", rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-                return  ! bail out
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              if (btest(verbosity,12)) then
+                write (msgString, '(A)') trim(name)//": "//&
+                  "- both sides want to share the Field -> shared."
+                call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                  return  ! bail out
+              endif
+            else
+              ! at least one side does not want to share -> not shared
+              ! but don't modify attribute here because if alread shared through
+              ! another connection, it must stay shared. Rely on "not shared" 
+              ! default.
+              if (btest(verbosity,12)) then
+                write (msgString, '(A)') trim(name)//": "//&
+                  "- at least one side does not want to share the Field "// &
+                  "-> not shared (isharePolicy="//trim(iSharePolicy)//&
+                  " & esharePolicy="//trim(eSharePolicy)//")"
+                call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                  return  ! bail out
+              endif
             endif
           endif
         endif
@@ -2245,7 +2246,8 @@ module NUOPC_Connector
       if (btest(verbosity,11).or.btest(verbosity,12)) then
         write (iString,'(I4)') i
         write (msgString, '(A)') trim(name)//": handle "// &
-          "cplList("//trim(adjustl(iString))//"): "//trim(cplName)
+          "cplList("//trim(adjustl(iString))//"): "//trim(cplName)//&
+          ", cplSetList("//trim(adjustl(iString))//"): "//trim(cplSetList(i))
         call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -2339,6 +2341,13 @@ module NUOPC_Connector
           transferDirection = "(import <- export)"
         else  ! both sides "provide"
           ! not a situation that needs handling here
+          if (btest(verbosity,12)) then
+            call ESMF_LogWrite("- nothing shared or transferred", &
+              ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+          endif
           cycle ! continue with the next i
         endif
         
@@ -3169,7 +3178,8 @@ module NUOPC_Connector
       if (btest(verbosity,11).or.btest(verbosity,12)) then
         write (iString,'(I4)') i
         write (msgString, '(A)') trim(name)//": handle "// &
-          "cplList("//trim(adjustl(iString))//"): "//trim(cplName)
+          "cplList("//trim(adjustl(iString))//"): "//trim(cplName)//&
+          ", cplSetList("//trim(adjustl(iString))//"): "//trim(cplSetList(i))
         call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -3261,7 +3271,15 @@ module NUOPC_Connector
           acceptorField = iField
           acceptorState = importStateList(iMatch)
           transferDirection = "(import <- export)"
-        else  ! not a situation that needs handling here
+        else  ! both sides "provide"
+          ! not a situation that needs handling here
+          if (btest(verbosity,12)) then
+            call ESMF_LogWrite("- nothing shared or transferred", &
+              ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+          endif
           cycle ! continue with the next i
         endif
 
@@ -4195,7 +4213,8 @@ module NUOPC_Connector
       if (btest(verbosity,11).or.btest(verbosity,12)) then
         write (iString,'(I4)') i
         write (msgString, '(A)') trim(name)//": handle "// &
-          "cplList("//trim(adjustl(iString))//"): "//trim(cplList(i))
+          "cplList("//trim(adjustl(iString))//"): "//trim(cplName)//&
+          ", cplSetList("//trim(adjustl(iString))//"): "//trim(cplSetList(i))
         call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -4322,6 +4341,7 @@ module NUOPC_Connector
           ! also add to cplListTemp
           cplListTemp(j)=cplList(i)
           j=j+1
+          ! add to cplSet specific FieldBundles and cplListTemp
           call ESMF_FieldBundleAdd(is%wrap%cplSet(sIndex)%srcFields, &
             (/iField/), multiflag=.true., rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -5696,9 +5716,9 @@ print *, "found match:"// &
 
   subroutine FieldBundleCplStore(srcFB, dstFB, cplList, rh, termOrders, name, &
     rc)
-    ! this method will destroy srcFB/dstFB, and replace with newly created FBs
-    ! order of fields in outgoing srcFB/dstFB may be different from incoming
-    ! order of elements in termOrders matches those in outgoing srcFB/dstFB
+    ! This method will destroy srcFB/dstFB, and replace with newly created FBs.
+    ! Order of fields in outgoing srcFB/dstFB may be different from incoming.
+    ! Order of elements in termOrders matches those in outgoing srcFB/dstFB.
     type(ESMF_FieldBundle),    intent(inout)         :: srcFB
     type(ESMF_FieldBundle),    intent(inout)         :: dstFB
     character(*)                                     :: cplList(:)
@@ -6611,7 +6631,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
 !     source side fields. The order in which the fields are stored
 !     in {\tt srcFields} is significant, as it corresponds to the order of
 !     fields in {\tt dstFields}. Consequently, when accessing and modifying
-!     the fields inside of {\tt srcFields}, it is imporant to use the
+!     the fields inside of {\tt srcFields}, it is important to use the
 !     {\tt itemorderflag=ESMF\_ITEMORDER\_ADDORDER} option to
 !     {\tt ESMF\_FieldBundleGet()}.
 !   \item[{[dstFields]}]
@@ -6619,7 +6639,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
 !     destination side fields. The order in which the fields are stored
 !     in {\tt dstFields} is significant, as it corresponds to the order of
 !     fields in {\tt srcFields}. Consequently, when accessing and modifying
-!     the fields inside of {\tt dstFields}, it is imporant to use the
+!     the fields inside of {\tt dstFields}, it is important to use the
 !     {\tt itemorderflag=ESMF\_ITEMORDER\_ADDORDER} option to
 !     {\tt ESMF\_FieldBundleGet()}.
 !   \item[{[rh]}]
