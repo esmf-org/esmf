@@ -318,16 +318,16 @@
 #endif
 
 #if defined (ESMF_PGIVERSION_MAJOR)
-// #if (ESMF_PGIVERSION_MAJOR >= 16)
-// #ifndef MOAB_HAVE_STDISFINITE
-// #define MOAB_HAVE_STDISFINITE 1
-// #endif
-// #else
+#if (ESMF_PGIVERSION_MAJOR >= 16)
+#ifndef MOAB_HAVE_STDISFINITE
+#define MOAB_HAVE_STDISFINITE 1
+#endif
+#else
 #ifndef MOAB_HAVE_ISFINITE
 #define MOAB_HAVE_ISFINITE 1
 #endif
 #endif
-// #endif
+#endif
 /*#undef MOAB_HAVE_STDISFINITE */
 
 /* MOAB qualified HAVE_STDLIB_H */
