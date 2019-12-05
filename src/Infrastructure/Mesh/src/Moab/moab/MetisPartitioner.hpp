@@ -36,9 +36,7 @@ using namespace moab;
 
   public:
     MetisPartitioner( Interface *impl = NULL,
-                          const bool use_coords = false,
-                          int argc = 0, 
-                          char **argv = NULL);
+                          const bool use_coords = false);
     
     virtual ~MetisPartitioner();
 
@@ -83,10 +81,6 @@ using namespace moab;
     // virtual ErrorCode write_file(const char *filename, const char *out_file);
   
   private:
-
-    int argcArg;
-    
-    char **argvArg;
 
     ErrorCode assemble_graph(const int dimension, 
                              std::vector<double> &coords,

@@ -717,7 +717,7 @@ ErrorCode ScdInterface::tag_shared_vertices(ParallelComm *pcomm, ScdBox *box)
       send_reqs(procs.size(), MPI_REQUEST_NULL);
   std::vector<EntityHandle> rhandles(4*procs.size()), shandles(4);
   for (unsigned int i = 0; i < procs.size(); i++) {
-    int success = MPI_Irecv(&rhandles[4*i], 4*sizeof(EntityHandle),
+    int success = MPI_Irecv((void*)&rhandles[4*i], 4*sizeof(EntityHandle),
                             MPI_UNSIGNED_CHAR, procs[i],
                             1, pcomm->proc_config().proc_comm(), 
                             &recv_reqs[i]);
@@ -740,7 +740,7 @@ ErrorCode ScdInterface::tag_shared_vertices(ParallelComm *pcomm, ScdBox *box)
     shandles[3] = box->start_element();
   }
   for (unsigned int i = 0; i < procs.size(); i++) {
-    int success = MPI_Isend(&shandles[0], 4*sizeof(EntityHandle), MPI_UNSIGNED_CHAR, procs[i], 
+    int success = MPI_Isend((void*)&shandles[0], 4*sizeof(EntityHandle), MPI_UNSIGNED_CHAR, procs[i],
                             1, pcomm->proc_config().proc_comm(), &send_reqs[i]);
     if (success != MPI_SUCCESS) return MB_FAILURE;
   }

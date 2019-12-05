@@ -136,6 +136,11 @@ using namespace moab;
     ErrorCode repartition(std::vector<double> & x,std::vector<double>&y, std::vector<double> &z, int StartID,
         const char * zmethod, Range & localGIDs);
 
+    // partition owned cell in a new number of parts, based on adjacency
+    // we might have some extra adjacencies expressed in extraAdjCellsId, which could point to a cell on a different task
+    ErrorCode  partition_owned_cells(Range & owned,  ParallelComm * pco, std::map<int, int> & extraAdjCellsId, std::map<int, int> procs,
+        int & numNewPartitions, std::map<int, Range> & distribution, int met);
+
 #ifdef MOAB_HAVE_CGM
     ErrorCode write_partition(const int nparts,
                               DLIList<RefEntity*> entities,

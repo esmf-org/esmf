@@ -104,10 +104,13 @@ ErrorCode DenseTag::get_array(const SequenceManager* seqman,
                               const unsigned char* const& ptr,
                               size_t& count) const
 {
-  return get_array(seqman, NULL, h, ptr, count);
+  //  cast away the const-ness; do we really want to do this?
+  // probably we are not calling this anywhere;
+  // clang compiler found this
+  return get_array_private(seqman, NULL, h, const_cast<const unsigned char *&> ( ptr ), count);
 }
 
-ErrorCode DenseTag::get_array(const SequenceManager* seqman,
+ErrorCode DenseTag::get_array_private(const SequenceManager* seqman,
                               Error* /* error */,
                               EntityHandle h,
                               const unsigned char*& ptr,
@@ -140,10 +143,12 @@ ErrorCode DenseTag::get_array(const SequenceManager* seqman,
 ErrorCode DenseTag::get_array(const EntitySequence* seq,
                               const unsigned char* const & ptr) const
 {
-  return get_array(seq, ptr);
+  // cast away the constness; otherwise it would be infinite recursion
+  // probably we are not calling this anywhere
+  return get_array_private(seq, const_cast<const unsigned char *&> ( ptr ));
 }
 
-ErrorCode DenseTag::get_array(const EntitySequence* seq,
+ErrorCode DenseTag::get_array_private(const EntitySequence* seq,
                               const unsigned char* & ptr) const
 {
   ptr = reinterpret_cast<const unsigned char*>(seq->data()->get_tag_data(mySequenceArray));
@@ -153,7 +158,7 @@ ErrorCode DenseTag::get_array(const EntitySequence* seq,
   return MB_SUCCESS;
 }
 
-ErrorCode DenseTag::get_array(SequenceManager* seqman,
+ErrorCode DenseTag::get_array_private(SequenceManager* seqman,
                               Error* /* error */,
                               EntityHandle h,
                               unsigned char*& ptr,
@@ -338,7 +343,7 @@ ErrorCode DenseTag::set_data(SequenceManager* seqman,
   size_t junk = 0;
 
   for (const EntityHandle* i = entities; i != end; ++i, ptr += get_size()) {
-    rval = get_array(seqman, NULL, *i, array, junk, true);MB_CHK_ERR(rval);
+    rval = get_array_private(seqman, NULL, *i, array, junk, true);MB_CHK_ERR(rval);
 
     memcpy(array, ptr, get_size());
   }
@@ -360,7 +365,7 @@ ErrorCode DenseTag::set_data(SequenceManager* seqman,
        p != entities.const_pair_end(); ++p) {
     EntityHandle start = p->first;
     while (start <= p->second) {
-      rval = get_array(seqman, NULL, start, array, avail, true);MB_CHK_ERR(rval);
+      rval = get_array_private(seqman, NULL, start, array, avail, true);MB_CHK_ERR(rval);
 
       const size_t count = std::min<size_t>(p->second - start + 1, avail);
       memcpy(array, data, get_size() * count);
@@ -386,7 +391,7 @@ ErrorCode DenseTag::set_data(SequenceManager* seqman,
   size_t junk = 0;
 
   for (const EntityHandle* i = entities; i != end; ++i, ++pointers) {
-    rval = get_array(seqman, NULL, *i, array, junk, true);MB_CHK_ERR(rval);
+    rval = get_array_private(seqman, NULL, *i, array, junk, true);MB_CHK_ERR(rval);
 
     memcpy(array, *pointers, get_size());
   }
@@ -408,7 +413,7 @@ ErrorCode DenseTag::set_data(SequenceManager* seqman,
        p != entities.const_pair_end(); ++p) {
     EntityHandle start = p->first;
     while (start <= p->second) {
-      rval = get_array(seqman, NULL, start, array, avail, true);MB_CHK_ERR(rval);
+      rval = get_array_private(seqman, NULL, start, array, avail, true);MB_CHK_ERR(rval);
 
       const EntityHandle end = std::min<EntityHandle>(p->second + 1, start + avail);
       while (start != end) {
@@ -436,7 +441,7 @@ ErrorCode DenseTag::clear_data(bool allocate,
   size_t junk = 0;
 
   for (const EntityHandle* i = entities; i != end; ++i) {
-    rval = get_array(seqman, NULL, *i, array, junk, allocate);MB_CHK_ERR(rval);
+    rval = get_array_private(seqman, NULL, *i, array, junk, allocate);MB_CHK_ERR(rval);
 
     if (array) // Array should never be null if allocate == true
       memcpy(array, value_ptr, get_size());
@@ -459,7 +464,7 @@ ErrorCode DenseTag::clear_data(bool allocate,
        p != entities.const_pair_end(); ++p) {
     EntityHandle start = p->first;
     while (start <= p->second) {
-      rval = get_array(seqman, NULL, start, array, avail, allocate);MB_CHK_ERR(rval);
+      rval = get_array_private(seqman, NULL, start, array, avail, allocate);MB_CHK_ERR(rval);
 
       const size_t count = std::min<size_t>(p->second - start + 1, avail);
       if (array) // Array should never be null if allocate == true
@@ -538,7 +543,7 @@ ErrorCode DenseTag::tag_iterate(SequenceManager* seqman,
 
   unsigned char* array = NULL;
   size_t avail = 0;
-  ErrorCode rval = get_array(seqman, NULL, *iter, array, avail, allocate);MB_CHK_ERR(rval);
+  ErrorCode rval = get_array_private(seqman, NULL, *iter, array, avail, allocate);MB_CHK_ERR(rval);
   data_ptr = array;
 
   size_t count = std::min<size_t>(avail, *(iter.end_of_block()) - *iter + 1);

@@ -1227,7 +1227,7 @@ ErrorCode AEntityFactory::notify_change_connectivity(EntityHandle entity,
                                                         int number_verts)
 {
   EntityType source_type = TYPE_FROM_HANDLE(entity);
-  if (source_type == MBPOLYHEDRON || source_type == MBPOLYGON)
+  if (source_type == MBPOLYHEDRON )
     return MB_NOT_IMPLEMENTED;
 
   // find out which ones to add and which to remove

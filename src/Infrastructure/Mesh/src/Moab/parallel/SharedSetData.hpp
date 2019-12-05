@@ -29,7 +29,7 @@ class Interface;
 class SharedSetData
 {
 public:
-  SharedSetData(Interface& moab, unsigned rank);
+  SharedSetData(Interface& moab, int pcID,  unsigned rank);
   
   ~SharedSetData();
   

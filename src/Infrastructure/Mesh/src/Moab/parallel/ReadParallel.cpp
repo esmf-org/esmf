@@ -30,7 +30,8 @@ const char *ReadParallel::ParallelActionsNames[] = {
     "PARALLEL EXCHANGE_GHOSTS",
     "PARALLEL RESOLVE_SHARED_SETS",
     "PARALLEL_AUGMENT_SETS_WITH_GHOSTS",
-    "PARALLEL PRINT_PARALLEL"
+    "PARALLEL PRINT_PARALLEL",
+    "PARALLEL_CREATE_TRIVIAL_PARTITION"
 };
 
 const char* ReadParallel::parallelOptsNames[] = { "NONE",
@@ -105,6 +106,15 @@ ErrorCode ReadParallel::load_file(const char **file_names,
   std::vector<int> partition_tag_vals;
   opts.get_ints_option("PARTITION_VAL", partition_tag_vals);
 
+  // see if partition tag name is "TRIVIAL", if the tag exists
+  bool create_trivial_partition=false;
+  if (partition_tag_name==std::string("TRIVIAL") )
+  {
+    Tag ttag; // see if the trivial tag exists
+    result = mbImpl->tag_get_handle(partition_tag_name.c_str(), ttag);
+    if (MB_TAG_NOT_FOUND == result)
+      create_trivial_partition = true;
+  }
   // See if we need to report times
   bool cputime = false;
   result = opts.get_null_option("CPUTIME");
@@ -201,6 +211,8 @@ ErrorCode ReadParallel::load_file(const char **file_names,
           pa_vec.push_back(PA_READ);
           pa_vec.push_back(PA_CHECK_GIDS_SERIAL);
           pa_vec.push_back(PA_GET_FILESET_ENTS);
+          if (create_trivial_partition)
+            pa_vec.push_back(PA_CREATE_TRIVIAL_PARTITION);
         }
         pa_vec.push_back(PA_BROADCAST);
         if (!is_reader)
@@ -438,7 +450,55 @@ ErrorCode ReadParallel::load_file(const char **file_names,
           // Add actual file set to entities too
           entities.insert(file_set);
           break;
+//==================
+      case PA_CREATE_TRIVIAL_PARTITION:
+        {
+          myDebug.tprint(1, "create trivial partition, for higher dim entities.\n");
+          // get high dim entities (2 or 3)
+          Range hi_dim_ents=entities.subset_by_dimension(3);
+          if (hi_dim_ents.empty())
+            hi_dim_ents=entities.subset_by_dimension(2);
+          if (hi_dim_ents.empty())
+            hi_dim_ents=entities.subset_by_dimension(1);
+          if (hi_dim_ents.empty())
+            MB_SET_ERR(MB_FAILURE, "there are no elements of dim 1-3");
 
+          size_t num_hi_ents= hi_dim_ents.size();
+          unsigned int num_parts = myPcomm->size();
+
+          // create first the trivial partition tag
+          int dum_id=-1;
+          Tag ttag; // trivial tag
+          tmp_result = mbImpl->tag_get_handle(partition_tag_name.c_str(), 1, MB_TYPE_INTEGER,
+              ttag, MB_TAG_CREAT | MB_TAG_SPARSE, &dum_id);MB_CHK_SET_ERR(tmp_result, "Can't create trivial partition tag");
+
+          // Compute the number of high dim entities on each part
+          size_t nPartEnts = num_hi_ents / num_parts;
+
+          // Number of extra entities after equal split over parts
+          int iextra = num_hi_ents % num_parts;
+          Range::iterator itr=hi_dim_ents.begin();
+          for ( int k=0; k<(int)num_parts; k++)
+          {
+            // create a mesh set, insert a subrange of entities
+            EntityHandle part_set;
+            tmp_result = mbImpl->create_meshset(MESHSET_SET, part_set);MB_CHK_SET_ERR(tmp_result, "Can't create part set");
+            entities.insert(part_set);
+
+            tmp_result=mbImpl->tag_set_data(ttag, &part_set, 1, &k);MB_CHK_SET_ERR(tmp_result, "Can't set trivial partition tag");
+            Range subrange;
+            size_t num_ents_in_part = nPartEnts;
+            if (i<iextra)
+              num_ents_in_part++;
+            for (size_t i1=0; i1<num_ents_in_part; i1++, itr++ )
+              subrange.insert(*itr);
+            tmp_result = mbImpl->add_entities(part_set, subrange);MB_CHK_SET_ERR(tmp_result, "Can't add entities to trivial part " << k);
+            myDebug.tprintf(1, "create trivial part %d with %lu entities \n", k, num_ents_in_part);
+            tmp_result =  mbImpl->add_entities(file_set, &part_set, 1);MB_CHK_SET_ERR(tmp_result, "Can't add trivial part to file set " << k);
+          }
+        }
+
+        break;
 //==================
       case PA_BROADCAST:
           // Do the actual broadcast; if single-processor, ignore error

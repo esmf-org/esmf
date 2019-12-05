@@ -39,9 +39,12 @@ class Range;
  */
 class OrientedBox
 {
+private:
+  void order_axes_by_length( double ax1_len, double ax2_len, double ax3_len ); //!< orders the box axes by the given lengths for each axis
+  
 public:
   CartVect center;  //!< Box center
-  CartVect axis[3]; //!< Box axes, unit vectors sorted by extent of box along axis
+  Matrix3 axes; //!< Box axes, unit vectors sorted by extent of box along axis
 #if MB_ORIENTED_BOX_UNIT_VECTORS
   CartVect length;  //!< distance from center to plane along each axis
 #endif
@@ -51,7 +54,8 @@ public:
 
   inline OrientedBox() : radius(0.0) {}
 
-  OrientedBox( const CartVect axis[3], const CartVect& center );
+  OrientedBox( const Matrix3& axes_mat, const CartVect& center );
+  OrientedBox( const CartVect axes_in[3], const CartVect& center );
 
   inline double inner_radius() const; //!< radius of inscribed sphere
   inline double outer_radius() const; //!< radius of circumscribed sphere
@@ -60,7 +64,8 @@ public:
   inline double volume() const;               //!< volume of box
   inline CartVect dimensions() const;       //!< number of dimensions for which box is not flat
   inline double area() const;                 //!< largest side area
-  inline CartVect scaled_axis( int index ) const; //!< get vector in direction of axis, from box center to face
+  inline CartVect axis( int index ) const; //!< get unit vector in direction of axis
+  inline CartVect scaled_axis( int index ) const; //!< get vector in direction of axis, scaled to its true length
   
   /** Test if point is contained in box */
   bool contained( const CartVect& point, double tolerance ) const;
@@ -165,7 +170,7 @@ double OrientedBox::inner_radius() const
 #if MB_ORIENTED_BOX_UNIT_VECTORS
   return length[0];
 #else
-  return axis[0].length();
+  return axes.col(0).length();
 #endif
 }
 
@@ -176,7 +181,7 @@ double OrientedBox::outer_radius() const
 #elif MB_ORIENTED_BOX_UNIT_VECTORS
   return length.length();
 #else
-  return (axis[0] + axis[1] + axis[2]).length();
+  return (axes.col(0) + axes.col(1) + axes.col(2)).length();
 #endif
 }
 
@@ -189,7 +194,7 @@ double OrientedBox::outer_radius_squared(const double reps) const
   CartVect tmp(length[0]+reps,length[1]+reps,length[2]+reps);
   return tmp % tmp;
 #else
-  CartVect half_diag = axis[0] + axis[1] + axis[2];
+  CartVect half_diag = axes.col(0) + axes.col(1) + axes.col(2);
   half_diag += CartVect(reps,reps,reps);
   return half_diag % half_diag;
 #endif
@@ -201,7 +206,7 @@ double OrientedBox::inner_radius_squared(const double reps) const
 #if MB_ORIENTED_BOX_UNIT_VECTORS
   return (length[0]-reps) * (length[0]-reps);
 #else
-  CartVect tmp = axis[0];
+  CartVect tmp = axes.col(0);
   tmp -= CartVect(reps,reps,reps);
   return (tmp % tmp);
 #endif
@@ -212,7 +217,7 @@ double OrientedBox::volume() const
 #if MB_ORIENTED_BOX_UNIT_VECTORS
   return 8 * length[0] * length[1] * length[2];
 #else
-  return fabs(8 * axis[0] % (axis[1] * axis[2]));
+  return fabs(8 * axes.col(0) % (axes.col(1) * axes.col(2)));
 #endif
 }
 
@@ -221,7 +226,7 @@ CartVect OrientedBox::dimensions() const
 #if MB_ORIENTED_BOX_UNIT_VECTORS
   return 2.0 * length;
 #else
-  return 2.0 * CartVect( axis[0].length(), axis[1].length(), axis[2].length() );
+  return 2.0 * CartVect( axes.col(0).length(), axes.col(1).length(), axes.col(2).length() );
 #endif
 }
 
@@ -230,16 +235,21 @@ double OrientedBox::area() const
 #if MB_ORIENTED_BOX_UNIT_VECTORS
   return 4 * length[1] * length[2];
 #else
-  return 4 * (axis[1] * axis[2]).length();
+  return 4 * (axes.col(1) * axes.col(2)).length();
 #endif
 }
 
+CartVect OrientedBox::axis( int index ) const
+{
+  return axes.col(index);
+}
+  
 CartVect OrientedBox::scaled_axis( int index ) const
 {
 #if MB_ORIENTED_BOX_UNIT_VECTORS
-  return length[index] * axis[index];
+  return length[index] * axes.col(index);
 #else
-  return axis[index];
+  return axes.col(index);
 #endif
 }
   

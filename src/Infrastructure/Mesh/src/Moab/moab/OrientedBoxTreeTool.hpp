@@ -22,6 +22,7 @@
 #define MOAB_ORIENTED_BOX_TREE_TOOL_HPP
 
 #include "moab/Forward.hpp"
+#include "moab/GeomUtil.hpp"
 #include "moab/OrientedBox.hpp"
 #include <iosfwd>
 #include <list>
@@ -41,6 +42,18 @@ class OrientedBoxTreeTool
 {
   public:
   
+    /**\brief This provides the search range for ray intersections, measured
+       relative to the origin of the ray.
+
+       first: nonnegative limit for search
+       second: negative limit for search
+
+       These are const double* so that the window is always defined by
+       pointing to other quantities, but it is not posible to change those
+       quantities via the window.
+     **/
+    typedef std::pair<const double*,const double*> IntersectSearchWindow;
+
     /**\brief Misc. knobs controlling tree subdivision
      *
      * Available settings for controlling when and how nodes in the tree
@@ -181,6 +194,59 @@ class OrientedBoxTreeTool
     };
 
 
+  /**\brief Default/Base class to provide a context for registering intersections
+   *
+   * To enable different logic for how individual intersections are
+   * accumulated, depending on the usage of ray_intersect_sets().  
+   *
+   * The API to this context has 3 parts:
+   * * getDesiredOrient() during initialization of ray_intersect_sets to
+        determine whether this context filters by context
+   * * update_orient() updates the context to know the orientation of the
+       current surface wrt to its volume during a traversal visit()
+   * * register_intersection() offers an intersection to the context so that
+       it can decide whether to accumulate it or ignore it
+   * 
+   * This implementation also provides a default NOP version that accumulates
+   * all intersections without logic.
+   *
+   * A reference implementation can be found in GeomQueryTool::GQT_IntRegCtxt.
+   *
+   */
+  
+    class IntRegCtxt {
+    
+    protected:
+      std::vector<double>       intersections;
+      std::vector<EntityHandle> sets;
+      std::vector<EntityHandle> facets;
+      
+    public:
+      /* provide a default behavior that will simply add the intersection data to the relevent lists
+         with no logic or discrimination */
+      virtual ErrorCode register_intersection(EntityHandle set, EntityHandle tri, double dist, 
+                                              IntersectSearchWindow & /* search_win */,
+                                              GeomUtil::intersection_type /* int_type */) {
+        intersections.push_back(dist);
+        sets.push_back(set);
+        facets.push_back(tri);
+        
+        return MB_SUCCESS;
+      };
+
+      /* determine the orientation of the topological set with respect to any
+         topological set in the context */
+      virtual ErrorCode update_orient(EntityHandle /* set */, int* /* surfTriOrient */) { return MB_SUCCESS;};
+
+      /* determine whether or not a preferred orientation is established  */
+      virtual const int* getDesiredOrient() {return NULL;};
+      
+      std::vector<double>  get_intersections() {return intersections;};
+      std::vector<EntityHandle> get_facets() {return facets;};
+      std::vector<EntityHandle> get_sets() {return sets;};
+    
+    };
+
     /**\brief Intersect a ray with the triangles contained within the tree
      *
      * Intersect a ray with the triangles contained in the tree and return
@@ -236,7 +302,7 @@ class OrientedBoxTreeTool
                           unsigned int* raytri_test_count = 0);
                           
 
-    /**\brief Intersect a ray with the triangles contained within the tree
+  /**\brief Intersect a ray with the triangles contained within the tree
      *
      * Intersect a ray with the triangles contained in the tree and return
      * the distance at which the intersection occured.
@@ -247,52 +313,50 @@ class OrientedBoxTreeTool
      *                     intersected triangle.
      *\param facets_out    Handles of intersected triangles corresponding to distances_out 
      *\param root_set      The MBENTITYSET representing the root of the tree.
-     *\param min_tolerance_intersections This method returns all intersections
-     *                     within 'tolerance' of the start of the ray and if 
-     *                     the number of intersections within the 'tolerance' of the
-     *                     ray start point is less than this number, the next closest
-     *                     intersection.  If the desired result is only the closest
-     *                     intersection, pass zero for this argument.
-     *                     This function will return all intersections, regardless
-     *                     of distance from the start of the ray, if this value
-     *                     is negative.
      *\param tolerance     The tolerance to use in intersection checks.
      *\param ray_point     The base point of the ray.
      *\param unit_ray_dir  The ray direction vector (must be unit length)
-     *\param nonneg_ray_len Optional ray length ahead of the ray_point (intersect 
-     *                     segment instead of ray.)
+     *\param search_win    An interval that defines the current window in which the
+     *                     an intersection is being sought: (nonnegative, negative)
+     *\param register_intersection A context for assessing and registering intersections
+     *                     derived from IntRegCtxt
      *\param accum         Optional class for tree traversal statistics.
-     *\param neg_ray_len   Optional ray length behind the ray_point to search for 
-     *                     intersections.
-     *\param geom_vol      Optional handle of the geometry set being searched. When
-     *                     used, glancing intersections are rejected. Must be used
-     *                     used with sense_tag.
-     *\param sense_tag     Must be used if geom_vol is used. Saves >4% of execution
-     *                     time by avoiding tag_get_handle call.
-     *\param desired_orient Optional ptr used to screen intersections by orientation.
-     *                     Pass 1 to keep intersections with surface normals in the
-     *                     same direction as the ray. Pass -1 for opposite orientation.
-     *                     Requires use of geom_vol.
-     *\param prev_facets   Optional vector of triangles that cannot be returned
-     *                     as intersections.
+     */
+
+    ErrorCode ray_intersect_sets( std::vector<double>&       distances_out,
+                                  std::vector<EntityHandle>& sets_out,
+                                  std::vector<EntityHandle>& facets_out,
+                                  EntityHandle               root_set,
+                                  double                     tolerance,
+                                  const double               ray_point[3],
+                                  const double               unit_ray_dir[3],
+                                  IntersectSearchWindow&     search_win,
+                                  IntRegCtxt&                register_intersection,
+                                  TrvStats*                  accum = 0 );
+
+    /*\brief Version that doesn't require a search window or an intersection registration context
+     * 
+     * 
      */
     ErrorCode ray_intersect_sets( std::vector<double>&       distances_out,
                                   std::vector<EntityHandle>& sets_out,
                                   std::vector<EntityHandle>& facets_out,
                                   EntityHandle               root_set,
                                   double                     tolerance,
-                                  int                        min_tolerace_intersections,
                                   const double               ray_point[3],
                                   const double               unit_ray_dir[3],
-                                  const double*              nonneg_ray_len = 0,
-                                  TrvStats*                  accum          = 0,
-                                  const double*              neg_ray_len    = 0,
-                                  const EntityHandle*        geom_vol       = 0,
-                                  const Tag*                 sense_tag      = 0,
-                                  const int*                 desired_orient = 0,
-                                  const std::vector<EntityHandle>* prev_facets = 0 );
-    
-    /**\brief Find closest surface, facet in surface, and location on facet
+                                  const double*              ray_length = 0,
+                                  TrvStats*                  accum = 0);
+ 
+    ErrorCode ray_intersect_sets( EntityHandle           root_set,
+                                  double                 tolerance,
+                                  const double           ray_point[3],
+                                  const double           unit_ray_dir[3],
+                                  IntersectSearchWindow& search_win,
+                                  IntRegCtxt&            register_intersection,
+                                  TrvStats*              accum = 0 );
+
+  /**\brief Find closest surface, facet in surface, and location on facet
      *
      * Find the closest location in the tree to the specified location.
      *\param point Location to search from
@@ -340,6 +404,14 @@ class OrientedBoxTreeTool
                                         std::vector<EntityHandle>* sets_out = 0, 
                                         TrvStats* accum = 0 );
     
+    ErrorCode get_close_tris( CartVect int_pt,
+                              double tol,
+                              const EntityHandle* rootSet,
+                              const EntityHandle* geomVol,
+                              const Tag* senseTag,
+                              std::vector<EntityHandle>& close_tris,
+                              std::vector<int>& close_senses);
+
     /**\brief Get oriented box at node in tree
      *
      * Get the oriented box for a node in an oriented bounding box tree.
@@ -351,6 +423,12 @@ class OrientedBoxTreeTool
                      double axis3[3] );
                          
     ErrorCode delete_tree( EntityHandle root_set );
+    
+    /**\brief Remove obb tree root from the Oriented Box Tree Tool data structure 
+     *
+     * Remove obb tree root from the Oriented Box Tree Tool data structure (createdTrees)
+     */
+    ErrorCode remove_root( EntityHandle root_set );
 
     /**\brief Print out tree
      *
@@ -470,7 +548,7 @@ class OrientedBoxTreeTool
                                     StatData& data,
                                     unsigned& count_out,
                                     CartVect& dimensions_out );
-  
+
     Interface* instance;
     Tag tagHandle;
  

@@ -89,6 +89,8 @@ ReadRTT::~ReadRTT() {
     MBI->release_interface(readMeshIface);
     readMeshIface = 0;
   }
+
+  delete myGeomTool;
 }
 
 ErrorCode ReadRTT::read_tag_values( const char*        /*file_name*/,
@@ -110,7 +112,7 @@ ErrorCode ReadRTT::load_file(const char                      *filename,
 
   // at this time there is no support for reading a subset of the file
   if (subset_list) {
-    std::cout << "Subset reading not supported for Rtt meshes" << std::endl;
+    std::cout << "Subset reading not supported for RTT meshes" << std::endl;
     return MB_UNSUPPORTED_OPERATION;
   }
 
@@ -120,6 +122,10 @@ ErrorCode ReadRTT::load_file(const char                      *filename,
   if(file == NULL) return MB_FILE_DOES_NOT_EXIST;
   // otherwise close the file
   fclose(file);
+
+  // read the header
+  rval = ReadRTT::read_header(filename);
+  if(rval != MB_SUCCESS) return rval;
 
   // read the side_flag data
   std::vector<side> side_data;
@@ -329,6 +335,31 @@ ErrorCode ReadRTT::build_moab(std::vector<node> node_data,
 }
 
 /*
+ * read the header data from the filename pointed to
+ */
+ErrorCode ReadRTT::read_header(const char* filename) {
+  std::ifstream input_file(filename); // filename for rtt file
+  // file ok?
+  if ( !input_file.good() ) {
+    std::cout << "Problems reading file = " << filename << std::endl;
+    return MB_FAILURE;
+  }
+  
+  // if it works
+  std::string line;
+  moab::ErrorCode rval = MB_FAILURE;
+  if( input_file.is_open() ) {
+    while ( std::getline (input_file,line) ) {
+      if ( line.compare("header") == 0 ) { 
+	rval = get_header_data(input_file);
+      }
+    }  
+    input_file.close();
+  }
+  return rval;
+}
+
+/*
  * reads the side data from the filename pointed to
  */
 ErrorCode ReadRTT::read_sides(const char* filename, std::vector<side> &side_data ){
@@ -476,9 +507,41 @@ ErrorCode ReadRTT::read_tets(const char* filename, std::vector<tet> &tet_data ){
 }
 
 /*
+ * given the open file handle read until we find
+ */
+ErrorCode ReadRTT::get_header_data(std::ifstream &input_file) {
+  std::string line; 
+  while ( std::getline(input_file,line)) {
+
+    // tokenize the line
+    std::istringstream iss(line);
+    std::vector<std::string> split_string;
+    do {
+      std::string sub_string;
+      iss >> sub_string;
+      split_string.push_back(sub_string);
+    } while (iss);
+
+    // if we find version
+    if ( line.find("version") != std::string::npos ) {
+      if ( split_string[1].find("v") != std::string::npos && split_string[0].find("version") != std::string::npos ) { 
+	header_data.version = split_string[1];
+      }
+    }
+    
+    if ( line.find("title") != std::string::npos ) { header_data.title = split_string[1];}
+    if ( line.find("date") != std::string::npos ) { header_data.date = split_string[1];}
+    if ( line.find("end_header") != std::string::npos ) { return MB_SUCCESS; } 
+  }
+  
+  // otherwise we never found the end_header keyword
+  return  MB_FAILURE;
+}
+
+/*
  * given the string sidedata, get the id number, senses and names of the sides
  */
-side ReadRTT::get_side_data(std::string sidedata) {
+ReadRTT::side ReadRTT::get_side_data(std::string sidedata) {
   side new_side;
   std::vector<std::string> tokens;
   tokens = ReadRTT::split_string(sidedata,' ');
@@ -513,7 +576,7 @@ side ReadRTT::get_side_data(std::string sidedata) {
 /*
  * given the string celldata, get the id number and name of each cell
  */
-cell ReadRTT::get_cell_data(std::string celldata) {
+ReadRTT::cell ReadRTT::get_cell_data(std::string celldata) {
   cell new_cell;
   std::vector<std::string> tokens;
   tokens = ReadRTT::split_string(celldata,' ');
@@ -534,7 +597,7 @@ cell ReadRTT::get_cell_data(std::string celldata) {
 /*
  * given the string nodedata, get the id number and coordinates of the node
  */
-node ReadRTT::get_node_data(std::string nodedata) {
+ReadRTT::node ReadRTT::get_node_data(std::string nodedata) {
   node new_node;
   std::vector<std::string> tokens;
   tokens = ReadRTT::split_string(nodedata,' ');
@@ -554,7 +617,7 @@ node ReadRTT::get_node_data(std::string nodedata) {
 /*
  * given the string nodedata, get the id number, connectivity and sense data
  */
-facet ReadRTT::get_facet_data(std::string facetdata) {
+ReadRTT::facet ReadRTT::get_facet_data(std::string facetdata) {
   facet new_facet;
   std::vector<std::string> tokens;
   tokens = ReadRTT::split_string(facetdata,' ');
@@ -563,12 +626,24 @@ facet ReadRTT::get_facet_data(std::string facetdata) {
   if(tokens.size() != 7 ) {
     MB_SET_ERR_RET_VAL("Error, too many tokens found from get_facet_data",new_facet);
   }
+  
   new_facet.id = std::atoi(tokens[0].c_str());
-  new_facet.connectivity[0] = std::atoi(tokens[1].c_str());
-  new_facet.connectivity[1] = std::atoi(tokens[2].c_str());
-  new_facet.connectivity[2] = std::atoi(tokens[3].c_str());
-  new_facet.side_id = std::atoi(tokens[4].c_str());
-  new_facet.surface_number = std::atoi(tokens[5].c_str());
+  // branch on the rtt version number
+  if( header_data.version == "v1.0.0" ) {
+    new_facet.connectivity[0] = std::atoi(tokens[1].c_str());
+    new_facet.connectivity[1] = std::atoi(tokens[2].c_str());
+    new_facet.connectivity[2] = std::atoi(tokens[3].c_str());
+    new_facet.side_id = std::atoi(tokens[4].c_str());
+    new_facet.surface_number = std::atoi(tokens[5].c_str());
+  } else if ( header_data.version == "v1.0.1" ) {
+    new_facet.connectivity[0] = std::atoi(tokens[2].c_str());
+    new_facet.connectivity[1] = std::atoi(tokens[3].c_str());
+    new_facet.connectivity[2] = std::atoi(tokens[4].c_str());
+    new_facet.side_id = std::atoi(tokens[5].c_str());
+    new_facet.surface_number = std::atoi(tokens[6].c_str());
+  } else {
+    MB_SET_ERR_RET_VAL("Error, version number not understood",new_facet);
+  }
 
   return new_facet;
 }
@@ -576,7 +651,7 @@ facet ReadRTT::get_facet_data(std::string facetdata) {
 /*
  * given the string tetdata, get the id number, connectivity and mat num of the tet
  */
-tet ReadRTT::get_tet_data(std::string tetdata) {
+ReadRTT::tet ReadRTT::get_tet_data(std::string tetdata) {
   tet new_tet;
   std::vector<std::string> tokens;
   tokens = ReadRTT::split_string(tetdata,' ');
@@ -586,11 +661,22 @@ tet ReadRTT::get_tet_data(std::string tetdata) {
     MB_SET_ERR_RET_VAL("Error, too many tokens found from get_tet_data",new_tet);
   }
   new_tet.id = std::atoi(tokens[0].c_str());
-  new_tet.connectivity[0] = std::atoi(tokens[1].c_str());
-  new_tet.connectivity[1] = std::atoi(tokens[2].c_str());
-  new_tet.connectivity[2] = std::atoi(tokens[3].c_str());
-  new_tet.connectivity[3] = std::atoi(tokens[4].c_str());
-  new_tet.material_number = std::atoi(tokens[5].c_str());
+  // branch on the version number
+  if ( header_data.version == "v1.0.0" ) {
+    new_tet.connectivity[0] = std::atoi(tokens[1].c_str());
+    new_tet.connectivity[1] = std::atoi(tokens[2].c_str());
+    new_tet.connectivity[2] = std::atoi(tokens[3].c_str());
+    new_tet.connectivity[3] = std::atoi(tokens[4].c_str());
+    new_tet.material_number = std::atoi(tokens[5].c_str());
+  } else if ( header_data.version == "v1.0.1" ) {
+    new_tet.connectivity[0] = std::atoi(tokens[2].c_str());
+    new_tet.connectivity[1] = std::atoi(tokens[3].c_str());
+    new_tet.connectivity[2] = std::atoi(tokens[4].c_str());
+    new_tet.connectivity[3] = std::atoi(tokens[5].c_str());
+    new_tet.material_number = std::atoi(tokens[6].c_str());
+  } else {
+    MB_SET_ERR_RET_VAL("Error, version number not supported",new_tet);
+  }
 
   return new_tet;
 }
@@ -599,7 +685,7 @@ tet ReadRTT::get_tet_data(std::string tetdata) {
  * splits string into sense and name, to later facilitate the building
  * of sense data, strips off the tailing @ if it exists
  */
-boundary ReadRTT::split_name(std::string atilla_cellname) {
+ReadRTT::boundary ReadRTT::split_name(std::string atilla_cellname) {
   boundary new_boundary;
   // default initialisation
   new_boundary.sense = 0;

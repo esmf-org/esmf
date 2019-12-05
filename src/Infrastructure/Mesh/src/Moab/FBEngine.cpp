@@ -4,6 +4,7 @@
 #include "moab/FBEngine.hpp"
 #include "moab/Interface.hpp"
 #include "moab/GeomTopoTool.hpp"
+#include "moab/GeomUtil.hpp"
 #include "moab/OrientedBoxTreeTool.hpp"
 
 #include <stdlib.h>
@@ -28,7 +29,6 @@ namespace moab {
 // some tolerances for ray tracing and geometry intersections
 // these are involved in ray tracing, at least
 
-unsigned min_tolerace_intersections = 1000;
 double tolerance = 0.01; // TODO: how is this used ????
 double tolerance_segment = 0.01; // for segments intersection, points collapse, area coordinates for triangles
 // it should be a relative, not an absolute value
@@ -752,8 +752,7 @@ ErrorCode FBEngine::getPntRayIntsct(double x, double y, double z, double dir_x,
     std::vector<EntityHandle> sets_out;
     std::vector<EntityHandle> facets_out;
     rval = _my_geomTopoTool->obb_tree()-> ray_intersect_sets(distances_out,
-        sets_out, facets_out, rootForFace, tolerance,
-        min_tolerace_intersections, point, dir);
+        sets_out, facets_out, rootForFace, tolerance, point, dir);
     unsigned int j;
     for (j = 0; j < distances_out.size(); j++)
       param_coords.push_back(distances_out[j]);
@@ -1295,8 +1294,7 @@ ErrorCode FBEngine::split_surface_with_direction(EntityHandle face, std::vector<
       std::vector<EntityHandle> sets_out;
       std::vector<EntityHandle> facets_out;
       rval = _my_geomTopoTool->obb_tree()-> ray_intersect_sets(distances_out,
-          sets_out, facets_out, rootForFace, tolerance,
-          min_tolerace_intersections, point, dir);
+          sets_out, facets_out, rootForFace, tolerance, point, dir);
       MBERRORR(rval, "Failed to get ray intersections.");
       if (distances_out.size() < 1)
         MBERRORR(MB_FAILURE, "Failed to get one intersection point, bad direction.");

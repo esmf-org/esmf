@@ -177,7 +177,7 @@ class ReorderTool
                                Range& old_handles,
                                std::vector<EntityHandle>& newhandles );
     
-    /**\brief convert from input for \chandle_order_from_sets_and_adj to
+    /**\brief convert from input for \c handle_order_from_sets_and_adj to
      *        \c input for handle_order_from_int_tag
      */
     ErrorCode int_order_from_sets_and_adj( const Range& sets,

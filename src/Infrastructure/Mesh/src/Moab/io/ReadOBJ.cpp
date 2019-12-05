@@ -62,7 +62,7 @@ const char geom_category[][CATEGORY_TAG_SIZE] =
 // Constructor
 ReadOBJ::ReadOBJ(Interface* impl)
   : MBI(impl),geom_tag(0), id_tag(0), name_tag(0), category_tag(0),
-    faceting_tol_tag(0), geometry_resabs_tag(0), obj_name_tag(0), sense_tag(0) 
+    faceting_tol_tag(0), geometry_resabs_tag(0), obj_name_tag(0)
 {
   assert(NULL != impl);
   MBI->query_interface(readMeshIface);
@@ -297,16 +297,16 @@ ErrorCode ReadOBJ::load_file(const char *filename,
  */
 void ReadOBJ::tokenize( const std::string& str, 
                          std::vector<std::string>& tokens,
-                         const char* delimiters)
+                         const char* delimiters2)
 {
   tokens.clear();
 
   std::string::size_type next_token_end, next_token_start =
-                         str.find_first_not_of( delimiters, 0);
+                         str.find_first_not_of( delimiters2, 0);
 
   while ( std::string::npos != next_token_start )
     {
-      next_token_end = str.find_first_of( delimiters, next_token_start );
+      next_token_end = str.find_first_of( delimiters2, next_token_start );
       if ( std::string::npos == next_token_end )
         {
 	  tokens.push_back(str.substr(next_token_start));
@@ -316,7 +316,7 @@ void ReadOBJ::tokenize( const std::string& str,
         {
           tokens.push_back( str.substr( next_token_start, next_token_end -
                                         next_token_start ) );
-          next_token_start = str.find_first_not_of( delimiters, next_token_end );
+          next_token_start = str.find_first_not_of( delimiters2, next_token_end );
         }
     }
 }

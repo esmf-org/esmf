@@ -76,7 +76,7 @@ class HalfFacetRep{
 
 public:
 
-  HalfFacetRep(Core *impl,  ParallelComm *comm=0, moab::EntityHandle rset=0);
+  HalfFacetRep(Core *impl,  ParallelComm *comm=0, moab::EntityHandle rset=0, bool filter_ghosts=true);
 
   ~HalfFacetRep();
 
@@ -513,8 +513,10 @@ protected:
 
   Core *mb;
   ParallelComm *pcomm;
-  bool mInitAHFmaps;
   EntityHandle _rset;
+  bool _filterghost;
+  bool mInitAHFmaps;
+
   Range _verts, _edges, _faces, _cells;
 
   //AHF map storage containers for 1D, 2D, 3D

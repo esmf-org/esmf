@@ -27,13 +27,13 @@ WriteGmsh::WriteGmsh(Interface* impl)
   impl->query_interface(mWriteIface);
 }
 
-WriteGmsh::~WriteGmsh() 
+WriteGmsh::~WriteGmsh()
 {
   mbImpl->release_interface(mWriteIface);
 }
 
 // A structure to store per-element information.
-struct ElemInfo { 
+struct ElemInfo {
   void set(int st, int idt) {
     while (count < st)
       sets[count++] = 0;
@@ -68,7 +68,7 @@ ErrorCode WriteGmsh::write_file(const char *file_name,
   // Get tags
   mbImpl->tag_get_handle(GLOBAL_ID_TAG_NAME, 1, MB_TYPE_INTEGER, global_id);
   mbImpl->tag_get_handle(MATERIAL_SET_TAG_NAME, 1, MB_TYPE_INTEGER, block_tag);
-  if (global_id) 
+  if (global_id)
     mbImpl->tag_get_handle(GEOM_DIMENSION_TAG_NAME, 1, MB_TYPE_INTEGER, geom_tag);
   mbImpl->tag_get_handle(PARALLEL_PARTITION_TAG_NAME, 1, MB_TYPE_INTEGER, prtn_tag);
 
@@ -83,7 +83,7 @@ ErrorCode WriteGmsh::write_file(const char *file_name,
     rval = mbImpl->get_entities_by_dimension(0, 0, nodes, false);
     if (MB_SUCCESS != rval)
       return rval;
-    for (int d = 1; d < 3; ++d) {
+    for (int d = 1; d <= 3; ++d) {
       Range tmp_range;
       rval = mbImpl->get_entities_by_dimension(0, d, tmp_range, false);
       if (MB_SUCCESS != rval)
@@ -163,7 +163,7 @@ ErrorCode WriteGmsh::write_file(const char *file_name,
     int id = *id_iter;
     ++id_iter;
     if (!elem_global_ids.insert(id).second)
-      id = max_id++;
+      id = ++max_id;
 
     ElemInfo& ei = elem_sets[*i];
     ei.count = 0;

@@ -153,13 +153,13 @@ public:
     /**@{*/
 
     //! Returns the entity type of an EntityHandle.
-    /** Returns the EntityType (ie, MeshVertex, MeshQuad, MeshHex ) of <em>handle</em>.
+    /** Returns the EntityType (ie, MBVERTEX, MBQUAD, MBHEX ) of <em>handle</em>.
         \param handle The EntityHandle you want to find the entity type of.
         \return type The entity type of <em>handle</em>. 
 
         Example: \code
         EntityType type = type_from_handle( handle); 
-        if( type == MeshHex ) ...  \endcode 
+        if( type == MBHEX ) ...  \endcode
     */
   virtual EntityType type_from_handle(const EntityHandle handle) const = 0;
  
@@ -193,7 +193,7 @@ public:
 
         Example: \code
         EntityType handle;
-        ErrorCode error_code = handle_from_id(MeshTri, 204, handle );
+        ErrorCode error_code = handle_from_id(MBTRI, 204, handle );
         if( error_code == MB_ENTITY_NOT_FOUND ) ... \endcode
     */
   virtual ErrorCode handle_from_id(const EntityType type, 
@@ -394,7 +394,7 @@ public:
 
     //! Gets xyz coordinate information for range of vertices
     /** Length of 'coords' should be at least 3*<em>entity_handles.size()</em> before making call.
-        \param entity_handles Range of vertex handles (error if not of type MeshVertex)
+        \param entity_handles Range of vertex handles (error if not of type MBVERTEX)
         \param coords Array used to return x, y, and z coordinates.
    
         Example: \code 
@@ -436,7 +436,7 @@ public:
   
     //! Sets the xyz coordinates for a vector of vertices
     /** An error is returned if any entities in the vector are not vertices.
-        \param entity_handles EntityHandle's to set coordinates of. (Must be of type MeshVertex)
+        \param entity_handles EntityHandle's to set coordinates of. (Must be of type MBVERTEX)
         \param num_entities Number of entities in entity_handles
         \param coords Array containing new xyz coordinates.
  
@@ -450,7 +450,7 @@ public:
 
     //! Sets the xyz coordinates for a vector of vertices
     /** An error is returned if any entities in the vector are not vertices.
-        \param entity_handles EntityHandle's to set coordinates of. (Must be of type MeshVertex)
+        \param entity_handles EntityHandle's to set coordinates of. (Must be of type MBVERTEX)
         \param num_entities Number of entities in entity_handles
         \param coords Array containing new xyz coordinates.
  
@@ -722,6 +722,20 @@ public:
                                                 Range &entities,
                                                 const bool recursive = false)  const = 0;
 
+    //! Retrieves all entities of a given topological dimension in the database or meshset.
+    /** Appends entities to list passed in.
+        \param meshset Meshset whose entities are being queried (zero if query is for entire mesh).
+        \param dimension Topological dimension of entities desired.
+        \param entities Range in which entities of dimension <em>dimension</em> are returned.
+        \param recursive If true, meshsets containing meshsets are queried recursively.  Returns
+                         the contents of meshsets, but not the meshsets themselves if true.
+
+        Example: \code
+          // get 1d (edge) elements in the entire mesh
+          Range edges;
+          get_entities_by_dimension( 0, 1, edges );
+          \endcode 
+    */
   virtual ErrorCode get_entities_by_dimension(const EntityHandle meshset,
                                                 const int dimension, 
                                                 std::vector<EntityHandle> &entities,
@@ -740,7 +754,7 @@ public:
         Example: \code
           // get the quadrilateral elements in meshset
           Range quads;
-          get_entities_by_type( meshset, MeshQuad, quads );
+          get_entities_by_type( meshset, MBQUAD, quads );
           \endcode 
     */
   virtual ErrorCode get_entities_by_type(const EntityHandle meshset,
@@ -748,6 +762,22 @@ public:
                                            Range &entities,
                                            const bool recursive = false) const = 0;
 
+    //! Retrieve all entities of a given type in the database or meshset.
+    /** Appends entities to list passed in.
+        \param meshset Meshset whose entities are being queried (zero if query is for entire mesh).
+        \param type Type of entities to be returned
+        \param entities Range in which entities of type <em>type</em> are returned.
+        \param recursive If true, meshsets containing meshsets are queried recursively.  Returns
+                         the contents of meshsets, but not the meshsets themselves.  Specifying 
+                         both recursive=true and type=MBENTITYSET is an error, as it would always 
+                         result in an empty list.
+
+        Example: \code
+          // get the quadrilateral elements in meshset
+          Range quads;
+          get_entities_by_type( meshset, MBQUAD, quads );
+          \endcode 
+    */
   virtual ErrorCode get_entities_by_type(const EntityHandle meshset,
                                            const EntityType type, 
                                            std::vector<EntityHandle> &entities,
@@ -780,7 +810,7 @@ public:
           Range dir_sets;
           Tag dir_tag;
           tag_get_handle(DIRICHLET_SET_TAG_NAME, dir_tag, 1, MB_TYPE_INTEGER);
-          get_entities_by_type_and_tag(0, MeshEntitySet, &dir_tag, NULL, 1, dir_sets, 
+          get_entities_by_type_and_tag(0, MBENTITYSET, &dir_tag, NULL, 1, dir_sets,
           Interface::UNION);
           \endcode 
     */
@@ -898,8 +928,8 @@ public:
     /** Create a new element in the database.  Vertices composing this element must already exist,
         and connectivity must be specified in canonical order for the given element type.  If 
         connectivity vector is not correct for EntityType <em>type</em> (ie, a vector with 
-        3 vertices is passed in to make an MeshQuad), the function returns MB_FAILURE. 
-        \param type Type of element to create. (MeshTet, MeshTri, MeshKnife, etc.) 
+        3 vertices is passed in to make an MBQUAD), the function returns MB_FAILURE.
+        \param type Type of element to create. (MBTET, MBTRI, MBKNIFE, etc.)
         \param connectivity 1d vector containing connectivity of element to create.
         \param num_vertices Number of vertices in element
         \param element_handle Handle representing the newly created element in the database.
@@ -907,7 +937,7 @@ public:
         Example: \code
         EntityHandle quad_conn[] = {vertex0, vertex1, vertex2, vertex3};
         EntityHandle quad_handle = 0;
-        create_element( MeshQuad, quad_conn, 4, quad_handle ); \endcode 
+        create_element( MBQUAD, quad_conn, 4, quad_handle ); \endcode
     */
   virtual ErrorCode create_element(const EntityType type, 
                                      const EntityHandle *connectivity,
@@ -2021,7 +2051,7 @@ public:
 //! predicate for STL algorithms.  Returns true if the entity handle is
 //! of the specified type.  For example, to remove all the tris out of a list
 //! of 2D entities retrieved using get_adjacencies you could do
-//! std::remove_if(list.begin(), list.end(), type_equals(gMB, MeshTri));
+//! std::remove_if(list.begin(), list.end(), type_equals(gMB, MBTRI));
 class type_equals : public std::unary_function<EntityHandle, bool>
 {
 public:
@@ -2044,7 +2074,7 @@ public:
 //! predicate for STL algorithms.  Returns true if the entity handle is not
 //! of the specified type.  For example, to remove all but the tris out of a list
 //! of 2D entities retrieved using get_adjacencies you could do
-//! std::remove_if(list.begin(), list.end(), type_not_equals(gMB, MeshTri));
+//! std::remove_if(list.begin(), list.end(), type_not_equals(gMB, MBTRI));
 class type_not_equals : public std::unary_function<EntityHandle, bool>
 {
 public:

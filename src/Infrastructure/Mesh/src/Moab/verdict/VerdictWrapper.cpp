@@ -6,7 +6,7 @@
  */
 
 #include "moab/Interface.hpp"
-#include "moab/VerdictWrapper.hpp"
+#include "moab/verdict/VerdictWrapper.hpp"
 #include "Internals.hpp"
 #include "moab/verdict.h"
 

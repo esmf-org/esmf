@@ -42,8 +42,8 @@
 
 namespace moab {
 
-WriteUtil::WriteUtil(Core* mdb, Error* error_handler)
-  : WriteUtilIface(), mMB(mdb), mError(error_handler)
+WriteUtil::WriteUtil(Core* mdb)
+  : WriteUtilIface(), mMB(mdb)
 {
 }
 
