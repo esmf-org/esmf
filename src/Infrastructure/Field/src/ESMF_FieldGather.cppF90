@@ -37,6 +37,7 @@ module ESMF_FieldGatherMod
     use ESMF_InitMacrosMod
     use ESMF_LogErrMod
     use ESMF_VMMod
+    use ESMF_StaggerLocMod
     use ESMF_GridMod
     use ESMF_MeshMod
     use ESMF_GeomBaseMod
@@ -157,6 +158,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Mesh)                 :: mesh
     type(ESMF_GeomType_Flag)        :: geomtype
     type(ESMF_TypeKind_Flag)        :: typekind
+    type(ESMF_StaggerLoc)           :: staggerloc
+    type(ESMF_MeshLoc)              :: meshloc
     integer                         :: rank, dimCount, ldeCount, lde
     integer, allocatable            :: coordDimCount(:)
     real(ESMF_KIND_R8)              :: l_const1
@@ -175,7 +178,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R8), pointer     :: coord2PtrR8D3(:,:,:)
     real(ESMF_KIND_R8), pointer     :: coord3PtrR8D3(:,:,:)
     integer                         :: i, j, k
-    integer                         :: numOwnedElements
+    integer                         :: numOwnedPoints
 
     integer                         :: l_member, l_step
     integer                         :: l_param1I4, l_param2I4
@@ -207,7 +210,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     allocate(coordDimCount(rank))
 
     if (geomtype==ESMF_GEOMTYPE_GRID) then
-      call ESMF_FieldGet(field, grid=grid, localDeCount=ldeCount, rc=rc)
+      call ESMF_FieldGet(field, grid=grid, localDeCount=ldeCount, &
+        staggerloc=staggerloc, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT)) &
         return  ! bail out
@@ -216,15 +220,30 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT)) &
         return  ! bail out
     elseif (geomtype==ESMF_GEOMTYPE_MESH) then
-      call ESMF_FieldGet(field, mesh=mesh, localDeCount=ldeCount, rc=rc)
+      call ESMF_FieldGet(field, mesh=mesh, localDeCount=ldeCount, &
+        meshloc=meshloc, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT)) &
         return  ! bail out
-      call ESMF_MeshGet(mesh, spatialDim=dimCount, &
-        numOwnedElements=numOwnedElements, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT)) &
-        return  ! bail out
+      if (meshloc==ESMF_MESHLOC_ELEMENT) then
+        call ESMF_MeshGet(mesh, spatialDim=dimCount, &
+          numOwnedElements=numOwnedPoints, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT)) &
+          return  ! bail out
+      elseif (meshloc==ESMF_MESHLOC_NODE) then
+        call ESMF_MeshGet(mesh, spatialDim=dimCount, &
+          numOwnedNodes=numOwnedPoints, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT)) &
+          return  ! bail out
+      else
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="Unsupported MESHLOC detected.", &
+          ESMF_CONTEXT, &
+          rcToReturn=rc)
+        return ! bail out
+      endif
     else
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
         msg="Unsupported geomtype detected.", &
@@ -240,16 +259,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           do lde=0, ldeCount-1
             if (geomtype==ESMF_GEOMTYPE_GRID) then
               call ESMF_GridGetCoord(grid, coordDim=1, localDe=lde, &
-                farrayPtr=coord1PtrR8D1, rc=rc)
+                farrayPtr=coord1PtrR8D1, staggerloc=staggerloc, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT)) &
                 return  ! bail out
             elseif (geomtype==ESMF_GEOMTYPE_MESH) then
-              allocate(coord1PtrR8D1(numOwnedElements))
-              call ESMF_MeshGet(mesh, ownedElemCoords=coord1PtrR8D1, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT)) &
-                return  ! bail out
+              allocate(coord1PtrR8D1(numOwnedPoints))
+              if (meshloc==ESMF_MESHLOC_ELEMENT) then
+                call ESMF_MeshGet(mesh, ownedElemCoords=coord1PtrR8D1, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT)) &
+                  return  ! bail out
+              else
+                call ESMF_MeshGet(mesh, ownedNodeCoords=coord1PtrR8D1, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT)) &
+                  return  ! bail out
+              endif
             endif
             call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR8D1, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
@@ -278,13 +304,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 ESMF_CONTEXT)) &
                 return  ! bail out
             elseif (geomtype==ESMF_GEOMTYPE_MESH) then
-              allocate(coordPtrR8D1(2*numOwnedElements), &
-               coord1PtrR8D1(numOwnedElements), coord2PtrR8D1(numOwnedElements))
-              call ESMF_MeshGet(mesh, ownedElemCoords=coordPtrR8D1, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT)) &
-                return  ! bail out
-              do i=1, numOwnedElements
+              allocate(coordPtrR8D1(2*numOwnedPoints), &
+               coord1PtrR8D1(numOwnedPoints), coord2PtrR8D1(numOwnedPoints))
+              if (meshloc==ESMF_MESHLOC_ELEMENT) then
+                call ESMF_MeshGet(mesh, ownedElemCoords=coordPtrR8D1, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT)) &
+                  return  ! bail out
+              else
+                call ESMF_MeshGet(mesh, ownedNodeCoords=coordPtrR8D1, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT)) &
+                  return  ! bail out
+              endif
+              do i=1, numOwnedPoints
                 coord1PtrR8D1(i) = coordPtrR8D1((i-1)*2+1)
                 coord2PtrR8D1(i) = coordPtrR8D1((i-1)*2+2)
               enddo
@@ -527,11 +560,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 ESMF_CONTEXT)) &
                 return  ! bail out
             elseif (geomtype==ESMF_GEOMTYPE_MESH) then
-              allocate(coord1PtrR8D1(numOwnedElements))
-              call ESMF_MeshGet(mesh, ownedElemCoords=coord1PtrR8D1, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT)) &
-                return  ! bail out
+              allocate(coord1PtrR8D1(numOwnedPoints))
+              if (meshloc==ESMF_MESHLOC_ELEMENT) then
+                call ESMF_MeshGet(mesh, ownedElemCoords=coord1PtrR8D1, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT)) &
+                  return  ! bail out
+              else
+                call ESMF_MeshGet(mesh, ownedNodeCoords=coord1PtrR8D1, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT)) &
+                  return  ! bail out
+              endif
             endif
             call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR4D1, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
@@ -561,13 +601,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 ESMF_CONTEXT)) &
                 return  ! bail out
             elseif (geomtype==ESMF_GEOMTYPE_MESH) then
-              allocate(coordPtrR8D1(2*numOwnedElements), &
-               coord1PtrR8D1(numOwnedElements), coord2PtrR8D1(numOwnedElements))
-              call ESMF_MeshGet(mesh, ownedElemCoords=coordPtrR8D1, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT)) &
-                return  ! bail out
-              do i=1, numOwnedElements
+              allocate(coordPtrR8D1(2*numOwnedPoints), &
+               coord1PtrR8D1(numOwnedPoints), coord2PtrR8D1(numOwnedPoints))
+              if (meshloc==ESMF_MESHLOC_ELEMENT) then
+                call ESMF_MeshGet(mesh, ownedElemCoords=coordPtrR8D1, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT)) &
+                  return  ! bail out
+              else
+                call ESMF_MeshGet(mesh, ownedNodeCoords=coordPtrR8D1, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT)) &
+                  return  ! bail out
+              endif
+              do i=1, numOwnedPoints
                 coord1PtrR8D1(i) = coordPtrR8D1((i-1)*2+1)
                 coord2PtrR8D1(i) = coordPtrR8D1((i-1)*2+2)
               enddo
