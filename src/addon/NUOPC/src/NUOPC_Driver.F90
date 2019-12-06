@@ -876,7 +876,7 @@ module NUOPC_Driver
                 ! directly inherit presets
                 vString = trim(valueString)
               else
-                ! not a present: lower 8-bit of parent's verbosity setting
+                ! not a preset level: lower 8-bit of parent's verbosity setting
                 vInherit = ibits(verbosity,0,8)
                 write(vString,"(I10)") vInherit
               endif
@@ -5244,7 +5244,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   !-----------------------------------------------------------------------------
     ! local variables
     integer                                         :: localrc
-    character(ESMF_MAXSTR)                          :: name
+    character(ESMF_MAXSTR)                          :: name, valueString
     type(type_InternalState)                        :: is
     integer                                         :: i, lineCount, tokenCount
     character(len=NUOPC_FreeFormatLen), allocatable :: tokenList(:)
@@ -5366,10 +5366,30 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU,&
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
               return  ! bail out
-            ! automatically created connectors inherit lower 8-bit
-            ! of parent's verbosity setting
-            vInherit = ibits(verbosity,0,8)
-            write(vString,"(I10)") vInherit
+            ! automatically created connectors inherit Verbosity from parent
+            call NUOPC_CompAttributeGet(driver, name="Verbosity", &
+              value=valueString, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail
+            if (trim(valueString)=="max" .or. trim(valueString)=="high" .or. &
+              trim(valueString)=="low" .or. trim(valueString)=="off") then
+              ! directly inherit presets
+              vString = trim(valueString)
+            else
+              ! not a preset level: lower 8-bit of parent's verbosity setting
+              vInherit = ibits(verbosity,0,8)
+              write(vString,"(I10)") vInherit
+            endif
+            if (btest(verbosity,13)) then
+              write (msgString,"(A)") trim(name)//&
+                " - Setting verbosity on created component to: "// &
+                trim(vString)
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, &
+                file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+            endif
             call NUOPC_CompAttributeSet(conn, name="Verbosity", value=vString, &
               rc=localrc)
             if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU,&
