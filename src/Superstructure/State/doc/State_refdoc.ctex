@@ -101,12 +101,14 @@
 \input{ESMF_StateAPI_fapi}
 \input{ESMF_StateReconcile2_fapi}
 \input{ESMF_StateRemRep_fapi}
+\input{ESMF_StateSet_fapi}
 \input{ESMF_StateVa_fapi}
 \input{ESMF_StateWr_fapi}
 #elif defined(CONSTITUENT)
 \input{../Superstructure/State/doc/ESMF_StateAPI_fapi}
 \input{../Superstructure/State/doc/ESMF_StateReconcile2_fapi}
 \input{../Superstructure/State/doc/ESMF_StateRemRep_fapi}
+\input{../Superstructure/State/doc/ESMF_StateSet_fapi}
 \input{../Superstructure/State/doc/ESMF_StateVa_fapi}
 \input{../Superstructure/State/doc/ESMF_StateWr_fapi}
 #endif
