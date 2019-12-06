@@ -31,6 +31,7 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMCI_IntegrateUTest \
                $(ESMF_TESTDIR)/ESMF_MeshOpUTest \
                $(ESMF_TESTDIR)/ESMF_MeshUTest
 
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_MBMesh_CreateLargeUTest
 # not quite ready for primetime
                # $(ESMF_TESTDIR)/ESMC_MBMesh_DualUTest \
 

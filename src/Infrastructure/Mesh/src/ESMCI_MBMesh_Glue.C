@@ -21,6 +21,8 @@
 // Take out if MOAB isn't being used
 #if defined ESMF_MOAB
 
+#define MOAB_GLOBAL_ID_INT32
+
 #include <string>
 #include <ostream>
 #include <iterator>
@@ -122,13 +124,20 @@ void MBMesh_create(void **mbmpp,
     int int_def_val = 0;
     double dbl_def_val[3] = {0.0, 0.0, 0.0};
 
-     // Setup global id tag
-    int_def_val=0;
-    merr=moab_mesh->tag_get_handle(GLOBAL_ID_TAG_NAME, 1, MB_TYPE_INTEGER, mbmp->gid_tag, MB_TAG_DENSE, &int_def_val);
+#ifdef MOAB_GLOBAL_ID_INT32
+    // Setup global id tag
+    int_def_val = 0;
+    merr=moab_mesh->tag_get_handle("global_id_int32", 1, MB_TYPE_INTEGER, mbmp->gid_tag, MB_TAG_DENSE, &int_def_val);
     if (merr != MB_SUCCESS) {
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
                                        moab::ErrorCodeStr[merr], ESMC_CONTEXT, rc)) return;
     }
+#else
+    // Setup global id tag as a 64 bit integer
+    long long int long_def_val = 0;
+    merr=moab_mesh->tag_get_handle("global_id_int64", 8, MB_TYPE_OPAQUE, mbmp->gid_tag,   MB_TAG_BYTES, &long_def_val);
+    if (merr != MB_SUCCESS) return NULL;
+#endif
 
     // Setup orig_pos tag
     int_def_val=-1;

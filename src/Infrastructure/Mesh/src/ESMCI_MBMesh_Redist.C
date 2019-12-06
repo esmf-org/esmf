@@ -13,6 +13,8 @@
 // Take out if MOAB isn't being used
 #if defined ESMF_MOAB
 
+#define MOAB_GLOBAL_ID_INT32
+
 #include <Mesh/include/Legacy/ESMCI_Exception.h>
 #include <Mesh/include/ESMCI_MBMesh_Util.h>
 #include <Mesh/include/ESMCI_MBMesh_Redist.h>
@@ -171,20 +173,26 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
   // TODO: eventually do this in one func shared with other creates, so only
     //       needs to be updated in one place
   // Default value
-  int def_val = 0;
+  int int_def_val = 0;
   
-   // Setup global id tag
-  def_val=0;
-  merr=moab_mesh->tag_get_handle(GLOBAL_ID_TAG_NAME, 1, MB_TYPE_INTEGER, out_mesh->gid_tag, MB_TAG_DENSE, &def_val);
-  if (merr != MB_SUCCESS) {
-    int localrc;
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT, &localrc)) throw localrc;
-  }     
+#ifdef MOAB_GLOBAL_ID_INT32
+    // Setup global id tag
+    int_def_val = 0;
+    merr=moab_mesh->tag_get_handle("global_id_int32", 1, MB_TYPE_INTEGER, mbmp->gid_tag, MB_TAG_DENSE, &int_def_val);
+    if (merr != MB_SUCCESS) {
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                       moab::ErrorCodeStr[merr], ESMC_CONTEXT, rc)) return;
+    }
+#else
+    // Setup global id tag as a 64 bit integer
+    long long int long_def_val = 0;
+    merr=moab_mesh->tag_get_handle("global_id_int64", 8, MB_TYPE_OPAQUE, mbmp->gid_tag,   MB_TAG_BYTES, &long_def_val);
+    if (merr != MB_SUCCESS) return NULL;
+#endif
   
   // Setup orig_pos tag
-  def_val=-1;
-  merr=moab_mesh->tag_get_handle("orig_pos", 1, MB_TYPE_INTEGER, out_mesh->orig_pos_tag, MB_TAG_EXCL|MB_TAG_DENSE, &def_val);
+  int_def_val=-1;
+  merr=moab_mesh->tag_get_handle("orig_pos", 1, MB_TYPE_INTEGER, out_mesh->orig_pos_tag, MB_TAG_EXCL|MB_TAG_DENSE, &int_def_val);
   if (merr != MB_SUCCESS) {
     int localrc;
     if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
@@ -192,8 +200,8 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
   }     
   
   // Setup owner tag
-  def_val=-1;
-  merr=moab_mesh->tag_get_handle("owner", 1, MB_TYPE_INTEGER, out_mesh->owner_tag, MB_TAG_EXCL|MB_TAG_DENSE, &def_val);
+  int_def_val=-1;
+  merr=moab_mesh->tag_get_handle("owner", 1, MB_TYPE_INTEGER, out_mesh->owner_tag, MB_TAG_EXCL|MB_TAG_DENSE, &int_def_val);
   if (merr != MB_SUCCESS) {
     int localrc;
     if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
@@ -202,16 +210,16 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
 
   // Setup masking tags
   if (src_mesh->has_elem_mask) {
-    def_val=0;
-    merr=moab_mesh->tag_get_handle("elem_mask", 1, MB_TYPE_INTEGER, out_mesh->elem_mask_tag, MB_TAG_EXCL|MB_TAG_DENSE, &def_val);
+    int_def_val=0;
+    merr=moab_mesh->tag_get_handle("elem_mask", 1, MB_TYPE_INTEGER, out_mesh->elem_mask_tag, MB_TAG_EXCL|MB_TAG_DENSE, &int_def_val);
     if (merr != MB_SUCCESS) {
       int localrc;
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
                                        moab::ErrorCodeStr[merr], ESMC_CONTEXT, &localrc)) throw localrc;
     }     
 
-    def_val=0;
-    merr=moab_mesh->tag_get_handle("elem_mask_val", 1, MB_TYPE_INTEGER, out_mesh->elem_mask_val_tag, MB_TAG_EXCL|MB_TAG_DENSE, &def_val);
+    int_def_val=0;
+    merr=moab_mesh->tag_get_handle("elem_mask_val", 1, MB_TYPE_INTEGER, out_mesh->elem_mask_val_tag, MB_TAG_EXCL|MB_TAG_DENSE, &int_def_val);
     if (merr != MB_SUCCESS) {
     int localrc;
     if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
@@ -222,16 +230,16 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
 
   // Setup masking tags
   if (src_mesh->has_node_mask) {
-    def_val=0;
-    merr=moab_mesh->tag_get_handle("node_mask", 1, MB_TYPE_INTEGER, out_mesh->node_mask_tag, MB_TAG_EXCL|MB_TAG_DENSE, &def_val);
+    int_def_val=0;
+    merr=moab_mesh->tag_get_handle("node_mask", 1, MB_TYPE_INTEGER, out_mesh->node_mask_tag, MB_TAG_EXCL|MB_TAG_DENSE, &int_def_val);
     if (merr != MB_SUCCESS) {
       int localrc;
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
                                        moab::ErrorCodeStr[merr], ESMC_CONTEXT, &localrc)) throw localrc;
     }     
 
-    def_val=0;
-    merr=moab_mesh->tag_get_handle("node_mask_val", 1, MB_TYPE_INTEGER, out_mesh->node_mask_val_tag, MB_TAG_EXCL|MB_TAG_DENSE, &def_val);
+    int_def_val=0;
+    merr=moab_mesh->tag_get_handle("node_mask_val", 1, MB_TYPE_INTEGER, out_mesh->node_mask_val_tag, MB_TAG_EXCL|MB_TAG_DENSE, &int_def_val);
     if (merr != MB_SUCCESS) {
     int localrc;
     if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
