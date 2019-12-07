@@ -1284,7 +1284,8 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
         call itemTypeWorker (stypep)
       endif
 
-      if (present(rc)) rc = localrc
+      ! return successfully
+      if (present(rc)) rc = ESMF_SUCCESS
 
     contains
 
