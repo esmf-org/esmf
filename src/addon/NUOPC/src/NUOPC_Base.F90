@@ -174,19 +174,25 @@ module NUOPC_Base
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    integer                 :: localrc
-    type(ESMF_State)        :: nestedS
-    character(len=80)       :: nestedSName
+    integer                     :: localrc
+    type(ESMF_State)            :: nestedS
+    character(len=80)           :: nestedSName
+    type(ESMF_StateIntent_Flag) :: stateIntent
     
     if (present(rc)) rc = ESMF_SUCCESS
     
+    call ESMF_StateGet(state, stateIntent=stateIntent, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
     if (present(nestedStateName)) then
       nestedSName = trim(nestedStateName)
     else
       nestedSName = trim(Namespace)
     endif
     
-    nestedS = ESMF_StateCreate(name=nestedSName, rc=localrc)
+    nestedS = ESMF_StateCreate(name=nestedSName, stateIntent=stateIntent, &
+      rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       
@@ -251,32 +257,40 @@ module NUOPC_Base
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    integer                 :: localrc
-    type(ESMF_State)        :: nestedS
+    integer                     :: localrc
+    type(ESMF_State)            :: nestedS
+    type(ESMF_StateIntent_Flag) :: stateIntent
     
     if (present(rc)) rc = ESMF_SUCCESS
     
+    call ESMF_StateGet(state, stateIntent=stateIntent, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
     if (present(nestedStateName)) then
-      nestedS = ESMF_StateCreate(name=trim(nestedStateName), rc=localrc)
+      nestedS = ESMF_StateCreate(name=trim(nestedStateName), &
+        stateIntent=stateIntent, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     elseif (present(Namespace)) then
       if (present(CplSet)) then
         nestedS = ESMF_StateCreate(name=trim(Namespace)//"_"//trim(CplSet), &
-          rc=localrc)
+          stateIntent=stateIntent, rc=localrc)
         if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       else
-        nestedS = ESMF_StateCreate(name=trim(Namespace), rc=localrc)
+        nestedS = ESMF_StateCreate(name=trim(Namespace), &
+          stateIntent=stateIntent, rc=localrc)
         if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       endif
     elseif (present(CplSet)) then
-      nestedS = ESMF_StateCreate(name=trim(CplSet), rc=localrc)
+      nestedS = ESMF_StateCreate(name=trim(CplSet), &
+        stateIntent=stateIntent, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     else
-      nestedS = ESMF_StateCreate(rc=localrc)
+      nestedS = ESMF_StateCreate(stateIntent=stateIntent, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     endif
@@ -385,8 +399,11 @@ module NUOPC_Base
 !     slash ("/") character.
 !     If omitted, the default is to use the value of the ShortName.
 !   \item[{[TransferOfferGeomObject]}]
-!     The "TransferOfferGeomObject" attribute of the advertised field. NUOPC 
-!     controls the vocabulary of this attribute. Valid options are 
+!     If the state intent of {\tt state} is {\tt ESMF\_STATEINTENT\_EXPORT},
+!     the "ProducerTransferOffer" attribute of the advertised field is set.
+!     If the state intent of {\tt state} is {\tt ESMF\_STATEINTENT\_IMPORT},
+!     the "ConsumerTransferOffer" attribute of the advertised field is set.
+!     NUOPC controls the vocabulary of this attribute. Valid options are 
 !     "will provide", "can provide", "cannot provide".
 !     If omitted, the default is "will provide".
 !   \item[{[SharePolicyField]}]
@@ -410,14 +427,22 @@ module NUOPC_Base
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    integer                 :: localrc
-    type(ESMF_Field)        :: field
-    character(ESMF_MAXSTR)  :: tempString
-    type(ESMF_Pointer)      :: vmThis
-    logical                 :: actualFlag
+    integer                     :: localrc
+    type(ESMF_Field)            :: field
+    character(ESMF_MAXSTR)      :: tempString
+    type(ESMF_Pointer)          :: vmThis
+    logical                     :: actualFlag
+    type(ESMF_StateIntent_Flag) :: stateIntent
     
     if (present(rc)) rc = ESMF_SUCCESS
     
+    call ESMF_StateGet(state, stateIntent=stateIntent, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME, &
+      rcToReturn=rc)) &
+      return  ! bail out
+
     field = ESMF_FieldEmptyCreate(name=name, vm=vm, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -453,8 +478,20 @@ module NUOPC_Base
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       endif
       if (present(TransferOfferGeomObject)) then
+        if (stateIntent==ESMF_STATEINTENT_EXPORT) then
+          tempString="ProducerTransferOffer"
+        elseif (stateIntent==ESMF_STATEINTENT_IMPORT) then
+          tempString="ConsumerTransferOffer"
+        else
+          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+            msg="The stateIntent must either be IMPORT or EXPORT here.", &
+            line=__LINE__, &
+            file=FILENAME, &
+            rcToReturn=rc)
+          return  ! bail out
+        endif
         if (trim(TransferOfferGeomObject)=="will provide") then
-          call NUOPC_SetAttribute(field, name="TransferOfferGeomObject", &
+          call NUOPC_SetAttribute(field, name=tempString, &
             value="will provide", rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, &
@@ -462,7 +499,7 @@ module NUOPC_Base
             rcToReturn=rc)) &
             return  ! bail out
         elseif (trim(TransferOfferGeomObject)=="can provide") then
-          call NUOPC_SetAttribute(field, name="TransferOfferGeomObject", &
+          call NUOPC_SetAttribute(field, name=tempString, &
             value="can provide", rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, &
@@ -470,7 +507,7 @@ module NUOPC_Base
             rcToReturn=rc)) &
             return  ! bail out
         elseif (trim(TransferOfferGeomObject)=="cannot provide") then
-          call NUOPC_SetAttribute(field, name="TransferOfferGeomObject", &
+          call NUOPC_SetAttribute(field, name=tempString, &
             value="cannot provide", rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, &
@@ -1703,7 +1740,7 @@ module NUOPC_Base
 !EOPI
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR)            :: attrList(19)
+    character(ESMF_MAXSTR)            :: attrList(21)
     character(ESMF_MAXSTR)            :: tempString
     logical                           :: accepted
     integer                           :: i
@@ -1718,21 +1755,24 @@ module NUOPC_Base
     attrList(3) = "ProducerConnection"! values: "open", "targeted", "connected"
     attrList(4) = "ConsumerConnection"! values: "open", "targeted", "connected"
     attrList(5) = "Updated" ! values: "true" or "false"
-    attrList(6) = "TransferOfferGeomObject"   ! values: "cannot provide",
+    attrList(6) = "ProducerTransferOffer"   ! values: "cannot provide",
                                     !   "can provide", "will provide"
-    attrList(7) = "TransferActionGeomObject"  ! values: "provide", "accept"
-    attrList(8) = "SharePolicyField"       ! values: "share", "not share"
-    attrList(9) = "ShareStatusField"       ! values: "shared", "not shared"
-    attrList(10)= "SharePolicyGeomObject"  ! values: "share", "not share"
-    attrList(11)= "ShareStatusGeomObject"  ! values: "shared", "not shared"
-    attrList(12)= "UngriddedLBound"
-    attrList(13)= "UngriddedUBound"
-    attrList(14)= "GridToFieldMap"
-    attrList(15)= "ArbDimCount"
-    attrList(16)= "MinIndex"
-    attrList(17)= "MaxIndex"
-    attrList(18)= "TypeKind"
-    attrList(19)= "GeomLoc"   ! either staggerloc or meshloc
+    attrList(7) = "ProducerTransferAction"  ! values: "provide", "accept"
+    attrList(8) = "ConsumerTransferOffer"   ! values: "cannot provide",
+                                    !   "can provide", "will provide"
+    attrList(9) = "ConsumerTransferAction"  ! values: "provide", "accept"
+    attrList(10)= "SharePolicyField"       ! values: "share", "not share"
+    attrList(11)= "ShareStatusField"       ! values: "shared", "not shared"
+    attrList(12)= "SharePolicyGeomObject"  ! values: "share", "not share"
+    attrList(13)= "ShareStatusGeomObject"  ! values: "shared", "not shared"
+    attrList(14)= "UngriddedLBound"
+    attrList(15)= "UngriddedUBound"
+    attrList(16)= "GridToFieldMap"
+    attrList(17)= "ArbDimCount"
+    attrList(18)= "MinIndex"
+    attrList(19)= "MaxIndex"
+    attrList(20)= "TypeKind"
+    attrList(21)= "GeomLoc"   ! either staggerloc or meshloc
     
     ! add Attribute packages
     call ESMF_AttributeAdd(field, convention="ESG", purpose="General", rc=localrc)
@@ -1891,17 +1931,33 @@ module NUOPC_Base
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
-    ! set TransferOfferGeomObject
+    ! set ProducerTransferOffer
     call ESMF_AttributeSet(field, &
-      name="TransferOfferGeomObject", value="will provide", &
+      name="ProducerTransferOffer", value="will provide", &
       convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
       rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
-    ! set TransferActionGeomObject
+    ! set ProducerTransferAction
     call ESMF_AttributeSet(field, &
-      name="TransferActionGeomObject", value="provide", &
+      name="ProducerTransferAction", value="provide", &
+      convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
+      rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+    ! set ConsumerTransferOffer
+    call ESMF_AttributeSet(field, &
+      name="ConsumerTransferOffer", value="will provide", &
+      convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
+      rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+    ! set ConsumerTransferAction
+    call ESMF_AttributeSet(field, &
+      name="ConsumerTransferAction", value="provide", &
       convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
       rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2804,9 +2860,16 @@ module NUOPC_Base
     type(ESMF_StaggerLoc)           :: staggerlocOpt
     character(len=80)               :: value
     logical                         :: isConnected
-
+    type(ESMF_StateIntent_Flag)     :: stateIntent
+    character(len=80)               :: tempString
+    
     if (present(rc)) rc = ESMF_SUCCESS
     
+    call ESMF_StateGet(state, stateIntent=stateIntent, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
     if (present(fieldName)) then
       ! fieldName provided -> construct a fieldNameList with a single element
       itemCount=1
@@ -2927,16 +2990,28 @@ module NUOPC_Base
           line=__LINE__, file=FILENAME, rcToReturn=rc)) &
           return  ! bail out
         if (isConnected) then
+          if (stateIntent==ESMF_STATEINTENT_EXPORT) then
+            tempString="ProducerTransferAction"
+          elseif (stateIntent==ESMF_STATEINTENT_IMPORT) then
+            tempString="ConsumerTransferAction"
+          else
+            call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+              msg="The stateIntent must either be IMPORT or EXPORT here.", &
+              line=__LINE__, &
+              file=FILENAME, &
+              rcToReturn=rc)
+            return  ! bail out
+          endif
           call ESMF_StateGet(state, itemName=fieldNameList(i), field=field, &
             rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=FILENAME, rcToReturn=rc)) &
             return  ! bail out
 #if 0
-          call NUOPC_GetAttribute(field, name="TransferActionGeomObject", &
+          call NUOPC_GetAttribute(field, name=tempString, &
             value=value, rc=localrc)
           call ESMF_LogWrite(trim(fieldNameList(i))//":*** "//trim(value)// &
-            " ***: TransferActionGeomObject", ESMF_LOGMSG_INFO, rc=localrc)
+            " ***: TransferAction", ESMF_LOGMSG_INFO, rc=localrc)
           call NUOPC_GetAttribute(field, name="ShareStatusField", &
             value=value, rc=localrc)
           call ESMF_LogWrite(trim(fieldNameList(i))//":*** "//trim(value)// &
@@ -2946,7 +3021,7 @@ module NUOPC_Base
           call ESMF_LogWrite(trim(fieldNameList(i))//":*** "//trim(value)// &
             " ***: ShareStatusGeomObject:", ESMF_LOGMSG_INFO, rc=localrc)
 #endif
-          call NUOPC_GetAttribute(field, name="TransferActionGeomObject", &
+          call NUOPC_GetAttribute(field, name=tempString, &
             value=value, rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=FILENAME, rcToReturn=rc)) &
@@ -3408,7 +3483,7 @@ module NUOPC_Base
     character(ESMF_MAXSTR)  :: ShortName
     integer                 :: localrc
     integer                 :: i
-    integer, parameter      :: attrCount=10
+    integer, parameter      :: attrCount=12
     character(ESMF_MAXSTR)  :: attrList(attrCount)
     character(ESMF_MAXSTR)  :: tempString
 
@@ -3433,12 +3508,14 @@ module NUOPC_Base
     attrList(2) = "ProducerConnection"
     attrList(3) = "ConsumerConnection"
     attrList(4) = "Updated"
-    attrList(5) = "TransferOfferGeomObject"
-    attrList(6) = "TransferActionGeomObject"
-    attrList(7) = "SharePolicyField"
-    attrList(8) = "ShareStatusField"
-    attrList(9) = "SharePolicyGeomObject"
-    attrList(10)= "ShareStatusGeomObject"
+    attrList(5) = "ProducerTransferOffer"
+    attrList(6) = "ProducerTransferAction"
+    attrList(7) = "ProducerTransferOffer"
+    attrList(8) = "ProducerTransferAction"
+    attrList(9) = "SharePolicyField"
+    attrList(10)= "ShareStatusField"
+    attrList(11)= "SharePolicyGeomObject"
+    attrList(12)= "ShareStatusGeomObject"
       
     ! Obtain basic attributes from the advertised Field
       
