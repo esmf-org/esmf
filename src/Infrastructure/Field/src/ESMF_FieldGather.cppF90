@@ -171,6 +171,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R4), pointer     :: dataPtrR4D3(:,:,:)
     real(ESMF_KIND_R8), pointer     :: coord1PtrR8D1(:)
     real(ESMF_KIND_R8), pointer     :: coord2PtrR8D1(:)
+    real(ESMF_KIND_R8), pointer     :: coord3PtrR8D1(:)
     real(ESMF_KIND_R8), pointer     :: coordPtrR8D1(:)
     real(ESMF_KIND_R8), pointer     :: coord1PtrR8D2(:,:)
     real(ESMF_KIND_R8), pointer     :: coord2PtrR8D2(:,:)
@@ -330,6 +331,71 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               dataPtrR8D1(i) = &
                 cos(real(l_param1I4)*3.1416*(coord1PtrR8D1(i)+real(l_step))/360.) * &
                 sin(real(l_param2I4)*3.1416*(coord2PtrR8D1(i)+real(l_step))/90.)
+            enddo
+            if (geomtype==ESMF_GEOMTYPE_MESH) then
+              deallocate(coordPtrR8D1, coord1PtrR8D1, coord2PtrR8D1)
+            endif
+          enddo
+        else if (dimCount==3) then
+          ! 3D pattern
+          do lde=0, ldeCount-1
+            if (geomtype==ESMF_GEOMTYPE_GRID) then
+              call ESMF_GridGetCoord(grid, coordDim=1, localDe=lde, &
+                farrayPtr=coord1PtrR8D1, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT)) &
+                return  ! bail out
+              call ESMF_GridGetCoord(grid, coordDim=2, localDe=lde, &
+                farrayPtr=coord2PtrR8D1, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT)) &
+                return  ! bail out
+              call ESMF_GridGetCoord(grid, coordDim=3, localDe=lde, &
+                farrayPtr=coord3PtrR8D1, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT)) &
+                return  ! bail out
+            elseif (geomtype==ESMF_GEOMTYPE_MESH) then
+              allocate(coordPtrR8D1(3*numOwnedPoints), &
+               coord1PtrR8D1(numOwnedPoints), coord2PtrR8D1(numOwnedPoints), &
+               coord3PtrR8D1(numOwnedPoints))
+              if (meshloc==ESMF_MESHLOC_ELEMENT) then
+                call ESMF_MeshGet(mesh, ownedElemCoords=coordPtrR8D1, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT)) &
+                  return  ! bail out
+              else
+                call ESMF_MeshGet(mesh, ownedNodeCoords=coordPtrR8D1, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT)) &
+                  return  ! bail out
+              endif
+              do i=1, numOwnedPoints
+                coord1PtrR8D1(i) = coordPtrR8D1((i-1)*3+1)
+                coord2PtrR8D1(i) = coordPtrR8D1((i-1)*3+2)
+                coord3PtrR8D1(i) = coordPtrR8D1((i-1)*3+3)
+              enddo
+            endif
+            call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR8D1, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT)) &
+              return  ! bail out
+            do i=lbound(dataPtrR4D1,1),ubound(dataPtrR4D1,1)
+#if 0
+              dataPtrR8D1(i) = real( &
+                cos(real(l_member)*3.1416*(coord1PtrR8D1(i)+real(l_step))/360.)&
+                * &
+                sin(real(l_member)*3.1416*(coord2PtrR8D1(i)+real(l_step))/90.)&
+                * &
+                cos(real(l_member)*3.1416*(coord3PtrR8D1(i)+real(l_step))/360.)&                
+                , ESMF_KIND_R8)
+#else
+              dataPtrR8D1(i) = real(real(l_member) * ( &
+                  coord1PtrR8D1(i)**2 &
+                + coord2PtrR8D1(i)**2 &
+                + coord3PtrR8D1(i)**2) &
+                , ESMF_KIND_R8)
+#endif
             enddo
             if (geomtype==ESMF_GEOMTYPE_MESH) then
               deallocate(coordPtrR8D1, coord1PtrR8D1, coord2PtrR8D1)
@@ -629,6 +695,71 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 * &
                 sin(real(l_member)*3.1416*(coord2PtrR8D1(i)+real(l_step))/90.)&
                 , ESMF_KIND_R4)
+            enddo
+            if (geomtype==ESMF_GEOMTYPE_MESH) then
+              deallocate(coordPtrR8D1, coord1PtrR8D1, coord2PtrR8D1)
+            endif
+          enddo
+        else if (dimCount==3) then
+          ! 3D pattern
+          do lde=0, ldeCount-1
+            if (geomtype==ESMF_GEOMTYPE_GRID) then
+              call ESMF_GridGetCoord(grid, coordDim=1, localDe=lde, &
+                farrayPtr=coord1PtrR8D1, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT)) &
+                return  ! bail out
+              call ESMF_GridGetCoord(grid, coordDim=2, localDe=lde, &
+                farrayPtr=coord2PtrR8D1, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT)) &
+                return  ! bail out
+              call ESMF_GridGetCoord(grid, coordDim=3, localDe=lde, &
+                farrayPtr=coord3PtrR8D1, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT)) &
+                return  ! bail out
+            elseif (geomtype==ESMF_GEOMTYPE_MESH) then
+              allocate(coordPtrR8D1(3*numOwnedPoints), &
+               coord1PtrR8D1(numOwnedPoints), coord2PtrR8D1(numOwnedPoints), &
+               coord3PtrR8D1(numOwnedPoints))
+              if (meshloc==ESMF_MESHLOC_ELEMENT) then
+                call ESMF_MeshGet(mesh, ownedElemCoords=coordPtrR8D1, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT)) &
+                  return  ! bail out
+              else
+                call ESMF_MeshGet(mesh, ownedNodeCoords=coordPtrR8D1, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT)) &
+                  return  ! bail out
+              endif
+              do i=1, numOwnedPoints
+                coord1PtrR8D1(i) = coordPtrR8D1((i-1)*3+1)
+                coord2PtrR8D1(i) = coordPtrR8D1((i-1)*3+2)
+                coord3PtrR8D1(i) = coordPtrR8D1((i-1)*3+3)
+              enddo
+            endif
+            call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR4D1, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT)) &
+              return  ! bail out
+            do i=lbound(dataPtrR4D1,1),ubound(dataPtrR4D1,1)
+#if 0
+              dataPtrR4D1(i) = real( &
+                cos(real(l_member)*3.1416*(coord1PtrR8D1(i)+real(l_step))/360.)&
+                * &
+                sin(real(l_member)*3.1416*(coord2PtrR8D1(i)+real(l_step))/90.)&
+                * &
+                cos(real(l_member)*3.1416*(coord3PtrR8D1(i)+real(l_step))/360.)&                
+                , ESMF_KIND_R4)
+#else
+              dataPtrR4D1(i) = real(real(l_member) * ( &
+                  coord1PtrR8D1(i)**2 &
+                + coord2PtrR8D1(i)**2 &
+                + coord3PtrR8D1(i)**2) &
+                , ESMF_KIND_R4)
+#endif
             enddo
             if (geomtype==ESMF_GEOMTYPE_MESH) then
               deallocate(coordPtrR8D1, coord1PtrR8D1, coord2PtrR8D1)
