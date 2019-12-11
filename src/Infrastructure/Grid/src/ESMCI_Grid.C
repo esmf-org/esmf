@@ -8680,65 +8680,65 @@ void GridCellIter::getDEBnds(
   grid->getDistExclusiveUBound(staggerDistgrid, localDE, uBnd);  
   grid->getDistExclusiveLBound(staggerDistgrid, localDE, lBnd);  
 
-  // if cell iterator then expand bounds
-  // If center stagger, expand if not bipole
-    if (staggerloc==0) {
+  // Change bounds to cell bounds. 
+  if (tileCount <= 1) { // Calc. depends on whether Grid is multi-tile
+
+    // Adjust based on alignment
+    for (int i=0; i<rank; i++) {
+      bool isLBnd=grid->isStaggerLBnd(staggerloc, localDE, i);
+      bool isUBnd=grid->isStaggerUBnd(staggerloc, localDE, i);
+          
+      if (align[i] <0) {
+        if (isUBnd) uBnd[i]--;
+      } else {
+        if (isLBnd) lBnd[i]++;
+      }    
+    }
+
+    // If center stagger, expand out again for bipole connection
+    if (staggerloc == 0) {
       for (int i=0; i<rank; i++) {
         bool isLBnd=grid->isStaggerLBnd(staggerloc, localDE, i);
         bool isUBnd=grid->isStaggerUBnd(staggerloc, localDE, i);
-        
-        if (align[i] <0) {
-          if (isUBnd && (connU[i] != ESMC_GRIDCONN_BIPOLE)) uBnd[i]--;
-        } else {
-          if (isLBnd && (connL[i] != ESMC_GRIDCONN_BIPOLE)) lBnd[i]++;
-        }    
-      }
-    } else {
-      // Calculations are different for single and multi-tile cases
-      if (tileCount <= 1) {
-        for (int i=0; i<rank; i++) {
-          bool isLBnd=grid->isStaggerLBnd(staggerloc, localDE, i);
-          bool isUBnd=grid->isStaggerUBnd(staggerloc, localDE, i);
-          
-          if (align[i] <0) {
-            if (isUBnd) uBnd[i]--;
-          } else {
-            if (isLBnd) lBnd[i]++;
-          }    
-        }
-      } else {
-        // Get tile min/max
-        int localrc,rc;
-        const int *localDEList= staggerDistgrid->getDELayout()->getLocalDeToDeMap();
-        const int *DETileList = staggerDistgrid->getTileListPDe();
-        int tile=DETileList[localDEList[localDE]];
-        
-        const int *tileMin=staggerDistgrid->getMinIndexPDimPTile(tile, &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-                                          &rc)) throw rc;
-        const int *tileMax=staggerDistgrid->getMaxIndexPDimPTile(tile, &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-                                          &rc)) throw rc;        
 
-        // Loop setting bounds based on tile edges
-        for (int i=0; i<rank; i++) {
+        if (isLBnd && (connL[i]==ESMC_GRIDCONN_BIPOLE)) lBnd[i]--;
+        if (isUBnd && (connU[i]==ESMC_GRIDCONN_BIPOLE)) uBnd[i]++; 
+      } 
+    } 
+
+  } else {
+    // Get tile min/max
+    int localrc,rc;
+    const int *localDEList= staggerDistgrid->getDELayout()->getLocalDeToDeMap();
+    const int *DETileList = staggerDistgrid->getTileListPDe();
+    int tile=DETileList[localDEList[localDE]];
+        
+    const int *tileMin=staggerDistgrid->getMinIndexPDimPTile(tile, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                      &rc)) throw rc;
+    const int *tileMax=staggerDistgrid->getMaxIndexPDimPTile(tile, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                      &rc)) throw rc;        
+
+    // Loop setting bounds based on tile edges
+    for (int i=0; i<rank; i++) {
           
-          // See if we're on the tile edge
-          bool isLBnd=false;
-          if (lBnd[i] == tileMin[i]) isLBnd=true;
+      // See if we're on the tile edge
+      bool isLBnd=false;
+      if (lBnd[i] == tileMin[i]) isLBnd=true;
           
-          bool isUBnd=false;
-          if (uBnd[i] == tileMax[i]) isUBnd=true;
+      bool isUBnd=false;
+      if (uBnd[i] == tileMax[i]) isUBnd=true;
           
-          // Adjust bounds
-          if (align[i] <0) {
-            if (isUBnd) uBnd[i]--;
-          } else {
-            if (isLBnd) lBnd[i]++;
-          }    
-        }
-      }
+      // Adjust bounds
+      if (align[i] <0) {
+        if (isUBnd) uBnd[i]--;
+      } else {
+        if (isLBnd) lBnd[i]++;
+      }    
     }
+  }
+
 }
 
 //-----------------------------------------------------------------------------
