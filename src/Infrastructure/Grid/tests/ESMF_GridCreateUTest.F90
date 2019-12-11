@@ -1425,7 +1425,6 @@ program ESMF_GridCreateUTest
   !-----------------------------------------------------------------------------
 
 
-
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Creating a 2D 1 periodic Grid with GridCreate1PeriDimReg"
@@ -1453,7 +1452,6 @@ program ESMF_GridCreateUTest
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
-
 
 
   !-----------------------------------------------------------------------------
@@ -2659,6 +2657,46 @@ program ESMF_GridCreateUTest
   call ESMF_GridWriteVTK(grid, staggerLoc=ESMF_STAGGERLOC_EDGE2, filename="ufrmEdge2Grid", &
                          rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+#endif
+
+
+  ! destroy grid
+  call ESMF_GridDestroy(grid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test ESMF_GridCreate1PeriDimUfrm with two bipole flags"
+  write(failMsg, *) "Incorrect result"
+ 
+  ! init success flag
+  rc=ESMF_SUCCESS
+
+
+  ! Create Grid
+  grid=ESMF_GridCreate1PeriDimUfrm(maxIndex=(/20,20/), &
+       minCornerCoord=(/-180.0_ESMF_KIND_R8,-80.0_ESMF_KIND_R8/), &
+       maxCornerCoord=(/ 180.0_ESMF_KIND_R8,80.0_ESMF_KIND_R8/), &
+        polekindflag=(/ESMF_POLEKIND_BIPOLE,ESMF_POLEKIND_BIPOLE/), &
+!       polekindflag=(/ESMF_POLEKIND_BIPOLE,ESMF_POLEKIND_MONOPOLE/), &
+       staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
+       rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+#if 1
+  ! Dump grid staggers to file
+  call ESMF_GridWriteVTK(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, filename="ufrmbipoleCntrGrid", &
+                         rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+!! The code isn't setup to do other than center stagger right now, when 
+!! other staggers work with bipole turn this back on.
+!  call ESMF_GridWriteVTK(grid, staggerLoc=ESMF_STAGGERLOC_CORNER, filename="ufrmbipoleCnrGrid", &
+!                         rc=localrc)
+!  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 #endif
 
 
