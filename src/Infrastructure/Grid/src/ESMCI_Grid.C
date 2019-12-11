@@ -91,15 +91,16 @@ void FTN_X(f_esmf_gridcreatecubedsphere)(ESMCI::Grid **grid,
 
 void FTN_X(f_esmf_gridcreatefromfile)(ESMCI::Grid **grid,
     const char *filename, int *fileTypeFlag,
-    int *regDecomp, int *rdpresent,
-    int *decompflag, int *dfpresent,
-    int *isSphere, int *ispresent,
-    int *addCornerStagger, int *acspresent,
-    int *addUserArea, int *auapresent,
+    int *regDecomp,
+    int *decompflag,
+    int *isSphere, 
+    int *polekind, int *len1,
+    int *addCornerStagger,
+    int *addUserArea,
     ESMC_IndexFlag *indexflag,
-    int *addMask, int *ampresent,
-    const char *varname, int *vnpresent,
-    const char *coordNames, int *cnpresent, int *rc,
+    int *addMask,
+    const char *varname,
+    const char *coordNames, int *rc,
     ESMCI_FortranStrLenArg len_filename,
     ESMCI_FortranStrLenArg len_varname,
     ESMCI_FortranStrLenArg len_coordNames);
@@ -538,6 +539,7 @@ int setDefaultsLUA(int dimCount,
     int *regDecomp,
     int *decompflag,
     int *isSphere,
+    ESMC_InterArrayInt *polekindflag,
     int *addCornerStagger,
     int *addUserArea,
     ESMC_IndexFlag *indexflag,
@@ -562,9 +564,6 @@ int setDefaultsLUA(int dimCount,
 
 
     // handle the optional arguments
-    int ispresent=0, acspresent=0, auapresent=0;
-    int ampresent=0, vnpresent=0, cnpresent=0;
-    int dfpresent=0, rdpresent=0;
     int *df_loc = NULL;
     int *rd_loc = NULL;
     char *vn_loc = (char *)"";
@@ -572,40 +571,57 @@ int setDefaultsLUA(int dimCount,
 
     if (regDecomp != NULL) {
       rd_loc = regDecomp;
-      rdpresent = 1;
     }
     if (decompflag != NULL) {
       df_loc = decompflag;
-      dfpresent = 1;
     }
     int is_loc = 1;
     if (isSphere != NULL) {
       is_loc = *isSphere;
-      ispresent = 1;
     }
     int acs_loc = 0;
     if (addCornerStagger != NULL) {
       acs_loc = *addCornerStagger;
-      acspresent = 1;
     }
     int aua_loc = 0;
     if (addUserArea != NULL) {
       aua_loc = *addUserArea;
-      auapresent = 1;
     }
     int am_loc = 0;
     if (addMask != NULL) {
       am_loc = *addMask;
-      ampresent = 1;
     }
     if (varname != NULL) {
       vn_len = strlen(varname);
-      vnpresent = vn_len > 0;
-      if (vnpresent) {
+      if (vn_len > 0) {
         vn_loc = (char *)malloc(vn_len);
         strncpy(vn_loc, varname, vn_len);
       }
     }
+
+    int *pkfArray;
+    int pkfLen;
+    
+    ESMCI::InterArray<int> *pkf = (ESMCI::InterArray<int> *)polekindflag;
+    if (pkf != NULL) {
+      if(pkf->dimCount != 1){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+          "- polekindflag array must be of rank 1", ESMC_CONTEXT, rc);
+          return ESMC_NULL_POINTER;
+      }
+
+      if(pkf->extent[0] != 2){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+          "- polekindflag array must hold 2 values", ESMC_CONTEXT, rc);
+          return ESMC_NULL_POINTER;
+      }
+      pkfArray = pkf->array;
+      pkfLen = pkf->extent[0];
+    } else {
+      pkfArray = NULL;
+      pkfLen = 0;
+    }
+
 
     // Create Fortran-style buffer to pass coordNames to Fortran if coordNames are present.
     int cn_len = 0;
@@ -620,7 +636,6 @@ int setDefaultsLUA(int dimCount,
       }
       cn_len = (cn_len0 >= cn_len1) ? cn_len0 : cn_len1;
       int fortran_buf_size = 2 * cn_len;
-      cnpresent = 1;
       cn_buf = (char *)malloc(fortran_buf_size);
       memset(cn_buf, ' ', fortran_buf_size);
       strncpy(&cn_buf[0], coordNames[0], cn_len);
@@ -630,11 +645,9 @@ int setDefaultsLUA(int dimCount,
     // allocate the grid object
     Grid *grid;
     FTN_X(f_esmf_gridcreatefromfile)(&grid, filename, &fileTypeFlag,
-                     rd_loc, &rdpresent, df_loc, &dfpresent,
-                     &is_loc, &ispresent, 
-                     &acs_loc, &acspresent, &aua_loc, &auapresent,
-                     indexflag, &am_loc, &ampresent, vn_loc, &vnpresent,
-                     cn_buf, &cnpresent, &localrc,
+                     rd_loc, df_loc, &is_loc, pkfArray, &pkfLen, 
+                     &acs_loc, &aua_loc, 
+                     indexflag, &am_loc, vn_loc, cn_buf, &localrc,
                      strlen(filename), vn_len, cn_len);
     if (vn_loc && (vn_len > 0)) {
       free(vn_loc);

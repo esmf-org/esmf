@@ -12,12 +12,13 @@ SOURCEC = \
   DebugOutput.cpp DenseTag.cpp DualTool.cpp \
   EntitySequence.cpp ErrorHandler.cpp ErrorOutput.cpp \
   Factory.cpp FBEngine.cpp FileOptions.cpp \
-  GeomTopoTool.cpp GeomUtil.cpp \
+  GeomQueryTool.cpp GeomTopoTool.cpp GeomUtil.cpp \
   HalfFacetRep.cpp HigherOrderFactory.cpp HomXform.cpp \
   iMOAB.cpp \
   LloydSmoother.cpp\
-  MergeMesh.cpp MeshSet.cpp MeshSetSequence.cpp MeshTag.cpp \
+  MergeMesh.cpp MeshGeneration.cpp MeshSet.cpp MeshSetSequence.cpp MeshTag.cpp \
   MeshTopoUtil.cpp \
+  NestedRefine.cpp \
   OrientedBox.cpp OrientedBoxTreeTool.cpp \
   PolyElementSeq.cpp ProgOptions.cpp \
   Range.cpp RangeSeqIntersectIter.cpp ReaderWriterSet.cpp \
@@ -33,11 +34,6 @@ SOURCEC = \
   WriteUtil.cpp
 
 
-# Not currently compiled:
-# ZoltanPartitioner.cpp
-# MetisPartitioner.cpp
-# SparseTagSuperCollection.cpp
-
 SOURCEF =
 
 SOURCEH =
@@ -52,10 +48,13 @@ LIBBASE   = libesmf
 LOCDIR    = src/Infrastructure/Mesh/src/Moab
 
 ESMF_CXXCOMPILECPPFLAGS += \
+                           -I$(ESMF_DIR)/$(LOCDIR)/DiscreteGeometry \
+                           -I$(ESMF_DIR)/$(LOCDIR)/IntxMesh \
                            -I$(ESMF_DIR)/$(LOCDIR)/io \
                            -I$(ESMF_DIR)/$(LOCDIR)/io/mhdf/include \
                            -I$(ESMF_DIR)/$(LOCDIR)/LocalDiscretization \
-                           -I$(ESMF_DIR)/$(LOCDIR)/parallel
+                           -I$(ESMF_DIR)/$(LOCDIR)/parallel \
+                           -I$(ESMF_DIR)/$(LOCDIR)/verdict
 
 #                           -I$(ESMF_DIR)/$(LOCDIR)/../Zoltan/.
 
@@ -65,6 +64,6 @@ CLOBBERDIRS =
 
 include $(ESMF_DIR)/makefile
 
-DIRS        = io LocalDiscretization parallel RefineMesh verdict
+DIRS        = DiscreteGeometry IntxMesh io LocalDiscretization parallel verdict
 
-# not building files in lotte directory
+# not building files in HYPRE, lotte, mesquite, Remapping directories

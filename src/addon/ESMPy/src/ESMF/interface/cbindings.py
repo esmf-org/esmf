@@ -501,11 +501,7 @@ def ESMP_GridCreate1PeriDim(maxIndex, polekindflag=None, periodicDim=None,
     #InterfaceInt requires int32 type numpy arrays
     if polekindflag is not None:
         if (polekindflag.dtype != np.int32):
-            raise TypeError('polekindflag must have dtype=int32')
-
-        # must be size 2
-        if (len(polekindflag) != 2):
-            raise TypeError('polekindflag must only have 2 entries')
+            raise TypeError('pole_kind must have dtype=int32')
 
     # reset the periodic_dim and pole_dim to be 1 based for ESMF
     if periodicDim is not None:
@@ -665,6 +661,7 @@ _ESMF.ESMC_GridCreateFromFile.argtypes = [Py3Char, ct.c_int,
                                           ct.POINTER(ct.c_int),
                                           OptionalNumpyArrayInt32,
                                           OptionalNamedConstant,
+                                          OptionalInterfaceInt,
                                           OptionalNamedConstant,
                                           OptionalNamedConstant,
                                           OptionalNamedConstant,
@@ -675,7 +672,7 @@ _ESMF.ESMC_GridCreateFromFile.argtypes = [Py3Char, ct.c_int,
 
 @netcdf
 def ESMP_GridCreateFromFile(filename, fileTypeFlag, regDecomp,
-                            decompflag=None, isSphere=None,
+                            decompflag=None, isSphere=None, polekindflag=None, 
                             addCornerStagger=None, addUserArea=None,
                             addMask=None, varname=None, coordNames=None):
     """
@@ -691,6 +688,7 @@ def ESMP_GridCreateFromFile(filename, fileTypeFlag, regDecomp,
         List of Integers                    :: regDecomp\n
         List of Integers (optional)         :: decompflag\n
         Boolean (optional)                  :: isSphere\n
+        Numpy.array(dtype=int32)            :: polekindflag\n
         Boolean (optional)                  :: addCornerStagger\n
         Boolean (optional)                  :: addUserArea\n
         Boolean (optional)                  :: addMask\n
@@ -702,9 +700,15 @@ def ESMP_GridCreateFromFile(filename, fileTypeFlag, regDecomp,
     # dummy value to correspond to ESMF_INDEX_GLOBAL = 1 for global indexing
     indexflag = 1
 
+    #InterfaceInt requires int32 type numpy arrays
+    if polekindflag is not None:
+        if (polekindflag.dtype != np.int32):
+            raise TypeError('pole_kind must have dtype=int32')
+
     gridstruct = _ESMF.ESMC_GridCreateFromFile(filename, fileTypeFlag,
                                                None, decompflag,
-                                               isSphere, addCornerStagger,
+                                               isSphere, polekindflag,
+                                               addCornerStagger,
                                                addUserArea, indexflag,
                                                addMask, varname,
                                                coordNames, ct.byref(lrc))

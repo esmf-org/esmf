@@ -28,12 +28,6 @@ ErrorCode get_file_options(int argc, char **argv,
                            std::string &dbgFile,
                            bool &help)
 {
-  #ifdef MESHDIR
-  std::string TestDir( STRINGIFY(MESHDIR) );
-  #else
-  std::string TestDir(".");
-  #endif
-
   // Initialize some of the outputs to null values indicating not present
   // in the argument list.
   gNormTag = "";

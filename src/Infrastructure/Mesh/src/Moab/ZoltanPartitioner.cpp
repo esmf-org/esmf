@@ -73,7 +73,7 @@ ZoltanPartitioner::ZoltanPartitioner( Interface *impl,
                     , GeometryQueryTool *gqt
 #endif
 )
-                   : PartitionerBase(impl,use_coords),
+                   : PartitionerBase<int>(impl,use_coords),
                      myZZ(NULL),
                      argcArg(argc),
                      argvArg(argv)
@@ -943,7 +943,7 @@ double ZoltanPartitioner::estimate_face_mesh_load(RefEntity* face, const double 
 double ZoltanPartitioner::estimate_face_comm_load(RefEntity* face, const double h)
 {
   double peri = 0.;
-#if ((CGM_MAJOR_VERSION == 14 && CGM_MINOR_VERSION > 2) || CGM_MAJOR_VERSION == 15)
+#if ((CGM_MAJOR_VERSION == 14 && CGM_MINOR_VERSION > 2) || CGM_MAJOR_VERSION >= 15)
   DLIList<DLIList<RefEdge*> > ref_edge_loops;
 #else
   DLIList<DLIList<RefEdge*>*> ref_edge_loops;
@@ -951,7 +951,7 @@ double ZoltanPartitioner::estimate_face_comm_load(RefEntity* face, const double 
   CAST_TO(face, RefFace)->ref_edge_loops(ref_edge_loops);
   ref_edge_loops.reset();
 
-#if ((CGM_MAJOR_VERSION == 14 && CGM_MINOR_VERSION > 2) || CGM_MAJOR_VERSION == 15)
+#if ((CGM_MAJOR_VERSION == 14 && CGM_MINOR_VERSION > 2) || CGM_MAJOR_VERSION >= 15)
   for (int i = 0; i < ref_edge_loops.size(); i++) {
     DLIList<RefEdge*> eloop = ref_edge_loops.get_and_step();
     eloop.reset();
@@ -2009,4 +2009,208 @@ void mbGetPart(void * /* userDefinedData */, int /* numGlobalIds */, int /* numL
 
     part[next++] = Parts[id];
   }
+}
+
+// new methods for partition in parallel, used by migrate in iMOAB
+ErrorCode ZoltanPartitioner::partition_owned_cells(Range & primary, ParallelComm * pco, std::map<int, int> & extraAdjCellsId,
+    std::map<int, int> procs, int & numNewPartitions, std::map<int, Range> & distribution, int met)
+{
+  // start copy
+  MeshTopoUtil mtu(mbImpl);
+  Range adjs;
+
+  std::vector<int> adjacencies;
+  std::vector<int> ids;
+  ids.resize(primary.size());
+  std::vector<int> length;
+  std::vector<double> coords;
+  std::vector<int>  nbor_proc;
+    // can use a fixed-size array 'cuz the number of lower-dimensional neighbors is limited
+    // by MBCN
+  int neighbors[5*MAX_SUB_ENTITIES];
+  int neib_proc[5*MAX_SUB_ENTITIES];
+  double avg_position[3];
+  int moab_id;
+  int primaryDim = mbImpl->dimension_from_handle(*primary.rbegin());
+    // get the global id tag handle
+  Tag gid;
+  ErrorCode rval = mbImpl->tag_get_handle(GLOBAL_ID_TAG_NAME, 1, MB_TYPE_INTEGER,
+                                  gid, MB_TAG_DENSE|MB_TAG_CREAT); MB_CHK_ERR ( rval );
+
+  rval = mbImpl->tag_get_data(gid, primary, &ids[0]); MB_CHK_ERR ( rval );
+
+  int rank = pco->rank(); // current rank , will be put on regular neighbors
+  int i=0;
+  for (Range::iterator rit = primary.begin(); rit != primary.end(); ++rit, i++)
+  {
+    EntityHandle cell=*rit;
+    // get bridge adjacencies for each cell
+    if (1==met)
+    {
+      adjs.clear();
+      rval = mtu.get_bridge_adjacencies(cell, (primaryDim > 0 ? primaryDim-1 : 3),
+          primaryDim, adjs); MB_CHK_ERR ( rval );
+
+        // get the graph vertex ids of those
+      if (!adjs.empty()) {
+        assert(adjs.size() < 5*MAX_SUB_ENTITIES);
+        rval = mbImpl->tag_get_data(gid, adjs, neighbors); MB_CHK_ERR ( rval );
+      }
+      // if adjacent to neighbor partitions, add to the list
+      int size_adjs = (int)adjs.size();
+      moab_id = ids[i] ;
+      for (int k=0; k<size_adjs; k++)
+        neib_proc[k]= rank; // current rank
+      if (extraAdjCellsId.find(moab_id) != extraAdjCellsId.end())
+      {
+        // it means that the current cell is adjacent to a cell in another partition
+        int otherID = extraAdjCellsId[moab_id];
+        neighbors[size_adjs] = otherID; // the id of the other cell, across partition
+        neib_proc[size_adjs] = procs[otherID]; // this is how we built this map, the cell id maps to what proc it came from
+        size_adjs++;
+      }
+        // copy those into adjacencies vector
+      length.push_back(size_adjs);
+      std::copy(neighbors, neighbors+size_adjs, std::back_inserter(adjacencies));
+      std::copy(neib_proc, neib_proc+size_adjs, std::back_inserter(nbor_proc));
+    }
+    else if (2==met)
+    {
+      rval = mtu.get_average_position(cell, avg_position); MB_CHK_ERR ( rval );
+      std::copy(avg_position, avg_position+3, std::back_inserter(coords));
+    }
+  }
+
+
+#ifdef VERBOSE
+  std::stringstream ff2;
+  ff2 << "zoltanInput_"<< pco->rank() << ".txt";
+  std::ofstream ofs;
+  ofs.open (ff2.str().c_str(), std::ofstream::out);
+  ofs << "Length vector: " << std::endl;
+  std::copy(length.begin(), length.end(), std::ostream_iterator<int>(ofs, ", "));
+  ofs << std::endl;
+  ofs << "Adjacencies vector: " << std::endl;
+  std::copy(adjacencies.begin(), adjacencies.end(), std::ostream_iterator<int>(ofs, ", "));
+  ofs << std::endl;
+  ofs << "Moab_ids vector: " << std::endl;
+  std::copy(ids.begin(), ids.end(), std::ostream_iterator<int>(ofs, ", "));
+  ofs << std::endl;
+  ofs << "Coords vector: " << std::endl;
+  std::copy(coords.begin(), coords.end(), std::ostream_iterator<double>(ofs, ", "));
+  ofs << std::endl;
+  ofs.close();
+#endif
+
+// these are static var in this file, and used in the callbacks
+  Points= &coords[0];
+  GlobalIds=&ids[0];
+  NumPoints=(int)ids.size();
+  NumEdges=&length[0];
+  NborGlobalId=&adjacencies[0];
+  NborProcs=&nbor_proc[0];
+  ObjWeights=NULL;
+  EdgeWeights=NULL;
+  Parts=NULL;
+
+  float version;
+  if (pco->rank() ==0)
+    std::cout << "Initializing zoltan..." << std::endl;
+
+  Zoltan_Initialize(argcArg, argvArg, &version);
+
+  // Create Zoltan object.  This calls Zoltan_Create.
+  if (NULL == myZZ) myZZ = new Zoltan(pco->comm() );
+
+
+  // set # requested partitions
+  char buff[10];
+  sprintf(buff, "%d", numNewPartitions);
+  int retval = myZZ->Set_Param("NUM_GLOBAL_PARTITIONS", buff);
+  if (ZOLTAN_OK != retval) return MB_FAILURE;
+
+    // request parts assignment
+  retval = myZZ->Set_Param("RETURN_LISTS", "PARTS");
+  if (ZOLTAN_OK != retval) return MB_FAILURE;
+
+
+  myZZ->Set_Num_Obj_Fn(mbGetNumberOfAssignedObjects, NULL);
+  myZZ->Set_Obj_List_Fn(mbGetObjectList, NULL);
+  // due to a bug in zoltan, if method is graph partitioning, do not pass coordinates!!
+  if (2 == met)
+  {
+    myZZ->Set_Num_Geom_Fn(mbGetObjectSize, NULL);
+    myZZ->Set_Geom_Multi_Fn(mbGetObject, NULL);
+    SetRCB_Parameters(); // geometry
+  }
+  else if (1 == met)
+  {
+    myZZ->Set_Num_Edges_Multi_Fn(mbGetNumberOfEdges, NULL);
+    myZZ->Set_Edge_List_Multi_Fn(mbGetEdgeList, NULL);
+    SetHypergraph_Parameters("auto");
+  }
+
+  // Perform the load balancing partitioning
+
+  int changes;
+  int numGidEntries;
+  int numLidEntries;
+  int num_import;
+  ZOLTAN_ID_PTR import_global_ids, import_local_ids;
+  int * import_procs;
+  int * import_to_part;
+  int num_export;
+  ZOLTAN_ID_PTR export_global_ids, export_local_ids;
+  int *assign_procs, *assign_parts;
+
+  if (pco->rank() ==0)
+    std::cout << "Computing partition using method (1-graph, 2-geom):" << met  <<
+      " for " << numNewPartitions << " parts..." << std::endl;
+
+  retval = myZZ->LB_Partition(changes, numGidEntries, numLidEntries,
+                              num_import, import_global_ids, import_local_ids, import_procs, import_to_part,
+                              num_export, export_global_ids, export_local_ids,
+                              assign_procs, assign_parts);
+  if (ZOLTAN_OK != retval) return MB_FAILURE;
+
+#ifdef VERBOSE
+  std::stringstream ff3;
+  ff3 << "zoltanOutput_"<< pco->rank() << ".txt";
+  std::ofstream ofs3;
+  ofs3.open (ff3.str().c_str(), std::ofstream::out);
+  ofs3<<" export elements on rank " << rank << " \n";
+  ofs3 << "\t index \t gb_id \t local \t proc \t part \n";
+  for (int k=0; k<num_export; k++)
+  {
+    ofs3<<"\t" << k << "\t" << export_global_ids[k] << "\t" << export_local_ids[k]<< "\t" <<
+        assign_procs[k] << "\t" << assign_parts[k] << "\n";
+  }
+  ofs3.close();
+#endif
+
+  // basically each local cell is assigned to a part
+
+  assert (num_export == (int) primary.size());
+  for (i=0; i<num_export; i++)
+  {
+    EntityHandle cell=primary[i];
+    distribution[assign_parts[i]].insert(cell);
+  }
+
+
+  Zoltan::LB_Free_Part(&import_global_ids, &import_local_ids, &import_procs, &import_to_part);
+  Zoltan::LB_Free_Part( &export_global_ids, &export_local_ids,
+      &assign_procs, &assign_parts);
+
+  delete myZZ;
+
+  // clear arrays that were resized locally, to free up local memory
+
+  std::vector<int>().swap(adjacencies);
+  std::vector<int>().swap(ids);
+  std::vector<int>().swap(length);
+  std::vector<int>().swap(nbor_proc);
+  std::vector<double>().swap(coords);
+
+  return MB_SUCCESS;
 }

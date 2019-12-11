@@ -19,6 +19,14 @@
 #define mbfloor floor
 #define mbceil ceil
 
+#ifdef INTEGER
+#undef INTEGER
+#endif
+
+#ifdef real
+#undef real
+#endif
+
 /* integer type to use for everything */
 #if   defined(USE_LONG)
 #  define INTEGER long

@@ -1,4 +1,4 @@
-#include "moab/SpectralQuad.hpp"
+#include "moab/LocalDiscretization/SpectralQuad.hpp"
 #include "moab/Forward.hpp"
 
 namespace moab 

@@ -282,7 +282,8 @@ template <class TYPE>
                                  int *rc);
   static Grid* createfromfile(const char *filename, int fileTypeFlag, 
                               int *regDecomp, int *decompflag,
-                              int *isSphere, int *addCornerStagger,
+                              int *isSphere, ESMC_InterArrayInt *polekindflag,
+                              int *addCornerStagger,
                               int *addUserArea, ESMC_IndexFlag *indexflag,
                               int *addMask, const char *varname,
                               const char **coordNames, int *rc);

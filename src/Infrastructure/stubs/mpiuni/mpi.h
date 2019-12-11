@@ -114,6 +114,7 @@ extern int MPIUNI_Memcpy(void*,const void*,int);
 #define MPI_CHAR            sizeof(char)
 #define MPI_BYTE            sizeof(char)
 #define MPI_INT             sizeof(int)
+#define MPI_INTEGER         sizeof(int)
 #define MPI_UNSIGNED        sizeof(unsigned int)
 #define MPI_LOGICAL         sizeof(int)
 #define MPI_LONG            sizeof(long)
@@ -568,7 +569,7 @@ extern double ESMC_MPI_Wtime(void);
      MPI_Abort(MPI_COMM_WORLD,0)
 #define MPI_Group_size(group,size) (*(size)=1,MPI_SUCCESS)
 #define MPI_Group_rank(group,rank) (*(rank)=0,MPI_SUCCESS)
-#define MPI_Group_translate_ranks (group1,n,ranks1,\
+#define MPI_Group_translate_ranks(group1,n,ranks1,\
      group2,ranks2) MPI_Abort(MPI_COMM_WORLD,0)
 #define MPI_Group_compare(group1,group2,result) \
      (*(result)=1,MPI_SUCCESS)

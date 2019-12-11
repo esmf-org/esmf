@@ -64,7 +64,6 @@ bool segment_box_intersect( CartVect box_min,
 /**\brief Test for intersection between a ray and a triangle.
  *\param ray_point  The start point of the ray.
  *\param ray_unit_direciton  The direction of the ray. Must be a unit vector.
- *\param tolerance  Absolute distance tolerance for point equality
  *\param t_out Output: The distance along the ray from ray_point in the
  *                  direction of ray_unit_direction at which the ray
  *                  itersected the triangle.
@@ -76,7 +75,6 @@ bool segment_box_intersect( CartVect box_min,
 bool ray_tri_intersect( const CartVect vertices[3],
                         const CartVect& ray_point,
                         const CartVect& ray_unit_direction,
-                        double tolerance,
                         double& t_out,
                         const double* ray_length = 0 );
 
@@ -85,7 +83,6 @@ bool ray_tri_intersect( const CartVect vertices[3],
  *\param vertices            Nodes of the triangle.
  *\param ray_point           The start point of the ray.
  *\param ray_unit_direction  The direction of the ray. Must be a unit vector.
- *\param tolerance           Absolute distance tolerance for point equality
  *\param t_out               Output: The distance along the ray from ray_point in the
  *                           direction of ray_unit_direction at which the ray
  *                           intersected the triangle.
@@ -103,16 +100,30 @@ bool ray_tri_intersect( const CartVect vertices[3],
  *                           identify edge/node intersections.
  *\return true if intersection, false otherwise.
  */
-enum intersection_type {NONE, INTERIOR, NODE0, NODE1, NODE2, EDGE0, EDGE1, EDGE2};
+enum intersection_type {NONE=0, INTERIOR, NODE0, NODE1, NODE2, EDGE0, EDGE1, EDGE2};
+/* intersection type is determined by which of the intermediate values are == 0.  There
+   are three such values that can therefore be encoded in a 3 bit integer.
+   0 = none are == 0 -> interior type
+   1 = pip0 == 0 -> EDGE0
+   2 = pip1 == 1 -> EDGE1
+   4 = pip2 == 2 -> EDGE2
+   5 = pip2 = pip0 == 0 -> NOEE0
+   3 = pip0 = pip1 == 0 -> NODE1
+   6 = pip1 = pip2 == 0 -> NODE2 */
+const intersection_type type_list[] = {INTERIOR, EDGE0, EDGE1, NODE1, EDGE2, NODE0, NODE2};
+
 bool plucker_ray_tri_intersect( const CartVect vertices[3],
                                 const CartVect& ray_point,
                                 const CartVect& ray_unit_direction,
-                                double tolerance, /* unused */
                                 double& dist_out,
                                 const double* nonneg_ray_length = 0,
                                 const double* neg_ray_length = 0,
                                 const int* orientation = 0,
                                 intersection_type* int_type = 0);
+double plucker_edge_test( const CartVect& vertexa,
+                          const CartVect& vertexb,
+                          const CartVect& ray,
+                          const CartVect& ray_normal);
 
     //! Find range of overlap between ray and axis-aligned box.
     //!
@@ -327,7 +338,10 @@ bool boxes_overlap( const CartVect & box_min1, const CartVect & box_max1,
 // see if boxes formed by 2 lists of "CartVect"s overlap
 bool bounding_boxes_overlap (const CartVect * list1, int num1, const CartVect * list2, int num2,
       double tolerance);
-//
+
+// see if boxes from vertices in 2d overlap (used in gnomonic planes right now)
+bool bounding_boxes_overlap_2d (const double * list1, int num1, const double * list2, int num2,
+      double tolerance);
 // point_in_trilinear_hex
 // Tests if a point in xyz space is within a hex element defined with
 // its eight vertex points forming a trilinear basis function.  Computes

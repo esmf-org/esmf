@@ -1,4 +1,4 @@
-#include "moab/QuadraticHex.hpp"
+#include "moab/LocalDiscretization/QuadraticHex.hpp"
 #include "moab/Forward.hpp"
 
 namespace moab 

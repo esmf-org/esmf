@@ -11,7 +11,7 @@
 
 namespace moab {
 
-SharedSetData::SharedSetData(Interface& moab, unsigned rank)
+SharedSetData::SharedSetData(Interface& moab, int pcID,  unsigned rank)
   : mb(moab), sharedSetTag(0)
 {
   SharedSetTagData zero;
@@ -23,9 +23,14 @@ SharedSetData::SharedSetData(Interface& moab, unsigned rank)
   zero.ownerRank = rank;
   zero.ownerHandle = 0;
   zero.sharingProcs = NULL;
-  ErrorCode rval = mb.tag_get_handle( "__sharedSetTag", sizeof(SharedSetTagData), MB_TYPE_OPAQUE,
+  // band-aid: make sure the tag is unique, to not interfere with different pcID
+  // maybe a better solution is needed
+  // pcID can be at most 64, it ranges from 0 to 63; problems appear at migrate mesh
+  std::ostringstream sharedTagUniqueName;
+  sharedTagUniqueName << "__sharedSetTag" << pcID;
+  ErrorCode rval = mb.tag_get_handle( sharedTagUniqueName.str().c_str(), sizeof(SharedSetTagData), MB_TYPE_OPAQUE,
                                       sharedSetTag, MB_TAG_CREAT|MB_TAG_SPARSE, &zero );
-  assert(MB_SUCCESS == rval);
+  assert(MB_SUCCESS == rval );
   if (MB_SUCCESS != rval) {
     fprintf(stderr, "Aborted from the constructor of SharedSetData.\n");
     abort();

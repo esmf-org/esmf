@@ -235,9 +235,9 @@ module NUOPC_Base
 !   \begin{description}
 !   \item[state]
 !     The {\tt ESMF\_State} object to which the namespace is added.
-!   \item[Namespace]
+!   \item[{[Namespace]}]
 !     Optional The Namespace string. Defaults to "\_\_UNSPECIFIED\_\_".
-!   \item[CplSet]
+!   \item[{[CplSet]}]
 !     Optional The CplSet string. Defaults to "\_\_UNSPECIFIED\_\_".
 !   \item[{[nestedStateName]}]
 !     Name of the nested state. Defaults to {\tt Namespace}\_{\tt CplSet},

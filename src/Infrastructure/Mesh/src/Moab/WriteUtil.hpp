@@ -25,18 +25,16 @@
 namespace moab {
 
 class Core;
-class Error;
 
 class WriteUtil : public WriteUtilIface
 {
 private:
   //! Pointer to the Core
   Core* mMB;
-  Error* mError;
 public:
 
   //! Constructor takes Core pointer
-  WriteUtil(Core* mdb, Error* error_handler);
+  WriteUtil(Core* mdb);
 
   //! Destructor
   ~WriteUtil(){}

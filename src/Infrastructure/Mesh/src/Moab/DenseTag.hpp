@@ -408,17 +408,7 @@ public:
   ErrorCode get_array( const EntitySequence* seq, 
                        const unsigned char* const& ptr) const;
   
-  /**\brief Get non-read-only tag storage for entire sequence
-   *
-   *\param seq     Sequence 
-   *\param ptr     Pointer to dag storage.  This pointer will be set
-   *               to null and \c MB_SUCCESS will be returned if no tag storage has been allocated.
-   *\return        MB_SUCCESS if sequence is valid (regardless of whether
-   *               or not any tag storage is allocated). 
-   */
-  ErrorCode get_array( const EntitySequence* seq, 
-                       const unsigned char* & ptr) const;
-  
+ 
 private:
   
   DenseTag( const DenseTag& );
@@ -441,7 +431,7 @@ private:
    *               or not any tag storage is allocated). 
    */
   inline
-  ErrorCode get_array( SequenceManager* seqman, 
+  ErrorCode get_array_private( SequenceManager* seqman, 
                        Error* error,
                        EntityHandle h, 
                        unsigned char*& ptr,
@@ -463,11 +453,22 @@ private:
    *               or not any tag storage is allocated). 
    */
   inline
-  ErrorCode get_array( const SequenceManager* seqman, 
+  ErrorCode get_array_private( const SequenceManager* seqman, 
                        Error* error,
                        EntityHandle h, 
                        const unsigned char*& ptr,
                        size_t& count ) const;
+
+  /**\brief Get non-read-only tag storage for entire sequence
+   *
+   *\param seq     Sequence 
+   *\param ptr     Pointer to dag storage.  This pointer will be set
+   *               to null and \c MB_SUCCESS will be returned if no tag storage has been allocated.
+   *\return        MB_SUCCESS if sequence is valid (regardless of whether
+   *               or not any tag storage is allocated). 
+   */
+  ErrorCode get_array_private( const EntitySequence* seq, 
+                       const unsigned char* & ptr) const;
                        
   /**\brief Common implementation of public clear_data and remove_data */
   ErrorCode clear_data( bool allocate,

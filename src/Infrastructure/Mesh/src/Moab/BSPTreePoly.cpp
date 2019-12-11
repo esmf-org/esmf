@@ -815,6 +815,7 @@ bool BSPTreePoly::is_point_contained( const CartVect& point ) const
   if (!faceList) // empty (zero-dimension) polyhedron
     return false;
   
+  const double EPSILON = 1e-6;
     // Test that point is below the plane of each face
     // NOTE: This will NOT work for polyhedra w/ concavities
   for (Face* face = faceList; face; face = face->nextPtr) {
@@ -828,7 +829,7 @@ bool BSPTreePoly::is_point_contained( const CartVect& point ) const
 
     CartVect norm = (*pt3 - *pt2) * (*pt1 - *pt2);
     double coeff = -(norm % *pt2);
-    if (norm % point > -coeff) // if above plane
+    if ( (norm % point + coeff) > EPSILON) // if above plane, with some -epsilon
       return false;
   }
   

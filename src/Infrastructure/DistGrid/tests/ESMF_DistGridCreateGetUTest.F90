@@ -60,6 +60,7 @@ program ESMF_DistGridCreateGetUTest
   logical:: isCreated
   integer:: elementCount, localStart
   integer, allocatable:: elementCountPTile(:), deToTileMap(:)
+  integer(ESMF_KIND_I8), allocatable:: elementCountPTileI8(:)
   integer, allocatable:: elementCountPDe(:), elementCountPDeTest(:)
   integer, allocatable:: minIndexPTile(:,:), maxIndexPTile(:,:)
   integer, allocatable:: minIndexPDe(:,:), maxIndexPDe(:,:)
@@ -67,6 +68,7 @@ program ESMF_DistGridCreateGetUTest
   type(ESMF_Decomp_Flag), allocatable:: decompflagPTile(:,:)
   integer, allocatable:: indexCountPDe(:,:), localDeToDeMap(:)
   integer, allocatable:: indexList(:), seqIndexList(:)
+  integer(ESMF_KIND_I8), allocatable:: seqIndexListI8(:)  
   integer, allocatable:: deBlockList(:,:,:)
   integer, allocatable:: arbSeqIndexList(:)
   integer, allocatable:: collocation(:)
@@ -78,7 +80,7 @@ program ESMF_DistGridCreateGetUTest
   logical:: distgridBool
   integer:: connectionCount
   type(ESMF_DistGridConnection), allocatable:: connectionList(:)
-
+  type(ESMF_TypeKind_Flag)  :: indexTK
 
   character, allocatable :: buffer(:)
   integer :: buff_len, offset
@@ -271,7 +273,9 @@ program ESMF_DistGridCreateGetUTest
   write(name, *) "DistGridGet() - dimCount, tileCount, deCount, regDecompFlag, DELayout"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_DistGridGet(distgrid, dimCount=dimCount, tileCount=tileCount, &
-    deCount=deCount, regDecompFlag=regDecompFlag, delayout=delayout, rc=rc)
+    deCount=deCount, connectionCount=connectionCount, &
+    localDeCount=localDeCount, regDecompFlag=regDecompFlag, delayout=delayout, &
+    indexTK=indexTK, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
@@ -1475,6 +1479,454 @@ program ESMF_DistGridCreateGetUTest
   write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
   call ESMF_DistGridValidate(distgrid4, rc=rc)
   call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
+
+#ifdef ESMF_TESTEXHAUSTIVE
+
+  !-----------------------------------------------------------------------------
+  ! More in depth sequence index tests
+  !-----------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "DistGridCreate() - below 32-bit limit - automatic indexTK"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/16000000,128/), &
+    rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+ 
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "DistGridGet() - indexTK"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridGet(distgrid, dimCount=dimCount, tileCount=tileCount, &
+    deCount=deCount, connectionCount=connectionCount, &
+    localDeCount=localDeCount, regDecompFlag=regDecompFlag, delayout=delayout, &
+    indexTK=indexTK, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+print *, "indexTK=", indexTK
+  
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "Verify indexTK"
+  write(failMsg, *) "Wrong result"
+  call ESMF_Test((indexTK==ESMF_TYPEKIND_I4), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "Verify tileCount"
+  write(failMsg, *) "Wrong result"
+  call ESMF_Test((tileCount==1), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "Verify localDeCount"
+  write(failMsg, *) "Wrong result"
+  call ESMF_Test((localDeCount==1), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "DistGridGet() - elementCountPTile(:)"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  allocate(elementCountPTile(tileCount))
+  call ESMF_DistGridGet(distgrid, elementCountPTile=elementCountPTile, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+print *, "elementCountPTile=", elementCountPTile
+  
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "Verify elementCountPTile"
+  write(failMsg, *) "Wrong result"
+  call ESMF_Test((elementCountPTile(1)==2048000000), name, failMsg, result, ESMF_SRCLINE)
+
+  deallocate(elementCountPTile)
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "DistGridGet() - elementCount"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridGet(distgrid, localDe=0, elementCount=elementCount, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+print *, "elementCount(on localDe)=", elementCount
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "Destroy test DistGrid"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "DistGridCreate() - above 32-bit limit - automatic indexTK"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/17000000,128/), &
+    rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+ 
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "DistGridGet() - indexTK"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridGet(distgrid, dimCount=dimCount, tileCount=tileCount, &
+    deCount=deCount, connectionCount=connectionCount, &
+    localDeCount=localDeCount, regDecompFlag=regDecompFlag, delayout=delayout, &
+    indexTK=indexTK, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+print *, "indexTK=", indexTK
+  
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "Verify indexTK"
+  write(failMsg, *) "Wrong result"
+  call ESMF_Test((indexTK==ESMF_TYPEKIND_I8), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "DistGridGet() - elementCountPTile(:)"
+  write(failMsg, *) "Did not return ESMC_RC_ARG_BAD"
+  allocate(elementCountPTile(tileCount))
+  call ESMF_DistGridGet(distgrid, elementCountPTile=elementCountPTile, rc=rc)
+  call ESMF_Test((rc.eq.ESMC_RC_ARG_BAD), name, failMsg, result, ESMF_SRCLINE)
+  
+print *, "elementCountPTile=", elementCountPTile
+  
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "Verify elementCountPTile"
+  write(failMsg, *) "Unexpected result"
+  call ESMF_Test((elementCountPTile(1)/=2176000000_ESMF_KIND_I8), name, failMsg, result, ESMF_SRCLINE)
+
+  deallocate(elementCountPTile)
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "DistGridGet() - elementCountPTileI8(:)"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  allocate(elementCountPTileI8(tileCount))
+  call ESMF_DistGridGet(distgrid, elementCountPTileI8=elementCountPTileI8, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+print *, "elementCountPTileI8=", elementCountPTileI8
+  
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "Verify elementCountPTile"
+  write(failMsg, *) "Wrong result"
+  call ESMF_Test((elementCountPTileI8(1)==2176000000_ESMF_KIND_I8), name, failMsg, result, ESMF_SRCLINE)
+
+  deallocate(elementCountPTileI8)
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "Destroy test DistGrid"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "DistGridCreate() - below 32-bit limit - specified indexTK=ESMF_TYPEKIND_I4"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/16000000,128/), &
+    indexTK=ESMF_TYPEKIND_I4, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+ 
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "DistGridGet() - indexTK"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridGet(distgrid, dimCount=dimCount, tileCount=tileCount, &
+    deCount=deCount, connectionCount=connectionCount, &
+    localDeCount=localDeCount, regDecompFlag=regDecompFlag, delayout=delayout, &
+    indexTK=indexTK, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+print *, "indexTK=", indexTK
+  
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "Verify indexTK"
+  write(failMsg, *) "Wrong result"
+  call ESMF_Test((indexTK==ESMF_TYPEKIND_I4), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "DistGridGet() - elementCountPTile(:)"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  allocate(elementCountPTile(tileCount))
+  call ESMF_DistGridGet(distgrid, elementCountPTile=elementCountPTile, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+print *, "elementCountPTile=", elementCountPTile
+  
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "Verify elementCountPTile"
+  write(failMsg, *) "Wrong result"
+  call ESMF_Test((elementCountPTile(1)==2048000000), name, failMsg, result, ESMF_SRCLINE)
+
+  deallocate(elementCountPTile)
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "Destroy test DistGrid"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "DistGridCreate() - below 32-bit limit - specified indexTK=ESMF_TYPEKIND_I8"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/16000000,128/), &
+    indexTK=ESMF_TYPEKIND_I8, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+ 
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "DistGridGet() - indexTK"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridGet(distgrid, dimCount=dimCount, tileCount=tileCount, &
+    deCount=deCount, connectionCount=connectionCount, &
+    localDeCount=localDeCount, regDecompFlag=regDecompFlag, delayout=delayout, &
+    indexTK=indexTK, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+print *, "indexTK=", indexTK
+  
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "Verify indexTK"
+  write(failMsg, *) "Wrong result"
+  call ESMF_Test((indexTK==ESMF_TYPEKIND_I8), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "DistGridGet() - elementCountPTile(:)"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  allocate(elementCountPTile(tileCount))
+  call ESMF_DistGridGet(distgrid, elementCountPTile=elementCountPTile, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+print *, "elementCountPTile=", elementCountPTile
+  
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "Verify elementCountPTile"
+  write(failMsg, *) "Wrong result"
+  call ESMF_Test((elementCountPTile(1)==2048000000), name, failMsg, result, ESMF_SRCLINE)
+
+  deallocate(elementCountPTile)
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "Destroy test DistGrid"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "DistGridCreate() - above 32-bit limit - specified indexTK=ESMF_TYPEKIND_I4"
+  write(failMsg, *) "Did not return ESMC_RC_ARG_INCOMP"
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/17000000,128/), &
+    indexTK=ESMF_TYPEKIND_I4, rc=rc)
+  call ESMF_Test((rc.eq.ESMC_RC_ARG_INCOMP), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "DistGridCreate() - above 32-bit limit - specified indexTK=ESMF_TYPEKIND_I8"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/17000000,128/), &
+    indexTK=ESMF_TYPEKIND_I8, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+ 
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "DistGridGet() - indexTK"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridGet(distgrid, dimCount=dimCount, tileCount=tileCount, &
+    deCount=deCount, connectionCount=connectionCount, &
+    localDeCount=localDeCount, regDecompFlag=regDecompFlag, delayout=delayout, &
+    indexTK=indexTK, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+print *, "indexTK=", indexTK
+  
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "Verify indexTK"
+  write(failMsg, *) "Wrong result"
+  call ESMF_Test((indexTK==ESMF_TYPEKIND_I8), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "DistGridGet() - elementCountPTile(:)"
+  write(failMsg, *) "Did not return ESMC_RC_ARG_BAD"
+  allocate(elementCountPTile(tileCount))
+  call ESMF_DistGridGet(distgrid, elementCountPTile=elementCountPTile, rc=rc)
+  call ESMF_Test((rc.eq.ESMC_RC_ARG_BAD), name, failMsg, result, ESMF_SRCLINE)
+  
+print *, "elementCountPTile=", elementCountPTile
+  
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "Verify elementCountPTile"
+  write(failMsg, *) "Unexpected result"
+  call ESMF_Test((elementCountPTile(1)/=2176000000_ESMF_KIND_I8), name, failMsg, result, ESMF_SRCLINE)
+
+  deallocate(elementCountPTile)
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "DistGridGet() - elementCountPTileI8(:)"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  allocate(elementCountPTileI8(tileCount))
+  call ESMF_DistGridGet(distgrid, elementCountPTileI8=elementCountPTileI8, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+print *, "elementCountPTileI8=", elementCountPTileI8
+  
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "Verify elementCountPTile"
+  write(failMsg, *) "Wrong result"
+  call ESMF_Test((elementCountPTileI8(1)==2176000000_ESMF_KIND_I8), name, failMsg, result, ESMF_SRCLINE)
+
+  deallocate(elementCountPTileI8)
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "Destroy test DistGrid"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "DistGridCreate() - canonical seqIndices below 32-bit limit"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+call ESMF_VMLogMemInfo("bef ESMF_DistGridCreate()", rc=rc)
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/1600000,128/), &
+    rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+call ESMF_VMLogMemInfo("aft ESMF_DistGridCreate()", rc=rc)
+ 
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "DistGridGet() - indexTK"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridGet(distgrid, dimCount=dimCount, tileCount=tileCount, &
+    deCount=deCount, connectionCount=connectionCount, &
+    localDeCount=localDeCount, regDecompFlag=regDecompFlag, delayout=delayout, &
+    indexTK=indexTK, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+print *, "indexTK=", indexTK
+  
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "Verify indexTK"
+  write(failMsg, *) "Wrong result"
+  call ESMF_Test((indexTK==ESMF_TYPEKIND_I4), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "Verify tileCount"
+  write(failMsg, *) "Wrong result"
+  call ESMF_Test((tileCount==1), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "Verify localDeCount"
+  write(failMsg, *) "Wrong result"
+  call ESMF_Test((localDeCount==1), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "DistGridGet() - elementCount"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridGet(distgrid, localDe=0, elementCount=elementCount, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+print *, "elementCount(on localDe)=", elementCount
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "DistGridGet() - seqIndexList"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+call ESMF_VMLogMemInfo("bef allocating space for seqIndexList", rc=rc)
+  allocate(seqIndexList(elementCount))
+call ESMF_VMLogMemInfo("bef filling of canonical seqIndexList", rc=rc)
+  call ESMF_DistGridGet(distgrid, localDe=0, seqIndexList=seqIndexList, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+call ESMF_VMLogMemInfo("aft filling of canonical seqIndexList", rc=rc)
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "DistGridSet() - seqIndexListI8"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  allocate(seqIndexListI8(elementCount))
+  do i=1, elementCount
+    seqIndexListI8(i) = seqIndexList(i)*10  ! make up some scaled seqIndex of I8
+  enddo
+call ESMF_VMLogMemInfo("bef setting arbitary seqIndexListI8 in DistGrid", rc=rc)
+  call ESMF_DistGridSet(distgrid, localDe=0, seqIndexListI8=seqIndexListI8, &
+    rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+call ESMF_VMLogMemInfo("aft setting arbitary seqIndexListI8 in DistGrid", rc=rc)
+
+  deallocate(seqIndexList)
+  deallocate(seqIndexListI8)
+call ESMF_VMLogMemInfo("aft deallocation of seqIndexList+seqIndexListI8", rc=rc)
+  
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "DistGridGet() - seqIndexList"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+call ESMF_VMLogMemInfo("bef allocating space for seqIndexList", rc=rc)
+  allocate(seqIndexList(elementCount))
+call ESMF_VMLogMemInfo("bef filling of canonical seqIndexList", rc=rc)
+  call ESMF_DistGridGet(distgrid, localDe=0, seqIndexList=seqIndexList, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+call ESMF_VMLogMemInfo("aft filling of canonical seqIndexList", rc=rc)
+
+  deallocate(seqIndexList)
+call ESMF_VMLogMemInfo("aft deallocation of      seqIndexList", rc=rc)
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "Destroy test DistGrid"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridDestroy(distgrid, noGarbage=.true., rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+call ESMF_VMLogMemInfo("aft ESMF_DistGridDestroy()", rc=rc)
+
+#endif
 
   !------------------------------------------------------------------------
 10 continue
