@@ -358,6 +358,16 @@ module NUOPC_Connector
     integer                   :: verbosity, profiling, diagnostic
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
+    integer                   :: importItemCount, exportItemCount
+    character(ESMF_MAXSTR), allocatable     :: importItemNameList(:)
+    type(ESMF_StateItem_Flag), allocatable  :: importItemTypeList(:)
+    character(ESMF_MAXSTR), allocatable     :: exportItemNameList(:)
+    type(ESMF_StateItem_Flag), allocatable  :: exportItemTypeList(:)
+    logical                   :: importHasNested, exportHasNested
+    type(ESMF_State)          :: importNestedState, exportNestedState
+    integer                   :: i, j
+    character(ESMF_MAXSTR)    :: importCplSet, exportCplSet
+    character(len=240)        :: msgString
 
     rc = ESMF_SUCCESS
 
@@ -439,22 +449,170 @@ module NUOPC_Connector
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
     
-    if (trim(exportXferPolicy)=="transferAll") then
-      call NUOPC_ConnectorGet(connector, dstVM=vm, rc=rc)
+    importHasNested = .false.
+    exportHasNested = .false.
+    if (trim(exportXferPolicy)=="transferNone" .and. &
+      trim(importXferPolicy)=="transferNone") then
+      ! in that case there will be nested state looping below
+      call ESMF_StateGet(importState, nestedFlag=.false., &
+        itemCount=importItemCount, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      if (importItemCount > 0) then
+        allocate(importItemNameList(importItemCount))
+        allocate(importItemTypeList(importItemCount))
+        call ESMF_StateGet(importState, nestedFlag=.false., &
+          itemNameList=importItemNameList, itemTypeList=importItemTypeList, &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        do i=1, importItemCount
+          if (importItemTypeList(i) == ESMF_STATEITEM_STATE) &
+            importHasNested = .true.
+        enddo
+      endif
+      call ESMF_StateGet(exportState, nestedFlag=.false., &
+        itemCount=exportItemCount, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      if (exportItemCount > 0) then
+        allocate(exportItemNameList(exportItemCount))
+        allocate(exportItemTypeList(exportItemCount))
+        call ESMF_StateGet(exportState, nestedFlag=.false., &
+          itemNameList=exportItemNameList, itemTypeList=exportItemTypeList, &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        do i=1, exportItemCount
+          if (exportItemTypeList(i) == ESMF_STATEITEM_STATE) &
+            exportHasNested = .true.
+        enddo
+      endif
+    endif
+    
+    ! prepare for mirroring into exportState
+    call NUOPC_ConnectorGet(connector, dstVM=vm, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    if (trim(exportXferPolicy)=="transferAll") then
+      ! top level mirroring into exportState
       call doMirror(importState, exportState, acceptorVM=vm, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    elseif (importHasNested .and. exportHasNested) then
+      ! loop through the nested states inside of the exportState and see if 
+      ! any of them request mirroring
+      do i=1, exportItemCount
+        if (exportItemTypeList(i) == ESMF_STATEITEM_STATE) then
+          ! get the associated nested state
+          call ESMF_StateGet(exportState, itemName=exportItemNameList(i), &
+            nestedState=exportNestedState, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          ! see if there is request for mirroring
+          call NUOPC_GetAttribute(exportNestedState, &
+            name="FieldTransferPolicy", value=exportXferPolicy, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (trim(exportXferPolicy)=="transferAll") then
+            ! found a nested state in the exportState that requests mirroring
+            ! -> query the CplSet attribute
+            call NUOPC_GetAttribute(exportNestedState, &
+              name="CplSet", value=exportCplSet, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            ! -> see if there is a matching CplSet on the import side
+            do j=1, importItemCount
+              if (importItemTypeList(j) == ESMF_STATEITEM_STATE) then
+                ! get the associated nested state
+                call ESMF_StateGet(importState, itemName=importItemNameList(j), &
+                  nestedState=importNestedState, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+                ! -> query the CplSet attribute
+                call NUOPC_GetAttribute(importNestedState, &
+                  name="CplSet", value=importCplSet, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+                ! finally see if the CplSet match
+                if (trim(importCplSet)==trim(exportCplSet)) then
+                  ! found a matching CplSet -> initiate mirroring
+                  call doMirror(importNestedState, exportNestedState, &
+                    acceptorVM=vm, rc=rc)
+                  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                    line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+                endif
+              endif
+            enddo
+          endif
+        endif
+      enddo
     endif
+
+    ! prepare for mirroring into importState
+    call NUOPC_ConnectorGet(connector, srcVM=vm, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (trim(importXferPolicy)=="transferAll") then
-      call NUOPC_ConnectorGet(connector, srcVM=vm, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      ! top level mirroring into importState
       call doMirror(exportState, importState, acceptorVM=vm, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    elseif (importHasNested .and. exportHasNested) then
+      ! loop through the nested states inside of the importState and see if 
+      ! any of them request mirroring
+      do i=1, importItemCount
+        if (importItemTypeList(i) == ESMF_STATEITEM_STATE) then
+          ! get the associated nested state
+          call ESMF_StateGet(importState, itemName=importItemNameList(i), &
+            nestedState=importNestedState, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          ! see if there is request for mirroring
+          call NUOPC_GetAttribute(importNestedState, &
+            name="FieldTransferPolicy", value=importXferPolicy, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (trim(importXferPolicy)=="transferAll") then
+            ! found a nested state in the importState that requests mirroring
+            ! -> query the CplSet attribute
+            call NUOPC_GetAttribute(importNestedState, &
+              name="CplSet", value=importCplSet, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            ! -> see if there is a matching CplSet on the export side
+            do j=1, exportItemCount
+              if (exportItemTypeList(j) == ESMF_STATEITEM_STATE) then
+                ! get the associated nested state
+                call ESMF_StateGet(exportState, itemName=exportItemNameList(j), &
+                  nestedState=exportNestedState, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+                ! -> query the CplSet attribute
+                call NUOPC_GetAttribute(exportNestedState, &
+                  name="CplSet", value=exportCplSet, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+                ! finally see if the CplSet match
+                if (trim(exportCplSet)==trim(importCplSet)) then
+                  ! found a matching CplSet -> initiate mirroring
+                  call doMirror(exportNestedState, importNestedState, &
+                    acceptorVM=vm, rc=rc)
+                  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                    line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+                endif
+              endif
+            enddo
+          endif
+        endif
+      enddo
     endif
+
+    ! clean-up
+    if (allocated(importItemNameList)) deallocate(importItemNameList)
+    if (allocated(importItemTypeList)) deallocate(importItemTypeList)
+    if (allocated(exportItemNameList)) deallocate(exportItemNameList)
+    if (allocated(exportItemTypeList)) deallocate(exportItemTypeList)
 
     ! handle diagnostic
     if (btest(diagnostic,2)) then
@@ -503,14 +661,15 @@ module NUOPC_Connector
       character(ESMF_MAXSTR), pointer       :: providerStandardNameList(:)
       character(ESMF_MAXSTR), pointer       :: acceptorStandardNameList(:)
       character(ESMF_MAXSTR), pointer       :: providerNamespaceList(:)
-      character(ESMF_MAXSTR), pointer       :: acceptorNamespaceList(:)
       type(ESMF_Field),       pointer       :: providerFieldList(:)
-      type(ESMF_Field),       pointer       :: acceptorFieldList(:)
       character(ESMF_MAXSTR), pointer       :: providerCplSetList(:)
-      character(ESMF_MAXSTR), pointer       :: acceptorCplSetList(:)
       type(ESMF_StateIntent_Flag) :: providerIntent, acceptorIntent
       logical                     :: flipIntent
       character(ESMF_MAXSTR)      :: transferOfferAttr
+      type(ESMF_Field)            :: fieldAdv
+      character(ESMF_MAXSTR)      :: valueString
+      type(ESMF_Pointer)          :: vmThis
+      logical                     :: actualFlag
       
       rc = ESMF_SUCCESS
 
@@ -519,10 +678,13 @@ module NUOPC_Connector
       nullify(providerFieldList)
       nullify(providerCplSetList)
       nullify(acceptorStandardNameList)
-      nullify(acceptorNamespaceList)
-      nullify(acceptorFieldList)
-      nullify(acceptorCplSetList)
       
+      actualFlag = .true.
+      call ESMF_VMGetThis(acceptorVM, vmThis)
+      if (vmThis == ESMF_NULL_POINTER) then
+        actualFlag = .false.  ! local PET is not for an actual member
+      endif
+    
       call ESMF_StateGet(acceptorState, name=acceptorStateName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -587,8 +749,7 @@ module NUOPC_Connector
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         
       call NUOPC_GetStateMemberLists(acceptorState, acceptorStandardNameList, &
-        fieldList=acceptorFieldList, namespaceList=acceptorNamespaceList, &
-        cplSetList=acceptorCplSetList, nestedFlag=.false., rc=rc)
+        nestedFlag=.false., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       !TODO: does not currently deal with field bundles
@@ -662,12 +823,43 @@ module NUOPC_Connector
               line=__LINE__, file=trim(name)//":"//FILENAME)) &
               return  ! bail out
           endif
+          
           call NUOPC_Advertise(acceptorState, &
             StandardName=trim(providerStandardNameList(i)), &
-            TransferOfferGeomObject=acceptorTransferOffer, vm=acceptorVM, rc=rc)
+            TransferOfferGeomObject=acceptorTransferOffer, vm=acceptorVM, &
+            field=fieldAdv, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+          if (actualFlag) then
+            ! Propagate basic attributes from the provider to acceptor side
+            call NUOPC_GetAttribute(providerFieldList(i), name="Units", &
+              value=valueString, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call NUOPC_SetAttribute(fieldAdv, name="Units", &
+              value=trim(valueString), rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+            call NUOPC_GetAttribute(providerFieldList(i), name="LongName", &
+              value=valueString, rc=rc)            
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call NUOPC_SetAttribute(fieldAdv, name="LongName", &
+              value=trim(valueString), rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+            call NUOPC_GetAttribute(providerFieldList(i), name="ShortName", &
+              value=valueString, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call NUOPC_SetAttribute(fieldAdv, name="ShortName", &
+              value=trim(valueString), rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
         end do
       endif
       
@@ -685,9 +877,6 @@ module NUOPC_Connector
       if (associated(providerCplSetList)) deallocate(providerCplSetList)
       if (associated(acceptorStandardNameList)) &
         deallocate(acceptorStandardNameList)
-      if (associated(acceptorNamespaceList)) deallocate(acceptorNamespaceList)
-      if (associated(acceptorFieldList)) deallocate(acceptorFieldList)
-      if (associated(acceptorCplSetList)) deallocate(acceptorCplSetList)
     end subroutine
 
   end subroutine
