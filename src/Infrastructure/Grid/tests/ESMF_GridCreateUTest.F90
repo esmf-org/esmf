@@ -2686,7 +2686,7 @@ program ESMF_GridCreateUTest
        rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-#if 1
+#if 0
   ! Dump grid staggers to file
   call ESMF_GridWriteVTK(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, filename="ufrmbipoleCntrGrid", &
                          rc=localrc)
