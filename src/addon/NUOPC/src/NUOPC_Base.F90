@@ -341,7 +341,7 @@ module NUOPC_Base
   ! Private name; call using NUOPC_Advertise() 
   subroutine NUOPC_AdvertiseField(state, StandardName, Units, &
     LongName, ShortName, name, TransferOfferGeomObject, SharePolicyField, &
-    SharePolicyGeomObject, vm, rc)
+    SharePolicyGeomObject, vm, field, rc)
 ! !ARGUMENTS:
     type(ESMF_State), intent(inout)         :: state
     character(*),     intent(in)            :: StandardName
@@ -353,6 +353,7 @@ module NUOPC_Base
     character(*),     intent(in),  optional :: SharePolicyField
     character(*),     intent(in),  optional :: SharePolicyGeomObject
     type(ESMF_VM),    intent(in),  optional :: vm
+    type(ESMF_Field), intent(out), optional :: field
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
 !   \label{NUOPC_AdvertiseField}
@@ -420,6 +421,8 @@ module NUOPC_Base
 !     If present, the Field object used during advertising is created on the
 !     specified {\tt ESMF\_VM} object. The default is to create the Field object
 !     on the VM of the current component context.
+!   \item[{[field]}]
+!     Returns the empty field object that was used to advertise.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -428,7 +431,7 @@ module NUOPC_Base
   !-----------------------------------------------------------------------------
     ! local variables
     integer                     :: localrc
-    type(ESMF_Field)            :: field
+    type(ESMF_Field)            :: fieldAdv
     character(ESMF_MAXSTR)      :: tempString
     type(ESMF_Pointer)          :: vmThis
     logical                     :: actualFlag
@@ -443,7 +446,7 @@ module NUOPC_Base
       rcToReturn=rc)) &
       return  ! bail out
 
-    field = ESMF_FieldEmptyCreate(name=name, vm=vm, rc=localrc)
+    fieldAdv = ESMF_FieldEmptyCreate(name=name, vm=vm, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME, &
@@ -460,7 +463,7 @@ module NUOPC_Base
     endif
     
     if (actualFlag) then
-      call NUOPC_InitAttributes(field, StandardName=StandardName, &
+      call NUOPC_InitAttributes(fieldAdv, StandardName=StandardName, &
         Units=Units, LongName=LongName, ShortName=ShortName, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
@@ -469,11 +472,11 @@ module NUOPC_Base
         return  ! bail out
       if (.not.present(name)) then
         ! name was not provided -> default to using ShortName
-        call NUOPC_GetAttribute(field, name="ShortName", value=tempString, &
+        call NUOPC_GetAttribute(fieldAdv, name="ShortName", value=tempString, &
           rc=localrc)
         if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-        call ESMF_FieldSet(field, name=trim(tempString), rc=localrc)
+        call ESMF_FieldSet(fieldAdv, name=trim(tempString), rc=localrc)
         if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       endif
@@ -491,7 +494,7 @@ module NUOPC_Base
           return  ! bail out
         endif
         if (trim(TransferOfferGeomObject)=="will provide") then
-          call NUOPC_SetAttribute(field, name=tempString, &
+          call NUOPC_SetAttribute(fieldAdv, name=tempString, &
             value="will provide", rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, &
@@ -499,7 +502,7 @@ module NUOPC_Base
             rcToReturn=rc)) &
             return  ! bail out
         elseif (trim(TransferOfferGeomObject)=="can provide") then
-          call NUOPC_SetAttribute(field, name=tempString, &
+          call NUOPC_SetAttribute(fieldAdv, name=tempString, &
             value="can provide", rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, &
@@ -507,7 +510,7 @@ module NUOPC_Base
             rcToReturn=rc)) &
             return  ! bail out
         elseif (trim(TransferOfferGeomObject)=="cannot provide") then
-          call NUOPC_SetAttribute(field, name=tempString, &
+          call NUOPC_SetAttribute(fieldAdv, name=tempString, &
             value="cannot provide", rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, &
@@ -525,7 +528,7 @@ module NUOPC_Base
       endif
       if (present(SharePolicyField)) then
         if (trim(SharePolicyField)=="share") then
-          call NUOPC_SetAttribute(field, name="SharePolicyField", &
+          call NUOPC_SetAttribute(fieldAdv, name="SharePolicyField", &
             value="share", rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, &
@@ -533,7 +536,7 @@ module NUOPC_Base
             rcToReturn=rc)) &
             return  ! bail out
         elseif (trim(SharePolicyField)=="not share") then
-          call NUOPC_SetAttribute(field, name="SharePolicyField", &
+          call NUOPC_SetAttribute(fieldAdv, name="SharePolicyField", &
             value="not share", rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, &
@@ -551,7 +554,7 @@ module NUOPC_Base
       endif
       if (present(SharePolicyGeomObject)) then
         if (trim(SharePolicyGeomObject)=="share") then
-          call NUOPC_SetAttribute(field, name="SharePolicyGeomObject", &
+          call NUOPC_SetAttribute(fieldAdv, name="SharePolicyGeomObject", &
             value="share", rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, &
@@ -559,7 +562,7 @@ module NUOPC_Base
             rcToReturn=rc)) &
             return  ! bail out
         elseif (trim(SharePolicyGeomObject)=="not share") then
-          call NUOPC_SetAttribute(field, name="SharePolicyGeomObject", &
+          call NUOPC_SetAttribute(fieldAdv, name="SharePolicyGeomObject", &
             value="not share", rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, &
@@ -576,22 +579,24 @@ module NUOPC_Base
         endif
       else
         ! set default for SharePolicyGeomObject
-        call NUOPC_GetAttribute(field, name="SharePolicyField", &
+        call NUOPC_GetAttribute(fieldAdv, name="SharePolicyField", &
           value=tempString, rc=localrc)
         if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-        call NUOPC_SetAttribute(field, name="SharePolicyGeomObject", &
+        call NUOPC_SetAttribute(fieldAdv, name="SharePolicyGeomObject", &
           value=tempString, rc=localrc)
         if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       endif
-      call ESMF_StateAdd(state, fieldList=(/field/), rc=localrc)
+      call ESMF_StateAdd(state, fieldList=(/fieldAdv/), rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME, &
         rcToReturn=rc)) &
         return  ! bail out
     endif
+    ! optionally return the advertised field
+    if (present(field)) field = fieldAdv
   end subroutine
   !-----------------------------------------------------------------------------
 
@@ -1822,6 +1827,8 @@ module NUOPC_Base
     
     ! set Units
     if (present(Units)) then
+#if 0
+!TODO: turn unit checking back on once we have agreed on handling
       if ((trim(Units))/=trim(fdEntry%wrap%canonicalUnits)) then
         ! not the same as canoncial units
         accepted = .false. ! reset
@@ -1835,6 +1842,7 @@ module NUOPC_Base
           return  ! bail out
         endif
       endif
+#endif
       tempString = Units
     else
       tempString = fdEntry%wrap%canonicalUnits  ! default
