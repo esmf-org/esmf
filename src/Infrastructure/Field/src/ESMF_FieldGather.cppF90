@@ -380,22 +380,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT)) &
               return  ! bail out
-            do i=lbound(dataPtrR4D1,1),ubound(dataPtrR4D1,1)
-#if 0
-              dataPtrR8D1(i) = real( &
-                cos(real(l_member)*3.1416*(coord1PtrR8D1(i)+real(l_step))/360.)&
-                * &
-                sin(real(l_member)*3.1416*(coord2PtrR8D1(i)+real(l_step))/90.)&
-                * &
-                cos(real(l_member)*3.1416*(coord3PtrR8D1(i)+real(l_step))/360.)&                
-                , ESMF_KIND_R8)
-#else
+            do i=lbound(dataPtrR8D1,1),ubound(dataPtrR8D1,1)
               dataPtrR8D1(i) = real(real(l_member) * ( &
                   coord1PtrR8D1(i)**2 &
                 + coord2PtrR8D1(i)**2 &
                 + coord3PtrR8D1(i)**2) &
                 , ESMF_KIND_R8)
-#endif
             enddo
             if (geomtype==ESMF_GEOMTYPE_MESH) then
               deallocate(coordPtrR8D1, coord1PtrR8D1, coord2PtrR8D1)
@@ -745,21 +735,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               ESMF_CONTEXT)) &
               return  ! bail out
             do i=lbound(dataPtrR4D1,1),ubound(dataPtrR4D1,1)
-#if 0
-              dataPtrR4D1(i) = real( &
-                cos(real(l_member)*3.1416*(coord1PtrR8D1(i)+real(l_step))/360.)&
-                * &
-                sin(real(l_member)*3.1416*(coord2PtrR8D1(i)+real(l_step))/90.)&
-                * &
-                cos(real(l_member)*3.1416*(coord3PtrR8D1(i)+real(l_step))/360.)&                
-                , ESMF_KIND_R4)
-#else
               dataPtrR4D1(i) = real(real(l_member) * ( &
                   coord1PtrR8D1(i)**2 &
                 + coord2PtrR8D1(i)**2 &
                 + coord3PtrR8D1(i)**2) &
                 , ESMF_KIND_R4)
-#endif
             enddo
             if (geomtype==ESMF_GEOMTYPE_MESH) then
               deallocate(coordPtrR8D1, coord1PtrR8D1, coord2PtrR8D1)
