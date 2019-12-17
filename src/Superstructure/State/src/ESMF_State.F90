@@ -73,6 +73,7 @@ module ESMF_StateMod
       public ESMF_StateRead
       public ESMF_StateWrite
       public ESMF_StatePrint
+      public ESMF_StateSet
 
       public ESMF_StateSerialize, ESMF_StateDeserialize
 

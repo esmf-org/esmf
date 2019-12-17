@@ -1000,7 +1000,7 @@ MeshCap *MeshCap::meshdeserialize(char *buffer, int *offset, int *rc,
   // Adjust offset
   *offset += sizeof(int);
 
-printf("MeshCap::deserialize is_esmf_mesh = %d\n", local_is_esmf_mesh);
+//printf("MeshCap::deserialize is_esmf_mesh = %d\n", local_is_esmf_mesh);
 
   if (local_is_esmf_mesh) {
     ESMCI_meshdeserialize(&mesh,
