@@ -2757,7 +2757,7 @@ module NUOPC_Driver
     i=0       ! from parent
     phase=1   ! use phase 1
     do j=1, is%wrap%modelCount
-      call executeCplComp(is, i, j, phase, activeClock, name, &
+      call routine_executeCplComp(is, i, j, phase, activeClock, name, &
         userrc=userrc, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -2788,7 +2788,7 @@ module NUOPC_Driver
     j=0       ! to parent
     phase=1   ! use phase 1
     do i=1, is%wrap%modelCount
-      call executeCplComp(is, i, j, phase, activeClock, name, &
+      call routine_executeCplComp(is, i, j, phase, activeClock, name, &
         userrc=userrc, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -2820,7 +2820,7 @@ module NUOPC_Driver
   
   !-----------------------------------------------------------------------------
   
-  subroutine executeGridComp(is, i, phase, activeClock, name, userrc, rc)
+  subroutine routine_executeGridComp(is, i, phase, activeClock, name, userrc, rc)
     type(type_InternalState)        :: is
     integer,          intent(in)    :: i, phase
     type(ESMF_Clock), intent(inout) :: activeClock
@@ -2871,7 +2871,7 @@ module NUOPC_Driver
 
   !-----------------------------------------------------------------------------
   
-  subroutine executeCplComp(is, i, j, phase, activeClock, name, userrc, rc)
+  subroutine routine_executeCplComp(is, i, j, phase, activeClock, name, userrc, rc)
     type(type_InternalState)        :: is
     integer,          intent(in)    :: i, j, phase
     type(ESMF_Clock), intent(inout) :: activeClock
@@ -3095,13 +3095,13 @@ module NUOPC_Driver
       if (runElement%j >= 0) then
         ! connector component: i -> j
         j = runElement%j
-        call executeCplComp(is, i, j, phase, activeClock, name, &
+        call routine_executeCplComp(is, i, j, phase, activeClock, name, &
           userrc=userrc, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       else
         ! model, mediator, or driver component
-        call executeGridComp(is, i, phase, activeClock, name, &
+        call routine_executeGridComp(is, i, phase, activeClock, name, &
           userrc=userrc, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -4702,12 +4702,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverGetComp()
   recursive subroutine NUOPC_DriverGetGridComp(driver, compLabel, comp, petList, &
-    relaxedflag, rc)
+    importState, exportState, relaxedflag, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
     character(len=*),    intent(in)            :: compLabel
     type(ESMF_GridComp), intent(out), optional :: comp
     integer,             pointer,     optional :: petList(:)
+    type(ESMF_State),    intent(out), optional :: importState
+    type(ESMF_State),    intent(out), optional :: exportState
     logical,             intent(in),  optional :: relaxedflag
     integer,             intent(out), optional :: rc 
 !
@@ -4783,6 +4785,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         return  ! bail out
       if (present(comp)) comp = cmEntry%wrap%component
       if (present(petList)) petList => cmEntry%wrap%petList
+      if (present(importState) .or. present(exportState)) then
+        call ESMF_GridCompGet(cmEntry%wrap%component, importState=importState, &
+          exportState=exportState, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      endif
     else
       ! return nullified arguments
       if (present(comp)) comp%compp => null()
