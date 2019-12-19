@@ -2703,6 +2703,9 @@ contains
         integer, dimension(:), optional   :: totalLWidth, totalUWidth
         logical, optional                 :: fieldget
         integer, intent(out)  :: rc
+ 
+        integer                 :: gminIndex(2), gmaxIndex(2), geleCount(2)
+        integer                 :: lminIndex(2), lmaxIndex(2), leleCount(2)
 
         type(ESMF_Field)        :: field
         type(ESMF_Grid)         :: grid
@@ -2844,7 +2847,18 @@ contains
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
+            call ESMF_FieldGet(field, minIndex = gminIndex, maxIndex = gmaxIndex, &
+                                    elementCount = geleCount, &
+                                    localMinIndex = lminIndex, &
+                                    localMaxIndex = lmaxIndex, &
+                                    localelementCount = leleCount, &
+                                    rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+
           endif
+
         endif
 
         call ESMF_FieldDestroy(field, rc=localrc)
@@ -4772,6 +4786,8 @@ contains
         real(ESMF_KIND_R8)                          :: n
         logical                                     :: t
         type(ESMF_STAGGERLOC)                       :: localStaggerLoc
+        integer                 :: gminIndex(7), gmaxIndex(7), geleCount(7)
+        integer                 :: lminIndex(7), lmaxIndex(7), leleCount(7)
 
         localrc = ESMF_SUCCESS
         rc = ESMF_SUCCESS
@@ -4930,6 +4946,16 @@ contains
               enddo
              enddo
             enddo
+            if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+
+            call ESMF_FieldGet(field, minIndex = gminIndex, maxIndex = gmaxIndex, &
+                                    elementCount = geleCount, &
+                                    localMinIndex = lminIndex, &
+                                    localMaxIndex = lmaxIndex, &
+                                    localelementCount = leleCount, &
+                                    rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -6933,6 +6959,8 @@ contains
         type(ESMF_Field)                            :: field1
         character, pointer                          :: buffer(:)
         integer                                     :: buff_length, offset
+        integer                 :: gminIndex(7), gmaxIndex(7), geleCount(7)
+        integer                 :: lminIndex(7), lmaxIndex(7), leleCount(7)
 
         localrc = ESMF_SUCCESS
         rc = ESMF_SUCCESS
@@ -7288,6 +7316,15 @@ contains
               enddo
              enddo
             enddo
+            if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+            call ESMF_FieldGet(field, minIndex = gminIndex, maxIndex = gmaxIndex, &
+                                    elementCount = geleCount, &
+                                    localMinIndex = lminIndex, &
+                                    localMaxIndex = lmaxIndex, &
+                                    localelementCount = leleCount, &
+                                    rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
