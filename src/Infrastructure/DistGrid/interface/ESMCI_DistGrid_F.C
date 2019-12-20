@@ -319,6 +319,7 @@ extern "C" {
     int *connectionCount,
     ESMCI::InterArray<int> *connectionList,
     ESMC_TypeKind_Flag *indexTK,
+    ESMC_IndexFlag *indexflag,
     ESMCI::DELayout **delayout, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridget()"
@@ -349,6 +350,8 @@ extern "C" {
     }
     if (ESMC_NOT_PRESENT_FILTER(indexTK) != ESMC_NULL_POINTER)
       *indexTK = (*ptr)->getIndexTK();
+    if (ESMC_NOT_PRESENT_FILTER(indexflag) != ESMC_NULL_POINTER)
+      *indexflag = (*ptr)->getIndexflag();
     // fill minIndexPDimPTile
     if (present(minIndexPDimPTile)){
       // minIndexPDimPTile was provided -> do some error checking

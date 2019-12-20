@@ -3277,8 +3277,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     dimCount, tileCount, deCount, localDeCount, minIndexPTile, maxIndexPTile, &
     elementCountPTile, elementCountPTileI8, minIndexPDe, maxIndexPDe, &
     elementCountPDe, elementCountPDeI8, localDeToDeMap, deToTileMap, &
-    indexCountPDe, collocation, regDecompFlag, indexTK, connectionCount, &
-    connectionList, rc)
+    indexCountPDe, collocation, regDecompFlag, indexTK, indexflag, &
+    connectionCount, connectionList, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DistGrid),      intent(in)            :: distgrid
@@ -3302,6 +3302,7 @@ integer(ESMF_KIND_I8),target, intent(out), optional :: elementCountPDeI8(:)
     integer,          target, intent(out), optional :: collocation(:)
     logical,                  intent(out), optional :: regDecompFlag
     type(ESMF_TypeKind_Flag), intent(out), optional :: indexTK
+    type(ESMF_Index_Flag),    intent(out), optional :: indexflag
     integer,                  intent(out), optional :: connectionCount
     type(ESMF_DistGridConnection), &
                       target, intent(out), optional :: connectionList(:)
@@ -3322,7 +3323,9 @@ integer(ESMF_KIND_I8),target, intent(out), optional :: elementCountPDeI8(:)
 ! \item[8.1.0] Added argument {\tt indexTK} to allow query of the sequence index
 !              typekind.\newline
 !              Added arguments {\tt elementCountPTileI8} and
-!              {\tt elementCountPDeI8} to provide 64-bit access.
+!              {\tt elementCountPDeI8} to provide 64-bit access.\newline
+!              Added argument {\tt indexflag} to allow user to query this
+!              setting.
 ! \end{description}
 ! \end{itemize}
 !         
@@ -3393,6 +3396,9 @@ integer(ESMF_KIND_I8),target, intent(out), optional :: elementCountPDeI8(:)
 !     Typekind used by the global sequence indexing. See section 
 !     \ref{const:typekind} for a list of typekind options. Only the integer
 !     types are supported for sequence indices.
+!   \item[{[indexflag]}]
+!     Return the indexing option used by the {\tt distgrid} object. See section
+!     \ref{const:indexflag} for a complete list of options.
 !   \item[{[connectionCount]}]
 !     Number of explicitly defined connections in {\tt distgrid}.
 !   \item[{[connectionList]}]
@@ -3487,7 +3493,7 @@ integer(ESMF_KIND_I8),target, intent(out), optional :: elementCountPDeI8(:)
       elementCountPTileI8Aux, minIndexPDeAux, maxIndexPDeAux, &
       elementCountPDeAux, elementCountPDeI8Aux, localDeToDeMapAux, &
       deToTileMapAux, indexCountPDeAux, collocationAux, regDecompFlagAux, &
-      connectionCount, connectionListAux, indexTK, delayout, localrc)
+      connectionCount, connectionListAux, indexTK, indexFlag, delayout, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
