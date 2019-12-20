@@ -69,6 +69,22 @@
         write(failMsg, *) ""
         write(name, *) "Get info associated with the empty field"
         call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a field from an fortran 2d array
+        call test_localglobalbounds(rc)
+        write(failMsg, *) ""
+        write(name, *) "Query field for global and local bounds"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a field from an fortran 2d array
+        call test_localglobalboundsmesh(rc)
+        write(failMsg, *) ""
+        write(name, *) "Query field for global and local bounds on mesh"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
@@ -7845,5 +7861,328 @@ contains
 
     end subroutine test_globalindex
 
+    subroutine test_localglobalbounds(rc)
+        integer, intent(out)  :: rc
+        integer                 :: localrc
+        type(ESMF_Field)        :: field
+        type(ESMF_Grid)         :: grid
+        real (ESMF_KIND_R8), pointer   :: farray(:,:)
+        logical                   :: correct
+        integer                 :: gminIndex(3), gmaxIndex(3), geleCount(3)
+        integer                 :: lminIndex(3), lmaxIndex(3), leleCount(3)
+
+        type(ESMF_VM)                   :: vm
+        integer                         :: localPet, petCount
+
+        rc = ESMF_SUCCESS
+        localrc = ESMF_SUCCESS
+        correct=.true.
+        call ESMF_VMGetCurrent(vm, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        grid = ESMF_GridCreateNoPeriDimUfrm(maxIndex=(/80, 100/), &
+        minCornerCoord=(/0._ESMF_KIND_R8,  -90._ESMF_KIND_R8/), &
+        maxCornerCoord=(/360._ESMF_KIND_R8, 90._ESMF_KIND_R8/), &
+        staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        field = ESMF_FieldCreate(grid, &
+          gridToFieldMap=(/2,3/), &
+          ungriddedLBound=(/1/), ungriddedUBound=(/10/), & 
+          typekind=ESMF_TYPEKIND_R8, &
+          rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call ESMF_FieldGet(field, minIndex = gminIndex, maxIndex = gmaxIndex, &
+                                elementCount = geleCount, &
+                                localMinIndex = lminIndex, &
+                                localMaxIndex = lmaxIndex, &
+                                localelementCount = leleCount, &
+                                rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       if(localPet .eq. 0) then
+         if(leleCount(1) .ne. 10) correct = .false.
+         if(leleCount(2) .ne. 20)  correct = .false.
+         if(leleCount(3) .ne. 100)  correct = .false.
+       else if(localPet .eq. 1) then
+         if(leleCount(1) .ne. 10) correct = .false.
+         if(leleCount(2) .ne. 20)  correct = .false.
+         if(leleCount(3) .ne. 100)  correct = .false.
+       else if(localPet .eq. 2) then
+         if(leleCount(1) .ne. 10) correct = .false.
+         if(leleCount(2) .ne. 20)  correct = .false.
+         if(leleCount(3) .ne. 100)  correct = .false.
+       else if(localPet .eq. 3) then
+         if(leleCount(1) .ne. 10) correct = .false.
+         if(leleCount(2) .ne. 20)  correct = .false.
+         if(leleCount(3) .ne. 100)  correct = .false.
+       endif
+
+
+        call ESMF_GridDestroy(grid, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        call ESMF_FieldDestroy(field, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+       ! return rc based on correct
+       if (correct) then
+         rc=ESMF_SUCCESS
+       else
+         rc=ESMF_FAILURE
+       endif
+    end subroutine test_localglobalbounds
+
+    subroutine test_localglobalboundsmesh(rc)
+        integer, intent(out)  :: rc
+        integer                 :: localrc
+        type(ESMF_Field)        :: field
+        real (ESMF_KIND_R8), pointer   :: farray(:,:)
+        logical                   :: correct
+        integer                 :: gminIndex(2), gmaxIndex(2), geleCount(2)
+        integer                 :: lminIndex(2), lmaxIndex(2), leleCount(2)
+        type(ESMF_Mesh)                 :: mesh
+        integer, pointer :: nodeIds(:),nodeOwners(:)
+        real(ESMF_KIND_R8), pointer :: nodeCoords(:)
+        integer :: numNodes
+        integer :: numElems
+        integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
+        type(ESMF_VM)                   :: vm
+        integer                         :: localPet, petCount
+
+        rc = ESMF_SUCCESS
+        localrc = ESMF_SUCCESS
+        correct=.true.
+        call ESMF_VMGetCurrent(vm, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        ! Only do this if we have 4 PETs
+         if (petCount .eq. 4) then
+            ! Setup mesh data depending on PET
+            if (localPet .eq. 0) then
+               ! Fill in node data
+               numNodes=4
+
+              !! node ids
+              allocate(nodeIds(numNodes))
+              nodeIds=(/1,2,4,5/) 
+
+              !! node Coords
+              allocate(nodeCoords(numNodes*2))
+              nodeCoords=(/0.0,0.0, &
+                           1.0,0.0, &
+                           0.0,1.0, &
+                           1.0,1.0/)
+
+              !! node owners
+              allocate(nodeOwners(numNodes))
+              nodeOwners=(/0,0,0,0/) ! everything on proc 0
+
+              ! Fill in elem data
+              numElems=1
+
+              !! elem ids
+              allocate(elemIds(numElems))
+              elemIds=(/1/) 
+
+              !! elem type
+              allocate(elemTypes(numElems))
+              elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+              !! elem conn
+              allocate(elemConn(numElems*4))
+              elemConn=(/1,2,4,3/)
+            else if (localPet .eq. 1) then
+               ! Fill in node data
+               numNodes=4
+
+              !! node ids
+              allocate(nodeIds(numNodes))
+              nodeIds=(/2,3,5,6/) 
+
+              !! node Coords
+              allocate(nodeCoords(numNodes*2))
+              nodeCoords=(/1.0,0.0, &
+                           2.0,0.0, &
+                           1.0,1.0, &
+                           2.0,1.0/)
+
+              !! node owners
+              allocate(nodeOwners(numNodes))
+              nodeOwners=(/0,1,0,1/) 
+
+              ! Fill in elem data
+              numElems=1
+
+              !! elem ids
+              allocate(elemIds(numElems))
+              elemIds=(/2/) 
+
+              !! elem type
+              allocate(elemTypes(numElems))
+              elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+              !! elem conn
+              allocate(elemConn(numElems*4))
+              elemConn=(/1,2,4,3/)
+            else if (localPet .eq. 2) then
+               ! Fill in node data
+               numNodes=4
+
+              !! node ids
+              allocate(nodeIds(numNodes))
+              nodeIds=(/4,5,7,8/) 
+
+              !! node Coords
+              allocate(nodeCoords(numNodes*2))
+              nodeCoords=(/0.0,1.0, &
+                           1.0,1.0, &
+                           0.0,2.0, &
+                           1.0,2.0/)
+
+              !! node owners
+              allocate(nodeOwners(numNodes))
+              nodeOwners=(/0,0,2,2/) 
+
+              ! Fill in elem data
+              numElems=1
+
+              !! elem ids
+              allocate(elemIds(numElems))
+              elemIds=(/3/) 
+
+              !! elem type
+              allocate(elemTypes(numElems))
+              elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+              !! elem conn
+              allocate(elemConn(numElems*4))
+              elemConn=(/1,2,4,3/)  
+            else 
+               ! Fill in node data
+               numNodes=4
+
+              !! node ids
+              allocate(nodeIds(numNodes))
+              nodeIds=(/5,6,8,9/) 
+
+              !! node Coords
+              allocate(nodeCoords(numNodes*2))
+              nodeCoords=(/1.0,1.0, &
+                           2.0,1.0, &
+                           1.0,2.0, &
+                           2.0,2.0/)
+
+              !! node owners
+              allocate(nodeOwners(numNodes))
+              nodeOwners=(/0,1,2,3/) 
+
+              ! Fill in elem data
+              numElems=1
+
+              !! elem ids
+              allocate(elemIds(numElems))
+              elemIds=(/4/) 
+
+              !! elem type
+              allocate(elemTypes(numElems))
+              elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+              !! elem conn
+              allocate(elemConn(numElems*4))
+              elemConn=(/1,2,4,3/)  
+            endif
+
+      !BOC
+            ! Create Mesh structure in 1 step
+            mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+                   nodeIds=nodeIds, nodeCoords=nodeCoords, &
+                   nodeOwners=nodeOwners, elementIds=elemIds,&
+                   elementTypes=elemTypes, elementConn=elemConn, &
+                   rc=rc)
+            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+            ! Field is created on the 1 dimensional nodal distgrid. On
+            ! each PET, Field is created on the locally owned nodes.
+            field = ESMF_FieldCreate(mesh, typekind=ESMF_TYPEKIND_I4, rc=rc)
+            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      !EOC
+
+            ! deallocate node data
+            deallocate(nodeIds)
+            deallocate(nodeCoords)
+            deallocate(nodeOwners)
+
+            ! deallocate elem data
+            deallocate(elemIds)
+            deallocate(elemTypes)
+            deallocate(elemConn)
+
+
+        field = ESMF_FieldCreate(mesh, &
+          gridToFieldMap=(/2/), &
+          ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
+          typekind=ESMF_TYPEKIND_R8, &
+          rc=rc)
+
+        call ESMF_FieldGet(field, minIndex = gminIndex, maxIndex = gmaxIndex, &
+                                elementCount = geleCount, &
+                                localMinIndex = lminIndex, &
+                                localMaxIndex = lmaxIndex, &
+                                localelementCount = leleCount, &
+                                rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+       if(localPet .eq. 0) then
+         if(leleCount(1) .ne. 10) correct = .false.
+         if(leleCount(2) .ne. 4)  correct = .false.
+       else if(localPet .eq. 1) then
+         if(leleCount(1) .ne. 10) correct = .false.
+         if(leleCount(2) .ne. 2)  correct = .false.
+       else if(localPet .eq. 2) then
+         if(leleCount(1) .ne. 10) correct = .false.
+         if(leleCount(2) .ne. 2)  correct = .false.
+       else if(localPet .eq. 3) then
+         if(leleCount(1) .ne. 10) correct = .false.
+         if(leleCount(2) .ne. 1)  correct = .false.
+       endif
+
+       ! Get rid of Mesh
+       call ESMF_MeshDestroy(mesh, rc=rc)
+       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+       call ESMF_FieldDestroy(field, rc=rc)
+       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+      endif
+
+      ! return rc based on correct
+      if (correct) then
+        rc=ESMF_SUCCESS
+      else
+        rc=ESMF_FAILURE
+      endif
+    end subroutine test_localglobalboundsmesh
 
 end program ESMF_FieldCreateGetUTest
