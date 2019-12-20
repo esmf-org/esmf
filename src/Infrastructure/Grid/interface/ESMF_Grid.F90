@@ -30158,7 +30158,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! Lower end
       if (polekindflaglocal(1) .eq. ESMF_POLEKIND_MONOPOLE) then
-         ! do pole connection
+
+         ! setup monopole connection
          posVec=0
          posVec(periodicDimLocal)=widthIndex(periodicDimLocal)/2
          posVec(poleDimLocal)=1
@@ -30170,7 +30171,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               rc=localrc)
          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
+
+         ! Advance postion in list
+         connListPos=connListPos+1
+
       else if (polekindflaglocal(1) .eq. ESMF_POLEKIND_BIPOLE) then
+
+         ! setup bipole connection
          posVec=0
          posVec(periodicDimLocal)=widthIndex(periodicDimLocal)+1
          posVec(poleDimLocal)=1
@@ -30183,8 +30190,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               rc=localrc)
          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
+
+         ! Advance postion in list
+         connListPos=connListPos+1
       endif
-      connListPos=connListPos+1
+
 
      ! Reinit orient vec
      do i=1,ESMF_MAXDIM
@@ -30193,6 +30203,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! Upper end
       if (polekindflaglocal(2) .eq. ESMF_POLEKIND_MONOPOLE) then
+
+         ! setup monopole connection
          posVec=0
          posVec(periodicDimLocal)=widthIndex(periodicDimLocal)/2
          posVec(poleDimLocal)=2*widthIndex(poleDimLocal)+1
@@ -30205,6 +30217,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
       else if (polekindflaglocal(2) .eq. ESMF_POLEKIND_BIPOLE) then
+
+         ! setup bipole connection
          posVec=0
          posVec(periodicDimLocal)=widthIndex(periodicDimLocal)+1
          posVec(poleDimLocal)=2*widthIndex(poleDimLocal)+1
