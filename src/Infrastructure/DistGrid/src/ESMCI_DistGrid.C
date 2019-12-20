@@ -671,9 +671,9 @@ DistGrid *DistGrid::create(
       dimInterArray, dimCountInterArray);
     
     // use indexflag inside dg as the default if not supplied by caller
-    ESMC_IndexFlag *indexflagOpt = dg->indexflag; // default
+    ESMC_IndexFlag indexflagOpt = dg->indexflag; // default
     if (indexflag)
-      indexflagOpt = indexflag; // provided by caller
+      indexflagOpt = *indexflag; // provided by caller
     
     //TODO: maybe also need to hold on to delabellist to preserve DE labeling?
     
@@ -710,7 +710,7 @@ DistGrid *DistGrid::create(
           decompflagCount = dg->dimCount;
         distgrid = DistGrid::create(minIndex, maxIndex, regDecomp, decompflag,
           decompflagCount, firstExtra, lastExtra, NULL,
-          indexflagOpt, connectionList, delayout, vm, &localrc, dg->indexTK);
+          &indexflagOpt, connectionList, delayout, vm, &localrc, dg->indexTK);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
       }else{
@@ -731,7 +731,7 @@ DistGrid *DistGrid::create(
         }
         distgrid = DistGrid::create(minIndex, maxIndex, regDecomp, decompflag,
           decompflagCount1, decompflagCount2, firstExtra, lastExtra, NULL,
-          indexflagOpt, connectionList, delayout, vm, &localrc, dg->indexTK);
+          &indexflagOpt, connectionList, delayout, vm, &localrc, dg->indexTK);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
       }
@@ -810,7 +810,7 @@ DistGrid *DistGrid::create(
 #endif
         // create DistGrid
         distgrid = DistGrid::create(minIndex, maxIndex, deBlockList,
-          NULL, indexflagOpt, connectionList, delayout, vm, &localrc);
+          NULL, &indexflagOpt, connectionList, delayout, vm, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
       }else{
@@ -828,7 +828,7 @@ DistGrid *DistGrid::create(
         // create DistGrid
         distgrid = DistGrid::create(minIndex, maxIndex, deBlockList,
           deToTileMap,
-          NULL, indexflagOpt, connectionList, delayout, vm, &localrc);
+          NULL, &indexflagOpt, connectionList, delayout, vm, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
         delete deToTileMap;
@@ -1228,11 +1228,7 @@ DistGrid *DistGrid::create(
         sizeof(Decomp_Flag)*dimCount*tileCount);
     }else
       distgrid->regDecomp = NULL;
-    if (dg->indexflag){
-      distgrid->indexflag = new ESMC_IndexFlag;
-      memcpy(distgrid->indexflag, dg->indexflag, sizeof(ESMC_IndexFlag));
-    }else
-      distgrid->indexflag = NULL;
+    distgrid->indexflag = dg->indexflag;
     distgrid->delayout = dg->delayout;
     distgrid->delayoutCreator = false;
     distgrid->vm = dg->vm;
@@ -3239,10 +3235,9 @@ int DistGrid::construct(
   }else
     decompflag = NULL;
   if (indexflagArg){
-    indexflag = new ESMC_IndexFlag; // must store in local storage
-    *indexflag = *indexflagArg;     // copy the value
+    indexflag = *indexflagArg;     // copy the value
   }else
-    indexflag = NULL;
+    indexflag = ESMC_INDEX_USER;
   
   // fill in the DistGrid object
   indexTK = indexTKArg;
@@ -3435,8 +3430,6 @@ int DistGrid::destruct(bool followCreator, bool noGarbage){
     
     if (decompflag)
       delete [] decompflag;
-    if (indexflag)
-      delete indexflag;
     
 //    int localDeCount = delayout->getLocalDeCount();
     int localDeCount = localDeCountAux; // TODO: delayout may be gone already!
@@ -5877,6 +5870,7 @@ int DistGrid::serialize(
   int *ip;
   ESMC_I8 *lp;
   ESMC_TypeKind_Flag *tkp;
+  ESMC_IndexFlag *ifp;
   int r;
 
   // Check if buffer has enough free memory to hold object
@@ -5907,8 +5901,13 @@ int DistGrid::serialize(
     *tkp++ = indexTK;
   else
     tkp += 1;
+  ifp = (ESMC_IndexFlag *)tkp;
+  if (inquireflag != ESMF_INQUIREONLY)
+    *ifp++ = indexflag;
+  else
+    ifp += 1;
   //
-  ip = (int *)tkp;
+  ip = (int *)ifp;
   if (inquireflag != ESMF_INQUIREONLY){
     *ip++ = dimCount;
     *ip++ = tileCount;
@@ -6020,6 +6019,7 @@ DistGrid *DistGrid::deserialize(
   int *ip;
   ESMC_I8 *lp;
   ESMC_TypeKind_Flag *tkp;
+  ESMC_IndexFlag *ifp;
   int r;
   
   // Deserialize the Base class
@@ -6039,7 +6039,9 @@ DistGrid *DistGrid::deserialize(
   if (r!=0) *offset += 8-r;  // alignment
   tkp = (ESMC_TypeKind_Flag *)(buffer + *offset);
   a->indexTK = *tkp++;
-  ip = (int *)tkp;
+  ifp = (ESMC_IndexFlag *)tkp;
+  a->indexflag = *ifp++;
+  ip = (int *)ifp;
   a->dimCount = *ip++;
   a->tileCount = *ip++;
   a->minIndexPDimPTile = new int[a->dimCount*a->tileCount];
