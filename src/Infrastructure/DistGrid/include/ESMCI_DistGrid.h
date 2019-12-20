@@ -88,7 +88,7 @@ namespace ESMCI {
     int *regDecomp;               // regular decomposition descriptor
                                   // [dimCount*tileCount]
     Decomp_Flag *decompflag;      // decomposition scheme [dimCount*tileCount]
-    ESMC_IndexFlag *indexflag;    // index scheme
+    ESMC_IndexFlag indexflag;     // index scheme
     // lower level object references
     DELayout *delayout;
     bool delayoutCreator;
@@ -103,13 +103,11 @@ namespace ESMCI {
     // native constructor and destructor
     DistGrid(VM *vm=NULL):ESMC_Base(vm){ // allow specific VM instead default
       decompflag = NULL;
-      indexflag = NULL;
       // initialize the name for this DistGrid object in the Base class
       ESMC_BaseSetName(NULL, "DistGrid");
     }
     DistGrid(int baseID):ESMC_Base(baseID){ // prevent baseID counter increment
       decompflag = NULL;
-      indexflag = NULL;
       // initialize the name for this DistGrid object in the Base class
       ESMC_BaseSetName(NULL, "DistGrid");
     }
@@ -179,6 +177,7 @@ namespace ESMCI {
     // get() and set()
     int getDimCount() const {return dimCount;}
     int getTileCount() const {return tileCount;}
+    ESMC_IndexFlag getIndexflag() const  {return indexflag;}
     ESMC_TypeKind_Flag getIndexTK() const {return indexTK;}
     int getDiffCollocationCount() const {return diffCollocationCount;}
     int const *getMinIndexPDimPTile() const {return minIndexPDimPTile;}
