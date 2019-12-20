@@ -2577,6 +2577,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     DELayout with 1 DE per PET across all PETs of the current VM is 
 !     automatically created.
 !
+!     This is a {\em collective} method across the current VM.
+!
 !     The arguments are:
 !     \begin{description}
 !     \item[arbSeqIndexList]
@@ -2635,7 +2637,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! create fitting DistGrid
     minC(1) = deblock(1,1,1)
     maxC(1) = deblock(1,2,petCount)
-    distgrid = ESMF_DistGridCreate(minC, maxC, deBlockList=deblock, rc=localrc)
+    distgrid = ESMF_DistGridCreate(minC, maxC, deBlockList=deblock, &
+      indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2697,6 +2700,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The sequence indices must be unique across all PETs. A default
 !     DELayout with 1 DE per PET across all PETs of the current VM is 
 !     automatically created.
+!
+!     This is a {\em collective} method across the current VM.
 !
 !     The arguments are:
 !     \begin{description}
@@ -2761,7 +2766,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     minC(1) = deblock(1,1,1)
     maxC(1) = deblock(1,2,petCount)
     distgrid = ESMF_DistGridCreate(minC, maxC, deBlockList=deblock, &
-      indexTK=ESMF_TYPEKIND_I8, rc=localrc)
+      indexTK=ESMF_TYPEKIND_I8, indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2824,6 +2829,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     there are arbitrary sequence indices in the associated list.
 !     The sequence indices must be unique across all DEs. A default
 !     DELayout with the correct number of DEs per PET is automatically created.
+!
+!     This is a {\em collective} method across the current VM.
 !
 !     The arguments are:
 !     \begin{description}
@@ -2926,7 +2933,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     minC(1) = deblock(1,1,1)
     maxC(1) = deblock(1,2,globalSizesCount)
     distgrid = ESMF_DistGridCreate(minC, maxC, deBlockList=deblock, &
-      delayout=delayout, rc=localrc)
+      delayout=delayout, indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3016,6 +3023,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     total index space described by the DistGrid object. The {\tt arbDim}
 !     argument allows to specify which dimension in the resulting DistGrid
 !     corresponds to the arbitrarily distributed one.
+!
+!     This is a {\em collective} method across the current VM.
 !
 !     The arguments are:
 !     \begin{description}
@@ -3112,7 +3121,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       minC(i) = deblock(i,1,1)
       maxC(i) = deblock(i,2,petCount)
     enddo
-    distgrid = ESMF_DistGridCreate(minC, maxC, deBlockList=deblock, rc=localrc)
+    distgrid = ESMF_DistGridCreate(minC, maxC, deBlockList=deblock, &
+      indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
