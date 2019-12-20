@@ -20,8 +20,10 @@ The Field metadata is implemented as an ESMF Attribute Package:
      {\tt ProducerConnection} & String value indicating whether the Field has been connected with a producer. & open, targeted,\newline connected\\ \hline
      {\tt ConsumerConnection} & String value indicating whether the Field has been connected with a consumer.& open, targeted,\newline connected\\ \hline
      {\tt Updated} & String value indicating updated status during initialization.& false, true\\ \hline
-     {\tt TransferOfferGeomObject} & String value indicating a component's ability to transfer information about the advertised Field, including its GeomObject.& will provide,\newline can provide,\newline cannot provide\\ \hline
-     {\tt TransferActionGeomObject} & String value indicating the action a component is supposed to take with respect to transferring Field information, including its GeomObject.& provide, accept\\ \hline
+     {\tt ProducerTransferOffer} & String value indicating a producer component's ability to transfer information about the advertised Field, including its GeomObject.& will provide,\newline can provide,\newline cannot provide\\ \hline
+     {\tt ProducerTransferAction} & String value indicating the action a producer component is supposed to take with respect to transferring Field information, including its GeomObject.& provide, accept\\ \hline
+     {\tt ConsumerTransferOffer} & String value indicating a consumer component's ability to transfer information about the advertised Field, including its GeomObject.& will provide,\newline can provide,\newline cannot provide\\ \hline
+     {\tt ConsumerTransferAction} & String value indicating the action a consumer component is supposed to take with respect to transferring Field information, including its GeomObject.& provide, accept\\ \hline
      {\tt SharePolicyField} & String value indicating a component's policy with respect to sharing the Field data allocation.& share,\newline not share\\ \hline
      {\tt ShareStatusField} & String value indicating the status with respect to sharing the underlying Field data allocation that was negotiated.& shared,\newline not shared\\ \hline
      {\tt SharePolicyGeomObject} & String value indicating a component's policy with respect to sharing the Grid or Mesh on which the advertised Field object is defined.& share,\newline not share\\ \hline

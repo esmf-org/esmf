@@ -1430,7 +1430,7 @@ contains
             rcToReturn=rc)) &
             return  ! bail out
 
-        attributeName = "TransferOfferGeomObject"
+        attributeName = "ProducerTransferOffer"
         call NUOPC_CheckFieldAttribute(prefix, field=field, &
             attributeName=attributeName, convention=convention, purpose=purpose, &
             rc=localrc)
@@ -1440,7 +1440,27 @@ contains
             rcToReturn=rc)) &
             return  ! bail out
 
-        attributeName = "TransferActionGeomObject"
+        attributeName = "ProducerTransferAction"
+        call NUOPC_CheckFieldAttribute(prefix, field=field, &
+            attributeName=attributeName, convention=convention, purpose=purpose, &
+            rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            line=__LINE__, &
+            file=FILENAME, &
+            rcToReturn=rc)) &
+            return  ! bail out
+
+        attributeName = "ConsumerTransferOffer"
+        call NUOPC_CheckFieldAttribute(prefix, field=field, &
+            attributeName=attributeName, convention=convention, purpose=purpose, &
+            rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            line=__LINE__, &
+            file=FILENAME, &
+            rcToReturn=rc)) &
+            return  ! bail out
+
+        attributeName = "ConsumerTransferAction"
         call NUOPC_CheckFieldAttribute(prefix, field=field, &
             attributeName=attributeName, convention=convention, purpose=purpose, &
             rc=localrc)

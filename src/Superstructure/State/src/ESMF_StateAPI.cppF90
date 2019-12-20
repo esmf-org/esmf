@@ -49,6 +49,7 @@ module ESMF_StateAPIMod
       use ESMF_RHandleMod
       use ESMF_StateTypesMod
       use ESMF_StateContainerMod
+      use ESMF_StateSetMod
       use ESMF_StateVaMod
       use ESMF_StateInternalsMod
       use ESMF_StateWrMod
@@ -90,6 +91,7 @@ module ESMF_StateAPIMod
       public ESMF_StateRead
       public ESMF_StateWrite
       public ESMF_StatePrint
+      public ESMF_StateSet
 
       public ESMF_StateSerialize, ESMF_StateDeserialize
 
@@ -1282,7 +1284,8 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
         call itemTypeWorker (stypep)
       endif
 
-      if (present(rc)) rc = localrc
+      ! return successfully
+      if (present(rc)) rc = ESMF_SUCCESS
 
     contains
 
