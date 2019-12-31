@@ -81,6 +81,7 @@ program ESMF_DistGridCreateGetUTest
   integer:: connectionCount
   type(ESMF_DistGridConnection), allocatable:: connectionList(:)
   type(ESMF_TypeKind_Flag)  :: indexTK
+  type(ESMF_Index_Flag)     :: indexflag
 
   character, allocatable :: buffer(:)
   integer :: buff_len, offset
@@ -275,9 +276,16 @@ program ESMF_DistGridCreateGetUTest
   call ESMF_DistGridGet(distgrid, dimCount=dimCount, tileCount=tileCount, &
     deCount=deCount, connectionCount=connectionCount, &
     localDeCount=localDeCount, regDecompFlag=regDecompFlag, delayout=delayout, &
-    indexTK=indexTK, rc=rc)
+    indexTK=indexTK, indexflag=indexflag, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verify indexflag"
+  write(failMsg, *) "Wrong result"
+  call ESMF_Test((indexflag == ESMF_INDEX_USER), &
+    name, failMsg, result, ESMF_SRCLINE)
+    
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Verify dimCount"
@@ -972,6 +980,20 @@ program ESMF_DistGridCreateGetUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   deallocate(arbSeqIndexList)
 
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridGet() - 1D arbitrary seq indices 1DE/PET case"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridGet(distgrid, indexflag=indexflag, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verify indexflag"
+  write(failMsg, *) "Wrong result"
+  call ESMF_Test((indexflag == ESMF_INDEX_GLOBAL), &
+    name, failMsg, result, ESMF_SRCLINE)
+    
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "DistGridPrint()"
