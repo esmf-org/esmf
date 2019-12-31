@@ -2702,7 +2702,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       return @\
     endif @\
 @\
-    geombase=ESMF_GeomBaseCreate(mesh,meshloc, rc=localrc) @\
+    geombase=ESMF_GeomBaseCreate(mesh, indexflag=indexflag, loc=meshloc, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -2843,7 +2843,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       return @\
     endif @\
 @\
-    geombase=ESMF_GeomBaseCreate(mesh,meshloc, rc=localrc) @\
+    geombase=ESMF_GeomBaseCreate(mesh, loc=meshloc, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -4430,15 +4430,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldEmptySet()
-  subroutine ESMF_FieldEmptySetMesh(field, mesh, keywordEnforcer, meshloc,  rc)
+  subroutine ESMF_FieldEmptySetMesh(field, mesh, keywordEnforcer, indexflag, meshloc,  rc)
 
 !
 ! !ARGUMENTS:
-  type(ESMF_Field),   intent(inout)         :: field
-  type(ESMF_Mesh),    intent(in)            :: mesh
+  type(ESMF_Field),     intent(inout)         :: field
+  type(ESMF_Mesh),      intent(in)            :: mesh
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  type(ESMF_MeshLoc), intent(in),  optional :: meshloc
-  integer,            intent(out), optional :: rc
+  type(ESMF_Index_Flag),intent(in),  optional :: indexflag
+  type(ESMF_MeshLoc),   intent(in),  optional :: meshloc
+  integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! \begin{sloppypar}
@@ -4464,6 +4465,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       {\tt ESMF\_FIELDSTATUS\_EMPTY} to {\tt ESMF\_FIELDSTATUS\_GRIDSET}.
 ! \item [mesh]
 !       {\tt ESMF\_Mesh} to be set in the {\tt ESMF\_Field}.
+! \item [{[indexflag]}]
+!       Indicate how DE-local indices are defined. See section
+!       \ref{const:indexflag} for a list of valid indexflag options.
 ! \item [{[meshloc]}]
 !       \begin{sloppypar}
 !       Which part of the mesh to build the Field on. Can be set to either
@@ -4477,7 +4481,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
 
-  type(ESMF_MeshLoc)                    :: l_meshloc
   type(ESMF_GEOMBASE)                   :: geombase
   type(ESMF_FieldStatus_Flag)           :: status
   integer                               :: localrc
@@ -4498,10 +4501,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     return
   endif
 
-  l_meshloc = ESMF_MESHLOC_NODE
-  if(present(meshloc)) l_meshloc = meshloc
-
-  geombase=ESMF_GeomBaseCreate(mesh, l_meshloc, rc=localrc)
+  geombase=ESMF_GeomBaseCreate(mesh, indexflag=indexflag, loc=meshloc, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) return
 

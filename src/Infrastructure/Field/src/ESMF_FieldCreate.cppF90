@@ -3317,7 +3317,7 @@ TypeKindRankDeclarationMacro(FieldCreateLSDataPtr)
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldCreate()
   function ESMF_FieldCreateMeshTKR(mesh, typekind, &
-    keywordEnforcer, meshloc, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
+    keywordEnforcer, indexflag, meshloc, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     name, rc)
 !
 ! !RETURN VALUE:
@@ -3327,6 +3327,7 @@ TypeKindRankDeclarationMacro(FieldCreateLSDataPtr)
     type(ESMF_Mesh),          intent(in)            :: mesh
     type(ESMF_TypeKind_Flag), intent(in)            :: typekind
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_Index_Flag),    intent(in),  optional :: indexflag
     type(ESMF_MeshLoc),       intent(in),  optional :: meshloc
     integer,                  intent(in),  optional :: gridToFieldMap(:)
     integer,                  intent(in),  optional :: ungriddedLBound(:)
@@ -3347,6 +3348,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item [typekind]
 !       The typekind of the Field. See section \ref{const:typekind}
 !       for a list of valid typekind options.
+! \item [{[indexflag]}]
+!       Indicate how DE-local indices are defined. See section
+!       \ref{const:indexflag} for a list of valid indexflag options.
 ! \item [{[meshloc]}]
 !       \begin{sloppypar}
 !       The part of the Mesh on which to build the Field. For valid
@@ -3404,6 +3408,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: memDimCount
     type(ESMF_MeshLoc) :: localMeshloc
     type(ESMF_Distgrid) :: localDistgrid
+    type(ESMF_Index_Flag) :: l_indexflag
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -3474,7 +3479,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
 
     ESMF_FieldCreateMeshTKR = ESMF_FieldCreate(mesh, arrayspec, &
-      meshloc=meshloc, gridToFieldMap=gridToFieldMap, &
+      indexflag=indexflag, meshloc=meshloc, gridToFieldMap=gridToFieldMap, &
       ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
       name=name, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -3493,7 +3498,7 @@ end function ESMF_FieldCreateMeshTKR
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldCreate()
   function ESMF_FieldCreateMeshArraySpec(mesh, arrayspec, &
-    keywordEnforcer, meshloc, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
+    keywordEnforcer, indexflag, meshloc, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     name, rc)
 !
 ! !RETURN VALUE:
@@ -3503,6 +3508,7 @@ end function ESMF_FieldCreateMeshTKR
     type(ESMF_Mesh),      intent(in)            :: mesh
     type(ESMF_ArraySpec), intent(in)            :: arrayspec
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_Index_Flag),intent(in),  optional :: indexflag
     type(ESMF_MeshLoc),   intent(in),  optional :: meshloc
     integer,              intent(in),  optional :: gridToFieldMap(:)
     integer,              intent(in),  optional :: ungriddedLBound(:)
@@ -3523,6 +3529,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       {\tt ESMF\_Mesh} object.
 ! \item [arrayspec]
 !       Data type and kind specification.
+! \item [{[indexflag]}]
+!       Indicate how DE-local indices are defined. See section
+!       \ref{const:indexflag} for a list of valid indexflag options.
 ! \item [{[meshloc]}]
 !       \begin{sloppypar}
 !       The part of the Mesh on which to build the Field. For valid
@@ -3590,7 +3599,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, arrayspec, rc)
 
     ! Create GeomBase from Mesh
-    geombase=ESMF_GeomBaseCreate(mesh, meshloc,  rc=localrc)
+    geombase=ESMF_GeomBaseCreate(mesh, indexflag=indexflag, loc=meshloc,  rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3728,7 +3737,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
 
     ! Create GeomBase from Mesh
-    geombase=ESMF_GeomBaseCreate(mesh, meshloc,  rc=localrc)
+    geombase=ESMF_GeomBaseCreate(mesh, loc=meshloc, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3891,7 +3900,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
 @\
     ! Create GeomBase from Mesh@\
-    geombase=ESMF_GeomBaseCreate(mesh,meshloc, rc=localrc)@\
+    geombase=ESMF_GeomBaseCreate(mesh, indexflag=indexflag, loc=meshloc, rc=localrc)@\
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &@\
       ESMF_CONTEXT, rcToReturn=rc)) return@\
 @\
@@ -4034,7 +4043,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
 @\
     ! Create GeomBase from Mesh@\
-    geombase=ESMF_GeomBaseCreate(mesh,meshloc, rc=localrc)@\
+    geombase=ESMF_GeomBaseCreate(mesh, loc=meshloc, rc=localrc)@\
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &@\
       ESMF_CONTEXT, rcToReturn=rc)) return@\
 @\

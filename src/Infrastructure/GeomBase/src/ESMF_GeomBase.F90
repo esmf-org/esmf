@@ -497,13 +497,14 @@ end interface
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GeomBaseCreate()
-      function ESMF_GeomBaseCreateMesh(mesh, loc, rc)
+      function ESMF_GeomBaseCreateMesh(mesh, indexflag, loc, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_GeomBase) :: ESMF_GeomBaseCreateMesh
 !
 ! !ARGUMENTS:
        type(ESMF_Mesh),       intent(in)              :: mesh
+       type(ESMF_Index_Flag), intent(in),  optional   :: indexflag
        type(ESMF_MeshLoc),    intent(in),  optional   :: loc
        integer,               intent(out), optional   :: rc
 !
@@ -547,6 +548,7 @@ end interface
        localLoc=ESMF_MESHLOC_NODE
     endif
 
+    ! TODO: properlly handle the indexflag information for Mesh
     ! Set values in GeomBase
     gbcp%type = ESMF_GEOMTYPE_MESH
     gbcp%mesh = mesh

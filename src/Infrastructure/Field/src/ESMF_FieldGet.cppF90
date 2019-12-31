@@ -158,6 +158,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 ! \item[6.3.0r] Added argument {\tt vm} in order to offer information about the
 !               VM on which the Field was created.
+! \item[8.0.0] Added argument {\tt minIndex}.
+!              The new argument allows the user to query the global lower bounds of the field data across all PETs.
+! \item[8.0.0] Added argument {\tt maxIndex}.
+!              The new argument allows the user to query the global upper bounds of the field data across all PETs.
+! \item[8.0.0] Added argument {\tt elementCount}.
+!              The new argument allows the user to query the global number of items of the field data across all PETs.
+! \item[8.0.0] Added argument {\tt localMinIndex}.
+!              The new argument allows the user to query the PET local lower bounds globally indexed of the field data.
+! \item[8.0.0] Added argument {\tt localMaxIndex}.
+!              The new argument allows the user to query the PET local upper bounds globally indexed of the field data.
+! \item[8.0.0] Added argument {\tt localElementCount}.
+!              The new argument allows the user to query the PET local number of items of the field data.
 ! \end{description}
 ! \end{itemize}
 !
