@@ -49,7 +49,7 @@
 
     ! cumulative result: count failures; no failures equals "all pass"
     integer :: result = 0
- 
+
        ! individual test result code
     integer :: rc = 1
 
@@ -60,7 +60,7 @@
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
- 
+
 #ifdef ESMF_TESTEXHAUSTIVE
 
 ! call ESMF_MeshSetMOAB(.true.)
@@ -73,9 +73,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Regrid between a 0 to 360 sphere and a -180 to 180 sphere"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-      
+
       ! do test
        call test_regrid180vs360(rc)
 
@@ -91,8 +91,8 @@
       ! Test regridding with a field with extra dimensions
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Regrid between two Fields with ungridded dimensions"
- 
-      ! initialize 
+
+      ! initialize
       rc=ESMF_SUCCESS
 
       ! do test
@@ -100,15 +100,15 @@
 
       ! return result
        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
- 
+
 
      !------------------------------------------------------------------------
       !EX_UTest
       ! Test regridding on Grids with indices switched
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Regrid between two Fields on Grids with indices switched"
- 
-      ! initialize 
+
+      ! initialize
       rc=ESMF_SUCCESS
 
       ! do test
@@ -127,9 +127,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Bilinear regrid between 3D Cart. Grids"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-      
+
       ! do test
       call test_regrid3D(rc)
 
@@ -142,9 +142,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Nearest STOD regrid between 3D Cart. Grids"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-      
+
       ! do test
       call test_regrid3D_STOD(rc)
 
@@ -158,9 +158,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Nearest DTOS regrid between 3D Cart. Grids"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-      
+
       ! do test
       call test_regrid3D_DTOS(rc)
 
@@ -175,9 +175,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Bilinear regrid between 3D Cart. Meshes"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-      
+
       ! do test
       call test_regrid3DCartMeshToMesh(rc)
 
@@ -191,9 +191,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Nearest STOD regrid between 3D Cart. Meshes"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-      
+
       ! do test
       call test_STOD_3DCartMeshToMesh(rc)
 
@@ -207,9 +207,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Nearest DTOS regrid between 3D Cart. Meshes"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-      
+
       ! do test
       call test_DTOS_3DCartMeshToMesh(rc)
 
@@ -223,12 +223,12 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Regrid with destination masks"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-      
+
        ! do test
        call test_regridDstMask(rc)
- 
+
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -238,12 +238,12 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Regrid with completely masked destination"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-      
+
        ! do test
        call test_regridAllDstMask(rc)
- 
+
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -253,12 +253,12 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Regrid with source and destination disjoint"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-      
+
        ! do test
        call test_regridDisjointSD(rc)
- 
+
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -268,9 +268,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Regrid with source masks"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-      
+
        ! do test
       call test_regridSrcMask(rc)
 
@@ -284,9 +284,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Regrid sphere with source masks"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-      
+
       ! do test
       call test_regridSphSrcMask(rc)
 
@@ -294,11 +294,11 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #if 0
-!the following test, when included in a run of the full test suite, will occassionally 
-!fail on at least one processor on yellowstone...ie the masked values will unexpectedly 
+!the following test, when included in a run of the full test suite, will occassionally
+!fail on at least one processor on yellowstone...ie the masked values will unexpectedly
 !change...i was unable to reproduce the error by running this test all by itself...
-!appears to be a memory error, but its unclear whether the error is in the test itself, 
- !or if it exposes a memory problem elsewhere...the problem was reproduced in a code 
+!appears to be a memory error, but its unclear whether the error is in the test itself,
+ !or if it exposes a memory problem elsewhere...the problem was reproduced in a code
 !sandbox that did not include any of the PointList code (mvr)
 
       !------------------------------------------------------------------------
@@ -307,9 +307,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Regrid sphere with destination masks"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-      
+
       ! do test
 
        call test_regridSphDstMask(rc)
@@ -326,9 +326,9 @@
       write(failMsg, *) "Test unsuccessful"
        write(name, *) "Regrid with R4 coordinates"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-       
+
       ! do test
       call test_regridR4(rc)
 
@@ -342,9 +342,9 @@
        write(failMsg, *) "Test unsuccessful"
       write(name, *) "Regrid with corner stagger"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-      
+
       ! do test
       call test_regridCnr(rc)
 
@@ -358,9 +358,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Regrid with edge stagger"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-       
+
       ! do test
       call test_regridEdge(rc)
 
@@ -373,9 +373,9 @@
        write(failMsg, *) "Test unsuccessful"
       write(name, *) "Regrid from Mesh to Grid"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-      
+
       ! do test
        call test_regridMeshToGrid(rc)
 
@@ -388,24 +388,24 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Regrid from Spherical Mesh to Grid"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-      
+
       ! do test
       call test_regridMeshSph3x3ToGrid(rc)
- 
+
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
- 
+
       !------------------------------------------------------------------------
       !EX_UTest
        ! Test regrid with masks
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Regrid from Grid to Mesh"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-      
+
       ! do test
       call test_regridGridToMesh(rc)
 
@@ -418,9 +418,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Regrid from Mesh to Mesh"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-        
+
       ! do test
       call test_regridMeshToMesh(rc)
 
@@ -434,26 +434,31 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Regrid from Mesh to Mesh using Patch"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-        
+
       ! do test
       call test_regridMeshToMeshPatch(rc)
 
       ! return result
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#ifdef ESMF_LAPACK
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+      write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+      call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
       !------------------------------------------------------------------------
 
- 
+
       !------------------------------------------------------------------------
       !EX_UTest
        ! Test regrid with masks
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Regrid from Mesh to Grid 3D"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-      
+
       ! do test
        call test_regridMeshToGrid3D(rc)
 
@@ -469,9 +474,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Regrid from Tetrahedral Mesh to 3D Grid"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-      
+
       ! do test
       call test_regridTetMeshToGrid3D(rc)
 
@@ -486,12 +491,12 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Regrid from 3D spherical Mesh to 3D spherical Grid"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-      
+
       ! do test
       call test_regridMeshToGridSph3D(rc)
-  
+
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -501,12 +506,12 @@
        write(failMsg, *) "Test unsuccessful"
       write(name, *) "Regrid between two 3D Spherical Global Grids"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
- 
+
       ! do test
       call test_regridGridToGridSph3D(rc)
- 
+
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -516,12 +521,12 @@
        write(failMsg, *) "Test unsuccessful"
       write(name, *) "Nearest STOD between two 3D Spherical Global Grids"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
- 
+
       ! do test
       call test_STODGridToGridSph3D(rc)
- 
+
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -531,12 +536,12 @@
        write(failMsg, *) "Test unsuccessful"
       write(name, *) "Nearest DTOS between two 3D Spherical Global Grids"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
- 
+
       ! do test
       call test_DTOSGridToGridSph3D(rc)
- 
+
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -547,9 +552,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Test regridding Sphere with ESMF_POLEMETHOD_NONE"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-      
+
       ! do test
       call test_regridSphPoleNone(rc)
 
@@ -562,9 +567,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Test regridding Sphere with ESMF_POLEMETHOD_ALLAVG"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-      
+
        ! do test
       call test_regridSphPoleAllAvg(rc)
 
@@ -577,9 +582,9 @@
       write(failMsg, *) "Test unsuccessful"
        write(name, *) "Test regridding Sphere with ESMF_POLEMETHOD_NPNTAVG"
 
-       ! initialize 
+       ! initialize
       rc=ESMF_SUCCESS
-      
+
       ! do test
       call test_regridSphPoleNpntAvg(rc)
 
@@ -592,9 +597,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Test regridding Sphere with ESMF_POLEMETHOD_TEETH"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-       
+
       ! do test
       call test_regridSphPoleTeeth(rc)
 
@@ -607,9 +612,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Test regridding from distgrid connections"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-      
+
       ! do test
       call test_regridDGSph(rc)
 
@@ -624,9 +629,9 @@
       write(name, *) "Test using matrix (factorList, factorIndexList) " // &
                      "from ESMF_FieldRegridStore() in ESMF_FieldSMMStore()"
 
-        ! initialize 
+        ! initialize
       rc=ESMF_SUCCESS
-       
+
       ! do test
       call test_regridMatrixFactor(rc)
 
@@ -641,9 +646,9 @@
       write(name, *) "Test using DEPRECATED matrix arguments (weights, indices) " // &
                      "from ESMF_FieldRegridStore() in ESMF_FieldSMMStore()"
 
-      ! initialize 
+      ! initialize
        rc=ESMF_SUCCESS
-       
+
       ! do test
       call test_regridMatrix(rc)
 
@@ -658,9 +663,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Test regridding on a grid with indexflag=ESMF_INDEX_DELOCAL"
 
-      ! initialize 
+      ! initialize
        rc=ESMF_SUCCESS
-      
+
       ! do test
       call test_regridDELOCAL(rc)
 
@@ -676,9 +681,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Test regridding on a grid with an irregular distribution"
 
-      ! initialize 
+      ! initialize
         rc=ESMF_SUCCESS
-      
+
       ! do test
       call test_regridIrreg(rc)
 
@@ -693,9 +698,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Test regridding on a spherical grids with NEAREST_STOD regridding"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-      
+
       ! do test
       call test_regridSphNearest(rc)
 
@@ -710,12 +715,12 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Regrid from Mesh to Mesh with NEAREST_STOD interp."
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-      
+
        ! do test
       call test_regridNearestMeshToMesh(rc)
- 
+
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -728,12 +733,12 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Regrid from Mesh to Mesh with NEAREST_DTOS interp."
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-      
+
        ! do test
       call test_regridNearestDTOSMeshToMesh(rc)
- 
+
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -746,9 +751,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Test regridding on a spherical grids with NEAREST_DTOS regridding"
 
-       ! initialize 
+       ! initialize
       rc=ESMF_SUCCESS
-       
+
       ! do test
       call test_regridSphNearestDTOS(rc)
 
@@ -765,9 +770,9 @@
        write(failMsg, *) "Test unsuccessful"
       write(name, *) "Test unmapped destination point list"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-       
+
       ! do test
       call test_unmappedDstList(rc)
 
@@ -781,9 +786,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Test regridding from a 2 tile distgrid"
 
-      ! initialize 
+      ! initialize
        rc=ESMF_SUCCESS
-      
+
       ! do test
       call test_regrid2TileDG(rc)
 
@@ -797,9 +802,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Test regridding with holes in srcGrid"
 
-       ! initialize 
+       ! initialize
       rc=ESMF_SUCCESS
-      
+
       ! do test
        call test_regridSrcHoles(rc)
 
@@ -812,15 +817,15 @@
       write(failMsg, *) "Test unsuccessful"
        write(name, *) "Test Mesh masking during regrid"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-      
+
       ! do test
       call test_regridMeshToMeshMask(rc)
 
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      
+
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
       !EX_UTest
@@ -828,9 +833,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Test regridding with sphere and gc bilinear"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-      
+
       ! do test
       call test_regridSphGC(50, 50, 80, 80, 0.1_ESMF_KIND_R8, rc)
 
@@ -844,25 +849,25 @@
       write(failMsg, *) "Test unsuccessful"
        write(name, *) "Test regridding with coarse sphere and gc bilinear"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-      
+
       ! do test
       call test_regridSphGC(5, 5, 80, 80, 0.4_ESMF_KIND_R8, rc)
- 
+
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
        !------------------------------------------------------------------------
- 
+
        !------------------------------------------------------------------------
       !EX_UTest
       ! Test regrid with masks
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Regrid from Mesh to Mesh with Pentagon and Hexagon"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-      
+
       ! do test
        call test_regridMeshToMeshPH(rc)
 
@@ -876,9 +881,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Regrid from Mesh to Mesh On Cell Centers"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-      
+
       ! do test
        call test_regridMeshToMeshCenter(rc)
 
@@ -891,9 +896,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Regrid Mesh with collapsed quads"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-      
+
       ! do test
       call test_regridCollapsedQuads(rc)
 
@@ -907,9 +912,9 @@
       write(failMsg, *) "Test unsuccessful"
        write(name, *) "Regrid from LocStream to LocStream with Nearest Neighbor interp."
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-       
+
       ! do test
       call test_regridNearestLocStreamToLocStream(rc)
 
@@ -923,9 +928,9 @@
       write(failMsg, *) "Test unsuccessful"
        write(name, *) "Regrid from 2D Cart LocStream to LocStream with Nearest STOD"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-       
+
       ! do test
       call test_Nearest2DCartLSToLS(ESMF_REGRIDMETHOD_NEAREST_STOD,rc)
 
@@ -938,9 +943,9 @@
       write(failMsg, *) "Test unsuccessful"
        write(name, *) "Regrid from 2D Cart LocStream to LocStream with Nearest DTOS"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-       
+
       ! do test
       call test_Nearest2DCartLSToLS(ESMF_REGRIDMETHOD_NEAREST_DTOS,rc)
 
@@ -954,9 +959,9 @@
       write(failMsg, *) "Test unsuccessful"
        write(name, *) "Regrid from 3D Cart LocStream to LocStream with Nearest STOD"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-       
+
       ! do test
       call test_Nearest3DCartLSToLS(ESMF_REGRIDMETHOD_NEAREST_STOD,rc)
 
@@ -969,9 +974,9 @@
       write(failMsg, *) "Test unsuccessful"
        write(name, *) "Regrid from 3D Cart LocStream to LocStream with Nearest DTOS"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-       
+
       ! do test
       call test_Nearest3DCartLSToLS(ESMF_REGRIDMETHOD_NEAREST_DTOS,rc)
 
@@ -992,7 +997,7 @@
 
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
- 
+
 
 
       !------------------------------------------------------------------------
@@ -1024,8 +1029,13 @@
        call test_regridGridToLocStreamRegDist(rc)
 
       ! return result
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
- 
+#ifdef ESMF_LAPACK
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+      write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+      call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
+
       call ESMF_UtilIOUnitFlush (6)
 
       !------------------------------------------------------------------------
@@ -1091,7 +1101,12 @@
       call test_PatchMeshToLocStreamMask(rc)
 
       ! return result
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#ifdef ESMF_LAPACK
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+      write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+      call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
 
 
       !------------------------------------------------------------------------
@@ -1110,16 +1125,16 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !      call ESMF_LogFlush()
 !      call ESMF_UtilIOUnitFlush (6)
-  
+
        !------------------------------------------------------------------------
       !EX_UTest
       ! Test regrid with masks
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Regrid from Mesh containing pentagons and hexagons to Grid"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-      
+
       ! do test
       call test_regridPHMeshToGrid(rc)
 
@@ -1132,9 +1147,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Regrid with periodic and non-periodic uniform grid creates"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-       
+
       ! do test
       call test_regrid_gridufrm(rc)
 
@@ -1148,9 +1163,9 @@
       write(failMsg, *) "Test unsuccessful"
        write(name, *) "Regrid with grid and ESMF_FieldRegrid() on only part of VM."
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-       
+
       ! do test
       call test_regridPartialVM(rc)
 
@@ -1164,9 +1179,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Test regrid per location status Field"
 
-       ! initialize 
+       ! initialize
       rc=ESMF_SUCCESS
-      
+
       ! do test
       call test_regridPerLocStatus(rc)
 
@@ -1178,9 +1193,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Test regrid per location status Field for Nearest Source to Destination"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-      
+
       ! do test
       call test_regridPerLocStatusNSToD(rc)
 
@@ -1193,9 +1208,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Test regrid smm on an arbitrary grid"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-      
+
       ! do test
       call test_regridSMMArbGrid(rc)
 
@@ -1210,9 +1225,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Test regrid extrap nearest_stod "
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-      
+
       ! do test
       call test_regrid_extrap_nearstod(rc)
 
@@ -1228,9 +1243,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Test regrid extrap inverse distance weighted average"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-      
+
       ! do test
       call test_regrid_extrap_near_npnts(rc)
 
@@ -1244,9 +1259,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Test regrid extrap creep fill"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-      
+
       ! do test
       call test_regrid_extrap_creep(rc)
 
@@ -1262,9 +1277,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Test creep fill on mesh"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-      
+
       ! do test
       call test_mesh_extrap_creep(rc)
 
@@ -1280,9 +1295,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Test per location status output with extrap"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-      
+
       ! do test
       call test_regridPerLocStatusExtrap(rc)
 
@@ -1296,9 +1311,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Test regridding using meshes created via Mesh create from Grid"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-      
+
       ! do test
       call test_regrid_w_gtom(rc)
 
@@ -1310,7 +1325,7 @@
 #endif
     call ESMF_TestEnd(ESMF_SRCLINE)
 
-contains 
+contains
 #define ESMF_METHOD "ESMF_TESTS"
 
       subroutine test_regrid180vs360(rc)
@@ -1343,7 +1358,7 @@ contains
   character(len=ESMF_MAXSTR) :: string
   integer src_nx, src_ny, dst_nx, dst_ny
   integer num_arrays
- 
+
   real(ESMF_KIND_R8) :: src_dx, src_dy
   real(ESMF_KIND_R8) :: dst_dx, dst_dy
   real(ESMF_KIND_R8) :: ctheta, stheta
@@ -1358,11 +1373,11 @@ contains
   integer :: localPet, petCount
 
   integer :: srcTermProcessing, pipeLineDepth
-  
+
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
   rc=ESMF_SUCCESS
@@ -1388,7 +1403,7 @@ contains
   ! setup source grid
   grid360=ESMF_GridCreate1PeriDim(minIndex=(/1,1/),maxIndex=(/src_nx,src_ny/),regDecomp=(/petCount,1/), &
                                   coordSys=ESMF_COORDSYS_SPH_DEG, indexflag=ESMF_INDEX_GLOBAL, &
-!                                  poleType=(/ESMF_POLETYPE_MONOPOLE,ESMF_POLETYPE_BIPOLE/), & 
+!                                  poleType=(/ESMF_POLETYPE_MONOPOLE,ESMF_POLETYPE_BIPOLE/), &
                                   rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
@@ -1514,7 +1529,7 @@ contains
 
   ! Get memory and set coords for src
   do lDE=0,localDECount-1
- 
+
      !! get coord 1
      call ESMF_GridGetCoord(grid360, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -1560,7 +1575,7 @@ contains
         farrayPtrYC(i1,i2) = -90. + (REAL(i2-1)*src_dy + 0.5*src_dy)
         lon = farrayPtrXC(i1,i2)
         lat = farrayPtrYC(i1,i2)
-     
+
        ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(lon)
         phi = DEG2RAD*(90.-lat)
@@ -1591,7 +1606,7 @@ contains
 
   ! Get memory and set coords for dst
   do lDE=0,localDECount-1
- 
+
      !! get coord 1
      call ESMF_GridGetCoord(grid180, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -1608,7 +1623,7 @@ contains
         return
      endif
 
-   
+
      call ESMF_FieldGet(field180, lDE, farrayPtr, computationalLBound=fclbnd, &
                              computationalUBound=fcubnd,  rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
@@ -1631,7 +1646,7 @@ contains
 
         ! init destination mesh to 0
         farrayPtr(i1,i2) = 0.
-     
+
      enddo
      enddo
 
@@ -1731,7 +1746,7 @@ contains
            errorfarrayPtr(i1,i2)=(farrayPtr(i1,i2) - farrayPtr2(i1,i2))
         endif
         if (ABS(errorfarrayPtr(i1,i2)) .gt. 0.01) then
-            correct=.false. 
+            correct=.false.
         endif
 
      enddo
@@ -1838,7 +1853,7 @@ write(*,*) "LOCALRC=",localrc
   real(ESMF_KIND_R8) :: A_maxx,A_maxy,A_maxz
   real(ESMF_KIND_R8) :: B_minx,B_miny,B_minz
   real(ESMF_KIND_R8) :: B_maxx,B_maxy,B_maxz
-  
+
   integer :: spherical_grid
 
   integer, pointer :: larrayList(:)
@@ -1846,7 +1861,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -1999,7 +2014,7 @@ write(*,*) "LOCALRC=",localrc
   ! Construct 3D Grid A
   ! (Get memory and set coords for src)
   do lDE=0,localDECount-1
- 
+
      !! get coord 1
      call ESMF_GridGetCoord(gridA, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -2065,7 +2080,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get memory and set coords for dst
   do lDE=0,localDECount-1
- 
+
      !! get coords
      call ESMF_GridGetCoord(gridB, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -2088,7 +2103,7 @@ write(*,*) "LOCALRC=",localrc
         return
      endif
 
-   
+
      call ESMF_FieldGet(fieldB, lDE, farrayPtr, computationalLBound=fclbnd, &
                              computationalUBound=fcubnd,  rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
@@ -2203,7 +2218,7 @@ write(*,*) "LOCALRC=",localrc
            errorfarrayPtr(i1,i2,i3)=(farrayPtr(i1,i2,i3) - farrayPtr2(i1,i2,i3))
         endif
         if (ABS(errorfarrayPtr(i1,i2,i3)) .gt. 0.001) then
-            correct=.false. 
+            correct=.false.
         endif
 
      enddo
@@ -2310,7 +2325,7 @@ write(*,*) "LOCALRC=",localrc
   real(ESMF_KIND_R8) :: A_maxx,A_maxy,A_maxz
   real(ESMF_KIND_R8) :: B_minx,B_miny,B_minz
   real(ESMF_KIND_R8) :: B_maxx,B_maxy,B_maxz
-  
+
   integer :: spherical_grid
 
   integer, pointer :: larrayList(:)
@@ -2318,7 +2333,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -2473,7 +2488,7 @@ write(*,*) "LOCALRC=",localrc
   ! Construct 3D Grid A
   ! (Get memory and set coords for src)
   do lDE=0,localDECount-1
- 
+
      !! get coord 1
      call ESMF_GridGetCoord(gridA, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -2539,7 +2554,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get memory and set coords for dst
   do lDE=0,localDECount-1
- 
+
      !! get coords
      call ESMF_GridGetCoord(gridB, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -2562,7 +2577,7 @@ write(*,*) "LOCALRC=",localrc
         return
      endif
 
-   
+
      call ESMF_FieldGet(fieldB, lDE, farrayPtr, computationalLBound=fclbnd, &
                              computationalUBound=fcubnd,  rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
@@ -2677,7 +2692,7 @@ write(*,*) "LOCALRC=",localrc
            errorfarrayPtr(i1,i2,i3)=(farrayPtr(i1,i2,i3) - farrayPtr2(i1,i2,i3))
         endif
         if (ABS(errorfarrayPtr(i1,i2,i3)) .gt. 0.001) then
-            correct=.false. 
+            correct=.false.
         endif
 
      enddo
@@ -2782,7 +2797,7 @@ write(*,*) "LOCALRC=",localrc
   real(ESMF_KIND_R8) :: A_maxx,A_maxy,A_maxz
   real(ESMF_KIND_R8) :: B_minx,B_miny,B_minz
   real(ESMF_KIND_R8) :: B_maxx,B_maxy,B_maxz
-  
+
   integer :: spherical_grid
 
   integer, pointer :: larrayList(:)
@@ -2790,7 +2805,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -2945,7 +2960,7 @@ write(*,*) "LOCALRC=",localrc
   ! Construct 3D Grid A
   ! (Get memory and set coords for src)
   do lDE=0,localDECount-1
- 
+
      !! get coord 1
      call ESMF_GridGetCoord(gridA, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -3011,7 +3026,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get memory and set coords for dst
   do lDE=0,localDECount-1
- 
+
      !! get coords
      call ESMF_GridGetCoord(gridB, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -3034,7 +3049,7 @@ write(*,*) "LOCALRC=",localrc
         return
      endif
 
-   
+
      call ESMF_FieldGet(fieldB, lDE, farrayPtr, computationalLBound=fclbnd, &
                              computationalUBound=fcubnd,  rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
@@ -3149,7 +3164,7 @@ write(*,*) "LOCALRC=",localrc
            errorfarrayPtr(i1,i2,i3)=(farrayPtr(i1,i2,i3) - farrayPtr2(i1,i2,i3))
         endif
         if (ABS(errorfarrayPtr(i1,i2,i3)) .gt. 0.001) then
-            correct=.false. 
+            correct=.false.
         endif
 
      enddo
@@ -3248,12 +3263,12 @@ write(*,*) "LOCALRC=",localrc
   integer A_nx, A_ny, B_nx, B_ny
   integer num_arrays
   real(ESMF_KIND_R8) :: dx,dy
-  
+
   real(ESMF_KIND_R8) :: A_minx,A_miny
   real(ESMF_KIND_R8) :: A_maxx,A_maxy
   real(ESMF_KIND_R8) :: B_minx,B_miny
   real(ESMF_KIND_R8) :: B_maxx,B_maxy
-  
+
   integer :: spherical_grid
 
   integer, pointer :: larrayList(:)
@@ -3261,7 +3276,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -3289,16 +3304,16 @@ write(*,*) "LOCALRC=",localrc
   ! Establish the coordinates of the grids
   B_minx = 0.0
   B_miny = 0.0
-  
+
   B_maxx = 10.0
   B_maxy = 10.0
-  
+
   A_minx = 0.0
   A_miny = 0.0
-  
+
   A_maxx = 10.0
   A_maxy = 10.0
-  
+
   ! setup source grid
   gridA=ESMF_GridCreateNoPeriDim(minIndex=(/1,1/),maxIndex=(/A_nx,A_ny/),regDecomp=(/petCount,1/), &
                               coordSys=ESMF_COORDSYS_CART,indexflag=ESMF_INDEX_GLOBAL, &
@@ -3397,7 +3412,7 @@ write(*,*) "LOCALRC=",localrc
   ! Construct 3D Grid A
   ! (Get memory and set coords for src)
   do lDE=0,localDECount-1
- 
+
      !! get coord 1
      call ESMF_GridGetCoord(gridA, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -3462,7 +3477,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get memory and set coords for dst
   do lDE=0,localDECount-1
- 
+
      !! get coords
      call ESMF_GridGetCoord(gridB, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -3486,7 +3501,7 @@ write(*,*) "LOCALRC=",localrc
         return
      endif
 
-   
+
      call ESMF_FieldGet(fieldB, lDE, farrayPtr, computationalLBound=fclbnd, &
                              computationalUBound=fcubnd,  rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
@@ -3565,7 +3580,7 @@ write(*,*) "LOCALRC=",localrc
         return
      endif
 
-   
+
      !! make sure we used the mask
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
@@ -3669,12 +3684,12 @@ write(*,*) "LOCALRC=",localrc
   integer A_nx, A_ny, B_nx, B_ny
   integer num_arrays
   real(ESMF_KIND_R8) :: dx,dy
-  
+
   real(ESMF_KIND_R8) :: A_minx,A_miny
   real(ESMF_KIND_R8) :: A_maxx,A_maxy
   real(ESMF_KIND_R8) :: B_minx,B_miny
   real(ESMF_KIND_R8) :: B_maxx,B_maxy
-  
+
   integer :: spherical_grid
 
   integer, pointer :: larrayList(:)
@@ -3682,7 +3697,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -3710,16 +3725,16 @@ write(*,*) "LOCALRC=",localrc
   ! Establish the coordinates of the grids
   B_minx = 0.0
   B_miny = 0.0
-  
+
   B_maxx = 10.0
   B_maxy = 10.0
-  
+
   A_minx = 0.0
   A_miny = 0.0
-  
+
   A_maxx = 10.0
   A_maxy = 10.0
-  
+
   ! setup source grid
   gridA=ESMF_GridCreateNoPeriDim(minIndex=(/1,1/),maxIndex=(/A_nx,A_ny/),regDecomp=(/petCount,1/), &
                               coordSys=ESMF_COORDSYS_CART, indexflag=ESMF_INDEX_GLOBAL, &
@@ -3832,7 +3847,7 @@ write(*,*) "LOCALRC=",localrc
   ! Construct 3D Grid A
   ! (Get memory and set coords for src)
   do lDE=0,localDECount-1
- 
+
      !! get coord 1
      call ESMF_GridGetCoord(gridA, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -3879,10 +3894,10 @@ write(*,*) "LOCALRC=",localrc
         dy=farrayPtrYC(i1,i2)-((A_maxy+A_miny)/2.0)
         if (sqrt(dx*dx+dy*dy) < 2.0) then
            maskA(i1,i2) = 2
-           farrayPtr(i1,i2) = -1000.0 
+           farrayPtr(i1,i2) = -1000.0
         else
            maskA(i1,i2) = 0
-           farrayPtr(i1,i2) = 20.0 
+           farrayPtr(i1,i2) = 20.0
         endif
 
      enddo
@@ -3897,7 +3912,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get memory and set coords for dst
   do lDE=0,localDECount-1
- 
+
      !! get coords
      call ESMF_GridGetCoord(gridB, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -4024,13 +4039,13 @@ write(*,*) "LOCALRC=",localrc
      !! make sure we're not using any bad points
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
-        ! if working should always be >= 0.0 
+        ! if working should always be >= 0.0
         if (farrayPtr(i1,i2) < 0.0) then
            correct=.false.
         endif
 
 #ifdef ESMF_LAPACK
-        ! if working should always be >= 0.0 
+        ! if working should always be >= 0.0
         if (farrayPtrPatch(i1,i2) < 0.0) then
            correct=.false.
         endif
@@ -4140,7 +4155,7 @@ write(*,*) "LOCALRC=",localrc
 
   real(ESMF_KIND_R8) :: A_dx, A_dy
   real(ESMF_KIND_R8) :: B_dx, B_dy
-  
+
   integer :: spherical_grid
 
   integer, pointer :: larrayList(:)
@@ -4148,7 +4163,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -4178,7 +4193,7 @@ write(*,*) "LOCALRC=",localrc
   B_dx=360.0/B_nx
   B_dy=180.0/B_ny
 
-  
+
   ! setup source grid
   gridA=ESMF_GridCreate1PeriDim(minIndex=(/1,1/),maxIndex=(/A_nx,A_ny/),regDecomp=(/petCount,1/), &
                               coordSys=ESMF_COORDSYS_SPH_DEG, indexflag=ESMF_INDEX_GLOBAL, &
@@ -4284,7 +4299,7 @@ write(*,*) "LOCALRC=",localrc
   ! Construct 3D Grid A
   ! (Get memory and set coords for src)
   do lDE=0,localDECount-1
- 
+
      !! get coord 1
      call ESMF_GridGetCoord(gridA, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -4330,10 +4345,10 @@ write(*,*) "LOCALRC=",localrc
         dx=farrayPtrXC(i1,i2)-180.0
         if (abs(dx) < 45.0) then
            maskA(i1,i2) = 2
-           farrayPtr(i1,i2) = -1000.0 
+           farrayPtr(i1,i2) = -1000.0
         else
            maskA(i1,i2) = 0
-           farrayPtr(i1,i2) = 20.0 
+           farrayPtr(i1,i2) = 20.0
         endif
 
      enddo
@@ -4348,7 +4363,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get memory and set coords for dst
   do lDE=0,localDECount-1
- 
+
      !! get coords
      call ESMF_GridGetCoord(gridB, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -4386,7 +4401,7 @@ write(*,*) "LOCALRC=",localrc
         ! Set source coordinates as 0 to 360
         farrayPtrXC(i1,i2) = REAL(i1-1)*B_dx
         farrayPtrYC(i1,i2) = -90. + (REAL(i2-1)*B_dy + 0.5*B_dy)
-  
+
         ! initialize destination field
         farrayPtr(i1,i2)=0.0
         farrayPtrPatch(i1,i2)=0.0
@@ -4474,13 +4489,13 @@ write(*,*) "LOCALRC=",localrc
      !! make sure we're not using any bad points
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
-        ! if working should always be >= 0.0 
+        ! if working should always be >= 0.0
         if (farrayPtr(i1,i2) < 0.0) then
            correct=.false.
         endif
 
 #ifdef ESMF_LAPACK
-        ! if working should always be >= 0.0 
+        ! if working should always be >= 0.0
         if (farrayPtrPatch(i1,i2) < 0.0) then
            correct=.false.
         endif
@@ -4592,7 +4607,7 @@ write(*,*) "LOCALRC=",localrc
 
   real(ESMF_KIND_R8) :: A_dx, A_dy
   real(ESMF_KIND_R8) :: B_dx, B_dy
-  
+
   integer :: spherical_grid
 
   integer, pointer :: larrayList(:)
@@ -4600,7 +4615,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -4721,7 +4736,7 @@ write(*,*) "LOCALRC=",localrc
     return
   endif
 
- 
+
   ! srcArrayA
   call ESMF_FieldGet(srcFieldA, array=srcArrayA, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -4736,7 +4751,7 @@ write(*,*) "LOCALRC=",localrc
   ! Construct 3D Grid A
   ! (Get memory and set coords for src)
   do lDE=0,localDECount-1
- 
+
      !! get coord 1
      call ESMF_GridGetCoord(gridA, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -4769,7 +4784,7 @@ write(*,*) "LOCALRC=",localrc
         farrayPtrYC(i1,i2) = -90. + (REAL(i2-1)*A_dy + 0.5*A_dy)
 
         ! Set source data
-        farrayPtr(i1,i2) = 20.0 
+        farrayPtr(i1,i2) = 20.0
 
      enddo
      enddo
@@ -4783,7 +4798,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get memory and set coords for dst
   do lDE=0,localDECount-1
- 
+
      !! get coords
      call ESMF_GridGetCoord(gridB, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -4829,16 +4844,16 @@ write(*,*) "LOCALRC=",localrc
         dx=farrayPtrXC(i1,i2)-180.0
         if (abs(dx) < 45.0) then
            maskB(i1,i2) = 2
-           farrayPtr(i1,i2) = -1000.0 
+           farrayPtr(i1,i2) = -1000.0
         else
            maskB(i1,i2) = 0
-           farrayPtr(i1,i2) = 0.0 
+           farrayPtr(i1,i2) = 0.0
         endif
 
         ! Set source coordinates as 0 to 360
         farrayPtrXC(i1,i2) = REAL(i1-1)*B_dx
         farrayPtrYC(i1,i2) = -90. + (REAL(i2-1)*B_dy + 0.5*B_dy)
-  
+
         ! initialize destination field
         farrayPtr(i1,i2)=0.0
         farrayPtrPatch(i1,i2)=0.0
@@ -4986,7 +5001,7 @@ write(*,*) "LOCALRC=",localrc
      return
    endif
 
- 
+
   ! Free the grids
   call ESMF_GridDestroy(gridA, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -5043,7 +5058,7 @@ write(*,*) "LOCALRC=",localrc
 
   real(ESMF_KIND_R8) :: A_dx, A_dy
   real(ESMF_KIND_R8) :: B_dx, B_dy
-  
+
   integer :: spherical_grid
 
   integer, pointer :: larrayList(:)
@@ -5051,7 +5066,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -5172,7 +5187,7 @@ write(*,*) "LOCALRC=",localrc
     return
   endif
 
- 
+
   ! srcArrayA
   call ESMF_FieldGet(srcFieldA, array=srcArrayA, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -5187,7 +5202,7 @@ write(*,*) "LOCALRC=",localrc
   ! Construct 3D Grid A
   ! (Get memory and set coords for src)
   do lDE=0,localDECount-1
- 
+
      !! get coord 1
      call ESMF_GridGetCoord(gridA, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -5220,7 +5235,7 @@ write(*,*) "LOCALRC=",localrc
         farrayPtrYC(i1,i2) = -90. + (REAL(i2-1)*A_dy + 0.5*A_dy)
 
         ! Set source data
-        farrayPtr(i1,i2) = 20.0 
+        farrayPtr(i1,i2) = 20.0
 
      enddo
      enddo
@@ -5234,7 +5249,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get memory and set coords for dst
   do lDE=0,localDECount-1
- 
+
      !! get coords
      call ESMF_GridGetCoord(gridB, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -5281,8 +5296,8 @@ write(*,*) "LOCALRC=",localrc
 
         ! set entire grid as masked
         maskB(i1,i2) = 2
-        farrayPtr(i1,i2) = -1000.0 
-  
+        farrayPtr(i1,i2) = -1000.0
+
      enddo
       enddo
 
@@ -5388,7 +5403,7 @@ write(*,*) "LOCALRC=",localrc
      return
    endif
 
- 
+
   ! Free the grids
   call ESMF_GridDestroy(gridA, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -5440,12 +5455,12 @@ write(*,*) "LOCALRC=",localrc
   integer A_nx, A_ny, B_nx, B_ny
   integer num_arrays
   real(ESMF_KIND_R8) :: dx,dy
-  
+
   real(ESMF_KIND_R8) :: A_minx,A_miny
   real(ESMF_KIND_R8) :: A_maxx,A_maxy
   real(ESMF_KIND_R8) :: B_minx,B_miny
   real(ESMF_KIND_R8) :: B_maxx,B_maxy
-  
+
   integer :: spherical_grid
 
   integer, pointer :: larrayList(:)
@@ -5453,7 +5468,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -5481,16 +5496,16 @@ write(*,*) "LOCALRC=",localrc
   ! Establish the coordinates of the grids
   B_minx = 0.0
   B_miny = 0.0
-  
+
   B_maxx = 10.0
   B_maxy = 10.0
-  
+
   A_minx = 0.0
   A_miny = 0.0
-  
+
   A_maxx = 10.0
   A_maxy = 10.0
-  
+
   ! setup source grid
   gridA=ESMF_GridCreateNoPeriDim(minIndex=(/1,1/),maxIndex=(/A_nx,A_ny/),regDecomp=(/petCount,1/), &
                                 coordSys=ESMF_COORDSYS_CART, indexflag=ESMF_INDEX_GLOBAL, &
@@ -5572,7 +5587,7 @@ write(*,*) "LOCALRC=",localrc
   ! Construct 3D Grid A
   ! (Get memory and set coords for src)
   do lDE=0,localDECount-1
- 
+
      !! get coord 1
      call ESMF_GridGetCoord(gridA, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CORNER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -5620,7 +5635,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get memory and set coords for dst
   do lDE=0,localDECount-1
- 
+
      !! get coords
      call ESMF_GridGetCoord(gridB, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -5716,7 +5731,7 @@ write(*,*) "LOCALRC=",localrc
         return
      endif
 
-   
+
      !! check error
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
@@ -5807,12 +5822,12 @@ write(*,*) "LOCALRC=",localrc
   integer A_nx, A_ny, B_nx, B_ny
   integer num_arrays
   real(ESMF_KIND_R8) :: dx,dy
-  
+
   real(ESMF_KIND_R8) :: A_minx,A_miny
   real(ESMF_KIND_R8) :: A_maxx,A_maxy
   real(ESMF_KIND_R8) :: B_minx,B_miny
   real(ESMF_KIND_R8) :: B_maxx,B_maxy
-  
+
   integer :: spherical_grid
 
   integer, pointer :: larrayList(:)
@@ -5820,7 +5835,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -5848,16 +5863,16 @@ write(*,*) "LOCALRC=",localrc
   ! Establish the coordinates of the grids
   B_minx = 0.0
   B_miny = 0.0
-  
+
   B_maxx = 10.0
   B_maxy = 10.0
-  
+
   A_minx = 0.0
   A_miny = 0.0
-  
+
   A_maxx = 10.0
   A_maxy = 10.0
-  
+
   ! setup source grid
   gridA=ESMF_GridCreateNoPeriDim(minIndex=(/1,1/),maxIndex=(/A_nx,A_ny/),regDecomp=(/petCount,1/), &
                                 coordSys=ESMF_COORDSYS_CART, indexflag=ESMF_INDEX_GLOBAL, &
@@ -5939,7 +5954,7 @@ write(*,*) "LOCALRC=",localrc
   ! Construct 3D Grid A
   ! (Get memory and set coords for src)
   do lDE=0,localDECount-1
- 
+
      !! get coord 1
      call ESMF_GridGetCoord(gridA, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_EDGE1, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -5987,7 +6002,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get memory and set coords for dst
   do lDE=0,localDECount-1
- 
+
      !! get coords
      call ESMF_GridGetCoord(gridB, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -6083,7 +6098,7 @@ write(*,*) "LOCALRC=",localrc
         return
      endif
 
-   
+
      !! check error
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
@@ -6173,12 +6188,12 @@ write(*,*) "LOCALRC=",localrc
   integer dst_nx, dst_ny
   integer num_arrays
   real(ESMF_KIND_R8) :: dx,dy
-  
+
   real(ESMF_KIND_R8) :: dst_minx,dst_miny
   real(ESMF_KIND_R8) :: dst_maxx,dst_maxy
 
   real(ESMF_KIND_R8) :: x,y
-  
+
   integer :: spherical_grid
 
    integer, pointer :: larrayList(:)
@@ -6192,7 +6207,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -6223,7 +6238,7 @@ write(*,*) "LOCALRC=",localrc
   ! Establish the coordinates of the grids
   dst_minx = 0.1
   dst_miny = 0.1
-  
+
   dst_maxx = 1.9
   dst_maxy = 1.9
 
@@ -6234,7 +6249,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the node id array.
      allocate(nodeIds(numNodes))
-     nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+     nodeIds=(/1,2,3,4,5,6,7,8,9/)
 
      ! Allocate and fill node coordinate array.
      ! Since this is a 2D Mesh the size is 2x the
@@ -6262,7 +6277,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the element id array.
      allocate(elemIds(numTotElems))
-     elemIds=(/1,2,3,4,5/) 
+     elemIds=(/1,2,3,4,5/)
 
 
      ! Allocate and fill the element topology type array.
@@ -6275,10 +6290,10 @@ write(*,*) "LOCALRC=",localrc
 
 
      ! Allocate and fill the element connection type array.
-     ! Note that entries in this array refer to the 
+     ! Note that entries in this array refer to the
      ! positions in the nodeIds, etc. arrays and that
      ! the order and number of entries for each element
-     ! reflects that given in the Mesh options 
+     ! reflects that given in the Mesh options
      ! section for the corresponding entry
      ! in the elemTypes array.
      allocate(elemConn(4*numQuadElems+3*numTriElems))
@@ -6297,7 +6312,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/1,2,4,5/) 
+       nodeIds=(/1,2,4,5/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -6322,7 +6337,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-       elemIds=(/1/) 
+       elemIds=(/1/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -6339,7 +6354,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/2,3,5,6/) 
+       nodeIds=(/2,3,5,6/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -6364,7 +6379,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/2,3/) 
+       elemIds=(/2,3/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -6382,7 +6397,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/4,5,7,8/) 
+        nodeIds=(/4,5,7,8/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -6408,7 +6423,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/4/) 
+        elemIds=(/4/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -6424,7 +6439,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/5,6,8,9/) 
+        nodeIds=(/5,6,8,9/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -6441,7 +6456,7 @@ write(*,*) "LOCALRC=",localrc
                      1, & ! node id 6
                      2, & ! node id 8
                      3/)  ! node id 9
- 
+
         ! Set the number of each type of element, plus the total number.
         numQuadElems=1
         numTriElems=0
@@ -6449,7 +6464,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/5/)  
+        elemIds=(/5/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -6482,7 +6497,7 @@ write(*,*) "LOCALRC=",localrc
     return
   endif
 
-  
+
   ! Load test data into the source Field
   ! Should only be 1 localDE
   call ESMF_FieldGet(srcField, 0, farrayPtr1D,  rc=localrc)
@@ -6575,7 +6590,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get memory and set coords for dst
   do lDE=0,localDECount-1
- 
+
      !! get coords
      call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -6672,7 +6687,7 @@ write(*,*) "LOCALRC=",localrc
         return
      endif
 
-    
+
      !! check error
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
@@ -6760,12 +6775,12 @@ write(*,*) "LOCALRC=",localrc
   integer src_nx, src_ny
   integer num_arrays
   real(ESMF_KIND_R8) :: dx,dy
-  
+
   real(ESMF_KIND_R8) :: src_minx,src_miny
   real(ESMF_KIND_R8) :: src_maxx,src_maxy
 
   real(ESMF_KIND_R8) :: x,y
-  
+
   integer :: spherical_grid
 
   integer, pointer :: larrayList(:)
@@ -6779,7 +6794,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -6810,9 +6825,9 @@ write(*,*) "LOCALRC=",localrc
   ! Establish the coordinates of the grids
   src_minx = -0.1
   src_miny = -0.1
-  
+
   src_maxx = 2.1
-  src_maxy = 2.1  
+  src_maxy = 2.1
 
 
   ! setup src grid
@@ -6863,7 +6878,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get memory and set coords for dst
   do lDE=0,localDECount-1
- 
+
      !! get coords
      call ESMF_GridGetCoord(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -6912,7 +6927,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the node id array.
      allocate(nodeIds(numNodes))
-     nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+     nodeIds=(/1,2,3,4,5,6,7,8,9/)
 
      ! Allocate and fill node coordinate array.
      ! Since this is a 2D Mesh the size is 2x the
@@ -6940,7 +6955,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the element id array.
      allocate(elemIds(numTotElems))
-     elemIds=(/1,2,3,4,5/) 
+     elemIds=(/1,2,3,4,5/)
 
 
      ! Allocate and fill the element topology type array.
@@ -6953,10 +6968,10 @@ write(*,*) "LOCALRC=",localrc
 
 
      ! Allocate and fill the element connection type array.
-     ! Note that entries in this array refer to the 
+     ! Note that entries in this array refer to the
      ! positions in the nodeIds, etc. arrays and that
      ! the order and number of entries for each element
-     ! reflects that given in the Mesh options 
+     ! reflects that given in the Mesh options
      ! section for the corresponding entry
      ! in the elemTypes array.
      allocate(elemConn(4*numQuadElems+3*numTriElems))
@@ -6975,7 +6990,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/1,2,4,5/) 
+       nodeIds=(/1,2,4,5/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -7000,7 +7015,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/1/) 
+       elemIds=(/1/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -7017,7 +7032,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/2,3,5,6/) 
+       nodeIds=(/2,3,5,6/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -7042,7 +7057,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/2,3/) 
+       elemIds=(/2,3/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -7060,7 +7075,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/4,5,7,8/) 
+        nodeIds=(/4,5,7,8/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -7086,7 +7101,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/4/) 
+        elemIds=(/4/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -7102,7 +7117,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/5,6,8,9/) 
+        nodeIds=(/5,6,8,9/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -7119,7 +7134,7 @@ write(*,*) "LOCALRC=",localrc
                      1, & ! node id 6
                      2, & ! node id 8
                      3/)  ! node id 9
- 
+
         ! Set the number of each type of element, plus the total number.
         numQuadElems=1
         numTriElems=0
@@ -7127,7 +7142,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/5/)  
+        elemIds=(/5/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -7151,7 +7166,7 @@ write(*,*) "LOCALRC=",localrc
          return
      endif
 
-  
+
   ! Create dest field
   call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
 
@@ -7170,7 +7185,7 @@ write(*,*) "LOCALRC=",localrc
     return
   endif
 
-  
+
   ! clear destination Field
   ! Should only be 1 localDE
   call ESMF_FieldGet(dstField, 0, farrayPtr1D,  rc=localrc)
@@ -7323,9 +7338,9 @@ write(*,*) "LOCALRC=",localrc
   real(ESMF_KIND_R8) :: coord(2)
   character(len=ESMF_MAXSTR) :: string
   real(ESMF_KIND_R8) :: dx,dy
-  
+
   real(ESMF_KIND_R8) :: x,y
-  
+
   integer :: spherical_grid
 
   integer, pointer :: larrayList(:)
@@ -7339,7 +7354,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -7371,7 +7386,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the node id array.
      allocate(nodeIds(numNodes))
-     nodeIds=(/100,20,30,40,50,60,70,80,90/) 
+     nodeIds=(/100,20,30,40,50,60,70,80,90/)
 
      ! Allocate and fill node coordinate array.
      ! Since this is a 2D Mesh the size is 2x the
@@ -7399,7 +7414,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the element id array.
      allocate(elemIds(numTotElems))
-     elemIds=(/1,2,3,4,5/) 
+     elemIds=(/1,2,3,4,5/)
 
 
      ! Allocate and fill the element topology type array.
@@ -7412,10 +7427,10 @@ write(*,*) "LOCALRC=",localrc
 
 
      ! Allocate and fill the element connection type array.
-     ! Note that entries in this array refer to the 
+     ! Note that entries in this array refer to the
      ! positions in the nodeIds, etc. arrays and that
      ! the order and number of entries for each element
-     ! reflects that given in the Mesh options 
+     ! reflects that given in the Mesh options
      ! section for the corresponding entry
      ! in the elemTypes array.
      allocate(elemConn(4*numQuadElems+3*numTriElems))
@@ -7434,7 +7449,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/100,20,40,50/) 
+       nodeIds=(/100,20,40,50/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -7459,7 +7474,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/1/) 
+       elemIds=(/1/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -7476,7 +7491,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/20,30,50,60/) 
+       nodeIds=(/20,30,50,60/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -7501,7 +7516,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/2,3/) 
+       elemIds=(/2,3/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -7519,7 +7534,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/40,50,70,80/) 
+        nodeIds=(/40,50,70,80/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -7545,7 +7560,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/4/) 
+        elemIds=(/4/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -7561,7 +7576,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/50,60,80,90/) 
+        nodeIds=(/50,60,80,90/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -7578,7 +7593,7 @@ write(*,*) "LOCALRC=",localrc
                      1, & ! node id 6
                      2, & ! node id 8
                      3/)  ! node id 9
- 
+
         ! Set the number of each type of element, plus the total number.
         numQuadElems=1
         numTriElems=0
@@ -7586,7 +7601,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/5/)  
+        elemIds=(/5/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -7619,7 +7634,7 @@ write(*,*) "LOCALRC=",localrc
     return
   endif
 
-  
+
   ! Load test data into the source Field
   ! Should only be 1 localDE
   call ESMF_FieldGet(srcField, 0, farrayPtr1D,  rc=localrc)
@@ -7665,7 +7680,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the node id array.
      allocate(nodeIds(numNodes))
-     nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+     nodeIds=(/1,2,3,4,5,6,7,8,9/)
 
      ! Allocate and fill node coordinate array.
      ! Since this is a 2D Mesh the size is 2x the
@@ -7693,7 +7708,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the element id array.
      allocate(elemIds(numTotElems))
-     elemIds=(/1,2,3,4,5/) 
+     elemIds=(/1,2,3,4,5/)
 
 
      ! Allocate and fill the element topology type array.
@@ -7706,10 +7721,10 @@ write(*,*) "LOCALRC=",localrc
 
 
      ! Allocate and fill the element connection type array.
-     ! Note that entries in this array refer to the 
+     ! Note that entries in this array refer to the
      ! positions in the nodeIds, etc. arrays and that
      ! the order and number of entries for each element
-     ! reflects that given in the Mesh options 
+     ! reflects that given in the Mesh options
      ! section for the corresponding entry
      ! in the elemTypes array.
      allocate(elemConn(4*numQuadElems+3*numTriElems))
@@ -7728,7 +7743,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/1,2,4,5/) 
+       nodeIds=(/1,2,4,5/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -7753,7 +7768,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/1/) 
+       elemIds=(/1/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -7770,7 +7785,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/2,3,5,6/) 
+       nodeIds=(/2,3,5,6/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -7795,7 +7810,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/2,3/) 
+       elemIds=(/2,3/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -7813,7 +7828,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/4,5,7,8/) 
+        nodeIds=(/4,5,7,8/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -7839,7 +7854,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/4/) 
+        elemIds=(/4/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -7855,7 +7870,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/5,6,8,9/) 
+        nodeIds=(/5,6,8,9/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -7872,7 +7887,7 @@ write(*,*) "LOCALRC=",localrc
                      1, & ! node id 6
                      2, & ! node id 8
                      3/)  ! node id 9
- 
+
         ! Set the number of each type of element, plus the total number.
         numQuadElems=1
         numTriElems=0
@@ -7880,7 +7895,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/5/)  
+        elemIds=(/5/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -7904,7 +7919,7 @@ write(*,*) "LOCALRC=",localrc
          return
      endif
 
-  
+
   ! Create dest field
   call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
 
@@ -7915,7 +7930,7 @@ write(*,*) "LOCALRC=",localrc
     return
   endif
 
-  
+
   ! clear destination Field
   ! Should only be 1 localDE
   call ESMF_FieldGet(dstField, 0, farrayPtr1D,  rc=localrc)
@@ -8069,9 +8084,9 @@ write(*,*) "LOCALRC=",localrc
   real(ESMF_KIND_R8) :: coord(2)
   character(len=ESMF_MAXSTR) :: string
   real(ESMF_KIND_R8) :: dx,dy
-  
+
   real(ESMF_KIND_R8) :: x,y
-  
+
   integer :: spherical_grid
 
   integer, pointer :: larrayList(:)
@@ -8085,7 +8100,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -8117,7 +8132,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the node id array.
      allocate(nodeIds(numNodes))
-     nodeIds=(/100,20,30,40,50,60,70,80,90/) 
+     nodeIds=(/100,20,30,40,50,60,70,80,90/)
 
      ! Allocate and fill node coordinate array.
      ! Since this is a 2D Mesh the size is 2x the
@@ -8145,7 +8160,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the element id array.
      allocate(elemIds(numTotElems))
-     elemIds=(/1,2,3,4,5/) 
+     elemIds=(/1,2,3,4,5/)
 
 
      ! Allocate and fill the element topology type array.
@@ -8158,10 +8173,10 @@ write(*,*) "LOCALRC=",localrc
 
 
      ! Allocate and fill the element connection type array.
-     ! Note that entries in this array refer to the 
+     ! Note that entries in this array refer to the
      ! positions in the nodeIds, etc. arrays and that
      ! the order and number of entries for each element
-     ! reflects that given in the Mesh options 
+     ! reflects that given in the Mesh options
      ! section for the corresponding entry
      ! in the elemTypes array.
      allocate(elemConn(4*numQuadElems+3*numTriElems))
@@ -8180,7 +8195,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/100,20,40,50/) 
+       nodeIds=(/100,20,40,50/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -8205,7 +8220,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/1/) 
+       elemIds=(/1/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -8222,7 +8237,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/20,30,50,60/) 
+       nodeIds=(/20,30,50,60/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -8247,7 +8262,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/2,3/) 
+       elemIds=(/2,3/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -8265,7 +8280,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/40,50,70,80/) 
+        nodeIds=(/40,50,70,80/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -8291,7 +8306,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/4/) 
+        elemIds=(/4/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -8307,7 +8322,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/50,60,80,90/) 
+        nodeIds=(/50,60,80,90/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -8324,7 +8339,7 @@ write(*,*) "LOCALRC=",localrc
                      1, & ! node id 6
                      2, & ! node id 8
                      3/)  ! node id 9
- 
+
         ! Set the number of each type of element, plus the total number.
         numQuadElems=1
         numTriElems=0
@@ -8332,7 +8347,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/5/)  
+        elemIds=(/5/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -8365,7 +8380,7 @@ write(*,*) "LOCALRC=",localrc
     return
   endif
 
-  
+
   ! Load test data into the source Field
   ! Should only be 1 localDE
   call ESMF_FieldGet(srcField, 0, farrayPtr1D,  rc=localrc)
@@ -8411,7 +8426,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the node id array.
      allocate(nodeIds(numNodes))
-     nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+     nodeIds=(/1,2,3,4,5,6,7,8,9/)
 
      ! Allocate and fill node coordinate array.
      ! Since this is a 2D Mesh the size is 2x the
@@ -8439,7 +8454,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the element id array.
      allocate(elemIds(numTotElems))
-     elemIds=(/1,2,3,4,5/) 
+     elemIds=(/1,2,3,4,5/)
 
 
      ! Allocate and fill the element topology type array.
@@ -8452,10 +8467,10 @@ write(*,*) "LOCALRC=",localrc
 
 
      ! Allocate and fill the element connection type array.
-     ! Note that entries in this array refer to the 
+     ! Note that entries in this array refer to the
      ! positions in the nodeIds, etc. arrays and that
      ! the order and number of entries for each element
-     ! reflects that given in the Mesh options 
+     ! reflects that given in the Mesh options
      ! section for the corresponding entry
      ! in the elemTypes array.
      allocate(elemConn(4*numQuadElems+3*numTriElems))
@@ -8474,7 +8489,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/1,2,4,5/) 
+       nodeIds=(/1,2,4,5/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -8499,7 +8514,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/1/) 
+       elemIds=(/1/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -8516,7 +8531,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/2,3,5,6/) 
+       nodeIds=(/2,3,5,6/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -8541,7 +8556,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/2,3/) 
+       elemIds=(/2,3/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -8559,7 +8574,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/4,5,7,8/) 
+        nodeIds=(/4,5,7,8/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -8585,7 +8600,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/4/) 
+        elemIds=(/4/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -8601,7 +8616,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/5,6,8,9/) 
+        nodeIds=(/5,6,8,9/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -8618,7 +8633,7 @@ write(*,*) "LOCALRC=",localrc
                      1, & ! node id 6
                      2, & ! node id 8
                      3/)  ! node id 9
- 
+
         ! Set the number of each type of element, plus the total number.
         numQuadElems=1
         numTriElems=0
@@ -8626,7 +8641,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/5/)  
+        elemIds=(/5/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -8650,7 +8665,7 @@ write(*,*) "LOCALRC=",localrc
          return
      endif
 
-  
+
   ! Create dest field
   call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
 
@@ -8661,7 +8676,7 @@ write(*,*) "LOCALRC=",localrc
     return
   endif
 
-  
+
   ! clear destination Field
   ! Should only be 1 localDE
   call ESMF_FieldGet(dstField, 0, farrayPtr1D,  rc=localrc)
@@ -8814,9 +8829,9 @@ write(*,*) "LOCALRC=",localrc
   real(ESMF_KIND_R8) :: coord(2)
   character(len=ESMF_MAXSTR) :: string
   real(ESMF_KIND_R8) :: dx,dy
-  
+
   real(ESMF_KIND_R8) :: x,y,z
-  
+
   integer :: spherical_grid
 
   integer, pointer :: larrayList(:)
@@ -8830,7 +8845,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -8862,7 +8877,7 @@ write(*,*) "LOCALRC=",localrc
      ! Allocate and fill the node id array.
      allocate(nodeIds(numNodes))
      nodeIds=(/1,2,3,4,5,6,7,8,9, &
-               10,11,12,13,14,15,16,17,18/) 
+               10,11,12,13,14,15,16,17,18/)
 
      ! Allocate and fill node coordinate array.
      ! Since this is a 3D Mesh the size is 3x the
@@ -8897,18 +8912,18 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the element id array.
      allocate(elemIds(numElems))
-     elemIds=(/1,2,3,4/) 
+     elemIds=(/1,2,3,4/)
 
      ! Allocate and fill the element topology type array.
      allocate(elemTypes(numElems))
      elemTypes=ESMF_MESHELEMTYPE_HEX
-                 
+
 
      ! Allocate and fill the element connection type array.
-     ! Note that entries in this array refer to the 
+     ! Note that entries in this array refer to the
      ! positions in the nodeIds, etc. arrays and that
      ! the order and number of entries for each element
-     ! reflects that given in the Mesh options 
+     ! reflects that given in the Mesh options
      ! section for the corresponding entry
      ! in the elemTypes array.
      allocate(elemConn(8*numElems))
@@ -8925,7 +8940,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/1,2,4,5,10,11,13,14/) 
+       nodeIds=(/1,2,4,5,10,11,13,14/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -8957,7 +8972,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numElems))
-       elemIds=(/1/) 
+       elemIds=(/1/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numElems))
@@ -8974,7 +8989,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/2,3,5,6,11,12,14,15/) 
+       nodeIds=(/2,3,5,6,11,12,14,15/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 3D Mesh the size is 2x the
@@ -9005,7 +9020,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numElems))
-       elemIds=(/2/) 
+       elemIds=(/2/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numElems))
@@ -9022,7 +9037,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/4,5,7,8,13,14,16,17/) 
+        nodeIds=(/4,5,7,8,13,14,16,17/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 3D Mesh the size is 2x the
@@ -9054,7 +9069,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numElems))
-       elemIds=(/3/) 
+       elemIds=(/3/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numElems))
@@ -9072,7 +9087,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/5,6,8,9,14,15,17,18/) 
+        nodeIds=(/5,6,8,9,14,15,17,18/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 3D Mesh the size is 2x the
@@ -9097,13 +9112,13 @@ write(*,*) "LOCALRC=",localrc
                      1, & ! node id 15
                      2, & ! node id 17
                      3/)  ! node id 18
- 
+
        ! Set the number of each type of element, plus the total number.
        numElems=1
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numElems))
-       elemIds=(/4/) 
+       elemIds=(/4/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numElems))
@@ -9138,7 +9153,7 @@ write(*,*) "LOCALRC=",localrc
     return
   endif
 
-  
+
   ! Load test data into the source Field
   ! Should only be 1 localDE
   call ESMF_FieldGet(srcField, 0, farrayPtr1D,  rc=localrc)
@@ -9186,7 +9201,7 @@ write(*,*) "LOCALRC=",localrc
      ! Allocate and fill the node id array.
      allocate(nodeIds(numNodes))
      nodeIds=(/1,2,3,4,5,6,7,8,9, &
-               10,11,12,13,14,15,16,17,18/) 
+               10,11,12,13,14,15,16,17,18/)
 
      ! Allocate and fill node coordinate array.
      ! Since this is a 3D Mesh the size is 3x the
@@ -9221,18 +9236,18 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the element id array.
      allocate(elemIds(numElems))
-     elemIds=(/1,2,3,4/) 
+     elemIds=(/1,2,3,4/)
 
      ! Allocate and fill the element topology type array.
      allocate(elemTypes(numElems))
      elemTypes=ESMF_MESHELEMTYPE_HEX
-                 
+
 
      ! Allocate and fill the element connection type array.
-     ! Note that entries in this array refer to the 
+     ! Note that entries in this array refer to the
      ! positions in the nodeIds, etc. arrays and that
      ! the order and number of entries for each element
-     ! reflects that given in the Mesh options 
+     ! reflects that given in the Mesh options
      ! section for the corresponding entry
      ! in the elemTypes array.
      allocate(elemConn(8*numElems))
@@ -9249,7 +9264,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/1,2,4,5,10,11,13,14/) 
+       nodeIds=(/1,2,4,5,10,11,13,14/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -9281,7 +9296,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numElems))
-       elemIds=(/1/) 
+       elemIds=(/1/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numElems))
@@ -9298,7 +9313,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/2,3,5,6,11,12,14,15/) 
+       nodeIds=(/2,3,5,6,11,12,14,15/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 3D Mesh the size is 2x the
@@ -9329,7 +9344,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numElems))
-       elemIds=(/2/) 
+       elemIds=(/2/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numElems))
@@ -9346,7 +9361,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/4,5,7,8,13,14,16,17/) 
+        nodeIds=(/4,5,7,8,13,14,16,17/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 3D Mesh the size is 2x the
@@ -9378,7 +9393,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numElems))
-       elemIds=(/3/) 
+       elemIds=(/3/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numElems))
@@ -9396,7 +9411,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/5,6,8,9,14,15,17,18/) 
+        nodeIds=(/5,6,8,9,14,15,17,18/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 3D Mesh the size is 2x the
@@ -9421,13 +9436,13 @@ write(*,*) "LOCALRC=",localrc
                      1, & ! node id 15
                      2, & ! node id 17
                      3/)  ! node id 18
- 
+
        ! Set the number of each type of element, plus the total number.
        numElems=1
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numElems))
-       elemIds=(/4/) 
+       elemIds=(/4/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numElems))
@@ -9452,7 +9467,7 @@ write(*,*) "LOCALRC=",localrc
        return
    endif
 
-  
+
   ! Create dest field
   call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
 
@@ -9463,7 +9478,7 @@ write(*,*) "LOCALRC=",localrc
     return
   endif
 
-  
+
   ! clear destination Field
   ! Should only be 1 localDE
   call ESMF_FieldGet(dstField, 0, farrayPtr1D,  rc=localrc)
@@ -9616,9 +9631,9 @@ write(*,*) "LOCALRC=",localrc
   real(ESMF_KIND_R8) :: coord(2)
   character(len=ESMF_MAXSTR) :: string
   real(ESMF_KIND_R8) :: dx,dy
-  
+
   real(ESMF_KIND_R8) :: x,y,z
-  
+
   integer :: spherical_grid
 
   integer, pointer :: larrayList(:)
@@ -9632,7 +9647,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -9664,7 +9679,7 @@ write(*,*) "LOCALRC=",localrc
      ! Allocate and fill the node id array.
      allocate(nodeIds(numNodes))
      nodeIds=(/1,2,3,4,5,6,7,8,9, &
-               10,11,12,13,14,15,16,17,18/) 
+               10,11,12,13,14,15,16,17,18/)
 
      ! Allocate and fill node coordinate array.
      ! Since this is a 3D Mesh the size is 3x the
@@ -9699,18 +9714,18 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the element id array.
      allocate(elemIds(numElems))
-     elemIds=(/1,2,3,4/) 
+     elemIds=(/1,2,3,4/)
 
      ! Allocate and fill the element topology type array.
      allocate(elemTypes(numElems))
      elemTypes=ESMF_MESHELEMTYPE_HEX
-                 
+
 
      ! Allocate and fill the element connection type array.
-     ! Note that entries in this array refer to the 
+     ! Note that entries in this array refer to the
      ! positions in the nodeIds, etc. arrays and that
      ! the order and number of entries for each element
-     ! reflects that given in the Mesh options 
+     ! reflects that given in the Mesh options
      ! section for the corresponding entry
      ! in the elemTypes array.
      allocate(elemConn(8*numElems))
@@ -9727,7 +9742,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/1,2,4,5,10,11,13,14/) 
+       nodeIds=(/1,2,4,5,10,11,13,14/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -9759,7 +9774,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numElems))
-       elemIds=(/1/) 
+       elemIds=(/1/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numElems))
@@ -9776,7 +9791,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/2,3,5,6,11,12,14,15/) 
+       nodeIds=(/2,3,5,6,11,12,14,15/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 3D Mesh the size is 2x the
@@ -9807,7 +9822,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numElems))
-       elemIds=(/2/) 
+       elemIds=(/2/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numElems))
@@ -9824,7 +9839,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/4,5,7,8,13,14,16,17/) 
+        nodeIds=(/4,5,7,8,13,14,16,17/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 3D Mesh the size is 2x the
@@ -9856,7 +9871,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numElems))
-       elemIds=(/3/) 
+       elemIds=(/3/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numElems))
@@ -9874,7 +9889,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/5,6,8,9,14,15,17,18/) 
+        nodeIds=(/5,6,8,9,14,15,17,18/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 3D Mesh the size is 2x the
@@ -9899,13 +9914,13 @@ write(*,*) "LOCALRC=",localrc
                      1, & ! node id 15
                      2, & ! node id 17
                      3/)  ! node id 18
- 
+
        ! Set the number of each type of element, plus the total number.
        numElems=1
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numElems))
-       elemIds=(/4/) 
+       elemIds=(/4/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numElems))
@@ -9940,7 +9955,7 @@ write(*,*) "LOCALRC=",localrc
     return
   endif
 
-  
+
   ! Load test data into the source Field
   ! Should only be 1 localDE
   call ESMF_FieldGet(srcField, 0, farrayPtr1D,  rc=localrc)
@@ -9988,7 +10003,7 @@ write(*,*) "LOCALRC=",localrc
      ! Allocate and fill the node id array.
      allocate(nodeIds(numNodes))
      nodeIds=(/1,2,3,4,5,6,7,8,9, &
-               10,11,12,13,14,15,16,17,18/) 
+               10,11,12,13,14,15,16,17,18/)
 
      ! Allocate and fill node coordinate array.
      ! Since this is a 3D Mesh the size is 3x the
@@ -10023,18 +10038,18 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the element id array.
      allocate(elemIds(numElems))
-     elemIds=(/1,2,3,4/) 
+     elemIds=(/1,2,3,4/)
 
      ! Allocate and fill the element topology type array.
      allocate(elemTypes(numElems))
      elemTypes=ESMF_MESHELEMTYPE_HEX
-                 
+
 
      ! Allocate and fill the element connection type array.
-     ! Note that entries in this array refer to the 
+     ! Note that entries in this array refer to the
      ! positions in the nodeIds, etc. arrays and that
      ! the order and number of entries for each element
-     ! reflects that given in the Mesh options 
+     ! reflects that given in the Mesh options
      ! section for the corresponding entry
      ! in the elemTypes array.
      allocate(elemConn(8*numElems))
@@ -10051,7 +10066,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/1,2,4,5,10,11,13,14/) 
+       nodeIds=(/1,2,4,5,10,11,13,14/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -10083,7 +10098,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numElems))
-       elemIds=(/1/) 
+       elemIds=(/1/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numElems))
@@ -10100,7 +10115,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/2,3,5,6,11,12,14,15/) 
+       nodeIds=(/2,3,5,6,11,12,14,15/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 3D Mesh the size is 2x the
@@ -10131,7 +10146,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numElems))
-       elemIds=(/2/) 
+       elemIds=(/2/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numElems))
@@ -10148,7 +10163,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/4,5,7,8,13,14,16,17/) 
+        nodeIds=(/4,5,7,8,13,14,16,17/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 3D Mesh the size is 2x the
@@ -10180,7 +10195,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numElems))
-       elemIds=(/3/) 
+       elemIds=(/3/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numElems))
@@ -10198,7 +10213,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/5,6,8,9,14,15,17,18/) 
+        nodeIds=(/5,6,8,9,14,15,17,18/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 3D Mesh the size is 2x the
@@ -10223,13 +10238,13 @@ write(*,*) "LOCALRC=",localrc
                      1, & ! node id 15
                      2, & ! node id 17
                      3/)  ! node id 18
- 
+
        ! Set the number of each type of element, plus the total number.
        numElems=1
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numElems))
-       elemIds=(/4/) 
+       elemIds=(/4/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numElems))
@@ -10254,7 +10269,7 @@ write(*,*) "LOCALRC=",localrc
        return
    endif
 
-  
+
   ! Create dest field
   call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
 
@@ -10265,7 +10280,7 @@ write(*,*) "LOCALRC=",localrc
     return
   endif
 
-  
+
   ! clear destination Field
   ! Should only be 1 localDE
   call ESMF_FieldGet(dstField, 0, farrayPtr1D,  rc=localrc)
@@ -10417,9 +10432,9 @@ write(*,*) "LOCALRC=",localrc
   real(ESMF_KIND_R8) :: coord(2)
   character(len=ESMF_MAXSTR) :: string
   real(ESMF_KIND_R8) :: dx,dy
-  
+
   real(ESMF_KIND_R8) :: x,y,z
-  
+
   integer :: spherical_grid
 
   integer, pointer :: larrayList(:)
@@ -10433,7 +10448,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -10465,7 +10480,7 @@ write(*,*) "LOCALRC=",localrc
      ! Allocate and fill the node id array.
      allocate(nodeIds(numNodes))
      nodeIds=(/1,2,3,4,5,6,7,8,9, &
-               10,11,12,13,14,15,16,17,18/) 
+               10,11,12,13,14,15,16,17,18/)
 
      ! Allocate and fill node coordinate array.
      ! Since this is a 3D Mesh the size is 3x the
@@ -10500,18 +10515,18 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the element id array.
      allocate(elemIds(numElems))
-     elemIds=(/1,2,3,4/) 
+     elemIds=(/1,2,3,4/)
 
      ! Allocate and fill the element topology type array.
      allocate(elemTypes(numElems))
      elemTypes=ESMF_MESHELEMTYPE_HEX
-                 
+
 
      ! Allocate and fill the element connection type array.
-     ! Note that entries in this array refer to the 
+     ! Note that entries in this array refer to the
      ! positions in the nodeIds, etc. arrays and that
      ! the order and number of entries for each element
-     ! reflects that given in the Mesh options 
+     ! reflects that given in the Mesh options
      ! section for the corresponding entry
      ! in the elemTypes array.
      allocate(elemConn(8*numElems))
@@ -10528,7 +10543,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/1,2,4,5,10,11,13,14/) 
+       nodeIds=(/1,2,4,5,10,11,13,14/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -10560,7 +10575,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numElems))
-       elemIds=(/1/) 
+       elemIds=(/1/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numElems))
@@ -10577,7 +10592,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/2,3,5,6,11,12,14,15/) 
+       nodeIds=(/2,3,5,6,11,12,14,15/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 3D Mesh the size is 2x the
@@ -10608,7 +10623,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numElems))
-       elemIds=(/2/) 
+       elemIds=(/2/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numElems))
@@ -10625,7 +10640,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/4,5,7,8,13,14,16,17/) 
+        nodeIds=(/4,5,7,8,13,14,16,17/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 3D Mesh the size is 2x the
@@ -10657,7 +10672,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numElems))
-       elemIds=(/3/) 
+       elemIds=(/3/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numElems))
@@ -10675,7 +10690,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/5,6,8,9,14,15,17,18/) 
+        nodeIds=(/5,6,8,9,14,15,17,18/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 3D Mesh the size is 2x the
@@ -10700,13 +10715,13 @@ write(*,*) "LOCALRC=",localrc
                      1, & ! node id 15
                      2, & ! node id 17
                      3/)  ! node id 18
- 
+
        ! Set the number of each type of element, plus the total number.
        numElems=1
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numElems))
-       elemIds=(/4/) 
+       elemIds=(/4/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numElems))
@@ -10741,7 +10756,7 @@ write(*,*) "LOCALRC=",localrc
     return
   endif
 
-  
+
   ! Load test data into the source Field
   ! Should only be 1 localDE
   call ESMF_FieldGet(srcField, 0, farrayPtr1D,  rc=localrc)
@@ -10789,7 +10804,7 @@ write(*,*) "LOCALRC=",localrc
      ! Allocate and fill the node id array.
      allocate(nodeIds(numNodes))
      nodeIds=(/1,2,3,4,5,6,7,8,9, &
-               10,11,12,13,14,15,16,17,18/) 
+               10,11,12,13,14,15,16,17,18/)
 
      ! Allocate and fill node coordinate array.
      ! Since this is a 3D Mesh the size is 3x the
@@ -10824,18 +10839,18 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the element id array.
      allocate(elemIds(numElems))
-     elemIds=(/1,2,3,4/) 
+     elemIds=(/1,2,3,4/)
 
      ! Allocate and fill the element topology type array.
      allocate(elemTypes(numElems))
      elemTypes=ESMF_MESHELEMTYPE_HEX
-                 
+
 
      ! Allocate and fill the element connection type array.
-     ! Note that entries in this array refer to the 
+     ! Note that entries in this array refer to the
      ! positions in the nodeIds, etc. arrays and that
      ! the order and number of entries for each element
-     ! reflects that given in the Mesh options 
+     ! reflects that given in the Mesh options
      ! section for the corresponding entry
      ! in the elemTypes array.
      allocate(elemConn(8*numElems))
@@ -10852,7 +10867,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/1,2,4,5,10,11,13,14/) 
+       nodeIds=(/1,2,4,5,10,11,13,14/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -10884,7 +10899,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numElems))
-       elemIds=(/1/) 
+       elemIds=(/1/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numElems))
@@ -10901,7 +10916,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/2,3,5,6,11,12,14,15/) 
+       nodeIds=(/2,3,5,6,11,12,14,15/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 3D Mesh the size is 2x the
@@ -10932,7 +10947,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numElems))
-       elemIds=(/2/) 
+       elemIds=(/2/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numElems))
@@ -10949,7 +10964,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/4,5,7,8,13,14,16,17/) 
+        nodeIds=(/4,5,7,8,13,14,16,17/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 3D Mesh the size is 2x the
@@ -10981,7 +10996,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numElems))
-       elemIds=(/3/) 
+       elemIds=(/3/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numElems))
@@ -10999,7 +11014,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/5,6,8,9,14,15,17,18/) 
+        nodeIds=(/5,6,8,9,14,15,17,18/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 3D Mesh the size is 2x the
@@ -11024,13 +11039,13 @@ write(*,*) "LOCALRC=",localrc
                      1, & ! node id 15
                      2, & ! node id 17
                      3/)  ! node id 18
- 
+
        ! Set the number of each type of element, plus the total number.
        numElems=1
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numElems))
-       elemIds=(/4/) 
+       elemIds=(/4/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numElems))
@@ -11055,7 +11070,7 @@ write(*,*) "LOCALRC=",localrc
        return
    endif
 
-  
+
   ! Create dest field
   call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
 
@@ -11066,7 +11081,7 @@ write(*,*) "LOCALRC=",localrc
     return
   endif
 
-  
+
   ! clear destination Field
   ! Should only be 1 localDE
   call ESMF_FieldGet(dstField, 0, farrayPtr1D,  rc=localrc)
@@ -11223,12 +11238,12 @@ write(*,*) "LOCALRC=",localrc
   integer dst_nx,dst_ny,dst_nz
   integer num_arrays
   real(ESMF_KIND_R8) :: dx,dy,dz
-  
+
   real(ESMF_KIND_R8) :: dst_minx,dst_miny,dst_minz
   real(ESMF_KIND_R8) :: dst_maxx,dst_maxy,dst_maxz
 
   real(ESMF_KIND_R8) :: x,y,z
-  
+
   integer :: spherical_grid
 
   integer, pointer :: larrayList(:)
@@ -11241,7 +11256,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -11275,11 +11290,11 @@ write(*,*) "LOCALRC=",localrc
   dst_minx = 0.1
   dst_miny = 0.1
   dst_minz = 0.1
-  
+
   dst_maxx = 1.9
   dst_maxy = 1.9
   dst_maxz = 0.9
-  
+
   ! setup source Mesh
   if (petCount .eq. 1) then
      ! Set number of nodes
@@ -11288,7 +11303,7 @@ write(*,*) "LOCALRC=",localrc
      ! Allocate and fill the node id array.
      allocate(nodeIds(numNodes))
      nodeIds=(/1,2,3,4,5,6,7,8,9, &
-               10,11,12,13,14,15,16,17,18/) 
+               10,11,12,13,14,15,16,17,18/)
 
      ! Allocate and fill node coordinate array.
      ! Since this is a 3D Mesh the size is 3x the
@@ -11323,18 +11338,18 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the element id array.
      allocate(elemIds(numElems))
-     elemIds=(/1,2,3,4/) 
+     elemIds=(/1,2,3,4/)
 
      ! Allocate and fill the element topology type array.
      allocate(elemTypes(numElems))
      elemTypes=ESMF_MESHELEMTYPE_HEX
-                 
+
 
      ! Allocate and fill the element connection type array.
-     ! Note that entries in this array refer to the 
+     ! Note that entries in this array refer to the
      ! positions in the nodeIds, etc. arrays and that
      ! the order and number of entries for each element
-     ! reflects that given in the Mesh options 
+     ! reflects that given in the Mesh options
      ! section for the corresponding entry
      ! in the elemTypes array.
      allocate(elemConn(8*numElems))
@@ -11351,7 +11366,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/1,2,4,5,10,11,13,14/) 
+       nodeIds=(/1,2,4,5,10,11,13,14/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -11383,7 +11398,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numElems))
-       elemIds=(/1/) 
+       elemIds=(/1/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numElems))
@@ -11400,7 +11415,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/2,3,5,6,11,12,14,15/) 
+       nodeIds=(/2,3,5,6,11,12,14,15/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 3D Mesh the size is 2x the
@@ -11431,7 +11446,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numElems))
-       elemIds=(/2/) 
+       elemIds=(/2/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numElems))
@@ -11448,7 +11463,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/4,5,7,8,13,14,16,17/) 
+        nodeIds=(/4,5,7,8,13,14,16,17/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 3D Mesh the size is 2x the
@@ -11480,7 +11495,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numElems))
-       elemIds=(/3/) 
+       elemIds=(/3/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numElems))
@@ -11498,7 +11513,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/5,6,8,9,14,15,17,18/) 
+        nodeIds=(/5,6,8,9,14,15,17,18/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 3D Mesh the size is 2x the
@@ -11523,13 +11538,13 @@ write(*,*) "LOCALRC=",localrc
                      1, & ! node id 15
                      2, & ! node id 17
                      3/)  ! node id 18
- 
+
        ! Set the number of each type of element, plus the total number.
        numElems=1
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numElems))
-       elemIds=(/4/) 
+       elemIds=(/4/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numElems))
@@ -11564,7 +11579,7 @@ write(*,*) "LOCALRC=",localrc
     return
   endif
 
-  
+
   ! Load test data into the source Field
   ! Should only be 1 localDE
   call ESMF_FieldGet(srcField, 0, farrayPtr1D,  rc=localrc)
@@ -11662,7 +11677,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get memory and set coords for dst
   do lDE=0,localDECount-1
- 
+
      !! get coords
      call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER_VCENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -11774,7 +11789,7 @@ write(*,*) "LOCALRC=",localrc
         rc=ESMF_FAILURE
         return
      endif
-   
+
      !! check error
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
@@ -11875,7 +11890,7 @@ write(*,*) "LOCALRC=",localrc
 
   real(ESMF_KIND_R8) :: A_dx, A_dy
   real(ESMF_KIND_R8) :: B_dx, B_dy
-  
+
   integer :: spherical_grid
 
   integer, pointer :: larrayList(:)
@@ -11883,7 +11898,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -11918,7 +11933,7 @@ write(*,*) "LOCALRC=",localrc
   B_dx=360.0/B_nx
   B_dy=180.0/B_ny
 
-  
+
   ! setup source grid
   gridA=ESMF_GridCreate1PeriDim(minIndex=(/1,1/),maxIndex=(/A_nx,A_ny/),regDecomp=(/petCount,1/), &
                                 coordSys=ESMF_COORDSYS_SPH_DEG, indexflag=ESMF_INDEX_GLOBAL, &
@@ -12008,7 +12023,7 @@ write(*,*) "LOCALRC=",localrc
   ! Construct 3D Grid A
   ! (Get memory and set coords for src)
   do lDE=0,localDECount-1
- 
+
      !! get coord 1
      call ESMF_GridGetCoord(gridA, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -12042,7 +12057,7 @@ write(*,*) "LOCALRC=",localrc
         farrayPtrYC(i1,i2) = -90. + (REAL(i2-1)*A_dy + 0.5*A_dy)
 
         ! Init source value
-        farrayPtr(i1,i2) = 20.0  
+        farrayPtr(i1,i2) = 20.0
 
      enddo
      enddo
@@ -12056,7 +12071,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get memory and set coords for dst
   do lDE=0,localDECount-1
- 
+
      !! get coords
      call ESMF_GridGetCoord(gridB, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -12088,7 +12103,7 @@ write(*,*) "LOCALRC=",localrc
         ! Set source coordinates as 0 to 360
         farrayPtrXC(i1,i2) = REAL(i1-1)*B_dx
         farrayPtrYC(i1,i2) = -90. + (REAL(i2-1)*B_dy + 0.5*B_dy)
-  
+
         ! initialize destination field
         farrayPtr(i1,i2)=0.0
 
@@ -12229,7 +12244,7 @@ write(*,*) "LOCALRC=",localrc
 
   real(ESMF_KIND_R8) :: A_dx, A_dy
   real(ESMF_KIND_R8) :: B_dx, B_dy
-  
+
   integer :: spherical_grid
 
   integer, pointer :: larrayList(:)
@@ -12237,7 +12252,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -12272,7 +12287,7 @@ write(*,*) "LOCALRC=",localrc
   B_dx=360.0/B_nx
   B_dy=180.0/B_ny
 
-  
+
   ! setup source grid
   gridA=ESMF_GridCreate1PeriDim(minIndex=(/1,1/),maxIndex=(/A_nx,A_ny/),regDecomp=(/petCount,1/), &
                                 coordSys=ESMF_COORDSYS_SPH_DEG, indexflag=ESMF_INDEX_GLOBAL, &
@@ -12362,7 +12377,7 @@ write(*,*) "LOCALRC=",localrc
   ! Construct 3D Grid A
   ! (Get memory and set coords for src)
   do lDE=0,localDECount-1
- 
+
      !! get coord 1
      call ESMF_GridGetCoord(gridA, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -12396,7 +12411,7 @@ write(*,*) "LOCALRC=",localrc
         farrayPtrYC(i1,i2) = -90. + (REAL(i2-1)*A_dy + 0.5*A_dy)
 
         ! Init source value
-        farrayPtr(i1,i2) = 20.0  
+        farrayPtr(i1,i2) = 20.0
 
      enddo
      enddo
@@ -12410,7 +12425,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get memory and set coords for dst
   do lDE=0,localDECount-1
- 
+
      !! get coords
      call ESMF_GridGetCoord(gridB, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -12442,7 +12457,7 @@ write(*,*) "LOCALRC=",localrc
         ! Set source coordinates as 0 to 360
         farrayPtrXC(i1,i2) = REAL(i1-1)*B_dx
         farrayPtrYC(i1,i2) = -90. + (REAL(i2-1)*B_dy + 0.5*B_dy)
-  
+
         ! initialize destination field
         farrayPtr(i1,i2)=0.0
 
@@ -12589,7 +12604,7 @@ write(*,*) "LOCALRC=",localrc
 
   real(ESMF_KIND_R8) :: A_dx, A_dy
   real(ESMF_KIND_R8) :: B_dx, B_dy
-  
+
   integer :: spherical_grid
 
   integer, pointer :: larrayList(:)
@@ -12597,7 +12612,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -12632,7 +12647,7 @@ write(*,*) "LOCALRC=",localrc
   B_dx=360.0/B_nx
   B_dy=180.0/B_ny
 
-  
+
   ! setup source grid
   gridA=ESMF_GridCreate1PeriDim(minIndex=(/1,1/),maxIndex=(/A_nx,A_ny/),regDecomp=(/petCount,1/), &
                                 coordSys=ESMF_COORDSYS_SPH_DEG, indexflag=ESMF_INDEX_GLOBAL, &
@@ -12722,7 +12737,7 @@ write(*,*) "LOCALRC=",localrc
   ! Construct 3D Grid A
   ! (Get memory and set coords for src)
   do lDE=0,localDECount-1
- 
+
      !! get coord 1
      call ESMF_GridGetCoord(gridA, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -12756,7 +12771,7 @@ write(*,*) "LOCALRC=",localrc
         farrayPtrYC(i1,i2) = -90. + (REAL(i2-1)*A_dy + 0.5*A_dy)
 
         ! Init source value
-        farrayPtr(i1,i2) = 20.0  
+        farrayPtr(i1,i2) = 20.0
 
      enddo
      enddo
@@ -12770,7 +12785,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get memory and set coords for dst
   do lDE=0,localDECount-1
- 
+
      !! get coords
      call ESMF_GridGetCoord(gridB, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -12802,7 +12817,7 @@ write(*,*) "LOCALRC=",localrc
         ! Set source coordinates as 0 to 360
         farrayPtrXC(i1,i2) = REAL(i1-1)*B_dx
         farrayPtrYC(i1,i2) = -90. + (REAL(i2-1)*B_dy + 0.5*B_dy)
-  
+
         ! initialize destination field
         farrayPtr(i1,i2)=0.0
 
@@ -12950,7 +12965,7 @@ write(*,*) "LOCALRC=",localrc
 
   real(ESMF_KIND_R8) :: A_dx, A_dy
   real(ESMF_KIND_R8) :: B_dx, B_dy
-  
+
   integer :: spherical_grid
 
   integer, pointer :: larrayList(:)
@@ -12958,7 +12973,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -12993,7 +13008,7 @@ write(*,*) "LOCALRC=",localrc
   B_dx=360.0/B_nx
   B_dy=180.0/B_ny
 
-  
+
   ! setup source grid
   gridA=ESMF_GridCreate1PeriDim(minIndex=(/1,1/),maxIndex=(/A_nx,A_ny/),regDecomp=(/petCount,1/), &
                                 coordSys=ESMF_COORDSYS_SPH_DEG, indexflag=ESMF_INDEX_GLOBAL, &
@@ -13083,7 +13098,7 @@ write(*,*) "LOCALRC=",localrc
   ! Construct 3D Grid A
   ! (Get memory and set coords for src)
   do lDE=0,localDECount-1
- 
+
      !! get coord 1
      call ESMF_GridGetCoord(gridA, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -13117,7 +13132,7 @@ write(*,*) "LOCALRC=",localrc
         farrayPtrYC(i1,i2) = -90. + (REAL(i2-1)*A_dy + 0.5*A_dy)
 
         ! Init source value
-        farrayPtr(i1,i2) = 20.0  
+        farrayPtr(i1,i2) = 20.0
 
      enddo
      enddo
@@ -13131,7 +13146,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get memory and set coords for dst
   do lDE=0,localDECount-1
- 
+
      !! get coords
      call ESMF_GridGetCoord(gridB, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -13163,7 +13178,7 @@ write(*,*) "LOCALRC=",localrc
         ! Set source coordinates as 0 to 360
         farrayPtrXC(i1,i2) = REAL(i1-1)*B_dx
         farrayPtrYC(i1,i2) = -90. + (REAL(i2-1)*B_dy + 0.5*B_dy)
-  
+
         ! initialize destination field
         farrayPtr(i1,i2)=0.0
 
@@ -13310,7 +13325,7 @@ write(*,*) "LOCALRC=",localrc
   real(ESMF_KIND_R8) :: dst_dx, dst_dy
 
   real(ESMF_KIND_R8) :: lon, lat, theta, phi, DEG2RAD
-  
+
   integer :: spherical_grid
 
   integer :: localPet, petCount
@@ -13320,7 +13335,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -13485,7 +13500,7 @@ write(*,*) "LOCALRC=",localrc
   ! Construct Src Grid
   ! (Get memory and set coords for src)
   do lDE=0,localDECount-1
- 
+
      !! get coord 1
      call ESMF_GridGetCoord(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -13541,7 +13556,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get memory and set coords for dst
   do lDE=0,localDECount-1
- 
+
      !! get coords
      call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -13580,11 +13595,11 @@ write(*,*) "LOCALRC=",localrc
         ! Set source coordinates as 0 to 360
         farrayPtrXC(i1,i2) = REAL(i1-1)*dst_dx
         farrayPtrYC(i1,i2) = -90. + (REAL(i2-1)*dst_dy + 0.5*dst_dy)
-  
+
         ! init exact answer
         lon = farrayPtrXC(i1,i2)
         lat = farrayPtrYC(i1,i2)
-     
+
        ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(lon)
         phi = DEG2RAD*(90.-lat)
@@ -13774,7 +13789,7 @@ write(*,*) "LOCALRC=",localrc
 
   real(ESMF_KIND_R8) :: A_dx, A_dy
   real(ESMF_KIND_R8) :: B_dx, B_dy
-  
+
   integer :: spherical_grid
 
   integer, pointer :: larrayList(:)
@@ -13782,10 +13797,10 @@ write(*,*) "LOCALRC=",localrc
 
   integer(ESMF_KIND_I4), pointer:: indices(:,:)
   real(ESMF_KIND_R8), pointer :: weights(:)
-  
+
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -13815,7 +13830,7 @@ write(*,*) "LOCALRC=",localrc
   B_dx=360.0/B_nx
   B_dy=180.0/B_ny
 
-  
+
   ! setup source grid
   gridA=ESMF_GridCreate1PeriDim(minIndex=(/1,1/),maxIndex=(/A_nx,A_ny/),regDecomp=(/petCount,1/), &
                                 coordSys=ESMF_COORDSYS_SPH_DEG, indexflag=ESMF_INDEX_GLOBAL, &
@@ -13905,7 +13920,7 @@ write(*,*) "LOCALRC=",localrc
   ! Construct 3D Grid A
   ! (Get memory and set coords for src)
   do lDE=0,localDECount-1
- 
+
      !! get coord 1
      call ESMF_GridGetCoord(gridA, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -13939,7 +13954,7 @@ write(*,*) "LOCALRC=",localrc
         farrayPtrYC(i1,i2) = -90. + (REAL(i2-1)*A_dy + 0.5*A_dy)
 
         ! Init source value
-        farrayPtr(i1,i2) = 20.0  
+        farrayPtr(i1,i2) = 20.0
 
      enddo
      enddo
@@ -13953,7 +13968,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get memory and set coords for dst
   do lDE=0,localDECount-1
- 
+
      !! get coords
      call ESMF_GridGetCoord(gridB, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -13985,7 +14000,7 @@ write(*,*) "LOCALRC=",localrc
         ! Set source coordinates as 0 to 360
         farrayPtrXC(i1,i2) = REAL(i1-1)*B_dx
         farrayPtrYC(i1,i2) = -90. + (REAL(i2-1)*B_dy + 0.5*B_dy)
-  
+
         ! initialize destination field
         farrayPtr(i1,i2)=0.0
 
@@ -14142,7 +14157,7 @@ write(*,*) "LOCALRC=",localrc
 
   real(ESMF_KIND_R8) :: A_dx, A_dy
   real(ESMF_KIND_R8) :: B_dx, B_dy
-  
+
   integer :: spherical_grid
 
   integer, pointer :: larrayList(:)
@@ -14150,10 +14165,10 @@ write(*,*) "LOCALRC=",localrc
 
   integer(ESMF_KIND_I4), pointer:: indices(:,:)
   real(ESMF_KIND_R8), pointer :: weights(:)
-  
+
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -14183,7 +14198,7 @@ write(*,*) "LOCALRC=",localrc
   B_dx=360.0/B_nx
   B_dy=180.0/B_ny
 
-  
+
   ! setup source grid
   gridA=ESMF_GridCreate1PeriDim(minIndex=(/1,1/),maxIndex=(/A_nx,A_ny/),regDecomp=(/petCount,1/), &
                                 coordSys=ESMF_COORDSYS_SPH_DEG, indexflag=ESMF_INDEX_GLOBAL, &
@@ -14273,7 +14288,7 @@ write(*,*) "LOCALRC=",localrc
   ! Construct 3D Grid A
   ! (Get memory and set coords for src)
   do lDE=0,localDECount-1
- 
+
      !! get coord 1
      call ESMF_GridGetCoord(gridA, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -14307,7 +14322,7 @@ write(*,*) "LOCALRC=",localrc
         farrayPtrYC(i1,i2) = -90. + (REAL(i2-1)*A_dy + 0.5*A_dy)
 
         ! Init source value
-        farrayPtr(i1,i2) = 20.0  
+        farrayPtr(i1,i2) = 20.0
 
      enddo
      enddo
@@ -14321,7 +14336,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get memory and set coords for dst
   do lDE=0,localDECount-1
- 
+
      !! get coords
      call ESMF_GridGetCoord(gridB, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -14353,7 +14368,7 @@ write(*,*) "LOCALRC=",localrc
         ! Set source coordinates as 0 to 360
         farrayPtrXC(i1,i2) = REAL(i1-1)*B_dx
         farrayPtrYC(i1,i2) = -90. + (REAL(i2-1)*B_dy + 0.5*B_dy)
-  
+
         ! initialize destination field
         farrayPtr(i1,i2)=0.0
 
@@ -14365,9 +14380,9 @@ write(*,*) "LOCALRC=",localrc
 
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store<
-  ! NOTE THAT THE FOLLOWING METHOD USES ARGUMENTS THAT ARE DEPRECATED. 
-  ! Please use (factorList, factorIndexList) instead of (weights, indices)  
-  ! See test_RegridMatrixFactor() for an example of their use. 
+  ! NOTE THAT THE FOLLOWING METHOD USES ARGUMENTS THAT ARE DEPRECATED.
+  ! Please use (factorList, factorIndexList) instead of (weights, indices)
+  ! See test_RegridMatrixFactor() for an example of their use.
   call ESMF_FieldRegridStore( &
           srcFieldA, &
           dstField=fieldB, &
@@ -14518,8 +14533,8 @@ write(*,*) "LOCALRC=",localrc
   real(ESMF_KIND_R8) :: A_dx, A_dy
   real(ESMF_KIND_R8) :: B_dx, B_dy
   real(ESMF_KIND_R8) :: DEG2RAD, lat, lon, theta, phi
-  real(ESMF_KIND_R8) :: rel_error  
-  real(ESMF_KIND_R8) :: max_rel_error  
+  real(ESMF_KIND_R8) :: rel_error
+  real(ESMF_KIND_R8) :: max_rel_error
 
   integer :: spherical_grid
 
@@ -14528,7 +14543,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -14561,7 +14576,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! degree to rad conversion
   DEG2RAD = 3.141592653589793_ESMF_KIND_R8/180.0_ESMF_KIND_R8
-  
+
   ! setup source grid
   srcGrid=ESMF_GridCreate1PeriDim(minIndex=(/1,1/),maxIndex=(/A_nx,A_ny/),regDecomp=(/petCount,1/), &
                                 coordSys=ESMF_COORDSYS_SPH_DEG, indexflag=ESMF_INDEX_DELOCAL, &
@@ -14653,15 +14668,15 @@ write(*,*) "LOCALRC=",localrc
   ! set coords, interpolated function
   do i1=1,A_nx
      do i2=1,A_ny
-        
+
         ! Set source coordinates as 0 to 360
         x_coord(i1,i2) = REAL(i1-1)*A_dx
         y_coord(i1,i2) = -90. + (REAL(i2-1)*A_dy + 0.5*A_dy)
 
-        ! set src data 
+        ! set src data
         lon = x_coord(i1,i2)
         lat = y_coord(i1,i2)
-     
+
        ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(lon)
         phi = DEG2RAD*(90.-lat)
@@ -14730,15 +14745,15 @@ write(*,*) "LOCALRC=",localrc
   ! set coords, interpolated function
   do i1=1,B_nx
      do i2=1,B_ny
-        
+
         ! Set source coordinates as 0 to 360
         x_coord(i1,i2) = REAL(i1-1)*B_dx
         y_coord(i1,i2) = -90. + (REAL(i2-1)*B_dy + 0.5*B_dy)
 
-        ! set src data 
+        ! set src data
         lon = x_coord(i1,i2)
         lat = y_coord(i1,i2)
-     
+
        ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(lon)
         phi = DEG2RAD*(90.-lat)
@@ -14973,14 +14988,14 @@ write(*,*) "LOCALRC=",localrc
   real(ESMF_KIND_R8) :: dst_dx, dst_dy
 
   real(ESMF_KIND_R8) :: lon, lat, theta, phi, DEG2RAD
-  
+
   integer :: spherical_grid
 
   integer :: localPet, petCount
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -15112,7 +15127,7 @@ write(*,*) "LOCALRC=",localrc
   ! Construct Src Grid
   ! (Get memory and set coords for src)
   do lDE=0,srclocalDECount-1
- 
+
      !! get coord 1
      call ESMF_GridGetCoord(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -15145,12 +15160,12 @@ write(*,*) "LOCALRC=",localrc
         farrayPtrXC(i1,i2) = REAL(i1-1)*src_dx
 
         farrayPtrYC(i1,i2) = -90. + (REAL(i2-1)*src_dy + 0.5*src_dy)
-!        farrayPtrYC(i1,i2) = -90. + REAL(i2-1)*src_dy 
+!        farrayPtrYC(i1,i2) = -90. + REAL(i2-1)*src_dy
 
         ! init exact answer
         lon = farrayPtrXC(i1,i2)
         lat = farrayPtrYC(i1,i2)
-     
+
        ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(lon)
         phi = DEG2RAD*(90.-lat)
@@ -15170,7 +15185,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get memory and set coords for dst
   do lDE=0,dstlocalDECount-1
- 
+
      !! get coords
      call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -15209,11 +15224,11 @@ write(*,*) "LOCALRC=",localrc
         ! Set source coordinates as 0 to 360
         farrayPtrXC(i1,i2) = REAL(i1-1)*dst_dx
         farrayPtrYC(i1,i2) = -90. + (REAL(i2-1)*dst_dy + 0.5*dst_dy)
-  
+
         ! init exact answer
         lon = farrayPtrXC(i1,i2)
         lat = farrayPtrYC(i1,i2)
-     
+
        ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(lon)
         phi = DEG2RAD*(90.-lat)
@@ -15381,12 +15396,12 @@ write(*,*) "LOCALRC=",localrc
   integer dst_nx,dst_ny,dst_nz
   integer num_arrays
   real(ESMF_KIND_R8) :: dx,dy,dz
-  
+
   real(ESMF_KIND_R8) :: dst_minx,dst_miny,dst_minz
   real(ESMF_KIND_R8) :: dst_maxx,dst_maxy,dst_maxz
 
   real(ESMF_KIND_R8) :: x,y,z
-  
+
   integer :: spherical_grid
 
   integer, pointer :: larrayList(:)
@@ -15400,7 +15415,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -15424,7 +15439,7 @@ write(*,*) "LOCALRC=",localrc
     return
   endif
 
-  
+
   ! setup source Mesh
   if (petCount .eq. 1) then
      ! Set number of nodes
@@ -15460,18 +15475,18 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the element id array.
      allocate(elemIds(numElems))
-     elemIds=(/1,2,3,4/) 
+     elemIds=(/1,2,3,4/)
 
      ! Allocate and fill the element topology type array.
      allocate(elemTypes(numElems))
      elemTypes=ESMF_MESHELEMTYPE_TETRA
-                 
+
 
      ! Allocate and fill the element connection type array.
-     ! Note that entries in this array refer to the 
+     ! Note that entries in this array refer to the
      ! positions in the nodeIds, etc. arrays and that
      ! the order and number of entries for each element
-     ! reflects that given in the Mesh options 
+     ! reflects that given in the Mesh options
      ! section for the corresponding entry
      ! in the elemTypes array.
      allocate(elemConn(4*numElems))
@@ -15488,17 +15503,17 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/1,2,4,7/) 
+       nodeIds=(/1,2,4,7/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
        ! number of nodes.
-       allocate(nodeCoords(3*numNodes)) 
+       allocate(nodeCoords(3*numNodes))
        nodeCoords=(/0.0,0.0,0.0, & ! node id 1
                     1.0,0.0,0.0, & ! node id 2
                     0.5,1.0,0.0, & ! node id 4
                     0.5,0.5,1.0/) ! node id 7
- 
+
 
 
        ! Allocate and fill the node owner array.
@@ -15513,7 +15528,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numElems))
-       elemIds=(/1/) 
+       elemIds=(/1/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numElems))
@@ -15530,7 +15545,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/2,3,5,9/) 
+       nodeIds=(/2,3,5,9/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 3D Mesh the size is 2x the
@@ -15554,7 +15569,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numElems))
-       elemIds=(/2/) 
+       elemIds=(/2/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numElems))
@@ -15571,7 +15586,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/2,4,5,8/) 
+        nodeIds=(/2,4,5,8/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 3D Mesh the size is 2x the
@@ -15597,7 +15612,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numElems))
-       elemIds=(/3/) 
+       elemIds=(/3/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numElems))
@@ -15614,7 +15629,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/4,5,6,10/) 
+        nodeIds=(/4,5,6,10/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 3D Mesh the size is 2x the
@@ -15633,13 +15648,13 @@ write(*,*) "LOCALRC=",localrc
                      2, & ! node id 5
                      3, & ! node id 6
                      3/)  ! node id 10
- 
+
        ! Set the number of each type of element, plus the total number.
        numElems=1
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numElems))
-       elemIds=(/4/) 
+       elemIds=(/4/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numElems))
@@ -15675,7 +15690,7 @@ write(*,*) "LOCALRC=",localrc
     return
   endif
 
-  
+
   ! Load test data into the source Field
   ! Should only be 1 localDE
   call ESMF_FieldGet(srcField, computationalLBound=clbnd(1:1), computationalUBound=cubnd(1:1), &
@@ -15736,7 +15751,7 @@ write(*,*) "LOCALRC=",localrc
   dst_minx = 0.0
   dst_miny = 0.0
   dst_minz = 0.0
-  
+
   dst_maxx = 2.0
   dst_maxy = 2.0
   dst_maxz = 1.0
@@ -15801,7 +15816,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get memory and set coords for dst
   do lDE=0,localDECount-1
- 
+
      !! get coords
      call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER_VCENTER, coordDim=1, &
                             farrayPtr=farrayPtrXC, rc=localrc)
@@ -15927,13 +15942,13 @@ write(*,*) "LOCALRC=",localrc
         rc=ESMF_FAILURE
         return
      endif
-   
+
      !! check error
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
      do i3=clbnd(3),cubnd(3)
 
-        !! skip if hasn't been interpolated to 
+        !! skip if hasn't been interpolated to
         !! (All interpolated values should be 20.0 or above)
         if (farrayPtr(i1,i2,i3) <1.0) cycle
 
@@ -16038,7 +16053,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -16073,7 +16088,7 @@ write(*,*) "LOCALRC=",localrc
   ! extra dimensions for field
   num_extra=5
 
-  
+
   ! setup source grid
   srcGrid=ESMF_GridCreate1PeriDim(minIndex=(/1,1/),maxIndex=(/src_nx,src_ny/),regDecomp=(/petCount,1/), &
                                 coordSys=ESMF_COORDSYS_SPH_DEG, indexflag=ESMF_INDEX_GLOBAL, &
@@ -16190,7 +16205,7 @@ write(*,*) "LOCALRC=",localrc
   ! Construct 2D Grid A
   ! (Get memory and set coords for src)
   do lDE=0,localDECount-1
- 
+
      !! get coord 1
      call ESMF_GridGetCoord(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -16229,7 +16244,7 @@ write(*,*) "LOCALRC=",localrc
      do i1=fclbnd(1),fcubnd(1)
      do i2=fclbnd(2),fcubnd(2)
      do i3=fclbnd(3),fcubnd(3)
-     
+
        ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(farrayPtrXC(i2,i3))
         phi = DEG2RAD*(90.-farrayPtrYC(i2,i3))
@@ -16250,7 +16265,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get memory and set coords for dst
   do lDE=0,localDECount-1
- 
+
      !! get coords
      call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -16865,7 +16880,7 @@ write(*,*) "LOCALRC=",localrc
                   write(*,*) i1,i2,"::", &
                      errorfarrayPtr(i1,i2), &
                      "::", farrayPtr(i1,i2),"::",farrayPtr2(i1,i2)
-          correct=.false. 
+          correct=.false.
         endif
 
      enddo
@@ -17378,7 +17393,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! init flags
   correct=.true.
   rc=ESMF_SUCCESS
@@ -17398,7 +17413,7 @@ write(*,*) "LOCALRC=",localrc
 
 
   ! Establish the resolution of the grids
-  ! Make the same resolution, so src and dst 
+  ! Make the same resolution, so src and dst
   ! fall on top of each other
   src_nx = 20
   src_ny = 20
@@ -17413,7 +17428,7 @@ write(*,*) "LOCALRC=",localrc
   dst_dy=180.0/dst_ny
 
 
-  
+
   ! setup source grid
   srcGrid=ESMF_GridCreate1PeriDim(minIndex=(/1,1/),maxIndex=(/src_nx,src_ny/),regDecomp=(/petCount,1/), &
                                 coordSys=ESMF_COORDSYS_SPH_DEG, indexflag=ESMF_INDEX_GLOBAL, &
@@ -17502,7 +17517,7 @@ write(*,*) "LOCALRC=",localrc
   ! Construct 2D Grid A
   ! (Get memory and set coords for src)
   do lDE=0,localDECount-1
- 
+
      !! get coord 1
      call ESMF_GridGetCoord(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -17552,7 +17567,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get memory and set coords for dst
   do lDE=0,localDECount-1
- 
+
      !! get coords
      call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -17772,7 +17787,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! init flags
   correct=.true.
   rc=ESMF_SUCCESS
@@ -17792,7 +17807,7 @@ write(*,*) "LOCALRC=",localrc
 
 
   ! Establish the resolution of the grids
-  ! Make the same resolution, so src and dst 
+  ! Make the same resolution, so src and dst
   ! fall on top of each other
   src_nx = 20
   src_ny = 20
@@ -17807,7 +17822,7 @@ write(*,*) "LOCALRC=",localrc
   dst_dy=180.0/dst_ny
 
 
-  
+
   ! setup source grid
   srcGrid=ESMF_GridCreate1PeriDim(minIndex=(/1,1/),maxIndex=(/src_nx,src_ny/),regDecomp=(/petCount,1/), &
                                 coordSys=ESMF_COORDSYS_SPH_DEG, indexflag=ESMF_INDEX_GLOBAL, &
@@ -17896,7 +17911,7 @@ write(*,*) "LOCALRC=",localrc
   ! Construct 2D Grid A
   ! (Get memory and set coords for src)
   do lDE=0,localDECount-1
- 
+
      !! get coord 1
      call ESMF_GridGetCoord(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -17946,7 +17961,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get memory and set coords for dst
   do lDE=0,localDECount-1
- 
+
      !! get coords
      call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -18174,7 +18189,7 @@ write(*,*) "LOCALRC=",localrc
   integer :: num_unmappedDstList
   integer :: seqInd,i
   logical :: found
-  
+
   ! init flags
   correct=.true.
   rc=ESMF_SUCCESS
@@ -18194,7 +18209,7 @@ write(*,*) "LOCALRC=",localrc
 
 
   ! Establish the resolution of the grids
-  ! Make the same resolution, so src and dst 
+  ! Make the same resolution, so src and dst
   ! fall on top of each other
   src_nx = 27
   src_ny = 27
@@ -18209,7 +18224,7 @@ write(*,*) "LOCALRC=",localrc
   dst_dy=180.0/dst_ny
 
 
-  
+
   ! setup source grid
   srcGrid=ESMF_GridCreate1PeriDim(minIndex=(/1,1/),maxIndex=(/src_nx,src_ny/),regDecomp=(/petCount,1/), &
                                 coordSys=ESMF_COORDSYS_SPH_DEG, indexflag=ESMF_INDEX_GLOBAL, &
@@ -18307,7 +18322,7 @@ write(*,*) "LOCALRC=",localrc
   ! Construct 2D Src Grid
   ! (Get memory and set coords for src)
   do lDE=0,localDECount-1
- 
+
      !! get coord 1
      call ESMF_GridGetCoord(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -18373,7 +18388,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get memory and set coords for dst
   do lDE=0,localDECount-1
- 
+
      !! get coords
      call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -18525,7 +18540,7 @@ write(*,*) "LOCALRC=",localrc
   if (found) then
      correct=.false.
   endif
-  
+
 
   ! Destroy the Fields
    call ESMF_FieldDestroy(srcField, rc=localrc)
@@ -18598,9 +18613,9 @@ write(*,*) "LOCALRC=",localrc
   real(ESMF_KIND_R8) :: coord(2)
   character(len=ESMF_MAXSTR) :: string
   real(ESMF_KIND_R8) :: dx,dy
-  
+
   real(ESMF_KIND_R8) :: x,y
-  
+
   integer :: spherical_grid
 
   integer, pointer :: larrayList(:)
@@ -18614,7 +18629,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -18646,7 +18661,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the node id array.
      allocate(nodeIds(numNodes))
-     nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+     nodeIds=(/1,2,3,4,5,6,7,8,9/)
 
      ! Allocate and fill node coordinate array.
      ! Since this is a 2D Mesh the size is 2x the
@@ -18674,7 +18689,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the element id array.
      allocate(elemIds(numTotElems))
-     elemIds=(/1,2,3,4,5/) 
+     elemIds=(/1,2,3,4,5/)
 
 
      ! Allocate and fill the element topology type array.
@@ -18687,10 +18702,10 @@ write(*,*) "LOCALRC=",localrc
 
 
      ! Allocate and fill the element connection type array.
-     ! Note that entries in this array refer to the 
+     ! Note that entries in this array refer to the
      ! positions in the nodeIds, etc. arrays and that
      ! the order and number of entries for each element
-     ! reflects that given in the Mesh options 
+     ! reflects that given in the Mesh options
      ! section for the corresponding entry
      ! in the elemTypes array.
      allocate(elemConn(4*numQuadElems+3*numTriElems))
@@ -18709,7 +18724,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/1,2,4,5/) 
+       nodeIds=(/1,2,4,5/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -18734,7 +18749,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/1/) 
+       elemIds=(/1/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -18751,7 +18766,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/2,3,5,6/) 
+       nodeIds=(/2,3,5,6/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -18776,7 +18791,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/2,3/) 
+       elemIds=(/2,3/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -18794,7 +18809,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/4,5,7,8/) 
+        nodeIds=(/4,5,7,8/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -18820,7 +18835,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/4/) 
+        elemIds=(/4/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -18836,7 +18851,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/5,6,8,9/) 
+        nodeIds=(/5,6,8,9/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -18853,7 +18868,7 @@ write(*,*) "LOCALRC=",localrc
                      1, & ! node id 6
                      2, & ! node id 8
                      3/)  ! node id 9
- 
+
         ! Set the number of each type of element, plus the total number.
         numQuadElems=1
         numTriElems=0
@@ -18861,7 +18876,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/5/)  
+        elemIds=(/5/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -18894,7 +18909,7 @@ write(*,*) "LOCALRC=",localrc
     return
   endif
 
-  
+
   ! Load test data into the source Field
   ! Should only be 1 localDE
   call ESMF_FieldGet(srcField, 0, farrayPtr1D,  rc=localrc)
@@ -18940,7 +18955,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the node id array.
      allocate(nodeIds(numNodes))
-     nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+     nodeIds=(/1,2,3,4,5,6,7,8,9/)
 
      ! Allocate and fill node coordinate array.
      ! Since this is a 2D Mesh the size is 2x the
@@ -18968,7 +18983,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the element id array.
      allocate(elemIds(numTotElems))
-     elemIds=(/1,2,3,4,5/) 
+     elemIds=(/1,2,3,4,5/)
 
 
      ! Allocate and fill the element topology type array.
@@ -18981,10 +18996,10 @@ write(*,*) "LOCALRC=",localrc
 
 
      ! Allocate and fill the element connection type array.
-     ! Note that entries in this array refer to the 
+     ! Note that entries in this array refer to the
      ! positions in the nodeIds, etc. arrays and that
      ! the order and number of entries for each element
-     ! reflects that given in the Mesh options 
+     ! reflects that given in the Mesh options
      ! section for the corresponding entry
      ! in the elemTypes array.
      allocate(elemConn(4*numQuadElems+3*numTriElems))
@@ -19003,7 +19018,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/1,2,4,5/) 
+       nodeIds=(/1,2,4,5/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -19028,7 +19043,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/1/) 
+       elemIds=(/1/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -19045,7 +19060,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/2,3,5,6/) 
+       nodeIds=(/2,3,5,6/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -19070,7 +19085,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/2,3/) 
+       elemIds=(/2,3/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -19088,7 +19103,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/4,5,7,8/) 
+        nodeIds=(/4,5,7,8/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -19114,7 +19129,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/4/) 
+        elemIds=(/4/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -19130,7 +19145,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/5,6,8,9/) 
+        nodeIds=(/5,6,8,9/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -19147,7 +19162,7 @@ write(*,*) "LOCALRC=",localrc
                      1, & ! node id 6
                      2, & ! node id 8
                      3/)  ! node id 9
- 
+
         ! Set the number of each type of element, plus the total number.
         numQuadElems=1
         numTriElems=0
@@ -19155,7 +19170,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/5/)  
+        elemIds=(/5/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -19179,7 +19194,7 @@ write(*,*) "LOCALRC=",localrc
          return
      endif
 
-  
+
   ! Create dest field
   call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
 
@@ -19190,7 +19205,7 @@ write(*,*) "LOCALRC=",localrc
     return
   endif
 
-  
+
   ! clear destination Field
   ! Should only be 1 localDE
   call ESMF_FieldGet(dstField, 0, farrayPtr1D,  rc=localrc)
@@ -19338,9 +19353,9 @@ write(*,*) "LOCALRC=",localrc
   real(ESMF_KIND_R8) :: coord(2)
   character(len=ESMF_MAXSTR) :: string
   real(ESMF_KIND_R8) :: dx,dy
-  
+
   real(ESMF_KIND_R8) :: x,y
-  
+
   integer :: spherical_grid
 
   integer, pointer :: larrayList(:)
@@ -19354,7 +19369,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -19386,7 +19401,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the node id array.
      allocate(nodeIds(numNodes))
-     nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+     nodeIds=(/1,2,3,4,5,6,7,8,9/)
 
      ! Allocate and fill node coordinate array.
      ! Since this is a 2D Mesh the size is 2x the
@@ -19414,7 +19429,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the element id array.
      allocate(elemIds(numTotElems))
-     elemIds=(/1,2,3,4,5/) 
+     elemIds=(/1,2,3,4,5/)
 
 
      ! Allocate and fill the element topology type array.
@@ -19427,10 +19442,10 @@ write(*,*) "LOCALRC=",localrc
 
 
      ! Allocate and fill the element connection type array.
-     ! Note that entries in this array refer to the 
+     ! Note that entries in this array refer to the
      ! positions in the nodeIds, etc. arrays and that
      ! the order and number of entries for each element
-     ! reflects that given in the Mesh options 
+     ! reflects that given in the Mesh options
      ! section for the corresponding entry
      ! in the elemTypes array.
      allocate(elemConn(4*numQuadElems+3*numTriElems))
@@ -19449,7 +19464,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/1,2,4,5/) 
+       nodeIds=(/1,2,4,5/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -19474,7 +19489,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/1/) 
+       elemIds=(/1/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -19491,7 +19506,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/2,3,5,6/) 
+       nodeIds=(/2,3,5,6/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -19516,7 +19531,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/2,3/) 
+       elemIds=(/2,3/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -19534,7 +19549,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/4,5,7,8/) 
+        nodeIds=(/4,5,7,8/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -19560,7 +19575,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/4/) 
+        elemIds=(/4/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -19576,7 +19591,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/5,6,8,9/) 
+        nodeIds=(/5,6,8,9/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -19593,7 +19608,7 @@ write(*,*) "LOCALRC=",localrc
                      1, & ! node id 6
                      2, & ! node id 8
                      3/)  ! node id 9
- 
+
         ! Set the number of each type of element, plus the total number.
         numQuadElems=1
         numTriElems=0
@@ -19601,7 +19616,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/5/)  
+        elemIds=(/5/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -19634,7 +19649,7 @@ write(*,*) "LOCALRC=",localrc
     return
   endif
 
-  
+
   ! Load test data into the source Field
   ! Should only be 1 localDE
   call ESMF_FieldGet(srcField, 0, farrayPtr1D,  rc=localrc)
@@ -19680,7 +19695,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the node id array.
      allocate(nodeIds(numNodes))
-     nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+     nodeIds=(/1,2,3,4,5,6,7,8,9/)
 
      ! Allocate and fill node coordinate array.
      ! Since this is a 2D Mesh the size is 2x the
@@ -19708,7 +19723,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the element id array.
      allocate(elemIds(numTotElems))
-     elemIds=(/1,2,3,4,5/) 
+     elemIds=(/1,2,3,4,5/)
 
 
      ! Allocate and fill the element topology type array.
@@ -19721,10 +19736,10 @@ write(*,*) "LOCALRC=",localrc
 
 
      ! Allocate and fill the element connection type array.
-     ! Note that entries in this array refer to the 
+     ! Note that entries in this array refer to the
      ! positions in the nodeIds, etc. arrays and that
      ! the order and number of entries for each element
-     ! reflects that given in the Mesh options 
+     ! reflects that given in the Mesh options
      ! section for the corresponding entry
      ! in the elemTypes array.
      allocate(elemConn(4*numQuadElems+3*numTriElems))
@@ -19743,7 +19758,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/1,2,4,5/) 
+       nodeIds=(/1,2,4,5/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -19768,7 +19783,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/1/) 
+       elemIds=(/1/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -19785,7 +19800,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/2,3,5,6/) 
+       nodeIds=(/2,3,5,6/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -19810,7 +19825,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/2,3/) 
+       elemIds=(/2,3/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -19828,7 +19843,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/4,5,7,8/) 
+        nodeIds=(/4,5,7,8/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -19854,7 +19869,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/4/) 
+        elemIds=(/4/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -19870,7 +19885,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/5,6,8,9/) 
+        nodeIds=(/5,6,8,9/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -19887,7 +19902,7 @@ write(*,*) "LOCALRC=",localrc
                      1, & ! node id 6
                      2, & ! node id 8
                      3/)  ! node id 9
- 
+
         ! Set the number of each type of element, plus the total number.
         numQuadElems=1
         numTriElems=0
@@ -19895,7 +19910,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/5/)  
+        elemIds=(/5/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -19919,7 +19934,7 @@ write(*,*) "LOCALRC=",localrc
          return
      endif
 
-  
+
   ! Create dest field
   call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
 
@@ -19930,7 +19945,7 @@ write(*,*) "LOCALRC=",localrc
     return
   endif
 
-  
+
   ! clear destination Field
   ! Should only be 1 localDE
   call ESMF_FieldGet(dstField, 0, farrayPtr1D,  rc=localrc)
@@ -20105,7 +20120,7 @@ write(*,*) "LOCALRC=",localrc
   real(ESMF_KIND_R8) :: dst_dx, dst_dy
 
   real(ESMF_KIND_R8) :: lon, lat, theta, phi, DEG2RAD
-  
+
   integer :: spherical_grid
 
   integer :: localPet, petCount
@@ -20122,7 +20137,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -20146,7 +20161,7 @@ write(*,*) "LOCALRC=",localrc
 
   src_minx(1) = 0.0
   src_miny(1) = 0.0
-  
+
   src_maxx(1) = 10.0
   src_maxy(1) = 10.0
 
@@ -20156,18 +20171,18 @@ write(*,*) "LOCALRC=",localrc
 
   src_minx(2) = 11.0
   src_miny(2) = 0.0
-  
+
   src_maxx(2) = 21.0
   src_maxy(2) = 10.0
 
   ! Set dst coordinates and resolution
-  ! dst grid is set so that it fits entirely within src grid 
+  ! dst grid is set so that it fits entirely within src grid
   dst_nx = 20
   dst_ny = 20
 
   dst_minx = 0.5
   dst_miny = 0.5
-  
+
   dst_maxx = 20.5
   dst_maxy = 9.5
 
@@ -20238,7 +20253,7 @@ write(*,*) "LOCALRC=",localrc
   if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
- 
+
 
    srcField = ESMF_FieldCreate(srcGrid, arrayspec, &
                          staggerloc=ESMF_STAGGERLOC_CENTER, name="source", rc=localrc)
@@ -20291,13 +20306,13 @@ write(*,*) "LOCALRC=",localrc
   if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
- 
+
   call ESMF_DistgridGet(srcDistgrid, delayout=delayout, rc=localrc)
   if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-  allocate(localDEtoDEMap(srclocalDECount))  
+  allocate(localDEtoDEMap(srclocalDECount))
 
   call ESMF_DELayoutGet(delayout, deCount=deCount, localDeToDeMap=localDeToDEMap, &
                         rc=localrc)
@@ -20305,7 +20320,7 @@ write(*,*) "LOCALRC=",localrc
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-  allocate(deToTileMap(deCount))  
+  allocate(deToTileMap(deCount))
 
 
   call ESMF_DistgridGet(srcDistgrid, deToTileMap=detoTileMap, rc=localrc)
@@ -20317,7 +20332,7 @@ write(*,*) "LOCALRC=",localrc
   ! Construct Src Grid
   ! (Get memory and set coords for src)
   do lDE=0,srclocalDECount-1
- 
+
      !! get coord 1
      call ESMF_GridGetCoord(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -20340,7 +20355,7 @@ write(*,*) "LOCALRC=",localrc
 
 
      !! Get Tile from localDE
-     tile=deToTileMap(localDEtoDEMap(lDE+1)+1)  
+     tile=deToTileMap(localDEtoDEMap(lDE+1)+1)
 
 
      !! Set values based on tile
@@ -20380,7 +20395,7 @@ write(*,*) "LOCALRC=",localrc
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 
-   return 
+   return
 #endif
 
 
@@ -20396,7 +20411,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get memory and set coords for dst
   do lDE=0,dstlocalDECount-1
- 
+
      !! get coords
      call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -20604,9 +20619,9 @@ write(*,*) "LOCALRC=",localrc
   real(ESMF_KIND_R8) :: coord(2)
   character(len=ESMF_MAXSTR) :: string
   real(ESMF_KIND_R8) :: dx,dy
-  
+
   real(ESMF_KIND_R8) :: x,y
-  
+
   integer :: spherical_grid
 
   integer, pointer :: larrayList(:)
@@ -20621,7 +20636,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -20653,7 +20668,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the node id array.
      allocate(nodeIds(numNodes))
-     nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+     nodeIds=(/1,2,3,4,5,6,7,8,9/)
 
      ! Allocate and fill node coordinate array.
      ! Since this is a 2D Mesh the size is 2x the
@@ -20677,7 +20692,7 @@ write(*,*) "LOCALRC=",localrc
      ! Allocate and fill the node mask array.
      ! Mask out node 9
      allocate(nodeMask(numNodes))
-     nodeMask=(/0,0,0,0,0,0,0,0,1/) 
+     nodeMask=(/0,0,0,0,0,0,0,0,1/)
 
 
      ! Set the number of each type of element, plus the total number.
@@ -20687,7 +20702,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the element id array.
      allocate(elemIds(numTotElems))
-     elemIds=(/1,2,3,4,5/) 
+     elemIds=(/1,2,3,4,5/)
 
 
      ! Allocate and fill the element topology type array.
@@ -20700,10 +20715,10 @@ write(*,*) "LOCALRC=",localrc
 
 
      ! Allocate and fill the element connection type array.
-     ! Note that entries in this array refer to the 
+     ! Note that entries in this array refer to the
      ! positions in the nodeIds, etc. arrays and that
      ! the order and number of entries for each element
-     ! reflects that given in the Mesh options 
+     ! reflects that given in the Mesh options
      ! section for the corresponding entry
      ! in the elemTypes array.
      allocate(elemConn(4*numQuadElems+3*numTriElems))
@@ -20722,7 +20737,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/1,2,4,5/) 
+       nodeIds=(/1,2,4,5/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -20754,7 +20769,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/1/) 
+       elemIds=(/1/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -20771,7 +20786,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/2,3,5,6/) 
+       nodeIds=(/2,3,5,6/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -20803,7 +20818,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/2,3/) 
+       elemIds=(/2,3/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -20821,7 +20836,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/4,5,7,8/) 
+        nodeIds=(/4,5,7,8/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -20853,7 +20868,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/4/) 
+        elemIds=(/4/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -20869,7 +20884,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/5,6,8,9/) 
+        nodeIds=(/5,6,8,9/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -20893,7 +20908,7 @@ write(*,*) "LOCALRC=",localrc
                    0, & ! node id 6
                    0, & ! node id 8
                    1/)  ! node id 9
- 
+
         ! Set the number of each type of element, plus the total number.
         numQuadElems=1
         numTriElems=0
@@ -20901,7 +20916,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/5/)  
+        elemIds=(/5/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -20935,7 +20950,7 @@ write(*,*) "LOCALRC=",localrc
     return
   endif
 
-  
+
   ! Load test data into the source Field
   ! Should only be 1 localDE
   call ESMF_FieldGet(srcField, 0, farrayPtr1D,  rc=localrc)
@@ -20987,7 +21002,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the node id array.
      allocate(nodeIds(numNodes))
-     nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+     nodeIds=(/1,2,3,4,5,6,7,8,9/)
 
      ! Allocate and fill node coordinate array.
      ! Since this is a 2D Mesh the size is 2x the
@@ -21012,7 +21027,7 @@ write(*,*) "LOCALRC=",localrc
      ! (Mask point sticking out of src grid and point
      !  uncovered by masked src point)
      allocate(nodeMask(numNodes))
-     nodeMask=(/2,0,0,0,0,0,0,0,2/) 
+     nodeMask=(/2,0,0,0,0,0,0,0,2/)
 
      ! Set the number of each type of element, plus the total number.
      numQuadElems=3
@@ -21021,7 +21036,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the element id array.
      allocate(elemIds(numTotElems))
-     elemIds=(/1,2,3,4,5/) 
+     elemIds=(/1,2,3,4,5/)
 
 
      ! Allocate and fill the element topology type array.
@@ -21034,10 +21049,10 @@ write(*,*) "LOCALRC=",localrc
 
 
      ! Allocate and fill the element connection type array.
-     ! Note that entries in this array refer to the 
+     ! Note that entries in this array refer to the
      ! positions in the nodeIds, etc. arrays and that
      ! the order and number of entries for each element
-     ! reflects that given in the Mesh options 
+     ! reflects that given in the Mesh options
      ! section for the corresponding entry
      ! in the elemTypes array.
      allocate(elemConn(4*numQuadElems+3*numTriElems))
@@ -21056,7 +21071,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/1,2,4,5/) 
+       nodeIds=(/1,2,4,5/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -21088,7 +21103,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/1/) 
+       elemIds=(/1/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -21105,7 +21120,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/2,3,5,6/) 
+       nodeIds=(/2,3,5,6/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -21137,7 +21152,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/2,3/) 
+       elemIds=(/2,3/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -21155,7 +21170,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/4,5,7,8/) 
+        nodeIds=(/4,5,7,8/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -21187,7 +21202,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/4/) 
+        elemIds=(/4/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -21203,7 +21218,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/5,6,8,9/) 
+        nodeIds=(/5,6,8,9/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -21236,7 +21251,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/5/)  
+        elemIds=(/5/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -21261,7 +21276,7 @@ write(*,*) "LOCALRC=",localrc
          return
      endif
 
-  
+
   ! Create dest field
   call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
 
@@ -21272,7 +21287,7 @@ write(*,*) "LOCALRC=",localrc
     return
   endif
 
-  
+
   ! clear destination Field
   ! Should only be 1 localDE
   call ESMF_FieldGet(dstField, 0, farrayPtr1D,  rc=localrc)
@@ -21330,7 +21345,7 @@ write(*,*) "LOCALRC=",localrc
      if (nodeOwners(i1) .eq. localPet) then
 
         ! not masked
-        if (nodeMask(i1) .eq. 0) then  
+        if (nodeMask(i1) .eq. 0) then
 
            ! Get coordinates
            x=nodeCoords(2*i1-1)
@@ -21403,14 +21418,14 @@ write(*,*) "LOCALRC=",localrc
 
   subroutine test_regridSrcHoles(rc)
     integer, intent(out)  :: rc
-    
+
     integer,  parameter           :: iMax = 200
     integer,  parameter           :: jMax = 100
     real(ESMF_KIND_R8), parameter :: lonMinS = 0.d0, lonMaxS = 210.d0
     real(ESMF_KIND_R8), parameter :: latMinS = -40.d0, latMaxS = 50.d0
     real(ESMF_KIND_R8), parameter :: lonMinD = 10.d0, lonMaxD = 200.d0
     real(ESMF_KIND_R8), parameter :: latMinD = -30.d0, latMaxD = 40.d0
-    
+
     type(ESMF_VM)         :: vm
     integer               :: petCount, localPet
     integer               :: i, j
@@ -21419,23 +21434,23 @@ write(*,*) "LOCALRC=",localrc
     type(ESMF_Grid)       :: srcGrid, dstGrid
     type(ESMF_Field)      :: srcField, dstField
     real(ESMF_KIND_R8), pointer :: fptr(:,:)
-    
+
     type(ESMF_RouteHandle):: rh
-    
+
     rc = ESMF_SUCCESS
-    
+
     call ESMF_VMGetCurrent(vm, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILE)) return ! bail out
-    
+
     call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILE)) return ! bail out
-      
+
     ! --- set up the source side ---
 
     allocate(deBlockList(2,2,0:petCount-1)) ! dimCount, 2, deCount
-    
+
     ! Set up deBlockList that covers the (1...iMax) x (1...jMax) index space
     ! by a row decomposition along j.
     do i=0, petCount-1
@@ -21446,7 +21461,7 @@ write(*,*) "LOCALRC=",localrc
         deBlockList(:,2,i) = (/iMax,(i+1)*jMax/petCount/) ! maxIndex DE i
       endif
     enddo
-    
+
 #if 0
     ! Modify the deBlockList to have holes in the index space coverage.
     do i=0, petCount-1
@@ -21501,15 +21516,15 @@ write(*,*) "LOCALRC=",localrc
       fptr(i,j) = (latMaxS-latMinS)/real(jMax) * (j-1) + latMinS
     enddo
     enddo
-    
+
     ! Create the srcField.
     srcField =  ESMF_FieldCreate(srcGrid, typekind=ESMF_TYPEKIND_R8, &
       indexflag=ESMF_INDEX_GLOBAL, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILE)) return ! bail out
-    
+
     ! --- set up the destination side ---
-    
+
     ! Create the dstDistGrid with default decomposition (no holes!).
     dstDistGrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/iMax,jMax/),&
       indexflag=ESMF_INDEX_GLOBAL, rc=rc)
@@ -21548,21 +21563,21 @@ write(*,*) "LOCALRC=",localrc
       fptr(i,j) = (latMaxD-latMinD)/real(jMax) * (j-1) + latMinD
     enddo
     enddo
-    
+
     ! Create the dstField.
     dstField =  ESMF_FieldCreate(dstGrid, typekind=ESMF_TYPEKIND_R8, &
       indexflag=ESMF_INDEX_GLOBAL, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILE)) return ! bail out
-    
+
     ! --- Regridding ---
-    
+
     ! Pre-compute the regrid RouteHandle.
     call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
       routehandle=rh, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILE)) return ! bail out
-    
+
     !TODO: execute the Regrid and validate the result.
     !TODO: right now it doesn't even make it that far for srcDistGrid w/ holes
 
@@ -21606,7 +21621,7 @@ write(*,*) "LOCALRC=",localrc
   real(ESMF_KIND_R8) :: dst_dx, dst_dy
 
   real(ESMF_KIND_R8) :: lon, lat, theta, phi, DEG2RAD
-  real(ESMF_KIND_R8) :: err, relErr,maxRelErr  
+  real(ESMF_KIND_R8) :: err, relErr,maxRelErr
 
   integer :: spherical_grid
 
@@ -21614,7 +21629,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -21760,7 +21775,7 @@ write(*,*) "LOCALRC=",localrc
   ! Construct Src Grid
   ! (Get memory and set coords for src)
   do lDE=0, srclocalDECount-1
- 
+
      !! get coord 1
      call ESMF_GridGetCoord(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -21796,7 +21811,7 @@ write(*,*) "LOCALRC=",localrc
         ! init exact answer
         lon = farrayPtrXC(i1,i2)
         lat = farrayPtrYC(i1,i2)
-     
+
        ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(lon)
         phi = DEG2RAD*(90.-lat)
@@ -21816,7 +21831,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get memory and set coords for dst
   do lDE=0, dstlocalDECount-1
- 
+
      !! get coords
      call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -21855,11 +21870,11 @@ write(*,*) "LOCALRC=",localrc
         ! Set source coordinates as 0 to 360
         farrayPtrXC(i1,i2) = REAL(i1-1)*dst_dx
         farrayPtrYC(i1,i2) = -90. + (REAL(i2-1)*dst_dy + 0.5*dst_dy)
-  
+
         ! init exact answer
         lon = farrayPtrXC(i1,i2)
         lat = farrayPtrYC(i1,i2)
-     
+
        ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(lon)
         phi = DEG2RAD*(90.-lat)
@@ -21950,13 +21965,13 @@ write(*,*) "LOCALRC=",localrc
         else
           relErr=err
         endif
-        
+
         ! Calc Max
-        if (relErr > maxRelErr) maxRelErr=relErr 
+        if (relErr > maxRelErr) maxRelErr=relErr
 
         ! Set error in field
-        errfarrayPtr(i1,i2)=relErr 
-        
+        errfarrayPtr(i1,i2)=relErr
+
         ! Return error if relative error too big
         if (relErr > errTol) then
             correct=.false.
@@ -22049,9 +22064,9 @@ write(*,*) "LOCALRC=",localrc
   real(ESMF_KIND_R8) :: coord(2)
   character(len=ESMF_MAXSTR) :: string
   real(ESMF_KIND_R8) :: dx,dy
-  
+
   real(ESMF_KIND_R8) :: x,y
-  
+
   integer :: spherical_grid
 
   integer, pointer :: larrayList(:)
@@ -22067,7 +22082,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -22093,7 +22108,7 @@ write(*,*) "LOCALRC=",localrc
 
 !             Src Mesh
 !
-!  2.5        8        10 --------11   
+!  2.5        8        10 --------11
 !          /     \   /            |
 !  2.1   7         9              12
 !        |         |      5       /
@@ -22105,8 +22120,8 @@ write(*,*) "LOCALRC=",localrc
 !        |         |  2   \  |
 ! -0.1   1 ------- 2 ------- 3
 !
-!      -0.1       1.0       2.1   2.5 
-! 
+!      -0.1       1.0       2.1   2.5
+!
 !        Node Id labels at corners
 !       Element Id labels in centers
 
@@ -22118,7 +22133,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the node id array.
      allocate(nodeIds(numNodes))
-     nodeIds=(/1,2,3,4,5,6,7,8,9,10,11,12/) 
+     nodeIds=(/1,2,3,4,5,6,7,8,9,10,11,12/)
 
      ! Allocate and fill node coordinate array.
      ! Since this is a 2D Mesh the size is 2x the
@@ -22153,7 +22168,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the element id array.
      allocate(elemIds(numTotElems))
-     elemIds=(/1,2,3,4,5/) 
+     elemIds=(/1,2,3,4,5/)
 
 
      ! Allocate and fill the element topology type array.
@@ -22166,10 +22181,10 @@ write(*,*) "LOCALRC=",localrc
 
 
      ! Allocate and fill the element connection type array.
-     ! Note that entries in this array refer to the 
+     ! Note that entries in this array refer to the
      ! positions in the nodeIds, etc. arrays and that
      ! the order and number of entries for each element
-     ! reflects that given in the Mesh options 
+     ! reflects that given in the Mesh options
      ! section for the corresponding entry
      ! in the elemTypes array.
      allocate(elemConn(numElemConn))
@@ -22187,7 +22202,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/1,2,4,5/) 
+       nodeIds=(/1,2,4,5/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -22213,10 +22228,10 @@ write(*,*) "LOCALRC=",localrc
        numTotElems=numTriElems+numQuadElems+numPentElems+numHexElems
        numElemConn=3*numTriElems+4*numQuadElems+ &
             5*numPentElems+6*numHexElems
-       
+
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/1/) 
+       elemIds=(/1/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -22233,7 +22248,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/2,3,5,6/) 
+       nodeIds=(/2,3,5,6/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -22262,7 +22277,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/2,3/) 
+       elemIds=(/2,3/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -22280,7 +22295,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/4,5,7,8,9/) 
+        nodeIds=(/4,5,7,8,9/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -22312,7 +22327,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/4/) 
+        elemIds=(/4/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -22328,7 +22343,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/5,6,9,10,11,12/) 
+        nodeIds=(/5,6,9,10,11,12/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -22349,7 +22364,7 @@ write(*,*) "LOCALRC=",localrc
                      3, & ! node id 10
                      3, & ! node id 11
                      3/)  ! node id 12
- 
+
 
         ! Set the number of each type of element, plus tot and num conn.
         numQuadElems=0
@@ -22363,7 +22378,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/5/)  
+        elemIds=(/5/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -22396,7 +22411,7 @@ write(*,*) "LOCALRC=",localrc
     return
   endif
 
-  
+
   ! Load test data into the source Field
   ! Should only be 1 localDE
   call ESMF_FieldGet(srcField, 0, farrayPtr1D,  rc=localrc)
@@ -22446,8 +22461,8 @@ write(*,*) "LOCALRC=",localrc
 !        |         |  2   \  |
 !  0.0   1 ------- 2 ------- 3
 !
-!       0.0       1.0        2.0 
-! 
+!       0.0       1.0        2.0
+!
 !        Node Id labels at corners
 !       Element Id labels in centers
 
@@ -22458,7 +22473,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the node id array.
      allocate(nodeIds(numNodes))
-     nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+     nodeIds=(/1,2,3,4,5,6,7,8,9/)
 
      ! Allocate and fill node coordinate array.
      ! Since this is a 2D Mesh the size is 2x the
@@ -22486,7 +22501,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the element id array.
      allocate(elemIds(numTotElems))
-     elemIds=(/1,2,3,4,5/) 
+     elemIds=(/1,2,3,4,5/)
 
 
      ! Allocate and fill the element topology type array.
@@ -22499,10 +22514,10 @@ write(*,*) "LOCALRC=",localrc
 
 
      ! Allocate and fill the element connection type array.
-     ! Note that entries in this array refer to the 
+     ! Note that entries in this array refer to the
      ! positions in the nodeIds, etc. arrays and that
      ! the order and number of entries for each element
-     ! reflects that given in the Mesh options 
+     ! reflects that given in the Mesh options
      ! section for the corresponding entry
      ! in the elemTypes array.
      allocate(elemConn(4*numQuadElems+3*numTriElems))
@@ -22521,7 +22536,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/1,2,4,5/) 
+       nodeIds=(/1,2,4,5/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -22546,7 +22561,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/1/) 
+       elemIds=(/1/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -22563,7 +22578,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/2,3,5,6/) 
+       nodeIds=(/2,3,5,6/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -22588,7 +22603,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/2,3/) 
+       elemIds=(/2,3/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -22606,7 +22621,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/4,5,7,8/) 
+        nodeIds=(/4,5,7,8/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -22632,7 +22647,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/4/) 
+        elemIds=(/4/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -22648,7 +22663,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/5,6,8,9/) 
+        nodeIds=(/5,6,8,9/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -22665,7 +22680,7 @@ write(*,*) "LOCALRC=",localrc
                      1, & ! node id 6
                      2, & ! node id 8
                      3/)  ! node id 9
- 
+
         ! Set the number of each type of element, plus the total number.
         numQuadElems=1
         numTriElems=0
@@ -22673,7 +22688,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/5/)  
+        elemIds=(/5/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -22697,7 +22712,7 @@ write(*,*) "LOCALRC=",localrc
          return
      endif
 
-  
+
   ! Create dest field
   call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
 
@@ -22708,7 +22723,7 @@ write(*,*) "LOCALRC=",localrc
     return
   endif
 
-  
+
   ! clear destination Field
   ! Should only be 1 localDE
   call ESMF_FieldGet(dstField, 0, farrayPtr1D,  rc=localrc)
@@ -22859,9 +22874,9 @@ write(*,*) "LOCALRC=",localrc
   real(ESMF_KIND_R8) :: relErr
   character(len=ESMF_MAXSTR) :: string
   real(ESMF_KIND_R8) :: dx,dy
-  
+
   real(ESMF_KIND_R8) :: x,y
-  
+
   integer :: spherical_grid
 
   integer, pointer :: larrayList(:)
@@ -22877,7 +22892,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -22903,11 +22918,11 @@ write(*,*) "LOCALRC=",localrc
 
    !!!! Create Src Mesh !!!!
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  ! 
-  ! Creates the following mesh on 
-  ! 1 or 4 PETs. Returns an error 
+  !
+  ! Creates the following mesh on
+  ! 1 or 4 PETs. Returns an error
   ! if run on other than 1 or 4 PETs
-  ! 
+  !
   !                     Mesh Ids
   !
   !   3.0   13 ------ 14 ------- 15 ------- 16
@@ -22928,9 +22943,9 @@ write(*,*) "LOCALRC=",localrc
   !
   !               Node Ids at corners
   !              Element Ids in centers
-  ! 
-  !!!!! 
-  ! 
+  !
+  !!!!!
+  !
   ! The owners for 1 PET are all Pet 0.
   ! The owners for 4 PETs are as follows:
   !
@@ -22954,10 +22969,10 @@ write(*,*) "LOCALRC=",localrc
   !
   !               Node Owners at corners
   !              Element Owners in centers
-  ! 
+  !
 
 
-  ! Setup mesh info depending on the 
+  ! Setup mesh info depending on the
   ! number of PETs
   if (petCount .eq. 1) then
 
@@ -22968,8 +22983,8 @@ write(*,*) "LOCALRC=",localrc
      allocate(nodeIds(numNodes))
      nodeIds=(/1,2,3,4,5,6,7,8, &
                9,10,11,12,13,14,&
-               15,16/) 
-     
+               15,16/)
+
      !! node Coords
      allocate(nodeCoords(numNodes*2))
      nodeCoords=(/0.0,0.0, & ! 1
@@ -22988,7 +23003,7 @@ write(*,*) "LOCALRC=",localrc
                  1.0,3.0, &  ! 14
                  2.0,3.0, &  ! 15
                  3.0,3.0 /)  ! 16
- 
+
 
       !! node owners
       allocate(nodeOwners(numNodes))
@@ -23003,11 +23018,11 @@ write(*,*) "LOCALRC=",localrc
 
       !! elem ids
       allocate(elemIds(numElems))
-      elemIds=(/1,2,3,4,5,6,7,8,9,10/) 
+      elemIds=(/1,2,3,4,5,6,7,8,9,10/)
 
       !! Masking
       allocate(elemMasks(numElems))
-      elemMasks=(/1,0,0,0,0,0,0,0,0,0/) 
+      elemMasks=(/1,0,0,0,0,0,0,0,0,0/)
 
       !! elem types
       allocate(elemTypes(numElems))
@@ -23058,13 +23073,13 @@ write(*,*) "LOCALRC=",localrc
      !! node ids
      allocate(nodeIds(numNodes))
      nodeIds=(/1,2,5,6/)
-     
+
      !! node Coords
      allocate(nodeCoords(numNodes*2))
      nodeCoords=(/0.0,0.0, & ! 1
                  1.0,0.0, &  ! 2
                  0.0,1.0, &  ! 5
-                 1.0,1.0 /)  ! 6 
+                 1.0,1.0 /)  ! 6
 
       !! node owners
       allocate(nodeOwners(numNodes))
@@ -23078,11 +23093,11 @@ write(*,*) "LOCALRC=",localrc
 
       !! elem ids
       allocate(elemIds(numElems))
-      elemIds=(/1/) 
+      elemIds=(/1/)
 
       !! elem masking
       allocate(elemMasks(numElems))
-      elemMasks=(/1/) 
+      elemMasks=(/1/)
 
 
       !! elem types
@@ -23105,7 +23120,7 @@ write(*,*) "LOCALRC=",localrc
      !! node ids
      allocate(nodeIds(numNodes))
      nodeIds=(/2,3,4,6,7,8/)
-     
+
      !! node Coords
      allocate(nodeCoords(numNodes*2))
      nodeCoords=(/1.0,0.0, &  ! 2
@@ -23115,7 +23130,7 @@ write(*,*) "LOCALRC=",localrc
                   2.0,1.0, &  ! 7
                   3.0,1.0 /)  ! 8
 
- 
+
 
       !! node owners
       allocate(nodeOwners(numNodes))
@@ -23167,19 +23182,19 @@ write(*,*) "LOCALRC=",localrc
                9,10,11, &
                13,14,15/)
 
-     
+
      !! node Coords
      allocate(nodeCoords(numNodes*2))
      nodeCoords=(/0.0,1.0, &  ! 5
                   1.0,1.0, &  ! 6
                   2.0,1.0, &  ! 7
-                  0.0,2.0, &  ! 9 
+                  0.0,2.0, &  ! 9
                   1.0,2.0, &  ! 10
                   2.0,2.0, &  ! 11
                   0.0,3.0, &  ! 13
                   1.0,3.0, &  ! 14
                   2.0,3.0/)  ! 15
- 
+
 
       !! node owners
       allocate(nodeOwners(numNodes))
@@ -23237,7 +23252,7 @@ write(*,*) "LOCALRC=",localrc
      !! node ids
      allocate(nodeIds(numNodes))
      nodeIds=(/7,8,11,12,15,16/)
-     
+
      !! node Coords
      allocate(nodeCoords(numNodes*2))
      nodeCoords=(/2.0,1.0, &  ! 7
@@ -23246,7 +23261,7 @@ write(*,*) "LOCALRC=",localrc
                   3.0,2.0, &  ! 12
                   2.0,3.0, &  ! 15
                   3.0,3.0 /)  ! 16
- 
+
 
       !! node owners
       allocate(nodeOwners(numNodes))
@@ -23265,11 +23280,11 @@ write(*,*) "LOCALRC=",localrc
 
       !! elem ids
       allocate(elemIds(numElems))
-      elemIds=(/6,9,10/) 
+      elemIds=(/6,9,10/)
 
       !! elem Masks
       allocate(elemMasks(numElems))
-      elemMasks=(/0,0,0/) 
+      elemMasks=(/0,0,0/)
 
       !! elem types
       allocate(elemTypes(numElems))
@@ -23291,7 +23306,7 @@ write(*,*) "LOCALRC=",localrc
      endif
    endif
 
-   
+
    ! Create Mesh structure in 1 step
    srcMesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
         coordSys=ESMF_COORDSYS_CART, &
@@ -23317,7 +23332,7 @@ write(*,*) "LOCALRC=",localrc
     return
   endif
 
-  
+
   ! Load test data into the source Field
   ! Should only be 1 localDE
   call ESMF_FieldGet(srcField, 0, farrayPtr1D,  rc=localrc)
@@ -23332,7 +23347,7 @@ write(*,*) "LOCALRC=",localrc
      ! Get coordinates
      x=elemCoords(2*i1-1)
      y=elemCoords(2*i1)
-     
+
      ! Set source function
      farrayPtr1D(i1) = 20.0+x+y
      !write(*,*) localPet,":: Src=",farrayPtr1D(i1)
@@ -23348,7 +23363,7 @@ write(*,*) "LOCALRC=",localrc
    deallocate(nodeIds)
    deallocate(nodeCoords)
    deallocate(nodeOwners)
-   
+
    ! deallocate elem data
    deallocate(elemIds)
    deallocate(elemTypes)
@@ -23359,11 +23374,11 @@ write(*,*) "LOCALRC=",localrc
 
    !!!! Create Dest Mesh !!!!
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  ! 
-  ! Creates the following mesh on 
-  ! 1 or 4 PETs. Returns an error 
+  !
+  ! Creates the following mesh on
+  ! 1 or 4 PETs. Returns an error
   ! if run on other than 1 or 4 PETs
-  ! 
+  !
   !                     Mesh Ids
   !
   !   3.0   13 ------ 14 ------- 15 ------- 16
@@ -23379,14 +23394,14 @@ write(*,*) "LOCALRC=",localrc
   !   0.5   |    1    |    2     |    3     |
   !         |         |          |          |
   !   0.0   1 ------- 2 -------- 3 -------- 4
-  !            
+  !
   !        0.0  0.5  1.0  1.5   2.0  2.5   3.0
   !
   !               Node Ids at corners
   !              Element Ids in centers
-  ! 
-  !!!!! 
-  ! 
+  !
+  !!!!!
+  !
   ! The owners for 1 PET are all Pet 0.
   ! The owners for 4 PETs are as follows:
   !
@@ -23410,9 +23425,9 @@ write(*,*) "LOCALRC=",localrc
   !
   !               Node Owners at corners
   !              Element Owners in centers
-  ! 
+  !
 
-  ! Setup mesh info depending on the 
+  ! Setup mesh info depending on the
   ! number of PETs
   if (petCount .eq. 1) then
 
@@ -23423,8 +23438,8 @@ write(*,*) "LOCALRC=",localrc
      allocate(nodeIds(numNodes))
      nodeIds=(/1,2,3,4,5,6,7,8, &
                9,10,11,12,13,14,&
-               15,16/) 
-     
+               15,16/)
+
      !! node Coords
      allocate(nodeCoords(numNodes*2))
      nodeCoords=(/0.0,0.0, & ! 1
@@ -23443,7 +23458,7 @@ write(*,*) "LOCALRC=",localrc
                  1.0,3.0, &  ! 14
                  2.0,3.0, &  ! 15
                  3.0,3.0 /)  ! 16
- 
+
 
       !! node owners
       allocate(nodeOwners(numNodes))
@@ -23458,11 +23473,11 @@ write(*,*) "LOCALRC=",localrc
 
       !! elem ids
       allocate(elemIds(numElems))
-      elemIds=(/1,2,3,4,5,6,7,8,9,10/) 
+      elemIds=(/1,2,3,4,5,6,7,8,9,10/)
 
       !! Masking
       allocate(elemMasks(numElems))
-      elemMasks=(/1,0,0,0,0,0,0,0,0,0/) 
+      elemMasks=(/1,0,0,0,0,0,0,0,0,0/)
 
       !! elem types
       allocate(elemTypes(numElems))
@@ -23513,13 +23528,13 @@ write(*,*) "LOCALRC=",localrc
      !! node ids
      allocate(nodeIds(numNodes))
      nodeIds=(/1,2,5,6/)
-     
+
      !! node Coords
      allocate(nodeCoords(numNodes*2))
      nodeCoords=(/0.0,0.0, & ! 1
                  1.0,0.0, &  ! 2
                  0.0,1.0, &  ! 5
-                 1.0,1.0 /)  ! 6 
+                 1.0,1.0 /)  ! 6
 
       !! node owners
       allocate(nodeOwners(numNodes))
@@ -23533,11 +23548,11 @@ write(*,*) "LOCALRC=",localrc
 
       !! elem ids
       allocate(elemIds(numElems))
-      elemIds=(/1/) 
+      elemIds=(/1/)
 
       !! elem masks
       allocate(elemMasks(numElems))
-      elemMasks=(/1/) 
+      elemMasks=(/1/)
 
       !! elem types
       allocate(elemTypes(numElems))
@@ -23559,7 +23574,7 @@ write(*,*) "LOCALRC=",localrc
      !! node ids
      allocate(nodeIds(numNodes))
      nodeIds=(/2,3,4,6,7,8/)
-     
+
      !! node Coords
      allocate(nodeCoords(numNodes*2))
      nodeCoords=(/1.0,0.0, &  ! 2
@@ -23569,7 +23584,7 @@ write(*,*) "LOCALRC=",localrc
                   2.0,1.0, &  ! 7
                   3.0,1.0 /)  ! 8
 
- 
+
 
       !! node owners
       allocate(nodeOwners(numNodes))
@@ -23621,19 +23636,19 @@ write(*,*) "LOCALRC=",localrc
                9,10,11, &
                13,14,15/)
 
-     
+
      !! node Coords
      allocate(nodeCoords(numNodes*2))
      nodeCoords=(/0.0,1.0, &  ! 5
                   1.0,1.0, &  ! 6
                   2.0,1.0, &  ! 7
-                  0.0,2.0, &  ! 9 
+                  0.0,2.0, &  ! 9
                   1.0,2.0, &  ! 10
                   2.0,2.0, &  ! 11
                   0.0,3.0, &  ! 13
                   1.0,3.0, &  ! 14
                   2.0,3.0/)  ! 15
- 
+
 
       !! node owners
       allocate(nodeOwners(numNodes))
@@ -23691,7 +23706,7 @@ write(*,*) "LOCALRC=",localrc
      !! node ids
      allocate(nodeIds(numNodes))
      nodeIds=(/7,8,11,12,15,16/)
-     
+
      !! node Coords
      allocate(nodeCoords(numNodes*2))
      nodeCoords=(/2.0,1.0, &  ! 7
@@ -23700,7 +23715,7 @@ write(*,*) "LOCALRC=",localrc
                   3.0,2.0, &  ! 12
                   2.0,3.0, &  ! 15
                   3.0,3.0 /)  ! 16
- 
+
 
       !! node owners
       allocate(nodeOwners(numNodes))
@@ -23719,11 +23734,11 @@ write(*,*) "LOCALRC=",localrc
 
       !! elem ids
       allocate(elemIds(numElems))
-      elemIds=(/6,9,10/) 
+      elemIds=(/6,9,10/)
 
       !! elem ids
       allocate(elemMasks(numElems))
-      elemMasks=(/0,0,0/) 
+      elemMasks=(/0,0,0/)
 
       !! elem types
       allocate(elemTypes(numElems))
@@ -23745,7 +23760,7 @@ write(*,*) "LOCALRC=",localrc
      endif
    endif
 
-   
+
    ! Create Mesh structure in 1 step
    dstMesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
         nodeIds=nodeIds, nodeCoords=nodeCoords, &
@@ -23759,7 +23774,7 @@ write(*,*) "LOCALRC=",localrc
        return
    endif
 
-  
+
   ! Create dest field
   call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
 
@@ -23770,7 +23785,7 @@ write(*,*) "LOCALRC=",localrc
     return
   endif
 
-  
+
   ! clear destination Field
   ! Should only be 1 localDE
   call ESMF_FieldGet(dstField, 0, farrayPtr1D,  rc=localrc)
@@ -23789,7 +23804,7 @@ write(*,*) "LOCALRC=",localrc
     return
   endif
 
-  
+
   ! Should only be 1 localDE
   call ESMF_FieldGet(xdstField, 0, xfarrayPtr1D,  rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -23803,7 +23818,7 @@ write(*,*) "LOCALRC=",localrc
      ! Get coordinates
      x=elemCoords(2*i1-1)
      y=elemCoords(2*i1)
-     
+
      ! Set source function
      xfarrayPtr1D(i1) = 20.0+x+y
      !write(*,*) localPet,":: XDst=",xfarrayPtr1D(i1)
@@ -23819,7 +23834,7 @@ write(*,*) "LOCALRC=",localrc
    deallocate(nodeIds)
    deallocate(nodeCoords)
    deallocate(nodeOwners)
-   
+
    ! deallocate elem data
    deallocate(elemIds)
    deallocate(elemTypes)
@@ -23959,7 +23974,7 @@ write(*,*) "LOCALRC=",localrc
   integer src_nx, src_ny, dst_nx, dst_ny
   integer num_arrays
   real(ESMF_KIND_R8) :: dx,dy
-  
+
   real(ESMF_KIND_R8) :: dst_minx,dst_miny
   real(ESMF_KIND_R8) :: dst_maxx,dst_maxy
 
@@ -23970,7 +23985,7 @@ write(*,*) "LOCALRC=",localrc
 
   real(ESMF_KIND_R8) :: lon, lat, theta, phi, DEG2RAD
   real(ESMF_KIND_R8) :: err, relErr
-  
+
   integer :: spherical_grid
 
   integer, pointer :: larrayList(:)
@@ -23985,7 +24000,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -24019,7 +24034,7 @@ write(*,*) "LOCALRC=",localrc
   ! Establish the coordinates of the grids
   dst_minx = 0.1
   dst_miny = 0.1
-  
+
   dst_maxx = 2.9
   dst_maxy = 2.9
 
@@ -24033,7 +24048,7 @@ write(*,*) "LOCALRC=",localrc
   DEG2RAD = 3.141592653589793_ESMF_KIND_R8/180.0_ESMF_KIND_R8
 
 
-  ! Setup mesh info depending on the 
+  ! Setup mesh info depending on the
   ! number of PETs
   if (petCount .eq. 1) then
 
@@ -24044,8 +24059,8 @@ write(*,*) "LOCALRC=",localrc
      allocate(nodeIds(numNodes))
      nodeIds=(/1,2,3,4,5,6,7,8, &
                9,10,11,12,13,14,&
-               15,16/) 
-     
+               15,16/)
+
      !! node Coords
      allocate(nodeCoords(numNodes*2))
      nodeCoords=(/0.0,0.0, & ! 1
@@ -24064,7 +24079,7 @@ write(*,*) "LOCALRC=",localrc
                  1.0,3.0, &  ! 14
                  2.0,3.0, &  ! 15
                  3.0,3.0 /)  ! 16
- 
+
 
       !! node owners
       allocate(nodeOwners(numNodes))
@@ -24079,7 +24094,7 @@ write(*,*) "LOCALRC=",localrc
 
       !! elem ids
       allocate(elemIds(numElems))
-      elemIds=(/1,2,3,4,5,6,7,8,9,10/) 
+      elemIds=(/1,2,3,4,5,6,7,8,9,10/)
 
       !! elem types
       allocate(elemTypes(numElems))
@@ -24130,13 +24145,13 @@ write(*,*) "LOCALRC=",localrc
      !! node ids
      allocate(nodeIds(numNodes))
      nodeIds=(/1,2,5,6/)
-     
+
      !! node Coords
      allocate(nodeCoords(numNodes*2))
      nodeCoords=(/0.0,0.0, & ! 1
                  1.0,0.0, &  ! 2
                  0.0,1.0, &  ! 5
-                 1.0,1.0 /)  ! 6 
+                 1.0,1.0 /)  ! 6
 
       !! node owners
       allocate(nodeOwners(numNodes))
@@ -24150,7 +24165,7 @@ write(*,*) "LOCALRC=",localrc
 
       !! elem ids
       allocate(elemIds(numElems))
-      elemIds=(/1/) 
+      elemIds=(/1/)
 
       !! elem types
       allocate(elemTypes(numElems))
@@ -24172,7 +24187,7 @@ write(*,*) "LOCALRC=",localrc
      !! node ids
      allocate(nodeIds(numNodes))
      nodeIds=(/2,3,4,6,7,8/)
-     
+
      !! node Coords
      allocate(nodeCoords(numNodes*2))
      nodeCoords=(/1.0,0.0, &  ! 2
@@ -24182,7 +24197,7 @@ write(*,*) "LOCALRC=",localrc
                   2.0,1.0, &  ! 7
                   3.0,1.0 /)  ! 8
 
- 
+
 
       !! node owners
       allocate(nodeOwners(numNodes))
@@ -24230,19 +24245,19 @@ write(*,*) "LOCALRC=",localrc
                9,10,11, &
                13,14,15/)
 
-     
+
      !! node Coords
      allocate(nodeCoords(numNodes*2))
      nodeCoords=(/0.0,1.0, &  ! 5
                   1.0,1.0, &  ! 6
                   2.0,1.0, &  ! 7
-                  0.0,2.0, &  ! 9 
+                  0.0,2.0, &  ! 9
                   1.0,2.0, &  ! 10
                   2.0,2.0, &  ! 11
                   0.0,3.0, &  ! 13
                   1.0,3.0, &  ! 14
                   2.0,3.0/)  ! 15
- 
+
 
       !! node owners
       allocate(nodeOwners(numNodes))
@@ -24296,7 +24311,7 @@ write(*,*) "LOCALRC=",localrc
      !! node ids
      allocate(nodeIds(numNodes))
      nodeIds=(/7,8,11,12,15,16/)
-     
+
      !! node Coords
      allocate(nodeCoords(numNodes*2))
      nodeCoords=(/2.0,1.0, &  ! 7
@@ -24305,7 +24320,7 @@ write(*,*) "LOCALRC=",localrc
                   3.0,2.0, &  ! 12
                   2.0,3.0, &  ! 15
                   3.0,3.0 /)  ! 16
- 
+
 
       !! node owners
       allocate(nodeOwners(numNodes))
@@ -24324,7 +24339,7 @@ write(*,*) "LOCALRC=",localrc
 
       !! elem ids
       allocate(elemIds(numElems))
-      elemIds=(/6,9,10/) 
+      elemIds=(/6,9,10/)
 
       !! elem types
       allocate(elemTypes(numElems))
@@ -24370,7 +24385,7 @@ write(*,*) "LOCALRC=",localrc
     return
   endif
 
-  
+
   ! Load test data into the source Field
   ! Should only be 1 localDE
   call ESMF_FieldGet(srcField, 0, farrayPtr1D,  rc=localrc)
@@ -24476,7 +24491,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get memory and set coords for dst
   do lDE=0,localDECount-1
- 
+
      !! get coords
      call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -24594,7 +24609,7 @@ write(*,*) "LOCALRC=",localrc
         return
      endif
 
-   
+
      !! check error
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
@@ -24700,7 +24715,7 @@ write(*,*) "LOCALRC=",localrc
   integer dst_nx,dst_ny,dst_nz
   integer num_arrays
   real(ESMF_KIND_R8) :: dx,dy,dz
-  
+
   real(ESMF_KIND_R8) :: dst_minx,dst_miny,dst_minz
   real(ESMF_KIND_R8) :: dst_maxx,dst_maxy,dst_maxz
 
@@ -24721,7 +24736,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! degree to rad conversion
   real(ESMF_KIND_R8),parameter :: &
      DEG2RAD = 3.141592653589793_ESMF_KIND_R8/180.0_ESMF_KIND_R8
@@ -24757,11 +24772,11 @@ write(*,*) "LOCALRC=",localrc
   dst_minx = 1.1
   dst_miny = 1.1
   dst_minz = 1.1
-  
+
   dst_maxx = 19.9
   dst_maxy = 19.9
   dst_maxz = 1.9
-  
+
   ! setup source Mesh
   if (petCount .eq. 1) then
      ! Set number of nodes
@@ -24770,7 +24785,7 @@ write(*,*) "LOCALRC=",localrc
      ! Allocate and fill the node id array.
      allocate(nodeIds(numNodes))
      nodeIds=(/1,2,3,4,5,6,7,8,9, &
-               10,11,12,13,14,15,16,17,18/) 
+               10,11,12,13,14,15,16,17,18/)
 
      ! Allocate and fill node coordinate array.
      ! Since this is a 3D Mesh the size is 3x the
@@ -24805,18 +24820,18 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the element id array.
      allocate(elemIds(numElems))
-     elemIds=(/1,2,3,4/) 
+     elemIds=(/1,2,3,4/)
 
      ! Allocate and fill the element topology type array.
      allocate(elemTypes(numElems))
      elemTypes=ESMF_MESHELEMTYPE_HEX
-                 
+
 
      ! Allocate and fill the element connection type array.
-     ! Note that entries in this array refer to the 
+     ! Note that entries in this array refer to the
      ! positions in the nodeIds, etc. arrays and that
      ! the order and number of entries for each element
-     ! reflects that given in the Mesh options 
+     ! reflects that given in the Mesh options
      ! section for the corresponding entry
      ! in the elemTypes array.
      allocate(elemConn(8*numElems))
@@ -24833,7 +24848,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/1,2,4,5,10,11,13,14/) 
+       nodeIds=(/1,2,4,5,10,11,13,14/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -24865,7 +24880,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numElems))
-       elemIds=(/1/) 
+       elemIds=(/1/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numElems))
@@ -24882,7 +24897,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/2,3,5,6,11,12,14,15/) 
+       nodeIds=(/2,3,5,6,11,12,14,15/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 3D Mesh the size is 2x the
@@ -24913,7 +24928,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numElems))
-       elemIds=(/2/) 
+       elemIds=(/2/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numElems))
@@ -24930,7 +24945,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/4,5,7,8,13,14,16,17/) 
+        nodeIds=(/4,5,7,8,13,14,16,17/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 3D Mesh the size is 2x the
@@ -24962,7 +24977,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numElems))
-       elemIds=(/3/) 
+       elemIds=(/3/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numElems))
@@ -24980,7 +24995,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/5,6,8,9,14,15,17,18/) 
+        nodeIds=(/5,6,8,9,14,15,17,18/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 3D Mesh the size is 2x the
@@ -25005,13 +25020,13 @@ write(*,*) "LOCALRC=",localrc
                      1, & ! node id 15
                      2, & ! node id 17
                      3/)  ! node id 18
- 
+
        ! Set the number of each type of element, plus the total number.
        numElems=1
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numElems))
-       elemIds=(/4/) 
+       elemIds=(/4/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numElems))
@@ -25046,7 +25061,7 @@ write(*,*) "LOCALRC=",localrc
     return
   endif
 
-  
+
   ! Load test data into the source Field
   ! Should only be 1 localDE
   call ESMF_FieldGet(srcField, 0, farrayPtr1D,  rc=localrc)
@@ -25072,9 +25087,9 @@ write(*,*) "LOCALRC=",localrc
 
         ! Set source function
         !farrayPtr1D(i2) = 20.0+x+y+z
-        !farrayPtr1D(i2) = z*(2. + cos(lon_rad)**2.*cos(2.*lat_rad))    
-        farrayPtr1D(i2) = z*5.0+2.0+ cos(lon_rad)**2.*cos(2.*lat_rad) 
-        !farrayPtr1D(i2) = 1.0+z*0.01+ cos(lat_rad)**2.*cos(2.*lon_rad) 
+        !farrayPtr1D(i2) = z*(2. + cos(lon_rad)**2.*cos(2.*lat_rad))
+        farrayPtr1D(i2) = z*5.0+2.0+ cos(lon_rad)**2.*cos(2.*lat_rad)
+        !farrayPtr1D(i2) = 1.0+z*0.01+ cos(lat_rad)**2.*cos(2.*lon_rad)
         !farrayPtr1D(i2) = z
 
         ! Advance to next owner
@@ -25165,7 +25180,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get memory and set coords for dst
   do lDE=0,localDECount-1
- 
+
      !! get coords
      call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER_VCENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -25210,7 +25225,7 @@ write(*,*) "LOCALRC=",localrc
         farrayPtrXC(i1,i2,i3) = ((dst_maxx-dst_minx)*REAL(i1-1)/REAL(dst_nx-1))+dst_minx
         farrayPtrYC(i1,i2,i3) = ((dst_maxy-dst_miny)*REAL(i2-1)/REAL(dst_ny-1))+dst_miny
         farrayPtrZC(i1,i2,i3) = ((dst_maxz-dst_minz)*REAL(i3-1)/REAL(dst_nz-1))+dst_minz
- 
+
         ! Put in more convenient form
         x=farrayPtrXC(i1,i2,i3)
         y=farrayPtrYC(i1,i2,i3)
@@ -25222,8 +25237,8 @@ write(*,*) "LOCALRC=",localrc
 
         ! initialize exact destination field
         !xfarrayPtr(i1,i2,i3)=z*(2. + cos(lon_rad)**2.*cos(2.*lat_rad))
-        xfarrayPtr(i1,i2,i3)= z*5.0+2.0+ cos(lon_rad)**2.*cos(2.*lat_rad) 
-        !xfarrayPtr(i1,i2,i3)= 1.0+z*0.01+ cos(lat_rad)**2.*cos(2.*lon_rad) 
+        xfarrayPtr(i1,i2,i3)= z*5.0+2.0+ cos(lon_rad)**2.*cos(2.*lat_rad)
+        !xfarrayPtr(i1,i2,i3)= 1.0+z*0.01+ cos(lat_rad)**2.*cos(2.*lon_rad)
         !xfarrayPtr(i1,i2,i3)=z
         ! Initialize destination field
         farrayPtr(i1,i2,i3)=0.0
@@ -25307,7 +25322,7 @@ write(*,*) "LOCALRC=",localrc
         rc=ESMF_FAILURE
         return
      endif
-   
+
      !! check error
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
@@ -25423,7 +25438,7 @@ write(*,*) "LOCALRC=",localrc
   real(ESMF_KIND_R8) :: dst_minr, dst_maxr
   real(ESMF_KIND_R8) :: src_dx,src_dy
   real(ESMF_KIND_R8) :: src_minr, src_maxr
-  
+
   real(ESMF_KIND_R8) :: dst_minx,dst_miny,dst_minz
   real(ESMF_KIND_R8) :: dst_maxx,dst_maxy,dst_maxz
 
@@ -25433,15 +25448,15 @@ write(*,*) "LOCALRC=",localrc
   real(ESMF_KIND_R8) :: err, relErr, maxRelErr
   real(ESMF_KIND_R8) :: totRelErr
   integer :: numRelErr
-  
+
   integer :: spherical_grid
 
   integer :: localPet, petCount
-  real(ESMF_KIND_R8) :: beg_time, end_time  
+  real(ESMF_KIND_R8) :: beg_time, end_time
 
   ! result code
   integer :: finalrc
-  
+
   ! degree to rad conversion
   real(ESMF_KIND_R8),parameter :: &
      DEG2RAD = 3.141592653589793_ESMF_KIND_R8/180.0_ESMF_KIND_R8
@@ -25484,7 +25499,7 @@ write(*,*) "LOCALRC=",localrc
     rc=ESMF_FAILURE
     return
    endif
-  
+
   ! Add center stagger
   call ESMF_GridAddCoord(srcGrid, staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -25521,7 +25536,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get memory and set coords for dst
   do lDE=0,localDECount-1
-  
+
      !! get coords
      call ESMF_GridGetCoord(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER_VCENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -25567,8 +25582,8 @@ write(*,*) "LOCALRC=",localrc
          r=farrayPtrZC(i1,i2,i3)
 
         ! initialize source field
-        farrayPtr(i1,i2,i3)= r*5.0+2.0+ cos(lon_rad)**2.*cos(2.*lat_rad) 
-        !farrayPtr(i1,i2,i3)= 2.0+r*5.0+ cos(lat_rad)**2.*cos(2.*lon_rad) 
+        farrayPtr(i1,i2,i3)= r*5.0+2.0+ cos(lon_rad)**2.*cos(2.*lat_rad)
+        !farrayPtr(i1,i2,i3)= 2.0+r*5.0+ cos(lat_rad)**2.*cos(2.*lon_rad)
         !farrayPtr(i1,i2,i3)= 1.0
      enddo
      enddo
@@ -25654,7 +25669,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get memory and set coords for dst
   do lDE=0,localDECount-1
- 
+
      !! get coords
      call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER_VCENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -25699,7 +25714,7 @@ write(*,*) "LOCALRC=",localrc
         farrayPtrXC(i1,i2,i3) = REAL(i1-1)*dst_dx
         farrayPtrYC(i1,i2,i3) = -90. + (REAL(i2-1)*dst_dy + 0.5*dst_dy)
         farrayPtrZC(i1,i2,i3) = ((dst_maxr-dst_minr)*REAL(i3-1)/REAL(dst_nz-1))+dst_minr
- 
+
         ! Compute Lat/Lon in rad
         lon_rad = DEG2RAD*farrayPtrXC(i1,i2,i3)
         lat_rad = DEG2RAD*(90.-farrayPtrYC(i1,i2,i3))
@@ -25708,8 +25723,8 @@ write(*,*) "LOCALRC=",localrc
         ! initialize exact destination field
         !xfarrayPtr(i1,i2,i3)=r*(2. + cos(lon_rad)**2.*cos(2.*lat_rad))
         !xfarrayPtr(i1,i2,i3)=r*5.0+2. + cos(lon_rad)**2.*cos(2.*lat_rad)
-        !xfarrayPtr(i1,i2,i3)= 1.0+r*0.01+ cos(lat_rad)**2.*cos(2.*lon_rad) 
-        xfarrayPtr(i1,i2,i3)= r*5.0+2.0+ cos(lon_rad)**2.*cos(2.*lat_rad) 
+        !xfarrayPtr(i1,i2,i3)= 1.0+r*0.01+ cos(lat_rad)**2.*cos(2.*lon_rad)
+        xfarrayPtr(i1,i2,i3)= r*5.0+2.0+ cos(lon_rad)**2.*cos(2.*lat_rad)
          !xfarrayPtr(i1,i2,i3)= 1.0
         !xfarrayPtr(i1,i2,i3)=r
 
@@ -25807,7 +25822,7 @@ write(*,*) "LOCALRC=",localrc
         rc=ESMF_FAILURE
         return
      endif
-   
+
      !! check error
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
@@ -25822,7 +25837,7 @@ write(*,*) "LOCALRC=",localrc
         else
            relErr=err
         endif
- 
+
         !! Calculate max
         if (relErr > maxRelErr) maxRelErr=relErr
 
@@ -25931,7 +25946,7 @@ write(*,*) "LOCALRC=",localrc
   real(ESMF_KIND_R8) :: dst_minr, dst_maxr
   real(ESMF_KIND_R8) :: src_dx,src_dy
   real(ESMF_KIND_R8) :: src_minr, src_maxr
-  
+
   real(ESMF_KIND_R8) :: dst_minx,dst_miny,dst_minz
   real(ESMF_KIND_R8) :: dst_maxx,dst_maxy,dst_maxz
 
@@ -25941,15 +25956,15 @@ write(*,*) "LOCALRC=",localrc
   real(ESMF_KIND_R8) :: err, relErr, maxRelErr
   real(ESMF_KIND_R8) :: totRelErr
   integer :: numRelErr
-  
+
   integer :: spherical_grid
 
   integer :: localPet, petCount
-  real(ESMF_KIND_R8) :: beg_time, end_time  
+  real(ESMF_KIND_R8) :: beg_time, end_time
 
   ! result code
   integer :: finalrc
-  
+
   ! degree to rad conversion
   real(ESMF_KIND_R8),parameter :: &
      DEG2RAD = 3.141592653589793_ESMF_KIND_R8/180.0_ESMF_KIND_R8
@@ -25992,7 +26007,7 @@ write(*,*) "LOCALRC=",localrc
     rc=ESMF_FAILURE
     return
    endif
-  
+
   ! Add center stagger
   call ESMF_GridAddCoord(srcGrid, staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -26029,7 +26044,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get memory and set coords for dst
   do lDE=0,localDECount-1
-  
+
      !! get coords
      call ESMF_GridGetCoord(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER_VCENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -26075,8 +26090,8 @@ write(*,*) "LOCALRC=",localrc
          r=farrayPtrZC(i1,i2,i3)
 
         ! initialize source field
-        farrayPtr(i1,i2,i3)= r*5.0+2.0+ cos(lon_rad)**2.*cos(2.*lat_rad) 
-        !farrayPtr(i1,i2,i3)= 2.0+r*5.0+ cos(lat_rad)**2.*cos(2.*lon_rad) 
+        farrayPtr(i1,i2,i3)= r*5.0+2.0+ cos(lon_rad)**2.*cos(2.*lat_rad)
+        !farrayPtr(i1,i2,i3)= 2.0+r*5.0+ cos(lat_rad)**2.*cos(2.*lon_rad)
         !farrayPtr(i1,i2,i3)= 1.0
      enddo
      enddo
@@ -26162,7 +26177,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get memory and set coords for dst
   do lDE=0,localDECount-1
- 
+
      !! get coords
      call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER_VCENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -26207,7 +26222,7 @@ write(*,*) "LOCALRC=",localrc
         farrayPtrXC(i1,i2,i3) = REAL(i1-1)*dst_dx
         farrayPtrYC(i1,i2,i3) = -90. + (REAL(i2-1)*dst_dy + 0.5*dst_dy)
         farrayPtrZC(i1,i2,i3) = ((dst_maxr-dst_minr)*REAL(i3-1)/REAL(dst_nz-1))+dst_minr
- 
+
         ! Compute Lat/Lon in rad
         lon_rad = DEG2RAD*farrayPtrXC(i1,i2,i3)
         lat_rad = DEG2RAD*(90.-farrayPtrYC(i1,i2,i3))
@@ -26216,8 +26231,8 @@ write(*,*) "LOCALRC=",localrc
         ! initialize exact destination field
         !xfarrayPtr(i1,i2,i3)=r*(2. + cos(lon_rad)**2.*cos(2.*lat_rad))
         !xfarrayPtr(i1,i2,i3)=r*5.0+2. + cos(lon_rad)**2.*cos(2.*lat_rad)
-        !xfarrayPtr(i1,i2,i3)= 1.0+r*0.01+ cos(lat_rad)**2.*cos(2.*lon_rad) 
-        xfarrayPtr(i1,i2,i3)= r*5.0+2.0+ cos(lon_rad)**2.*cos(2.*lat_rad) 
+        !xfarrayPtr(i1,i2,i3)= 1.0+r*0.01+ cos(lat_rad)**2.*cos(2.*lon_rad)
+        xfarrayPtr(i1,i2,i3)= r*5.0+2.0+ cos(lon_rad)**2.*cos(2.*lat_rad)
          !xfarrayPtr(i1,i2,i3)= 1.0
         !xfarrayPtr(i1,i2,i3)=r
 
@@ -26314,7 +26329,7 @@ write(*,*) "LOCALRC=",localrc
         rc=ESMF_FAILURE
         return
      endif
-   
+
      !! check error
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
@@ -26329,7 +26344,7 @@ write(*,*) "LOCALRC=",localrc
         else
            relErr=err
         endif
- 
+
         !! Calculate max
         if (relErr > maxRelErr) maxRelErr=relErr
 
@@ -26439,7 +26454,7 @@ write(*,*) "LOCALRC=",localrc
   real(ESMF_KIND_R8) :: dst_minr, dst_maxr
   real(ESMF_KIND_R8) :: src_dx,src_dy
   real(ESMF_KIND_R8) :: src_minr, src_maxr
-  
+
   real(ESMF_KIND_R8) :: dst_minx,dst_miny,dst_minz
   real(ESMF_KIND_R8) :: dst_maxx,dst_maxy,dst_maxz
 
@@ -26449,15 +26464,15 @@ write(*,*) "LOCALRC=",localrc
   real(ESMF_KIND_R8) :: err, relErr, maxRelErr
   real(ESMF_KIND_R8) :: totRelErr
   integer :: numRelErr
-  
+
   integer :: spherical_grid
 
   integer :: localPet, petCount
-  real(ESMF_KIND_R8) :: beg_time, end_time  
+  real(ESMF_KIND_R8) :: beg_time, end_time
 
   ! result code
   integer :: finalrc
-  
+
   ! degree to rad conversion
   real(ESMF_KIND_R8),parameter :: &
      DEG2RAD = 3.141592653589793_ESMF_KIND_R8/180.0_ESMF_KIND_R8
@@ -26500,7 +26515,7 @@ write(*,*) "LOCALRC=",localrc
     rc=ESMF_FAILURE
     return
    endif
-  
+
   ! Add center stagger
   call ESMF_GridAddCoord(srcGrid, staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -26537,7 +26552,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get memory and set coords for dst
   do lDE=0,localDECount-1
-  
+
      !! get coords
      call ESMF_GridGetCoord(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER_VCENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -26583,8 +26598,8 @@ write(*,*) "LOCALRC=",localrc
          r=farrayPtrZC(i1,i2,i3)
 
         ! initialize source field
-        farrayPtr(i1,i2,i3)= r*5.0+2.0+ cos(lon_rad)**2.*cos(2.*lat_rad) 
-        !farrayPtr(i1,i2,i3)= 2.0+r*5.0+ cos(lat_rad)**2.*cos(2.*lon_rad) 
+        farrayPtr(i1,i2,i3)= r*5.0+2.0+ cos(lon_rad)**2.*cos(2.*lat_rad)
+        !farrayPtr(i1,i2,i3)= 2.0+r*5.0+ cos(lat_rad)**2.*cos(2.*lon_rad)
         !farrayPtr(i1,i2,i3)= 1.0
      enddo
      enddo
@@ -26670,7 +26685,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get memory and set coords for dst
   do lDE=0,localDECount-1
- 
+
      !! get coords
      call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER_VCENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -26715,7 +26730,7 @@ write(*,*) "LOCALRC=",localrc
         farrayPtrXC(i1,i2,i3) = REAL(i1-1)*dst_dx
         farrayPtrYC(i1,i2,i3) = -90. + (REAL(i2-1)*dst_dy + 0.5*dst_dy)
         farrayPtrZC(i1,i2,i3) = ((dst_maxr-dst_minr)*REAL(i3-1)/REAL(dst_nz-1))+dst_minr
- 
+
         ! Compute Lat/Lon in rad
         lon_rad = DEG2RAD*farrayPtrXC(i1,i2,i3)
         lat_rad = DEG2RAD*(90.-farrayPtrYC(i1,i2,i3))
@@ -26724,8 +26739,8 @@ write(*,*) "LOCALRC=",localrc
         ! initialize exact destination field
         !xfarrayPtr(i1,i2,i3)=r*(2. + cos(lon_rad)**2.*cos(2.*lat_rad))
         !xfarrayPtr(i1,i2,i3)=r*5.0+2. + cos(lon_rad)**2.*cos(2.*lat_rad)
-        !xfarrayPtr(i1,i2,i3)= 1.0+r*0.01+ cos(lat_rad)**2.*cos(2.*lon_rad) 
-        xfarrayPtr(i1,i2,i3)= r*5.0+2.0+ cos(lon_rad)**2.*cos(2.*lat_rad) 
+        !xfarrayPtr(i1,i2,i3)= 1.0+r*0.01+ cos(lat_rad)**2.*cos(2.*lon_rad)
+        xfarrayPtr(i1,i2,i3)= r*5.0+2.0+ cos(lon_rad)**2.*cos(2.*lat_rad)
          !xfarrayPtr(i1,i2,i3)= 1.0
         !xfarrayPtr(i1,i2,i3)=r
 
@@ -26822,7 +26837,7 @@ write(*,*) "LOCALRC=",localrc
         rc=ESMF_FAILURE
         return
      endif
-   
+
      !! check error
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
@@ -26837,7 +26852,7 @@ write(*,*) "LOCALRC=",localrc
         else
            relErr=err
         endif
- 
+
         !! Calculate max
         if (relErr > maxRelErr) maxRelErr=relErr
 
@@ -27256,7 +27271,7 @@ write(*,*) "LOCALRC=",localrc
   integer, intent(out)  :: rc
   logical :: correct
   integer :: localrc
-  
+
 
   type(ESMF_Field) :: srcField
   type(ESMF_Field) :: dstField
@@ -27467,7 +27482,7 @@ write(*,*) "LOCALRC=",localrc
   !-------------------------------------------------------------------
   ! Set key data.
   !-------------------------------------------------------------------
-  !setting the coordinates with offset 
+  !setting the coordinates with offset
   do i=1,numLocationsOnThisPet
      x(i)=(i-1)*360.0/numLocationsOnThisPet+0.001
      y(i)=REAL(localPet,ESMF_KIND_R8)
@@ -27596,7 +27611,7 @@ write(*,*) "LOCALRC=",localrc
   integer, intent(out)  :: rc
   logical :: correct
   integer :: localrc
-  
+
 
   type(ESMF_Field) :: srcField
   type(ESMF_Field) :: dstField
@@ -27849,7 +27864,7 @@ write(*,*) "LOCALRC=",localrc
   !-------------------------------------------------------------------
   ! Set key data.
   !-------------------------------------------------------------------
-  !setting the coordinates with offset 
+  !setting the coordinates with offset
   do i=1,numLocationsOnThisPet
      x(i)=(i-1)*360.0/numLocationsOnThisPet+0.001
      y(i)=REAL(localPet,ESMF_KIND_R8)
@@ -27997,9 +28012,9 @@ write(*,*) "LOCALRC=",localrc
   real(ESMF_KIND_R8) :: coord(2)
   character(len=ESMF_MAXSTR) :: string
   real(ESMF_KIND_R8) :: dx,dy
-  
+
   real(ESMF_KIND_R8) :: x,y
-  
+
   integer, pointer :: larrayList(:)
   integer :: localPet, petCount
 
@@ -28017,7 +28032,7 @@ write(*,*) "LOCALRC=",localrc
   integer :: numLocationsOnThisPet,i
   real(ESMF_KIND_R8), pointer :: Xarray(:),Yarray(:)
 
-  
+
   ! init success flag
   correct=.true.
 
@@ -28090,7 +28105,7 @@ write(*,*) "LOCALRC=",localrc
       temperature(3)=99
     endif
   endif
-  
+
   !-------------------------------------------------------------------
   ! Create the LocStream:  Allocate space for the LocStream object,
   ! define the number and distribution of the locations.
@@ -28233,7 +28248,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the node id array.
      allocate(nodeIds(numNodes))
-     nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+     nodeIds=(/1,2,3,4,5,6,7,8,9/)
 
      ! Allocate and fill node coordinate array.
      ! Since this is a 2D Mesh the size is 2x the
@@ -28261,7 +28276,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the element id array.
      allocate(elemIds(numTotElems))
-     elemIds=(/1,2,3,4,5/) 
+     elemIds=(/1,2,3,4,5/)
 
 
      ! Allocate and fill the element topology type array.
@@ -28274,10 +28289,10 @@ write(*,*) "LOCALRC=",localrc
 
 
      ! Allocate and fill the element connection type array.
-     ! Note that entries in this array refer to the 
+     ! Note that entries in this array refer to the
      ! positions in the nodeIds, etc. arrays and that
      ! the order and number of entries for each element
-     ! reflects that given in the Mesh options 
+     ! reflects that given in the Mesh options
      ! section for the corresponding entry
      ! in the elemTypes array.
      allocate(elemConn(4*numQuadElems+3*numTriElems))
@@ -28296,7 +28311,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/1,2,4,5/) 
+       nodeIds=(/1,2,4,5/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -28321,7 +28336,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/1/) 
+       elemIds=(/1/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -28338,7 +28353,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/2,3,5,6/) 
+       nodeIds=(/2,3,5,6/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -28363,7 +28378,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/2,3/) 
+       elemIds=(/2,3/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -28381,7 +28396,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/4,5,7,8/) 
+        nodeIds=(/4,5,7,8/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -28407,7 +28422,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/4/) 
+        elemIds=(/4/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -28423,7 +28438,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/5,6,8,9/) 
+        nodeIds=(/5,6,8,9/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -28440,7 +28455,7 @@ write(*,*) "LOCALRC=",localrc
                      1, & ! node id 6
                      2, & ! node id 8
                      3/)  ! node id 9
- 
+
         ! Set the number of each type of element, plus the total number.
         numQuadElems=1
         numTriElems=0
@@ -28448,7 +28463,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/5/)  
+        elemIds=(/5/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -28472,7 +28487,7 @@ write(*,*) "LOCALRC=",localrc
      return
    endif
 
-  
+
    ! Create dest field
    call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
 
@@ -28483,7 +28498,7 @@ write(*,*) "LOCALRC=",localrc
      return
    endif
 
-  
+
    ! clear destination Field
    ! Should only be 1 localDE
    call ESMF_FieldGet(dstField, 0, farrayPtr1D,  rc=localrc)
@@ -28647,7 +28662,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! init flags
   correct=.true.
   rc=ESMF_SUCCESS
@@ -28847,7 +28862,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get memory and set coords for dst
   do lDE=0,localDECount-1
- 
+
      !! get coords
      call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -29040,7 +29055,7 @@ write(*,*) "LOCALRC=",localrc
   integer :: src_nx, src_ny, dst_nx, dst_ny
   integer :: cl,cu,idx
   integer :: localPet, petCount
-  real(ESMF_KIND_R8) :: beg_time, end_time  
+  real(ESMF_KIND_R8) :: beg_time, end_time
 #if defined (ESMF_LAPACK)
   logical, external :: LSAME
   logical :: tf
@@ -29230,7 +29245,7 @@ write(*,*) "LOCALRC=",localrc
       rc=ESMF_FAILURE
       return
     endif
- 
+
     !-------------------------------------------------------------------
     ! Get key data.
     !-------------------------------------------------------------------
@@ -29886,11 +29901,11 @@ write(*,*) "LOCALRC=",localrc
   real(ESMF_KIND_R8) :: src_maxx,src_maxy,src_maxz
 
   real(ESMF_KIND_R8) :: x,y,z,expected
-  
+
   integer :: localPet, petCount
 
   ! result code
-  
+
   type(ESMF_LocStream) :: dstLocStream
   integer :: numLocationsOnThisPet,i
   real(ESMF_KIND_R8), pointer :: Xarray(:),Yarray(:),Zarray(:)
@@ -29928,10 +29943,10 @@ write(*,*) "LOCALRC=",localrc
   src_minx = -0.1
   src_miny = -0.1
   src_minz = -0.1
-  
+
   src_maxx = 2.1
-  src_maxy = 2.1 
-  src_maxz = 2.1 
+  src_maxy = 2.1
+  src_maxz = 2.1
 
 
   ! setup src grid
@@ -29977,7 +29992,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get memory and set coords for dst
   do lDE=0,localDECount-1
- 
+
      !! get coords
      call ESMF_GridGetCoord(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, &
                             coordDim=1, &
@@ -30338,7 +30353,7 @@ write(*,*) "LOCALRC=",localrc
   integer :: i1,i2,i3, index(2)
   integer :: lDE, localDECount
   integer :: cl,cu
-  
+
   real(ESMF_KIND_R8) :: x,y
 
   integer :: localPet, petCount
@@ -30354,7 +30369,7 @@ write(*,*) "LOCALRC=",localrc
   real(ESMF_KIND_R8), pointer :: Xarray(:),Yarray(:)
   integer(ESMF_KIND_I4) :: maskValues(2)
   integer(ESMF_KIND_I4), pointer :: maskArray(:)
-  
+
   ! init success flag
   correct=.true.
 
@@ -30386,7 +30401,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the node id array.
      allocate(nodeIds(numNodes))
-     nodeIds=(/100,20,30,40,50,60,70,80,90/) 
+     nodeIds=(/100,20,30,40,50,60,70,80,90/)
 
      ! Allocate and fill node coordinate array.
      ! Since this is a 2D Mesh the size is 2x the
@@ -30414,7 +30429,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the element id array.
      allocate(elemIds(numTotElems))
-     elemIds=(/1,2,3,4,5/) 
+     elemIds=(/1,2,3,4,5/)
 
 
      ! Allocate and fill the element topology type array.
@@ -30427,10 +30442,10 @@ write(*,*) "LOCALRC=",localrc
 
 
      ! Allocate and fill the element connection type array.
-     ! Note that entries in this array refer to the 
+     ! Note that entries in this array refer to the
      ! positions in the nodeIds, etc. arrays and that
      ! the order and number of entries for each element
-     ! reflects that given in the Mesh options 
+     ! reflects that given in the Mesh options
      ! section for the corresponding entry
      ! in the elemTypes array.
      allocate(elemConn(4*numQuadElems+3*numTriElems))
@@ -30449,7 +30464,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/100,20,40,50/) 
+       nodeIds=(/100,20,40,50/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -30474,7 +30489,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/1/) 
+       elemIds=(/1/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -30491,7 +30506,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/20,30,50,60/) 
+       nodeIds=(/20,30,50,60/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -30516,7 +30531,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/2,3/) 
+       elemIds=(/2,3/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -30534,7 +30549,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/40,50,70,80/) 
+        nodeIds=(/40,50,70,80/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -30560,7 +30575,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/4/) 
+        elemIds=(/4/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -30576,7 +30591,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/50,60,80,90/) 
+        nodeIds=(/50,60,80,90/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -30593,7 +30608,7 @@ write(*,*) "LOCALRC=",localrc
                      1, & ! node id 6
                      2, & ! node id 8
                      3/)  ! node id 9
- 
+
         ! Set the number of each type of element, plus the total number.
         numQuadElems=1
         numTriElems=0
@@ -30601,7 +30616,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/5/)  
+        elemIds=(/5/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -30634,7 +30649,7 @@ write(*,*) "LOCALRC=",localrc
     return
   endif
 
-  
+
   ! Load test data into the source Field
   ! Should only be 1 localDE
   call ESMF_FieldGet(srcField, 0, farrayPtr1D,  rc=localrc)
@@ -30877,7 +30892,7 @@ write(*,*) "LOCALRC=",localrc
     return
   endif
 
-  
+
   ! clear destination Field
   ! Should only be 1 localDE
   call ESMF_FieldGet(dstField, 0, farrayPtr1D,  rc=localrc)
@@ -30999,7 +31014,7 @@ write(*,*) "LOCALRC=",localrc
   integer :: i1,i2,i3, index(2)
   integer :: lDE, localDECount
   integer :: cl,cu
-  
+
   real(ESMF_KIND_R8) :: x,y
 
   integer :: localPet, petCount
@@ -31015,7 +31030,7 @@ write(*,*) "LOCALRC=",localrc
   real(ESMF_KIND_R8), pointer :: Xarray(:),Yarray(:)
   integer(ESMF_KIND_I4) :: maskValues(2)
   integer(ESMF_KIND_I4), pointer :: maskArray(:)
-  
+
   ! init success flag
   correct=.true.
 
@@ -31047,7 +31062,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the node id array.
      allocate(nodeIds(numNodes))
-     nodeIds=(/100,20,30,40,50,60,70,80,90/) 
+     nodeIds=(/100,20,30,40,50,60,70,80,90/)
 
      ! Allocate and fill node coordinate array.
      ! Since this is a 2D Mesh the size is 2x the
@@ -31075,7 +31090,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the element id array.
      allocate(elemIds(numTotElems))
-     elemIds=(/1,2,3,4,5/) 
+     elemIds=(/1,2,3,4,5/)
 
 
      ! Allocate and fill the element topology type array.
@@ -31088,10 +31103,10 @@ write(*,*) "LOCALRC=",localrc
 
 
      ! Allocate and fill the element connection type array.
-     ! Note that entries in this array refer to the 
+     ! Note that entries in this array refer to the
      ! positions in the nodeIds, etc. arrays and that
      ! the order and number of entries for each element
-     ! reflects that given in the Mesh options 
+     ! reflects that given in the Mesh options
      ! section for the corresponding entry
      ! in the elemTypes array.
      allocate(elemConn(4*numQuadElems+3*numTriElems))
@@ -31110,7 +31125,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/100,20,40,50/) 
+       nodeIds=(/100,20,40,50/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -31135,7 +31150,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/1/) 
+       elemIds=(/1/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -31152,7 +31167,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/20,30,50,60/) 
+       nodeIds=(/20,30,50,60/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -31177,7 +31192,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/2,3/) 
+       elemIds=(/2,3/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -31195,7 +31210,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/40,50,70,80/) 
+        nodeIds=(/40,50,70,80/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -31221,7 +31236,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/4/) 
+        elemIds=(/4/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -31237,7 +31252,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/50,60,80,90/) 
+        nodeIds=(/50,60,80,90/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -31254,7 +31269,7 @@ write(*,*) "LOCALRC=",localrc
                      1, & ! node id 6
                      2, & ! node id 8
                      3/)  ! node id 9
- 
+
         ! Set the number of each type of element, plus the total number.
         numQuadElems=1
         numTriElems=0
@@ -31262,7 +31277,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/5/)  
+        elemIds=(/5/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -31295,7 +31310,7 @@ write(*,*) "LOCALRC=",localrc
     return
   endif
 
-  
+
   ! Load test data into the source Field
   ! Should only be 1 localDE
   call ESMF_FieldGet(srcField, 0, farrayPtr1D,  rc=localrc)
@@ -31538,7 +31553,7 @@ write(*,*) "LOCALRC=",localrc
     return
   endif
 
-  
+
   ! clear destination Field
   ! Should only be 1 localDE
   call ESMF_FieldGet(dstField, 0, farrayPtr1D,  rc=localrc)
@@ -31692,7 +31707,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! init flags
   correct=.true.
   rc=ESMF_SUCCESS
@@ -31715,7 +31730,7 @@ write(*,*) "LOCALRC=",localrc
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   ! Establish the resolution of the grids
-  ! Make the same resolution, so src and dst 
+  ! Make the same resolution, so src and dst
   ! fall on top of each other
   src_nx = 17
   src_ny = 17
@@ -31760,7 +31775,7 @@ write(*,*) "LOCALRC=",localrc
   ! Construct 2D Grid A
   ! (Get memory and set coords for src)
   do lDE=0,localDECount-1
- 
+
      !! get coord 1
      call ESMF_GridGetCoord(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, &
                             coordDim=1, &
@@ -31823,7 +31838,7 @@ write(*,*) "LOCALRC=",localrc
   else
     decompX=1
     decompY=1
-  endif  
+  endif
   dstGrid=ESMF_GridCreate1PeriDim(minIndex=(/1,1/),maxIndex=(/dst_nx,dst_ny/), &
                                   regDecomp=(/decompX,decompY/), &
                                   coordSys=ESMF_COORDSYS_SPH_DEG, indexflag=ESMF_INDEX_GLOBAL, &
@@ -31863,7 +31878,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get memory and set coords for dst
   do lDE=0,localDECountDst-1
- 
+
      !! get coords
      call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, &
                             coordDim=1, &
@@ -32110,7 +32125,7 @@ write(*,*) "LOCALRC=",localrc
 
     ! Allocate and fill the node id array.
     allocate(nodeIds(numNodes))
-    nodeIds=(/1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16/) 
+    nodeIds=(/1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16/)
 
     ! Allocate and fill node coordinate array.
     ! Since this is a 2D Mesh the size is 2x the
@@ -32145,7 +32160,7 @@ write(*,*) "LOCALRC=",localrc
 
     ! Allocate and fill the element id array.
     allocate(elemIds(numTotElems))
-    elemIds=(/1,2,3,4,5,6,7,8,9/) 
+    elemIds=(/1,2,3,4,5,6,7,8,9/)
 
 
     ! Allocate and fill the element topology type array.
@@ -32162,10 +32177,10 @@ write(*,*) "LOCALRC=",localrc
 
 
     ! Allocate and fill the element connection type array.
-    ! Note that entries in this array refer to the 
+    ! Note that entries in this array refer to the
     ! positions in the nodeIds, etc. arrays and that
     ! the order and number of entries for each element
-    ! reflects that given in the Mesh options 
+    ! reflects that given in the Mesh options
     ! section for the corresponding entry
     ! in the elemTypes array.
     allocate(elemConn(4*numQuadElems+3*numTriElems))
@@ -32188,7 +32203,7 @@ write(*,*) "LOCALRC=",localrc
 
       ! Allocate and fill the node id array.
       allocate(nodeIds(numNodes))
-      nodeIds=(/1,2,3,5,6,7,9,10,11/) 
+      nodeIds=(/1,2,3,5,6,7,9,10,11/)
 
       ! Allocate and fill node coordinate array.
       ! Since this is a 2D Mesh the size is 2x the
@@ -32223,7 +32238,7 @@ write(*,*) "LOCALRC=",localrc
 
       ! Allocate and fill the element id array.
       allocate(elemIds(numTotElems))
-      elemIds=(/1,2,4,5/) 
+      elemIds=(/1,2,4,5/)
 
       ! Allocate and fill the element topology type array.
       allocate(elemTypes(numTotElems))
@@ -32246,7 +32261,7 @@ write(*,*) "LOCALRC=",localrc
 
       ! Allocate and fill the node id array.
       allocate(nodeIds(numNodes))
-      nodeIds=(/3,4,7,8,11,12/) 
+      nodeIds=(/3,4,7,8,11,12/)
 
       ! Allocate and fill node coordinate array.
       ! Since this is a 2D Mesh the size is 2x the
@@ -32275,7 +32290,7 @@ write(*,*) "LOCALRC=",localrc
 
       ! Allocate and fill the element id array.
       allocate(elemIds(numTotElems))
-      elemIds=(/3,6/) 
+      elemIds=(/3,6/)
 
       ! Allocate and fill the element topology type array.
       allocate(elemTypes(numTotElems))
@@ -32293,7 +32308,7 @@ write(*,*) "LOCALRC=",localrc
 
       ! Allocate and fill the node id array.
       allocate(nodeIds(numNodes))
-      nodeIds=(/9,10,11,13,14,15/) 
+      nodeIds=(/9,10,11,13,14,15/)
 
       ! Allocate and fill node coordinate array.
       ! Since this is a 2D Mesh the size is 2x the
@@ -32323,7 +32338,7 @@ write(*,*) "LOCALRC=",localrc
 
       ! Allocate and fill the element id array.
       allocate(elemIds(numTotElems))
-      elemIds=(/7,8/) 
+      elemIds=(/7,8/)
 
       ! Allocate and fill the element topology type array.
       allocate(elemTypes(numTotElems))
@@ -32341,7 +32356,7 @@ write(*,*) "LOCALRC=",localrc
 
       ! Allocate and fill the node id array.
       allocate(nodeIds(numNodes))
-      nodeIds=(/11,12,15,16/) 
+      nodeIds=(/11,12,15,16/)
 
       ! Allocate and fill node coordinate array.
       ! Since this is a 2D Mesh the size is 2x the
@@ -32358,7 +32373,7 @@ write(*,*) "LOCALRC=",localrc
                    3, & ! node id 12
                    3, & ! node id 15
                    3/)  ! node id 16
- 
+
       ! Set the number of each type of element, plus the total number.
       numQuadElems=1
       numTriElems=0
@@ -32366,7 +32381,7 @@ write(*,*) "LOCALRC=",localrc
 
       ! Allocate and fill the element id array.
       allocate(elemIds(numTotElems))
-      elemIds=(/9/)  
+      elemIds=(/9/)
 
       ! Allocate and fill the element topology type array.
       allocate(elemTypes(numTotElems))
@@ -32388,7 +32403,7 @@ write(*,*) "LOCALRC=",localrc
          rc=ESMF_FAILURE
          return
      endif
-  
+
   ! Create dest field
   call ESMF_ArraySpecSet(arrayspec3, 1, ESMF_TYPEKIND_R8, rc=rc)
 
@@ -32549,7 +32564,7 @@ write(*,*) "LOCALRC=",localrc
     endif
 !    write(*,*) "dst Grid and Mesh ",i1,i2,"::",dstPtr(i1,i2),mdstPtr(i3)
 !    write(*,*) "dst Grid and LocStream ",i1,i2,"::",dstPtr(i1,i2),lsdstPtr(i3)
-    
+
   enddo
   enddo
 
@@ -32652,11 +32667,11 @@ write(*,*) "LOCALRC=",localrc
   real(ESMF_KIND_R8) :: coord(2)
   character(len=ESMF_MAXSTR) :: string
   real(ESMF_KIND_R8) :: dx,dy
-  
+
   real(ESMF_KIND_R8) :: x,y
 
  real(ESMF_KIND_R8) :: err,maxErr
-  
+
   integer :: spherical_grid
 
   integer, pointer :: larrayList(:)
@@ -32670,7 +32685,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -32697,11 +32712,11 @@ write(*,*) "LOCALRC=",localrc
   ! Setup Src Mesh
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  ! 
-  ! Creates the following mesh on 
-  ! 1 or 4 PETs. Returns an error 
+  !
+  ! Creates the following mesh on
+  ! 1 or 4 PETs. Returns an error
   ! if run on other than 1 or 4 PETs
-  ! 
+  !
   !              Mesh Ids
   !
   !   2.0            8,9
@@ -32712,15 +32727,15 @@ write(*,*) "LOCALRC=",localrc
   !          \        |        /
   !            \   1  | 2   /
   !              \    |  /
-  !   0.0           1,2 
+  !   0.0           1,2
   !
-  !        0.0       1.0        2.0 
+  !        0.0       1.0        2.0
   !
   !      Node Ids at corners
   !      Element Ids in centers
-   ! 
-  !!!!! 
-  ! 
+   !
+  !!!!!
+  !
   ! The owners for 1 PET are all Pet 0.
   ! The owners for 4 PETs are as follows:
   !
@@ -32734,26 +32749,26 @@ write(*,*) "LOCALRC=",localrc
   !          \        |        /
   !            \   0  | 1   /
   !              \    |  /
-  !   0.0           0,0 
+  !   0.0           0,0
   !
-  !        0.0       1.0        2.0 
+  !        0.0       1.0        2.0
   !
   !      Node Ids at corners
   !      Element Ids in centers
-  !  
+  !
 
 
-  ! Setup mesh info depending on the 
+  ! Setup mesh info depending on the
   ! number of PETs
   if (petCount .eq. 1) then
- 
+
      ! Fill in node data
      numNodes=9
 
      !! node ids
      allocate(nodeIds(numNodes))
-     nodeIds=(/1,2,3,4,5,6,7,8,9/) 
-     
+     nodeIds=(/1,2,3,4,5,6,7,8,9/)
+
      !! node Coords
      allocate(nodeCoords(numNodes*2))
      nodeCoords=(/1.0,0.0, & ! 1
@@ -32776,7 +32791,7 @@ write(*,*) "LOCALRC=",localrc
 
       !! elem ids
       allocate(elemIds(numElems))
-      elemIds=(/1,2,3,4/) 
+      elemIds=(/1,2,3,4/)
 
       !! elem types
       allocate(elemTypes(numElems))
@@ -32784,9 +32799,9 @@ write(*,*) "LOCALRC=",localrc
 
       !! elem conn
       allocate(elemConn(numElems*4))
-      elemConn=(/1,2,5,4, & 
-                 2,3,6,5, & 
-                 4,5,8,7, & 
+      elemConn=(/1,2,5,4, &
+                 2,3,6,5, &
+                 4,5,8,7, &
                  5,6,9,8/)
 
    else if (petCount .eq. 4) then
@@ -32797,7 +32812,7 @@ write(*,*) "LOCALRC=",localrc
 
        !! node ids
        allocate(nodeIds(numNodes))
-       nodeIds=(/1,2,4,5/) 
+       nodeIds=(/1,2,4,5/)
 
        !! node Coords
         allocate(nodeCoords(numNodes*2))
@@ -32815,7 +32830,7 @@ write(*,*) "LOCALRC=",localrc
 
        !! elem ids
        allocate(elemIds(numElems))
-       elemIds=(/1/) 
+       elemIds=(/1/)
 
        !! elem type
        allocate(elemTypes(numElems))
@@ -32830,7 +32845,7 @@ write(*,*) "LOCALRC=",localrc
 
        !! node ids
        allocate(nodeIds(numNodes))
-       nodeIds=(/2,3,5,6/) 
+       nodeIds=(/2,3,5,6/)
 
        !! node Coords
        allocate(nodeCoords(numNodes*2))
@@ -32841,14 +32856,14 @@ write(*,*) "LOCALRC=",localrc
 
        !! node owners
        allocate(nodeOwners(numNodes))
-       nodeOwners=(/0,1,0,1/) 
+       nodeOwners=(/0,1,0,1/)
 
        ! Fill in elem data
        numElems=1
 
        !! elem ids
        allocate(elemIds(numElems))
-       elemIds=(/2/) 
+       elemIds=(/2/)
 
        !! elem type
        allocate(elemTypes(numElems))
@@ -32864,7 +32879,7 @@ write(*,*) "LOCALRC=",localrc
 
        !! node ids
        allocate(nodeIds(numNodes))
-       nodeIds=(/4,5,7,8/) 
+       nodeIds=(/4,5,7,8/)
 
        !! node Coords
        allocate(nodeCoords(numNodes*2))
@@ -32875,14 +32890,14 @@ write(*,*) "LOCALRC=",localrc
 
        !! node owners
        allocate(nodeOwners(numNodes))
-       nodeOwners=(/0,0,2,2/) 
+       nodeOwners=(/0,0,2,2/)
 
        ! Fill in elem data
        numElems=1
 
         !! elem ids
        allocate(elemIds(numElems))
-       elemIds=(/3/) 
+       elemIds=(/3/)
 
        !! elem type
        allocate(elemTypes(numElems))
@@ -32890,14 +32905,14 @@ write(*,*) "LOCALRC=",localrc
 
        !! elem conn
        allocate(elemConn(numElems*4))
-       elemConn=(/1,2,4,3/)  
-     else 
+       elemConn=(/1,2,4,3/)
+     else
         ! Fill in node data
         numNodes=4
 
        !! node ids
        allocate(nodeIds(numNodes))
-       nodeIds=(/5,6,8,9/) 
+       nodeIds=(/5,6,8,9/)
 
        !! node Coords
        allocate(nodeCoords(numNodes*2))
@@ -32908,14 +32923,14 @@ write(*,*) "LOCALRC=",localrc
 
        !! node owners
        allocate(nodeOwners(numNodes))
-        nodeOwners=(/0,1,2,3/) 
+        nodeOwners=(/0,1,2,3/)
 
        ! Fill in elem data
        numElems=1
 
        !! elem ids
        allocate(elemIds(numElems))
-       elemIds=(/4/) 
+       elemIds=(/4/)
 
        !! elem type
        allocate(elemTypes(numElems))
@@ -32923,7 +32938,7 @@ write(*,*) "LOCALRC=",localrc
 
        !! elem conn
        allocate(elemConn(numElems*4))
-       elemConn=(/1,2,4,3/)  
+       elemConn=(/1,2,4,3/)
      endif
    endif
 
@@ -32951,7 +32966,7 @@ write(*,*) "LOCALRC=",localrc
     return
   endif
 
-  
+
   ! Load test data into the source Field
   ! Should only be 1 localDE
   call ESMF_FieldGet(srcField, 0, farrayPtr1D,  rc=localrc)
@@ -32989,15 +33004,15 @@ write(*,*) "LOCALRC=",localrc
    deallocate(elemTypes)
    deallocate(elemConn)
 
- 
+
   ! Setup Dst Mesh
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  ! 
-  ! Creates the following mesh on 
-  ! 1 or 4 PETs. Returns an error 
+  !
+  ! Creates the following mesh on
+  ! 1 or 4 PETs. Returns an error
   ! if run on other than 1 or 4 PETs
-  ! 
+  !
   !              Mesh Ids
   !
   !   2.0            8,9
@@ -33008,15 +33023,15 @@ write(*,*) "LOCALRC=",localrc
   !          \        |        /
   !            \   1  | 2   /
   !              \    |  /
-  !   0.0           1,2 
+  !   0.0           1,2
   !
-  !        0.0       1.0        2.0 
+  !        0.0       1.0        2.0
   !
   !      Node Ids at corners
   !      Element Ids in centers
-  ! 
-  !!!!! 
-  ! 
+  !
+  !!!!!
+  !
    ! The owners for 1 PET are all Pet 0.
   ! The owners for 4 PETs are as follows:
   !
@@ -33030,24 +33045,24 @@ write(*,*) "LOCALRC=",localrc
   !          \        |        /
   !            \   0  | 1   /
   !              \    |  /
-  !   0.0           0,0 
+  !   0.0           0,0
   !
-  !        0.0       1.0        2.0 
+  !        0.0       1.0        2.0
   !
   !      Node Ids at corners
   !      Element Ids in centers
 
-  ! Setup mesh info depending on the 
+  ! Setup mesh info depending on the
   ! number of PETs
   if (petCount .eq. 1) then
 
      ! Fill in node data
      numNodes=9
- 
+
      !! node ids
      allocate(nodeIds(numNodes))
-     nodeIds=(/1,2,3,4,5,6,7,8,9/) 
-     
+     nodeIds=(/1,2,3,4,5,6,7,8,9/)
+
      !! node Coords
      allocate(nodeCoords(numNodes*2))
      nodeCoords=(/0.95,0.1, & ! 1
@@ -33063,24 +33078,24 @@ write(*,*) "LOCALRC=",localrc
       !! node owners
       allocate(nodeOwners(numNodes))
       nodeOwners=0 ! everything on proc 0
- 
+
 
       ! Fill in elem data
       numElems=4
 
       !! elem ids
       allocate(elemIds(numElems))
-      elemIds=(/1,2,3,4/) 
- 
+      elemIds=(/1,2,3,4/)
+
       !! elem types
       allocate(elemTypes(numElems))
       elemTypes=ESMF_MESHELEMTYPE_QUAD
 
       !! elem conn
       allocate(elemConn(numElems*4))
-      elemConn=(/1,2,5,4, & 
-                 2,3,6,5, & 
-                 4,5,8,7, & 
+      elemConn=(/1,2,5,4, &
+                 2,3,6,5, &
+                 4,5,8,7, &
                  5,6,9,8/)
 
     else if (petCount .eq. 4) then
@@ -33091,7 +33106,7 @@ write(*,*) "LOCALRC=",localrc
 
        !! node ids
        allocate(nodeIds(numNodes))
-       nodeIds=(/1,2,4,5/) 
+       nodeIds=(/1,2,4,5/)
 
        !! node Coords
        allocate(nodeCoords(numNodes*2))
@@ -33109,7 +33124,7 @@ write(*,*) "LOCALRC=",localrc
 
        !! elem ids
        allocate(elemIds(numElems))
-       elemIds=(/1/) 
+       elemIds=(/1/)
 
        !! elem type
        allocate(elemTypes(numElems))
@@ -33124,8 +33139,8 @@ write(*,*) "LOCALRC=",localrc
 
        !! node ids
        allocate(nodeIds(numNodes))
-       nodeIds=(/2,3,5,6/) 
- 
+       nodeIds=(/2,3,5,6/)
+
        !! node Coords
        allocate(nodeCoords(numNodes*2))
        nodeCoords=(/ 1.05,0.1, & ! 2
@@ -33135,14 +33150,14 @@ write(*,*) "LOCALRC=",localrc
 
        !! node owners
        allocate(nodeOwners(numNodes))
-       nodeOwners=(/0,1,0,1/) 
+       nodeOwners=(/0,1,0,1/)
 
         ! Fill in elem data
        numElems=1
 
         !! elem ids
        allocate(elemIds(numElems))
-       elemIds=(/2/) 
+       elemIds=(/2/)
 
        !! elem type
        allocate(elemTypes(numElems))
@@ -33158,7 +33173,7 @@ write(*,*) "LOCALRC=",localrc
 
        !! node ids
        allocate(nodeIds(numNodes))
-       nodeIds=(/4,5,7,8/) 
+       nodeIds=(/4,5,7,8/)
 
        !! node Coords
        allocate(nodeCoords(numNodes*2))
@@ -33169,14 +33184,14 @@ write(*,*) "LOCALRC=",localrc
 
        !! node owners
        allocate(nodeOwners(numNodes))
-       nodeOwners=(/0,0,2,2/) 
+       nodeOwners=(/0,0,2,2/)
 
        ! Fill in elem data
        numElems=1
 
        !! elem ids
        allocate(elemIds(numElems))
-       elemIds=(/3/) 
+       elemIds=(/3/)
 
        !! elem type
         allocate(elemTypes(numElems))
@@ -33184,14 +33199,14 @@ write(*,*) "LOCALRC=",localrc
 
        !! elem conn
        allocate(elemConn(numElems*4))
-       elemConn=(/1,2,4,3/)  
-     else 
+       elemConn=(/1,2,4,3/)
+     else
         ! Fill in node data
         numNodes=4
 
        !! node ids
        allocate(nodeIds(numNodes))
-        nodeIds=(/5,6,8,9/) 
+        nodeIds=(/5,6,8,9/)
 
        !! node Coords
        allocate(nodeCoords(numNodes*2))
@@ -33202,14 +33217,14 @@ write(*,*) "LOCALRC=",localrc
 
        !! node owners
        allocate(nodeOwners(numNodes))
-       nodeOwners=(/0,1,2,3/) 
+       nodeOwners=(/0,1,2,3/)
 
        ! Fill in elem data
        numElems=1
 
        !! elem ids
        allocate(elemIds(numElems))
-       elemIds=(/4/) 
+       elemIds=(/4/)
 
        !! elem type
        allocate(elemTypes(numElems))
@@ -33217,7 +33232,7 @@ write(*,*) "LOCALRC=",localrc
 
        !! elem conn
        allocate(elemConn(numElems*4))
-       elemConn=(/1,2,4,3/)  
+       elemConn=(/1,2,4,3/)
      endif
    endif
 
@@ -33234,10 +33249,10 @@ write(*,*) "LOCALRC=",localrc
 
 
   !   call ESMF_MeshWrite(dstMesh, "dstMesh")
-  
+
   ! Create dest field
    call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
-  
+
    dstField = ESMF_FieldCreate(dstMesh, arrayspec, &
                         name="source", rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -33245,7 +33260,7 @@ write(*,*) "LOCALRC=",localrc
     return
   endif
 
-  
+
   ! clear destination Field
   ! Should only be 1 localDE
   call ESMF_FieldGet(dstField, 0, farrayPtr1D,  rc=localrc)
@@ -33314,7 +33329,7 @@ write(*,*) "LOCALRC=",localrc
         if (err > 0.1) then
             correct=.false.
         endif
- 
+
         ! Advance to next owner
         i2=i2+1
      endif
@@ -33346,7 +33361,7 @@ write(*,*) "LOCALRC=",localrc
      return
    endif
 
-  
+
    ! Free the grids
   call ESMF_MeshDestroy(dstMesh, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -33360,7 +33375,7 @@ write(*,*) "LOCALRC=",localrc
       return
    endif
 
- 
+
   ! return answer based on correct flag
   if (correct) then
     rc=ESMF_SUCCESS
@@ -33409,14 +33424,14 @@ write(*,*) "LOCALRC=",localrc
   real(ESMF_KIND_R8) :: dst_dx, dst_dy
 
   real(ESMF_KIND_R8) :: lon, lat, theta, phi, DEG2RAD, relErr
-  
+
   integer :: spherical_grid
 
   integer :: localPet, petCount
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -33562,7 +33577,7 @@ write(*,*) "LOCALRC=",localrc
   ! Construct Src Grid
   ! (Get memory and set coords for src)
   do lDE=0,srclocalDECount-1
- 
+
      !! get coord 1
      call ESMF_GridGetCoord(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC_R4, &
@@ -33601,7 +33616,7 @@ write(*,*) "LOCALRC=",localrc
         ! init exact answer
         lon = farrayPtrXC_R4(i1,i2)
         lat = farrayPtrYC_R4(i1,i2)
-     
+
        ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(lon)
         phi = DEG2RAD*(90.-lat)
@@ -33620,7 +33635,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get memory and set coords for dst
   do lDE=0,dstlocalDECount-1
- 
+
      !! get coords
      call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -33659,11 +33674,11 @@ write(*,*) "LOCALRC=",localrc
         ! Set source coordinates as 0 to 360
         farrayPtrXC(i1,i2) = REAL(i1-1)*dst_dx
         farrayPtrYC(i1,i2) = -90. + (REAL(i2-1)*dst_dy + 0.5*dst_dy)
-  
+
         ! init exact answer
         lon = farrayPtrXC(i1,i2)
         lat = farrayPtrYC(i1,i2)
-     
+
        ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(lon)
         phi = DEG2RAD*(90.-lat)
@@ -33847,12 +33862,12 @@ write(*,*) "LOCALRC=",localrc
   integer dst_nx, dst_ny
   integer num_arrays
   real(ESMF_KIND_R8) :: dx,dy
-  
+
    real(ESMF_KIND_R8) :: dst_minx,dst_miny
   real(ESMF_KIND_R8) :: dst_maxx,dst_maxy
 
   real(ESMF_KIND_R8) :: x,y
-  
+
   integer :: spherical_grid
 
    integer, pointer :: larrayList(:)
@@ -33866,7 +33881,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -33897,7 +33912,7 @@ write(*,*) "LOCALRC=",localrc
   ! Establish the coordinates of the grids
   dst_minx = 0.1
   dst_miny = 0.1
-  
+
   dst_maxx = 1.9
   dst_maxy = 1.9
 
@@ -33907,7 +33922,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the node id array.
      allocate(nodeIds(numNodes))
-     nodeIds=(/1,2,3,4,5,6,7,8,9,10,11,12/) 
+     nodeIds=(/1,2,3,4,5,6,7,8,9,10,11,12/)
 
      ! Allocate and fill node coordinate array.
      ! Since this is a 2D Mesh the size is 2x the
@@ -33942,7 +33957,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the element id array.
      allocate(elemIds(numTotElems))
-      elemIds=(/1,2,3,4,5/) 
+      elemIds=(/1,2,3,4,5/)
 
 
      ! Allocate and fill the element topology type array.
@@ -33967,10 +33982,10 @@ write(*,*) "LOCALRC=",localrc
 
 
      ! Allocate and fill the element connection type array.
-     ! Note that entries in this array refer to the 
+     ! Note that entries in this array refer to the
       ! positions in the nodeIds, etc. arrays and that
       ! the order and number of entries for each element
-     ! reflects that given in the Mesh options 
+     ! reflects that given in the Mesh options
      ! section for the corresponding entry
      ! in the elemTypes array.
      allocate(elemConn(numElemConn))
@@ -33988,7 +34003,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-         nodeIds=(/1,2,4,5/) 
+         nodeIds=(/1,2,4,5/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -34014,10 +34029,10 @@ write(*,*) "LOCALRC=",localrc
        numTotElems=numTriElems+numQuadElems+numPentElems+numHexElems
         numElemConn=3*numTriElems+4*numQuadElems+ &
             5*numPentElems+6*numHexElems
-       
+
        ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/1/) 
+        elemIds=(/1/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -34041,7 +34056,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/2,3,5,6/) 
+       nodeIds=(/2,3,5,6/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -34058,7 +34073,7 @@ write(*,*) "LOCALRC=",localrc
                     1, & ! node id 3
                     0, & ! node id 5
                     1/)  ! node id 6
- 
+
        ! Set the number of each type of element, plus tot and num conn.
        numQuadElems=0
        numTriElems=2
@@ -34070,8 +34085,8 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/2,3/) 
- 
+       elemIds=(/2,3/)
+
         ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
        elemTypes=(/ESMF_MESHELEMTYPE_TRI, & ! elem id 2
@@ -34095,7 +34110,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/4,5,7,8,9/) 
+        nodeIds=(/4,5,7,8,9/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -34127,8 +34142,8 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the element id array.
           allocate(elemIds(numTotElems))
-        elemIds=(/4/) 
- 
+        elemIds=(/4/)
+
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
         elemTypes=(/5/) ! elem id 4
@@ -34149,7 +34164,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/5,6,9,10,11,12/) 
+        nodeIds=(/5,6,9,10,11,12/)
 
         ! Allocate and fill node coordinate array.
          ! Since this is a 2D Mesh the size is 2x the
@@ -34170,7 +34185,7 @@ write(*,*) "LOCALRC=",localrc
                      3, & ! node id 10
                      3, & ! node id 11
                      3/)  ! node id 12
- 
+
 
         ! Set the number of each type of element, plus tot and num conn.
         numQuadElems=0
@@ -34184,7 +34199,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/5/)  
+        elemIds=(/5/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -34224,7 +34239,7 @@ write(*,*) "LOCALRC=",localrc
     return
   endif
 
-  
+
   ! Load test data into the source Field
   ! Should only be 1 localDE
   call ESMF_FieldGet(srcField, 0, farrayPtr1D,  rc=localrc)
@@ -34238,7 +34253,7 @@ write(*,*) "LOCALRC=",localrc
      ! Get coordinates
      x=elemCoords(2*i1-1)
      y=elemCoords(2*i1)
-     
+
      ! Set source function
      farrayPtr1D(i1) = 20.0+x+y
   enddo
@@ -34247,7 +34262,7 @@ write(*,*) "LOCALRC=",localrc
    deallocate(nodeIds)
    deallocate(nodeCoords)
    deallocate(nodeOwners)
-   
+
    ! deallocate elem data
    deallocate(elemIds)
    deallocate(elemTypes)
@@ -34302,14 +34317,14 @@ write(*,*) "LOCALRC=",localrc
     return
   endif
 
- 
+
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   ! Destination grid
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   ! Get memory and set coords for dst
   do lDE=0,localDECount-1
- 
+
      !! get coords
      call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -34324,7 +34339,7 @@ write(*,*) "LOCALRC=",localrc
         rc=ESMF_FAILURE
         return
      endif
- 
+
 
      call ESMF_FieldGet(dstField, lDE, farrayPtr, computationalLBound=fclbnd, &
                              computationalUBound=fcubnd,  rc=localrc)
@@ -34342,7 +34357,7 @@ write(*,*) "LOCALRC=",localrc
          ! Set source coordinates
         farrayPtrXC(i1,i2) = ((dst_maxx-dst_minx)*REAL(i1-1)/REAL(dst_nx-1))+dst_minx
         farrayPtrYC(i1,i2) = ((dst_maxy-dst_miny)*REAL(i2-1)/REAL(dst_ny-1))+dst_miny
- 
+
         ! initialize destination field
         farrayPtr(i1,i2)=0.0
 
@@ -34406,12 +34421,12 @@ write(*,*) "LOCALRC=",localrc
         return
      endif
 
-    
+
       !! check error
      do i1=clbnd(1),cubnd(1)
       do i2=clbnd(2),cubnd(2)
- 
-          ! Skip unmapped points 
+
+          ! Skip unmapped points
          if (farrayPtr(i1,i2) < 1.0) cycle
 
 
@@ -34507,12 +34522,12 @@ write(*,*) "LOCALRC=",localrc
   character(len=ESMF_MAXSTR) :: string
   integer src_nx, src_ny, dst_nx, dst_ny
   real(ESMF_KIND_R8) :: lon, lat, theta, phi, DEG2RAD, relErr
-  real(ESMF_KIND_R8) :: coords(2)  
+  real(ESMF_KIND_R8) :: coords(2)
   integer :: localPet, petCount
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -34643,7 +34658,7 @@ write(*,*) "LOCALRC=",localrc
   ! Construct Src Grid
   ! (Get memory and set coords for src)
   do lDE=0,srclocalDECount-1
- 
+
      ! get src pointer
      call ESMF_FieldGet(srcField, lDE, farrayPtr, &
           computationalLBound=clbnd, computationalUBound=cubnd, rc=localrc)
@@ -34668,7 +34683,7 @@ write(*,*) "LOCALRC=",localrc
         ! init exact answer
         lon = coords(1)
         lat = coords(2)
-     
+
        ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(lon)
         phi = DEG2RAD*(90.-lat)
@@ -34687,7 +34702,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get memory and set coords for dst
   do lDE=0,dstlocalDECount-1
- 
+
      ! get dst pointer
      call ESMF_FieldGet(dstField, lDE, farrayPtr, &
           computationalLBound=clbnd, computationalUBound=cubnd, rc=localrc)
@@ -34718,7 +34733,7 @@ write(*,*) "LOCALRC=",localrc
         ! init exact answer
         lon = coords(1)
         lat = coords(2)
-     
+
        ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(lon)
         phi = DEG2RAD*(90.-lat)
@@ -34911,9 +34926,9 @@ write(*,*) "LOCALRC=",localrc
 
   real(ESMF_KIND_R8) :: src_dx, src_dy
   real(ESMF_KIND_R8) :: dst_dx, dst_dy
- 
+
   real(ESMF_KIND_R8) :: lon, lat, theta, phi, DEG2RAD, relErr
-  
+
   integer :: spherical_grid
 
   integer :: localPet, petCount, regDecomp(2)
@@ -34921,7 +34936,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -34956,7 +34971,7 @@ write(*,*) "LOCALRC=",localrc
      regDecomp(:)=(/1,1/)
      allocate(petMap(1,1,1))
      petMap(1,1,1)=0
-  else 
+  else
      regDecomp(:)=(/2,2/)
      allocate(petMap(2,2,1))
      petMap(:,1,1)=(/0,0/)
@@ -35042,7 +35057,7 @@ write(*,*) "LOCALRC=",localrc
   endif
 
 
- 
+
   ! Get arrays
   ! dstArray
   call ESMF_FieldGet(dstField, array=dstArray, rc=localrc)
@@ -35083,7 +35098,7 @@ write(*,*) "LOCALRC=",localrc
   ! Construct Src Grid
   ! (Get memory and set coords for src)
   do lDE=0,srclocalDECount-1
- 
+
      !! get coord 1
      call ESMF_GridGetCoord(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, &
@@ -35122,7 +35137,7 @@ write(*,*) "LOCALRC=",localrc
          ! init exact answer
         lon = farrayPtrXC(i1,i2)
         lat = farrayPtrYC(i1,i2)
-     
+
        ! Set the source to be a function of the x,y,z coordinate
          theta = DEG2RAD*(lon)
         phi = DEG2RAD*(90.-lat)
@@ -35141,7 +35156,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get memory and set coords for dst
   do lDE=0,dstlocalDECount-1
- 
+
      !! get coords
      call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -35180,11 +35195,11 @@ write(*,*) "LOCALRC=",localrc
         ! Set source coordinates as 0 to 360
         farrayPtrXC(i1,i2) = REAL(i1-1)*dst_dx
          farrayPtrYC(i1,i2) = -90. + (REAL(i2-1)*dst_dy + 0.5*dst_dy)
-  
+
         ! init exact answer
         lon = farrayPtrXC(i1,i2)
         lat = farrayPtrYC(i1,i2)
-     
+
        ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(lon)
         phi = DEG2RAD*(90.-lat)
@@ -35374,9 +35389,9 @@ write(*,*) "LOCALRC=",localrc
   real(ESMF_KIND_R8) :: coord(2)
   character(len=ESMF_MAXSTR) :: string
   real(ESMF_KIND_R8) :: dx,dy
-   
+
   real(ESMF_KIND_R8) :: x,y
-  
+
   integer :: spherical_grid
 
   integer, pointer :: larrayList(:)
@@ -35390,7 +35405,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -35421,7 +35436,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the node id array.
      allocate(nodeIds(numNodes))
-      nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+      nodeIds=(/1,2,3,4,5,6,7,8,9/)
 
      ! Allocate and fill node coordinate array.
      ! Since this is a 2D Mesh the size is 2x the
@@ -35445,7 +35460,7 @@ write(*,*) "LOCALRC=",localrc
      ! Allocate and fill the node mask array.
      ! Mask out node 9
      allocate(nodeMask(numNodes))
-     nodeMask=(/0,0,0,0,0,0,0,0,1/) 
+     nodeMask=(/0,0,0,0,0,0,0,0,1/)
 
 
      ! Set the number of each type of element, plus the total number.
@@ -35455,7 +35470,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the element id array.
      allocate(elemIds(numTotElems))
-     elemIds=(/1,2,3,4,5/) 
+     elemIds=(/1,2,3,4,5/)
 
 
      ! Allocate and fill the element topology type array.
@@ -35468,10 +35483,10 @@ write(*,*) "LOCALRC=",localrc
 
 
      ! Allocate and fill the element connection type array.
-     ! Note that entries in this array refer to the 
+     ! Note that entries in this array refer to the
      ! positions in the nodeIds, etc. arrays and that
       ! the order and number of entries for each element
-     ! reflects that given in the Mesh options 
+     ! reflects that given in the Mesh options
      ! section for the corresponding entry
      ! in the elemTypes array.
      allocate(elemConn(4*numQuadElems+3*numTriElems))
@@ -35490,7 +35505,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/1,2,4,5/) 
+       nodeIds=(/1,2,4,5/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -35519,10 +35534,10 @@ write(*,*) "LOCALRC=",localrc
        numQuadElems=1
        numTriElems=0
        numTotElems=numQuadElems+numTriElems
- 
+
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/1/) 
+       elemIds=(/1/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -35539,7 +35554,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/2,3,5,6/) 
+       nodeIds=(/2,3,5,6/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -35568,10 +35583,10 @@ write(*,*) "LOCALRC=",localrc
        numQuadElems=0
        numTriElems=2
        numTotElems=numQuadElems+numTriElems
- 
+
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/2,3/) 
+       elemIds=(/2,3/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -35589,7 +35604,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/4,5,7,8/) 
+        nodeIds=(/4,5,7,8/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -35621,7 +35636,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/4/) 
+        elemIds=(/4/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -35637,7 +35652,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/5,6,8,9/) 
+        nodeIds=(/5,6,8,9/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -35661,15 +35676,15 @@ write(*,*) "LOCALRC=",localrc
                    0, & ! node id 6
                    0, & ! node id 8
                    1/)  ! node id 9
- 
+
         ! Set the number of each type of element, plus the total number.
         numQuadElems=1
         numTriElems=0
         numTotElems=numQuadElems+numTriElems
- 
+
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/5/)  
+        elemIds=(/5/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -35722,7 +35737,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the node id array.
      allocate(nodeIds(numNodes))
-     nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+     nodeIds=(/1,2,3,4,5,6,7,8,9/)
 
      ! Allocate and fill node coordinate array.
      ! Since this is a 2D Mesh the size is 2x the
@@ -35747,7 +35762,7 @@ write(*,*) "LOCALRC=",localrc
      ! (Mask point sticking out of src grid and point
      !  uncovered by masked src point)
      allocate(nodeMask(numNodes))
-     nodeMask=(/0,0,0,2,0,0,0,0,0/) 
+     nodeMask=(/0,0,0,2,0,0,0,0,0/)
 
      ! Set the number of each type of element, plus the total number.
      numQuadElems=3
@@ -35756,7 +35771,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the element id array.
      allocate(elemIds(numTotElems))
-     elemIds=(/1,2,3,4,5/) 
+     elemIds=(/1,2,3,4,5/)
 
 
      ! Allocate and fill the element topology type array.
@@ -35769,10 +35784,10 @@ write(*,*) "LOCALRC=",localrc
 
 
      ! Allocate and fill the element connection type array.
-     ! Note that entries in this array refer to the 
+     ! Note that entries in this array refer to the
      ! positions in the nodeIds, etc. arrays and that
      ! the order and number of entries for each element
-     ! reflects that given in the Mesh options 
+     ! reflects that given in the Mesh options
      ! section for the corresponding entry
      ! in the elemTypes array.
      allocate(elemConn(4*numQuadElems+3*numTriElems))
@@ -35781,7 +35796,7 @@ write(*,*) "LOCALRC=",localrc
                 3,6,5,   &  ! elem id 3
                 4,5,8,7, &  ! elem id 4
                 5,6,9,8/)   ! elem id 5
- 
+
 
  else if (petCount .eq. 4) then
      ! Setup mesh data depending on PET
@@ -35791,7 +35806,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/1,2,4,5/) 
+       nodeIds=(/1,2,4,5/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -35823,7 +35838,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/1/) 
+       elemIds=(/1/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -35840,7 +35855,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/2,3,5,6/) 
+       nodeIds=(/2,3,5,6/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -35872,7 +35887,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/2,3/) 
+       elemIds=(/2,3/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -35890,7 +35905,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/4,5,7,8/) 
+        nodeIds=(/4,5,7,8/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -35922,7 +35937,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/4/) 
+        elemIds=(/4/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -35938,7 +35953,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/5,6,8,9/) 
+        nodeIds=(/5,6,8,9/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -35971,7 +35986,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/5/)  
+        elemIds=(/5/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -36007,7 +36022,7 @@ write(*,*) "LOCALRC=",localrc
    deallocate(elemConn)
 
 
-  
+
   ! Create dest field
   call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
 
@@ -36049,7 +36064,7 @@ write(*,*) "LOCALRC=",localrc
       rc=ESMF_FAILURE
       return
    endif
- 
+
   ! Check destination field
   ! Should only be 1 localDE
   call ESMF_FieldGet(regridStatusField, 0, statusPtr,  rc=localrc)
@@ -36076,7 +36091,7 @@ write(*,*) "LOCALRC=",localrc
  else if (petCount .eq. 4) then
      if (localPET .eq. 0) then !!! This part only for PET 0
 
-        ! Check status for  nodeIds=(/1,2,4,5/) 
+        ! Check status for  nodeIds=(/1,2,4,5/)
         if (statusPtr(1) .ne. ESMF_REGRIDSTATUS_OUTSIDE) correct=.false.
         if (statusPtr(2) .ne. ESMF_REGRIDSTATUS_MAPPED) correct=.false.
         if (statusPtr(3) .ne. ESMF_REGRIDSTATUS_DSTMASKED) correct=.false.
@@ -36084,21 +36099,21 @@ write(*,*) "LOCALRC=",localrc
 
      else if (localPET .eq. 1) then !!! This part only for PET 1
 
-       ! Check status for nodeIds=(/X,3,X,6/) 
+       ! Check status for nodeIds=(/X,3,X,6/)
        if (statusPtr(1) .ne. ESMF_REGRIDSTATUS_MAPPED) correct=.false.
        if (statusPtr(2) .ne. ESMF_REGRIDSTATUS_MAPPED) correct=.false.
 
     else if (localPET .eq. 2) then !!! This part only for PET 2
 
-        ! Check status for nodeIds=(/X,X,7,8/) 
+        ! Check status for nodeIds=(/X,X,7,8/)
        if (statusPtr(1) .ne. ESMF_REGRIDSTATUS_MAPPED) correct=.false.
        if (statusPtr(2) .ne. ESMF_REGRIDSTATUS_MAPPED) correct=.false.
 
      else if (localPET .eq. 3) then !!! This part only for PET 3
 
-        ! Check status for nodeIds=(/X,X,X,9/) 
+        ! Check status for nodeIds=(/X,X,X,9/)
         if (statusPtr(1) .ne. ESMF_REGRIDSTATUS_SRCMASKED) correct=.false.
-        
+
      endif
   endif
 
@@ -36143,7 +36158,7 @@ write(*,*) "LOCALRC=",localrc
     rc=ESMF_FAILURE
   endif
 
- end subroutine test_regridPerLocStatus 
+ end subroutine test_regridPerLocStatus
 
  subroutine test_regridPerLocStatusNSToD(rc)
         integer, intent(out)  :: rc
@@ -36170,9 +36185,9 @@ write(*,*) "LOCALRC=",localrc
   real(ESMF_KIND_R8) :: coord(2)
   character(len=ESMF_MAXSTR) :: string
   real(ESMF_KIND_R8) :: dx,dy
-   
+
   real(ESMF_KIND_R8) :: x,y
-  
+
   integer :: spherical_grid
 
   integer, pointer :: larrayList(:)
@@ -36186,7 +36201,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -36217,7 +36232,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the node id array.
      allocate(nodeIds(numNodes))
-      nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+      nodeIds=(/1,2,3,4,5,6,7,8,9/)
 
      ! Allocate and fill node coordinate array.
      ! Since this is a 2D Mesh the size is 2x the
@@ -36241,7 +36256,7 @@ write(*,*) "LOCALRC=",localrc
      ! Allocate and fill the node mask array.
      ! Mask out node 9
      allocate(nodeMask(numNodes))
-     nodeMask=(/0,0,0,0,0,0,0,0,1/) 
+     nodeMask=(/0,0,0,0,0,0,0,0,1/)
 
 
      ! Set the number of each type of element, plus the total number.
@@ -36251,7 +36266,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the element id array.
      allocate(elemIds(numTotElems))
-     elemIds=(/1,2,3,4,5/) 
+     elemIds=(/1,2,3,4,5/)
 
 
      ! Allocate and fill the element topology type array.
@@ -36264,10 +36279,10 @@ write(*,*) "LOCALRC=",localrc
 
 
      ! Allocate and fill the element connection type array.
-     ! Note that entries in this array refer to the 
+     ! Note that entries in this array refer to the
      ! positions in the nodeIds, etc. arrays and that
       ! the order and number of entries for each element
-     ! reflects that given in the Mesh options 
+     ! reflects that given in the Mesh options
      ! section for the corresponding entry
      ! in the elemTypes array.
      allocate(elemConn(4*numQuadElems+3*numTriElems))
@@ -36286,7 +36301,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/1,2,4,5/) 
+       nodeIds=(/1,2,4,5/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -36315,10 +36330,10 @@ write(*,*) "LOCALRC=",localrc
        numQuadElems=1
        numTriElems=0
        numTotElems=numQuadElems+numTriElems
- 
+
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/1/) 
+       elemIds=(/1/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -36335,7 +36350,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/2,3,5,6/) 
+       nodeIds=(/2,3,5,6/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -36364,10 +36379,10 @@ write(*,*) "LOCALRC=",localrc
        numQuadElems=0
        numTriElems=2
        numTotElems=numQuadElems+numTriElems
- 
+
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/2,3/) 
+       elemIds=(/2,3/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -36385,7 +36400,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/4,5,7,8/) 
+        nodeIds=(/4,5,7,8/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -36417,7 +36432,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/4/) 
+        elemIds=(/4/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -36433,7 +36448,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/5,6,8,9/) 
+        nodeIds=(/5,6,8,9/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -36457,15 +36472,15 @@ write(*,*) "LOCALRC=",localrc
                    0, & ! node id 6
                    0, & ! node id 8
                    1/)  ! node id 9
- 
+
         ! Set the number of each type of element, plus the total number.
         numQuadElems=1
         numTriElems=0
         numTotElems=numQuadElems+numTriElems
- 
+
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/5/)  
+        elemIds=(/5/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -36518,7 +36533,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the node id array.
      allocate(nodeIds(numNodes))
-     nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+     nodeIds=(/1,2,3,4,5,6,7,8,9/)
 
      ! Allocate and fill node coordinate array.
      ! Since this is a 2D Mesh the size is 2x the
@@ -36543,7 +36558,7 @@ write(*,*) "LOCALRC=",localrc
      ! (Mask point sticking out of src grid and point
      !  uncovered by masked src point)
      allocate(nodeMask(numNodes))
-     nodeMask=(/0,0,0,2,0,0,0,0,0/) 
+     nodeMask=(/0,0,0,2,0,0,0,0,0/)
 
      ! Set the number of each type of element, plus the total number.
      numQuadElems=3
@@ -36552,7 +36567,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the element id array.
      allocate(elemIds(numTotElems))
-     elemIds=(/1,2,3,4,5/) 
+     elemIds=(/1,2,3,4,5/)
 
 
      ! Allocate and fill the element topology type array.
@@ -36565,10 +36580,10 @@ write(*,*) "LOCALRC=",localrc
 
 
      ! Allocate and fill the element connection type array.
-     ! Note that entries in this array refer to the 
+     ! Note that entries in this array refer to the
      ! positions in the nodeIds, etc. arrays and that
      ! the order and number of entries for each element
-     ! reflects that given in the Mesh options 
+     ! reflects that given in the Mesh options
      ! section for the corresponding entry
      ! in the elemTypes array.
      allocate(elemConn(4*numQuadElems+3*numTriElems))
@@ -36577,7 +36592,7 @@ write(*,*) "LOCALRC=",localrc
                 3,6,5,   &  ! elem id 3
                 4,5,8,7, &  ! elem id 4
                 5,6,9,8/)   ! elem id 5
- 
+
 
  else if (petCount .eq. 4) then
      ! Setup mesh data depending on PET
@@ -36587,7 +36602,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/1,2,4,5/) 
+       nodeIds=(/1,2,4,5/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -36619,7 +36634,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/1/) 
+       elemIds=(/1/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -36636,7 +36651,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/2,3,5,6/) 
+       nodeIds=(/2,3,5,6/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -36668,7 +36683,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/2,3/) 
+       elemIds=(/2,3/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -36686,7 +36701,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/4,5,7,8/) 
+        nodeIds=(/4,5,7,8/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -36718,7 +36733,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/4/) 
+        elemIds=(/4/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -36734,7 +36749,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/5,6,8,9/) 
+        nodeIds=(/5,6,8,9/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -36767,7 +36782,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/5/)  
+        elemIds=(/5/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -36803,7 +36818,7 @@ write(*,*) "LOCALRC=",localrc
    deallocate(elemConn)
 
 
-  
+
   ! Create dest field
   call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
 
@@ -36873,7 +36888,7 @@ write(*,*) "LOCALRC=",localrc
  else if (petCount .eq. 4) then
      if (localPET .eq. 0) then !!! This part only for PET 0
 
-        ! Check status for  nodeIds=(/1,2,4,5/) 
+        ! Check status for  nodeIds=(/1,2,4,5/)
         if (statusPtr(1) .ne. ESMF_REGRIDSTATUS_MAPPED) correct=.false.
         if (statusPtr(2) .ne. ESMF_REGRIDSTATUS_MAPPED) correct=.false.
         if (statusPtr(3) .ne. ESMF_REGRIDSTATUS_DSTMASKED) correct=.false.
@@ -36881,21 +36896,21 @@ write(*,*) "LOCALRC=",localrc
 
      else if (localPET .eq. 1) then !!! This part only for PET 1
 
-       ! Check status for nodeIds=(/X,3,X,6/) 
+       ! Check status for nodeIds=(/X,3,X,6/)
        if (statusPtr(1) .ne. ESMF_REGRIDSTATUS_MAPPED) correct=.false.
        if (statusPtr(2) .ne. ESMF_REGRIDSTATUS_MAPPED) correct=.false.
 
     else if (localPET .eq. 2) then !!! This part only for PET 2
 
-        ! Check status for nodeIds=(/X,X,7,8/) 
+        ! Check status for nodeIds=(/X,X,7,8/)
        if (statusPtr(1) .ne. ESMF_REGRIDSTATUS_MAPPED) correct=.false.
        if (statusPtr(2) .ne. ESMF_REGRIDSTATUS_MAPPED) correct=.false.
 
      else if (localPET .eq. 3) then !!! This part only for PET 3
 
-        ! Check status for nodeIds=(/X,X,X,9/) 
+        ! Check status for nodeIds=(/X,X,X,9/)
         if (statusPtr(1) .ne. ESMF_REGRIDSTATUS_MAPPED) correct=.false.
-        
+
      endif
   endif
 
@@ -36940,14 +36955,14 @@ write(*,*) "LOCALRC=",localrc
     rc=ESMF_FAILURE
   endif
 
- end subroutine test_regridPerLocStatusNSToD 
+ end subroutine test_regridPerLocStatusNSToD
 
 
       subroutine test_regridSMMArbGrid(rc)
         integer, intent(out)  :: rc
   logical :: correct
   integer :: localrc
-  type(ESMF_Grid) :: srcGrid  
+  type(ESMF_Grid) :: srcGrid
   type(ESMF_Grid) :: dstGrid
   type(ESMF_Grid) :: dstArbGrid
   type(ESMF_Field) :: srcFieldA
@@ -36984,8 +36999,8 @@ write(*,*) "LOCALRC=",localrc
   real(ESMF_KIND_R8) :: relErr, maxrelErr
 
   integer :: localCount
-  integer, allocatable :: localIndices(:,:)  
- 
+  integer, allocatable :: localIndices(:,:)
+
   integer, pointer :: larrayList(:)
   integer :: localPet, petCount
 
@@ -36994,12 +37009,12 @@ write(*,*) "LOCALRC=",localrc
 
   ! result code
   integer :: finalrc
-  
+
    ! init success flag
   correct=.true.
- 
+
   rc=ESMF_SUCCESS
- 
+
   ! get pet info
   call ESMF_VMGetGlobal(vm, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -37023,16 +37038,16 @@ write(*,*) "LOCALRC=",localrc
   ! Establish the coordinates of the grids
    Dst_minx = 0.0
   Dst_miny = 0.0
-  
+
   Dst_maxx = 10.0
   Dst_maxy = 10.0
-  
+
   Src_minx = 0.0
   Src_miny = 0.0
-  
+
   Src_maxx = 10.0
   Src_maxy = 10.0
-  
+
   ! setup source grid
   srcGrid=ESMF_GridCreateNoPeriDim(minIndex=(/1,1/),maxIndex=(/Src_nx,Src_ny/),regDecomp=(/petCount,1/), &
                               coordSys=ESMF_COORDSYS_CART,indexflag=ESMF_INDEX_GLOBAL, &
@@ -37041,7 +37056,7 @@ write(*,*) "LOCALRC=",localrc
     rc=ESMF_FAILURE
     return
   endif
- 
+
 
   ! setup dest. grid
   dstGrid=ESMF_GridCreateNoPeriDim(minIndex=(/1,1/),maxIndex=(/Dst_nx,Dst_ny/),regDecomp=(/1,petCount/), &
@@ -37069,7 +37084,7 @@ write(*,*) "LOCALRC=",localrc
     rc=ESMF_FAILURE
      return
    endif
-  
+
 
    xdstField = ESMF_FieldCreate(dstGrid, arrayspec, &
                          staggerloc=ESMF_STAGGERLOC_CENTER, name="dest", rc=localrc)
@@ -37092,7 +37107,7 @@ write(*,*) "LOCALRC=",localrc
     return
   endif
 
- 
+
    ! Get number of local DEs
   call ESMF_GridGet(srcGrid, localDECount=localDECount, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -37116,11 +37131,11 @@ write(*,*) "LOCALRC=",localrc
     return
    endif
 
- 
+
   ! Construct 3D Grid A
   ! (Get memory and set coords for src)
   do lDE=0,localDECount-1
- 
+
       !! get coord 1
      call ESMF_GridGetCoord(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -37167,7 +37182,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get memory and set coords for dst
   do lDE=0,localDECount-1
- 
+
      !! get coords
      call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -37175,7 +37190,7 @@ write(*,*) "LOCALRC=",localrc
         rc=ESMF_FAILURE
          return
      endif
- 
+
      call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
                              computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrYC, rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
@@ -37183,7 +37198,7 @@ write(*,*) "LOCALRC=",localrc
          return
      endif
 
-   
+
      call ESMF_FieldGet(dstField, lDE, farrayPtr, computationalLBound=fclbnd, &
                              computationalUBound=fcubnd,  rc=localrc)
       if (localrc /=ESMF_SUCCESS) then
@@ -37197,18 +37212,18 @@ write(*,*) "LOCALRC=",localrc
         rc=ESMF_FAILURE
         return
      endif
- 
+
       !! set coords
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
- 
+
         ! Set dst coordinates
         farrayPtrXC(i1,i2) = ((Dst_maxx-Dst_minx)*REAL(i1-1)/REAL(Dst_nx-1))+Dst_minx
         farrayPtrYC(i1,i2) = ((Dst_maxy-Dst_miny)*REAL(i2-1)/REAL(Dst_ny-1))+Dst_miny
 
         ! initialize destination field
         farrayPtr(i1,i2) = 0.0
-         
+
         ! Set exact destination field
          xfarrayPtr(i1,i2) = 2.0+farrayPtrXC(i1,i2)+10*farrayPtrYC(i1,i2)
 
@@ -37259,7 +37274,7 @@ write(*,*) "LOCALRC=",localrc
    endif
 
    ! Error Check
-  maxRelErr=0.0  
+  maxRelErr=0.0
   do lDE=0,localDECount-1
 
      call ESMF_FieldGet(dstField, lDE, farrayPtr, computationalLBound=clbnd, &
@@ -37285,12 +37300,12 @@ write(*,*) "LOCALRC=",localrc
         else
            relErr=abs(farrayPtr(i1,i2)-xfarrayPtr(i1,i2))
         endif
- 
+
         ! if working everything should be close to exact answer
         if (relErr .gt. 1.0E-14) then
            correct=.false.
         endif
-  
+
        ! Calc Max error
        if (relErr .gt. maxRelErr) then
            maxRelErr=relErr
@@ -37305,10 +37320,10 @@ write(*,*) "LOCALRC=",localrc
 #endif
 
   ! Create arbitrary dst grid
-  if (petCount .eq. 0) then 
+  if (petCount .eq. 0) then
      ! Allocate list
      localCount=Dst_nx*Dst_ny
-      allocate(localIndices(localCount,2))    
+      allocate(localIndices(localCount,2))
 
      ! Fill local indices
      pos=1
@@ -37319,7 +37334,7 @@ write(*,*) "LOCALRC=",localrc
         pos=pos+1
      enddo
      enddo
-  else 
+  else
      ! Calc local count
      localCount=0
      do i1=1, Dst_nx
@@ -37329,9 +37344,9 @@ write(*,*) "LOCALRC=",localrc
         endif
      enddo
      enddo
- 
+
      ! Allocate list
-     allocate(localIndices(localCount,2))    
+     allocate(localIndices(localCount,2))
 
        ! Set indices
      pos=1
@@ -37344,7 +37359,7 @@ write(*,*) "LOCALRC=",localrc
         endif
      enddo
      enddo
-  endif 
+  endif
 
   ! Setup dest. arbitrary grid
   dstArbGrid=ESMF_GridCreateNoPeriDim(minIndex=(/1,1/),maxIndex=(/Dst_nx,Dst_ny /), &
@@ -37364,7 +37379,7 @@ write(*,*) "LOCALRC=",localrc
     rc=ESMF_FAILURE
      return
    endif
-   
+
 
    xdstArbField = ESMF_FieldCreate(dstArbGrid, typekind=ESMF_TYPEKIND_R8, &
                          staggerloc=ESMF_STAGGERLOC_CENTER, name="dest", rc=localrc)
@@ -37391,10 +37406,10 @@ write(*,*) "LOCALRC=",localrc
      ! Calc coordinates
      x = ((Dst_maxx-Dst_minx)*REAL(localIndices(local_i1,1)-1)/REAL(Dst_nx-1))+Dst_minx
      y = ((Dst_maxy-Dst_miny)*REAL(localIndices(local_i1,2)-1)/REAL(Dst_ny-1))+Dst_miny
-     
+
      ! Set exact destination field
      xfarrayPtr1D(i1) = 2.0+x+10*y
-     
+
   enddo
 
   ! Do SMM
@@ -37436,7 +37451,7 @@ write(*,*) "LOCALRC=",localrc
   endif
 
   ! Set exact field
-  maxRelErr=0.0  
+  maxRelErr=0.0
   do i1=clbnd1D(1),cubnd1D(1)
 
      ! Compute relative error
@@ -37445,12 +37460,12 @@ write(*,*) "LOCALRC=",localrc
      else
         relErr=abs(farrayPtr1D(i1)-xfarrayPtr1D(i1))
      endif
- 
+
      ! if working everything should be close to exact answer
      if (relErr .gt. 1.0E-14) then
         correct=.false.
       endif
-     
+
      ! Calc Max error
      if (relErr .gt. maxRelErr) then
         maxRelErr=relErr
@@ -37478,7 +37493,7 @@ write(*,*) "LOCALRC=",localrc
      return
    endif
 
- 
+
   ! Free the grids
   call ESMF_GridDestroy(srcGrid, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -37538,7 +37553,7 @@ end subroutine test_regridSMMArbGrid
   character(len=ESMF_MAXSTR) :: string
   integer src_nx, src_ny, dst_nx, dst_ny
   real(ESMF_KIND_R8) :: lon, lat, theta, phi, DEG2RAD, relErr
-  real(ESMF_KIND_R8) :: coords(2)  
+  real(ESMF_KIND_R8) :: coords(2)
   real(ESMF_KIND_R8) :: maxRelErr,avgRelErr
   integer :: localPet, petCount
 
@@ -37546,7 +37561,7 @@ end subroutine test_regridSMMArbGrid
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -37678,7 +37693,7 @@ end subroutine test_regridSMMArbGrid
   ! Construct Src Grid
   ! (Get memory and set coords for src)
   do lDE=0,srclocalDECount-1
- 
+
      ! get src pointer
      call ESMF_FieldGet(srcField, lDE, farrayPtr, &
           computationalLBound=clbnd, computationalUBound=cubnd, rc=localrc)
@@ -37703,7 +37718,7 @@ end subroutine test_regridSMMArbGrid
         ! init exact answer
         lon = coords(1)
         lat = coords(2)
-     
+
        ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(lon)
         phi = DEG2RAD*(90.-lat)
@@ -37726,7 +37741,7 @@ end subroutine test_regridSMMArbGrid
 
   ! Get memory and set coords for dst
   do lDE=0,dstlocalDECount-1
- 
+
      ! get dst pointer
      call ESMF_FieldGet(dstField, lDE, farrayPtr, &
           computationalLBound=clbnd, computationalUBound=cubnd, rc=localrc)
@@ -37757,7 +37772,7 @@ end subroutine test_regridSMMArbGrid
         ! init exact answer
         lon = coords(1)
         lat = coords(2)
-     
+
        ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(lon)
         phi = DEG2RAD*(90.-lat)
@@ -37957,7 +37972,7 @@ end subroutine test_regridSMMArbGrid
   character(len=ESMF_MAXSTR) :: string
   integer src_nx, src_ny, dst_nx, dst_ny
   real(ESMF_KIND_R8) :: lon, lat, theta, phi, DEG2RAD, relErr
-  real(ESMF_KIND_R8) :: coords(2)  
+  real(ESMF_KIND_R8) :: coords(2)
   real(ESMF_KIND_R8) :: maxRelErr,avgRelErr
   integer :: localPet, petCount
 
@@ -37965,7 +37980,7 @@ end subroutine test_regridSMMArbGrid
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -38094,7 +38109,7 @@ end subroutine test_regridSMMArbGrid
   ! Construct Src Grid
   ! (Get memory and set coords for src)
   do lDE=0,srclocalDECount-1
- 
+
      ! get src pointer
      call ESMF_FieldGet(srcField, lDE, farrayPtr, &
           computationalLBound=clbnd, computationalUBound=cubnd, rc=localrc)
@@ -38119,7 +38134,7 @@ end subroutine test_regridSMMArbGrid
         ! init exact answer
         lon = coords(1)
         lat = coords(2)
-     
+
        ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(lon)
         phi = DEG2RAD*(90.-lat)
@@ -38142,7 +38157,7 @@ end subroutine test_regridSMMArbGrid
 
   ! Get memory and set coords for dst
   do lDE=0,dstlocalDECount-1
- 
+
      ! get dst pointer
      call ESMF_FieldGet(dstField, lDE, farrayPtr, &
           computationalLBound=clbnd, computationalUBound=cubnd, rc=localrc)
@@ -38173,7 +38188,7 @@ end subroutine test_regridSMMArbGrid
         ! init exact answer
         lon = coords(1)
         lat = coords(2)
-     
+
        ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(lon)
         phi = DEG2RAD*(90.-lat)
@@ -38371,9 +38386,9 @@ end subroutine test_regridSMMArbGrid
   real(ESMF_KIND_R8) :: coord(2)
   character(len=ESMF_MAXSTR) :: string
   real(ESMF_KIND_R8) :: dx,dy
-   
+
   real(ESMF_KIND_R8) :: x,y
-  
+
   integer :: spherical_grid
 
   integer, pointer :: larrayList(:)
@@ -38387,7 +38402,7 @@ end subroutine test_regridSMMArbGrid
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -38418,7 +38433,7 @@ end subroutine test_regridSMMArbGrid
 
      ! Allocate and fill the node id array.
      allocate(nodeIds(numNodes))
-      nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+      nodeIds=(/1,2,3,4,5,6,7,8,9/)
 
      ! Allocate and fill node coordinate array.
      ! Since this is a 2D Mesh the size is 2x the
@@ -38442,7 +38457,7 @@ end subroutine test_regridSMMArbGrid
      ! Allocate and fill the node mask array.
      ! Mask out node 9
      allocate(nodeMask(numNodes))
-     nodeMask=(/0,0,0,0,0,0,0,0,1/) 
+     nodeMask=(/0,0,0,0,0,0,0,0,1/)
 
 
      ! Set the number of each type of element, plus the total number.
@@ -38452,7 +38467,7 @@ end subroutine test_regridSMMArbGrid
 
      ! Allocate and fill the element id array.
      allocate(elemIds(numTotElems))
-     elemIds=(/1,2,3,4,5/) 
+     elemIds=(/1,2,3,4,5/)
 
 
      ! Allocate and fill the element topology type array.
@@ -38465,10 +38480,10 @@ end subroutine test_regridSMMArbGrid
 
 
      ! Allocate and fill the element connection type array.
-     ! Note that entries in this array refer to the 
+     ! Note that entries in this array refer to the
      ! positions in the nodeIds, etc. arrays and that
       ! the order and number of entries for each element
-     ! reflects that given in the Mesh options 
+     ! reflects that given in the Mesh options
      ! section for the corresponding entry
      ! in the elemTypes array.
      allocate(elemConn(4*numQuadElems+3*numTriElems))
@@ -38487,7 +38502,7 @@ end subroutine test_regridSMMArbGrid
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/1,2,4,5/) 
+       nodeIds=(/1,2,4,5/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -38516,10 +38531,10 @@ end subroutine test_regridSMMArbGrid
        numQuadElems=1
        numTriElems=0
        numTotElems=numQuadElems+numTriElems
- 
+
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/1/) 
+       elemIds=(/1/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -38536,7 +38551,7 @@ end subroutine test_regridSMMArbGrid
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/2,3,5,6/) 
+       nodeIds=(/2,3,5,6/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -38565,10 +38580,10 @@ end subroutine test_regridSMMArbGrid
        numQuadElems=0
        numTriElems=2
        numTotElems=numQuadElems+numTriElems
- 
+
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/2,3/) 
+       elemIds=(/2,3/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -38586,7 +38601,7 @@ end subroutine test_regridSMMArbGrid
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/4,5,7,8/) 
+        nodeIds=(/4,5,7,8/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -38618,7 +38633,7 @@ end subroutine test_regridSMMArbGrid
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/4/) 
+        elemIds=(/4/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -38634,7 +38649,7 @@ end subroutine test_regridSMMArbGrid
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/5,6,8,9/) 
+        nodeIds=(/5,6,8,9/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -38658,15 +38673,15 @@ end subroutine test_regridSMMArbGrid
                    0, & ! node id 6
                    0, & ! node id 8
                    1/)  ! node id 9
- 
+
         ! Set the number of each type of element, plus the total number.
         numQuadElems=1
         numTriElems=0
         numTotElems=numQuadElems+numTriElems
- 
+
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/5/)  
+        elemIds=(/5/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -38719,7 +38734,7 @@ end subroutine test_regridSMMArbGrid
 
      ! Allocate and fill the node id array.
      allocate(nodeIds(numNodes))
-     nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+     nodeIds=(/1,2,3,4,5,6,7,8,9/)
 
      ! Allocate and fill node coordinate array.
      ! Since this is a 2D Mesh the size is 2x the
@@ -38744,7 +38759,7 @@ end subroutine test_regridSMMArbGrid
      ! (Mask point sticking out of src grid and point
      !  uncovered by masked src point)
      allocate(nodeMask(numNodes))
-     nodeMask=(/0,0,0,2,0,0,0,0,0/) 
+     nodeMask=(/0,0,0,2,0,0,0,0,0/)
 
      ! Set the number of each type of element, plus the total number.
      numQuadElems=3
@@ -38753,7 +38768,7 @@ end subroutine test_regridSMMArbGrid
 
      ! Allocate and fill the element id array.
      allocate(elemIds(numTotElems))
-     elemIds=(/1,2,3,4,5/) 
+     elemIds=(/1,2,3,4,5/)
 
 
      ! Allocate and fill the element topology type array.
@@ -38766,10 +38781,10 @@ end subroutine test_regridSMMArbGrid
 
 
      ! Allocate and fill the element connection type array.
-     ! Note that entries in this array refer to the 
+     ! Note that entries in this array refer to the
      ! positions in the nodeIds, etc. arrays and that
      ! the order and number of entries for each element
-     ! reflects that given in the Mesh options 
+     ! reflects that given in the Mesh options
      ! section for the corresponding entry
      ! in the elemTypes array.
      allocate(elemConn(4*numQuadElems+3*numTriElems))
@@ -38778,7 +38793,7 @@ end subroutine test_regridSMMArbGrid
                 3,6,5,   &  ! elem id 3
                 4,5,8,7, &  ! elem id 4
                 5,6,9,8/)   ! elem id 5
- 
+
 
  else if (petCount .eq. 4) then
      ! Setup mesh data depending on PET
@@ -38788,7 +38803,7 @@ end subroutine test_regridSMMArbGrid
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/1,2,4,5/) 
+       nodeIds=(/1,2,4,5/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -38820,7 +38835,7 @@ end subroutine test_regridSMMArbGrid
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/1/) 
+       elemIds=(/1/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -38837,7 +38852,7 @@ end subroutine test_regridSMMArbGrid
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/2,3,5,6/) 
+       nodeIds=(/2,3,5,6/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -38869,7 +38884,7 @@ end subroutine test_regridSMMArbGrid
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/2,3/) 
+       elemIds=(/2,3/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -38887,7 +38902,7 @@ end subroutine test_regridSMMArbGrid
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/4,5,7,8/) 
+        nodeIds=(/4,5,7,8/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -38919,7 +38934,7 @@ end subroutine test_regridSMMArbGrid
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/4/) 
+        elemIds=(/4/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -38935,7 +38950,7 @@ end subroutine test_regridSMMArbGrid
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/5,6,8,9/) 
+        nodeIds=(/5,6,8,9/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -38968,7 +38983,7 @@ end subroutine test_regridSMMArbGrid
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/5/)  
+        elemIds=(/5/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -39004,7 +39019,7 @@ end subroutine test_regridSMMArbGrid
    deallocate(elemConn)
 
 
-  
+
   ! Create dest field
   call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
 
@@ -39048,7 +39063,7 @@ end subroutine test_regridSMMArbGrid
       return
    endif
 
- 
+
   ! Check destination field
   ! Should only be 1 localDE
   call ESMF_FieldGet(regridStatusField, 0, statusPtr,  rc=localrc)
@@ -39074,7 +39089,7 @@ end subroutine test_regridSMMArbGrid
  else if (petCount .eq. 4) then
      if (localPET .eq. 0) then !!! This part only for PET 0
 
-        ! Check status for  nodeIds=(/1,2,4,5/) 
+        ! Check status for  nodeIds=(/1,2,4,5/)
         if (statusPtr(1) .ne. ESMF_REGRIDSTATUS_EXMAPPED) correct=.false.
         if (statusPtr(2) .ne. ESMF_REGRIDSTATUS_MAPPED) correct=.false.
         if (statusPtr(3) .ne. ESMF_REGRIDSTATUS_DSTMASKED) correct=.false.
@@ -39082,21 +39097,21 @@ end subroutine test_regridSMMArbGrid
 
      else if (localPET .eq. 1) then !!! This part only for PET 1
 
-       ! Check status for nodeIds=(/X,3,X,6/) 
+       ! Check status for nodeIds=(/X,3,X,6/)
        if (statusPtr(1) .ne. ESMF_REGRIDSTATUS_MAPPED) correct=.false.
        if (statusPtr(2) .ne. ESMF_REGRIDSTATUS_MAPPED) correct=.false.
 
     else if (localPET .eq. 2) then !!! This part only for PET 2
 
-        ! Check status for nodeIds=(/X,X,7,8/) 
+        ! Check status for nodeIds=(/X,X,7,8/)
        if (statusPtr(1) .ne. ESMF_REGRIDSTATUS_MAPPED) correct=.false.
        if (statusPtr(2) .ne. ESMF_REGRIDSTATUS_MAPPED) correct=.false.
 
      else if (localPET .eq. 3) then !!! This part only for PET 3
 
-        ! Check status for nodeIds=(/X,X,X,9/) 
+        ! Check status for nodeIds=(/X,X,X,9/)
         if (statusPtr(1) .ne. ESMF_REGRIDSTATUS_EXMAPPED) correct=.false.
-        
+
      endif
   endif
 
@@ -39141,7 +39156,7 @@ end subroutine test_regridSMMArbGrid
     rc=ESMF_FAILURE
   endif
 
- end subroutine test_regridPerLocStatusExtrap 
+ end subroutine test_regridPerLocStatusExtrap
 
  subroutine test_regrid_w_gtom(rc)
         integer, intent(out)  :: rc
@@ -39171,9 +39186,9 @@ end subroutine test_regridSMMArbGrid
   real(ESMF_KIND_R8) :: srcmass(1), dstmass(1), srcmassg(1), dstmassg(1)
   real(ESMF_KIND_R8) :: maxerror(1), minerror(1), error
   real(ESMF_KIND_R8) :: maxerrorg(1), minerrorg(1), errorg
- 
+
   real(ESMF_KIND_R8) :: errorTot, errorTotG
-   
+
   integer, pointer :: nodeIds(:),nodeOwners(:)
   real(ESMF_KIND_R8), pointer :: nodeCoords(:)
   integer, pointer :: elemIds(:),elemTypes(:),elemConn(:),elemMask(:)
@@ -39202,7 +39217,7 @@ end subroutine test_regridSMMArbGrid
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
- 
+
 
   ! If we don't have 1 or 4 PETS then exit successfully
   if ((petCount .ne. 1) .and. (petCount .ne. 4)) then
@@ -39214,7 +39229,7 @@ end subroutine test_regridSMMArbGrid
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   !!!!!!!!!!!!!!!! Setup Source !!!!!!!!!!!!!
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- 
+
   ! Create Source Grid
   srcGrid=ESMF_GridCreate1PeriDimUfrm(maxIndex=(/80,80/), &
        minCornerCoord=(/0.0_ESMF_KIND_R8,-85.0_ESMF_KIND_R8/), &
@@ -39230,7 +39245,7 @@ end subroutine test_regridSMMArbGrid
   if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
-   
+
 
    ! Array spec for fields
   call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
@@ -39243,7 +39258,7 @@ end subroutine test_regridSMMArbGrid
     return
   endif
 
-  
+
   ! Load test data into the source Field
   ! Should only be 1 localDE
   call ESMF_FieldGet(srcField, 0, srcFarrayPtr,  rc=localrc)
@@ -39317,8 +39332,8 @@ end subroutine test_regridSMMArbGrid
 
    ! Array spec
    call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
-   
-   
+
+
    ! Create dest. field
    dstField = ESMF_FieldCreate(dstMesh, arrayspec, meshloc=ESMF_MESHLOC_ELEMENT, &
          name="dest", rc=localrc)
@@ -39326,7 +39341,7 @@ end subroutine test_regridSMMArbGrid
       rc=ESMF_FAILURE
       return
    endif
-   
+
 
    ! Create exact dest. field
    xdstField = ESMF_FieldCreate(dstMesh, arrayspec, meshloc=ESMF_MESHLOC_ELEMENT, &
@@ -39343,10 +39358,10 @@ end subroutine test_regridSMMArbGrid
       rc=ESMF_FAILURE
       return
    endif
-   
+
    ! Init destination field to 0.0
    dstFarrayPtr=0.0
-   
+
    ! Init exact destination field
    ! Should only be 1 localDE
    call ESMF_FieldGet(xdstField, 0, xdstFarrayPtr,  rc=localrc)
@@ -39482,10 +39497,10 @@ end subroutine test_regridSMMArbGrid
     return
   endif
 
-#if 0  
+#if 0
   ! Uncomment these calls to see some actual regrid results
   if (localPet == 0) then
-    write(*,*) 
+    write(*,*)
     write(*,*) "Grid to Mesh Interpolation:"
     write(*,*) "Max Error = ", maxerrorg(1)
     write(*,*) "Min Error = ", minerrorg(1)
@@ -39578,7 +39593,7 @@ end subroutine test_regridSMMArbGrid
   character(len=ESMF_MAXSTR) :: string
   integer src_nx, src_ny, dst_nx, dst_ny
   real(ESMF_KIND_R8) :: lon, lat, theta, phi, DEG2RAD, relErr
-  real(ESMF_KIND_R8) :: coords(2)  
+  real(ESMF_KIND_R8) :: coords(2)
   real(ESMF_KIND_R8) :: maxRelErr,avgRelErr
   integer :: localPet, petCount
 
@@ -39586,7 +39601,7 @@ end subroutine test_regridSMMArbGrid
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -39659,7 +39674,7 @@ end subroutine test_regridSMMArbGrid
   ! Construct Src Grid
   ! (Get memory and set coords for src)
   do lDE=0,srclocalDECount-1
- 
+
      ! get src pointer
      call ESMF_FieldGet(srcField, lDE, farrayPtr, &
           computationalLBound=clbnd, computationalUBound=cubnd, rc=localrc)
@@ -39684,7 +39699,7 @@ end subroutine test_regridSMMArbGrid
         ! init exact answer
         lon = coords(1)
         lat = coords(2)
-     
+
        ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(lon)
         phi = DEG2RAD*(90.-lat)
@@ -39771,7 +39786,7 @@ end subroutine test_regridSMMArbGrid
 
   ! Get memory and set coords for dst
   do lDE=0,dstlocalDECount-1
- 
+
      ! get dst pointer
      call ESMF_FieldGet(dstField, lDE, farrayPtr, &
           computationalLBound=clbnd, computationalUBound=cubnd, rc=localrc)
@@ -39810,7 +39825,7 @@ end subroutine test_regridSMMArbGrid
         ! init exact answer
         lon = coords(1)
         lat = coords(2)
-     
+
        ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(lon)
         phi = DEG2RAD*(90.-lat)
@@ -39827,7 +39842,7 @@ end subroutine test_regridSMMArbGrid
         farrayMask(i1,i2)=0
 
         ! Set masked area
-        if (((lon > -5.0) .and. (lon < 5.0)) .and. & 
+        if (((lon > -5.0) .and. (lon < 5.0)) .and. &
              ((lat > 45.0) .and. (lat < 49.0))) then
 
            ! initialize destination field to bad value
@@ -39835,7 +39850,7 @@ end subroutine test_regridSMMArbGrid
 
            ! Init to mask area
            farrayMask(i1,i2)=1
-           
+
         endif
      enddo
      enddo
@@ -40045,9 +40060,9 @@ end subroutine test_regridSMMArbGrid
   real(ESMF_KIND_R8) :: coord(2)
   character(len=ESMF_MAXSTR) :: string
   real(ESMF_KIND_R8) :: dx,dy
-   
+
   real(ESMF_KIND_R8) :: x,y
-  
+
   integer :: spherical_grid
 
   integer, pointer :: larrayList(:)
@@ -40061,7 +40076,7 @@ end subroutine test_regridSMMArbGrid
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -40092,7 +40107,7 @@ end subroutine test_regridSMMArbGrid
 
      ! Allocate and fill the node id array.
      allocate(nodeIds(numNodes))
-      nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+      nodeIds=(/1,2,3,4,5,6,7,8,9/)
 
      ! Allocate and fill node coordinate array.
      ! Since this is a 2D Mesh the size is 2x the
@@ -40116,7 +40131,7 @@ end subroutine test_regridSMMArbGrid
      ! Allocate and fill the node mask array.
      ! Mask out node 9
      allocate(nodeMask(numNodes))
-     nodeMask=(/0,0,0,0,0,0,0,0,0/) 
+     nodeMask=(/0,0,0,0,0,0,0,0,0/)
 
 
      ! Set the number of each type of element, plus the total number.
@@ -40126,7 +40141,7 @@ end subroutine test_regridSMMArbGrid
 
      ! Allocate and fill the element id array.
      allocate(elemIds(numTotElems))
-     elemIds=(/1,2,3,4,5/) 
+     elemIds=(/1,2,3,4,5/)
 
 
      ! Allocate and fill the element topology type array.
@@ -40139,10 +40154,10 @@ end subroutine test_regridSMMArbGrid
 
 
      ! Allocate and fill the element connection type array.
-     ! Note that entries in this array refer to the 
+     ! Note that entries in this array refer to the
      ! positions in the nodeIds, etc. arrays and that
       ! the order and number of entries for each element
-     ! reflects that given in the Mesh options 
+     ! reflects that given in the Mesh options
      ! section for the corresponding entry
      ! in the elemTypes array.
      allocate(elemConn(4*numQuadElems+3*numTriElems))
@@ -40161,7 +40176,7 @@ end subroutine test_regridSMMArbGrid
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/1,2,4,5/) 
+       nodeIds=(/1,2,4,5/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -40190,10 +40205,10 @@ end subroutine test_regridSMMArbGrid
        numQuadElems=1
        numTriElems=0
        numTotElems=numQuadElems+numTriElems
- 
+
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/1/) 
+       elemIds=(/1/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -40210,7 +40225,7 @@ end subroutine test_regridSMMArbGrid
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/2,3,5,6/) 
+       nodeIds=(/2,3,5,6/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -40239,10 +40254,10 @@ end subroutine test_regridSMMArbGrid
        numQuadElems=0
        numTriElems=2
        numTotElems=numQuadElems+numTriElems
- 
+
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/2,3/) 
+       elemIds=(/2,3/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -40260,7 +40275,7 @@ end subroutine test_regridSMMArbGrid
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/4,5,7,8/) 
+        nodeIds=(/4,5,7,8/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -40292,7 +40307,7 @@ end subroutine test_regridSMMArbGrid
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/4/) 
+        elemIds=(/4/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -40308,7 +40323,7 @@ end subroutine test_regridSMMArbGrid
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/5,6,8,9/) 
+        nodeIds=(/5,6,8,9/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -40332,15 +40347,15 @@ end subroutine test_regridSMMArbGrid
                    0, & ! node id 6
                    0, & ! node id 8
                    0/)  ! node id 9
- 
+
         ! Set the number of each type of element, plus the total number.
         numQuadElems=1
         numTriElems=0
         numTotElems=numQuadElems+numTriElems
- 
+
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/5/)  
+        elemIds=(/5/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -40404,7 +40419,7 @@ end subroutine test_regridSMMArbGrid
 
      ! Allocate and fill the node id array.
      allocate(nodeIds(numNodes))
-     nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+     nodeIds=(/1,2,3,4,5,6,7,8,9/)
 
      ! Allocate and fill node coordinate array.
      ! Since this is a 2D Mesh the size is 2x the
@@ -40429,7 +40444,7 @@ end subroutine test_regridSMMArbGrid
      ! (Mask point sticking out of src grid and point
      !  uncovered by masked src point)
      allocate(nodeMask(numNodes))
-     nodeMask=(/0,0,0,2,0,0,0,0,0/) 
+     nodeMask=(/0,0,0,2,0,0,0,0,0/)
 
      ! Set the number of each type of element, plus the total number.
      numQuadElems=3
@@ -40438,7 +40453,7 @@ end subroutine test_regridSMMArbGrid
 
      ! Allocate and fill the element id array.
      allocate(elemIds(numTotElems))
-     elemIds=(/1,2,3,4,5/) 
+     elemIds=(/1,2,3,4,5/)
 
 
      ! Allocate and fill the element topology type array.
@@ -40451,10 +40466,10 @@ end subroutine test_regridSMMArbGrid
 
 
      ! Allocate and fill the element connection type array.
-     ! Note that entries in this array refer to the 
+     ! Note that entries in this array refer to the
      ! positions in the nodeIds, etc. arrays and that
      ! the order and number of entries for each element
-     ! reflects that given in the Mesh options 
+     ! reflects that given in the Mesh options
      ! section for the corresponding entry
      ! in the elemTypes array.
      allocate(elemConn(4*numQuadElems+3*numTriElems))
@@ -40463,7 +40478,7 @@ end subroutine test_regridSMMArbGrid
                 3,6,5,   &  ! elem id 3
                 4,5,8,7, &  ! elem id 4
                 5,6,9,8/)   ! elem id 5
- 
+
 
  else if (petCount .eq. 4) then
      ! Setup mesh data depending on PET
@@ -40473,7 +40488,7 @@ end subroutine test_regridSMMArbGrid
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/1,2,4,5/) 
+       nodeIds=(/1,2,4,5/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -40505,7 +40520,7 @@ end subroutine test_regridSMMArbGrid
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/1/) 
+       elemIds=(/1/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -40522,7 +40537,7 @@ end subroutine test_regridSMMArbGrid
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/2,3,5,6/) 
+       nodeIds=(/2,3,5,6/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -40554,7 +40569,7 @@ end subroutine test_regridSMMArbGrid
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/2,3/) 
+       elemIds=(/2,3/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -40572,7 +40587,7 @@ end subroutine test_regridSMMArbGrid
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/4,5,7,8/) 
+        nodeIds=(/4,5,7,8/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -40604,7 +40619,7 @@ end subroutine test_regridSMMArbGrid
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/4/) 
+        elemIds=(/4/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -40620,7 +40635,7 @@ end subroutine test_regridSMMArbGrid
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/5,6,8,9/) 
+        nodeIds=(/5,6,8,9/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -40653,7 +40668,7 @@ end subroutine test_regridSMMArbGrid
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/5/)  
+        elemIds=(/5/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -40693,7 +40708,7 @@ end subroutine test_regridSMMArbGrid
    ! Debug output
    !   call ESMF_MeshWrite(srcMesh,"srcMesh",rc=localrc)
    !   call ESMF_MeshWrite(dstMesh,"dstMesh",rc=localrc)
-   
+
 
    ! Create dest field
    call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
@@ -40711,7 +40726,7 @@ end subroutine test_regridSMMArbGrid
       rc=ESMF_FAILURE
       return
    endif
-   
+
    ! Set dst field to all 0.0
    farrayPtr1D=0.0
 
@@ -40745,7 +40760,7 @@ end subroutine test_regridSMMArbGrid
       rc=ESMF_FAILURE
       return
    endif
- 
+
   ! Check destination field
   ! Should only be 1 localDE
   call ESMF_FieldGet(regridStatusField, 0, statusPtr,  rc=localrc)
@@ -40773,7 +40788,7 @@ end subroutine test_regridSMMArbGrid
  else if (petCount .eq. 4) then
      if (localPET .eq. 0) then !!! This part only for PET 0
 
-        ! Check status for  nodeIds=(/1,2,4,5/) 
+        ! Check status for  nodeIds=(/1,2,4,5/)
         if (statusPtr(1) .ne. ESMF_REGRIDSTATUS_EXMAPPED) correct=.false.
         if (statusPtr(2) .ne. ESMF_REGRIDSTATUS_EXMAPPED) correct=.false.
         if (statusPtr(3) .ne. ESMF_REGRIDSTATUS_EXMAPPED) correct=.false.
@@ -40781,21 +40796,21 @@ end subroutine test_regridSMMArbGrid
 
      else if (localPET .eq. 1) then !!! This part only for PET 1
 
-       ! Check status for nodeIds=(/X,3,X,6/) 
+       ! Check status for nodeIds=(/X,3,X,6/)
        if (statusPtr(1) .ne. ESMF_REGRIDSTATUS_EXMAPPED) correct=.false.
        if (statusPtr(2) .ne. ESMF_REGRIDSTATUS_MAPPED) correct=.false.
 
     else if (localPET .eq. 2) then !!! This part only for PET 2
 
-        ! Check status for nodeIds=(/X,X,7,8/) 
+        ! Check status for nodeIds=(/X,X,7,8/)
        if (statusPtr(1) .ne. ESMF_REGRIDSTATUS_EXMAPPED) correct=.false.
        if (statusPtr(2) .ne. ESMF_REGRIDSTATUS_MAPPED) correct=.false.
 
      else if (localPET .eq. 3) then !!! This part only for PET 3
 
-        ! Check status for nodeIds=(/X,X,X,9/) 
+        ! Check status for nodeIds=(/X,X,X,9/)
         if (statusPtr(1) .ne. ESMF_REGRIDSTATUS_MAPPED) correct=.false.
-        
+
      endif
   endif
 
@@ -40811,9 +40826,9 @@ end subroutine test_regridSMMArbGrid
 
   ! Make sure dst field is close to 10.0
   do i1=clbnd(1),cubnd(1)
-     if (abs(farrayPtr1D(i1)-10.0) > 1.0E-10)  correct=.false. 
+     if (abs(farrayPtr1D(i1)-10.0) > 1.0E-10)  correct=.false.
   enddo
-  
+
 
   ! Destroy the Fields
    call ESMF_FieldDestroy(srcField, rc=localrc)
@@ -40882,9 +40897,9 @@ end subroutine test_regridSMMArbGrid
   real(ESMF_KIND_R8) :: coord(2)
   character(len=ESMF_MAXSTR) :: string
   real(ESMF_KIND_R8) :: dx,dy
-   
+
   real(ESMF_KIND_R8) :: x,y
-  
+
   integer :: spherical_grid
 
   integer, pointer :: larrayList(:)
@@ -40898,7 +40913,7 @@ end subroutine test_regridSMMArbGrid
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
 
@@ -40929,7 +40944,7 @@ end subroutine test_regridSMMArbGrid
 
      ! Allocate and fill the node id array.
      allocate(nodeIds(numNodes))
-      nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+      nodeIds=(/1,2,3,4,5,6,7,8,9/)
 
      ! Allocate and fill node coordinate array.
      ! Since this is a 2D Mesh the size is 2x the
@@ -40953,7 +40968,7 @@ end subroutine test_regridSMMArbGrid
      ! Allocate and fill the node mask array.
      ! Mask out node 9
      allocate(nodeMask(numNodes))
-     nodeMask=(/0,0,0,0,0,0,0,0,1/) 
+     nodeMask=(/0,0,0,0,0,0,0,0,1/)
 
 
      ! Set the number of each type of element, plus the total number.
@@ -40963,7 +40978,7 @@ end subroutine test_regridSMMArbGrid
 
      ! Allocate and fill the element id array.
      allocate(elemIds(numTotElems))
-     elemIds=(/1,2,3,4,5/) 
+     elemIds=(/1,2,3,4,5/)
 
 
      ! Allocate and fill the element topology type array.
@@ -40976,10 +40991,10 @@ end subroutine test_regridSMMArbGrid
 
 
      ! Allocate and fill the element connection type array.
-     ! Note that entries in this array refer to the 
+     ! Note that entries in this array refer to the
      ! positions in the nodeIds, etc. arrays and that
       ! the order and number of entries for each element
-     ! reflects that given in the Mesh options 
+     ! reflects that given in the Mesh options
      ! section for the corresponding entry
      ! in the elemTypes array.
      allocate(elemConn(4*numQuadElems+3*numTriElems))
@@ -40998,7 +41013,7 @@ end subroutine test_regridSMMArbGrid
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/1,2,4,5/) 
+       nodeIds=(/1,2,4,5/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -41027,10 +41042,10 @@ end subroutine test_regridSMMArbGrid
        numQuadElems=1
        numTriElems=0
        numTotElems=numQuadElems+numTriElems
- 
+
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/1/) 
+       elemIds=(/1/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -41047,7 +41062,7 @@ end subroutine test_regridSMMArbGrid
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/2,3,5,6/) 
+       nodeIds=(/2,3,5,6/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -41076,10 +41091,10 @@ end subroutine test_regridSMMArbGrid
        numQuadElems=0
        numTriElems=2
        numTotElems=numQuadElems+numTriElems
- 
+
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/2,3/) 
+       elemIds=(/2,3/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -41097,7 +41112,7 @@ end subroutine test_regridSMMArbGrid
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/4,5,7,8/) 
+        nodeIds=(/4,5,7,8/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -41129,7 +41144,7 @@ end subroutine test_regridSMMArbGrid
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/4/) 
+        elemIds=(/4/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -41145,7 +41160,7 @@ end subroutine test_regridSMMArbGrid
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/5,6,8,9/) 
+        nodeIds=(/5,6,8,9/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -41169,15 +41184,15 @@ end subroutine test_regridSMMArbGrid
                    0, & ! node id 6
                    0, & ! node id 8
                    1/)  ! node id 9
- 
+
         ! Set the number of each type of element, plus the total number.
         numQuadElems=1
         numTriElems=0
         numTotElems=numQuadElems+numTriElems
- 
+
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/5/)  
+        elemIds=(/5/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -41230,7 +41245,7 @@ end subroutine test_regridSMMArbGrid
 
      ! Allocate and fill the node id array.
      allocate(nodeIds(numNodes))
-     nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+     nodeIds=(/1,2,3,4,5,6,7,8,9/)
 
      ! Allocate and fill node coordinate array.
      ! Since this is a 2D Mesh the size is 2x the
@@ -41255,7 +41270,7 @@ end subroutine test_regridSMMArbGrid
      ! (Mask point sticking out of src grid and point
      !  uncovered by masked src point)
      allocate(nodeMask(numNodes))
-     nodeMask=(/0,0,0,2,0,0,0,0,0/) 
+     nodeMask=(/0,0,0,2,0,0,0,0,0/)
 
      ! Set the number of each type of element, plus the total number.
      numQuadElems=3
@@ -41264,7 +41279,7 @@ end subroutine test_regridSMMArbGrid
 
      ! Allocate and fill the element id array.
      allocate(elemIds(numTotElems))
-     elemIds=(/1,2,3,4,5/) 
+     elemIds=(/1,2,3,4,5/)
 
 
      ! Allocate and fill the element topology type array.
@@ -41277,10 +41292,10 @@ end subroutine test_regridSMMArbGrid
 
 
      ! Allocate and fill the element connection type array.
-     ! Note that entries in this array refer to the 
+     ! Note that entries in this array refer to the
      ! positions in the nodeIds, etc. arrays and that
      ! the order and number of entries for each element
-     ! reflects that given in the Mesh options 
+     ! reflects that given in the Mesh options
      ! section for the corresponding entry
      ! in the elemTypes array.
      allocate(elemConn(4*numQuadElems+3*numTriElems))
@@ -41289,7 +41304,7 @@ end subroutine test_regridSMMArbGrid
                 3,6,5,   &  ! elem id 3
                 4,5,8,7, &  ! elem id 4
                 5,6,9,8/)   ! elem id 5
- 
+
 
  else if (petCount .eq. 4) then
      ! Setup mesh data depending on PET
@@ -41299,7 +41314,7 @@ end subroutine test_regridSMMArbGrid
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/1,2,4,5/) 
+       nodeIds=(/1,2,4,5/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -41331,7 +41346,7 @@ end subroutine test_regridSMMArbGrid
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/1/) 
+       elemIds=(/1/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -41348,7 +41363,7 @@ end subroutine test_regridSMMArbGrid
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/2,3,5,6/) 
+       nodeIds=(/2,3,5,6/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -41380,7 +41395,7 @@ end subroutine test_regridSMMArbGrid
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/2,3/) 
+       elemIds=(/2,3/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -41398,7 +41413,7 @@ end subroutine test_regridSMMArbGrid
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/4,5,7,8/) 
+        nodeIds=(/4,5,7,8/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -41430,7 +41445,7 @@ end subroutine test_regridSMMArbGrid
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/4/) 
+        elemIds=(/4/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -41446,7 +41461,7 @@ end subroutine test_regridSMMArbGrid
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/5,6,8,9/) 
+        nodeIds=(/5,6,8,9/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -41479,7 +41494,7 @@ end subroutine test_regridSMMArbGrid
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/5/)  
+        elemIds=(/5/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -41515,7 +41530,7 @@ end subroutine test_regridSMMArbGrid
    deallocate(elemConn)
 
 
-  
+
   ! Create dest field
   call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
 
@@ -41557,7 +41572,7 @@ end subroutine test_regridSMMArbGrid
       rc=ESMF_FAILURE
       return
    endif
- 
+
   ! Check destination field
   ! Should only be 1 localDE
   call ESMF_FieldGet(regridStatusField, 0, statusPtr,  rc=localrc)
@@ -41584,7 +41599,7 @@ end subroutine test_regridSMMArbGrid
  else if (petCount .eq. 4) then
      if (localPET .eq. 0) then !!! This part only for PET 0
 
-        ! Check status for  nodeIds=(/1,2,4,5/) 
+        ! Check status for  nodeIds=(/1,2,4,5/)
         if (statusPtr(1) .ne. ESMF_REGRIDSTATUS_OUTSIDE) correct=.false.
         if (statusPtr(2) .ne. ESMF_REGRIDSTATUS_OUTSIDE) correct=.false.
         if (statusPtr(3) .ne. ESMF_REGRIDSTATUS_DSTMASKED) correct=.false.
@@ -41592,21 +41607,21 @@ end subroutine test_regridSMMArbGrid
 
      else if (localPET .eq. 1) then !!! This part only for PET 1
 
-       ! Check status for nodeIds=(/X,3,X,6/) 
+       ! Check status for nodeIds=(/X,3,X,6/)
        if (statusPtr(1) .ne. ESMF_REGRIDSTATUS_OUTSIDE) correct=.false.
        if (statusPtr(2) .ne. ESMF_REGRIDSTATUS_OUTSIDE) correct=.false.
 
     else if (localPET .eq. 2) then !!! This part only for PET 2
 
-        ! Check status for nodeIds=(/X,X,7,8/) 
+        ! Check status for nodeIds=(/X,X,7,8/)
        if (statusPtr(1) .ne. ESMF_REGRIDSTATUS_OUTSIDE) correct=.false.
        if (statusPtr(2) .ne. ESMF_REGRIDSTATUS_OUTSIDE) correct=.false.
 
      else if (localPET .eq. 3) then !!! This part only for PET 3
 
-        ! Check status for nodeIds=(/X,X,X,9/) 
+        ! Check status for nodeIds=(/X,X,X,9/)
         if (statusPtr(1) .ne. ESMF_REGRIDSTATUS_OUTSIDE) correct=.false.
-        
+
      endif
   endif
 
@@ -41656,5 +41671,3 @@ end subroutine test_regridSMMArbGrid
 
 
 end program ESMF_FieldRegridUTest
-
-
