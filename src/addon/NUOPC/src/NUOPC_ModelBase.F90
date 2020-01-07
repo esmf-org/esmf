@@ -706,6 +706,7 @@ module NUOPC_ModelBase
     character(ESMF_MAXSTR)    :: name
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
+    logical                   :: exportIsCreated
 
 #define NUOPC_MODELBASE_TRACE__OFF
 #ifdef NUOPC_MODELBASE_TRACE
@@ -966,23 +967,18 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
 
-#ifdef NUOPC_MODELBASE_TRACE
-    call ESMF_TraceRegionEnter("NUOPC_ModelBase:TimestampExport")
-#endif
-    ! SPECIALIZE optionally: label_TimestampExport
-    ! -> first check for the label with phase index
-    call ESMF_MethodExecute(gcomp, label=label_TimestampExport, index=phase, &
-      existflag=existflag, userRc=localrc, rc=rc)
+    exportIsCreated = ESMF_StateIsCreated(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, &
-      rcToReturn=rc)) &
-      return  ! bail out
-    if (.not.existflag) then
-      ! -> next check for the label without phase index
-      call ESMF_MethodExecute(gcomp, label=label_TimestampExport, &
+
+    if (exportIsCreated) then
+#ifdef NUOPC_MODELBASE_TRACE
+      call ESMF_TraceRegionEnter("NUOPC_ModelBase:TimestampExport")
+#endif
+      ! SPECIALIZE optionally: label_TimestampExport
+      ! -> first check for the label with phase index
+      call ESMF_MethodExecute(gcomp, label=label_TimestampExport, index=phase, &
         existflag=existflag, userRc=localrc, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
@@ -991,10 +987,22 @@ module NUOPC_ModelBase
         line=__LINE__, file=trim(name)//":"//FILENAME, &
         rcToReturn=rc)) &
         return  ! bail out
-   endif
+      if (.not.existflag) then
+        ! -> next check for the label without phase index
+        call ESMF_MethodExecute(gcomp, label=label_TimestampExport, &
+          existflag=existflag, userRc=localrc, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) &
+          return  ! bail out
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, &
+          rcToReturn=rc)) &
+          return  ! bail out
+      endif
 #ifdef NUOPC_MODELBASE_TRACE
-   call ESMF_TraceRegionExit("NUOPC_ModelBase:TimestampExport")
+      call ESMF_TraceRegionExit("NUOPC_ModelBase:TimestampExport")
 #endif
+    endif
 
     ! handle diagnostic
     if (btest(diagnostic,6)) then
