@@ -262,7 +262,7 @@ module ESMF_AttachMethodsMod
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MethodExecute()
-  subroutine ESMF_MethodStateExecute(state, label, index, existflag, &
+  recursive subroutine ESMF_MethodStateExecute(state, label, index, existflag, &
     userRc, rc)
 !
 ! !ARGUMENTS:
@@ -722,7 +722,7 @@ module ESMF_AttachMethodsMod
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MethodExecute()
-  subroutine ESMF_MethodGridCompExecute(gcomp, label, index, existflag, &
+  recursive subroutine ESMF_MethodGridCompExecute(gcomp, label, index, existflag, &
     userRc, rc)
 !
 ! !ARGUMENTS:
@@ -805,7 +805,7 @@ module ESMF_AttachMethodsMod
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MethodExecute()
-  subroutine ESMF_MethodCplCompExecute(cplcomp, label, index, existflag, &
+  recursive subroutine ESMF_MethodCplCompExecute(cplcomp, label, index, existflag, &
     userRc, rc)
 !
 ! !ARGUMENTS:
