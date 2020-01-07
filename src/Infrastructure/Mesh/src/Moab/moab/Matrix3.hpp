@@ -62,7 +62,7 @@
 #error Need either Eigen3 or BLAS/LAPACK libraries
 #endif
 
-// RLO: Only use ESMF-interal LAPACK subroutines with ESMF internal LAPACK.
+// RLO: Only use ESMF-internal LAPACK subroutines with ESMF internal LAPACK.
 //      It seems like only dgeev and dsyevd are currently in use with MOAB.
 //      ESMF-internal LAPACK does not currently support dsyevr, dgetrf, dgetri.
 #if defined ESMF_LAPACK_INTERNAL
