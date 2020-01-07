@@ -38,7 +38,7 @@ program ESMF_RegridWeightGenUTest
   character(*), parameter :: version = &
     '$Id$'
 !------------------------------------------------------------------------------
-    
+
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
 
@@ -68,7 +68,7 @@ program ESMF_RegridWeightGenUTest
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  
+
   !----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "RegridWeightGen bilinear Test"
@@ -88,12 +88,12 @@ program ESMF_RegridWeightGenUTest
        polemethod = pole, unmappedaction = unmappedaction, &
        srcFileType = srcFileType, dstFileType = dstFileType, &
        verboseFlag = .true., rc=rc)
-  
+
 #ifdef ESMF_NETCDF
   call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
 #else
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
 #endif
 
   !----------------------------------------------------------------------------
@@ -109,11 +109,11 @@ program ESMF_RegridWeightGenUTest
        srcFileType = srcFileType, dstFileType = dstFileType, &
        verboseFlag = .true., rc=rc)
 
-#ifdef ESMF_NETCDF
+#if defined(ESMF_NETCDF) && defined(ESMF_LAPACK)
   call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
 #else
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
 #endif
 
   !----------------------------------------------------------------------------
@@ -135,7 +135,7 @@ program ESMF_RegridWeightGenUTest
   call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
 #else
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
 #endif
 
   !----------------------------------------------------------------------------
@@ -156,14 +156,14 @@ program ESMF_RegridWeightGenUTest
   call ESMF_RegridWeightGen(srcfile, dstfile, routehandle, regridmethod=methodflag, &
        unmappedaction = unmappedaction, &
        verboseFlag = .true., rc=rc)
-  
+
 #ifdef ESMF_NETCDF
   call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
   call ESMF_FieldSMMRelease(routehandle, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 #else
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
 #endif
 
   !----------------------------------------------------------------------------
@@ -178,13 +178,13 @@ program ESMF_RegridWeightGenUTest
        unmappedaction = unmappedaction, &
        verboseFlag = .true., rc=rc)
 
-#ifdef ESMF_NETCDF
+#if defined(ESMF_NETCDF) && defined(ESMF_LAPACK)
   call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
   call ESMF_FieldSMMRelease(routehandle, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 #else
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
 #endif
 
   !----------------------------------------------------------------------------
@@ -206,7 +206,7 @@ program ESMF_RegridWeightGenUTest
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 #else
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
 #endif
 
   !-----------------------------------------------------------------------------
