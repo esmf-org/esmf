@@ -747,13 +747,14 @@ module NUOPC_Base
 ! !IROUTINE: NUOPC_CheckSetClock - Check a Clock for compatibility and set its values
 ! !INTERFACE:
   subroutine NUOPC_CheckSetClock(setClock, checkClock, setStartTimeToCurrent, &
-    currTime, forceCurrTime, rc)
+    currTime, forceCurrTime, forceTimeStep, rc)
 ! !ARGUMENTS:
     type(ESMF_Clock),        intent(inout)         :: setClock
     type(ESMF_Clock),        intent(in)            :: checkClock
     logical,                 intent(in),  optional :: setStartTimeToCurrent
     type(ESMF_Time),         intent(in),  optional :: currTime
     logical,                 intent(in),  optional :: forceCurrTime
+    logical,                 intent(in),  optional :: forceTimeStep
     integer,                 intent(out), optional :: rc
 ! !DESCRIPTION:
 !   By default compare {\tt setClock} to {\tt checkClock} to ensure they match
@@ -784,6 +785,12 @@ module NUOPC_Base
 !     If {\tt .true.} then do {\em not} check the current time of the
 !     {\tt setClock}, but instead force it to align with the {\tt checkClock},
 !     or {\tt currTime}, if it was provided. The default is {\tt .false.}.
+!   \item[{[forceTimeStep]}]
+!     If {\tt .true.} then do {\em not} use the {\tt timeStep} of the 
+!     {\tt setClock} to check if the next increment on the {\tt checkClock}
+!     can be reached in an integer number of steps. Instead set the
+!     {\tt timeStep} of the {\tt setClock} to the {\tt timeStep} of the
+!     {\tt checkClock}. The default is {\tt .false.}.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -803,16 +810,27 @@ module NUOPC_Base
 
     if (present(rc)) rc = ESMF_SUCCESS
     
-    call ESMF_ClockGet(setClock, currTime=setCurrTime, timeStep=timeStep, &
-      runDuration=runDuration, rc=localrc)
+    call ESMF_ClockGet(checkClock, currTime=checkCurrTime, &
+      timeStep=checkTimeStep, direction=direction, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME, &
       rcToReturn=rc)) &
       return  ! bail out
     
-    call ESMF_ClockGet(checkClock, currTime=checkCurrTime, &
-      timeStep=checkTimeStep, direction=direction, rc=localrc)
+    if (present(forceTimeStep)) then
+      if (forceTimeStep) then
+        call ESMF_ClockSet(setClock, timeStep=checkTimeStep, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)) &
+          return  ! bail out
+      endif
+    endif
+    
+    call ESMF_ClockGet(setClock, currTime=setCurrTime, timeStep=timeStep, &
+      runDuration=runDuration, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME, &
