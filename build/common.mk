@@ -1187,10 +1187,6 @@ ESMF_F90LINKPATHSTHIRD    += -L$(ESMF_MOAB_LIBPATH)
 ESMF_CXXLINKRPATHSTHIRD   += $(ESMF_CXXRPATHPREFIX)$(ESMF_MOAB_LIBPATH)
 ESMF_F90LINKRPATHSTHIRD   += $(ESMF_F90RPATHPREFIX)$(ESMF_MOAB_LIBPATH)
 endif
-# LAPACK cannot be OFF if MOAB is ON
-# ifeq ($(ESMF_LAPACK),OFF)
-# ESMF_LAPACK = internal
-# endif
 endif
 
 #-------------------------------------------------------------------------------
@@ -1234,6 +1230,12 @@ endif
 ifeq ($(ESMF_LAPACK),scsl)
 ifndef ESMF_LAPACK_LIBS
 ESMF_LAPACK_LIBS = -lscs
+endif
+endif
+
+ifeq ($(ESMF_LAPACK),openblas)
+ifndef ESMF_LAPACK_LIBS
+ESMF_LAPACK_LIBS = -lopenblas
 endif
 endif
 
