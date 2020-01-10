@@ -774,7 +774,7 @@ ErrorCode GeomQueryTool::point_in_volume(const EntityHandle volume,
 
   // if overlaps, ray must be cast to infinity and all RTIs must be returned
   const double   large       = 1e15;
-  const double   ray_length  = large;
+  double   ray_length  = large;
 
   // If overlaps occur, the pt is inside if traveling along the ray from the
   // origin, there are ever more exits than entrances. In lieu of implementing
