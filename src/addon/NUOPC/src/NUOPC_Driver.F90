@@ -2946,6 +2946,7 @@ module NUOPC_Driver
     type(type_InternalState)  :: is
     character(ESMF_MAXSTR)    :: name
     logical                   :: clockIsCreated
+    type(ESMF_TimeInterval)   :: timeStep
 
     rc = ESMF_SUCCESS
 
@@ -2960,13 +2961,15 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
+    ! see if the parent clock can be used
     clockIsCreated = ESMF_ClockIsCreated(is%wrap%driverClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     if (clockIsCreated) then
-      ! check and set the model clock against the driver clock
-      call NUOPC_CompCheckSetClock(driver, is%wrap%driverClock, rc=rc)
+      ! check and set the driver clock against the parent clock, force timeStep
+      call NUOPC_CompCheckSetClock(driver, is%wrap%driverClock, &
+        forceTimeStep=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
