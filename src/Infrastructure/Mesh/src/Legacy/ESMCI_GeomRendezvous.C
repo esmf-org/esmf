@@ -257,7 +257,7 @@ void GeomRend::build_dest(double cmin[], double cmax[], ZoltanUD &zud) {
 
           zud.dstObj.push_back(&obj);
 
-          BBox obox(coord, obj, 0.25);
+          BBox obox(coord, obj, 0.25, on_sph);
 
           for (UInt d = 0; d < sdim; d++) {
             if (obox.getMin()[d] < cmin[d]) cmin[d] = obox.getMin()[d];
@@ -1358,7 +1358,7 @@ void GeomRend::migrate_meshes() {
 
 
 void mesh_isect(const MEField<> & scoord, const BBox & srcBBox, const MEField<> & dcoord, std::vector<MeshObj *> objlist,
-  std::vector<CommRel::CommNode> & mignode, double tol, int sdim){
+                std::vector<CommRel::CommNode> & mignode, double tol, int sdim, bool on_sph){
 
   // all gather all srcBBox on all pets
   // construct local buffer
@@ -1380,7 +1380,7 @@ void mesh_isect(const MEField<> & scoord, const BBox & srcBBox, const MEField<> 
 
   for (; si != se; ++si) {
     MeshObj &elem = **si;
-    BBox ebox(dcoord, elem, 0.25);
+    BBox ebox(dcoord, elem, 0.25, on_sph);
     // Insersect with each of the src bounding box
     for(int i = 0; i < commsize; i ++)
       if (BBoxIntersect(ebox, srcBBoxList[i], tol))
@@ -1406,7 +1406,7 @@ void GeomRend::Build_Merge(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> *
   ThrowRequire(!dcfg.neighbors || srcmesh->HasGhost());
         
   MEField<> &scoord = *srcmesh->GetCoordField();
-  BBox srcBBox(scoord, *srcmesh);
+  BBox srcBBox(scoord, *srcmesh, on_sph);
   BBox gsrcBBox = BBoxParUnion(srcBBox);
 
   MEField<> &dcoord = *dstmesh->GetCoordField();
@@ -1417,14 +1417,14 @@ void GeomRend::Build_Merge(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> *
   Mesh::iterator ei = dstmesh->elem_begin(), ee = dstmesh->elem_end();
   for (; ei != ee; ++ei) {
     MeshObj &elem = *ei;
-    BBox ebox(dcoord, elem, 0.25);
+    BBox ebox(dcoord, elem, 0.25, on_sph);
     if (BBoxIntersect(ebox, gsrcBBox, dcfg.geom_tol))
       dstObjList.push_back(&elem);
   } // for ei
 
   // Build the destination migration
   std::vector<CommRel::CommNode> mignode;
-  mesh_isect(scoord, srcBBox, dcoord, dstObjList, mignode, dcfg.geom_tol, sdim);
+  mesh_isect(scoord, srcBBox, dcoord, dstObjList, mignode, dcfg.geom_tol, sdim, on_sph);
   // Add results to the migspec
   CommRel &dst_migration = dstComm.GetCommRel(dcfg.obj_type);
   dst_migration.Init("dst_migration", *dstmesh, dstmesh_rend, false);
@@ -1485,14 +1485,14 @@ void GeomRend::build_dst_mig_all_overlap(ZoltanUD &zud) {
   MEField<> &scoord = *(srcmesh_rend.GetCoordField());
 
   // get local and global bounding boxes of srcmesh_rend
-  BBox srcBBox(scoord, srcmesh_rend);
+  BBox srcBBox(scoord, srcmesh_rend, on_sph);
 
   // Get coord field of destination mesh
   MEField<> &dcoord = *(dstmesh->GetCoordField());
 
   // Build the destination migration
   std::vector<CommRel::CommNode> mignode;
-  mesh_isect(scoord, srcBBox, dcoord, zud.dstObj, mignode, dcfg.geom_tol, sdim);
+  mesh_isect(scoord, srcBBox, dcoord, zud.dstObj, mignode, dcfg.geom_tol, sdim, on_sph);
 
   // Add results to the migspec
   CommRel &dst_migration = dstComm.GetCommRel(dcfg.obj_type);

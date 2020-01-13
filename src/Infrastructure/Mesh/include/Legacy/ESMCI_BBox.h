@@ -43,7 +43,7 @@ BBox(UInt dim, const double min[], const double max[]);
  BBox(const MEField<> &coords, const MeshObj &obj, double normexp = 0.0, bool is_sph=false);
 
 // Build a box around the whole mesh.  Not a cheap operation (loops nodes)
-BBox(const MEField<> &coords, const MeshDB &mesh);
+ BBox(const MEField<> &coords, const MeshDB &mesh, bool is_sph=false);
 
 BBox(_field &coords, const MeshDB &mesh);
 
