@@ -1685,10 +1685,11 @@ module NUOPC_Comp
 ! !IROUTINE: NUOPC_CompCheckSetClock - Check Clock compatibility and set stopTime
 ! !INTERFACE:
   ! Private name; call using NUOPC_CompCheckSetClock() 
-  subroutine NUOPC_GridCompCheckSetClock(comp, externalClock, rc)
+  subroutine NUOPC_GridCompCheckSetClock(comp, externalClock, forceTimeStep, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp),     intent(inout)         :: comp
     type(ESMF_Clock),        intent(in)            :: externalClock
+    logical,                 intent(in),  optional :: forceTimeStep
     integer,                 intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Compare {\tt externalClock} to the internal clock of {\tt comp} to make sure
@@ -1698,6 +1699,9 @@ module NUOPC_Comp
 !   so it is reached in one time step of the external clock. Otherwise leave the
 !   internal clock unchanged and return with error. The direction of
 !   the involved clocks is taking into account.
+!   Setting the {\tt forceTimeStep} argument to {\tt .true.} forces the 
+!   {\tt timeStep} of the {\tt externalClock} to be used to reset the
+!   {\tt timeStep} of the internal clock.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -1714,7 +1718,7 @@ module NUOPC_Comp
       return  ! bail out
     
     call NUOPC_CheckSetClock(setClock=internalClock, &
-      checkClock=externalClock, rc=localrc)
+      checkClock=externalClock, forceTimeStep=forceTimeStep, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME, &
