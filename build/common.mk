@@ -1316,12 +1316,22 @@ pathtype := $(shell $(ESMF_DIR)/scripts/pathtype $(ESMF_NETCDF))
 endif
 ifeq ($(pathtype),abs)
 # use the $(ESMF_NETCDF) contents as nc-config
-# but must check if there is also nf-config available
 ESMF_NCCONFIG = $(ESMF_NETCDF)
+endif
+ifeq ($(ESMF_NETCDF),nc-config)
+ESMF_NCCONFIG = $(ESMF_NETCDF)
+endif
+ifdef ESMF_NCCONFIG
 ifneq ($(origin ESMF_NFCONFIG), environment)
+ifeq ($(shell $(ESMF_DIR)/scripts/available nf-config),nf-config)
+# There is an nf-config command in the user's path, use it
+ESMF_NFCONFIG = nf-config
+else
+# See if there is a nf-config command same place as nc-config
 ESMF_NFCONFIG = $(shell $(ESMF_NETCDF) --prefix)/bin/nf-config
 ifneq ($(shell $(ESMF_DIR)/scripts/exists $(ESMF_NFCONFIG)),$(ESMF_NFCONFIG))
 ESMF_NFCONFIG :=
+endif
 endif
 export ESMF_NFCONFIG
 endif
@@ -1331,7 +1341,13 @@ export ESMF_NETCDF_INCLUDE
 endif
 ifneq ($(origin ESMF_NETCDF_LIBS), environment)
 ifdef ESMF_NFCONFIG
+ifeq ($(shell $(ESMF_DIR)/scripts/nfconfigtest $(ESMF_NFCONFIG)),working)
+# a working nf-config
 ESMF_NETCDF_LIBS    := $(shell $(ESMF_NFCONFIG) --flibs)
+else
+# not a working nf-config -> try manually setting
+ESMF_NETCDF_LIBS    := -lnetcdff
+endif
 else
 ESMF_NETCDF_LIBS    := $(shell $(ESMF_NCCONFIG) --flibs)
 endif
@@ -1339,24 +1355,6 @@ ESMF_NETCDF_CONFIG_LIBS := $(shell $(ESMF_NCCONFIG) --libs)
 ESMF_NETCDF_LIBS   += $(ESMF_NETCDF_CONFIG_LIBS)
 endif
 export ESMF_NETCDF_LIBS
-endif
-
-# Handle the regular case where nc-config comes without absolute path.
-ifeq ($(ESMF_NETCDF),nc-config)
-ESMF_NETCDF_CPATH = $(shell nc-config --prefix)
-ESMF_NETCDF_INCLUDE = $(ESMF_NETCDF_CPATH)/include
-ESMF_NETCDF_LIBPATH = $(ESMF_NETCDF_CPATH)/lib
-# Fortran API library might be in a different directory than the main C library.
-ESMF_NETCDF_FPATH = $(shell nf-config --prefix 2>/dev/null)
-ifeq ($(ESMF_NETCDF_FPATH),"")
-ESMF_NETCDF_LIBS = -lnetcdf
-else
-ESMF_NETCDF_LIBS = -lnetcdff -lnetcdf
-ifneq ($(ESMF_NETCDF_CPATH),$(ESMF_NETCDF_FPATH))
-ESMF_NETCDF_INCLUDE += -I$(ESMF_NETCDF_FPATH)/include
-ESMF_NETCDF_FLIBPATH = $(ESMF_NETCDF_FPATH)/lib
-endif
-endif
 endif
 
 ifeq ($(ESMF_NETCDF),standard)
