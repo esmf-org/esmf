@@ -179,12 +179,12 @@ module ESMF_FieldSMMFromFileUTestMod
     line=__LINE__, file=FILENAME, rcToReturn=rc)) return
 
   call ESMF_SparseMatrixWrite(factorList, factorIndexList, &
-                              "data/weights_esmf_smmsff.nc", rc=localrc)
+                              "weights_esmf_smmsff.nc", rc=localrc)
   if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=FILENAME, rcToReturn=rc)) return
 
   ! SMM store
-  call ESMF_FieldSMMStore(srcField, dstField, "data/weights_esmf_smmsff.nc", &
+  call ESMF_FieldSMMStore(srcField, dstField, "weights_esmf_smmsff.nc", &
                           routeHandle, rc=localrc)
   if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=FILENAME, rcToReturn=rc)) return
