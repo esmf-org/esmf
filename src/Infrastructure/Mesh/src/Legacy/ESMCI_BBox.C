@@ -56,7 +56,7 @@ BBox &BBox::operator=(const BBox &rhs) {
   return *this;
 }
 
-
+  // TODO: take normexp out of parameter list because it's reset inside
   BBox::BBox(const MEField<> &coords, const MeshObj &obj, double normexp, bool is_sph) :
  isempty(false)
 {
@@ -108,8 +108,11 @@ BBox &BBox::operator=(const BBox &rhs) {
       if (dist > diam) diam = dist;
     }
     
-    // BOB   normexp *= diam;    
-    normexp=2.0*diam;
+    // Orig:   normexp *= diam;    
+    // Drop to 1.0. 1.0 is still overkill, but 2.0 seems like way overkill
+    // normexp=2.0*diam;
+    normexp=1.0*diam;
+
 
     for (UInt n = 0; n < npe; n++) {
       for (UInt j = 0; j < dim; j++) {
@@ -180,7 +183,7 @@ BBox &BBox::operator=(const BBox &rhs) {
 
 
 
-BBox::BBox(const MEField<> &coords, const MeshDB &mesh) :
+  BBox::BBox(const MEField<> &coords, const MeshDB &mesh, bool is_sph) :
  isempty(false)
 {
 
@@ -191,17 +194,32 @@ BBox::BBox(const MEField<> &coords, const MeshDB &mesh) :
     max[i] = -std::numeric_limits<double>::max();
   }
 
-  // Loop nodes
-  MeshDB::const_iterator ni = mesh.node_begin(), ne = mesh.node_end();
-  for (; ni != ne; ni++) {
-    const double *coord = coords.data(*ni);
-    for (UInt i = 0; i < dim; i++) {
-      if (coord[i] < min[i]) min[i] = coord[i];
-      if (coord[i] > max[i]) max[i] = coord[i];
-    }
+  // Loop elems getting their bounding boxes, and calculate 
+  // mesh bounding box based on those. 
+  MeshDB::const_iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+  for (; ei != ee; ei++) {
+      const MeshObj &elem = *ei;
+
+      // Calc bbox of elem
+      // (set normexp to 1.0 because it's reset inside anyways)
+      BBox elem_bbox(coords, elem, 1.0, is_sph);
+
+      // Expand mesh bbox to fit elem bbox
+      const double *elem_min=elem_bbox.getMin();
+      const double *elem_max=elem_bbox.getMax();
+      for (UInt i = 0; i < dim; i++) {
+        if (elem_min[i] < min[i]) min[i] = elem_min[i];
+        if (elem_max[i] > max[i]) max[i] = elem_max[i];
+      }
   }
+
 }
 
+  // Note that unlike the previous method, this method only takes into account the 
+  // coords of the nodes when calculating a bounding box. It doesn't take into account
+  // any curvature of the elements between the nodes. This is fine for cases where
+  // you only care about the points/nodes (e.g. the destination of a non-conservative regridding), but
+  // may be an issue where you want to bound the elements themselves (e.g. conservative regridding).  
 BBox::BBox(_field &coords, const MeshDB &mesh) {
   
   dim = mesh.spatial_dim();
