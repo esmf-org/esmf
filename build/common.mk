@@ -1163,6 +1163,12 @@ endif
 #-------------------------------------------------------------------------------
 # MOAB
 #-------------------------------------------------------------------------------
+ifneq ($(ESMF_MOAB),OFF)
+ifeq ($(ESMF_LAPACK),OFF)
+$(error ESMF_MOAB cannot be built with ESMF_LAPACK=OFF.)
+endif
+endif
+
 ifeq ($(ESMF_MOAB),standard)
 ifneq ($(origin ESMF_MOAB_LIBS), environment)
 ESMF_MOAB_LIBS = -lMOAB
