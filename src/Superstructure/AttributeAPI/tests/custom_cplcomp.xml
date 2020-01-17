@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<custom_component>
+  <!-- Custom Attributes and values for a Component, defined by user -->
+  <MyAttribute1>My Coupler</MyAttribute1>
+  <MyAttribute2>My Earth System Model</MyAttribute2>
+  <MyAttribute3>Atmosphere</MyAttribute3>
+  <MyAttribute4>Land</MyAttribute4>
+  <MyAttribute5>Version 1</MyAttribute5>
+</custom_component>

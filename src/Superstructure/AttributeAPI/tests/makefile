@@ -327,13 +327,9 @@ RUN_ESMF_AttributeCplCompUTestUNI:
 	$(MAKE) TNAME=AttributeCplComp NP=1 ftest
 
 RUN_ESMF_AttReadCplCompUTest:
-	cp -f $(ESMF_DIR)/src/Superstructure/Component/etc/esmf_cplcomp.xml $(ESMF_TESTDIR)
-	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttReadCplComp NP=4 ftest
 
 RUN_ESMF_AttReadCplCompUTestUNI:
-	cp -f $(ESMF_DIR)/src/Superstructure/Component/etc/esmf_cplcomp.xml $(ESMF_TESTDIR)
-	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttReadCplComp NP=1 ftest
 
 # --- DistGrid
@@ -361,13 +357,9 @@ RUN_ESMF_AttributeFieldUTestUNI:
 	$(MAKE) TNAME=AttributeField NP=1 ftest
 
 RUN_ESMF_AttReadFieldUTest:
-	cp -f $(ESMF_DIR)/src/Infrastructure/Field/etc/esmf_field.xml $(ESMF_TESTDIR)
-	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttReadField NP=4 ftest
 
 RUN_ESMF_AttReadFieldUTestUNI:
-	cp -f $(ESMF_DIR)/src/Infrastructure/Field/etc/esmf_field.xml $(ESMF_TESTDIR)
-	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttReadField NP=1 ftest
 
 # --- GridComp
@@ -379,13 +371,9 @@ RUN_ESMF_AttributeGridCompUTestUNI:
 	$(MAKE) TNAME=AttributeGridComp NP=1 ftest
 
 RUN_ESMF_AttReadGridCompUTest:
-	cp -f $(ESMF_DIR)/src/Superstructure/Component/etc/esmf_gridcomp.xml $(ESMF_TESTDIR)
-	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttReadGridComp NP=4 ftest
 
 RUN_ESMF_AttReadGridCompUTestUNI:
-	cp -f $(ESMF_DIR)/src/Superstructure/Component/etc/esmf_gridcomp.xml $(ESMF_TESTDIR)
-	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttReadGridComp NP=1 ftest
 
 # --- Grid
@@ -419,13 +407,9 @@ RUN_ESMF_AttributeSciCompUTestUNI:
 	$(MAKE) TNAME=AttributeSciComp NP=1 ftest
 
 RUN_ESMF_AttReadSciCompUTest:
-	cp -f $(ESMF_DIR)/src/Superstructure/Component/etc/esmf_scicomp.xml $(ESMF_TESTDIR)
-	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttReadSciComp NP=4 ftest
 
 RUN_ESMF_AttReadSciCompUTestUNI:
-	cp -f $(ESMF_DIR)/src/Superstructure/Component/etc/esmf_scicomp.xml $(ESMF_TESTDIR)
-	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttReadSciComp NP=1 ftest
 
 # --- State
@@ -493,4 +477,3 @@ RUN_ESMF_AttributeXMLUTestUNI:
 	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_gridded_comp_cim_rp.xml $(ESMF_TESTDIR)
 	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_gridded_comp_cust_rp.xml $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttributeXML NP=1 ftest
-

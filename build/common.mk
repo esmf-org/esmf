@@ -244,10 +244,6 @@ ifndef ESMF_TESTHARNESS_FIELD
 export ESMF_TESTHARNESS_FIELD = default
 endif
 
-ifndef ESMF_ETCDIR
-export ESMF_ETCDIR = default
-endif
-
 ifndef ESMF_MOAB
 export ESMF_MOAB = default
 endif
@@ -458,10 +454,6 @@ endif
 
 ifneq ($(ESMF_TESTFORCEOPENACC),ON)
 export ESMF_TESTFORCEOPENACC = OFF
-endif
-
-ifeq ($(ESMF_ETCDIR),default)
-export ESMF_ETCDIR = $(ESMF_BUILD)/src/etc
 endif
 
 ifeq ($(ESMF_MOAB),default)
@@ -1966,11 +1958,6 @@ chkdir_include:
 	  echo Making directory $(ESMF_INCDIR) for include files; \
 	  mkdir -p $(ESMF_INCDIR) ; fi
 
-chkdir_etc:
-	@if [ ! -d $(ESMF_ETCDIR) ]; then \
-	  echo Making directory $(ESMF_ETCDIR) for Attribute package files; \
-	  mkdir -p $(ESMF_ETCDIR) ; fi
-
 chkdir_examples:
 	@if [ ! -d $(ESMF_EXDIR) ]; then \
 	  echo Making directory $(ESMF_EXDIR) for examples output; \
@@ -2087,7 +2074,7 @@ lib: info
 	@echo "To verify, build and run the unit and system tests with: $(MAKE) check"
 	@echo " or the more extensive: $(MAKE) all_tests"
 
-build_libs: chkdir_lib include_n_etc
+build_libs: chkdir_lib include
 	cd $(ESMF_DIR) ; $(MAKE) ACTION=tree_lib tree
 ifeq ($(ESMF_DEFER_LIB_BUILD),ON)
 	cd $(ESMF_DIR) ; $(MAKE) defer
@@ -2108,8 +2095,8 @@ endif
 endif
 
 # Build only stuff in and below the current dir.
-build_here: chkdir_lib chkdir_include chkdir_etc
-	$(MAKE) ACTION="tree_include tree_etc" tree
+build_here: chkdir_lib chkdir_include
+	$(MAKE) ACTION="tree_include" tree
 	$(MAKE) ACTION=tree_lib tree
 ifeq ($(ESMF_DEFER_LIB_BUILD),ON)
 	$(MAKE) defer
@@ -2142,24 +2129,6 @@ tree_include:
 	    cp -fp ../include/$$hfile $(ESMF_INCDIR) ; \
 	  fi ; \
 	done
-
-# copy private attpack files into src/etc directory.
-etc: chkdir_etc $(if $(findstring ON,$(ESMF_DEFER_LIB_BUILD)),chkdir_lib)
-	cd $(ESMF_DIR) ;\
-	$(MAKE) ACTION=tree_etc tree
-
-# action for 'tree' etc target.
-tree_etc:
-	@for etcfile in ${STOREETC} foo ; do \
-	  if [ $$etcfile != "foo" ]; then \
-	    cp -fp ../etc/$$etcfile $(ESMF_ETCDIR) ; \
-	  fi ; \
-	done
-
-# combined include and etc target that walks the tree only once
-include_n_etc: chkdir_include chkdir_etc $(if $(findstring ON,$(ESMF_DEFER_LIB_BUILD)),chkdir_lib)
-	cd $(ESMF_DIR) ;\
-        $(MAKE) ACTION="tree_include tree_etc" tree
 
 # extra indirection to allow build_libs to be turned off in targets using it
 autobuild_libs:

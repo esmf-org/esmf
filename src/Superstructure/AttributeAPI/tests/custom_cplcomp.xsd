@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+  <xsd:element name="custom_component">
+    <xsd:complexType>
+      <xsd:sequence>
+
+        <!-- Custom Attributes for a Component, defined by user -->
+        <!--  names can be any valid XML name; -->
+        <!--  type currently limited to string -->
+        <xsd:element name="MyAttribute1" type="xsd:string"/>
+        <xsd:element name="MyAttribute2" type="xsd:string"/>
+        <xsd:element name="MyAttribute3" type="xsd:string"/>
+        <xsd:element name="MyAttribute4" type="xsd:string"/>
+        <xsd:element name="MyAttribute5" type="xsd:string"/>
+
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+</xsd:schema>

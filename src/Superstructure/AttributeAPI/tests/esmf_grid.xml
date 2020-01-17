@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<GridSpec name="gfdl_fv_cubed_sphere_atmos_am3">
+  <Mosaic name="gfdl_fv_cubed_sphere_atmos_am3_mosaic">
+    <attribute_package convention="GridSpec" purpose="General">
+      <GridType>cubed sphere</GridType>
+      <CongruentTiles>true</CongruentTiles>
+      <NumberOfGridTiles>1</NumberOfGridTiles>
+      <DimensionOrder>YX</DimensionOrder>
+      <DiscretizationType>logically_rectangular</DiscretizationType>
+      <GeometryType>sphere</GeometryType>
+      <IsConformal>false</IsConformal>
+      <IsRegular>false</IsRegular>
+      <IsUniform>false</IsUniform>
+      <NorthPoleLocation>long: 0.0 lat: 90.0</NorthPoleLocation>
+      <NumberOfCells>53457</NumberOfCells>
+      <NX>96</NX>
+      <NY>96</NY>
+      <HorizontalResolution>C48</HorizontalResolution>
+    </attribute_package>
+  </Mosaic>
+</GridSpec>

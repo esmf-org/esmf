@@ -42,9 +42,9 @@ ESMF_AttributeUpdateEx.o : $(ESMF_EXAMPLE_AttributeUpdate_OBJS)
 
 include $(ESMF_DIR)/makefile
 
-DIRS	  = 
+DIRS	  =
 
-CLEANDIRS   = 
+CLEANDIRS   =
 CLEANFILES  = $(EXAMPLES_BUILD)
 CLOBBERDIRS =
 
@@ -100,37 +100,23 @@ run_ESMF_AttributeInternalInfoEx_uni:
 # --- ESMF_AttReadCustCplCompEx
 
 run_ESMF_AttReadCustCplCompEx:
-	cp -f $(ESMF_DIR)/src/Superstructure/Component/etc/custom_cplcomp.xml $(ESMF_EXDIR)
-	cp -f $(ESMF_DIR)/src/Superstructure/Component/etc/custom_cplcomp.xsd $(ESMF_EXDIR)
-	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_EXDIR)
 	$(MAKE) EXNAME=AttReadCustCplComp NP=4 exfrun
 
 run_ESMF_AttReadCustCplCompEx_uni:
-	cp -f $(ESMF_DIR)/src/Superstructure/Component/etc/custom_cplcomp.xml $(ESMF_EXDIR)
-	cp -f $(ESMF_DIR)/src/Superstructure/Component/etc/custom_cplcomp.xsd $(ESMF_EXDIR)
-	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_EXDIR)
 	$(MAKE) EXNAME=AttReadCustCplComp NP=1 exfrun
 
 # --- ESMF_AttReadGridCompEx
 
 run_ESMF_AttReadGridCompEx:
-	cp -f $(ESMF_DIR)/src/Superstructure/Component/etc/esmf_gridcomp.xml $(ESMF_EXDIR)
-	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_EXDIR)
 	$(MAKE) EXNAME=AttReadGridComp NP=4 exfrun
 
 run_ESMF_AttReadGridCompEx_uni:
-	cp -f $(ESMF_DIR)/src/Superstructure/Component/etc/esmf_gridcomp.xml $(ESMF_EXDIR)
-	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_EXDIR)
 	$(MAKE) EXNAME=AttReadGridComp NP=1 exfrun
 
 # --- ESMF_AttReadFieldEx
 
 run_ESMF_AttReadFieldEx:
-	cp -f $(ESMF_DIR)/src/Infrastructure/Field/etc/esmf_field.xml $(ESMF_EXDIR)
-	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_EXDIR)
 	$(MAKE) EXNAME=AttReadField NP=4 exfrun
 
 run_ESMF_AttReadFieldEx_uni:
-	cp -f $(ESMF_DIR)/src/Infrastructure/Field/etc/esmf_field.xml $(ESMF_EXDIR)
-	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_EXDIR)
 	$(MAKE) EXNAME=AttReadField NP=1 exfrun
