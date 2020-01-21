@@ -522,8 +522,11 @@ end interface
 !
 !EOPI
     type(ESMF_GeomBaseClass),pointer :: gbcp
-    integer :: localrc ! local error status
-    type(ESMF_MeshLoc) :: localLoc
+    integer                          :: localrc ! local error status
+    type(ESMF_MeshLoc)               :: localLoc
+    type(ESMF_Index_Flag)            :: loc_indexflag
+    type(ESMF_DistGrid)              :: distgrid
+    logical                          :: isPresent
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -548,11 +551,53 @@ end interface
        localLoc=ESMF_MESHLOC_NODE
     endif
 
+    if(localLoc == ESMF_MESHLOC_NODE) then
+      call ESMF_MeshGet(mesh, nodalDistgridisPresent=isPresent, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      if(.not. isPresent) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
+          msg="- mesh does have a distgrid for user supplied nodal meshloc", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+      call ESMF_MeshGet(mesh, nodalDistgrid=distgrid, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else if(localLoc == ESMF_MESHLOC_ELEMENT) then
+      call ESMF_MeshGet(mesh, elementDistgridisPresent=isPresent, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      if(.not. isPresent) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
+          msg="- mesh does have a distgrid for user supplied element meshloc", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+      call ESMF_MeshGet(mesh, elementDistgrid=distgrid, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    call ESMF_DistGridGet(distgrid, indexflag=loc_indexflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if(present(indexflag)) then
+      if(indexflag /= loc_indexflag) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
+          msg="- user supplied indexflag does not match indexflag in Mesh/Distgrid ", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+    endif
+
     ! TODO: properlly handle the indexflag information for Mesh
     ! Set values in GeomBase
     gbcp%type = ESMF_GEOMTYPE_MESH
     gbcp%mesh = mesh
     gbcp%meshloc = localLoc
+
 
     ! Set GeomBase Type into GeomBase
      ESMF_GeomBaseCreateMesh%gbcp=>gbcp

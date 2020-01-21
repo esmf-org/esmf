@@ -1288,6 +1288,7 @@ interface operator (/=)
   module procedure ESMF_bfne
   module procedure ESMF_ctfne
   module procedure ESMF_tnfne
+  module procedure ESMF_ifneq
   module procedure ESMF_frne
   module procedure ESMF_unmappedactionne
   module procedure ESMF_RegridPoleNe
@@ -1760,6 +1761,13 @@ function ESMF_ifeq(if1, if2)
   type(ESMF_Index_Flag), intent(in) :: if1, if2
 
   ESMF_ifeq = (if1%i_type == if2%i_type)
+end function
+
+function ESMF_ifneq(if1, if2)
+  logical ESMF_ifneq
+  type(ESMF_Index_Flag), intent(in) :: if1, if2
+
+  ESMF_ifneq = (if1%i_type /= if2%i_type)
 end function
 
 !------------------------------------------------------------------------------
