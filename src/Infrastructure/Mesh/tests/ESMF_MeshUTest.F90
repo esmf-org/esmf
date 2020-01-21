@@ -109,6 +109,8 @@ program ESMF_MeshUTest
   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+#if 1
+
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
@@ -2565,7 +2567,21 @@ endif
 
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
+#endif
 
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test Mesh Create from Grid with 1 width DE"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! initialize check variables
+  correct=.false.
+  rc=ESMF_FAILURE
+ 
+  ! Do test
+  call test_1_width_DE_GtoM(correct, rc)
+
+  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
   ! TODO: "Activate once the mesh is fully created. ESMF_MeshWrite is not meant
@@ -6155,13 +6171,85 @@ subroutine test_mesh_create_ee_1type(correct, rc)
    deallocate(elemCornerCoords)
 
    ! Output Mesh for debugging
-   call ESMF_MeshWrite(mesh,"meshee1t",rc=localrc)
-   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+   !call ESMF_MeshWrite(mesh,"meshee1t",rc=localrc)
+   !if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
    ! Return success
    rc=ESMF_SUCCESS
 
 end subroutine test_mesh_create_ee_1type
+
+subroutine test_1_width_DE_GtoM(correct, rc)
+  logical :: correct
+  integer :: rc
+
+  type(ESMF_Grid) :: grid
+  type(ESMF_Mesh) :: mesh
+  type(ESMF_VM) :: vm
+  integer :: localPet, petCount
+
+  ! get global VM
+  call ESMF_VMGetGlobal(vm, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+  call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  ! Init correct
+  correct=.true.
+
+! XMRKX !
+
+  ! Create Grid
+  grid=ESMF_GridCreateNoPeriDimUfrm( &
+!       maxIndex=(/6,6/), &
+       maxIndex=(/3,3/), &
+       minCornerCoord=(/0.0_ESMF_KIND_R8,0.0_ESMF_KIND_R8/), &
+       maxCornerCoord=(/10.0_ESMF_KIND_R8,10.0_ESMF_KIND_R8/), &
+!        regDecomp=(/4,1/), & ! Gives a couple of 1 width DEs (this works)
+!       regDecomp=(/8,1/), & ! Gives a couple of 0 width and the rest 1 (now works)
+       regDecomp=(/4,1/), & ! Gives one 0 width and the rest 1 (now works)
+       staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
+       coordSys=ESMF_COORDSYS_CART, &
+       rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+   ! Create Mesh structure in 1 step
+   mesh=ESMF_MeshCreate(grid, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+#if 0
+   ! Output Mesh for debugging
+   call ESMF_MeshWrite(mesh,"mesh_1de_gtom",rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+#endif
+
+   ! Get rid of Grid
+   call ESMF_GridDestroy(grid, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+   ! Get rid of Mesh
+   call ESMF_MeshDestroy(mesh, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+   ! Return success
+   rc=ESMF_SUCCESS
+
+end subroutine test_1_width_DE_GtoM
+
 
 
 end program ESMF_MeshUTest
