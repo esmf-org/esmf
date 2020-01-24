@@ -146,7 +146,7 @@ extern "C" void FTN_X(c_esmc_meshwrite)(MeshCap **meshpp, char *fname, int *rc,
 }
 
 
-extern "C" void FTN_X(c_esmc_meshwritevtk)(MeshCap **meshpp, char *fname, 
+extern "C" void FTN_X(c_esmc_meshwritevtk)(MeshCap **meshpp, char *fname,
                                            ESMCI::Array **nodeArray1,
                                            ESMCI::Array **nodeArray2,
                                            ESMCI::Array **nodeArray3,
@@ -197,7 +197,7 @@ extern "C" void FTN_X(c_esmc_meshwritevtk)(MeshCap **meshpp, char *fname,
   num_elemArrays=e;
 
   // Call into implementation
-  (*meshpp)->meshwritewarrays(fname, nlen, 
+  (*meshpp)->meshwritewarrays(fname, nlen,
                               num_nodeArrays, nodeArrays,
                               num_elemArrays, elemArrays, rc);
 
@@ -309,23 +309,25 @@ extern "C" void FTN_X(c_esmc_meshinfodeserialize)(int *intMeshFreed,
 
 extern "C" void FTN_X(c_esmc_meshserialize)(MeshCap **meshpp,
                 char *buffer, int *length, int *offset,
+                ESMC_AttReconcileFlag *attreconflag,
                 ESMC_InquireFlag *inquireflag, int *rc,
                 ESMCI_FortranStrLenArg buffer_l){
 
   (*meshpp)->meshserialize(buffer, length, offset,
-                           inquireflag, rc,
-                           buffer_l);
+                           *attreconflag, inquireflag, rc, buffer_l);
 
 }
 
 
 extern "C" void FTN_X(c_esmc_meshdeserialize)(MeshCap **meshpp,
                              char *buffer, int *offset,
-                             int *rc,
+                             ESMC_AttReconcileFlag *attreconflag, int *rc,
                              ESMCI_FortranStrLenArg buffer_l){
 
-  *meshpp=MeshCap::meshdeserialize(buffer, offset, rc,
-                             buffer_l);
+  // Create MeshCap
+  *meshpp=new MeshCap(-1);   // prevent baseID counter increment
+
+  (*meshpp)->meshdeserialize(buffer, offset, *attreconflag, rc, buffer_l);
 }
 
 
@@ -488,7 +490,7 @@ extern "C" void FTN_X(c_esmc_sphdeg_to_cart)(double *lon, double *lat,
 
 
 // This method sets the pole values so a 2D Mesh from a SCRIP grid can still be used in regrid with poles
-extern "C" void FTN_X(c_esmc_meshsetpoles)(MeshCap **meshpp, int *_pole_obj_type, int *_pole_val, 
+extern "C" void FTN_X(c_esmc_meshsetpoles)(MeshCap **meshpp, int *_pole_obj_type, int *_pole_val,
                                            int *_min_pole_gid, int *_max_pole_gid,
                                            int *rc) {
 
@@ -589,18 +591,18 @@ extern "C" void FTN_X(c_esmc_meshcreatefromgrid)(MeshCap **meshpp,
 } // meshcreate
 
 
-extern "C" void FTN_X(c_esmc_geteleminfointoarray)(MeshCap **meshpp, 
-                                                   DistGrid **elemDistgrid, 
-                                                   int *numElemArrays, 
-                                                   int *infoTypeElemArrays, 
-                                                   Array **elemArrays, 
+extern "C" void FTN_X(c_esmc_geteleminfointoarray)(MeshCap **meshpp,
+                                                   DistGrid **elemDistgrid,
+                                                   int *numElemArrays,
+                                                   int *infoTypeElemArrays,
+                                                   Array **elemArrays,
                                                    int *rc)
 {
 
-  (*meshpp)->geteleminfointoarray(*elemDistgrid, 
-                                  *numElemArrays, 
+  (*meshpp)->geteleminfointoarray(*elemDistgrid,
+                                  *numElemArrays,
                                   infoTypeElemArrays,
-                                  elemArrays, 
+                                  elemArrays,
                                   rc);
 
 }
