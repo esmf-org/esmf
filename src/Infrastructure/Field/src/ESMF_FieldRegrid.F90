@@ -795,6 +795,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            lregridmethod=ESMF_REGRIDMETHOD_BILINEAR
         endif
 
+        ! Make sure that patch isn't being used without LAPACK
+#ifndef ESMF_LAPACK
+        if (lregridmethod .eq. ESMF_REGRIDMETHOD_PATCH) then
+              call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, & 
+                   msg=" The patch regrid method (ESMF_REGRIDMETHOD_PATCH) "// &
+                       "is not supported when ESMF has been built with LAPACK disabled.", &
+                   ESMF_CONTEXT, rcToReturn=rc) 
+              return
+        endif
+#endif
+
         ! Handle optional extrap method argument
         if (present(extrapMethod)) then
            localExtrapMethod=extrapMethod
@@ -836,7 +847,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! endif
 
 
-        ! Can use extrapolation with conservative right now
+        ! Can't use extrapolation with conservative right now
         if ((lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE) .or. &
              (lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE_2ND)) then
            if (localExtrapMethod .ne. ESMF_EXTRAPMETHOD_NONE) then
