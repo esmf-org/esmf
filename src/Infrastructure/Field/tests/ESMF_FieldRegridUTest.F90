@@ -8698,7 +8698,7 @@ write(*,*) "LOCALRC=",localrc
           regridmethod=ESMF_REGRIDMETHOD_PATCH, &
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
-      rc=ESMF_FAILURE
+      rc=localrc
       return
    endif
 
@@ -29366,7 +29366,7 @@ write(*,*) "LOCALRC=",localrc
           regridmethod=ESMF_REGRIDMETHOD_PATCH, &
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
-      rc=ESMF_FAILURE
+      rc=localrc
       return
    endif
 
@@ -31575,7 +31575,7 @@ write(*,*) "LOCALRC=",localrc
           regridmethod=ESMF_REGRIDMETHOD_PATCH, &
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
-      rc=ESMF_FAILURE
+      rc=localrc
       return
    endif
 
