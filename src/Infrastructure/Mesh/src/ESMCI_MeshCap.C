@@ -1624,11 +1624,13 @@ MeshCap *MeshCap::meshcreatedual(MeshCap **src_meshpp, int *rc) {
   return mc;
 }
 
-void MeshCap::destroy(MeshCap **mcpp,int *rc) {
+int MeshCap::destroy(MeshCap **mcpp, bool noGarbage) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::destroy()"
 
-  // Dereference meshcap
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+    // Dereference meshcap
   MeshCap *mcp=*mcpp;
 
   // Get mesh type
@@ -1641,7 +1643,7 @@ void MeshCap::destroy(MeshCap **mcpp,int *rc) {
       int localrc;
       ESMCI_meshdestroy(&(mcp->mesh), &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-                                        ESMC_CONTEXT, rc)) return;
+                                        ESMC_CONTEXT, &rc)) return rc;
     }
   } else {
 #if defined ESMF_MOAB
@@ -1650,23 +1652,27 @@ void MeshCap::destroy(MeshCap **mcpp,int *rc) {
       int localrc;
       MBMesh_destroy(&(mcp->mbmesh), &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-                                        ESMC_CONTEXT, rc)) return;
+                                        ESMC_CONTEXT, &rc)) return rc;
     }
 #else
    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
       "This functionality requires ESMF to be built with the MOAB library enabled" ,
-      ESMC_CONTEXT, rc)) return;
+      ESMC_CONTEXT, &rc)) return rc;
 #endif
   }
 
-  // delete MeshCap struct
-  delete mcp;
+  // optionally delete the complete object and remove from garbage collection
+  if (noGarbage){
+    VM::rmObject(mcp);  // remove object from garbage collection
+    delete mcp;         // completely delete the object, free heap
+  }
 
   // Set to NULL
   *mcpp=NULL;
 
-  // Set error code to success
-  if (rc) *rc=ESMF_SUCCESS;
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
 }
 
 // returns NULL if unsuccessful

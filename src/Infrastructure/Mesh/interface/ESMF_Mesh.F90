@@ -4472,18 +4472,25 @@ end function ESMF_MeshCreateCubedSphere
 ! !IROUTINE: ESMF_MeshDestroy - Release resources associated with a Mesh
 !
 ! !INTERFACE:
-      subroutine ESMF_MeshDestroy(mesh, keywordEnforcer, rc)
+      subroutine ESMF_MeshDestroy(mesh, keywordEnforcer, noGarbage, rc)
 !
 ! !RETURN VALUE:
 !
 ! !ARGUMENTS:
     type(ESMF_Mesh), intent(inout)          :: mesh
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,         intent(in),   optional :: noGarbage
     integer,         intent(out),  optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.1.0] Added argument {\tt noGarbage}.
+!   The argument provides a mechanism to override the default garbage collection
+!   mechanism when destroying an ESMF object.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -4494,18 +4501,41 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 ! \item [mesh]
 ! Mesh object to be destroyed.
+! \item[{[noGarbage]}]
+!      If set to {\tt .TRUE.} the object will be fully destroyed and removed
+!      from the ESMF garbage collection system. Note however that under this 
+!      condition ESMF cannot protect against accessing the destroyed object 
+!      through dangling aliases -- a situation which may lead to hard to debug 
+!      application crashes.
+! 
+!      It is generally recommended to leave the {\tt noGarbage} argument
+!      set to {\tt .FALSE.} (the default), and to take advantage of the ESMF 
+!      garbage collection system which will prevent problems with dangling
+!      aliases or incorrect sequences of destroy calls. However this level of
+!      support requires that a small remnant of the object is kept in memory
+!      past the destroy call. This can lead to an unexpected increase in memory
+!      consumption over the course of execution in applications that use 
+!      temporary ESMF objects. For situations where the repeated creation and 
+!      destruction of temporary objects leads to memory issues, it is 
+!      recommended to call with {\tt noGarbage} set to {\tt .TRUE.}, fully 
+!      removing the entire temporary object from memory.
 ! \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
 !EOP
       integer  :: localrc
+      type(ESMF_Logical)      :: opt_noGarbage  ! helper variable
 
       ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
 
+      ! Set default flags
+      opt_noGarbage = ESMF_FALSE
+      if (present(noGarbage)) opt_noGarbage = noGarbage
+
       ! If not already freed then free the c side
       if (.not. mesh%isCMeshFreed) then
-        call C_ESMC_MeshDestroy(mesh%this, localrc)
+        call C_ESMC_MeshDestroy(mesh%this, opt_noGarbage, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
 

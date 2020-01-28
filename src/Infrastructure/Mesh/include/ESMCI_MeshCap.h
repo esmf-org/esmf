@@ -286,7 +286,7 @@
                         ESMCI::Array **arraypp, int *staggerLoc,
                         int *rc);
 
-     static void destroy(MeshCap **mcpp,int *rc);
+     static int destroy(MeshCap **mcpp, bool noGarbage=false);
 
      void set_xgrid_info(int *side, int *ind, int *rc);
   };

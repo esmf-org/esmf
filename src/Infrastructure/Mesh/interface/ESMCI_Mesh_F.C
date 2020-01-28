@@ -242,10 +242,20 @@ extern "C" void FTN_X(c_esmc_meshvtkbody)(char *filename, int *nodeId, double *n
                          nlen);
 }
 
-extern "C" void FTN_X(c_esmc_meshdestroy)(MeshCap **meshpp, int *rc) {
-
-  MeshCap::destroy(meshpp, rc);
-
+extern "C" void FTN_X(c_esmc_meshdestroy)(MeshCap **meshpp,
+  ESMC_Logical *noGarbage, int *rc){
+  // Initialize return code; assume routine not implemented
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+  // convert to bool
+  bool noGarbageOpt = false;  // default
+  if (ESMC_NOT_PRESENT_FILTER(noGarbage) != ESMC_NULL_POINTER)
+    if (*noGarbage == ESMF_TRUE) noGarbageOpt = true;
+  // test for NULL pointer via macro before calling any class methods
+  ESMCI_NULL_CHECK_PRC(meshpp, rc)
+  ESMCI_NULL_CHECK_PRC(*meshpp, rc)
+  ESMC_LogDefault.MsgFoundError(ESMCI::MeshCap::destroy(meshpp,noGarbageOpt),
+    ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_NOT_PRESENT_FILTER(rc));
 }
 
 extern "C" void FTN_X(c_esmc_meshfreememory)(MeshCap **meshpp, int *rc) {
