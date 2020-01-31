@@ -109,7 +109,7 @@ program ESMF_MeshUTest
   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-#if 1
+#if 0
 
   !------------------------------------------------------------------------
 
@@ -2567,7 +2567,6 @@ endif
 
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
-#endif
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
@@ -2580,6 +2579,30 @@ endif
  
   ! Do test
   call test_1_width_DE_GtoM(correct, rc)
+
+  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+
+#endif
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test MOAB Mesh Create from Grid"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! Don't test if MOAB isn't available
+#if defined ESMF_MOAB
+
+  ! initialize check variables
+  correct=.false.
+  rc=ESMF_FAILURE
+ 
+  ! Do test
+  call test_MOAB_GtoM(correct, rc)
+
+#else
+  rc=ESMF_SUCCESS
+  correct=.true.
+#endif
 
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
@@ -6250,7 +6273,90 @@ subroutine test_1_width_DE_GtoM(correct, rc)
 
 end subroutine test_1_width_DE_GtoM
 
+subroutine test_MOAB_GtoM(correct, rc)
+  logical :: correct
+  integer :: rc
 
+  type(ESMF_Grid) :: grid
+  type(ESMF_Mesh) :: mesh
+  type(ESMF_VM) :: vm
+  integer :: localPet, petCount
+
+  ! get global VM
+  call ESMF_VMGetGlobal(vm, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+  call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  ! Init correct
+  correct=.true.
+
+! XMRKX !
+
+  ! Create Grid
+  grid=ESMF_GridCreateNoPeriDimUfrm( &
+       maxIndex=(/4,4/), &
+       minCornerCoord=(/0.0_ESMF_KIND_R8,0.0_ESMF_KIND_R8/), &
+       maxCornerCoord=(/10.0_ESMF_KIND_R8,10.0_ESMF_KIND_R8/), &
+       regDecomp=(/2,2/), & 
+       staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
+       coordSys=ESMF_COORDSYS_CART, &
+       rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  ! Turn on MOAB mesh creation
+  call ESMF_MeshSetMOAB(.true., rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+   ! Create Mesh structure in 1 step
+   mesh=ESMF_MeshCreate(grid, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+      call ESMF_MeshSetMOAB(.false.)
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  ! Turn off MOAB mesh creation
+  call ESMF_MeshSetMOAB(.false., rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+#if 1
+   ! Output Mesh for debugging
+   call ESMF_MeshWrite(mesh,"moab_gtom_mesh",rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+#endif
+
+   ! Get rid of Grid
+   call ESMF_GridDestroy(grid, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+   ! Get rid of Mesh
+   call ESMF_MeshDestroy(mesh, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+
+   ! Return success
+   rc=ESMF_SUCCESS
+
+end subroutine test_MOAB_GtoM
 
 end program ESMF_MeshUTest
 

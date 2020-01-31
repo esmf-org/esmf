@@ -35,13 +35,16 @@ namespace ESMCI {
 #if defined ESMF_MOAB
 
   public:
-    int sdim, pdim; // dimensions MAYBE I SHOULD NAME THESE MORE SIMILAR TO WHAT IN OTHER MESH
-    int orig_sdim;
+    int pdim; 
+    int sdim; // Spatial dim of coordinates (after conversion), maybe change to cart_sdim? 
+    int orig_sdim;  // Original spatial dim before converting
     ESMC_CoordSys_Flag coordsys;
 
     Interface *mesh; // Moab mesh  MAYBE I SHOULD NAME ThIS SOMETHING ELSE????
 
-    int num_verts;
+    int num_verts; // number of verts this processor
+
+    // eventualy get rid of this
     EntityHandle *verts; // Temporary storage for element create
 
     int num_elems; // number of elems on this processor
@@ -84,7 +87,12 @@ namespace ESMCI {
 
 #endif
 
+    // Empty mesh
     MBMesh();
+
+    // Mesh from inputs
+    MBMesh(int _pdim, int _orig_sdim, ESMC_CoordSys_Flag _coordSys);
+
 
     ~MBMesh();
 

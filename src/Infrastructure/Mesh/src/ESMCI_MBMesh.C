@@ -35,6 +35,7 @@
 #include "Mesh/include/ESMCI_MBMesh.h"
 #include "Mesh/include/ESMCI_MBMesh_Glue.h"
 
+#include "MBTagConventions.hpp"
 #include "moab/ParallelComm.hpp"
 #include "MBParallelConventions.h"
 
@@ -57,8 +58,91 @@ using namespace std;
 #define ESMF
 #define ESMC_METHOD "MBMesh::func()"
 
+// Empty mesh
+// TODO: Get rid of this once the more complete creation interfaces are used everywhere??
 MBMesh::MBMesh() : sdim(0),pdim(0),mesh(NULL),verts(NULL) {
 
+} 
+
+// From inputs
+// _pdim - parametric dimension
+// _orig_sdim - the original spatial dimension (before converting to Cart 3D)
+// _coordSys  - the coordinate system of the mesh
+MBMesh::MBMesh(int _pdim, int _orig_sdim, ESMC_CoordSys_Flag _coordsys): 
+  // TODO: Figure out if there's an empty tag to init tags to
+  pdim(_pdim),
+  sdim(0), 
+  orig_sdim(_orig_sdim),
+  coordsys(_coordsys), 
+  mesh(NULL),
+  num_verts(0),
+  verts(NULL),
+  num_elems(0),
+  has_node_orig_coords(false),
+  has_node_mask(false),
+  has_elem_frac(false),
+  has_elem_mask(false),
+  has_elem_area(false),
+  has_elem_coords(false),
+  has_elem_orig_coords(false), 
+  is_split(false),
+  max_non_split_id(0) {
+
+  // Moab error
+  int merr;
+
+  // Get cartesian dimension
+  int cart_sdim;
+  int localrc;
+  localrc=ESMCI_CoordSys_CalcCartDim(coordsys, orig_sdim, &cart_sdim);
+  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+
+
+  // Set cartesian spatial dim in struct
+  sdim=cart_sdim;
+  
+  // Create MOAB Mesh
+  mesh=new Core();
+
+  // Default value
+  int int_def_val = 0;
+  double dbl_def_val[3] = {0.0, 0.0, 0.0};
+
+  // Setup global id tag
+  int_def_val=0;
+  merr=mesh->tag_get_handle(GLOBAL_ID_TAG_NAME, 1, MB_TYPE_INTEGER, gid_tag, MB_TAG_DENSE, &int_def_val);
+  if (merr != MB_SUCCESS) {
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT, &localrc)) throw localrc;
+  }
+  
+  // Setup orig_pos tag
+  int_def_val=-1;
+  merr=mesh->tag_get_handle("orig_pos", 1, MB_TYPE_INTEGER, orig_pos_tag, MB_TAG_EXCL|MB_TAG_DENSE, &int_def_val);
+  if (merr != MB_SUCCESS) {
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT, &localrc)) throw localrc;
+  }
+  
+  // Setup owner tag
+  int_def_val=-1;
+  merr=mesh->tag_get_handle("owner", 1, MB_TYPE_INTEGER, owner_tag, MB_TAG_EXCL|MB_TAG_DENSE, &int_def_val);
+  if (merr != MB_SUCCESS) {
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT, &localrc)) throw localrc;
+  }
+  
+  // Setup node_orig_coord tag
+  has_node_orig_coords=false;
+  if (coordsys != ESMC_COORDSYS_CART) {
+    dbl_def_val[0]=dbl_def_val[1]=dbl_def_val[2]=-1.0;
+    merr=mesh->tag_get_handle("node_orig_coords", orig_sdim, MB_TYPE_DOUBLE, node_orig_coords_tag, MB_TAG_EXCL|MB_TAG_DENSE, dbl_def_val);
+    if (merr != MB_SUCCESS) {
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                       moab::ErrorCodeStr[merr], ESMC_CONTEXT, &localrc)) throw localrc;
+    }
+    has_node_orig_coords=true;
+  }
 } 
 
 MBMesh::~MBMesh() {

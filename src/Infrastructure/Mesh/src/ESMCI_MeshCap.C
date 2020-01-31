@@ -40,6 +40,7 @@
 #include "Mesh/include/ESMCI_MBMesh.h"
 #include "Mesh/include/ESMCI_MBMesh_Dual.h"
 #include "Mesh/include/ESMCI_MBMesh_Glue.h"
+#include "Mesh/include/ESMCI_MBMesh_GToM_Glue.h"
 #include "Mesh/include/ESMCI_MBMesh_Regrid_Glue.h"
 #include "Mesh/include/ESMCI_MBMesh_Util.h"
 #include "Mesh/include/ESMCI_MeshCap.h"
@@ -369,7 +370,7 @@ MeshCap *MeshCap::GridToMeshCell(const Grid &grid_,
                                       ESMC_CONTEXT, rc)) return NULL;
   } else {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-      "- this functionality is not currently supported using MOAB",
+            "- this functionality is not currently supported using MOAB",
                                   ESMC_CONTEXT, rc);
     return NULL;
   }
@@ -1751,10 +1752,16 @@ MeshCap *MeshCap::meshcreate_from_grid(Grid **gridpp,
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                        ESMC_CONTEXT, rc)) return NULL;
   } else {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-            "- this functionality is not currently supported using MOAB",
-                                  ESMC_CONTEXT, rc);
-    return NULL;
+#if defined ESMF_MOAB
+    MBMesh_GridToMeshCell(grid,
+                          &mbmesh, 
+                          &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return NULL;
+#else
+   if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+      "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return NULL;
+#endif
   }
 
   // Create MeshCap
