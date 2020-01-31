@@ -2284,6 +2284,16 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
     
   }
 
+  typedef struct {
+    double p[3];
+    double distsq;
+  } GUESS;
+
+  // Sort by distance
+  static bool _are_distsq_less_GUESS(const GUESS lhs, const GUESS rhs) {
+    return (lhs.distsq < rhs.distsq);
+  }
+
 
 // Take in a spherical hex represented in xyz and
 // a point value. Calculate the parameters for where the
@@ -2308,7 +2318,43 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
                                 {1.0,1.0,1.0}};
 
 
-/* XMRKX */
+  // List of optional guesses, and which we're using
+  GUESS guess_list[NUM_GUESS]={{0.5,0.5,0.5,0.0},
+                               {0.0,0.0,0.0,0.0},
+                               {0.0,0.0,1.0,0.0},
+                               {0.0,1.0,0.0,0.0},
+                               {0.0,1.0,1.0,0.0},
+                               {1.0,0.0,0.0,0.0},
+                               {1.0,0.0,1.0,0.0},
+                               {1.0,1.0,0.0,0.0},
+                               {1.0,1.0,1.0,0.0}};
+
+
+
+  /* XMRKX */
+
+  // Set distance squared for each guess
+  for (int guess=0; guess<NUM_GUESS; guess++) {
+    
+    // Calculate point and jacobian at guess
+    double tmp_pnt[3];
+    double jac[3*3];
+    double max_angle[3];
+    calc_pnt_and_jac_hex_sph3D_xyz(hex_xyz, guess_list[guess].p,
+                                     tmp_pnt, jac, max_angle);
+
+    
+      // Calculate diff vector from tmp_pnt to pnt
+      // (point at p-pnt_xyz)
+      double diff[3];
+      MU_SUB_VEC3D(diff,tmp_pnt,pnt_xyz);
+
+      // Calculate Cart. dist. between tmp_pnt and actual point
+      guess_list[guess].distsq=MU_LENSQ_VEC3D(diff);
+  }
+
+  // Sort so we start with closest
+  std::sort(guess_list, guess_list+NUM_GUESS, _are_distsq_less_GUESS);
 
   // Loop over guesses
   bool p_out_valid=false;
@@ -2316,9 +2362,12 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
 
     // Load guess into p
     double p[3];
-    p[0]=p_guess[guess][0];
-    p[1]=p_guess[guess][1];
-    p[2]=p_guess[guess][2];
+    //p[0]=p_guess[guess][0];
+    //p[1]=p_guess[guess][1];
+    //p[2]=p_guess[guess][2];
+    p[0]=guess_list[guess].p[0];
+    p[1]=guess_list[guess].p[1];
+    p[2]=guess_list[guess].p[2];
 
 
     // Do multiple interations for each guess

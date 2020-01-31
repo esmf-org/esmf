@@ -66,7 +66,7 @@
 ! call ESMF_MeshSetMOAB(.true.)
 
 ! This #if surrounds all the tests to enable turning on just one test
-#if 1
+#if 0
      !------------------------------------------------------------------------
       !EX_UTest
       ! Test regrid between -180-180 sphere and a 360 sphere
@@ -367,6 +367,8 @@
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+#endif
+
       !------------------------------------------------------------------------
        !EX_UTest
       ! Test regrid with masks
@@ -381,6 +383,8 @@
  
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+#if 0
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -20214,7 +20218,7 @@ write(*,*) "LOCALRC=",localrc
   enddo    ! lDE
 
   ! Get start time
- !  call ESMF_VMWtime(beg_time)
+  call ESMF_VMWtime(beg_time)
 
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
@@ -20232,14 +20236,14 @@ write(*,*) "LOCALRC=",localrc
    endif
 
   ! Get end time
-  !call ESMF_VMWtime(end_time)
+  call ESMF_VMWtime(end_time)
 
 
 
   ! output info
-!  write(*,*) "Src dims=",src_nx,src_ny
-!  write(*,*) "Dst dims=",dst_nx,dst_ny
-!  write(*,*) "Store time = ",end_time-beg_time
+  write(*,*) "Src dims=",src_nx,src_ny
+  write(*,*) "Dst dims=",dst_nx,dst_ny
+  write(*,*) "Store time = ",end_time-beg_time
 
   ! Do regrid
   call ESMF_FieldRegrid(srcField, dstField, routeHandle, rc=localrc)
@@ -20335,8 +20339,8 @@ write(*,*) "LOCALRC=",localrc
      write(*,*) "Test not correct. Max Rel. Error= ",maxRelErr
   endif
 
-  !write(*,*) "Max Rel. Error= ",maxRelErr
-  !write(*,*) "Avg Rel. Error= ",totRelErr/REAL(numRelErr)
+ write(*,*) "Max Rel. Error= ",maxRelErr
+ write(*,*) "Avg Rel. Error= ",totRelErr/REAL(numRelErr)
 
 #if 0
   call ESMF_GridWriteVTK(srcGrid,staggerloc=ESMF_STAGGERLOC_CENTER, &
