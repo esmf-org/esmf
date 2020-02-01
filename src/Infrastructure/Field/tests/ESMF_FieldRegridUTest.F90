@@ -55,7 +55,7 @@
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
  
 #ifdef ESMF_TESTEXHAUSTIVE
-#if 1
+#if 0
 
      !------------------------------------------------------------------------
       !EX_UTest
@@ -359,7 +359,7 @@
 
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
+#endif
 
       !------------------------------------------------------------------------
 
@@ -378,7 +378,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-
+#if 0
 
       !EX_UTest
       ! Test regrid with masks
@@ -657,7 +657,7 @@
 
       !------------------------------------------------------------------------
 
-#endif
+
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test really coarse regrid
@@ -821,8 +821,7 @@
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-
-
+#endif
 #endif
     call ESMF_TestEnd(ESMF_SRCLINE)
 
@@ -19968,7 +19967,7 @@ return
   enddo    ! lDE
 
   ! Get start time
-  ! call ESMF_VMWtime(beg_time)
+  call ESMF_VMWtime(beg_time)
 
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
@@ -19976,7 +19975,7 @@ return
  	  srcField, &
           dstField=dstField, &
           routeHandle=routeHandle, &
-          unmappedAction=ESMF_UNMAPPEDACTION_IGNORE, &
+!          unmappedAction=ESMF_UNMAPPEDACTION_IGNORE, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -19985,10 +19984,10 @@ return
    endif
 
   ! Get end time
-  !call ESMF_VMWtime(end_time)
+  call ESMF_VMWtime(end_time)
 
   ! output time
-  ! write(*,*) "Store time = ",end_time-beg_time
+  write(*,*) "Store time = ",end_time-beg_time
 
   ! Do regrid
   call ESMF_FieldRegrid(srcField, dstField, routeHandle, rc=localrc)
@@ -20077,6 +20076,8 @@ return
   if (.not. correct) then
      write(*,*) "Test not correct. Max Rel. Error= ",maxRelErr
   endif
+
+     write(*,*) "Max Rel. Error= ",maxRelErr
 
 #if 0
   call ESMF_GridWriteVTK(srcGrid,staggerloc=ESMF_STAGGERLOC_CENTER, &

@@ -20,6 +20,7 @@
 #include <Mesh/include/ESMCI_Ftn.h>
 #include <Mesh/include/ESMCI_ParEnv.h>
 #include <Mesh/include/ESMCI_MathUtil.h>
+#include "sacado/Sacado.hpp"
 
 #include <iostream>
 #include <iterator>
@@ -36,12 +37,17 @@ static const char *const version = "$Id$";
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
-#endif
+ #endif
 
           
 namespace ESMCI {
 
-  bool mathutil_debug=false;
+   bool mathutil_debug=false;
+
+  // Defines used just in this file here
+#define SFAD3D_NUM_DERIV_COMP 3
+  typedef Sacado::Fad::SFad<double,SFAD3D_NUM_DERIV_COMP> Sfad3D;
+
 
   ///////// File for random math routines that I didn't know where to put ///////////
 
@@ -80,7 +86,7 @@ bool invert_matrix_3x3(double m[], double m_inv[]) {
   m_inv[6] = (m[3]*m[7] - m[4]*m[6]) * deti;
   m_inv[7] = (m[1]*m[6] - m[0]*m[7]) * deti;
   m_inv[8] = (m[0]*m[4] - m[1]*m[3]) * deti;
-
+ 
   return true;
 }
 
@@ -1652,7 +1658,11 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
 
   // return success
   return 0;
+
+
 } 
+
+#define WSACADO 0
 
   //////// NEW STUFF /////
  /* XMRKX */
@@ -1663,77 +1673,172 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
   // OUTPUTS:
   //   out_pnt - the point at p between pnt0 and pnt1 also expressed in x,y,z Cartesian
   //   out_angle01 - the angle between pnt0 and pnt1
-  void sph_comb_pnts(const double *pnt0, const double *pnt1, double p,
-       double *out_pnt, double *out_angle01) {
+  template <class TYPE>
+  void sph_comb_pnts(const TYPE *pnt0, const TYPE *pnt1, TYPE p,
+       TYPE *out_pnt, TYPE *out_angle01) {
 
   // Thought about doing a case here if the points are the same, but I think that 
   // the below will just work in that case, and this way I don't have to come up 
   // with an arbitrary tol for sameness. 
 
+#ifdef DISP_DERIV
+#ifdef ESMF_REGRID_DEBUG_MAP_NODE
+    if (mathutil_debug) {
+      printf("DX/DY: -- Start -- \n");
+    }
+#endif
+#endif
+
   // lengths
-  double len0=MU_LEN_VEC3D(pnt0);
-  double len1=MU_LEN_VEC3D(pnt1);
+  TYPE len0=MU_LEN_VEC3D(pnt0);
+  TYPE len1=MU_LEN_VEC3D(pnt1);
 
   // calc unit vec
-  double u_pnt0[3];
+  TYPE u_pnt0[3];
   u_pnt0[0] = pnt0[0]/len0;
   u_pnt0[1] = pnt0[1]/len0;
   u_pnt0[2] = pnt0[2]/len0;
 
-  double u_pnt1[3];
+  TYPE u_pnt1[3];
   u_pnt1[0] = pnt1[0]/len1;
   u_pnt1[1] = pnt1[1]/len1;
   u_pnt1[2] = pnt1[2]/len1;
 
   // Compute angle between 0 and 1
   // TODO: FIX THIS SO IT WORKS FOR ALL 360 DEG. 
-  double cos01=MU_DOT_VEC3D(u_pnt0,u_pnt1);
-  if (cos01 < -1.0) cos01=-1.0;
-  else if (cos01 > 1.0) cos01=1.0;
-  double angle01=acos(cos01);
+  TYPE cos01=MU_DOT_VEC3D(u_pnt0,u_pnt1);
+
+  // MORE GENERAL WAY TO COMPUTE ANGLE
+#if 0
+  TYPE cross[3];
+  MU_CROSS_PRODUCT_VEC3D(cross,u_pnt0,u_pnt1);
+  TYPE sin01=MU_LEN_VEC3D(cross);
+
+  // Compute angle
+  TYPE angle01=std::atan2(sin01,cos01);
+#else 
+  //  if (cos01 < -1.0) cos01=-1.0;
+  //  else if (cos01 > 1.0) cos01=1.0;
+  //  TYPE angle01=acos(cos01);
+
+  TYPE angle01;
+  if (cos01 <= -1.0) {
+#ifdef ESMF_REGRID_DEBUG_MAP_NODE
+    if (mathutil_debug) {
+      printf(" cos01<=-1.0 case happening cos01=%f! \n",cos01);
+    }
+#endif
+    angle01=M_PI;
+  } else if (cos01 >= 1.0) {
+#ifdef ESMF_REGRID_DEBUG_MAP_NODE
+    if (mathutil_debug) {
+      printf(" cos01 >=1.0 case happening cos01=%f! \n",cos01);
+    }
+#endif
+    angle01=0.0;
+  }
+  else angle01=acos(cos01);
+#endif
+
 
   // printf("angle01=%f\n",angle01);
  
   // Compute info to use to compute new point
-  double cosp=cos(p*angle01);  // cos contribution
-  double sinp=sin(p*angle01);  // sin contribution
-  double radp=(1.0-p)*len0+p*len1; // radius linear between pnt0 and pnt1
+  TYPE cosp=cos(p*angle01);  // cos contribution
+  TYPE sinp=sin(p*angle01);  // sin contribution
+  TYPE radp=(1.0-p)*len0+p*len1; // radius linear between pnt0 and pnt1
 
   // Clamp rad, so less than 0 doesn't count
-  if (radp < 0.0) radp=0.0;
+  if (radp < 0.0) {
+#ifdef ESMF_REGRID_DEBUG_MAP_NODE
+    if (mathutil_debug) {
+      printf(" Radp<0.0 case happening! \n");
+    }
+#endif
+    radp=0.0;
+  }
 
   // printf("cosp=%f sinp=%f radp=%f\n",cosp,sinp,radp);
  
   // Compute vec. perp to u_pnt0
-  double tmp[3];
+  TYPE tmp[3];
   MU_CROSS_PRODUCT_VEC3D(tmp,u_pnt1,u_pnt0);
-  double pntp[3];
+  TYPE pntp[3];
   MU_CROSS_PRODUCT_VEC3D(pntp,u_pnt0,tmp);
-  double lenp=MU_LEN_VEC3D(pntp);
+  TYPE lenp=MU_LEN_VEC3D(pntp);
 
   // If lenp is 0.0, then the vectors are parallel or 180 degrees
   // TODO: handle 180 case
   // SHOULD I DO THIS ABOVE IF ANGLE01==0.0??
   // A: MAYBE NOT SINCE NO HAVING lenp == 0.0 IS MORE IMPORTANT FOR AVOIDING NAN 
   if (lenp == 0.0) {
+#ifdef ESMF_REGRID_DEBUG_MAP_NODE
+    if (mathutil_debug) {
+      printf(" Lenp==0.0 case happening! \n");
+    }
+#endif
     out_pnt[0]=radp*u_pnt0[0];
     out_pnt[1]=radp*u_pnt0[1];
     out_pnt[2]=radp*u_pnt0[2];
     *out_angle01=angle01;
-
     return;
   }
 
-  double u_pntp[3];
+  TYPE u_pntp[3];
   u_pntp[0]=pntp[0]/lenp;
   u_pntp[1]=pntp[1]/lenp;
   u_pntp[2]=pntp[2]/lenp;
  
- 
+#ifdef DISP_DERIV
+#if WSACADO 
+#ifdef ESMF_REGRID_DEBUG_MAP_NODE
+    if (mathutil_debug) {
+      printf("DX/DY: u_pntp[0]=%f %f %f\n",u_pntp[0].dx(0),u_pntp[0].dx(1),u_pntp[0].dx(2));
+      printf("DX/DY: u_pnt0[0]=%f %f %f\n",u_pnt0[0].dx(0),u_pnt0[0].dx(1),u_pnt0[0].dx(2));
+      printf("DX/DY: p=%f %f %f val=%f\n",p.dx(0), p.dx(1), p.dx(2), p.val());
+      printf("DX/DY: angle01=%f %f %f val=%f\n",angle01.dx(0), angle01.dx(1), angle01.dx(2), angle01.val());
+      printf("DX/DY: radp=%f %f %f val=%f\n",radp.dx(0), radp.dx(1), radp.dx(2), radp.val());
+      printf("DX/DY: cosp=%f %f %f val=%f\n",cosp.dx(0), cosp.dx(1), cosp.dx(2), cosp.val());
+      printf("DX/DY: sinp=%f %f %f val=%f\n",sinp.dx(0), sinp.dx(1), sinp.dx(2), sinp.val());
+    }
+#endif
+#else
+#ifdef ESMF_REGRID_DEBUG_MAP_NODE
+    if (mathutil_debug) {
+      printf("DX/DY: u_pntp[0]=%f %f %f\n",0.0,0.0,0.0);
+      printf("DX/DY: u_pnt0[0]=%f %f %f\n",0.0,0.0,0.0);
+      printf("DX/DY: p=%f %f %f val=%f\n",0.0, 0.0, 0.0, p);
+      printf("DX/DY: angle01=%f %f %f val=%f\n",0.0, 0.0, 0.0, angle01);
+      printf("DX/DY: radp=%f %f %f val=%f\n",0.0, 0.0, 0.0, radp);
+      printf("DX/DY: cosp=%f %f %f val=%f\n",0.0, 0.0, 0.0, cosp);
+      printf("DX/DY: sinp=%f %f %f val=%f\n",0.0, 0.0, 0.0, sinp);
+    }
+#endif
+#endif
+#endif
+
   // compute point and output
   out_pnt[0]=radp*(cosp*u_pnt0[0]+sinp*u_pntp[0]);
   out_pnt[1]=radp*(cosp*u_pnt0[1]+sinp*u_pntp[1]);
   out_pnt[2]=radp*(cosp*u_pnt0[2]+sinp*u_pntp[2]);
+
+#ifdef DISP_DERIV
+#if WSACADO 
+#ifdef ESMF_REGRID_DEBUG_MAP_NODE
+    if (mathutil_debug) {
+      printf("DX/DY: out_pnt[0]=%f %f %f\n",out_pnt[0].dx(0),out_pnt[0].dx(1),out_pnt[0].dx(2));
+      printf("DX/DY: -- End -- \n");
+    }
+#endif
+#else
+#ifdef ESMF_REGRID_DEBUG_MAP_NODE
+    if (mathutil_debug) {
+      printf("DX/DY: out_pnt[0]=%f %f %f\n",0.0,0.0,0.0);
+      printf("DX/DY: -- End -- \n");
+    }
+#endif
+#endif
+#endif
 
   *out_angle01=angle01;
 }
@@ -1748,12 +1853,13 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
 // p           - should be of size 2  (2 parameters)
 // o_pnt       - should be of size 3  (1 Cartesian 3D point)
 // o_max_angle - the maximum angle for the cooresponding p values (2 values)
-  void calc_pnt_quad_sph3D_xyz(const double *quad_xyz, double *p, 
-                               double *o_pnt, double *o_max_angle) {
-  const double *q0, *q1, *q2, *q3;
-  double pnt01[3];
-  double pnt32[3];
-  double angle;
+  template <class TYPE>
+  void calc_pnt_quad_sph3D_xyz(const TYPE *quad_xyz, TYPE *p, 
+                               TYPE *o_pnt, TYPE *o_max_angle) {
+  const TYPE *q0, *q1, *q2, *q3;
+  TYPE pnt01[3];
+  TYPE pnt32[3];
+  TYPE angle;
 
   // Grab points
   q0=quad_xyz;
@@ -1783,10 +1889,11 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
 // p        - should be of size 3  (3 parameters)
 // o_pnt    - should be of size 3  (1 Cartesian 3D point)
 // o_max_angle - the maximum angle for the cooresponding p values (3 values)
-  void calc_pnt_hex_sph3D_xyz(const double *hex_xyz, double *p, double *o_pnt, double *o_max_angle) {
-  double pnt_btm[3];
-  double pnt_top[3];
-  double max_angle2D[2];
+  template <class TYPE>
+  void calc_pnt_hex_sph3D_xyz(const TYPE *hex_xyz, TYPE *p, TYPE *o_pnt, TYPE *o_max_angle) {
+  TYPE pnt_btm[3];
+  TYPE pnt_top[3];
+  TYPE max_angle2D[2];
 
   // calc the bottom quad
   calc_pnt_quad_sph3D_xyz(hex_xyz, p, pnt_btm, o_max_angle);
@@ -1803,12 +1910,81 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
 }
 
 
+#if WSACADO
+// Take in a spherical hex represented in Cartesian 3D and 
+// 2 parameter (p) values. Calculate a new point that is at the 
+// position described by the parameters in the quad. 
+// Also return the Jacobian at that point
+// hex_xyz - should be of size 24 (8 Cartesian 3D points)
+// p        - should be of size 3  (3 parameters)
+// o_pnt    - should be of size 3  (1 Cartesian 3D point)
+// o_max_angle - the maximum angle for the cooresponding p values (3 values)
+// o_jac - the jacobian of the function around that point
+  void calc_pnt_and_jac_hex_sph3D_xyz(const double *hex_xyz, double *p, double *o_pnt, double *o_max_angle, double *o_jac) {
+    // Defines used just in here
+    Sfad3D s_hex_xyz[24];
+    Sfad3D s_p[3];
+    Sfad3D s_o_pnt[3];
+    Sfad3D s_o_max_angle[3];
+
+    // Load hex points
+    for (int i=0; i<24; i++) {
+      s_hex_xyz[i]=Sfad3D(hex_xyz[i]);
+    }
+
+#if 0
+    int pos=0;
+    for (int i=0; i<8; i++) {
+      for (int d=0; d<3; d++) {
+        s_hex_xyz[pos]=Sfad3D(SFAD3D_NUM_DERIV_COMP,d,hex_xyz[pos]);
+        pos++;
+      }
+    }
+#endif
+
+    // Load p
+    s_p[0]=Sfad3D(SFAD3D_NUM_DERIV_COMP,0,p[0]);
+    s_p[1]=Sfad3D(SFAD3D_NUM_DERIV_COMP,1,p[1]);
+    s_p[2]=Sfad3D(SFAD3D_NUM_DERIV_COMP,2,p[2]);
+
+    // Init out point
+    // DO I NEED TO DO THIS??
+    s_o_pnt[0]=Sfad3D(0.0);
+    s_o_pnt[1]=Sfad3D(0.0);
+    s_o_pnt[2]=Sfad3D(0.0);
+
+    // Call into function to calculate points    
+    calc_pnt_hex_sph3D_xyz(s_hex_xyz, s_p, s_o_pnt, s_o_max_angle);
+
+    // Output pnt back to double
+    o_pnt[0]=s_o_pnt[0].val();
+    o_pnt[1]=s_o_pnt[1].val();
+    o_pnt[2]=s_o_pnt[2].val();
+
+    // Output max angle
+    o_max_angle[0]=s_o_max_angle[0].val();
+    o_max_angle[1]=s_o_max_angle[1].val();
+    o_max_angle[2]=s_o_max_angle[2].val();
+
+    // Output Jacobian
+    o_jac[0]=s_o_pnt[0].dx(0);  // dpnt[0]/dp[0]
+    o_jac[1]=s_o_pnt[0].dx(1);  // dpnt[0]/dp[1]
+    o_jac[2]=s_o_pnt[0].dx(2);  // dpnt[0]/dp[2]
+    o_jac[3]=s_o_pnt[1].dx(0);  // dpnt[1]/dp[0]
+    o_jac[4]=s_o_pnt[1].dx(1);  // dpnt[1]/dp[1]
+    o_jac[5]=s_o_pnt[1].dx(2);  // dpnt[1]/dp[2]
+    o_jac[6]=s_o_pnt[2].dx(0);  // dpnt[2]/dp[0]
+    o_jac[7]=s_o_pnt[2].dx(1);  // dpnt[2]/dp[1]
+    o_jac[8]=s_o_pnt[2].dx(2);  // dpnt[2]/dp[2]
+  }
+#endif
 
 // Take in a spherical quad represented in Cartesian 3D and 
 // 2 parameter (p) values. Calculate the jacobian for the 
 // position described by the parameters in the quad.
 void calc_jac_hex_sph3D_xyz(const double *hex_xyz, double *p,double *jac) {
   double delta=1.0E-10; // Small distance to use to estimate derivative
+  //  double delta=1.0E-15; // Small distance to use to estimate derivative
   double max_angle[3];   
 
   // Calculate Function with given p's
@@ -1883,7 +2059,6 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
   double pi=M_PI;
   double two_pi=2*M_PI;
 
-
   // Initial guess
   p[0]=0.5;
   p[1]=0.5;
@@ -1892,13 +2067,27 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
 
   // Do multiple interations exiting in loop if solution is close enough
   bool stuck=false;
+  int num_since_last_improvement=0;
   for (int i=0; i<1000; i++) {
 
     // Calculate point at p
     double tmp_pnt[3];
     double max_angle[3];
+    double jac[3*3];
+
+    double jac2[3*3];
+    double tmp_pnt2[3];
+    double max_angle2[3];
+
+#if WSACADO
+    calc_pnt_and_jac_hex_sph3D_xyz(hex_xyz, p, tmp_pnt, max_angle, jac);
+    // calc_jac_hex_sph3D_xyz(hex_xyz, p, jac2);    
+    //calc_pnt_hex_sph3D_xyz(hex_xyz, p, tmp_pnt2, max_angle2);    
+#else
     calc_pnt_hex_sph3D_xyz(hex_xyz, p, tmp_pnt, max_angle);    
-    
+#endif
+
+
     // Calculate function we're trying to 0
     // (point at p-pnt_xyz)
     double f[3];
@@ -1907,10 +2096,12 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
     // calc squared distance from solution
     double dist_sq=f[0]*f[0]+f[1]*f[1]+f[2]*f[2];
 
+
 #ifdef ESMF_REGRID_DEBUG_MAP_NODE
     if (mathutil_debug) {
-      printf("%d AFTER DIST CALC    p=%f %f %f d=%E\n",i,p[0],p[1],p[2],dist_sq);
-      printf("%d AFTER DIST CALC  ang=%f %f %f \n",i,p[0]*max_angle[0],p[1]*max_angle[1],p[2]*max_angle[2]);
+      printf("%d AFTER DIST CALC    f=%20.17f %20.17f %20.17f  \n",i,f[0],f[1],f[2]);
+      printf("%d AFTER DIST CALC    p=%20.17f %20.17f %20.17f d=%E\n",i,p[0],p[1],p[2],dist_sq);
+      //     printf("%d AFTER DIST CALC  ang=%f %f %f \n",i,p[0]*max_angle[0],p[1]*max_angle[1],p[2]*max_angle[2]);
     }
 #endif
 
@@ -1920,18 +2111,46 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
       best_p[0]=p[0];
       best_p[1]=p[1];
       best_p[2]=p[2];
+      num_since_last_improvement=0;
+    } else {
+      num_since_last_improvement++;
     }
 
     // If we're close enough then exit
-     if (best_dist_sq <1.0E-22) break;
+    if (best_dist_sq <1.0E-22) break;
 
      // Construct Jacobian
-    double jac[3*3];
+#if WSACADO
+     // Constructed above
+#else
     calc_jac_hex_sph3D_xyz(hex_xyz, p, jac);    
+#endif
+
+#ifdef ESMF_REGRID_DEBUG_MAP_NODE
+    if (mathutil_debug) {
+      printf("%d jac    =%f %f %f %f %f %f %f %f %f\n",i,jac[0],jac[1],jac[2],
+             jac[3],jac[4],jac[5],jac[6],jac[7],jac[8]);
+#if WSACADO
+      // printf("%d jac2   =%f %f %f %f %f %f %f %f %f\n",i,jac2[0],jac2[1],jac2[2],
+      //       jac2[3],jac2[4],jac2[5],jac2[6],jac2[7],jac2[8]);
+#endif
+
+      printf("%d tmp_pnt =%20.17f %20.17f %20.17f \n",tmp_pnt[0],tmp_pnt[1],tmp_pnt[2]);
+#if WSACADO
+      // printf("%d tmp_pnt2=%20.17f %20.17f %20.17f \n",tmp_pnt2[0],tmp_pnt2[1],tmp_pnt2[2]);
+#endif
+      printf("%d max_angle =%20.17f %20.17f %20.17f \n",max_angle[0],max_angle[1],max_angle[2]);
+#if WSACADO
+      //  printf("%d max_angle2=%20.17f %20.17f %20.17f \n",max_angle2[0],max_angle2[1],max_angle2[2]);
+#endif
+    }
+#endif
+
 
     // Invert Jacobian
     double inv_jac[3*3];
     if (!invert_matrix_3x3(jac, inv_jac)) {
+ 
       // Oops, couldn't invert, so try another guess
       if (guess<8) {
         p[0]=p_guess[guess][0];
@@ -1960,19 +2179,35 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
      double delta_p[3];
     MU_MAT_X_VEC3D(delta_p, inv_jac, f);
 
-#define NEW_WAY 1
-#if NEW_WAY
+#ifdef ESMF_REGRID_DEBUG_MAP_NODE
+    if (mathutil_debug) {
+      printf("%d inv_jac=%f %f %f %f %f %f %f %f %f\n",i,inv_jac[0],inv_jac[1],inv_jac[2],
+             inv_jac[3],inv_jac[4],inv_jac[5],inv_jac[6],inv_jac[7],inv_jac[8]);
+      printf("%d Delta_p=%30.27f %30.27f %30.27f \n",i,delta_p[0],delta_p[1],delta_p[2]);
+    }
+#endif
 
     // get length of change
     double len_delta_p=MU_LEN_VEC3D(delta_p);
 
-    // If change is to big, make it smaller
+    // If change is too big, make it smaller
     if (len_delta_p > 1.0) {
       delta_p[0] = delta_p[0]/len_delta_p;
       delta_p[1] = delta_p[1]/len_delta_p;
       delta_p[2] = delta_p[2]/len_delta_p;
     }
-#endif
+
+#if 0
+    // I DON'T THINK THAT THIS IS NECESSARY!!!!!
+    // If we're not improving, then try something a bit different
+    if (num_since_last_improvement>10) {
+      double adjust=0.5*(1000.0-((double)i))/1000.0; // adjust so things change every time step
+      delta_p[0] = adjust*delta_p[0];
+      delta_p[1] = adjust*delta_p[1];
+      delta_p[2] = adjust*delta_p[2];
+      num_since_last_improvement=0;
+    }
+#endif    
 
     // Move to next approximation of p
     MU_SUB_VEC3D(p,p,delta_p);    
@@ -1983,7 +2218,6 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
     }
 #endif
 
-#if NEW_WAY
     // Calculate half the max_angle to make things easier below
     double half_max_angle[3];
     half_max_angle[0]=0.5*max_angle[0];
@@ -2091,33 +2325,7 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
 #ifdef ESMF_REGRID_DEBUG_MAP_NODE
       if (mathutil_debug) printf(" AFTER P[2] small p=%f angle=%f \n",p[2],p[2]*max_angle[2]);
 #endif
-    }                             
-#else
-    // If we're too far away then try something else
-     // HANDLES CASE WHERE P WRAPS AROUND SPHERE 
-      // TODO: calculate beter limits for p from hex and use here
-    if (guess < 9){
-      if ((p[0]< -5.0) || (p[0]>4.0) ||
-          (p[1]< -5.0) || (p[1]>4.0) ||
-          (p[2]< -5.0) || (p[2]>4.0)) {
-        // Try another guess...
-        if (guess<8) {
-          p[0]=p_guess[guess][0];
-          p[1]=p_guess[guess][1];
-          p[2]=p_guess[guess][2];
-          guess++;
-        } else { //... if we've tried them all then continue with best so far.
-          p[0]=best_p[0];
-          p[1]=best_p[1];
-          p[2]=best_p[2];
-           guess++;
-        }
-#ifdef ESMF_REGRID_DEBUG_MAP_NODE
-        if (mathutil_debug) printf(" AFTER ADJ new p=%f %f %f \n",p[0],p[1],p[2]);
-#endif
-      }
-    }
-#endif
+    } 
   }
 
   // Use the best p

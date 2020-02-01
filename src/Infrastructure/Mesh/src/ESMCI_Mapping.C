@@ -477,6 +477,7 @@ bool POLY_Mapping<SFUNC_TYPE,MPTRAITS,SPATIAL_DIM,PARAMETRIC_DIM>::is_in_cell(co
 
 #define SPH_MAP
 #ifdef SPH_MAP
+
   // Is this spherical and 3D, then use Spherical mapping
   // TODO: ORGANIZE THIS BETTER
   // ALSO NEED TO MAKE SURE IS HEX.
