@@ -12,4 +12,4 @@ before_install:
   - cd esmf-travis-ci
 
 script:
-  - cd docker/esmf && docker build -t esmf .
+  - cd docker/esmf && docker build -t esmf --build-arg ESMF_BRANCH=$TRAVIS_BRANCH .
