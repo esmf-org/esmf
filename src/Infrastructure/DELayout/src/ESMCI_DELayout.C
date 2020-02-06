@@ -3830,16 +3830,20 @@ int XXE::exec(
 #endif
 
 #ifdef XXE_EXEC_LOG_on
-  sprintf(msg, "ESMCI::XXE::exec(): bufferInfoList.size()=%d",
+  sprintf(msg, "ESMCI::XXE::exec(): bufferInfoList.size()=%lu",
     bufferInfoList.size());
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
   for (unsigned i=0; i<bufferInfoList.size(); i++){
     unsigned long currentSize = bufferInfoList[i]->vectorLengthMultiplier
-      * *vectorLength;
+      * (unsigned long)*vectorLength;
 #ifdef XXE_EXEC_BUFFLOG_on
-    sprintf(msg, "ESMCI::XXE::exec(): buffer #%d, (needed)currentSize=%d, "
-      " existing buffer size=%d", i, currentSize, bufferInfoList[i]->size);
+    sprintf(msg, "ESMCI::XXE::exec(): buffer #%d, vectorLengthMultiplier=%d, "
+      " vectorLength=%d", i, bufferInfoList[i]->vectorLengthMultiplier,
+      *vectorLength);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ESMCI::XXE::exec(): buffer #%d, (needed)currentSize=%lu, "
+      " existing buffer size=%lu", i, currentSize, bufferInfoList[i]->size);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
     if (bufferInfoList[i]->size < currentSize){
