@@ -3055,7 +3055,7 @@ module NUOPC_Connector
           if (btest(verbosity,11)) then
             call ESMF_LogWrite(trim(name)//&
               ": - transferring underlying DistGrid "//trim(transferDirection)&
-              //" for LocStream", ESMF_LOGMSG_INFO, rc=rc)
+              //" for LocStream: "//trim(geomobjname), ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           endif
@@ -3600,13 +3600,6 @@ module NUOPC_Connector
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           if (geomtype==ESMF_GEOMTYPE_GRID) then
-            if (btest(verbosity,11)) then
-              call ESMF_LogWrite(trim(name)//&
-                ": - transferring the full Grid with coordinates "//&
-                trim(transferDirection), ESMF_LOGMSG_INFO, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            endif
             call ESMF_FieldGet(providerField, grid=providerGrid, &
               staggerloc=staggerloc, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -3614,6 +3607,14 @@ module NUOPC_Connector
             call ESMF_GridGet(providerGrid, name=geomobjname, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (btest(verbosity,11)) then
+              call ESMF_LogWrite(trim(name)//&
+                ": - transferring the full geomobject with coordinates "//&
+                trim(transferDirection)//" for Grid: "//trim(geomobjname),&
+                ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            endif
             call ESMF_FieldGet(acceptorField, grid=acceptorGrid, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -3658,8 +3659,9 @@ module NUOPC_Connector
           elseif (geomtype==ESMF_GEOMTYPE_MESH) then
             if (btest(verbosity,11)) then
               call ESMF_LogWrite(trim(name)//&
-                ": - transferring the full Mesh with coordinates "//&
-                trim(transferDirection), ESMF_LOGMSG_INFO, rc=rc)
+                ": - transferring the full geomobject with coordinates "//&
+                trim(transferDirection)//"for Mesh: ",&
+                ESMF_LOGMSG_INFO, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             endif
@@ -3745,19 +3747,20 @@ module NUOPC_Connector
                endif
             endif
           elseif (geomtype==ESMF_GEOMTYPE_LOCSTREAM) then
-            if (btest(verbosity,11)) then
-              call ESMF_LogWrite(trim(name)//&
-                ": - transferring the full LocStream with coordinates "//&
-                trim(transferDirection), ESMF_LOGMSG_INFO, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            endif
             call ESMF_FieldGet(providerField, locstream=providerLocstream, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             call ESMF_LocStreamGet(providerLocstream, name=geomobjname, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (btest(verbosity,11)) then
+              call ESMF_LogWrite(trim(name)//&
+                ": - transferring the full geomobject with coordinates "//&
+                trim(transferDirection)//"for LocStream: "//trim(geomobjname),&
+                ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            endif
             call ESMF_FieldGet(acceptorField, locstream=acceptorLocstream, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
