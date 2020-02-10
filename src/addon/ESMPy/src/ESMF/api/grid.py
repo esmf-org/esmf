@@ -1162,6 +1162,24 @@ class Grid(object):
         else:
             raise GridItemNotSupported
 
+    def _set_arb_indices_(self, indices):
+
+        if indices is not None:
+            if (type(indices) == tuple):
+                indices = np.array(indices, dtype=np.int32)
+            elif (type(indices) == list):
+                indices = np.array(indices, dtype=np.int32)
+            elif (type(indices) == np.ndarray):
+                indices = np.array(indices, dtype=np.int32)
+            else:
+                raise TypeError('indices is not a recognized type, please use a list, tuple or numpy array')
+
+        # get the distgrid
+        distGrid = ESMP_GridGetDistGrid(self)
+
+        # set the arb indices array on the distgrid
+        ESMP_DistGridSetArbIndices(self, indices)
+
     def _write_(self, filename, staggerloc=None):
         """
         Write a Grid to vtk formatted file at a specified stagger 

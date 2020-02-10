@@ -499,6 +499,33 @@ int ESMC_GridGetCoordBounds(
 //-----------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_GridGetDistGrid - Get coordinate bounds from a Grid
+//
+// !INTERFACE:
+ESMC_DistGrid * ESMC_GridGetDistGrid(
+  ESMC_Grid grid,                         // in
+  int *rc                                 // out
+);
+
+// !RETURN VALUE:
+//  pointer to an ESMC_DistGrid
+//
+// !DESCRIPTION:
+//  Get coordinates bounds from the Grid.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[grid]
+//    Grid object from which to obtain the DistGrid.
+//  \item[rc]
+//  Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
 //BOPI
 // !IROUTINE: ESMC_GridWrite - Write a Grid to a VTK file
 //

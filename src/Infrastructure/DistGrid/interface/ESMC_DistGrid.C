@@ -129,4 +129,32 @@ int ESMC_DistGridDestroy(ESMC_DistGrid *distgrid){
   return rc;
 }  
 
+int ESMC_DistGridSetArbIndices(ESMC_DistGrid *distgrid, int *indices){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DistGridSetArbIndices()"
+
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // test for NULL pointer via macro before calling any class methods
+  ESMCI_NULL_CHECK_RC(distgrid, rc)
+  
+  // typecast into ESMCI type
+  ESMCI::DistGrid *dgp = (ESMCI::DistGrid *)(distgrid->ptr);
+  // test for NULL pointer via macro before calling any class methods
+  ESMCI_NULL_CHECK_RC(dgp, rc)
+
+  // convert indices to InterArray
+
+  // call into ESMCI method  
+  localrc = ESMCI::DistGrid::setArbSeqIndex(indices_ii, 0);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    ESMC_CONTEXT, &rc)) return rc;  // bail out
+    
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}  
+
 }; // extern "C"

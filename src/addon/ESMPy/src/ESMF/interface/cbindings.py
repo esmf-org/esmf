@@ -29,13 +29,16 @@ def handle_esmf_error(rc, esmf_name):
 class ESMP_Field(ct.Structure):
     _fields_ = [("ptr", ct.c_void_p)]
 
-class ESMP_GridStruct(ct.Structure):
+class ESMP_Grid(ct.Structure):
     _fields_ = [("ptr", ct.c_void_p)]
 
 class ESMP_Mesh(ct.Structure):
     _fields_ = [("ptr", ct.c_void_p)]
 
 class ESMP_LocStream(ct.Structure):
+    _fields_ = [("ptr", ct.c_void_p)]
+
+class ESMP_DistGrid(ct.Structure):
     _fields_ = [("ptr", ct.c_void_p)]
 
 class ESMP_VM(ct.Structure):
@@ -456,7 +459,7 @@ def ESMP_LogSet(flush):
 #### GRID #####################################################
 
 #TODO: InterfaceInt should be passed by value when ticket 3613642 is resolved
-_ESMF.ESMC_GridCreate1PeriDim.restype = ESMP_GridStruct
+_ESMF.ESMC_GridCreate1PeriDim.restype = ESMP_Grid
 _ESMF.ESMC_GridCreate1PeriDim.argtypes = [ct.POINTER(ESMP_InterfaceInt),
                                           OptionalInterfaceInt,
                                           OptionalNamedConstant,
@@ -529,7 +532,7 @@ def ESMP_GridCreate1PeriDim(maxIndex, polekindflag=None, periodicDim=None,
     return gridstruct
 
 #TODO: InterfaceInt should be passed by value when ticket 3613642 is resolved
-_ESMF.ESMC_GridCreateNoPeriDim.restype = ESMP_GridStruct
+_ESMF.ESMC_GridCreateNoPeriDim.restype = ESMP_Grid
 _ESMF.ESMC_GridCreateNoPeriDim.argtypes = [ct.POINTER(ESMP_InterfaceInt),
                                            OptionalNamedConstant,
                                            OptionalNamedConstant,
@@ -582,7 +585,7 @@ def ESMP_GridCreateNoPeriDim(maxIndex, coordSys=None, coordTypeKind=None):
     return gridstruct
 
 #TODO: InterfaceInt should be passed by value when ticket 3613642 is resolved
-_ESMF.ESMC_GridCreateCubedSphere.restype = ESMP_GridStruct
+_ESMF.ESMC_GridCreateCubedSphere.restype = ESMP_Grid
 _ESMF.ESMC_GridCreateCubedSphere.argtypes = [ct.POINTER(ct.c_int),
                                              ct.POINTER(ESMP_InterfaceInt),
                                              #ct.POINTER(ESMP_InterfaceInt),
@@ -656,7 +659,7 @@ def ESMP_GridCreateCubedSphere(tilesize, regDecompPTile=None,
     # create the ESMP Grid object from ctypes pointer
     return gridstruct
 
-_ESMF.ESMC_GridCreateFromFile.restype = ESMP_GridStruct
+_ESMF.ESMC_GridCreateFromFile.restype = ESMP_Grid
 _ESMF.ESMC_GridCreateFromFile.argtypes = [Py3Char, ct.c_int,
                                           ct.POINTER(ct.c_int),
                                           OptionalNumpyArrayInt32,
@@ -677,9 +680,9 @@ def ESMP_GridCreateFromFile(filename, fileTypeFlag, regDecomp,
                             addMask=None, varname=None, coordNames=None):
     """
     Preconditions: ESMP has been initialized.\n
-    Postconditions: An ESMP_GridStruct has been created.\n
+    Postconditions: An ESMP_Grid has been created.\n
     Arguments:\n
-        :RETURN: ESMP_GridStruct            :: gridstruct\n
+        :RETURN: ESMP_Grid            :: gridstruct\n
         String                              :: filename\n
         FileFormat                          :: fileTypeFlag\n
             Argument Values:\n
@@ -992,6 +995,28 @@ def ESMP_GridGetItem(grid, item, staggerloc=constants.StaggerLoc.CENTER,
 
     return gridItemPtr
 
+_ESMF.ESMC_GridGetDistGrid.restype = ESMP_DistGrid
+_ESMF.ESMC_GridGetDistGrid.argtypes = [ct.c_void_p, ct.POINTER(ct.c_int)]
+
+def ESMP_GridGetDistGrid(grid):
+    """
+    Preconditions: An ESMP_Grid has been created.\n
+    Postconditions: A pointer to the DistGrid of the Grid is returned.\n
+    Arguments:\n
+        :RETURN: ESMP_DistGrid :: distgrid\n
+        ESMP_Grid              :: grid\n
+    """
+    lrc = ct.c_int(0)
+
+    distgrid = _ESMF.ESMC_GridGetDistGrid(grid.struct.ptr, ct.byref(lrc))
+
+    rc = lrc.value
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_GridGetDistGrid() failed with rc = '+str(rc)+'.    '+
+                        constants._errmsg)
+
+    return distgrid
+
 _ESMF.ESMC_GridWrite.restype = ct.c_int
 _ESMF.ESMC_GridWrite.argtypes = [ct.c_void_p, ct.c_uint,Py3Char]
 
@@ -1022,6 +1047,33 @@ def ESMP_GridWrite(grid, filename, staggerloc=constants.StaggerLoc.CENTER):
     if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_GridWrite() failed with rc = '+str(rc)+'.    '+
                         constants._errmsg)
+
+#### DISTGRID #####################################################
+
+_ESMF.ESMC_DistGridSetArbIndices.restype = ct.POINTER(ct.c_int)
+_ESMF.ESMC_DistGridSetArbIndices.argtypes = [ct.c_void_p, ct.POINTER(ct.c_int)]
+
+def ESMP_DistGridSetArbIndices(distgrid, indices):
+    """
+    Preconditions: An ESMP_DistGrid has been created.\n
+    Postconditions: The arbitrary sequence indices of the DistGrid have been 
+                    modified.\n
+    Arguments:\n
+        :RETURN: integer :: rc\n
+        ESMP_DistGrid    :: distgrid\n
+        numpy.array      :: indices\n
+    """
+    lrc = ct.c_int(0)
+
+    ESMF.ESMC_DistGridSetArbIndices(distgrid.struct.ptr, indices, ct.byref(lrc))
+
+    rc = lrc.value
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_DistGridSetArbIndices() failed with rc = '+str(rc)+'.    '+
+                        constants._errmsg)
+
+    return rc
+
 
 #### MESH #####################################################
 

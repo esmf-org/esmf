@@ -121,7 +121,35 @@ int ESMC_DistGridPrint(
 //  The arguments are:
 //  \begin{description}
 //  \item[distgrid] 
-//    {\tt ESMC\_DistGrid} object to be destroyed.
+//    {\tt ESMC\_DistGrid} object to be printed.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_DistGridSetArbIndices - Set the arbitrary sequence indices of a DistGrid
+//
+// !INTERFACE:
+int ESMC_DistGridSetArbIndices(
+  ESMC_DistGrid distgrid,
+  int *indices
+);
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//
+//  Set the arbitrary sequence indices of the specified {\tt ESMC\_DistGrid} 
+//  object.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[distgrid] 
+//    {\tt ESMC\_DistGrid} object.
+//  \item[arbSeqIndexList]
+//    The list of arbitrary sequence indices to set on the {|tt ESMC\_DistGrid}.
 //  \end{description}
 //
 //EOP

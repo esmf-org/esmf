@@ -429,6 +429,29 @@ void * ESMC_GridGetItem(ESMC_Grid grid,
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_GridGetDistGrid()"
+ESMC_DistGrid * ESMC_GridGetDistGrid(ESMC_Grid grid, int *rc){
+
+  // Initialize return code. Assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;
+
+  // convert the ESMC_Grid to an ESMCI::Grid
+  ESMCI::Grid *gridp = reinterpret_cast<ESMCI::Grid *>(grid.ptr);
+  //printf("\n\ngridstatus = %d\n\n", gridp->getStatus());
+  
+  ESMCI::DistGrid *distgrid = 0;
+  distgrid = gridp->getDistGrid();
+  
+  ESMC_DistGrid *distgridp = reinterpret_cast<ESMC_DistGrid *>(distgrid);
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  return distgridp;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_GridWrite()"
 int ESMC_GridWrite(ESMC_Grid grid,
                    enum ESMC_StaggerLoc staggerloc,
