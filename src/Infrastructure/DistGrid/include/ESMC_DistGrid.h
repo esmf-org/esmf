@@ -134,7 +134,7 @@ int ESMC_DistGridPrint(
 // !INTERFACE:
 int ESMC_DistGridSetArbIndices(
   ESMC_DistGrid distgrid,
-  int *indices
+  ESMC_InterArrayInt *indices
 );
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.

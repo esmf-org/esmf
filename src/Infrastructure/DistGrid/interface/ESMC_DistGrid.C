@@ -129,7 +129,8 @@ int ESMC_DistGridDestroy(ESMC_DistGrid *distgrid){
   return rc;
 }  
 
-int ESMC_DistGridSetArbIndices(ESMC_DistGrid *distgrid, int *indices){
+int ESMC_DistGridSetArbIndices(ESMC_DistGrid *distgrid, 
+                               ESMC_InterArrayInt *indices){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_DistGridSetArbIndices()"
 
@@ -146,9 +147,10 @@ int ESMC_DistGridSetArbIndices(ESMC_DistGrid *distgrid, int *indices){
   ESMCI_NULL_CHECK_RC(dgp, rc)
 
   // convert indices to InterArray
+  ESMCI::InterArray<int> *ii = (ESMCI::InterArray<int> *)indices;
 
   // call into ESMCI method  
-  localrc = ESMCI::DistGrid::setArbSeqIndex(indices_ii, 0);
+  localrc = ESMCI::DistGrid::setArbSeqIndex(ii, 0);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
     ESMC_CONTEXT, &rc)) return rc;  // bail out
     

@@ -1051,7 +1051,8 @@ def ESMP_GridWrite(grid, filename, staggerloc=constants.StaggerLoc.CENTER):
 #### DISTGRID #####################################################
 
 _ESMF.ESMC_DistGridSetArbIndices.restype = ct.POINTER(ct.c_int)
-_ESMF.ESMC_DistGridSetArbIndices.argtypes = [ct.c_void_p, ct.POINTER(ct.c_int)]
+_ESMF.ESMC_DistGridSetArbIndices.argtypes = [ct.c_void_p, 
+                                             ct.POINTER(ESMP_InterfaceInt)]
 
 def ESMP_DistGridSetArbIndices(distgrid, indices):
     """
@@ -1065,7 +1066,10 @@ def ESMP_DistGridSetArbIndices(distgrid, indices):
     """
     lrc = ct.c_int(0)
 
-    ESMF.ESMC_DistGridSetArbIndices(distgrid.struct.ptr, indices, ct.byref(lrc))
+    # set up interfaceint for indices
+    indices_i = ESMP_InterfaceInt(indices)
+
+    ESMF.ESMC_DistGridSetArbIndices(distgrid.struct.ptr, ct.byref(indices_i))
 
     rc = lrc.value
     if rc != constants._ESMP_SUCCESS:
