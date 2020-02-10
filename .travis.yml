@@ -1,0 +1,15 @@
+language: python
+
+services:
+  - docker
+
+#env:
+#  global:
+#  matrix:
+
+before_install:
+  - git clone --depth 1 https://github.com/NESII/esmf-travis-ci.git
+  - cd esmf-travis-ci
+
+script:
+  - cd docker/esmf && docker build -t esmf --build-arg ESMF_BRANCH=$TRAVIS_BRANCH .
