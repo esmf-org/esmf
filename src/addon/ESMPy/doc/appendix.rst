@@ -25,6 +25,7 @@ Named Constants
 
     CoordSys
     FileFormat
+    FileMode
     GridItem
     LineType
     LogKind
