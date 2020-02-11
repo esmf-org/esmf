@@ -2086,6 +2086,11 @@ _ESMF.ESMC_FieldRegridStoreFile.argtypes = [ct.c_void_p, ct.c_void_p,
                                             OptionalNamedConstant,
                                             OptionalBool,
                                             OptionalBool,
+                                            OptionalNamedConstant,
+                                            ct.c_char_p,
+                                            ct.c_char_p,
+                                            OptionalNamedConstant,
+                                            OptionalNamedConstant,
                                             OptionalField,
                                             OptionalField]
 @deprecated
@@ -2095,6 +2100,8 @@ def ESMP_FieldRegridStoreFile(srcField, dstField, filename,
                           polemethod=None, regridPoleNPnts=None,
                           lineType=None, normType=None, unmappedaction=None,
                           ignoreDegenerate=None, createRH=None,
+                          filemode=None, srcFile=None, dstFile=None,
+                          srcFileType=None, dstFileType=None,
                           srcFracField=None, dstFracField=None):
     """
     Preconditions: Two ESMP_Fields have been created and initialized
@@ -2143,6 +2150,11 @@ def ESMP_FieldRegridStoreFile(srcField, dstField, filename,
                 UnmappedAction.IGNORE\n
         boolean (optional)                  :: ignoreDegenerate\n
         boolean (optional)                  :: createRH\n
+        FileMode (optional)                 :: filemode\n
+        string (optional)                   :: srcFile\n
+        string (optional)                   :: dstFile\n
+        FileFormat (optional)               :: srcFileType\n
+        FileFormat (optional)               :: dstFileType\n
         ESMP_Field (optional)               :: srcFracField\n
         ESMP_Field (optional)               :: dstFracField\n
     """
@@ -2170,6 +2182,17 @@ def ESMP_FieldRegridStoreFile(srcField, dstField, filename,
     b_filename = filename.encode('utf-8')
     b_filename = ct.create_string_buffer(b_filename)
 
+    b_srcfilename = None
+    if (srcFile):
+        b_srcfilename = srcFile.encode('utf-8')
+        b_srcfilename = ct.create_string_buffer(b_srcfilename)
+
+    b_dstfilename = None
+    if (dstFile):
+        b_dstfilename = dstFile.encode('utf-8')
+        b_dstfilename = ct.create_string_buffer(b_dstfilename)
+
+
     # liD = None
     # if ignoreDegenerate == True:
     #     liD = ct.POINTER(ct.c_int(1))
@@ -2196,6 +2219,11 @@ def ESMP_FieldRegridStoreFile(srcField, dstField, filename,
                                      unmappedaction,
                                      ignoreDegenerate,
                                      createRH,
+                                     filemode,
+                                     b_srcfilename,
+                                     b_dstfilename,
+                                     srcFileType,
+                                     dstFileType,
                                      srcFracField,
                                      dstFracField)
     if rc != constants._ESMP_SUCCESS:

@@ -305,6 +305,49 @@ class TestRegrid(TestBase):
         mgr.barrier()
 
     @attr('parallel')
+    def test_field_regrid_file3(self):
+        import os
+        DD = os.path.join(os.getcwd(), "test/data")
+        if not os.path.isdir(DD):
+            os.makedirs(DD)
+        from ESMF.util.cache_data import cache_data_file
+        cache_data_file(os.path.join(DD, "ll2.5deg_grid.nc"))
+        cache_data_file(os.path.join(DD, "T42_grid.nc"))
+
+        mgr = Manager()
+        filename = 'esmpy_test_field_regrid_file3.nc'
+        if local_pet() == 0:
+            path = os.path.join(os.getcwd(), filename)
+            if os.path.isfile(path):
+                os.remove(path)
+        mgr.barrier()
+        
+        grid1 = "test/data/ll2.5deg_grid.nc"
+        srcgrid = ESMF.Grid(filename=grid1, filetype=ESMF.FileFormat.SCRIP)
+
+        grid2 = "test/data/T42_grid.nc"
+        dstgrid = ESMF.Grid(filename=grid2, filetype=ESMF.FileFormat.SCRIP)
+
+        srcfield = ESMF.Field(srcgrid)
+        dstfield = ESMF.Field(dstgrid)
+
+        _ = ESMF.Regrid(srcfield, dstfield, filename=filename,
+                        regrid_method=ESMF.RegridMethod.BILINEAR,
+                        unmapped_action=ESMF.UnmappedAction.IGNORE,
+                        file_mode=ESMF.FileMode.BASIC, 
+                        src_file=grid1, dst_file=grid2,
+                        src_file_type=ESMF.FileFormat.SCRIP, 
+                        dst_file_type=ESMF.FileFormat.SCRIP)
+        mgr.barrier()
+
+        self.assertTrue(os.path.exists(filename))
+
+        src_size = 400
+        dst_size = 100
+        # self.assertWeightFileIsRational(filename, src_size, dst_size)
+        mgr.barrier()
+
+    @attr('parallel')
     def test_field_regrid_from_file(self):
         mgr = Manager()
         filename = 'esmpy_test_field_from_file.nc'
