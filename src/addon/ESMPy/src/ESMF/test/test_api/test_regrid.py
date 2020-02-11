@@ -334,7 +334,7 @@ class TestRegrid(TestBase):
         _ = ESMF.Regrid(srcfield, dstfield, filename=filename,
                         regrid_method=ESMF.RegridMethod.BILINEAR,
                         unmapped_action=ESMF.UnmappedAction.IGNORE,
-                        file_mode=ESMF.FileMode.BASIC, 
+                        file_mode=ESMF.FileMode.WITHAUX, 
                         src_file=grid1, dst_file=grid2,
                         src_file_type=ESMF.FileFormat.SCRIP, 
                         dst_file_type=ESMF.FileFormat.SCRIP)
@@ -342,9 +342,9 @@ class TestRegrid(TestBase):
 
         self.assertTrue(os.path.exists(filename))
 
-        src_size = 400
-        dst_size = 100
-        # self.assertWeightFileIsRational(filename, src_size, dst_size)
+        src_size = 10368
+        dst_size = 8192
+        self.assertWeightFileIsRational(filename, src_size, dst_size)
         mgr.barrier()
 
     @attr('parallel')
