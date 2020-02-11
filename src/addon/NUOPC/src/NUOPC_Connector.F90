@@ -2331,6 +2331,15 @@ module NUOPC_Connector
     integer                         :: tk, gl
     character(ESMF_MAXSTR)          :: acceptorTransferActionAttr
     
+    type GridL
+      type(ESMF_Grid)               :: providerGrid
+      type(ESMF_Grid)               :: acceptorGrid
+      type(GridL), pointer          :: prev
+    end type
+    
+    type(GridL), pointer            :: gridList, gridListE
+    logical                         :: gridListMatch
+    
     rc = ESMF_SUCCESS
 
     ! query the component for info
@@ -2462,6 +2471,9 @@ module NUOPC_Connector
 
     ! prepare chopStringList
     nullify(chopStringList)
+    
+    ! prepare gridList
+    nullify(gridList)
     
     ! main loop over all entries in the cplList
     do i=1, cplListSize
@@ -2681,49 +2693,88 @@ module NUOPC_Connector
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return
           else
-            ! not shared GeomObject > must transfer
+            ! not shared GeomObject -> must transfer
             call ESMF_GridGet(grid, distgrid=providerDG, name=geomobjname, &
               dimCount=dimCount, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            call ESMF_FieldGet(acceptorField, vm=vm, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            ! see if provider grid has been dealt with before
+            gridListMatch=.false.
+            gridListE=>gridList
+            do while (associated(gridListE))
+call ESMF_PointerLog(grid%this, prefix="Comparing "//trim(geomobjname)//": ", rc=rc)
+call ESMF_GridGet(gridListE%providerGrid, name=msgString, rc=rc)
+call ESMF_PointerLog(gridListE%providerGrid%this, prefix="to "//trim(msgString)//": ", rc=rc)
+!TODO: Actually want to check for alias match.
+!              if (gridListE%providerGrid == grid) then
+!TODO: But for now this does not work due to proxy duplication, and as a 
+!TODO: work-around matching is done by name. This is very fragile and should
+!TODO: be fixed as soon as we can rely on correct proxy behavior!
+              if (trim(geomobjname)==trim(msgString)) then
+                gridListMatch=.true.
+                exit
+              endif
+              gridListE=>gridListE%prev   ! previous element
+            enddo
             if (btest(verbosity,11)) then
-              call ESMF_LogWrite(trim(name)//": - transferring underlying "// &
-                "DistGrid "//trim(transferDirection)//" for Grid: "&
+              write(msgString, *) "gridListMatch=", gridListMatch
+              call ESMF_LogWrite(trim(name)//": "//trim(msgString)//" for Grid: "&
                 //trim(geomobjname), ESMF_LOGMSG_INFO, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             endif
-            acceptorDG = ESMF_DistGridCreate(providerDG, vm=vm, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            if (btest(verbosity,11)) then
-              call ESMF_LogWrite(trim(name)//&
-                ": - done creating acceptorDG from providerDG", &
-                ESMF_LOGMSG_INFO, rc=rc)
+            if (gridListMatch) then
+              ! retrieve previously stored acceptor grid
+              grid = gridListE%acceptorGrid
+            else
+              ! this is a provider grid not seen before -> add to gridList
+              allocate(gridListE)
+              gridListE%prev=>gridList  ! link new element to previous list head
+              gridList=>gridListE       ! list head now pointing to new element
+              gridListE%providerGrid = grid ! store the provider grid for lookup
+              ! deal with the DistGrid transfer
+              if (btest(verbosity,11)) then
+                call ESMF_LogWrite(trim(name)//": - transferring underlying "// &
+                  "DistGrid "//trim(transferDirection)//" for Grid: "&
+                  //trim(geomobjname), ESMF_LOGMSG_INFO, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              endif
+              call ESMF_FieldGet(acceptorField, vm=vm, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              acceptorDG = ESMF_DistGridCreate(providerDG, vm=vm, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              if (btest(verbosity,11)) then
+                call ESMF_LogWrite(trim(name)//&
+                  ": - done creating acceptorDG from providerDG", &
+                  ESMF_LOGMSG_INFO, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              endif
+              grid = ESMF_GridEmptyCreate(vm=vm, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              call ESMF_GridSet(grid, name=geomobjname, distgrid=acceptorDG, &
+                vm=vm, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              if (btest(verbosity,11)) then
+                call ESMF_LogWrite(trim(name)//&
+                  ": - done transferring underlying DistGrid", &
+                  ESMF_LOGMSG_INFO, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              endif
+              ! add the acceptor grid for later lookup
+              gridListE%acceptorGrid = grid ! store the acceptor grid
             endif
-            grid = ESMF_GridEmptyCreate(vm=vm, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            call ESMF_GridSet(grid, name=geomobjname, distgrid=acceptorDG, &
-              vm=vm, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            ! set grid in the acceptorField
             call ESMF_FieldEmptySet(acceptorField, grid=grid, &
               staggerloc=staggerloc, vm=vm, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            if (btest(verbosity,11)) then
-              call ESMF_LogWrite(trim(name)//&
-                ": - done transferring underlying DistGrid", &
-                ESMF_LOGMSG_INFO, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            endif
           endif
           ! query additional provider information
           call ESMF_FieldGet(providerField, grid=grid, dimCount=fieldDimCount, &
@@ -3169,6 +3220,13 @@ module NUOPC_Connector
 
     enddo
 
+    ! take down gridList
+    do while (associated(gridList))
+      gridListE=>gridList
+      gridList=>gridList%prev
+      deallocate(gridListE)
+    enddo
+
     if (associated(cplList)) deallocate(cplList)
     if (associated(cplSetList)) deallocate(cplSetList)
     if (associated(importStandardNameList)) deallocate(importStandardNameList)
@@ -3265,6 +3323,15 @@ module NUOPC_Connector
     character(len=40)               :: transferDirection
     logical                         :: isPresentNDG, isPresentEDG
     type(ESMF_VM)                   :: vm
+
+    type GridL
+      type(ESMF_Grid)               :: providerGrid
+      type(ESMF_Grid)               :: acceptorGrid
+      type(GridL), pointer          :: prev
+    end type
+    
+    type(GridL), pointer            :: gridList, gridListE
+    logical                         :: gridListMatch
 
     rc = ESMF_SUCCESS
 
@@ -3398,6 +3465,9 @@ module NUOPC_Connector
     ! prepare chopStringList
     nullify(chopStringList)
 
+    ! prepare gridList
+    nullify(gridList)
+    
     ! main loop over all entries in the cplList
     do i=1, cplListSize
       call NUOPC_ChopString(cplList(i), chopChar=":", &
@@ -3607,35 +3677,74 @@ module NUOPC_Connector
             call ESMF_GridGet(providerGrid, name=geomobjname, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+            gridListMatch=.false.
+            gridListE=>gridList
+            do while (associated(gridListE))
+call ESMF_PointerLog(providerGrid%this, prefix="Comparing "//trim(geomobjname)//": ", rc=rc)
+call ESMF_GridGet(gridListE%providerGrid, name=msgString, rc=rc)
+call ESMF_PointerLog(gridListE%providerGrid%this, prefix="to "//trim(msgString)//": ", rc=rc)
+!TODO: Actually want to check for alias match.
+!              if (gridListE%providerGrid == providerGrid) then
+!TODO: But for now this does not work due to proxy duplication, and as a 
+!TODO: work-around matching is done by name. This is very fragile and should
+!TODO: be fixed as soon as we can rely on correct proxy behavior!
+              if (trim(geomobjname)==trim(msgString)) then
+                gridListMatch=.true.
+                exit
+              endif
+              gridListE=>gridListE%prev   ! previous element
+            enddo
             if (btest(verbosity,11)) then
-              call ESMF_LogWrite(trim(name)//&
-                ": - transferring the full geomobject with coordinates "//&
-                trim(transferDirection)//" for Grid: "//trim(geomobjname),&
-                ESMF_LOGMSG_INFO, rc=rc)
+              write(msgString, *) "gridListMatch=", gridListMatch
+              call ESMF_LogWrite(trim(name)//": "//trim(msgString)//" for Grid: "&
+                //trim(geomobjname), ESMF_LOGMSG_INFO, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             endif
-            call ESMF_FieldGet(acceptorField, grid=acceptorGrid, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            call ESMF_GridGet(acceptorGrid, distgrid=distgrid, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            acceptorGrid = ESMF_GridCreate(providerGrid, distgrid, &
-              name=geomobjname, copyAttributes=.TRUE.,rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (gridListMatch) then
+              ! retrieve previously stored acceptor grid
+              acceptorGrid = gridListE%acceptorGrid
+            else
+              ! this is a provider grid not seen before -> add to gridList
+              allocate(gridListE)
+              gridListE%prev=>gridList  ! link new element to previous list head
+              gridList=>gridListE       ! list head now pointing to new element
+              gridListE%providerGrid = providerGrid ! store the provider grid
+              ! deal with the Grid transfer
+              if (btest(verbosity,11)) then
+                call ESMF_LogWrite(trim(name)//&
+                  ": - transferring the full geomobject with coordinates "//&
+                  trim(transferDirection)//" for Grid: "//trim(geomobjname),&
+                  ESMF_LOGMSG_INFO, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              endif
+              call ESMF_FieldGet(acceptorField, grid=acceptorGrid, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              call ESMF_GridGet(acceptorGrid, distgrid=distgrid, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              acceptorGrid = ESMF_GridCreate(providerGrid, distgrid, &
+                name=geomobjname, copyAttributes=.TRUE.,rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              if (btest(verbosity,11)) then
+                call ESMF_LogWrite(trim(name)//&
+                  ": - done transferring the full Grid with coordinates", &
+                  ESMF_LOGMSG_INFO, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              endif
+              ! add the acceptor grid for later lookup
+              gridListE%acceptorGrid = acceptorGrid ! store the acceptor grid
+            endif
+            ! set acceptorGrid in acceptorField
             call ESMF_FieldEmptySet(acceptorField, grid=acceptorGrid, &
               staggerloc=staggerloc, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            if (btest(verbosity,11)) then
-              call ESMF_LogWrite(trim(name)//&
-                ": - done transferring the full Grid with coordinates", &
-                ESMF_LOGMSG_INFO, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            endif
             if (sharedField) then
               ! sharedField, can now be created because grid is complete
               call ShareFieldWithGrid(acceptorField, providerField, name=name, &
@@ -3798,6 +3907,13 @@ module NUOPC_Connector
         !TODO: Fields mentioned via stdname in Cpl metadata not found -> error?
       endif
 
+    enddo
+
+    ! take down gridList
+    do while (associated(gridList))
+      gridListE=>gridList
+      gridList=>gridList%prev
+      deallocate(gridListE)
     enddo
 
     if (associated(cplList)) deallocate(cplList)
@@ -6412,7 +6528,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
         endif
       enddo
 
-      ! for now optimized reuse of RouteHandle is only implemented for Grids
+      ! for now reuse of Regrid RouteHandle is only implemented for Grids
       
       call ESMF_FieldGet(srcFields(i), geomtype=srcGeomtype, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
