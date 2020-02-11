@@ -31,6 +31,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <cstdio>
+#include <sstream>
 using namespace std;
 
 #if !defined (ESMF_OS_MinGW)
@@ -375,6 +376,14 @@ extern "C" {
 
 void FTN_X(c_pointerprint)(void **ptr){
   printf("ESMF_PointerPrint: %p\n", *ptr);
+}
+
+void FTN_X(c_pointerlog)(void **ptr, char *prefix, 
+  ESMCI_FortranStrLenArg prefix_l){
+  std::string prefixStr(prefix, prefix_l);
+  std::stringstream msg;
+  msg << prefixStr << *ptr;
+  ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
 }
 
 } // extern "C"
