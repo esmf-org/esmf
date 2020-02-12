@@ -12,5 +12,5 @@ before_install:
   - cd esmf-travis-ci
 
 script:
-  - cd docker/esmf && docker build -t bekozi/esmf --build-arg ESMF_BRANCH=$TRAVIS_BRANCH .
-  - cd docker/nuopc-protos && docker build -t bekozi/nuopc-protos .
+  - docker build -t bekozi/esmf --file docker/esmf/Dockerfile --build-arg ESMF_BRANCH=$TRAVIS_BRANCH .
+  - docker build -t bekozi/nuopc-protos  --file docker/nuopc-protos/Dockerfile .
