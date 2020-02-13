@@ -1,5 +1,5 @@
 #!/bin/sh
 # return the ESMF version from Git if available, or empty string otherwise
 if [ -d $ESMF_DIR/.git ] ; then \
-git describe --tags |& grep -v fatal
+git describe --tags 2>&1 | grep -v fatal
 fi
