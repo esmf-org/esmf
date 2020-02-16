@@ -129,7 +129,7 @@ int ESMC_DistGridDestroy(ESMC_DistGrid *distgrid){
   return rc;
 }  
 
-int ESMC_DistGridSetArbIndices(ESMC_DistGrid *distgrid, 
+int ESMC_DistGridSetArbIndices(ESMC_DistGrid distgrid, 
                                ESMC_InterArrayInt *indices){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_DistGridSetArbIndices()"
@@ -138,11 +138,8 @@ int ESMC_DistGridSetArbIndices(ESMC_DistGrid *distgrid,
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
-  // test for NULL pointer via macro before calling any class methods
-  ESMCI_NULL_CHECK_RC(distgrid, rc)
-  
   // typecast into ESMCI type
-  ESMCI::DistGrid *dgp = (ESMCI::DistGrid *)(distgrid->ptr);
+  ESMCI::DistGrid *dgp = (ESMCI::DistGrid *)(distgrid.ptr);
   // test for NULL pointer via macro before calling any class methods
   ESMCI_NULL_CHECK_RC(dgp, rc)
 
@@ -150,7 +147,7 @@ int ESMC_DistGridSetArbIndices(ESMC_DistGrid *distgrid,
   ESMCI::InterArray<int> *ii = (ESMCI::InterArray<int> *)indices;
 
   // call into ESMCI method  
-  localrc = ESMCI::DistGrid::setArbSeqIndex(ii, 0);
+  localrc = dgp->setArbSeqIndex(ii, 0);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
     ESMC_CONTEXT, &rc)) return rc;  // bail out
     

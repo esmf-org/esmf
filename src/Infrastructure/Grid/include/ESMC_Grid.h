@@ -38,6 +38,7 @@
 
 #include "ESMC_Interface.h"
 #include "ESMC_Util.h"
+#include "ESMC_DistGrid.h"
 
 #if defined (__cplusplus)
 extern "C" {
@@ -503,7 +504,7 @@ int ESMC_GridGetCoordBounds(
 // !IROUTINE: ESMC_GridGetDistGrid - Get coordinate bounds from a Grid
 //
 // !INTERFACE:
-ESMC_DistGrid * ESMC_GridGetDistGrid(
+ESMC_DistGrid ESMC_GridGetDistGrid(
   ESMC_Grid grid,                         // in
   int *rc                                 // out
 );

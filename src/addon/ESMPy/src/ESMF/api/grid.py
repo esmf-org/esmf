@@ -403,7 +403,7 @@ class Grid(object):
 
         else:
             # ctypes stuff
-            self._struct = ESMP_GridStruct()
+            self._struct = ESMP_Grid()
             if self.num_peri_dims == 0:
                 self._struct = ESMP_GridCreateNoPeriDim(self.max_index,
                                                        coordSys=coord_sys,
@@ -1175,10 +1175,10 @@ class Grid(object):
                 raise TypeError('indices is not a recognized type, please use a list, tuple or numpy array')
 
         # get the distgrid
-        distGrid = ESMP_GridGetDistGrid(self)
+        distgrid = ESMP_GridGetDistGrid(self)
 
         # set the arb indices array on the distgrid
-        ESMP_DistGridSetArbIndices(self, indices)
+        ESMP_DistGridSetArbIndices(distgrid, indices)
 
     def _write_(self, filename, staggerloc=None):
         """

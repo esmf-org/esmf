@@ -21,7 +21,7 @@ class TestMaskedArray(TestBase):
             :type maxindex: np array with dtype = int32
             :return:
             '''
-            self.struct = ESMP_GridStruct()
+            self.struct = ESMP_Grid()
             self.maxindex = maxindex
             self.rank = len(maxindex)
 

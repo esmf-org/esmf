@@ -430,7 +430,7 @@ void * ESMC_GridGetItem(ESMC_Grid grid,
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_GridGetDistGrid()"
-ESMC_DistGrid * ESMC_GridGetDistGrid(ESMC_Grid grid, int *rc){
+ESMC_DistGrid ESMC_GridGetDistGrid(ESMC_Grid grid, int *rc){
 
   // Initialize return code. Assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;
@@ -439,10 +439,16 @@ ESMC_DistGrid * ESMC_GridGetDistGrid(ESMC_Grid grid, int *rc){
   ESMCI::Grid *gridp = reinterpret_cast<ESMCI::Grid *>(grid.ptr);
   //printf("\n\ngridstatus = %d\n\n", gridp->getStatus());
   
-  ESMCI::DistGrid *distgrid = 0;
+  const ESMCI::DistGrid *distgrid = 0;
   distgrid = gridp->getDistGrid();
   
-  ESMC_DistGrid *distgridp = reinterpret_cast<ESMC_DistGrid *>(distgrid);
+  // distgrid->print();
+
+  ESMCI::DistGrid *distgridnc = const_cast<ESMCI::DistGrid *>(distgrid);
+  ESMC_DistGrid distgridp;
+  distgridp.ptr = reinterpret_cast<ESMC_DistGrid *>(distgridnc);
+
+  // localrc = ESMC_DistGridPrint(distgridp);
 
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;

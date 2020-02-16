@@ -6608,6 +6608,15 @@ template<typename T> int DistGrid::setArbSeqIndex(
     return rc;
   }
   
+#ifdef DEBUGPRINTS
+  // sprintf(msg, "arbseqindex array = {");
+  // ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  // for (int i=0; i<arbSeqIndex->extent[0]; ++i) {
+  //     sprintf(msg, "%d", arbSeqIndex->array[i]);
+  //     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  // }
+#endif
+
   // copy the provided arbSeqIndex array into the DistGrid
   memcpy(arbSeqIndexListPCollPLocalDe[collocationIndex][localDe],
     arbSeqIndex->array, sizeOfType*arbSeqIndex->extent[0]);

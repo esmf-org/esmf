@@ -863,3 +863,72 @@ class TestGrid(TestBase):
         except:
             raise NameError('grid_create_from_file_scrip_cyclic_cyclic failed!')
 
+    @attr('parallel')
+    def test_set_arb_seq_ind(self):
+        mgr = Manager()
+        filename = 'esmpy_test_grid_setarb_file.nc'
+        if local_pet() == 0:
+            path = os.path.join(os.getcwd(), filename)
+            if os.path.isfile(path):
+                os.remove(path)
+        mgr.barrier()
+        
+        srcgrid = ESMF.Grid(np.array([20, 20]),
+                            staggerloc=ESMF.StaggerLoc.CENTER,
+                            coord_sys=ESMF.CoordSys.SPH_DEG)
+
+        # Get and set the source grid coordinates.
+        srcGridCoordLon = srcgrid.get_coords(0)
+        srcGridCoordLat = srcgrid.get_coords(1)
+
+        lons = np.linspace(-120, 120, 20)
+        lats = np.linspace(-60, 60, 20)
+        
+        # parallel coordinates
+        slons_par = lons[srcgrid.lower_bounds[ESMF.StaggerLoc.CENTER][0]:srcgrid.upper_bounds[ESMF.StaggerLoc.CENTER][0]]
+        slats_par = lats[srcgrid.lower_bounds[ESMF.StaggerLoc.CENTER][1]:srcgrid.upper_bounds[ESMF.StaggerLoc.CENTER][1]]
+        
+        # make sure to use indexing='ij' as ESMPy backend uses matrix indexing (not Cartesian)
+        lonm, latm = np.meshgrid(slons_par, slats_par, indexing='ij')
+        
+        srcGridCoordLon[:] = lonm
+        srcGridCoordLat[:] = latm
+
+        dstgrid = ESMF.Grid(np.array([10, 10]),
+                             staggerloc=ESMF.StaggerLoc.CENTER,
+                             coord_sys=ESMF.CoordSys.SPH_DEG)
+
+        # Get and set the source grid coordinates.
+        dstGridCoordLon = dstgrid.get_coords(0)
+        dstGridCoordLat = dstgrid.get_coords(1)
+        
+        lons = np.linspace(-120, 120, 10)
+        lats = np.linspace(-60, 60, 10)
+
+        # parallel coordinates
+        dlons_par = lons[dstgrid.lower_bounds[ESMF.StaggerLoc.CENTER][0]:dstgrid.upper_bounds[ESMF.StaggerLoc.CENTER][0]]
+        dlats_par = lats[dstgrid.lower_bounds[ESMF.StaggerLoc.CENTER][1]:dstgrid.upper_bounds[ESMF.StaggerLoc.CENTER][1]]
+        
+        # make sure to use indexing='ij' as ESMPy backend uses matrix indexing (not Cartesian)
+        lonm, latm = np.meshgrid(dlons_par, dlats_par, indexing='ij')
+        
+        dstGridCoordLon[:] = lonm
+        dstGridCoordLat[:] = latm
+
+        srcfield = ESMF.Field(srcgrid)
+        dstfield = ESMF.Field(dstgrid)
+
+        dstgrid._set_arb_indices_(np.linspace(10000, 20000, 100))
+
+        _ = ESMF.Regrid(srcfield, dstfield, filename=filename,
+                        regrid_method=ESMF.RegridMethod.BILINEAR,
+                        unmapped_action=ESMF.UnmappedAction.IGNORE)
+        mgr.barrier()
+
+        self.assertTrue(os.path.exists(filename))
+
+        src_size = 400
+        dst_size = 100
+        self.assertWeightFileIsRational(filename, src_size, dst_size)
+        mgr.barrier()
+        
