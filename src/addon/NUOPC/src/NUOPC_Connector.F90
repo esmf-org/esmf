@@ -2336,10 +2336,17 @@ module NUOPC_Connector
       type(ESMF_Grid)               :: acceptorGrid
       type(GridL), pointer          :: prev
     end type
-    
     type(GridL), pointer            :: gridList, gridListE
     logical                         :: gridListMatch
     
+    type MeshL
+      type(ESMF_Mesh)               :: providerMesh
+      type(ESMF_Mesh)               :: acceptorMesh
+      type(MeshL), pointer          :: prev
+    end type
+    type(MeshL), pointer            :: meshList, meshListE
+    logical                         :: meshListMatch
+
     rc = ESMF_SUCCESS
 
     ! query the component for info
@@ -2474,6 +2481,8 @@ module NUOPC_Connector
     
     ! prepare gridList
     nullify(gridList)
+    ! prepare meshList
+    nullify(meshList)
     
     ! main loop over all entries in the cplList
     do i=1, cplListSize
@@ -2941,38 +2950,78 @@ call ESMF_PointerLog(gridListE%providerGrid%this, prefix="to "//trim(msgString)/
               nodalDistgrid=providerDG_nodal, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            call ESMF_FieldGet(acceptorField, vm=vm, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            ! see if provider mesh has been dealt with before
+            meshListMatch=.false.
+            meshListE=>meshList
+            do while (associated(meshListE))
+call ESMF_PointerLog(mesh%this, prefix="Comparing Mesh: ", rc=rc)
+call ESMF_PointerLog(meshListE%providerMesh%this, prefix="to Mesh: ", rc=rc)
+!TODO: Actually want to check for alias match.
+!              if (meshListE%providerMesh == mesh) then
+!TODO: But for now this does not work due to proxy duplication, and as a 
+!TODO: work-around matching is done by name. This is very fragile and should
+!TODO: be fixed as soon as we can rely on correct proxy behavior!
+!              if (trim(geomobjname)==trim(msgString)) then
+!TODO: For now Mesh doesn't even have a name, so just don't do anything here
+              if (.false.) then
+                meshListMatch=.true.
+                exit
+              endif
+              meshListE=>meshListE%prev   ! previous element
+            enddo
             if (btest(verbosity,11)) then
-              call ESMF_LogWrite(trim(name)//&
-                ": - transferring underlying DistGrid "//&
-                trim(transferDirection)//" for Mesh", ESMF_LOGMSG_INFO, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            endif
-            acceptorDG = ESMF_DistGridCreate(providerDG, vm=vm, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            acceptorDG_nodal = ESMF_DistGridCreate(providerDG_nodal, vm=vm, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            !TODO: When Mesh implements a name, make sure to transfer it here!
-            mesh = ESMF_MeshCreate(acceptorDG, nodalDistgrid=acceptorDG_nodal, &
-              rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            call ESMF_FieldEmptySet(acceptorField, mesh=mesh, meshloc=meshloc, &
-              rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            if (btest(verbosity,11)) then
-              call ESMF_LogWrite(trim(name)//&
-                ": - done transferring underlying DistGrid", &
+              write(msgString, *) "meshListMatch=", meshListMatch
+              call ESMF_LogWrite(trim(name)//": "//trim(msgString)//" for Mesh ",&
                 ESMF_LOGMSG_INFO, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             endif
+            if (meshListMatch) then
+              ! retrieve previously stored acceptor mesh
+              mesh = meshListE%acceptorMesh
+            else
+              ! this is a provider mesh not seen before -> add to meshList
+              allocate(meshListE)
+              meshListE%prev=>meshList  ! link new element to previous list head
+              meshList=>meshListE       ! list head now pointing to new element
+              meshListE%providerMesh = mesh ! store the provider mesh for lookup
+              ! deal with the DistGrid transfer
+              if (btest(verbosity,11)) then
+                call ESMF_LogWrite(trim(name)//&
+                  ": - transferring underlying DistGrid "//&
+                  trim(transferDirection)//" for Mesh", ESMF_LOGMSG_INFO, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              endif
+              call ESMF_FieldGet(acceptorField, vm=vm, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              acceptorDG = ESMF_DistGridCreate(providerDG, vm=vm, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              acceptorDG_nodal = ESMF_DistGridCreate(providerDG_nodal, vm=vm, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              !TODO: When Mesh implements a name, make sure to transfer it here!
+              mesh = ESMF_MeshCreate(acceptorDG, nodalDistgrid=acceptorDG_nodal, &
+                rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              if (btest(verbosity,11)) then
+                call ESMF_LogWrite(trim(name)//&
+                  ": - done transferring underlying DistGrid", &
+                  ESMF_LOGMSG_INFO, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              endif
+              ! add the acceptor mesh for later lookup
+              meshListE%acceptorMesh = mesh ! store the acceptor mesh
+            endif
+            ! set mesh in the acceptorField
+            call ESMF_FieldEmptySet(acceptorField, mesh=mesh, meshloc=meshloc, &
+              rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           endif
           ! query additional provider information
           call ESMF_FieldGet(providerField, dimCount=fieldDimCount, rc=rc)
@@ -3226,6 +3275,12 @@ call ESMF_PointerLog(gridListE%providerGrid%this, prefix="to "//trim(msgString)/
       gridList=>gridList%prev
       deallocate(gridListE)
     enddo
+    ! take down meshList
+    do while (associated(meshList))
+      meshListE=>meshList
+      meshList=>meshList%prev
+      deallocate(meshListE)
+    enddo
 
     if (associated(cplList)) deallocate(cplList)
     if (associated(cplSetList)) deallocate(cplSetList)
@@ -3329,9 +3384,16 @@ call ESMF_PointerLog(gridListE%providerGrid%this, prefix="to "//trim(msgString)/
       type(ESMF_Grid)               :: acceptorGrid
       type(GridL), pointer          :: prev
     end type
-    
     type(GridL), pointer            :: gridList, gridListE
     logical                         :: gridListMatch
+    
+    type MeshL
+      type(ESMF_Mesh)               :: providerMesh
+      type(ESMF_Mesh)               :: acceptorMesh
+      type(MeshL), pointer          :: prev
+    end type
+    type(MeshL), pointer            :: meshList, meshListE
+    logical                         :: meshListMatch
 
     rc = ESMF_SUCCESS
 
@@ -3467,6 +3529,8 @@ call ESMF_PointerLog(gridListE%providerGrid%this, prefix="to "//trim(msgString)/
 
     ! prepare gridList
     nullify(gridList)
+    ! prepare meshList
+    nullify(meshList)
     
     ! main loop over all entries in the cplList
     do i=1, cplListSize
@@ -3677,7 +3741,7 @@ call ESMF_PointerLog(gridListE%providerGrid%this, prefix="to "//trim(msgString)/
             call ESMF_GridGet(providerGrid, name=geomobjname, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-
+            ! see if provider grid has been dealt with before
             gridListMatch=.false.
             gridListE=>gridList
             do while (associated(gridListE))
@@ -3766,75 +3830,115 @@ call ESMF_PointerLog(gridListE%providerGrid%this, prefix="to "//trim(msgString)/
                endif
             endif
           elseif (geomtype==ESMF_GEOMTYPE_MESH) then
-            if (btest(verbosity,11)) then
-              call ESMF_LogWrite(trim(name)//&
-                ": - transferring the full geomobject with coordinates "//&
-                trim(transferDirection)//"for Mesh: ",&
-                ESMF_LOGMSG_INFO, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            endif
             call ESMF_FieldGet(providerField, mesh=providerMesh, &
               meshloc=meshloc, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out            
-            call ESMF_MeshGet(providerMesh, isMemFreed=meshNoConnections, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            call ESMF_FieldGet(acceptorField, mesh=acceptorMesh, vm=vm, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            call ESMF_MeshGet(acceptorMesh, nodalDistgridIsPresent=isPresentNDG, &
-              elementDistgridIsPresent=isPresentEDG, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            if (isPresentNDG.and.isPresentEDG) then
-              ! get and use both DistGrids
-              call ESMF_MeshGet(acceptorMesh, nodalDistgrid=nDistgrid, &
-                elementDistgrid=eDistgrid, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-              acceptorMesh = ESMF_MeshCreate(providerMesh, &
-                nodalDistgrid=nDistgrid, elementDistgrid=eDistgrid, vm=vm, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            elseif (isPresentNDG.and. .not.isPresentEDG) then
-              ! only use Node DistGrids
-              call ESMF_MeshGet(acceptorMesh, nodalDistgrid=nDistgrid, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-              acceptorMesh = ESMF_MeshCreate(providerMesh, &
-                nodalDistgrid=nDistgrid, vm=vm, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            elseif (isPresentEDG.and. .not.isPresentNDG) then
-              ! only use Element DistGrids
-              call ESMF_MeshGet(acceptorMesh, elementDistgrid=eDistgrid, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-              acceptorMesh = ESMF_MeshCreate(providerMesh, &
-                elementDistgrid=eDistgrid, vm=vm, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            else
-              ! cannot create Mesh without a DistGrid -> error out
-              call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-                msg="Acceptor side must define nodal or element DistGrid.", &
-                line=__LINE__, file=trim(name)//":"//FILENAME, &
-                rcToReturn=rc)
-              return  ! bail out
-            endif
-            call ESMF_FieldEmptySet(acceptorField, mesh=acceptorMesh, &
-              meshloc=meshloc, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            ! see if provider mesh has been dealt with before
+            meshListMatch=.false.
+            meshListE=>meshList
+            do while (associated(meshListE))
+call ESMF_PointerLog(providerMesh%this, prefix="Comparing Mesh: ", rc=rc)
+call ESMF_PointerLog(meshListE%providerMesh%this, prefix="to Mesh: ", rc=rc)
+!TODO: Actually want to check for alias match.
+!              if (meshListE%providerMesh == providerMesh) then
+!TODO: But for now this does not work due to proxy duplication, and as a 
+!TODO: work-around matching is done by name. This is very fragile and should
+!TODO: be fixed as soon as we can rely on correct proxy behavior!
+!              if (trim(geomobjname)==trim(msgString)) then
+!TODO: For now Mesh doesn't even have a name, so just don't do anything here
+              if (.false.) then
+                meshListMatch=.true.
+                exit
+              endif
+              meshListE=>meshListE%prev   ! previous element
+            enddo
             if (btest(verbosity,11)) then
-              call ESMF_LogWrite(trim(name)//&
-                ": - done transferring the full Mesh with coordinates", &
+              write(msgString, *) "meshListMatch=", meshListMatch
+              call ESMF_LogWrite(trim(name)//": "//trim(msgString)//" for Mesh ",&
                 ESMF_LOGMSG_INFO, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             endif
+            if (meshListMatch) then
+              ! retrieve previously stored acceptor mesh
+              acceptorMesh = meshListE%acceptorMesh
+            else
+              ! this is a provider mesh not seen before -> add to meshList
+              allocate(meshListE)
+              meshListE%prev=>meshList  ! link new element to previous list head
+              meshList=>meshListE       ! list head now pointing to new element
+              meshListE%providerMesh = providerMesh ! store the provider mesh
+              ! deal with the Mesh transfer
+              if (btest(verbosity,11)) then
+                call ESMF_LogWrite(trim(name)//&
+                  ": - transferring the full geomobject with coordinates "//&
+                  trim(transferDirection)//"for Mesh: ",&
+                  ESMF_LOGMSG_INFO, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              endif
+              call ESMF_MeshGet(providerMesh, isMemFreed=meshNoConnections, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              call ESMF_FieldGet(acceptorField, mesh=acceptorMesh, vm=vm, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              call ESMF_MeshGet(acceptorMesh, nodalDistgridIsPresent=isPresentNDG, &
+                elementDistgridIsPresent=isPresentEDG, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              if (isPresentNDG.and.isPresentEDG) then
+                ! get and use both DistGrids
+                call ESMF_MeshGet(acceptorMesh, nodalDistgrid=nDistgrid, &
+                  elementDistgrid=eDistgrid, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+                acceptorMesh = ESMF_MeshCreate(providerMesh, &
+                  nodalDistgrid=nDistgrid, elementDistgrid=eDistgrid, vm=vm, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              elseif (isPresentNDG.and. .not.isPresentEDG) then
+                ! only use Node DistGrids
+                call ESMF_MeshGet(acceptorMesh, nodalDistgrid=nDistgrid, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+                acceptorMesh = ESMF_MeshCreate(providerMesh, &
+                  nodalDistgrid=nDistgrid, vm=vm, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              elseif (isPresentEDG.and. .not.isPresentNDG) then
+                ! only use Element DistGrids
+                call ESMF_MeshGet(acceptorMesh, elementDistgrid=eDistgrid, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+                acceptorMesh = ESMF_MeshCreate(providerMesh, &
+                  elementDistgrid=eDistgrid, vm=vm, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              else
+                ! cannot create Mesh without a DistGrid -> error out
+                call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+                  msg="Acceptor side must define nodal or element DistGrid.", &
+                  line=__LINE__, file=trim(name)//":"//FILENAME, &
+                  rcToReturn=rc)
+                return  ! bail out
+              endif
+              if (btest(verbosity,11)) then
+                call ESMF_LogWrite(trim(name)//&
+                  ": - done transferring the full Mesh with coordinates", &
+                  ESMF_LOGMSG_INFO, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              endif
+              ! add the acceptor mesh for later lookup
+              meshListE%acceptorMesh = acceptorMesh ! store the acceptor mesh
+            endif
+            ! set acceptorMesh in acceptorField
+            call ESMF_FieldEmptySet(acceptorField, mesh=acceptorMesh, &
+              meshloc=meshloc, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             if (sharedField) then
               ! sharedField, can now be created because mesh is complete
               call ShareFieldWithMesh(acceptorField, providerField, name=name, &
@@ -3914,6 +4018,12 @@ call ESMF_PointerLog(gridListE%providerGrid%this, prefix="to "//trim(msgString)/
       gridListE=>gridList
       gridList=>gridList%prev
       deallocate(gridListE)
+    enddo
+    ! take down meshList
+    do while (associated(meshList))
+      meshListE=>meshList
+      meshList=>meshList%prev
+      deallocate(meshListE)
     enddo
 
     if (associated(cplList)) deallocate(cplList)
