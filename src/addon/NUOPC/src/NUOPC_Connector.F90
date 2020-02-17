@@ -2711,9 +2711,10 @@ module NUOPC_Connector
             gridListMatch=.false.
             gridListE=>gridList
             do while (associated(gridListE))
-call ESMF_PointerLog(grid%this, prefix="Comparing "//trim(geomobjname)//": ", rc=rc)
+call ESMF_PointerLog(grid%this, prefix="Comparing Grid: "//trim(geomobjname)//": ", rc=rc)
 call ESMF_GridGet(gridListE%providerGrid, name=msgString, rc=rc)
-call ESMF_PointerLog(gridListE%providerGrid%this, prefix="to "//trim(msgString)//": ", rc=rc)
+call ESMF_PointerLog(gridListE%providerGrid%this, &
+                                prefix="       to Grid: "//trim(msgString)//": ", rc=rc)
 !TODO: Actually want to check for alias match.
 !              if (gridListE%providerGrid == grid) then
 !TODO: But for now this does not work due to proxy duplication, and as a 
@@ -2947,23 +2948,23 @@ call ESMF_PointerLog(gridListE%providerGrid%this, prefix="to "//trim(msgString)/
           else
             ! not sharedGeom -> must transfer
             call ESMF_MeshGet(mesh, elementDistgrid=providerDG, &
-              nodalDistgrid=providerDG_nodal, rc=rc)
+              nodalDistgrid=providerDG_nodal, name=geomobjname, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             ! see if provider mesh has been dealt with before
             meshListMatch=.false.
             meshListE=>meshList
             do while (associated(meshListE))
-call ESMF_PointerLog(mesh%this, prefix="Comparing Mesh: ", rc=rc)
-call ESMF_PointerLog(meshListE%providerMesh%this, prefix="to Mesh: ", rc=rc)
+call ESMF_PointerLog(mesh%this, prefix="Comparing Mesh: "//trim(geomobjname)//": ", rc=rc)
+call ESMF_MeshGet(meshListE%providerMesh, name=msgString, rc=rc)
+call ESMF_PointerLog(meshListE%providerMesh%this, &
+                                prefix="       to Mesh: "//trim(msgString)//": ", rc=rc)
 !TODO: Actually want to check for alias match.
 !              if (meshListE%providerMesh == mesh) then
 !TODO: But for now this does not work due to proxy duplication, and as a 
 !TODO: work-around matching is done by name. This is very fragile and should
 !TODO: be fixed as soon as we can rely on correct proxy behavior!
-!              if (trim(geomobjname)==trim(msgString)) then
-!TODO: For now Mesh doesn't even have a name, so just don't do anything here
-              if (.false.) then
+              if (trim(geomobjname)==trim(msgString)) then
                 meshListMatch=.true.
                 exit
               endif
@@ -2971,8 +2972,8 @@ call ESMF_PointerLog(meshListE%providerMesh%this, prefix="to Mesh: ", rc=rc)
             enddo
             if (btest(verbosity,11)) then
               write(msgString, *) "meshListMatch=", meshListMatch
-              call ESMF_LogWrite(trim(name)//": "//trim(msgString)//" for Mesh ",&
-                ESMF_LOGMSG_INFO, rc=rc)
+              call ESMF_LogWrite(trim(name)//": "//trim(msgString)//" for Mesh: "&
+                //trim(geomobjname), ESMF_LOGMSG_INFO, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             endif
@@ -2987,9 +2988,9 @@ call ESMF_PointerLog(meshListE%providerMesh%this, prefix="to Mesh: ", rc=rc)
               meshListE%providerMesh = mesh ! store the provider mesh for lookup
               ! deal with the DistGrid transfer
               if (btest(verbosity,11)) then
-                call ESMF_LogWrite(trim(name)//&
-                  ": - transferring underlying DistGrid "//&
-                  trim(transferDirection)//" for Mesh", ESMF_LOGMSG_INFO, rc=rc)
+                call ESMF_LogWrite(trim(name)//": - transferring underlying "// &
+                  "DistGrid "//trim(transferDirection)//" for Mesh: "&
+                  //trim(geomobjname), ESMF_LOGMSG_INFO, rc=rc)
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
               endif
@@ -3745,9 +3746,10 @@ call ESMF_PointerLog(meshListE%providerMesh%this, prefix="to Mesh: ", rc=rc)
             gridListMatch=.false.
             gridListE=>gridList
             do while (associated(gridListE))
-call ESMF_PointerLog(providerGrid%this, prefix="Comparing "//trim(geomobjname)//": ", rc=rc)
+call ESMF_PointerLog(providerGrid%this, prefix="Comparing Grid: "//trim(geomobjname)//": ", rc=rc)
 call ESMF_GridGet(gridListE%providerGrid, name=msgString, rc=rc)
-call ESMF_PointerLog(gridListE%providerGrid%this, prefix="to "//trim(msgString)//": ", rc=rc)
+call ESMF_PointerLog(gridListE%providerGrid%this, &
+                                        prefix="       to Grid: "//trim(msgString)//": ", rc=rc)
 !TODO: Actually want to check for alias match.
 !              if (gridListE%providerGrid == providerGrid) then
 !TODO: But for now this does not work due to proxy duplication, and as a 
@@ -3834,20 +3836,23 @@ call ESMF_PointerLog(gridListE%providerGrid%this, prefix="to "//trim(msgString)/
               meshloc=meshloc, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out            
+            call ESMF_MeshGet(providerMesh, name=geomobjname, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             ! see if provider mesh has been dealt with before
             meshListMatch=.false.
             meshListE=>meshList
             do while (associated(meshListE))
-call ESMF_PointerLog(providerMesh%this, prefix="Comparing Mesh: ", rc=rc)
-call ESMF_PointerLog(meshListE%providerMesh%this, prefix="to Mesh: ", rc=rc)
+call ESMF_PointerLog(providerMesh%this, prefix="Comparing Mesh: "//trim(geomobjname)//": ", rc=rc)
+call ESMF_MeshGet(meshListE%providerMesh, name=msgString, rc=rc)
+call ESMF_PointerLog(meshListE%providerMesh%this, &
+                                        prefix="       to Mesh: "//trim(msgString)//": ", rc=rc)
 !TODO: Actually want to check for alias match.
 !              if (meshListE%providerMesh == providerMesh) then
 !TODO: But for now this does not work due to proxy duplication, and as a 
 !TODO: work-around matching is done by name. This is very fragile and should
 !TODO: be fixed as soon as we can rely on correct proxy behavior!
-!              if (trim(geomobjname)==trim(msgString)) then
-!TODO: For now Mesh doesn't even have a name, so just don't do anything here
-              if (.false.) then
+              if (trim(geomobjname)==trim(msgString)) then
                 meshListMatch=.true.
                 exit
               endif
@@ -3855,8 +3860,8 @@ call ESMF_PointerLog(meshListE%providerMesh%this, prefix="to Mesh: ", rc=rc)
             enddo
             if (btest(verbosity,11)) then
               write(msgString, *) "meshListMatch=", meshListMatch
-              call ESMF_LogWrite(trim(name)//": "//trim(msgString)//" for Mesh ",&
-                ESMF_LOGMSG_INFO, rc=rc)
+              call ESMF_LogWrite(trim(name)//": "//trim(msgString)//" for Mesh: "&
+                //trim(geomobjname), ESMF_LOGMSG_INFO, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             endif
@@ -3873,7 +3878,7 @@ call ESMF_PointerLog(meshListE%providerMesh%this, prefix="to Mesh: ", rc=rc)
               if (btest(verbosity,11)) then
                 call ESMF_LogWrite(trim(name)//&
                   ": - transferring the full geomobject with coordinates "//&
-                  trim(transferDirection)//"for Mesh: ",&
+                  trim(transferDirection)//" for Mesh: "//trim(geomobjname),&
                   ESMF_LOGMSG_INFO, rc=rc)
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
