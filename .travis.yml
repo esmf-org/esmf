@@ -1,0 +1,16 @@
+language: python
+
+services:
+  - docker
+
+#env:
+#  global:
+#  matrix:
+
+before_install:
+  - git clone --depth 1 https://github.com/NESII/esmf-travis-ci.git
+  - cd esmf-travis-ci
+
+script:
+  - docker build -t bekozi/esmf --file docker/esmf/Dockerfile --build-arg ESMF_BRANCH=$TRAVIS_BRANCH .
+  - docker build -t bekozi/nuopc-protos  --file docker/nuopc-protos/Dockerfile .

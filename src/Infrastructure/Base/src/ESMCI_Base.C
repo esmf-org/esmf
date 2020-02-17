@@ -69,10 +69,10 @@ static const char *const version = "$Id$";
 //
 // !ARGUMENTS:
       const ESMC_Base&) {
-// 
+//
 // !RETURN VALUE:
 //    Base object.
-// 
+//
 // !DESCRIPTION:
 //    Empty private operator =.
 //
@@ -91,10 +91,10 @@ static const char *const version = "$Id$";
 //
 // !ARGUMENTS:
       const ESMC_Base&) {
-// 
+//
 // !RETURN VALUE:
 //    Base object.
-// 
+//
 // !DESCRIPTION:
 //    Empty private copy constructor.
 //
@@ -118,10 +118,10 @@ static const char *const version = "$Id$";
 //
 // !ARGUMENTS:
       void)  const {
-// 
+//
 // !RETURN VALUE:
 //    Character pointer to class name.
-// 
+//
 // !DESCRIPTION:
 //    Accessor method for the class name of the object.
 //
@@ -139,17 +139,17 @@ static const char *const version = "$Id$";
 //
 // !INTERFACE:
       int ESMC_Base::ESMC_BaseGetF90ClassName(
-// 
+//
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
-// 
+//
 // !ARGUMENTS:
      char *name,         // in - Location to copy name into
      int nlen) const {   // in - Maximum length of string buffer
-// 
+//
 // !DESCRIPTION:
 //     Return a separate copy of the base class name, in Fortran friendly
-//     format, which means not null terminated, and space filled.  
+//     format, which means not null terminated, and space filled.
 //     Will not copy more than {\tt nlen} bytes into {\tt name} string.
 //
 //EOPI
@@ -164,19 +164,19 @@ static const char *const version = "$Id$";
 #define ESMC_METHOD "ESMC_BaseGetID"
 //BOPI
 // !IROUTINE:  ESMC_BaseGetID - Get Base class unique ID
-//  
+//
 // !INTERFACE:
       int ESMC_Base::ESMC_BaseGetID(
-// 
+//
 // !ARGUMENTS:
       void) const {
-//  
+//
 // !RETURN VALUE:
 //    Unique object ID.
-//  
+//
 // !DESCRIPTION:
 //    Returns the unique object ID.
-//  
+//
 //EOPI
 
   return ID;
@@ -188,19 +188,19 @@ static const char *const version = "$Id$";
 #define ESMC_METHOD "ESMC_BaseGetVMId"
 //BOPI
 // !IROUTINE:  ESMC_BaseGetVMId - Get Base class VMId
-//  
+//
 // !INTERFACE:
       ESMCI::VMId *ESMC_Base::ESMC_BaseGetVMId(
-// 
+//
 // !ARGUMENTS:
       void) const {
-//  
+//
 // !RETURN VALUE:
 //    Unique VMId of the context in which this base object was created
-//  
+//
 // !DESCRIPTION:
 //    Returns the object's VMId.
-//  
+//
 //EOPI
 
   return vmID;
@@ -212,21 +212,21 @@ static const char *const version = "$Id$";
 #define ESMC_METHOD "ESMC_BaseSetVMId"
 //BOPI
 // !IROUTINE:  ESMC_BaseSetVMId - Set Base class VMId
-//  
+//
 // !INTERFACE:
       void ESMC_Base::ESMC_BaseSetVMId(
-// 
+//
 // !ARGUMENTS:
       ESMCI::VMId *vmID) {
-//  
-//  
+//
+//
 // !DESCRIPTION:
 //    Set the unique VMId of the context in which this base object was created
-//  
+//
 //EOPI
   int localrc;
-  
-  // first deal with old vmID if this is the creator  
+
+  // first deal with old vmID if this is the creator
   if (vmIDCreator){
     // responsible for vmID deallocation
     localrc = this->vmID->destroy();
@@ -245,19 +245,19 @@ static const char *const version = "$Id$";
 #define ESMC_METHOD "ESMC_BaseGetVM"
 //BOPI
 // !IROUTINE:  ESMC_BaseGetVM - Get Base class VM
-//  
+//
 // !INTERFACE:
       ESMCI::VM *ESMC_Base::ESMC_BaseGetVM(
-// 
+//
 // !ARGUMENTS:
       void) const {
-//  
+//
 // !RETURN VALUE:
 //    Unique VM of the context in which this base object was created
-//  
+//
 // !DESCRIPTION:
 //    Returns the object's VM.
-//  
+//
 //EOPI
 
   return vm;
@@ -272,13 +272,13 @@ static const char *const version = "$Id$";
 //
 // !INTERFACE:
       char *ESMC_Base::ESMC_BaseGetName(
-// 
+//
 // !ARGUMENTS:
       void) const {
-// 
+//
 // !RETURN VALUE:
 //    Character pointer to {\tt ESMC\_Base} name.
-// 
+//
 // !DESCRIPTION:
 //    Accessor method for the {\tt ESMC\_Base} name.
 //
@@ -296,13 +296,13 @@ static const char *const version = "$Id$";
 //
 // !INTERFACE:
       char *ESMC_Base::ESMC_BaseGetF90Name(
-// 
+//
 // !ARGUMENTS:
       void) const {
-// 
+//
 // !RETURN VALUE:
 //     Pointer to object name, not null terminated and space filled.
-// 
+//
 // !DESCRIPTION:
 //     Accessor to base class name returned in Fortran friendly format, which
 //     means not null terminated, and space filled.
@@ -321,7 +321,7 @@ static const char *const version = "$Id$";
 //
 // !INTERFACE:
       int ESMC_Base::ESMC_BaseGetRefCount(
-// 
+//
 // !ARGUMENTS:
       void) const {
 //
@@ -344,20 +344,20 @@ static const char *const version = "$Id$";
 //
 // !INTERFACE:
       int ESMC_Base::ESMC_BaseSetClassName(
-// 
+//
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
-// 
+//
 // !ARGUMENTS:
       const char *classname) { // in - context in which name should be unique
-// 
+//
 // !DESCRIPTION:
 //    Accessor method to set base class name.
 //
 //EOPI
 
   int rc;
- 
+
     // Initialize local return code; assume routine not implemented
     rc = ESMC_RC_NOT_IMPL;
 
@@ -367,7 +367,7 @@ static const char *const version = "$Id$";
        char msgbuf[ESMF_MAXSTR];
        sprintf(msgbuf, "Error: object type %d bytes longer than limit of %d",
                           len, ESMF_MAXSTR-1);
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, 
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT,
          &rc);
        return rc;
      }
@@ -378,7 +378,7 @@ static const char *const version = "$Id$";
   return ESMF_SUCCESS;
 
 }  // end ESMC_BaseSetClassName
- 
+
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_BaseSetF90ClassName"
@@ -387,14 +387,14 @@ static const char *const version = "$Id$";
 //
 // !INTERFACE:
       int ESMC_Base::ESMC_BaseSetF90ClassName(
-// 
+//
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
-// 
+//
 // !ARGUMENTS:
       const char *name,// in - contains name to set in fortran format
       int nlen) {      // in - length of the input name buffer
-// 
+//
 // !DESCRIPTION:
 //    Accessor method to set base class name.
 //
@@ -408,7 +408,7 @@ static const char *const version = "$Id$";
        char msgbuf[ESMF_MAXSTR];
        sprintf(msgbuf, "string name %d bytes longer than limit of %d bytes",
                        nlen, ESMF_MAXSTR);
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, 
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT,
             &rc);
        return rc;
   }
@@ -422,19 +422,19 @@ static const char *const version = "$Id$";
 #define ESMC_METHOD "ESMC_BaseSetID"
 //BOPI
 // !IROUTINE:  ESMC_BaseSetID - Set Base class unique ID
-//  
+//
 // !INTERFACE:
       void ESMC_Base::ESMC_BaseSetID(
-//  
+//
 // !RETURN VALUE:
 //    none
-//  
+//
 // !ARGUMENTS:
       int id) {   // in - ID to set
-//  
-// !DESCRIPTION: 
+//
+// !DESCRIPTION:
 //     override default ID (see constructor)
-//  
+//
 //EOPI
 
   ID = id;
@@ -449,14 +449,14 @@ static const char *const version = "$Id$";
 //
 // !INTERFACE:
       int ESMC_Base::ESMC_BaseSetName(
-// 
+//
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
-// 
+//
 // !ARGUMENTS:
       const char *name,           // in - base name to set
       const char *classname) {    // in - context in which name should be unique
-// 
+//
 // !DESCRIPTION:
 //     Accessor method for base class name.
 //
@@ -464,7 +464,7 @@ static const char *const version = "$Id$";
 
   int len, rc;
   int defname, defclass;
- 
+
     // Initialize local return code; assume routine not implemented
     rc = ESMC_RC_NOT_IMPL;
 
@@ -475,13 +475,13 @@ static const char *const version = "$Id$";
   defclass = 1;
 
   // simple error checks first
-  if (name && (name[0]!='\0')) { 
+  if (name && (name[0]!='\0')) {
      len = strlen(name);
      if (len >= ESMF_MAXSTR) {
        char msgbuf[ESMF_MAXSTR];
        sprintf(msgbuf, "object name %d bytes longer than limit of %d bytes",
                        len, ESMF_MAXSTR-1);
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, 
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT,
            &rc);
        return rc;
      }
@@ -495,7 +495,7 @@ static const char *const version = "$Id$";
        return rc;
      }
      defname = 0;
-  } 
+  }
 
   if (classname && (classname[0]!='\0')) {
      len = strlen(classname);
@@ -503,7 +503,7 @@ static const char *const version = "$Id$";
        char msgbuf[ESMF_MAXSTR];
        sprintf(msgbuf, "object type %d bytes longer than limit of %d bytes",
                        len, ESMF_MAXSTR-1);
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, 
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT,
            &rc);
        return rc;
      }
@@ -511,20 +511,20 @@ static const char *const version = "$Id$";
   }
 
   strcpy(className, defclass ? "global" : classname);
-  if (defname) 
-      sprintf(baseName, "%s%03d", className, ID); 
+  if (defname)
+      sprintf(baseName, "%s%03d", className, ID);
   else
       strcpy(baseName, name);
 
   ESMC_CtoF90string(baseName, baseNameF90, ESMF_MAXSTR);
-  
-  
+
+
   //printf("%s\n", baseName);
 
   return ESMF_SUCCESS;
 
 }  // end ESMC_BaseSetName
- 
+
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_BaseSetF90Name"
@@ -533,14 +533,14 @@ static const char *const version = "$Id$";
 //
 // !INTERFACE:
       int ESMC_Base::ESMC_BaseSetF90Name(
-// 
+//
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
-// 
+//
 // !ARGUMENTS:
       const char *name,// in - class name to set, in fortran format
       int nlen) {      // in - length of class name buffer
-// 
+//
 // !DESCRIPTION:
 //     Accessor method to set base class name.
 //
@@ -553,7 +553,7 @@ static const char *const version = "$Id$";
   if (nlen > ESMF_MAXSTR) {
        std::string msgbuf;
        msgbuf = "Base name " + std::string(name, nlen) + " is longer than ESMF_MAXSTR";
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, 
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT,
            &rc);
        return rc;
   }
@@ -568,7 +568,7 @@ static const char *const version = "$Id$";
   }
 
   memcpy(baseNameF90, name, nlen);
-  if (nlen < ESMF_MAXSTR) 
+  if (nlen < ESMF_MAXSTR)
       memset(baseNameF90 + nlen, (int)' ', ESMF_MAXSTR-nlen);
 
   ESMC_F90toCstring(baseNameF90, ESMF_MAXSTR-1, baseName, ESMF_MAXSTR);
@@ -585,13 +585,13 @@ static const char *const version = "$Id$";
 //
 // !INTERFACE:
       void ESMC_Base::ESMC_BaseSetRefCount(
-// 
+//
 // !RETURN VALUE:
 //    none
-// 
+//
 // !ARGUMENTS:
       int count) {
-// 
+//
 // !DESCRIPTION:
 //     Accessor method for reference count.
 //
@@ -624,7 +624,7 @@ static const char *const version = "$Id$";
 //    Turn a stream of bytes into an object.
 //
 //EOPI
-    
+
     int *ip, i, nbytes;
     ESMC_Status *sp;
     ESMC_ProxyFlag *pfp;
@@ -640,7 +640,7 @@ static const char *const version = "$Id$";
 
     ip = (int *)(buffer + *offset);
     ID = *ip++;
-    refCount = *ip++;  
+    refCount = *ip++;
     classID = *ip++;
 
     sp = (ESMC_Status *)ip;
@@ -661,7 +661,7 @@ static const char *const version = "$Id$";
     cp += ESMF_MAXSTR;
     memcpy(className, cp, ESMF_MAXSTR);
     cp += ESMF_MAXSTR;
-    
+
     // update offset to point to past the current obj
     *offset = (cp - buffer);
 
@@ -681,10 +681,10 @@ static const char *const version = "$Id$";
     // Deserialize the Attribute hierarchy
     if (attreconflag == ESMC_ATTRECONCILE_ON) {
       localrc = root->ESMC_Deserialize(buffer,offset);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, 
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             ESMC_CONTEXT, &localrc)) return localrc;
     }
-        
+
   return ESMF_SUCCESS;
 
  } // end ESMC_Deserialize
@@ -797,13 +797,13 @@ static const char *const version = "$Id$";
     // PLI -- 10/4/2007 -- use this function to print attribute lists in various ESMF classes
     // No need to print the base object ID, Name or Class because these information will be
     // printed at the derived class
- 
+
     //  sprintf(msgbuf,
-    //   "Base object ID: %d, Ref count: %d, Status=%s, Name=%s, Class=%s\n", 
+    //   "Base object ID: %d, Ref count: %d, Status=%s, Name=%s, Class=%s\n",
     //       ID, refCount, ESMC_StatusString(baseStatus), baseName, className);
     // printf(msgbuf);
     // ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
-    
+
   // root Attribute
   if (level > 0) {
     std::cout << " ";
@@ -932,18 +932,18 @@ static const char *const version = "$Id$";
       *offset += fixedpart;
     } else {
       if ((*length - *offset) < fixedpart) {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
-                               "Buffer too short to add a Base object", 
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                               "Buffer too short to add a Base object",
             ESMC_CONTEXT, &localrc);
-        return localrc; 
+        return localrc;
         //buffer = (char *)realloc((void *)buffer, *length + 2*fixedpart);
         //*length += 2 * fixedpart;
       }
 
       ip = (int *)(buffer + *offset);
       *ip++ = ID;
-      *ip++ = refCount;  
-      *ip++ = classID;  
+      *ip++ = refCount;
+      *ip++ = classID;
 
       sp = (ESMC_Status *)ip;
       *sp++ = baseStatus;
@@ -976,7 +976,7 @@ static const char *const version = "$Id$";
     // Serialize the Attribute hierarchy
     if (attreconflag == ESMC_ATTRECONCILE_ON) {
       localrc = root->ESMC_Serialize(buffer,length,offset, inquireflag);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, 
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             ESMC_CONTEXT, &localrc)) return localrc;
     }
 
@@ -1010,7 +1010,7 @@ static const char *const version = "$Id$";
    // Initialize local return code; assume routine not implemented
    localrc = ESMC_RC_NOT_IMPL;
 
-  if (baseStatus != ESMF_STATUS_READY) 
+  if (baseStatus != ESMF_STATUS_READY)
     return ESMF_FAILURE;
 
   return ESMF_SUCCESS;
@@ -1026,13 +1026,13 @@ static const char *const version = "$Id$";
 //
 // !INTERFACE:
       int ESMC_Base::ESMC_Write(
-// 
+//
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
-// 
+//
 // !ARGUMENTS:
       void) const {
-// 
+//
 // !DESCRIPTION:
 //    Base class provides stubs for optional read/write methods.
 //
@@ -1059,11 +1059,11 @@ static const char *const version = "$Id$";
 //    none
 //
 // !DESCRIPTION:
-//   default initialization 
+//   default initialization
 //
 //EOPI
   int rc;
-  
+
   if (vmArg==NULL){
     // no VM passed in -> get vmID of the current VM context
     vmID = ESMCI::VM::getCurrentID(&rc);
@@ -1073,10 +1073,10 @@ static const char *const version = "$Id$";
     vmID = vmArg->getVMId(&rc);
     vm = vmArg;
   }
-    
+
   //ESMCI::VMIdPrint(vmID);
   vmIDCreator = false;  // vmID points into global table
-  
+
   // set ID
   ID = ESMCI::VM::getBaseIDAndInc(vmID);
   classID = 0;
@@ -1088,14 +1088,14 @@ static const char *const version = "$Id$";
   strcpy(className, "global");
   sprintf(baseName, "%s%03d", "unnamed", ID);
   ESMC_CtoF90string(baseName, baseNameF90, ESMF_MAXSTR);
-  
+
 #if 0
   char msgbuf[ESMF_MAXSTR];
-  sprintf(msgbuf, "ESMC_Base constructor: %p, %s, %s", this, 
+  sprintf(msgbuf, "ESMC_Base constructor: %p, %s, %s", this,
     this->ESMC_BaseGetClassName(), this->ESMC_BaseGetName());
   ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
 #endif
-  
+
   // add object to list for automatic garbage collection
   ESMCI::VM::addObject(this, vmID);
 
@@ -1130,7 +1130,7 @@ static const char *const version = "$Id$";
 //
 //EOPI
   int rc;
-  
+
   vmID = ESMCI::VM::getCurrentID(&rc);  // get vmID of current VM context
   if (id==-1){
     // proxy members hold NULL for the vm and space for a remote VMId
@@ -1142,7 +1142,7 @@ static const char *const version = "$Id$";
   }
 //  ESMCI::VMIdPrint(vmID);
   vmIDCreator = false;  // vmID points into global table
-  
+
   // set ID to objectCount;
   ID = id;
   classID = 0;
@@ -1153,14 +1153,14 @@ static const char *const version = "$Id$";
   strcpy(className, "global");
   sprintf(baseName, "%s%03d", "unnamed", ID);
   ESMC_CtoF90string(baseName, baseNameF90, ESMF_MAXSTR);
-  
+
 #if 0
   char msgbuf[ESMF_MAXSTR];
-  sprintf(msgbuf, "ESMC_Base constructor: %p, %s, %s", this, 
+  sprintf(msgbuf, "ESMC_Base constructor: %p, %s, %s", this,
     this->ESMC_BaseGetClassName(), this->ESMC_BaseGetName());
   ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
 #endif
-  
+
   // add object to list for automatic garbage collection
   ESMCI::VM::addObject(this, vmID);
 
@@ -1201,7 +1201,7 @@ static const char *const version = "$Id$";
 //
 //EOPI
   int rc;
-  
+
   if (vmArg==NULL){
     // no VM passed in -> get vmID of the current VM context
     vmID = ESMCI::VM::getCurrentID(&rc);
@@ -1214,7 +1214,7 @@ static const char *const version = "$Id$";
 
   //ESMCI::VMIdPrint(vmID);
   vmIDCreator = false;  // vmID points into global table
-  
+
   // set ID to objectCount
   ID = ESMCI::VM::getBaseIDAndInc(vmID);
   classID = 0;
@@ -1224,7 +1224,7 @@ static const char *const version = "$Id$";
 
   refCount = 1;
   strcpy(className, superclass ? superclass : "global");
-  if (name && (name[0]!='\0')) 
+  if (name && (name[0]!='\0'))
       // TODO: make sure this name is unique in this namespace.  This means
       // some sort of registry utility.
       strcpy(baseName, name);
@@ -1234,11 +1234,11 @@ static const char *const version = "$Id$";
 
 #if 0
   char msgbuf[ESMF_MAXSTR];
-  sprintf(msgbuf, "ESMC_Base constructor: %p, %s, %s", this, 
+  sprintf(msgbuf, "ESMC_Base constructor: %p, %s, %s", this,
     this->ESMC_BaseGetClassName(), this->ESMC_BaseGetName());
   ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
 #endif
-  
+
   // add object to list for automatic garbage collection
   ESMCI::VM::addObject(this, vmID);
 
@@ -1281,7 +1281,7 @@ static const char *const version = "$Id$";
     this->ESMC_BaseGetClassName());
   ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
 #endif
-  
+
   if (vmIDCreator){
     // Base object is responsible for vmID deallocation
     rc = vmID->destroy();
@@ -1311,4 +1311,3 @@ static const char *const version = "$Id$";
   // test if (refCount > 0) and do something if true;
 
  } // end ~ESMC_Base
-

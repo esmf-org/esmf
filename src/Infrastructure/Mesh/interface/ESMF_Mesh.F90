@@ -156,7 +156,7 @@ module ESMF_MeshMod
         ESMF_MESHLOC_NODE = ESMF_MeshLoc(0), &
         ESMF_MESHLOC_ELEMENT = ESMF_MeshLoc(1), &
         ESMF_MESHLOC_NONE = ESMF_MeshLoc(2)
- 
+
 
 
 !------------------------------------------------------------------------------
@@ -1562,7 +1562,7 @@ num_elems, &
     ESMF_MeshCreateFromDG%status=ESMF_MESHSTATUS_COMPLETE
 
     ! Set Cmesh status
-    ESMF_MeshCreateFromDG%isCMeshFreed = .true. 
+    ESMF_MeshCreateFromDG%isCMeshFreed = .true.
 
     ESMF_INIT_SET_CREATED(ESMF_MeshCreateFromDG)
 
@@ -1590,13 +1590,13 @@ end function ESMF_MeshCreateFromDG
 
 !
 ! !DESCRIPTION:
-!   Create an ESMF Mesh from an ESMF Grid. This method creates the elements of 
-!  the Mesh from the cells of the Grid, and the nodes of the Mesh from the corners of 
-!  the Grid. Corresponding locations in the Grid and new Mesh will have the same 
+!   Create an ESMF Mesh from an ESMF Grid. This method creates the elements of
+!  the Mesh from the cells of the Grid, and the nodes of the Mesh from the corners of
+!  the Grid. Corresponding locations in the Grid and new Mesh will have the same
 !  coordinates, sequence indices, masking, and area information.
 !
-!   This method currently only works for 2D Grids. In addition, this method requires 
-!   the input Grid to have coordinates in the corner stagger location.  
+!   This method currently only works for 2D Grids. In addition, this method requires
+!   the input Grid to have coordinates in the corner stagger location.
 !
 !   \begin{description}
 !   \item [grid]
@@ -1935,7 +1935,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !         The name of the grid file
 !   \item[fileformat]
 !         The file format. The valid options are {\tt ESMF\_FILEFORMAT\_SCRIP}, {\tt ESMF\_FILEFORMAT\_ESMFMESH} and
-!         {\tt ESMF\_FILEFORMAT\_UGRID}. 
+!         {\tt ESMF\_FILEFORMAT\_UGRID}.
 !         Please see Section~\ref{const:fileformatflag} for a detailed description of the options.
 !   \item[{[convertToDual]}]
 !         if {\tt .true.}, the mesh will be converted to its dual. If not specified,
@@ -2065,7 +2065,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
              ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_MeshDestroy(myMesh)
     else
-       ESMF_MeshCreateFromFile = myMesh                         
+       ESMF_MeshCreateFromFile = myMesh
     endif
 
     if (present(rc)) rc=ESMF_SUCCESS
@@ -2265,7 +2265,7 @@ end function ESMF_MeshCreateFromFile
 
     ! define default coordinate system
     coordSys = ESMF_COORDSYS_SPH_DEG
-    
+
     ! define default haveOrigGridDims
     haveOrigGridDims=.false.
 
@@ -2301,7 +2301,7 @@ end function ESMF_MeshCreateFromFile
        else
            call ESMF_EsmfGetNode(filename, nodeCoords, &
                                 convertToDeg=convertToDeg, coordSys=coordSys, rc=localrc)
-       endif                                            
+       endif
 
        if (haveElmtMask .and. localAddUserArea) then
             call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
@@ -2437,7 +2437,7 @@ end function ESMF_MeshCreateFromFile
     if (parametricDim .eq. 2) then
        j=1
        do ElemNo = 1, ElemCnt
-          do i=1,elmtNum(ElemNo)        
+          do i=1,elmtNum(ElemNo)
             if (elementConn(j) /= ESMF_MESH_POLYBREAK) then
                 NodeUsed(elementConn(j))=PetNo
              endif
@@ -2542,7 +2542,7 @@ end function ESMF_MeshCreateFromFile
                             NodeMask = NodeMask, &
                             rc=localrc)
        deallocate(NodeMask)
-       deallocate(glbNodeMask)          
+       deallocate(glbNodeMask)
     endif
 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -4472,18 +4472,25 @@ end function ESMF_MeshCreateCubedSphere
 ! !IROUTINE: ESMF_MeshDestroy - Release resources associated with a Mesh
 !
 ! !INTERFACE:
-      subroutine ESMF_MeshDestroy(mesh, keywordEnforcer, rc)
+      subroutine ESMF_MeshDestroy(mesh, keywordEnforcer, noGarbage, rc)
 !
 ! !RETURN VALUE:
 !
 ! !ARGUMENTS:
     type(ESMF_Mesh), intent(inout)          :: mesh
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,         intent(in),   optional :: noGarbage
     integer,         intent(out),  optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.1.0] Added argument {\tt noGarbage}.
+!   The argument provides a mechanism to override the default garbage collection
+!   mechanism when destroying an ESMF object.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -4494,18 +4501,41 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 ! \item [mesh]
 ! Mesh object to be destroyed.
+! \item[{[noGarbage]}]
+!      If set to {\tt .TRUE.} the object will be fully destroyed and removed
+!      from the ESMF garbage collection system. Note however that under this 
+!      condition ESMF cannot protect against accessing the destroyed object 
+!      through dangling aliases -- a situation which may lead to hard to debug 
+!      application crashes.
+! 
+!      It is generally recommended to leave the {\tt noGarbage} argument
+!      set to {\tt .FALSE.} (the default), and to take advantage of the ESMF 
+!      garbage collection system which will prevent problems with dangling
+!      aliases or incorrect sequences of destroy calls. However this level of
+!      support requires that a small remnant of the object is kept in memory
+!      past the destroy call. This can lead to an unexpected increase in memory
+!      consumption over the course of execution in applications that use 
+!      temporary ESMF objects. For situations where the repeated creation and 
+!      destruction of temporary objects leads to memory issues, it is 
+!      recommended to call with {\tt noGarbage} set to {\tt .TRUE.}, fully 
+!      removing the entire temporary object from memory.
 ! \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
 !EOP
       integer  :: localrc
+      type(ESMF_Logical)      :: opt_noGarbage  ! helper variable
 
       ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
 
+      ! Set default flags
+      opt_noGarbage = ESMF_FALSE
+      if (present(noGarbage)) opt_noGarbage = noGarbage
+
       ! If not already freed then free the c side
       if (.not. mesh%isCMeshFreed) then
-        call C_ESMC_MeshDestroy(mesh%this, localrc)
+        call C_ESMC_MeshDestroy(mesh%this, opt_noGarbage, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4567,7 +4597,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Create a Mesh to hold distribution information (i.e. Distgrids).
 !   Such a mesh will have no coordinate or connectivity information stored.
 !   Aside from holding distgrids the Mesh created by this call can't be used in other
-!   ESMF functionality (e.g. it can't be used to create a Field or in regridding). 
+!   ESMF functionality (e.g. it can't be used to create a Field or in regridding).
 !
 !   \begin{description}
 !   \item [{[nodalDistgrid]}]
@@ -4596,7 +4626,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! This is only a vehical for carrying distgrids, so it's not fully
     ! created yet. It should error out of most calls, except a specific set
-    ! of MeshGet() queries. 
+    ! of MeshGet() queries.
     ESMF_MeshEmptyCreate%status=ESMF_MESHSTATUS_EMPTY
 
     ! mark as created
@@ -4673,7 +4703,7 @@ end function ESMF_MeshEmptyCreate
                    numOwnedNodes, ownedNodeCoords, &
                    numOwnedElements, ownedElemCoords, &
                    elemMaskArray, elemAreaArray, &
-                   isMemFreed, coordSys, status, rc)
+                   isMemFreed, coordSys, status, name, rc)
 !
 ! !RETURN VALUE:
 !
@@ -4694,6 +4724,7 @@ end function ESMF_MeshEmptyCreate
     type(ESMF_Array),         intent(inout), optional :: elemAreaArray
     type(ESMF_CoordSys_Flag), intent(out), optional :: coordSys
     type(ESMF_MeshStatus_Flag),intent(out), optional :: status
+    character(len=*),         intent(out), optional :: name
     integer,                  intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -4712,14 +4743,14 @@ end function ESMF_MeshEmptyCreate
 ! making up the Mesh. For a manifold, the spatial dimension can be larger than the
 ! parametric dim (e.g. the 2D surface of a sphere in 3D space), but it can't be smaller.
 ! \item [{[nodalDistgridIsPresent]}]
-! .true. if nodalDistgrid was set in Mesh object, .false. otherwise. 
+! .true. if nodalDistgrid was set in Mesh object, .false. otherwise.
 ! \item [{[nodalDistgrid]}]
 ! A Distgrid describing the distribution of the nodes across the PETs. Note that
 ! on each PET the distgrid will only contain entries for nodes owned by that PET.
 ! This is the DistGrid that would be used to construct the Array in a Field that is constructed
 ! on {\tt mesh}.
 ! \item [{[elementDistgridIsPresent]}]
-! .true. if elementDistgrid was set in Mesh object, .false. otherwise. 
+! .true. if elementDistgrid was set in Mesh object, .false. otherwise.
 ! \item [{[elementDistgrid]}]
 ! A Distgrid describing the distribution of elements across the PETs. Note that
 ! on each PET the distgrid will only contain entries for elements owned by that PET.
@@ -4742,10 +4773,10 @@ end function ESMF_MeshEmptyCreate
 ! {\tt numOwnedElements}.
 ! \item [{[elemMaskArray]}]
 ! The mask information for elements put into an ESMF Array. The ESMF Array must be build on a DistGrid which
-! matches the elementDistgrid. 
+! matches the elementDistgrid.
 ! \item [{[elemAreaArray]}]
 ! The area information for elements put into an ESMF Array. The ESMF Array must be build on a DistGrid which
-! matches the elementDistgrid. 
+! matches the elementDistgrid.
 ! \item [{[isMemFreed]}]
 ! Indicates if the coordinate and connection memory been freed from {\tt mesh}. If so, it
 ! can no longer be used as part of an {\tt ESMF\_FieldRegridStore()} call.
@@ -4754,6 +4785,8 @@ end function ESMF_MeshEmptyCreate
 ! \item[{[status]}]
 !    Flag indicating the status of the Mesh. Please
 !    see Section~\ref{const:meshstatus} for the list of options.
+! \item [{[name]}]
+!    Name of the Mesh object.
 ! \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -4879,9 +4912,9 @@ end function ESMF_MeshEmptyCreate
           call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
                msg="- this mesh doesn't contain a valid nodal distgrid", &
                ESMF_CONTEXT, rcToReturn=rc)
-          return       
+          return
        endif
-       
+
        ! Output distgrid
        nodalDistgrid = mesh%nodal_distgrid
     endif
@@ -4911,9 +4944,9 @@ end function ESMF_MeshEmptyCreate
           call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
                msg="- this mesh doesn't contain a valid element distgrid", &
                ESMF_CONTEXT, rcToReturn=rc)
-          return       
+          return
        endif
-       
+
        ! Output distgrid
        elementDistgrid = mesh%element_distgrid
     endif
@@ -4939,10 +4972,10 @@ end function ESMF_MeshEmptyCreate
        ! Load info type
        infoTypeElemArrays(numElemArrays)=infoTypeElem_Mask
 
-       ! Load Array 
+       ! Load Array
        call ESMF_ArrayGetThis(elemMaskArray,elemArrays(numElemArrays),rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return      
+            ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
 
@@ -4958,10 +4991,10 @@ end function ESMF_MeshEmptyCreate
        ! Load info type
        infoTypeElemArrays(numElemArrays)=infoTypeElem_Area
 
-       ! Load Array 
+       ! Load Array
        call ESMF_ArrayGetThis(elemAreaArray,elemArrays(numElemArrays),rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return      
+            ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
 
@@ -4976,7 +5009,7 @@ end function ESMF_MeshEmptyCreate
             elemArrays, &
             localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return      
+            ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     ! Get freed status
@@ -4990,6 +5023,13 @@ end function ESMF_MeshEmptyCreate
     ! Get status
     if (present(status)) status=mesh%status
 
+    ! Special call to get name out of Base class
+    if (present(name)) then
+      call c_ESMC_GetName(mesh, name, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    
     ! Error output
     if (present(rc)) rc = localrc
 
@@ -5233,15 +5273,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_MeshSerialize - Serialize mesh info into a byte stream
 !
 ! !INTERFACE:
-      subroutine ESMF_MeshSerialize(mesh, buffer, length, offset, inquireflag, rc)
+      subroutine ESMF_MeshSerialize(mesh, buffer, length, offset, &
+                                    attreconflag, inquireflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Mesh), intent(inout) :: mesh
       character, pointer, dimension(:) :: buffer
       integer, intent(inout) :: length
       integer, intent(inout) :: offset
+      type(ESMF_AttReconcileFlag), intent(in), optional :: attreconflag
       type(ESMF_InquireFlag), intent(in), optional :: inquireflag
-       integer, intent(out), optional :: rc
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !      Takes an {\tt ESMF\_Mesh} object and adds all the information needed
@@ -5262,14 +5304,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           Current write offset in the current buffer.  This will be
 !           updated by this routine and return pointing to the next
 !           available byte in the buffer.
-!     \item [inquireflag]
+!     \item[{[attreconflag]}]
+!           Flag to tell if Attribute serialization is to be done
+!     \item[{[inquireflag]}]
+!           Flag to tell if serialization is to be done (ESMF_NOINQUIRE)
+!           or if this is simply a size inquiry (ESMF_INQUIREONLY)
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOPI
       integer :: i,localrc
-      type(ESMF_AttReconcileFlag) :: attreconflag
+      type(ESMF_AttReconcileFlag) :: lattreconflag
       type(ESMF_InquireFlag) :: linquireflag
       integer :: intMeshFreed,intFullyCreated
       logical :: isPresentNDG, isPresentEDG
@@ -5281,6 +5327,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit,mesh,rc)
+
+      ! deal with optional attreconflag and inquireflag
+      if (present(attreconflag)) then
+        lattreconflag = attreconflag
+      else
+        lattreconflag = ESMF_ATTRECONCILE_OFF
+      endif
 
       if (present (inquireflag)) then
         linquireflag = inquireflag
@@ -5294,7 +5347,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       else
         intMeshFreed=0
       endif
-      
+
       ! Check for Distgrids being present
       call ESMF_MeshGet(mesh, nodalDistgridIsPresent=isPresentNDG, &
         elementDistgridIsPresent=isPresentEDG, rc=localrc)
@@ -5311,7 +5364,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       else
         intIsPresentEDG=0
       endif
-      
+
       ! Serialize Mesh info items
       call c_ESMC_MeshInfoSerialize(intMeshFreed, &
               mesh%spatialDim, mesh%parametricDim, &
@@ -5342,7 +5395,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! If exists serialize mesh
       if (.not. mesh%isCMeshFreed) then
          call c_ESMC_MeshSerialize(mesh%this, buffer, length, offset, &
-                                 linquireflag, localrc)
+                                   lattreconflag, linquireflag, localrc)
          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
       endif
@@ -5360,14 +5413,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_MeshDeserialize - Deserialize a byte stream into a Mesh
 !
 ! !INTERFACE:
-      function ESMF_MeshDeserialize(buffer, offset, rc)
+      function ESMF_MeshDeserialize(buffer, offset, attreconflag, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Mesh) :: ESMF_MeshDeserialize
 !
 ! !ARGUMENTS:
       character, pointer, dimension(:) :: buffer
-       integer, intent(inout) :: offset
+      integer, intent(inout) :: offset
+      type(ESMF_AttReconcileFlag), intent(in), optional :: attreconflag
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -5384,6 +5438,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           Current read offset in the current buffer.  This will be
 !           updated by this routine and return pointing to the next
 !           unread byte in the buffer.
+!     \item[{[attreconflag]}]
+!           Flag to tell if Attribute serialization is to be done
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -5392,7 +5448,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       integer :: localrc
       integer :: i
-      type(ESMF_AttReconcileFlag) :: attreconflag
+      type(ESMF_AttReconcileFlag) :: lattreconflag
       integer :: intMeshFreed, spatialDim, parametricDim
       integer :: intIsPresentNDG, intIsPresentEDG
 
@@ -5400,6 +5456,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       localrc = ESMF_RC_NOT_IMPL
       if  (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+      ! deal with optional attreconflag
+      if (present(attreconflag)) then
+        lattreconflag = attreconflag
+      else
+        lattreconflag = ESMF_ATTRECONCILE_OFF
+      endif
 
       ! Deserialize Mesh info items
       call c_ESMC_MeshInfoDeserialize(intMeshFreed, &
@@ -5423,7 +5485,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rcToReturn=rc)) return
       endif
-      
+
       ! Conditinally deserialize Element Distgrid
       if (intIsPresentEDG==1) then
         call c_ESMC_DistGridDeserialize(ESMF_MeshDeserialize%element_distgrid, &
@@ -5447,7 +5509,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Set values who's values are implied by the fact
       ! that this is a proxy mesh
       ESMF_MeshDeserialize%hasSplitElem=.false.
-      ESMF_MeshDeserialize%status=ESMF_MESHSTATUS_COMPLETE 
+      ESMF_MeshDeserialize%status=ESMF_MESHSTATUS_COMPLETE
       ESMF_MeshDeserialize%numOwnedNodes=0
       ESMF_MeshDeserialize%numOwnedElements=0
       ESMF_MeshDeserialize%spatialDim=spatialDim
@@ -5456,7 +5518,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! If exists serialize mesh
       if (.not. ESMF_MeshDeserialize%isCMeshFreed) then
          call c_ESMC_MeshDeserialize(ESMF_MeshDeserialize%this, buffer, &
-                                     offset, localrc)
+                                     offset, lattreconflag, localrc)
          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
       endif
@@ -5482,8 +5544,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out) , optional            :: rc
 !
 ! !DESCRIPTION:
-!   This method is only temporary. It was created to enable testing during the stage in ESMF development while 
-!   we have two internal mesh implementations. At some point it will be removed. 
+!   This method is only temporary. It was created to enable testing during the stage in ESMF development while
+!   we have two internal mesh implementations. At some point it will be removed.
 !
 !   This method can be employed to turn on or off using the MOAB library
 !   to hold the internal structure of the Mesh. When set to .true. the following
@@ -5493,7 +5555,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   with caution as they haven't yet been tested as thoroughly as the native version.
 !   Also, operations that use a pair of Meshes (e.g. regrid weight generation) are only supported between
 !   meshes of the same type (e.g. you can regrid between two MOAB meshes, but not between a MOAB and
-!   a native mesh). 
+!   a native mesh).
 !
 !   \begin{description}
 !   \item [moabOn]
@@ -5603,7 +5665,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! If mesh has been freed then exit
-    if (mesh%status .ne. ESMF_MESHSTATUS_COMPLETE) then   
+    if (mesh%status .ne. ESMF_MESHSTATUS_COMPLETE) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
                  msg="- the mesh has not been fully created", &
                  ESMF_CONTEXT, rcToReturn=rc)
@@ -5690,8 +5752,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     call C_ESMC_MeshWriteVTK(mesh%this, filename, &
-         nodeArray1, nodeArray2, nodeArray3, & 
-         elemArray1, elemArray2, elemArray3, & 
+         nodeArray1, nodeArray2, nodeArray3, &
+         elemArray1, elemArray2, elemArray3, &
          localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -5917,7 +5979,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! If mesh has been freed then exit
-    if (mesh%status .ne. ESMF_MESHSTATUS_COMPLETE) then 
+    if (mesh%status .ne. ESMF_MESHSTATUS_COMPLETE) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
                  msg="- the mesh has not been fully created", &
                  ESMF_CONTEXT, rcToReturn=rc)
@@ -6082,7 +6144,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! If mesh has been freed then exit
-    if (mesh%status .ne. ESMF_MESHSTATUS_COMPLETE) then        
+    if (mesh%status .ne. ESMF_MESHSTATUS_COMPLETE) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
                  msg="- the mesh has not been fully created", &
                  ESMF_CONTEXT, rcToReturn=rc)
@@ -6155,7 +6217,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! If mesh has been freed then exit
-    if (mesh%status .ne. ESMF_MESHSTATUS_COMPLETE) then        
+    if (mesh%status .ne. ESMF_MESHSTATUS_COMPLETE) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
                  msg="- the mesh has not been fully created", &
                  ESMF_CONTEXT, rcToReturn=rc)
@@ -6271,7 +6333,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
 
     ! If mesh has not been fully created
-    if (mesh%status .ne. ESMF_MESHSTATUS_COMPLETE) then        
+    if (mesh%status .ne. ESMF_MESHSTATUS_COMPLETE) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
                  msg="- the mesh has not been fully created", &
                  ESMF_CONTEXT, rcToReturn=rc)
@@ -6294,7 +6356,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                  msg="- splitElemMap input parameter wrong size ", &
                  ESMF_CONTEXT, rcToReturn=rc)
             return
-         endif                  
+         endif
 
         splitElemMap(:)=mesh%splitElemMap(:)
       endif
@@ -6370,7 +6432,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! If mesh has been freed then exit
-    if (mesh%status .ne. ESMF_MESHSTATUS_COMPLETE) then 
+    if (mesh%status .ne. ESMF_MESHSTATUS_COMPLETE) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
                  msg="- the mesh has not been fully created", &
                  ESMF_CONTEXT, rcToReturn=rc)
@@ -6505,7 +6567,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! If mesh has been freed then exit
-    if (mesh%status .ne. ESMF_MESHSTATUS_COMPLETE) then 
+    if (mesh%status .ne. ESMF_MESHSTATUS_COMPLETE) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
                  msg="- the mesh has not been fully created", &
                  ESMF_CONTEXT, rcToReturn=rc)
@@ -7324,7 +7386,7 @@ offset = 0
        else
            call ESMF_EsmfGetNode(filename, nodeCoords, &
                               convertToDeg=convertToDeg, coordSys=coordSys, rc=localrc)
-       endif                                            
+       endif
        if (haveElmtMask) then
         if (localAddUserArea) then
            call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
@@ -7458,7 +7520,7 @@ offset = 0
     maxNumPoly=0
     if (parametricDim .eq. 2) then
        do ElemNo =1, ElemCnt
-          do i=1,elmtNum(ElemNo)        
+          do i=1,elmtNum(ElemNo)
              NodeUsed(elementConn(i,ElemNo))=PetNo
           enddo
           if (elmtNum(ElemNo) > 4) TotalElements = TotalElements + (elmtNum(ElemNo)-3)
@@ -7473,7 +7535,7 @@ offset = 0
        end do
     else ! If not parametricDim==2, assuming parmetricDim==3
        do ElemNo =1, ElemCnt
-          do i=1,elmtNum(ElemNo)        
+          do i=1,elmtNum(ElemNo)
              NodeUsed(elementConn(i,ElemNo))=PetNo
           enddo
           TotalConnects = TotalConnects+elmtNum(ElemNo)
@@ -7716,7 +7778,7 @@ offset = 0
                             NodeMask = NodeMask, &
                             rc=localrc)
        deallocate(NodeMask)
-       deallocate(glbNodeMask)          
+       deallocate(glbNodeMask)
     endif
 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
