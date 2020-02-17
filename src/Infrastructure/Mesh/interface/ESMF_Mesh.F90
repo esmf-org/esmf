@@ -4703,7 +4703,7 @@ end function ESMF_MeshEmptyCreate
                    numOwnedNodes, ownedNodeCoords, &
                    numOwnedElements, ownedElemCoords, &
                    elemMaskArray, elemAreaArray, &
-                   isMemFreed, coordSys, status, rc)
+                   isMemFreed, coordSys, status, name, rc)
 !
 ! !RETURN VALUE:
 !
@@ -4724,6 +4724,7 @@ end function ESMF_MeshEmptyCreate
     type(ESMF_Array),         intent(inout), optional :: elemAreaArray
     type(ESMF_CoordSys_Flag), intent(out), optional :: coordSys
     type(ESMF_MeshStatus_Flag),intent(out), optional :: status
+    character(len=*),         intent(out), optional :: name
     integer,                  intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -4784,6 +4785,8 @@ end function ESMF_MeshEmptyCreate
 ! \item[{[status]}]
 !    Flag indicating the status of the Mesh. Please
 !    see Section~\ref{const:meshstatus} for the list of options.
+! \item [{[name]}]
+!    Name of the Mesh object.
 ! \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -5020,6 +5023,13 @@ end function ESMF_MeshEmptyCreate
     ! Get status
     if (present(status)) status=mesh%status
 
+    ! Special call to get name out of Base class
+    if (present(name)) then
+      call c_ESMC_GetName(mesh, name, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    
     ! Error output
     if (present(rc)) rc = localrc
 
