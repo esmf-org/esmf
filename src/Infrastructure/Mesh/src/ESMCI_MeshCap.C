@@ -56,7 +56,7 @@
 
 
 // Private constructor
- MeshCap::MeshCap() : is_esmf_mesh(false), mesh(NULL) {
+ MeshCap::MeshCap() : is_esmf_mesh(false), mesh(NULL), mbmesh(NULL) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::MeshCap()"
 
@@ -489,7 +489,7 @@ void MeshCap::regrid_create(
     int *extrapNumSrcPnts,
     ESMC_R8 *extrapDistExponent,
     int *extrapNumLevels,
-    int *extrapNumInputLevels,                                             
+    int *extrapNumInputLevels,
     int *unmappedaction, int *_ignoreDegenerate,
     int *srcTermProcessing, int *pipelineDepth,
     ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
@@ -924,19 +924,21 @@ void MeshCap::meshinfodeserialize(int *intMeshFreed,
 }
 
 void MeshCap::meshserialize(char *buffer, int *length, int *offset,
+                            const ESMC_AttReconcileFlag &attreconflag,
                             ESMC_InquireFlag *inquireflag, int *rc,
                             ESMCI_FortranStrLenArg buffer_l){
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::meshserialize()"
 
   int localrc;
+  int r;
 
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   // Calc Size
   int size = 1*sizeof(int);
-  
+
   // TODO: verify length > vars.
   if (*inquireflag != ESMF_INQUIREONLY) {
     if ((*length - *offset) < size) {
@@ -945,15 +947,21 @@ void MeshCap::meshserialize(char *buffer, int *length, int *offset,
        return;
     }
   }
-  
+
   // Save integers
   int *ip= (int *)(buffer + *offset);
   if (*inquireflag != ESMF_INQUIREONLY) {
     *ip++ = static_cast<int> (is_esmf_mesh);
   }
-  
+
   // Adjust offset
   *offset += size;
+
+  // Serialize the Base class,
+  localrc = ESMC_Base::ESMC_Serialize(buffer, length, offset, attreconflag,
+    *inquireflag);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) return;
 
    // Call into func. depending on mesh type
   if (is_esmf_mesh) {
@@ -965,7 +973,7 @@ void MeshCap::meshserialize(char *buffer, int *length, int *offset,
                                       ESMC_CONTEXT, rc)) return;
   } else {
 #if defined ESMF_MOAB
-    MBMesh_serialize(&mbmesh, buffer, length, offset, inquireflag, &localrc, 
+    MBMesh_serialize(&mbmesh, buffer, length, offset, inquireflag, &localrc,
                      buffer_l);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return;
@@ -975,62 +983,66 @@ void MeshCap::meshserialize(char *buffer, int *length, int *offset,
 #endif
   }
 
+  if (*inquireflag != ESMF_INQUIREONLY) std::cout << ESMC_METHOD << ": offset = " << *offset << std::endl;
+
   if (rc!=NULL) *rc=ESMF_SUCCESS;
 }
 
-MeshCap *MeshCap::meshdeserialize(char *buffer, int *offset, int *rc,
-                                  ESMCI_FortranStrLenArg buffer_l){
+void MeshCap::meshdeserialize(char *buffer, int *offset,
+                             const ESMC_AttReconcileFlag &attreconflag,
+                             int *rc, ESMCI_FortranStrLenArg buffer_l){
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::meshdeserialize()"
 
   Mesh *mesh;
   void *mbmesh;
   int localrc;
+  int r;
   int local_is_esmf_mesh = 1;
 
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
-  
+
   // Get pointer
   int *ip= (int *)(buffer + *offset);
-  
+
   // Get values
   local_is_esmf_mesh=*ip++;
 
   // Adjust offset
   *offset += sizeof(int);
 
-//printf("MeshCap::deserialize is_esmf_mesh = %d\n", local_is_esmf_mesh);
+  // Deserialize the Base class
+  localrc = ESMC_Base::ESMC_Deserialize(buffer, offset, attreconflag);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) return;
 
   if (local_is_esmf_mesh) {
     ESMCI_meshdeserialize(&mesh,
                           buffer, offset, &localrc,
                           buffer_l);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-                                      ESMC_CONTEXT, rc)) return NULL;
+                                      ESMC_CONTEXT, rc)) return;
   } else {
 #if defined ESMF_MOAB
     MBMesh_deserialize(&mbmesh, buffer, offset, &localrc, buffer_l);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-                                      ESMC_CONTEXT, rc)) return NULL;
+                                      ESMC_CONTEXT, rc)) return;
 #else
    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
-      "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return NULL;
+      "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
 #endif
   }
 
-  // Create MeshCap
-  MeshCap *mc=new MeshCap();
-
   // Set member variables
-  mc->is_esmf_mesh=static_cast<bool> (local_is_esmf_mesh);
-  mc->mesh=mesh;
-  mc->mbmesh=mbmesh;
+  this->is_esmf_mesh=static_cast<bool> (local_is_esmf_mesh);
+  this->mesh=mesh;
+  this->mbmesh=mbmesh;
 
   if (rc!=NULL) *rc=ESMF_SUCCESS;
 
   // Output new MeshCap
-  return mc;
+  return;
 }
 
 void MeshCap::meshfindpnt(int *unmappedaction, int *dimPnts, int *numPnts,
@@ -1612,11 +1624,13 @@ MeshCap *MeshCap::meshcreatedual(MeshCap **src_meshpp, int *rc) {
   return mc;
 }
 
-void MeshCap::destroy(MeshCap **mcpp,int *rc) {
+int MeshCap::destroy(MeshCap **mcpp, bool noGarbage) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::destroy()"
 
-  // Dereference meshcap
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+    // Dereference meshcap
   MeshCap *mcp=*mcpp;
 
   // Get mesh type
@@ -1629,7 +1643,7 @@ void MeshCap::destroy(MeshCap **mcpp,int *rc) {
       int localrc;
       ESMCI_meshdestroy(&(mcp->mesh), &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-                                        ESMC_CONTEXT, rc)) return;
+                                        ESMC_CONTEXT, &rc)) return rc;
     }
   } else {
 #if defined ESMF_MOAB
@@ -1638,23 +1652,27 @@ void MeshCap::destroy(MeshCap **mcpp,int *rc) {
       int localrc;
       MBMesh_destroy(&(mcp->mbmesh), &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-                                        ESMC_CONTEXT, rc)) return;
+                                        ESMC_CONTEXT, &rc)) return rc;
     }
 #else
    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
       "This functionality requires ESMF to be built with the MOAB library enabled" ,
-      ESMC_CONTEXT, rc)) return;
+      ESMC_CONTEXT, &rc)) return rc;
 #endif
   }
 
-  // delete MeshCap struct
-  delete mcp;
+  // optionally delete the complete object and remove from garbage collection
+  if (noGarbage){
+    VM::rmObject(mcp);  // remove object from garbage collection
+    delete mcp;         // completely delete the object, free heap
+  }
 
   // Set to NULL
   *mcpp=NULL;
 
-  // Set error code to success
-  if (rc) *rc=ESMF_SUCCESS;
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
 }
 
 // returns NULL if unsuccessful
@@ -1775,7 +1793,7 @@ MeshCap *MeshCap::meshcreate_from_grid(Grid **gridpp,
 void MeshCap::set_xgrid_info(int *side, int *ind, int *rc) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "set_xgrid_info()"
- 
+
   // Call into func. depending on mesh type
   if (is_esmf_mesh) {
     mesh->side=*side;

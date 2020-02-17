@@ -27,7 +27,7 @@
 
  namespace ESMCI {
 
-  class MeshCap {
+  class MeshCap : public ESMC_Base {
 
     // Eventually merge this with MeshCXX
 
@@ -41,6 +41,12 @@
 
     // NOT NEEDED RIGHT NOW
     //    bool is_internal_mesh_esmf() {return is_esmf_mesh;}
+
+    MeshCap(int baseID):ESMC_Base(baseID){  // prevent baseID counter increment
+      is_esmf_mesh = false;
+      mesh = NULL;
+      mbmesh = NULL;
+    }
 
     void *get_internal_mesh_ptr() {
       if (is_esmf_mesh) {
@@ -80,7 +86,7 @@
                                           bool _is_esmf_mesh, int *rc);
 
     static MeshCap *meshcreate_from_grid(Grid **gridpp,
-                                                  bool _is_esmf_mesh, 
+                                                  bool _is_esmf_mesh,
                                                   int *rc);
 
     void meshaddnodes(int *num_nodes, int *nodeId,
@@ -92,8 +98,8 @@
                    ESMCI_FortranStrLenArg nlen);
 
     void meshwritewarrays(char *fname, ESMCI_FortranStrLenArg nlen,
-                                   int num_nodeArrays, ESMCI::Array **nodeArrays, 
-                                   int num_elemArrays, ESMCI::Array **elemArrays, 
+                                   int num_nodeArrays, ESMCI::Array **nodeArrays,
+                                   int num_elemArrays, ESMCI::Array **elemArrays,
                                    int *rc);
 
     void meshaddelements(int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
@@ -138,20 +144,22 @@
                                     ESMCI_FortranStrLenArg buffer_l);
 
     void meshserialize(char *buffer, int *length, int *offset,
+                       const ESMC_AttReconcileFlag &attreconflag,
                        ESMC_InquireFlag *inquireflag, int *rc,
                        ESMCI_FortranStrLenArg buffer_l);
 
 
-    static MeshCap *meshdeserialize(char *buffer, int *offset, int *rc,
-                         ESMCI_FortranStrLenArg buffer_l);
+    void meshdeserialize(char *buffer, int *offset,
+                         const ESMC_AttReconcileFlag &attreconflag,
+                         int *rc, ESMCI_FortranStrLenArg buffer_l);
 
     void meshfindpnt(int *unmappedaction, int *dimPnts, int *numPnts,
                      double *pnts, int *pets, int *rc);
 
-    void geteleminfointoarray(DistGrid *elemDistgrid, 
+    void geteleminfointoarray(DistGrid *elemDistgrid,
                                    int numElemArrays,
-                                   int *infoTypeElemArrays, 
-                                   Array **elemArrays, 
+                                   int *infoTypeElemArrays,
+                                   Array **elemArrays,
                                    int *rc);
 
     void getlocalcoords(double *nodeCoord, int *_orig_sdim, int *rc);
@@ -278,7 +286,7 @@
                         ESMCI::Array **arraypp, int *staggerLoc,
                         int *rc);
 
-     static void destroy(MeshCap **mcpp,int *rc);
+     static int destroy(MeshCap **mcpp, bool noGarbage=false);
 
      void set_xgrid_info(int *side, int *ind, int *rc);
   };
