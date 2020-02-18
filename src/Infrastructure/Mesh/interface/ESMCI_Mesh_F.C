@@ -324,7 +324,7 @@ extern "C" void FTN_X(c_esmc_meshserialize)(MeshCap **meshpp,
                 ESMCI_FortranStrLenArg buffer_l){
 
   (*meshpp)->meshserialize(buffer, length, offset,
-                           *attreconflag, inquireflag, rc, buffer_l);
+                           *attreconflag, inquireflag, false, rc, buffer_l);
 
 }
 
@@ -337,7 +337,31 @@ extern "C" void FTN_X(c_esmc_meshdeserialize)(MeshCap **meshpp,
   // Create MeshCap
   *meshpp=new MeshCap(-1);   // prevent baseID counter increment
 
-  (*meshpp)->meshdeserialize(buffer, offset, *attreconflag, rc, buffer_l);
+  (*meshpp)->meshdeserialize(buffer, offset, *attreconflag, false, rc, buffer_l);
+}
+
+
+extern "C" void FTN_X(c_esmc_meshserializebase)(MeshCap **meshpp,
+                char *buffer, int *length, int *offset,
+                ESMC_AttReconcileFlag *attreconflag,
+                ESMC_InquireFlag *inquireflag, int *rc,
+                ESMCI_FortranStrLenArg buffer_l){
+
+  (*meshpp)->meshserialize(buffer, length, offset,
+                           *attreconflag, inquireflag, true, rc, buffer_l);
+
+}
+
+
+extern "C" void FTN_X(c_esmc_meshdeserializebase)(MeshCap **meshpp,
+                             char *buffer, int *offset,
+                             ESMC_AttReconcileFlag *attreconflag, int *rc,
+                             ESMCI_FortranStrLenArg buffer_l){
+
+  // Create MeshCap
+  *meshpp=new MeshCap(-1);   // prevent baseID counter increment
+
+  (*meshpp)->meshdeserialize(buffer, offset, *attreconflag, true, rc, buffer_l);
 }
 
 
@@ -466,6 +490,11 @@ extern "C" void FTN_X(c_esmc_meshcreateredist)(MeshCap **src_meshpp, int *num_no
 }
 
 
+extern "C" void FTN_X(c_esmc_meshcreatebase)(MeshCap **mesh, int *rc) {
+
+  *mesh=new MeshCap();
+  if (rc) *rc=ESMF_SUCCESS;
+}
 
 // This method verifies that nodes in node_gids array are the same as the local nodes in meshpp, otherwise
 // it returns an error (used to test MeshRedist()).

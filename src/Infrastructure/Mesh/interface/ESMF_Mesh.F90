@@ -4611,6 +4611,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
 
+    integer  :: localrc
+
     ! Set nodal distgrid
     if (present(nodalDistgrid)) then
       ESMF_MeshEmptyCreate%nodal_distgrid = nodalDistgrid
@@ -4628,6 +4630,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! created yet. It should error out of most calls, except a specific set
     ! of MeshGet() queries.
     ESMF_MeshEmptyCreate%status=ESMF_MESHSTATUS_EMPTY
+
+    ! ensure that Base is okay to be queried
+    call c_ESMC_MeshCreateBase(ESMF_MeshEmptyCreate, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! mark as created
     ESMF_INIT_SET_CREATED(ESMF_MeshEmptyCreate)
@@ -5398,6 +5405,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                    lattreconflag, linquireflag, localrc)
          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+#if 1
+        ! ensure that Base is okay to be queried
+         call c_ESMC_MeshSerializeBase(mesh%this, buffer, length, offset, &
+                                   lattreconflag, linquireflag, localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+#endif
       endif
 
       ! return success
@@ -5521,6 +5536,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                      offset, lattreconflag, localrc)
          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+#if 1
+        ! ensure that Base is okay to be queried
+         call c_ESMC_MeshDeserializeBase(ESMF_MeshDeserialize%this, buffer, &
+                                     offset, lattreconflag, localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+#endif
       endif
 
      ! Set init status

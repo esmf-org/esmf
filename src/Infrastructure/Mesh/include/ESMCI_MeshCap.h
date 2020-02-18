@@ -32,9 +32,9 @@
     // Eventually merge this with MeshCXX
 
   private:
-    MeshCap();
 
   public:
+    MeshCap();
     bool is_esmf_mesh;
     Mesh *mesh;     // Make 1 void pointer here for both
     void *mbmesh;
@@ -145,13 +145,14 @@
 
     void meshserialize(char *buffer, int *length, int *offset,
                        const ESMC_AttReconcileFlag &attreconflag,
-                       ESMC_InquireFlag *inquireflag, int *rc,
+                       ESMC_InquireFlag *inquireflag, bool baseOnly, int *rc,
                        ESMCI_FortranStrLenArg buffer_l);
 
 
     void meshdeserialize(char *buffer, int *offset,
                          const ESMC_AttReconcileFlag &attreconflag,
-                         int *rc, ESMCI_FortranStrLenArg buffer_l);
+                         bool baseOnly, int *rc,
+                         ESMCI_FortranStrLenArg buffer_l);
 
     void meshfindpnt(int *unmappedaction, int *dimPnts, int *numPnts,
                      double *pnts, int *pets, int *rc);

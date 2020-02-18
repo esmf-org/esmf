@@ -925,8 +925,8 @@ void MeshCap::meshinfodeserialize(int *intMeshFreed,
 
 void MeshCap::meshserialize(char *buffer, int *length, int *offset,
                             const ESMC_AttReconcileFlag &attreconflag,
-                            ESMC_InquireFlag *inquireflag, int *rc,
-                            ESMCI_FortranStrLenArg buffer_l){
+                            ESMC_InquireFlag *inquireflag, bool baseOnly,
+                            int *rc, ESMCI_FortranStrLenArg buffer_l){
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::meshserialize()"
 
@@ -963,24 +963,26 @@ void MeshCap::meshserialize(char *buffer, int *length, int *offset,
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return;
 
-   // Call into func. depending on mesh type
-  if (is_esmf_mesh) {
-    ESMCI_meshserialize(&mesh,
+  if (!baseOnly){
+    // Call into func. depending on mesh type
+    if (is_esmf_mesh) {
+      ESMCI_meshserialize(&mesh,
                         buffer, length, offset,
                         inquireflag, &localrc,
                         buffer_l);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return;
-  } else {
+    } else {
 #if defined ESMF_MOAB
-    MBMesh_serialize(&mbmesh, buffer, length, offset, inquireflag, &localrc,
+      MBMesh_serialize(&mbmesh, buffer, length, offset, inquireflag, &localrc,
                      buffer_l);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return;
 #else
-   if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
-      "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+        "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
 #endif
+    }
   }
 
   if (*inquireflag != ESMF_INQUIREONLY) std::cout << ESMC_METHOD << ": offset = " << *offset << std::endl;
@@ -990,6 +992,7 @@ void MeshCap::meshserialize(char *buffer, int *length, int *offset,
 
 void MeshCap::meshdeserialize(char *buffer, int *offset,
                              const ESMC_AttReconcileFlag &attreconflag,
+                             bool baseOnly,
                              int *rc, ESMCI_FortranStrLenArg buffer_l){
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::meshdeserialize()"
@@ -1017,27 +1020,28 @@ void MeshCap::meshdeserialize(char *buffer, int *offset,
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return;
 
-  if (local_is_esmf_mesh) {
-    ESMCI_meshdeserialize(&mesh,
+  if (!baseOnly){
+    if (local_is_esmf_mesh) {
+      ESMCI_meshdeserialize(&mesh,
                           buffer, offset, &localrc,
                           buffer_l);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return;
-  } else {
+    } else {
 #if defined ESMF_MOAB
-    MBMesh_deserialize(&mbmesh, buffer, offset, &localrc, buffer_l);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      MBMesh_deserialize(&mbmesh, buffer, offset, &localrc, buffer_l);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return;
 #else
-   if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
-      "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+        "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
 #endif
+    }
+    // Set member variables
+    this->is_esmf_mesh=static_cast<bool> (local_is_esmf_mesh);
+    this->mesh=mesh;
+    this->mbmesh=mbmesh;
   }
-
-  // Set member variables
-  this->is_esmf_mesh=static_cast<bool> (local_is_esmf_mesh);
-  this->mesh=mesh;
-  this->mbmesh=mbmesh;
 
   if (rc!=NULL) *rc=ESMF_SUCCESS;
 
