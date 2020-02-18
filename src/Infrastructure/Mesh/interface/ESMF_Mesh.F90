@@ -987,15 +987,16 @@ end subroutine
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
     function ESMF_MeshCreate3Part(parametricDim, spatialDim, &
-                                  coordSys, rc)
+                                  coordSys, name, rc)
 !
 !
 ! !RETURN VALUE:
-    type(ESMF_Mesh)         :: ESMF_MeshCreate3Part
+    type(ESMF_Mesh)                                 :: ESMF_MeshCreate3Part
 ! !ARGUMENTS:
     integer,                  intent(in)            :: parametricDim
     integer,                  intent(in)            :: spatialDim
     type(ESMF_CoordSys_Flag), intent(in),  optional :: coordSys
+    character(len=*),         intent(in),  optional :: name
     integer,                  intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1021,14 +1022,17 @@ end subroutine
 !         The coordinate system of the grid coordinate data.
 !         For a full list of options, please see Section~\ref{const:coordsys}.
 !         If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
+!   \item [{[name]}]
+!         The name of the Mesh.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                  :: localrc      ! local return code
+    integer :: localrc
     type(ESMF_CoordSys_Flag) :: coordSysLocal
+    integer :: len_name
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1044,10 +1048,20 @@ end subroutine
     ! Create C++ Mesh
     ESMF_MeshCreate3Part%this = ESMF_NULL_POINTER
 
-    call c_ESMC_meshcreate(ESMF_MeshCreate3Part%this, parametricDim, spatialDim, &
-                           coordSysLocal, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    ! Optional name argument requires separate calls into C++
+    if (present(name)) then
+      len_name = len(name)
+      call c_ESMC_meshcreate(ESMF_MeshCreate3Part%this, parametricDim, spatialDim, &
+                           coordSysLocal, name, len_name, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else 
+      len_name = 0
+      call c_ESMC_meshcreate(ESMF_MeshCreate3Part%this, parametricDim, spatialDim, &
+                           coordSysLocal, "", len_name, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     ! The C side has been created
     ESMF_MeshCreate3Part%isCMeshFreed=.false.
@@ -1086,28 +1100,29 @@ end subroutine
                    nodeIds, nodeCoords, nodeOwners, nodeMask, nodalDistgrid, &
                    elementIds, elementTypes, elementConn, &
                    elementMask, elementArea, elementCoords, &
-                   elementDistgrid, coordSys, rc)
+                   elementDistgrid, coordSys, name, rc)
 !
 !
 ! !RETURN VALUE:
-    type(ESMF_Mesh)                           :: ESMF_MeshCreate1Part
+    type(ESMF_Mesh)                                 :: ESMF_MeshCreate1Part
 ! !ARGUMENTS:
-    integer,            intent(in)            :: parametricDim
-    integer,            intent(in)            :: spatialDim
-    integer,            intent(in)            :: nodeIds(:)
-    real(ESMF_KIND_R8), intent(in)            :: nodeCoords(:)
-    integer,            intent(in)            :: nodeOwners(:)
-    integer,            intent(in),  optional :: nodeMask(:)
-    type(ESMF_DistGrid), intent(in), optional :: nodalDistgrid
-    integer,            intent(in)            :: elementIds(:)
-    integer,            intent(in)            :: elementTypes(:)
-    integer,            intent(in)            :: elementConn(:)
-    integer,            intent(in),  optional :: elementMask(:)
-    real(ESMF_KIND_R8), intent(in),  optional :: elementArea(:)
-    real(ESMF_KIND_R8), intent(in),  optional :: elementCoords(:)
-    type(ESMF_DistGrid), intent(in),  optional :: elementDistgrid
+    integer,                  intent(in)            :: parametricDim
+    integer,                  intent(in)            :: spatialDim
+    integer,                  intent(in)            :: nodeIds(:)
+    real(ESMF_KIND_R8),       intent(in)            :: nodeCoords(:)
+    integer,                  intent(in)            :: nodeOwners(:)
+    integer,                  intent(in),  optional :: nodeMask(:)
+    type(ESMF_DistGrid),      intent(in),  optional :: nodalDistgrid
+    integer,                  intent(in)            :: elementIds(:)
+    integer,                  intent(in)            :: elementTypes(:)
+    integer,                  intent(in)            :: elementConn(:)
+    integer,                  intent(in),  optional :: elementMask(:)
+    real(ESMF_KIND_R8),       intent(in),  optional :: elementArea(:)
+    real(ESMF_KIND_R8),       intent(in),  optional :: elementCoords(:)
+    type(ESMF_DistGrid),      intent(in),  optional :: elementDistgrid
     type(ESMF_CoordSys_Flag), intent(in),  optional :: coordSys
-    integer,            intent(out), optional :: rc
+    character(len=*),         intent(in),  optional :: name
+    integer,                  intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Create a Mesh object in one step. After this call the Mesh is usable, for
@@ -1240,6 +1255,8 @@ end subroutine
 !         The coordinate system of the grid coordinate data.
 !         For a full list of options, please see Section~\ref{const:coordsys}.
 !         If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
+!   \item [{[name]}]
+!         The name of the Mesh.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1256,6 +1273,7 @@ end subroutine
     real(ESMF_KIND_R8) :: tmpCoords(2)
     integer :: coordsPresent
     type(ESMF_CoordSys_Flag) :: coordSysLocal
+    integer :: len_name
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1294,10 +1312,20 @@ end subroutine
    endif
 
     ! Create C++ Mesh
-    call c_ESMC_meshcreate(ESMF_MeshCreate1Part%this, parametricDim, spatialDim, &
-                           coordSyslocal, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    ! Optional name argument requires separate calls into C++
+    if (present(name)) then
+      len_name = len(name)
+      call c_ESMC_meshcreate(ESMF_MeshCreate1Part%this, parametricDim, spatialDim, &
+                             coordSyslocal, name, len_name, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      len_name = 0
+      call c_ESMC_meshcreate(ESMF_MeshCreate1Part%this, parametricDim, spatialDim, &
+                             coordSyslocal, "", len_name, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     ! Set init status of arguments
     ESMF_INIT_SET_CREATED(ESMF_MeshCreate1Part)
@@ -1579,13 +1607,14 @@ end function ESMF_MeshCreateFromDG
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
-    function ESMF_MeshCreateFromGrid(grid, rc)
+    function ESMF_MeshCreateFromGrid(grid, name, rc)
 !
 !
 ! !RETURN VALUE:
     type(ESMF_Mesh)         :: ESMF_MeshCreateFromGrid
 ! !ARGUMENTS:
     type(ESMF_Grid),        intent(in)            :: grid
+    character(len=*),       intent(in),  optional :: name
     integer,                intent(out), optional :: rc
 
 !
@@ -1601,6 +1630,8 @@ end function ESMF_MeshCreateFromDG
 !   \begin{description}
 !   \item [grid]
 !         The ESMF Grid from which to create the Mesh.
+!   \item [{[name]}]
+!         The name of the Mesh.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1610,12 +1641,23 @@ end function ESMF_MeshCreateFromDG
     integer::  localrc
     type(ESMF_CoordSys_Flag) :: coordSys
     integer :: dimCount
+    integer :: len_name
 
     ! Create C side Mesh
-    call C_ESMC_MeshCreateFromGrid(ESMF_MeshCreateFromGrid%this, &
-         grid, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
+    ! Optional name argument requires separate calls into C++
+    if (present(name)) then
+      len_name = len(name)
+      call C_ESMC_MeshCreateFromGrid(ESMF_MeshCreateFromGrid%this, &
+                                     grid, name, len_name, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      len_name = 0
+      call C_ESMC_MeshCreateFromGrid(ESMF_MeshCreateFromGrid%this, &
+                                     grid, "", len_name, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     ! The C side has been created
     ESMF_MeshCreateFromGrid%isCMeshFreed=.false.
@@ -3673,18 +3715,18 @@ end function ESMF_MeshCreateDual
 !
 !
 ! !RETURN VALUE:
-    type(ESMF_Mesh)                           :: ESMF_MeshCreateEasyElems1Type
+    type(ESMF_Mesh) :: ESMF_MeshCreateEasyElems1Type
 ! !ARGUMENTS:
-    integer,            intent(in)            :: parametricDim
+    integer,                  intent(in)            :: parametricDim
     type(ESMF_CoordSys_Flag), intent(in),  optional :: coordSys
-    integer,            intent(in), optional  :: elementIds(:)
-    integer,            intent(in)            :: elementType
-    real(ESMF_KIND_R8), intent(in)            :: elementCornerCoords(:,:,:)
-    integer,            intent(in),  optional :: elementMask(:)
-    real(ESMF_KIND_R8), intent(in),  optional :: elementArea(:)
-    real(ESMF_KIND_R8), intent(in),  optional :: elementCoords(:,:)
-    type(ESMF_DistGrid), intent(in),  optional :: elementDistgrid
-    integer,            intent(out), optional :: rc
+    integer,                  intent(in),  optional :: elementIds(:)
+    integer,                  intent(in)            :: elementType
+    real(ESMF_KIND_R8),       intent(in)            :: elementCornerCoords(:,:,:)
+    integer,                  intent(in),  optional :: elementMask(:)
+    real(ESMF_KIND_R8),       intent(in),  optional :: elementArea(:)
+    real(ESMF_KIND_R8),       intent(in),  optional :: elementCoords(:,:)
+    type(ESMF_DistGrid),      intent(in),  optional :: elementDistgrid
+    integer,                  intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Create a Mesh object in one step by just specifying the corner coordinates of each element.
@@ -3818,18 +3860,18 @@ end function ESMF_MeshCreateDual
 !
 !
 ! !RETURN VALUE:
-    type(ESMF_Mesh)                           :: ESMF_MeshCreateEasyElemsGen
+    type(ESMF_Mesh) :: ESMF_MeshCreateEasyElemsGen
 ! !ARGUMENTS:
-    integer,            intent(in)            :: parametricDim
+    integer,                  intent(in)            :: parametricDim
     type(ESMF_CoordSys_Flag), intent(in),  optional :: coordSys
-    integer,            intent(in), optional  :: elementIds(:)
-    integer,            intent(in)            :: elementTypes(:)
-    real(ESMF_KIND_R8), intent(in)            :: elementCornerCoords(:,:)
-    integer,            intent(in),  optional :: elementMask(:)
-    real(ESMF_KIND_R8), intent(in),  optional :: elementArea(:)
-    real(ESMF_KIND_R8), intent(in),  optional :: elementCoords(:,:)
-    type(ESMF_DistGrid), intent(in),  optional :: elementDistgrid
-    integer,            intent(out), optional :: rc
+    integer,                  intent(in),  optional :: elementIds(:)
+    integer,                  intent(in)            :: elementTypes(:)
+    real(ESMF_KIND_R8),       intent(in)            :: elementCornerCoords(:,:)
+    integer,                  intent(in),  optional :: elementMask(:)
+    real(ESMF_KIND_R8),       intent(in),  optional :: elementArea(:)
+    real(ESMF_KIND_R8),       intent(in),  optional :: elementCoords(:,:)
+    type(ESMF_DistGrid),      intent(in),  optional :: elementDistgrid
+    integer,                  intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Create a Mesh object in one step by just specifying the corner coordinates of each element.
@@ -4107,7 +4149,7 @@ end function ESMF_MeshCreateDual
 ! !IROUTINE: ESMF_MeshCreateCubedSphere - Create a Mesh representation of a cubed sphere grid
 !
 ! !INTERFACE:
-function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, rc)
+function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, name, rc)
 
 ! !RETURN VALUE:
     type(ESMF_Mesh)         :: ESMF_MeshCreateCubedSphere
@@ -4116,7 +4158,8 @@ function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, rc)
     integer,                  intent(in)            :: tileSize
     integer,                  intent(in)            :: nx
     integer,                  intent(in)            :: ny
-    integer,                  intent(out),optional  :: rc
+    character(len=*),         intent(in),  optional :: name
+    integer,                  intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
@@ -4140,6 +4183,8 @@ function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, rc)
 !          The number of blocks on the horizontal size of each tile
 !     \item[ny]
 !          The number of blocks on the vertical size of each tile
+!   \item [{[name]}]
+!         The name of the Mesh.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -4200,7 +4245,7 @@ function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, rc)
   allocate(lonEdge(tileSize+1, (tileSize+1)*6),latEdge(tileSize+1, (tileSize+1)*6))
 
   ! Create a mesh
-  mesh = ESMF_MeshCreate(2, 2, coordSys=ESMF_COORDSYS_SPH_DEG, rc=localrc)
+  mesh = ESMF_MeshCreate(2, 2, coordSys=ESMF_COORDSYS_SPH_DEG, name=name, rc=localrc)
 
   ! Distribute center coordinates according to the nx/ny decomposition
 #if 0

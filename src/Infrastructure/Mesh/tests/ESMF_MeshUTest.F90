@@ -88,7 +88,7 @@ program ESMF_MeshUTest
   integer :: dimCount, localDECount
   logical :: nodalIsPresent, elementIsPresent
   type(ESMF_MESHSTATUS_FLAG) :: status
-  character(len=80)      :: meshName
+  character(len=80)      :: meshName, meshNameOut
 
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -130,9 +130,10 @@ program ESMF_MeshUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
+  meshName = "bigbadmeshname"
   write(name, *) "Create test Mesh for IsCreated"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, rc=localrc)
+  mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, name=meshName, rc=localrc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
@@ -156,9 +157,9 @@ program ESMF_MeshUTest
   !NEX_UTest
   write(name, *) "Testing MeshGet, accessing name"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_MeshGet(mesh, name=meshName, rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  call ESMF_LogWrite("meshName="//trim(meshName), ESMF_LOGMSG_INFO, rc=rc)
+  call ESMF_MeshGet(mesh, name=meshNameOut, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(meshNameOut == meshName), name, failMsg, result, ESMF_SRCLINE)
+  call ESMF_LogWrite("meshName="//trim(meshNameOut), ESMF_LOGMSG_INFO, rc=rc)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------

@@ -46,6 +46,7 @@
       is_esmf_mesh = false;
       mesh = NULL;
       mbmesh = NULL;
+      ESMC_BaseSetName(NULL, "Mesh");
     }
 
     void *get_internal_mesh_ptr() {

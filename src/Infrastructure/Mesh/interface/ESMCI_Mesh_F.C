@@ -110,16 +110,28 @@ extern "C" void FTN_X(c_esmc_clumppntsll)(int *num_pnt, double *pnt_lon, double 
 
 extern "C" void FTN_X(c_esmc_meshcreate)(MeshCap **meshpp,
                                          int *pdim, int *sdim,
-                                         ESMC_CoordSys_Flag *coordSys, int *rc)
+                                         ESMC_CoordSys_Flag *coordSys, 
+                                         char *name, int *len_name, 
+                                         int *rc, ESMCI_FortranStrLenArg name_l)
 {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_meshcreate()"
+
+  int localrc = ESMC_RC_NOT_IMPL;
 
   // Create Mesh depending on whether MOAB or not
   if (Moab_on) {
     *meshpp=MeshCap::meshcreate(pdim,sdim,coordSys,false,rc);
   } else {
     *meshpp=MeshCap::meshcreate(pdim,sdim,coordSys,true,rc);
+  }
+
+  std::string cname = std::string(name, ESMC_F90lentrim (name, *len_name));
+  if (cname.length() > 0) {
+    localrc = (*meshpp)->ESMC_BaseSetName(name, "Mesh");
+    ESMC_LogDefault.MsgFoundError(localrc,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+    return;
   }
 
 } // meshcreate
@@ -558,7 +570,8 @@ extern "C" void FTN_X(c_esmc_meshcreateeasyelems)(MeshCap **meshpp,
                                                   double *elemArea,
                                                   int *has_elemCoords,
                                                   double *elemCoords,
-                                                  ESMC_CoordSys_Flag *coordSys, int *rc)
+                                                  ESMC_CoordSys_Flag *coordSys, 
+                                                  int *rc)
 {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_meshcreateeasyelems()"
@@ -586,16 +599,27 @@ extern "C" void FTN_X(c_esmc_meshcreateeasyelems)(MeshCap **meshpp,
 
 extern "C" void FTN_X(c_esmc_meshcreatefromgrid)(MeshCap **meshpp,
                                                  Grid **gridpp,
-                                                 int *rc)
+                                                 char *name, int *len_name, 
+                                                 int *rc, ESMCI_FortranStrLenArg name_l)
 {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_meshcreatefromgrid()"
+
+  int localrc = ESMC_RC_NOT_IMPL;
 
   // Create Mesh depending on whether MOAB or not
   if (Moab_on) {
     *meshpp=MeshCap::meshcreate_from_grid(gridpp,false,rc);
   } else {
     *meshpp=MeshCap::meshcreate_from_grid(gridpp,true,rc);
+  }
+
+  std::string cname = std::string(name, ESMC_F90lentrim (name, *len_name));
+  if (cname.length() > 0) {
+    localrc = (*meshpp)->ESMC_BaseSetName(name, "Mesh");
+    ESMC_LogDefault.MsgFoundError(localrc,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+    return;
   }
 
 } // meshcreate

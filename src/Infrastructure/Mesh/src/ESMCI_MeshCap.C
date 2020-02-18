@@ -59,7 +59,7 @@
  MeshCap::MeshCap() : is_esmf_mesh(false), mesh(NULL), mbmesh(NULL) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::MeshCap()"
-
+    ESMC_BaseSetName(NULL, "Mesh");
   }
 
 
