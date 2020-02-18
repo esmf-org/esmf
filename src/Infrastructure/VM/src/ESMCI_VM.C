@@ -1096,7 +1096,8 @@ void VM::shutdown(
             std::stringstream debugmsg;
             debugmsg << "ESMF Automatic Garbage Collection: delete: "
               << matchTable_Objects[i][k]->ESMC_BaseGetClassName() << " : "
-              << matchTable_Objects[i][k]->ESMC_BaseGetName();
+              << matchTable_Objects[i][k]->ESMC_BaseGetName() << " : "
+              << matchTable_Objects[i][k];
             ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
 #endif
             delete matchTable_Objects[i][k];  // delete ESMF object, incl. Base
@@ -2971,7 +2972,8 @@ void VM::finalize(
       std::stringstream debugmsg;
       debugmsg << "ESMF Automatic Garbage Collection: delete: "
         << matchTable_Objects[0][k]->ESMC_BaseGetClassName() << " : "
-        << matchTable_Objects[0][k]->ESMC_BaseGetName();
+        << matchTable_Objects[0][k]->ESMC_BaseGetName() << " : "
+        << matchTable_Objects[0][k];
       ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
 #endif
       delete matchTable_Objects[0][k];  // delete ESMF object, incl. Base

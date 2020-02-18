@@ -1159,7 +1159,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          ESMF_CONTEXT, rcToReturn=rc)) return
 
      ! Get rid of mesh created above
-     call ESMF_MeshDestroy(mesh, rc=localrc)
+     call ESMF_MeshDestroy(mesh, noGarbage=.true., rc=localrc)
      if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return      

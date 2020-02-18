@@ -24,7 +24,7 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMCI_IntegrateUTest \
                $(ESMF_TESTDIR)/ESMC_MBMesh_RendezvousUTest \
                $(ESMF_TESTDIR)/ESMC_MBMesh_RendezvousParUTest \
                $(ESMF_TESTDIR)/ESMC_MBMesh_SearchUTest \
-							 $(ESMF_TESTDIR)/ESMC_MBMesh_SerializeUTest \
+               $(ESMF_TESTDIR)/ESMC_MBMesh_SerializeUTest \
                $(ESMF_TESTDIR)/ESMC_MBMesh_UtilUTest \
                $(ESMF_TESTDIR)/ESMC_MBMesh_UtilParUTest \
                $(ESMF_TESTDIR)/ESMC_NearestUTest \
