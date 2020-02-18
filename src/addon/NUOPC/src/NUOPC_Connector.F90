@@ -88,6 +88,18 @@ module NUOPC_Connector
     type(type_InternalStateStruct), pointer :: wrap
   end type
 
+  type GridL
+    type(ESMF_Grid)               :: keyGrid
+    type(ESMF_Grid)               :: acceptorGrid
+    type(GridL), pointer          :: prev
+  end type
+
+  type MeshL
+    type(ESMF_Mesh)               :: keyMesh
+    type(ESMF_Mesh)               :: acceptorMesh
+    type(MeshL), pointer          :: prev
+  end type
+
   ! Generic methods
   public NUOPC_ConnectorGet, NUOPC_ConnectorSet
 
@@ -2331,19 +2343,9 @@ module NUOPC_Connector
     integer                         :: tk, gl
     character(ESMF_MAXSTR)          :: acceptorTransferActionAttr
     
-    type GridL
-      type(ESMF_Grid)               :: providerGrid
-      type(ESMF_Grid)               :: acceptorGrid
-      type(GridL), pointer          :: prev
-    end type
     type(GridL), pointer            :: gridList, gridListE
     logical                         :: gridListMatch
     
-    type MeshL
-      type(ESMF_Mesh)               :: providerMesh
-      type(ESMF_Mesh)               :: acceptorMesh
-      type(MeshL), pointer          :: prev
-    end type
     type(MeshL), pointer            :: meshList, meshListE
     logical                         :: meshListMatch
 
@@ -2712,9 +2714,9 @@ module NUOPC_Connector
             gridListE=>gridList
             do while (associated(gridListE))
 call ESMF_PointerLog(grid%this, prefix="Comparing Grid: "//trim(geomobjname)//": ", rc=rc)
-call ESMF_GridGet(gridListE%providerGrid, name=msgString, rc=rc)
-call ESMF_PointerLog(gridListE%providerGrid%this, &
-                                prefix="       to Grid: "//trim(msgString)//": ", rc=rc)
+call ESMF_GridGet(gridListE%keyGrid, name=msgString, rc=rc)
+call ESMF_PointerLog(gridListE%keyGrid%this, &
+                                prefix="    to keyGrid: "//trim(msgString)//": ", rc=rc)
 !TODO: Actually want to check for alias match.
 !              if (gridListE%providerGrid == grid) then
 !TODO: But for now this does not work due to proxy duplication, and as a 
@@ -2736,12 +2738,19 @@ call ESMF_PointerLog(gridListE%providerGrid%this, &
             if (gridListMatch) then
               ! retrieve previously stored acceptor grid
               grid = gridListE%acceptorGrid
+              if (btest(verbosity,11)) then
+                call ESMF_LogWrite(trim(name)//&
+                  ": - skipping DistGrid transfer for Grid: "//&
+                  trim(geomobjname), ESMF_LOGMSG_INFO, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              endif
             else
               ! this is a provider grid not seen before -> add to gridList
               allocate(gridListE)
               gridListE%prev=>gridList  ! link new element to previous list head
               gridList=>gridListE       ! list head now pointing to new element
-              gridListE%providerGrid = grid ! store the provider grid for lookup
+              gridListE%keyGrid = grid  ! store the provider grid as lookup key
               ! deal with the DistGrid transfer
               if (btest(verbosity,11)) then
                 call ESMF_LogWrite(trim(name)//": - transferring underlying "// &
@@ -2956,9 +2965,9 @@ call ESMF_PointerLog(gridListE%providerGrid%this, &
             meshListE=>meshList
             do while (associated(meshListE))
 call ESMF_PointerLog(mesh%this, prefix="Comparing Mesh: "//trim(geomobjname)//": ", rc=rc)
-call ESMF_MeshGet(meshListE%providerMesh, name=msgString, rc=rc)
-call ESMF_PointerLog(meshListE%providerMesh%this, &
-                                prefix="       to Mesh: "//trim(msgString)//": ", rc=rc)
+call ESMF_MeshGet(meshListE%keyMesh, name=msgString, rc=rc)
+call ESMF_PointerLog(meshListE%keyMesh%this, &
+                                prefix="    to keyMesh: "//trim(msgString)//": ", rc=rc)
 !TODO: Actually want to check for alias match.
 !              if (meshListE%providerMesh == mesh) then
 !TODO: But for now this does not work due to proxy duplication, and as a 
@@ -2980,12 +2989,19 @@ call ESMF_PointerLog(meshListE%providerMesh%this, &
             if (meshListMatch) then
               ! retrieve previously stored acceptor mesh
               mesh = meshListE%acceptorMesh
+              if (btest(verbosity,11)) then
+                call ESMF_LogWrite(trim(name)//&
+                  ": - skipping DistGrid transfer for Mesh: "//&
+                  trim(geomobjname), ESMF_LOGMSG_INFO, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              endif
             else
               ! this is a provider mesh not seen before -> add to meshList
               allocate(meshListE)
               meshListE%prev=>meshList  ! link new element to previous list head
               meshList=>meshListE       ! list head now pointing to new element
-              meshListE%providerMesh = mesh ! store the provider mesh for lookup
+              meshListE%keyMesh = mesh  ! store the provider mesh as lookup key
               ! deal with the DistGrid transfer
               if (btest(verbosity,11)) then
                 call ESMF_LogWrite(trim(name)//": - transferring underlying "// &
@@ -3380,19 +3396,9 @@ call ESMF_PointerLog(meshListE%providerMesh%this, &
     logical                         :: isPresentNDG, isPresentEDG
     type(ESMF_VM)                   :: vm
 
-    type GridL
-      type(ESMF_Grid)               :: providerGrid
-      type(ESMF_Grid)               :: acceptorGrid
-      type(GridL), pointer          :: prev
-    end type
     type(GridL), pointer            :: gridList, gridListE
     logical                         :: gridListMatch
     
-    type MeshL
-      type(ESMF_Mesh)               :: providerMesh
-      type(ESMF_Mesh)               :: acceptorMesh
-      type(MeshL), pointer          :: prev
-    end type
     type(MeshL), pointer            :: meshList, meshListE
     logical                         :: meshListMatch
 
@@ -3735,23 +3741,22 @@ call ESMF_PointerLog(meshListE%providerMesh%this, &
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           if (geomtype==ESMF_GEOMTYPE_GRID) then
-            call ESMF_FieldGet(providerField, grid=providerGrid, &
-              staggerloc=staggerloc, rc=rc)
+            call ESMF_FieldGet(acceptorField, grid=acceptorGrid, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            call ESMF_GridGet(providerGrid, name=geomobjname, rc=rc)
+            call ESMF_GridGet(acceptorGrid, name=geomobjname, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            ! see if provider grid has been dealt with before
+            ! see if old acceptor grid has been dealt with before
             gridListMatch=.false.
             gridListE=>gridList
             do while (associated(gridListE))
-call ESMF_PointerLog(providerGrid%this, prefix="Comparing Grid: "//trim(geomobjname)//": ", rc=rc)
-call ESMF_GridGet(gridListE%providerGrid, name=msgString, rc=rc)
-call ESMF_PointerLog(gridListE%providerGrid%this, &
-                                        prefix="       to Grid: "//trim(msgString)//": ", rc=rc)
+call ESMF_PointerLog(acceptorGrid%this, prefix="Comparing Grid: "//trim(geomobjname)//": ", rc=rc)
+call ESMF_GridGet(gridListE%keyGrid, name=msgString, rc=rc)
+call ESMF_PointerLog(gridListE%keyGrid%this, &
+                                        prefix="    to keyGrid: "//trim(msgString)//": ", rc=rc)
 !TODO: Actually want to check for alias match.
-!              if (gridListE%providerGrid == providerGrid) then
+!              if (acceptorGrid == gridListE%keyGrid) then
 !TODO: But for now this does not work due to proxy duplication, and as a 
 !TODO: work-around matching is done by name. This is very fragile and should
 !TODO: be fixed as soon as we can rely on correct proxy behavior!
@@ -3771,12 +3776,19 @@ call ESMF_PointerLog(gridListE%providerGrid%this, &
             if (gridListMatch) then
               ! retrieve previously stored acceptor grid
               acceptorGrid = gridListE%acceptorGrid
+              if (btest(verbosity,11)) then
+                call ESMF_LogWrite(trim(name)//&
+                  ": - skipping full geomobject transfer for Grid: "//&
+                  trim(geomobjname), ESMF_LOGMSG_INFO, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              endif
             else
-              ! this is a provider grid not seen before -> add to gridList
+              ! this is an old acceptor grid not seen before -> add to gridList
               allocate(gridListE)
               gridListE%prev=>gridList  ! link new element to previous list head
               gridList=>gridListE       ! list head now pointing to new element
-              gridListE%providerGrid = providerGrid ! store the provider grid
+              gridListE%keyGrid = acceptorGrid ! store the old acceptor grid as key
               ! deal with the Grid transfer
               if (btest(verbosity,11)) then
                 call ESMF_LogWrite(trim(name)//&
@@ -3786,7 +3798,8 @@ call ESMF_PointerLog(gridListE%providerGrid%this, &
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
               endif
-              call ESMF_FieldGet(acceptorField, grid=acceptorGrid, rc=rc)
+              call ESMF_FieldGet(providerField, grid=providerGrid, &
+                staggerloc=staggerloc, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
               call ESMF_GridGet(acceptorGrid, distgrid=distgrid, rc=rc)
@@ -3832,23 +3845,22 @@ call ESMF_PointerLog(gridListE%providerGrid%this, &
                endif
             endif
           elseif (geomtype==ESMF_GEOMTYPE_MESH) then
-            call ESMF_FieldGet(providerField, mesh=providerMesh, &
-              meshloc=meshloc, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out            
-            call ESMF_MeshGet(providerMesh, name=geomobjname, rc=rc)
+            call ESMF_FieldGet(acceptorField, mesh=acceptorMesh, vm=vm, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            ! see if provider mesh has been dealt with before
+            call ESMF_MeshGet(acceptorMesh, name=geomobjname, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            ! see if old acceptor mesh has been dealt with before
             meshListMatch=.false.
             meshListE=>meshList
             do while (associated(meshListE))
-call ESMF_PointerLog(providerMesh%this, prefix="Comparing Mesh: "//trim(geomobjname)//": ", rc=rc)
-call ESMF_MeshGet(meshListE%providerMesh, name=msgString, rc=rc)
-call ESMF_PointerLog(meshListE%providerMesh%this, &
-                                        prefix="       to Mesh: "//trim(msgString)//": ", rc=rc)
+call ESMF_PointerLog(acceptorMesh%this, prefix="Comparing Mesh: "//trim(geomobjname)//": ", rc=rc)
+call ESMF_MeshGet(meshListE%keyMesh, name=msgString, rc=rc)
+call ESMF_PointerLog(meshListE%keyMesh%this, &
+                                        prefix="    to keyMesh: "//trim(msgString)//": ", rc=rc)
 !TODO: Actually want to check for alias match.
-!              if (meshListE%providerMesh == providerMesh) then
+!              if (acceptorMesh == meshListE%keyMesh) then
 !TODO: But for now this does not work due to proxy duplication, and as a 
 !TODO: work-around matching is done by name. This is very fragile and should
 !TODO: be fixed as soon as we can rely on correct proxy behavior!
@@ -3868,12 +3880,19 @@ call ESMF_PointerLog(meshListE%providerMesh%this, &
             if (meshListMatch) then
               ! retrieve previously stored acceptor mesh
               acceptorMesh = meshListE%acceptorMesh
+              if (btest(verbosity,11)) then
+                call ESMF_LogWrite(trim(name)//&
+                  ": - skipping full geomobject transfer for Mesh: "//&
+                  trim(geomobjname), ESMF_LOGMSG_INFO, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              endif
             else
-              ! this is a provider mesh not seen before -> add to meshList
+              ! this is an old acceptor mesh not seen before -> add to meshList
               allocate(meshListE)
               meshListE%prev=>meshList  ! link new element to previous list head
               meshList=>meshListE       ! list head now pointing to new element
-              meshListE%providerMesh = providerMesh ! store the provider mesh
+              meshListE%keyMesh = acceptorMesh ! store old acceptor mesh as key
               ! deal with the Mesh transfer
               if (btest(verbosity,11)) then
                 call ESMF_LogWrite(trim(name)//&
@@ -3883,10 +3902,11 @@ call ESMF_PointerLog(meshListE%providerMesh%this, &
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
               endif
-              call ESMF_MeshGet(providerMesh, isMemFreed=meshNoConnections, rc=rc)
+              call ESMF_FieldGet(providerField, mesh=providerMesh, &
+                meshloc=meshloc, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-              call ESMF_FieldGet(acceptorField, mesh=acceptorMesh, vm=vm, rc=rc)
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out            
+              call ESMF_MeshGet(providerMesh, isMemFreed=meshNoConnections, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
               call ESMF_MeshGet(acceptorMesh, nodalDistgridIsPresent=isPresentNDG, &
