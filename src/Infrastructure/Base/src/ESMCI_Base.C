@@ -1091,8 +1091,8 @@ static const char *const version = "$Id$";
 
 #if 0
   char msgbuf[ESMF_MAXSTR];
-  sprintf(msgbuf, "ESMC_Base constructor: %p, %s, %s", this,
-    this->ESMC_BaseGetClassName(), this->ESMC_BaseGetName());
+  sprintf(msgbuf, "ESMC_Base constructor: %d, %p, %s, %s, %s", __LINE__, this,
+    this->ESMC_BaseGetClassName(), this->ESMC_BaseGetName(), baseName);
   ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
 #endif
 
@@ -1156,8 +1156,8 @@ static const char *const version = "$Id$";
 
 #if 0
   char msgbuf[ESMF_MAXSTR];
-  sprintf(msgbuf, "ESMC_Base constructor: %p, %s, %s", this,
-    this->ESMC_BaseGetClassName(), this->ESMC_BaseGetName());
+  sprintf(msgbuf, "ESMC_Base constructor: %d, %p, %s, %s, %s", __LINE__, this,
+    this->ESMC_BaseGetClassName(), this->ESMC_BaseGetName(), baseName);
   ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
 #endif
 
@@ -1234,8 +1234,8 @@ static const char *const version = "$Id$";
 
 #if 0
   char msgbuf[ESMF_MAXSTR];
-  sprintf(msgbuf, "ESMC_Base constructor: %p, %s, %s", this,
-    this->ESMC_BaseGetClassName(), this->ESMC_BaseGetName());
+  sprintf(msgbuf, "ESMC_Base constructor: %d, %p, %s, %s, %s", __LINE__, this,
+    this->ESMC_BaseGetClassName(), this->ESMC_BaseGetName(), baseName);
   ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
 #endif
 
