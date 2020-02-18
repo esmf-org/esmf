@@ -13,9 +13,9 @@
 //==============================================================================
 #define XXE_CONSTRUCTOR_LOG_off
 #define XXE_STORAGEDELETE_LOG_off
-#define XXE_EXEC_LOG_off
+#define XXE_EXEC_LOG_on
 #define XXE_EXEC_MEMLOG_off
-#define XXE_EXEC_BUFFLOG_off
+#define XXE_EXEC_BUFFLOG_on
 #define XXE_EXEC_OPSLOG_off
 #define XXE_EXEC_RECURSLOG_off
 //==============================================================================
@@ -3738,13 +3738,13 @@ int XXE::exec(
 
 #ifdef XXE_EXEC_LOG_on
   char msg[1024];
-  sprintf(msg, "ESMCI::XXE::exec(): START: stream=%p, count=%d, "
-    "indexStart=%d, indexStop=%d",
-    stream, count, indexStart, indexStop);
+  sprintf(msg, "ESMCI::XXE::exec():%d START: stream=%p, count=%d, "
+    "indexStart=%d, indexStop=%d", __LINE__,
+    opstream, count, indexStart, indexStop);
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
   sprintf(msg, "ESMCI::XXE::exec(): START: sizeof(StreamElement)=%lu, "
-    "rraCount=%d, vectorLength=%d",
-    sizeof(StreamElement), rraCount, *vectorLength);
+    "sizeof(WtimerInfo)=%lu, rraCount=%d, vectorLength=%d",
+    sizeof(StreamElement), sizeof(WtimerInfo), rraCount, *vectorLength);
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
   sprintf(msg, "ESMCI::XXE::exec(): START'ed: filterBitField=0x%08x, "
     "finished=%p, cancelled=%p", filterBitField, finished, cancelled);
@@ -5402,6 +5402,10 @@ printf("gjt - DID NOT CANCEL commhandle\n");
     case wtimer:
       {
         xxeWtimerInfo = (WtimerInfo *)xxeElement;
+#ifdef XXE_EXEC_LOG_on
+        sprintf(msg, "XXE::xxeWtimerInfo: index=%d", xxeWtimerInfo->actualWtimerIndex);
+        ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+#endif
         int index = xxeWtimerInfo->actualWtimerIndex;
         double *wtime = &(xxeWtimerInfo->wtime);
         *wtime = 0.;                      // initialize
