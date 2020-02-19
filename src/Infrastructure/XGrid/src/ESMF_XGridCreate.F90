@@ -797,7 +797,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
         if(i .gt. 2) then
           ! the intermediate meshA is only a pointer type of mesh at this point, 
           ! call the C api to destroy it
-          call C_ESMC_MeshDestroy(meshA%this, localrc)
+          call C_ESMC_MeshDestroy(meshA%this, ESMF_TRUE, localrc)
           if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -883,7 +883,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         if(i .gt. 2) then
-          call C_ESMC_MeshDestroy(meshB%this, localrc)
+          call C_ESMC_MeshDestroy(meshB%this, ESMF_TRUE, localrc)
           if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
