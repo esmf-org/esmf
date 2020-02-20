@@ -3530,14 +3530,6 @@ XXE::~XXE(){
 
 
 //-----------------------------------------------------------------------------
-// utility function used by streamify
-template<typename T> void append(stringstream &streami, T value){
-  streami.write((char*)&value, sizeof(T));
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::XXE::streamify()"
 void XXE::streamify(stringstream &streami){

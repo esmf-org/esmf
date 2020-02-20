@@ -19,6 +19,9 @@
 
 #include <mpi.h>
 #include <vector>
+#include <string>
+#include <sstream>
+#include <map>
 
 #ifdef VMK_STANDALONE
 #include <pthread.h>
@@ -37,6 +40,8 @@ enum vmOp   { vmSUM=1, vmMIN, vmMAX};
 // typekind indicators
 //   Note: vmL4 indicates Fortran logicals, not c++ bools
 enum vmType { vmBYTE=1, vmI4, vmI8, vmR4, vmR8, vmL4};
+// epochs
+enum vmEpoch  { epochNone=0, epochBuffer};
 
 // VM_ANY_SOURCE and VM_ANY_TAG
 #define VM_ANY_SRC                    (-2)
@@ -93,6 +98,14 @@ void sync_reset(shmsync *shms);
 
 
 namespace ESMCI {
+
+
+//-----------------------------------------------------------------------------
+// utility function
+template<typename T> void append(std::stringstream &streami, T value){
+  streami.write((char*)&value, sizeof(T));
+}
+//-----------------------------------------------------------------------------
 
 
 class VMK{
@@ -181,6 +194,29 @@ class VMK{
     ipshmAlloc *prev;   // pointer to prev. ipshmAlloc element in list
     ipshmAlloc *next;   // pointer to next ipshmAlloc element in list
   };
+  
+  struct sendBuffer{
+    std::stringstream stream;
+    std::string streamBuffer;
+    MPI_Request mpireq;
+    bool firstFlag;
+   public:
+    sendBuffer(){  // native constructor
+      mpireq = MPI_REQUEST_NULL;
+      firstFlag = true;
+    }
+    void clear();
+  };
+    
+  struct recvBuffer{
+    std::string streamBuffer;
+    void *buffer;
+    bool firstFlag;
+   public:
+    recvBuffer(){  // native constructor
+      firstFlag = true;
+    }
+  };
 
   // members
   protected:
@@ -227,6 +263,11 @@ class VMK{
     // Communication requests queue
     int nhandles;
     commhandle *firsthandle;
+    // Epoch support
+    vmEpoch epoch;
+    bool pastFirst; // true if the first epoch enabled call has been made
+    std::map<int, sendBuffer> sendMap;
+    std::map<int, recvBuffer> recvMap;
     // static info of physical machine
     static int ncores;  // total number of cores in the physical machine
     static int *cpuid;  // cpuid associated with certain core (multi-core cpus)
@@ -431,7 +472,15 @@ class VMK{
     // Simple thread-safety lock/unlock using internal pth_mutex
     int lock();
     int unlock();
-    
+
+    // Epoch support
+    void epochSetFirst();
+    void epochInit();
+    void epochFinal();
+    void epochStart(vmEpoch epoch_);
+    void epochEnd();
+    vmEpoch getEpoch() const {return epoch;}
+        
     // Timer methods
     static void wtime(double *time);
     static void wtimeprec(double *prec);
