@@ -1076,6 +1076,27 @@ def ESMP_DistGridSetArbIndices(distgrid, indices):
     return rc
 
 
+_ESMF.ESMC_DistGridPrint.restype = ct.c_int
+_ESMF.ESMC_DistGridPrint.argtypes = [ESMP_DistGrid]
+
+def ESMP_DistGridPrint(distgrid):
+    """
+    Preconditions: An ESMP_DistGrid has been created.\n
+    Postconditions: The ESMP_DistGrid information is printed.\n
+    Arguments:\n
+        :RETURN: integer :: rc\n
+        ESMP_DistGrid    :: distgrid\n
+    """
+
+    rc = _ESMF.ESMC_DistGridPrint(distgrid)
+
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_DistGridPrint() failed with rc = '+str(rc)+'.    '+
+                        constants._errmsg)
+
+    return rc
+
+
 #### MESH #####################################################
 
 _ESMF.ESMC_MeshAddElements.restype = ct.c_int

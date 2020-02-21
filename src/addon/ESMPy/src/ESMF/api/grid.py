@@ -1180,6 +1180,14 @@ class Grid(object):
         # set the arb indices array on the distgrid
         ESMP_DistGridSetArbIndices(distgrid, indices)
 
+    def _write_distgrid_(self):
+
+        # get the distgrid
+        distgrid = ESMP_GridGetDistGrid(self)
+
+        # print the distgrid
+        ESMP_DistGridPrint(distgrid)
+
     def _write_(self, filename, staggerloc=None):
         """
         Write a Grid to vtk formatted file at a specified stagger 
