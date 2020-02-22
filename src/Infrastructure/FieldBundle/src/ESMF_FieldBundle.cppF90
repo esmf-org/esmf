@@ -592,7 +592,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     end subroutine ESMF_FieldBundleAddList
 
-    ! Private name; call using ESMF_FieldBundleAdd()   
+    ! Private name; call using ESMF_FieldBundleAdd()
     subroutine ESMF_FieldBundleAddListInternal(fieldbundle, fieldList, &
       multiflag, relaxedflag, rc)
 !
@@ -677,20 +677,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           endif
         enddo
 
-        ! Attribute link
-        linkChange = ESMF_TRUE
-
         if(size(addedList) .ge. 1) then
           call ESMF_FieldBundleSetGeom(fieldbundle, addedList(1), rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                         ESMF_CONTEXT, rcToReturn=rc))  return
         endif
-
-        do i=1, size(addedList)
-          call c_ESMC_AttributeLink(fieldbundle%this%base, addedList(i)%ftypep%base, linkChange, localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                        ESMF_CONTEXT, rcToReturn=rc))  return
-        enddo
         deallocate(addedList)
 
       endif  ! partial add
@@ -717,13 +708,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc))  return
       endif ! non-empty fieldlist
 
-      linkChange = ESMF_TRUE
-      do i=1, size(fieldList)
-        call c_ESMC_AttributeLink(fieldbundle%this%base, fieldList(i)%ftypep%base, linkChange, localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                      ESMF_CONTEXT, rcToReturn=rc))  return
-      enddo
-      
     endif ! garbageSize /= 0
 
     ! always deallocate garbageList because it is always associated returning from Container
@@ -842,8 +826,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer                       :: localrc      ! local return code
-    integer                       :: fieldCount, i, garbageSize
-    type(ESMF_Logical)            :: linkChange
+    integer                       :: fieldCount, i
     type(ESMF_Field), pointer     :: garbageList(:)
 
     ! initialize return code; assume routine not implemented
@@ -860,7 +843,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
-    
+
     ! Determine the number of FieldList elements
     fieldCount = size(fieldList)
     nullify(garbageList)
@@ -894,22 +877,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc))  return
     endif ! non-empty fieldlist
-    linkChange = ESMF_TRUE
-    ! Add all fields in fieldList
-    do i = 1, fieldCount
-      call c_ESMC_AttributeLink(fieldbundle%this%base, fieldList(i)%ftypep%base, linkChange, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc))  return
-    enddo
-    
-    ! Remove those that were replaced
-    garbageSize = size(garbageList)
-    do i=1, garbageSize
-      call c_ESMC_AttributeLinkRemove(fieldbundle%this%base, garbageList(i)%ftypep%base, linkChange, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc))  return
-    enddo
-    deallocate(garbageList)
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -980,7 +947,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                 :: localrc    ! local return code
     type(ESMF_FieldBundleType), pointer  :: this
     integer                 :: fieldCount, i
-    type(ESMF_Logical)      :: linkChange
     type(ESMF_GeomType_Flag)     :: geomtype
     type(ESMF_Grid)         :: grid
     type(ESMF_XGrid)        :: xgrid
@@ -1737,7 +1703,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !         {\tt ESMF\_FieldBundle}. The argument must be allocated to be at least of
 !         size {\tt fieldCount}.
 !   \item [{[isPacked]}]
-!         Upon return holds the information if this FieldBundle is packed. 
+!         Upon return holds the information if this FieldBundle is packed.
 !   \item [{[name]}]
 !         Name of the fieldbundle object.
 !   \item [{[rc]}]
@@ -1882,7 +1848,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       enddo
     endif
 
-    ! If fieldbundle is not packed, evaluate the results 
+    ! If fieldbundle is not packed, evaluate the results
     if(fieldbundle%this%is_packed) then
       if(l_fieldCount .ne. 1) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
@@ -1914,7 +1880,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
       if(associated(fieldNameListPtr)) deallocate(fieldNameListPtr)
     endif
-  
+
     deallocate(l_fieldList)
 
     if (present(isPacked)) then
@@ -1997,7 +1963,7 @@ msg="This call does not work with packed FieldBundle.",&
           ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
-    
+
     if (present(fieldCount)) then
       call ESMF_ContainerGet(fieldbundle%this%container, &
         itemName=trim(fieldName), itemCount=fieldCount, rc=localrc)
@@ -2109,7 +2075,7 @@ msg="This call does not work with packed FieldBundle.",&
           ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
-    
+
     nullify(l_fieldList)
     ! Check size
     call ESMF_ContainerGet(fieldbundle%this%container, trim(fieldName), &
@@ -4045,8 +4011,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              method.
 ! \item[8.0.0] Added argument {\tt extrapNumLevels}. For level based extrapolation methods
 !              (e.g. {\tt ESMF\_EXTRAPMETHOD\_CREEP}) this argument allows the user to
-!              set how many levels to extrapolate. 
-!! 
+!              set how many levels to extrapolate.
+!!
 ! \end{description}
 ! \end{itemize}
 !
@@ -4120,13 +4086,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The exponent to raise the distance to when calculating weights for 
 !           the {\tt ESMF\_EXTRAPMETHOD\_NEAREST\_IDAVG} extrapolation method. A higher value reduces the influence 
 !           of more distant points. If not specified, defaults to 2.0.
-!  \item [{[extrapNumLevels]}] 
+!  \item [{[extrapNumLevels]}]
 !           The number of levels to output for the extrapolation methods that fill levels
-!           (e.g. {\tt ESMF\_EXTRAPMETHOD\_CREEP}). When a method is used that requires this, then an error will be returned, if it 
+!           (e.g. {\tt ESMF\_EXTRAPMETHOD\_CREEP}). When a method is used that requires this, then an error will be returned, if it
 !           is not specified.
 !  \item [{[unmappedaction]}]
 !    Specifies what should happen if there are destination points that
-!    can not be mapped to a source cell. Please see Section~\ref{const:unmappedaction} for a 
+!    can not be mapped to a source cell. Please see Section~\ref{const:unmappedaction} for a
 !           list of valid options. If not specified, {\tt unmappedaction} defaults to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
 !   \item [{[ignoreDegenerate]}]
 !           Ignore degenerate cells when checking the input Grids or Meshes for errors. If this is set to true, then the 
@@ -4629,7 +4595,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     integer                       :: localrc      ! local return code
     integer                       :: fieldCount, i, fcount
-    type(ESMF_Logical)            :: linkChange
     type(ESMF_Field), pointer     :: garbageList(:)
 
     ! initialize return code; assume routine not implemented
@@ -4663,12 +4628,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Remove attribute link for those Fields that were removed
-    do i=1, size(garbageList)
-      call c_ESMC_AttributeLinkRemove(fieldbundle%this%base, garbageList(i)%ftypep%base, linkChange, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc))  return
-    enddo
     deallocate(garbageList)
 
     ! Check if the fieldbundle is empty
@@ -4745,7 +4704,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     integer                       :: localrc      ! local return code
     integer                       :: fieldCount, i
-    type(ESMF_Logical)            :: linkChange
     type(ESMF_Field), pointer     :: garbageList(:)
 
     ! initialize return code; assume routine not implemented
@@ -4788,20 +4746,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc))  return
     endif ! non-empty fieldlist
 
-    ! Add all the input Fields in fieldList
-    linkChange = ESMF_TRUE
-    do i = 1, fieldCount
-      call c_ESMC_AttributeLink(fieldbundle%this%base, fieldList(i)%ftypep%base, linkChange, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc))  return
-    enddo
-    
-    ! Remove those that were replaced or not added
-    do i = 1, size(garbageList)
-      call c_ESMC_AttributeLinkRemove(fieldbundle%this%base, garbageList(i)%ftypep%base, linkChange, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc))  return
-    enddo
     deallocate(garbageList)
 
     ! Return successfully
@@ -4849,7 +4793,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       integer :: status                           ! Error status
       type(ESMF_FieldBundleType), pointer :: btype     ! internal data
-      type(ESMF_Logical) :: linkChange
 
       ! Initialize return code; assume routine not implemented
       status = ESMF_RC_NOT_IMPL
@@ -4877,12 +4820,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! Set Status to containing a Grid
       btype%status = ESMF_FBSTATUS_GRIDSET
-
-      !  link the Attribute hierarchies
-      linkChange = ESMF_TRUE
-      call c_ESMC_AttributeLink(btype%base, grid, linkChange, status)
-      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc))  return
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -5001,7 +4938,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       integer :: status                           ! Error status
       type(ESMF_FieldBundleType), pointer :: btype     ! internal data
-      type(ESMF_Logical) :: linkChange
 
       ! Initialize return code; assume routine not implemented
       status = ESMF_RC_NOT_IMPL
@@ -5028,12 +4964,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! Set Status to containing a Geombase
       btype%status = ESMF_FBSTATUS_GRIDSET
-
-      !  link the Attribute hierarchies
-      linkChange = ESMF_TRUE
-      call c_ESMC_AttributeLink(btype%base, locstream%lstypep%base, linkChange, status)
-      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc))  return
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -6510,6 +6440,9 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
       type(ESMF_InquireFlag) :: linquireflag
       type(ESMF_Field), pointer :: l_fieldList(:)
 
+      logical, parameter :: debug = .false.
+      character(len=ESMF_MAXSTR) :: logmsg
+
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
@@ -6540,13 +6473,39 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-      
+
+      if (debug) then
+        call ESMF_LogWrite(ESMF_METHOD // ": Calling ESMF_BaseSerialize", &
+          ESMF_LOGMSG_INFO, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+           ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+        write(logmsg, *) ESMF_METHOD // ": offset (before)= ", offset
+        call ESMF_LogWrite(TRIM(logmsg), ESMF_LOGMSG_INFO, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+           ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+      end if
+
       call ESMF_BaseSerialize (bp%base, buffer, offset,  &
           lattreconflag, linquireflag,  &
           rc=localrc)
       if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
+
+      if (debug) then
+        write(logmsg, *) ESMF_METHOD // ": offset (after)= ", offset
+        call ESMF_LogWrite(TRIM(logmsg), ESMF_LOGMSG_INFO, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+           ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+         logmsg = ESMF_METHOD // ": Exited ESMF_BaseSerialize"
+         call ESMF_LogWrite(logmsg, ESMF_LOGMSG_INFO, rc=localrc)
+         if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+       end if
 
       call c_ESMC_FieldBundleSerialize(bp%status, fieldCount, &
                                  buffer, length, offset, linquireflag, localrc)
@@ -6638,7 +6597,9 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
       type(ESMF_LocStream) :: locstream
       type(ESMF_GeomType_Flag) :: geomtype
       type(ESMF_Field), pointer :: flist(:)
-      type(ESMF_Logical) :: linkChange
+
+      logical, parameter :: debug = .false.
+      character(len=ESMF_MAXSTR) :: logmsg
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -6653,8 +6614,6 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
       else
         lattreconflag = ESMF_ATTRECONCILE_OFF
       endif
-      ! linkChange flag true for all but Components
-      linkChange = ESMF_TRUE;
 
       ! in case of error, make sure this is invalid.
       nullify(bp)
@@ -6666,12 +6625,38 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
         msg="space for new FieldBundle object", &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
+      if (debug) then
+        call ESMF_LogWrite(ESMF_METHOD // ": Calling ESMF_BaseDeserialize", &
+           ESMF_LOGMSG_INFO, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+           ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+        write(logmsg, *) ESMF_METHOD // ": buffer length= ", LEN(buffer)
+        call ESMF_LogWrite(TRIM(logmsg), ESMF_LOGMSG_INFO, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+           ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+        write(logmsg, *) ESMF_METHOD // ": offset= ", offset
+        call ESMF_LogWrite(TRIM(logmsg), ESMF_LOGMSG_INFO, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+           ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+      end if
+
       ! Deserialize Base
       bp%base = ESMF_BaseDeserialize (buffer, offset=offset,  &
           attreconflag=lattreconflag, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
+
+      if (debug) then
+        logmsg = ESMF_METHOD // ": Exited ESMF_BaseDeserialize"
+        call ESMF_LogWrite(logmsg, ESMF_LOGMSG_INFO, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+           ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+      end if
 
       call ESMF_BaseSetInitCreated(bp%base, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
@@ -6701,31 +6686,7 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-        !  link the Attribute hierarchies
-        call ESMF_GeomBaseGet(bp%geombase, geomtype=geomtype, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        if (geomtype == ESMF_GEOMTYPE_GRID) then
-           call ESMF_GeomBaseGet(bp%geombase, grid=grid, rc=localrc)
-           if (ESMF_LogFoundError(localrc, &
-                ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
-           linkChange = ESMF_TRUE
-           call c_ESMC_AttributeLink(bp%base, grid, linkChange, status)
-           if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc))  return
-        else if (geomtype == ESMF_GEOMTYPE_LOCSTREAM) then
-           call ESMF_GeomBaseGet(bp%geombase, locstream=locstream, rc=localrc)
-           if (ESMF_LogFoundError(localrc, &
-                ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
-           linkChange = ESMF_TRUE
-           call c_ESMC_AttributeLink(bp%base, locstream%lstypep%base, linkChange, status)
-           if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc))  return
-        endif
-     endif
+      endif
 
       ! TODO: decide if these need to be sent before or after
       allocate(flist(fieldCount), stat=localrc)
@@ -6903,7 +6864,6 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
     integer                                           :: localrc
     type(ESMF_GeomType_Flag)                               :: geomtype
     type(ESMF_Grid)                                   :: grid
-    type(ESMF_Logical)                                :: linkChange
 
     localrc = ESMF_RC_NOT_IMPL
     if(present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -6922,16 +6882,7 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
     call ESMF_GeomBaseGet(fieldbundle%this%geombase, geomtype=geomtype, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc))  return
-    if(geomtype == ESMF_GEOMTYPE_GRID) then
-      call ESMF_GeombaseGet(fieldbundle%this%geombase, grid=grid, rc=localrc)  
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc))  return
 
-      linkChange = ESMF_TRUE
-      call c_ESMC_AttributeLinkRemove(fieldbundle%this%base, grid, linkChange, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc))  return
-    endif
     call ESMF_GeomBaseDestroy(fieldbundle%this%geombase, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc))  return
@@ -6986,7 +6937,7 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
 
     if(.not. fieldbundle%this%is_packed) then
 
-      call ESMF_FieldBundleGet(fieldbundle, fieldCount=fcount, rc=localrc) 
+      call ESMF_FieldBundleGet(fieldbundle, fieldCount=fcount, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc))  return
 
@@ -7088,47 +7039,47 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
      ESMF_FieldBundleStatusNE = (sf1%status /= sf2%status)
     end function
 
-    subroutine decodeName(string, delimiter, decodeCount, strArray) 
-      ! splitstring splits a string to an array of 
-      ! substrings based on a selected delimiter 
-      ! note any facing space/blank in substrings will be removed 
+    subroutine decodeName(string, delimiter, decodeCount, strArray)
+      ! splitstring splits a string to an array of
+      ! substrings based on a selected delimiter
+      ! note any facing space/blank in substrings will be removed
       ! Credit to Mohammad from comp.lang.fortran with slight modification
 
       character(len=ESMF_MAXSTR), intent(in) :: string
       character,                  intent(in) :: delimiter
       integer,                    intent(out):: decodeCount
-      character(len=ESMF_MAXSTR), pointer    :: strarray(:) 
+      character(len=ESMF_MAXSTR), pointer    :: strarray(:)
 
       ! Local Variables
-      integer   :: n, m, p 
-      integer   :: i, idx 
-      character(len=ESMF_MAXSTR):: strtmp 
+      integer   :: n, m, p
+      integer   :: i, idx
+      character(len=ESMF_MAXSTR):: strtmp
 
 
-      ! 0. remove initial blanks if any 
-      strtmp=trim (adjustl(string) ) 
+      ! 0. remove initial blanks if any
+      strtmp=trim (adjustl(string) )
 
-      ! 1. count the number substrings separated by delimiter 
+      ! 1. count the number substrings separated by delimiter
       i = 1
-      n = count( [ (strtmp(i:i), i=1, len_trim(strtmp)) ] == delimiter) 
-      ! 4. allocate the output string array 
-      allocate(strarray(n+1)) 
+      n = count( [ (strtmp(i:i), i=1, len_trim(strtmp)) ] == delimiter)
+      ! 4. allocate the output string array
+      allocate(strarray(n+1))
       decodeCount = n+1
 
-      m=1 
-      do i=1, n 
-          idx=index(strtmp(m:),delimiter) 
-          strarray(i) = adjustl( strtmp(m:m+idx-2) ) 
-          m = m + idx 
-      end do 
-      strarray(n+1)=adjustl(strtmp(m:) ) 
+      m=1
+      do i=1, n
+          idx=index(strtmp(m:),delimiter)
+          strarray(i) = adjustl( strtmp(m:m+idx-2) )
+          m = m + idx
+      end do
+      strarray(n+1)=adjustl(strtmp(m:) )
 
-      ! 6. pring the results 
-      !print*, '"'//string//'"' 
-      !print *, 'nvalues=', n+1 
-      !print '(a)', strarray(1:n+1) 
-      !print*,'----------------------' 
+      ! 6. pring the results
+      !print*, '"'//string//'"'
+      !print *, 'nvalues=', n+1
+      !print '(a)', strarray(1:n+1)
+      !print*,'----------------------'
 
-    end subroutine decodeName 
+    end subroutine decodeName
 
 end module ESMF_FieldBundleMod

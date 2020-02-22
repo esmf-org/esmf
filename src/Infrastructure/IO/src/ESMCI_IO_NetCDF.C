@@ -38,6 +38,7 @@
 #include "ESMCI_Array.h"
 
 using namespace std;
+using json = nlohmann::json;
 
 //-------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
@@ -854,19 +855,14 @@ void IO_NetCDF::destruct(void) {
       //printf("      nc att name[%d]: %s\n", j, thisAtt->name());
       //printf("      nc att type[%d]: %d ", j, thisAtt->type());
 
-      void* valueBase;
       string attValString;
-      vector<string> attValStringVector;
-      attValStringVector.reserve(1);
       int attValInt;
-      vector<int> attValIntVector;
-      attValIntVector.reserve(1);
       float attValFloat;
-      vector<float> attValFloatVector;
-      attValFloatVector.reserve(1);
       double attValDouble;
-      vector<double> attValDoubleVector;
-      attValDoubleVector.reserve(1);
+
+      ESMCI::Info *info = thisArray->ESMC_BaseGetInfo();
+      std::string sattname(attname);
+      assert(rc);
 
       switch (atttype)
       {
@@ -881,8 +877,12 @@ void IO_NetCDF::destruct(void) {
          }
          attValString = string(att_str, attlen);
          delete[] att_str;
-         attValStringVector.push_back(attValString);
-         valueBase = (void*) (&attValStringVector);
+         try {
+           info->set(sattname, attValString, true);
+         } catch (ESMCI::esmf_info_error &exc_info) {
+           ESMC_LogDefault.MsgFoundError(exc_info.getReturnCode(), exc_info.what(), ESMC_CONTEXT, rc);
+           return thisArray;
+         }
          //printf("(ncChar)\n");
          //printf("     nc att value[%d]: %s\n", j, attValString.c_str());
 
@@ -899,8 +899,12 @@ void IO_NetCDF::destruct(void) {
          }
          attValInt = att_int[0];
          delete[] att_int;
-         attValIntVector.push_back(attValInt);
-         valueBase = (void*) (&attValIntVector);
+         try {
+           info->set(sattname, attValInt, true);
+         } catch (ESMCI::esmf_info_error &exc_info) {
+           ESMC_LogDefault.MsgFoundError(exc_info.getReturnCode(), exc_info.what(), ESMC_CONTEXT, rc);
+           return thisArray;
+         }
          //printf("(ncInt)\n");
          //printf("     nc att value[%d]: %d\n", j, attValInt);
         break;
@@ -916,8 +920,12 @@ void IO_NetCDF::destruct(void) {
          }
          attValFloat = att_float[0];
          delete[] att_float;
-         attValFloatVector.push_back(attValFloat);
-         valueBase = (void*) (&attValFloatVector);
+         try {
+           info->set(sattname, attValFloat, true);
+         } catch (ESMCI::esmf_info_error &exc_info) {
+           ESMC_LogDefault.MsgFoundError(exc_info.getReturnCode(), exc_info.what(), ESMC_CONTEXT, rc);
+           return thisArray;
+         }
          //printf("(ncFloat)\n");
          //printf("     nc att value[%d]: %f\n", j, attValFloat);
         break;
@@ -933,8 +941,12 @@ void IO_NetCDF::destruct(void) {
          }
          attValDouble = att_double[0];
          delete[] att_double;
-         attValDoubleVector.push_back(attValDouble);
-         valueBase = (void*) (&attValDoubleVector);
+         try {
+           info->set(sattname, attValDouble, true);
+         } catch (ESMCI::esmf_info_error &exc_info) {
+           ESMC_LogDefault.MsgFoundError(exc_info.getReturnCode(), exc_info.what(), ESMC_CONTEXT, rc);
+           return thisArray;
+         }
          //printf("(ncDouble)\n");
          //printf("     nc att value[%d]: %g\n", j, attValDouble);
         break;
@@ -943,15 +955,9 @@ void IO_NetCDF::destruct(void) {
         break;
       }
 
-      ESMC_TypeKind_Flag        attType = ncToEsmcType(atttype);
       //printf("   ESMC type[%d]: %d (%s)\n", j, attType,
       //                                      ESMC_TypeKind_FlagString(attType));
 
-      Attribute* esmfAtt = new Attribute(attname,
-                                         attType, 1,
-                                         valueBase);
-      thisArray->ESMC_BaseGetRoot()->AttributeSet(esmfAtt);
-      //thisArray->ESMC_BaseGetRoot()->ESMC_Print();
     }
 
     *rc = ESMF_SUCCESS;
@@ -1092,138 +1098,52 @@ void IO_NetCDF::destruct(void) {
       return localrc;
     }
 
-    int  numAttributes = thisArray->ESMC_BaseGetRoot()->getCountTotal();
-    if (trace)
-      std::cerr << ESMC_METHOD << ": numAttributes = " << numAttributes << std::endl;
-    for (int i = 0; i < numAttributes; ++i)
-    {
-      string         attName;
-      ESMC_TypeKind_Flag  attEsmfType;
-      int            numAttValues = 0;
-      Attribute*     thisAtt = thisArray->ESMC_BaseGetRoot()->AttributeGet(i);
-      attName = thisAtt->getName();
-      attEsmfType = thisAtt->getTypeKind();
-      numAttValues = thisAtt->getItemCount();
-
-      nc_type  attNcType = esmcToNcType(attEsmfType);
-
-      ncerror = nc_redef (netCdfFile);  // ensure we are in Define Mode
-
-      if (trace)
-        std::cerr << ESMC_METHOD << ": attribute name: " << attName << std::endl;
-
-      switch (attNcType)
-      {
-      case NC_CHAR:
-        {
-          string  attVal;
-                  vector<string> attValVector;
-          thisArray->ESMC_BaseGetRoot()->AttributeGet(attName)->get(&attValVector);
-          if (numAttValues == 1) {
-            attVal = attValVector.at(0);
-            if (trace)
-              std::cerr << ESMC_METHOD << ": writing NC_CHAR string attribute: " << attVal.c_str() << ", size = " << attVal.size() << std::endl;
-            if ((ncerror = nc_put_att_text (netCdfFile, thisVar, attName.c_str(), attVal.size(), attVal.c_str())) != NC_NOERR) {
-              string errstr = string(": nc_put_att_text failure: ") + nc_strerror(ncerror);
-              ESMC_LogDefault.MsgFoundError(ESMF_FAILURE,
-                 errstr, ESMC_CONTEXT, &localrc);
-              return localrc;
-            }
-//            thisVar->add_att(attName.c_str(), attVal.c_str());
-          } else {
-            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-              "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
-            return localrc;}
-          //printf("      att name[%d]: %s\n", i, attName.c_str());
-          //printf("      att val[%d]: %s\n", i, attVal.c_str());
+    ESMCI::Info *info = thisArray->ESMC_BaseGetInfo();
+    const json &j = info->getStorageRef();
+    ncerror = nc_redef (netCdfFile);  // ensure we are in Define Mode
+    if (ncerror != NC_NOERR) {
+      string errstr = string(": nc_redef failure: ") + nc_strerror(ncerror);
+      ESMC_LogDefault.MsgFoundError(ESMF_FAILURE, errstr, ESMC_CONTEXT, &localrc);
+      return localrc;
+    }
+    for (json::const_iterator it_info=j.cbegin(); it_info!=j.cend(); it_info++) {
+      auto attrname = it_info.key().c_str();
+      if (it_info.value().is_string()) {
+        string value_string = it_info.value().get<string>();
+        ncerror = nc_put_att_text(netCdfFile, thisVar, attrname, value_string.size(), value_string.c_str());
+        if (ncerror != NC_NOERR) {
+          string errstr = string(": nc_put_att_text failure: ") + nc_strerror(ncerror);
+          ESMC_LogDefault.MsgFoundError(ESMF_FAILURE, errstr, ESMC_CONTEXT, &localrc);
+          return localrc;
         }
-        break;
-
-      case NC_INT:
-        {
-          if (trace)
-            std::cerr << ESMC_METHOD << ": writing NC_INT attribute" << std::endl;
-          int  attVal;
-          vector<int> attValVector;
-          thisArray->ESMC_BaseGetRoot()->AttributeGet(attName)->get(&numAttValues, &attValVector);
-          if (numAttValues == 1) {
-            attVal = attValVector.at(0);
-            if ((ncerror = nc_put_att_int (netCdfFile, thisVar, attName.c_str(), NC_INT, 1, &attVal)) != NC_NOERR) {
-              string errstr = string(": nc_put_att_int failure: ") + nc_strerror(ncerror);
-              ESMC_LogDefault.MsgFoundError(ESMF_FAILURE,
-                 errstr, ESMC_CONTEXT, &localrc);
-              return localrc;
-            }
-
-//          thisVar->add_att(attName.c_str(), attVal);
-          } else {
-            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-              "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
-            return localrc;}
-          //printf("      att name[%d]: %s\n", i, attName.c_str());
-          //printf("      att val[%d]: %d\n", i, attVal);
+      } else if (it_info.value().is_number_float()) {
+        double value_double = it_info.value().get<double>();
+        ncerror = nc_put_att_double(netCdfFile, thisVar, attrname, NC_DOUBLE, 1, &value_double);
+        if (ncerror != NC_NOERR) {
+          string errstr = string(": nc_put_att_double failure: ") + nc_strerror(ncerror);
+          ESMC_LogDefault.MsgFoundError(ESMF_FAILURE, errstr, ESMC_CONTEXT, &localrc);
+          return localrc;
         }
-        break;
-
-      case NC_FLOAT:
-        {
-          if (trace)
-            std::cerr << ESMC_METHOD << ": writing NC_FLOAT attribute" << std::endl;
-          float  attVal;
-          vector<float> attValVector;
-          thisArray->ESMC_BaseGetRoot()->AttributeGet(attName)->get(&numAttValues, &attValVector);
-          if (numAttValues == 1) {
-            attVal = attValVector.at(0);
-            if ((ncerror = nc_put_att_float (netCdfFile, thisVar, attName.c_str(), NC_FLOAT, 1, &attVal)) != NC_NOERR) {
-              string errstr = string(": nc_put_att_float failure: ") + nc_strerror(ncerror);
-              ESMC_LogDefault.MsgFoundError(ESMF_FAILURE,
-                 errstr, ESMC_CONTEXT, &localrc);
-              return localrc;
-            }
-//          thisVar->add_att(attName.c_str(), attVal);
-          } else {
-            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-              "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
-            return localrc;}
-          //printf("      att name[%d]: %s\n", i, attName.c_str());
-          //printf("      att val[%d]: %f\n", i, attVal);
+      } else if (it_info.value().is_number_integer()) {
+        int64_t value_long = it_info.value().get<int64_t>();
+        ncerror = nc_put_att_long(netCdfFile, thisVar, attrname, NC_LONG, 1, &value_long);
+        if (ncerror != NC_NOERR) {
+          string errstr = string(": nc_put_att_long failure: ") + nc_strerror(ncerror);
+          ESMC_LogDefault.MsgFoundError(ESMF_FAILURE, errstr, ESMC_CONTEXT, &localrc);
+          return localrc;
         }
-        break;
-
-      case NC_DOUBLE:
-        {
-          if (trace)
-            std::cerr << ESMC_METHOD << ": writing NC_DOUBLE attribute" << std::endl;
-          double  attVal;
-          vector<double> attValVector;
-          thisArray->ESMC_BaseGetRoot()->AttributeGet(attName)->get(&numAttValues, &attValVector);
-          if (numAttValues == 1) {
-            attVal = attValVector.at(0);
-            if ((ncerror = nc_put_att_double (netCdfFile, thisVar, attName.c_str(), NC_DOUBLE, 1, &attVal)) != NC_NOERR) {
-              string errstr = string(": nc_put_att_text failure: ") + nc_strerror(ncerror);
-              ESMC_LogDefault.MsgFoundError(ESMF_FAILURE,
-                 errstr, ESMC_CONTEXT, &localrc);
-              return localrc;
-            }
-//          thisVar->add_att(attName.c_str(), attVal);
-          } else {
-            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-              "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
-            return localrc;}
-          //printf("      att name[%d]: %s\n", i, attName.c_str());
-          //printf("      att val[%d]: %g\n", i, attVal);
-        }
-        break;
-
-      default:
-        break;
+      } else {
+        string errstr = "JSON key/value not writable to netCDF attribute: " + it_info->dump();
+        ESMC_LogDefault.MsgFoundError(ESMF_FAILURE, errstr, ESMC_CONTEXT, &localrc);
+        return localrc;
       }
     }
+
 
     ncerror = nc_enddef (netCdfFile);
 
     if ((ncerror = nc_sync (netCdfFile)) != NC_NOERR) {
-      string errstr = string(": nc_put_att_text failure: ") + nc_strerror(ncerror);
+      string errstr = string(": nc_sync failure: ") + nc_strerror(ncerror);
       ESMC_LogDefault.MsgFoundError(ESMF_FAILURE,
           errstr, ESMC_CONTEXT, &localrc);
       return localrc;

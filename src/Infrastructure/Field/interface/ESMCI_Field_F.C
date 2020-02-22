@@ -29,6 +29,7 @@ using namespace std;
 #include "ESMCI_IO.h"
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
+#include "ESMCI_Info.h"
 
 
 //-----------------------------------------------------------------------------
@@ -77,10 +78,14 @@ extern "C" {
     if (purposeName)
       purpose = string (purposeName, ESMC_F90lentrim (purposeName, purpose_l));
 
+    // Key for the "attribute package"
+    const std::string key = "/"+convention+"/"+purpose;
+    bool has_convpurp = (convention.length() > 0) && (purpose.length() > 0);
+
     ESMCI::Grid *grid_p = NULL;
-    if ((convention.length() > 0) && (purpose.length() > 0)) {
+    if (has_convpurp) {
       grid_p = *grid;
-      if (grid_p->ESMC_BaseGetRoot()->getCountPack() == 0) {
+      if (grid_p->ESMC_BaseGetInfo()->getCountPack() == 0) {
         localrc = ESMF_RC_ATTR_NOTSET;
         if (ESMC_LogDefault.MsgFoundError(localrc, "No Field or Grid AttPacks found", ESMC_CONTEXT,
             rc)) return;
@@ -88,51 +93,47 @@ extern "C" {
     }
 
     // If present, use Attributes at the Grid level for dimension names
-    ESMCI::Attribute *dimAttPack = NULL;
-    if ((convention.length() > 0) && (purpose.length() > 0)) {
-      std::vector<std::string> attPackNameList;
-      int attPackNameCount;
-      localrc = grid_p->ESMC_BaseGetRoot()->AttPackGet(
-          convention, purpose, "grid",
-          attPackNameList, attPackNameCount, ESMC_ATTNEST_ON);
-      if (localrc == ESMF_SUCCESS) {
-        dimAttPack = grid_p->ESMC_BaseGetRoot()->AttPackGet (
-            convention, purpose, "grid",
-            attPackNameList[0], ESMC_ATTNEST_ON);
+    ESMCI::Info *dimAttPack = nullptr;
+    if (has_convpurp) {
+      try {
+        if (grid_p->ESMC_BaseGetInfo()->hasKey(key, true, false)) {
+          dimAttPack = new ESMCI::Info();
+          grid_p->ESMC_BaseGetInfo()->get(*dimAttPack, key);
+        }
+      } catch (ESMCI::esmf_info_error &exc_info) {
+        ESMC_LogDefault.MsgFoundError(exc_info.getReturnCode(), exc_info.what(), ESMC_CONTEXT, rc);
+        return;
       }
     }
 
     // If present, use Attributes at the Field level for variable attributes
     ESMC_Base *base_p = *base;
-    ESMCI::Attribute *varAttPack = NULL;
-    if ((convention.length() > 0) && (purpose.length() > 0)) {
-      std::vector<std::string> attPackNameList;
-      int attPackNameCount;
-      localrc = base_p->ESMC_BaseGetRoot()->AttPackGet(
-          convention, purpose, "field",
-          attPackNameList, attPackNameCount, ESMC_ATTNEST_ON);
-      if (localrc == ESMF_SUCCESS) {
-        varAttPack = base_p->ESMC_BaseGetRoot()->AttPackGet (
-            convention, purpose, "field",
-            attPackNameList[0], ESMC_ATTNEST_ON);
+    ESMCI::Info *varAttPack = nullptr;
+    if (has_convpurp) {
+      try {
+        if (base_p->ESMC_BaseGetInfo()->hasKey(key, true, false)) {
+          varAttPack = new ESMCI::Info();
+          base_p->ESMC_BaseGetInfo()->get(*varAttPack, key);
+        }
+      } catch (ESMCI::esmf_info_error &exc_info) {
+        ESMC_LogDefault.MsgFoundError(exc_info.getReturnCode(), exc_info.what(), ESMC_CONTEXT, rc);
+        return;
       }
     }
 
-
     // If present, use Attributes at the FieldBundle level for global attributes
-    ESMCI::Attribute *gblAttPack = NULL;
+    ESMCI::Info *gblAttPack = nullptr;
     if (gblbase) {
       ESMC_Base *gblbase_p = *gblbase;
-      if ((convention.length() > 0) && (purpose.length() > 0)) {
-        std::vector<std::string> attPackNameList;
-        int attPackNameCount;
-        localrc = gblbase_p->ESMC_BaseGetRoot()->AttPackGet(
-            convention, purpose, "fieldbundle",
-            attPackNameList, attPackNameCount, ESMC_ATTNEST_ON);
-        if (localrc == ESMF_SUCCESS) {
-          gblAttPack = gblbase_p->ESMC_BaseGetRoot()->AttPackGet (
-              convention, purpose, "fieldbundle",
-              attPackNameList[0], ESMC_ATTNEST_ON);
+      if (has_convpurp) {
+        try {
+          if (gblbase_p->ESMC_BaseGetInfo()->hasKey(key, true, false)) {
+            gblAttPack = new ESMCI::Info();
+            gblbase_p->ESMC_BaseGetInfo()->get(*gblAttPack, key);
+          }
+        } catch (ESMCI::esmf_info_error &exc_info) {
+          ESMC_LogDefault.MsgFoundError(exc_info.getReturnCode(), exc_info.what(), ESMC_CONTEXT, rc);
+          return;
         }
       }
     }

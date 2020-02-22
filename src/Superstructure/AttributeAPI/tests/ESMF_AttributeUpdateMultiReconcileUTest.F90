@@ -495,8 +495,12 @@ module ESMF_AttributeUpdateMultiReconcileUTestMod
     call ESMF_AttributeSet(field, attrList(2), valueList(2), &
       convention=convESMF, purpose=purp2, rc=rc)
     if (rc/=ESMF_SUCCESS) return
+    call ESMF_LogWrite("ESMF_AttributeUpdateMultiReconcileUTest: Calling ESMF_AttributeRemove", ESMF_LOGMSG_INFO, rc=rc)
+    if (rc/=ESMF_SUCCESS) return
     call ESMF_AttributeRemove(field, name=name3, convention=convESMF, &
       purpose=purpGen, rc=status)
+    if (rc/=ESMF_SUCCESS) return
+    call ESMF_LogWrite("ESMF_AttributeUpdateMultiReconcileUTest: After ESMF_AttributeRemove", ESMF_LOGMSG_INFO, rc=rc)
     if (rc/=ESMF_SUCCESS) return
 
   end subroutine userm1_run
@@ -532,8 +536,7 @@ module ESMF_AttributeUpdateMultiReconcileUTestMod
     call ESMF_AttributeUpdate(importState, vm, rootList=rootList, rc=rc)
     if (rc/=ESMF_SUCCESS) return
 
-    call ESMF_AttributeCopy(importState, exportState, &
-      attcopy=ESMF_ATTCOPY_HYBRID, rc=rc)
+    call ESMF_AttributeCopy(importState, exportState, rc=rc)
     if (rc/=ESMF_SUCCESS) return
 
   end subroutine usercpl1_run
@@ -597,8 +600,7 @@ module ESMF_AttributeUpdateMultiReconcileUTestMod
     call ESMF_AttributeUpdate(importState, vm, rootList=rootList, rc=rc)
     if (rc/=ESMF_SUCCESS) return
 
-    call ESMF_AttributeCopy(importState, exportState, &
-      attcopy=ESMF_ATTCOPY_HYBRID, rc=rc)
+    call ESMF_AttributeCopy(importState, exportState, rc=rc)
     if (rc/=ESMF_SUCCESS) return
 
   end subroutine usercpl2_run
@@ -928,15 +930,17 @@ program ESMF_AttributeUpdateMultiReconcileUTest
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     !EX_UTest_Multi_Proc_Only
+    write(name, *) "Getting an updated Attribute value from a Field test"
+    call ESMF_LogWrite("Start: "//TRIM(name))
     call ESMF_AttributeGetAttPack(field, convention=convESMF, purpose=purpGen, &
         attpack=attpack, rc=rc)
     call ESMF_AttributeGet(field, name2, value=outVal, attpack=attpack, rc=rc)
     print *, "PET: ", localPet, "outVal: ", trim(outVal)
     print *, "                expected: ", trim(value2)
     write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-    write(name, *) "Getting an updated Attribute value from a Field test"
     call ESMF_Test((rc==ESMF_SUCCESS).and.(value2==outVal), &
                     name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_LogWrite("End: "//TRIM(name))
 
     !EX_UTest_Multi_Proc_Only
     call ESMF_AttributeGetAttPack(field, convention=convESMF, purpose=purp2, &
@@ -961,11 +965,12 @@ program ESMF_AttributeUpdateMultiReconcileUTest
                     name, failMsg, result, ESMF_SRCLINE)
 
     !EX_UTest_Multi_Proc_Only
+    write(name, *) "Getting an updated deleted Attribute value from a Field test"
+    call ESMF_LogWrite("Start: "//TRIM(name))
     call ESMF_AttributeGet(field, name3, value=outVal, &
       convention=convESMF, purpose=purpGen, rc=rc)
     print *, "PET: ", localPet, "DELETED, rc = ", rc
     write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-    write(name, *) "Getting an updated deleted Attribute value from a Field test"
     call ESMF_Test((rc/=ESMF_SUCCESS), &
                     name, failMsg, result, ESMF_SRCLINE)
 

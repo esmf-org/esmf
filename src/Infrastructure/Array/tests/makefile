@@ -7,6 +7,7 @@ run_uni:  run_unit_tests_uni
 LOCDIR	  = src/Infrastructure/Array/tests
 
 .NOTPARALLEL:
+#TESTS_BUILD = $(ESMF_TESTDIR)/ESMF_ArrayInfoUTest
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_ArrayCreateGetUTest \
                 $(ESMF_TESTDIR)/ESMF_ArrayDataUTest \
                 $(ESMF_TESTDIR)/ESMF_ArrayScatterUTest \
@@ -18,7 +19,7 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_ArrayCreateGetUTest \
                 $(ESMF_TESTDIR)/ESMF_ArrayRedistUTest \
                 $(ESMF_TESTDIR)/ESMF_ArrayRedistPerfUTest \
                 $(ESMF_TESTDIR)/ESMF_ArrayHaloUTest \
-                $(ESMF_TESTDIR)/ESMC_ArrayUTest 
+                $(ESMF_TESTDIR)/ESMC_ArrayUTest
 
 TESTS_RUN     = RUN_ESMF_ArrayCreateGetUTest \
                 RUN_ESMF_ArrayDataUTest  \
@@ -31,7 +32,7 @@ TESTS_RUN     = RUN_ESMF_ArrayCreateGetUTest \
                 RUN_ESMF_ArrayRedistUTest \
                 RUN_ESMF_ArrayRedistPerfUTest \
                 RUN_ESMF_ArrayHaloUTest \
-                RUN_ESMC_ArrayUTest 
+                RUN_ESMC_ArrayUTest
 
 TESTS_RUN_UNI = RUN_ESMF_ArrayDataUTestUNI \
                 RUN_ESMF_ArraySMMUTestUNI \

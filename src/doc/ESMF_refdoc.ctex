@@ -217,7 +217,7 @@
 
 \newpage
 
-#include "../Infrastructure/Attribute/doc/Attribute_refdoc.ctex"
+#include "../Infrastructure/Base/doc/Info_refdoc.ctex"
 
 #include "../Infrastructure/TimeMgr/doc/TimeMgr_refdoc.ctex"
 

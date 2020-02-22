@@ -1,0 +1,139 @@
+{#Data type iteration target#}
+{% set esmf_types = meta['ESMF_TYPES'] %}
+{{ meta['ESMF_FILEHEADER'] }}
+
+#define FILENAME "src/Superstructure/InfoAPI/interface/ESMF_InfoSync.F90"
+
+{{ meta['F_JINJADISCLAIMER'] }}
+
+#include "ESMF_Macros.inc"
+#include "ESMF.h"
+
+!==============================================================================
+!==============================================================================
+
+module ESMF_InfoSyncMod
+
+use ESMF_UtilTypesMod     ! ESMF utility types
+use ESMF_InitMacrosMod    ! ESMF initializer macros
+use ESMF_BaseMod          ! ESMF base class
+use ESMF_LogErrMod        ! ESMF error handling
+
+use ESMF_VMMod
+use ESMF_StateMod
+use ESMF_StateItemMod
+use ESMF_DistGridMod
+use ESMF_FieldMod
+use ESMF_FieldGetMod
+use ESMF_FieldBundleMod
+use ESMF_CompMod
+use ESMF_GridCompMod
+use ESMF_CplCompMod
+use ESMF_SciCompMod
+use ESMF_ArrayMod
+use ESMF_ArrayBundleMod
+use ESMF_InfoMod
+use ESMF_UtilTypesMod
+use ESMF_GeomBaseMod
+use ESMF_MeshMod
+use ESMF_GridMod
+use ESMF_XGridMod
+use ESMF_XGridGetMod
+use ESMF_LocStreamMod
+use ESMF_RHandleMod
+use ESMF_InfoDescribeMod
+implicit none
+
+!==============================================================================
+!==============================================================================
+
+private
+public ESMF_InfoSync
+public ESMF_InfoGetHandle
+
+!==============================================================================
+!==============================================================================
+
+interface ESMF_InfoSync
+{% for et in meta['STATE_SYNC_TYPES'] %}
+  module procedure ESMF_InfoSync{{ et }}
+{% endfor %}
+end interface
+
+interface ESMF_InfoGetHandle
+{% for esmf_type in esmf_types %}
+  module procedure ESMF_InfoGetHandle{{ esmf_type }}
+{% endfor %}
+end interface
+
+contains !=====================================================================
+
+!===============================================================================
+! ESMF_InfoSync ================================================================
+!===============================================================================
+!tdk:todo: add option to set dirty status for a hierarchy using describe
+{% for et in meta['STATE_SYNC_TYPES'] %}
+{% set method_name =  "ESMF_InfoSync"~et %}
+
+! Note: Documentation stub located in ESMF_InfoMod
+#undef  ESMF_METHOD
+#define ESMF_METHOD "{{ method_name }}()"
+subroutine {{ method_name }}(target, rootPet, vm, keywordEnforcer, rc)
+  type(ESMF_{{ et }}), intent(inout) :: target
+  integer, intent(in) :: rootPet
+  type(ESMF_VM), intent(in) :: vm
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  integer, intent(inout), optional :: rc
+
+  type(ESMF_InfoDescribe) :: eidesc
+  integer :: localrc
+  type(ESMF_Pointer) :: eptr
+
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+  call ESMF_VMGetThis(vm, eptr, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call eidesc%Initialize(addBaseAddress=.true., addObjectInfo=.false., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call eidesc%Update(target, "", rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call c_info_base_sync(eidesc%info%ptr, rootPet, eptr%ptr, localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call eidesc%Destroy(rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine {{ method_name }}
+{% endfor %}
+
+! =============================================================================
+! ESMF_InfoGetHandle ==========================================================
+! =============================================================================
+{% for esmf_type in meta['ESMF_TYPES'] %}
+
+! Note: Documentation stub located in ESMF_InfoMod
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoGetHandle{{ esmf_type }}()"
+function ESMF_InfoGetHandle{{ esmf_type }}(target, keywordEnforcer, rc) result(info)
+  type(ESMF_{{ esmf_type }}), intent(in) :: target
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  integer, intent(inout), optional :: rc
+  type(ESMF_Info) :: info
+
+  integer :: localrc
+  type(ESMF_InfoDescribe) :: eidesc
+
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+  info = eidesc%GetInfo(target, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end function ESMF_InfoGetHandle{{ esmf_type }}
+{% endfor %}
+
+end module ESMF_InfoSyncMod

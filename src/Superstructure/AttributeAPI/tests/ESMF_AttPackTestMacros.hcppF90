@@ -61,8 +61,9 @@
       character(ESMF_MAXSTR) :: attrname, attrvalue, filename, baseline @\
  @\
       logical                :: rc_logical, isPresent @\
-      integer                :: count, attrcount, packcount @\
+      integer                :: count, attrcount, packcount, rc2 @\
       character(ESMF_MAXSTR), dimension(1) :: exclusions @\
+      type(ESMF_Info) :: info_actual, info_desired, info_handle @\
  @\
 ^endif @\
 ! < end macro - do not edit directly >  @\
@@ -142,68 +143,6 @@
       call ESMF_Test((rc==ESMF_SUCCESS) & @\
                      .and. attrcount == 13 & @\
                      .and. packcount == 1, name, failMsg, result, ESMF_SRCLINE) @\
-      !---------------------------------------------------------------------- @\
- @\
-      !mtag @\
-      ! Create a redundant Attribute package using attpack on mobj Test @\
-      call ESMF_AttributeAdd(mname, conv, purp, attrList=attpackList(1:5), & @\
-        redundant=.true., attpack=attpack2, rc=rc) @\
-      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
-      write(name, *) "Creating a redundant Attribute package using attpack on ", mobj, " Test" @\
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
-      !---------------------------------------------------------------------- @\
- @\
-      !mtag @\
-      ! Add to a custom Attribute package using attpack on mobj Test @\
-      attpackList(1) = "ESMF_I4_new" @\
-      call ESMF_AttributeAdd(mname, conv, purp, attrList=attpackList(1:1), & @\
-        attpack=attpack2, rc=rc) @\
-      attpackList(1) = "ESMF_I4_new2" @\
-      call ESMF_AttributeAdd(mname, conv, purp, attrList=attpackList(1:1), & @\
-        rc=rc) @\
-      attrcount = -5 @\
-      call ESMF_AttributeGet(mname, count=attrcount, attpack=attpack2, & @\
-                             attnestflag=ESMF_ATTNEST_OFF, rc=rc) @\
-      packcount = -5 @\
-      call ESMF_AttributeGet(mname, & @\
-                             attnestflag=ESMF_ATTNEST_OFF, & @\
-                             attcountflag=ESMF_ATTGETCOUNT_ATTPACK, & @\
-                             count=packcount, rc=rc) @\
-      ! reset the attrList @\
-      attpackList(1) = "ESMF_I4" @\
-      ! remove this attpack to avoid confusion with remaining tests @\
-      call ESMF_AttributeRemove(mname, attpack=attpack2, rc=rc) @\
-      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
-      write(name, *) "Add to a custom Attribute package using attpack on ", mobj, " Test" @\
-      call ESMF_Test((rc==ESMF_SUCCESS) & @\
-                     .and. attrcount == 7 & @\
-                     .and. packcount == 2, name, failMsg, result, ESMF_SRCLINE) @\
-      !---------------------------------------------------------------------- @\
- @\
-      !mtag @\
-      purp = "doodle          " @\
-      ! Add to a custom Attribute package that cannot be found on mobj Test @\
-      call ESMF_AttributeAdd(mname, conv, purp, attrList=attpackList(1:5), & @\
-        rc=rc) @\
-      call ESMF_AttributeGetAttPack(mname, conv, purp, attpack=attpack2, & @\
-        rc=rc) @\
-      attrcount = -5 @\
-      call ESMF_AttributeGet(mname, count=attrcount, attpack=attpack2, & @\
-                             attnestflag=ESMF_ATTNEST_OFF, rc=rc) @\
-      packcount = -5 @\
-      call ESMF_AttributeGet(mname, & @\
-                             attnestflag=ESMF_ATTNEST_OFF, & @\
-                             attcountflag=ESMF_ATTGETCOUNT_ATTPACK, & @\
-                             count=packcount, rc=rc) @\
-      ! reset the purp @\
-      purp = "custompurpose   " @\
-      ! remove this attpack to avoid confusion with remaining tests @\
-      call ESMF_AttributeRemove(mname, attpack=attpack2, rc=rc) @\
-      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
-      write(name, *) "Add to a custom Attribute package that cannot be found on ", mobj, " Test" @\
-      call ESMF_Test((rc==ESMF_SUCCESS) & @\
-                     .and. attrcount == 5 & @\
-                     .and. packcount == 2, name, failMsg, result, ESMF_SRCLINE) @\
       !---------------------------------------------------------------------- @\
  @\
     !------------------------------------------------------------------------- @\
@@ -441,26 +380,6 @@
       !---------------------------------------------------------------------- @\
  @\
       !mtag @\
-      isPresent = .false. @\
-      ! Test for the presence of an AttPack object using a specList on mobj @\
-      call ESMF_AttributeGetAttPack(mname, (/conv, purp/), & @\
-        isPresent=isPresent, rc=rc)      @\
-      write(failMsg, *) "Did not return isPresent=True" @\
-      write(name, *) "Test for the presence of an AttPack object using a specList on mobj" @\
-      call ESMF_Test((rc==ESMF_SUCCESS .and. isPresent.eqv..true.), & @\
-                      name, failMsg, result, ESMF_SRCLINE) @\
-      !---------------------------------------------------------------------- @\
- @\
-      !mtag @\
-      ! Get an AttPack using a specList on mobj test @\
-      call ESMF_AttributeGetAttPack(mname, specList=(/conv, purp/), & @\
-        attpack=attpack, rc=rc) @\
-      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
-      write(name, *) "Get an AttPack using a specList on ", mobj, " Test" @\
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
-      !---------------------------------------------------------------------- @\
- @\
-      !mtag @\
       ! Get the count of an AttPack object on mobj @\
       count = -5 @\
       call ESMF_AttributeGet(mname, convention=conv, purpose=purp, & @\
@@ -512,34 +431,6 @@
                       name, failMsg, result, ESMF_SRCLINE) @\
       !---------------------------------------------------------------------- @\
  @\
-      !mtag @\
-      ! Get the count of an AttPack object on mobj @\
-      count = -5 @\
-      call ESMF_AttributeGet(mname, convention=conv, purpose=purp, & @\
-                             attnestflag=ESMF_ATTNEST_ON, & @\
-                             attcountflag=ESMF_ATTGETCOUNT_ATTLINK, & @\
-                             count=count, rc=rc) @\
-      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
-      write(name, *) "Test for getting the Attlink count of an Attpack on mobj, ", & @\
-                     "count = ", count @\
-      call ESMF_Test((rc==ESMF_SUCCESS .and. count.eq.0), & @\
-                      name, failMsg, result, ESMF_SRCLINE) @\
-      !---------------------------------------------------------------------- @\
- @\
-      !mtag @\
-      ! Get the count of an AttPack object on mobj @\
-      count = -5 @\
-      call ESMF_AttributeGet(mname, attpack=attpack, & @\
-                             attnestflag=ESMF_ATTNEST_ON, & @\
-                             attcountflag=ESMF_ATTGETCOUNT_ATTLINK, & @\
-                             count=count, rc=rc) @\
-      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
-      write(name, *) "Test for getting the Attlink count using an Attpack object on mobj, ", & @\
-                     "count = ", count @\
-      call ESMF_Test((rc==ESMF_SUCCESS .and. count.eq.0), & @\
-                      name, failMsg, result, ESMF_SRCLINE) @\
-      !---------------------------------------------------------------------- @\
- @\
     !------------------------------------------------------------------------- @\
     !  Attribute package - custom nested @\
     !------------------------------------------------------------------------- @\
@@ -571,13 +462,31 @@
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
       !---------------------------------------------------------------------- @\
  @\
+       !mtag @\
+       ! Add a duplicate attpack. Ensure mappig is identical after adding. @\
+       info_handle = ESMF_InfoGetHandle(mname, rc=rc) @\
+       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT) @\
+       info_desired = ESMF_InfoCopy(info_handle, rc=rc) @\
+       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT) @\
+       call ESMF_AttributeAdd(mname, convention=nestconv, purpose=nestpurp, & @\
+         attrList=attpackListTNames2, nestConvention=conv, nestPurpose=purp, rc=rc) @\
+       info_actual = ESMF_InfoCopy(info_handle, rc=rc) @\
+       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT) @\
+       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT) @\
+       write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+       write(name, *) "Add a duplicate attpack. Ensure mappig is identical after adding." @\
+       call ESMF_Test((info_actual==info_desired), name, failMsg, result, ESMF_SRCLINE) @\
+       !---------------------------------------------------------------------- @\
+  @\
       !mtag @\
       ! Remove an Attribute in a nested Attribute package on mobj Test @\
       call ESMF_AttributeRemove(mname, name=attrname, convention=nestconv, & @\
         purpose=nestpurp, rc=rc) @\
+      call ESMF_AttributeGet(mname, name=attrname, isPresent=isPresent, rc=rc2) @\
       write(failMsg, *) "Did not return ESMF_SUCCESS" @\
-      write(name, *) "Removeing an Attribute in a nested Attribute package on ", mobj, " Test" @\
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      write(name, *) "Removing an Attribute in a nested Attribute package on ", mobj, " Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS .and. rc2==ESMF_SUCCESS .and. .not. isPresent), & @\
+        name, failMsg, result, ESMF_SRCLINE) @\
       !---------------------------------------------------------------------- @\
  @\
       !mtag @\
@@ -585,7 +494,7 @@
       call ESMF_AttributeRemove(mname, name=attrname, convention=nestconv, & @\
         purpose=nestpurp, rc=rc) @\
       write(failMsg, *) "Did not return ESMC_RC_NOT_FOUND" @\
-      write(name, *) "Removeing an Attribute in a nested Attribute package on mobj Test, again" @\
+      write(name, *) "Removing an Attribute in a nested Attribute package on mobj Test, again" @\
       call ESMF_Test((rc==ESMC_RC_NOT_FOUND), name, failMsg, result, ESMF_SRCLINE) @\
       !---------------------------------------------------------------------- @\
  @\
@@ -609,7 +518,7 @@
       call ESMF_AttributeGetAttPack(mname, conv, purp, & @\
         attpack=attpack, rc=rc) @\
       write(failMsg, *) "Did not return ESMF_SUCCESS" @\
-      write(name, *) "Get an AttPack using a specList on ", mobj, " Test" @\
+      write(name, *) "Get a nested AttPack on ", mobj, " Test" @\
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
       !---------------------------------------------------------------------- @\
  @\
@@ -725,11 +634,11 @@
  @\
       !mtag @\
       isPresent = .false. @\
-      ! Test for the presence of a nested AttPack on mobj @\
+      ! Test for the presence of a nested AttPack using index on mobj @\
       call ESMF_AttributeGet(mname, 3, attrname, convention=conv, purpose=purp, & @\
         attnestflag=ESMF_ATTNEST_ON, isPresent=isPresent, rc=rc) @\
       write(failMsg, *) "Did not return isPresent=True" @\
-      write(name, *) "Test for the presence of a nested AttPack on mobj" @\
+      write(name, *) "Test for the presence of a nested AttPack using index on mobj" @\
       call ESMF_Test((rc==ESMF_SUCCESS .and. isPresent.eqv..true.), & @\
                       name, failMsg, result, ESMF_SRCLINE) @\
       !---------------------------------------------------------------------- @\
@@ -769,19 +678,6 @@
       count = -5 @\
       !mtag @\
       call ESMF_AttributeGet(mname, count, & @\
-                             convention=nestconv, purpose=nestpurp, & @\
-                             attcountflag=ESMF_ATTGETCOUNT_ATTLINK, rc=rc) @\
-      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
-      write(name, *) "Test for getting the count of Attlinks in a ", & @\
-                     " nested Attpack, count = ", count @\
-      call ESMF_Test((rc==ESMF_SUCCESS .and. count.eq.0), & @\
-                      name, failMsg, result, ESMF_SRCLINE) @\
-      !---------------------------------------------------------------------- @\
- @\
-      ! Get the count of an AttPack object on mobj Test @\
-      count = -5 @\
-      !mtag @\
-      call ESMF_AttributeGet(mname, count, & @\
                              convention=conv, purpose=purp, & @\
                              attcountflag=ESMF_ATTGETCOUNT_ATTRIBUTE, rc=rc) @\
       write(failMsg, *) "Did not return ESMF_SUCCESS" @\
@@ -804,19 +700,6 @@
                       name, failMsg, result, ESMF_SRCLINE) @\
       !---------------------------------------------------------------------- @\
  @\
-      ! Get the count of an AttPack object on mobj Test @\
-      count = -5 @\
-      !mtag @\
-      call ESMF_AttributeGet(mname, count, & @\
-                             convention=conv, purpose=purp, & @\
-                             attcountflag=ESMF_ATTGETCOUNT_ATTLINK, rc=rc) @\
-      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
-      write(name, *) "Test for getting the count of Attlinks in a ", & @\
-                     " nested Attpack, count = ", count @\
-      call ESMF_Test((rc==ESMF_SUCCESS .and. count.eq.0), & @\
-                      name, failMsg, result, ESMF_SRCLINE) @\
-      !---------------------------------------------------------------------- @\
- @\
     !------------------------------------------------------------------------- @\
     !  Attribute nestflag @\
     !------------------------------------------------------------------------- @\
@@ -830,7 +713,7 @@
                              attnestflag=ESMF_ATTNEST_OFF, rc=rc) @\
       write(failMsg, *) "Did not return ESMF_SUCCESS" @\
       write(name, *) "Test for getting the count of Attributes in a ", & @\
-                     " nested Attpack, count = ", count @\
+                     " nested Attpack with ATTNEST_OFF, count = ", count @\
       call ESMF_Test((rc==ESMF_SUCCESS .and. count.eq.11), & @\
                       name, failMsg, result, ESMF_SRCLINE) @\
       !---------------------------------------------------------------------- @\
@@ -844,7 +727,7 @@
                              attnestflag=ESMF_ATTNEST_ON, rc=rc) @\
       write(failMsg, *) "Did not return ESMF_SUCCESS" @\
       write(name, *) "Test for getting the count of Attributes in a ", & @\
-                     "nested Attpack, count = ", count @\
+                     "nested Attpack with ATTNEST_ON, count = ", count @\
       call ESMF_Test((rc==ESMF_SUCCESS .and. count.eq.21), & @\
                       name, failMsg, result, ESMF_SRCLINE) @\
       !---------------------------------------------------------------------- @\
@@ -858,10 +741,10 @@
         if (rc /= ESMF_SUCCESS) continue @\
       enddo @\
       write(failMsg, *) "Did not return ESMF_SUCCESS" @\
-      write(name, *) "Get all Attributes in an AttPack object by index Test", & @\
+      write(name, *) "Get all Attributes in an AttPack object by index with ATTNEST_ON Test", & @\
                      ", count = ", count, & @\
-                     ", convention = ", trim(conv), & @\
-                     ", purpose = ", trim(purp) @\
+                     ", convention = ", trim(nestconv), & @\
+                     ", purpose = ", trim(nestpurp) @\
       call ESMF_Test((rc==ESMF_SUCCESS), & @\
                       name, failMsg, result, ESMF_SRCLINE) @\
       !---------------------------------------------------------------------- @\
@@ -913,51 +796,6 @@
     !------------------------------------------------------------------------- @\
     !  AttributeWrite @\
     !------------------------------------------------------------------------- @\
- @\
-      !mtag @\
-      ! Write the Attribute package to .xml from mobj Test @\
-      call ESMF_AttributeWrite(mname, convention=conv, purpose=purp, & @\
-                               attwriteflag=ESMF_ATTWRITE_XML, rc=rc) @\
-      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
-      write(name, *) "Writing an Attribute package to .xml from ", mobj, " Test" @\
-      call ESMF_Test((rc==ESMF_SUCCESS .or. rc==ESMF_RC_LIB_NOT_PRESENT), & @\
-                      name, failMsg, result, ESMF_SRCLINE) @\
-      !---------------------------------------------------------------------- @\
- @\
-      !mtag @\
-      ! compare the output file to the baseline file @\
-      exclusions(1) = "ESMF Version" @\
-      write (filename, "(2a)") mfilename, ".xml" @\
-      write (baseline, "(3a)") "baseline_", mfilename, ".xml" @\
-      rc_logical = ESMF_TestFileCompare(filename, baseline, & @\
-                                        exclusionList=exclusions) @\
-      write(failMsg, *) "Did not return True" @\
-      write(name, *) "Compare the XML output file to the baseline file" @\
-      call ESMF_Test(rc_logical.eqv..true., name, failMsg, result, ESMF_SRCLINE) @\
-      !---------------------------------------------------------------------- @\
-      print *, "rc = ", rc_logical, " filename = ", trim(filename), & @\
-               " and baseline = ", trim(baseline) @\
- @\
-      !mtag @\
-      ! Write the Attribute package to .stdout from mobj Test @\
-      call ESMF_AttributeWrite(mname, convention=conv, purpose=purp, & @\
-                               attwriteflag=ESMF_ATTWRITE_TAB, rc=rc) @\
-      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
-      write(name, *) "Writing an Attribute package to .stdout from ", mobj, " Test" @\
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
-      !---------------------------------------------------------------------- @\
- @\
-      !mtag @\
-      ! compare the output file to the baseline file @\
-      write (filename, "(2a)") mfilename, ".stdout" @\
-      write (baseline, "(3a)") "baseline_", mfilename, ".stdout" @\
-      rc_logical = ESMF_TestFileCompare(filename, baseline) @\
-      write(failMsg, *) "Did not return True" @\
-      write(name, *) "Compare the stdout output file to the baseline file" @\
-      call ESMF_Test(rc_logical.eqv..true., name, failMsg, result, ESMF_SRCLINE) @\
-      !---------------------------------------------------------------------- @\
-      print *, "rc = ", rc_logical, " filename = ", trim(filename), & @\
-               " and baseline = ", trim(baseline) @\
  @\
     !------------------------------------------------------------------------- @\
     !  Get an Attribute which was not set from an Attribute package @\

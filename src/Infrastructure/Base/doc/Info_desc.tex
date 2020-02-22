@@ -1,0 +1,29 @@
+% $Id$
+
+When created, ESMF base objects contain a managed instance of a JSON object \cite{json_for_modern_cpp_object} called \texttt{ESMF\_Info}. \texttt{ESMF\_Info} stores key-value pairs that may be nested in a hierarchy composed of multiple JSON objects. An \texttt{ESMF\_Info} object will have only one root JSON object store.
+
+ESMF uses \textit{JSON for Modern C++} \cite{json_for_modern_cpp} as its backend JSON manipulator and parser. JSON, or Javascript Object Notation, is widely used as an interoperability data format and specification.
+
+\textbf{\textit{There are some aspects of the \texttt{ESMF\_Info} implementation related to JSON that should be noted by users:}}
+\begin{enumerate}
+    \item Only 64-bit data types for integers and reals are supported (\cite{json_for_modern_cpp_64bit_int}, \cite{json_for_modern_cpp_64bit_float}).
+    \item The memory overhead requires an additional allocator pointer \cite{json_for_modern_cpp_memory_overhead}. Hence, the JSON map is not suited for big data storage, offering flexibility in exchange.
+    \item Keys are stored in an unordered map sorted in lexicographical order.
+\end{enumerate}
+
+\subsection{Migrating from Attribute}
+The \texttt{ESMF\_Info} class is intended to replace the \texttt{ESMF\_Attribute} class. It is recommended that users migrate \texttt{ESMF\_Attribute} code to \texttt{ESMF\_Info}. The \texttt{ESMF\_Info} class provides the backend for \texttt{ESMF\_Attribute} since ESMF version 8.0. In practice, users should experience no friction when migrating client code. Please email ESMF support in the case of a migration issue. Some structural changes to \texttt{ESMF\_Attribute} did occur:
+\begin{itemize}
+    \item Changed behavior when getting fixed-size lists. List size in storage must match size of outgoing list.
+    \item Removed ability to use a default value with list gets.
+    \item Removed \texttt{attPackInstanceName} from all interfaces.
+    \item Removed \texttt{attcopyFlag} from all interfaces.
+    \item Removed \texttt{ESMF\_Attribute}-managed object linking.
+    \item Modified \texttt{ESMF\_AttributeAdd} to set the target key to a null JSON value.
+    \item Modified \texttt{ESMF\_AttributeSet} to not require an attribute be added through \texttt{ESMF\_AttributeAdd} before setting.
+    \item Removed support for attribute XML I/O.
+\end{itemize}
+
+\subsection{Key Format}
+\label{info_key_format}
+Keys in the \texttt{ESMF\_Info} class use the JSON Pointer syntax \cite{json_for_modern_cpp_json_pointer}. A forward slash is prepended to string keys if it does not exist. Hence, \texttt{"aKey"} and \texttt{"/aKey"} are equivalent. Note the indexing aspect of the JSON Pointer syntax is not supported.

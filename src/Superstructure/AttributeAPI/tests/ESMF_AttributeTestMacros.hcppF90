@@ -60,7 +60,8 @@
       character(ESMF_MAXSTR)                :: outConstantChar @\
       character(ESMF_MAXSTR), dimension(3)  :: outConstantCharl @\
  @\
-      logical :: isPresent @\
+      logical                               :: isPresent @\
+      character(len=ESMF_MAXSTR)            :: logmsg @\
  @\
 ^ifdef ESMF_TESTEXHAUSTIVE @\
  @\
@@ -193,11 +194,15 @@
       !mtag_ex @\
       ! Add ASCII characters to an Attribute on an Array Test @\
       correct = .true. @\
-      inASCII = "!""#$%&'()*+,-./0123456789:;<=>?" @\
+      ! NOTE (bekozi): Remove the forward slash / from list of possible keys. This is @\
+      ! used by JSON Pointer Syntax and creates nests which break these tests. @\
+      inASCII = "!""#$%&'()*+,-.0123456789:;<=>?" @\
       inASCII = ESMF_StringConcat (trim (inASCII), "ABCDEFGHIJKLMNOPQRSTUVWXYZ") @\
       inASCII = ESMF_StringConcat (trim (inASCII), "[\]^_`") @\
       inASCII = ESMF_StringConcat (trim (inASCII), "abcdefghijklmnopqrstuvwxyz") @\
-      inASCII = ESMF_StringConcat (trim (inASCII), "{|}~") @\
+      ! NOTE (bekozi): Remove the tilda ~ from list of possible keys. This is @\
+      ! used by JSON Pointer Syntax is not valid without an integer index after. @\
+      inASCII = ESMF_StringConcat (trim (inASCII), "{|}") @\
       do i=1,len_trim(inASCII) @\
         call ESMF_AttributeSet(mname, name=inASCII(i:i), value=inASCII, rc=rc) @\
         if (rc /= ESMF_SUCCESS) then @\
@@ -376,9 +381,7 @@
         valueList=dfltOutI4l, defaultvalueList=defaultI4lWrong, rc=rc) @\
       write(failMsg, *) "Did not return ESMF_SUCCESS" @\
       write(name, *) "Getting a wrong sized default Attribute I4 list from mobj test" @\
-      call ESMF_Test((rc==ESMF_SUCCESS) .and. & @\
-        all (dfltOutI4l==defaultI4lWrong(1:size(DfltOutI4l))), & @\
-        name, failMsg, result, ESMF_SRCLINE) @\
+      call ESMF_Test(rc==ESMF_RC_ATTR_ITEMSOFF, name, failMsg, result, ESMF_SRCLINE) @\
       !---------------------------------------------------------------------- @\
  @\
       !mtag_ex @\
@@ -530,16 +533,6 @@
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
       !---------------------------------------------------------------------- @\
  @\
-      !mtag_ex @\
-      ! Get a constant numerical Attribute from mobj Test @\
-      ! expect fail because this will default to I4 @\
-      call ESMF_AttributeGet(mname, name="ConstantI8", value=outConstantI8, rc=rc) @\
-      write(failMsg, *) "Did not return ESMC_RC_ATTR_WRONGTYPE" @\
-      write(name, *) "Getting a constant I8 Attribute from mobj Test" @\
-      call ESMF_Test((rc==ESMC_RC_ATTR_WRONGTYPE), & @\
-                      name, failMsg, result, ESMF_SRCLINE) @\
-      !---------------------------------------------------------------------- @\
- @\
       !---------------------------------------------------------------------- @\
       !  ESMF_I8 list @\
       !---------------------------------------------------------------------- @\
@@ -600,9 +593,7 @@
         valueList=dfltOutI8l, defaultvalueList=defaultI8lWrong, rc=rc) @\
       write(failMsg, *) "Did not return ESMF_SUCCESS" @\
       write(name, *) "Getting a wrong sized default Attribute I8 list from mobj test" @\
-      call ESMF_Test((rc==ESMF_SUCCESS) .and. & @\
-        all (dfltOutI8l==defaultI8lWrong(1:size(DfltOutI8l))), & @\
-        name, failMsg, result, ESMF_SRCLINE) @\
+      call ESMF_Test(rc==ESMF_RC_ATTR_ITEMSOFF, name, failMsg, result, ESMF_SRCLINE) @\
       !---------------------------------------------------------------------- @\
  @\
       !mtag_ex @\
@@ -660,17 +651,6 @@
       write(failMsg, *) "Did not return ESMF_SUCCESS" @\
       write(name, *) "Adding a constant I8 list Attribute to mobj Test" @\
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
-      !---------------------------------------------------------------------- @\
- @\
-      !mtag_ex @\
-      ! Get a constant numerical Attribute from mobj Test @\
-      ! expect fail because this will default to I4 @\
-      call ESMF_AttributeGet(mname, name="ConstantI8l", & @\
-        valueList=outConstantI8l, rc=rc) @\
-      write(failMsg, *) "Did not return ESMC_RC_ATTR_WRONGTYPE" @\
-      write(name, *) "Getting a constant I8 list Attribute from mobj Test" @\
-      call ESMF_Test((rc==ESMC_RC_ATTR_WRONGTYPE), & @\
-                      name, failMsg, result, ESMF_SRCLINE) @\
       !---------------------------------------------------------------------- @\
  @\
       !---------------------------------------------------------------------- @\
@@ -824,9 +804,7 @@
         valueList=dfltOutR4l, defaultvalueList=defaultR4lWrong, rc=rc) @\
       write(failMsg, *) "Did not return ESMF_SUCCESS" @\
       write(name, *) "Getting a wrong sized default Attribute R4 list from mobj test" @\
-      call ESMF_Test((rc==ESMF_SUCCESS) .and. & @\
-        all (dfltOutR4l==defaultR4lWrong(1:size(DfltOutR4l))), & @\
-        name, failMsg, result, ESMF_SRCLINE) @\
+      call ESMF_Test(rc==ESMF_RC_ATTR_ITEMSOFF, name, failMsg, result, ESMF_SRCLINE) @\
       !---------------------------------------------------------------------- @\
  @\
       !mtag_ex @\
@@ -980,16 +958,6 @@
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
       !---------------------------------------------------------------------- @\
  @\
-      !mtag_nex @\
-      ! Get a constant numerical Attribute from mobj Test @\
-      ! expect fail because this will default to R4 @\
-      call ESMF_AttributeGet(mname, name="ConstantR8", value=outConstantR8, rc=rc) @\
-      write(failMsg, *) "Did not return ESMC_RC_ATTR_WRONGTYPE" @\
-      write(name, *) "Getting a constant R8 Attribute from mobj Test" @\
-      call ESMF_Test((rc==ESMC_RC_ATTR_WRONGTYPE), & @\
-                      name, failMsg, result, ESMF_SRCLINE) @\
-      !---------------------------------------------------------------------- @\
- @\
       !---------------------------------------------------------------------- @\
       !  ESMF_R8 list @\
       !---------------------------------------------------------------------- @\
@@ -1050,9 +1018,7 @@
         valueList=dfltOutR8l, defaultvalueList=defaultR8lWrong, rc=rc) @\
       write(failMsg, *) "Did not return ESMF_SUCCESS" @\
       write(name, *) "Getting a wrong sized default Attribute R8 list from mobj test" @\
-      call ESMF_Test((rc==ESMF_SUCCESS) .and. & @\
-        all (dfltOutR8l==defaultR8lWrong(1:size(DfltOutR8l))), & @\
-        name, failMsg, result, ESMF_SRCLINE) @\
+      call ESMF_Test(rc==ESMF_RC_ATTR_ITEMSOFF, name, failMsg, result, ESMF_SRCLINE) @\
       !---------------------------------------------------------------------- @\
  @\
       !mtag_nex @\
@@ -1110,16 +1076,6 @@
       write(failMsg, *) "Did not return ESMF_SUCCESS" @\
       write(name, *) "Adding a constant R8 list Attribute to mobj Test" @\
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
-      !---------------------------------------------------------------------- @\
- @\
-      !mtag_nex @\
-      ! Get a constant numerical Attribute from mobj Test @\
-      call ESMF_AttributeGet(mname, name="ConstantR8l", & @\
-        valueList=outConstantR8l, rc=rc) @\
-      write(failMsg, *) "Did not return ESMC_RC_ATTR_WRONGTYPE" @\
-      write(name, *) "Getting a constant R8 list Attribute from mobj Test" @\
-      call ESMF_Test((rc==ESMC_RC_ATTR_WRONGTYPE), & @\
-                      name, failMsg, result, ESMF_SRCLINE) @\
       !---------------------------------------------------------------------- @\
  @\
       !---------------------------------------------------------------------- @\
@@ -1282,9 +1238,7 @@
         valueList=DfltOutCharl, defaultvalueList=defaultCharlWrong, rc=rc) @\
       write(failMsg, *) "Did not return ESMF_SUCCESS" @\
       write(name, *) "Getting a wrong sized default Attribute char list from mobj test" @\
-      call ESMF_Test((rc==ESMF_SUCCESS) .and. & @\
-        all (DfltOutCharl==defaultCharlWrong(1:size(DfltOutCharl))), & @\
-        name, failMsg, result, ESMF_SRCLINE) @\
+      call ESMF_Test(rc==ESMF_RC_ATTR_ITEMSOFF, name, failMsg, result, ESMF_SRCLINE) @\
       !---------------------------------------------------------------------- @\
  @\
       !mtag_ex @\
@@ -1515,9 +1469,7 @@
         valueList=dfltOutLogl, defaultvalueList=defaultLoglWrong, rc=rc) @\
       write(failMsg, *) "Did not return ESMF_SUCCESS" @\
       write(name, *) "Getting a wrong sized default Attribute logical list from mobj test" @\
-      call ESMF_Test((rc==ESMF_SUCCESS) .and. & @\
-        all (dfltOutLogl.eqv.defaultLoglWrong(1:size(DfltOutLogl))), & @\
-        name, failMsg, result, ESMF_SRCLINE) @\
+      call ESMF_Test(rc==ESMF_RC_ATTR_ITEMSOFF, name, failMsg, result, ESMF_SRCLINE) @\
       !---------------------------------------------------------------------- @\
  @\
       !mtag_ex @\
@@ -1623,8 +1575,7 @@
         valueList=outI4lLong(4:8), itemCount=itemCount, rc=rc) @\
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
       write(name, *) "Getting an ESMF_I4l Attribute from mobj Test with long valueList" @\
-      call ESMF_Test((rc==ESMF_SUCCESS).and. all (inI4l==outI4lLong(4:6) .and. & @\
-                    itemCount==3), name, failMsg, result, ESMF_SRCLINE) @\
+      call ESMF_Test(rc==ESMF_RC_ATTR_ITEMSOFF, name, failMsg, result, ESMF_SRCLINE) @\
       !---------------------------------------------------------------------- @\
  @\
       !---------------------------------------------------------------------- @\
@@ -1657,8 +1608,7 @@
         valueList=outI8lLong(4:8), itemCount=itemCount, rc=rc) @\
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
       write(name, *) "Getting an ESMF_I8l Attribute from mobj Test with long valueList" @\
-      call ESMF_Test((rc==ESMF_SUCCESS).and. all (inI8l==outI8lLong(4:6) .and. & @\
-                    itemCount==3), name, failMsg, result, ESMF_SRCLINE) @\
+      call ESMF_Test(rc==ESMF_RC_ATTR_ITEMSOFF, name, failMsg, result, ESMF_SRCLINE) @\
       !---------------------------------------------------------------------- @\
  @\
       !---------------------------------------------------------------------- @\
@@ -1691,8 +1641,7 @@
         valueList=outR4lLong(4:8), itemCount=itemCount, rc=rc) @\
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
       write(name, *) "Getting an ESMF_R4l Attribute from mobj Test with long valueList" @\
-      call ESMF_Test((rc==ESMF_SUCCESS).and. all (inR4l==outR4lLong(4:6) .and. & @\
-                    itemCount==3), name, failMsg, result, ESMF_SRCLINE) @\
+      call ESMF_Test(rc==ESMF_RC_ATTR_ITEMSOFF, name, failMsg, result, ESMF_SRCLINE) @\
       !---------------------------------------------------------------------- @\
  @\
       !---------------------------------------------------------------------- @\
@@ -1725,8 +1674,7 @@
         valueList=outR8lLong(4:8), itemCount=itemCount, rc=rc) @\
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
       write(name, *) "Getting an ESMF_R8l Attribute from mobj Test with long valueList" @\
-      call ESMF_Test((rc==ESMF_SUCCESS).and. all (inR8l==outR8lLong(4:6) .and. & @\
-                    itemCount==3), name, failMsg, result, ESMF_SRCLINE) @\
+      call ESMF_Test(rc==ESMF_RC_ATTR_ITEMSOFF, name, failMsg, result, ESMF_SRCLINE) @\
       !---------------------------------------------------------------------- @\
  @\
       !---------------------------------------------------------------------- @\
@@ -1758,8 +1706,7 @@
         valueList=outCharlLong(4:8), itemCount=itemCount, rc=rc) @\
       write(failMsg, *) "Did not return ESMF_SUCCESS" @\
       write(name, *) "Getting a default Attribute char list from mobj test with long valueList" @\
-      call ESMF_Test((rc==ESMF_SUCCESS).and. all (inCharl==outCharlLong(4:6) .and. & @\
-                    itemCount==3), name, failMsg, result, ESMF_SRCLINE) @\
+      call ESMF_Test(rc==ESMF_RC_ATTR_ITEMSOFF, name, failMsg, result, ESMF_SRCLINE) @\
       !---------------------------------------------------------------------- @\
  @\
       !---------------------------------------------------------------------- @\
@@ -1779,9 +1726,9 @@
       ! Too Short Get an ESMF_R8 list Attribute from mobj Test @\
       call ESMF_AttributeGet(mname, name=attrname,  & @\
         valueList=outLoglLong(1:2), rc=rc) @\
-      write(failMsg, *) "Did not return ESMC_RC_ATTR_ITEMSOFF" @\
+      write(failMsg, *) "Did not return ESMF_RC_ATTR_ITEMSOFF" @\
       write(name, *) "Getting an logical list Attribute from mobj Test with short valueList" @\
-      call ESMF_Test((rc==ESMC_RC_ATTR_ITEMSOFF), name, failMsg, result, ESMF_SRCLINE) @\
+      call ESMF_Test((rc==ESMF_RC_ATTR_ITEMSOFF), name, failMsg, result, ESMF_SRCLINE) @\
       !---------------------------------------------------------------------- @\
  @\
       itemCount = 3 @\
@@ -1791,8 +1738,7 @@
         valueList=outLoglLong(4:8), itemCount=itemCount, rc=rc) @\
       write(failMsg, *) "Did not return logical .TRUE." @\
       write(name, *) "Getting an logical list Attribute from mobj Test with long valueList" @\
-      call ESMF_Test((rc == ESMF_SUCCESS).and. all (inLogl .eqv. outLoglLong(4:6)) .and. & @\
-                    itemCount==3, name, failMsg, result, ESMF_SRCLINE) @\
+      call ESMF_Test(rc==ESMF_RC_ATTR_ITEMSOFF, name, failMsg, result, ESMF_SRCLINE) @\
       !---------------------------------------------------------------------- @\
  @\
       !---------------------------------------------------------------------- @\
@@ -1806,11 +1752,15 @@
  @\
       !mtag_ex @\
       ! Get the Attribute count from a mobj Test @\
+      call ESMF_LogWrite("Start: Get the Attribute count from a mobj Test") @\
       call ESMF_AttributeGet(mname, count=count, rc=rc) @\
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
       write(name, *) "Getting the Attribute count from a mobj Test" @\
-      call ESMF_Test((rc==ESMF_SUCCESS).and.(count.ge.0), & @\
+      write(logmsg, *) "count=", count @\
+      call ESMF_LogWrite(logmsg) @\
+      call ESMF_Test((rc==ESMF_SUCCESS).and.(count.ge.10), & @\
                       name, failMsg, result, ESMF_SRCLINE) @\
+      call ESMF_LogWrite("End: Get the Attribute count from a mobj Test") @\
       !---------------------------------------------------------------------- @\
  @\
       !mtag_ex @\
@@ -1883,7 +1833,7 @@
  @\
       !mtag_ex @\
       ! Get Attribute info by num from a mobj Test @\
-      call ESMF_AttributeGet(mname, attributeIndex=count, name=attrnameOut, & @\
+      call ESMF_AttributeGet(mname, attributeIndex=38, name=attrnameOut, & @\
         typekind=attrTK, itemcount=items, rc=rc) @\
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
       write(name, *) "Getting Attribute info by num from a mobj Test" @\
@@ -1922,8 +1872,7 @@
  @\
       !mtag_nex @\
       ! Copy mdesc Attribute hierarchy ALIAS Test @\
-      call ESMF_AttributeCopy(mname##A, mname##Alias, & @\
-        attcopy=ESMF_ATTCOPY_REFERENCE, rc=rc) @\
+      call ESMF_AttributeCopy(mname##A, mname##Alias, rc=rc) @\
       write(failMsg, *) "Did not return ESMF_SUCCESS" @\
       write(name, *) "Copying mdesc Attribute hierarchy ALIAS Test" @\
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
@@ -1950,27 +1899,20 @@
       print *, "count = ", count @\
  @\
       !mtag_nex @\
-      ! Get a constant character Attribute from mobj Test @\
-      call ESMF_AttributeSet(mname##A, name="CopyChar", value="imachar", rc=rc) @\
-      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
-      write(name, *) "Setting a constant character Attribute on mobj Test" @\
-      call ESMF_Test((rc==ESMF_SUCCESS), & @\
-                      name, failMsg, result, ESMF_SRCLINE) @\
- @\
-      !mtag_nex @\
-      ! Get a constant character Attribute from mobj Test @\
+      ! Get a constant character Attribute from the alias mobj Test @\
+      call ESMF_LogWrite("Start: Getting a constant character Attribute from the alias mobj Test") @\
       call ESMF_AttributeGet(mname##Alias, name="CopyChar", value=outConstantChar, rc=rc) @\
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
       write(name, *) "Getting a constant character Attribute from the alias mobj Test" @\
-      call ESMF_Test((rc==ESMF_SUCCESS).and.("imachar"==outConstantChar), & @\
+      call ESMF_Test((rc==ESMF_SUCCESS).and.("imacharA"==outConstantChar), & @\
                       name, failMsg, result, ESMF_SRCLINE) @\
+      call ESMF_LogWrite("End: Getting a constant character Attribute from the alias mobj Test") @\
       !---------------------------------------------------------------------- @\
       print *, outConstantChar @\
  @\
       !mtag_nex @\
       ! Copy mdesc Attribute hierarchy VALUE ONE LEVEL Test @\
-      call ESMF_AttributeCopy(mname##A, mname##Value, & @\
-        attcopy=ESMF_ATTCOPY_VALUE, rc=rc) @\
+      call ESMF_AttributeCopy(mname##A, mname##Value, rc=rc) @\
       write(failMsg, *) "Did not return ESMF_SUCCESS" @\
       write(name, *) "Copying mdesc Attribute hierarchy VALUE ONE LEVEL Test" @\
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
@@ -1978,8 +1920,7 @@
  @\
       !mtag_nex @\
       ! Copy mdesc Attribute hierarchy HYBRID Test @\
-      call ESMF_AttributeCopy(mname##A, mname##Hybrid, & @\
-        attcopy=ESMF_ATTCOPY_REFERENCE, rc=rc) @\
+      call ESMF_AttributeCopy(mname##A, mname##Hybrid, rc=rc) @\
       write(failMsg, *) "Did not return ESMF_SUCCESS" @\
       write(name, *) "Copying mdesc Attribute hierarchy HYBRID Test" @\
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\

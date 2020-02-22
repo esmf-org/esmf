@@ -1,0 +1,41 @@
+{% set set_or_get = "Copy" %}
+{% set proc_suffix = "" %}
+{% set arglist = "(src, dst, keywordEnforcer, rc)" %}
+{% set method_name = "ESMF_AttributeCopy"~et~"To"~et_dst %}
+#undef  ESMF_METHOD
+#define ESMF_METHOD "{{ method_name }}"
+subroutine {{ method_name }}{{ arglist }}
+  ! 39.11.6 - attcopy removed
+  type(ESMF_{{ et }}), intent(in) :: src
+  type(ESMF_{{ et_dst }}), intent(inout) :: dst
+  type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc
+  type(ESMF_InfoDescribe) :: eidesc
+  type(ESMF_Info) :: isrc, idst
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_{{ et }}GetInit, src, localrc)
+  ESMF_INIT_CHECK_DEEP(ESMF_{{ et_dst }}GetInit, dst, localrc)
+{% if et == "Info" %}
+  isrc = ESMF_InfoBaseGet(src%base)
+{% else %}
+  isrc = eidesc%GetInfo(src, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+{% endif %}
+{% if et_dst == "Info" %}
+  idst = ESMF_InfoBaseGet(dst%base)
+{%else %}
+  idst = eidesc%GetInfo(dst, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+{% endif %}
+
+  call c_info_copyforattribute(isrc%ptr, idst%ptr, localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine {{ method_name }}

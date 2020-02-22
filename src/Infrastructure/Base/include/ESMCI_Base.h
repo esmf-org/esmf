@@ -25,7 +25,8 @@
 class ESMC_Base;
 
 #include "ESMCI_VM.h"
-#include "ESMCI_Attribute.h"
+//#include "ESMCI_Attribute.h"
+#include "ESMCI_Info.h"
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -41,7 +42,7 @@ class ESMC_Base;
 
 // !PUBLIC TYPES:
  class ESMC_Base;
- class Attribute;
+// class Attribute;
 
 class ESMC_Base
 {
@@ -59,14 +60,15 @@ class ESMC_Base
     char            baseName[ESMF_MAXSTR];    // object name, unique over class 
     char            baseNameF90[ESMF_MAXSTR]; // same name, non-null terminated
     char            className[ESMF_MAXSTR];   // object class
-    ESMCI::Attribute* root;
-    bool            rootalias;
-
+    ESMCI::Info*    info;         // object's Info container
+    bool            infoalias;    // true if Info container is an alias
   private:
 
     // prevent accidental copying
     //ESMC_Base& operator=(const ESMC_Base&);
     ESMC_Base(const ESMC_Base&);
+
+    void constructInfo(ESMC_Base& base);
   
   public:
     int           classID;      // unique ID relative to this class
@@ -74,9 +76,9 @@ class ESMC_Base
     // required & optional standard interface methods for all ESMF classes.
     // should not instantiate a ESMC_Base object directly; must sub-class first.
 
-    // accessor to root
-    ESMCI::Attribute *ESMC_BaseGetRoot(void) const {return root;}
-    void ESMC_BaseSetRoot(ESMCI::Attribute *orig) {root = orig; rootalias=true;}
+    // accessor to Info
+    ESMCI::Info *ESMC_BaseGetInfo(void) const {return info;}
+    void ESMC_BaseSetInfo(ESMCI::Info *orig) {info = orig; infoalias=true;}
 
     // accessors to unique ID
     void ESMC_BaseSetID(int id);

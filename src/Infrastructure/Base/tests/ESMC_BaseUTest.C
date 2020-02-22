@@ -62,15 +62,26 @@ void testSerializeDeserialize(int& rc, char failMsg[]) {
   char *nullbuffer = nullptr;
   const std::vector<ESMC_AttReconcileFlag> arflags = {ESMC_ATTRECONCILE_OFF,
                                                       ESMC_ATTRECONCILE_ON};
+
+  // Test with and without attribute (info) reconciliation
   for (const auto arflag : arflags) {
     logmsg = std::string(ESMC_METHOD) + ": arflag=" + std::to_string(arflag);
     lognprint(logmsg, TO_STDOUT);
 
     ESMC_Base *base_src = new ESMC_Base(1);
     ESMC_Base *base_dst = new ESMC_Base(-1);
-    
+
     int length = 0;
     int offset = 0;
+
+    // Add some attributes to the source base
+    ESMCI::Info *info = base_src->ESMC_BaseGetInfo();
+    try {
+      info->set<int>("key1", 44, false);
+      info->set<double>("key123", 3.146789, false);
+      info->set<std::string>("a-string-key", "some-data", false);
+    }
+    ESMF_CATCH_INFO
 
     rc = base_src->ESMC_Serialize(nullbuffer, &length, &offset, arflag, ESMF_INQUIREONLY);
     if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return;
@@ -98,6 +109,22 @@ void testSerializeDeserialize(int& rc, char failMsg[]) {
     offset = shift;
     rc = base_dst->ESMC_Deserialize(buffer, &offset, arflag);
     if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return;
+
+    ESMCI::Info *infod = base_dst->ESMC_BaseGetInfo();
+    try {
+      std::string dump = infod->dump();
+      if (arflag == ESMC_ATTRECONCILE_OFF) {
+        if (dump != "{}") {
+          return finalizeFailure(rc, failMsg, "if not reconciling info, then object should be empty");
+        }
+      } else {
+        const std::string desired = "{\"a-string-key\":\"some-data\",\"key1\":44,\"key123\":3.146789}";
+        if (dump != desired) {
+          return finalizeFailure(rc, failMsg, "if reconciling info, then object should have data");
+        }
+      }
+    }
+    ESMF_CATCH_INFO
   }
 
   return;

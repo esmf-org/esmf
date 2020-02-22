@@ -1967,7 +1967,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                        :: localrc  @\
     type(ESMF_GeomBase)   :: geombase @\
     type(ESMF_GridDecompType) :: decompType @\
-    type(ESMF_Logical) :: linkChange @\
     type(ESMF_FieldStatus_Flag)         :: status @\
 @\
     if (present(rc)) then @\
@@ -2032,12 +2031,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
-@\
-    !  link the Attribute hierarchies @\
-    linkChange = ESMF_TRUE @\
-    call c_ESMC_AttributeLink(field%ftypep%base, grid, linkChange, localrc) @\
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
-                    ESMF_CONTEXT, rcToReturn=rc))  return @\
 @\
     if (present(rc)) rc = ESMF_SUCCESS @\
   end subroutine ESMF_FieldEmptyCompGrid##mrank##D##mtypekind  @\
@@ -2172,7 +2165,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                        :: localrc  @\
     type(ESMF_GeomBase)            :: geombase @\
     type(ESMF_GridDecompType)      :: decompType @\
-    type(ESMF_Logical)             :: linkChange @\
     type(ESMF_FieldStatus_Flag)    :: status @\
 @\
     if (present(rc)) then @\
@@ -2237,13 +2229,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
-@\
-@\
-    !  link the Attribute hierarchies @\
-    linkChange = ESMF_TRUE @\
-    call c_ESMC_AttributeLink(field%ftypep%base, grid, linkChange, localrc) @\
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
-                    ESMF_CONTEXT, rcToReturn=rc))  return @\
 @\
     if (present(rc)) rc = ESMF_SUCCESS @\
   end subroutine ESMF_FieldEmptyCompGridPtr##mrank##D##mtypekind  @\
@@ -2366,7 +2351,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! local variables @\
     integer                        :: localrc  @\
     type(ESMF_GeomBase)   :: geombase @\
-    type(ESMF_Logical)             :: linkChange @\
     type(ESMF_FieldStatus_Flag)    :: status @\
 @\
     if (present(rc)) then @\
@@ -2403,13 +2387,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
-@\
-@\
-    !  link the Attribute hierarchies @\
-    linkChange = ESMF_TRUE @\
-    call c_ESMC_AttributeLink(field%ftypep%base, locstream%lstypep%base, linkChange, localrc) @\
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
-                    ESMF_CONTEXT, rcToReturn=rc))  return @\
 @\
     if (present(rc)) rc = ESMF_SUCCESS @\
   end subroutine ESMF_FieldEmptyCompLS##mrank##D##mtypekind  @\
@@ -2506,7 +2483,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! local variables @\
     integer                        :: localrc  @\
     type(ESMF_GeomBase)   :: geombase @\
-    type(ESMF_Logical)             :: linkChange @\
     type(ESMF_FieldStatus_Flag)    :: status @\
 @\
     if (present(rc)) then @\
@@ -2542,13 +2518,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
-@\
-@\
-    !  link the Attribute hierarchies @\
-    linkChange = ESMF_TRUE @\
-    call c_ESMC_AttributeLink(field%ftypep%base, locstream%lstypep%base, linkChange, localrc) @\
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
-                    ESMF_CONTEXT, rcToReturn=rc))  return @\
 @\
     if (present(rc)) rc = ESMF_SUCCESS @\
   end subroutine ESMF_FieldEmptyCompLSPtr##mrank##D##mtypekind  @\
@@ -4369,7 +4338,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   type(ESMF_GEOMBASE)                   :: geombase
   type(ESMF_FieldStatus_Flag)           :: status
   integer                               :: localrc
-  type(ESMF_Logical)                    :: linkChange
   type(ESMF_Pointer)                    :: vmThis
   logical                               :: actualFlag
 
@@ -4406,12 +4374,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     geombase=ESMF_GeomBaseCreate(grid,l_staggerloc, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! link the Attribute hierarchies
-    linkChange = ESMF_TRUE
-    call c_ESMC_AttributeLink(field%ftypep%base, grid, linkChange, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc))  return
 
     field%ftypep%geombase = geombase
     field%ftypep%status = ESMF_FIELDSTATUS_GRIDSET
@@ -4570,7 +4532,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   type(ESMF_GEOMBASE)                   :: geombase
   type(ESMF_FieldStatus_Flag)           :: status
-  type(ESMF_Logical)                    :: linkChange
   integer                               :: localrc
   type(ESMF_Pointer)                    :: vmThis
   logical                               :: actualFlag
@@ -4604,13 +4565,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     geombase=ESMF_GeomBaseCreate(locstream, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! link the Attribute hierarchies
-    linkChange = ESMF_TRUE
-    call c_ESMC_AttributeLink(field%ftypep%base, locstream%lstypep%base, &
-      linkChange, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc))  return
 
     field%ftypep%geombase = geombase
     field%ftypep%status = ESMF_FIELDSTATUS_GRIDSET

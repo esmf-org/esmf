@@ -3724,7 +3724,6 @@ module NUOPC_Base
     logical                         :: l_realizeOnlyNotComplete
     logical                         :: isComplete, isConnected, isSharedField
     type(ESMF_FieldStatus_Flag)     :: fieldStatus
-
     if (present(rc)) rc = ESMF_SUCCESS
     
     l_realizeOnlyConnected = .true.   ! defaut

@@ -12,7 +12,6 @@ DIRS      = ESMF_CompCreate \
             ESMF_RecursiveComponent \
             ESMF_ArrayScatterGather \
             ESMF_Attribute \
-            ESMF_AttributeCIM \
             ESMF_ComplianceChecker \
             ESMF_ArraySparseMatMul \
             ESMF_ArrayRedist \

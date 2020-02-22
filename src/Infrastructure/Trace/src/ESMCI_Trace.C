@@ -1403,33 +1403,38 @@ namespace ESMCI {
         vector<string> RPM;
         vector<string> FPM;
 
-        Attribute *attrRoot = base->ESMC_BaseGetRoot();
-        if (attrRoot != NULL) {
-
-          Attribute *attrPack = attrRoot->AttPackGet("NUOPC", "Instance", "comp", "", ESMC_ATTNEST_ON);
-          if (attrPack != NULL) {
-
-            Attribute *attr;
-            attr = attrPack->AttPackGetAttribute("InitializePhaseMap", ESMC_ATTNEST_ON);
-            if (attr != NULL && Attribute::isSet(attr)) {
-              localrc = attr->get(&IPM);
-              if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
-            }
-            attr = attrPack->AttPackGetAttribute("InternalInitializePhaseMap", ESMC_ATTNEST_ON);
-            if (attr != NULL && Attribute::isSet(attr)) {
-              localrc = attr->get(&IIPM);
-              if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
-            }
-            attr = attrPack->AttPackGetAttribute("RunPhaseMap", ESMC_ATTNEST_ON);
-            if (attr != NULL && Attribute::isSet(attr)) {
-              localrc = attr->get(&RPM);
-              if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
-            }
-            attr = attrPack->AttPackGetAttribute("FinalizePhaseMap", ESMC_ATTNEST_ON);
-            if (attr != NULL && Attribute::isSet(attr)) {
-              localrc = attr->get(&FPM);
-              if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
-            }
+        ESMCI::Info *info = base->ESMC_BaseGetInfo();
+        if (info) {
+          const std::string nest = "/NUOPC/Instance";
+          bool has_nest;
+          try {
+            has_nest = info->hasKey(nest, true);
+          } catch (ESMCI::esmf_info_error &exc_info) {
+            if (ESMC_LogDefault.MsgFoundError(exc_info.getReturnCode(), ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
+          }
+          if (has_nest) {
+            std::map<string, vector<string>*> attrs;
+            attrs["InitializePhaseMap"] = &IPM;
+            attrs["InternalInitializePhaseMap"] = &IIPM;
+            attrs["RunPhaseMap"] = &RPM;
+            attrs["FinalizePhaseMap"] = &FPM;
+            if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
+              for (std::pair<string, vector<string>*> element : attrs) {
+                string key = nest + "/" + element.first;
+                bool has_key;
+                try {
+                  has_key = info->hasKey(key, true);
+                } catch (ESMCI::esmf_info_error &exc_info) {
+                  if (ESMC_LogDefault.MsgFoundError(exc_info.getReturnCode(), ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
+                }
+                if (has_key) {
+                  try {
+                    *(element.second) = info->getvec<std::string>(key, true);
+                  } catch (ESMCI::esmf_info_error &exc_info) {
+                    if (ESMC_LogDefault.MsgFoundError(exc_info.getReturnCode(), ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
+                  }
+                }
+              }
           }
         }
         TraceEventComponentInfo(&localvmid, &baseid, compName, IPM, IIPM, RPM, FPM);

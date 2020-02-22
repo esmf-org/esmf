@@ -39,3 +39,4 @@
 #include "../Infrastructure/IO/doc/IO.bib"
 #include "../Infrastructure/Mesh/doc/Mesh.bib"
 #include "../Infrastructure/TimeMgr/doc/TimeMgr.bib"
+#include "../Infrastructure/Base/doc/Info.bib"

@@ -1,0 +1,4 @@
+{{ "  " }}localrc = ESMF_FAILURE
+{{ "  " }}if (present(rc)) rc = ESMF_RC_NOT_IMPL
+{{ "  " }}! Check object initialization
+{{ "  " }}ESMF_INIT_CHECK_DEEP(ESMF_{{ et }}GetInit, target, rc)

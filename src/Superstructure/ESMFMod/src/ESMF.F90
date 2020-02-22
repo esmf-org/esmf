@@ -103,8 +103,6 @@ module ESMF
     use ESMF_CplCompMod
     use ESMF_SciCompMod
     
-    use ESMF_InfoMod
-    
     use ESMF_AttachMethodsMod
     
     use ESMF_ContainerMod
@@ -123,5 +121,9 @@ module ESMF
     use & ! prevent MOD_FUNC from grabbing this dependency during build
       ESMF_MapperUtilMod
 #endif
+
+    use ESMF_InfoMod
+    use ESMF_InfoDescribeMod
+    use ESMF_InfoSyncMod
 
 end module ESMF

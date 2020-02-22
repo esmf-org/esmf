@@ -90,6 +90,7 @@ module ESMF_ContainerMod
   public ESMF_ContainerGarbageOff
   public ESMF_ContainerGarbageClear
   public ESMF_ContainerGarbageGet
+  public ESMF_ContainerGetPointer
   
 !EOPI
 !------------------------------------------------------------------------------
@@ -195,7 +196,6 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 
 ! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
@@ -1393,5 +1393,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   end subroutine ESMF_ContainerGarbageGetFL
 !------------------------------------------------------------------------------
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ContainerGetPointer()"
+function ESMF_ContainerGetPointer(container, rc) result(eptr)
+  !tdk:doc
+  type(ESMF_Container) :: container
+  integer, optional :: rc
+  type(ESMF_Pointer) :: eptr
+  eptr = container%this
+  if (present(rc)) rc = ESMF_SUCCESS
+end function ESMF_ContainerGetPointer
 
 end module ESMF_ContainerMod

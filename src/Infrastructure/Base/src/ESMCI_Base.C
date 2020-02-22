@@ -101,6 +101,14 @@ static const char *const version = "$Id$";
 //EOPI
 
 }  // end ESMC_Base
+
+#undef ESMC_METHOD
+#define ESMC_METHOD "ESMC_Base::constructInfo()"
+void ESMC_Base::constructInfo(ESMC_Base& base) {
+  base.info = new ESMCI::Info();
+  base.infoalias = false;
+}
+
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //
@@ -561,7 +569,7 @@ static const char *const version = "$Id$";
   // nested States.
   if (memchr (name, '/', nlen) != NULL) {
     std::string msgbuf;
-    msgbuf = "Base name " + std::string (name, nlen) + " must not have a slash (/) in its name";
+    msgbuf = "Base name " + std::string (name, nlen) + ": must not have a slash (/) in its name";
     ESMC_LogDefault.MsgFoundError (ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT,
         &rc);
     return rc;
@@ -673,16 +681,17 @@ static const char *const version = "$Id$";
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, &localrc)) return localrc;
 
-    // setup the root Attribute, passing the address of this
-    root = new ESMCI::Attribute(ESMF_TRUE);
-    root->setBase(this);
-    rootalias = false;
+    // setup the Info object
+    constructInfo(*this);
 
     // Deserialize the Attribute hierarchy
     if (attreconflag == ESMC_ATTRECONCILE_ON) {
-      localrc = root->ESMC_Deserialize(buffer,offset);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-            ESMC_CONTEXT, &localrc)) return localrc;
+      try {
+        info->deserialize(buffer, offset);
+      } catch (ESMCI::esmf_info_error &e) {
+        ESMC_LogDefault.MsgFoundError(e.getReturnCode(), e.what(), ESMC_CONTEXT, &localrc);
+        return localrc;
+      }
     }
 
   return ESMF_SUCCESS;
@@ -827,16 +836,16 @@ static const char *const version = "$Id$";
       }
     }
   }
-  if ((root->getCountAttr() > 0 || root->getCountPack() > 0) && tofile) {
-    std::cout << " Root Attributes:" << std::endl;
-    // ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
+//  if ((root->getCountAttr() > 0 || root->getCountPack() > 0) && tofile) {
+  std::cout << " Root Info (Attributes):" << std::endl;
+  // ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
 
-    // traverse the Attribute hierarchy, printing as we go
-    if (append)
-      root->ESMC_Print(tofile, filename, true);
-    else
-      root->ESMC_Print(tofile, filename, false);
-  }
+  // traverse the Attribute hierarchy, printing as we go
+  if (append)
+    info->ESMC_Print(tofile, filename, true);
+  else
+    info->ESMC_Print(tofile, filename, false);
+//  }
   fflush (NULL);
 
   return ESMF_SUCCESS;
@@ -975,9 +984,12 @@ static const char *const version = "$Id$";
 
     // Serialize the Attribute hierarchy
     if (attreconflag == ESMC_ATTRECONCILE_ON) {
-      localrc = root->ESMC_Serialize(buffer,length,offset, inquireflag);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-            ESMC_CONTEXT, &localrc)) return localrc;
+      try {
+        info->serialize(buffer, length, offset, inquireflag);
+      } catch (ESMCI::esmf_info_error &e) {
+        ESMC_LogDefault.MsgFoundError(e.getReturnCode(), ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
+        return localrc;
+      }
     }
 
   return ESMF_SUCCESS;
@@ -1099,10 +1111,8 @@ static const char *const version = "$Id$";
   // add object to list for automatic garbage collection
   ESMCI::VM::addObject(this, vmID);
 
-  // setup the root Attribute, passing the address of this
-  root = new ESMCI::Attribute(ESMF_TRUE);
-  root->setBase(this);
-  rootalias = false;
+  // setup the root Info
+  constructInfo(*this);
 
   baseStatus  = ESMF_STATUS_READY;
   status      = ESMF_STATUS_READY;
@@ -1166,11 +1176,9 @@ static const char *const version = "$Id$";
 
   // setup the root Attribute, passing the address of this
   if (id==-1){
-    rootalias = true; // protect root Attribute from being used in delete
+    infoalias = true; // protect Info pointer from being deleted
   }else{
-    root = new ESMCI::Attribute(ESMF_TRUE);
-    root->setBase(this);
-    rootalias = false;
+    constructInfo(*this);
   }
 
   baseStatus  = ESMF_STATUS_READY;
@@ -1186,7 +1194,7 @@ static const char *const version = "$Id$";
 // !IROUTINE:  ESMC_Base - native C++ constructor for ESMC_Base class
 //
 // !INTERFACE:
-      ESMC_Base::ESMC_Base(const char *superclass, const char *name, int nattrs,
+      ESMC_Base::ESMC_Base(const char *superclass, const char *name, int ninfo,
         ESMCI::VM *vmArg){
 //
 // !RETURN VALUE:
@@ -1197,7 +1205,7 @@ static const char *const version = "$Id$";
 //
 // !DESCRIPTION:
 //   initialization with known class name, object name, initial number
-//   of attributes to make space for.
+//   of Info to make space for.
 //
 //EOPI
   int rc;
@@ -1242,10 +1250,8 @@ static const char *const version = "$Id$";
   // add object to list for automatic garbage collection
   ESMCI::VM::addObject(this, vmID);
 
-  // setup the root Attribute, passing the address of this
-  root = new ESMCI::Attribute(ESMF_TRUE);
-  root->setBase(this);
-  rootalias = false;
+  // setup the root Info
+  constructInfo(*this);
 
   baseStatus  = ESMF_STATUS_READY;
   status      = ESMF_STATUS_READY;
@@ -1303,9 +1309,8 @@ static const char *const version = "$Id$";
   ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
 #endif
 
-  // delete the root Attribute
-  if (!rootalias)
-    delete root;
+  // delete the root Info if not an alias
+  if (!infoalias) { delete info; }
 
   // if we have to support reference counts someday,
   // test if (refCount > 0) and do something if true;
