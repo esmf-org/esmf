@@ -126,9 +126,12 @@ extern "C" void FTN_X(c_esmc_meshcreate)(MeshCap **meshpp,
     *meshpp=MeshCap::meshcreate(pdim,sdim,coordSys,true,rc);
   }
 
-  std::string cname = std::string(name, ESMC_F90lentrim (name, *len_name));
+  // copy and convert F90 string to null terminated one
+  std::string cname(name, name_l);
+  cname.resize(cname.find_last_not_of(" ")+1);
+
   if (cname.length() > 0) {
-    localrc = (*meshpp)->ESMC_BaseSetName(name, "Mesh");
+    localrc = (*meshpp)->ESMC_BaseSetName(cname.c_str(), "Mesh");
     ESMC_LogDefault.MsgFoundError(localrc,
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
     return;
