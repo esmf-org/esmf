@@ -111,7 +111,7 @@ extern "C" void FTN_X(c_esmc_clumppntsll)(int *num_pnt, double *pnt_lon, double 
 extern "C" void FTN_X(c_esmc_meshcreate)(MeshCap **meshpp,
                                          int *pdim, int *sdim,
                                          ESMC_CoordSys_Flag *coordSys, 
-                                         char *name, int *len_name, 
+                                         char *name,
                                          int *rc, ESMCI_FortranStrLenArg name_l)
 {
 #undef  ESMC_METHOD
@@ -631,8 +631,9 @@ extern "C" void FTN_X(c_esmc_meshcreateeasyelems)(MeshCap **meshpp,
 
 extern "C" void FTN_X(c_esmc_meshcreatefromgrid)(MeshCap **meshpp,
                                                  Grid **gridpp,
-                                                 char *name, int *len_name, 
-                                                 int *rc, ESMCI_FortranStrLenArg name_l)
+                                                 char *name,
+                                                 int *rc, 
+                                                 ESMCI_FortranStrLenArg name_l)
 {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_meshcreatefromgrid()"
@@ -646,9 +647,12 @@ extern "C" void FTN_X(c_esmc_meshcreatefromgrid)(MeshCap **meshpp,
     *meshpp=MeshCap::meshcreate_from_grid(gridpp,true,rc);
   }
 
-  std::string cname = std::string(name, ESMC_F90lentrim (name, *len_name));
+  // copy and convert F90 string to null terminated one
+  std::string cname(name, name_l);
+  cname.resize(cname.find_last_not_of(" ")+1);
+
   if (cname.length() > 0) {
-    localrc = (*meshpp)->ESMC_BaseSetName(name, "Mesh");
+    localrc = (*meshpp)->ESMC_BaseSetName(cname.c_str(), "Mesh");
     ESMC_LogDefault.MsgFoundError(localrc,
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
     return;
