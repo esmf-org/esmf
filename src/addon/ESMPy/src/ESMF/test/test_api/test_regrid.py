@@ -347,6 +347,23 @@ class TestRegrid(TestBase):
         self.assertWeightFileIsRational(filename, src_size, dst_size)
         mgr.barrier()
 
+        # Confirm auxiliary variables exist in the file
+        try:
+            from netCDF4 import Dataset
+        except ImportError:
+            pass
+        else:
+            ds = Dataset(filename)
+            try:
+                vars = ds.variables.keys()
+                try:
+                    self.assertGreater(len(vars), 3)
+                except AssertionError:
+                    print(vars)
+                    raise
+            finally:
+                ds.close()
+
     @attr('parallel')
     def test_field_regrid_from_file(self):
         mgr = Manager()
