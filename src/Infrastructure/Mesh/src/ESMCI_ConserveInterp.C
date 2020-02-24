@@ -1471,7 +1471,7 @@ void norm_poly3D(int num_p, double *p) {
                                                            sintd_nodes, 
                                                            sintd_cells, res_map, zz);
 
-#if 1
+#if 0
 	if (valid && (global_src_id == 6488)) {
 	  tot += sintd_area;
           printf("BOB: WGT CALC dst=%d src=%d valid=%d darea=%g sintd_area=%g tot=%g t/s=%g\n",global_dst_id,global_src_id,valid,dst_area,sintd_area,tot,tot/src_area);	

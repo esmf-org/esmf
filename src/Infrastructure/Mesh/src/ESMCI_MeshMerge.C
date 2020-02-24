@@ -1115,7 +1115,7 @@ if (ret == ESMCI_TP_SUCCESS) {
   //sprintf(str, "mergemesh.vtk.%d", me);
   //WriteVTKMesh(mergemesh, str);
 
-  WriteMesh(mergemesh, "MergedMesh");
+  // WriteMesh(mergemesh, "MergedMesh");
 
 }
 
