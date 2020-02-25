@@ -783,7 +783,2927 @@ character(*), parameter, private :: version = '$Id$'
 contains  !====================================================================
 
 !==============================================================================
-! AttPack Procedures ==========================================================
+! ESMF_Attribute Legacy Docs
+!==============================================================================
+!tdk:doc: remove and document changed parameters
+
+!BOPI
+! !IROUTINE: ESMF_AttributeAdd  - Add an ESMF standard Attribute package using a specification list
+!
+! !INTERFACE:
+!     ! Private name; call using ESMF_AttributeAdd()
+!     subroutine ESMF_AttAddPackStdSL(<object>, specList, keywordEnforcer, &
+!       attpack, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     character (len = *), intent(in)               :: specList(:)
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!     type(ESMF_AttPack),  intent(inout), optional  :: attpack
+!     integer,             intent(out),   optional  :: rc
+!
+! !DESCRIPTION:
+!     Add an ESMF standard Attribute package.  See Section~\ref{sec:AttPacks}
+!     for a description of Attribute packages.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Array),       intent(inout) :: array
+!     \item type(ESMF\_CplComp),     intent(inout) :: comp
+!     \item type(ESMF\_GridComp),    intent(inout) :: comp
+!     \item type(ESMF\_SciComp),     intent(inout) :: comp
+!     \item type(ESMF\_Field),       intent(inout) :: field
+!     \item type(ESMF\_Grid),        intent(inout) :: grid
+!     \item type(ESMF\_State),       intent(inout) :: state
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [specList]
+!           A character list of values which identify the Attribute package, such as
+!           convention, purpose, and instancename.
+!     \item [{[attpack]}]
+!           An optional handle to the Attribute package that is to be created.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_AttributeAdd  - Add a custom Attribute package or modify an existing Attribute package using a specification list
+!
+! !INTERFACE:
+!     ! Private name; call using ESMF_AttributeAdd()
+!     subroutine ESMF_AttAddPackCstSL(<object>, specList, &
+!       attrList, keywordEnforcer, count, redundant, attpack, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     character (len = *), intent(in)              :: specList(:)
+!     character (len = *), intent(in)              :: attrList(:)
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!     integer,             intent(in),    optional :: count
+!     logical,             intent(in),    optional :: redundant
+!     type(ESMF_AttPack),  intent(inout), optional :: attpack
+!     integer,             intent(out),   optional :: rc
+!
+! !DESCRIPTION:
+!     Add a custom Attribute package to <object>, or add
+!     Attributes to an existing Attribute package. The {\tt redundant} flag can
+!     be set to {\tt .true.} to create redundant Attribute packages. Otherwise,
+!     Attributes will be added to an existing package. The {\tt attpack} will be
+!     used instead of {\tt specList} if both are present.
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Array),       intent(inout) :: array
+!     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
+!     \item type(ESMF\_CplComp),     intent(inout) :: comp
+!     \item type(ESMF\_GridComp),    intent(inout) :: comp
+!     \item type(ESMF\_SciComp),     intent(inout) :: comp
+!     \item type(ESMF\_DistGrid),    intent(inout) :: distgrid
+!     \item type(ESMF\_Field),       intent(inout) :: field
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF\_Grid),        intent(inout) :: grid
+!     \item type(ESMF\_State),       intent(inout) :: state
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [specList]
+!           A character list of values which identify the Attribute package,
+!           such as convention, purpose, and instancename.
+!     \item [attrList]
+!           The list of Attribute names to specify the custom Attribute package.
+!     \item [{[count]}]
+!           The number of Attributes to add to the custom Attribute package.
+!     \item [{[redundant]}]
+!           A flag to determine whether or not to create redundant Attribute
+!           packages. If an Attribute package already exists with the specified
+!           {\tt specList} and {\tt redundant} is set to
+!           {\tt .true.} then a redundant Attribute package will be created.
+!           The default value is {\tt .false.}.
+!     \item [{[attpack]}]
+!           The handle to the Attribute package that was created.
+!           This can also be used as an input parameter to indicate the
+!           Attribute package to which additional Attributes should be added.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeAdd  - Add an ESMF standard Attribute package
+!
+! !INTERFACE:
+!     ! Private name; call using ESMF_AttributeAdd()
+!     subroutine ESMF_AttAddPackStd(<object>, convention, purpose, attpack, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     character (len = *), intent(in)              :: convention
+!     character (len = *), intent(in)              :: purpose
+!     type(ESMF_AttPack),  intent(inout), optional :: attpack
+!     integer,             intent(out),   optional :: rc
+!
+! !DESCRIPTION:
+!     Add an ESMF standard Attribute package.  See Section~\ref{sec:AttPacks}
+!     for a description of Attribute packages.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Array),       intent(inout) :: array
+!     \item type(ESMF\_CplComp),     intent(inout) :: comp
+!     \item type(ESMF\_GridComp),    intent(inout) :: comp
+!     \item type(ESMF\_SciComp),     intent(inout) :: comp
+!     \item type(ESMF\_Field),       intent(inout) :: field
+!     \item type(ESMF\_Grid),        intent(inout) :: grid
+!     \item type(ESMF\_State),       intent(inout) :: state
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [convention]
+!           The convention of the new Attribute package.
+!     \item [purpose]
+!           The purpose of the new Attribute package.
+!     \item [{[attpack]}]
+!           An optional handle to the Attribute package that is to be created.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeAdd  - Add an ESMF standard Attribute package containing nested standard Attribute packages
+!
+! !INTERFACE:
+!     ! Private name; call using ESMF_AttributeAdd()
+!     subroutine ESMF_AttAddPackStdN(<object>, convention, purpose, &
+!       nestConvention, nestPurpose, nestAttPackInstanceCountList, &
+!       nestAttPackInstanceNameList, nestCount, &
+!       nestAttPackInstanceNameCount, attpack, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     character (len = *), intent(in)              :: convention
+!     character (len = *), intent(in)              :: purpose
+!     character (len = *), intent(in)              :: nestConvention(:)
+!     character (len = *), intent(in)              :: nestPurpose(:)
+!     integer,             intent(in)              :: nestAttPackInstanceCountList(:)
+!     character (len = *), intent(out)             :: nestAttPackInstanceNameList(:)
+!     integer,             intent(in),    optional :: nestCount
+!     integer,             intent(out),   optional :: nestAttPackInstanceNameCount
+!     type(ESMF_AttPack),  intent(inout), optional :: attpack
+!     integer,             intent(out),   optional :: rc
+!
+! !DESCRIPTION:
+!     Add an ESMF standard Attribute package which contains a user-specified
+!     number of nested standard Attribute packages.  ESMF generates and returns
+!     default instance names for the nested Attribute packages.  These names
+!     can be used later to distinguish among multiple nested Attribute
+!     packages of the same type in calls to {\tt ESMF\_AttributeGet()},
+!     {\tt ESMF\_AttributeSet()}, and {\tt ESMF\_AttributeRemove()}.
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_CplComp),  intent(inout) :: comp
+!     \item type(ESMF\_GridComp), intent(inout) :: comp
+!     \item type(ESMF\_SciComp),  intent(inout) :: comp
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [convention]
+!           The convention of the new Attribute package.
+!     \item [purpose]
+!           The purpose of the new Attribute package.
+!     \item [nestConvention]
+!           The convention(s) of the standard Attribute package(s) around
+!           which to nest the new Attribute package.
+!     \item [nestPurpose]
+!           The purpose(s) of the standard Attribute package(s) around
+!           which to nest the new Attribute package.
+!     \item [nestAttPackInstanceCountList]
+!           The desired number of nested Attribute package instances for each
+!           nested (nestConvention, nestPurpose) package type. Note: if only one
+!           of each nested package type is desired, then the
+!           {\tt ESMF\_AttributeAdd()} overloaded method
+!           {\tt ESMF\_AttAddPackStd()} should be used.
+!     \item [nestAttPackInstanceNameList]
+!           The name(s) of the nested Attribute package instances, generated
+!           by ESMF, used to distinguish between multiple instances of the
+!           same convention and purpose.
+!     \item [{[nestCount]}]
+!           The count of the number of nested Attribute package types to add to
+!           the new Attribute package.
+!     \item [{[nestAttPackInstanceNameCount]}]
+!           The number of nested Attribute package instance names.
+!     \item [{[attpack]}]
+!           An optional handle to the Attribute package that is to be created.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeAdd  - Add a custom Attribute package or modify an existing Attribute package
+!
+! !INTERFACE:
+!     ! Private name; call using ESMF_AttributeAdd()
+!     subroutine ESMF_AttAddPackCst(<object>, convention, purpose, &
+!       attrList, count, redundant, attpack, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     character (len = *), intent(in)              :: convention
+!     character (len = *), intent(in)              :: purpose
+!     character (len = *), intent(in)              :: attrList(:)
+!     integer,             intent(in),    optional :: count
+!     logical,             intent(in),    optional :: redundant
+!     type(ESMF_AttPack),  intent(inout), optional :: attpack
+!     integer,             intent(out),   optional :: rc
+!
+! !DESCRIPTION:
+!     Add a custom Attribute package to <object>, or add
+!     Attributes to an existing Attribute package. The {\tt redundant} flag can
+!     be set to {\tt .true.} to create redundant Attribute packages. Otherwise,
+!     Attributes will be added to an existing package. The {\tt attpack} will be
+!     used instead of {\tt convention} and {\tt purpose} if both are present.
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Array),       intent(inout) :: array
+!     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
+!     \item type(ESMF\_CplComp),     intent(inout) :: comp
+!     \item type(ESMF\_GridComp),    intent(inout) :: comp
+!     \item type(ESMF\_SciComp),     intent(inout) :: comp
+!     \item type(ESMF\_DistGrid),    intent(inout) :: distgrid
+!     \item type(ESMF\_Field),       intent(inout) :: field
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF\_Grid),        intent(inout) :: grid
+!     \item type(ESMF\_State),       intent(inout) :: state
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [convention]
+!           The convention of the Attribute package.
+!     \item [purpose]
+!           The purpose of the Attribute package.
+!     \item [attrList]
+!           The list of Attribute names to specify the custom Attribute package.
+!     \item [{[count]}]
+!           The number of Attributes to add to the custom Attribute package.
+!     \item [{[redundant]}]
+!           A flag to determine whether or not to create redundant Attribute
+!           packages. If an Attribute package already exists with the specified
+!           {\tt convention} and {\tt purpose} and {\tt redundant} is set to
+!           {\tt .true.} then a redundant Attribute package will be created.
+!           The default value is {\tt .false.}.
+!     \item [{[attpack]}]
+!           The handle to the Attribute package that was created.
+!           This can also be used as an input parameter to indicate the
+!           Attribute package to which additional Attributes should be added.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeAdd  - Add a custom Attribute package with nested Attribute packages
+!
+! !INTERFACE:
+!     ! Private name; call using ESMF_AttributeAdd()
+!     subroutine ESMF_AttAddPackCstN(<object>, convention, purpose, &
+!       attrList, count, nestConvention, nestPurpose, nestCount, attpack, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     character (len = *), intent(in)              :: convention
+!     character (len = *), intent(in)              :: purpose
+!     character (len = *), intent(in),    optional :: attrList(:)
+!     integer,             intent(in),    optional :: count
+!     character (len = *), intent(in)              :: nestConvention(:)
+!     character (len = *), intent(in)              :: nestPurpose(:)
+!     integer,             intent(in),    optional :: nestCount
+!     type(ESMF_AttPack),  intent(inout), optional :: attpack
+!     integer,             intent(out),   optional :: rc
+!
+! !DESCRIPTION:
+!     Add a custom Attribute package, with one or more nested Attribute
+!     packages, to <object>.  Allows for building full multiple-child Attribute
+!     hierarchies (multi-child trees).
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Array),       intent(inout) :: array
+!     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
+!     \item type(ESMF\_CplComp),     intent(inout) :: comp
+!     \item type(ESMF\_GridComp),    intent(inout) :: comp
+!     \item type(ESMF\_SciComp),     intent(inout) :: comp
+!     \item type(ESMF\_DistGrid),    intent(inout) :: distgrid
+!     \item type(ESMF\_Field),       intent(inout) :: field
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF\_Grid),        intent(inout) :: grid
+!     \item type(ESMF\_State),       intent(inout) :: state
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [convention]
+!           The convention of the Attribute package.
+!     \item [purpose]
+!           The purpose of the Attribute package.
+!     \item [{[attrList]}]
+!           The list of Attribute names to specify the custom Attribute package.
+!     \item [{[count]}]
+!           The number of Attributes to add to the custom Attribute package.
+!     \item [nestConvention]
+!           The convention(s) of the Attribute package(s) around which to nest
+!           the new Attribute package.
+!     \item [nestPurpose]
+!           The purpose(s) of the Attribute package(s) around which to nest the
+!           new Attribute package.
+!     \item [{[nestCount]}]
+!           The number of nested Attribute packages to add to the custom
+!           Attribute package.
+!     \item [{[attpack]}]
+!           An optional handle to the Attribute package that is to be created.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeAdd  - Add a custom Attribute package with a single nested Attribute package
+!
+! !INTERFACE:
+!     ! Private name; call using ESMF_AttributeAdd()
+!     subroutine ESMF_AttAddPackCstN1(<object>, convention, purpose, &
+!       attrList, count, nestConvention, nestPurpose, attpack, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     character (len = *), intent(in)              :: convention
+!     character (len = *), intent(in)              :: purpose
+!     character (len = *), intent(in),    optional :: attrList(:)
+!     integer,             intent(in),    optional :: count
+!     character (len = *), intent(in)              :: nestConvention
+!     character (len = *), intent(in)              :: nestPurpose
+!     type(ESMF_AttPack),  intent(inout), optional :: attpack
+!     integer,             intent(out),   optional :: rc
+!
+! !DESCRIPTION:
+!     Add a custom Attribute package, with a single nested Attribute
+!     package, to <object>.  Allows for building single-child Attribute
+!     hierarchies (single-child trees).
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Array),       intent(inout) :: array
+!     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
+!     \item type(ESMF\_CplComp),     intent(inout) :: comp
+!     \item type(ESMF\_GridComp),    intent(inout) :: comp
+!     \item type(ESMF\_SciComp),     intent(inout) :: comp
+!     \item type(ESMF\_DistGrid),    intent(inout) :: distgrid
+!     \item type(ESMF\_Field),       intent(inout) :: field
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF\_Grid),        intent(inout) :: grid
+!     \item type(ESMF\_State),       intent(inout) :: state
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [convention]
+!           The convention of the Attribute package.
+!     \item [purpose]
+!           The purpose of the Attribute package.
+!     \item [{[attrList]}]
+!           The list of Attribute names to specify the custom Attribute package.
+!     \item [{[count]}]
+!           The number of Attributes to add to the custom Attribute package.
+!     \item [nestConvention]
+!           The convention of the Attribute package around which to nest
+!           the new Attribute package.
+!     \item [nestPurpose]
+!           The purpose of the Attribute package around which to nest the
+!           new Attribute package.
+!     \item [{[attpack]}]
+!           An optional handle to the Attribute package that is to be created.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeCopy - Copy an Attribute hierarchy
+!
+! !INTERFACE:
+!     ! Private name; call using ESMF_AttributeCopy()
+!     subroutine ESMF_AttributeCopy(<object1>, <object2>, attcopy, rc)
+!
+! !ARGUMENTS:
+!     <object1>, see below for supported values
+!     <object2>, see below for supported values
+!     type(ESMF_AttCopy_Flag),intent(in)   optional :: attcopy
+!     integer,                intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Copy an Attribute hierarchy from <object1> to <object2>.  The
+!     default behavior is to ignore (instead of replace) values on
+!     pre-existing Attributes.
+!
+!     Supported values for <object1> are:
+!     \begin{description}
+!     \item type(ESMF\_CplComp),     intent(in)    :: comp1
+!     \item type(ESMF\_GridComp),    intent(in)    :: comp1
+!     \item type(ESMF\_SciComp),     intent(in)    :: comp1
+!     \item type(ESMF\_Field),       intent(inout) :: field1
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle1
+!     \item type(ESMF\_Grid),        intent(inout) :: grid1
+!     \item type(ESMF\_State),       intent(in)    :: state
+!     \end{description}
+!
+!     Supported values for <object2> are:
+!     \begin{description}
+!     \item type(ESMF\_CplComp),     intent(inout) :: comp2
+!     \item type(ESMF\_GridComp),    intent(inout) :: comp2
+!     \item type(ESMF\_SciComp),     intent(inout) :: comp2
+!     \item type(ESMF\_Field),       intent(inout) :: field2
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle2
+!     \item type(ESMF\_Grid),        intent(inout) :: grid2
+!     \item type(ESMF\_State),       intent(inout) :: state
+!     \end{description}
+!
+!     NOTE: Copies between different ESMF object types are not possible at this time.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object1>]
+!           An {\tt Attribute}-bearing ESMF object.
+!     \item [<object2>]
+!           An {\tt Attribute}-bearing ESMF object.
+!     \item [{[attcopy]}]
+!           A flag to determine if the copy is to be by reference, value,
+!           or hybrid.  This flag is documented in section \ref{const:attcopy}.
+!           The default is to copy by value.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeGet  - Get an Attribute from an ESMF_AttPack
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeGet(<object>, name, attpack, <value> &
+!       keywordEnforcer, <defaultvalue>, attnestflag, isPresent, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     character (len = *),    intent(in)            :: name
+!     type(ESMF_AttPack),     intent(inout)         :: attpack
+!     <value>, see below for supported values
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!     <defaultvalue>, see below for supported values
+!     type(ESMF_AttNest_Flag),intent(in),  optional :: attnestflag
+!     logical,                intent(out), optional :: isPresent
+!     integer,                intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Return an Attribute {\tt value} from the <object>, or from an Attribute
+!     package on the <object>, specified by {\tt attpack}.  Internal information can also
+!     be retrieved from Grid objects by prepending 'ESMF:' to the name of the
+!     piece of information that is requested.  See
+!     Section~\ref{sec:InternalInfo} for more information
+!     on which pieces of Grid data can be retrieved through this interface.
+!     A {\tt defaultvalue} argument
+!     may be given if a return code is not desired when the Attribute is not
+!     found.  See Section~\ref{sec:AttPacks} for a description of Attribute
+!     packages.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Array),       intent(in) :: array
+!     \item type(ESMF\_ArrayBundle), intent(in) :: arraybundle
+!     \item type(ESMF\_CplComp),     intent(in) :: comp
+!     \item type(ESMF\_GridComp),    intent(in) :: comp
+!     \item type(ESMF\_SciComp),     intent(in) :: comp
+!     \item type(ESMF\_DistGrid),    intent(in) :: distgrid
+!     \item type(ESMF\_Field),       intent(in) :: field
+!     \item type(ESMF\_FieldBundle), intent(in) :: fieldbundle
+!     \item type(ESMF\_Grid),        intent(in) :: grid
+!     \item type(ESMF\_State),       intent(in) :: state
+!     \end{description}
+!
+!     Supported values for <value> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(out) :: value
+!     \item integer(ESMF\_KIND\_I8), intent(out) :: value
+!     \item real (ESMF\_KIND\_R4),   intent(out) :: value
+!     \item real (ESMF\_KIND\_R8),   intent(out) :: value
+!     \item logical,                 intent(out) :: value
+!     \item character (len = *),     intent(out) :: value
+!     \end{description}
+!
+!     Supported values for <defaultvalue> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(in), optional :: defaultvalue
+!     \item integer(ESMF\_KIND\_I8), intent(in), optional :: defaultvalue
+!     \item real (ESMF\_KIND\_R4),   intent(in), optional :: defaultvalue
+!     \item real (ESMF\_KIND\_R8),   intent(in), optional :: defaultvalue
+!     \item logical,                 intent(in), optional :: defaultvalue
+!     \item character (len = *),     intent(in), optional :: defaultvalue
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [name]
+!           The name of the Attribute to retrieve.
+!     \item [attpack]
+!           A handle to the Attribute package.
+!     \item [<value>]
+!           The value of the named Attribute.
+!     \item [{[<defaultvalue>]}]
+!           The default value of the named Attribute.
+!     \item [{[attnestflag]}]
+!           A flag to determine whether to descend the
+!           Attribute hierarchy when looking for this Attribute, the default
+!           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
+!           \ref{const:attnest}.
+!     \item [{[isPresent]}]
+!           A logical flag to tell if this Attribute is present or not.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeGet - Get an Attribute pointing to internal class information from an ESMF_AttPack
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeGet(<object>, name, attpack, <value>, &
+!       keywordEnforcer, <defaultvalue>, inputList, attnestflag, isPresent, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     character (len = *),   intent(in)             :: name
+!     type(ESMF_AttPack),    intent(inout)          :: attpack
+!     <value>, see below for supported values
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!     <defaultvalue>, see below for supported values
+!     character (len = *),    intent(in),  optional :: inputList(:)
+!     type(ESMF_AttNest_Flag),intent(in),  optional :: attnestflag
+!     logical,                intent(out), optional :: isPresent
+!     integer,                intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Return an Attribute {\tt value} from the <object>, or from an Attribute
+!     package on the <object>, specified by {\tt attpack}.  Internal class information can
+!     be retrieved by prepending 'ESMF:' to the name of the
+!     piece of information that is requested.  See
+!     Section~\ref{sec:InternalInfo} for more information
+!     on this capability.
+!     A {\tt defaultvalue} argument
+!     may be given if a return code is not desired when the Attribute is not
+!     found.  See Section~\ref{sec:AttPacks} for a description of Attribute
+!     packages.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Grid), intent(in) :: grid
+!     \end{description}
+!
+!     Supported values for <value> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(out) :: value
+!     \item character (len = *),     intent(out) :: value
+!     \end{description}
+!
+!     Supported values for <defaultvalue> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(in), optional :: defaultvalue
+!     \item character (len = *),     intent(in), optional :: defaultvalue
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [name]
+!           The name of the Attribute to retrieve.
+!     \item [attpack]
+!           A handle to the Attribute package.
+!     \item [<value argument>]
+!           The value of the named Attribute.
+!     \item [{[<defaultvalue argument>]}]
+!           The default value of the named Attribute.
+!     \item [{[inputList]}]
+!           A list of the input parameters required to retrieve internal info.
+!     \item [{[attnestflag]}]
+!           A flag to determine whether to descend the
+!           Attribute hierarchy when looking for this Attribute, the default
+!           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
+!           \ref{const:attnest}.
+!     \item [{[isPresent]}]
+!           A logical flag to tell if this Attribute is present or not.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeGet  - Get an Attribute from an ESMF_AttPack
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeGet(<object>, name, attpack, <valueList>, &
+!       keywordEnforcer, <defaultvalueList>, attnestflag, itemCount, &
+!       isPresent, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     character (len = *),    intent(in)            :: name
+!     type(ESMF_AttPack),     intent(inout)         :: attpack
+!     <valueList>, see below for supported values
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!     <defaultvalueList>, see below for supported values
+!     type(ESMF_AttNest_Flag),intent(in),  optional :: attnestflag
+!     integer,                intent(out), optional :: itemCount
+!     logical,                intent(out), optional :: isPresent
+!     integer,                intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Return an Attribute {\tt valueList} from the <object>, or from an
+!     Attribute package on the <object>, specified by {\tt attpack}.  Internal
+!     information can also be retrieved from Grid objects by prepending 'ESMF:'
+!     to the name of the piece of information that is requested.  See
+!     Section~\ref{sec:InternalInfo} for more information
+!     on which pieces of Grid data can be retrieved through this interface.
+!     A {\tt defaultvalueList} list argument may be given if
+!     a return code is not desired when the Attribute is not found.
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Array),       intent(in) :: array
+!     \item type(ESMF\_ArrayBundle), intent(in) :: arraybundle
+!     \item type(ESMF\_CplComp),     intent(in) :: comp
+!     \item type(ESMF\_GridComp),    intent(in) :: comp
+!     \item type(ESMF\_SciComp),     intent(in) :: comp
+!     \item type(ESMF\_DistGrid),    intent(in) :: distgrid
+!     \item type(ESMF\_Field),       intent(in) :: field
+!     \item type(ESMF\_FieldBundle), intent(in) :: fieldbundle
+!     \item type(ESMF\_Grid),        intent(in) :: grid
+!     \item type(ESMF\_State),       intent(in) :: state
+!     \end{description}
+!
+!     Supported values for <valueList> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(out) :: valueList(:)
+!     \item integer(ESMF\_KIND\_I8), intent(out) :: valueList(:)
+!     \item real (ESMF\_KIND\_R4),   intent(out) :: valueList(:)
+!     \item real (ESMF\_KIND\_R8),   intent(out) :: valueList(:)
+!     \item logical,                 intent(out) :: valueList(:)
+!     \item character (len = *),     intent(out) :: valueList(:)
+!     \end{description}
+!
+!     Supported values for <defaultvalueList> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(in), optional :: defaultvalueList(:)
+!     \item integer(ESMF\_KIND\_I8), intent(in), optional :: defaultvalueList(:)
+!     \item real (ESMF\_KIND\_R4),   intent(in), optional :: defaultvalueList(:)
+!     \item real (ESMF\_KIND\_R8),   intent(in), optional :: defaultvalueList(:)
+!     \item logical,                 intent(in), optional :: defaultvalueList(:)
+!     \item character (len = *),     intent(in), optional :: defaultvalueList(:)
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [name]
+!           The name of the Attribute to retrieve.
+!     \item [attpack]
+!           A handle to the Attribute package.
+!     \item [<valueList>]
+!           The valueList of the named Attribute.
+!     \item [{[<defaultvalueList>]}]
+!           The default value list of the named Attribute.
+!     \item [{[attnestflag]}]
+!           A flag to determine whether to descend the
+!           Attribute hierarchy when looking for this Attribute, the default
+!           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
+!           \ref{const:attnest}.
+!     \item [{[itemCount]}]
+!           The number of items in a multi-valued Attribute.
+!     \item [{[isPresent]}]
+!           A logical flag to tell if this Attribute is present or not.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeGet - Get an Attribute pointing to internal class information from an ESMF_AttPack
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeGet(<object>, name, attpack, <valueList>, &
+!       keywordEnforcer, <defaultvalueList>, inputList, attnestflag, &
+!       itemCount, isPresent, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     character (len = *),    intent(in)            :: name
+!     type(ESMF_AttPack),     intent(inout)         :: attpack
+!     <valueList>, see below for supported values
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!     <defaultvalueList>, see below for supported values
+!     character (len = *),    intent(in),  optional :: inputList(:)
+!     type(ESMF_AttNest_Flag),intent(in),  optional :: attnestflag
+!     integer,                intent(out), optional :: itemCount
+!     logical,                intent(out), optional :: isPresent
+!     integer,                intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Return an Attribute {\tt valueList} from the <object>, or from an
+!     Attribute package on the <object>, specified by {\tt attpack}.  Internal class
+!     information can be retrieved by prepending 'ESMF:'
+!     to the name of the piece of information that is requested.  See
+!     Section~\ref{sec:InternalInfo} for more information
+!     on this capability.
+!     A {\tt defaultvalueList} list argument may be given if
+!     a return code is not desired when the Attribute is not found.
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Grid),        intent(in) :: grid
+!     \end{description}
+!
+!     Supported values for <valueList> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(out) :: valueList(:)
+!     \item real (ESMF\_KIND\_R8),   intent(out) :: valueList(:)
+!     \item logical,                 intent(out) :: valueList(:)
+!     \end{description}
+!
+!     Supported values for <defaultvalueList> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(in), optional :: defaultvalueList(:)
+!     \item real (ESMF\_KIND\_R8),   intent(in), optional :: defaultvalueList(:)
+!     \item logical,                 intent(in), optional :: defaultvalueList(:)
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [name]
+!           The name of the Attribute to retrieve.
+!     \item [attpack]
+!           A handle to the Attribute package.
+!     \item [<valueList>]
+!           The valueList of the named Attribute.
+!     \item [{[<defaultvalueList>]}]
+!           The default value list of the named Attribute.
+!     \item [{[inputList]}]
+!           A list of the input parameters required to retrieve internal info.
+!     \item [{[attnestflag]}]
+!           A flag to determine whether to descend the
+!           Attribute hierarchy when looking for this Attribute, the default
+!           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
+!           \ref{const:attnest}.
+!     \item [{[itemCount]}]
+!           The number of items in a multi-valued Attribute.
+!     \item [{[isPresent]}]
+!           A logical flag to tell if this Attribute is present or not.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeGet  - Get an Attribute
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeGet(<object>, name, <value>, <defaultvalue>, &
+!       convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     character (len = *),    intent(in)            :: name
+!     <value>, see below for supported values
+!     <defaultvalue>, see below for supported values
+!     character (len = *),    intent(in),  optional :: convention
+!     character (len = *),    intent(in),  optional :: purpose
+!     character (len = *),    intent(in),  optional :: attPackInstanceName
+!     type(ESMF_AttNest_Flag),intent(in),  optional :: attnestflag
+!     logical,                intent(out), optional :: isPresent
+!     integer,                intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Return an Attribute {\tt value} from the <object>, or from an Attribute
+!     package on the <object>, specified by {\tt convention},
+!     {\tt purpose}, and {\tt attPackInstanceName}.  Internal information can also
+!     be retrieved from Grid objects by prepending 'ESMF:' to the name of the
+!     piece of information that is requested.  See
+!     Section~\ref{sec:InternalInfo} for more information
+!     on which pieces of Grid data can be retrieved through this interface.
+!     A {\tt defaultvalue} argument
+!     may be given if a return code is not desired when the Attribute is not
+!     found.  See Section~\ref{sec:AttPacks} for a description of Attribute
+!     packages.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Array),       intent(in) :: array
+!     \item type(ESMF\_ArrayBundle), intent(in) :: arraybundle
+!     \item type(ESMF\_CplComp),     intent(in) :: comp
+!     \item type(ESMF\_GridComp),    intent(in) :: comp
+!     \item type(ESMF\_SciComp),     intent(in) :: comp
+!     \item type(ESMF\_DistGrid),    intent(in) :: distgrid
+!     \item type(ESMF\_Field),       intent(in) :: field
+!     \item type(ESMF\_FieldBundle), intent(in) :: fieldbundle
+!     \item type(ESMF\_Grid),        intent(in) :: grid
+!     \item type(ESMF\_State),       intent(in) :: state
+!     \end{description}
+!
+!     Supported values for <value> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(out) :: value
+!     \item integer(ESMF\_KIND\_I8), intent(out) :: value
+!     \item real (ESMF\_KIND\_R4),   intent(out) :: value
+!     \item real (ESMF\_KIND\_R8),   intent(out) :: value
+!     \item logical,                 intent(out) :: value
+!     \item character (len = *),     intent(out) :: value
+!     \end{description}
+!
+!     Supported values for <defaultvalue> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(in), optional :: defaultvalue
+!     \item integer(ESMF\_KIND\_I8), intent(in), optional :: defaultvalue
+!     \item real (ESMF\_KIND\_R4),   intent(in), optional :: defaultvalue
+!     \item real (ESMF\_KIND\_R8),   intent(in), optional :: defaultvalue
+!     \item logical,                 intent(in), optional :: defaultvalue
+!     \item character (len = *),     intent(in), optional :: defaultvalue
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [name]
+!           The name of the Attribute to retrieve.
+!     \item [<value>]
+!           The value of the named Attribute.
+!     \item [{[<defaultvalue>]}]
+!           The default value of the named Attribute.
+!     \item [{[convention]}]
+!           The convention of the Attribute package.
+!     \item [{[purpose]}]
+!           The purpose of the Attribute package.
+!     \item [{[attPackInstanceName]}]
+!           The name of an Attribute package instance, specifying which one
+!           of multiple Attribute package instances of the same convention
+!           and purpose, within a nest.  If not specified, defaults to the
+!           first instance.
+!     \item [{[attnestflag]}]
+!           A flag to determine whether to descend the
+!           Attribute hierarchy when looking for this Attribute, the default
+!           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
+!           \ref{const:attnest}.
+!     \item [{[isPresent]}]
+!           A logical flag to tell if this Attribute is present or not.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeGet - Get an Attribute pointing to internal class information
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeGet(<object>, name, <value>, <defaultvalue>, &
+!       inputList, convention, purpose, attPackInstanceName, attnestflag, &
+!       isPresent, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     character (len = *),    intent(in)            :: name
+!     <value>, see below for supported values
+!     <defaultvalue>, see below for supported values
+!     character (len = *),    intent(in),  optional :: inputList(:)
+!     character (len = *),    intent(in),  optional :: convention
+!     character (len = *),    intent(in),  optional :: purpose
+!     character (len = *),    intent(in),  optional :: attPackInstanceName
+!     type(ESMF_AttNest_Flag),intent(in),  optional :: attnestflag
+!     logical,                intent(out), optional :: isPresent
+!     integer,                intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Return an Attribute {\tt value} from the <object>, or from an Attribute
+!     package on the <object>, specified by {\tt convention},
+!     {\tt purpose}, and {\tt attPackInstanceName}.  Internal class information can
+!     be retrieved by prepending 'ESMF:' to the name of the
+!     piece of information that is requested.  See
+!     Section~\ref{sec:InternalInfo} for more information
+!     on this capability.
+!     A {\tt defaultvalue} argument
+!     may be given if a return code is not desired when the Attribute is not
+!     found.  See Section~\ref{sec:AttPacks} for a description of Attribute
+!     packages.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Grid), intent(in) :: grid
+!     \end{description}
+!
+!     Supported values for <value> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(out) :: value
+!     \item character (len = *),     intent(out) :: value
+!     \end{description}
+!
+!     Supported values for <defaultvalue> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(in), optional :: defaultvalue
+!     \item character (len = *),     intent(in), optional :: defaultvalue
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [name]
+!           The name of the Attribute to retrieve.
+!     \item [<value argument>]
+!           The value of the named Attribute.
+!     \item [{[<defaultvalue argument>]}]
+!           The default value of the named Attribute.
+!     \item [{[inputList]}]
+!           A list of the input parameters required to retrieve internal info.
+!     \item [{[convention]}]
+!           The convention of the Attribute package.
+!     \item [{[purpose]}]
+!           The purpose of the Attribute package.
+!     \item [{[attPackInstanceName]}]
+!           The name of an Attribute package instance, specifying which one
+!           of multiple Attribute package instances of the same convention
+!           and purpose, within a nest.  If not specified, defaults to the
+!           first instance.
+!     \item [{[attnestflag]}]
+!           A flag to determine whether to descend the
+!           Attribute hierarchy when looking for this Attribute, the default
+!           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
+!           \ref{const:attnest}.
+!     \item [{[isPresent]}]
+!           A logical flag to tell if this Attribute is present or not.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeGet  - Get an Attribute
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeGet(<object>, name, <valueList>, &
+!       <defaultvalueList>, convention, purpose, attPackInstanceName, &
+!       attnestflag, itemCount, isPresent, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     character (len = *),    intent(in)            :: name
+!     <valueList>, see below for supported values
+!     <defaultvalueList>, see below for supported values
+!     character (len = *),    intent(in),  optional :: convention
+!     character (len = *),    intent(in),  optional :: purpose
+!     character (len = *),    intent(in),  optional :: attPackInstanceName
+!     type(ESMF_AttNest_Flag),intent(in),  optional :: attnestflag
+!     integer,                intent(out), optional :: itemCount
+!     logical,                intent(out), optional :: isPresent
+!     integer,                intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Return an Attribute {\tt valueList} from the <object>, or from an
+!     Attribute package on the <object>, specified by {\tt convention},
+!     {\tt purpose}, and {\tt attPackInstanceName}.  Internal
+!     information can also be retrieved from Grid objects by prepending 'ESMF:'
+!     to the name of the piece of information that is requested.  See
+!     Section~\ref{sec:InternalInfo} for more information
+!     on which pieces of Grid data can be retrieved through this interface.
+!     A {\tt defaultvalueList} list argument may be given if
+!     a return code is not desired when the Attribute is not found.
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Array),       intent(in) :: array
+!     \item type(ESMF\_ArrayBundle), intent(in) :: arraybundle
+!     \item type(ESMF\_CplComp),     intent(in) :: comp
+!     \item type(ESMF\_GridComp),    intent(in) :: comp
+!     \item type(ESMF\_SciComp),     intent(in) :: comp
+!     \item type(ESMF\_DistGrid),    intent(in) :: distgrid
+!     \item type(ESMF\_Field),       intent(in) :: field
+!     \item type(ESMF\_FieldBundle), intent(in) :: fieldbundle
+!     \item type(ESMF\_Grid),        intent(in) :: grid
+!     \item type(ESMF\_State),       intent(in) :: state
+!     \end{description}
+!
+!     Supported values for <valueList> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(out) :: valueList(:)
+!     \item integer(ESMF\_KIND\_I8), intent(out) :: valueList(:)
+!     \item real (ESMF\_KIND\_R4),   intent(out) :: valueList(:)
+!     \item real (ESMF\_KIND\_R8),   intent(out) :: valueList(:)
+!     \item logical,                 intent(out) :: valueList(:)
+!     \item character (len = *),     intent(out) :: valueList(:)
+!     \end{description}
+!
+!     Supported values for <defaultvalueList> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(in), optional :: defaultvalueList(:)
+!     \item integer(ESMF\_KIND\_I8), intent(in), optional :: defaultvalueList(:)
+!     \item real (ESMF\_KIND\_R4),   intent(in), optional :: defaultvalueList(:)
+!     \item real (ESMF\_KIND\_R8),   intent(in), optional :: defaultvalueList(:)
+!     \item logical,                 intent(in), optional :: defaultvalueList(:)
+!     \item character (len = *),     intent(in), optional :: defaultvalueList(:)
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [name]
+!           The name of the Attribute to retrieve.
+!     \item [<valueList>]
+!           The valueList of the named Attribute.
+!     \item [{[<defaultvalueList>]}]
+!           The default value list of the named Attribute.
+!     \item [{[convention]}]
+!           The convention of the Attribute package.
+!     \item [{[purpose]}]
+!           The purpose of the Attribute package.
+!     \item [{[attPackInstanceName]}]
+!           The name of an Attribute package instance, specifying which one
+!           of multiple Attribute package instances of the same convention
+!           and purpose, within a nest.  If not specified, defaults to the
+!           first instance.
+!     \item [{[attnestflag]}]
+!           A flag to determine whether to descend the
+!           Attribute hierarchy when looking for this Attribute, the default
+!           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
+!           \ref{const:attnest}.
+!     \item [{[itemCount]}]
+!           The number of items in a multi-valued Attribute.
+!     \item [{[isPresent]}]
+!           A logical flag to tell if this Attribute is present or not.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeGet - Get an Attribute pointing to internal class information
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeGet(<object>, name, <valueList>, &
+!       <defaultvalueList>, inputList, convention, purpose, attPackInstanceName, &
+!       attnestflag, itemCount, isPresent, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     character (len = *),    intent(in)            :: name
+!     <valueList>, see below for supported values
+!     <defaultvalueList>, see below for supported values
+!     character (len = *),    intent(in),  optional :: inputList(:)
+!     character (len = *),    intent(in),  optional :: convention
+!     character (len = *),    intent(in),  optional :: purpose
+!     character (len = *),    intent(in),  optional :: attPackInstanceName
+!     type(ESMF_AttNest_Flag),intent(in),  optional :: attnestflag
+!     integer,                intent(out), optional :: itemCount
+!     logical,                intent(out), optional :: isPresent
+!     integer,                intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Return an Attribute {\tt valueList} from the <object>, or from an
+!     Attribute package on the <object>, specified by {\tt convention},
+!     {\tt purpose}, and {\tt attPackInstanceName}.  Internal class
+!     information can be retrieved by prepending 'ESMF:'
+!     to the name of the piece of information that is requested.  See
+!     Section~\ref{sec:InternalInfo} for more information
+!     on this capability.
+!     A {\tt defaultvalueList} list argument may be given if
+!     a return code is not desired when the Attribute is not found.
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Grid),        intent(in) :: grid
+!     \end{description}
+!
+!     Supported values for <valueList> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(out) :: valueList(:)
+!     \item real (ESMF\_KIND\_R8),   intent(out) :: valueList(:)
+!     \item logical,                 intent(out) :: valueList(:)
+!     \end{description}
+!
+!     Supported values for <defaultvalueList> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(in), optional :: defaultvalueList(:)
+!     \item real (ESMF\_KIND\_R8),   intent(in), optional :: defaultvalueList(:)
+!     \item logical,                 intent(in), optional :: defaultvalueList(:)
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [name]
+!           The name of the Attribute to retrieve.
+!     \item [<valueList>]
+!           The valueList of the named Attribute.
+!     \item [{[<defaultvalueList>]}]
+!           The default value list of the named Attribute.
+!     \item [{[inputList]}]
+!           A list of the input parameters required to retrieve internal info.
+!     \item [{[convention]}]
+!           The convention of the Attribute package.
+!     \item [{[purpose]}]
+!           The purpose of the Attribute package.
+!     \item [{[attPackInstanceName]}]
+!           The name of an Attribute package instance, specifying which one
+!           of multiple Attribute package instances of the same convention
+!           and purpose, within a nest.  If not specified, defaults to the
+!           first instance.
+!     \item [{[attnestflag]}]
+!           A flag to determine whether to descend the
+!           Attribute hierarchy when looking for this Attribute, the default
+!           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
+!           \ref{const:attnest}.
+!     \item [{[itemCount]}]
+!           The number of items in a multi-valued Attribute.
+!     \item [{[isPresent]}]
+!           A logical flag to tell if this Attribute is present or not.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeGet - Get the Attribute count from an ESMF_AttPack
+!
+! !INTERFACE:
+!     ! Private name; call using ESMF_AttributeGet()
+!     subroutine ESMF_AttributeGetCount(<object>, attpack, count, &
+!                                       attcountflag, attnestflag, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     type(ESMF_AttPack),         intent(inout)         :: attpack
+!     integer,                    intent(out)           :: count
+!     type(ESMF_AttGetCountFlag), intent(in),  optional :: attcountflag
+!     type(ESMF_AttNest_Flag),    intent(in),  optional :: attnestflag
+!     integer,                    intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Return the Attribute count for <object>.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Array),       intent(in) :: array
+!     \item type(ESMF\_ArrayBundle), intent(in) :: arraybundle
+!     \item type(ESMF\_CplComp),     intent(in) :: comp
+!     \item type(ESMF\_GridComp),    intent(in) :: comp
+!     \item type(ESMF\_SciComp),     intent(in) :: comp
+!     \item type(ESMF\_DistGrid),    intent(in) :: distgrid
+!     \item type(ESMF\_Field),       intent(in) :: field
+!     \item type(ESMF\_FieldBundle), intent(in) :: fieldbundle
+!     \item type(ESMF\_Grid),        intent(in) :: grid
+!     \item type(ESMF\_State),       intent(in) :: state
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [attpack]
+!           A handle to the Attribute package.
+!     \item [count]
+!           The number of all existing Attributes of the type designated in the
+!           {\it attcountflag}, not just Attribute that have been set.
+!     \item [{[attcountflag]}]
+!           The flag to specify which attribute count to return, the
+!           default is ESMF\_ATTGETCOUNT\_ATTRIBUTE.  This flag is documented
+!           in section \ref{const:attgetcount}.
+!     \item [{[attnestflag]}]
+!           A flag to determine whether to descend the
+!           Attribute hierarchy when looking for this Attribute, the default
+!           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
+!           \ref{const:attnest}.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeGet - Get the Attribute count
+!
+! !INTERFACE:
+!     ! Private name; call using ESMF_AttributeGet()
+!     subroutine ESMF_AttributeGetCount(<object>, count, &
+!                                       convention, purpose, attPackInstanceName, &
+!                                       attcountflag, attnestflag, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     integer,                    intent(out)           :: count
+!     character (len=*),          intent(in),  optional :: convention
+!     character (len=*),          intent(in),  optional :: purpose
+!     character (len=*),          intent(in),  optional :: attPackInstanceName
+!     type(ESMF_AttGetCountFlag), intent(in),  optional :: attcountflag
+!     type(ESMF_AttNest_Flag),    intent(in),  optional :: attnestflag
+!     integer,                    intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Return the Attribute count for <object>.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Array),       intent(in) :: array
+!     \item type(ESMF\_ArrayBundle), intent(in) :: arraybundle
+!     \item type(ESMF\_CplComp),     intent(in) :: comp
+!     \item type(ESMF\_GridComp),    intent(in) :: comp
+!     \item type(ESMF\_SciComp),     intent(in) :: comp
+!     \item type(ESMF\_DistGrid),    intent(in) :: distgrid
+!     \item type(ESMF\_Field),       intent(in) :: field
+!     \item type(ESMF\_FieldBundle), intent(in) :: fieldbundle
+!     \item type(ESMF\_Grid),        intent(in) :: grid
+!     \item type(ESMF\_State),       intent(in) :: state
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [count]
+!           The number of all existing Attributes of the type designated in the
+!           {\it attcountflag}, not just Attribute that have been set.
+!     \item [{[convention]}]
+!           The convention of the Attribute package.
+!     \item [{[purpose]}]
+!           The purpose of the Attribute package.
+!     \item [{[attPackInstanceName]}]
+!           The name of an Attribute package instance, specifying which one
+!           of multiple Attribute package instances of the same convention
+!           and purpose, within a nest.  If not specified, defaults to the
+!           first instance.
+!     \item [{[attcountflag]}]
+!           The flag to specify which attribute count to return, the
+!           default is ESMF\_ATTGETCOUNT\_ATTRIBUTE.  This flag is documented
+!           in section \ref{const:attgetcount}.
+!     \item [{[attnestflag]}]
+!           A flag to determine whether to descend the
+!           Attribute hierarchy when looking for this Attribute, the default
+!           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
+!           \ref{const:attnest}.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeGet - Get Attribute info by name from an ESMF_AttPack
+!
+! !INTERFACE:
+!     ! Private name; call using ESMF_AttributeGet()
+!     subroutine ESMF_AttributeGetInfoByNamAP(<object>, name, attpack, &
+!       keywordEnforcer, attnestflag, typekind, itemCount, isPresent, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     character (len = *),      intent(in)            :: name
+!     type(ESMF_AttPack),       intent(inout)         :: attpack
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!     type(ESMF_AttNest_Flag),  intent(in),  optional :: attnestflag
+!     type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
+!     integer,                  intent(out), optional :: itemCount
+!     logical,                  intent(out), optional :: isPresent
+!     integer,                  intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Return information associated with an Attribute in an Attribute package,
+!     including {\tt typekind} and {\tt itemCount}.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Array),       intent(in) :: array
+!     \item type(ESMF\_ArrayBundle), intent(in) :: arraybundle
+!     \item type(ESMF\_CplComp),     intent(in) :: comp
+!     \item type(ESMF\_GridComp),    intent(in) :: comp
+!     \item type(ESMF\_SciComp),     intent(in) :: comp
+!     \item type(ESMF\_DistGrid),    intent(in) :: distgrid
+!     \item type(ESMF\_Field),       intent(in) :: field
+!     \item type(ESMF\_FieldBundle), intent(in) :: fieldbundle
+!     \item type(ESMF\_Grid),        intent(in) :: grid
+!     \item type(ESMF\_State),       intent(in) :: state
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [name]
+!           The name of the Attribute to query.
+!     \item [attpack]
+!           A handle to the Attribute package.
+!     \item [{[attnestflag]}]
+!           A flag to determine whether to descend the
+!           Attribute hierarchy when looking for this Attribute, the default
+!           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
+!           \ref{const:attnest}.
+!     \item [{[typekind]}]
+!           The typekind of the Attribute. This flag is documented in section
+!           \ref{const:typekind}.
+!     \item [{[itemCount]}]
+!           The number of items in this Attribute.
+!     \item [{[isPresent]}]
+!           A logical flag to tell if this Attribute is present or not.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeGet - Get Attribute info by name
+!
+! !INTERFACE:
+!     ! Private name; call using ESMF_AttributeGet()
+!     subroutine ESMF_AttributeGetInfoByNam(<object>, name, keywordEnforcer, &
+!       convention, purpose, attPackInstanceName, &
+!       attnestflag, typekind, itemCount, isPresent, rc)
+!
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     character (len = *),      intent(in)            :: name
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!     character (len=*),        intent(in),  optional :: convention
+!     character (len=*),        intent(in),  optional :: purpose
+!     character (len=*),        intent(in),  optional :: attPackInstanceName
+!     type(ESMF_AttNest_Flag),  intent(in),  optional :: attnestflag
+!     type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
+!     integer,                  intent(out), optional :: itemCount
+!     logical,                  intent(out), optional :: isPresent
+!     integer,                  intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Return information associated with the named Attribute,
+!     including {\tt typekind} and {\tt itemCount}.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Array),       intent(in) :: array
+!     \item type(ESMF\_ArrayBundle), intent(in) :: arraybundle
+!     \item type(ESMF\_CplComp),     intent(in) :: comp
+!     \item type(ESMF\_GridComp),    intent(in) :: comp
+!     \item type(ESMF\_SciComp),     intent(in) :: comp
+!     \item type(ESMF\_DistGrid),    intent(in) :: distgrid
+!     \item type(ESMF\_Field),       intent(in) :: field
+!     \item type(ESMF\_FieldBundle), intent(in) :: fieldbundle
+!     \item type(ESMF\_Grid),        intent(in) :: grid
+!     \item type(ESMF\_State),       intent(in) :: state
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [name]
+!           The name of the Attribute to query.
+!     \item [{[convention]}]
+!           The convention of the Attribute package.
+!     \item [{[purpose]}]
+!           The purpose of the Attribute package.
+!     \item [{[attPackInstanceName]}]
+!           The name of an Attribute package instance, specifying which one
+!           of multiple Attribute package instances of the same convention
+!           and purpose, within a nest.  If not specified, defaults to the
+!           first instance.
+!     \item [{[attnestflag]}]
+!           A flag to determine whether to descend the
+!           Attribute hierarchy when looking for this Attribute, the default
+!           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
+!           \ref{const:attnest}.
+!     \item [{[typekind]}]
+!           The typekind of the Attribute. This flag is documented in section
+!           \ref{const:typekind}.
+!     \item [{[itemCount]}]
+!           The number of items in this Attribute.
+!     \item [{[isPresent]}]
+!           A logical flag to tell if this Attribute is present or not.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeGet - Get Attribute info by index number from an ESMF_AttPack
+!
+! !INTERFACE:
+!     ! Private name; call using ESMF_AttributeGet()
+!     subroutine ESMF_AttributeGetInfoByNum(<object>, attributeIndex, &
+!       name, attpack, attnestflag, typekind, itemcount, isPresent, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     integer,                  intent(in)            :: attributeIndex
+!     character (len = *),      intent(out)           :: name
+!     type(ESMF_AttPack),       intent(inout)         :: attpack
+!     type(ESMF_AttNest_Flag),  intent(in),  optional :: attnestflag
+!     type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
+!     integer,                  intent(out), optional :: itemCount
+!     logical,                  intent(out), optional :: isPresent
+!     integer,                  intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Returns information associated with the indexed Attribute,
+!     including {\tt name}, {\tt typekind} and {\tt itemCount}.  Keep in
+!     mind that these indices start from 1, as expected in a Fortran API.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Array),       intent(in) :: array
+!     \item type(ESMF\_ArrayBundle), intent(in) :: arraybundle
+!     \item type(ESMF\_CplComp),     intent(in) :: comp
+!     \item type(ESMF\_GridComp),    intent(in) :: comp
+!     \item type(ESMF\_SciComp),     intent(in) :: comp
+!     \item type(ESMF\_DistGrid),    intent(in) :: distgrid
+!     \item type(ESMF\_Field),       intent(in) :: field
+!     \item type(ESMF\_FieldBundle), intent(in) :: fieldbundle
+!     \item type(ESMF\_Grid),        intent(in) :: grid
+!     \item type(ESMF\_State),       intent(in) :: state
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [attributeIndex]
+!           The index number of the Attribute to query.
+!     \item [name]
+!           The name of the Attribute.
+!     \item [attpack]
+!           A handle to the Attribute package.
+!     \item [{[attnestflag]}]
+!           A flag to determine whether to descend the
+!           Attribute hierarchy when looking for this Attribute, the default
+!           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
+!           \ref{const:attnest}.
+!     \item [{[typekind]}]
+!           The typekind of the Attribute. This flag is documented in section
+!           \ref{const:typekind}.
+!     \item [{[itemCount]}]
+!           The number of items in this Attribute.
+!     \item [{[isPresent]}]
+!           A logical flag to tell if this Attribute is present or not.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeGet - Get Attribute info by index number
+!
+! !INTERFACE:
+!     ! Private name; call using ESMF_AttributeGet()
+!     subroutine ESMF_AttributeGetInfoByNum(<object>, attributeIndex, &
+!       name, convention, purpose, attPackInstanceName, attnestflag, &
+!       typekind, itemcount, isPresent, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     integer,                  intent(in)            :: attributeIndex
+!     character (len = *),      intent(out)           :: name
+!     character (len = *),      intent(in),  optional :: convention
+!     character (len = *),      intent(in),  optional :: purpose
+!     character (len = *),      intent(in),  optional :: attPackInstanceName
+!     type(ESMF_AttNest_Flag),  intent(in),  optional :: attnestflag
+!     type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
+!     integer,                  intent(out), optional :: itemCount
+!     logical,                  intent(out), optional :: isPresent
+!     integer,                  intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Returns information associated with the indexed Attribute,
+!     including {\tt name}, {\tt typekind} and {\tt itemCount}.  Keep in
+!     mind that these indices start from 1, as expected in a Fortran API.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Array),       intent(in) :: array
+!     \item type(ESMF\_ArrayBundle), intent(in) :: arraybundle
+!     \item type(ESMF\_CplComp),     intent(in) :: comp
+!     \item type(ESMF\_GridComp),    intent(in) :: comp
+!     \item type(ESMF\_SciComp),     intent(in) :: comp
+!     \item type(ESMF\_DistGrid),    intent(in) :: distgrid
+!     \item type(ESMF\_Field),       intent(in) :: field
+!     \item type(ESMF\_FieldBundle), intent(in) :: fieldbundle
+!     \item type(ESMF\_Grid),        intent(in) :: grid
+!     \item type(ESMF\_State),       intent(in) :: state
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [attributeIndex]
+!           The index number of the Attribute to query.
+!     \item [name]
+!           The name of the Attribute.
+!     \item [{[convention]}]
+!           The convention of the Attribute package.
+!     \item [{[purpose]}]
+!           The purpose of the Attribute package.
+!     \item [{[attPackInstanceName]}]
+!           The name of an Attribute package instance, specifying which one
+!           of multiple Attribute package instances of the same convention
+!           and purpose, within a nest.  If not specified, defaults to the
+!           first instance.
+!     \item [{[attnestflag]}]
+!           A flag to determine whether to descend the
+!           Attribute hierarchy when looking for this Attribute, the default
+!           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
+!           \ref{const:attnest}.
+!     \item [{[typekind]}]
+!           The typekind of the Attribute. This flag is documented in section
+!           \ref{const:typekind}.
+!     \item [{[itemCount]}]
+!           The number of items in this Attribute.
+!     \item [{[isPresent]}]
+!           A logical flag to tell if this Attribute is present or not.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeGet  - Get Attribute package instance names from an ESMF_AttPack
+!
+! !INTERFACE:
+!     ! Private name; call using ESMF_AttributeGet()
+!     subroutine ESMF_AttributeGetAPinstNamesAP(<object>, attpack, &
+!       attPackInstanceNameList, attPackInstanceNameCount, keywordEnforcer, &
+!       attnestflag, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     type(ESMF_AttPack),      intent(inout)         :: attpack
+!     character (len = *),     intent(out)           :: attPackInstanceNameList(:)
+!     integer,                 intent(out)           :: attPackInstanceNameCount
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!     type(ESMF_AttNest_Flag), intent(in),  optional :: attnestflag
+!     integer,                 intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Get the Attribute package instance names of the ESMF\_AttPack.
+!     Also get the number of such names.
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_CplComp),  intent(in) :: comp
+!     \item type(ESMF\_GridComp), intent(in) :: comp
+!     \item type(ESMF\_SciComp),  intent(in) :: comp
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [attpack]
+!           A handle to the Attribute package.
+!     \item [attPackInstanceNameList]
+!           The name(s) of the Attribute package instances of the given
+!           convention and purpose.
+!     \item [attPackInstanceNameCount]
+!           The number of Attribute package instance names.
+!     \item [{[attnestflag]}]
+!           A flag to determine whether to descend the
+!           Attribute hierarchy when searching for this Attribute package,
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented
+!           in section \ref{const:attnest}.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeGet  - Get Attribute package instance names
+!
+! !INTERFACE:
+!     ! Private name; call using ESMF_AttributeGet()
+!     subroutine ESMF_AttributeGetAPinstNames(<object>, convention, purpose, &
+!       attPackInstanceNameList, attPackInstanceNameCount, attnestflag, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     character (len = *),     intent(in),           :: convention
+!     character (len = *),     intent(in),           :: purpose
+!     character (len = *),     intent(out)           :: attPackInstanceNameList(:)
+!     integer,                 intent(out)           :: attPackInstanceNameCount
+!     type(ESMF_AttNest_Flag), intent(in),  optional :: attnestflag
+!     integer,                 intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Get the Attribute package instance names of the specified convention
+!     and purpose.  Also get the number of such names.
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages
+!     and their conventions, purposes, and object types.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_CplComp),  intent(in) :: comp
+!     \item type(ESMF\_GridComp), intent(in) :: comp
+!     \item type(ESMF\_SciComp),  intent(in) :: comp
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [convention]
+!           The convention of the Attribute package instances.
+!     \item [purpose]
+!           The purpose of the Attribute package instances.
+!     \item [attPackInstanceNameList]
+!           The name(s) of the Attribute package instances of the given
+!           convention and purpose.
+!     \item [attPackInstanceNameCount]
+!           The number of Attribute package instance names.
+!     \item [{[attnestflag]}]
+!           A flag to determine whether to descend the
+!           Attribute hierarchy when searching for this Attribute package,
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented
+!           in section \ref{const:attnest}.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_AttributeGetAttPack  - Get an ESMF Attribute package object and/or query for presence using a specification list
+!
+! !INTERFACE:
+!     ! Private name; call using ESMF_AttributeGetAttPack()
+!     subroutine ESMF_AttGetAttPackSL(<object>, specList, keywordEnforcer, &
+!       attpack, attnestflag, isPresent, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     character (len = *),     intent(in)              :: specList(:)
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!     type(ESMF_AttPack),      intent(inout), optional :: attpack
+!     type(ESMF_AttNest_Flag), intent(in),    optional :: attnestflag
+!     logical,                 intent(out),   optional :: isPresent
+!     integer,                 intent(out),   optional :: rc
+!
+! !DESCRIPTION:
+!     Get an ESMF Attribute package object. If there are redundant Attribute
+!     packages on this object then the {\it most recently created} one will be
+!     retrieved.
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Array),       intent(inout) :: array
+!     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
+!     \item type(ESMF\_CplComp),     intent(inout) :: comp
+!     \item type(ESMF\_GridComp),    intent(inout) :: comp
+!     \item type(ESMF\_SciComp),     intent(inout) :: comp
+!     \item type(ESMF\_DistGrid),    intent(inout) :: distgrid
+!     \item type(ESMF\_Field),       intent(inout) :: field
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF\_Grid),        intent(inout) :: grid
+!     \item type(ESMF\_State),       intent(inout) :: state
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [specList]
+!           A character list of values which identify the Attribute package,
+!           such as convention, purpose, and instancename.
+!     \item [{[attpack]}]
+!           A handle to the Attribute package.
+!     \item [{[attnestflag]}]
+!           A flag to determine whether to descend the
+!           Attribute hierarchy when searching for this Attribute package, the
+!           default is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in
+!           section \ref{const:attnest}.
+!     \item [{[isPresent]}]
+!           A logical flag to tell if this Attribute package is present or not.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeGetAttPack  - Get an ESMF Attribute package object and/or query for presence
+!
+! !INTERFACE:
+!     ! Private name; call using ESMF_AttributeGetAttPack()
+!     subroutine ESMF_AttGetAttPack(<object>, convention, purpose, keywordEnforcer, &
+!       attPackInstanceName, attpack, attnestflag, isPresent, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     character (len = *),     intent(in)               :: convention
+!     character (len = *),     intent(in)               :: purpose
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!     character (len = *),     intent(in),     optional :: attPackInstanceName
+!     type(ESMF_AttPack),      intent(inout),  optional :: attpack
+!     type(ESMF_AttNest_Flag), intent(in),     optional :: attnestflag
+!     logical,                 intent(out),    optional :: isPresent
+!     integer,                 intent(out),    optional :: rc
+!
+! !DESCRIPTION:
+!     Get an ESMF Attribute package object. If there are redundant Attribute
+!     packages on this object then the {\it most recently created} one will be
+!     retrieved.
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Array),       intent(inout) :: array
+!     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
+!     \item type(ESMF\_CplComp),     intent(inout) :: comp
+!     \item type(ESMF\_GridComp),    intent(inout) :: comp
+!     \item type(ESMF\_SciComp),     intent(inout) :: comp
+!     \item type(ESMF\_DistGrid),    intent(inout) :: distgrid
+!     \item type(ESMF\_Field),       intent(inout) :: field
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF\_Grid),        intent(inout) :: grid
+!     \item type(ESMF\_State),       intent(inout) :: state
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [convention]
+!           The convention of the Attribute package.
+!     \item [purpose]
+!           The purpose of the Attribute package.
+!     \item [{[attPackInstanceName]}]
+!           The name of an Attribute package instance, specifying which one
+!           of multiple Attribute package instances of the same convention
+!           and purpose, within a nest.  If not specified, defaults to the
+!           first instance.
+!     \item [{[attpack]}]
+!           A handle to the Attribute package.
+!     \item [{[attnestflag]}]
+!           A flag to determine whether to descend the
+!           Attribute hierarchy when searching for this Attribute package, the
+!           default is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in
+!           section \ref{const:attnest}.
+!     \item [{[isPresent]}]
+!           A logical flag to tell if this Attribute package is present or not.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeLink - Link a Component Attribute hierarchy to that of a Component or State
+!
+! !INTERFACE:
+!      ! Private name; call using ESMF_AttributeLink()
+!      subroutine ESMF_CompAttLink(<object1>, <object2>, rc)
+!
+! !ARGUMENTS:
+!      <object1>, see below for supported values
+!      <object2>, see below for supported values
+!      integer, intent(out), optional :: rc
+!
+!
+! !DESCRIPTION:
+!     Attach a {\tt CplComp}, {\tt GridComp}, or {\tt SciComp} Attribute
+!     hierarchy to the
+!     hierarchy of a {\tt CplComp}, {\tt GridComp}, {\tt SciComp}, or
+!     {\tt State}.
+!
+!     Supported values for the <object1> are:
+!     \begin{description}
+!     \item type(ESMF\_CplComp),  intent(inout) :: comp1
+!     \item type(ESMF\_GridComp), intent(inout) :: comp1
+!     \item type(ESMF\_SCiComp),  intent(inout) :: comp1
+!     \end{description}
+!
+!     Supported values for the <object2> are:
+!     \begin{description}
+!     \item type(ESMF\_CplComp),  intent(in) :: comp2
+!     \item type(ESMF\_GridComp), intent(in) :: comp2
+!     \item type(ESMF\_SciComp),  intent(in) :: comp2
+!     \item type(ESMF\_State),    intent(in) :: state
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object1>]
+!       The \textit{parent} object in the Attribute hierarchy link.
+!     \item [<object2>]
+!       The \textit{child} object in the Attribute hierarchy link.
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeLink - Link a State Attribute hierarchy with the hierarchy of an Array, ArrayBundle, Field, FieldBundle, or State
+!
+! !INTERFACE:
+!      ! Private name; call using ESMF_AttributeLink()
+!      subroutine ESMF_StateAttLink(state, <object>, rc)
+!
+! !ARGUMENTS:
+!      type(ESMF_State), intent(inout)         :: state
+!      <object>, see below for supported values
+!      integer,          intent(out), optional :: rc
+!
+!
+! !DESCRIPTION:
+!     Attach a {\tt State} Attribute hierarchy to the hierarchy of
+!     a {\tt Fieldbundle}, {\tt Field}, or another {\tt State}.
+!
+!     Supported values for the <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Array),       intent(in) :: array
+!     \item type(ESMF\_ArrayBundle), intent(in) :: arraybundle
+!     \item type(ESMF\_Field),       intent(in) :: field
+!     \item type(ESMF\_FieldBundle), intent(in) :: fieldbundle
+!     \item type(ESMF\_State),       intent(in) :: state
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [state]
+!       An {\tt ESMF\_State} object.
+!     \item [<object>]
+!       The object with which to link hierarchies.
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeLink - Link a FieldBundle and Field Attribute hierarchy
+!
+! !INTERFACE:
+!      ! Private name; call using ESMF_AttributeLink()
+!      subroutine ESMF_FieldBundleAttLink(fieldbundle, field, rc)
+!
+! !ARGUMENTS:
+!      type(ESMF_FieldBundle), intent(inout)         :: fieldbundle
+!      type(ESMF_Field),       intent(in)            :: field
+!      integer,                intent(out), optional :: rc
+!
+!
+! !DESCRIPTION:
+!     Attach a {\tt FieldBundle} Attribute hierarchy to the hierarchy of
+!     a {\tt Field}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [fieldbundle]
+!       An {\tt ESMF\_FieldBundle} object.
+!     \item [field]
+!       An {\tt ESMF\_Field} object.
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeLink - Link a Field and Grid Attribute hierarchy
+!
+! !INTERFACE:
+!      ! Private name; call using ESMF_AttributeLink()
+!      subroutine ESMF_FieldAttLink(field, grid, rc)
+!
+! !ARGUMENTS:
+!      type(ESMF_Field), intent(inout)         :: field
+!      type(ESMF_Grid),  intent(in)            :: grid
+!      integer,          intent(out), optional :: rc
+!
+!
+! !DESCRIPTION:
+!     Attach a {\tt Field} Attribute hierarchy to the hierarchy of
+!     a {\tt Grid}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!       An {\tt ESMF\_Field} object.
+!     \item [grid]
+!       An {\tt ESMF\_Grid} object.
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeLink - Link an ArrayBundle and Array Attribute hierarchy
+!
+! !INTERFACE:
+!      ! Private name; call using ESMF_AttributeLink()
+!      subroutine ESMF_ArrayBundleAttLink(arraybundle, array, rc)
+!
+! !ARGUMENTS:
+!      type(ESMF_ArrayBundle), intent(inout)         :: arraybundle
+!      type(ESMF_Array),       intent(in)            :: array
+!      integer,                intent(out), optional :: rc
+!
+!
+! !DESCRIPTION:
+!     Attach an {\tt ArrayBundle} Attribute hierarchy to the hierarchy of
+!     an {\tt Array}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [arraybundle]
+!       An {\tt ESMF\_ArrayBundle} object.
+!     \item [array]
+!       An {\tt ESMF\_Array} object.
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeLinkRemove - Unlink a Component Attribute hierarchy from that of a Component or State
+!
+! !INTERFACE:
+!      ! Private name; call using ESMF_AttributeLinkRemove()
+!      subroutine ESMF_CompAttLinkRemove(<object1>, <object2>, rc)
+!
+! !ARGUMENTS:
+!      <object1>, see below for supported values
+!      <object2>, see below for supported values
+!      integer, intent(out), optional :: rc
+!
+!
+! !DESCRIPTION:
+!     Unattach a {\tt CplComp}, {\tt GridComp}, or {\tt SciComp} Attribute
+!     hierarchy from the hierarchy of a {\tt CplComp}, {\tt GridComp},
+!     {\tt SciComp}, or {\tt State}.
+!
+!     Supported values for the <object1> are:
+!     \begin{description}
+!     \item type(ESMF\_CplComp),  intent(inout) :: comp1
+!     \item type(ESMF\_GridComp), intent(inout) :: comp1
+!     \item type(ESMF\_SciComp),  intent(inout) :: comp1
+!     \end{description}
+!
+!     Supported values for the <object2> are:
+!     \begin{description}
+!     \item type(ESMF\_CplComp),  intent(in) :: comp2
+!     \item type(ESMF\_GridComp), intent(in) :: comp2
+!     \item type(ESMF\_SciComp),  intent(in) :: comp2
+!     \item type(ESMF\_State),    intent(in) :: state
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object1>]
+!       The \textit{parent} object in the Attribute hierarchy link.
+!     \item [<object2>]
+!       The \textit{child} object in the Attribute hierarchy link.
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeLinkRemove - Unlink a State Attribute hierarchy from the hierarchy of an Array, ArrayBundle, Field, FieldBundle, or State
+!
+! !INTERFACE:
+!      ! Private name; call using ESMF_AttributeLinkRemove()
+!      subroutine ESMF_StateAttLinkRemove(state, <object>, rc)
+!
+! !ARGUMENTS:
+!      type(ESMF_State), intent(inout)         :: state
+!      <object>, see below for supported values
+!      integer,          intent(out), optional :: rc
+!
+!
+! !DESCRIPTION:
+!     Unattach a {\tt State} Attribute hierarchy from the hierarchy of
+!     a {\tt Fieldbundle}, {\tt Field}, or another {\tt State}.
+!
+!     Supported values for the <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Array),       intent(in) :: array
+!     \item type(ESMF\_ArrayBundle), intent(in) :: arraybundle
+!     \item type(ESMF\_Field),       intent(in) :: field
+!     \item type(ESMF\_FieldBundle), intent(in) :: fieldbundle
+!     \item type(ESMF\_State),       intent(in) :: state
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [state]
+!       An {\tt ESMF\_State} object.
+!     \item [<object>]
+!       The object with which to unlink hierarchies.
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeLinkRemove - Unlink a FieldBundle and Field Attribute hierarchy
+!
+! !INTERFACE:
+!      ! Private name; call using ESMF_AttributeLinkRemove()
+!      subroutine ESMF_FieldBundleAttLinkRemove(fieldbundle, field, rc)
+!
+! !ARGUMENTS:
+!      type(ESMF_FieldBundle), intent(inout)         :: fieldbundle
+!      type(ESMF_Field),       intent(in)            :: field
+!      integer,                intent(out), optional :: rc
+!
+!
+! !DESCRIPTION:
+!     Unattach a {\tt FieldBundle} Attribute hierarchy from the hierarchy of
+!     a {\tt Field}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [fieldbundle]
+!       An {\tt ESMF\_FieldBundle} object.
+!     \item [field]
+!       An {\tt ESMF\_Field} object.
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeLinkRemove - Unlink a Field and Grid Attribute hierarchy
+!
+! !INTERFACE:
+!      ! Private name; call using ESMF_AttributeLinkRemove()
+!      subroutine ESMF_FieldAttLinkRemove(field, grid, rc)
+!
+! !ARGUMENTS:
+!      type(ESMF_Field), intent(inout)         :: field
+!      type(ESMF_Grid),  intent(in)            :: grid
+!      integer,          intent(out), optional :: rc
+!
+!
+! !DESCRIPTION:
+!     Unattach a {\tt Field} Attribute hierarchy from the hierarchy of
+!     a {\tt Grid}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!       An {\tt ESMF\_Field} object.
+!     \item [grid]
+!       An {\tt ESMF\_Grid} object.
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeLinkRemove - Unlink an ArrayBundle and Array Attribute hierarchy
+!
+! !INTERFACE:
+!      ! Private name; call using ESMF_AttributeLinkRemove()
+!      subroutine ESMF_ArrayBundleAttLinkRemove(arraybundle, array, rc)
+!
+! !ARGUMENTS:
+!      type(ESMF_ArrayBundle), intent(inout)         :: arraybundle
+!      type(ESMF_Array),       intent(in)            :: array
+!      integer,                intent(out), optional :: rc
+!
+!
+! !DESCRIPTION:
+!     Unattach an {\tt ArrayBundle} Attribute hierarchy from the hierarchy of
+!     an {\tt Array}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [arraybundle]
+!       An {\tt ESMF\_ArrayBundle} object.
+!     \item [array]
+!       An {\tt ESMF\_Array} object.
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeRead  - Read Attributes from an XML file
+! \label{api:AttributeRead}
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeRead(<object>, fileName, schemaFileName, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     character (len = *), intent(in),  optional :: fileName
+!     character (len = *), intent(in),  optional :: schemaFileName
+!     integer,             intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Read Attributes for <object> from fileName, whose format is XML.
+!     schemaFileName format is XSD.  If present, the schemaFileName is used to
+!     validate the contents of fileName.  schemaFileName must be specified for
+!     a fileName containing custom, user-defined Attributes.
+!
+!     Requires the third-party Xerces C++ XML Parser library to be installed,
+!     v3.1.0 or newer.  For more details, see the "ESMF Users Guide",
+!     "Building and Installing the ESMF, Third Party Libraries, Xerces" and
+!     the website
+!     \newline
+!     "http://xerces.apache.org/xerces-c".  Also please see the
+!     section on Attribute I/O,~\ref{io:attributeio}.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Array),       intent(inout) :: array       ! not yet implemented
+!     \item type(ESMF\_ArrayBundle), intent(inout) :: arrayBundle ! not yet implemented
+!     \item type(ESMF\_CplComp),     intent(inout) :: cplComp
+!     \item type(ESMF\_GridComp),    intent(inout) :: gridComp
+!     \item type(ESMF\_SciComp),     intent(inout) :: gridComp
+!     \item type(ESMF\_Field),       intent(inout) :: field
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle ! not yet implemented
+!     \item type(ESMF\_Grid),        intent(inout) :: grid
+!     \item type(ESMF\_DistGrid),    intent(inout) :: distGrid    ! not yet implemented
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           The {\tt ESMF} object onto which the read Attributes will be placed.
+!     \item [{[fileName]}]
+!           The name of the XML file to read.
+!     \item [{[schemaFileName]}]
+!           The name of the XSD file to validate the contents of fileName.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeRemove - Remove an Attribute or Attribute package using an ESMF_AttPack
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeRemove(<object>, keywordEnforcer, name, &
+!       attpack, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!     character (len = *),  intent(in),  optional :: name
+!     type(ESMF_AttPack),   intent(inout)         :: attpack
+!     integer,              intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Remove an Attribute, or Attribute package on <object>.
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages
+!     and their conventions, purposes, and object types.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Array),       intent(inout) :: array
+!     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
+!     \item type(ESMF\_CplComp),     intent(inout) :: comp
+!     \item type(ESMF\_GridComp),    intent(inout) :: comp
+!     \item type(ESMF\_SciComp),     intent(inout) :: comp
+!     \item type(ESMF\_DistGrid),    intent(inout) :: distgrid
+!     \item type(ESMF\_Field),       intent(inout) :: field
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF\_Grid),        intent(inout) :: grid
+!     \item type(ESMF\_State),       intent(inout) :: state
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [{[name]}]
+!           The name of the Attribute to remove.
+!     \item [attpack]
+!           A handle to the Attribute package.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!     NOTE:  An entire Attribute package can be removed by specifying
+!            {\tt attpack} only, without {\tt name}.  By specifying
+!            {\tt attpack} an Attribute will be removed
+!            from the corresponding Attribute package, if it exists.  An
+!            Attribute can be removed directly from <object> by specifying
+!            {\tt name}, without {\tt attpack}.
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeRemove - Remove an Attribute or Attribute package
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeRemove(<object>, name, convention, purpose, &
+!       attPackInstanceName, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     character (len = *),  intent(in),  optional :: name
+!     character (len = *),  intent(in),  optional :: convention
+!     character (len = *),  intent(in),  optional :: purpose
+!     character (len = *),  intent(in),  optional :: attPackInstanceName
+!     integer,              intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Remove an Attribute, or Attribute package on <object>.
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages
+!     and their conventions, purposes, and object types.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Array),       intent(inout) :: array
+!     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
+!     \item type(ESMF\_CplComp),     intent(inout) :: comp
+!     \item type(ESMF\_GridComp),    intent(inout) :: comp
+!     \item type(ESMF\_SciComp),     intent(inout) :: comp
+!     \item type(ESMF\_DistGrid),    intent(inout) :: distgrid
+!     \item type(ESMF\_Field),       intent(inout) :: field
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF\_Grid),        intent(inout) :: grid
+!     \item type(ESMF\_State),       intent(inout) :: state
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [{[name]}]
+!           The name of the Attribute to remove.
+!     \item [{[convention]}]
+!           The convention of the Attribute package.
+!     \item [{[purpose]}]
+!           The purpose of the Attribute package.
+!     \item [{[attPackInstanceName]}]
+!           The name of an Attribute package instance, specifying which one
+!           of multiple Attribute package instances of the same convention
+!           and purpose, within a nest.  If not specified, defaults to the
+!           first instance.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!     NOTE:  An entire Attribute package can be removed by specifying
+!            {\tt convention}, {\tt purpose}, and {\tt attPackInstanceName}
+!            only, without {\tt name}. An
+!            Attribute can be removed directly from <object> by specifying
+!            {\tt name}, without {\tt convention}, {\tt purpose}, and
+!            {\tt attPackInstanceName}.
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeSet - Set an Attribute in an ESMF_AttPack
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeSet(<object>, name, <value>, attpack, &
+!       keywordEnforcer, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     character (len = *),  intent(in)            :: name
+!     <value>, see below for supported values
+!     type(ESMF_AttPack),   intent(inout)         :: attpack
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!     integer,              intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Attach an Attribute to <object>, or set an Attribute in an
+!     Attribute package.  The Attribute has a {\tt name} and {\tt value},
+!     and, if in an Attribute package, a {\tt attpack}.
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Array),       intent(inout) :: array
+!     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
+!     \item type(ESMF\_CplComp),     intent(inout) :: comp
+!     \item type(ESMF\_GridComp),    intent(inout) :: comp
+!     \item type(ESMF\_SciComp),     intent(inout) :: comp
+!     \item type(ESMF\_DistGrid),    intent(inout) :: distgrid
+!     \item type(ESMF\_Field),       intent(inout) :: field
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF\_Grid),        intent(inout) :: grid
+!     \item type(ESMF\_State),       intent(inout) :: state
+!     \end{description}
+!
+!     Supported values for the <value> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(in) :: value
+!     \item integer(ESMF\_KIND\_I8), intent(in) :: value
+!     \item real (ESMF\_KIND\_R4),   intent(in) :: value
+!     \item real (ESMF\_KIND\_R8),   intent(in) :: value
+!     \item logical,                 intent(in) :: value
+!     \item character (len = *),     intent(in) :: value
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [name]
+!           The name of the Attribute to set.
+!     \item [<value argument>]
+!           The value of the Attribute to set.
+!     \item [attpack]
+!           A handle to the Attribute package.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeSet - Set an Attribute to point to internal class information in an ESMF_AttPack
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeSet(<object>, name, <value>,  attpack, &
+!       keywordEnforcer, inputList, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     character (len = *),  intent(in)            :: name
+!     <value>, see below for supported values
+!     type(ESMF_AttPack),   intent(inout)         :: attpack
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!     character (len = *),  intent(in),  optional :: inputList(:)
+!     integer,              intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Attach an Attribute to <object>, or set an Attribute in an
+!     Attribute package.  The Attribute has a {\tt name} and {\tt value},
+!     and, if in an Attribute package, a {\tt attpack}.
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages.
+!     The Attribute can
+!     also be set to be a pointer to internal class information.  See Section
+!     \ref{sec:InternalInfo} for a description of this capability.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Grid), intent(inout) :: grid
+!     \end{description}
+!
+!     Supported values for the <value> are:
+!     \begin{description}
+!     \item character (len = *), intent(in), :: value
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [name]
+!           The name of the Attribute to set.
+!     \item [<value argument>]
+!           The value of the Attribute to set.
+!     \item [attpack]
+!           A handle to the Attribute package.
+!     \item [{[inputList]}]
+!           A list of the input parameters required to set internal info.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeSet - Set an Attribute in an ESMF_AttPack
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeSet(<object>, name, <valueList>, attpack, &
+!       keywordEnforcer, itemCount, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     character (len = *),  intent(in)            :: name
+!     <valueList>, see below for supported values
+!     type(ESMF_AttPack),   intent(in)            :: attpack
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!     integer,              intent(in),  optional :: itemCount
+!     integer,              intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Attach an Attribute to <object>, or set an Attribute in an
+!     Attribute package.  The Attribute has a {\tt name} and a
+!     {\tt valueList}, with an {\tt itemCount}, and, if in an Attribute
+!     package, a {\tt attpack}.  See Section~\ref{sec:AttPacks} for a
+!     description of Attribute packages.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Array),       intent(inout) :: array
+!     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
+!     \item type(ESMF\_CplComp),     intent(inout) :: comp
+!     \item type(ESMF\_GridComp),    intent(inout) :: comp
+!     \item type(ESMF\_SciComp),     intent(inout) :: comp
+!     \item type(ESMF\_DistGrid),    intent(inout) :: distgrid
+!     \item type(ESMF\_Field),       intent(inout) :: field
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF\_Grid),        intent(inout) :: grid
+!     \item type(ESMF\_State),       intent(inout) :: state
+!     \end{description}
+!
+!     Supported values for the <valueList> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(in) :: valueList(:)
+!     \item integer(ESMF\_KIND\_I8), intent(in) :: valueList(:)
+!     \item real (ESMF\_KIND\_R4),   intent(in) :: valueList(:)
+!     \item real (ESMF\_KIND\_R8),   intent(in) :: valueList(:)
+!     \item logical,                 intent(in) :: valueList(:)
+!     \item character (len = *),     intent(in) :: valueList(:)
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [name]
+!           The name of the Attribute to set.
+!     \item [<valueList argument>]
+!           The valueList of the Attribute to set.
+!     \item [attpack]
+!           A handle to the Attribute package.
+!     \item [{[itemCount]}]
+!           The number of items in a multi-valued Attribute.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeSet - Set an Attribute
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeSet(<object>, name, <value>, &
+!       convention, purpose, attPackInstanceName, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     character (len = *),  intent(in)            :: name
+!     <value>, see below for supported values
+!     character (len = *),  intent(in),  optional :: convention
+!     character (len = *),  intent(in),  optional :: purpose
+!     character (len = *),  intent(in),  optional :: attPackInstanceName
+!     integer,              intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Attach an Attribute to <object>, or set an Attribute in an
+!     Attribute package.  The Attribute has a {\tt name} and {\tt value},
+!     and, if in an Attribute package, {\tt convention}, {\tt purpose}, and
+!     {\tt attPackInstanceName}.
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Array),       intent(inout) :: array
+!     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
+!     \item type(ESMF\_CplComp),     intent(inout) :: comp
+!     \item type(ESMF\_GridComp),    intent(inout) :: comp
+!     \item type(ESMF\_SciComp),     intent(inout) :: comp
+!     \item type(ESMF\_DistGrid),    intent(inout) :: distgrid
+!     \item type(ESMF\_Field),       intent(inout) :: field
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF\_Grid),        intent(inout) :: grid
+!     \item type(ESMF\_State),       intent(inout) :: state
+!     \end{description}
+!
+!     Supported values for the <value> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(in) :: value
+!     \item integer(ESMF\_KIND\_I8), intent(in) :: value
+!     \item real (ESMF\_KIND\_R4),   intent(in) :: value
+!     \item real (ESMF\_KIND\_R8),   intent(in) :: value
+!     \item logical,                 intent(in) :: value
+!     \item character (len = *),     intent(in) :: value
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [name]
+!           The name of the Attribute to set.
+!     \item [<value argument>]
+!           The value of the Attribute to set.
+!     \item [{[convention]}]
+!           The convention of the Attribute package.
+!     \item [{[purpose]}]
+!           The purpose of the Attribute package.
+!     \item [{[attPackInstanceName]}]
+!           The name of an Attribute package instance, specifying which one
+!           of multiple Attribute package instances of the same convention
+!           and purpose, within a nest.  If not specified, defaults to the
+!           first instance. (Not implemented yet)
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeSet - Set an Attribute to point to internal class information
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeSet(<object>, name, <value>, inputList,
+!       convention, purpose, attPackInstanceName, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     character (len = *),  intent(in)            :: name
+!     <value>, see below for supported values
+!     character (len = *),  intent(in),  optional :: inputList(:)
+!     character (len = *),  intent(in),  optional :: convention
+!     character (len = *),  intent(in),  optional :: purpose
+!     character (len = *),  intent(in),  optional :: attPackInstanceName
+!     integer,              intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Attach an Attribute to <object>, or set an Attribute in an
+!     Attribute package.  The Attribute has a {\tt name} and {\tt value},
+!     and, if in an Attribute package, {\tt convention}, {\tt purpose}, and
+!     {\tt attPackInstanceName}.
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages.
+!     The Attribute can
+!     also be set to be a pointer to internal class information.  See Section
+!     \ref{sec:InternalInfo} for a description of this capability.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Grid), intent(inout) :: grid
+!     \end{description}
+!
+!     Supported values for the <value> are:
+!     \begin{description}
+!     \item character (len = *), intent(in), :: value
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [name]
+!           The name of the Attribute to set.
+!     \item [<value argument>]
+!           The value of the Attribute to set.
+!     \item [{[inputList]}]
+!           A list of the input parameters required to set internal info.
+!     \item [{[convention]}]
+!           The convention of the Attribute package.
+!     \item [{[purpose]}]
+!           The purpose of the Attribute package.
+!     \item [{[attPackInstanceName]}]
+!           The name of an Attribute package instance, specifying which one
+!           of multiple Attribute package instances of the same convention
+!           and purpose, within a nest.  If not specified, defaults to the
+!           first instance. (Not implemented yet)
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeSet - Set an Attribute
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeSet(<object>, name, <valueList>, &
+!       convention, purpose, attPackInstanceName, itemCount, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     character (len = *),  intent(in)            :: name
+!     <valueList>, see below for supported values
+!     character (len = *),  intent(in),  optional :: convention
+!     character (len = *),  intent(in),  optional :: purpose
+!     character (len = *),  intent(in),  optional :: attPackInstanceName
+!     integer,              intent(in),  optional :: itemCount
+!     integer,              intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Attach an Attribute to <object>, or set an Attribute in an
+!     Attribute package.  The Attribute has a {\tt name} and a
+!     {\tt valueList}, with an {\tt itemCount}, and, if in an Attribute
+!     package, {\tt convention}, {\tt purpose}, and {\tt attPackInstanceName}.
+!     See Section~\ref{sec:AttPacks} for a
+!     description of Attribute packages.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Array),       intent(inout) :: array
+!     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
+!     \item type(ESMF\_CplComp),     intent(inout) :: comp
+!     \item type(ESMF\_GridComp),    intent(inout) :: comp
+!     \item type(ESMF\_SciComp),     intent(inout) :: comp
+!     \item type(ESMF\_DistGrid),    intent(inout) :: distgrid
+!     \item type(ESMF\_Field),       intent(inout) :: field
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF\_Grid),        intent(inout) :: grid
+!     \item type(ESMF\_State),       intent(inout) :: state
+!     \end{description}
+!
+!     Supported values for the <valueList> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(in) :: valueList(:)
+!     \item integer(ESMF\_KIND\_I8), intent(in) :: valueList(:)
+!     \item real (ESMF\_KIND\_R4),   intent(in) :: valueList(:)
+!     \item real (ESMF\_KIND\_R8),   intent(in) :: valueList(:)
+!     \item logical,                 intent(in) :: valueList(:)
+!     \item character (len = *),     intent(in) :: valueList(:)
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [name]
+!           The name of the Attribute to set.
+!     \item [<valueList argument>]
+!           The valueList of the Attribute to set.
+!     \item [{[convention]}]
+!           The convention of the Attribute package.
+!     \item [{[purpose]}]
+!           The purpose of the Attribute package.
+!     \item [{[attPackInstanceName]}]
+!           The name of an Attribute package instance, specifying which one
+!           of multiple Attribute package instances of the same convention
+!           and purpose, within a nest.  If not specified, defaults to the
+!           first instance. (Not implemented yet)
+!     \item [{[itemCount]}]
+!           The number of items in a multi-valued Attribute.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeUpdate  - Update an Attribute hierarchy
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeUpdate(<object>, vm, rootList, reconcile, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     type(ESMF_VM), intent(in)            :: vm
+!     integer,       intent(in)            :: rootList(:)
+!     logical,       intent(in), optional  :: reconcile
+!     integer,       intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Update an Attribute hierarchy during runtime. The information from
+!     the PETs in the {\tt rootList} is transferred to the PETs that are not
+!     in the {\tt rootList}.  Care should be taken to ensure that the
+!     information contained in the Attributes on the PETs in the {\tt rootList}
+!     is consistent.
+!     If changes have been made to the underlying object hierarchy then either
+!     {\tt ESMF\_StateReconcile()} or the {\tt reconcile} flag must be used to
+!     resolve them. The same applies if changes are made to both PETs and in
+!     the {\tt rootList} and PETs outside of the {\tt rootList}, or if the same
+!     changes are made in a different order.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Array),       intent(inout) :: array
+!     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
+!     \item type(ESMF\_CplComp),     intent(inout) :: comp
+!     \item type(ESMF\_GridComp),    intent(inout) :: comp
+!     \item type(ESMF\_SciComp),     intent(inout) :: comp
+!     \item type(ESMF\_Field),       intent(inout) :: field
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF\_State),       intent(inout) :: state
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [vm]
+!           The virtual machine over which this Attribute hierarchy
+!           should be updated.
+!     \item [rootList]
+!           The list of PETs that are to be used as the source of the update.
+!     \item [{[reconcile]}] @\
+!           A logical flag used to indicate whether to use reconcile behavior @\
+!           or normal update behavior. If {\tt reconcile} is set to  @\
+!           {\tt .true.} then the values of the root PETs will be sent to @\
+!           the nonroot PETs without exception. Otherwise, an algorithm that @\
+!           is optimized to use minimal memory will be used to update only  @\
+!           the modified parts of the Attribute hierarchy on the nonroot @\
+!           PETs. The default value is {\tt .false.}. @\
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeWrite  - Write an Attribute package
+! \label{api:AttributeWrite}
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeWrite(<object>, convention, purpose, &
+!       attwriteflag, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     character (len = *),     intent(in),  optional :: convention
+!     character (len = *),     intent(in),  optional :: purpose
+!     type(ESMF_AttWriteFlag), intent(in),  optional :: attwriteflag
+!     integer,                 intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Write the Attribute package for <object>.  The Attribute package defines
+!     the convention, purpose, and object type of the associated Attributes.  Either
+!     tab-delimited or xml format is achieved by using {\tt attwriteflag}.
+!     Currently, only ESMF/ESG/CF Field Attribute packages can be written in
+!     tab-delimited format.  See Section~\ref{sec:AttPacks} for a description
+!     of Attribute packages and their conventions, purposes, and object types.
+!
+!     This call is collective across the current VM.
+!
+!     Writing Attribute XML files is performed with the standard C++ output
+!     file stream facility.
+!
+!     Note:  For an object type of {\tt ESMF\_GridComp}, convention='WaterML',
+!     purpose='TimeSeries', and
+!     \newline
+!     attwriteflag=ESMF\_ATTWRITE\_XML, an XML file
+!     conforming to a hydrologic standard called WaterML will be written.  See
+!     the following for more information:
+!
+!     \begin{description}
+!     \item{"http://his.cuahsi.org/wofws.html"}
+!     \item{"http://www.earthsystemcurator.org/projects/waterml.shtml"}
+!     \end{description}
+!
+!     An ESMF Use Test Case is available which showcases an example of how
+!     to write a WaterML file; please see
+!
+!     \begin{description}
+!     \item{"http://esmf.cvs.sourceforge.net/viewvc/esmf/use\_test\_cases/ESMF\_WaterML"}
+!     \item{"http://esmf.cvs.sourceforge.net/viewvc/esmf/use\_test\_cases/README"}
+!     \end{description}
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Array),       intent(in) :: array
+!     \item type(ESMF\_ArrayBundle), intent(in) :: arraybundle
+!     \item type(ESMF\_CplComp),     intent(in) :: comp
+!     \item type(ESMF\_GridComp),    intent(in) :: comp
+!     \item type(ESMF\_SciComp),     intent(in) :: comp
+!     \item type(ESMF\_DistGrid),    intent(in) :: distgrid
+!     \item type(ESMF\_Field),       intent(in) :: field
+!     \item type(ESMF\_FieldBundle), intent(in) :: fieldbundle
+!     \item type(ESMF\_Grid),        intent(in) :: grid
+!     \item type(ESMF\_State),       intent(in) :: state
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [{[convention]}]
+!           The convention of the Attribute package.
+!     \item [{[purpose]}]
+!           The purpose of the Attribute package.
+!     \item [{[attwriteflag]}]
+!           The flag to specify which format is desired for the write, the
+!           default is ESMF\_ATTWRITE\_TAB.  This flag is documented in
+!           section \ref{const:attwrite}.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+
+!==============================================================================
+! AttPack Procedures
 !==============================================================================
 
 #undef  ESMF_METHOD
@@ -868,7 +3788,7 @@ function attpack_getPayload(self, rc) result(payload)
 end function attpack_getPayload
 
 !==============================================================================
-! Helper Functions ============================================================
+! Helper Functions
 !==============================================================================
 
 #undef  ESMF_METHOD
@@ -933,7 +3853,7 @@ subroutine ESMF_InfoFormatKey(key, name, rc, convention, purpose)
 end subroutine ESMF_InfoFormatKey
 
 !==============================================================================
-! ESMF_AttributeAdd ===========================================================
+! ESMF_AttributeAdd
 !==============================================================================
 
 #undef  ESMF_METHOD
@@ -1341,7 +4261,7 @@ subroutine ESMF_AttributeAddAttPackStdLocStream(target, convention, purpose, att
 end subroutine ESMF_AttributeAddAttPackStdLocStream
 
 !==============================================================================
-! ESMF_AttributeSet ===========================================================
+! ESMF_AttributeSet
 !==============================================================================
 
 #undef  ESMF_METHOD
@@ -16921,7 +19841,7 @@ subroutine ESMF_AttributeSetObjLocStreamLGList(target, name, valueList, conventi
 end subroutine ESMF_AttributeSetObjLocStreamLGList
 
 !==============================================================================
-! ESMF_AttributeGet ===========================================================
+! ESMF_AttributeGet
 !==============================================================================
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackArrayR4()"
@@ -23458,7 +26378,7 @@ subroutine ESMF_AttributeGetObjLocStreamLG(target, name, value, defaultvalue, co
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjLocStreamLG
 !==============================================================================
-! ESMF_AttributeGet (Lists) ===================================================
+! ESMF_AttributeGet (Lists)
 !==============================================================================
 
 #undef  ESMF_METHOD
@@ -23524,7 +26444,7 @@ subroutine ESMF_AttributeGetAttPackArrayR4List(target, name, attpack, valueList,
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackArrayR4List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjArrayR4List()"
 subroutine ESMF_AttributeGetObjArrayR4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -23662,7 +26582,7 @@ subroutine ESMF_AttributeGetAttPackArrayR8List(target, name, attpack, valueList,
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackArrayR8List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjArrayR8List()"
 subroutine ESMF_AttributeGetObjArrayR8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -23800,7 +26720,7 @@ subroutine ESMF_AttributeGetAttPackArrayI4List(target, name, attpack, valueList,
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackArrayI4List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjArrayI4List()"
 subroutine ESMF_AttributeGetObjArrayI4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -23938,7 +26858,7 @@ subroutine ESMF_AttributeGetAttPackArrayI8List(target, name, attpack, valueList,
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackArrayI8List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjArrayI8List()"
 subroutine ESMF_AttributeGetObjArrayI8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -24076,7 +26996,7 @@ subroutine ESMF_AttributeGetAttPackArrayCHList(target, name, attpack, valueList,
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackArrayCHList
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjArrayCHList()"
 subroutine ESMF_AttributeGetObjArrayCHList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -24214,7 +27134,7 @@ subroutine ESMF_AttributeGetAttPackArrayLGList(target, name, attpack, valueList,
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackArrayLGList
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjArrayLGList()"
 subroutine ESMF_AttributeGetObjArrayLGList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -24352,7 +27272,7 @@ subroutine ESMF_AttributeGetAttPackArrayBundleR4List(target, name, attpack, valu
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackArrayBundleR4List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjArrayBundleR4List()"
 subroutine ESMF_AttributeGetObjArrayBundleR4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -24490,7 +27410,7 @@ subroutine ESMF_AttributeGetAttPackArrayBundleR8List(target, name, attpack, valu
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackArrayBundleR8List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjArrayBundleR8List()"
 subroutine ESMF_AttributeGetObjArrayBundleR8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -24628,7 +27548,7 @@ subroutine ESMF_AttributeGetAttPackArrayBundleI4List(target, name, attpack, valu
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackArrayBundleI4List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjArrayBundleI4List()"
 subroutine ESMF_AttributeGetObjArrayBundleI4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -24766,7 +27686,7 @@ subroutine ESMF_AttributeGetAttPackArrayBundleI8List(target, name, attpack, valu
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackArrayBundleI8List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjArrayBundleI8List()"
 subroutine ESMF_AttributeGetObjArrayBundleI8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -24904,7 +27824,7 @@ subroutine ESMF_AttributeGetAttPackArrayBundleCHList(target, name, attpack, valu
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackArrayBundleCHList
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjArrayBundleCHList()"
 subroutine ESMF_AttributeGetObjArrayBundleCHList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -25042,7 +27962,7 @@ subroutine ESMF_AttributeGetAttPackArrayBundleLGList(target, name, attpack, valu
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackArrayBundleLGList
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjArrayBundleLGList()"
 subroutine ESMF_AttributeGetObjArrayBundleLGList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -25180,7 +28100,7 @@ subroutine ESMF_AttributeGetAttPackCplCompR4List(target, name, attpack, valueLis
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackCplCompR4List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjCplCompR4List()"
 subroutine ESMF_AttributeGetObjCplCompR4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -25318,7 +28238,7 @@ subroutine ESMF_AttributeGetAttPackCplCompR8List(target, name, attpack, valueLis
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackCplCompR8List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjCplCompR8List()"
 subroutine ESMF_AttributeGetObjCplCompR8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -25456,7 +28376,7 @@ subroutine ESMF_AttributeGetAttPackCplCompI4List(target, name, attpack, valueLis
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackCplCompI4List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjCplCompI4List()"
 subroutine ESMF_AttributeGetObjCplCompI4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -25594,7 +28514,7 @@ subroutine ESMF_AttributeGetAttPackCplCompI8List(target, name, attpack, valueLis
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackCplCompI8List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjCplCompI8List()"
 subroutine ESMF_AttributeGetObjCplCompI8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -25732,7 +28652,7 @@ subroutine ESMF_AttributeGetAttPackCplCompCHList(target, name, attpack, valueLis
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackCplCompCHList
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjCplCompCHList()"
 subroutine ESMF_AttributeGetObjCplCompCHList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -25870,7 +28790,7 @@ subroutine ESMF_AttributeGetAttPackCplCompLGList(target, name, attpack, valueLis
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackCplCompLGList
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjCplCompLGList()"
 subroutine ESMF_AttributeGetObjCplCompLGList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -26008,7 +28928,7 @@ subroutine ESMF_AttributeGetAttPackGridCompR4List(target, name, attpack, valueLi
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackGridCompR4List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjGridCompR4List()"
 subroutine ESMF_AttributeGetObjGridCompR4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -26146,7 +29066,7 @@ subroutine ESMF_AttributeGetAttPackGridCompR8List(target, name, attpack, valueLi
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackGridCompR8List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjGridCompR8List()"
 subroutine ESMF_AttributeGetObjGridCompR8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -26284,7 +29204,7 @@ subroutine ESMF_AttributeGetAttPackGridCompI4List(target, name, attpack, valueLi
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackGridCompI4List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjGridCompI4List()"
 subroutine ESMF_AttributeGetObjGridCompI4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -26422,7 +29342,7 @@ subroutine ESMF_AttributeGetAttPackGridCompI8List(target, name, attpack, valueLi
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackGridCompI8List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjGridCompI8List()"
 subroutine ESMF_AttributeGetObjGridCompI8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -26560,7 +29480,7 @@ subroutine ESMF_AttributeGetAttPackGridCompCHList(target, name, attpack, valueLi
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackGridCompCHList
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjGridCompCHList()"
 subroutine ESMF_AttributeGetObjGridCompCHList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -26698,7 +29618,7 @@ subroutine ESMF_AttributeGetAttPackGridCompLGList(target, name, attpack, valueLi
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackGridCompLGList
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjGridCompLGList()"
 subroutine ESMF_AttributeGetObjGridCompLGList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -26836,7 +29756,7 @@ subroutine ESMF_AttributeGetAttPackSciCompR4List(target, name, attpack, valueLis
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackSciCompR4List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjSciCompR4List()"
 subroutine ESMF_AttributeGetObjSciCompR4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -26974,7 +29894,7 @@ subroutine ESMF_AttributeGetAttPackSciCompR8List(target, name, attpack, valueLis
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackSciCompR8List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjSciCompR8List()"
 subroutine ESMF_AttributeGetObjSciCompR8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -27112,7 +30032,7 @@ subroutine ESMF_AttributeGetAttPackSciCompI4List(target, name, attpack, valueLis
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackSciCompI4List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjSciCompI4List()"
 subroutine ESMF_AttributeGetObjSciCompI4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -27250,7 +30170,7 @@ subroutine ESMF_AttributeGetAttPackSciCompI8List(target, name, attpack, valueLis
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackSciCompI8List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjSciCompI8List()"
 subroutine ESMF_AttributeGetObjSciCompI8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -27388,7 +30308,7 @@ subroutine ESMF_AttributeGetAttPackSciCompCHList(target, name, attpack, valueLis
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackSciCompCHList
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjSciCompCHList()"
 subroutine ESMF_AttributeGetObjSciCompCHList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -27526,7 +30446,7 @@ subroutine ESMF_AttributeGetAttPackSciCompLGList(target, name, attpack, valueLis
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackSciCompLGList
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjSciCompLGList()"
 subroutine ESMF_AttributeGetObjSciCompLGList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -27664,7 +30584,7 @@ subroutine ESMF_AttributeGetAttPackDistGridR4List(target, name, attpack, valueLi
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackDistGridR4List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjDistGridR4List()"
 subroutine ESMF_AttributeGetObjDistGridR4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -27802,7 +30722,7 @@ subroutine ESMF_AttributeGetAttPackDistGridR8List(target, name, attpack, valueLi
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackDistGridR8List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjDistGridR8List()"
 subroutine ESMF_AttributeGetObjDistGridR8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -27940,7 +30860,7 @@ subroutine ESMF_AttributeGetAttPackDistGridI4List(target, name, attpack, valueLi
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackDistGridI4List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjDistGridI4List()"
 subroutine ESMF_AttributeGetObjDistGridI4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -28078,7 +30998,7 @@ subroutine ESMF_AttributeGetAttPackDistGridI8List(target, name, attpack, valueLi
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackDistGridI8List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjDistGridI8List()"
 subroutine ESMF_AttributeGetObjDistGridI8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -28216,7 +31136,7 @@ subroutine ESMF_AttributeGetAttPackDistGridCHList(target, name, attpack, valueLi
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackDistGridCHList
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjDistGridCHList()"
 subroutine ESMF_AttributeGetObjDistGridCHList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -28354,7 +31274,7 @@ subroutine ESMF_AttributeGetAttPackDistGridLGList(target, name, attpack, valueLi
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackDistGridLGList
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjDistGridLGList()"
 subroutine ESMF_AttributeGetObjDistGridLGList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -28492,7 +31412,7 @@ subroutine ESMF_AttributeGetAttPackFieldR4List(target, name, attpack, valueList,
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackFieldR4List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjFieldR4List()"
 subroutine ESMF_AttributeGetObjFieldR4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -28630,7 +31550,7 @@ subroutine ESMF_AttributeGetAttPackFieldR8List(target, name, attpack, valueList,
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackFieldR8List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjFieldR8List()"
 subroutine ESMF_AttributeGetObjFieldR8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -28768,7 +31688,7 @@ subroutine ESMF_AttributeGetAttPackFieldI4List(target, name, attpack, valueList,
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackFieldI4List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjFieldI4List()"
 subroutine ESMF_AttributeGetObjFieldI4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -28906,7 +31826,7 @@ subroutine ESMF_AttributeGetAttPackFieldI8List(target, name, attpack, valueList,
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackFieldI8List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjFieldI8List()"
 subroutine ESMF_AttributeGetObjFieldI8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -29044,7 +31964,7 @@ subroutine ESMF_AttributeGetAttPackFieldCHList(target, name, attpack, valueList,
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackFieldCHList
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjFieldCHList()"
 subroutine ESMF_AttributeGetObjFieldCHList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -29182,7 +32102,7 @@ subroutine ESMF_AttributeGetAttPackFieldLGList(target, name, attpack, valueList,
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackFieldLGList
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjFieldLGList()"
 subroutine ESMF_AttributeGetObjFieldLGList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -29320,7 +32240,7 @@ subroutine ESMF_AttributeGetAttPackFieldBundleR4List(target, name, attpack, valu
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackFieldBundleR4List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjFieldBundleR4List()"
 subroutine ESMF_AttributeGetObjFieldBundleR4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -29458,7 +32378,7 @@ subroutine ESMF_AttributeGetAttPackFieldBundleR8List(target, name, attpack, valu
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackFieldBundleR8List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjFieldBundleR8List()"
 subroutine ESMF_AttributeGetObjFieldBundleR8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -29596,7 +32516,7 @@ subroutine ESMF_AttributeGetAttPackFieldBundleI4List(target, name, attpack, valu
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackFieldBundleI4List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjFieldBundleI4List()"
 subroutine ESMF_AttributeGetObjFieldBundleI4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -29734,7 +32654,7 @@ subroutine ESMF_AttributeGetAttPackFieldBundleI8List(target, name, attpack, valu
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackFieldBundleI8List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjFieldBundleI8List()"
 subroutine ESMF_AttributeGetObjFieldBundleI8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -29872,7 +32792,7 @@ subroutine ESMF_AttributeGetAttPackFieldBundleCHList(target, name, attpack, valu
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackFieldBundleCHList
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjFieldBundleCHList()"
 subroutine ESMF_AttributeGetObjFieldBundleCHList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -30010,7 +32930,7 @@ subroutine ESMF_AttributeGetAttPackFieldBundleLGList(target, name, attpack, valu
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackFieldBundleLGList
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjFieldBundleLGList()"
 subroutine ESMF_AttributeGetObjFieldBundleLGList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -30148,7 +33068,7 @@ subroutine ESMF_AttributeGetAttPackGridR4List(target, name, attpack, valueList, 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackGridR4List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjGridR4List()"
 subroutine ESMF_AttributeGetObjGridR4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -30286,7 +33206,7 @@ subroutine ESMF_AttributeGetAttPackGridR8List(target, name, attpack, valueList, 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackGridR8List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjGridR8List()"
 subroutine ESMF_AttributeGetObjGridR8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -30424,7 +33344,7 @@ subroutine ESMF_AttributeGetAttPackGridI4List(target, name, attpack, valueList, 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackGridI4List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjGridI4List()"
 subroutine ESMF_AttributeGetObjGridI4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -30562,7 +33482,7 @@ subroutine ESMF_AttributeGetAttPackGridI8List(target, name, attpack, valueList, 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackGridI8List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjGridI8List()"
 subroutine ESMF_AttributeGetObjGridI8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -30700,7 +33620,7 @@ subroutine ESMF_AttributeGetAttPackGridCHList(target, name, attpack, valueList, 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackGridCHList
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjGridCHList()"
 subroutine ESMF_AttributeGetObjGridCHList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -30838,7 +33758,7 @@ subroutine ESMF_AttributeGetAttPackGridLGList(target, name, attpack, valueList, 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackGridLGList
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjGridLGList()"
 subroutine ESMF_AttributeGetObjGridLGList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -30976,7 +33896,7 @@ subroutine ESMF_AttributeGetAttPackStateR4List(target, name, attpack, valueList,
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackStateR4List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjStateR4List()"
 subroutine ESMF_AttributeGetObjStateR4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -31114,7 +34034,7 @@ subroutine ESMF_AttributeGetAttPackStateR8List(target, name, attpack, valueList,
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackStateR8List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjStateR8List()"
 subroutine ESMF_AttributeGetObjStateR8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -31252,7 +34172,7 @@ subroutine ESMF_AttributeGetAttPackStateI4List(target, name, attpack, valueList,
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackStateI4List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjStateI4List()"
 subroutine ESMF_AttributeGetObjStateI4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -31390,7 +34310,7 @@ subroutine ESMF_AttributeGetAttPackStateI8List(target, name, attpack, valueList,
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackStateI8List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjStateI8List()"
 subroutine ESMF_AttributeGetObjStateI8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -31528,7 +34448,7 @@ subroutine ESMF_AttributeGetAttPackStateCHList(target, name, attpack, valueList,
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackStateCHList
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjStateCHList()"
 subroutine ESMF_AttributeGetObjStateCHList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -31666,7 +34586,7 @@ subroutine ESMF_AttributeGetAttPackStateLGList(target, name, attpack, valueList,
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackStateLGList
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjStateLGList()"
 subroutine ESMF_AttributeGetObjStateLGList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -31804,7 +34724,7 @@ subroutine ESMF_AttributeGetAttPackLocStreamR4List(target, name, attpack, valueL
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackLocStreamR4List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjLocStreamR4List()"
 subroutine ESMF_AttributeGetObjLocStreamR4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -31942,7 +34862,7 @@ subroutine ESMF_AttributeGetAttPackLocStreamR8List(target, name, attpack, valueL
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackLocStreamR8List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjLocStreamR8List()"
 subroutine ESMF_AttributeGetObjLocStreamR8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -32080,7 +35000,7 @@ subroutine ESMF_AttributeGetAttPackLocStreamI4List(target, name, attpack, valueL
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackLocStreamI4List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjLocStreamI4List()"
 subroutine ESMF_AttributeGetObjLocStreamI4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -32218,7 +35138,7 @@ subroutine ESMF_AttributeGetAttPackLocStreamI8List(target, name, attpack, valueL
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackLocStreamI8List
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjLocStreamI8List()"
 subroutine ESMF_AttributeGetObjLocStreamI8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -32356,7 +35276,7 @@ subroutine ESMF_AttributeGetAttPackLocStreamCHList(target, name, attpack, valueL
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackLocStreamCHList
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjLocStreamCHList()"
 subroutine ESMF_AttributeGetObjLocStreamCHList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -32494,7 +35414,7 @@ subroutine ESMF_AttributeGetAttPackLocStreamLGList(target, name, attpack, valueL
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackLocStreamLGList
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjLocStreamLGList()"
 subroutine ESMF_AttributeGetObjLocStreamLGList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
@@ -32569,7 +35489,7 @@ subroutine ESMF_AttributeGetObjLocStreamLGList(target, name, valueList, defaultv
 end subroutine ESMF_AttributeGetObjLocStreamLGList
 
 !==============================================================================
-! ESMF_AttributeGet (Inquire) =================================================
+! ESMF_AttributeGet (Inquire)
 !==============================================================================
 
 #undef  ESMF_METHOD
@@ -32891,9 +35811,9 @@ subroutine ESMF_AttributeGetInfoByNumArray(target, attributeIndex, name, convent
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetInfoByNumArray
 
-! ==============================================================================
+!==============================================================================
 ! ESMF_AttributeGetAttPack
-! ==============================================================================
+!==============================================================================
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackArray()"
@@ -33293,9 +36213,9 @@ subroutine ESMF_AttributeGetInfoByNumArrayBundle(target, attributeIndex, name, c
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetInfoByNumArrayBundle
 
-! ==============================================================================
+!==============================================================================
 ! ESMF_AttributeGetAttPack
-! ==============================================================================
+!==============================================================================
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackArrayBundle()"
@@ -33695,9 +36615,9 @@ subroutine ESMF_AttributeGetInfoByNumCplComp(target, attributeIndex, name, conve
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetInfoByNumCplComp
 
-! ==============================================================================
+!==============================================================================
 ! ESMF_AttributeGetAttPack
-! ==============================================================================
+!==============================================================================
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackCplComp()"
@@ -34097,9 +37017,9 @@ subroutine ESMF_AttributeGetInfoByNumGridComp(target, attributeIndex, name, conv
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetInfoByNumGridComp
 
-! ==============================================================================
+!==============================================================================
 ! ESMF_AttributeGetAttPack
-! ==============================================================================
+!==============================================================================
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackGridComp()"
@@ -34499,9 +37419,9 @@ subroutine ESMF_AttributeGetInfoByNumSciComp(target, attributeIndex, name, conve
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetInfoByNumSciComp
 
-! ==============================================================================
+!==============================================================================
 ! ESMF_AttributeGetAttPack
-! ==============================================================================
+!==============================================================================
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackSciComp()"
@@ -34901,9 +37821,9 @@ subroutine ESMF_AttributeGetInfoByNumDistGrid(target, attributeIndex, name, conv
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetInfoByNumDistGrid
 
-! ==============================================================================
+!==============================================================================
 ! ESMF_AttributeGetAttPack
-! ==============================================================================
+!==============================================================================
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackDistGrid()"
@@ -35303,9 +38223,9 @@ subroutine ESMF_AttributeGetInfoByNumField(target, attributeIndex, name, convent
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetInfoByNumField
 
-! ==============================================================================
+!==============================================================================
 ! ESMF_AttributeGetAttPack
-! ==============================================================================
+!==============================================================================
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackField()"
@@ -35705,9 +38625,9 @@ subroutine ESMF_AttributeGetInfoByNumFieldBundle(target, attributeIndex, name, c
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetInfoByNumFieldBundle
 
-! ==============================================================================
+!==============================================================================
 ! ESMF_AttributeGetAttPack
-! ==============================================================================
+!==============================================================================
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackFieldBundle()"
@@ -36107,9 +39027,9 @@ subroutine ESMF_AttributeGetInfoByNumGrid(target, attributeIndex, name, conventi
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetInfoByNumGrid
 
-! ==============================================================================
+!==============================================================================
 ! ESMF_AttributeGetAttPack
-! ==============================================================================
+!==============================================================================
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackGrid()"
@@ -36509,9 +39429,9 @@ subroutine ESMF_AttributeGetInfoByNumState(target, attributeIndex, name, convent
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetInfoByNumState
 
-! ==============================================================================
+!==============================================================================
 ! ESMF_AttributeGetAttPack
-! ==============================================================================
+!==============================================================================
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackState()"
@@ -36911,9 +39831,9 @@ subroutine ESMF_AttributeGetInfoByNumLocStream(target, attributeIndex, name, con
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetInfoByNumLocStream
 
-! ==============================================================================
+!==============================================================================
 ! ESMF_AttributeGetAttPack
-! ==============================================================================
+!==============================================================================
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackLocStream()"
@@ -36995,7 +39915,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackLocStream
 !==============================================================================
-! ESMF_AttributeRemove ========================================================
+! ESMF_AttributeRemove
 !==============================================================================
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeRemoveAttPackArray()"
@@ -38853,7 +41773,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
 end subroutine ESMF_AttributeReadLocStream
 
 !==============================================================================
-! ESMF_AttributeUpdate ========================================================
+! ESMF_AttributeUpdate
 !==============================================================================
 
 #undef  ESMF_METHOD
@@ -38983,7 +41903,7 @@ subroutine ESMF_AttributeUpdateState(target, vm, rootList, rc)
 end subroutine ESMF_AttributeUpdateState
 
 !==============================================================================
-! ESMF_AttributeWrite =========================================================
+! ESMF_AttributeWrite
 !==============================================================================
 
 #undef  ESMF_METHOD
@@ -39528,4 +42448,4 @@ subroutine ESMF_AttPackStreamJSON(attpack, output, rc)
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttPackStreamJSON
 
-end module ESMF_AttributeMod  !===============================================
+end module ESMF_AttributeMod

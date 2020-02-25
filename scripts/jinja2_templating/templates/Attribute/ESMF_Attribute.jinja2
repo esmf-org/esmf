@@ -156,8 +156,10 @@ character(*), parameter, private :: version = '$Id$'
 
 contains  !====================================================================
 
+{% include "ESMF_Attribute-Doc.jinja2" %}{{ "" }}
+
 !==============================================================================
-! AttPack Procedures ==========================================================
+! AttPack Procedures
 !==============================================================================
 
 #undef  ESMF_METHOD
@@ -242,7 +244,7 @@ function attpack_getPayload(self, rc) result(payload)
 end function attpack_getPayload
 
 !==============================================================================
-! Helper Functions ============================================================
+! Helper Functions
 !==============================================================================
 
 #undef  ESMF_METHOD
@@ -307,7 +309,7 @@ subroutine ESMF_InfoFormatKey(key, name, rc, convention, purpose)
 end subroutine ESMF_InfoFormatKey
 
 !==============================================================================
-! ESMF_AttributeAdd ===========================================================
+! ESMF_AttributeAdd
 !==============================================================================
 
 #undef  ESMF_METHOD
@@ -437,7 +439,7 @@ end subroutine ESMF_AttributeAddAttPackStd{{ et }}
 {% endfor %}
 
 !==============================================================================
-! ESMF_AttributeSet ===========================================================
+! ESMF_AttributeSet
 !==============================================================================
 {% set set_or_get = "Set" %}
 {% for et in ets %}{% for t in ts %}{% for d in do_array %}
@@ -554,7 +556,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
 {% endfor %}{% endfor %}{% endfor %}
 
 !==============================================================================
-! ESMF_AttributeGet ===========================================================
+! ESMF_AttributeGet
 !==============================================================================
 {% set set_or_get = "Get" %}
 {% set d = False %}
@@ -644,7 +646,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
 {% include "ESMF_Attribute-ProcFinalize.jinja2" %}{{ "" }}
 {% endfor %}{% endfor %}
 !==============================================================================
-! ESMF_AttributeGet (Lists) ===================================================
+! ESMF_AttributeGet (Lists)
 !==============================================================================
 {% set set_or_get = "Get" %}
 {% set d = True %}
@@ -705,7 +707,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
 
 {% include "ESMF_Attribute-ProcFinalize.jinja2" %}{{ "" }}
 
-!==============================================================================
+!------------------------------------------------------------------------------
 {% set proc_suffix = "Obj" %}
 {% set arglist = "(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)" %}
 {% include "ESMF_Attribute-ProcHeader.jinja2" %}{{ "" }}
@@ -773,7 +775,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
 
 {% endfor %}{% endfor %}
 !==============================================================================
-! ESMF_AttributeGet (Inquire) =================================================
+! ESMF_AttributeGet (Inquire)
 !==============================================================================
 {% set d = False %}
 {% set set_or_get = "Get" %}
@@ -1064,9 +1066,9 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
 
 {% include "ESMF_Attribute-ProcFinalize.jinja2" %}{{ "" }}
 
-! ==============================================================================
+!==============================================================================
 ! ESMF_AttributeGetAttPack
-! ==============================================================================
+!==============================================================================
 
 {% set set_or_get = "Get" %}
 {% set proc_suffix = "AttPack" %}
@@ -1143,7 +1145,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
 {% endfor %}
 
 !==============================================================================
-! ESMF_AttributeRemove ========================================================
+! ESMF_AttributeRemove
 !==============================================================================
 {% for et in ets %}
 {% set set_or_get = "Remove" %}
@@ -1329,7 +1331,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
 {% endfor %}
 
 !==============================================================================
-! ESMF_AttributeUpdate ========================================================
+! ESMF_AttributeUpdate
 !==============================================================================
 {% set set_or_get = "Update" %}
 {% for update_esmf_type in update_esmf_types %}
@@ -1355,7 +1357,7 @@ end subroutine ESMF_AttributeUpdate{{ update_esmf_type }}
 {% endfor %}
 
 !==============================================================================
-! ESMF_AttributeWrite =========================================================
+! ESMF_AttributeWrite
 !==============================================================================
 {% for et in ets %}
 
@@ -1429,4 +1431,4 @@ subroutine ESMF_AttPackStreamJSON(attpack, output, rc)
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttPackStreamJSON
 
-end module ESMF_AttributeMod  !===============================================
+end module ESMF_AttributeMod

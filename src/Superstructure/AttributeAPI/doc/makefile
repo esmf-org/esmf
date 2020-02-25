@@ -2,9 +2,9 @@ ALL: onedoc
 
 LOCDIR = src/Superstructure/AttributeAPI/doc
 
-DVIFILES  =
-PDFFILES  =
-HTMLFILES =
+DVIFILES  = AttributeAPI_refdoc.dvi
+PDFFILES  = AttributeAPI_refdoc.pdf
+HTMLFILES = AttributeAPI_refdoc
 
 #
 # Tex Files to make

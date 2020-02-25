@@ -19,8 +19,8 @@
 \textwidth 6.5in
 \textheight 8.5in
 \addtolength{\oddsidemargin}{-.75in}
-\newcommand{\mytitle}{\Large {\bf Info Fortran Reference}}
-\newcommand{\myauthors}{\large {\it Ben Koziol}}
+\newcommand{\mytitle}{\Large {\bf Attribute Fortran Reference}}
+\newcommand{\myauthors}{\large {\it Ryan O'Kuinghttons}}
 % set a standard paragraph style
 \setlength{\parskip}{0pt}
 \setlength{\parindent}{0pt}
@@ -50,31 +50,19 @@
 
 #endif
 
-\section{Info Class (Object Attributes)}
-\label{esmf_info_class}
-#ifdef STANDALONE
-\input{Info_desc}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/Base/doc/Info_desc}
-#endif
+\section{Attribute Class}
 
-\subsection{Usage and Examples}
-#ifdef STANDALONE
-\input{ESMF_InfoGetHandleEx_fapi}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/Base/doc/ESMF_InfoGetHandleEx_fapi}
-#endif
-#ifdef STANDALONE
-\input{ESMF_InfoTutorialEx_fapi}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/Base/doc/ESMF_InfoTutorialEx_fapi}
-#endif
+%#ifdef STANDALONE
+%\input{AttributeAPI_desc}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Base/doc/AttributeAPI_desc}
+%#endif
 
 \subsection{Class API}
 #ifdef STANDALONE
-\input{ESMF_Info_fapi}
+\input{ESMF_Attribute_fapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Base/doc/ESMF_Info_fapi}
+\input{../Superstructure/AttributeAPI/doc/ESMF_Attribute_fapi}
 #endif
 
 #ifdef STANDALONE
