@@ -1202,7 +1202,7 @@
 
       public ESMF_MapPtr
 
-      public ESMF_PointerPrint
+      public ESMF_PointerPrint, ESMF_PointerLog
 
       public ESMF_UnmappedAction_Flag, ESMF_UNMAPPEDACTION_ERROR, &
                                    ESMF_UNMAPPEDACTION_IGNORE
@@ -1813,9 +1813,18 @@ end function
 ! subroutine to print the corresponding C pointer of ESMF_Pointer object
 
 subroutine ESMF_PointerPrint(ptr)
- type(ESMF_Pointer), intent(in) :: ptr
-
+  type(ESMF_Pointer), intent(in) :: ptr
   call c_pointerprint(ptr)
+end subroutine
+
+subroutine ESMF_PointerLog(ptr, prefix, rc)
+  type(ESMF_Pointer),  intent(in)             :: ptr
+  character (len=*),   intent(in),  optional  :: prefix
+  integer,             intent(out), optional  :: rc           
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  call c_pointerlog(ptr, prefix)
+  ! return successfully
+  if (present(rc)) rc = ESMF_SUCCESS
 end subroutine
 
 !------------------------------------------------------------------------------

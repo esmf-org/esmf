@@ -715,8 +715,9 @@ int setDefaultsLUA(int dimCount,
   meshp->meshwrite(non_const_fname, &localrc, nlen);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
 
-  // Get rid of Mesh  
-  delete meshp;
+  // Get rid of Mesh, also considering garbage collection
+  localrc = MeshCap::destroy(&meshp, true);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
 
   // return success
   return ESMF_SUCCESS;

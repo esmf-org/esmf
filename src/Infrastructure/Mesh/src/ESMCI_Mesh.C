@@ -27,7 +27,7 @@
 
 #include <bitset>
 #include <cstdio>
-
+#include <limits>
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
@@ -1854,6 +1854,8 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
    MEField<> *cfield;
    MEField<> *src_mask_val;
    Mesh::MeshObjIDMap::const_iterator mb,mi,me;
+   bool check_id=false;
+   int max_ok_id=std::numeric_limits<int>::max();
 
    // Initialize the parallel environment for mesh (if not already done)
    ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
@@ -1861,9 +1863,9 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
      throw localrc;  // bail out with exception
 
 
+   // Set up based on whether nodes or elem
    if (meshLoc == ESMC_MESHLOC_NODE) {
-
-     //     cfield = GetCoordField();
+     // Get coord field
      cfield = GetField("coordinates");
      if (cfield == NULL) {
        int localrc;
@@ -1871,29 +1873,37 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
                                         "- mesh node coordinates unavailable",
                                         ESMC_CONTEXT, &localrc)) throw localrc;
      }
+
+     // Get Iterators
      mb = map_begin(MeshObj::NODE);
      me = map_end(MeshObj::NODE);
 
+     // Get mask field
      src_mask_val = GetField("node_mask_val");
 
-   } else if (meshLoc == ESMC_MESHLOC_ELEMENT) {
+     // Don't need to check ids for nodes
+     check_id=false;
 
-     //need check here to see that elem coordinates are set
+   } else if (meshLoc == ESMC_MESHLOC_ELEMENT) {
+     // Get coord field
      cfield = GetField("elem_coordinates");
      if (cfield == NULL) {
-
-
-       cfield = GetField("coordinates");
-
        int localrc;
        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                         "- mesh element coordinates unavailable",
                                         ESMC_CONTEXT, &localrc)) throw localrc;
      }
+
+     // Get Iterators
      mb = map_begin(MeshObj::ELEMENT);
      me = map_end(MeshObj::ELEMENT);
 
+     // Get mask field
      src_mask_val = GetField("elem_mask_val");
+
+     // If split, make sure we aren't using split elems
+     check_id=is_split;
+     if (check_id) max_ok_id=max_non_split_id;
 
    } else {
      //unknown meshLoc
@@ -1903,21 +1913,20 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
                                       ESMC_CONTEXT, &localrc)) throw localrc;
    }
 
+   // Create point list using slighly different ways if mesh unmasked or masked
    int numMaskValues;
    int *ptrMaskValues;
-
    if (src_mask_val==NULL) {         //no masking info in mesh
-     //if (maskValuesArg!=NULL) {
-     //  int localrc;
-     //  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-     //                                 "- mask values provided but no mask info in mesh",
-     //                                 ESMC_CONTEXT, &localrc)) throw localrc;
-     //}
 
+     // Count points in mesh
      int num_local_pts=0;
      for (mi=mb; mi != me; ++mi) {
        const MeshObj &obj = *mi;
 
+       // skip if not a good id (e.g. is a split elem)
+       if (check_id && (obj.get_id() > max_ok_id)) continue;
+
+       // Count local objects
        if (GetAttr(obj).is_locally_owned()) {
          num_local_pts++;
        }
@@ -1930,6 +1939,10 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
      for (mi=mb; mi != me; ++mi) {
        const MeshObj &obj = *mi;
 
+       // skip if not a good id (e.g. is a split elem)
+       if (check_id && (obj.get_id() > max_ok_id)) continue;
+
+       // Get local object coords
        if (GetAttr(obj).is_locally_owned()) {
          double *coords=cfield->data(obj);
          plp->add(obj.get_id(),coords);
@@ -1947,10 +1960,15 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
        ptrMaskValues = NULL;
      }
 
+     // Count unmasked points in mesh
      int num_local_pts=0;
      for (mi=mb; mi != me; ++mi) {
        const MeshObj &obj = *mi;
 
+       // skip if not a good id (e.g. is a split elem)
+       if (check_id && (obj.get_id() > max_ok_id)) continue;
+
+       // Count unmasked local objects
        if (GetAttr(obj).is_locally_owned()) {
          double *mv=src_mask_val->data(*mi);
          int mv_int = (int)((*mv)+0.5);
@@ -1973,10 +1991,14 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
      // Create PointList
      plp = new PointList(num_local_pts,spatial_dim());
 
-     // Loop through adding local nodes
+     // Loop through adding unmasked points
      for (mi=mb; mi != me; ++mi) {
        const MeshObj &obj = *mi;
 
+       // skip if not a good id (e.g. is a split elem)
+       if (check_id && (obj.get_id() > max_ok_id)) continue;
+
+       // Get unmasked local object coords
        if (GetAttr(obj).is_locally_owned()) {
          double *mv=src_mask_val->data(*mi);
          int mv_int = (int)((*mv)+0.5);
@@ -1999,10 +2021,6 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
      }
    }
 
-
-   //delete iterator
-   //delete ni;
-   //delete ne;
 
    if (rc!=NULL) *rc=ESMF_SUCCESS;
    return plp;
