@@ -439,14 +439,13 @@ ESMC_DistGrid ESMC_GridGetDistGrid(ESMC_Grid grid, int *rc){
   ESMCI::Grid *gridp = reinterpret_cast<ESMCI::Grid *>(grid.ptr);
   //printf("\n\ngridstatus = %d\n\n", gridp->getStatus());
   
-  const ESMCI::DistGrid *distgrid = 0;
-  distgrid = gridp->getDistGrid();
+  ESMCI::DistGrid *distgrid = 0;
+  localrc = gridp->getStaggerDistgrid(ESMC_STAGGERLOC_CENTER, &distgrid);
   
   // distgrid->print();
 
-  ESMCI::DistGrid *distgridnc = const_cast<ESMCI::DistGrid *>(distgrid);
   ESMC_DistGrid distgridp;
-  distgridp.ptr = reinterpret_cast<ESMC_DistGrid *>(distgridnc);
+  distgridp.ptr = reinterpret_cast<ESMC_DistGrid *>(distgrid);
 
   // localrc = ESMC_DistGridPrint(distgridp);
 
