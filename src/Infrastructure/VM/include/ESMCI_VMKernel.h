@@ -21,6 +21,7 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <strstream>
 #include <map>
 
 #ifdef VMK_STANDALONE
@@ -103,6 +104,9 @@ namespace ESMCI {
 //-----------------------------------------------------------------------------
 // utility function
 template<typename T> void append(std::stringstream &streami, T value){
+  streami.write((char*)&value, sizeof(T));
+}
+template<typename T> void append(std::strstream &streami, T value){
   streami.write((char*)&value, sizeof(T));
 }
 //-----------------------------------------------------------------------------
@@ -196,7 +200,11 @@ class VMK{
   };
   
   struct sendBuffer{
+#ifdef STRSTREAM
+    std::strstream stream;
+#else
     std::stringstream stream;
+#endif
     std::string streamBuffer;
     MPI_Request mpireq;
     bool firstFlag;
@@ -477,7 +485,7 @@ class VMK{
     void epochSetFirst();
     void epochInit();
     void epochFinal();
-    void epochStart(vmEpoch epoch_);
+    void epochStart(vmEpoch epoch);
     void epochEnd();
     vmEpoch getEpoch() const {return epoch;}
         

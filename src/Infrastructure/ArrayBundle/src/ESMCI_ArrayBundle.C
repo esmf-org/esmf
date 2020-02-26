@@ -1614,17 +1614,12 @@ int ArrayBundle::sparseMatMul(
       if (zeroflag!=ESMC_REGION_SELECT)
         filterBitField |= XXE::filterBitRegionSelectZero; // filter reg. select zero
       // execute XXE stream
-  VM *vm = VM::getCurrent(&localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-    &rc)) return rc;
-  vm->epochStart(epochBuffer);
       localrc = xxe->exec(rraCount, &(rraList[0]), &(vectorLength[0]), 
         filterBitField, NULL, NULL, NULL, -1, -1,
         // following are super-vectorization parameters
         &(srcLocalDeCountList[0]), &(superVectPList[0]));
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, &rc)) return rc;
-  vm->epochEnd();
       // garbage collection
       for (unsigned i=0; i<superVectPList.size(); i++){
         delete [] superVectPList[i].srcSuperVecSize_i;
