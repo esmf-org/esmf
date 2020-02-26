@@ -3052,17 +3052,28 @@ void VMK::epochEnd(){
     std::map<int, sendBuffer>:: iterator its;
     for (its=sendMap.begin(); its!=sendMap.end(); ++its){
       sendBuffer *sm = &(its->second);
+
+#ifdef STRSTREAM
+      sm->stream << std::ends;  // terminate the string
+      sm->streamBuffer((char *)sm->stream.str());  // copy data into contiguous buffer
+      sm->stream.freeze(false);
+      sm->stream.clear();
+#else
       sm->streamBuffer = sm->stream.str();  // copy data into contiguous buffer
       sm->stream.str(""); // done with stream -> clear
+#endif
       
-      std::stringstream msg;
-      msg << "epochBuffer:" << __LINE__ << " ready to post non-blocking send:"
-      << " dst=" << its->first << " size=" << sm->streamBuffer.size()
-      << " streamBuffer=" << (void *)sm->streamBuffer.data();
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      if (sm->streamBuffer.size() > 0){
       
-      MPI_Isend((void *)sm->streamBuffer.data(), sm->streamBuffer.size(),
-        MPI_BYTE, lpid[its->first], 987561, mpi_c, &sm->mpireq);
+        std::stringstream msg;
+        msg << "epochBuffer:" << __LINE__ << " ready to post non-blocking send:"
+        << " dst=" << its->first << " size=" << sm->streamBuffer.size()
+        << " streamBuffer=" << (void *)sm->streamBuffer.data();
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      
+        MPI_Isend((void *)sm->streamBuffer.data(), sm->streamBuffer.size(),
+          MPI_BYTE, lpid[its->first], 987561, mpi_c, &sm->mpireq);
+      }
       
     }
   }
