@@ -61,7 +61,7 @@ namespace ESMCI {
     Tag node_mask_tag;
     Tag node_mask_val_tag;
 
-    bool has_elem_frac;
+    bool has_elem_frac; // TODO: Get rid of this
     Tag  elem_frac_tag;
 
     bool has_elem_mask;
@@ -85,15 +85,61 @@ namespace ESMCI {
 
     void CreateGhost();
 
-#endif
-
-    // Empty mesh
-    MBMesh();
 
     // Mesh from inputs
     MBMesh(int _pdim, int _orig_sdim, ESMC_CoordSys_Flag _coordSys);
 
+    // Add one node
+    EntityHandle add_node(double *orig_coords, int gid, int orig_pos, int owner);
 
+    // Add one elem
+    EntityHandle add_elem(EntityType elem_type, int num_nodes, EntityHandle *nodes, 
+                          int gid, int orig_pos, int owner);
+
+
+    // Change owner
+    void set_owner(EntityHandle eh, int owner);
+
+    // Get owner
+    int get_owner(EntityHandle eh);
+
+    // Get gid
+    int get_gid(EntityHandle eh);
+
+    // Turn on node masking for this mesh
+    void setup_node_mask();
+
+    // Set node mask value
+    void set_node_mask_val(EntityHandle eh, int mask_val);
+
+    // Set node coords
+    void set_node_coords(EntityHandle eh, double *orig_coords);
+
+    // Turn on elem masking
+    void setup_elem_mask();
+
+    // Set a mask value 
+    void set_elem_mask_val(EntityHandle eh, int mask_val);
+
+    // Setup elem areas
+    void setup_elem_area();
+
+    // Set an elem area value
+    void set_elem_area(EntityHandle eh, double area);
+
+    // Setup elem coords
+    void setup_elem_coords();
+
+    // Set coords in an elem
+    void set_elem_coords(EntityHandle eh, double *orig_coords);
+
+
+#endif
+
+    // Create empty mesh
+    MBMesh();
+
+    // Get rid of mesh
     ~MBMesh();
 
   };

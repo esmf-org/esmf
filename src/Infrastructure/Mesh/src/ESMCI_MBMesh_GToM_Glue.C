@@ -20,7 +20,7 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "ESMCI_Mesh_GToM_Glue.h"
+//#include "ESMCI_Mesh_GToM_Glue.h"
 
 #include "ESMCI_Grid.h"
 #include "ESMCI_VM.h"
@@ -57,55 +57,233 @@ namespace ESMCI {
 #define ESMC_METHOD "MBMEsh_GridToMeshCell()"
  /* XMRKX */
 
+  // DEBUG
+  //bool mbmmesh_gqcn_debug=false;
+
+  static void _get_quad_corner_nodes_from_tile(MBMesh *mesh, std::map<int,EntityHandle> *gid_to_node_map, DistGrid *cnrDistgrid, int tile, int index[2], 
+                                               int cnr_offset[NUM_QUAD_CORNERS][2], int *local_node_index, 
+                                               EntityHandle *cnr_nodes, bool *_all_nodes_ok) {
+  // Init output
+  *_all_nodes_ok=true;
 
 
-#if 0
+  // Loop getting global ids
+  int cnr_gids[NUM_QUAD_CORNERS];
+  for (int i=0; i<NUM_QUAD_CORNERS; i++) {
 
+    // calc index of corner
+    int cnr_index[2];
+    cnr_index[0]=index[0]+cnr_offset[i][0];
+    cnr_index[1]=index[1]+cnr_offset[i][1];
 
-  //// Node Fields
-#define GTOM_NFIELD_MASK 0
-#define GTOM_NFIELD_MASK_VAL 1
-#define GTOM_NFIELD_COORD 2
-#define GTOM_NFIELD_ORIG_COORD 3
-#define GTOM_NFIELD_NUM 4
-  
-  static void create_nfields(Grid *grid, Mesh *mesh,
-                             IOField<NodalField> *nfields[GTOM_NFIELD_NUM]) {
+    // DEBUG
+    //   if (mbmesh_gqcn_debug) {
+    //  printf("%d# in _get_quad_corner_nodes BEFORE cnr_index=%d %d \n",Par::Rank(),cnr_index[0],cnr_index[1]);
+    //}
 
-    // Init field array to null
-    for (int i=0; i<GTOM_NFIELD_NUM; i++) {
-      nfields[i]=NULL;
+    // Get global id, if we can't then leave
+    bool is_local;
+    if (!get_global_id_from_tile(cnrDistgrid, tile, cnr_index,
+                        cnr_gids+i, &is_local)) {
+      *_all_nodes_ok=false;
+      return;
     }
 
-    // Masks
-   if (grid->hasItemStaggerLoc(ESMCI_STAGGERLOC_CORNER, ESMC_GRIDITEM_MASK)) {
-     nfields[GTOM_NFIELD_MASK] = mesh->RegisterNodalField(*mesh, "mask", 1);
-     nfields[GTOM_NFIELD_MASK_VAL] = mesh->RegisterNodalField(*mesh, "node_mask_val", 1);
-   }
+    //if (gqcn_debug) {
+    //  printf("%d# in _get_quad_corner_nodes AFTER cnr_index=%d %d \n",Par::Rank(),cnr_index[0],cnr_index[1]);
+    //}
 
-    // Coords
-    if (grid->hasCoordStaggerLoc(ESMCI_STAGGERLOC_CORNER)) {
-                                           
-      // Add node coord field
-      nfields[GTOM_NFIELD_COORD]=mesh->RegisterNodalField(*mesh, "coordinates", mesh->spatial_dim()); 
+  }
 
-      // If not cartesian then add original coordinates field
-      if (grid->getCoordSys() != ESMC_COORDSYS_CART) {
-        nfields[GTOM_NFIELD_ORIG_COORD]=mesh->RegisterNodalField(*mesh, "orig_coordinates", grid->getDimCount()); 
-      }      
+  // Convert gids to nodes
+  for (int i=0; i<NUM_QUAD_CORNERS; i++) {
+
+    // get gid of this corner
+    int gid=cnr_gids[i];
+
+    // declare node that we're looking for
+    EntityHandle node;
+
+    // If a node with this gid doesn't already exist, then create, otherwise
+    // get the one from the map
+    std::map<int,EntityHandle>::iterator mi =  gid_to_node_map->find(gid);
+    if (mi == gid_to_node_map->end()) {
+
+      // We don't necessarily know the coordinates yet, so 
+      // use {0,0,0} and set later.
+      double node_coords[3]={0.0, 0.0, 0.0};
+      
+      // If we didn't find it then we need to make a new one
+      node=mesh->add_node(node_coords, gid, *local_node_index, GTOM_BAD_PROC);
+      
+      // Add to map
+      (*gid_to_node_map)[gid]=node;
+      
+      // Advance to next node index
+      (*local_node_index)++;
+
     } else {
-      int localrc;
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-         "- Grid does not contain coordinates at staggerloc=ESMF_STAGGERLOC_CORNER. ", ESMC_CONTEXT, &localrc);
-      throw localrc;
+      // Get node pointer
+      node=mi->second;
+    }
+
+    // Put into list
+    cnr_nodes[i]=node;
+  }
+}
+
+  static void _get_quad_corner_nodes_from_localDE(MBMesh *mesh, std::map<int,EntityHandle> *gid_to_node_map, DistGrid *cnrDistgrid, int localDE, int de_index[2], 
+                                               int cnr_offset[NUM_QUAD_CORNERS][2], int *local_node_index, 
+                                               EntityHandle *cnr_nodes, bool *_all_nodes_ok) {
+
+    //// Translate localDE info into tile info ////
+    int tile;
+    int tile_index[ESMF_MAXDIM];
+    convert_localDE_to_tile_info(cnrDistgrid, localDE, de_index, &tile, tile_index);
+
+    // Call into get get quad corner nodes from tile
+    _get_quad_corner_nodes_from_tile(mesh, gid_to_node_map, cnrDistgrid, tile, tile_index, cnr_offset,
+                                     local_node_index, cnr_nodes, _all_nodes_ok);
+}
+
+
+
+  // Add a node that you need on this PET, but that doesn't necessarily have a local element to host it
+  // ...although don't add it if there isn't a cell anyplace to host it.
+  static void _force_add_node(int node_gid, int cnr_de_index[2], MBMesh *mesh, std::map<int,EntityHandle> *gid_to_node_map,
+                              int localDE, int center_offset[NUM_QUAD_CORNERS][2], DistGrid *centerDistgrid, 
+                              int cnr_offset[NUM_QUAD_CORNERS][2], DistGrid *cnrDistgrid,
+                              int *local_node_index, int *local_elem_index, 
+                              EntityType etype, bool *added_node) {
+
+    // Init indicator variable for whether node was successfully added
+    *added_node=false;
+
+    // Need to use tile version of _get_global_id() because if the localDE is empty (as
+    // is likely the case with the center localDE here, then _get_global_id_from_localDE() 
+    // won't work. Therefore, find tile & tile index for corner localDE and index
+    int tile;
+    int cnr_tile_index[ESMF_MAXDIM];
+    convert_localDE_to_tile_info(cnrDistgrid, localDE, cnr_de_index, &tile, cnr_tile_index);
+
+    // Loop to find a suitable element host
+    for (int i=0; i<NUM_QUAD_CORNERS; i++) {
+
+      // calc index of corner
+      int center_index[2];
+      center_index[0]=cnr_tile_index[0]+center_offset[i][0]; 
+      center_index[1]=cnr_tile_index[1]+center_offset[i][1];
+
+      // Get global id, if we can't then not a suitable element
+      bool is_local;
+      int elem_gid=GTOM_BAD_ID;
+      if (!get_global_id_from_tile(centerDistgrid, tile, center_index,
+                          &elem_gid, &is_local)) continue;
+    
+      // DEBUG
+      //if (node_gid == 7) {
+      //  printf("%d# in _force_add id=%d elem_id=%d\n",Par::Rank(),node_gid,elem_gid);
+      //  gqcn_debug=true;
+      // }
+
+
+      // If didn't find a good one, then move onto next 
+      if (elem_gid == GTOM_BAD_ID) continue;
+    
+      // Assuming that element isn't already in mesh, because otherwise it's nodes
+      // (e.g. the node to be added) would already be in the mesh. Therefore, 
+      // not checking to see if element is in mesh.
+      
+      // Add the node here?? Or just trust that _get_quad_corner_nodes will do it????
+      // LET _get_quad_... do it, that way if it can't find all the nodes it won't 
+      // add the element or the forced node. 
+
+      // Get quad corner nodes for this element, this should add the node (among others)
+      bool all_nodes_ok=true;
+      EntityHandle cnr_nodes[NUM_QUAD_CORNERS];
+      _get_quad_corner_nodes_from_tile(mesh, gid_to_node_map, cnrDistgrid,
+                                       tile, center_index, cnr_offset,
+                                       local_node_index, cnr_nodes, &all_nodes_ok);
+
+      // DEBUG
+      //if (node_gid == 7) {
+      //  printf("%d# in _force_add id=%d all_nodes_ok=%d\n",Par::Rank(),node_gid,all_nodes_ok);
+      //  gqcn_debug=false;
+      //}
+
+
+      // If we didn't get all the nodes, then move onto next 
+      if (!all_nodes_ok) continue;
+
+      // Get proc based on gid
+      int proc;
+      gid_to_proc(elem_gid, centerDistgrid, &proc);
+
+
+      // Create new element
+      mesh->add_elem(etype, NUM_QUAD_CORNERS, cnr_nodes, 
+                     elem_gid, *local_elem_index, proc);
+
+
+      // Advance to next elem index
+      (*local_elem_index)++;
+
+
+      // DON'T NEED THIS RIGHT NOW, BUT KEEP IN CASE WE EVENTUALY ADD THIS 
+      // KIND OF CAPABILITY TO MBMesh
+#if 0
+      // If not local, turn off OWNED_ID, ACTIVE_ID, and turn on SHARED_ID. This is 
+      // what happens for ghost elems, so it makes sense to do that here. 
+      // (This seems to happen automatically for nodes, but not elems)
+      if (proc != Par::Rank()) {
+        // Setup for changing attribute
+        const Context &ctxt = GetMeshObjContext(*elem);
+        Context newctxt(ctxt);
+
+        // Clear OWNED_ID since we're not owned
+        newctxt.clear(Attr::OWNED_ID);
+
+        // Clear ACTIVE_ID since we're not locally owned 
+        newctxt.clear(Attr::ACTIVE_ID);
+
+        // turn on SHARED_ID since owned someplace else 
+        newctxt.set(Attr::SHARED_ID);
+
+        // If attribute has changed change in elem
+        if (newctxt != ctxt) {
+          Attr attr(GetAttr(*elem), newctxt);
+          mesh->update_obj(elem, attr);
+        }
+      }
+#endif
+
+      // DEBUG OUTPUT
+      //printf("%d# in _force_add elem_id=%d proc=%d owner=%d is_local=%d\n",Par::Rank(),elem_gid,proc,elem->get_owner(),GetAttr(*elem).is_locally_owned());
+
+      // Indicate that we've successfully added the node (via adding the elem that contains it) 
+      *added_node=true;
+
+      // If we've successfully added the element, then leave
+      break;
+    }
+  }
+
+
+
+
+  //// Create Node fields/tags in mesh
+  static void _create_nfields(Grid *grid, MBMesh *mesh) {
+
+    // Masks
+    if (grid->hasItemStaggerLoc(ESMCI_STAGGERLOC_CORNER, ESMC_GRIDITEM_MASK)) {
+      mesh->setup_node_mask();
     }
 
   }
 
 
   // Set node fields in mesh
-  static void set_nfields(Grid *grid, Mesh *mesh,
-                          IOField<NodalField> *nfields[GTOM_NFIELD_NUM]) {
+  static void _set_nfields(Grid *grid, MBMesh *mesh, std::map<int,EntityHandle> *gid_to_node_map) {
     int localrc;
 
     // Get distgrid for the center staggerloc
@@ -152,141 +330,89 @@ namespace ESMCI {
           if (!is_local) continue;
 
           // Get associated node
-          Mesh::MeshObjIDMap::iterator mi =  mesh->map_find(MeshObj::NODE, node_gid);
-
-          // If it doesn't exist then go to next
-          if (mi == mesh->map_end(MeshObj::NODE)) {
-            continue;
-          }
-
-          // Get node 
-          MeshObj &node=*mi;
-
-          // Mask
-          // Init to 0 (set later in ESMF_FieldRegridStore()
-          if (nfields[GTOM_NFIELD_MASK]) {
-            double *d=nfields[GTOM_NFIELD_MASK]->data(node);
-            *d=0.0;
-          }
-
-          // Mask Val
-          // Get data from grid
-          if (nfields[GTOM_NFIELD_MASK_VAL]) {
-            double *d=nfields[GTOM_NFIELD_MASK_VAL]->data(node);
-            localrc=grid->getItemInternalConvert(ESMCI_STAGGERLOC_CORNER,
-                                                 ESMC_GRIDITEM_MASK,
-                                                 lDE, index, d);
-            if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-              throw localrc;  // bail out with exception
-          }
-
-
-          // (Cart) Coords
-          // Get data from grid
-          if (nfields[GTOM_NFIELD_COORD]) {
-
-            // Get original coord
-            double orig_coord[ESMF_MAXDIM];
-            localrc=grid->getCoordInternalConvert(ESMCI_STAGGERLOC_CORNER,
-                                                  lDE, index, orig_coord);
-            if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-              throw localrc;  // bail out with exception
-
-            // Get data field in mesh
-            double *d=nfields[GTOM_NFIELD_COORD]->data(node);
-
-            // Call into coordsys method to convert to Cart
-            localrc=ESMCI_CoordSys_ConvertToCart(grid->getCoordSys(),
-                                                 grid->getDimCount(),
-                                                 orig_coord,  // Input coordinates 
-                                                 d);
-            if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-              throw localrc;  // bail out with exception
-          }
-
-
-          // Original Coords
-          // Get data from grid
-          if (nfields[GTOM_NFIELD_ORIG_COORD]) {
-            double *d=nfields[GTOM_NFIELD_ORIG_COORD]->data(node);
-            localrc=grid->getCoordInternalConvert(ESMCI_STAGGERLOC_CORNER,
-                                                  lDE, index, d);
-            if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-              throw localrc;  // bail out with exception
-          }
+          std::map<int,EntityHandle>::iterator mi =  gid_to_node_map->find(node_gid);
           
+          // If it doesn't exist, then go to next
+          if (mi == gid_to_node_map->end()) continue;
+
+          // Get node pointer
+          EntityHandle node=mi->second;
+
+          // Set Mask
+          if (mesh->has_node_mask) {
+              int mask_val;
+              localrc=grid->getItemInternalConvert(ESMCI_STAGGERLOC_CORNER,
+                                                   ESMC_GRIDITEM_MASK,
+                                                   lDE, index, &mask_val);
+              if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+                throw localrc;  // bail out with exception
+
+              mesh->set_node_mask_val(node,mask_val);
+          }
+
+
+          // Set Coords
+
+          // Get original coords from Grid
+          double orig_coord[ESMF_MAXDIM];
+          localrc=grid->getCoordInternalConvert(ESMCI_STAGGERLOC_CORNER,
+                                                lDE, index, orig_coord);
+          if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+            throw localrc;  // bail out with exception
+
+          // Set coords in Mesh
+          mesh->set_node_coords(node, orig_coord);
         }
       }
     } 
+
   }
 
 
-  /// Element fields
-#define GTOM_EFIELD_MASK 0
-#define GTOM_EFIELD_MASK_VAL 1
-#define GTOM_EFIELD_AREA     2
-#define GTOM_EFIELD_COORD 3
-#define GTOM_EFIELD_ORIG_COORD 4
-#define GTOM_EFIELD_FRAC 5
-#define GTOM_EFIELD_FRAC2 6
-#define GTOM_EFIELD_NUM 7
-
   // Create element fields on mesh
-  static void create_efields(Grid *grid, Mesh *mesh,
-                             MEField<> *efields[GTOM_EFIELD_NUM]) {
-
-    // Init field array to null
-    for (int i=0; i<GTOM_EFIELD_NUM; i++) {
-      efields[i]=NULL;
-    }
-
-    // Set context
-    Context ctxt; ctxt.flip();
-
+  static void _create_efields(Grid *grid, MBMesh *mesh) {
 
     // Mask
     if (grid->hasItemStaggerLoc(ESMCI_STAGGERLOC_CENTER, ESMC_GRIDITEM_MASK)) {
-      efields[GTOM_EFIELD_MASK] = mesh->RegisterField("elem_mask",
-                          MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
-
-      efields[GTOM_EFIELD_MASK_VAL] = mesh->RegisterField("elem_mask_val",
-                          MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+      mesh->setup_elem_mask();
     }
 
     // Area
     if (grid->hasItemStaggerLoc(ESMCI_STAGGERLOC_CENTER, ESMC_GRIDITEM_AREA)) {
-      efields[GTOM_EFIELD_AREA] = mesh->RegisterField("elem_area",
-                          MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+      mesh->setup_elem_area();
     }
 
-
-    // COORDS
-    if (grid->hasCoordStaggerLoc(ESMCI_STAGGERLOC_CENTER)) {
-                                           
-      // Add element coords field
-      efields[GTOM_EFIELD_COORD] = mesh->RegisterField("elem_coordinates",
-                 MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, mesh->spatial_dim(), true);
-
-      // If not cartesian then add original coordinates field
-      if (grid->getCoordSys() != ESMC_COORDSYS_CART) {
-        efields[GTOM_EFIELD_ORIG_COORD]= mesh->RegisterField("elem_orig_coordinates",
-                   MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, grid->getDimCount(), true);
-      }      
+    // elem coords
+    if (grid->hasCoordStaggerLoc(ESMCI_STAGGERLOC_CENTER)) {                     
+      mesh->setup_elem_coords();
     }
 
-
-    // Fracs are always there
-    efields[GTOM_EFIELD_FRAC] = mesh->RegisterField("elem_frac",
-                                             MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
-
-    efields[GTOM_EFIELD_FRAC2] = mesh->RegisterField("elem_frac2",
-                                             MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+    // Fracs are added in mesh create, because they are always on
   }
 
   // Set element fields in mesh
-  static void set_efields(Grid *grid, Mesh *mesh,
-                          MEField<> *efields[GTOM_EFIELD_NUM]) {
+  static void _set_efields(Grid *grid, MBMesh *mesh) {
     int localrc;
+
+    // Get elems
+    Range elems;
+    int merr=mesh->mesh->get_entities_by_dimension(0, mesh->pdim, elems);
+    if (merr != MB_SUCCESS) {
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                       moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+    }
+
+    // Loop and set up gid_to_elem_map
+    std::map<int,EntityHandle> gid_to_elem_map;
+    for (Range::iterator it=elems.begin(); it !=elems.end(); it++) {
+      EntityHandle elem=*it;
+
+      // Get node global id
+      int gid=mesh->get_gid(elem);
+
+      // Add to map
+      gid_to_elem_map[gid]=elem;
+    }
 
     // Get distgrid for the center staggerloc
     DistGrid *centerDistgrid;
@@ -329,320 +455,65 @@ namespace ESMCI {
           // Only set elem information if this is the owner
           if (!is_local) continue;
 
-          // Get associated elem
-          Mesh::MeshObjIDMap::iterator mi =  mesh->map_find(MeshObj::ELEMENT, elem_gid);
+          // Get associated node
+          std::map<int,EntityHandle>::iterator mi =  gid_to_elem_map.find(elem_gid);
+          
+          // If it doesn't exist, then go to next
+          if (mi == gid_to_elem_map.end()) continue;
 
-          // If it doesn't exist then go to next
-          if (mi == mesh->map_end(MeshObj::ELEMENT)) {
-            continue;
-          }
-
-          // Get elem
-          MeshObj &elem=*mi;
-
-
-          // Mask
-          // Init to 0 (set later in ESMF_FieldRegridStore()
-          if (efields[GTOM_EFIELD_MASK]) {
-            double *d=efields[GTOM_EFIELD_MASK]->data(elem);
-            *d=0.0;
-          }
+          // Get node pointer
+          EntityHandle elem=mi->second;
 
           // Mask Val
-          // Get data from grid
-          if (efields[GTOM_EFIELD_MASK_VAL]) {
-            double *d=efields[GTOM_EFIELD_MASK_VAL]->data(elem);
+          if (mesh->has_elem_mask) {
+            int mask_val;
             localrc=grid->getItemInternalConvert(ESMCI_STAGGERLOC_CENTER,
                                                  ESMC_GRIDITEM_MASK,
-                                                 lDE, index, d);
+                                                 lDE, index, &mask_val);
             if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
               throw localrc;  // bail out with exception
+            
+            // Set elem mask value
+            mesh->set_elem_mask_val(elem, mask_val);
           }
 
 
           // Area
-          // Get data from grid
-          if (efields[GTOM_EFIELD_AREA]) {
-            double *d=efields[GTOM_EFIELD_AREA]->data(elem);
+          if (mesh->has_elem_area) {
+            double elem_area;
             localrc=grid->getItemInternalConvert(ESMCI_STAGGERLOC_CENTER,
                                                  ESMC_GRIDITEM_AREA,
-                                                 lDE, index, d);
+                                                 lDE, index, &elem_area);
             if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
               throw localrc;  // bail out with exception
+
+            // Set elem area
+            mesh->set_elem_area(elem, elem_area);
           }
 
 
-          // (Cart) Coords
-          // Get data from grid
-          if (efields[GTOM_EFIELD_COORD]) {
+          // Elem Coords
+          if (mesh->has_elem_coords) {
 
             // Get original coord
-            double orig_coord[ESMF_MAXDIM];
+            double orig_coords[ESMF_MAXDIM];
             localrc=grid->getCoordInternalConvert(ESMCI_STAGGERLOC_CENTER,
-                                                  lDE, index, orig_coord);
+                                                  lDE, index, orig_coords);
             if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
               throw localrc;  // bail out with exception
 
-            // Get data field in mesh
-            double *d=efields[GTOM_EFIELD_COORD]->data(elem);
-
-            // Call into coordsys method to convert to Cart
-            localrc=ESMCI_CoordSys_ConvertToCart(grid->getCoordSys(),
-                                                 grid->getDimCount(), 
-                                                 orig_coord,  // Input coordinates 
-                                                 d);
-            if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-              throw localrc;  // bail out with exception
+            // Set elem coords
+            mesh->set_elem_coords(elem, orig_coords);
 
             //printf("id=%d orig_coords=%g %g coords=%g %g %g\n",elem.get_id(),orig_coord[0],orig_coord[1],d[0],d[1],d[2]);
           }
 
-
-          // Original Coords
-          // Get data from grid
-          if (efields[GTOM_EFIELD_ORIG_COORD]) {
-            double *d=efields[GTOM_EFIELD_ORIG_COORD]->data(elem);
-            localrc=grid->getCoordInternalConvert(ESMCI_STAGGERLOC_CENTER,
-                                                  lDE, index, d);
-            if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-              throw localrc;  // bail out with exception
-          }
-
-
-          // Init fracs
-          if (efields[GTOM_EFIELD_FRAC]) {
-            double *d=efields[GTOM_EFIELD_FRAC]->data(elem);
-            *d=1.0;
-          }
-
-          if (efields[GTOM_EFIELD_FRAC2]) {
-            double *d=efields[GTOM_EFIELD_FRAC2]->data(elem);
-            *d=1.0;
-          }
-        }
-
-      }
-    }
-  }
-
-
-  bool gqcn_debug=false;
-
-  static void _get_quad_corner_nodes_from_tile(Mesh *mesh, DistGrid *cnrDistgrid, int tile, int index[2], int cnr_offset[NUM_QUAD_CORNERS][2],
-                                     int *local_node_index, std::vector<MeshObj*> *cnr_nodes, bool *_all_nodes_ok) {
-  // Init output
-  *_all_nodes_ok=true;
-
-
-  // Loop getting global ids
-  int cnr_gids[NUM_QUAD_CORNERS];
-  for (int i=0; i<NUM_QUAD_CORNERS; i++) {
-
-    // calc index of corner
-    int cnr_index[2];
-    cnr_index[0]=index[0]+cnr_offset[i][0];
-    cnr_index[1]=index[1]+cnr_offset[i][1];
-
-    // DEBUG
-    //   if (gqcn_debug) {
-    //  printf("%d# in _get_quad_corner_nodes BEFORE cnr_index=%d %d \n",Par::Rank(),cnr_index[0],cnr_index[1]);
-    //}
-
-    // Get global id, if we can't then leave
-    bool is_local;
-    if (!get_global_id_from_tile(cnrDistgrid, tile, cnr_index,
-                        cnr_gids+i, &is_local)) {
-      *_all_nodes_ok=false;
-      return;
-    }
-
-    //if (gqcn_debug) {
-    //  printf("%d# in _get_quad_corner_nodes AFTER cnr_index=%d %d \n",Par::Rank(),cnr_index[0],cnr_index[1]);
-    //}
-
-  }
-
-  // Convert gids to nodes
-  for (int i=0; i<NUM_QUAD_CORNERS; i++) {
-
-    // get gid of this corner
-    int gid=cnr_gids[i];
-
-    // declare node that we're looking for
-    MeshObj *node;
-
-    // If a node with this gid already exists, then put into list
-    Mesh::MeshObjIDMap::iterator mi =  mesh->map_find(MeshObj::NODE, gid);
-    if (mi != mesh->map_end(MeshObj::NODE)) {
-
-      // Get node pointer
-      node=&*mi;
-
-      // Put into list
-      (*cnr_nodes)[i]=node;
-
-      // Go to next iteration
-      continue;
-    }
-
-    // If we didn't find it then we need to make a new one
-
-    // Create new node in mesh object
-    node = new MeshObj(MeshObj::NODE,     // node...
-                                   gid,               // unique global id
-                                   *local_node_index
-                                   );
-    // Advance to next node index
-    (*local_node_index)++;
-
-    // Set owner to bad proc value and change later
-    node->set_owner(BAD_PROC);
-
-    // Eventually need to figure out pole id stuff
-    UInt nodeset=0; // UInt nodeset = gni->getPoleID();   // Do we need to partition the nodes in any sets?
-    mesh->add_node(node, nodeset);
-
-
-    // Put into list
-    (*cnr_nodes)[i]=node;
-  }
-}
-
-  static void _get_quad_corner_nodes_from_localDE(Mesh *mesh, DistGrid *cnrDistgrid, int localDE, int de_index[2], int cnr_offset[NUM_QUAD_CORNERS][2],
-                                     int *local_node_index, std::vector<MeshObj*> *cnr_nodes, bool *_all_nodes_ok) {
-
-    //// Translate localDE info into tile info ////
-    int tile;
-    int tile_index[ESMF_MAXDIM];
-    convert_localDE_to_tile_info(cnrDistgrid, localDE, de_index, &tile, tile_index);
-
-    // Call into get get quad corner nodes from tile
-    get_quad_corner_nodes_from_tile(mesh, cnrDistgrid, tile, tile_index, cnr_offset,
-                                     local_node_index, cnr_nodes, _all_nodes_ok);
-}
-
-/* XMRKX */
-
-  // Add a node that you need on this PET, but that doesn't necessarily have a local element to host it
-  // ...although don't add it if there isn't a cell anyplace to host it.
-  static void _force_add_node(int node_gid, int cnr_de_index[2], Mesh *mesh, int localDE, 
-                              int center_offset[NUM_QUAD_CORNERS][2], DistGrid *centerDistgrid, 
-                              int cnr_offset[NUM_QUAD_CORNERS][2], DistGrid *cnrDistgrid,
-                              int *local_node_index, int *local_elem_index, std::vector<MeshObj*> *cnr_nodes,
-                              const MeshObjTopo *elem_topo, bool *added_node) {
-
-    // Init indicator variable for whether node was successfully added
-    *added_node=false;
-
-    // Need to use tile version of _get_global_id() because if the localDE is empty (as
-    // is likely the case with the center localDE here, then _get_global_id_from_localDE() 
-    // won't work. Therefore, find tile & tile index for corner localDE and index
-    int tile;
-    int cnr_tile_index[ESMF_MAXDIM];
-    convert_localDE_to_tile_info(cnrDistgrid, localDE, cnr_de_index, &tile, cnr_tile_index);
-
-    // Loop to find a suitable element host
-    for (int i=0; i<NUM_QUAD_CORNERS; i++) {
-
-      // calc index of corner
-      int center_index[2];
-      center_index[0]=cnr_tile_index[0]+center_offset[i][0]; 
-      center_index[1]=cnr_tile_index[1]+center_offset[i][1];
-
-      // Get global id, if we can't then not a suitable element
-      bool is_local;
-      int elem_gid=GTOM_BAD_ID;
-      if (!get_global_id_from_tile(centerDistgrid, tile, center_index,
-                          &elem_gid, &is_local)) continue;
-    
-      // DEBUG
-      //if (node_gid == 7) {
-      //  printf("%d# in _force_add id=%d elem_id=%d\n",Par::Rank(),node_gid,elem_gid);
-      //  gqcn_debug=true;
-      // }
-
-
-      // If didn't find a good one, then move onto next 
-      if (elem_gid == BAD_ID) continue;
-    
-      // Assuming that element isn't already in mesh, because otherwise it's nodes
-      // (e.g. the node to be added) would already be in the mesh. Therefore, 
-      // not checking to see if element is in mesh.
-      
-      // Add the node here?? Or just trust that _get_quad_corner_nodes will do it????
-      // LET _get_quad_... do it, that way if it can't find all the nodes it won't 
-      // add the element or the forced node. 
-
-      // Get quad corner nodes for this element, this should add the node (among others)
-      bool all_nodes_ok=true;
-      _get_quad_corner_nodes_from_tile(mesh, cnrDistgrid, tile, center_index, cnr_offset,
-                             local_node_index, cnr_nodes, &all_nodes_ok);
-
-      // DEBUG
-      //if (node_gid == 7) {
-      //  printf("%d# in _force_add id=%d all_nodes_ok=%d\n",Par::Rank(),node_gid,all_nodes_ok);
-      //  gqcn_debug=false;
-      //}
-
-
-      // If we didn't get all the nodes, then move onto next 
-      if (!all_nodes_ok) continue;
-
-      // Create Element
-      MeshObj *elem = new MeshObj(MeshObj::ELEMENT,    // Mesh equivalent of Cell
-                                  elem_gid,            // unique global id
-                                  (*local_elem_index)++
-                                  );
-
-      // Add element
-      UInt block_id = 1;  // Any reason to use different sets for cells?
-      mesh->add_element(elem, *cnr_nodes, block_id, elem_topo);
-
-      // Get proc based on gid
-      int proc;
-      _gid_to_proc(elem_gid, centerDistgrid, &proc);
-
-      // Set proc
-      elem->set_owner(proc);
-
-      // If not local, turn off OWNED_ID, ACTIVE_ID, and turn on SHARED_ID. This is 
-      // what happens for ghost elems, so it makes sense to do that here. 
-      // (This seems to happen automatically for nodes, but not elems)
-      if (proc != Par::Rank()) {
-        // Setup for changing attribute
-        const Context &ctxt = GetMeshObjContext(*elem);
-        Context newctxt(ctxt);
-
-        // Clear OWNED_ID since we're not owned
-        newctxt.clear(Attr::OWNED_ID);
-
-        // Clear ACTIVE_ID since we're not locally owned 
-        newctxt.clear(Attr::ACTIVE_ID);
-
-        // turn on SHARED_ID since owned someplace else 
-        newctxt.set(Attr::SHARED_ID);
-
-        // If attribute has changed change in elem
-        if (newctxt != ctxt) {
-          Attr attr(GetAttr(*elem), newctxt);
-          mesh->update_obj(elem, attr);
         }
       }
-
-      // DEBUG OUTPUT
-      //printf("%d# in _force_add elem_id=%d proc=%d owner=%d is_local=%d\n",Par::Rank(),elem_gid,proc,elem->get_owner(),GetAttr(*elem).is_locally_owned());
-
-      // Indicate that we've successfully added the node (via adding the elem that contains it) 
-      *added_node=true;
-
-      // If we've successfully added the element, then leave
-      break;
     }
+
   }
 
-
-
-#endif
 
  /* XMRKX */
 
@@ -694,7 +565,6 @@ void MBMesh_GridToMeshCell(const Grid &grid_,
  // Set output mesh
  *out_meshpp=(void *)mesh;
 
-
  // Get distgrid for the center staggerloc
  DistGrid *centerDistgrid;
  grid->getStaggerDistgrid(ESMCI_STAGGERLOC_CENTER, &centerDistgrid);
@@ -721,14 +591,15 @@ void MBMesh_GridToMeshCell(const Grid &grid_,
  int center_offset[NUM_QUAD_CORNERS][2];
  calc_center_offset(cnr_offset, center_offset);
 
- // Space for corner verts
+ // Space for corner nodes
  EntityHandle cnr_nodes[NUM_QUAD_CORNERS];
 
  // printf("offset=[%d %d] [%d %d]  [%d %d]  [%d %d]\n",cnr_offset[0][0],
  //cnr_offset[0][1],cnr_offset[1][0],cnr_offset[1][1],cnr_offset[2][0],cnr_offset[2][1],
  //cnr_offset[3][0], cnr_offset[3][1]);
 
-#if 0
+ // Map from gid to nodes
+ std::map<int,EntityHandle> gid_to_node_map;
 
  // Loop over center DEs adding cells
  int local_node_index=0;
@@ -751,9 +622,6 @@ void MBMesh_GridToMeshCell(const Grid &grid_,
    //printf("%d# lDE=%d CENTER lbnd=%d %d ubnd=%d %d\n",Par::Rank(),lDE,lbnd[0],lbnd[1],ubnd[0],ubnd[1]);
    //printf("%d# lDE=%d CORNER lbnd=%d %d ubnd=%d %d\n",Par::Rank(),lDE,cnr_lbnd[0],cnr_lbnd[1],cnr_ubnd[0],cnr_ubnd[1]);
 
-
-
-
    // Loop over bounds
    for (int i0=lbnd[0]; i0<=ubnd[0]; i0++){
      for (int i1=lbnd[1]; i1<=ubnd[1]; i1++){
@@ -768,13 +636,11 @@ void MBMesh_GridToMeshCell(const Grid &grid_,
        de_index[0]=i0-lbnd[0];
        de_index[1]=i1-lbnd[1];
 
-
- /// STOPPED HERE /// 
-
        // Get Element corner nodes
        bool all_nodes_ok=true;
-       _get_quad_corner_nodes_from_localDE(mesh, cnrDistgrid, lDE, de_index, cnr_offset, &local_node_index,
-                                           cnr_nodes, &all_nodes_ok);
+       _get_quad_corner_nodes_from_localDE(mesh, &gid_to_node_map,
+                                           cnrDistgrid, lDE, de_index, cnr_offset, 
+                                           &local_node_index, cnr_nodes, &all_nodes_ok);
 
        // If we didn't get all the nodes, then go to next element
        if (!all_nodes_ok) continue;
@@ -787,19 +653,13 @@ void MBMesh_GridToMeshCell(const Grid &grid_,
          continue; // If we can't find a global id, then just skip
        }
 
+       // Create new element
+       mesh->add_elem(etype, NUM_QUAD_CORNERS, cnr_nodes, 
+                      elem_gid, local_elem_index, Par::Rank());
 
-       // Create Element
-       MeshObj *elem = new MeshObj(MeshObj::ELEMENT,    // Mesh equivalent of Cell
-                                   elem_gid,            // unique global id
-                                   local_elem_index++
-                                   );
 
-       // Add element
-       UInt block_id = 1;  // Any reason to use different sets for cells?
-       mesh->add_element(elem, cnr_nodes, block_id, elem_topo);
-
-       // Set owner to the current processor
-       elem->set_owner(Par::Rank());
+       // Advance to next elem index
+       local_elem_index++;
 
        // DEBUG
        //if (elem_gid==9) {
@@ -808,9 +668,6 @@ void MBMesh_GridToMeshCell(const Grid &grid_,
      }
    }
  }
-
-
-
 
 
 
@@ -851,22 +708,23 @@ void MBMesh_GridToMeshCell(const Grid &grid_,
        if (!is_local) continue;
 
        // Get associated node
-       Mesh::MeshObjIDMap::iterator mi =  mesh->map_find(MeshObj::NODE, node_gid);
+       std::map<int,EntityHandle>::iterator mi =  gid_to_node_map.find(node_gid);
 
        // If it exists then go to next
-       if (mi != mesh->map_end(MeshObj::NODE)) continue;
+       if (mi != gid_to_node_map.end()) continue;
+
 
        // Otherwise add
        bool added_node=false;
-       _force_add_node(node_gid, de_index, mesh, lDE, 
-                       center_offset, centerDistgrid, 
+       _force_add_node(node_gid, de_index, mesh, &gid_to_node_map, 
+                       lDE, center_offset, centerDistgrid, 
                        cnr_offset, cnrDistgrid,
-                       &local_node_index, &local_elem_index, &cnr_nodes,
-                       elem_topo, &added_node);
-
+                       &local_node_index, &local_elem_index, 
+                       etype, &added_node);
      }
    }
  }
+
 
  // Loop setting local node owners
  for (int lDE=0; lDE < cnrLocalDECount; lDE++) {
@@ -904,34 +762,41 @@ void MBMesh_GridToMeshCell(const Grid &grid_,
        // Only set node information if this is the owner
        if (!is_local) continue;
 
-       // Get associated node
-       Mesh::MeshObjIDMap::iterator mi =  mesh->map_find(MeshObj::NODE, node_gid);
 
-       // If it doesn't exist then go to next
-       if (mi == mesh->map_end(MeshObj::NODE)) {
-         continue;
-       }
+       // Get associated node
+       std::map<int,EntityHandle>::iterator mi =  gid_to_node_map.find(node_gid);
+
+       // If it doesn't exist, then go to next
+       if (mi == gid_to_node_map.end()) continue;
 
        // Get node pointer
-       MeshObj *node=&*mi;
+       EntityHandle node=mi->second;
 
        // Set owner to the current processor
-       node->set_owner(Par::Rank());
-
+       mesh->set_owner(node, Par::Rank());
      }
    }
  }
 
+
+ // Get range of nodes
+ // TODO: maybe hide this in a MBMesh wrapper? 
+ Range nodes;
+ int merr=mesh->mesh->get_entities_by_dimension(0, 0, nodes);
+ if (merr != MB_SUCCESS) {
+   if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                    moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+ }
+
  // Loop through Mesh nodes setting the remaining owners
- MeshDB::iterator ni = mesh->node_begin(), ne = mesh->node_end();
- for (; ni != ne; ++ni) {
-   MeshObj *node=&*ni;
+ for (Range::iterator it=nodes.begin(); it != nodes.end(); it++) {
+   EntityHandle node=*it;
 
    // Get node global id
-   int gid=node->get_id();
+   int gid=mesh->get_gid(node);
 
    // get node owner
-   int owner=node->get_owner();
+   int owner=mesh->get_owner(node);
 
    // If the owner is already set then skip
    if (owner != GTOM_BAD_PROC) continue;
@@ -940,29 +805,37 @@ void MBMesh_GridToMeshCell(const Grid &grid_,
    int proc;
    gid_to_proc(gid, cnrDistgrid, &proc);
 
-   // Set owner
-   node->set_owner(proc);
+   // Set owner to the current processor
+   mesh->set_owner(node, proc);
  }
 
  // Add node Fields
- IOField<NodalField> *nfields[GTOM_NFIELD_NUM];
- create_nfields(grid, mesh, nfields);
+ _create_nfields(grid, mesh);
 
  // Set node fields
- // (This has to happen before mesh is committed below)
- set_nfields(grid, mesh, nfields);
+ _set_nfields(grid, mesh, &gid_to_node_map);
+
+ // Don't need gid_to_node_map anymore, so clear it to save memory
+ gid_to_node_map.clear();
 
  // Add element Fields
- MEField<> *efields[GTOM_EFIELD_NUM];
- create_efields(grid, mesh, efields);
-
- // Finalize the Mesh
- mesh->build_sym_comm_rel(MeshObj::NODE);
- mesh->Commit();
+ _create_efields(grid, mesh);
 
  // Set element fields
- set_efields(grid, mesh, efields);
+ _set_efields(grid, mesh);
 
+ // STOPPED HERE // 
+
+ // Finalize the Mesh
+ // WHAT TO DO FOR THIS???
+ // Probably need to setup parallel stuff, etc... 
+ //mesh->build_sym_comm_rel(MeshObj::NODE);
+ //mesh->Commit();
+
+ // Halo field values
+ // mesh->CreateGhost(); or I think just use the internal part that updates the values???
+
+#if 0 
  // Halo fields, so entities with an owner on another processor
  // will have the correct value
  {
