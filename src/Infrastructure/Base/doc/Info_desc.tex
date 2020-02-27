@@ -12,7 +12,7 @@ ESMF uses \textit{JSON for Modern C++} \cite{json_for_modern_cpp} as its backend
 \end{enumerate}
 
 \subsection{Migrating from Attribute}
-The \texttt{ESMF\_Info} class is intended to replace the \texttt{ESMF\_Attribute} class. It is recommended that users migrate \texttt{ESMF\_Attribute} code to \texttt{ESMF\_Info}. The \texttt{ESMF\_Info} class provides the backend for \texttt{ESMF\_Attribute} since ESMF version 8.0. In practice, users should experience no friction when migrating client code. Please email ESMF support in the case of a migration issue. Some structural changes to \texttt{ESMF\_Attribute} did occur:
+The \texttt{ESMF\_Info} class is intended to replace the \texttt{ESMF\_Attribute} class. It is recommended that users migrate \texttt{ESMF\_Attribute} code to \texttt{ESMF\_Info}. The \texttt{ESMF\_Info} class provides the backend for \texttt{ESMF\_Attribute} since ESMF version 8.1. The \texttt{ESMF\_Attribute} docs are located in appendix \ref{appendix_attribute_legacy_api}. In practice, users should experience no friction when migrating client code. Please email ESMF support in the case of a migration issue. Some structural changes to \texttt{ESMF\_Attribute} did occur:
 \begin{itemize}
     \item Changed behavior when getting fixed-size lists. List size in storage must match size of outgoing list.
     \item Removed ability to use a default value with list gets.
@@ -22,6 +22,8 @@ The \texttt{ESMF\_Info} class is intended to replace the \texttt{ESMF\_Attribute
     \item Modified \texttt{ESMF\_AttributeAdd} to set the target key to a null JSON value.
     \item Modified \texttt{ESMF\_AttributeSet} to not require an attribute be added through \texttt{ESMF\_AttributeAdd} before setting.
     \item Removed support for attribute XML I/O.
+    \item Removed ability to add multiple nested Attribute packages.
+    \item Removed retrieval of "internal" ESMF object Attributes.
 \end{itemize}
 
 \subsection{Key Format}
