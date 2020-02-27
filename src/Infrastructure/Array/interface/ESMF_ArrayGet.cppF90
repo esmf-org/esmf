@@ -135,7 +135,7 @@ contains
     computationalUBound, totalLBound, totalUBound, computationalLWidth, &
     computationalUWidth, totalLWidth, totalUWidth, distgrid, dimCount, &
     tileCount, minIndexPTile, maxIndexPTile, deToTileMap, indexCountPDe, &
-    delayout, deCount, localDeCount, ssiLocalDeCount, localDeToDeMap, info, &
+    delayout, deCount, localDeCount, ssiLocalDeCount, localDeToDeMap, &
     localDeList, &    ! DEPRECATED ARGUMENT
     name, vm, rc)
 !
@@ -174,7 +174,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(out), optional :: localDeCount
     integer,                       intent(out), optional :: ssiLocalDeCount
     integer,                       intent(out), optional :: localDeToDeMap(:)
-    type(ESMF_Info),               intent(out), optional :: info !tdk:rm:last: remove this from the arrayget interface if handle subroutines are used
     integer,                       intent(out), optional :: localDeList(:)     ! DEPRECATED ARGUMENT
     character(len=*),              intent(out), optional :: name
     type(ESMF_VM),                 intent(out), optional :: vm
@@ -468,13 +467,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       totalLWidthArg, totalUWidthArg, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! Get info object if requested
-    if (present(info)) then
-      call c_ESMC_ArrayGetInfo(array, info, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
 
     ! Set init code for deep C++ objects
     call ESMF_DELayoutSetInitCreated(opt_delayout, rc=localrc)

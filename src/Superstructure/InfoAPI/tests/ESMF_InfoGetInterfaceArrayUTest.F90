@@ -10,7 +10,6 @@
 !
 !==============================================================================
 
-!tdk:rm: this file is obsolete since we are using the get handle approach
 #define FILENAME "src/Infrastructure/Attribute/tests/ESMF_InfoGetInterfaceArrayUTest.F90"
 
 #include "ESMF_Macros.inc"
@@ -52,7 +51,7 @@ program ESMF_ArrayInfoUTest
   integer               :: result = 0
 
   integer(ESMF_KIND_I4) :: desired = 999, actual
-  type(ESMF_Info) :: attrs, attrs2
+  type(ESMF_Info) :: info, info2
   type(ESMF_Array)      :: array
   type(ESMF_DistGrid)   :: distgrid
   real(ESMF_KIND_R8)    :: farray2D(10,10)
@@ -87,19 +86,19 @@ program ESMF_ArrayInfoUTest
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! Get the attribute object created with the array
-    call ESMF_ArrayGet(array, info=attrs, rc=rc)
+    info = ESMF_InfoGetHandle(array, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! Get a different reference to the same attributes object
-    call ESMF_ArrayGet(array, info=attrs2, rc=rc)
+    info2 = ESMF_InfoGetHandle(array, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! Set a key/value on the attributes object
-    call ESMF_InfoSet(attrs, key, desired, rc=rc)
+    call ESMF_InfoSet(info, key, desired, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! Get the attribute value from the second reference
-    call ESMF_InfoGet(attrs2, key, actual, rc=rc)
+    call ESMF_InfoGet(info2, key, actual, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! Destroy objects

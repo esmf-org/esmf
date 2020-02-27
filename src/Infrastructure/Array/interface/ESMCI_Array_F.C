@@ -751,13 +751,6 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_arraygetinfo)(ESMCI::Array **ptr, ESMCI::Info **info, int *rc) {
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_arraygetinfo()"
-    *info = (*ptr)->ESMC_BaseGetInfo();
-    if (rc) {*rc = ESMF_SUCCESS;}
-  }
-
   void FTN_X(c_esmc_arraywrite)(ESMCI::Array **array,
                                 char *file,
                                 char *variableName, char *convention, char *purpose,
