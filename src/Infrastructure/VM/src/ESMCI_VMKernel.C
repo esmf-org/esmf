@@ -2829,7 +2829,7 @@ int VMK::commwait(commhandle **ch, status *status, int nanopause){
   int localrc=0;
   if (status)
     status->comm_type = VM_COMM_TYPE_MPIUNI;  // safe initialization
-  if ((ch!=NULL) && ((*ch)!=NULL)){
+  if ((epoch!=epochBuffer) && (ch!=NULL) && ((*ch)!=NULL)){
     // wait for all non-blocking requests in commhandle to complete
     if ((*ch)->type==0){
       // this is a commhandle container
@@ -2899,7 +2899,6 @@ int VMK::commwait(commhandle **ch, status *status, int nanopause){
 #ifndef ESMF_NO_PTHREADS
           if (mpi_mutex_flag) pthread_mutex_lock(pth_mutex);
 #endif
-  if (epoch!=epochBuffer){
 #ifdef DEBUG_WAIT
           MPI_Status mpis;
           localrc = MPI_Wait(&((*ch)->mpireq[i]), &mpis);
@@ -2919,7 +2918,6 @@ int VMK::commwait(commhandle **ch, status *status, int nanopause){
 #else
           localrc = MPI_Wait(&((*ch)->mpireq[i]), mpi_s);
 #endif
-  }
 
 #ifndef ESMF_NO_PTHREADS
           if (mpi_mutex_flag) pthread_mutex_unlock(pth_mutex);
@@ -3131,11 +3129,6 @@ int VMK::send(const void *message, int size, int dest, int tag){
 #if (VERBOSITY > 9)
   printf("sending to: %d, %d\n", dest, lpid[dest]);
 #endif
-  if (epoch==epochBuffer){
-    std::stringstream msg;
-    msg << "epochBuffer:" << __LINE__ << " blocking send";
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
-  }
   int localrc=0;
   shared_mp *shmp;
   pipc_mp *pipcmp;
@@ -3293,22 +3286,6 @@ int VMK::send(const void *message, int size, int dest, commhandle **ch,
 #if (VERBOSITY > 9)
   printf("sending to: %d, %d\n", dest, lpid[dest]);
 #endif
-  if (epoch==epochBuffer){
-    std::stringstream msg;
-    sendBuffer *sm = &(sendMap[dest]);
-    msg << "epochBuffer:" << __LINE__ << " non-blocking send" << 
-    " firstFlag=" << sm->firstFlag <<
-    " msg size=" << size;
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
-    if (sm->firstFlag){
-      // deal with the first actions here
-      sm->firstFlag = false;  // reset the flag
-      sm->clear();  // wait for outstanding comm and clear out.
-    }
-    append(sm->stream, size);
-    append(sm->stream, tag);
-    sm->stream.write((const char*)message, size);
-  }
   int localrc=0;
   shared_mp *shmp;
   pipc_mp *pipcmp;
@@ -3326,40 +3303,56 @@ int VMK::send(const void *message, int size, int dest, commhandle **ch,
   // switch into the appropriate implementation
   switch(sendChannel[dest].comm_type){
   case VM_COMM_TYPE_MPI1:
-    (*ch)->nelements=1;
-    (*ch)->type=1;          // MPI
-    (*ch)->sendFlag=true;   // send request
-    (*ch)->mpireq = new MPI_Request[1];
-    // MPI-1 implementation
-    void *messageC; // for MPI C interface convert (const void *) -> (void *)
-    memcpy(&messageC, &message, sizeof(void *));
-    // use mutex to serialize mpi comm calls if mpi thread support requires it
+    if (epoch==epochBuffer){
+      std::stringstream msg;
+      sendBuffer *sm = &(sendMap[dest]);
+      msg << "epochBuffer:" << __LINE__ << " non-blocking send" << 
+      " firstFlag=" << sm->firstFlag <<
+      " msg size=" << size;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      if (sm->firstFlag){
+        // deal with the first actions here
+        sm->firstFlag = false;  // reset the flag
+        sm->clear();  // wait for outstanding comm and clear out.
+      }
+      // append the message into the epoch buffer stream
+      append(sm->stream, size);
+      append(sm->stream, tag);
+      sm->stream.write((const char*)message, size);
+    }else{
+      (*ch)->nelements=1;
+      (*ch)->type=1;          // MPI
+      (*ch)->sendFlag=true;   // send request
+      (*ch)->mpireq = new MPI_Request[1];
+      // MPI-1 implementation
+      void *messageC; // for MPI C interface convert (const void *) -> (void *)
+      memcpy(&messageC, &message, sizeof(void *));
+      // use mutex to serialize mpi comm calls if mpi thread support requires it
 #ifndef ESMF_NO_PTHREADS
-    if (mpi_mutex_flag) pthread_mutex_lock(pth_mutex);
+      if (mpi_mutex_flag) pthread_mutex_lock(pth_mutex);
 #endif
 //fprintf(stderr, "MPI_Isend: ch=%p\n", (*ch)->mpireq);
-    if (tag == -1){
-      tag = 1000*mypet+dest;  // default tag to simplify debugging
-      // make sure to stay below max tag
-      int maxTag = getMaxTag();
-      if (maxTag > 0)
-        tag = tag%maxTag;
-      else
-        tag = 0;
-    }
+      if (tag == -1){
+        tag = 1000*mypet+dest;  // default tag to simplify debugging
+        // make sure to stay below max tag
+        int maxTag = getMaxTag();
+        if (maxTag > 0)
+          tag = tag%maxTag;
+        else
+          tag = 0;
+      }
 #ifdef VM_MEMLOG_on
-  VM::logMemInfo(std::string("VM::send():1.0"));
+      VM::logMemInfo(std::string("VM::send():1.0"));
 #endif
-  if (epoch!=epochBuffer){
-    localrc = MPI_Isend(messageC, size, MPI_BYTE, lpid[dest], tag, mpi_c, 
-      (*ch)->mpireq);
-  }
+      localrc = MPI_Isend(messageC, size, MPI_BYTE, lpid[dest], tag, mpi_c, 
+        (*ch)->mpireq);
 #ifdef VM_MEMLOG_on
-  VM::logMemInfo(std::string("VM::send():2.0"));
+      VM::logMemInfo(std::string("VM::send():2.0"));
 #endif
 #ifndef ESMF_NO_PTHREADS
-    if (mpi_mutex_flag) pthread_mutex_unlock(pth_mutex);
+      if (mpi_mutex_flag) pthread_mutex_unlock(pth_mutex);
 #endif
+    }
     break;
   case VM_COMM_TYPE_PTHREAD:
     // Pthread implementation
@@ -3432,11 +3425,6 @@ int VMK::recv(void *message, int size, int source, int tag, status *status){
 #if (VERBOSITY > 9)
   printf("receiving from: %d, %d\n", source, lpid[source]);
 #endif
-  if (epoch==epochBuffer){
-    std::stringstream msg;
-    msg << "epochBuffer:" << __LINE__ << " blocking recv";
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
-  }
   int localrc=0;
   pipc_mp *pipcmp;
   shared_mp *shmp;
@@ -3631,71 +3619,6 @@ int VMK::recv(void *message, int size, int source, commhandle **ch, int tag){
   printf("receiving from: %d, %d\n", source, lpid[source]);
 #endif
   int localrc=0;
-  if (epoch==epochBuffer){
-    std::stringstream msg;
-    recvBuffer *rm = &(recvMap[source]);
-    msg << "epochBuffer:" << __LINE__ << " non-blocking recv" << 
-    " firstFlag=" << rm->firstFlag <<
-    " size=" << size;
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
-    if (rm->firstFlag){
-      // deal with the first actions here
-      rm->firstFlag = false;  // reset the flag
-      // query the message size with probe
-      std::stringstream msg;
-      msg << "epochBuffer:" << __LINE__ << " ready to probe:"
-      << " src=" << source;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
-      
-      MPI_Status mpistat;
-      MPI_Probe(lpid[source], 987561, mpi_c, &mpistat);
-      
-      int bytecount;
-      MPI_Get_count(&mpistat, MPI_BYTE, &bytecount);
-      
-      rm->streamBuffer.resize(bytecount);
-      rm->buffer = (void *)rm->streamBuffer.data();
-      
-      // post blocking recv
-      msg.str(""); // clear
-      msg << "epochBuffer:" << __LINE__ << " ready to post blocking recv:"
-      << " src=" << source << " size=" << rm->streamBuffer.size()
-      << " streamBuffer=" << (void *)rm->streamBuffer.data();
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
-      
-      MPI_Recv(rm->buffer, bytecount, MPI_BYTE,
-        lpid[source], 987561, mpi_c, MPI_STATUS_IGNORE);
-      
-    }
-    
-    // now service the specific receive call with chunk of data from buffer
-    int *ip = (int *)rm->buffer;
-    int chunkSize = *ip++;
-    int chunkTag = *ip++;
-    char *cp = (char *)ip;
-    
-    msg.str(""); // clear
-    msg << "epochBuffer:" << __LINE__ << " processing recv chunk:"
-    << " buffer=" << rm->buffer
-    << " chunkSize=" << chunkSize << " chunkTag=" << chunkTag;
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
-    
-    if (chunkSize!=size){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-        "chunk size incorrect", ESMC_CONTEXT, &localrc);
-      return localrc;
-    }
-    if (chunkTag!=tag){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-        "chunk tag incorrect", ESMC_CONTEXT, &localrc);
-      return localrc;
-    }
-    
-    memcpy(message, cp, size);
-    
-    rm->buffer = (void *)(cp+chunkSize);  // next chunk in buffer
-    
-  }
   pipc_mp *pipcmp;
   shared_mp *shmp;
   int scpsize, rcpsize;
@@ -3720,36 +3643,95 @@ int VMK::recv(void *message, int size, int source, commhandle **ch, int tag){
   // switch into the appropriate implementation
   switch(comm_type){
   case VM_COMM_TYPE_MPI1:
-    (*ch)->nelements=1;
-    (*ch)->type=1;          // MPI
-    (*ch)->sendFlag=false;  // not a send request
-    (*ch)->mpireq = new MPI_Request[1];
-    // MPI-1 implementation
-    // use mutex to serialize mpi comm calls if mpi thread support requires it
+    if (epoch==epochBuffer){
+      std::stringstream msg;
+      recvBuffer *rm = &(recvMap[source]);
+      msg << "epochBuffer:" << __LINE__ << " non-blocking recv" << 
+      " firstFlag=" << rm->firstFlag <<
+      " size=" << size;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      if (rm->firstFlag){
+        // deal with the first actions here
+        rm->firstFlag = false;  // reset the flag
+        // query the message size with probe
+        std::stringstream msg;
+        msg << "epochBuffer:" << __LINE__ << " ready to probe:"
+        << " src=" << source;
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        
+        MPI_Status mpistat;
+        MPI_Probe(lpid[source], 987561, mpi_c, &mpistat);
+        
+        int bytecount;
+        MPI_Get_count(&mpistat, MPI_BYTE, &bytecount);
+        
+        rm->streamBuffer.resize(bytecount);
+        rm->buffer = (void *)rm->streamBuffer.data();
+        
+        // post blocking recv of the enire epoch buffer
+        msg.str(""); // clear
+        msg << "epochBuffer:" << __LINE__ << " ready to post blocking recv:"
+        << " src=" << source << " size=" << rm->streamBuffer.size()
+        << " streamBuffer=" << (void *)rm->streamBuffer.data();
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        
+        MPI_Recv(rm->buffer, bytecount, MPI_BYTE,
+          lpid[source], 987561, mpi_c, MPI_STATUS_IGNORE);
+      }
+      // now service the specific receive call with chunk of data from buffer
+      int *ip = (int *)rm->buffer;
+      int chunkSize = *ip++;
+      int chunkTag = *ip++;
+      char *cp = (char *)ip;
+      
+      msg.str(""); // clear
+      msg << "epochBuffer:" << __LINE__ << " processing recv chunk:"
+      << " buffer=" << rm->buffer
+      << " chunkSize=" << chunkSize << " chunkTag=" << chunkTag;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      
+      if (chunkSize!=size){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+          "chunk size incorrect", ESMC_CONTEXT, &localrc);
+        return localrc;
+      }
+      if (chunkTag!=tag){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+          "chunk tag incorrect", ESMC_CONTEXT, &localrc);
+        return localrc;
+      }
+      memcpy(message, cp, size);
+      rm->buffer = (void *)(cp+chunkSize);  // next chunk in buffer
+    }else{
+      (*ch)->nelements=1;
+      (*ch)->type=1;          // MPI
+      (*ch)->sendFlag=false;  // not a send request
+      (*ch)->mpireq = new MPI_Request[1];
+      // MPI-1 implementation
+      // use mutex to serialize mpi comm calls if mpi thread support requires it
 #ifndef ESMF_NO_PTHREADS
-    if (mpi_mutex_flag) pthread_mutex_lock(pth_mutex);
+      if (mpi_mutex_flag) pthread_mutex_lock(pth_mutex);
 #endif
 //fprintf(stderr, "MPI_Irecv: ch=%p\n", (*ch)->mpireq);
-    if (tag == -1){
-      tag = 1000*source+mypet;  // default tag to simplify debugging
-      // make sure to stay below max tag
-      int maxTag = getMaxTag();
-      if (maxTag > 0)
-        tag = tag%maxTag;
-      else
-        tag = 0;
-    }else if (tag == VM_ANY_TAG)
-      tag = MPI_ANY_TAG;
-    int mpiSource;
-    if (source == VM_ANY_SRC) mpiSource = MPI_ANY_SOURCE;
-    else mpiSource = lpid[source];
-  if (epoch!=epochBuffer){
-    localrc = MPI_Irecv(message, size, MPI_BYTE, mpiSource, tag, mpi_c,
-      (*ch)->mpireq);
-  }
+      if (tag == -1){
+        tag = 1000*source+mypet;  // default tag to simplify debugging
+        // make sure to stay below max tag
+        int maxTag = getMaxTag();
+        if (maxTag > 0)
+          tag = tag%maxTag;
+        else
+          tag = 0;
+      }else if (tag == VM_ANY_TAG)
+        tag = MPI_ANY_TAG;
+      int mpiSource;
+      if (source == VM_ANY_SRC) mpiSource = MPI_ANY_SOURCE;
+      else mpiSource = lpid[source];
+      localrc = MPI_Irecv(message, size, MPI_BYTE, mpiSource, tag, mpi_c,
+        (*ch)->mpireq);
 #ifndef ESMF_NO_PTHREADS
-    if (mpi_mutex_flag) pthread_mutex_unlock(pth_mutex);
+      if (mpi_mutex_flag) pthread_mutex_unlock(pth_mutex);
 #endif
+    }
     break;
   case VM_COMM_TYPE_PTHREAD:
     // Pthread implementation
