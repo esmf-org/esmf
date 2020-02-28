@@ -66,7 +66,7 @@ void ESMC_InfoGetR4(ESMCI::Info *info, char *key, float &value, int &esmf_rc, fl
   try {
     std::string local_key(key);
     bool recursive = fortran_bool_recursive == 1;
-    value = info->get<float>(local_key, def, index, recursive);
+    value = info->get<float>(local_key, def, index, recursive, nullptr, false);
     esmf_rc = ESMF_SUCCESS;
   }
   ESMF_INFO_CATCH_ISOC
@@ -80,7 +80,7 @@ void ESMC_InfoGetR8(ESMCI::Info *info, char *key, double &value, int &esmf_rc, d
   try {
     std::string local_key(key);
     bool recursive = fortran_bool_recursive == 1;
-    value = info->get<double>(local_key, def, index, recursive);
+    value = info->get<double>(local_key, def, index, recursive, nullptr, false);
     esmf_rc = ESMF_SUCCESS;
   }
   ESMF_INFO_CATCH_ISOC
@@ -94,7 +94,7 @@ void ESMC_InfoGetI4(ESMCI::Info *info, char *key, int &value, int &esmf_rc, int 
   try {
     std::string local_key(key);
     bool recursive = fortran_bool_recursive == 1;
-    value = info->get<int>(local_key, def, index, recursive);
+    value = info->get<int>(local_key, def, index, recursive, nullptr, false);
     esmf_rc = ESMF_SUCCESS;
   }
   ESMF_INFO_CATCH_ISOC
@@ -108,7 +108,7 @@ void ESMC_InfoGetI8(ESMCI::Info *info, char *key, long int &value, int &esmf_rc,
   try {
     std::string local_key(key);
     bool recursive = fortran_bool_recursive == 1;
-    value = info->get<long int>(local_key, def, index, recursive);
+    value = info->get<long int>(local_key, def, index, recursive, nullptr, false);
     esmf_rc = ESMF_SUCCESS;
   }
   ESMF_INFO_CATCH_ISOC
@@ -122,7 +122,7 @@ void ESMC_InfoGetLG(ESMCI::Info *info, char *key, bool &value, int &esmf_rc, boo
   try {
     std::string local_key(key);
     bool recursive = fortran_bool_recursive == 1;
-    value = info->get<bool>(local_key, def, index, recursive);
+    value = info->get<bool>(local_key, def, index, recursive, nullptr, false);
     esmf_rc = ESMF_SUCCESS;
   }
   ESMF_INFO_CATCH_ISOC
@@ -147,14 +147,19 @@ void ESMC_InfoGetArrayR4(ESMCI::Info *info, char *key, float *value, int &count,
       count = (int)ap->size();
       for (int ii=0; ii<count; ii++) {
         try {
-          value[ii] = ap->at(ii);
+          const json &ap_at = ap->at(ii);
+          value[ii] = ap_at;
+          try {
+            ESMCI::handleJSONTypeCheck(local_key, value[ii], ap_at);
+          }
+          ESMF_INFO_CATCH_ERRPASSTHRU
         }
         catch (std::out_of_range &exc) {
           ESMF_INFO_CHECKRC("ESMF_RC_ARG_OUTOFRANGE", ESMF_RC_ARG_OUTOFRANGE, std::string(exc.what()));
         }
       }
     } else {
-      value[0] = info->get<float>(local_key, nullptr, nullptr, recursive);
+      value[0] = info->get<float>(local_key, nullptr, nullptr, recursive, nullptr, false);
     }
     esmf_rc = ESMF_SUCCESS;
   }
@@ -180,14 +185,19 @@ void ESMC_InfoGetArrayR8(ESMCI::Info *info, char *key, double *value, int &count
       count = (int)ap->size();
       for (int ii=0; ii<count; ii++) {
         try {
-          value[ii] = ap->at(ii);
+          const json &ap_at = ap->at(ii);
+          value[ii] = ap_at;
+          try {
+            ESMCI::handleJSONTypeCheck(local_key, value[ii], ap_at);
+          }
+          ESMF_INFO_CATCH_ERRPASSTHRU
         }
         catch (std::out_of_range &exc) {
           ESMF_INFO_CHECKRC("ESMF_RC_ARG_OUTOFRANGE", ESMF_RC_ARG_OUTOFRANGE, std::string(exc.what()));
         }
       }
     } else {
-      value[0] = info->get<double>(local_key, nullptr, nullptr, recursive);
+      value[0] = info->get<double>(local_key, nullptr, nullptr, recursive, nullptr, false);
     }
     esmf_rc = ESMF_SUCCESS;
   }
@@ -213,14 +223,19 @@ void ESMC_InfoGetArrayI4(ESMCI::Info *info, char *key, int *value, int &count, i
       count = (int)ap->size();
       for (int ii=0; ii<count; ii++) {
         try {
-          value[ii] = ap->at(ii);
+          const json &ap_at = ap->at(ii);
+          value[ii] = ap_at;
+          try {
+            ESMCI::handleJSONTypeCheck(local_key, value[ii], ap_at);
+          }
+          ESMF_INFO_CATCH_ERRPASSTHRU
         }
         catch (std::out_of_range &exc) {
           ESMF_INFO_CHECKRC("ESMF_RC_ARG_OUTOFRANGE", ESMF_RC_ARG_OUTOFRANGE, std::string(exc.what()));
         }
       }
     } else {
-      value[0] = info->get<int>(local_key, nullptr, nullptr, recursive);
+      value[0] = info->get<int>(local_key, nullptr, nullptr, recursive, nullptr, false);
     }
     esmf_rc = ESMF_SUCCESS;
   }
@@ -246,14 +261,19 @@ void ESMC_InfoGetArrayI8(ESMCI::Info *info, char *key, long int *value, int &cou
       count = (int)ap->size();
       for (int ii=0; ii<count; ii++) {
         try {
-          value[ii] = ap->at(ii);
+          const json &ap_at = ap->at(ii);
+          value[ii] = ap_at;
+          try {
+            ESMCI::handleJSONTypeCheck(local_key, value[ii], ap_at);
+          }
+          ESMF_INFO_CATCH_ERRPASSTHRU
         }
         catch (std::out_of_range &exc) {
           ESMF_INFO_CHECKRC("ESMF_RC_ARG_OUTOFRANGE", ESMF_RC_ARG_OUTOFRANGE, std::string(exc.what()));
         }
       }
     } else {
-      value[0] = info->get<long int>(local_key, nullptr, nullptr, recursive);
+      value[0] = info->get<long int>(local_key, nullptr, nullptr, recursive, nullptr, false);
     }
     esmf_rc = ESMF_SUCCESS;
   }
@@ -279,14 +299,19 @@ void ESMC_InfoGetArrayLG(ESMCI::Info *info, char *key, bool *value, int &count, 
       count = (int)ap->size();
       for (int ii=0; ii<count; ii++) {
         try {
-          value[ii] = ap->at(ii);
+          const json &ap_at = ap->at(ii);
+          value[ii] = ap_at;
+          try {
+            ESMCI::handleJSONTypeCheck(local_key, value[ii], ap_at);
+          }
+          ESMF_INFO_CATCH_ERRPASSTHRU
         }
         catch (std::out_of_range &exc) {
           ESMF_INFO_CHECKRC("ESMF_RC_ARG_OUTOFRANGE", ESMF_RC_ARG_OUTOFRANGE, std::string(exc.what()));
         }
       }
     } else {
-      value[0] = info->get<bool>(local_key, nullptr, nullptr, recursive);
+      value[0] = info->get<bool>(local_key, nullptr, nullptr, recursive, nullptr, false);
     }
     esmf_rc = ESMF_SUCCESS;
   }

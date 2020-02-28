@@ -61,7 +61,7 @@ void {{ method_name }}(ESMCI::Info *info, char *key, {{ t.ctype }} {% if is_scal
     std::string local_key(key);
     bool recursive = fortran_bool_recursive == 1;
 {% if is_scalar %}
-    value = info->get<{{ t.ctype }}>(local_key, def, index, recursive);
+    value = info->get<{{ t.ctype }}>(local_key, def, index, recursive, nullptr, false);
 {% else %}
     bool scalar_to_array = fortran_bool_scalarToArray == 1;
     const json *j = info->getPointer(local_key, recursive);
@@ -74,14 +74,19 @@ void {{ method_name }}(ESMCI::Info *info, char *key, {{ t.ctype }} {% if is_scal
       count = (int)ap->size();
       for (int ii=0; ii<count; ii++) {
         try {
-          value[ii] = ap->at(ii);
+          const json &ap_at = ap->at(ii);
+          value[ii] = ap_at;
+          try {
+            ESMCI::handleJSONTypeCheck(local_key, value[ii], ap_at);
+          }
+          ESMF_INFO_CATCH_ERRPASSTHRU
         }
         catch (std::out_of_range &exc) {
           ESMF_INFO_CHECKRC("ESMF_RC_ARG_OUTOFRANGE", ESMF_RC_ARG_OUTOFRANGE, std::string(exc.what()));
         }
       }
     } else {
-      value[0] = info->get<{{ t.ctype }}>(local_key, nullptr, nullptr, recursive);
+      value[0] = info->get<{{ t.ctype }}>(local_key, nullptr, nullptr, recursive, nullptr, false);
     }
 {% endif %}
     esmf_rc = ESMF_SUCCESS;

@@ -61,10 +61,12 @@ program ESMF_InfoUTest
 
   integer(ESMF_KIND_I4) :: value, actual, actual2, actual3, arr_i4_get_count, &
                            actual4, ir4=0, implicit_i4
+  integer(ESMF_KIND_I4), dimension(1) :: implicit_i4_list
   integer(ESMF_KIND_I8) :: desired_i8, value_i8
   real :: actual_rw_val, desired_rw_val
   real(ESMF_KIND_R4) :: desired_r4, value_r4
   real(ESMF_KIND_R8) :: desired_r8, value_r8
+  real(ESMF_KIND_R8), dimension(3) :: values_r8
   integer(ESMF_KIND_I4), dimension(3) :: arr_i4
   integer(ESMF_KIND_I4), dimension(:), allocatable :: arr_i4_get
   type(ESMF_Info) :: info, info2, info3, info4, info5, info6, &
@@ -467,6 +469,16 @@ program ESMF_InfoUTest
   deallocate(arr_i4_get)
 
   call ESMF_Test((.not. failed), name, failMsg, result, ESMF_SRCLINE)
+  !----------------------------------------------------------------------------
+
+  !----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "ESMF_Info Implicit Conversion w/ Array"
+  write(failMsg, *) "Did not throw proper error"
+  failed = .false.
+
+  call ESMF_InfoGet(info9, "the-key", values_r8, rc=rc)
+  call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   call ESMF_InfoDestroy(info9, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -858,9 +870,28 @@ program ESMF_InfoUTest
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_InfoGet(info_implicit, "float", implicit_i4, rc=rc)
+  call ESMF_Test(rc/=ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+  call ESMF_InfoDestroy(info_implicit, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !----------------------------------------------------------------------------
+
+  !----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "ESMF_Info Implicit Conversion w/ Scalar to List"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  rc = ESMF_FAILURE
+  failed = .false.
+
+  info_implicit = ESMF_InfoCreate(rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_Test(implicit_i4==33, name, failMsg, result, ESMF_SRCLINE)
+  call ESMF_InfoSet(info_implicit, "float", 33.33, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_InfoGet(info_implicit, "float", implicit_i4_list, scalarToArray=.true., &
+    rc=rc)
+  call ESMF_Test(rc/=ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
   call ESMF_InfoDestroy(info_implicit, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)

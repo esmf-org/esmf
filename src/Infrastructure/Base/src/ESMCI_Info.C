@@ -353,8 +353,14 @@ bool handleHasKey(const Info &info, const json::json_pointer &jpkey, bool force)
 #define ESMC_METHOD "handleJSONTypeCheck()"
 void handleJSONTypeCheck(key_t &key, const json &src, const json &dst) {
   if (!src.is_null() && src.type() != dst.type()) {
-    std::string errmsg = "Types not equivalent. The key is: " + key;
-    ESMF_INFO_CHECKRC("ESMC_RC_ARG_BAD", ESMC_RC_ARG_BAD, errmsg);
+    // Allowed unsigned to integer conversion and vice-versa.
+    if (!((src.type() == json::value_t::number_integer ||
+         src.type() == json::value_t::number_unsigned) &&
+        (dst.type() == json::value_t::number_integer ||
+         dst.type() == json::value_t::number_unsigned))) {
+      std::string errmsg = "Types not equivalent. The key is: " + key;
+      ESMF_INFO_CHECKRC("ESMC_RC_ARG_BAD", ESMC_RC_ARG_BAD, errmsg);
+    }
   }
 }
 
@@ -617,10 +623,19 @@ json::json_pointer Info::formatKey(key_t& key) {
   }
 };
 
+#define HANDLE_JSON_TYPE_CHECK(dst) \
+  if (!allow_implicit) { \
+    try { \
+      T archetype; \
+      handleJSONTypeCheck(key, json(archetype), dst); \
+    } \
+    ESMF_INFO_CATCH_ERRPASSTHRU}
+
 #undef  ESMC_METHOD
 #define ESMC_METHOD "Info::get()"
 template <typename T>
-T Info::get(key_t &key, const T *def, const int *index, bool recursive, std::string *ikey) const {
+T Info::get(key_t &key, const T *def, const int *index, bool recursive, std::string *ikey,
+  bool allow_implicit) const {
   // Exceptions:  ESMCI:esmf_info_error
 
 #if 0
@@ -646,7 +661,9 @@ T Info::get(key_t &key, const T *def, const int *index, bool recursive, std::str
         if (jp->is_array()) {
           json::array_t const *jarr = jp->get_ptr < json::array_t const * > ();
           try {
-            ret = jarr->at(*index);
+            const json &at_index = jarr->at(*index);
+            ret = at_index;
+            HANDLE_JSON_TYPE_CHECK(at_index)
           }
           catch (std::out_of_range &e) {
             ESMF_INFO_CHECKRC("ESMC_RC_ARG_OUTOFRANGE", ESMC_RC_ARG_OUTOFRANGE, e.what())
@@ -686,8 +703,8 @@ T Info::get(key_t &key, const T *def, const int *index, bool recursive, std::str
         } else {
           try {
             ret = *jp;
+            HANDLE_JSON_TYPE_CHECK(*jp)
           } catch (json::type_error &e) {
-
 #if 0
             std::string emsg2 = std::string(__FILE__) + ":" + std::to_string(__LINE__) + " " + ESMC_METHOD + ": JSON dump: " + this->dump();
             ESMC_LogWrite(emsg2.c_str(), ESMC_LOGMSG_ERROR);
@@ -711,13 +728,13 @@ T Info::get(key_t &key, const T *def, const int *index, bool recursive, std::str
   ESMF_CATCH_INFO
   return ret;
 }
-template float Info::get(key_t&, const float*, const int*, bool, std::string*) const;
-template double Info::get(key_t&, const double*, const int*, bool, std::string*) const;
-template int Info::get(key_t&, const int*, const int*, bool, std::string*) const;
-template long int Info::get(key_t&, const long int*, const int*, bool, std::string*) const;
-template bool Info::get(key_t&, const bool*, const int*, bool, std::string*) const;
-template std::string Info::get(key_t&, const std::string*, const int*, bool, std::string*) const;
-template json Info::get(key_t&, const json*, const int*, bool, std::string*) const;
+template float Info::get(key_t&, const float*, const int*, bool, std::string*, bool) const;
+template double Info::get(key_t&, const double*, const int*, bool, std::string*, bool) const;
+template int Info::get(key_t&, const int*, const int*, bool, std::string*, bool) const;
+template long int Info::get(key_t&, const long int*, const int*, bool, std::string*, bool) const;
+template bool Info::get(key_t&, const bool*, const int*, bool, std::string*, bool) const;
+template std::string Info::get(key_t&, const std::string*, const int*, bool, std::string*, bool) const;
+template json Info::get(key_t&, const json*, const int*, bool, std::string*, bool) const;
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "Info::get() Info"

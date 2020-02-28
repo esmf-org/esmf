@@ -1101,6 +1101,42 @@ void test_find_by_index(int& rc, char failMsg[]) {
   rc = ESMF_SUCCESS;
 };
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "test_implicit_conversion()"
+void test_implicit_conversion(int& rc, char failMsg[]) {
+  rc = ESMF_FAILURE;
+
+  ESMCI::Info info;
+
+  // Test float to integer.
+  try {
+    info.set("float", 33.3, false);
+    int an_int = info.get<int>("float", nullptr, nullptr, false, nullptr, false);
+    return finalizeFailure(rc, failMsg, "did not catch implicit conversion");
+  }
+  catch (esmf_info_error &exc) {
+    if (exc.getReturnCode() != ESMC_RC_ARG_BAD) {
+      return finalizeFailure(rc, failMsg, "wrong rc");
+    }
+  }
+
+  // Test float to integer with an array.
+  try {
+    double values[3] = {1, 2, 3};
+    info.set("float-array", values, 3, false);
+    int index = 1;
+    int an_int = info.get<int>("float-array", nullptr, &index, false, nullptr, false);
+    return finalizeFailure(rc, failMsg, "did not catch implicit conversion for array");
+  }
+  catch (esmf_info_error &exc) {
+    if (exc.getReturnCode() != ESMC_RC_ARG_BAD) {
+      return finalizeFailure(rc, failMsg, "wrong rc");
+    }
+  }
+
+  rc = ESMF_SUCCESS;
+};
+
 int main(void) {
 
   char name[80];
@@ -1251,6 +1287,13 @@ int main(void) {
   //NEX_UTest
   strcpy(name, "Info test_find_by_index");
   test_find_by_index(rc, failMsg);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //---------------------------------------------------------------------------
+
+  //---------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Info test_implicit_conversion");
+  test_implicit_conversion(rc, failMsg);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //---------------------------------------------------------------------------
 

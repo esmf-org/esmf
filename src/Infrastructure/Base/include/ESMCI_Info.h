@@ -136,6 +136,7 @@ bool isIn(key_t& target, const std::vector<std::string>& container);
 bool isIn(const std::vector<std::string>& target, const std::vector<std::string>& container);
 bool isIn(key_t& target, const json& j);
 ESMC_TypeKind_Flag json_type_to_esmf_typekind(const json &j, const bool allow_array) noexcept;
+void handleJSONTypeCheck(key_t &key, const json &src, const json &dst);
 
 //-----------------------------------------------------------------------------
 
@@ -170,7 +171,8 @@ public:
 
   //---------------------------------------------------------------------------
   template <typename T>
-  T get(key_t &key, const T *def = nullptr, const int *index = nullptr, bool recursive = false, std::string *ikey = nullptr) const;
+  T get(key_t &key, const T *def = nullptr, const int *index = nullptr, bool recursive = false,
+    std::string *ikey = nullptr, bool allow_implicit = true) const;
 
   void get(ESMCI::Info &info, key_t &key) const;
   //---------------------------------------------------------------------------
