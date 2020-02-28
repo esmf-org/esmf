@@ -136,7 +136,7 @@
 
   type(ESMF_GridConn_Flag), parameter :: &
     ESMF_GRIDCONN_NONE = ESMF_GridConn_Flag(0), &
-     ESMF_GRIDCONN_PERIODIC = ESMF_GridConn_Flag(1), &
+    ESMF_GRIDCONN_PERIODIC = ESMF_GridConn_Flag(1), &
     ESMF_GRIDCONN_POLE = ESMF_GridConn_Flag(2), &
     ESMF_GRIDCONN_BIPOLE = ESMF_GridConn_Flag(3)
 
@@ -5927,7 +5927,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      specifies the connection that occurs at the minimum end of the pole dimension. The value in polekindflag(2)
 !      specifies the connection that occurs at the maximum end of the pole dimension. Please see
 !      Section~\ref{const:polekind} for a full list of options. If not specified,
-!      the default is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.
+!      the default is {\tt ESMF\_POLEKIND\_MONOPOLE} for both.
 ! \item[{[addCornerStagger]}]
 !      Uses the information in the grid file to add the Corner stagger to
 !      the Grid. The coordinates for the corner stagger is required for conservative
@@ -6245,7 +6245,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      specifies the connection that occurs at the minimum end of the pole dimension. The value in polekindflag(2)
 !      specifies the connection that occurs at the maximum end of the pole dimension. Please see
 !      Section~\ref{const:polekind} for a full list of options. If not specified,
-!      the default is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.
+!      the default is {\tt ESMF\_POLEKIND\_MONOPOLE} for both.
 ! \item[{[addCornerStagger]}]
 !      Uses the information in the grid file to add the Corner stagger to
 !      the Grid. The coordinates for the corner stagger is required for conservative
@@ -6520,7 +6520,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      specifies the connection that occurs at the minimum end of the pole dimension. The value in polekindflag(2)
 !      specifies the connection that occurs at the maximum end of the pole dimension. Please see
 !      Section~\ref{const:polekind} for a full list of options. If not specified,
-!      the default is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.
+!      the default is {\tt ESMF\_POLEKIND\_MONOPOLE} for both.
 ! \item[{[addCornerStagger]}]
 !      Uses the information in the SCRIP file to add the Corner stagger to
 !      the Grid. If not specified, defaults to false.
@@ -6652,6 +6652,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         return
     endif
 
+#if DEBUG_POLEKIND
+    if(present(polekindflag)) then
+      print *, "ESMF_GridCreateFrmScrip", polekindflag(1), polekindflag(2), localIsSphere
+    endif
+#endif    
     ! Create Grid based on the input distgrid
     if (localIsSphere) then
        grid=ESMF_GridCreate1PeriDim(minIndex=(/1,1/), maxIndex=dims, &
@@ -7048,7 +7053,7 @@ end function ESMF_GridCreateFrmScrip
 !      specifies the connection that occurs at the minimum end of the pole dimension. The value in polekindflag(2)
 !      specifies the connection that occurs at the maximum end of the pole dimension. Please see
 !      Section~\ref{const:polekind} for a full list of options. If not specified,
-!      the default is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.
+!      the default is {\tt ESMF\_POLEKIND\_MONOPOLE} for both.
 ! \item[{[addCornerStagger]}]
 !      Uses the information in the GridSpec file to add the Corner stagger to
 !      the Grid. If not specified, defaults to true (since GridSpec defaults to
@@ -8805,7 +8810,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      specifies the connection that occurs at the minimum end of the pole dimension. The value in polekindflag(2)
 !      specifies the connection that occurs at the maximum end of the pole dimension. Please see
 !      Section~\ref{const:polekind} for a full list of options. If not specified,
-!      the default is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.
+!      the default is {\tt ESMF\_POLEKIND\_MONOPOLE} for both.
 ! \item[{[periodicDim]}]
 !      The periodic dimension. If not specified, defaults to 1.
 ! \item[{[poleDim]}]
@@ -9086,7 +9091,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      specifies the connection that occurs at the minimum end of the pole dimension. The value in polekindflag(2)
 !      specifies the connection that occurs at the maximum end of the pole dimension. Please see
 !      Section~\ref{const:polekind} for a full list of options. If not specified,
-!      the default is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.
+!      the default is {\tt ESMF\_POLEKIND\_MONOPOLE} for both.
 ! \item[{[periodicDim]}]
 !      The periodic dimension. If not specified, defaults to 1.
 ! \item[{[poleDim]}]
@@ -9182,6 +9187,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+#if DEBUG_POLEKIND
+    if(present(polekindflag)) then
+      print *, "GridCreate1PeriDim", polekindflag(1), polekindflag(2)
+    endif
+#endif
+    
     ! Get IndexSpace
     call GetIndexSpaceReg(minIndex, maxIndex, &
           dimCount, minIndexLocal, maxIndexLocal,  rc=localrc)
@@ -9356,7 +9367,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      specifies the connection that occurs at the minimum end of the pole dimension. The value in polekindflag(2)
 !      specifies the connection that occurs at the maximum end of the pole dimension. Please see
 !      Section~\ref{const:polekind} for a full list of options. If not specified,
-!      the default is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.
+!      the default is {\tt ESMF\_POLEKIND\_MONOPOLE} for both.
 ! \item[{[periodicDim]}]
 !      The periodic dimension. If not specified, defaults to 1.
 ! \item[{[poleDim]}]
@@ -11231,7 +11242,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      specifies the connection that occurs at the minimum end of the pole dimension. The value in polekindflag(2)
 !      specifies the connection that occurs at the maximum end of the pole dimension. Please see
 !      Section~\ref{const:polekind} for a full list of options. If not specified,
-!      the default is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.
+!      the default is {\tt ESMF\_POLEKIND\_MONOPOLE} for both.
 ! \item[{[coordSys]}]
 !     The coordinate system of the grid coordinate data.
 !     For a full list of options, please see Section~\ref{const:coordsys}.
@@ -11487,7 +11498,7 @@ msg=" coords in periodic dim (i.e. 1) are not periodic "// &
 !      specifies the connection that occurs at the minimum end of the pole dimension. The value in polekindflag(2)
 !      specifies the connection that occurs at the maximum end of the pole dimension. Please see
 !      Section~\ref{const:polekind} for a full list of options. If not specified,
-!      the default is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.
+!      the default is {\tt ESMF\_POLEKIND\_MONOPOLE} for both.
 ! \item[{[coordSys]}]
 !     The coordinate system of the grid coordinate data.
 !     For a full list of options, please see Section~\ref{const:coordsys}.
@@ -30033,7 +30044,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer :: widthIndex(ESMF_MAXDIM)
        integer :: localrc
 
-
+#if DEBUG_POLEKIND
+    if(present(polekindflag)) then
+      print *, "Setup1PeriodicConn", polekindflag(1), polekindflag(2)
+    endif
+#endif
+    
        ! Error check input
        if (present(periodicDim)) then
           if (periodicDim .gt. dimCount) then
@@ -30142,7 +30158,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! Lower end
       if (polekindflaglocal(1) .eq. ESMF_POLEKIND_MONOPOLE) then
-         ! do pole connection
+
+         ! setup monopole connection
          posVec=0
          posVec(periodicDimLocal)=widthIndex(periodicDimLocal)/2
          posVec(poleDimLocal)=1
@@ -30154,7 +30171,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               rc=localrc)
          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
+
+         ! Advance postion in list
+         connListPos=connListPos+1
+
       else if (polekindflaglocal(1) .eq. ESMF_POLEKIND_BIPOLE) then
+
+         ! setup bipole connection
          posVec=0
          posVec(periodicDimLocal)=widthIndex(periodicDimLocal)+1
          posVec(poleDimLocal)=1
@@ -30167,8 +30190,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               rc=localrc)
          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
+
+         ! Advance postion in list
+         connListPos=connListPos+1
       endif
-      connListPos=connListPos+1
+
 
      ! Reinit orient vec
      do i=1,ESMF_MAXDIM
@@ -30177,6 +30203,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! Upper end
       if (polekindflaglocal(2) .eq. ESMF_POLEKIND_MONOPOLE) then
+
+         ! setup monopole connection
          posVec=0
          posVec(periodicDimLocal)=widthIndex(periodicDimLocal)/2
          posVec(poleDimLocal)=2*widthIndex(poleDimLocal)+1
@@ -30189,6 +30217,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
       else if (polekindflaglocal(2) .eq. ESMF_POLEKIND_BIPOLE) then
+
+         ! setup bipole connection
          posVec=0
          posVec(periodicDimLocal)=widthIndex(periodicDimLocal)+1
          posVec(poleDimLocal)=2*widthIndex(poleDimLocal)+1

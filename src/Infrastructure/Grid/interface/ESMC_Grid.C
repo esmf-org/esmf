@@ -94,10 +94,10 @@ ESMC_Grid ESMC_GridCreateNoPeriDim(ESMC_InterArrayInt *maxIndex,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_GridCreate1PeriDim()"
 ESMC_Grid ESMC_GridCreate1PeriDim(ESMC_InterArrayInt *maxIndex,
+                                  ESMC_InterArrayInt *polekindflag,
                                   int *periodicDim, int *poleDim,
                                   enum ESMC_CoordSys_Flag *coordSys,
                                   enum ESMC_TypeKind_Flag *coordTypeKind, 
-                                  enum ESMC_PoleKind_Flag *poleKind,
                                   enum ESMC_IndexFlag *indexflag,
                                   int *rc){
   int localrc = ESMC_RC_NOT_IMPL;
@@ -108,11 +108,11 @@ ESMC_Grid ESMC_GridCreate1PeriDim(ESMC_InterArrayInt *maxIndex,
   grid.ptr = NULL;
   
   grid.ptr = reinterpret_cast<void *>(ESMCI::Grid::create1peridim(maxIndex,
-                                                                  periodicDim, 
+                                                                  polekindflag, 
+                                                                  periodicDim,
                                                                   poleDim,
                                                                   coordSys, 
                                                                   coordTypeKind, 
-                                                                  poleKind, 
                                                                   indexflag,
                                                                   &localrc));
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -160,7 +160,8 @@ ESMC_Grid ESMC_GridCreateCubedSphere(int *tilesize,
 #define ESMC_METHOD "ESMC_GridCreateFromFile()"
 ESMC_Grid ESMC_GridCreateFromFile(const char *filename, int fileTypeFlag, 
                   int *regDecomp, int *decompflag,
-                  int *isSphere, int *addCornerStagger,
+                  int *isSphere, ESMC_InterArrayInt *polekindflag,
+                  int *addCornerStagger,
                   int *addUserArea, enum ESMC_IndexFlag *indexflag, int *addMask,
                   const char *varname, const char **coordNames,
                   int *rc) {
@@ -174,8 +175,8 @@ ESMC_Grid ESMC_GridCreateFromFile(const char *filename, int fileTypeFlag,
 
   grid.ptr = reinterpret_cast<void *>
     (ESMCI::Grid::createfromfile(filename, fileTypeFlag, regDecomp, decompflag,
-                 isSphere, addCornerStagger, addUserArea, indexflag,
-                 addMask, varname, coordNames, &localrc));
+                 isSphere, polekindflag, addCornerStagger, addUserArea, 
+                 indexflag, addMask, varname, coordNames, &localrc));
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return grid; // bail out
   

@@ -295,6 +295,26 @@ class NormType(IntEnum):
     cell that overlaps with the entire source mesh.
     """
 
+# PoleKind
+class PoleKind(IntEnum):
+    """
+    This type describes the type of connection that occurs at the pole of a  
+    :class:`~ESMF.api.grid.Grid`.
+    """
+    NONE = 0
+    """
+    No connection at pole.
+    """
+    MONOPOLE = 1
+    """
+    This edge is connected to itself. Given that the edge is n elements long, 
+    then element i is connected to element i+n/2.
+    """
+    BIPOLE = 2
+    """
+    This edge is connected to itself. Given that the edge is n elements long, element i is connected to element n-i-1.
+    """
+
 # PoleMethod
 class PoleMethod(IntEnum):
     """
