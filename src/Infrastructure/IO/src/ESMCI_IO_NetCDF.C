@@ -879,8 +879,8 @@ void IO_NetCDF::destruct(void) {
          delete[] att_str;
          try {
            info->set(sattname, attValString, true);
-         } catch (ESMCI::esmf_info_error &exc_info) {
-           ESMC_LogDefault.MsgFoundError(exc_info.getReturnCode(), exc_info.what(), ESMC_CONTEXT, rc);
+         } catch (ESMCI::esmc_error &exc) {
+           ESMC_LogDefault.MsgFoundError(exc.getReturnCode(), exc.what(), ESMC_CONTEXT, rc);
            return thisArray;
          }
          //printf("(ncChar)\n");
@@ -901,8 +901,8 @@ void IO_NetCDF::destruct(void) {
          delete[] att_int;
          try {
            info->set(sattname, attValInt, true);
-         } catch (ESMCI::esmf_info_error &exc_info) {
-           ESMC_LogDefault.MsgFoundError(exc_info.getReturnCode(), exc_info.what(), ESMC_CONTEXT, rc);
+         } catch (ESMCI::esmc_error &exc) {
+           ESMC_LogDefault.MsgFoundError(exc.getReturnCode(), exc.what(), ESMC_CONTEXT, rc);
            return thisArray;
          }
          //printf("(ncInt)\n");
@@ -922,8 +922,8 @@ void IO_NetCDF::destruct(void) {
          delete[] att_float;
          try {
            info->set(sattname, attValFloat, true);
-         } catch (ESMCI::esmf_info_error &exc_info) {
-           ESMC_LogDefault.MsgFoundError(exc_info.getReturnCode(), exc_info.what(), ESMC_CONTEXT, rc);
+         } catch (ESMCI::esmc_error &exc) {
+           ESMC_LogDefault.MsgFoundError(exc.getReturnCode(), exc.what(), ESMC_CONTEXT, rc);
            return thisArray;
          }
          //printf("(ncFloat)\n");
@@ -943,8 +943,8 @@ void IO_NetCDF::destruct(void) {
          delete[] att_double;
          try {
            info->set(sattname, attValDouble, true);
-         } catch (ESMCI::esmf_info_error &exc_info) {
-           ESMC_LogDefault.MsgFoundError(exc_info.getReturnCode(), exc_info.what(), ESMC_CONTEXT, rc);
+         } catch (ESMCI::esmc_error &exc) {
+           ESMC_LogDefault.MsgFoundError(exc.getReturnCode(), exc.what(), ESMC_CONTEXT, rc);
            return thisArray;
          }
          //printf("(ncDouble)\n");

@@ -46,6 +46,24 @@
 static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
 
+namespace ESMCI {
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "esmc_error::esmc_error()"
+esmc_error::esmc_error (const std::string &code_name, int esmc_rc, const std::string &msg) {
+  assert(esmc_rc != ESMF_SUCCESS);
+  std::string the_msg;
+  if (code_name != "") {
+    the_msg = "Error/Return Code " + std::to_string(esmc_rc) + " (" + \
+                     code_name + ") - " + msg;
+  } else {
+    the_msg = "Error/Return Code " + std::to_string(esmc_rc) + " - " + msg;
+  }
+  this->msg = the_msg;
+  this->esmc_rc = esmc_rc;
+}
+} // namespace
+
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //
@@ -688,7 +706,7 @@ void ESMC_Base::constructInfo(ESMC_Base& base) {
     if (attreconflag == ESMC_ATTRECONCILE_ON) {
       try {
         info->deserialize(buffer, offset);
-      } catch (ESMCI::esmf_info_error &e) {
+      } catch (ESMCI::esmc_error &e) {
         ESMC_LogDefault.MsgFoundError(e.getReturnCode(), e.what(), ESMC_CONTEXT, &localrc);
         return localrc;
       }
@@ -986,7 +1004,7 @@ void ESMC_Base::constructInfo(ESMC_Base& base) {
     if (attreconflag == ESMC_ATTRECONCILE_ON) {
       try {
         info->serialize(buffer, length, offset, inquireflag);
-      } catch (ESMCI::esmf_info_error &e) {
+      } catch (ESMCI::esmc_error &e) {
         ESMC_LogDefault.MsgFoundError(e.getReturnCode(), ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         return localrc;
       }

@@ -1409,8 +1409,8 @@ namespace ESMCI {
           bool has_nest;
           try {
             has_nest = info->hasKey(nest, true);
-          } catch (ESMCI::esmf_info_error &exc_info) {
-            if (ESMC_LogDefault.MsgFoundError(exc_info.getReturnCode(), ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
+          } catch (ESMCI::esmc_error &exc) {
+            if (ESMC_LogDefault.MsgFoundError(exc.getReturnCode(), ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
           }
           if (has_nest) {
             std::map<string, vector<string>*> attrs;
@@ -1424,14 +1424,14 @@ namespace ESMCI {
                 bool has_key;
                 try {
                   has_key = info->hasKey(key, true);
-                } catch (ESMCI::esmf_info_error &exc_info) {
-                  if (ESMC_LogDefault.MsgFoundError(exc_info.getReturnCode(), ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
+                } catch (ESMCI::esmc_error &exc) {
+                  if (ESMC_LogDefault.MsgFoundError(exc.getReturnCode(), ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
                 }
                 if (has_key) {
                   try {
                     *(element.second) = info->getvec<std::string>(key, true);
-                  } catch (ESMCI::esmf_info_error &exc_info) {
-                    if (ESMC_LogDefault.MsgFoundError(exc_info.getReturnCode(), ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
+                  } catch (ESMCI::esmc_error &exc) {
+                    if (ESMC_LogDefault.MsgFoundError(exc.getReturnCode(), ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
                   }
                 }
               }

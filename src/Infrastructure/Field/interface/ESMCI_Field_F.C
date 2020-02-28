@@ -100,8 +100,8 @@ extern "C" {
           dimAttPack = new ESMCI::Info();
           grid_p->ESMC_BaseGetInfo()->get(*dimAttPack, key);
         }
-      } catch (ESMCI::esmf_info_error &exc_info) {
-        ESMC_LogDefault.MsgFoundError(exc_info.getReturnCode(), exc_info.what(), ESMC_CONTEXT, rc);
+      } catch (ESMCI::esmc_error &exc) {
+        ESMC_LogDefault.MsgFoundError(exc.getReturnCode(), exc.what(), ESMC_CONTEXT, rc);
         return;
       }
     }
@@ -115,8 +115,8 @@ extern "C" {
           varAttPack = new ESMCI::Info();
           base_p->ESMC_BaseGetInfo()->get(*varAttPack, key);
         }
-      } catch (ESMCI::esmf_info_error &exc_info) {
-        ESMC_LogDefault.MsgFoundError(exc_info.getReturnCode(), exc_info.what(), ESMC_CONTEXT, rc);
+      } catch (ESMCI::esmc_error &exc) {
+        ESMC_LogDefault.MsgFoundError(exc.getReturnCode(), exc.what(), ESMC_CONTEXT, rc);
         return;
       }
     }
@@ -131,8 +131,8 @@ extern "C" {
             gblAttPack = new ESMCI::Info();
             gblbase_p->ESMC_BaseGetInfo()->get(*gblAttPack, key);
           }
-        } catch (ESMCI::esmf_info_error &exc_info) {
-          ESMC_LogDefault.MsgFoundError(exc_info.getReturnCode(), exc_info.what(), ESMC_CONTEXT, rc);
+        } catch (ESMCI::esmc_error &exc) {
+          ESMC_LogDefault.MsgFoundError(exc.getReturnCode(), exc.what(), ESMC_CONTEXT, rc);
           return;
         }
       }
