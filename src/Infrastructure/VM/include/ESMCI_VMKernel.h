@@ -17,11 +17,15 @@
 #define MPICH_IGNORE_CXX_SEEK
 #endif
 
+#define USE_STRSTREAM
+
 #include <mpi.h>
 #include <vector>
 #include <string>
 #include <sstream>
+#ifdef USE_STRSTREAM
 #include <strstream>
+#endif
 #include <map>
 
 #ifdef VMK_STANDALONE
@@ -106,9 +110,11 @@ namespace ESMCI {
 template<typename T> void append(std::stringstream &streami, T value){
   streami.write((char*)&value, sizeof(T));
 }
+#ifdef USE_STRSTREAM
 template<typename T> void append(std::strstream &streami, T value){
   streami.write((char*)&value, sizeof(T));
 }
+#endif
 //-----------------------------------------------------------------------------
 
 
@@ -200,12 +206,12 @@ class VMK{
   };
   
   struct sendBuffer{
-#ifdef STRSTREAM
+#ifdef USE_STRSTREAM
     std::strstream stream;
 #else
     std::stringstream stream;
-#endif
     std::string streamBuffer;
+#endif
     MPI_Request mpireq;
     bool firstFlag;
    public:
