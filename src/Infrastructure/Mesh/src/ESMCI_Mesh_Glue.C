@@ -55,6 +55,11 @@ using namespace ESMCI;
 
 // #define DEBUG_OWNED
 
+
+extern "C" void FTN_X(f_esmf_getmeshdistgrid)(int*, int*, int*, int*);
+
+
+
 void ESMCI_meshcreate(Mesh **meshpp,
                       int *pdim, int *sdim,
                       ESMC_CoordSys_Flag *coordSys, int *rc)
@@ -1776,8 +1781,6 @@ void ESMCI_meshfreememory(Mesh **meshpp, int *rc) {
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
 }
-
-extern "C" void FTN_X(f_esmf_getmeshdistgrid)(int*, int*, int*, int*);
 
 
 /**
