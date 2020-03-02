@@ -175,7 +175,6 @@ private
 
 public operator(==)
 public operator(/=)
-!tdk:todo: change BaseGet name to BaseGetHandle and PointerGetHandle
 public ESMF_Info
 public ESMF_InfoCreate
 public ESMF_InfoDestroy
@@ -184,8 +183,8 @@ public ESMF_InfoGetCharAlloc
 public ESMF_InfoGetAlloc
 public ESMF_InfoSet
 public ESMF_InfoRemove
-public ESMF_InfoBaseGet
-public ESMF_InfoPointerGet
+public ESMF_InfoBaseGetHandle
+public ESMF_InfoPointerGetHandle
 public ESMF_InfoCopy
 public ESMF_InfoSetNULL
 public ESMF_InfoSetDirty
@@ -2371,7 +2370,6 @@ end subroutine ESMF_InfoGetLG
 ! GetArray --------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
-!tdk:rename: scalarToArray to scalarToList
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoGetArrayR4()"
 !BOPI
@@ -3624,7 +3622,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 end subroutine ESMF_InfoGetArrayLGAlloc
 !------------------------------------------------------------------------------
 
-!tdk:todo: check if isPresent is true without a key
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoInquire()"
 !BOP
@@ -3697,8 +3694,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       Useful when iterating using an index. Does not return the JSON Pointer
 !       location.
 !     \item [{[isPresent]}]
-!       Returns true if the \textit{key} exists in storage. If no
-!       \textit{key} is provided, this will return true.
+!       Returns true if the \textit{key} exists in storage. If no \textit{key}
+!       is provided, this will return true.
 !     \item [{[isStructured]}]
 !       Returns true if the JSON target is structured \cite{json_for_modern_cpp_is_structured}.
 !     \item [{[isNull]}]
@@ -3881,12 +3878,12 @@ end subroutine ESMF_InfoInquire
 ! =============================================================================
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoBaseGet()"
+#define ESMF_METHOD "ESMF_InfoBaseGetHandle()"
 !BOPI
-! !IROUTINE: ESMF_InfoBaseGet
+! !IROUTINE: ESMF_InfoBaseGetHandle
 !
 ! !INTERFACE:
-function ESMF_InfoBaseGet(base) result(info)
+function ESMF_InfoBaseGetHandle(base) result(info)
 ! !ARGUMENTS:
   type(ESMF_Base), intent(in) :: base
 ! !RETURN VALUE:
@@ -3903,17 +3900,17 @@ function ESMF_InfoBaseGet(base) result(info)
 !EOPI
 
   info%ptr = c_info_base_get(base%this%ptr)
-end function ESMF_InfoBaseGet
+end function ESMF_InfoBaseGetHandle
 
 ! -----------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoPointerGet()"
+#define ESMF_METHOD "ESMF_InfoPointerGetHandle()"
 !BOPI
-! !IROUTINE: ESMF_InfoPointerGet
+! !IROUTINE: ESMF_InfoPointerGetHandle
 !
 ! !INTERFACE:
-function ESMF_InfoPointerGet(ptr) result(info)
+function ESMF_InfoPointerGetHandle(ptr) result(info)
 ! !ARGUMENTS:
   type(ESMF_Pointer), intent(in) :: ptr
 ! !RETURN VALUE:
@@ -3931,7 +3928,7 @@ function ESMF_InfoPointerGet(ptr) result(info)
 
   info%ptr = c_info_base_get(ptr%ptr)
 
-end function ESMF_InfoPointerGet
+end function ESMF_InfoPointerGetHandle
 
 ! -----------------------------------------------------------------------------
 

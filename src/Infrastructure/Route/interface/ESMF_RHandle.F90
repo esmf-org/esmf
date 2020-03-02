@@ -819,13 +819,34 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   end subroutine ESMF_RouteHandleGetI
 !------------------------------------------------------------------------------
 
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_RouteHandleGetThis()"
+!BOPI
+! !IROUTINE: ESMF_RouteHandleGetThis - Internal access routine for C++ pointer
+
+! !INTERFACE:
 subroutine ESMF_RouteHandleGetThis(rh, this, rc)
-  !tdk:doc
+! ARGUMENTS:
   type(ESMF_RouteHandle), intent(in) :: rh
   type(ESMF_Pointer), intent(out) :: this
   integer, intent(inout), optional :: rc
+!
+! !DESCRIPTION:
+!     Internal access routine for C++ pointer.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[rh]
+!          Specified {\tt ESMF\_RouteHandle} object.
+!     \item[this]
+!          C++ pointer.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
 
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
   this = rh%this

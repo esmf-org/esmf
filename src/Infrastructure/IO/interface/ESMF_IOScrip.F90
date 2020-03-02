@@ -43,7 +43,7 @@
 #ifdef ESMF_NETCDF
       use netcdf
 #endif
-      use ESMF_InfoMod, only : ESMF_Info, ESMF_InfoSet, ESMF_InfoPointerGet
+      use ESMF_InfoMod, only : ESMF_Info, ESMF_InfoSet, ESMF_InfoPointerGetHandle
 
       implicit none
 
@@ -302,7 +302,7 @@ subroutine ESMF_OutputWeightFile (weightFile, factorList, factorIndexList, rc)
     call ESMF_DistGridGetThis(distgridFL, ptr, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) return
-    idg = ESMF_InfoPointerGet(ptr)
+    idg = ESMF_InfoPointerGetHandle(ptr)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InfoSet(idg, "/netcdf/metadata/"//name, (/ value /), rc=localrc)

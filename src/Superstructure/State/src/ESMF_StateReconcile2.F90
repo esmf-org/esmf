@@ -62,7 +62,7 @@ module ESMF_StateReconcile2Mod
   use ESMF_FieldBundleMod
   use ESMF_RHandleMod
 
-  use ESMF_InfoMod, only : ESMF_Info, ESMF_InfoBaseGet, ESMF_InfoUpdate
+  use ESMF_InfoMod, only : ESMF_Info, ESMF_InfoBaseGetHandle, ESMF_InfoUpdate
 
   implicit none
   private
@@ -1420,8 +1420,8 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        lhs = ESMF_InfoBaseGet(base_temp)
-        rhs = ESMF_InfoBaseGet(base)
+        lhs = ESMF_InfoBaseGetHandle(base_temp)
+        rhs = ESMF_InfoBaseGetHandle(base)
         call ESMF_InfoUpdate(lhs, rhs, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &

@@ -54,7 +54,7 @@
       use ESMF_StateContainerMod
       use ESMF_StateItemMod
       use ESMF_InitMacrosMod
-      use ESMF_InfoMod, only : ESMF_Info, ESMF_InfoBaseGet, ESMF_InfoUpdate
+      use ESMF_InfoMod, only : ESMF_Info, ESMF_InfoBaseGetHandle, ESMF_InfoUpdate
       implicit none
 
 !------------------------------------------------------------------------------
@@ -963,8 +963,8 @@ petloop:  &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
 
-            lhs = ESMF_InfoBaseGet(base)
-            rhs = ESMF_InfoBaseGet(state%statep%base)
+            lhs = ESMF_InfoBaseGetHandle(base)
+            rhs = ESMF_InfoBaseGetHandle(state%statep%base)
             call ESMF_InfoUpdate(lhs, rhs, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &

@@ -1029,7 +1029,6 @@ void Info::serialize(char *buffer, int *length, int *offset, ESMC_InquireFlag in
 void Info::set(key_t &key, json &&j, bool force, const int *index, const key_t * const pkey) {
   // Test:
   // Notes: parent key (pkey) must exist in the map
-  //tdk:question:last: should force also override type differences? setting to null is always allowed.
 
 #if 0
   std::string prefix = std::string(ESMC_METHOD) + ": ";

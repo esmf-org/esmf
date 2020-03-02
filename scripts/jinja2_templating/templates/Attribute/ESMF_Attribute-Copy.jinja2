@@ -22,13 +22,13 @@ subroutine {{ method_name }}{{ arglist }}
   ESMF_INIT_CHECK_DEEP(ESMF_{{ et }}GetInit, src, localrc)
   ESMF_INIT_CHECK_DEEP(ESMF_{{ et_dst }}GetInit, dst, localrc)
 {% if et == "Info" %}
-  isrc = ESMF_InfoBaseGet(src%base)
+  isrc = ESMF_InfoBaseGetHandle(src%base)
 {% else %}
   isrc = eidesc%GetInfo(src, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 {% endif %}
 {% if et_dst == "Info" %}
-  idst = ESMF_InfoBaseGet(dst%base)
+  idst = ESMF_InfoBaseGetHandle(dst%base)
 {%else %}
   idst = eidesc%GetInfo(dst, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return

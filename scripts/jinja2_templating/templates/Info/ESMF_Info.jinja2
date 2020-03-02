@@ -161,11 +161,10 @@ private
 
 public operator(==)
 public operator(/=)
-!tdk:todo: change BaseGet name to BaseGetHandle and PointerGetHandle
 {% set suffixes = ["","Create","Destroy","Get","GetCharAlloc", "GetAlloc","Set",
-                   "Remove","BaseGet","PointerGet","Copy","SetNULL","SetDirty",
-                   "IsSet","IsPresent","Print","Dump","Update","ReadJSON","WriteJSON",
-                   "Broadcast"] %}
+                   "Remove","BaseGetHandle","PointerGetHandle","Copy","SetNULL",
+                   "SetDirty","IsSet","IsPresent","Print","Dump","Update","ReadJSON",
+                   "WriteJSON","Broadcast"] %}
 {% for suffix in suffixes %}
 public ESMF_Info{{ suffix }}
 {% endfor %}
@@ -990,7 +989,6 @@ end subroutine {{ method_name }}
 ! GetArray --------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
-!tdk:rename: scalarToArray to scalarToList
 {% for t in ts %}{% for alloc in [False, True] %}
 {% if t.esmf_suffix == "I4" %}
   {% set do_doc = true %}
@@ -1161,7 +1159,6 @@ end subroutine ESMF_InfoGetArray{{ t.esmf_suffix }}{% if alloc %}Alloc{% endif %
 {% endfor %}{% endfor %}
 !------------------------------------------------------------------------------
 
-!tdk:todo: check if isPresent is true without a key
 {% set method_name = "ESMF_InfoInquire" %}
 #undef  ESMF_METHOD
 #define ESMF_METHOD "{{ method_name }}()"
@@ -1235,8 +1232,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       Useful when iterating using an index. Does not return the JSON Pointer
 !       location.
 !     \item [{[isPresent]}]
-!       Returns true if the \textit{key} exists in storage. If no
-!       \textit{key} is provided, this will return true.
+!       Returns true if the \textit{key} exists in storage. If no \textit{key}
+!       is provided, this will return true.
 !     \item [{[isStructured]}]
 !       Returns true if the JSON target is structured \cite{json_for_modern_cpp_is_structured}.
 !     \item [{[isNull]}]
@@ -1409,7 +1406,7 @@ end subroutine {{ method_name }}
 
 ! =============================================================================
 
-{% set method_name = "ESMF_InfoBaseGet" %}
+{% set method_name = "ESMF_InfoBaseGetHandle" %}
 #undef  ESMF_METHOD
 #define ESMF_METHOD "{{ method_name }}()"
 !BOPI
@@ -1437,7 +1434,7 @@ end function {{ method_name }}
 
 ! -----------------------------------------------------------------------------
 
-{% set method_name = "ESMF_InfoPointerGet" %}
+{% set method_name = "ESMF_InfoPointerGetHandle" %}
 #undef  ESMF_METHOD
 #define ESMF_METHOD "{{ method_name }}()"
 !BOPI
