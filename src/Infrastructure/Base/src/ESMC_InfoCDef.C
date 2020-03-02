@@ -289,13 +289,15 @@ void ESMC_InfoUpdate(ESMCI::Info *lhs, ESMCI::Info *rhs, int &esmf_rc) {
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoBaseSyncDo"
-void ESMC_InfoBaseSyncDo(const std::vector<long int> &base_addresses, const int &rootPet, const long int &vmAddress, int &esmf_rc) {
+void ESMC_InfoBaseSyncDo(const std::vector<long int> &base_addresses, const int &rootPet, const long int &vmAddress, int &markClean, int &esmf_rc) {
   esmf_rc = ESMF_FAILURE;
   try {
     void *v = (void *)vmAddress;
     ESMCI::VM *vm = reinterpret_cast<ESMCI::VM *>(v);
     int localPet = vm->getLocalPet();
     json j = json::object();
+    bool markClean_bool = markClean == 1;
+    bool dirty = true;
     if (localPet == rootPet) {
       // For each base address, blind-cast to an Info object and determine
       // if that object has been updated (dirty). If it has been updated, then
@@ -309,12 +311,18 @@ void ESMC_InfoBaseSyncDo(const std::vector<long int> &base_addresses, const int 
             j[std::to_string(ii)] = info->getStorageRef().dump();
             // This data will be broadcast and we can consider the object
             // clean.
-//            info->setDirty(false); //tdk:todo:last: do we really want to remove dirtiness support?
+            if (markClean_bool) {
+              dirty = false;
+            } else {
+              dirty = true;
+            }
+            info->setDirty(dirty);
           }
           ESMF_INFO_CATCH_JSON
         }
       }
     }
+
     // Broadcast the update map.
     ESMCI::Info binfo(std::move(j));
     broadcastInfo(&binfo, rootPet, *vm);
@@ -334,12 +342,20 @@ void ESMC_InfoBaseSyncDo(const std::vector<long int> &base_addresses, const int 
       try {
         if (localPet != rootPet) {
           info_to_update->getStorageRefWritable() = rhs.getStorageRef();
+
+          // Since these data were broadcast, they should be marked as dirty in
+          // case the root PET is switched to this PET. This may happen with
+          // sequential calls to the synchronize routine.
+          if (markClean_bool) {
+            dirty = false;
+          } else {
+            dirty = true;
+          }
+          info_to_update->setDirty(dirty);
+
           // Note (bekozi): Commented in favor or replacing to avoid tracking
           // down removals in the root PET.
 //          info_to_update->update(rhs);
-          // Since this is part of the sync operation, we do not consider this
-          // data dirty after the update.
-//          info_to_update->setDirty(false); //tdk:todo:last: do we really want to remove dirtiness support?
         }
       }
       ESMF_INFO_CATCH_JSON
@@ -351,7 +367,7 @@ void ESMC_InfoBaseSyncDo(const std::vector<long int> &base_addresses, const int 
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoBaseSync()"
-void ESMC_InfoBaseSync(ESMCI::Info *inqstate, int &rootPet, long int &vmAddress, int &esmf_rc) {
+void ESMC_InfoBaseSync(ESMCI::Info *inqstate, int &rootPet, long int &vmAddress, int &markClean, int &esmf_rc) {
   ESMF_INFO_CHECKINIT(inqstate, esmf_rc)
   esmf_rc = ESMF_FAILURE;
   try {
@@ -360,7 +376,7 @@ void ESMC_InfoBaseSync(ESMCI::Info *inqstate, int &rootPet, long int &vmAddress,
     updateDirtyInfo(j_inqstate, &ctr, nullptr);
     std::vector<long int> base_addresses(ctr, 0);
     updateDirtyInfo(j_inqstate, nullptr, &base_addresses);
-    ESMC_InfoBaseSyncDo(base_addresses, rootPet, vmAddress, esmf_rc);
+    ESMC_InfoBaseSyncDo(base_addresses, rootPet, vmAddress, markClean, esmf_rc);
   }
   ESMF_INFO_CATCH_ISOC
 }

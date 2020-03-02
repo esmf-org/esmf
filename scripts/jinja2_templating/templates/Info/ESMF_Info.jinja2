@@ -1990,12 +1990,14 @@ end subroutine {{ method_name }}
 ! !IROUTINE: {{ doc_generic_method }} - Synchronize Info contents across a VM
 !
 ! !INTERFACE:
-!subroutine {{ doc_generic_method }}(target, rootPet, vm, keywordEnforcer, rc)
+!subroutine {{ doc_generic_method }}(target, rootPet, vm, keywordEnforcer, markClean, &
+!   rc)
 ! !ARGUMENTS:
 !  type(ESMF_*), intent(inout) :: target
 !  integer, intent(in) :: rootPet
 !  type(ESMF_VM), intent(in) :: vm
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!  logical, intent(in), optional :: markClean
 !  integer, intent(inout), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2017,6 +2019,10 @@ end subroutine {{ method_name }}
 !       The root PET to use for the synchronization.
 !     \item [vm]
 !       The VM to synchronize across.
+!     \item [{[markClean]}]
+!       Default is false. If true, mark changed \texttt{ESMF\_Info} contents as
+!       clean once synchronized. These contents will no longer be broadcast in
+!       consecutive calls to \texttt{ESMF\_InfoSync}.
 {{ doc_rc }}
 !     \end{description}
 !EOP

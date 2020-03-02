@@ -62,6 +62,7 @@ program ESMF_InfoSyncUTest
   type(ESMF_InfoDescribe) :: eidesc, desired_eidesc, ainq
   integer :: rootPet=0
   integer(ESMF_KIND_I8), dimension(:), allocatable :: bases
+  logical :: isDirty
 
   !----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)  ! calls ESMF_Initialize() internally
@@ -94,7 +95,7 @@ program ESMF_InfoSyncUTest
 
   !----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "ESMF_InfoSync"
+  write(name, *) "General"
   write(failMsg, *) "Did not sync successfully"
   rc = ESMF_FAILURE
 
@@ -221,7 +222,39 @@ program ESMF_InfoSyncUTest
 
   call ESMF_Test((eidesc%info == desired_info), name, failMsg, result, ESMF_SRCLINE)
 
-!------------------------------------------------------------------------------
+  ! ---------------------------------------------------------------------------
+
+  ! ---------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Check Dirty State"
+  write(failMsg, *) "Did not remain dirty"
+  rc = ESMF_FAILURE
+
+  infoh = ESMF_InfoGetHandle(locstream, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_InfoGet(infoh, isDirty=isDirty, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_Test(isDirty, name, failMsg, result, ESMF_SRCLINE)
+
+  ! ---------------------------------------------------------------------------
+
+  ! ---------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Mark Clean"
+  write(failMsg, *) "Did not clean"
+  rc = ESMF_FAILURE
+
+  call ESMF_InfoSync(state, rootPet, vm, markClean=.true., rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_InfoGet(infoh, isDirty=isDirty, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_Test(isDirty .neqv. .true., name, failMsg, result, ESMF_SRCLINE)
+
+  ! ---------------------------------------------------------------------------
 
   call eidesc%Destroy(rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)

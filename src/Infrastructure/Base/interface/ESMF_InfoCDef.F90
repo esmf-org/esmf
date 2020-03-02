@@ -165,12 +165,13 @@ interface
 
   !=============================================================================
 
-  subroutine c_info_base_sync(inqstate, rootPet, vmAddress, rc) bind(C, name="ESMC_InfoBaseSync")
+  subroutine c_info_base_sync(inqstate, rootPet, vmAddress, markClean, rc) bind(C, name="ESMC_InfoBaseSync")
     use iso_c_binding
     implicit none
     type(C_PTR), value :: inqstate
     integer(C_INT), intent(in) :: rootPet
     integer(C_LONG), intent(in) :: vmAddress
+    integer(C_INT), intent(in) :: markClean
     integer(C_INT), intent(inout) :: rc
   end subroutine
 

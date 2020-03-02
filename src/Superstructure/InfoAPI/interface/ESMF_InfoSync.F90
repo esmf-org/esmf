@@ -56,6 +56,8 @@ use ESMF_XGridGetMod
 use ESMF_LocStreamMod
 use ESMF_RHandleMod
 use ESMF_InfoDescribeMod
+
+use iso_c_binding, only: C_INT
 implicit none
 
 !==============================================================================
@@ -96,23 +98,28 @@ contains !=====================================================================
 !===============================================================================
 ! ESMF_InfoSync ================================================================
 !===============================================================================
-!tdk:todo: add option to set dirty status for a hierarchy using describe
 
 ! Note: Documentation stub located in ESMF_InfoMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoSyncState()"
-subroutine ESMF_InfoSyncState(target, rootPet, vm, keywordEnforcer, rc)
+subroutine ESMF_InfoSyncState(target, rootPet, vm, keywordEnforcer, markClean, rc)
   type(ESMF_State), intent(inout) :: target
   integer, intent(in) :: rootPet
   type(ESMF_VM), intent(in) :: vm
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  logical, intent(in), optional :: markClean
   integer, intent(inout), optional :: rc
 
   type(ESMF_InfoDescribe) :: eidesc
   integer :: localrc
+  integer(C_INT) :: local_markClean
   type(ESMF_Pointer) :: eptr
 
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  local_markClean = 0  !False
+  if (present(markClean)) then
+    if (markClean) local_markClean = 1  !True
+  endif
 
   call ESMF_VMGetThis(vm, eptr, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -123,7 +130,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   call eidesc%Update(target, "", rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  call c_info_base_sync(eidesc%info%ptr, rootPet, eptr%ptr, localrc)
+  call c_info_base_sync(eidesc%info%ptr, rootPet, eptr%ptr, local_markClean, localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   call eidesc%Destroy(rc=localrc)
@@ -135,18 +142,24 @@ end subroutine ESMF_InfoSyncState
 ! Note: Documentation stub located in ESMF_InfoMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoSyncCplComp()"
-subroutine ESMF_InfoSyncCplComp(target, rootPet, vm, keywordEnforcer, rc)
+subroutine ESMF_InfoSyncCplComp(target, rootPet, vm, keywordEnforcer, markClean, rc)
   type(ESMF_CplComp), intent(inout) :: target
   integer, intent(in) :: rootPet
   type(ESMF_VM), intent(in) :: vm
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  logical, intent(in), optional :: markClean
   integer, intent(inout), optional :: rc
 
   type(ESMF_InfoDescribe) :: eidesc
   integer :: localrc
+  integer(C_INT) :: local_markClean
   type(ESMF_Pointer) :: eptr
 
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  local_markClean = 0  !False
+  if (present(markClean)) then
+    if (markClean) local_markClean = 1  !True
+  endif
 
   call ESMF_VMGetThis(vm, eptr, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -157,7 +170,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   call eidesc%Update(target, "", rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  call c_info_base_sync(eidesc%info%ptr, rootPet, eptr%ptr, localrc)
+  call c_info_base_sync(eidesc%info%ptr, rootPet, eptr%ptr, local_markClean, localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   call eidesc%Destroy(rc=localrc)
@@ -169,18 +182,24 @@ end subroutine ESMF_InfoSyncCplComp
 ! Note: Documentation stub located in ESMF_InfoMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoSyncGridComp()"
-subroutine ESMF_InfoSyncGridComp(target, rootPet, vm, keywordEnforcer, rc)
+subroutine ESMF_InfoSyncGridComp(target, rootPet, vm, keywordEnforcer, markClean, rc)
   type(ESMF_GridComp), intent(inout) :: target
   integer, intent(in) :: rootPet
   type(ESMF_VM), intent(in) :: vm
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  logical, intent(in), optional :: markClean
   integer, intent(inout), optional :: rc
 
   type(ESMF_InfoDescribe) :: eidesc
   integer :: localrc
+  integer(C_INT) :: local_markClean
   type(ESMF_Pointer) :: eptr
 
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  local_markClean = 0  !False
+  if (present(markClean)) then
+    if (markClean) local_markClean = 1  !True
+  endif
 
   call ESMF_VMGetThis(vm, eptr, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -191,7 +210,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   call eidesc%Update(target, "", rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  call c_info_base_sync(eidesc%info%ptr, rootPet, eptr%ptr, localrc)
+  call c_info_base_sync(eidesc%info%ptr, rootPet, eptr%ptr, local_markClean, localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   call eidesc%Destroy(rc=localrc)
@@ -203,18 +222,24 @@ end subroutine ESMF_InfoSyncGridComp
 ! Note: Documentation stub located in ESMF_InfoMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoSyncSciComp()"
-subroutine ESMF_InfoSyncSciComp(target, rootPet, vm, keywordEnforcer, rc)
+subroutine ESMF_InfoSyncSciComp(target, rootPet, vm, keywordEnforcer, markClean, rc)
   type(ESMF_SciComp), intent(inout) :: target
   integer, intent(in) :: rootPet
   type(ESMF_VM), intent(in) :: vm
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  logical, intent(in), optional :: markClean
   integer, intent(inout), optional :: rc
 
   type(ESMF_InfoDescribe) :: eidesc
   integer :: localrc
+  integer(C_INT) :: local_markClean
   type(ESMF_Pointer) :: eptr
 
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  local_markClean = 0  !False
+  if (present(markClean)) then
+    if (markClean) local_markClean = 1  !True
+  endif
 
   call ESMF_VMGetThis(vm, eptr, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -225,7 +250,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   call eidesc%Update(target, "", rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  call c_info_base_sync(eidesc%info%ptr, rootPet, eptr%ptr, localrc)
+  call c_info_base_sync(eidesc%info%ptr, rootPet, eptr%ptr, local_markClean, localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   call eidesc%Destroy(rc=localrc)
@@ -237,18 +262,24 @@ end subroutine ESMF_InfoSyncSciComp
 ! Note: Documentation stub located in ESMF_InfoMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoSyncField()"
-subroutine ESMF_InfoSyncField(target, rootPet, vm, keywordEnforcer, rc)
+subroutine ESMF_InfoSyncField(target, rootPet, vm, keywordEnforcer, markClean, rc)
   type(ESMF_Field), intent(inout) :: target
   integer, intent(in) :: rootPet
   type(ESMF_VM), intent(in) :: vm
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  logical, intent(in), optional :: markClean
   integer, intent(inout), optional :: rc
 
   type(ESMF_InfoDescribe) :: eidesc
   integer :: localrc
+  integer(C_INT) :: local_markClean
   type(ESMF_Pointer) :: eptr
 
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  local_markClean = 0  !False
+  if (present(markClean)) then
+    if (markClean) local_markClean = 1  !True
+  endif
 
   call ESMF_VMGetThis(vm, eptr, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -259,7 +290,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   call eidesc%Update(target, "", rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  call c_info_base_sync(eidesc%info%ptr, rootPet, eptr%ptr, localrc)
+  call c_info_base_sync(eidesc%info%ptr, rootPet, eptr%ptr, local_markClean, localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   call eidesc%Destroy(rc=localrc)
@@ -271,18 +302,24 @@ end subroutine ESMF_InfoSyncField
 ! Note: Documentation stub located in ESMF_InfoMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoSyncFieldBundle()"
-subroutine ESMF_InfoSyncFieldBundle(target, rootPet, vm, keywordEnforcer, rc)
+subroutine ESMF_InfoSyncFieldBundle(target, rootPet, vm, keywordEnforcer, markClean, rc)
   type(ESMF_FieldBundle), intent(inout) :: target
   integer, intent(in) :: rootPet
   type(ESMF_VM), intent(in) :: vm
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  logical, intent(in), optional :: markClean
   integer, intent(inout), optional :: rc
 
   type(ESMF_InfoDescribe) :: eidesc
   integer :: localrc
+  integer(C_INT) :: local_markClean
   type(ESMF_Pointer) :: eptr
 
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  local_markClean = 0  !False
+  if (present(markClean)) then
+    if (markClean) local_markClean = 1  !True
+  endif
 
   call ESMF_VMGetThis(vm, eptr, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -293,7 +330,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   call eidesc%Update(target, "", rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  call c_info_base_sync(eidesc%info%ptr, rootPet, eptr%ptr, localrc)
+  call c_info_base_sync(eidesc%info%ptr, rootPet, eptr%ptr, local_markClean, localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   call eidesc%Destroy(rc=localrc)

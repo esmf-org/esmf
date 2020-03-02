@@ -4461,12 +4461,14 @@ end subroutine ESMF_InfoWriteJSON
 ! !IROUTINE: ESMF_InfoSync - Synchronize Info contents across a VM
 !
 ! !INTERFACE:
-!subroutine ESMF_InfoSync(target, rootPet, vm, keywordEnforcer, rc)
+!subroutine ESMF_InfoSync(target, rootPet, vm, keywordEnforcer, markClean, &
+!   rc)
 ! !ARGUMENTS:
 !  type(ESMF_*), intent(inout) :: target
 !  integer, intent(in) :: rootPet
 !  type(ESMF_VM), intent(in) :: vm
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!  logical, intent(in), optional :: markClean
 !  integer, intent(inout), optional :: rc
 !
 ! !DESCRIPTION:
@@ -4491,6 +4493,10 @@ end subroutine ESMF_InfoWriteJSON
 !       The root PET to use for the synchronization.
 !     \item [vm]
 !       The VM to synchronize across.
+!     \item [{[markClean]}]
+!       Default is false. If true, mark changed \texttt{ESMF\_Info} contents as
+!       clean once synchronized. These contents will no longer be broadcast in
+!       consecutive calls to \texttt{ESMF\_InfoSync}.
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
