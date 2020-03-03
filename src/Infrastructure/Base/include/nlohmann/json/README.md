@@ -2,7 +2,6 @@
 
 * URL: https://github.com/nlohmann/json
 * Release: v3.7.3
-# tdk:todo: update to most recent release
 * Git Clone Command: `git clone -b <Release> --depth 1 <URL>`
 
 ## Updating to New Version
