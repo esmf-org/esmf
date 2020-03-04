@@ -89,113 +89,113 @@ ESMCI::Info* ESMC_BaseGetInfo(long int &baseAddress) {
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoCopy()"
-ESMCI::Info* ESMC_InfoCopy(ESMCI::Info *info, int &esmf_rc) {
+ESMCI::Info* ESMC_InfoCopy(ESMCI::Info *info, int &esmc_rc) {
   if (!info) {
-    ESMC_LogDefault.MsgFoundError(ESMF_RC_OBJ_NOT_CREATED, "Info pointer is null. Object has not been created appropriately. Was ESMF_InfoCreate used?", ESMC_CONTEXT, &esmf_rc);
+    ESMC_LogDefault.MsgFoundError(ESMF_RC_OBJ_NOT_CREATED, "Info pointer is null. Object has not been created appropriately. Was ESMF_InfoCreate used?", ESMC_CONTEXT, &esmc_rc);
     return nullptr;
   }
-  esmf_rc = ESMF_SUCCESS;
+  esmc_rc = ESMF_SUCCESS;
   return new ESMCI::Info(info->getStorageRef());
 }
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoCopyForAttribute()"
-void ESMC_InfoCopyForAttribute(const ESMCI::Info* src, ESMCI::Info* dst, int &esmf_rc) {
-  ESMF_INFO_CHECKINIT(src, esmf_rc)
-  ESMF_INFO_CHECKINIT(dst, esmf_rc)
-  esmf_rc = ESMF_FAILURE;
+void ESMC_InfoCopyForAttribute(const ESMCI::Info* src, ESMCI::Info* dst, int &esmc_rc) {
+  ESMC_CHECK_INIT(src, esmc_rc)
+  ESMC_CHECK_INIT(dst, esmc_rc)
+  esmc_rc = ESMF_FAILURE;
   try {
     dst->getStorageRefWritable() = src->getStorageRef();
-    esmf_rc = ESMF_SUCCESS;
+    esmc_rc = ESMF_SUCCESS;
   }
-  ESMF_INFO_CATCH_ISOC
+  ESMC_CATCH_ISOC
 }
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoCreate()"
-ESMCI::Info* ESMC_InfoCreate(int &esmf_rc) {
-  esmf_rc = ESMF_SUCCESS;
+ESMCI::Info* ESMC_InfoCreate(int &esmc_rc) {
+  esmc_rc = ESMF_SUCCESS;
   return new ESMCI::Info();
 }
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoCreateByKey()"
-ESMCI::Info* ESMC_InfoCreateByKey(ESMCI::Info *srcInfo, char* key, int &esmf_rc) {
+ESMCI::Info* ESMC_InfoCreateByKey(ESMCI::Info *srcInfo, char* key, int &esmc_rc) {
   if (!srcInfo) {
-    ESMC_LogDefault.MsgFoundError(ESMF_RC_OBJ_NOT_CREATED, "Info pointer is null. Object has not been created appropriately. Was ESMF_InfoCreate used?", ESMC_CONTEXT, &esmf_rc);
+    ESMC_LogDefault.MsgFoundError(ESMF_RC_OBJ_NOT_CREATED, "Info pointer is null. Object has not been created appropriately. Was ESMF_InfoCreate used?", ESMC_CONTEXT, &esmc_rc);
     return nullptr;
   }
-  esmf_rc = ESMF_FAILURE;
+  esmc_rc = ESMF_FAILURE;
   ESMCI::Info *info;
   try {
     std::string local_key(key);
     json new_storage = srcInfo->get<json>(local_key);
     info = new ESMCI::Info(std::move(new_storage));
-    esmf_rc = ESMF_SUCCESS;
+    esmc_rc = ESMF_SUCCESS;
   }
-  ESMF_INFO_CATCH_ISOC
+  ESMC_CATCH_ISOC
   return info;
 }
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoCreateByParse()"
-ESMCI::Info* ESMC_InfoCreateByParse(char *payload, int &esmf_rc) {
-  esmf_rc = ESMF_FAILURE;
+ESMCI::Info* ESMC_InfoCreateByParse(char *payload, int &esmc_rc) {
+  esmc_rc = ESMF_FAILURE;
   ESMCI::Info *info;
   try {
     std::string local_payload(payload);
     info = new ESMCI::Info(local_payload);
-    esmf_rc = ESMF_SUCCESS;
+    esmc_rc = ESMF_SUCCESS;
   }
-  ESMF_INFO_CATCH_ISOC
+  ESMC_CATCH_ISOC
   return info;
 }
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoDestroy()"
-void ESMC_InfoDestroy(ESMCI::Info* info, int &esmf_rc) {
-  ESMF_INFO_CHECKINIT(info, esmf_rc)
+void ESMC_InfoDestroy(ESMCI::Info* info, int &esmc_rc) {
+  ESMC_CHECK_INIT(info, esmc_rc)
   delete info;
-  esmf_rc = ESMF_SUCCESS;
+  esmc_rc = ESMF_SUCCESS;
 }
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoDump()"
-void ESMC_InfoDump(ESMCI::Info *info, char *output, int &esmf_rc, int &indent) {
+void ESMC_InfoDump(ESMCI::Info *info, char *output, int &esmc_rc, int &indent) {
   // Test:
   // Notes:
-  ESMF_INFO_CHECKINIT(info, esmf_rc)
-  esmf_rc = ESMF_FAILURE;
+  ESMC_CHECK_INIT(info, esmc_rc)
+  esmc_rc = ESMF_FAILURE;
   try {
     const std::string c_output = info->dump(indent);
     for (std::size_t ii = 0; ii < c_output.size(); ++ii) {
       output[ii] = c_output[ii];
     }
-    esmf_rc = ESMF_SUCCESS;
+    esmc_rc = ESMF_SUCCESS;
   }
-  ESMF_INFO_CATCH_ISOC
+  ESMC_CATCH_ISOC
 }
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoDumpLength()"
-void ESMC_InfoDumpLength(ESMCI::Info *info, int &dump_length, int &esmf_rc, int &indent) {
+void ESMC_InfoDumpLength(ESMCI::Info *info, int &dump_length, int &esmc_rc, int &indent) {
   // Test:
   // Notes:
-  ESMF_INFO_CHECKINIT(info, esmf_rc)
-  esmf_rc = ESMF_FAILURE;
+  ESMC_CHECK_INIT(info, esmc_rc)
+  esmc_rc = ESMF_FAILURE;
   try {
     dump_length = info->dump(indent).size();
-    esmf_rc = ESMF_SUCCESS;
+    esmc_rc = ESMF_SUCCESS;
   }
-  ESMF_INFO_CATCH_ISOC
+  ESMC_CATCH_ISOC
 }
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoErase()"
 void ESMC_InfoErase(ESMCI::Info* info, char* keyParent, char* keyChild, bool &recursive,
-                    int &esmf_rc) {
-  ESMF_INFO_CHECKINIT(info, esmf_rc)
-  esmf_rc = ESMF_FAILURE;
+                    int &esmc_rc) {
+  ESMC_CHECK_INIT(info, esmc_rc)
+  esmc_rc = ESMF_FAILURE;
   // This seems strange. This is the best method to delete from the Fortran
   // interface to avoid passing "" as the parent key when you want to delete
   // from the root. Otherwise a parent and child key are always required which
@@ -208,18 +208,18 @@ void ESMC_InfoErase(ESMCI::Info* info, char* keyParent, char* keyChild, bool &re
     } else {
       info->erase(localkeyParent, localkeyChild, recursive);
     }
-    esmf_rc = ESMF_SUCCESS;
+    esmc_rc = ESMF_SUCCESS;
   }
-  ESMF_INFO_CATCH_ISOC
+  ESMC_CATCH_ISOC
 }
 
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoInquire()"
 void ESMC_InfoInquire(ESMCI::Info *info, ESMCI::Info *inq, char *key,
                        int &fortran_recursive, int *idx, int &fortran_attr_compliance,
-                       int &esmf_rc) {
-  ESMF_INFO_CHECKINIT(info, esmf_rc)
-  esmf_rc = ESMF_FAILURE;
+                       int &esmc_rc) {
+  ESMC_CHECK_INIT(info, esmc_rc)
+  esmc_rc = ESMF_FAILURE;
   bool recursive = (fortran_recursive == 1) ? true:false;
   bool attr_compliance = (fortran_attr_compliance == 1) ? true:false;
   try {
@@ -227,70 +227,70 @@ void ESMC_InfoInquire(ESMCI::Info *info, ESMCI::Info *inq, char *key,
     json jinq = info->inquire(localKey, recursive, idx, attr_compliance);
     json &inqref = inq->getStorageRefWritable();
     inqref = std::move(jinq);
-    esmf_rc = ESMF_SUCCESS;
+    esmc_rc = ESMF_SUCCESS;
   }
-  ESMF_INFO_CATCH_ISOC
+  ESMC_CATCH_ISOC
 }
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoIsEqual()"
 void ESMC_InfoIsEqual(ESMCI::Info *lhs, ESMCI::Info *rhs,
-  bool &res, int &esmf_rc) {
-  ESMF_INFO_CHECKINIT(lhs, esmf_rc)
-  ESMF_INFO_CHECKINIT(rhs, esmf_rc)
-  esmf_rc = ESMF_FAILURE;
+  bool &res, int &esmc_rc) {
+  ESMC_CHECK_INIT(lhs, esmc_rc)
+  ESMC_CHECK_INIT(rhs, esmc_rc)
+  esmc_rc = ESMF_FAILURE;
   try {
     res = lhs->getStorageRef() == rhs->getStorageRef();
-    esmf_rc = ESMF_SUCCESS;
+    esmc_rc = ESMF_SUCCESS;
   }
-  ESMF_INFO_CATCH_ISOC
+  ESMC_CATCH_ISOC
 }
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoIsPresent()"
 void ESMC_InfoIsPresent(ESMCI::Info *info, char *key, int &fortran_bool_res,
-        int &esmf_rc, int &fortran_bool_recursive, int &fortran_bool_isptr) {
-  ESMF_INFO_CHECKINIT(info, esmf_rc)
+        int &esmc_rc, int &fortran_bool_recursive, int &fortran_bool_isptr) {
+  ESMC_CHECK_INIT(info, esmc_rc)
   bool recursive = (fortran_bool_recursive == 1) ? true:false;
   bool isptr = (fortran_bool_isptr == 1) ? true:false;
   try {
     std::string local_key(key);
     bool res = info->hasKey(local_key, isptr, recursive);
     fortran_bool_res = (res == true) ? 1:0;
-    esmf_rc = ESMF_SUCCESS;
+    esmc_rc = ESMF_SUCCESS;
   }
-  ESMF_INFO_CATCH_ISOC
+  ESMC_CATCH_ISOC
 }
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoIsSet()"
-void ESMC_InfoIsSet(ESMCI::Info *info, char *key, int &isSet, int &esmf_rc) {
-  ESMF_INFO_CHECKINIT(info, esmf_rc)
+void ESMC_InfoIsSet(ESMCI::Info *info, char *key, int &isSet, int &esmc_rc) {
+  ESMC_CHECK_INIT(info, esmc_rc)
   std::string local_key(key);
   try {
     isSet = info->isSetNull(local_key);
-    esmf_rc = ESMF_SUCCESS;
+    esmc_rc = ESMF_SUCCESS;
   }
-  ESMF_INFO_CATCH_ISOC
+  ESMC_CATCH_ISOC
 }
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoUpdate()"
-void ESMC_InfoUpdate(ESMCI::Info *lhs, ESMCI::Info *rhs, int &esmf_rc) {
-  ESMF_INFO_CHECKINIT(lhs, esmf_rc)
-  ESMF_INFO_CHECKINIT(rhs, esmf_rc)
-  esmf_rc = ESMF_FAILURE;
+void ESMC_InfoUpdate(ESMCI::Info *lhs, ESMCI::Info *rhs, int &esmc_rc) {
+  ESMC_CHECK_INIT(lhs, esmc_rc)
+  ESMC_CHECK_INIT(rhs, esmc_rc)
+  esmc_rc = ESMF_FAILURE;
   try {
     lhs->update(*rhs);
-    esmf_rc = ESMF_SUCCESS;
+    esmc_rc = ESMF_SUCCESS;
   }
-  ESMF_INFO_CATCH_ISOC
+  ESMC_CATCH_ISOC
 }
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoBaseSyncDo"
-void ESMC_InfoBaseSyncDo(const std::vector<long int> &base_addresses, const int &rootPet, const long int &vmAddress, int &markClean, int &esmf_rc) {
-  esmf_rc = ESMF_FAILURE;
+void ESMC_InfoBaseSyncDo(const std::vector<long int> &base_addresses, const int &rootPet, const long int &vmAddress, int &markClean, int &esmc_rc) {
+  esmc_rc = ESMF_FAILURE;
   try {
     void *v = (void *)vmAddress;
     ESMCI::VM *vm = reinterpret_cast<ESMCI::VM *>(v);
@@ -360,52 +360,52 @@ void ESMC_InfoBaseSyncDo(const std::vector<long int> &base_addresses, const int 
       }
       ESMF_INFO_CATCH_JSON
     }
-    esmf_rc = ESMF_SUCCESS;
+    esmc_rc = ESMF_SUCCESS;
   }
-  ESMF_INFO_CATCH_ISOC
+  ESMC_CATCH_ISOC
 }
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoBaseSync()"
-void ESMC_InfoBaseSync(ESMCI::Info *inqstate, int &rootPet, long int &vmAddress, int &markClean, int &esmf_rc) {
-  ESMF_INFO_CHECKINIT(inqstate, esmf_rc)
-  esmf_rc = ESMF_FAILURE;
+void ESMC_InfoBaseSync(ESMCI::Info *inqstate, int &rootPet, long int &vmAddress, int &markClean, int &esmc_rc) {
+  ESMC_CHECK_INIT(inqstate, esmc_rc)
+  esmc_rc = ESMF_FAILURE;
   try {
     const json &j_inqstate = inqstate->getStorageRef();
     int ctr = 0;
     updateDirtyInfo(j_inqstate, &ctr, nullptr);
     std::vector<long int> base_addresses(ctr, 0);
     updateDirtyInfo(j_inqstate, nullptr, &base_addresses);
-    ESMC_InfoBaseSyncDo(base_addresses, rootPet, vmAddress, markClean, esmf_rc);
+    ESMC_InfoBaseSyncDo(base_addresses, rootPet, vmAddress, markClean, esmc_rc);
   }
-  ESMF_INFO_CATCH_ISOC
+  ESMC_CATCH_ISOC
 }
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoBroadcast()"
-void ESMC_InfoBroadcast(ESMCI::Info *info, int &rootPet, int &esmf_rc) {
-  ESMF_INFO_CHECKINIT(info, esmf_rc)
-  esmf_rc = ESMF_FAILURE;
+void ESMC_InfoBroadcast(ESMCI::Info *info, int &rootPet, int &esmc_rc) {
+  ESMC_CHECK_INIT(info, esmc_rc)
+  esmc_rc = ESMF_FAILURE;
   try {
-    ESMCI::VM *vm = ESMCI::VM::getCurrent(&esmf_rc);
-    ESMF_INFO_CHECKRC("", esmf_rc, "Did not get current VM");
+    ESMCI::VM *vm = ESMCI::VM::getCurrent(&esmc_rc);
+    ESMC_CHECK_RC("", esmc_rc, "Did not get current VM");
     broadcastInfo(info, rootPet, *vm);
-    esmf_rc = ESMF_SUCCESS;
+    esmc_rc = ESMF_SUCCESS;
   }
-  ESMF_INFO_CATCH_ISOC
+  ESMC_CATCH_ISOC
 }
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoReadJSON()"
-void ESMC_InfoReadJSON(ESMCI::Info *info, char *filename, int &esmf_rc) {
-  ESMF_INFO_CHECKINIT(info, esmf_rc)
-  esmf_rc = ESMF_FAILURE;
+void ESMC_InfoReadJSON(ESMCI::Info *info, char *filename, int &esmc_rc) {
+  ESMC_CHECK_INIT(info, esmc_rc)
+  esmc_rc = ESMF_FAILURE;
   try {
     std::string filename2(filename);
     std::ifstream i(filename2, std::ifstream::in);
     if (!i.good()){
       std::string errmsg = "File location not working: " + filename2;
-      ESMF_INFO_CHECKRC("ESMC_RC_FILE_READ", ESMC_RC_FILE_READ, errmsg);
+      ESMC_CHECK_RC("ESMC_RC_FILE_READ", ESMC_RC_FILE_READ, errmsg);
     }
     json j;
     try {
@@ -416,29 +416,29 @@ void ESMC_InfoReadJSON(ESMCI::Info *info, char *filename, int &esmf_rc) {
     i.close();
     json &out = info->getStorageRefWritable();
     out = move(j);
-    esmf_rc = ESMF_SUCCESS;
+    esmc_rc = ESMF_SUCCESS;
   }
-  ESMF_INFO_CATCH_ISOC
+  ESMC_CATCH_ISOC
 }
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoWriteJSON()"
-void ESMC_InfoWriteJSON(ESMCI::Info *info, char *filename, int &esmf_rc) {
-  ESMF_INFO_CHECKINIT(info, esmf_rc)
-  esmf_rc = ESMF_FAILURE;
+void ESMC_InfoWriteJSON(ESMCI::Info *info, char *filename, int &esmc_rc) {
+  ESMC_CHECK_INIT(info, esmc_rc)
+  esmc_rc = ESMF_FAILURE;
   try {
     std::string filename2(filename);
     std::ofstream file;
     file.open(filename2);
     if (!file.is_open()) {
       std::string errmsg = "Error opening output file: " + filename2;
-      ESMF_INFO_CHECKRC("ESMC_RC_FILE_OPEN", ESMC_RC_FILE_OPEN, errmsg);
+      ESMC_CHECK_RC("ESMC_RC_FILE_OPEN", ESMC_RC_FILE_OPEN, errmsg);
     }
     file << info->getStorageRef();
     file.close();
-    esmf_rc = ESMF_SUCCESS;
+    esmc_rc = ESMF_SUCCESS;
   }
-  ESMF_INFO_CATCH_ISOC
+  ESMC_CATCH_ISOC
 }
 
 //-----------------------------------------------------------------------------
@@ -448,10 +448,10 @@ void ESMC_InfoWriteJSON(ESMCI::Info *info, char *filename, int &esmf_rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoGetCH()"
 void ESMC_InfoGetCH(ESMCI::Info* info, char *key, char *value,
-  int &vlen, int &esmf_rc, char *def, int *index, int &fortran_bool_recursive,
+  int &vlen, int &esmc_rc, char *def, int *index, int &fortran_bool_recursive,
   int &fortran_bool_strlen_only) {
-  ESMF_INFO_CHECKINIT(info, esmf_rc)
-  esmf_rc = ESMF_FAILURE;
+  ESMC_CHECK_INIT(info, esmc_rc)
+  esmc_rc = ESMF_FAILURE;
   // String pointer used to define the default value if present
   std::string *def_str_ptr;
   // String object that holds the default if present
@@ -486,17 +486,17 @@ void ESMC_InfoGetCH(ESMCI::Info* info, char *key, char *value,
       // If value is nullptr, only the stored string length is requested
       vlen = (int)as_str.size();
     }
-    esmf_rc = ESMF_SUCCESS;
+    esmc_rc = ESMF_SUCCESS;
   }
-  ESMF_INFO_CATCH_ISOC
+  ESMC_CATCH_ISOC
 }
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoSetCH()"
 void ESMC_InfoSetCH(ESMCI::Info *info, char *key, char *value,
-                              bool &force, int &esmf_rc, int *index, char *pkey) {
-  ESMF_INFO_CHECKINIT(info, esmf_rc)
-  esmf_rc = ESMF_FAILURE;
+                              bool &force, int &esmc_rc, int *index, char *pkey) {
+  ESMC_CHECK_INIT(info, esmc_rc)
+  esmc_rc = ESMF_FAILURE;
   try {
     std::string local_key(key);
     std::string local_value(value);
@@ -504,28 +504,28 @@ void ESMC_InfoSetCH(ESMCI::Info *info, char *key, char *value,
     std::string *local_pkeyp = nullptr;
     if (local_pkey.size() != 0) {local_pkeyp = &local_pkey;}
     info->set<std::string>(local_key, local_value, force, index, local_pkeyp);
-    esmf_rc = ESMF_SUCCESS;
+    esmc_rc = ESMF_SUCCESS;
   }
-  ESMF_INFO_CATCH_ISOC
+  ESMC_CATCH_ISOC
 }
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoSetArrayCH()"
 void ESMC_InfoSetArrayCH(ESMCI::Info *info, char *key, int &count,
-                          bool &force, int &esmf_rc, char *pkey) {
+                          bool &force, int &esmc_rc, char *pkey) {
   // Notes:
   //  * Only allocates storage. Does not actually insert anything!
-  ESMF_INFO_CHECKINIT(info, esmf_rc)
-  esmf_rc = ESMF_FAILURE;
+  ESMC_CHECK_INIT(info, esmc_rc)
+  esmc_rc = ESMF_FAILURE;
   try {
     std::string local_key(key);
     std::string local_pkey(pkey);
     std::string *local_pkeyp = nullptr;
     if (local_pkey.size() != 0) {local_pkeyp = &local_pkey;}
     info->set<std::vector<std::string>>(local_key, nullptr, count, force, local_pkeyp);
-    esmf_rc = ESMF_SUCCESS;
+    esmc_rc = ESMF_SUCCESS;
   }
-  ESMF_INFO_CATCH_ISOC
+  ESMC_CATCH_ISOC
 }
 
 //-----------------------------------------------------------------------------
@@ -534,43 +534,43 @@ void ESMC_InfoSetArrayCH(ESMCI::Info *info, char *key, int &count,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoSetINFO()"
 void ESMC_InfoSetINFO(ESMCI::Info *info, char *key,
-  ESMCI::Info *value, bool &force, int &esmf_rc) {
-  ESMF_INFO_CHECKINIT(info, esmf_rc)
-  esmf_rc = ESMF_FAILURE;
+  ESMCI::Info *value, bool &force, int &esmc_rc) {
+  ESMC_CHECK_INIT(info, esmc_rc)
+  esmc_rc = ESMF_FAILURE;
   try {
     std::string local_key(key);
     info->set(local_key, *value, force);
-    esmf_rc = ESMF_SUCCESS;
+    esmc_rc = ESMF_SUCCESS;
   }
-  ESMF_INFO_CATCH_ISOC
+  ESMC_CATCH_ISOC
 }
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoSetNULL()"
-void ESMC_InfoSetNULL(ESMCI::Info *info, char *key, bool &force, int &esmf_rc) {
-  ESMF_INFO_CHECKINIT(info, esmf_rc)
-  esmf_rc = ESMF_FAILURE;
+void ESMC_InfoSetNULL(ESMCI::Info *info, char *key, bool &force, int &esmc_rc) {
+  ESMC_CHECK_INIT(info, esmc_rc)
+  esmc_rc = ESMF_FAILURE;
   try {
     std::string local_key(key);
     info->setNull(local_key, force);
-    esmf_rc = ESMF_SUCCESS;
+    esmc_rc = ESMF_SUCCESS;
   }
-  ESMF_INFO_CATCH_ISOC
+  ESMC_CATCH_ISOC
 }
 
 //-----------------------------------------------------------------------------
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoSetDirty"
-void ESMC_InfoSetDirty(ESMCI::Info *info, int &flag, int &esmf_rc) {
-  ESMF_INFO_CHECKINIT(info, esmf_rc)
-  esmf_rc = ESMF_FAILURE;
+void ESMC_InfoSetDirty(ESMCI::Info *info, int &flag, int &esmc_rc) {
+  ESMC_CHECK_INIT(info, esmc_rc)
+  esmc_rc = ESMF_FAILURE;
   try {
     bool cflag = flag == 1;
     info->setDirty(cflag);
-    esmf_rc = ESMF_SUCCESS;
+    esmc_rc = ESMF_SUCCESS;
   }
-  ESMF_INFO_CATCH_ISOC
+  ESMC_CATCH_ISOC
 }
 
 }  // extern "C"

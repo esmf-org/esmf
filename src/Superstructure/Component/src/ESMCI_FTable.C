@@ -1858,8 +1858,8 @@ std::cout << "calling out of case FT_VOIDP1INTP" << "\n";
           bool presentFlag;
           try {
             presentFlag = info->hasKey(key_cr, false);
-          } catch (ESMCI::esmf_info_error &exc_info) {
-            ESMC_LogDefault.MsgFoundError(exc_info.getReturnCode(), ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc);
+          } catch (ESMCI::esmc_error &exc) {
+            ESMC_LogDefault.MsgFoundError(exc.getReturnCode(), ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc);
             return rc; // bail out
           }
 
@@ -1878,8 +1878,8 @@ std::cout << "calling out of case FT_VOIDP1INTP" << "\n";
             std::string value;
             try {
               value = info->get<std::string>(key_cr);
-            } catch (ESMCI::esmf_info_error &exc_info) {
-              ESMC_LogDefault.MsgFoundError(exc_info.getReturnCode(), ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc);
+            } catch (ESMCI::esmc_error &exc) {
+              ESMC_LogDefault.MsgFoundError(exc.getReturnCode(), ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc);
               return rc; // bail out
             }
 

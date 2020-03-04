@@ -28,6 +28,67 @@ class ESMC_Base;
 //#include "ESMCI_Attribute.h"
 #include "ESMCI_Info.h"
 
+// Standard ESMC check error macros
+#define ESMC_CHECK_INIT(obj_to_check, esmc_rc_to_return) \
+  if (!obj_to_check) { \
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_NOT_CREATED, "Object pointer is null. Object has not been created appropriately.", ESMC_CONTEXT, &esmc_rc_to_return); \
+    return;}
+
+#define ESMC_CHECK_RC(name_rc, actual_rc, msg) {\
+  if (actual_rc != ESMF_SUCCESS) {\
+    ESMCI::esmc_error local_macro_error(name_rc, actual_rc, msg); \
+    if (ESMC_LogDefault.MsgFoundError(actual_rc, local_macro_error.what(), ESMC_CONTEXT, nullptr)) \
+      throw(local_macro_error);}}
+
+#define ESMC_CHECK_NULLPTR(target) \
+  if (!target) { \
+    ESMC_CHECK_RC("ESMF_RC_ARG_BAD", ESMC_RC_ARG_BAD, "Pointer may not be null") \
+  } \
+
+#define ESMC_ERRPASSTHRU(exc) {\
+  ESMC_LogDefault.MsgFoundError(exc.getReturnCode(), ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, nullptr); \
+  throw(exc);}
+
+#define ESMC_CATCH_ERRPASSTHRU \
+  catch (ESMCI::esmc_error &exc) {ESMC_ERRPASSTHRU(exc)}
+
+#define ESMC_CATCH_ISOC \
+  catch (ESMCI::esmc_error &exc) {\
+    ESMC_LogDefault.MsgFoundError(exc.getReturnCode(), exc.what(), ESMC_CONTEXT, nullptr); \
+    esmc_rc = exc.getReturnCode();} \
+  catch(...) {\
+    std::string msg;\
+  if (esmc_rc == ESMF_SUCCESS) {\
+    msg = "Unhandled throw and return code is ESMF_SUCCESS. Changing return code to ESMF_FAILURE";\
+    esmc_rc = ESMF_FAILURE;} \
+  else {\
+    msg = "Unhandled throw";}\
+  ESMC_LogDefault.MsgFoundError(esmc_rc, msg, ESMC_CONTEXT, nullptr);}
+
+//-----------------------------------------------------------------------------
+
+namespace ESMCI {
+  class Info;
+
+  class esmc_error : public std::exception
+  {
+  public:
+  
+    esmc_error(const std::string &code_name, int esmc_rc, const std::string &msg);
+  
+    const std::string getCodeName() {return this->code_name;}
+  
+    int getReturnCode() {return this->esmc_rc;}
+  
+    const char* what() const noexcept {return this->msg.c_str();}
+  
+  private:
+    std::string msg;
+    int esmc_rc;
+    std::string code_name;
+  };
+}
+
 //-----------------------------------------------------------------------------
 //BOP
 // !CLASS:  ESMC_Base - all ESMF classes inherit from ESMC_Base
@@ -41,9 +102,6 @@ class ESMC_Base;
 // !USES:
 
 // !PUBLIC TYPES:
- class ESMC_Base;
-// class Attribute;
-
 class ESMC_Base
 {
   protected:

@@ -21,41 +21,16 @@
 #include <vector>
 #include <fstream>
 
+#include "ESMCI_Base.h"
 #include "ESMCI_Util.h"
 #include "json.hpp"
 
 using json = nlohmann::json;  // Convenience rename for JSON namespace.
 
 // Standard ESMF check error macros
-#define ESMF_INFO_CHECKRC(name_rc, actual_rc, msg) {\
-  if (actual_rc != ESMF_SUCCESS) {\
-    ESMCI::esmf_info_error local_macro_error(name_rc, actual_rc, msg); \
-    if (ESMC_LogDefault.MsgFoundError(actual_rc, local_macro_error.what(), ESMC_CONTEXT, nullptr)) \
-      throw(local_macro_error);}}
-
 #define ESMF_INFO_THROW_JSON(json_exc, name_rc, actual_rc) {\
   ESMC_LogDefault.MsgFoundError(actual_rc, json_exc.what(), ESMC_CONTEXT, nullptr); \
-  throw(ESMCI::esmf_info_error(name_rc, actual_rc, json_exc.what()));}
-
-#define ESMF_INFO_ERRPASSTHRU(exc_info) {\
-  ESMC_LogDefault.MsgFoundError(exc_info.getReturnCode(), exc_info.what(), ESMC_CONTEXT, nullptr); \
-  throw(exc_info);}
-
-#define ESMF_INFO_CATCH_ERRPASSTHRU \
-  catch (ESMCI::esmf_info_error &exc_info) {ESMF_INFO_ERRPASSTHRU(exc_info)}
-
-#define ESMF_INFO_CATCH_ISOC \
-  catch (ESMCI::esmf_info_error &exc_info) {\
-    ESMC_LogDefault.MsgFoundError(exc_info.getReturnCode(), exc_info.what(), ESMC_CONTEXT, nullptr); \
-    esmf_rc = exc_info.getReturnCode();} \
-  catch(...) {\
-    std::string msg;\
-  if (esmf_rc == ESMF_SUCCESS) {\
-    msg = "Unhandled throw and return code is ESMF_SUCCESS. Changing return code to ESMF_FAILURE";\
-    esmf_rc = ESMF_FAILURE;} \
-  else {\
-    msg = "Unhandled throw";}\
-  ESMC_LogDefault.MsgFoundError(esmf_rc, msg, ESMC_CONTEXT, nullptr);}
+  throw(ESMCI::esmc_error(name_rc, actual_rc, json_exc.what()));}
 
 #define ESMF_INFO_CATCH_JSON \
   catch (json::out_of_range &e) {\
@@ -67,20 +42,11 @@ using json = nlohmann::json;  // Convenience rename for JSON namespace.
 
 #define ESMF_CATCH_INFO \
   ESMF_INFO_CATCH_JSON \
-  catch (ESMCI::esmf_info_error &exc_info) {\
-    ESMF_INFO_ERRPASSTHRU(exc_info);} \
+  catch (ESMCI::esmc_error &exc) {\
+    ESMC_ERRPASSTHRU(exc);} \
   catch (...) {\
-    ESMF_INFO_CHECKRC("ESMF_FAILURE", ESMF_FAILURE, "Unhandled throw");}
+    ESMC_CHECK_RC("ESMF_FAILURE", ESMF_FAILURE, "Unhandled throw");}
 
-#define ESMF_INFO_CHECKINIT(info_to_check, esmf_rc_to_return) \
-  if (!info_to_check) { \
-    ESMC_LogDefault.MsgFoundError(ESMF_RC_OBJ_NOT_CREATED, "Info pointer is null. Object has not been created appropriately. Was ESMF_InfoCreate used?", ESMC_CONTEXT, &esmf_rc_to_return); \
-    return;}
-
-#define ESMF_INFO_CHECK_NULLPTR(target) \
-  if (!target) { \
-    ESMF_INFO_CHECKRC("ESMF_RC_ARG_BAD", ESMF_RC_ARG_BAD, "Pointer may not be null") \
-  } \
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -104,25 +70,6 @@ typedef json::array_t const *arrjson_t;
 typedef std::unordered_map<std::string, std::size_t> count_map_t;
 
 enum ESMC_ISOCType {C_INT, C_LONG, C_FLOAT, C_DOUBLE, C_CHAR};
-
-//-----------------------------------------------------------------------------
-
-class esmf_info_error : public std::exception
-{
-public:
-  esmf_info_error(key_t &code_name, int esmf_rc, key_t &msg);
-
-  key_t getCodeName() {return this->code_name;}
-
-  int getReturnCode() {return this->esmf_rc;}
-
-  const char* what() const noexcept {return this->msg.c_str();}
-
-private:
-  std::string msg;
-  int esmf_rc;
-  key_t code_name;
-};
 
 //-----------------------------------------------------------------------------
 

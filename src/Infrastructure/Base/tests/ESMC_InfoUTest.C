@@ -47,7 +47,7 @@ void testbroadcastInfo(int& rc, char failMsg[]) {
   rc = ESMF_FAILURE;
 
   ESMCI::VM *vm = ESMCI::VM::getCurrent(&rc);
-  ESMF_INFO_CHECKRC("", rc, "Did not get current VM");
+  ESMC_CHECK_RC("", rc, "Did not get current VM");
 
   int localPet = vm->getLocalPet();
   int petCount = vm->getPetCount();
@@ -67,13 +67,13 @@ void testbroadcastInfo(int& rc, char failMsg[]) {
     try {
         info.set("foo", desired, false);
     }
-    ESMF_INFO_CATCH_ERRPASSTHRU
+    ESMC_CATCH_ERRPASSTHRU
   }
 
   try {
     ESMCI::broadcastInfo(&info, rootPet, *vm);
   }
-  ESMF_INFO_CATCH_ERRPASSTHRU
+  ESMC_CATCH_ERRPASSTHRU
 
   try {
     int actual = info.get<int>("foo");
@@ -81,7 +81,7 @@ void testbroadcastInfo(int& rc, char failMsg[]) {
       return finalizeFailure(rc, failMsg, "Value not broadcast");
     }
   }
-  ESMF_INFO_CATCH_ERRPASSTHRU
+  ESMC_CATCH_ERRPASSTHRU
 };
 
 #undef  ESMC_METHOD
@@ -102,7 +102,7 @@ void testConstructor(int& rc, char failMsg[]) {
       return finalizeFailure(rc, failMsg, "JSON object changed value");
     }
   }
-  ESMF_INFO_CATCH_ERRPASSTHRU
+  ESMC_CATCH_ERRPASSTHRU
 
   root.clear();
   try {
@@ -111,7 +111,7 @@ void testConstructor(int& rc, char failMsg[]) {
       return finalizeFailure(rc, failMsg, "Clear removed desired value");
     }
   }
-  ESMF_INFO_CATCH_ERRPASSTHRU
+  ESMC_CATCH_ERRPASSTHRU
 
   //---------------------------------------------------------------------------
   // Test move constructor
@@ -136,7 +136,7 @@ void testConstructor(int& rc, char failMsg[]) {
       return finalizeFailure(rc, failMsg, "Pointer addresses not equal after move");
     }
   }
-  ESMF_INFO_CATCH_ERRPASSTHRU
+  ESMC_CATCH_ERRPASSTHRU
   rc = ESMF_SUCCESS;
 };
 
@@ -150,7 +150,7 @@ void testGet(int& rc, char failMsg[]) {
   try {
     info.set("target", 50, false);
   }
-  ESMF_INFO_CATCH_ERRPASSTHRU
+  ESMC_CATCH_ERRPASSTHRU
 
   try {
     auto actual = info.get<int>("target");
@@ -167,12 +167,12 @@ void testGet(int& rc, char failMsg[]) {
       return finalizeFailure(rc, failMsg, "Addresses should not be equal");
     }
   }
-  ESMF_INFO_CATCH_ERRPASSTHRU
+  ESMC_CATCH_ERRPASSTHRU
 
   try {
     info.get<int>("blah");
     return finalizeFailure(rc, failMsg, "Error not raised for missing key");
-  } catch (esmf_info_error& err) {
+  } catch (esmc_error& err) {
     if (err.getReturnCode() != ESMF_RC_ATTR_NOTSET) {
       return finalizeFailure(rc, failMsg, "Wrong error return code");
     }
@@ -189,7 +189,7 @@ void testGet(int& rc, char failMsg[]) {
       return finalizeFailure(rc, failMsg, "Did not get default value");
     }
   }
-  ESMF_INFO_CATCH_ERRPASSTHRU
+  ESMC_CATCH_ERRPASSTHRU
 
   rc = ESMF_SUCCESS;
   return;
@@ -210,7 +210,7 @@ void testGetObjectIndex(int& rc, char failMsg[]) {
     int index = 1;
     actual = info.get<int>(key, nullptr, &index, false, &actual_key);
   }
-  ESMF_INFO_CATCH_ERRPASSTHRU
+  ESMC_CATCH_ERRPASSTHRU
 
   // Test object index retrieval with key value
   if (actual != 2 && actual_key != "foo2") {
@@ -224,7 +224,7 @@ void testGetObjectIndex(int& rc, char failMsg[]) {
     actual = info.get<int>(key, nullptr, &index);
     return finalizeFailure(rc, failMsg, "Did not catch wrong type");
   }
-  catch (ESMCI::esmf_info_error &exc_esmf) {
+  catch (ESMCI::esmc_error &exc_esmf) {
     rc = ESMF_SUCCESS;
   }
 
@@ -235,7 +235,7 @@ void testGetObjectIndex(int& rc, char failMsg[]) {
     actual = info.get<int>(key, nullptr, &index);
     return finalizeFailure(rc, failMsg, "Did not catch out of range");
   }
-  catch (ESMCI::esmf_info_error &exc_esmf) {
+  catch (ESMCI::esmc_error &exc_esmf) {
     rc = ESMF_SUCCESS;
   }
 }
@@ -257,8 +257,8 @@ void testSetGetIndex(int& rc, char failMsg[]) {
       info.set<double>(key, values[ii], false, &ii);
     }
   }
-  catch (ESMCI::esmf_info_error &exc_esmf) {
-    ESMF_INFO_ERRPASSTHRU(exc_esmf);
+  catch (ESMCI::esmc_error &exc_esmf) {
+    ESMC_ERRPASSTHRU(exc_esmf);
   }
   double diff;
   double actual;
@@ -266,8 +266,8 @@ void testSetGetIndex(int& rc, char failMsg[]) {
     try {
       actual = info.get<double>(key, nullptr, &ii);
     }
-    catch (ESMCI::esmf_info_error &exc_esmf) {
-      ESMF_INFO_ERRPASSTHRU(exc_esmf);
+    catch (ESMCI::esmc_error &exc_esmf) {
+      ESMC_ERRPASSTHRU(exc_esmf);
     }
     diff = std::abs(values[ii] - actual);
     if (diff >= 1e-16) {
@@ -281,7 +281,7 @@ void testSetGetIndex(int& rc, char failMsg[]) {
   try {
     actual = info.get<double>(key, nullptr, &jj);
   }
-  catch (ESMCI::esmf_info_error &exc_esmf) {
+  catch (ESMCI::esmc_error &exc_esmf) {
     if (exc_esmf.getReturnCode() != ESMC_RC_ARG_OUTOFRANGE) {
       return finalizeFailure(rc, failMsg, "Did not handle out_of_range");
     } else {
@@ -296,7 +296,7 @@ void testSetGetIndex(int& rc, char failMsg[]) {
   try {
     info.set<int>(not_there, 111, false, &noidx);
   }
-  catch (ESMCI::esmf_info_error &exc_esmf) {
+  catch (ESMCI::esmc_error &exc_esmf) {
     if (exc_esmf.getReturnCode() == ESMC_RC_NOT_FOUND) {
       rc = ESMF_SUCCESS;
     } else {
@@ -315,7 +315,7 @@ void testHasKey(int& rc, char failMsg[]) {
   try {
     info.set("/neverEver", 13, false);
   }
-  ESMF_INFO_CATCH_ERRPASSTHRU
+  ESMC_CATCH_ERRPASSTHRU
 
   bool actual = info.hasKey("/hello", true);
   if (actual){
@@ -347,12 +347,12 @@ void testErase(int& rc, char failMsg[]) {
   try {
     info.set(key, 10, false);
   }
-  ESMF_INFO_CATCH_ERRPASSTHRU
+  ESMC_CATCH_ERRPASSTHRU
 
   try {
     info.erase("/something", "nested");
   }
-  ESMF_INFO_CATCH_ERRPASSTHRU
+  ESMC_CATCH_ERRPASSTHRU
 
   const json &storage = info.getStorageRef();
   const json &actual = storage["something"];
@@ -369,7 +369,7 @@ void testErase(int& rc, char failMsg[]) {
     info.erase("/nothing", "nested");
     failed = true;
   }
-  catch (esmf_info_error &err) {
+  catch (esmc_error &err) {
     if (err.getReturnCode() == ESMC_RC_NOT_FOUND){
       failed = false;
     }
@@ -383,7 +383,7 @@ void testErase(int& rc, char failMsg[]) {
     info.erase("/something", "underground");
     failed = true;
   }
-  catch (esmf_info_error &err){
+  catch (esmc_error &err){
     if (err.getReturnCode() == ESMC_RC_NOT_FOUND){
       failed = false;
     }
@@ -405,7 +405,7 @@ void testFormatKey(int& rc, char failMsg[]) {
   try {
     has_key = info.hasKey("/foo/~", true);
   }
-  catch (ESMCI::esmf_info_error &exc_esmf) {
+  catch (ESMCI::esmc_error &exc_esmf) {
     if (exc_esmf.getReturnCode() != ESMC_RC_ARG_BAD) {
       return finalizeFailure(rc, failMsg, "Did not handle JSON parse error");
     }
@@ -501,7 +501,7 @@ void testSetGet(int& rc, char failMsg[]) {
   try {
     info.set(key, value, false);
   }
-  ESMF_INFO_CATCH_ERRPASSTHRU
+  ESMC_CATCH_ERRPASSTHRU
 
   const json& storage = info.getStorageRef();
 
@@ -517,7 +517,7 @@ void testSetGet(int& rc, char failMsg[]) {
       return finalizeFailure(rc, failMsg, "Did not get pointer key correctly");
     }
   }
-  ESMF_INFO_CATCH_ERRPASSTHRU
+  ESMC_CATCH_ERRPASSTHRU
 
   //---------------------------------------------------------------------------
 
@@ -527,7 +527,7 @@ void testSetGet(int& rc, char failMsg[]) {
   try {
     info.set(keyp, value2, false);
   }
-  ESMF_INFO_CATCH_ERRPASSTHRU
+  ESMC_CATCH_ERRPASSTHRU
 
   if (storage["root"]["group1"]["group2"] != value2){
     return finalizeFailure(rc, failMsg, "Did not set nested key correctly");
@@ -540,7 +540,7 @@ void testSetGet(int& rc, char failMsg[]) {
       return finalizeFailure(rc, failMsg, "Did not get nested key correctly");
     }
   }
-  ESMF_INFO_CATCH_ERRPASSTHRU
+  ESMC_CATCH_ERRPASSTHRU
 
   //---------------------------------------------------------------------------
 
@@ -548,13 +548,13 @@ void testSetGet(int& rc, char failMsg[]) {
   try {
     info.set(key, 10, false);
   }
-  ESMF_INFO_CATCH_ERRPASSTHRU
+  ESMC_CATCH_ERRPASSTHRU
 
   value = 12;
   try {
     info.set(key, value, true);
   }
-  ESMF_INFO_CATCH_ERRPASSTHRU
+  ESMC_CATCH_ERRPASSTHRU
 
   if (*info.getPointer(key) != value){
     return finalizeFailure(rc, failMsg, "Did not overload existing key correctly");
@@ -567,7 +567,7 @@ void testSetGet(int& rc, char failMsg[]) {
   try {
     info.set(key, value3, false);
   }
-  ESMF_INFO_CATCH_ERRPASSTHRU
+  ESMC_CATCH_ERRPASSTHRU
 
   try {
     string actual3 = info.get<string>(key);
@@ -575,7 +575,7 @@ void testSetGet(int& rc, char failMsg[]) {
       return finalizeFailure(rc, failMsg, "Did not get string value");
     }
   }
-  ESMF_INFO_CATCH_ERRPASSTHRU
+  ESMC_CATCH_ERRPASSTHRU
 
   // Test using a JSON Pointer with an array ==================================
 
@@ -591,7 +591,7 @@ void testSetGet(int& rc, char failMsg[]) {
       return finalizeFailure(rc, failMsg, "Did not get array element value");
     }
   }
-  ESMF_INFO_CATCH_ERRPASSTHRU
+  ESMC_CATCH_ERRPASSTHRU
 
   // Test with an array pointer ===============================================
 
@@ -603,7 +603,7 @@ void testSetGet(int& rc, char failMsg[]) {
   try {
     info2.set("the-key", c_int_arr, count, false);
   }
-  ESMF_INFO_CATCH_ERRPASSTHRU
+  ESMC_CATCH_ERRPASSTHRU
 
   json::array_t apref = info2.getStorageRef()["the-key"];
 
@@ -631,7 +631,7 @@ void testSetGet(int& rc, char failMsg[]) {
   try {
     pkey_test.set("foo", 22, false, nullptr, &pkey);
   }
-  ESMF_INFO_CATCH_ERRPASSTHRU
+  ESMC_CATCH_ERRPASSTHRU
   if (pkey_test.get<int>("/parent/storage/foo") != 22) {
     return finalizeFailure(rc, failMsg, "Parent key set failure");
   }
@@ -646,7 +646,7 @@ void testSetGet(int& rc, char failMsg[]) {
     info_host.set("hello", info_to_set, false);
     actual = info_host.get<int>("/hello/a");
   }
-  ESMF_INFO_CATCH_ERRPASSTHRU
+  ESMC_CATCH_ERRPASSTHRU
 
   if (actual != 55) {
     return finalizeFailure(rc, failMsg, "Did not set info object");
@@ -664,7 +664,7 @@ void testSetGetErrorHandling(int& rc, char failMsg[]) {
   //---------------------------------------------------------------------------
   // Test the ESMF info exception
 
-  esmf_info_error ae("ESMC_RC_NOT_FOUND", ESMC_RC_NOT_FOUND, "a message");
+  esmc_error ae("ESMC_RC_NOT_FOUND", ESMC_RC_NOT_FOUND, "a message");
   const char *actual = ae.what();
   string desired = "Error/Return Code 541 (ESMC_RC_NOT_FOUND) - a message";
   if (actual != desired || ae.getReturnCode() != ESMC_RC_NOT_FOUND) {
@@ -682,7 +682,7 @@ void testSetGetErrorHandling(int& rc, char failMsg[]) {
   try {
     auto actual = info.getPointer(key);
   }
-  catch (esmf_info_error& err) {
+  catch (esmc_error& err) {
     if (err.getReturnCode() == ESMC_RC_NOT_FOUND){
       failed = false;
     }
@@ -701,13 +701,13 @@ void testSetGetErrorHandling(int& rc, char failMsg[]) {
   try {
     info.set(key2, 111, false);
   }
-  ESMF_INFO_CATCH_ERRPASSTHRU
+  ESMC_CATCH_ERRPASSTHRU
 
   failed = true;
   try {
     info.set(key2, 222, false);
   }
-  catch (esmf_info_error &err) {
+  catch (esmc_error &err) {
     if (err.getReturnCode() == ESMC_RC_CANNOT_SET) {
       failed = false;
     }
@@ -724,7 +724,7 @@ void testSetGetErrorHandling(int& rc, char failMsg[]) {
   try {
     info.set(key3, 111, false);
   }
-  catch (esmf_info_error &err) {
+  catch (esmc_error &err) {
     if (err.getReturnCode() == ESMC_RC_ARG_BAD) {
       failed = false;
     }
@@ -749,14 +749,14 @@ void testDumpLength(int& rc, char failMsg[]) {
   try {
     infobuff = info.dump();
   }
-  ESMF_INFO_CATCH_ERRPASSTHRU
+  ESMC_CATCH_ERRPASSTHRU
 
   std::size_t sf = infobuff.length();
   try {
     info.set("the_int", 50, false);
     infobuff = info.dump();
   }
-  ESMF_INFO_CATCH_ERRPASSTHRU
+  ESMC_CATCH_ERRPASSTHRU
 
   std::size_t sf2 = infobuff.length();
   if (sf2 < sf) {
@@ -776,8 +776,8 @@ void testSerializeDeserialize(int& rc, char failMsg[]) {
   try {
     info.set("foo", 16, false);
   }
-  catch (esmf_info_error &e) {
-    ESMF_INFO_ERRPASSTHRU(e);
+  catch (esmc_error &e) {
+    ESMC_ERRPASSTHRU(e);
   }
   char *null_buffer = nullptr;
   int inquire_length = 0;
@@ -785,8 +785,8 @@ void testSerializeDeserialize(int& rc, char failMsg[]) {
   try {
     info.serialize(null_buffer, &inquire_length, &offset, ESMF_INQUIREONLY);
   }
-  catch (esmf_info_error &e) {
-    ESMF_INFO_ERRPASSTHRU(e);
+  catch (esmc_error &e) {
+    ESMC_ERRPASSTHRU(e);
   }
   if (inquire_length != 0) {
     return finalizeFailure(rc, failMsg, "Should not have adjusted length");
@@ -797,8 +797,8 @@ void testSerializeDeserialize(int& rc, char failMsg[]) {
   try {
     info.serialize(buffer, &inquire_length, &offset, ESMF_NOINQUIRE);
   }
-  catch (esmf_info_error &e) {
-    ESMF_INFO_ERRPASSTHRU(e);
+  catch (esmc_error &e) {
+    ESMC_ERRPASSTHRU(e);
   }
 
   Info deinfo;
@@ -806,8 +806,8 @@ void testSerializeDeserialize(int& rc, char failMsg[]) {
   try {
     deinfo.deserialize(buffer, &deoffset);
   }
-  catch (esmf_info_error &e) {
-    ESMF_INFO_ERRPASSTHRU(e);
+  catch (esmc_error &e) {
+    ESMC_ERRPASSTHRU(e);
   }
   if (deoffset != offset) {
     return finalizeFailure(rc, failMsg, "Deserialize offset incorrect");
@@ -836,7 +836,7 @@ void testSerializeDeserialize2(int& rc, char failMsg[]) {
       try {
         element->serialize(null_buffer, &inquire_length, &offset, ESMF_INQUIREONLY);
       }
-      ESMF_INFO_CATCH_ERRPASSTHRU
+      ESMC_CATCH_ERRPASSTHRU
     }
     inquire_length = offset;
     offset = 0;
@@ -845,7 +845,7 @@ void testSerializeDeserialize2(int& rc, char failMsg[]) {
       try {
         element->serialize(buffer, &inquire_length, &offset, ESMF_NOINQUIRE);
       }
-      ESMF_INFO_CATCH_ERRPASSTHRU
+      ESMC_CATCH_ERRPASSTHRU
     }
 
     Info infod;
@@ -857,7 +857,7 @@ void testSerializeDeserialize2(int& rc, char failMsg[]) {
       try {
         element->deserialize(buffer, &offset);
       }
-      ESMF_INFO_CATCH_ERRPASSTHRU
+      ESMC_CATCH_ERRPASSTHRU
     }
 
     for (std::size_t ii = 0; ii < infops.size(); ++ii) {
@@ -868,7 +868,7 @@ void testSerializeDeserialize2(int& rc, char failMsg[]) {
       }
     }
   }
-  ESMF_INFO_CATCH_ERRPASSTHRU
+  ESMC_CATCH_ERRPASSTHRU
   rc = ESMF_SUCCESS;
 };
 
@@ -890,7 +890,7 @@ void testInquire(int& rc, char failMsg[]) {
   try {
     inq = info.inquire("", def_recursive, def_idx, true);
   }
-  ESMF_INFO_CATCH_ERRPASSTHRU
+  ESMC_CATCH_ERRPASSTHRU
   if(inq.at("attPackCount")!=2) {
     return finalizeFailure(rc, failMsg, "Wrong inquire count");
   }
@@ -898,7 +898,7 @@ void testInquire(int& rc, char failMsg[]) {
   try {
     inq = info.inquire("/ESMF/General");
   }
-  ESMF_INFO_CATCH_ERRPASSTHRU
+  ESMC_CATCH_ERRPASSTHRU
   if(inq.at("size")!=2) {
     return finalizeFailure(rc, failMsg, "Wrong inquire size with key");
   }
@@ -906,7 +906,7 @@ void testInquire(int& rc, char failMsg[]) {
   try {
     inq = info.inquire("", true, def_idx, true);
   }
-  ESMF_INFO_CATCH_ERRPASSTHRU
+  ESMC_CATCH_ERRPASSTHRU
   if(inq.at("attrCountTotal")!=4) {
     return finalizeFailure(rc, failMsg, "Wrong inquire attribute count with recursive");
   }
@@ -916,7 +916,7 @@ void testInquire(int& rc, char failMsg[]) {
     int idx = 1;
     inq = info.inquire("/NUOPC/General/foobar", false, &idx);
   }
-  ESMF_INFO_CATCH_ERRPASSTHRU
+  ESMC_CATCH_ERRPASSTHRU
   if(inq.at("jsonType")!="number") {
     return finalizeFailure(rc, failMsg, "Wrong inquire count with recursive");
   }
@@ -926,7 +926,7 @@ void testInquire(int& rc, char failMsg[]) {
     int idx = 1;
     inq = info.inquire("/ESMF/General", false, &idx);
   }
-  ESMF_INFO_CATCH_ERRPASSTHRU
+  ESMC_CATCH_ERRPASSTHRU
   if (inq.at("key") != "x") {
     return finalizeFailure(rc, failMsg, "Did not use object index correctly");
   }
@@ -939,7 +939,7 @@ void testInquire(int& rc, char failMsg[]) {
   try {
     inq2 = info2.inquire("character");
   }
-  ESMF_INFO_CATCH_ERRPASSTHRU
+  ESMC_CATCH_ERRPASSTHRU
   if (inq2.at("size") != 1) {
     return finalizeFailure(rc, failMsg, "Wrong size");
   }
@@ -970,7 +970,7 @@ void testUpdate(int& rc, char failMsg[]) {
   try {
     update_target_info.update(used_to_update_info);
   }
-  ESMF_INFO_CATCH_ERRPASSTHRU
+  ESMC_CATCH_ERRPASSTHRU
 
   const json desired = R"( {"color": "blue", "price": 17.99, "speed": 100} )"_json;
 
@@ -1076,7 +1076,7 @@ void test_find_by_index(int& rc, char failMsg[]) {
     it = find_by_index(j, 10, true, false);
     return finalizeFailure(rc, failMsg, "did not catch out of range");
   }
-  catch (esmf_info_error &exc) {
+  catch (esmc_error &exc) {
     if (exc.getReturnCode() != ESMC_RC_NOT_FOUND) {
       return finalizeFailure(rc, failMsg, "wrong rc");
     }

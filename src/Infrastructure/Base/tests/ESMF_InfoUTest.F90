@@ -830,7 +830,7 @@ program ESMF_InfoUTest
 
   call ESMF_InfoSet(info_uninit, "not-init", "empty-value", rc=rc)
 
-  call ESMF_Test(rc==ESMF_RC_OBJ_NOT_CREATED, name, failMsg, result, ESMF_SRCLINE)
+  call ESMF_Test(rc==ESMC_RC_OBJ_NOT_CREATED, name, failMsg, result, ESMF_SRCLINE)
   !----------------------------------------------------------------------------
 
   !----------------------------------------------------------------------------

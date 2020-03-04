@@ -3935,8 +3935,8 @@ int Array::write(
         dimAttPack = new ESMCI::Info();
         info_dg->get(*dimAttPack, key);
       }
-    } catch (ESMCI::esmf_info_error &exc_info) {
-      ESMC_LogDefault.MsgFoundError(exc_info.getReturnCode(), exc_info.what(), ESMC_CONTEXT, &rc);
+    } catch (ESMCI::esmc_error &exc) {
+      ESMC_LogDefault.MsgFoundError(exc.getReturnCode(), exc.what(), ESMC_CONTEXT, &rc);
       return rc;
     }
   }
@@ -3949,8 +3949,8 @@ int Array::write(
         varAttPack = new ESMCI::Info();
         info_this->get(*varAttPack, key);
       }
-    } catch (ESMCI::esmf_info_error &exc_info) {
-      ESMC_LogDefault.MsgFoundError(exc_info.getReturnCode(), exc_info.what(), ESMC_CONTEXT, &rc);
+    } catch (ESMCI::esmc_error &exc) {
+      ESMC_LogDefault.MsgFoundError(exc.getReturnCode(), exc.what(), ESMC_CONTEXT, &rc);
       return rc;
     }
   }
