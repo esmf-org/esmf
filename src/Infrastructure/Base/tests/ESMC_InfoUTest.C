@@ -1114,7 +1114,7 @@ void test_implicit_conversion(int& rc, char failMsg[]) {
     int an_int = info.get<int>("float", nullptr, nullptr, false, nullptr, false);
     return finalizeFailure(rc, failMsg, "did not catch implicit conversion");
   }
-  catch (esmf_info_error &exc) {
+  catch (esmc_error &exc) {
     if (exc.getReturnCode() != ESMC_RC_ARG_BAD) {
       return finalizeFailure(rc, failMsg, "wrong rc");
     }
@@ -1128,7 +1128,7 @@ void test_implicit_conversion(int& rc, char failMsg[]) {
     int an_int = info.get<int>("float-array", nullptr, &index, false, nullptr, false);
     return finalizeFailure(rc, failMsg, "did not catch implicit conversion for array");
   }
-  catch (esmf_info_error &exc) {
+  catch (esmc_error &exc) {
     if (exc.getReturnCode() != ESMC_RC_ARG_BAD) {
       return finalizeFailure(rc, failMsg, "wrong rc");
     }

@@ -79,7 +79,7 @@ void {{ method_name }}(ESMCI::Info *info, char *key, {{ t.ctype }} {% if is_scal
           try {
             ESMCI::handleJSONTypeCheck(local_key, value[ii], ap_at);
           }
-          ESMC_ERRPASSTHRU
+          ESMC_CATCH_ERRPASSTHRU
         }
         catch (std::out_of_range &exc) {
           ESMC_CHECK_RC("ESMF_RC_ARG_OUTOFRANGE", ESMF_RC_ARG_OUTOFRANGE, std::string(exc.what()));

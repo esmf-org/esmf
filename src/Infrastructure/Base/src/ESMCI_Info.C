@@ -629,7 +629,7 @@ json::json_pointer Info::formatKey(key_t& key) {
       T archetype; \
       handleJSONTypeCheck(key, json(archetype), dst); \
     } \
-    ESMF_INFO_CATCH_ERRPASSTHRU}
+    ESMC_CATCH_ERRPASSTHRU}
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "Info::get()"

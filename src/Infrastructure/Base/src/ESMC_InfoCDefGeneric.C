@@ -152,7 +152,7 @@ void ESMC_InfoGetArrayR4(ESMCI::Info *info, char *key, float *value, int &count,
           try {
             ESMCI::handleJSONTypeCheck(local_key, value[ii], ap_at);
           }
-          ESMC_ERRPASSTHRU
+          ESMC_CATCH_ERRPASSTHRU
         }
         catch (std::out_of_range &exc) {
           ESMC_CHECK_RC("ESMF_RC_ARG_OUTOFRANGE", ESMF_RC_ARG_OUTOFRANGE, std::string(exc.what()));
@@ -190,7 +190,7 @@ void ESMC_InfoGetArrayR8(ESMCI::Info *info, char *key, double *value, int &count
           try {
             ESMCI::handleJSONTypeCheck(local_key, value[ii], ap_at);
           }
-          ESMC_ERRPASSTHRU
+          ESMC_CATCH_ERRPASSTHRU
         }
         catch (std::out_of_range &exc) {
           ESMC_CHECK_RC("ESMF_RC_ARG_OUTOFRANGE", ESMF_RC_ARG_OUTOFRANGE, std::string(exc.what()));
@@ -228,7 +228,7 @@ void ESMC_InfoGetArrayI4(ESMCI::Info *info, char *key, int *value, int &count, i
           try {
             ESMCI::handleJSONTypeCheck(local_key, value[ii], ap_at);
           }
-          ESMC_ERRPASSTHRU
+          ESMC_CATCH_ERRPASSTHRU
         }
         catch (std::out_of_range &exc) {
           ESMC_CHECK_RC("ESMF_RC_ARG_OUTOFRANGE", ESMF_RC_ARG_OUTOFRANGE, std::string(exc.what()));
@@ -266,7 +266,7 @@ void ESMC_InfoGetArrayI8(ESMCI::Info *info, char *key, long int *value, int &cou
           try {
             ESMCI::handleJSONTypeCheck(local_key, value[ii], ap_at);
           }
-          ESMC_ERRPASSTHRU
+          ESMC_CATCH_ERRPASSTHRU
         }
         catch (std::out_of_range &exc) {
           ESMC_CHECK_RC("ESMF_RC_ARG_OUTOFRANGE", ESMF_RC_ARG_OUTOFRANGE, std::string(exc.what()));
@@ -304,7 +304,7 @@ void ESMC_InfoGetArrayLG(ESMCI::Info *info, char *key, bool *value, int &count, 
           try {
             ESMCI::handleJSONTypeCheck(local_key, value[ii], ap_at);
           }
-          ESMC_ERRPASSTHRU
+          ESMC_CATCH_ERRPASSTHRU
         }
         catch (std::out_of_range &exc) {
           ESMC_CHECK_RC("ESMF_RC_ARG_OUTOFRANGE", ESMF_RC_ARG_OUTOFRANGE, std::string(exc.what()));
