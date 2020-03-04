@@ -351,7 +351,11 @@ bool handleHasKey(const Info &info, const json::json_pointer &jpkey, bool force)
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "handleJSONTypeCheck()"
-void handleJSONTypeCheck(key_t &key, const json &src, const json &dst) {
+void handleJSONTypeCheck(
+  key_t &key,       // used for error string formatting
+  const json &src,  // the source target; the JSON type we are interested in checking
+  const json &dst   // the destination target used to check against
+                         ) {
   if (!src.is_null() && src.type() != dst.type()) {
     // Allowed unsigned to integer conversion and vice-versa.
     if (!((src.type() == json::value_t::number_integer ||
@@ -637,6 +641,7 @@ template <typename T>
 T Info::get(key_t &key, const T *def, const int *index, bool recursive, std::string *ikey,
   bool allow_implicit) const {
   // Exceptions:  ESMCI:esmc_error
+  //tdk:todo: implement a truncation check for 32-bit to 64-bit
 
 #if 0
     std::string prefix = std::string(ESMC_METHOD) + ": ";
