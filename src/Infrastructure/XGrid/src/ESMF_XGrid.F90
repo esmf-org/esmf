@@ -147,6 +147,7 @@ module ESMF_XGridMod
 ! - ESMF-public methods:
    public ESMF_XGridValidate           ! Check internal consistency
    public ESMF_XGridMatch              ! Check if two XGrids match
+   public ESMF_XGridWriteVTK           ! Write midmesh as vtk file for examination
 
    public assignment(=)
    public operator(==)
@@ -1254,6 +1255,69 @@ contains
       if  (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_XGridDeserialize
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_XGridWriteVTK"
+
+!BOPI
+! !IROUTINE: ESMF_XGridWriteVTK - Write the midmesh in XGrid
+!
+! !INTERFACE:
+      subroutine ESMF_XGridWriteVTK(xgrid, filename, &
+         nodeArray1, nodeArray2, nodeArray3, &
+         elemArray1, elemArray2, elemArray3, &
+         rc)
+!
+! !ARGUMENTS:
+      type(ESMF_XGrid), intent(in)            :: xgrid
+      character(len=*), intent(in)            :: filename
+      type(ESMF_Array), intent(in), optional  :: nodeArray1
+      type(ESMF_Array), intent(in), optional  :: nodeArray2
+      type(ESMF_Array), intent(in), optional  :: nodeArray3
+      type(ESMF_Array), intent(in), optional  :: elemArray1
+      type(ESMF_Array), intent(in), optional  :: elemArray2
+      type(ESMF_Array), intent(in), optional  :: elemArray3
+      integer,          intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Write the midmesh in XGrid as vtk file and possibly some data for examination
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [xgrid]
+!           XGrid to write. Must be created upon entry.
+!     \item [filename]
+!           VTK filename
+!   \item[{[nodeArray1-3]}]
+!         Arrays built on the node location of the mesh
+!   \item[{[elemArray1-3]}]
+!         Arrays built on the element location of the mesh
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+      integer :: localrc
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if  (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      if(xgrid%xgtypep%storeoverlay) then
+        call ESMF_MeshWriteVTK(xgrid%xgtypep%mesh, filename=filename, &
+         nodeArray1=nodeArray1, nodeArray2=nodeArray2, nodeArray3=nodeArray3, &
+         elemArray1=elemArray1, elemArray2=elemArray2, elemArray3=elemArray3, &
+         rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+           ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+
+      if  (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_XGridWriteVTK
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

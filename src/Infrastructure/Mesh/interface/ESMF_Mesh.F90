@@ -1032,7 +1032,6 @@ end subroutine
 !------------------------------------------------------------------------------
     integer :: localrc
     type(ESMF_CoordSys_Flag) :: coordSysLocal
-    integer :: len_name
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1050,15 +1049,13 @@ end subroutine
 
     ! Optional name argument requires separate calls into C++
     if (present(name)) then
-      len_name = len(name)
       call c_ESMC_meshcreate(ESMF_MeshCreate3Part%this, parametricDim, spatialDim, &
-                           coordSysLocal, name, len_name, localrc)
+                           coordSysLocal, name, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else 
-      len_name = 0
       call c_ESMC_meshcreate(ESMF_MeshCreate3Part%this, parametricDim, spatialDim, &
-                           coordSysLocal, "", len_name, localrc)
+                           coordSysLocal, "", localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
@@ -1273,7 +1270,6 @@ end subroutine
     real(ESMF_KIND_R8) :: tmpCoords(2)
     integer :: coordsPresent
     type(ESMF_CoordSys_Flag) :: coordSysLocal
-    integer :: len_name
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1314,15 +1310,13 @@ end subroutine
     ! Create C++ Mesh
     ! Optional name argument requires separate calls into C++
     if (present(name)) then
-      len_name = len(name)
       call c_ESMC_meshcreate(ESMF_MeshCreate1Part%this, parametricDim, spatialDim, &
-                             coordSyslocal, name, len_name, localrc)
+                             coordSyslocal, name, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
-      len_name = 0
       call c_ESMC_meshcreate(ESMF_MeshCreate1Part%this, parametricDim, spatialDim, &
-                             coordSyslocal, "", len_name, localrc)
+                             coordSyslocal, "", localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
@@ -1641,20 +1635,17 @@ end function ESMF_MeshCreateFromDG
     integer::  localrc
     type(ESMF_CoordSys_Flag) :: coordSys
     integer :: dimCount
-    integer :: len_name
 
     ! Create C side Mesh
     ! Optional name argument requires separate calls into C++
     if (present(name)) then
-      len_name = len(name)
       call C_ESMC_MeshCreateFromGrid(ESMF_MeshCreateFromGrid%this, &
-                                     grid, name, len_name, localrc)
+                                     grid, name, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
     else
-      len_name = 0
       call C_ESMC_MeshCreateFromGrid(ESMF_MeshCreateFromGrid%this, &
-                                     grid, "", len_name, localrc)
+                                     grid, "", localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
     endif
