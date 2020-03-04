@@ -54,9 +54,9 @@ extern "C" {
 {% set method_name = method_name~t.esmf_suffix %}
 #undef  ESMC_METHOD
 #define ESMC_METHOD "{{ method_name }}()"
-void {{ method_name }}(ESMCI::Info *info, char *key, {{ t.ctype }} {% if is_scalar %}&{% else %}*{% endif %}value, {% if not is_scalar %}int &count, {% endif %}int &esmf_rc, {% if is_scalar %}{{ t.ctype }} *def, int *index, {% endif %}int &fortran_bool_recursive{% if not is_scalar %}, bool &fortran_bool_scalarToArray{% endif %}) {
-  ESMF_INFO_CHECKINIT(info, esmf_rc)
-  esmf_rc = ESMF_FAILURE;
+void {{ method_name }}(ESMCI::Info *info, char *key, {{ t.ctype }} {% if is_scalar %}&{% else %}*{% endif %}value, {% if not is_scalar %}int &count, {% endif %}int &esmc_rc, {% if is_scalar %}{{ t.ctype }} *def, int *index, {% endif %}int &fortran_bool_recursive{% if not is_scalar %}, bool &fortran_bool_scalarToArray{% endif %}) {
+  ESMC_CHECK_INIT(info, esmc_rc)
+  esmc_rc = ESMF_FAILURE;
   try {
     std::string local_key(key);
     bool recursive = fortran_bool_recursive == 1;
@@ -67,7 +67,7 @@ void {{ method_name }}(ESMCI::Info *info, char *key, {{ t.ctype }} {% if is_scal
     const json *j = info->getPointer(local_key, recursive);
     if (!j->is_array() && !scalar_to_array) {
       std::string msg = "Array requested but type in JSON storage is not an array. Key is: " + local_key;
-      ESMF_INFO_CHECKRC("ESMF_RC_ATTR_WRONGTYPE", ESMF_RC_ATTR_WRONGTYPE, msg)
+      ESMC_CHECK_RC("ESMF_RC_ATTR_WRONGTYPE", ESMF_RC_ATTR_WRONGTYPE, msg)
     }
     if (j->is_array()) {
       const json::array_t *ap = j->get_ptr<const json::array_t *>();
@@ -79,19 +79,19 @@ void {{ method_name }}(ESMCI::Info *info, char *key, {{ t.ctype }} {% if is_scal
           try {
             ESMCI::handleJSONTypeCheck(local_key, value[ii], ap_at);
           }
-          ESMF_INFO_CATCH_ERRPASSTHRU
+          ESMC_ERRPASSTHRU
         }
         catch (std::out_of_range &exc) {
-          ESMF_INFO_CHECKRC("ESMF_RC_ARG_OUTOFRANGE", ESMF_RC_ARG_OUTOFRANGE, std::string(exc.what()));
+          ESMC_CHECK_RC("ESMF_RC_ARG_OUTOFRANGE", ESMF_RC_ARG_OUTOFRANGE, std::string(exc.what()));
         }
       }
     } else {
       value[0] = info->get<{{ t.ctype }}>(local_key, nullptr, nullptr, recursive, nullptr, false);
     }
 {% endif %}
-    esmf_rc = ESMF_SUCCESS;
+    esmc_rc = ESMF_SUCCESS;
   }
-  ESMF_INFO_CATCH_ISOC
+  ESMC_CATCH_ISOC
 }
 
 {% endif %}{% endfor %}{% endfor %}
@@ -107,18 +107,18 @@ void {{ method_name }}(ESMCI::Info *info, char *key, {{ t.ctype }} {% if is_scal
 {% set method_name = method_name~t.esmf_suffix %}
 #undef  ESMC_METHOD
 #define ESMC_METHOD "{{ method_name }}()"
-void {{ method_name }}(ESMCI::Info *info, char *key, {{ t.ctype }} {% if is_scalar %}&{% else %}*{% endif %}value, {% if not is_scalar %}int &count, {% endif %}bool &force, int &esmf_rc, {% if is_scalar %}int *index, {% endif %}char *pkey) {
-  ESMF_INFO_CHECKINIT(info, esmf_rc)
-  esmf_rc = ESMF_FAILURE;
+void {{ method_name }}(ESMCI::Info *info, char *key, {{ t.ctype }} {% if is_scalar %}&{% else %}*{% endif %}value, {% if not is_scalar %}int &count, {% endif %}bool &force, int &esmc_rc, {% if is_scalar %}int *index, {% endif %}char *pkey) {
+  ESMC_CHECK_INIT(info, esmc_rc)
+  esmc_rc = ESMF_FAILURE;
   try {
     std::string local_key(key);
     std::string local_pkey(pkey);
     std::string *local_pkeyp = nullptr;
     if (local_pkey.size() != 0) {local_pkeyp = &local_pkey;}
     info->set<{{ t.ctype }}>(local_key, value, {% if not is_scalar %}count, {% endif %}force, {% if is_scalar %}index, {% endif %}local_pkeyp);
-    esmf_rc = ESMF_SUCCESS;
+    esmc_rc = ESMF_SUCCESS;
   }
-  ESMF_INFO_CATCH_ISOC
+  ESMC_CATCH_ISOC
 }
 
 {% endif %}{% endfor %}{% endfor %}
