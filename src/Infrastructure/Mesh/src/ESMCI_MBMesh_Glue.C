@@ -36,8 +36,9 @@
 #include "Mesh/include/Regridding/ESMCI_MeshRegrid.h"
 
 #include "Mesh/include/ESMCI_MBMesh.h"
-#include "Mesh/include/ESMCI_MBMesh_Util.h"
 #include "Mesh/include/ESMCI_MBMesh_Glue.h"
+#include "Mesh/include/ESMCI_MBMesh_Redist.h"
+#include "Mesh/include/ESMCI_MBMesh_Util.h"
 
 #include "MBTagConventions.hpp"
 #include "moab/ParallelComm.hpp"
@@ -3039,5 +3040,362 @@ void MBMesh_deserialize(void **mbmpp, char *buffer, int *offset, int *rc,
 
   if (rc!=NULL) *rc=ESMF_SUCCESS;
 }
+
+
+/// REDIST ///
+
+void MBMesh_createredistelems(void **src_meshpp, int *num_elem_gids, int *elem_gids,
+                              void **output_meshpp, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh_createredistelems()"
+
+  try {
+    int localrc, merr;
+    VM *vm = VM::getCurrent(&localrc);
+    int petCount = vm->getPetCount();
+    int localPet = vm->getLocalPet();
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;
+
+    // Dereference
+    MBMesh *mesh=static_cast<MBMesh *> (*src_meshpp);
+    MBMesh *outmesh=static_cast<MBMesh *> (*output_meshpp);
+
+    // declare the elem_to_proc_list to pass into create_mbmesh_redist_elem
+    std::vector<EH_Comm_Pair> *elem_to_proc_list;
+
+    // algorithm to create the elem_to_proc_list
+    // 1. put this pet and elem_gid list into a Proc_Elem_Pair
+    // 2. broadcast this Proc_Elem_Pair (as one element in a vector)
+    // 3. Loop through elements on this pet, search Proc_Elem_Pairs for matches
+    // 4. If theres a match, create EH_Comm_Pair with elem and localPet and add to elem_to_proc_list
+
+    // structure to holds a processor and this list of elem_gids
+    Proc_Elem_Pair pep = Proc_Elem_Pair(localPet, num_elem_gids, elem_gids);
+    std::vector<Proc_Elem_Pair> *pepvec;
+    pepvec->reserve(petCount);
+    pepvec[localPet] = pep;
+
+    // broadcast and collect in a vector
+    vm->broadcast(dynamic_cast<void*> (pepvec[localPet]), sizeof(pep), localPet);
+
+    // Get a range containing all elements
+    Range *elems;
+    merr=mesh->mesh->get_entities_by_dimension(0,mesh->pdim,*elems);
+    if (merr != MB_SUCCESS) {
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+        moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+    }
+
+    // Loop through objects assigning them to procs
+    Range::iterator si = elems->begin(), se = elems->end();
+    for (; si != se; ++si) {
+      const EntityHandle elem = *si;
+      int gid;
+      MBMesh_get_gid(mesh, elem, &gid);
+
+      // search Proc_Elem_Pairs for matching element gids
+      std::vector<Proc_Elem_Pair>::iterator pi = pepvec->begin(), pe = pepvec->end();
+      for (; pi != pe; ++pi) {
+        std::vector<int>::iterator ii;
+        ii = std::find(pi->elem_gids.begin(), pi->elem_gids.end(), gid);
+        // if there is a match
+        if (ii != pi->elem_gids.end()) {
+          EH_Comm_Pair ecp(elem, pi->proc);
+ 
+          std::vector<EH_Comm_Pair>::iterator lb =
+            std::lower_bound(elem_to_proc_list->begin(), elem_to_proc_list->end(), ecp);
+
+          // Add if not already there
+          if (lb == elem_to_proc_list->end() || *lb != ecp)
+            elem_to_proc_list->insert(lb, ecp);
+        } // for ii
+      } // for pi
+    } // for si
+
+
+    // if not split mesh, then just do the usual thing
+    if (!mesh->is_split) {
+      create_mbmesh_redist_elem(mesh, elem_to_proc_list, &outmesh);
+
+
+    } else {
+      // not yet implemented, should error out in Fortran layer but throw here just in case
+      throw;
+#if 0
+      // If split mesh expand ids
+      int num_elem_gids_ws;
+      int *elem_gids_ws=NULL;
+      std::map<UInt,UInt> split_to_orig_id;
+      expand_split_elem_ids(src_mesh,*num_elem_gids,elem_gids,&num_elem_gids_ws,&elem_gids_ws,split_to_orig_id);
+
+      // Call into redist with expanded ids
+      MBMeshRedistElem(src_mesh, num_elem_gids_ws, elem_gids_ws, output_meshpp);
+
+
+      // dereference output mesh
+      Mesh *output_mesh=*output_meshpp;
+
+      // if split mesh add info
+      output_mesh->is_split=src_mesh->is_split;
+      output_mesh->max_non_split_id=src_mesh->max_non_split_id;
+      output_mesh->split_to_orig_id=split_to_orig_id;
+
+      // calculate split_id_to_frac map from other info
+      calc_split_id_to_frac(output_mesh);
+#endif
+#if 0
+      // DEBUG OUTPUT
+    // Loop and get split-orig id pairs
+    std::map<UInt,UInt>::iterator mi=output_mesh->split_to_orig_id.begin();
+    std::map<UInt,UInt>::iterator me=output_mesh->split_to_orig_id.end();
+
+    for ( ; mi != me; mi++) {
+      printf("%d# split=%d orig=%d\n",Par::Rank(),mi->first,mi->second);
+    }
+#endif
+
+
+#if 0
+
+    {
+      // DEBUG OUTPUT
+    // Loop and get split-frac id pairs
+    std::map<UInt,double>::iterator si=src_mesh->split_id_to_frac.begin();
+    std::map<UInt,double>::iterator se=src_mesh->split_id_to_frac.end();
+
+    for ( ; si != se; si++) {
+      printf("%d# S: split=%d frac=%f\n",Par::Rank(),si->first,si->second);
+    }
+    }
+
+    {
+      // DEBUG OUTPUT
+    // Loop and get split-frac id pairs
+    std::map<UInt,double>::iterator si=output_mesh->split_id_to_frac.begin();
+    std::map<UInt,double>::iterator se=output_mesh->split_id_to_frac.end();
+
+    for ( ; si != se; si++) {
+      printf("%d# O: split=%d frac=%f\n",Par::Rank(),si->first,si->second);
+    }
+    }
+#endif
+    /* XMRKX */
+#if 0
+      // Free split gids
+      if (elem_gids_ws !=NULL) delete [] elem_gids_ws;
+#endif
+    }
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                           "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
+
+  if (rc!=NULL) *rc=ESMF_SUCCESS;
+}
+
+#if 0
+
+void MBMesh_createredistnodes(void **src_meshpp, int *num_node_gids, int *node_gids,
+                              void **output_meshpp, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh_createredistelems()"
+
+  try {
+
+    // Initialize the parallel environment for mesh (if not already done)
+    {
+      int localrc;
+      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception
+    }
+
+    // Dereference
+    Mesh *src_mesh=*src_meshpp;
+
+    // if not split mesh, then just do the usual thing
+    if (!src_mesh->is_split) {
+      MeshRedistNode(src_mesh, *num_node_gids, node_gids, output_meshpp);
+    } else {
+
+      // Redist nodes
+      // NOTE: internally sets: is_split and split_to_orig_id map
+      //       split_id_to_frac is set below
+      MeshRedistNode(src_mesh, *num_node_gids, node_gids, output_meshpp);
+
+      // dereference output mesh
+      Mesh *output_mesh=*output_meshpp;
+
+      // if split mesh add info
+      // output_mesh->is_split=src_mesh->is_split; // SET INSIDE MeshRedistNode()
+      output_mesh->max_non_split_id=src_mesh->max_non_split_id;
+      // output_mesh->split_to_orig_id=split_to_orig_id; // SET INSIDE MeshRedistNode()
+
+      // calculate split_id_to_frac map from other info
+      calc_split_id_to_frac(output_mesh);
+
+#if 0
+      // DEBUG OUTPUT
+    // Loop and get split-orig id pairs
+    std::map<UInt,UInt>::iterator mi=output_mesh->split_to_orig_id.begin();
+    std::map<UInt,UInt>::iterator me=output_mesh->split_to_orig_id.end();
+
+    for ( ; mi != me; mi++) {
+      printf("%d# split=%d orig=%d\n",Par::Rank(),mi->first,mi->second);
+    }
+#endif
+
+
+#if 0
+
+    {
+      // DEBUG OUTPUT
+    // Loop and get split-frac id pairs
+    std::map<UInt,double>::iterator si=src_mesh->split_id_to_frac.begin();
+    std::map<UInt,double>::iterator se=src_mesh->split_id_to_frac.end();
+
+    for ( ; si != se; si++) {
+      printf("%d# S: split=%d frac=%f\n",Par::Rank(),si->first,si->second);
+    }
+    }
+
+    {
+      // DEBUG OUTPUT
+    // Loop and get split-frac id pairs
+    std::map<UInt,double>::iterator si=output_mesh->split_id_to_frac.begin();
+    std::map<UInt,double>::iterator se=output_mesh->split_id_to_frac.end();
+
+    for ( ; si != se; si++) {
+      printf("%d# O: split=%d frac=%f\n",Par::Rank(),si->first,si->second);
+    }
+    }
+
+#endif
+    }
+
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                           "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
+
+  if (rc!=NULL) *rc=ESMF_SUCCESS;
+}
+
+
+
+void MBMesh_createredist(void **src_meshpp, int *num_node_gids, int *node_gids,
+                         int *num_elem_gids, int *elem_gids,  
+                         void **output_meshpp, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh_createredist()"
+
+  try {
+
+    // Initialize the parallel environment for mesh (if not already done)
+    {
+      int localrc;
+      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception
+    }
+
+
+    // Dereference
+    Mesh *src_mesh=*src_meshpp;
+
+    // if not split mesh, then just do the usual thing
+    if (!src_mesh->is_split) {
+      MeshRedist(src_mesh, *num_node_gids, node_gids, *num_elem_gids, elem_gids, output_meshpp);
+    } else {
+      // If split mesh expand ids
+      int num_elem_gids_ws;
+      int *elem_gids_ws=NULL;
+      std::map<UInt,UInt> split_to_orig_id;
+      expand_split_elem_ids(src_mesh,*num_elem_gids,elem_gids,&num_elem_gids_ws,&elem_gids_ws,split_to_orig_id);
+
+      // Call into redist with expanded ids
+      MeshRedist(src_mesh, *num_node_gids, node_gids, num_elem_gids_ws, elem_gids_ws, output_meshpp);
+
+      // dereference output mesh
+      Mesh *output_mesh=*output_meshpp;
+
+      // if split mesh add info
+      output_mesh->is_split=src_mesh->is_split;
+      output_mesh->max_non_split_id=src_mesh->max_non_split_id;
+      output_mesh->split_to_orig_id=split_to_orig_id;
+
+      // calculate split_id_to_frac map from other info
+      calc_split_id_to_frac(output_mesh);
+
+      // Free split gids
+      if (elem_gids_ws !=NULL) delete [] elem_gids_ws;
+    }
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                           "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
+
+  if (rc!=NULL) *rc=ESMF_SUCCESS;
+}
+
+#endif
+
+
+
 
 #endif // ESMF_MOAB

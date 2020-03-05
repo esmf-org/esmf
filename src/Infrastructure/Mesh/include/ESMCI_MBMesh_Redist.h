@@ -25,6 +25,34 @@ namespace ESMCI {
 struct point;
 
 // Eventually move this to wherever you have the code to redist a mesh
+struct Proc_Elem_Pair {
+  int proc;
+  std::vector<int> elem_gids;
+
+  Proc_Elem_Pair(int _proc, int *_num_elem_gids, int *_elem_gids) {
+    proc = _proc;
+    elem_gids.reserve(*_num_elem_gids);
+    for(int i=0; i<*_num_elem_gids; ++i) elem_gids.push_back(_elem_gids[i]);
+  }
+
+  // // Sort as obj <, proc
+  // bool operator< (const EH_Comm_Pair &other) const {
+  //   return eh != other.eh ?
+  //      eh < other.eh 
+  //    : proc < other.proc;
+  // }
+  // 
+  // bool operator==(const EH_Comm_Pair &other) const {
+  //   if (eh != other.eh) return false;
+  //   if (proc != other.proc) return false;
+  //   return true;
+  // }
+  // 
+  // bool operator!=(const EH_Comm_Pair &rhs) const {
+  //   return !(*this == rhs);
+  // }
+};
+
 struct EH_Comm_Pair {
   EntityHandle eh;
   int proc;

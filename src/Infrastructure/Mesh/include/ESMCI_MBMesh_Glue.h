@@ -75,6 +75,18 @@ void MBMesh_createnodedistgrid(void **meshpp, int *ngrid, int *num_lnodes, int *
 
 void MBMesh_createelemdistgrid(void **meshpp, int *egrid, int *num_lelems, int *rc);
 
+void MBMesh_createredistelems(void **src_meshpp, int *num_elem_gids, int *elem_gids,
+                              void **output_meshpp, int *rc);
+
+#if 0
+void MBMesh_createredistnodes(void **src_meshpp, int *num_node_gids, int *node_gids,
+                              void **output_meshpp, int *rc);
+
+
+void MBMesh_createredist(Mesh **src_meshpp, int *num_node_gids, int *node_gids,
+                            int *num_elem_gids, int *elem_gids,  Mesh **output_meshpp, int *rc);
+#endif
+
 void MBMesh_getarea(void **mbmpp, int *num_elem, double *elem_areas, int *rc);
 
 
