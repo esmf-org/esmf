@@ -492,7 +492,7 @@ class VMK{
     void epochInit();
     void epochFinal();
     void epochStart(vmEpoch epoch);
-    void epochEnd();
+    void epochEnd(bool keepAlloc=true);
     vmEpoch getEpoch() const {return epoch;}
         
     // Timer methods

@@ -438,7 +438,8 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_vmepochend)(ESMCI::VM **vm, int *rc){
+  void FTN_X(c_esmc_vmepochend)(ESMCI::VM **vm, ESMC_Logical *keepAlloc, 
+    int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmepochend()"
     // Initialize return code; assume routine not implemented
@@ -448,8 +449,12 @@ extern "C" {
     // test for NULL pointer via macro before calling any class methods
     ESMCI_NULL_CHECK_PRC(vm, rc)
     ESMCI_NULL_CHECK_PRC(*vm, rc)
+    // convert to bool
+    bool keepAllocOpt = true; // default
+    if (ESMC_NOT_PRESENT_FILTER(keepAlloc) != ESMC_NULL_POINTER)
+      if (*keepAlloc == ESMF_FALSE) keepAllocOpt = false;
     try{
-      (*vm)->epochEnd();
+      (*vm)->epochEnd(keepAllocOpt);
     }catch(int localrc){
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc))

@@ -3052,7 +3052,7 @@ void VMK::epochFinal(){
   }
 }
 void VMK::epochStart(vmEpoch epoch_){epoch=epoch_;epochSetFirst();}
-void VMK::epochEnd(){
+void VMK::epochEnd(bool keepAlloc){
   if (epoch==epochBuffer){
     // loop over the sendMap and post non-blocking sends
     std::map<int, sendBuffer>:: iterator its;
@@ -3086,6 +3086,11 @@ void VMK::epochEnd(){
       }
 #endif
       
+    }
+    if (!keepAlloc){
+      // clear the recvMap, freeing all receive buffers held
+      // use this option in case the receving side is tight on memory
+      recvMap.clear();
     }
   }
   // reset the epoch member

@@ -4040,11 +4040,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_VMEpochEnd - End an ESMF epoch
 
 ! !INTERFACE:
-  subroutine ESMF_VMEpochEnd(keywordEnforcer, vm, rc)
+  subroutine ESMF_VMEpochEnd(keywordEnforcer, vm, keepAlloc, rc)
 !
 ! !ARGUMENTS:
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_VM),            intent(in),  optional :: vm
+    logical,                  intent(in),  optional :: keepAlloc
     integer,                  intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -4054,6 +4055,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{description}
 !   \item[{[vm]}]
 !        {\tt ESMF\_VM} object. Defaults to the current VM.
+!   \item[{[keepAlloc]}]
+!        For {\tt .true.}, keep internal allocations to be reused during the 
+!        epoch phase. For {\tt .false.}, deallocate all internal buffers.
+!        The flag only affects the local PET. Defaults to {\tt .true.}.
 !   \item[{[rc]}]
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -4061,7 +4066,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
-    type(ESMF_VM)           :: vm_opt
+    type(ESMF_VM)           :: vm_opt         ! helper variable
+    type(ESMF_Logical)      :: keepAlloc_opt  ! helper variable
     
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -4075,12 +4081,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
+    keepAlloc_opt = ESMF_TRUE ! default
+    if (present(keepAlloc)) keepAlloc_opt = keepAlloc
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm_opt, rc)
 
     ! Call into the C++ interface
-    call c_ESMC_VMEpochEnd(vm_opt, localrc)
+    call c_ESMC_VMEpochEnd(vm_opt, keepAlloc_opt, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
