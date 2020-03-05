@@ -34,6 +34,7 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <limits>
 
 using json = nlohmann::json;  // Convenience rename for JSON namespace.
 
@@ -363,7 +364,7 @@ void handleJSONTypeCheck(
         (dst.type() == json::value_t::number_integer ||
          dst.type() == json::value_t::number_unsigned))) {
       std::string errmsg = "Types not equivalent. The key is: " + key;
-      ESMC_CHECK_RC("ESMC_RC_ARG_BAD", ESMC_RC_ARG_BAD, errmsg);
+      ESMC_CHECK_RC("ESMC_RC_ARG_BAD", ESMC_RC_ARG_BAD, errmsg)
     }
   }
 }
@@ -627,13 +628,29 @@ json::json_pointer Info::formatKey(key_t& key) {
   }
 };
 
+//tdk:order
 #define HANDLE_JSON_TYPE_CHECK(dst) \
   if (!allow_implicit) { \
     try { \
       T archetype; \
       handleJSONTypeCheck(key, json(archetype), dst); \
     } \
-    ESMC_CATCH_ERRPASSTHRU}
+    ESMC_CATCH_ERRPASSTHRU }
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "check_overflow(<template>)"
+template <typename T, typename T2>
+void check_overflow(T dst, T2 tocheck) {
+  // Exceptions:  ESMCI:esmc_error
+  T2 max = std::numeric_limits<T>::max();
+  if (tocheck > max) {
+    const std::string errmsg = "Overflow error when converting from 64-bit to 32-bit.";
+    ESMC_CHECK_RC("ESMC_RC_ARG_BAD", ESMC_RC_ARG_BAD, errmsg)
+  }
+};
+template void check_overflow(int, long int);
+template void check_overflow(int, unsigned long int);
+template void check_overflow(float, double);
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "Info::get()"
@@ -641,7 +658,6 @@ template <typename T>
 T Info::get(key_t &key, const T *def, const int *index, bool recursive, std::string *ikey,
   bool allow_implicit) const {
   // Exceptions:  ESMCI:esmc_error
-  //tdk:todo: implement a truncation check for 32-bit to 64-bit
 
 #if 0
     std::string prefix = std::string(ESMC_METHOD) + ": ";
@@ -707,7 +723,11 @@ T Info::get(key_t &key, const T *def, const int *index, bool recursive, std::str
           ret = *def;
         } else {
           try {
-            ret = *jp;
+            if (jp->is_number()) {
+              try { check_overflow(ret, *jp); }
+              ESMC_CATCH_ERRPASSTHRU
+            }
+            ret = *jp;  // Standard retrieval location
             HANDLE_JSON_TYPE_CHECK(*jp)
           } catch (json::type_error &e) {
 #if 0

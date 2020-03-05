@@ -14,6 +14,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <iostream>
+#include <limits>
 
 #include "ESMC.h"
 #include "ESMC_Test.h"
@@ -1137,6 +1138,28 @@ void test_implicit_conversion(int& rc, char failMsg[]) {
   rc = ESMF_SUCCESS;
 };
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "test_bit_overflow()"
+void test_bit_overflow(int& rc, char failMsg[]) {
+  rc = ESMF_FAILURE;
+
+  ESMCI::Info info;
+
+  // Test integer overflow
+  try {
+    info.set("bigint", ((long int)(std::numeric_limits<int>::max()))+10, false);
+    int too_small = info.get<int>("bigint");
+    return finalizeFailure(rc, failMsg, "did not catch overflow");
+  }
+  catch (esmc_error &exc) {
+    if (exc.getReturnCode() != ESMC_RC_ARG_BAD) {
+      return finalizeFailure(rc, failMsg, "wrong rc");
+    }
+  }
+
+  rc = ESMF_SUCCESS;
+};
+
 int main(void) {
 
   char name[80];
@@ -1294,6 +1317,13 @@ int main(void) {
   //NEX_UTest
   strcpy(name, "Info test_implicit_conversion");
   test_implicit_conversion(rc, failMsg);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //---------------------------------------------------------------------------
+
+  //---------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Info test_bit_overflow");
+  test_bit_overflow(rc, failMsg);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //---------------------------------------------------------------------------
 
