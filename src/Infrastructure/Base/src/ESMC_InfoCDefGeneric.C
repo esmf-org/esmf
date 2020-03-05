@@ -147,15 +147,17 @@ void ESMC_InfoGetArrayR4(ESMCI::Info *info, char *key, float *value, int &count,
       count = (int)ap->size();
       for (int ii=0; ii<count; ii++) {
         try {
-          const json &ap_at = ap->at(ii);
-          value[ii] = ap_at;
-          try {
-            ESMCI::handleJSONTypeCheck(local_key, value[ii], ap_at);
+          const json &ap_at = ap->at(ii);  // Target JSON in in the output array
+          if (ap_at.is_number()) {
+            try { ESMCI::check_overflow(value[ii], ap_at); }  // Check bit overflow
+            ESMC_CATCH_ERRPASSTHRU
           }
+          value[ii] = ap_at;
+          try { ESMCI::handleJSONTypeCheck(local_key, value[ii], ap_at); }
           ESMC_CATCH_ERRPASSTHRU
         }
         catch (std::out_of_range &exc) {
-          ESMC_CHECK_RC("ESMF_RC_ARG_OUTOFRANGE", ESMF_RC_ARG_OUTOFRANGE, std::string(exc.what()));
+          ESMC_CHECK_RC("ESMF_RC_ARG_OUTOFRANGE", ESMF_RC_ARG_OUTOFRANGE, std::string(exc.what()))
         }
       }
     } else {
@@ -185,15 +187,17 @@ void ESMC_InfoGetArrayR8(ESMCI::Info *info, char *key, double *value, int &count
       count = (int)ap->size();
       for (int ii=0; ii<count; ii++) {
         try {
-          const json &ap_at = ap->at(ii);
-          value[ii] = ap_at;
-          try {
-            ESMCI::handleJSONTypeCheck(local_key, value[ii], ap_at);
+          const json &ap_at = ap->at(ii);  // Target JSON in in the output array
+          if (ap_at.is_number()) {
+            try { ESMCI::check_overflow(value[ii], ap_at); }  // Check bit overflow
+            ESMC_CATCH_ERRPASSTHRU
           }
+          value[ii] = ap_at;
+          try { ESMCI::handleJSONTypeCheck(local_key, value[ii], ap_at); }
           ESMC_CATCH_ERRPASSTHRU
         }
         catch (std::out_of_range &exc) {
-          ESMC_CHECK_RC("ESMF_RC_ARG_OUTOFRANGE", ESMF_RC_ARG_OUTOFRANGE, std::string(exc.what()));
+          ESMC_CHECK_RC("ESMF_RC_ARG_OUTOFRANGE", ESMF_RC_ARG_OUTOFRANGE, std::string(exc.what()))
         }
       }
     } else {
@@ -223,15 +227,17 @@ void ESMC_InfoGetArrayI4(ESMCI::Info *info, char *key, int *value, int &count, i
       count = (int)ap->size();
       for (int ii=0; ii<count; ii++) {
         try {
-          const json &ap_at = ap->at(ii);
-          value[ii] = ap_at;
-          try {
-            ESMCI::handleJSONTypeCheck(local_key, value[ii], ap_at);
+          const json &ap_at = ap->at(ii);  // Target JSON in in the output array
+          if (ap_at.is_number()) {
+            try { ESMCI::check_overflow(value[ii], ap_at); }  // Check bit overflow
+            ESMC_CATCH_ERRPASSTHRU
           }
+          value[ii] = ap_at;
+          try { ESMCI::handleJSONTypeCheck(local_key, value[ii], ap_at); }
           ESMC_CATCH_ERRPASSTHRU
         }
         catch (std::out_of_range &exc) {
-          ESMC_CHECK_RC("ESMF_RC_ARG_OUTOFRANGE", ESMF_RC_ARG_OUTOFRANGE, std::string(exc.what()));
+          ESMC_CHECK_RC("ESMF_RC_ARG_OUTOFRANGE", ESMF_RC_ARG_OUTOFRANGE, std::string(exc.what()))
         }
       }
     } else {
@@ -261,15 +267,17 @@ void ESMC_InfoGetArrayI8(ESMCI::Info *info, char *key, long int *value, int &cou
       count = (int)ap->size();
       for (int ii=0; ii<count; ii++) {
         try {
-          const json &ap_at = ap->at(ii);
-          value[ii] = ap_at;
-          try {
-            ESMCI::handleJSONTypeCheck(local_key, value[ii], ap_at);
+          const json &ap_at = ap->at(ii);  // Target JSON in in the output array
+          if (ap_at.is_number()) {
+            try { ESMCI::check_overflow(value[ii], ap_at); }  // Check bit overflow
+            ESMC_CATCH_ERRPASSTHRU
           }
+          value[ii] = ap_at;
+          try { ESMCI::handleJSONTypeCheck(local_key, value[ii], ap_at); }
           ESMC_CATCH_ERRPASSTHRU
         }
         catch (std::out_of_range &exc) {
-          ESMC_CHECK_RC("ESMF_RC_ARG_OUTOFRANGE", ESMF_RC_ARG_OUTOFRANGE, std::string(exc.what()));
+          ESMC_CHECK_RC("ESMF_RC_ARG_OUTOFRANGE", ESMF_RC_ARG_OUTOFRANGE, std::string(exc.what()))
         }
       }
     } else {
@@ -299,15 +307,17 @@ void ESMC_InfoGetArrayLG(ESMCI::Info *info, char *key, bool *value, int &count, 
       count = (int)ap->size();
       for (int ii=0; ii<count; ii++) {
         try {
-          const json &ap_at = ap->at(ii);
-          value[ii] = ap_at;
-          try {
-            ESMCI::handleJSONTypeCheck(local_key, value[ii], ap_at);
+          const json &ap_at = ap->at(ii);  // Target JSON in in the output array
+          if (ap_at.is_number()) {
+            try { ESMCI::check_overflow(value[ii], ap_at); }  // Check bit overflow
+            ESMC_CATCH_ERRPASSTHRU
           }
+          value[ii] = ap_at;
+          try { ESMCI::handleJSONTypeCheck(local_key, value[ii], ap_at); }
           ESMC_CATCH_ERRPASSTHRU
         }
         catch (std::out_of_range &exc) {
-          ESMC_CHECK_RC("ESMF_RC_ARG_OUTOFRANGE", ESMF_RC_ARG_OUTOFRANGE, std::string(exc.what()));
+          ESMC_CHECK_RC("ESMF_RC_ARG_OUTOFRANGE", ESMF_RC_ARG_OUTOFRANGE, std::string(exc.what()))
         }
       }
     } else {

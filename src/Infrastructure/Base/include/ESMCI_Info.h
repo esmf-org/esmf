@@ -84,6 +84,8 @@ bool isIn(const std::vector<std::string>& target, const std::vector<std::string>
 bool isIn(key_t& target, const json& j);
 ESMC_TypeKind_Flag json_type_to_esmf_typekind(const json &j, const bool allow_array) noexcept;
 void handleJSONTypeCheck(key_t &key, const json &src, const json &dst);
+template<typename T, typename T2>
+void check_overflow(T dst, T2 tocheck);
 
 //-----------------------------------------------------------------------------
 
