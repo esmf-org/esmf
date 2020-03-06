@@ -54,16 +54,16 @@ class ESMC_Base;
 
 #define ESMC_CATCH_ISOC \
   catch (ESMCI::esmc_error &exc) {\
-    ESMC_LogDefault.MsgFoundError(exc.getReturnCode(), exc.what(), ESMC_CONTEXT, nullptr); \
+    ESMC_LogDefault.MsgFoundError(exc.getReturnCode(), ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, nullptr); \
     esmc_rc = exc.getReturnCode();} \
   catch(...) {\
     std::string msg;\
-  if (esmc_rc == ESMF_SUCCESS) {\
-    msg = "Unhandled throw and return code is ESMF_SUCCESS. Changing return code to ESMF_FAILURE";\
-    esmc_rc = ESMF_FAILURE;} \
-  else {\
-    msg = "Unhandled throw";}\
-  ESMC_LogDefault.MsgFoundError(esmc_rc, msg, ESMC_CONTEXT, nullptr);}
+    if (esmc_rc == ESMF_SUCCESS) {\
+      msg = "Unhandled throw and return code is ESMF_SUCCESS. Changing return code to ESMF_FAILURE";\
+      esmc_rc = ESMF_FAILURE;} \
+    else {\
+      msg = "Unhandled throw";}\
+    ESMC_LogDefault.MsgFoundError(esmc_rc, msg, ESMC_CONTEXT, nullptr);}
 
 //-----------------------------------------------------------------------------
 

@@ -3616,17 +3616,101 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 end subroutine ESMF_InfoGetArrayLGAlloc
 !------------------------------------------------------------------------------
 
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoInquire()"
 !BOP
 ! !IROUTINE: ESMF_InfoGet - Inquire an Info object for metadata
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_InfoGet()
+!subroutine ESMF_InfoInquire(info, keywordEnforcer, key, size, jsonType, isArray, &
+!  isDirty, idx, typekind, ikey, isPresent, isStructured, isNull, rc)
+! !ARGUMENTS:
+!  type(ESMF_Info), intent(in) :: info
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!  character(len=*), intent(in), optional :: key
+!  integer, intent(out), optional :: size
+!  character(len=*), intent(out), optional :: jsonType
+!  logical, intent(out), optional :: isArray
+!  logical, intent(out), optional :: isDirty
+!  integer, intent(in), optional :: idx
+!  type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
+!  character(len=*), intent(out), optional :: ikey
+!  logical, intent(out), optional :: isPresent
+!  logical, intent(out), optional :: isStructured
+!  logical, intent(out), optional :: isNull
+!  integer, intent(inout), optional :: rc
+!
+! !DESCRIPTION:
+!     Inquire an \texttt{ESMF\_Info} object for metadata.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [info]
+!       Target \texttt{ESMF\_Info} object.
+!     \item [{[key]}]
+!       If provided, use this location as the origin instead of root. See section
+!       \ref{info_key_format} for an overview of the key format.
+!     \item [{[size]}]
+!       Returns the size of the target. The following rules apply:
+!       \begin{itemize}
+!         \item If the target is an object, return the number of key-value pairs.
+!         \item If the target is a scalar, return \texttt{1}.
+!         \item If the target is an array, return its length.
+!       \end{itemize}
+!     \item [{[jsonType]}]
+!       Returns the JSON object type name \cite{json_for_modern_cpp_typename}.
+!     \item [{[isArray]}]
+!       Returns true if the target is an array.
+!     \item [{[isDirty]}]
+!       Returns true if the \texttt{ESMF\_Info} object should be synchronized during
+!       an \texttt{ESMF\_InfoSync} operation.
+!     \item [{[idx]}]
+!       An integer index to use. This will index into an object type providing
+!       the primary mechanism for iteration.
+!     \item [{[typekind]}]
+!       Get the ESMF typekind for the target.
+!     \item [{[ikey]}]
+!       If present, this will be set to the key's name for the current inquire.
+!       Useful when iterating using an index. This does \textit{not} return the full key
+!       path if nested.
+!     \item [{[isPresent]}]
+!       Returns true if the \textit{key} exists in storage. If no \textit{key}
+!       is provided, this will return true.
+!     \item [{[isStructured]}]
+!       Returns true if the target is structured \cite{json_for_modern_cpp_is_structured}.
+!       This means it is either an object (a map) or an array.
+!     \item [{[isNull]}]
+!       Returns true if the target is null \cite{json_for_modern_cpp_null}.
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOP
+! Private parameter documentation:
+!     \item [{[attrCount]}]
+!       Returns the count of of \texttt{ESMF\_Attribute} objects excluding \texttt{ESMF\_AttPack}
+!       conventions and purposes. Does not descend the object hierarchy when counting.
+!     \item [{[attrCountTotal]}]
+!       Returns the count of of \texttt{ESMF\_Attribute} objects excluding \texttt{ESMF\_AttPack}
+!       conventions and purposes. Descends the object hierarchy when counting.
+!     \item [{[attPackCount]}]
+!       Returns the count of \texttt{ESMF\_AttPack} conventions and purposes.
+!       Does not descend the object hierarchy when counting.
+!     \item [{[attPackCountTotal]}]
+!       Returns the count of \texttt{ESMF\_AttPack} conventions and purposes.
+!       Does descend the object hierarchy when counting.
+!     \item [{[attrCompliance]}]
+!       Default is false. If true, treat the JSON scheme as an \textit{ESMF\_Attribute}
+!       schema.
+
+! !!!!!
+! NOTE: Documentation stub above to make some parameters private.
+! !!!!!
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoInquire()"
 subroutine ESMF_InfoInquire(info, keywordEnforcer, key, size, attrCount, attrCountTotal, jsonType, &
   isArray, isDirty, attPackCount, attPackCountTotal, attnestflag, idx, typekind, &
   ikey, isPresent, isStructured, isNull, attrCompliance, rc)
-! !ARGUMENTS:
+
   type(ESMF_Info), intent(in) :: info
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   character(len=*), intent(in), optional :: key
@@ -3647,60 +3731,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   logical, intent(out), optional :: isNull
   logical, intent(in), optional :: attrCompliance
   integer, intent(inout), optional :: rc
-!
-! !DESCRIPTION:
-!     Inquire an \texttt{ESMF\_Info} object for useful metadata.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-!       Target \texttt{ESMF\_Info} object.
-!     \item [{[key]}]
-!       If provided, use this location as the origin instead of root.
-!     \item [{[size]}]
-!       Returns the size of the target JSON object \cite{json_for_modern_cpp_size}.
-!     \item [{[attrCount]}]
-!       Returns the count of of \texttt{ESMF\_Attribute} objects excluding \texttt{ESMF\_AttPack}
-!       conventions and purposes. Does not descend the object hierarchy when counting.
-!     \item [{[attrCountTotal]}]
-!       Returns the count of of \texttt{ESMF\_Attribute} objects excluding \texttt{ESMF\_AttPack}
-!       conventions and purposes. Descends the object hierarchy when counting.
-!     \item [{[jsonType]}]
-!       Returns the JSON object type name \cite{json_for_modern_cpp_typename}.
-!     \item [{[isArray]}]
-!       Returns true if the JSON target is a JSON Array \cite{json_for_modern_cpp_is_array}.
-!     \item [{[isDirty]}]
-!       Returns true if the \texttt{ESMF\_Info} object should be synchronized during
-!       an \texttt{ESMF\_InfoSync} operation.
-!     \item [{[attPackCount]}]
-!       Returns the count of \texttt{ESMF\_AttPack} conventions and purposes.
-!       Does not descend the object hierarchy when counting.
-!     \item [{[attPackCountTotal]}]
-!       Returns the count of \texttt{ESMF\_AttPack} conventions and purposes.
-!       Does descend the object hierarchy when counting.
-!     \item [{[idx]}]
-!       An integer index to use. This will index into an object type providing
-!       the primary mechanism for iteration.
-!     \item [{[typekind]}]
-!       Convert the JSON type to an ESMF typekind.
-!     \item [{[ikey]}]
-!       If present, this will be set to the key's name for the current inquire.
-!       Useful when iterating using an index. Does not return the JSON Pointer
-!       location.
-!     \item [{[isPresent]}]
-!       Returns true if the \textit{key} exists in storage. If no \textit{key}
-!       is provided, this will return true.
-!     \item [{[isStructured]}]
-!       Returns true if the JSON target is structured \cite{json_for_modern_cpp_is_structured}.
-!     \item [{[isNull]}]
-!       Returns true if the JSON target is null \cite{json_for_modern_cpp_null}.
-!     \item [{[attrCompliance]}]
-!       Default is false. If true, treat the JSON scheme as an \textit{ESMF\_Attribute}
-!       schema.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOP
 
   integer :: localrc, esmc_typekind, local_size
   type(ESMF_Info) :: inq, inq2
@@ -3963,44 +3993,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   if (present(rc)) rc = ESMF_SUCCESS
 end function ESMF_InfoCopy
 
-! -----------------------------------------------------------------------------
-
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoBroadcast()"
-!BOP
-! !IROUTINE: ESMF_InfoBroadcast - Broadcast Info contents
-!
-! !INTERFACE:
-subroutine ESMF_InfoBroadcast(info, rootPet, keywordEnforcer, rc)
-! !ARGUMENTS:
-  type(ESMF_Info), intent(inout) :: info
-  integer, intent(in) :: rootPet
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  integer, intent(inout), optional :: rc
-!
-! !DESCRIPTION:
-!     Broadcast an \texttt{ESMF\_Info} object collectively across the current VM.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [rootPet]
-!       The root PET identifier.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOP
-
-  integer :: localrc
-
-  localrc = ESMF_FAILURE
-  if (present(rc)) rc = ESMF_FAILURE
-
-  call c_info_broadcast(info%ptr, rootPet, localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (present(rc)) rc = ESMF_SUCCESS
-end subroutine ESMF_InfoBroadcast
-
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
@@ -4089,9 +4081,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       Target \texttt{ESMF\_Info} object.
 !     \item [keyParent]
 !       String key to identify the parent location for the removal. If no \textit{keyChild}
-!       is specified, then the root location is assumed.
+!       is specified, then the root location is assumed. See section \ref{info_key_format}
+!       for an overview of the key format.
 !     \item [{[keyChild]}]
-!       String key to identify the value for the removal.
+!       String key to identify the value for the removal. This \textit{may not}
+!       be a path.
 !     \item [{[attnestflag]}]
 !       Setting to \texttt{ESMF\_ATTNEST\_ON} triggers a recursive search for
 !       \textit{keyParent}. The first instance of the key will be found in the
@@ -4336,8 +4330,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(inout), optional :: rc
 !
 ! !DESCRIPTION:
-!     Update the contents of \textit{lhs} using the contents of \textit{rhs}. See
-!     the JSON documentation for implementation details \cite{json_for_modern_cpp_update}.
+!     Update the contents of \textit{lhs} using the contents of \textit{rhs}. The
+!     operation inserts or overwrites any key present in \textit{rhs} with its
+!     respective value in \textit{lhs}. Otherwise, the contents of \textit{lhs}
+!     is left unaltered.See the JSON documentation for implementation details
+!     \cite{json_for_modern_cpp_update}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -4443,12 +4440,60 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoWriteJSON
 
+! -----------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoBroadcast()"
+!BOP
+! !IROUTINE: ESMF_InfoBroadcast - Broadcast Info contents
+! \label{esmf_infobroadcast}
+!
+! !INTERFACE:
+subroutine ESMF_InfoBroadcast(info, rootPet, keywordEnforcer, rc)
+! !ARGUMENTS:
+  type(ESMF_Info), intent(inout) :: info
+  integer, intent(in) :: rootPet
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  integer, intent(inout), optional :: rc
+!
+! !DESCRIPTION:
+!     Broadcast an \texttt{ESMF\_Info} object collectively across the current VM.
+!
+!     Users wishing to synchronize via broadcast an attribute hierarchy associated
+!     with an ESMF object should consult the \texttt{ESMF\_InfoSync} documentation
+!     \ref{esmf_infosync}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [info]
+!       The \texttt{ESMF\_Info} object that is the source (on \textit{rootPet}) or the
+!       destination object to populate (on all other PETs). On destination PETs,
+!       the structure of \textit{info} is overwritten with data from \textit{rootPet}.
+!     \item [rootPet]
+!       The root PET identifier.
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOP
+
+  integer :: localrc
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_FAILURE
+
+  call c_info_broadcast(info%ptr, rootPet, localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_InfoBroadcast
+
 !------------------------------------------------------------------------------
 ! Sync Documentation ----------------------------------------------------------
 !------------------------------------------------------------------------------
 
 !BOP
 ! !IROUTINE: ESMF_InfoSync - Synchronize Info contents across a VM
+! \label{esmf_infosync}
 !
 ! !INTERFACE:
 !subroutine ESMF_InfoSync(target, rootPet, vm, keywordEnforcer, markClean, &
@@ -4466,6 +4511,9 @@ end subroutine ESMF_InfoWriteJSON
 !     Contents on the \textit{rootPet} are set as the contents on matching objects
 !     sharing the VM. An attempt is made to optimize by only communicating updated
 !     contents (i.e. something set or modified).
+!
+!     Users interested in broadcasting only the \texttt{ESMF\_Info} object should
+!     consult the \texttt{ESMF\_InfoBroadcast} documentation \ref{esmf_infobroadcast}.
 !
 !     The arguments are:
 !     \begin{description}
