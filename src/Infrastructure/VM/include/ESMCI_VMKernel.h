@@ -356,6 +356,7 @@ class VMK{
     int getVas(int i);             // return vas for PET
     int getLpid(int i);            // return lpid for PET
     
+    int getDefaultTag(int src, int dst);   // return default tag
     int getMaxTag();               // return maximum value of tag
     
     // get() calls

@@ -3030,6 +3030,7 @@ bool VMK::cancelled(status *status){
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 void VMK::epochInit(){epoch=epochNone;epochSetFirst();}
+
 void VMK::epochFinal(){
   // loop over the sendMap and wait for outstanding comms
   std::map<int, sendBuffer>:: iterator its;
@@ -3051,14 +3052,16 @@ void VMK::epochFinal(){
     sm->clear();
   }
 }
+
 void VMK::epochStart(vmEpoch epoch_){epoch=epoch_;epochSetFirst();}
+
 void VMK::epochEnd(bool keepAlloc){
   if (epoch==epochBuffer){
     // loop over the sendMap and post non-blocking sends
     std::map<int, sendBuffer>:: iterator its;
     for (its=sendMap.begin(); its!=sendMap.end(); ++its){
       sendBuffer *sm = &(its->second);
-
+      int tag = getDefaultTag(mypet,its->first);
 #ifdef USE_STRSTREAM
       void *buffer = (void *)sm->stream.str();  // access the buffer -> freeze
       int size = sm->stream.pcount();           // bytes in stream buffer
@@ -3068,7 +3071,8 @@ void VMK::epochEnd(bool keepAlloc){
           << " dst=" << its->first << " size=" << size
           << " buffer=" << buffer;
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
-        MPI_Isend(buffer, size, MPI_BYTE, lpid[its->first], 987561, mpi_c,
+//        MPI_Isend(buffer, size, MPI_BYTE, lpid[its->first], 987561, mpi_c,
+        MPI_Isend(buffer, size, MPI_BYTE, lpid[its->first], tag, mpi_c,
           &sm->mpireq);
         sm->stream.seekp(0);  // reset stream to the beginning (not affect buff)
       }
@@ -3082,10 +3086,10 @@ void VMK::epochEnd(bool keepAlloc){
         << " buffer=" << (void *)sm->streamBuffer.data();
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
         MPI_Isend((void *)sm->streamBuffer.data(), sm->streamBuffer.size(),
-          MPI_BYTE, lpid[its->first], 987561, mpi_c, &sm->mpireq);
+//          MPI_BYTE, lpid[its->first], 987561, mpi_c, &sm->mpireq);
+          MPI_BYTE, lpid[its->first], tag, mpi_c, &sm->mpireq);
       }
 #endif
-      
     }
     if (!keepAlloc){
       // clear the recvMap, freeing all receive buffers held
@@ -3096,6 +3100,7 @@ void VMK::epochEnd(bool keepAlloc){
   // reset the epoch member
   epoch=epochNone;
 }
+
 void VMK::epochSetFirst(){
   std::map<int, sendBuffer>:: iterator its;
   for (its=sendMap.begin(); its!=sendMap.end(); ++its){
@@ -3122,11 +3127,23 @@ void VMK::sendBuffer::clear(){
 #endif
 }
 
+
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // ~~~ Communication Calls
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+int VMK::getDefaultTag(int src, int dst){
+  int tag = 1000*src+dst;   // default tag to simplify debugging
+  // make sure to stay below max tag
+  int maxTag = getMaxTag();
+  if (maxTag > 0)
+    tag = tag%maxTag;
+  else
+    tag = 0;
+  return tag;
+}
 
 
 int VMK::send(const void *message, int size, int dest, int tag){
@@ -3152,15 +3169,7 @@ int VMK::send(const void *message, int size, int dest, int tag){
 #ifndef ESMF_NO_PTHREADS
     if (mpi_mutex_flag) pthread_mutex_lock(pth_mutex);
 #endif
-    if (tag == -1){
-      tag = 1000*mypet+dest;  // default tag to simplify debugging
-      // make sure to stay below max tag
-      int maxTag = getMaxTag();
-      if (maxTag > 0)
-        tag = tag%maxTag;
-      else
-        tag = 0;
-    }
+    if (tag == -1) tag = getDefaultTag(mypet,dest);
     localrc = MPI_Send(messageC, size, MPI_BYTE, lpid[dest], tag, mpi_c);
 #ifndef ESMF_NO_PTHREADS
     if (mpi_mutex_flag) pthread_mutex_unlock(pth_mutex);
@@ -3308,6 +3317,7 @@ int VMK::send(const void *message, int size, int dest, commhandle **ch,
   // switch into the appropriate implementation
   switch(sendChannel[dest].comm_type){
   case VM_COMM_TYPE_MPI1:
+    if (tag == -1) tag = getDefaultTag(mypet,dest);
     if (epoch==epochBuffer){
       std::stringstream msg;
       sendBuffer *sm = &(sendMap[dest]);
@@ -3337,15 +3347,6 @@ int VMK::send(const void *message, int size, int dest, commhandle **ch,
       if (mpi_mutex_flag) pthread_mutex_lock(pth_mutex);
 #endif
 //fprintf(stderr, "MPI_Isend: ch=%p\n", (*ch)->mpireq);
-      if (tag == -1){
-        tag = 1000*mypet+dest;  // default tag to simplify debugging
-        // make sure to stay below max tag
-        int maxTag = getMaxTag();
-        if (maxTag > 0)
-          tag = tag%maxTag;
-        else
-          tag = 0;
-      }
 #ifdef VM_MEMLOG_on
       VM::logMemInfo(std::string("VM::send():1.0"));
 #endif
@@ -3457,16 +3458,8 @@ int VMK::recv(void *message, int size, int source, int tag, status *status){
 #ifndef ESMF_NO_PTHREADS
     if (mpi_mutex_flag) pthread_mutex_lock(pth_mutex);
 #endif
-    if (tag == -1){
-      tag = 1000*source+mypet;  // default tag to simplify debugging
-      // make sure to stay below max tag
-      int maxTag = getMaxTag();
-      if (maxTag > 0)
-        tag = tag%maxTag;
-      else
-        tag = 0;
-    }else if (tag == VM_ANY_TAG)
-      tag = MPI_ANY_TAG;
+    if (tag == -1) tag = getDefaultTag(source,mypet);
+    else if (tag == VM_ANY_TAG) tag = MPI_ANY_TAG;
     int mpiSource;
     if (source == VM_ANY_SRC) mpiSource = MPI_ANY_SOURCE;
     else mpiSource = lpid[source];
@@ -3648,6 +3641,8 @@ int VMK::recv(void *message, int size, int source, commhandle **ch, int tag){
   // switch into the appropriate implementation
   switch(comm_type){
   case VM_COMM_TYPE_MPI1:
+    if (tag == -1) tag = getDefaultTag(source,mypet);
+    else if (tag == VM_ANY_TAG) tag = MPI_ANY_TAG;
     if (epoch==epochBuffer){
       std::stringstream msg;
       recvBuffer *rm = &(recvMap[source]);
@@ -3664,8 +3659,10 @@ int VMK::recv(void *message, int size, int source, commhandle **ch, int tag){
         << " src=" << source;
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
         
+        int defaultTag = getDefaultTag(source,mypet);
         MPI_Status mpistat;
-        MPI_Probe(lpid[source], 987561, mpi_c, &mpistat);
+//        MPI_Probe(lpid[source], 987561, mpi_c, &mpistat);
+        MPI_Probe(lpid[source], defaultTag, mpi_c, &mpistat);
         
         int bytecount;
         MPI_Get_count(&mpistat, MPI_BYTE, &bytecount);
@@ -3681,7 +3678,8 @@ int VMK::recv(void *message, int size, int source, commhandle **ch, int tag){
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
         
         MPI_Recv(rm->buffer, bytecount, MPI_BYTE,
-          lpid[source], 987561, mpi_c, MPI_STATUS_IGNORE);
+//          lpid[source], 987561, mpi_c, MPI_STATUS_IGNORE);
+          lpid[source], defaultTag, mpi_c, MPI_STATUS_IGNORE);
       }
       // now service the specific receive call with chunk of data from buffer
       int *ip = (int *)rm->buffer;
@@ -3718,16 +3716,6 @@ int VMK::recv(void *message, int size, int source, commhandle **ch, int tag){
       if (mpi_mutex_flag) pthread_mutex_lock(pth_mutex);
 #endif
 //fprintf(stderr, "MPI_Irecv: ch=%p\n", (*ch)->mpireq);
-      if (tag == -1){
-        tag = 1000*source+mypet;  // default tag to simplify debugging
-        // make sure to stay below max tag
-        int maxTag = getMaxTag();
-        if (maxTag > 0)
-          tag = tag%maxTag;
-        else
-          tag = 0;
-      }else if (tag == VM_ANY_TAG)
-        tag = MPI_ANY_TAG;
       int mpiSource;
       if (source == VM_ANY_SRC) mpiSource = MPI_ANY_SOURCE;
       else mpiSource = lpid[source];
