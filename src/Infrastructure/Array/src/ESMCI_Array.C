@@ -16,7 +16,7 @@
 #define ASMM_STORE_LOG_off
 #define ASMM_STORE_TIMING_off
 #define ASMM_STORE_MEMLOG_off
-#define ASMM_STORE_TUNELOG_off
+#define ASMM_STORE_TUNELOG_on
 #define ASMM_STORE_COMMMATRIX_on
 #define ASMM_STORE_DUMPSMM_off
 
@@ -10797,7 +10797,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
     // use the provided srcTermProcessing
 #ifdef ASMM_STORE_TUNELOG_on
     char msg[160];
-    sprintf(msg, "ASMM_STORE_TUNELOG: %d srcTermProcessingArg = %d"
+    sprintf(msg, "ASMM_STORE_TUNELOG:%d srcTermProcessingArg = %d"
       " was provided -> do not tune", __LINE__, *srcTermProcessingArg);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
@@ -10806,7 +10806,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
     // optimize srcTermProcessing
 #ifdef ASMM_STORE_TUNELOG_on
     char msg[160];
-    sprintf(msg, "ASMM_STORE_TUNELOG: %d srcTermProcessingArg was NOT"
+    sprintf(msg, "ASMM_STORE_TUNELOG:%d srcTermProcessingArg was NOT"
       " provided -> tuning...", __LINE__);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
@@ -10932,7 +10932,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
       srcTermProcessingOpt = srcTermProcessingOptList[petCount-1];
     }
 #ifdef ASMM_STORE_TUNELOG_on
-    sprintf(msg, "ASMM_STORE_TUNELOG: %d ... finished tuning, found"
+    sprintf(msg, "ASMM_STORE_TUNELOG:%d ... finished tuning, found"
       " srcTermProcessingOpt = %d", __LINE__, srcTermProcessingOpt);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
@@ -10982,7 +10982,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
     // use the provided pipelineDepthArg
 #ifdef ASMM_STORE_TUNELOG_on
     char msg[160];
-    sprintf(msg, "ASMM_STORE_TUNELOG: %d pipelineDepthArg = %d was provided"
+    sprintf(msg, "ASMM_STORE_TUNELOG:%d pipelineDepthArg = %d was provided"
       " -> do not tune", __LINE__, *pipelineDepthArg);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
@@ -10991,7 +10991,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
     // optimize pipeline depth
 #ifdef ASMM_STORE_TUNELOG_on
     char msg[160];
-    sprintf(msg, "ASMM_STORE_TUNELOG: %d pipelineDepthArg was NOT provided"
+    sprintf(msg, "ASMM_STORE_TUNELOG:%d pipelineDepthArg was NOT provided"
       " -> tuning...", __LINE__);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif

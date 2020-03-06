@@ -123,6 +123,22 @@ module ESMF_VMMod
   public ESMF_PREF_INTER_SSI_MPI1
 
 !------------------------------------------------------------------------------
+  ! ESMF_VMEpoch_Flag
+  type ESMF_VMEpoch_Flag
+  private
+#ifdef ESMF_NO_INITIALIZERS
+    integer :: value
+#else
+    integer :: value = 0
+#endif
+  end type
+
+  type(ESMF_VMEpoch_Flag), parameter:: &
+    ESMF_VMEPOCH_NONE      = ESMF_VMEpoch_Flag(0), &
+    ESMF_VMEPOCH_BUFFER    = ESMF_VMEpoch_Flag(1)
+    
+  public ESMF_VMEpoch_Flag, ESMF_VMEPOCH_NONE, ESMF_VMEPOCH_BUFFER
+!------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 ! !PRIVATE MODULE VARIABLES:
@@ -148,6 +164,8 @@ module ESMF_VMMod
   public ESMF_VMBroadcast
   public ESMF_VMCommWait
   public ESMF_VMCommWaitAll
+  public ESMF_VMEpochStart
+  public ESMF_VMEpochEnd
   public ESMF_VMGather
   public ESMF_VMGatherV
   public ESMF_VMGet
@@ -3940,6 +3958,144 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMCommWaitAll
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMEpochStart()"
+!BOP
+! !IROUTINE: ESMF_VMEpochStart - Start an ESMF epoch
+
+! !INTERFACE:
+  subroutine ESMF_VMEpochStart(keywordEnforcer, vm, epoch, rc)
+!
+! !ARGUMENTS:
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_VM),            intent(in),  optional :: vm
+    type(ESMF_VMEpoch_Flag),  intent(in),  optional :: epoch
+    integer,                  intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Start a specific VM epoch. VM epochs change low level communication behavior
+!   which can have significant performance implications. It is an error to call
+!   {\tt ESMF\_VMEpochStart()} again before ending a previous epoch with 
+!   {\tt ESMF\_VMEpochEnd()}.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[{[vm]}]
+!        {\tt ESMF\_VM} object. Defaults to the current VM.
+!   \item[{[epoch]}]
+!        The epoch to be entered. See section ... for a complete list 
+!        of options. Defaults to {\tt ESMF\_VMEPOCH\_NONE}.
+!   \item[{[rc]}]
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_VM)           :: vm_opt
+    type(ESMF_VMEpoch_Flag) :: epoch_opt
+    
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! deal with optional arguments
+    if (present(vm)) then
+      vm_opt = vm
+    else
+      call ESMF_VMGetCurrent(vm_opt, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    if (present(epoch)) then
+      epoch_opt = epoch
+    else
+      epoch_opt = ESMF_VMEPOCH_NONE
+    endif
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm_opt, rc)
+
+    ! Call into the C++ interface
+    call c_ESMC_VMEpochStart(vm_opt, epoch_opt, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMEpochStart
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMEpochEnd()"
+!BOP
+! !IROUTINE: ESMF_VMEpochEnd - End an ESMF epoch
+
+! !INTERFACE:
+  subroutine ESMF_VMEpochEnd(keywordEnforcer, vm, keepAlloc, rc)
+!
+! !ARGUMENTS:
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_VM),            intent(in),  optional :: vm
+    logical,                  intent(in),  optional :: keepAlloc
+    integer,                  intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   End a prevously started VM epoch.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[{[vm]}]
+!        {\tt ESMF\_VM} object. Defaults to the current VM.
+!   \item[{[keepAlloc]}]
+!        For {\tt .true.}, keep internal allocations to be reused during the 
+!        epoch phase. For {\tt .false.}, deallocate all internal buffers.
+!        The flag only affects the local PET. Defaults to {\tt .true.}.
+!   \item[{[rc]}]
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_VM)           :: vm_opt         ! helper variable
+    type(ESMF_Logical)      :: keepAlloc_opt  ! helper variable
+    
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! deal with optional arguments
+    if (present(vm)) then
+      vm_opt = vm
+    else
+      call ESMF_VMGetCurrent(vm_opt, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    keepAlloc_opt = ESMF_TRUE ! default
+    if (present(keepAlloc)) keepAlloc_opt = keepAlloc
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm_opt, rc)
+
+    ! Call into the C++ interface
+    call c_ESMC_VMEpochEnd(vm_opt, keepAlloc_opt, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMEpochEnd
 !------------------------------------------------------------------------------
 
 
