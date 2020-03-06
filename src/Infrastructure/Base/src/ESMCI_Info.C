@@ -8,7 +8,7 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
-#define ESMC_FILENAME "./src/Infrastructure/Attribute/src/ESMCI_Info.C"
+#define ESMC_FILENAME "./src/Infrastructure/Base/src/ESMCI_Info.C"
 
 // Attribute method implementation (body) file
 
@@ -683,6 +683,10 @@ T Info::get(key_t &key, const T *def, const int *index, bool recursive, std::str
           json::array_t const *jarr = jp->get_ptr < json::array_t const * > ();
           try {
             const json &at_index = jarr->at(*index);
+            if (at_index.is_number()) {
+              try { check_overflow(ret, at_index); }
+              ESMC_CATCH_ERRPASSTHRU
+            }
             ret = at_index;
             HANDLE_JSON_TYPE_CHECK(at_index)
           }

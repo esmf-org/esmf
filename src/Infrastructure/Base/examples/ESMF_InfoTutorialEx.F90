@@ -15,7 +15,7 @@
 !==============================================================================
 
 !BOE
-! \subsubsection{Tutorial}
+! \subsubsection{General Usage Examples}
 ! \label{info_tutorial}
 ! General usage examples for the \texttt{ESMF\_Info} class. The demonstrated capabilities are:
 ! \begin{itemize}
@@ -23,7 +23,7 @@
 ! \item Setting/getting a key-value pair.
 ! \item Setting/getting a list value and a list value by index.
 ! \item Printing and dumping \texttt{ESMF\_Info} contents.
-! \item Checking for key presense and set state (null value check).
+! \item Checking for key presence and set state (null value check).
 ! \item Setting/getting with nesting (hierarchies).
 ! \item Inquiring the \texttt{ESMF\_Info} object for general item metadata and iteration purposes.
 ! \item Copying \texttt{ESMF\_Info} contents.
@@ -56,7 +56,8 @@
     character(:), allocatable :: output, getCh
     real(ESMF_KIND_R8), dimension(4) :: realList
     real(ESMF_KIND_R8), dimension(:), allocatable :: realListAlloc
-    integer(ESMF_KIND_I4) :: getInt, getReal
+    integer(ESMF_KIND_I4) :: getInt
+    real(ESMF_KIND_R8) :: getReal
     integer :: rc, infoSize, ii
     logical :: isPresent, isSet
 !EOC
@@ -104,14 +105,14 @@
 ! are converted to 64-bit.
 !EOE
 !BOC
-    call ESMF_InfoSet(info, "int-key", 54, rc=rc)
+    call ESMF_InfoSet(info, "myIntegerKey", 54, rc=rc)
 !EOC
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! Get the integer value we just set.
 !EOE
 !BOC
-    call ESMF_InfoGet(info, "int-key", getInt, rc=rc)
+    call ESMF_InfoGet(info, "myIntegerKey", getInt, rc=rc)
 !EOC
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
@@ -122,28 +123,28 @@
 ! Set a list of reals.
 !EOE
 !BOC
-    call ESMF_InfoSet(info, "real-list", (/ 33.3, 44.4, 0.0, 99.0 /), rc=rc)
+    call ESMF_InfoSet(info, "myListOfReals", (/ 33.3, 44.4, 0.0, 99.0 /), rc=rc)
 !EOC
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
-! Set an index in the new list (technially an array in JSON). Then retrieve the
+! Set an index in the new list (technically an array in JSON). Then retrieve the
 ! value.
 !EOE
 !BOC
-    call ESMF_InfoSet(info, "real-list", 1234.0, idx=3)
+    call ESMF_InfoSet(info, "myListOfReals", 1234.0, idx=3, rc=rc)
 !EOC
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
-    call ESMF_InfoGet(info, "real-list", getReal, idx=3)
+    call ESMF_InfoGet(info, "myListOfReals", getReal, idx=3, rc=rc)
 !EOC
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-    
+
     if ((getReal-1234.0) > 0) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! Get the values from a list.
 !EOE
 !BOC
-    call ESMF_InfoGet(info, "real-list", realList, rc=rc)
+    call ESMF_InfoGet(info, "myListOfReals", realList, rc=rc)
 !EOC
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     
@@ -152,7 +153,7 @@
 ! Allocatable lists may be used through a specific interface.
 !EOE
 !BOC
-    call ESMF_InfoGetAlloc(info, "real-list", realListAlloc, rc=rc)
+    call ESMF_InfoGetAlloc(info, "myListOfReals", realListAlloc, rc=rc)
 !EOC
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     
@@ -179,7 +180,7 @@
 ! Check if a key is present.
 !EOE
 !BOC
-    isPresent = ESMF_InfoIsPresent(info, "int-key", rc=rc)
+    isPresent = ESMF_InfoIsPresent(info, "myIntegerKey", rc=rc)
 !EOC
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
@@ -189,17 +190,17 @@
 ! Add a null value and check if it is set (has a non-null value).
 !EOE
 !BOC
-    call ESMF_InfoSetNULL(info, "a-null-key", rc=rc)
+    call ESMF_InfoSetNULL(info, "aNullKey", rc=rc)
 !EOC
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
-    isSet = ESMF_InfoIsSet(info, "a-null-key", rc=rc)
+    isSet = ESMF_InfoIsSet(info, "aNullKey", rc=rc)
 !EOC
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
     if (isSet) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-    isSet = ESMF_InfoIsSet(info, "int-key", rc=rc)
+    isSet = ESMF_InfoIsSet(info, "myIntegerKey", rc=rc)
 !EOC
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
@@ -210,16 +211,17 @@
 ! map. The force flag is set to true by default.
 !EOE
 !BOC
-    call ESMF_InfoSet(info, "int-key", 33, force=.false., rc=rc)
+    call ESMF_InfoSet(info, "myIntegerKey", 33, force=.false., rc=rc)
     if (rc .ne. ESMC_RC_CANNOT_SET) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !EOC
 
 !------------------------------------------------------------------------------
 
 !BOE
-! Nesting uses the JSON Pointer \cite{json_for_modern_cpp_json_pointer} syntax.
-! All key arguments in \texttt{ESMF\_Info} may use this syntax. \textit{Note the indexing
-! aspect of the JSON Pointer is not supported.}
+! Nesting uses the JSON Pointer \ref{info_key_format} syntax. All key arguments
+! in \texttt{ESMF\_Info} may use this syntax. When creating a nested object, objects
+! are created if they do not exist. Hence, it is not necessary to create the individual
+! nested elements for deep hierarchies.
 !EOE
 !BOC
     call ESMF_InfoSet(info, "/Universe/Galaxy/Star/Planet", "Venus", rc=rc)
@@ -230,6 +232,9 @@
 
 !BOE
 ! Using the get inquire interface, it is possible to iterate over the storage contents.
+! In the call below, we are retrieving the number of elements (key-value pairs)
+! that exist in our root storage object. We then select the target element in root
+! using an index and retrieve some additional metadata for the target object.
 !EOE
 !BOC
     call ESMF_InfoGet(info, size=infoSize, rc=rc)
@@ -271,7 +276,7 @@
 ! longer be equal.
 !EOE
 !BOC
-    call ESMF_InfoRemove(infoCopy, "int-key", rc=rc)
+    call ESMF_InfoRemove(infoCopy, "myIntegerKey", rc=rc)
 !EOC
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
@@ -325,7 +330,7 @@
     call ESMF_InfoDestroy(info, rc=rc)
 !EOC
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-    
+
 !------------------------------------------------------------------------------
 
     ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log

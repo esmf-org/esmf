@@ -10,7 +10,7 @@
 !
 !==============================================================================
 
-#define FILENAME "src/Infrastructure/Attribute/test/ESMF_InfoUTest.F90"
+#define FILENAME "src/Infrastructure/Base/test/ESMF_InfoUTest.F90"
 
 #include "ESMF_Macros.inc"
 #include "ESMF.h"

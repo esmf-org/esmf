@@ -8,7 +8,7 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
-#define ESMC_FILENAME "./src/Infrastructure/Attribute/src/ESMC_InfoCDef.C"
+#define ESMC_FILENAME "./src/Infrastructure/Base/src/ESMC_InfoCDef.C"
 
 // Info C-Fortran method implementation (body) file
 

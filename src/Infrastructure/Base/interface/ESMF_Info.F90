@@ -383,7 +383,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !     Destroy an \texttt{ESMF\_Info} object. Destroying an \texttt{ESMF\_Info}
-!     handle results in an error.
+!     object created internally by an ESMF object results in an error
 !
 !     The arguments are:
 !     \begin{description}
@@ -464,8 +464,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[idx]}]
 !       An integer index to set if the target key's value is a list.
 !     \item [{[pkey]}]
-!       Use this key's location as the origin for the set call. Used primarily
-!       for recursive requirements related to \texttt{ESMF\_Attribute}.
+!       Use this key's location as the origin for the set call.
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -558,8 +557,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[idx]}]
 !       An integer index to set if the target key's value is a list.
 !     \item [{[pkey]}]
-!       Use this key's location as the origin for the set call. Used primarily
-!       for recursive requirements related to \texttt{ESMF\_Attribute}.
+!       Use this key's location as the origin for the set call.
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -652,8 +650,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[idx]}]
 !       An integer index to set if the target key's value is a list.
 !     \item [{[pkey]}]
-!       Use this key's location as the origin for the set call. Used primarily
-!       for recursive requirements related to \texttt{ESMF\_Attribute}.
+!       Use this key's location as the origin for the set call.
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -746,8 +743,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[idx]}]
 !       An integer index to set if the target key's value is a list.
 !     \item [{[pkey]}]
-!       Use this key's location as the origin for the set call. Used primarily
-!       for recursive requirements related to \texttt{ESMF\_Attribute}.
+!       Use this key's location as the origin for the set call.
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -840,8 +836,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[idx]}]
 !       An integer index to set if the target key's value is a list.
 !     \item [{[pkey]}]
-!       Use this key's location as the origin for the set call. Used primarily
-!       for recursive requirements related to \texttt{ESMF\_Attribute}.
+!       Use this key's location as the origin for the set call.
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -934,8 +929,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[idx]}]
 !       An integer index to set if the target key's value is a list.
 !     \item [{[pkey]}]
-!       Use this key's location as the origin for the set call. Used primarily
-!       for recursive requirements related to \texttt{ESMF\_Attribute}.
+!       Use this key's location as the origin for the set call.
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1709,8 +1703,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       An integer index to get if the target key's value is a list.
 !     \item [{[attnestflag]}]
 !       Setting to \texttt{ESMF\_ATTNEST\_ON} triggers a recursive search. The
-!       first instance of the key will be found in the hierarchy. Default
-!       is \texttt{ESMF\_ATTNEST\_OFF}.
+!       first instance of the key (searching by depth) will be found in the hierarchy.
+!       Default is \texttt{ESMF\_ATTNEST\_OFF}.
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1812,8 +1806,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       An integer index to get if the target key's value is a list.
 !     \item [{[attnestflag]}]
 !       Setting to \texttt{ESMF\_ATTNEST\_ON} triggers a recursive search. The
-!       first instance of the key will be found in the hierarchy. Default
-!       is \texttt{ESMF\_ATTNEST\_OFF}.
+!       first instance of the key (searching by depth) will be found in the hierarchy.
+!       Default is \texttt{ESMF\_ATTNEST\_OFF}.
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1915,8 +1909,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       An integer index to get if the target key's value is a list.
 !     \item [{[attnestflag]}]
 !       Setting to \texttt{ESMF\_ATTNEST\_ON} triggers a recursive search. The
-!       first instance of the key will be found in the hierarchy. Default
-!       is \texttt{ESMF\_ATTNEST\_OFF}.
+!       first instance of the key (searching by depth) will be found in the hierarchy.
+!       Default is \texttt{ESMF\_ATTNEST\_OFF}.
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2018,8 +2012,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       An integer index to get if the target key's value is a list.
 !     \item [{[attnestflag]}]
 !       Setting to \texttt{ESMF\_ATTNEST\_ON} triggers a recursive search. The
-!       first instance of the key will be found in the hierarchy. Default
-!       is \texttt{ESMF\_ATTNEST\_OFF}.
+!       first instance of the key (searching by depth) will be found in the hierarchy.
+!       Default is \texttt{ESMF\_ATTNEST\_OFF}.
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2121,8 +2115,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       An integer index to get if the target key's value is a list.
 !     \item [{[attnestflag]}]
 !       Setting to \texttt{ESMF\_ATTNEST\_ON} triggers a recursive search. The
-!       first instance of the key will be found in the hierarchy. Default
-!       is \texttt{ESMF\_ATTNEST\_OFF}.
+!       first instance of the key (searching by depth) will be found in the hierarchy.
+!       Default is \texttt{ESMF\_ATTNEST\_OFF}.
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2208,8 +2202,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       An integer index to get if the target key's value is a list.
 !     \item [{[attnestflag]}]
 !       Setting to \texttt{ESMF\_ATTNEST\_ON} triggers a recursive search. The
-!       first instance of the key will be found in the hierarchy. Default
-!       is \texttt{ESMF\_ATTNEST\_OFF}.
+!       first instance of the key (searching by depth) will be found in the hierarchy.
+!       Default is \texttt{ESMF\_ATTNEST\_OFF}.
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2311,8 +2305,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       An integer index to get if the target key's value is a list.
 !     \item [{[attnestflag]}]
 !       Setting to \texttt{ESMF\_ATTNEST\_ON} triggers a recursive search. The
-!       first instance of the key will be found in the hierarchy. Default
-!       is \texttt{ESMF\_ATTNEST\_OFF}.
+!       first instance of the key (searching by depth) will be found in the hierarchy.
+!       Default is \texttt{ESMF\_ATTNEST\_OFF}.
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3625,7 +3619,7 @@ end subroutine ESMF_InfoGetArrayLGAlloc
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoInquire()"
 !BOP
-! !IROUTINE: ESMF_InfoGet - Inquire an Info object for useful metadata
+! !IROUTINE: ESMF_InfoGet - Inquire an Info object for metadata
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_InfoGet()
@@ -4280,8 +4274,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(inout), optional :: rc
 !
 ! !DESCRIPTION:
-!     Destroy an \texttt{ESMF\_Info} object. Destroying an \texttt{ESMF\_Info}
-!     handle results in an error.
+!     Print \texttt{ESMF\_Info} contents in JSON format.
 !
 !     The arguments are:
 !     \begin{description}
