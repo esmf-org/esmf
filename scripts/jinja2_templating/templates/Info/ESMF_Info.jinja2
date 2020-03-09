@@ -183,7 +183,7 @@ character(*), parameter, private :: version = '$Id$'
 contains  !====================================================================
 
 {% set doc_force = '!       Default is true. When true, insert the key even if it already exists in
-!       storage. If false, \textit{rc} will not return {\tt ESMF\_SUCCESS} if the
+!       storage. If false, \\textit{rc} will not return {\\tt ESMF\\_SUCCESS} if the
 !       key already exists.' %}
 {% set doc_info = '!       Target \\texttt{ESMF\\_Info} object.' %}
 {% set doc_key = '!       String key to access in \\texttt{ESMF\\_Info} storage. See section \\ref{info_key_format}
@@ -430,7 +430,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(inout), optional :: rc
 !
 ! !DESCRIPTION:
-!     Set a value in an \texttt{ESMF\_Info} object using a key.
+!     Set a value in an \texttt{ESMF\_Info} object using a key. List values are
+!     initialized to null.
 !
 {% if not do_charalloc %}
 !     Overloaded \textit{value} for the following types:

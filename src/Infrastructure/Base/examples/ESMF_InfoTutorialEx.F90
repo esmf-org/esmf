@@ -127,8 +127,7 @@
 !EOC
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
-! Set an index in the new list (technically an array in JSON). Then retrieve the
-! value.
+! Set an index in the new list then retrieve the value.
 !EOE
 !BOC
     call ESMF_InfoSet(info, "myListOfReals", 1234.0, idx=3, rc=rc)
@@ -219,9 +218,9 @@
 
 !BOE
 ! Nesting uses the JSON Pointer \ref{info_key_format} syntax. All key arguments
-! in \texttt{ESMF\_Info} may use this syntax. When creating a nested object, objects
-! are created if they do not exist. Hence, it is not necessary to create the individual
-! nested elements for deep hierarchies.
+! in \texttt{ESMF\_Info} may use this syntax unless noted otherwise. When creating
+! a nested object, objects are created if they do not exist. Hence, it is not necessary
+! to create the individual nested elements for deep hierarchies.
 !EOE
 !BOC
     call ESMF_InfoSet(info, "/Universe/Galaxy/Star/Planet", "Venus", rc=rc)
@@ -231,7 +230,7 @@
 !------------------------------------------------------------------------------
 
 !BOE
-! Using the get inquire interface, it is possible to iterate over the storage contents.
+! Using the get interface, it is possible to iterate over the storage contents.
 ! In the call below, we are retrieving the number of elements (key-value pairs)
 ! that exist in our root storage object. We then select the target element in root
 ! using an index and retrieve some additional metadata for the target object.

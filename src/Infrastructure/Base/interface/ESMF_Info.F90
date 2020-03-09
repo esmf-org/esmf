@@ -435,7 +435,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(inout), optional :: rc
 !
 ! !DESCRIPTION:
-!     Set a value in an \texttt{ESMF\_Info} object using a key.
+!     Set a value in an \texttt{ESMF\_Info} object using a key. List values are
+!     initialized to null.
 !
 !     Overloaded \textit{value} for the following types:
 !     \begin{itemize}
@@ -459,7 +460,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       The input value associated with the key.
 !     \item [{[force]}]
 !       Default is true. When true, insert the key even if it already exists in
-!       storage. If false, 	extit{rc} will not return {	t ESMF\_SUCCESS} if the
+!       storage. If false, \textit{rc} will not return {\tt ESMF\_SUCCESS} if the
 !       key already exists.
 !     \item [{[idx]}]
 !       An integer index to set if the target key's value is a list.
@@ -528,7 +529,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(inout), optional :: rc
 !
 ! !DESCRIPTION:
-!     Set a value in an \texttt{ESMF\_Info} object using a key.
+!     Set a value in an \texttt{ESMF\_Info} object using a key. List values are
+!     initialized to null.
 !
 !     Overloaded \textit{value} for the following types:
 !     \begin{itemize}
@@ -552,7 +554,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       The input value associated with the key.
 !     \item [{[force]}]
 !       Default is true. When true, insert the key even if it already exists in
-!       storage. If false, 	extit{rc} will not return {	t ESMF\_SUCCESS} if the
+!       storage. If false, \textit{rc} will not return {\tt ESMF\_SUCCESS} if the
 !       key already exists.
 !     \item [{[idx]}]
 !       An integer index to set if the target key's value is a list.
@@ -621,7 +623,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(inout), optional :: rc
 !
 ! !DESCRIPTION:
-!     Set a value in an \texttt{ESMF\_Info} object using a key.
+!     Set a value in an \texttt{ESMF\_Info} object using a key. List values are
+!     initialized to null.
 !
 !     Overloaded \textit{value} for the following types:
 !     \begin{itemize}
@@ -645,7 +648,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       The input value associated with the key.
 !     \item [{[force]}]
 !       Default is true. When true, insert the key even if it already exists in
-!       storage. If false, 	extit{rc} will not return {	t ESMF\_SUCCESS} if the
+!       storage. If false, \textit{rc} will not return {\tt ESMF\_SUCCESS} if the
 !       key already exists.
 !     \item [{[idx]}]
 !       An integer index to set if the target key's value is a list.
@@ -714,7 +717,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(inout), optional :: rc
 !
 ! !DESCRIPTION:
-!     Set a value in an \texttt{ESMF\_Info} object using a key.
+!     Set a value in an \texttt{ESMF\_Info} object using a key. List values are
+!     initialized to null.
 !
 !     Overloaded \textit{value} for the following types:
 !     \begin{itemize}
@@ -738,7 +742,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       The input value associated with the key.
 !     \item [{[force]}]
 !       Default is true. When true, insert the key even if it already exists in
-!       storage. If false, 	extit{rc} will not return {	t ESMF\_SUCCESS} if the
+!       storage. If false, \textit{rc} will not return {\tt ESMF\_SUCCESS} if the
 !       key already exists.
 !     \item [{[idx]}]
 !       An integer index to set if the target key's value is a list.
@@ -807,7 +811,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(inout), optional :: rc
 !
 ! !DESCRIPTION:
-!     Set a value in an \texttt{ESMF\_Info} object using a key.
+!     Set a value in an \texttt{ESMF\_Info} object using a key. List values are
+!     initialized to null.
 !
 !     Overloaded \textit{value} for the following types:
 !     \begin{itemize}
@@ -831,7 +836,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       The input value associated with the key.
 !     \item [{[force]}]
 !       Default is true. When true, insert the key even if it already exists in
-!       storage. If false, 	extit{rc} will not return {	t ESMF\_SUCCESS} if the
+!       storage. If false, \textit{rc} will not return {\tt ESMF\_SUCCESS} if the
 !       key already exists.
 !     \item [{[idx]}]
 !       An integer index to set if the target key's value is a list.
@@ -900,7 +905,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(inout), optional :: rc
 !
 ! !DESCRIPTION:
-!     Set a value in an \texttt{ESMF\_Info} object using a key.
+!     Set a value in an \texttt{ESMF\_Info} object using a key. List values are
+!     initialized to null.
 !
 !     Overloaded \textit{value} for the following types:
 !     \begin{itemize}
@@ -924,7 +930,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       The input value associated with the key.
 !     \item [{[force]}]
 !       Default is true. When true, insert the key even if it already exists in
-!       storage. If false, 	extit{rc} will not return {	t ESMF\_SUCCESS} if the
+!       storage. If false, \textit{rc} will not return {\tt ESMF\_SUCCESS} if the
 !       key already exists.
 !     \item [{[idx]}]
 !       An integer index to set if the target key's value is a list.
@@ -1021,7 +1027,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       The input value list associated with the key.
 !     \item [{[force]}]
 !       Default is true. When true, insert the key even if it already exists in
-!       storage. If false, 	extit{rc} will not return {	t ESMF\_SUCCESS} if the
+!       storage. If false, \textit{rc} will not return {\tt ESMF\_SUCCESS} if the
 !       key already exists.
 !     \item [{[pkey]}]
 !       Use this key's location as the origin for the set call. Used primarily
@@ -1104,7 +1110,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       The input value list associated with the key.
 !     \item [{[force]}]
 !       Default is true. When true, insert the key even if it already exists in
-!       storage. If false, 	extit{rc} will not return {	t ESMF\_SUCCESS} if the
+!       storage. If false, \textit{rc} will not return {\tt ESMF\_SUCCESS} if the
 !       key already exists.
 !     \item [{[pkey]}]
 !       Use this key's location as the origin for the set call. Used primarily
@@ -1187,7 +1193,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       The input value list associated with the key.
 !     \item [{[force]}]
 !       Default is true. When true, insert the key even if it already exists in
-!       storage. If false, 	extit{rc} will not return {	t ESMF\_SUCCESS} if the
+!       storage. If false, \textit{rc} will not return {\tt ESMF\_SUCCESS} if the
 !       key already exists.
 !     \item [{[pkey]}]
 !       Use this key's location as the origin for the set call. Used primarily
@@ -1270,7 +1276,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       The input value list associated with the key.
 !     \item [{[force]}]
 !       Default is true. When true, insert the key even if it already exists in
-!       storage. If false, 	extit{rc} will not return {	t ESMF\_SUCCESS} if the
+!       storage. If false, \textit{rc} will not return {\tt ESMF\_SUCCESS} if the
 !       key already exists.
 !     \item [{[pkey]}]
 !       Use this key's location as the origin for the set call. Used primarily
@@ -1353,7 +1359,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       The input value list associated with the key.
 !     \item [{[force]}]
 !       Default is true. When true, insert the key even if it already exists in
-!       storage. If false, 	extit{rc} will not return {	t ESMF\_SUCCESS} if the
+!       storage. If false, \textit{rc} will not return {\tt ESMF\_SUCCESS} if the
 !       key already exists.
 !     \item [{[pkey]}]
 !       Use this key's location as the origin for the set call. Used primarily
@@ -1439,7 +1445,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       The input value list associated with the key.
 !     \item [{[force]}]
 !       Default is true. When true, insert the key even if it already exists in
-!       storage. If false, 	extit{rc} will not return {	t ESMF\_SUCCESS} if the
+!       storage. If false, \textit{rc} will not return {\tt ESMF\_SUCCESS} if the
 !       key already exists.
 !     \item [{[pkey]}]
 !       Use this key's location as the origin for the set call. Used primarily
@@ -1516,7 +1522,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       for an overview of the key format.
 !     \item [{[force]}]
 !       Default is true. When true, insert the key even if it already exists in
-!       storage. If false, 	extit{rc} will not return {	t ESMF\_SUCCESS} if the
+!       storage. If false, \textit{rc} will not return {\tt ESMF\_SUCCESS} if the
 !       key already exists.
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1573,7 +1579,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       The \texttt{ESMF\_Info} object to use as source data.
 !     \item [{[force]}]
 !       Default is true. When true, insert the key even if it already exists in
-!       storage. If false, 	extit{rc} will not return {	t ESMF\_SUCCESS} if the
+!       storage. If false, \textit{rc} will not return {\tt ESMF\_SUCCESS} if the
 !       key already exists.
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.

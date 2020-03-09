@@ -17,12 +17,11 @@
 !BOE
 ! \subsubsection{Get Handle}
 ! \label{get_info_handle_from_esmf_object}
-! This examples demonstrates how to retrieve an \texttt{ESMF\_Info} object handle from an ESMF
-! object. Route handles and Meshes do not currently host attributes. \texttt{ESMF\_Info} handles
-! are a view into the object's \texttt{ESMF\_Info} storage and should not be created/destroyed
-! as the \texttt{ESMF\_Info}'s lifetime is determined by its host object's lifetime. Hence, if
-! the object an \texttt{ESMF\_Info} handle is viewing is destroyed, the handle is left in an undefined
-! state.
+! This example demonstrates how to retrieve an \texttt{ESMF\_Info} object handle
+! from an ESMF object. \texttt{ESMF\_Info} handles are a view into the object's
+! \texttt{ESMF\_Info} storage and should not be created/destroyed as the \texttt{ESMF\_Info}'s
+! lifetime is determined by its host object's lifetime. Destroying the host object
+! will leave a handle in an undefined state.
 !EOE
 
     program ESMF_InfoGetHandleEx

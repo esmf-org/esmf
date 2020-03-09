@@ -37,6 +37,30 @@ The \texttt{ESMF\_Info} class is a replacement for the \texttt{ESMF\_Attribute} 
     \item Removed retrieval of "internal" ESMF object Attributes.
 \end{itemize}
 
+Below are examples for setting and getting an attribute using \texttt{ESMF\_Info} and the legacy \texttt{ESMF\_Attribute}. The \texttt{ESMF\_Info} interfaces are not overloaded for ESMF object types but rather work off a handle retrieved via a get call.
+
+\subsubsection{Setting an Attribute}
+With \texttt{ESMF\_Attribute}:
+\begin{verbatim}
+call ESMF_AttributeSet(array, "aKey", 15, rc=rc)
+\end{verbatim}
+With \texttt{ESMF\_Info}:
+\begin{verbatim}
+info = ESMF_InfoGetHandle(array, rc=rc)
+call ESMF_InfoSet(info, "aKey", 15, rc=rc)
+\end{verbatim}
+
+\subsubsection{Getting an Attribute}
+With \texttt{ESMF\_Attribute}:
+\begin{verbatim}
+call ESMF_AttributeGet(array, "aKey", aKeyValue, rc=rc)
+\end{verbatim}
+With \texttt{ESMF\_Info}:
+\begin{verbatim}
+info = ESMF_InfoGetHandle(array, rc=rc)
+call ESMF_InfoGet(info, "aKey", aKeyValue, rc=rc)
+\end{verbatim}
+
 \subsection{Key Format Overview}
 \label{info_key_format}
 Keys in the \texttt{ESMF\_Info} class use the JSON Pointer syntax \cite{json_for_modern_cpp_json_pointer}. A forward slash is prepended to string keys if it does not exist. Hence, \texttt{"aKey"} and \texttt{"/aKey"} are equivalent. Note the indexing aspect of the JSON Pointer syntax is not supported.
