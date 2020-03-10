@@ -25,7 +25,6 @@
 class ESMC_Base;
 
 #include "ESMCI_VM.h"
-//#include "ESMCI_Attribute.h"
 #include "ESMCI_Info.h"
 
 // Standard ESMC check error macros
