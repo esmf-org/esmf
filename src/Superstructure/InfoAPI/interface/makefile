@@ -4,7 +4,7 @@ ALL: build_here
 
 AUTOGEN	  =
 SOURCEC	  =
-SOURCEF	  = ESMF_InfoDescribe.F90 ESMF_InfoSync.F90
+SOURCEF	  = ESMF_InfoDescribe.F90 ESMF_InfoSync.F90 ESMF_InfoCache.F90
 SOURCEH	  = 
 TEXFILES  = $(addsuffix _fapi.tex, $(basename $(AUTOGEN)))
 

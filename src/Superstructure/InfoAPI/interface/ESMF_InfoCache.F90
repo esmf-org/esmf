@@ -30,7 +30,7 @@ use ESMF_InfoMod
 use ESMF_UtilTypesMod
 use ESMF_InfoDescribeMod
 
-use iso_c_binding
+use iso_c_binding, only : C_PTR, C_NULL_PTR, C_INT
       
 implicit none
 
@@ -40,9 +40,7 @@ implicit none
 !private
 !public
 
-contains ! ====================================================================
-
-type, public ESMF_InfoCache
+type, public :: ESMF_InfoCache
   type(C_PTR) :: cptr = C_NULL_PTR
 contains
   procedure, private, pass :: ESMF_InfoCacheInitialize, ESMF_InfoCacheDestroy, &
@@ -51,6 +49,8 @@ contains
   generic, public :: Destroy => ESMF_InfoCacheDestroy
   generic, public :: FindUpdate => ESMF_InfoCacheFindUpdate
 end type ESMF_InfoCache
+
+contains ! ====================================================================
 
 ! -----------------------------------------------------------------------------
 ! ISOC Bindings
@@ -87,7 +87,7 @@ end function c_infocache_findupdate
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoCache%ESMF_InfoCacheInitialize()"
 subroutine ESMF_InfoCacheInitialize(self, rc)
-  class(ESMF_InfoDescribe), intent(inout) :: self
+  class(ESMF_InfoCache), intent(inout) :: self
   integer, intent(out) :: rc
   
   rc = c_infocache_initialize(self%cptr)
@@ -100,7 +100,7 @@ end subroutine ESMF_InfoCacheInitialize
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoCache%ESMF_InfoCacheDestroy()"
 subroutine ESMF_InfoCacheDestroy(self, rc)
-  class(ESMF_InfoDescribe), intent(inout) :: self
+  class(ESMF_InfoCache), intent(inout) :: self
   integer, intent(out) :: rc
   
   rc = c_infocache_destroy(self%cptr)
@@ -115,23 +115,24 @@ end subroutine ESMF_InfoCacheDestroy
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoCache%ESMF_InfoCacheFindUpdate()"
 function ESMF_InfoCacheFindUpdate(self, base, shouldUpdate, rc) result(found)
-  class(ESMF_InfoDescribe), intent(inout) :: self
+  class(ESMF_InfoCache), intent(inout) :: self
   type(ESMF_Base), intent(in) :: base
   logical, intent(in) :: shouldUpdate
   integer, intent(out) :: rc
-  logical, intent(out) :: found
+  logical :: found
   
   integer(C_INT) :: local_found, local_shouldUpdate
   
+  found = .false.
+  local_found = 0  !false
   local_shouldUpdate = 0  !false
   if (shouldUpdate) local_shouldUpdate = 1  !true
   
   rc = c_infocache_findupdate(self%cptr, base%this%ptr, local_found, local_shouldUpdate)
   if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   
-  found = .false.
   if (local_found == 1) found = .true.
   
-end subroutine ESMF_InfoCacheFindUpdate
+end function ESMF_InfoCacheFindUpdate
 
 end module ESMF_InfoCacheMod ! ================================================
