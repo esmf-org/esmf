@@ -27,7 +27,7 @@ static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
 
 typedef long int esmc_address_t;
-typedef std::vector<ESMC_Base*> esmc_infocache_t;
+typedef std::vector<ESMC_Base *> esmc_infocache_t;
 
 ESMC_Base* baseAddressToBase(const esmc_address_t &baseAddress) {
   void *v = (void *) baseAddress;
@@ -35,21 +35,15 @@ ESMC_Base* baseAddressToBase(const esmc_address_t &baseAddress) {
 }
 
 //tdk:todo: add nullptr init checks
+//tdk:todo: clean up error handling
 extern "C" {
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoCacheInitialize()"
-int ESMC_InfoCacheInitialize(esmc_infocache_t *infoCache) {
-  int esmc_rc = ESMF_FAILURE;
-  std::size_t reserve_size = 100;
-  infoCache = new esmc_infocache_t;
-  try {
-    infoCache->reserve(reserve_size);
-    esmc_rc = ESMF_SUCCESS;
-  } catch (std::bad_alloc &exc) {
-    if (ESMC_LogDefault.MsgFoundError(ESMF_FAILURE, exc.what().c_str(), ESMC_CONTEXT, &esmc_rc)) return esmc_rc;
-  }
-  return esmc_rc;
+esmc_infocache_t* ESMC_InfoCacheInitialize(void) {
+  esmc_infocache_t *infoCache = new esmc_infocache_t;
+  infoCache->reserve(25);
+  return infoCache;
 }
 
 #undef  ESMC_METHOD
@@ -62,26 +56,35 @@ int ESMC_InfoCacheDestroy(esmc_infocache_t *infoCache) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoCacheFindUpdate()"
 int ESMC_InfoCacheFindUpdate(esmc_infocache_t *infoCache, esmc_address_t &baseAddress, int &i_found, int &i_shouldUpdate) {
+  std::string msg = std::string(ESMC_METHOD) + ": entering"; //tdk:p
+  ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO); //tdk:p
   int esmc_rc = ESMF_FAILURE;
   bool shouldUpdate = i_shouldUpdate == 1;  //true
+  bool found = false;
   try {
-    //tdk:todo: implement
     ESMC_Base *src_base = baseAddressToBase(baseAddress);
-    ESMCI::VMId *src_vmid = base->ESMC_BaseGetVMId();
-    int src_baseid = base->ESMC_BaseGetID();
-    for (auto dst_base : *infoCache) {
-      ESMCI::VMId *dst_vmid = dst_base->ESMC_BaseGetVMId();
-      int dst_baseid = dst_base->ESMC_BaseGetID();
+    ESMCI::VMId *src_vmid = src_base->ESMC_BaseGetVMId();
+    int src_baseid = src_base->ESMC_BaseGetID();
+//    for (auto dst_base : *infoCache) {
+    for (std::size_t ii = 0; ii < infoCache->size(); ++ii) {
+      ESMC_Base &dst_base = *(infoCache->at(ii));
+      ESMCI::VMId *dst_vmid = dst_base.ESMC_BaseGetVMId();
+      int dst_baseid = dst_base.ESMC_BaseGetID();
       if (ESMCI::VMIdCompare(src_vmid, dst_vmid) && (src_baseid == dst_baseid)) {
-        i_found = 1;  //true
+        found = true;
         break;
       }
     }
+    if (!found && shouldUpdate) {  // not found and should update
+      infoCache->push_back(src_base);
+    }
     esmc_rc = ESMF_SUCCESS;
   } catch (...) {
-    //tdk:todo: implement
-//    if (ESMC_LogDefault.MsgFoundError(ESMF_FAILURE, exc.what().c_str(), ESMC_CONTEXT, &esmc_rc)) return esmc_rc;
+    if (ESMC_LogDefault.MsgFoundError(ESMF_FAILURE, "Unhandled exception", ESMC_CONTEXT, &esmc_rc)) return esmc_rc;
   }
+  msg = std::string(ESMC_METHOD) + ": found=" + std::to_string(found); //tdk:p
+  ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO); //tdk:p
+  i_found = (found) ? 1 : 0;
   return esmc_rc;
 }
 

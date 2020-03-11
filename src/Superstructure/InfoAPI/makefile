@@ -14,7 +14,7 @@ include ${ESMF_DIR}/makefile
 #  directly below this directory, and have either library,
 #  example/test code, or documents which need to be generated.
 #DIRS	  = interface doc examples
-DIRS      = interface examples tests doc
+DIRS      = src interface examples tests doc
 
 
 
