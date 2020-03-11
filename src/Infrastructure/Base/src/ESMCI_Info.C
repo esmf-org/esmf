@@ -44,6 +44,14 @@ using json = nlohmann::json;  // Convenience rename for JSON namespace.
  static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
 
+#define HANDLE_JSON_TYPE_CHECK(dst) \
+  if (!allow_implicit) { \
+    try { \
+      T archetype; \
+      handleJSONTypeCheck(key, json(archetype), dst); \
+    } \
+    ESMC_CATCH_ERRPASSTHRU }
+
 namespace ESMCI {
 
 //-----------------------------------------------------------------------------
@@ -627,15 +635,6 @@ json::json_pointer Info::formatKey(key_t& key) {
     ESMF_INFO_THROW_JSON(e, "ESMC_RC_ARG_BAD", ESMC_RC_ARG_BAD);
   }
 };
-
-//tdk:order
-#define HANDLE_JSON_TYPE_CHECK(dst) \
-  if (!allow_implicit) { \
-    try { \
-      T archetype; \
-      handleJSONTypeCheck(key, json(archetype), dst); \
-    } \
-    ESMC_CATCH_ERRPASSTHRU }
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "check_overflow(<template>)"
