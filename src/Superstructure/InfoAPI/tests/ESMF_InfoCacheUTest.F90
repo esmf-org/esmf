@@ -92,10 +92,10 @@ program ESMF_InfoCacheUTest
   call info_cache%Initialize(rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  found = info_cache%FindUpdateGeom(field, .true., rc)
+  call info_cache%UpdateGeoms(field, rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_Test((found .eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !----------------------------------------------------------------------------
 
   !----------------------------------------------------------------------------
@@ -107,10 +107,10 @@ program ESMF_InfoCacheUTest
   field2 = ESMF_FieldCreate(grid, ESMF_TYPEKIND_I8, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  found = info_cache%FindUpdateGeom(field2, .true., rc)
+  call info_cache%UpdateGeoms(field2, rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_Test((found), name, failMsg, result, ESMF_SRCLINE)
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !----------------------------------------------------------------------------
 
   call info_cache%Destroy(rc)

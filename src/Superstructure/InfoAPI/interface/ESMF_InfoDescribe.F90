@@ -65,6 +65,7 @@ type, public :: ESMF_InfoDescribe
   logical :: createInfo = .true.  ! If true, also recurse objects with members (i.e. ArrayBundle)
   logical :: is_initialized = .false.  ! If true, the object is initialized
   logical :: curr_base_is_valid = .false.  ! If true, the object's base is valid (i.e. can be reinterpret casted)
+  logical :: curr_base_is_geom = .false.  ! If true, the Base is for an ESMF Geometry object
   type(ESMF_Base) :: curr_base  ! Holds a reference to the current update object's base. Will change when recursively updating
 contains
   procedure, private :: updateWithState, updateWithArray, updateWithArrayBundle, &
@@ -281,9 +282,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   character(:), allocatable :: c_id_base, l_uname
 
   character(:), allocatable :: local_root_key
-  integer :: localrc
+  integer :: localrc, ii
   logical :: l_base_is_valid
   type(ESMF_Info) :: object_info
+  character(len=9), dimension(4), parameter :: geom_etypes = (/"Grid     ", "Mesh     ", "LocStream", "XGrid    "/)
 
   localrc = ESMF_FAILURE
   if (.not. self%is_initialized) then
@@ -299,6 +301,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   end if
   self%curr_base_is_valid = l_base_is_valid
   self%curr_base = base
+
+  self%curr_base_is_geom = .false.
+  do ii=1,SIZE(geom_etypes)
+    if (trim(etype) == trim(geom_etypes(ii))) then
+      self%curr_base_is_geom = .true.
+      exit
+    end if
+  end do
 
   if (self%createInfo) then
     if (l_base_is_valid) then
@@ -337,6 +347,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       call ESMF_InfoSetNULL(self%info, local_root_key//"/base_id", force=.false., rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
     end if
+
+    call ESMF_InfoSet(self%info, local_root_key//"/is_geom", self%curr_base_is_geom, force=.false., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (self%addObjectInfo) then
       if (l_base_is_valid) then
