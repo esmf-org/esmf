@@ -46,7 +46,9 @@ program ESMF_InfoCacheUTest
   type(ESMF_DistGrid) :: distgrid
   type(ESMF_Grid) :: grid
   type(ESMF_Field) :: field, field2
-  logical :: found
+  type(ESMF_FieldBundle) :: fb
+  type(ESMF_State) :: state
+  type(ESMF_InfoDescribe) :: idesc
 
   !----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)  ! calls ESMF_Initialize() internally
@@ -76,7 +78,7 @@ program ESMF_InfoCacheUTest
 
   !----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "FindUpdate for Field Not Found"
+  write(name, *) "UpdateGeoms for State"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   rc = ESMF_FAILURE
 
@@ -89,31 +91,42 @@ program ESMF_InfoCacheUTest
   field = ESMF_FieldCreate(grid, ESMF_TYPEKIND_I8, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call info_cache%Initialize(rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  call info_cache%UpdateGeoms(field, rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  !----------------------------------------------------------------------------
-
-  !----------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "FindUpdate for Field Is Found"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  rc = ESMF_FAILURE
-
   field2 = ESMF_FieldCreate(grid, ESMF_TYPEKIND_I8, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call info_cache%UpdateGeoms(field2, rc)
+  fb = ESMF_FieldBundleCreate(fieldList=(/field, field2/), rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  state = ESMF_StateCreate(fieldbundleList=(/fb/), rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call info_cache%Initialize(rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call info_cache%UpdateGeoms(state, rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call idesc%Initialize(createInfo=.true., addObjectInfo=.true., rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call idesc%Update(state, "", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_InfoPrint(idesc%info) !tdk:p
 
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !----------------------------------------------------------------------------
 
+  call idesc%Destroy(rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
   call info_cache%Destroy(rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_StateDestroy(state, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_FieldBundleDestroy(fb, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldDestroy(field, rc=rc)

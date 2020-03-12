@@ -119,7 +119,7 @@ end subroutine ESMF_InfoCacheDestroy
 #define ESMF_METHOD "ESMF_InfoCache%ESMF_InfoCacheUpdateGeoms()"
 subroutine ESMF_InfoCacheUpdateGeoms(self, target, rc)
   class(ESMF_InfoCache), intent(inout) :: self
-  type(ESMF_Field), intent(in) :: target
+  type(ESMF_State), intent(in) :: target
   integer, intent(out) :: rc
 
   type(ESMF_InfoDescribe) :: idesc

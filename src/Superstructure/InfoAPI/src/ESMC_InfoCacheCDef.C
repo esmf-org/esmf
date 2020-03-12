@@ -105,24 +105,6 @@ int ESMC_InfoCacheDestroy(esmc_infocache_t *infoCache) {
   return ESMF_SUCCESS;
 }
 
-//#undef  ESMC_METHOD
-//#define ESMC_METHOD "ESMC_InfoCacheFind()"
-//int ESMC_InfoCacheFind(esmc_infocache_t *infoCache, esmc_address_t &baseAddress, int &i_found) {
-//  std::string msg = std::string(ESMC_METHOD) + ": entering"; //tdk:p
-//  ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO); //tdk:p
-//  int esmc_rc = ESMF_FAILURE;
-//  bool found = false;
-//  try {
-//    ESMC_Base *base = baseAddressToBase(baseAddress);
-//    found = findBase(*base, *infoCache);
-//    ESMC_Base *found = findBase(*base, *infoCache);
-//    i_found = (found) ? 1 : 0;  // If pointer is null, we did not find the base
-//    esmc_rc = ESMF_SUCCESS;
-//  }
-//  ESMC_CATCH_ISOC
-//  return esmc_rc;
-//}
-
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoCacheUpdateGeoms()"
 int ESMC_InfoCacheUpdateGeoms(esmc_infocache_t *infoCache, ESMCI::Info *infoDesc) {
@@ -135,5 +117,18 @@ int ESMC_InfoCacheUpdateGeoms(esmc_infocache_t *infoCache, ESMCI::Info *infoDesc
   ESMC_CATCH_ISOC
   return esmc_rc;
 }
+
+//#undef  ESMC_METHOD
+//#define ESMC_METHOD "ESMC_InfoCacheTest()"
+//int ESMC_InfoCacheTest(ESMCI::Info *infoDesc) {
+//  int esmc_rc = ESMF_FAILURE;
+//  try {
+//    const json &info_desc_storage = infoDesc->getStorageRef();
+//    collect_geom_base_objects(info_desc_storage, *infoCache);
+//    esmc_rc = ESMF_SUCCESS;
+//  }
+//  ESMC_CATCH_ISOC
+//  return esmc_rc;
+//}
 
 }  // extern "C"
