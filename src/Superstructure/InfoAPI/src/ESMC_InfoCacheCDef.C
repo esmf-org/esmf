@@ -65,23 +65,36 @@ ESMC_Base* findBase(ESMC_Base &target, esmc_infocache_t &infoCache) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "collect_base_geom_objects()"
 void collect_geom_base_objects(const json &infoDescStorage, esmc_infocache_t &infoCache, ESMC_Base *parentBase) {
+  bool should_serialize_geom = false;
   for (json::const_iterator it=infoDescStorage.cbegin(); it!=infoDescStorage.cend(); it++) {
     ESMC_Base *base = nullptr;
     if (it.value().at("base_is_valid")) {
       base = baseAddressToBase(it.value().at("base_address"));
+      // Pointer is null if base not found
       ESMC_Base *ibase = findBase(*base, infoCache);
-      if (it.value().at("is_geom") &&
-          !ibase) {  // Pointer is null if base not found
+      if (it.value().at("is_geom") && !ibase) {
+        should_serialize_geom = true;
         infoCache.push_back(base);
-        if (parentBase) {
-          ESMCI::Info *info = parentBase->ESMC_BaseGetInfo();
-          try {
-            //tdk:todo: use the correct attributes here
-            info->set("_esmf_state_reconcile_geom", true, false);
-          }
-          ESMC_CATCH_ERRPASSTHRU
-        }
       }
+      if (parentBase) {
+        ESMCI::Info *parent_info = parentBase->ESMC_BaseGetInfo();
+        try {
+          if (!parent_info->hasKey("_esmf_state_reconcile")) {
+            parent_info->set("_esmf_state_reconcile/should_serialize_geom",
+                             should_serialize_geom, false);
+            if (!should_serialize_geom) {
+              parent_info->set<int>("_esmf_state_reconcile/geom_base_id",
+                               it.value().at("base_id"), false);
+              parent_info->set<std::string>("_esmf_state_reconcile/geom_base_name",
+                               it.value().at("base_name"), false);
+            }
+          }
+        }
+        ESMC_CATCH_ERRPASSTHRU
+      }
+    }
+    if (it.value().at("esmf_type") != "Field") {
+      base = nullptr;
     }
     const json &members = it.value().at("members");
     if (not members.is_null()) {

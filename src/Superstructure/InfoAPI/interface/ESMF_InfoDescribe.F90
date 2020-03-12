@@ -326,6 +326,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     allocate(character(len(trim(root_key))+len(l_uname)+1)::local_root_key)
     local_root_key = trim(root_key)//"/"//l_uname
 
+    call ESMF_InfoSet(self%info, local_root_key//"/base_name", trim(name), force=.false., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+
     call ESMF_InfoSet(self%info, local_root_key//"/esmf_type", etype, force=.false., rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
