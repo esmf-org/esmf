@@ -75,10 +75,11 @@ type, public :: ESMF_InfoCache
   type(C_PTR) :: cptr = C_NULL_PTR
 contains
   procedure, private, pass :: ESMF_InfoCacheInitialize, ESMF_InfoCacheDestroy, &
-   ESMF_InfoCacheFindUpdateBase, ESMF_InfoCacheFindUpdateFieldGeom
+   ESMF_InfoCacheFindUpdateBase, ESMF_InfoCacheFindUpdateGeom
   generic, public :: Initialize => ESMF_InfoCacheInitialize
   generic, public :: Destroy => ESMF_InfoCacheDestroy
-  generic, public :: FindUpdate => ESMF_InfoCacheFindUpdateBase, ESMF_InfoCacheFindUpdateFieldGeom
+  generic, public :: FindUpdateBase => ESMF_InfoCacheFindUpdateBase
+  generic, public :: FindUpdateGeom => ESMF_InfoCacheFindUpdateGeom
 end type ESMF_InfoCache
 
 contains ! ====================================================================
@@ -144,8 +145,8 @@ end function ESMF_InfoCacheFindUpdateBase
 
 !tdk:comment
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoCache%ESMF_InfoCacheFindUpdateFieldGeom()"
-function ESMF_InfoCacheFindUpdateFieldGeom(self, target, shouldUpdate, rc) result(found)
+#define ESMF_METHOD "ESMF_InfoCache%ESMF_InfoCacheFindUpdateGeom()"
+function ESMF_InfoCacheFindUpdateGeom(self, target, shouldUpdate, rc) result(found)
   class(ESMF_InfoCache), intent(inout) :: self
   type(ESMF_Field), intent(in) :: target
   logical, intent(in) :: shouldUpdate
@@ -182,7 +183,7 @@ function ESMF_InfoCacheFindUpdateFieldGeom(self, target, shouldUpdate, rc) resul
     base%this%ptr = base_address
 
     call ESMF_LogWrite("calling self%FindUpdate") !tdk:p
-    found = self%FindUpdate(base, shouldUpdate, rc)
+    found = self%FindUpdateBase(base, shouldUpdate, rc)
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
     found = .false.
@@ -191,6 +192,6 @@ function ESMF_InfoCacheFindUpdateFieldGeom(self, target, shouldUpdate, rc) resul
   call idesc%Destroy(rc=rc)
   if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-end function ESMF_InfoCacheFindUpdateFieldGeom
+end function ESMF_InfoCacheFindUpdateGeom
 
 end module ESMF_InfoCacheMod ! ================================================
