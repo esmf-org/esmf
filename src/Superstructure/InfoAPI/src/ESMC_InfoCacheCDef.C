@@ -64,24 +64,28 @@ ESMC_Base* findBase(ESMC_Base &target, esmc_infocache_t &infoCache) {
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "collect_base_geom_objects()"
-void collect_geom_base_objects(const json &infoDescStorage, esmc_infocache_t &infoCache) {
+void collect_geom_base_objects(const json &infoDescStorage, esmc_infocache_t &infoCache, ESMC_Base *parentBase) {
   for (json::const_iterator it=infoDescStorage.cbegin(); it!=infoDescStorage.cend(); it++) {
-    if (it.value().at("base_is_valid") && (it.value().at("is_geom"))) {
-      ESMC_Base *base = baseAddressToBase(it.value().at("base_address"));
+    ESMC_Base *base = nullptr;
+    if (it.value().at("base_is_valid")) {
+      base = baseAddressToBase(it.value().at("base_address"));
       ESMC_Base *ibase = findBase(*base, infoCache);
-      if (!ibase) {  // Pointer is null if base not found
+      if (it.value().at("is_geom") &&
+          !ibase) {  // Pointer is null if base not found
         infoCache.push_back(base);
-        ESMCI::Info *info = base->ESMC_BaseGetInfo();
-        try {
-          //tdk:todo: use the correct attributes here
-          info->set("_esmf_state_reconcile", true, false);
+        if (parentBase) {
+          ESMCI::Info *info = parentBase->ESMC_BaseGetInfo();
+          try {
+            //tdk:todo: use the correct attributes here
+            info->set("_esmf_state_reconcile_geom", true, false);
+          }
+          ESMC_CATCH_ERRPASSTHRU
         }
-        ESMC_CATCH_ERRPASSTHRU
       }
     }
     const json &members = it.value().at("members");
     if (not members.is_null()) {
-      collect_geom_base_objects(members, infoCache);
+      collect_geom_base_objects(members, infoCache, base);
     }
   }
 }
@@ -110,8 +114,8 @@ int ESMC_InfoCacheDestroy(esmc_infocache_t *infoCache) {
 int ESMC_InfoCacheUpdateGeoms(esmc_infocache_t *infoCache, ESMCI::Info *infoDesc) {
   int esmc_rc = ESMF_FAILURE;
   try {
-    const json &info_desc_storage = infoDesc->getStorageRef();
-    collect_geom_base_objects(info_desc_storage, *infoCache);
+    const json &info_desc_storage = infoDesc->getStorageRefWritable();
+    collect_geom_base_objects(info_desc_storage, *infoCache, nullptr);
     esmc_rc = ESMF_SUCCESS;
   }
   ESMC_CATCH_ISOC

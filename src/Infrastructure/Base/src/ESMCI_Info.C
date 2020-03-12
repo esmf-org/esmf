@@ -219,7 +219,7 @@ void update_json_pointer(const json &j, json const **jdp, const json::json_point
 }
 
 #undef  ESMC_METHOD
-#define ESMC_METHOD "update_json_pointer(<non-const>)"
+#define ESMC_METHOD "update_json_pointer(<const>)"
 void update_json_pointer(json &j, json **jdp, const json::json_pointer &key,
   bool recursive) {
   // Test: test_update_json_pointer (for const overload)
@@ -242,7 +242,7 @@ void update_json_pointer(json &j, json **jdp, const json::json_pointer &key,
 }
 
 #undef  ESMC_METHOD
-#define ESMC_METHOD "update_json_pointer(<non-const> + container)"
+#define ESMC_METHOD "update_json_pointer(<const> + container)"
 void update_json_pointer(json &j, json **jdp, const json::json_pointer &key,
                          bool recursive, json **container) {
   // Test: test_update_json_pointer (for const overload)
@@ -316,6 +316,7 @@ json::iterator find_by_index(json &j, const std::size_t index_target, bool recur
   return ret;
 }
 
+//tdk:todo: can i remove this function?
 #undef  ESMC_METHOD
 #define ESMC_METHOD "update_json_pointer(<non-const> + container)"
 void update_json_pointer(json &j, json **jdp, int index, bool recursive,
