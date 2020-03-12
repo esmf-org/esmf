@@ -16,15 +16,20 @@
 #include "ESMCI_LogErr.h"
 #include "ESMCI_Util.h"
 #include "ESMCI_VM.h"
+#include "json.hpp"
 
 #include <iostream>
 #include <vector>
+
+using json = nlohmann::json;
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
 static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
+
+//tdk:todo: consider putting this in the ESMCI namespace
 
 typedef long int esmc_address_t;
 typedef std::vector<ESMC_Base *> esmc_infocache_t;
@@ -34,10 +39,57 @@ ESMC_Base* baseAddressToBase(const esmc_address_t &baseAddress) {
   return reinterpret_cast<ESMC_Base *>(v);
 }
 
+bool basesAreEqual(ESMC_Base &src_base, ESMC_Base &dst_base) {
+  ESMCI::VMId *src_vmid = src_base.ESMC_BaseGetVMId();
+  int src_baseid = src_base.ESMC_BaseGetID();
+
+  ESMCI::VMId *dst_vmid = dst_base.ESMC_BaseGetVMId();
+  int dst_baseid = dst_base.ESMC_BaseGetID();
+
+  bool ret = (ESMCI::VMIdCompare(src_vmid, dst_vmid) && (src_baseid == dst_baseid));
+  return ret;
+}
+
+ESMC_Base* findBase(ESMC_Base &target, esmc_infocache_t &infoCache) {
+  ESMC_Base *ret = nullptr;
+  for (std::size_t ii = 0; ii < infoCache.size(); ++ii) {
+    ESMC_Base *dst_base = infoCache.at(ii);
+    if (basesAreEqual(target, *dst_base)) {
+      ret = dst_base;
+      break;
+    }
+  }
+  return ret;
+}
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "collect_base_geom_objects()"
+void collect_geom_base_objects(const json &infoDescStorage, esmc_infocache_t &infoCache) {
+  for (json::const_iterator it=infoDescStorage.cbegin(); it!=infoDescStorage.cend(); it++) {
+    if (it.value().at("base_is_valid") && (it.value().at("is_geom"))) {
+      ESMC_Base *base = baseAddressToBase(it.value().at("base_address"));
+      ESMC_Base *ibase = findBase(*base, infoCache);
+      if (!ibase) {  // Pointer is null if base not found
+        infoCache.push_back(base);
+        ESMCI::Info *info = base->ESMC_BaseGetInfo();
+        try {
+          //tdk:todo: use the correct attributes here
+          info->set("_esmf_state_reconcile", true, false);
+        }
+        ESMC_CATCH_ERRPASSTHRU
+      }
+    }
+    const json &members = it.value().at("members");
+    if (not members.is_null()) {
+      collect_geom_base_objects(members, infoCache);
+    }
+  }
+}
+
 //tdk:todo: add nullptr init checks
-//tdk:todo: clean up error handling
 extern "C" {
 
+//tdk:todo: try and make this return a return code instead of the pointer
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoCacheInitialize()"
 esmc_infocache_t* ESMC_InfoCacheInitialize(void) {
@@ -53,38 +105,34 @@ int ESMC_InfoCacheDestroy(esmc_infocache_t *infoCache) {
   return ESMF_SUCCESS;
 }
 
+//#undef  ESMC_METHOD
+//#define ESMC_METHOD "ESMC_InfoCacheFind()"
+//int ESMC_InfoCacheFind(esmc_infocache_t *infoCache, esmc_address_t &baseAddress, int &i_found) {
+//  std::string msg = std::string(ESMC_METHOD) + ": entering"; //tdk:p
+//  ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO); //tdk:p
+//  int esmc_rc = ESMF_FAILURE;
+//  bool found = false;
+//  try {
+//    ESMC_Base *base = baseAddressToBase(baseAddress);
+//    found = findBase(*base, *infoCache);
+//    ESMC_Base *found = findBase(*base, *infoCache);
+//    i_found = (found) ? 1 : 0;  // If pointer is null, we did not find the base
+//    esmc_rc = ESMF_SUCCESS;
+//  }
+//  ESMC_CATCH_ISOC
+//  return esmc_rc;
+//}
+
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_InfoCacheFindUpdate()"
-int ESMC_InfoCacheFindUpdate(esmc_infocache_t *infoCache, esmc_address_t &baseAddress, int &i_found, int &i_shouldUpdate) {
-  std::string msg = std::string(ESMC_METHOD) + ": entering"; //tdk:p
-  ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO); //tdk:p
+#define ESMC_METHOD "ESMC_InfoCacheUpdateGeoms()"
+int ESMC_InfoCacheUpdateGeoms(esmc_infocache_t *infoCache, ESMCI::Info *infoDesc) {
   int esmc_rc = ESMF_FAILURE;
-  bool shouldUpdate = i_shouldUpdate == 1;  //true
-  bool found = false;
   try {
-    ESMC_Base *src_base = baseAddressToBase(baseAddress);
-    ESMCI::VMId *src_vmid = src_base->ESMC_BaseGetVMId();
-    int src_baseid = src_base->ESMC_BaseGetID();
-//    for (auto dst_base : *infoCache) {
-    for (std::size_t ii = 0; ii < infoCache->size(); ++ii) {
-      ESMC_Base &dst_base = *(infoCache->at(ii));
-      ESMCI::VMId *dst_vmid = dst_base.ESMC_BaseGetVMId();
-      int dst_baseid = dst_base.ESMC_BaseGetID();
-      if (ESMCI::VMIdCompare(src_vmid, dst_vmid) && (src_baseid == dst_baseid)) {
-        found = true;
-        break;
-      }
-    }
-    if (!found && shouldUpdate) {  // not found and should update
-      infoCache->push_back(src_base);
-    }
+    const json &info_desc_storage = infoDesc->getStorageRef();
+    collect_geom_base_objects(info_desc_storage, *infoCache);
     esmc_rc = ESMF_SUCCESS;
-  } catch (...) {
-    if (ESMC_LogDefault.MsgFoundError(ESMF_FAILURE, "Unhandled exception", ESMC_CONTEXT, &esmc_rc)) return esmc_rc;
   }
-  msg = std::string(ESMC_METHOD) + ": found=" + std::to_string(found); //tdk:p
-  ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO); //tdk:p
-  i_found = (found) ? 1 : 0;
+  ESMC_CATCH_ISOC
   return esmc_rc;
 }
 
