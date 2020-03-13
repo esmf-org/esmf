@@ -2102,6 +2102,8 @@ contains
     type(ESMF_RouteHandle),     pointer :: rhandlep
     type(ESMF_StateClass),      pointer :: statep
 
+    type(ESMF_InfoCache) :: info_cache
+
     integer :: localrc
     integer :: i
     integer :: memstat
@@ -2245,6 +2247,18 @@ contains
       end select
 
     end do
+
+    ! Update Field metadata for unique geometries
+    ! '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    call info_cache%Initialize(localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call info_cache%UpdateGeoms(state, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call info_cache%Destroy(localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    ! '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
     rc = ESMF_SUCCESS
 

@@ -114,7 +114,7 @@ end subroutine ESMF_InfoCacheDestroy
 
 ! -----------------------------------------------------------------------------
 
-!tdk:comment
+!tdk:comm
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoCache%ESMF_InfoCacheUpdateGeoms()"
 subroutine ESMF_InfoCacheUpdateGeoms(self, target, rc)
