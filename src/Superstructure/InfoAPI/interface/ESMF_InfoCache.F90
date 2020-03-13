@@ -115,6 +115,7 @@ end subroutine ESMF_InfoCacheDestroy
 ! -----------------------------------------------------------------------------
 
 !tdk:comm
+!tdk:todo: consider renaming to UpdateFields since it's actually their metadata that's updated
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoCache%ESMF_InfoCacheUpdateGeoms()"
 subroutine ESMF_InfoCacheUpdateGeoms(self, target, rc)
