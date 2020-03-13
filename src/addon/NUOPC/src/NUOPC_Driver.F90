@@ -2946,7 +2946,6 @@ module NUOPC_Driver
     type(type_InternalState)  :: is
     character(ESMF_MAXSTR)    :: name
     logical                   :: clockIsCreated
-    type(ESMF_TimeInterval)   :: timeStep
 
     rc = ESMF_SUCCESS
 
@@ -2967,9 +2966,13 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     if (clockIsCreated) then
-      ! check and set the driver clock against the parent clock, force timeStep
+      ! check and set the driver clock against the parent clock
       call NUOPC_CompCheckSetClock(driver, is%wrap%driverClock, &
-        forceTimeStep=.true., rc=rc)
+!        forceTimeStep=.true., &  !TODO: not having this set will break NEPTUNE
+!TODO: Need to figure out why this was needed in NEPTUNE's customized
+!TODO: ExecuteRunSequence() implementation, and then make this behavior maybe
+!TODO: dependent on a Driver attribute, or just specialize SetRunClock().
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
