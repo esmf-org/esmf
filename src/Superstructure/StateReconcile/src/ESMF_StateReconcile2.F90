@@ -209,7 +209,7 @@ contains
       lattreconflag = attreconflag
     endif
     !tdk:todo: what do we do about attribute reconcile when they are required? recommend just leaving on
-    lattreconflag = ESMF_ATTRECONCILE_ON
+    !lattreconflag = ESMF_ATTRECONCILE_ON
 
     call ESMF_StateReconcile_driver (state, vm=localvm, &
         attreconflag=lattreconflag, rc=localrc)
@@ -2253,7 +2253,7 @@ contains
     call info_cache%Initialize(localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call info_cache%UpdateGeoms(state, localrc)
+    !call info_cache%UpdateGeoms(state, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
     call info_cache%Destroy(localrc)
