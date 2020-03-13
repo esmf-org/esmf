@@ -164,8 +164,8 @@ module ESMF_VMMod
   public ESMF_VMBroadcast
   public ESMF_VMCommWait
   public ESMF_VMCommWaitAll
-  public ESMF_VMEpochStart
-  public ESMF_VMEpochEnd
+  public ESMF_VMEpochEnter
+  public ESMF_VMEpochExit
   public ESMF_VMGather
   public ESMF_VMGatherV
   public ESMF_VMGet
@@ -3963,12 +3963,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_VMEpochStart()"
+#define ESMF_METHOD "ESMF_VMEpochEnter()"
 !BOP
-! !IROUTINE: ESMF_VMEpochStart - Start an ESMF epoch
+! !IROUTINE: ESMF_VMEpochEnter - Enter an ESMF epoch
 
 ! !INTERFACE:
-  subroutine ESMF_VMEpochStart(keywordEnforcer, vm, epoch, rc)
+  subroutine ESMF_VMEpochEnter(keywordEnforcer, vm, epoch, rc)
 !
 ! !ARGUMENTS:
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -3977,10 +3977,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                  intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!   Start a specific VM epoch. VM epochs change low level communication behavior
+!   Enter a specific VM epoch. VM epochs change low level communication behavior
 !   which can have significant performance implications. It is an error to call
-!   {\tt ESMF\_VMEpochStart()} again before ending a previous epoch with 
-!   {\tt ESMF\_VMEpochEnd()}.
+!   {\tt ESMF\_VMEpochEnter()} again before exiting a previous epoch with 
+!   {\tt ESMF\_VMEpochExit()}.
 !
 !   The arguments are:
 !   \begin{description}
@@ -4022,25 +4022,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm_opt, rc)
 
     ! Call into the C++ interface
-    call c_ESMC_VMEpochStart(vm_opt, epoch_opt, localrc)
+    call c_ESMC_VMEpochEnter(vm_opt, epoch_opt, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_VMEpochStart
+  end subroutine ESMF_VMEpochEnter
 !------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_VMEpochEnd()"
+#define ESMF_METHOD "ESMF_VMEpochExit()"
 !BOP
-! !IROUTINE: ESMF_VMEpochEnd - End an ESMF epoch
+! !IROUTINE: ESMF_VMEpochExit - Exit an ESMF epoch
 
 ! !INTERFACE:
-  subroutine ESMF_VMEpochEnd(keywordEnforcer, vm, keepAlloc, rc)
+  subroutine ESMF_VMEpochExit(keywordEnforcer, vm, keepAlloc, rc)
 !
 ! !ARGUMENTS:
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -4088,14 +4088,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm_opt, rc)
 
     ! Call into the C++ interface
-    call c_ESMC_VMEpochEnd(vm_opt, keepAlloc_opt, localrc)
+    call c_ESMC_VMEpochExit(vm_opt, keepAlloc_opt, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_VMEpochEnd
+  end subroutine ESMF_VMEpochExit
 !------------------------------------------------------------------------------
 
 

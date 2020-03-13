@@ -3056,9 +3056,9 @@ void VMK::epochFinal(){
   }
 }
 
-void VMK::epochStart(vmEpoch epoch_){epoch=epoch_;epochSetFirst();}
+void VMK::epochEnter(vmEpoch epoch_){epoch=epoch_;epochSetFirst();}
 
-void VMK::epochEnd(bool keepAlloc){
+void VMK::epochExit(bool keepAlloc){
   if (epoch==epochBuffer){
     // loop over the sendMap and post non-blocking sends
     std::map<int, sendBuffer>:: iterator its;
