@@ -58,6 +58,8 @@ module ESMF_FieldMod
   use ESMF_TimeMod
   use ESMF_InitMacrosMod
 
+  use ESMF_InfoMod, only : ESMF_Info, ESMF_InfoBaseGetHandle, ESMF_InfoGet
+
   implicit none
 
 !------------------------------------------------------------------------------
@@ -442,6 +444,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_AttReconcileFlag) :: lattreconflag
       type(ESMF_InquireFlag) :: linquireflag
 
+      type(ESMF_Info) :: infoh
+      logical :: should_serialize_geom
+
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -484,11 +489,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       if (fp%status .eq. ESMF_FIELDSTATUS_GRIDSET .or. &
           fp%status .eq. ESMF_FIELDSTATUS_COMPLETE) then
-        call ESMF_GeomBaseSerialize(fp%geombase, buffer, length, offset, &
-                                    lattreconflag, linquireflag, localrc)
-        if (ESMF_LogFoundError(localrc, &
-                                     ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+
+        infoh = ESMF_InfoBaseGetHandle(field%ftypep%base)
+        call ESMF_InfoGet(infoh, "_esmf_state_reconcile/should_serialize_geom", &
+          should_serialize_geom, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+        if (should_serialize_geom) then
+          call ESMF_GeomBaseSerialize(fp%geombase, buffer, length, offset, &
+                                      lattreconflag, linquireflag, localrc)
+          if (ESMF_LogFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
+        end if
       endif
 
       if (fp%status .eq. ESMF_FIELDSTATUS_COMPLETE) then
@@ -551,6 +564,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer staggerloc
       type(ESMF_AttReconcileFlag) :: lattreconflag
 
+      type(ESMF_Info) :: infoh
+      logical :: should_serialize_geom
+
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
       if  (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -596,11 +612,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       if (fp%status .eq. ESMF_FIELDSTATUS_GRIDSET .or. &
           fp%status .eq. ESMF_FIELDSTATUS_COMPLETE) then
+
+        infoh = ESMF_InfoBaseGetHandle(fp%base)
+        call ESMF_InfoGet(infoh, "_esmf_state_reconcile/should_serialize_geom", &
+          should_serialize_geom, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+        if (should_serialize_geom) then
           fp%geombase=ESMF_GeomBaseDeserialize(buffer, offset, &
                                               lattreconflag, localrc)
           if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rcToReturn=rc)) return
+        end if
       endif
 
       if (fp%status .eq. ESMF_FIELDSTATUS_COMPLETE) then
