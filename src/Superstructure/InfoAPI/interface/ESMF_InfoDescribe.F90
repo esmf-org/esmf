@@ -64,9 +64,9 @@ type, public :: ESMF_InfoDescribe
   logical :: addObjectInfo = .false.  ! If true, add ESMF_Info map for each object
   logical :: createInfo = .true.  ! If true, also recurse objects with members (i.e. ArrayBundle)
   logical :: is_initialized = .false.  ! If true, the object is initialized
+  type(ESMF_Base) :: curr_base  ! Holds a reference to the current update object's base. Will change when recursively updating
   logical :: curr_base_is_valid = .false.  ! If true, the object's base is valid (i.e. can be reinterpret casted)
   logical :: curr_base_is_geom = .false.  ! If true, the Base is for an ESMF Geometry object
-  type(ESMF_Base) :: curr_base  ! Holds a reference to the current update object's base. Will change when recursively updating
 contains
   procedure, private :: updateWithState, updateWithArray, updateWithArrayBundle, &
    updateWithField, updateWithFieldBundle, updateWithLocStream, updateWithGrid, &
