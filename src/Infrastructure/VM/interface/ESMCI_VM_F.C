@@ -409,9 +409,9 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
-  void FTN_X(c_esmc_vmepochstart)(ESMCI::VM **vm, vmEpoch *epoch, int *rc){
+  void FTN_X(c_esmc_vmepochenter)(ESMCI::VM **vm, vmEpoch *epoch, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_vmepochstart()"
+#define ESMC_METHOD "c_esmc_vmepochenter()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // start assuming local success
@@ -420,7 +420,7 @@ extern "C" {
     ESMCI_NULL_CHECK_PRC(vm, rc)
     ESMCI_NULL_CHECK_PRC(*vm, rc)
     try{
-      (*vm)->epochStart(*epoch);
+      (*vm)->epochEnter(*epoch);
     }catch(int localrc){
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc))
@@ -438,10 +438,10 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_vmepochend)(ESMCI::VM **vm, ESMC_Logical *keepAlloc, 
+  void FTN_X(c_esmc_vmepochexit)(ESMCI::VM **vm, ESMC_Logical *keepAlloc, 
     int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_vmepochend()"
+#define ESMC_METHOD "c_esmc_vmepochexit()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // start assuming local success
@@ -454,7 +454,7 @@ extern "C" {
     if (ESMC_NOT_PRESENT_FILTER(keepAlloc) != ESMC_NULL_POINTER)
       if (*keepAlloc == ESMF_FALSE) keepAllocOpt = false;
     try{
-      (*vm)->epochEnd(keepAllocOpt);
+      (*vm)->epochExit(keepAllocOpt);
     }catch(int localrc){
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc))

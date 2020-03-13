@@ -493,8 +493,8 @@ class VMK{
     void epochSetFirst();
     void epochInit();
     void epochFinal();
-    void epochStart(vmEpoch epoch);
-    void epochEnd(bool keepAlloc=true);
+    void epochEnter(vmEpoch epoch);
+    void epochExit(bool keepAlloc=true);
     vmEpoch getEpoch() const {return epoch;}
         
     // Timer methods
