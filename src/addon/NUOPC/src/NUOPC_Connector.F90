@@ -72,6 +72,7 @@ module NUOPC_Connector
     type(ESMF_Field), pointer           :: dstFieldList(:)
     integer                             :: srcFieldCount
     integer                             :: dstFieldCount    
+    logical                             :: srcDstOverlap
     type(ESMF_RouteHandle)              :: rh
     type(ESMF_State)                    :: state
     type(ESMF_TermOrder_Flag), pointer  :: termOrders(:)
@@ -4403,6 +4404,12 @@ module NUOPC_Connector
       endif    
     endif
     
+    ! determine whether there is src/dst overlap on any PET
+    call DetermineSrcDstOverlap(is%wrap%srcFieldList, is%wrap%dstFieldList, &
+      is%wrap%srcDstOverlap, verbosity, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
     ! build Timestamp update packets
     !TODO: consider whether CplSet needs extra treatment here or not
     call BuildUpdatePackets(is%wrap%srcFieldList, is%wrap%dstFieldList, &
@@ -4484,6 +4491,93 @@ module NUOPC_Connector
 
   end subroutine
     
+  !-----------------------------------------------------------------------------
+
+  subroutine DetermineSrcDstOverlap(srcFieldList, dstFieldList, srcDstOverlap, &
+    verbosity, rc)
+    type(ESMF_Field), pointer           :: srcFieldList(:)
+    type(ESMF_Field), pointer           :: dstFieldList(:)
+    logical,                intent(out) :: srcDstOverlap
+    integer,                intent(in)  :: verbosity
+    integer,                intent(out) :: rc
+    ! local variables
+    integer                           :: i, localPet
+    logical                           :: srcFlag, dstFlag
+    type(ESMF_VM)                     :: vm
+    character(ESMF_MAXSTR)            :: fieldName
+    character(len=240)                :: msgString
+    integer                           :: helperIn, helperOut
+
+    rc = ESMF_SUCCESS
+
+    srcFlag = .false.
+    dstFlag = .false.
+    do i=1, size(srcFieldList)
+      ! check srcField
+      call ESMF_FieldGet(srcFieldList(i), vm=vm, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      call ESMF_VMGet(vm, localPet=localPet, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      if (btest(verbosity,12)) then
+        call ESMF_FieldGet(srcFieldList(i), name=fieldName, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        write(msgString,*) "DetermineSrcDstOverlap: "//trim(fieldName)//&
+          ", srcLocalPet=", localPet
+        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      endif
+      if (localPet>-1) srcFlag = .true. ! localPet is a src
+      ! check dstField
+      call ESMF_FieldGet(dstFieldList(i), vm=vm, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      call ESMF_VMGet(vm, localPet=localPet, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      if (btest(verbosity,12)) then
+        call ESMF_FieldGet(dstFieldList(i), name=fieldName, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        write(msgString,*) "DetermineSrcDstOverlap: "//trim(fieldName)//&
+          ", dstLocalPet=", localPet
+        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      endif
+      if (localPet>-1) dstFlag = .true. ! localPet is a dst
+    enddo
+
+    helperIn = 0
+    if (srcFlag.and.dstFlag) helperIn=1
+    ! implement a logical OR operation based on REDUCE_SUM
+    call ESMF_VMGetCurrent(vm=vm, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    call ESMF_VMAllFullReduce(vm, sendData=(/helperIn/), &
+      recvData=helperOut, count=1, reduceflag=ESMF_REDUCE_SUM, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    
+    ! ready to determine srcDstOverlap globally
+    srcDstOverlap = .false. ! assume there is no overloap on any PET
+    if (helperOut > 0) then
+      ! there was overlap on at least one PET
+      srcDstOverlap = .true.
+    endif
+
+    if (btest(verbosity,12)) then
+      write(msgString,*) "DetermineSrcDstOverlap: srcDstOverlap=", srcDstOverlap
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    endif
+
+  end subroutine
+
   !-----------------------------------------------------------------------------
 
   subroutine BuildUpdatePackets(srcFieldList, dstFieldList, updatePackets, &
@@ -5120,9 +5214,11 @@ module NUOPC_Connector
     endif
 
     if (.not.existflag) then
-      call ESMF_VMEpochStart(epoch=ESMF_VMEPOCH_BUFFER, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      if (.not. is%wrap%srcDstOverlap) then
+        call ESMF_VMEpochEnter(epoch=ESMF_VMEPOCH_BUFFER, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      endif
       ! if not specialized -> use default method to:
       ! execute the regrid operation
       if (is%wrap%cplSetCount > 1) then
@@ -5151,9 +5247,11 @@ module NUOPC_Connector
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         endif
       endif
-      call ESMF_VMEpochEnd(keepAlloc=.false., rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      if (.not. is%wrap%srcDstOverlap) then
+        call ESMF_VMEpochExit(rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      endif
       if (btest(verbosity,14)) then
         call ESMF_LogWrite(trim(name)//&
           ": called default label_ExecuteRouteHandle", &
