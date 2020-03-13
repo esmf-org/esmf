@@ -63,6 +63,7 @@ module ESMF_StateReconcile2Mod
   use ESMF_RHandleMod
 
   use ESMF_InfoMod, only : ESMF_Info, ESMF_InfoBaseGetHandle, ESMF_InfoUpdate
+  use ESMF_InfoCacheMod
 
   implicit none
   private
@@ -207,6 +208,8 @@ contains
     if(present(attreconflag)) then
       lattreconflag = attreconflag
     endif
+    !tdk:todo: what do we do about attribute reconcile when they are required? recommend just leaving on
+    lattreconflag = ESMF_ATTRECONCILE_ON
 
     call ESMF_StateReconcile_driver (state, vm=localvm, &
         attreconflag=lattreconflag, rc=localrc)
