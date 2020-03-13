@@ -815,34 +815,37 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  localrc = ESMF_FAILURE
  if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
- call ESMF_FieldGet(field, geomtype=geomtype, rc=localrc)
- if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+ if (field%ftypep%status .eq. ESMF_FIELDSTATUS_GRIDSET .or. &
+     field%ftypep%status .eq. ESMF_FIELDSTATUS_COMPLETE) then
+   call ESMF_FieldGet(field, geomtype=geomtype, rc=localrc)
+   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
- select case (geomtype%type)
-   case (ESMF_GEOMTYPE_GRID%type)
-     call ESMF_FieldGet(field, grid=grid, rc=localrc)
-     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-     call self%Update(grid, root_key, rc=localrc)
-     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-   case (ESMF_GEOMTYPE_LOCSTREAM%type)
-     call ESMF_FieldGet(field, locstream=locstream, rc=localrc)
-     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-     call self%Update(locstream, root_key, rc=localrc)
-     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-   case (ESMF_GEOMTYPE_XGRID%type)
-     call ESMF_FieldGet(field, xgrid=xgrid, rc=localrc)
-     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-     call self%Update(xgrid, root_key, rc=localrc)
-     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-   case (ESMF_GEOMTYPE_MESH%type)
-     call ESMF_FieldGet(field, mesh=mesh, rc=localrc)
-     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-     call self%Update(mesh, root_key, rc=localrc)
-     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-   case default
-     if (ESMF_LogFoundError(ESMF_RC_OBJ_NOT_CREATED, msg="Geometry type not supported for Inquire", &
-      ESMF_CONTEXT, rcToReturn=rc)) return
- end select
+   select case (geomtype%type)
+     case (ESMF_GEOMTYPE_GRID%type)
+       call ESMF_FieldGet(field, grid=grid, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+       call self%Update(grid, root_key, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+     case (ESMF_GEOMTYPE_LOCSTREAM%type)
+       call ESMF_FieldGet(field, locstream=locstream, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+       call self%Update(locstream, root_key, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+     case (ESMF_GEOMTYPE_XGRID%type)
+       call ESMF_FieldGet(field, xgrid=xgrid, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+       call self%Update(xgrid, root_key, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+     case (ESMF_GEOMTYPE_MESH%type)
+       call ESMF_FieldGet(field, mesh=mesh, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+       call self%Update(mesh, root_key, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+     case default
+       if (ESMF_LogFoundError(ESMF_RC_OBJ_NOT_CREATED, msg="Geometry type not supported for Inquire", &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+   end select
+ end if
 
  if (present(rc)) rc = ESMF_SUCCESS
 
