@@ -10,7 +10,7 @@
 !
 ! =============================================================================
 
-#define FILENAME "src/Superstructure/InfoAPI/interface/ESMF_InfoCache.F90"
+#define ESMF_FILENAME "ESMF_InfoCache.F90"
 
 #include "ESMF_Macros.inc"
 #include "ESMF.h"
