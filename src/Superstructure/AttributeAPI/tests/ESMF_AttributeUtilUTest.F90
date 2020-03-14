@@ -10,7 +10,7 @@
 !
 !==============================================================================
 
-#define FILENAME "src/Superstructure/AttributeAPI/tests/ESMF_AttributeUtilUTest.F90"
+#define ESMF_FILENAME "ESMF_AttributeUtilUTest.F90"
 
 #include "ESMF_Macros.inc"
 #include "ESMF.h"

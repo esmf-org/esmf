@@ -9,7 +9,7 @@
 ! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
-#define ESMF_FILENAME "src/Infrastructure/Base/interface/ESMF_Info.F90"
+#define ESMF_FILENAME "ESMF_Info.F90"
 !==============================================================================
 
 !==============================================================================
