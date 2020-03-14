@@ -220,6 +220,12 @@ program ESMF_InfoSyncUTest
   call eidesc%Update(state, "", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+!tdk:debug
+#if 1
+  call ESMF_LogWrite("eidesc%info="//ESMF_InfoDump(eidesc%info))
+  call ESMF_LogWrite("desired_info="//ESMF_InfoDump(desired_info))
+#endif
+
   call ESMF_Test((eidesc%info == desired_info), name, failMsg, result, ESMF_SRCLINE)
 
   ! ---------------------------------------------------------------------------
