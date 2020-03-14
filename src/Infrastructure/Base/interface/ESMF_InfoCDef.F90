@@ -125,8 +125,8 @@ interface
     implicit none
     type(C_PTR), value :: lhs
     type(C_PTR), value :: rhs
-    logical(C_BOOL), intent(inout) :: is_equal
-    integer(C_INT), intent(inout) :: localrc
+    integer(C_INT), intent(out) :: is_equal
+    integer(C_INT), intent(out) :: localrc
   end subroutine c_info_is_equal
 
   !=============================================================================

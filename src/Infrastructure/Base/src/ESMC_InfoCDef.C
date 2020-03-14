@@ -235,12 +235,13 @@ void ESMC_InfoInquire(ESMCI::Info *info, ESMCI::Info *inq, char *key,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoIsEqual()"
 void ESMC_InfoIsEqual(ESMCI::Info *lhs, ESMCI::Info *rhs,
-  bool &res, int &esmc_rc) {
+  int &res, int &esmc_rc) {
   ESMC_CHECK_INIT(lhs, esmc_rc)
   ESMC_CHECK_INIT(rhs, esmc_rc)
   esmc_rc = ESMF_FAILURE;
   try {
-    res = lhs->getStorageRef() == rhs->getStorageRef();
+    bool local_res = lhs->getStorageRef() == rhs->getStorageRef();
+    res = local_res == 1;  //true
     esmc_rc = ESMF_SUCCESS;
   }
   ESMC_CATCH_ISOC
