@@ -240,6 +240,15 @@ void ESMC_InfoIsEqual(ESMCI::Info *lhs, ESMCI::Info *rhs, int &res, int &esmc_rc
   esmc_rc = ESMF_FAILURE;
   try {
     bool local_res = lhs->getStorageRef() == rhs->getStorageRef();
+
+//tdk:debug
+#if 1
+    std::string prefix = std::string(ESMC_METHOD) + ": ";
+    std::string msg;
+    msg = prefix + "local_res=" + std::to_string(local_res);
+    ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO);
+#endif
+
     res = 0;  //false
     if (local_res) res = 1;  //true
     esmc_rc = ESMF_SUCCESS;
