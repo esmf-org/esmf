@@ -239,7 +239,9 @@ void ESMC_InfoIsEqual(ESMCI::Info *lhs, ESMCI::Info *rhs, int &res, int &esmc_rc
   ESMC_CHECK_INIT(rhs, esmc_rc)
   esmc_rc = ESMF_FAILURE;
   try {
-    bool local_res = lhs->getStorageRef() == rhs->getStorageRef();
+//    bool local_res = lhs->getStorageRef() == rhs->getStorageRef();
+    //tdk:todo: this fix is temporary. it is obviously inefficient.
+    bool local_res = lhs->getStorageRef().dump() == rhs->getStorageRef().dump();
 
 //tdk:debug
 #if 1
