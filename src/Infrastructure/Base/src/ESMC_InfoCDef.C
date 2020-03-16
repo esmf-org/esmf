@@ -249,9 +249,16 @@ void ESMC_InfoIsEqual(ESMCI::Info *lhs, ESMCI::Info *rhs, int &res, int &esmc_rc
     msg = prefix + "local_res=" + std::to_string(local_res);
     ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO);
 
-    msg = prefix + "lhs.dump=" + lhs->getStorageRef().dump();
+    std::string lhs_dump = lhs->getStorageRef().dump();
+    std::string rhs_dump = rhs->getStorageRef().dump();
+
+    msg = prefix + "lhs_dump=" + lhs_dump;
     ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO);
-    msg = prefix + "rhs.dump=" + rhs->getStorageRef().dump();
+    msg = prefix + "rhs_dump=" + rhs_dump;
+    ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO);
+
+    bool as_strings_eq = lhs_dump == rhs_dump;
+    msg = prefix + "as_strings_eq=" + std::to_string(as_strings_eq);
     ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO);
 #endif
 
