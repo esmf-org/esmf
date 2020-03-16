@@ -243,8 +243,7 @@ void ESMC_InfoIsEqual(ESMCI::Info *lhs, ESMCI::Info *rhs, int &res, int &esmc_rc
     //tdk:todo: this fix is temporary. it is obviously inefficient.
     bool local_res = lhs->getStorageRef().dump() == rhs->getStorageRef().dump();
 
-//tdk:debug
-#if 1
+#if 0
     std::string prefix = std::string(ESMC_METHOD) + ": ";
     std::string msg;
 
