@@ -245,7 +245,13 @@ void ESMC_InfoIsEqual(ESMCI::Info *lhs, ESMCI::Info *rhs, int &res, int &esmc_rc
 #if 1
     std::string prefix = std::string(ESMC_METHOD) + ": ";
     std::string msg;
+
     msg = prefix + "local_res=" + std::to_string(local_res);
+    ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO);
+
+    msg = prefix + "lhs.dump=" + lhs->getStorageRef().dump();
+    ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO);
+    msg = prefix + "rhs.dump=" + rhs->getStorageRef().dump();
     ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO);
 #endif
 
