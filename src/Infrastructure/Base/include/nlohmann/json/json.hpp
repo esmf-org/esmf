@@ -8684,7 +8684,7 @@ template<typename BasicJsonType>
 class parser
 {
     using number_integer_t = typename BasicJsonType::number_integer_t;
-    using number_unsigned_t = typename BasicJsonType::number_integer_t;
+    using number_unsigned_t = typename BasicJsonType::number_unsigned_t;
     using number_float_t = typename BasicJsonType::number_float_t;
     using string_t = typename BasicJsonType::string_t;
     using lexer_t = lexer<BasicJsonType>;
