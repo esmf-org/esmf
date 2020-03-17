@@ -13,9 +13,9 @@
 //==============================================================================
 #define XXE_CONSTRUCTOR_LOG_off
 #define XXE_STORAGEDELETE_LOG_off
-#define XXE_EXEC_LOG_on
+#define XXE_EXEC_LOG_off
 #define XXE_EXEC_MEMLOG_off
-#define XXE_EXEC_BUFFLOG_on
+#define XXE_EXEC_BUFFLOG_off
 #define XXE_EXEC_OPSLOG_off
 #define XXE_EXEC_RECURSLOG_off
 //==============================================================================
@@ -3728,8 +3728,11 @@ int XXE::exec(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-#ifdef XXE_EXEC_LOG_on
+#if (defined XXE_EXEC_LOG_on || defined XXE_EXEC_BUFFLOG_on)
   char msg[1024];
+#endif
+
+#ifdef XXE_EXEC_LOG_on
   sprintf(msg, "ESMCI::XXE::exec():%d START: opstream=%p, count=%d, "
     "indexStart=%d, indexStop=%d", __LINE__,
     opstream, count, indexStart, indexStop);
