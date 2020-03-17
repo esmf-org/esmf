@@ -239,9 +239,13 @@ void ESMC_InfoIsEqual(ESMCI::Info *lhs, ESMCI::Info *rhs, int &res, int &esmc_rc
   ESMC_CHECK_INIT(rhs, esmc_rc)
   esmc_rc = ESMF_FAILURE;
   try {
-//    bool local_res = lhs->getStorageRef() == rhs->getStorageRef();
+
+#if defined (__INTEL_COMPILER)
     //tdk:todo: this fix is temporary. it is obviously inefficient.
     bool local_res = lhs->getStorageRef().dump() == rhs->getStorageRef().dump();
+#else
+    bool local_res = lhs->getStorageRef() == rhs->getStorageRef();
+#endif
 
 #if 0
     std::string prefix = std::string(ESMC_METHOD) + ": ";
