@@ -9,7 +9,7 @@
 ! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
-#define ESMF_FILENAME "src/Infrastructure/Base/interface/ESMF_Info.F90"
+#define ESMF_FILENAME "ESMF_Info.F90"
 !==============================================================================
 
 !==============================================================================
@@ -223,13 +223,14 @@ function ESMF_InfoEqual(lhs, rhs) result(is_equal)
   logical :: is_equal
 
   integer :: localrc
-  logical(C_BOOL) :: local_is_equal
+  integer(C_INT) :: local_is_equal
 
-  is_equal = .false.
+  local_is_equal = 0  !false
   call c_info_is_equal(lhs%ptr, rhs%ptr, local_is_equal, localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT)) return
 
-  is_equal = local_is_equal
+  is_equal = .false.
+  if (local_is_equal == 1) is_equal = .true.
 end function ESMF_InfoEqual
 
 #undef  ESMF_METHOD

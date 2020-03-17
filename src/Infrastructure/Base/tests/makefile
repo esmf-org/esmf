@@ -69,9 +69,11 @@ RUN_ESMC_InfoUTest:
 	$(MAKE) TNAME=Info NP=4 ctest
 
 RUN_ESMC_InfoUTestUNI:
+	rm -f test-esmf-info-write.json
 	$(MAKE) TNAME=Info NP=1 ctest
 
 RUN_ESMF_InfoUTest:
+	rm -f test-esmf-info-write.json
 	$(MAKE) TNAME=Info NP=4 ftest
 
 RUN_ESMF_InfoUTestUNI:

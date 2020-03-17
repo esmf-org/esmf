@@ -10,7 +10,7 @@
 !
 !==============================================================================
 
-#define FILENAME "src/Superstructure/InfoAPI/tests/ESMF_InfoSyncUTest.F90"
+#define ESMF_FILENAME "ESMF_InfoSyncUTest.F90"
 
 #include "ESMF_Macros.inc"
 #include "ESMF.h"
@@ -219,6 +219,11 @@ program ESMF_InfoSyncUTest
 
   call eidesc%Update(state, "", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+#if 0
+  call ESMF_LogWrite("eidesc%info="//ESMF_InfoDump(eidesc%info))
+  call ESMF_LogWrite("desired_info="//ESMF_InfoDump(desired_info))
+#endif
 
   call ESMF_Test((eidesc%info == desired_info), name, failMsg, result, ESMF_SRCLINE)
 

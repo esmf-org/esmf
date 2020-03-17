@@ -234,13 +234,41 @@ void ESMC_InfoInquire(ESMCI::Info *info, ESMCI::Info *inq, char *key,
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoIsEqual()"
-void ESMC_InfoIsEqual(ESMCI::Info *lhs, ESMCI::Info *rhs,
-  bool &res, int &esmc_rc) {
+void ESMC_InfoIsEqual(ESMCI::Info *lhs, ESMCI::Info *rhs, int &res, int &esmc_rc) {
   ESMC_CHECK_INIT(lhs, esmc_rc)
   ESMC_CHECK_INIT(rhs, esmc_rc)
   esmc_rc = ESMF_FAILURE;
   try {
-    res = lhs->getStorageRef() == rhs->getStorageRef();
+
+#if defined (__INTEL_COMPILER)
+    //tdk:todo: this fix is temporary. it is obviously inefficient.
+    bool local_res = lhs->getStorageRef().dump() == rhs->getStorageRef().dump();
+#else
+    bool local_res = lhs->getStorageRef() == rhs->getStorageRef();
+#endif
+
+#if 0
+    std::string prefix = std::string(ESMC_METHOD) + ": ";
+    std::string msg;
+
+    msg = prefix + "local_res=" + std::to_string(local_res);
+    ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO);
+
+    std::string lhs_dump = lhs->getStorageRef().dump();
+    std::string rhs_dump = rhs->getStorageRef().dump();
+
+    msg = prefix + "lhs_dump=" + lhs_dump;
+    ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO);
+    msg = prefix + "rhs_dump=" + rhs_dump;
+    ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO);
+
+    bool as_strings_eq = lhs_dump == rhs_dump;
+    msg = prefix + "as_strings_eq=" + std::to_string(as_strings_eq);
+    ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO);
+#endif
+
+    res = 0;  //false
+    if (local_res) res = 1;  //true
     esmc_rc = ESMF_SUCCESS;
   }
   ESMC_CATCH_ISOC

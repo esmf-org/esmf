@@ -10,7 +10,7 @@
 !
 !==============================================================================
 
-#define FILENAME "src/Infrastructure/Base/test/ESMF_InfoUTest.F90"
+#define ESMF_FILENAME "ESMF_InfoUTest.F90"
 
 #include "ESMF_Macros.inc"
 #include "ESMF.h"
@@ -567,6 +567,8 @@ program ESMF_InfoUTest
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_InfoDestroy(info_w, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
   call ESMF_InfoDestroy(info_r, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
