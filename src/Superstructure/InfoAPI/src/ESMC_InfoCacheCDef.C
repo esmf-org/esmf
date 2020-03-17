@@ -51,31 +51,41 @@ bool basesAreEqual(ESMC_Base &src_base, ESMC_Base &dst_base) {
   return ret;
 }
 
-ESMC_Base* findBase(ESMC_Base &target, esmc_infocache_t &infoCache) {
+ESMC_Base* findBase(ESMC_Base &target, esmc_infocache_t &infoCache, std::size_t &index) {
   ESMC_Base *ret = nullptr;
   for (std::size_t ii = 0; ii < infoCache.size(); ++ii) {
     ESMC_Base *dst_base = infoCache.at(ii);
     if (basesAreEqual(target, *dst_base)) {
       ret = dst_base;
-      break;
+      index = ii;
     }
   }
   return ret;
 }
 
+//tdk:todo: rename variables, etc. to make clear which are field, geometries, etc.
 #undef  ESMC_METHOD
 #define ESMC_METHOD "collect_base_geom_objects()"
-void collect_geom_base_objects(const json &infoDescStorage, esmc_infocache_t &infoCache, ESMC_Base *parentBase) {
+void collect_geom_base_objects(const json &infoDescStorage, esmc_infocache_t &infoCache, ESMC_Base *parentBase, esmc_infocache_t *fieldCache) {
   bool should_serialize_geom = false;
+  esmc_infocache_t local_fieldCache;
+  if (!fieldCache) {
+    local_fieldCache.reserve(ESMCI::ESMC_INFOCACHE_RESERVESIZE);
+    fieldCache = &local_fieldCache;
+  }
   for (json::const_iterator it=infoDescStorage.cbegin(); it!=infoDescStorage.cend(); it++) {
     ESMC_Base *base = nullptr;
     if (it.value().at("base_is_valid")) {
       base = baseAddressToBase(it.value().at("base_address"));
       // Pointer is null if base not found
-      ESMC_Base *ibase = findBase(*base, infoCache);
+      std::size_t index = 0;
+      ESMC_Base *ibase = findBase(*base, infoCache, index);
       if (it.value().at("is_geom") && !ibase) {
         should_serialize_geom = true;
         infoCache.push_back(base);
+        assert(fieldCache);
+        assert(parentBase);
+        fieldCache->push_back(parentBase);
       }
       if (parentBase) {
         ESMCI::Info *parent_info = parentBase->ESMC_BaseGetInfo();
@@ -84,10 +94,10 @@ void collect_geom_base_objects(const json &infoDescStorage, esmc_infocache_t &in
             parent_info->set("_esmf_state_reconcile/should_serialize_geom",
                              should_serialize_geom, false);
             if (!should_serialize_geom) {
-              parent_info->set<int>("_esmf_state_reconcile/geom_base_id",
-                               it.value().at("base_id"), false);
-              parent_info->set<std::string>("_esmf_state_reconcile/geom_base_name",
-                               it.value().at("base_name"), false);
+              parent_info->set<int>("_esmf_state_reconcile/field_archetype_id",
+                               fieldCache->at(index)->ESMC_BaseGetID(), false);
+              parent_info->set<std::string>("_esmf_state_reconcile/field_archetype_base_name",
+                               fieldCache->at(index)->ESMC_BaseGetName(), false);
             }
           }
         }
@@ -99,7 +109,7 @@ void collect_geom_base_objects(const json &infoDescStorage, esmc_infocache_t &in
     }
     const json &members = it.value().at("members");
     if (not members.is_null()) {
-      collect_geom_base_objects(members, infoCache, base);
+      collect_geom_base_objects(members, infoCache, base, fieldCache);
     }
   }
 }
@@ -131,7 +141,7 @@ int ESMC_InfoCacheUpdateGeoms(ESMCI::esmc_infocache_t *infoCache, ESMCI::Info *i
   int esmc_rc = ESMF_FAILURE;
   try {
     const json &info_desc_storage = infoDesc->getStorageRefWritable();
-    ESMCI::collect_geom_base_objects(info_desc_storage, *infoCache, nullptr);
+    ESMCI::collect_geom_base_objects(info_desc_storage, *infoCache, nullptr, nullptr);
     esmc_rc = ESMF_SUCCESS;
   }
   ESMC_CATCH_ISOC
