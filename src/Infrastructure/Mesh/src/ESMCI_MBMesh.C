@@ -21,6 +21,7 @@
 // Take out if MOAB isn't being used
 #if defined ESMF_MOAB
 
+#include <limits>
 #include <string>
 #include <ostream>
 #include <iterator>
@@ -269,6 +270,24 @@ int MBMesh::get_owner(EntityHandle eh) {
   return owner;
 }
 
+int MBMesh::get_orig_pos(EntityHandle eh) {
+
+  // Error return codes
+  int localrc;
+  int merr;
+  
+  // Get Owner
+  int orig_pos;
+  merr=mesh->tag_get_data(orig_pos_tag, &eh, 1, &orig_pos);
+  if (merr != MB_SUCCESS) {
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+  }
+
+  // return owner
+  return orig_pos;
+}
+
 
 int MBMesh::get_gid(EntityHandle eh) {
 
@@ -411,6 +430,7 @@ void MBMesh::set_node_coords(EntityHandle eh, double *orig_coords) {
 
 }
 
+
 void MBMesh::setup_elem_mask() {
 
   int merr,localrc;
@@ -551,11 +571,307 @@ void MBMesh::set_elem_coords(EntityHandle eh, double *orig_coords) {
  
 }
 
+// Setup MBMesh to operate in parallel by resolving shared ents, etc. 
+void MBMesh::setup_parallel() {
+  int merr,localrc;
+
+  // Get MPI Communicator of current VM
+  MPI_Comm mpi_comm=VM::getCurrent(&localrc)->getMpi_c();
+  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+    throw localrc;  // bail out with exception
+
+  // setup parallel comm, destroyed in MBMesh destructor   
+  ParallelComm *pcomm= new ParallelComm(mesh, mpi_comm);
+
+  // Get list of elements
+  Range elems;
+  merr=mesh->get_entities_by_dimension(0, pdim, elems);
+  MBMESH_CHECK_ERR(merr, localrc);
+    
+  // Resolve object sharing 
+  merr = pcomm->resolve_shared_ents(0, elems, pdim, pdim-1);
+  MBMESH_CHECK_ERR(merr, localrc);
+
+}
+
+// Update parallel
+// If the mesh has changed, call this to update the parallel connections
+// between pieces of the mesh. (E.g. for haloing, etc...) 
+// (This hasn't been tested, but it should be what has to happen.
+//  TODO: Test!)
+void MBMesh::update_parallel() {
+  int merr,localrc;
+
+  // Get the indexed pcomm object from the interface                                                                
+  // index 0 should return the one created inside MBMesh_addelements                                                
+  ParallelComm *pcomm = ParallelComm::get_pcomm(this->mesh, 0);
+
+  // Get current list of elements
+  Range elems;
+  merr=mesh->get_entities_by_dimension(0, pdim, elems);
+  MBMESH_CHECK_ERR(merr, localrc);
+    
+  // Resolve object sharing 
+  merr = pcomm->resolve_shared_ents(0, elems, pdim, pdim-1);
+  MBMESH_CHECK_ERR(merr, localrc);
+
+}
+
+// Do halo communication for all appropriate tags on nodes
+// TODO: Right now this is a work around because MOAB doesn't let you specify which 
+//       is the owned version of a shared entity (it decides itself). So we use reduce min
+//       and set the non-owned versions to the max. 
+//       do_internal_coords - if true also halo internal vertex coords. This is more expensive, because a new tag needs
+//                   to be added and removed, so if not supplied it's default off. 
+void MBMesh::halo_comm_nodes_all_tags(bool do_internal_coords) {
+  int merr, localrc;
+
+  // Get localPet
+  int localPet = VM::getCurrent(&localrc)->getLocalPet();
+  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+    throw localrc;  // bail out with exception
+
+  // Get the indexed pcomm object from the interface                                                                
+  // index 0 should return the one created inside MBMesh_addelements                                                
+  ParallelComm *pcomm = ParallelComm::get_pcomm(this->mesh, 0);
+
+  // Do node halo comm
+  vector<Tag> node_tags;  
+  // DON'T UPDATE THIS IS LOCAL INFO node_tags.push_back(this->gid_tag);
+  // DON'T UPDATE THIS IS LOCAL INFO node_tags.push_back(this->orig_pos_tag);
+  // DON'T UPDATE THIS IS LOCAL INFO node_tags.push_back(this->owner_tag);
+  if (this->has_node_orig_coords) node_tags.push_back(this->node_orig_coords_tag);
+  if (this->has_node_mask) {
+    node_tags.push_back(this->node_mask_tag);
+    node_tags.push_back(this->node_mask_val_tag);
+  }
+
+
+  // Get shared nodes
+  Range shared_nodes;
+  merr=pcomm->get_shared_entities(-1, shared_nodes,0);
+  MBMESH_CHECK_ERR(merr, localrc);
+
+  // Loop setting unowned data to max
+  for (Range::iterator it=shared_nodes.begin(); it != shared_nodes.end(); it++) {
+    EntityHandle node=*it;
+    
+    // Only reset if not local
+    if (this->get_owner(node) != localPet) {
+
+      // ONLY FOR TESTING
+      //int max_orig_pos=std::numeric_limits<int>::max();
+      //merr=mesh->tag_set_data(orig_pos_tag, &node, 1, &max_orig_pos);
+      //MBMESH_CHECK_ERR(merr, localrc);
+      
+      // Set orig_coords
+      if (this->has_node_orig_coords) {
+        double max_orig_coords[3]={std::numeric_limits<double>::max(),
+                               std::numeric_limits<double>::max(),
+                               std::numeric_limits<double>::max()};
+        merr=mesh->tag_set_data(node_orig_coords_tag, &node, 1, max_orig_coords);
+        MBMESH_CHECK_ERR(merr, localrc);
+      }
+
+      // Set mask
+      if (this->has_node_mask) {
+        int max_mask=std::numeric_limits<int>::max();
+        merr=mesh->tag_set_data(node_mask_tag, &node, 1, &max_mask);
+        MBMESH_CHECK_ERR(merr, localrc);
+
+        merr=mesh->tag_set_data(node_mask_val_tag, &node, 1, &max_mask);
+        MBMESH_CHECK_ERR(merr, localrc);
+      }
+    }
+  }
+
+  // Add coords if asked
+  Tag tmp_node_coords_tag;
+  if (do_internal_coords) {
+
+    // Add tmp coords tag
+    double dbl_def_val[3]={-1.0, -1.0, -1.0};
+    merr=mesh->tag_get_handle("tmp_node_coords", sdim, MB_TYPE_DOUBLE, tmp_node_coords_tag, MB_TAG_EXCL|MB_TAG_DENSE, dbl_def_val);
+    if (merr != MB_SUCCESS) {
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                       moab::ErrorCodeStr[merr], ESMC_CONTEXT, &localrc)) throw localrc;
+    }
+   
+    // Add tag to list
+    node_tags.push_back(tmp_node_coords_tag);
+
+    // Loop setting unowned data to max
+    for (Range::iterator it=shared_nodes.begin(); it != shared_nodes.end(); it++) {
+      EntityHandle node=*it;
+
+      // If local set from vertex coords
+      if (this->get_owner(node) == localPet) {
+
+        // get vertex coords
+        double coords[3]={0.0,0.0,0.0};
+        merr=mesh->get_coords(&node,1,coords);
+        MBMESH_CHECK_ERR(merr, localrc);
+
+        // set vertex coords in tmp tag
+        merr=mesh->tag_set_data(tmp_node_coords_tag, &node, 1, coords);
+        MBMESH_CHECK_ERR(merr, localrc);
+
+      } else { // Not local set as max
+        double max_coords[3]={std::numeric_limits<double>::max(),
+                              std::numeric_limits<double>::max(),
+                              std::numeric_limits<double>::max()};
+        merr=mesh->tag_set_data(tmp_node_coords_tag, &node, 1, max_coords);
+        MBMESH_CHECK_ERR(merr, localrc);
+      }
+    }
+  }
+
+  // Now do a halo by doing a reduce
+  merr = pcomm->reduce_tags(node_tags, node_tags, MPI_MIN, shared_nodes);
+  MBMESH_CHECK_ERR(merr, localrc);
+
+  // Copy tmp coords back to vertex
+  if (do_internal_coords) {
+   
+    // Loop setting unowned vertex to tmp tag
+    for (Range::iterator it=shared_nodes.begin(); it != shared_nodes.end(); it++) {
+      EntityHandle node=*it;
+
+      // If not local set vertex coords from tmp tag
+      if (this->get_owner(node) != localPet) {
+
+        // get vertex coords from tmp tag
+        double coords[3]={0.0,0.0,0.0};
+        merr=mesh->tag_get_data(tmp_node_coords_tag, &node, 1, coords);
+        MBMESH_CHECK_ERR(merr, localrc);
+
+        // Put into vertex
+        merr=mesh->set_coords(&node,1,coords);
+        MBMESH_CHECK_ERR(merr, localrc);
+      }
+    }
+
+    // TODO: REMOVE tmp_node_coords_tag HERE!!!!!
+  }
+
+
+}
+
+// Do halo communication for all appropriate tags on elems
+// TODO: Right now this is a work around because MOAB doesn't let you specify which 
+//       is the owned version of a shared entity (it decides itself). So we use reduce min
+//       and set the non-owned versions to the max. 
+void MBMesh::halo_comm_elems_all_tags() {
+  int merr, localrc;
+
+  // Get localPet
+  int localPet = VM::getCurrent(&localrc)->getLocalPet();
+  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+    throw localrc;  // bail out with exception
+
+  // Get the indexed pcomm object from the interface                                                                
+  // index 0 should return the one created inside MBMesh_addelements                                                
+  ParallelComm *pcomm = ParallelComm::get_pcomm(this->mesh, 0);
+
+  // Do elem halo comm
+  vector<Tag> elem_tags;  
+  // DON'T UPDATE THIS IS LOCAL INFO elem_tags.push_back(this->gid_tag);
+  // DON'T UPDATE THIS IS LOCAL INFO elem_tags.push_back(this->orig_pos_tag);
+  // DON'T UPDATE THIS IS LOCAL INFO elem_tags.push_back(this->owner_tag);
+  if (this->has_elem_frac) elem_tags.push_back(this->elem_frac_tag);
+  if (this->has_elem_mask) {
+    elem_tags.push_back(this->elem_mask_tag);
+    elem_tags.push_back(this->elem_mask_val_tag);
+  }
+  if (this->has_elem_area) elem_tags.push_back(this->elem_area_tag);
+  if (this->has_elem_coords) elem_tags.push_back(this->elem_coords_tag);
+  if (this->has_elem_orig_coords) elem_tags.push_back(this->elem_orig_coords_tag);
+
+
+  // Get shared elems
+  Range shared_elems;
+  merr=pcomm->get_shared_entities(-1, shared_elems,pdim);
+  MBMESH_CHECK_ERR(merr, localrc);
+
+  // Loop setting unowned data to max
+  for (Range::iterator it=shared_elems.begin(); it != shared_elems.end(); it++) {
+    EntityHandle elem=*it;
+    
+    // Only reset if not local
+    if (this->get_owner(elem) != localPet) {
+
+      // ONLY FOR TESTING
+      // int max_orig_pos=std::numeric_limits<int>::max();
+      //merr=mesh->tag_set_data(orig_pos_tag, &node, 1, &max_orig_pos);
+      //MBMESH_CHECK_ERR(merr, localrc);
+
+      // Set elem_frac
+      if (this->has_elem_frac) {
+        double max_elem_frac=std::numeric_limits<double>::max();
+        merr=mesh->tag_set_data(elem_frac_tag, &elem, 1, &max_elem_frac);
+        MBMESH_CHECK_ERR(merr, localrc);
+      }
+
+      // Set elem_area
+      if (this->has_elem_area) {
+        double max_elem_area=std::numeric_limits<double>::max();
+        merr=mesh->tag_set_data(elem_area_tag, &elem, 1, &max_elem_area);
+        MBMESH_CHECK_ERR(merr, localrc);
+      }
+
+      
+      // Set elem_orig_coords
+      if (this->has_elem_orig_coords) {
+        double max_orig_coords[3]={std::numeric_limits<double>::max(),
+                               std::numeric_limits<double>::max(),
+                               std::numeric_limits<double>::max()};
+        merr=mesh->tag_set_data(elem_orig_coords_tag, &elem, 1, max_orig_coords);
+        MBMESH_CHECK_ERR(merr, localrc);
+      }
+
+      // Set elem_coords
+      if (this->has_elem_coords) {
+        double max_coords[3]={std::numeric_limits<double>::max(),
+                              std::numeric_limits<double>::max(),
+                              std::numeric_limits<double>::max()};
+        merr=mesh->tag_set_data(elem_coords_tag, &elem, 1, max_coords);
+        MBMESH_CHECK_ERR(merr, localrc);
+      }
+
+
+      // Set mask
+      if (this->has_elem_mask) {
+        int max_mask=std::numeric_limits<int>::max();
+        merr=mesh->tag_set_data(elem_mask_tag, &elem, 1, &max_mask);
+        MBMESH_CHECK_ERR(merr, localrc);
+
+        merr=mesh->tag_set_data(elem_mask_val_tag, &elem, 1, &max_mask);
+        MBMESH_CHECK_ERR(merr, localrc);
+      }
+    }
+  }
+
+  // Now do a halo by doing a reduce
+  merr = pcomm->reduce_tags(elem_tags, elem_tags, MPI_MIN, shared_elems);
+  MBMESH_CHECK_ERR(merr, localrc);
+
+#if 0
+  Range elems;
+  merr=this->mesh->get_entities_by_dimension(0, this->pdim, elems);
+  MBMESH_CHECK_ERR(merr, localrc);
+
+  merr = pcomm->exchange_tags(elem_tags, elem_tags, elems);
+  MBMESH_CHECK_ERR(merr, localrc);
+#endif
+
+}
+
+
 
 MBMesh::~MBMesh() {
 
-  // get the indexed pcomm object from the interface
-  // index 0 should return the one created inside MBMesh_addelements
+  // Get the indexed pcomm object from the interface                                                                
+  // index 0 should return the one created inside MBMesh_addelements                                                
   ParallelComm *pcomm = ParallelComm::get_pcomm(this->mesh, 0);
   delete pcomm;
   
@@ -566,6 +882,156 @@ MBMesh::~MBMesh() {
   if (verts != NULL) delete [] verts;
   
 } 
+
+
+/* XMRKX */
+void MBMesh::debug_output_nodes() {
+  int merr,localrc;
+
+  // Get localPet
+  int localPet = VM::getCurrent(&localrc)->getLocalPet();
+  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+    throw localrc;  // bail out with exception
+
+  // get the indexed pcomm object from the interface
+  ParallelComm *pcomm = ParallelComm::get_pcomm(this->mesh, 0);
+
+  // Get range of nodes
+  Range nodes;
+  merr=mesh->get_entities_by_dimension(0, 0, nodes);
+  if (merr != MB_SUCCESS) {
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+  }
+
+  // Loop over nodes outputting information
+  for (Range::iterator it=nodes.begin(); it != nodes.end(); it++) {
+    EntityHandle node=*it;
+
+    // Output info
+    cout<<localPet<<"# NODE:";
+    
+    // Output global id
+    int gid=this->get_gid(node);
+    cout<<" gid="<<gid;
+
+    // output node owner
+    int owner=this->get_owner(node);
+    cout<<" owner="<<owner;
+
+    // FOR DEBUGGING 
+    // output moab owner
+    //int moab_owner;
+    //pcomm->get_owner(node,moab_owner);
+    //cout<<" moab_owner="<<moab_owner;
+    
+    // get node orig pos
+    int orig_pos=this->get_orig_pos(node);
+    cout<<" orig_pos="<<orig_pos;
+
+    // Output coords
+    double coords[3];
+    merr=mesh->get_coords(&node,1,coords);
+    MBMESH_CHECK_ERR(merr, localrc);
+    cout<<" coords=["<<coords[0]<<" "<<coords[1]<<" "<<coords[2]<<"]";
+
+
+    //end line
+    cout<<"\n";
+  }
+}
+
+void MBMesh::debug_output_elems() {
+  int merr,localrc;
+
+  // Get localPet
+  int localPet = VM::getCurrent(&localrc)->getLocalPet();
+  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+    throw localrc;  // bail out with exception
+
+  // get the indexed pcomm object from the interface
+  ParallelComm *pcomm = ParallelComm::get_pcomm(this->mesh, 0);
+
+  // Get range of elems
+  Range elems;
+  merr=mesh->get_entities_by_dimension(0, pdim, elems);
+  if (merr != MB_SUCCESS) {
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+  }
+
+  // Loop over nodes outputting information
+  for (Range::iterator it=elems.begin(); it != elems.end(); it++) {
+    EntityHandle elem=*it;
+
+    // Output info
+    cout<<localPet<<"# ELEM:";
+    
+    // Output global id
+    int gid=this->get_gid(elem);
+    cout<<" gid="<<gid;
+
+    // output node owner
+    int owner=this->get_owner(elem);
+    cout<<" owner="<<owner;
+
+    // FOR DEBUGGING 
+    // output moab owner
+    //int moab_owner;
+    //pcomm->get_owner(node,moab_owner);
+    //cout<<" moab_owner="<<moab_owner;
+    
+    // get node orig pos
+    int orig_pos=this->get_orig_pos(elem);
+    cout<<" orig_pos="<<orig_pos;
+
+    //end line
+    cout<<"\n";
+  }
+}
+
+// DEPRECATED 
+// TODO: Get rid of verts array
+// Call after all nodes have been added to setup verts array
+void MBMesh::setup_verts_array() {
+  int merr, localrc;
+
+  // Allocate storage for verts
+  verts=new EntityHandle[num_verts];
+  
+  // Get range of nodes
+  Range nodes;
+  merr=mesh->get_entities_by_dimension(0, 0, nodes);
+  if (merr != MB_SUCCESS) {
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+  }
+
+  // Complain if sizes don't match
+  if (num_verts != nodes.size()) {
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG,
+                                     "num_verts and node.size() don't match as they should",
+                                     ESMC_CONTEXT,&localrc)) throw localrc;
+  }
+
+
+  // Loop over nodes filling array
+  int i=0;
+  for (Range::iterator it=nodes.begin(); it != nodes.end(); it++) {
+    EntityHandle node=*it;
+
+    verts[i]=node;
+    i++;
+  }
+
+  // Sort so ordered by orig pos
+  // I'M NOT DOING THIS BECAUSE I DON'T THINK THAT 
+  // IT'S NECESSARY AND THIS SUBROUTINE SHOULD GO AWAY SOON, BUT
+  // LEAVING THIS NOTE JUST IN CASE...
+
+}
+
+
 
 void MBMesh::CreateGhost() {
 

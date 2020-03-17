@@ -2336,9 +2336,6 @@ endif
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
-
-#if 1
-
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test creating a MOAB Mesh"
@@ -2358,6 +2355,10 @@ endif
   ! Create test mesh
   call createTestMesh3x3(mesh, rc=localrc)  
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+!  call ESMF_MeshWrite(mesh,"tst_moab",rc=localrc)
+
 
 #if 0
   ! Only do this if we have 1 processor
@@ -2462,8 +2463,6 @@ endif
 
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
-#endif
-
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
@@ -6329,7 +6328,7 @@ subroutine test_MOAB_GtoM(correct, rc)
     return
   endif
 
-#if 1
+#if 0
    ! Output Mesh for debugging
    call ESMF_MeshWrite(mesh,"moab_gtom_mesh",rc=localrc)
    if (localrc /=ESMF_SUCCESS) then

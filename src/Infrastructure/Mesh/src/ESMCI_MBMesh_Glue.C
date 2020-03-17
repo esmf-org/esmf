@@ -2065,6 +2065,8 @@ void MBMesh_write(void **mbmpp, char *fname, int *rc,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_write()"
 
+  int localrc;
+
  #if 0
   // Initialize the parallel environment for mesh (if not already done)
     {
@@ -2075,6 +2077,15 @@ void MBMesh_write(void **mbmpp, char *fname, int *rc,
    throw localrc;  // bail out with exception
     }
 #endif
+
+  // Get localPet
+  int localPet = VM::getCurrent(&localrc)->getLocalPet();
+  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,rc)) return;
+
+  // Get petCount
+  int petCount = VM::getCurrent(&localrc)->getPetCount();
+  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,rc)) return;
+
 
     // Get Moab Mesh wrapper
     MBMesh *mbmp=*((MBMesh **)mbmpp);
@@ -2095,7 +2106,13 @@ void MBMesh_write(void **mbmpp, char *fname, int *rc,
       return;
     }
 #undef FILENAME_W_VTK_MAX
-    sprintf(filename_w_vtk,"%s.vtk",filename);
+
+    // Write file name (add pet info if > 1 PET)
+    if (petCount > 1) {
+      sprintf(filename_w_vtk,"%s.%d.%d.vtk",filename,petCount,localPet);
+    } else {
+      sprintf(filename_w_vtk,"%s.vtk",filename);
+    }
 
     // Call into MOAB
     int merr=moab_mesh->write_file(filename_w_vtk,NULL,NULL);

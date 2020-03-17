@@ -9,7 +9,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#define ESMC_FILENAME "ESMCI_GridToMesh.C"
+#define ESMC_FILENAME "ESMCI_MBMesh_GToM_Glue.C"
 //==============================================================================
 //
 //-----------------------------------------------------------------------------
@@ -522,15 +522,21 @@ void MBMesh_GridToMeshCell(const Grid &grid_,
                            void **out_meshpp, 
                            int *rc) {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "GridToMeshCell()"
+#define ESMC_METHOD "MBMesh_GridToMeshCell()"
   Trace __trace("GridToMeshCell(const Grid &grid_, ESMCI::Mesh &mesh)");
 
   try {
 
-    printf("MBMesh_GridToMeshCell(): Beg\n");
+    //    printf("MBMesh_GridToMeshCell(): Beg\n");
 
   // local error code
   int localrc;
+  
+  // Get localPet
+  int localPet = VM::getCurrent(&localrc)->getLocalPet();
+  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+    throw localrc;  // bail out with exception
+
 
   // Get grid pointer
   Grid *grid = &(const_cast<Grid&>(grid_));
@@ -655,7 +661,7 @@ void MBMesh_GridToMeshCell(const Grid &grid_,
 
        // Create new element
        mesh->add_elem(etype, NUM_QUAD_CORNERS, cnr_nodes, 
-                      elem_gid, local_elem_index, Par::Rank());
+                      elem_gid, local_elem_index, localPet);
 
 
        // Advance to next elem index
@@ -773,7 +779,7 @@ void MBMesh_GridToMeshCell(const Grid &grid_,
        EntityHandle node=mi->second;
 
        // Set owner to the current processor
-       mesh->set_owner(node, Par::Rank());
+       mesh->set_owner(node, localPet);
      }
    }
  }
@@ -809,7 +815,7 @@ void MBMesh_GridToMeshCell(const Grid &grid_,
    mesh->set_owner(node, proc);
  }
 
- // Add node Fields
+ // Add node fields
  _create_nfields(grid, mesh);
 
  // Set node fields
@@ -818,64 +824,31 @@ void MBMesh_GridToMeshCell(const Grid &grid_,
  // Don't need gid_to_node_map anymore, so clear it to save memory
  gid_to_node_map.clear();
 
- // Add element Fields
+ // Add element fields
  _create_efields(grid, mesh);
 
  // Set element fields
  _set_efields(grid, mesh);
 
- // STOPPED HERE // 
+ // Setup parallel information
+ mesh->setup_parallel();
 
- // Finalize the Mesh
- // WHAT TO DO FOR THIS???
- // Probably need to setup parallel stuff, etc... 
- //mesh->build_sym_comm_rel(MeshObj::NODE);
- //mesh->Commit();
+// Do halo communication on all appropriate node tags
+ mesh->halo_comm_nodes_all_tags(true);
 
- // Halo field values
- // mesh->CreateGhost(); or I think just use the internal part that updates the values???
-
-#if 0 
- // Halo fields, so entities with an owner on another processor
- // will have the correct value
- {
-   std::vector<MEField<>*> fds;
-
-   Mesh::FieldReg::MEField_iterator fi = mesh->Field_begin(), fe = mesh->Field_end();
-
-   for (; fi != fe; ++fi) fds.push_back(&*fi);
-
-   mesh->HaloFields(fds.size(), &fds[0]);
- }
+ // setup verts array
+ // TODO: Deprecated so get rid of this soon!!
+ mesh->setup_verts_array();
 
 
-#if 0
- // DEBUG OUTPUT
-  {
-     // Output list of nodes with info
-    MeshDB::iterator ni = mesh->node_begin(), ne = mesh->node_end();
-    for (; ni != ne; ++ni) {
-      MeshObj &node=*ni;
+ // Debug output
+ // mesh->debug_output_nodes();
 
-      //      printf("%d# node: id=%d owner=%d is_local=%d data_index=%d \n",Par::Rank(),node.get_id(),node.get_owner(),GetAttr(node).is_locally_owned(),node.get_data_index());
-      printf("%d# node: id=%d owner=%d is_local=%d is_active=%d is_shared=%d data_index=%d\n",Par::Rank(),node.get_id(),node.get_owner(),GetAttr(node).is_locally_owned(),GetAttr(node).GetContext().is_set(Attr::ACTIVE_ID), GetAttr(node).is_shared(),node.get_data_index());
+ // Do halo communication on all appropriate elem tags
+ mesh->halo_comm_elems_all_tags();
 
-    }
-
-   printf("\n");
-
-     // Output list of elems with info
-    MeshDB::iterator ei = mesh->elem_begin_all(), ee = mesh->elem_end_all();
-    for (; ei != ee; ++ei) {
-      MeshObj &elem=*ei;
-
-      printf("%d# elem: id=%d owner=%d is_local=%d is_active=%d is_shared=%d data_index=%d\n",Par::Rank(),elem.get_id(),elem.get_owner(),GetAttr(elem).is_locally_owned(),GetAttr(elem).GetContext().is_set(Attr::ACTIVE_ID), GetAttr(elem).is_shared(),elem.get_data_index());
-    }
-  }
-#endif
-
-#endif
-
+ // Debug output
+ //mesh->debug_output_elems();
 
   } catch(std::exception &x) {
     // catch Mesh exception return code

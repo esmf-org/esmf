@@ -103,6 +103,9 @@ namespace ESMCI {
     // Get owner
     int get_owner(EntityHandle eh);
 
+    // Get original position
+    int get_orig_pos(EntityHandle eh);
+
     // Get gid
     int get_gid(EntityHandle eh);
 
@@ -133,6 +136,28 @@ namespace ESMCI {
     // Set coords in an elem
     void set_elem_coords(EntityHandle eh, double *orig_coords);
 
+    // Do halo communication on all node tags
+    void halo_comm_nodes_all_tags(bool do_internal_coords=false);
+
+    // Do halo communication on all elem tags
+    void halo_comm_elems_all_tags();
+
+    // Setup MBMesh to operate in parallel by resolving shared ents, etc. 
+    void setup_parallel();
+
+    // If the mesh has changed, update parallel (NOT TESTED!)
+    void update_parallel();
+
+    // Output mesh nodes for debugging
+    void debug_output_nodes();
+
+    // Output mesh elems for debugging
+    void debug_output_elems();
+
+// DEPRECATED 
+// TODO: Get rid of verts array
+// Call after all nodes have been added to setup verts array
+    void setup_verts_array();
 
 #endif
 
