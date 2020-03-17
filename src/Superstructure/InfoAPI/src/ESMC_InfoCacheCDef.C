@@ -29,9 +29,9 @@ using json = nlohmann::json;
 static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
 
-//tdk:todo: consider putting this in the ESMCI namespace
+namespace ESMCI {
 
-const std::size_t INFOCACHE_RESERVESIZE = 25;
+const std::size_t ESMC_INFOCACHE_RESERVESIZE = 25;
 typedef long int esmc_address_t;
 typedef std::vector<ESMC_Base *> esmc_infocache_t;
 
@@ -104,32 +104,34 @@ void collect_geom_base_objects(const json &infoDescStorage, esmc_infocache_t &in
   }
 }
 
+}  // namespace ESMCI
+
 //tdk:todo: add nullptr init checks
 extern "C" {
 
 //tdk:todo: try and make this return a return code instead of the pointer
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoCacheInitialize()"
-esmc_infocache_t* ESMC_InfoCacheInitialize(void) {
-  esmc_infocache_t *infoCache = new esmc_infocache_t;
-  infoCache->reserve(INFOCACHE_RESERVESIZE);
+ESMCI::esmc_infocache_t* ESMC_InfoCacheInitialize(void) {
+  ESMCI::esmc_infocache_t *infoCache = new ESMCI::esmc_infocache_t;
+  infoCache->reserve(ESMCI::ESMC_INFOCACHE_RESERVESIZE);
   return infoCache;
 }
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoCacheDestroy()"
-int ESMC_InfoCacheDestroy(esmc_infocache_t *infoCache) {
+int ESMC_InfoCacheDestroy(ESMCI::esmc_infocache_t *infoCache) {
   delete infoCache;
   return ESMF_SUCCESS;
 }
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoCacheUpdateGeoms()"
-int ESMC_InfoCacheUpdateGeoms(esmc_infocache_t *infoCache, ESMCI::Info *infoDesc) {
+int ESMC_InfoCacheUpdateGeoms(ESMCI::esmc_infocache_t *infoCache, ESMCI::Info *infoDesc) {
   int esmc_rc = ESMF_FAILURE;
   try {
     const json &info_desc_storage = infoDesc->getStorageRefWritable();
-    collect_geom_base_objects(info_desc_storage, *infoCache, nullptr);
+    ESMCI::collect_geom_base_objects(info_desc_storage, *infoCache, nullptr);
     esmc_rc = ESMF_SUCCESS;
   }
   ESMC_CATCH_ISOC
