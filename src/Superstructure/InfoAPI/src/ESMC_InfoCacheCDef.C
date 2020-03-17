@@ -31,6 +31,7 @@ static const char *const version = "$Id$";
 
 //tdk:todo: consider putting this in the ESMCI namespace
 
+const std::size_t INFOCACHE_RESERVESIZE = 25;
 typedef long int esmc_address_t;
 typedef std::vector<ESMC_Base *> esmc_infocache_t;
 
@@ -111,7 +112,7 @@ extern "C" {
 #define ESMC_METHOD "ESMC_InfoCacheInitialize()"
 esmc_infocache_t* ESMC_InfoCacheInitialize(void) {
   esmc_infocache_t *infoCache = new esmc_infocache_t;
-  infoCache->reserve(25);
+  infoCache->reserve(INFOCACHE_RESERVESIZE);
   return infoCache;
 }
 
