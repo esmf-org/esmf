@@ -66,7 +66,7 @@
 ! call ESMF_MeshSetMOAB(.true.)
 
 ! This #if surrounds all the tests to enable turning on just one test
-#if 0
+#if 1
      !------------------------------------------------------------------------
       !EX_UTest
       ! Test regrid between -180-180 sphere and a 360 sphere
@@ -1304,7 +1304,7 @@
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-#endif
+
       !------------------------------------------------------------------------
       !EX_UTest
 
@@ -1338,7 +1338,6 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-#if 0
 #endif
 #endif
     call ESMF_TestEnd(ESMF_SRCLINE)

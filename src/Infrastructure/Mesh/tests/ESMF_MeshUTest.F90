@@ -110,7 +110,8 @@ program ESMF_MeshUTest
   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-#if 0
+ ! This surrounds all the tests to make turning off everything but one test easier
+#if 1
 
   !------------------------------------------------------------------------
 
@@ -2594,8 +2595,6 @@ endif
 
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
-#endif
-
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test MOAB Mesh Create from Grid"
@@ -2616,6 +2615,7 @@ endif
   correct=.true.
 #endif
 
+#endif
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
