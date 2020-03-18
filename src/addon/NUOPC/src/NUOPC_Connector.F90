@@ -2948,6 +2948,9 @@ call ESMF_PointerLog(gridListE%keyGrid%this, &
           call ESMF_FieldGet(providerField, mesh=mesh, meshloc=meshloc, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call ESMF_MeshGet(mesh, elementDistgrid=providerDG, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           if (sharedGeom) then
             ! set the shared Mesh on the acceptor side
             call ESMF_FieldEmptySet(acceptorField, mesh=mesh, meshloc=meshloc, &
@@ -2956,8 +2959,8 @@ call ESMF_PointerLog(gridListE%keyGrid%this, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           else
             ! not sharedGeom -> must transfer
-            call ESMF_MeshGet(mesh, elementDistgrid=providerDG, &
-              nodalDistgrid=providerDG_nodal, name=geomobjname, rc=rc)
+            call ESMF_MeshGet(mesh, nodalDistgrid=providerDG_nodal, &
+              name=geomobjname, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             ! see if provider mesh has been dealt with before
