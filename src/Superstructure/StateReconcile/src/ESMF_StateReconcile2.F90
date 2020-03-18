@@ -211,7 +211,7 @@ contains
       lattreconflag = attreconflag
     endif
     !tdk:todo: what do we do about attribute reconcile when they are required? recommend just leaving on
-    !lattreconflag = ESMF_ATTRECONCILE_ON
+    lattreconflag = ESMF_ATTRECONCILE_ON !tdk:bc
 
 !tdk:debug
 #if 1
@@ -1775,6 +1775,10 @@ contains
 
     logical, parameter :: debug = .false.
 
+    character(len=ESMF_MAXSTR) :: logmsg
+
+    ! -------------------------------------------------------------------------
+
     localrc = ESMF_RC_NOT_IMPL
 
     call ESMF_VMGet(vm, localPet=mypet, petCount=npets, rc=localrc)
@@ -1872,6 +1876,16 @@ contains
       offsets_recv(i) = offset_pos
       offset_pos = offset_pos + itemcount
     end do
+
+!tdk:debug
+#if 1
+    write(logmsg, *) SIZE(buffer_send)
+    call ESMF_LogWrite("SIZE(buffer_send)="//TRIM(logmsg), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    write(logmsg, *) SIZE(recv_buffer)
+    call ESMF_LogWrite("SIZE(recv_buffer)="//TRIM(logmsg), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+#endif
 
     ! AlltoAllV
 

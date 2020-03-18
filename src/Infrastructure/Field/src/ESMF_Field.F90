@@ -486,7 +486,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
-
       if (fp%status .eq. ESMF_FIELDSTATUS_GRIDSET .or. &
           fp%status .eq. ESMF_FIELDSTATUS_COMPLETE) then
 
@@ -495,7 +494,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           should_serialize_geom, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-        if (should_serialize_geom) then
+        if (.true.) then !tdk:bc
           call ESMF_GeomBaseSerialize(fp%geombase, buffer, length, offset, &
                                       lattreconflag, linquireflag, localrc)
           if (ESMF_LogFoundError(localrc, &
@@ -618,7 +617,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           should_serialize_geom, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-        if (should_serialize_geom) then
+        if (.true.) then !tdk:bc
           fp%geombase=ESMF_GeomBaseDeserialize(buffer, offset, &
                                               lattreconflag, localrc)
           if (ESMF_LogFoundError(localrc, &
