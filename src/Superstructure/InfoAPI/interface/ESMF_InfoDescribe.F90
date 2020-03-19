@@ -47,6 +47,9 @@ use ESMF_XGridMod
 use ESMF_XGridGetMod
 use ESMF_LocStreamMod
 use ESMF_RHandleMod
+
+use iso_c_binding, only : C_INT, C_NULL_CHAR
+
 implicit none
 
 !==============================================================================
@@ -55,9 +58,24 @@ implicit none
 !private
 !public
 
+interface
+
+function c_infodescribe_search(toSearch, rootKey, searchCriteria, found) bind(C, name="ESMC_InfoDescribeSearch")
+  use iso_c_binding, only : C_PTR, C_INT, C_CHAR
+  implicit none
+  type(C_PTR), value :: toSearch
+  character(C_CHAR), intent(in) :: rootKey(*)
+  type(C_PTR), value :: searchCriteria
+  integer(C_INT), intent(out) :: found
+  integer(C_INT) :: c_infodescribe_search
+end function
+
+end interface
+
 !==============================================================================
 !==============================================================================
 
+!tdk:optimize: where the info storage may be passed in and reused during a search. probably change info to be a pointer
 type, public :: ESMF_InfoDescribe
   type(ESMF_Info) :: info
   logical :: addBaseAddress = .false.  ! If true, add the object's base address
@@ -68,6 +86,8 @@ type, public :: ESMF_InfoDescribe
   logical :: curr_base_is_valid = .false.  ! If true, the object's base is valid (i.e. can be reinterpret casted)
   logical :: curr_base_is_geom = .false.  ! If true, the Base is for an ESMF Geometry object
   type(ESMF_Info), pointer :: searchCriteria ! If associated use these Info contents to find an object
+  logical :: found = .false. ! Used internally when finding objects
+  type(ESMF_Field), pointer :: foundField ! Used when finding Fields
 contains
   procedure, private :: updateWithState, updateWithArray, updateWithArrayBundle, &
    updateWithField, updateWithFieldBundle, updateWithLocStream, updateWithGrid, &
@@ -117,13 +137,14 @@ subroutine ESMF_InfoDescribeInitialize(self, addBaseAddress, addObjectInfo, crea
     if (ESMF_LogFoundError(ESMF_FAILURE, msg="Object already initialized", ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
+  nullify(self%searchCriteria)
+  nullify(self%foundField)
   if (present(searchCriteria)) then
     self%addBaseAddress = .true.
     self%addObjectInfo = .true.
     self%createInfo = .true.
     self%searchCriteria => searchCriteria
   else
-    nullify(self%searchCriteria)
     if (present(addBaseAddress)) self%addBaseAddress = addBaseAddress
     if (present(addObjectInfo)) self%addObjectInfo = addObjectInfo
     if (present(createInfo)) self%createInfo = createInfo
@@ -152,6 +173,9 @@ subroutine ESMF_InfoDescribeDestroy(self, rc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
     endif
   endif
+
+  nullify(self%searchCriteria)
+  nullify(self%foundField)
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoDescribeDestroy
@@ -296,6 +320,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   logical :: l_base_is_valid
   type(ESMF_Info) :: object_info
   character(len=9), dimension(4), parameter :: geom_etypes = (/"Grid     ", "Mesh     ", "LocStream", "XGrid    "/)
+  integer(C_INT) :: found_as_int
 
   localrc = ESMF_FAILURE
   if (.not. self%is_initialized) then
@@ -339,7 +364,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call ESMF_InfoSet(self%info, local_root_key//"/base_name", trim(name), force=.false., rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-
     call ESMF_InfoSet(self%info, local_root_key//"/esmf_type", etype, force=.false., rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -379,6 +403,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(uname)) then
       allocate(character(len(l_uname))::uname)
       uname = l_uname
+    end if
+
+    if (associated(self%searchCriteria)) then
+      found_as_int = 0  !false
+      localrc = c_infodescribe_search(self%info%ptr, trim(local_root_key)//C_NULL_CHAR, &
+        self%searchCriteria%ptr, found_as_int)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+      self%found = .false.
+      if (found_as_int == 1) self%found = .true.
     end if
 
     deallocate(local_root_key, l_uname)
@@ -512,7 +546,7 @@ end subroutine updateWithState
 #define ESMF_METHOD "ESMF_InfoDescribe%updateWithField()"
 subroutine updateWithField(self, target, root_key, keywordEnforcer, rc)
   class(ESMF_InfoDescribe), intent(inout) :: self
-  type(ESMF_Field), intent(in) :: target
+  type(ESMF_Field), target, intent(in) :: target
   character(*), intent(in) :: root_key
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(inout), optional :: rc
@@ -528,6 +562,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   call self%updateGeneric(root_key, name, etype, target%ftypep%base, uname=uname, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (self%found) then
+    !tdk:todo: should we add a duplicate check?
+!    if (associated(self%foundField)) then
+!      if (ESMF_LogFoundError(ESMF_FAILURE, msg="Field already found", ESMF_CONTEXT, rcToReturn=rc)) return
+!    end if
+    self%foundField => target
+  end if
 
   if (self%createInfo) then
     call self%FillMembers(target, root_key//"/"//uname//"/members", rc=localrc)

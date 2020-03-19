@@ -2,7 +2,7 @@
 
 ALL: build_here
 
-SOURCEC	  = ESMC_InfoCacheCDef.C
+SOURCEC	  = ESMC_InfoDescribeCDef.C ESMC_InfoCacheCDef.C
 SOURCEF	  =
 STOREH    =
 

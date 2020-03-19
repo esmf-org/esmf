@@ -70,7 +70,7 @@ program ESMF_InfoDescribeUTest
   !----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Initialize/Destroy"
-  write(failMsg, *) "Did not sync successfully"
+  write(failMsg, *) "Did not succeed"
   rc = ESMF_FAILURE
 
   call eidesc_create_destroy%Initialize(rc=rc)

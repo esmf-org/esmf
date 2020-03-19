@@ -59,9 +59,10 @@ program ESMF_InfoSyncUTest
   type(ESMF_LocStream) :: locstream
   type(ESMF_RouteHandle) :: rh
   type(ESMF_State) :: state, nested_state, nested_state2
-  type(ESMF_InfoDescribe) :: eidesc, desired_eidesc, ainq
+  type(ESMF_InfoDescribe) :: eidesc, desired_eidesc, ainq, search_idesc
   integer :: rootPet=0
   integer(ESMF_KIND_I8), dimension(:), allocatable :: bases
+  type(ESMF_Info) :: search_criteria
   logical :: isDirty
 
   !----------------------------------------------------------------------------
@@ -111,7 +112,7 @@ program ESMF_InfoSyncUTest
 
   field = ESMF_FieldCreate(grid, ESMF_TYPEKIND_I8, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  field2 = ESMF_FieldCreate(grid, ESMF_TYPEKIND_I8, rc=rc)
+  field2 = ESMF_FieldCreate(grid, ESMF_TYPEKIND_I8, name="search_target", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   field3 = ESMF_FieldCreate(locstream, ESMF_TYPEKIND_I4, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -258,6 +259,37 @@ program ESMF_InfoSyncUTest
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_Test(isDirty .neqv. .true., name, failMsg, result, ESMF_SRCLINE)
+
+  ! ---------------------------------------------------------------------------
+
+  ! ---------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Finding a Field"
+  write(failMsg, *) "Did not succeed"
+  rc = ESMF_FAILURE
+
+  search_criteria = ESMF_InfoCreate(rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_InfoSet(search_criteria, "esmf_type", "Field", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_InfoSet(search_criteria, "base_name", "search_target", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call search_idesc%Initialize(searchCriteria=search_criteria, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call search_idesc%Update(state, "", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_Test((associated(search_idesc%foundField)), name, failMsg, result, ESMF_SRCLINE)
+
+  call search_idesc%Destroy(rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_InfoDestroy(search_criteria, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   ! ---------------------------------------------------------------------------
 
