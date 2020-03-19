@@ -67,6 +67,7 @@ type, public :: ESMF_InfoDescribe
   type(ESMF_Base) :: curr_base  ! Holds a reference to the current update object's base. Will change when recursively updating
   logical :: curr_base_is_valid = .false.  ! If true, the object's base is valid (i.e. can be reinterpret casted)
   logical :: curr_base_is_geom = .false.  ! If true, the Base is for an ESMF Geometry object
+  type(ESMF_Info), pointer :: searchCriteria ! If associated use these Info contents to find an object
 contains
   procedure, private :: updateWithState, updateWithArray, updateWithArrayBundle, &
    updateWithField, updateWithFieldBundle, updateWithLocStream, updateWithGrid, &
@@ -82,14 +83,14 @@ contains
    fillMembersFieldBundle
   procedure, private, pass :: ESMF_InfoDescribeDestroy, ESMF_InfoDescribePrint, &
    ESMF_InfoDescribeGetCurrentBase, ESMF_InfoDescribeGetCurrentInfo
-  procedure, private :: updateGeneric, ESMF_InfoDescribeIntialize
+  procedure, private :: updateGeneric, ESMF_InfoDescribeInitialize
   procedure, private, nopass :: getInfoArray, getInfoArrayBundle, getInfoCplComp, &
    getInfoGridComp, getInfoSciComp, getInfoDistGrid, getInfoField, getInfoFieldBundle, &
    getInfoGrid, getInfoState, getInfoLocStream
   generic, public :: GetInfo => getInfoArray, getInfoArrayBundle, getInfoCplComp, getInfoGridComp, &
    getInfoSciComp, getInfoDistGrid, getInfoField, getInfoFieldBundle, getInfoGrid, &
    getInfoState, getInfoLocStream
-  generic, public :: Initialize => ESMF_InfoDescribeIntialize
+  generic, public :: Initialize => ESMF_InfoDescribeInitialize
   generic, public :: Destroy => ESMF_InfoDescribeDestroy
   generic, public :: Print => ESMF_InfoDescribePrint
   generic, public :: GetCurrentBase => ESMF_InfoDescribeGetCurrentBase
@@ -99,12 +100,13 @@ end type ESMF_InfoDescribe
 contains !=====================================================================
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoDescribe%ESMF_InfoDescribeIntialize()"
-subroutine ESMF_InfoDescribeIntialize(self, addBaseAddress, addObjectInfo, createInfo, rc)
+#define ESMF_METHOD "ESMF_InfoDescribeInitialize()"
+subroutine ESMF_InfoDescribeInitialize(self, addBaseAddress, addObjectInfo, createInfo, searchCriteria, rc)
   class(ESMF_InfoDescribe), intent(inout) :: self
   logical, intent(in), optional :: addBaseAddress
   logical, intent(in), optional :: addObjectInfo
   logical, intent(in), optional :: createInfo
+  type(ESMF_Info), target, intent(in), optional :: searchCriteria
   integer, intent(inout), optional :: rc
   integer :: localrc
 
@@ -115,17 +117,25 @@ subroutine ESMF_InfoDescribeIntialize(self, addBaseAddress, addObjectInfo, creat
     if (ESMF_LogFoundError(ESMF_FAILURE, msg="Object already initialized", ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  if (present(addBaseAddress)) self%addBaseAddress = addBaseAddress
-  if (present(addObjectInfo)) self%addObjectInfo = addObjectInfo
-  if (present(createInfo)) self%createInfo = createInfo
+  if (present(searchCriteria)) then
+    self%addBaseAddress = .true.
+    self%addObjectInfo = .true.
+    self%createInfo = .true.
+    self%searchCriteria => searchCriteria
+  else
+    nullify(self%searchCriteria)
+    if (present(addBaseAddress)) self%addBaseAddress = addBaseAddress
+    if (present(addObjectInfo)) self%addObjectInfo = addObjectInfo
+    if (present(createInfo)) self%createInfo = createInfo
+  end if
   if (self%createInfo) then
     self%info = ESMF_InfoCreate(rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-  endif
+  end if
   self%is_initialized = .true.
 
   if (present(rc)) rc = ESMF_SUCCESS
-end subroutine ESMF_InfoDescribeIntialize
+end subroutine ESMF_InfoDescribeInitialize
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoDescribe%ESMF_InfoDescribeDestroy()"
