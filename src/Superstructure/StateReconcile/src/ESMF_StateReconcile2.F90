@@ -1294,6 +1294,9 @@ contains
 
     end do ! needs_count
 
+    call ESMF_InfoCacheReassembleFields(state, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
     if (trace) then
       print *, '    pet', mypet,  &
           ': *** Deserialization complete'
