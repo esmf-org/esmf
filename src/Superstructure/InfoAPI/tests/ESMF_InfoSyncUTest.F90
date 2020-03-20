@@ -33,6 +33,8 @@ program ESMF_InfoSyncUTest
   use ESMF_UtilTypesMod     ! ESMF utility types
   use ESMF
 
+  use ESMF_InfoCacheMod
+
   implicit none
 
   !----------------------------------------------------------------------------
@@ -52,7 +54,7 @@ program ESMF_InfoSyncUTest
   type(ESMF_ArrayBundle) :: ab
   type(ESMF_Pointer) :: eptr
   type(ESMF_Info) :: infoh, desired_info
-  type(ESMF_Field) :: field, field2, field3, field4
+  type(ESMF_Field) :: field, field2, field3, field4, foundField
   type(ESMF_FieldBundle) :: fb
   type(ESMF_DistGrid) :: distgrid, distgrid1d, distgrid2
   type(ESMF_Grid) :: grid
@@ -60,10 +62,11 @@ program ESMF_InfoSyncUTest
   type(ESMF_RouteHandle) :: rh
   type(ESMF_State) :: state, nested_state, nested_state2
   type(ESMF_InfoDescribe) :: eidesc, desired_eidesc, ainq, search_idesc
-  integer :: rootPet=0
+  integer :: rootPet=0, find_base_id
   integer(ESMF_KIND_I8), dimension(:), allocatable :: bases
   type(ESMF_Info) :: search_criteria
-  logical :: isDirty
+  logical :: isDirty, found
+  character(len=ESMF_MAXSTR) :: found_field_name
 
   !----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)  ! calls ESMF_Initialize() internally
@@ -227,7 +230,6 @@ program ESMF_InfoSyncUTest
 #endif
 
   call ESMF_Test((eidesc%info == desired_info), name, failMsg, result, ESMF_SRCLINE)
-
   ! ---------------------------------------------------------------------------
 
   ! ---------------------------------------------------------------------------
@@ -243,7 +245,6 @@ program ESMF_InfoSyncUTest
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_Test(isDirty, name, failMsg, result, ESMF_SRCLINE)
-
   ! ---------------------------------------------------------------------------
 
   ! ---------------------------------------------------------------------------
@@ -259,38 +260,24 @@ program ESMF_InfoSyncUTest
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_Test(isDirty .neqv. .true., name, failMsg, result, ESMF_SRCLINE)
-
   ! ---------------------------------------------------------------------------
 
   ! ---------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Finding a Field"
+  write(name, *) "Find a Field"
   write(failMsg, *) "Did not succeed"
   rc = ESMF_FAILURE
 
-  search_criteria = ESMF_InfoCreate(rc=rc)
+  call ESMF_BaseGetID(field2%ftypep%base, find_base_id, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_InfoSet(search_criteria, "esmf_type", "Field", rc=rc)
+  found = ESMF_InfoCacheFindField(state, foundField, find_base_id, rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_InfoSet(search_criteria, "base_name", "search_target", rc=rc)
+  call ESMF_FieldGet(foundField, name=found_field_name, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call search_idesc%Initialize(searchCriteria=search_criteria, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  call search_idesc%Update(state, "", rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  call ESMF_Test((associated(search_idesc%foundField)), name, failMsg, result, ESMF_SRCLINE)
-
-  call search_idesc%Destroy(rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  call ESMF_InfoDestroy(search_criteria, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
+  call ESMF_Test((found .and. (trim(found_field_name)=="search_target")), name, failMsg, result, ESMF_SRCLINE)
   ! ---------------------------------------------------------------------------
 
   call eidesc%Destroy(rc=rc)

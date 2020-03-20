@@ -34,6 +34,7 @@ static const char *const version = "$Id$";
 //tdk:todo: add nullptr init checks
 extern "C" {
 
+  //tdk:todo: consider removing the search capability; was a dramatic failure for unknown reasons
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoDescribeSearch()"
 int ESMC_InfoDescribeSearch(ESMCI::Info *toSearch, char *rootKey, ESMCI::Info *searchCriteria, int &found) {
@@ -47,7 +48,6 @@ int ESMC_InfoDescribeSearch(ESMCI::Info *toSearch, char *rootKey, ESMCI::Info *s
     const json &j_to_search = toSearch->getStorageRef();
     std::vector<bool> local_found;
     local_found.reserve(j_search_criteria.size()+10);
-    std::cout << ESMC_METHOD << " j_to_search=" + j_to_search.dump() << std::endl;  //tdk:p
     for (json::const_iterator cit=j_search_criteria.cbegin(); cit!=j_search_criteria.cend(); cit++) {
       // We always expect the key to at least exist.
       try {
@@ -64,6 +64,7 @@ int ESMC_InfoDescribeSearch(ESMCI::Info *toSearch, char *rootKey, ESMCI::Info *s
     for (auto element : local_found) {
       if (!element) {
         found = 0;  //false
+        break;
       }
     }
     esmc_rc = ESMF_SUCCESS;

@@ -139,4 +139,94 @@ subroutine ESMF_InfoCacheUpdateGeoms(self, target, rc)
 
 end subroutine ESMF_InfoCacheUpdateGeoms
 
+! -----------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoCacheFindField()"
+recursive function ESMF_InfoCacheFindField(target, foundField, baseID, rc) result(found)
+  type(ESMF_State), intent(in) :: target
+  type(ESMF_Field), intent(out) :: foundField
+  integer, intent(in) :: baseID
+  integer, intent(out) :: rc
+  logical :: found
+
+  type(ESMF_FieldBundle) :: fb
+  type(ESMF_Field) :: field
+  type(ESMF_StateItem_Flag), dimension(:), allocatable :: stateTypes
+  character(len=ESMF_MAXSTR), dimension(:), allocatable :: stateNames
+  integer :: ii, itemCount, jj
+  type(ESMF_State) :: state
+  character(len=ESMF_MAXSTR) :: curr_field_name
+  integer :: curr_field_base_id, field_count
+  character(len=ESMF_MAXSTR), dimension(:), allocatable :: field_name_list
+
+  found = .false.
+  rc = ESMF_SUCCESS
+
+  call ESMF_StateGet(target, itemCount=itemCount, rc=rc)
+  if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  allocate(stateTypes(itemCount), stateNames(itemCount))
+
+  call ESMF_StateGet(target, itemTypeList=stateTypes, itemNameList=stateNames, rc=rc)
+  if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  do ii=1,itemCount
+    select case (stateTypes(ii)%ot)
+      case(ESMF_STATEITEM_STATE%ot)
+        call ESMF_StateGet(target, trim(stateNames(ii)), state, rc=rc)
+        if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+        found = ESMF_InfoCacheFindField(state, foundField, baseID, rc)
+        if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+        if (found) return
+      case(ESMF_STATEITEM_FIELD%ot)
+        call ESMF_StateGet(target, trim(stateNames(ii)), field, rc=rc)
+        if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call ESMF_FieldGet(field, name=curr_field_name, rc=rc)
+        if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call ESMF_BaseGetID(field%ftypep%base, curr_field_base_id, rc=rc)
+        if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+        if (curr_field_base_id==baseID) then
+          found = .true.
+          foundField = field
+          return
+        end if
+      case(ESMF_STATEITEM_FIELDBUNDLE%ot)
+        call ESMF_StateGet(target, trim(stateNames(ii)), fb, rc=rc)
+        if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call ESMF_FieldBundleGet(fb, fieldCount=field_count, rc=rc)
+        if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+        allocate(field_name_list(field_count))
+
+        call ESMF_FieldBundleGet(fb, fieldNameList=field_name_list, rc=rc)
+        if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+        do jj=1,field_count
+          call ESMF_FieldBundleGet(fb, trim(field_name_list(jj)), field=field, rc=rc)
+          if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+          call ESMF_BaseGetID(field%ftypep%base, curr_field_base_id, rc=rc)
+          if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+          if (curr_field_base_id==baseID) then
+            found = .true.
+            foundField = field
+            return
+          end if
+        end do
+
+        deallocate(field_name_list)
+    end select
+  end do
+
+  deallocate(stateTypes, stateNames)
+end function
+
 end module ESMF_InfoCacheMod ! ================================================

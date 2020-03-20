@@ -87,7 +87,7 @@ type, public :: ESMF_InfoDescribe
   logical :: curr_base_is_geom = .false.  ! If true, the Base is for an ESMF Geometry object
   type(ESMF_Info), pointer :: searchCriteria ! If associated use these Info contents to find an object
   logical :: found = .false. ! Used internally when finding objects
-  type(ESMF_Field), pointer :: foundField ! Used when finding Fields
+  type(ESMF_Field) :: foundField ! Used when finding Fields
 contains
   procedure, private :: updateWithState, updateWithArray, updateWithArrayBundle, &
    updateWithField, updateWithFieldBundle, updateWithLocStream, updateWithGrid, &
@@ -138,7 +138,6 @@ subroutine ESMF_InfoDescribeInitialize(self, addBaseAddress, addObjectInfo, crea
   endif
 
   nullify(self%searchCriteria)
-  nullify(self%foundField)
   if (present(searchCriteria)) then
     self%addBaseAddress = .true.
     self%addObjectInfo = .true.
@@ -175,7 +174,6 @@ subroutine ESMF_InfoDescribeDestroy(self, rc)
   endif
 
   nullify(self%searchCriteria)
-  nullify(self%foundField)
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoDescribeDestroy
@@ -240,7 +238,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   type(ESMF_Array) :: array
   type(ESMF_ArrayBundle) :: arraybundle
-  type(ESMF_Field) :: field
+  type(ESMF_Field), target :: field
   type(ESMF_FieldBundle) :: fieldbundle
   type(ESMF_RouteHandle) :: rh
   type(ESMF_State) :: state_nested
@@ -413,6 +411,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       self%found = .false.
       if (found_as_int == 1) self%found = .true.
+      if (self%found) then !tdk:p
+        call ESMF_LogWrite("self%found == .true.") !tdk:p
+        call ESMF_LogWrite(trim(local_root_key)) !tdk:p
+      else !tdk:p
+        call ESMF_LogWrite("self%found == .false.") !tdk:p
+      end if !tdk:p
     end if
 
     deallocate(local_root_key, l_uname)
@@ -568,7 +572,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    if (associated(self%foundField)) then
 !      if (ESMF_LogFoundError(ESMF_FAILURE, msg="Field already found", ESMF_CONTEXT, rcToReturn=rc)) return
 !    end if
-    self%foundField => target
+    self%foundField = target
+    ! The target has been found. Do not search anymore.
+    nullify(self%searchCriteria)
+    self%found = .false.
   end if
 
   if (self%createInfo) then
