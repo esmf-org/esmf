@@ -507,6 +507,9 @@ void MBMesh::set_elem_area(EntityHandle eh, double area) {
   }  
 }
 
+
+
+
 void MBMesh::setup_elem_coords() {
 
   int merr,localrc;
@@ -566,10 +569,37 @@ void MBMesh::set_elem_coords(EntityHandle eh, double *orig_coords) {
   merr=mesh->tag_set_data(elem_coords_tag, &eh, 1, cart_coords);
   if (merr != MB_SUCCESS) {
     if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-  }  
- 
+                                  moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+  }   
 }
+
+
+// Get all nodes in the mesh (on this proc)
+Range MBMesh::get_range_all_nodes() {
+  int merr,localrc;
+
+  // Get range of nodes
+  Range nodes;
+  merr=mesh->get_entities_by_dimension(0, 0, nodes);
+  MBMESH_CHECK_ERR(merr, localrc);
+
+  // return elems
+  return nodes;
+}
+
+// Get all elems in the mesh (on this proc)
+Range MBMesh::get_range_all_elems() {
+  int merr,localrc;
+
+  // Get range of elems
+  Range elems;
+  merr=mesh->get_entities_by_dimension(0, pdim, elems);
+  MBMESH_CHECK_ERR(merr, localrc);
+
+  // return elems
+  return elems;
+}
+
 
 // Setup MBMesh to operate in parallel by resolving shared ents, etc. 
 void MBMesh::setup_parallel() {
@@ -593,6 +623,7 @@ void MBMesh::setup_parallel() {
   MBMESH_CHECK_ERR(merr, localrc);
 
 }
+
 
 // Update parallel
 // If the mesh has changed, call this to update the parallel connections

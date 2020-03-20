@@ -1326,7 +1326,7 @@
       !EX_UTest
 
       write(failMsg, *) "Test unsuccessful"
-      write(name, *) "Test regridding using meshes created via Mesh create from Grid"
+      write(name, *) "Test regridding using meshes created via MOAB Mesh create from Grid"
 
       ! initialize 
       rc=ESMF_SUCCESS

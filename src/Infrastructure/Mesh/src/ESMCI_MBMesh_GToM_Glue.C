@@ -395,12 +395,7 @@ namespace ESMCI {
     int localrc;
 
     // Get elems
-    Range elems;
-    int merr=mesh->mesh->get_entities_by_dimension(0, mesh->pdim, elems);
-    if (merr != MB_SUCCESS) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                       moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-    }
+    Range elems=mesh->get_range_all_elems();
 
     // Loop and set up gid_to_elem_map
     std::map<int,EntityHandle> gid_to_elem_map;
@@ -785,16 +780,8 @@ void MBMesh_GridToMeshCell(const Grid &grid_,
  }
 
 
- // Get range of nodes
- // TODO: maybe hide this in a MBMesh wrapper? 
- Range nodes;
- int merr=mesh->mesh->get_entities_by_dimension(0, 0, nodes);
- if (merr != MB_SUCCESS) {
-   if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                    moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
- }
-
  // Loop through Mesh nodes setting the remaining owners
+ Range nodes=mesh->get_range_all_nodes();
  for (Range::iterator it=nodes.begin(); it != nodes.end(); it++) {
    EntityHandle node=*it;
 
@@ -839,7 +826,6 @@ void MBMesh_GridToMeshCell(const Grid &grid_,
  // setup verts array
  // TODO: Deprecated so get rid of this soon!!
  mesh->setup_verts_array();
-
 
  // Debug output
  // mesh->debug_output_nodes();

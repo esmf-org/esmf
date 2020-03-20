@@ -136,6 +136,12 @@ namespace ESMCI {
     // Set coords in an elem
     void set_elem_coords(EntityHandle eh, double *orig_coords);
 
+    // Get all nodes in the mesh (on this proc)
+    Range get_range_all_nodes();
+
+    // Get all elems in the mesh (on this proc)
+    Range get_range_all_elems();
+
     // Do halo communication on all node tags
     void halo_comm_nodes_all_tags(bool do_internal_coords=false);
 
