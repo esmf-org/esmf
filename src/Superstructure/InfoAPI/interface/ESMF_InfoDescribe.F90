@@ -860,6 +860,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   allocate(targetList(targetCount))
 
+  !tdk:note: if search criteria implemented this must used a name list to get the field since this is deallocated
   call ESMF_FieldBundleGet(target, fieldList=targetList, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
