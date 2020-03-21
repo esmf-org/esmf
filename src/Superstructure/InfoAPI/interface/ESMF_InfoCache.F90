@@ -268,7 +268,7 @@ subroutine ESMF_InfoCacheReassembleField(target, state, rc)
     target%ftypep%geombase = archetype_field%ftypep%geombase
   end if
 
-  call ESMF_InfoRemove(infoh, "/_esmf_state_reconcile", rc=rc)
+  call ESMF_InfoRemove(infoh, "_esmf_state_reconcile", rc=rc)
   if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   rc = ESMF_SUCCESS

@@ -213,8 +213,7 @@ contains
     !tdk:todo: what do we do about attribute reconcile when they are required? recommend just leaving on
     lattreconflag = ESMF_ATTRECONCILE_ON !tdk:bc
 
-!tdk:debug
-#if 1
+#if 0
     call idesc%Initialize(createInfo=.true., addObjectInfo=.true., rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
     call idesc%Update(state, "", rc=localrc)
@@ -233,8 +232,10 @@ contains
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
 
-!tdk:debug
-#if 1
+     call ESMF_InfoCacheReassembleFields(state, localrc) !tdk:bc
+     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+#if 0
     call idesc2%Initialize(createInfo=.true., addObjectInfo=.true., rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
     call idesc2%Update(state, "", rc=localrc)
@@ -1294,8 +1295,8 @@ contains
 
     end do ! needs_count
 
-    call ESMF_InfoCacheReassembleFields(state, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    !call ESMF_InfoCacheReassembleFields(state, localrc) !tdk:remove
+    !if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return !tdk:remove
 
     if (trace) then
       print *, '    pet', mypet,  &
@@ -1880,8 +1881,7 @@ contains
       offset_pos = offset_pos + itemcount
     end do
 
-!tdk:debug
-#if 1
+#if 0
     write(logmsg, *) SIZE(buffer_send)
     call ESMF_LogWrite("SIZE(buffer_send)="//TRIM(logmsg), rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return

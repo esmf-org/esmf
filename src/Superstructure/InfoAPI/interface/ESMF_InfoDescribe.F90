@@ -411,12 +411,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       self%found = .false.
       if (found_as_int == 1) self%found = .true.
-      if (self%found) then !tdk:p
-        call ESMF_LogWrite("self%found == .true.") !tdk:p
-        call ESMF_LogWrite(trim(local_root_key)) !tdk:p
-      else !tdk:p
-        call ESMF_LogWrite("self%found == .false.") !tdk:p
-      end if !tdk:p
     end if
 
     deallocate(local_root_key, l_uname)
