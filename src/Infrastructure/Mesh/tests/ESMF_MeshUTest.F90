@@ -88,6 +88,7 @@ program ESMF_MeshUTest
   integer :: dimCount, localDECount
   logical :: nodalIsPresent, elementIsPresent
   type(ESMF_MESHSTATUS_FLAG) :: status
+  character(len=80)      :: meshName, meshNameOut
 
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -129,9 +130,10 @@ program ESMF_MeshUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
+  meshName = "bigbadmeshname"
   write(name, *) "Create test Mesh for IsCreated"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, rc=localrc)
+  mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, name=meshName, rc=localrc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
@@ -149,6 +151,15 @@ program ESMF_MeshUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   isCreated = ESMF_MeshIsCreated(mesh, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing MeshGet, accessing name"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_MeshGet(mesh, name=meshNameOut, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(meshNameOut == meshName), name, failMsg, result, ESMF_SRCLINE)
+  call ESMF_LogWrite("meshName="//trim(meshNameOut), ESMF_LOGMSG_INFO, rc=rc)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
@@ -180,7 +191,7 @@ program ESMF_MeshUTest
   write(failMsg, *) "Incorrect result"
 
   !!!!!!!!!!!!!!!!!!!!!
-  ! 
+  !
   !              Mesh Ids
   !
     !  2.0   7 ------- 8 -------- 9
@@ -193,14 +204,14 @@ program ESMF_MeshUTest
   !        |         |          |
   !  0.0   1 ------- 2 -------- 3
   !
-  !       0.0       1.0        2.0 
+  !       0.0       1.0        2.0
   !
   !      Node Ids at corners
   !      Element Ids in centers
   !
   !!!
-  !      ( Everything owned by PET 0) 
-  !!!!! 
+  !      ( Everything owned by PET 0)
+  !!!!!
 
   ! init success flag
   rc=ESMF_SUCCESS
@@ -218,14 +229,14 @@ program ESMF_MeshUTest
   call ESMF_MeshGet(mesh, status=status, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-  if (status .ne. ESMF_MESHSTATUS_STRUCTCREATED) correct=.false. 
+  if (status .ne. ESMF_MESHSTATUS_STRUCTCREATED) correct=.false.
 
   ! Fill in node data
   numNodes=9
 
   !! node ids
   allocate(nodeIds(numNodes))
-  nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+  nodeIds=(/1,2,3,4,5,6,7,8,9/)
 
   !! node Coords
   allocate(nodeCoords(numNodes*2))
@@ -256,14 +267,14 @@ program ESMF_MeshUTest
   call ESMF_MeshGet(mesh, status=status, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-  if (status .ne. ESMF_MESHSTATUS_NODESADDED) correct=.false. 
+  if (status .ne. ESMF_MESHSTATUS_NODESADDED) correct=.false.
 
   ! Fill in elem data
   numElems=4
 
   !! elem ids
   allocate(elemIds(numElems))
-  elemIds=(/1,2,3,4/) 
+  elemIds=(/1,2,3,4/)
 
   allocate(elemCoords(numElems*2))
   elemCoords= (/0.5,0.5, &
@@ -280,9 +291,9 @@ program ESMF_MeshUTest
 
    !! elem conn
   allocate(elemConn(numElems*4))
-  elemConn=(/1,2,5,4, & 
-             2,3,6,5, & 
-             4,5,8,7, & 
+  elemConn=(/1,2,5,4, &
+             2,3,6,5, &
+             4,5,8,7, &
              5,6,9,8/)
 
   ! Add Elements
@@ -303,7 +314,7 @@ program ESMF_MeshUTest
   call ESMF_MeshGet(mesh, status=status, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-  if (status .ne. ESMF_MESHSTATUS_COMPLETE) correct=.false. 
+  if (status .ne. ESMF_MESHSTATUS_COMPLETE) correct=.false.
 
 
   !! Write mesh for debugging
@@ -313,7 +324,7 @@ program ESMF_MeshUTest
 !  call ESMF_MeshDestroy(mesh, rc=rc)
 
   ! endif for skip for >1 proc
-  endif 
+  endif
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
@@ -322,7 +333,7 @@ program ESMF_MeshUTest
 
   ! init success flag
   meshBool = .false.
- 
+
   ! Only do this if we have 1 processor
   if (petCount .eq. 1) then
 
@@ -331,10 +342,10 @@ program ESMF_MeshUTest
   meshBool = (meshAlias.eq.mesh)
 
   ! endif for skip for >1 proc
-  endif 
+  endif
 
    call ESMF_Test(.not.meshBool, name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest
   ! Testing ESMF_MeshAssignment(=)()
@@ -350,7 +361,7 @@ program ESMF_MeshUTest
   meshBool = (meshAlias.eq.mesh)
 
   ! endif for skip for >1 proc
-  endif 
+  endif
 
   call ESMF_Test(meshBool, name, failMsg, result, ESMF_SRCLINE)
 
@@ -368,7 +379,7 @@ program ESMF_MeshUTest
   call ESMF_MeshDestroy(mesh, rc=rc)
 
   ! endif for skip for >1 proc
-  endif 
+  endif
 
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -381,16 +392,16 @@ program ESMF_MeshUTest
 
   ! Only do this if we have 1 processor
    if (petCount .eq. 1) then
- 
+
   write(name, *) "Mesh equality after destroy Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   meshBool = (meshAlias==mesh)
 
   ! endif for skip for >1 proc
-  endif 
+  endif
 
   call ESMF_Test(.not.meshBool, name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest
   ! Testing ESMF_MeshOperator(/=)()
@@ -406,7 +417,7 @@ program ESMF_MeshUTest
   meshBool = (meshAlias/=mesh)
 
   ! endif for skip for >1 proc
-  endif 
+  endif
 
   call ESMF_Test(meshBool, name, failMsg, result, ESMF_SRCLINE)
 
@@ -414,14 +425,14 @@ program ESMF_MeshUTest
 
 
 
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test creating a small 2x2 2D QUAD Mesh in 1 step on 4 procs and MeshGet"
   write(failMsg, *) "Incorrect result"
 
   !!!!!!!!!!!!!!!!!!!!!
-  ! 
+  !
   !              Mesh Ids
   !
   !  2.0   7 ------- 8 -------- 9
@@ -434,12 +445,12 @@ program ESMF_MeshUTest
   !        |         |          |
   !  0.0   1 ------- 2 -------- 3
   !
-  !       0.0       1.0        2.0 
+  !       0.0       1.0        2.0
   !
   !      Node Ids at corners
   !      Element Ids in centers
-  ! 
-  !!!!! 
+  !
+  !!!!!
    !             Mesh Owners
   !
   !  2.0   2 ------- 2 -------- 3
@@ -452,11 +463,11 @@ program ESMF_MeshUTest
   !        |         |          |
   !  0.0   0 ------- 0 -------- 1
   !
-  !       0.0       1.0        2.0 
+  !       0.0       1.0        2.0
   !
   !      Node Owners at corners
   !      Element Owners in centers
-  ! 
+  !
 
 
   ! init success flag
@@ -473,8 +484,8 @@ program ESMF_MeshUTest
 
        !! node ids
        allocate(nodeIds(numNodes))
-       nodeIds=(/1,2,4,5/) 
- 
+       nodeIds=(/1,2,4,5/)
+
        !! node Coords
        allocate(nodeCoords(numNodes*2))
        nodeCoords=(/0.0,0.0, &
@@ -491,7 +502,7 @@ program ESMF_MeshUTest
 
        !! elem ids
        allocate(elemIds(numElems))
-       elemIds=(/1/) 
+       elemIds=(/1/)
 
        !! elem type
        allocate(elemTypes(numElems))
@@ -504,7 +515,7 @@ program ESMF_MeshUTest
        !! elem coords
        allocate(elemCoords(numElems*2))
        elemCoords=(/0.5,0.5/)
-     
+
      else if (localPet .eq. 1) then
         ! Fill in node data
         numNodes=4
@@ -512,7 +523,7 @@ program ESMF_MeshUTest
 
        !! node ids
        allocate(nodeIds(numNodes))
-       nodeIds=(/2,3,5,6/) 
+       nodeIds=(/2,3,5,6/)
 
        !! node Coords
        allocate(nodeCoords(numNodes*2))
@@ -523,14 +534,14 @@ program ESMF_MeshUTest
 
         !! node owners
        allocate(nodeOwners(numNodes))
-       nodeOwners=(/0,1,0,1/) 
+       nodeOwners=(/0,1,0,1/)
 
        ! Fill in elem data
        numElems=1
 
        !! elem ids
        allocate(elemIds(numElems))
-       elemIds=(/2/) 
+       elemIds=(/2/)
 
        !! elem type
        allocate(elemTypes(numElems))
@@ -550,7 +561,7 @@ program ESMF_MeshUTest
 
        !! node ids
        allocate(nodeIds(numNodes))
-       nodeIds=(/4,5,7,8/) 
+       nodeIds=(/4,5,7,8/)
 
        !! node Coords
        allocate(nodeCoords(numNodes*2))
@@ -558,17 +569,17 @@ program ESMF_MeshUTest
                     1.0,1.0, &
                     0.0,2.0, &
                     1.0,2.0/)
- 
+
        !! node owners
        allocate(nodeOwners(numNodes))
-       nodeOwners=(/0,0,2,2/) 
+       nodeOwners=(/0,0,2,2/)
 
        ! Fill in elem data
        numElems=1
 
        !! elem ids
        allocate(elemIds(numElems))
-        elemIds=(/3/) 
+        elemIds=(/3/)
 
        !! elem type
        allocate(elemTypes(numElems))
@@ -576,19 +587,19 @@ program ESMF_MeshUTest
 
        !! elem conn
        allocate(elemConn(numElems*4))
-       elemConn=(/1,2,4,3/)  
+       elemConn=(/1,2,4,3/)
 
        !! elem coords
        allocate(elemCoords(numElems*2))
        elemCoords=(/1.5,0.5/)
-     else 
+     else
         ! Fill in node data
         numNodes=4
         numOwnedNodes=1
 
        !! node ids
        allocate(nodeIds(numNodes))
-       nodeIds=(/5,6,8,9/) 
+       nodeIds=(/5,6,8,9/)
 
        !! node Coords
        allocate(nodeCoords(numNodes*2))
@@ -599,14 +610,14 @@ program ESMF_MeshUTest
 
        !! node owners
        allocate(nodeOwners(numNodes))
-       nodeOwners=(/0,1,2,3/) 
+       nodeOwners=(/0,1,2,3/)
 
        ! Fill in elem data
        numElems=1
 
        !! elem ids
        allocate(elemIds(numElems))
-       elemIds=(/4/) 
+       elemIds=(/4/)
 
        !! elem type
        allocate(elemTypes(numElems))
@@ -614,8 +625,8 @@ program ESMF_MeshUTest
 
        !! elem conn
        allocate(elemConn(numElems*4))
-       elemConn=(/1,2,4,3/)  
- 
+       elemConn=(/1,2,4,3/)
+
        !! elem coords
         allocate(elemCoords(numElems*2))
        elemCoords=(/1.5,1.5/)
@@ -655,14 +666,14 @@ program ESMF_MeshUTest
   j=1
   do i=1,numNodes
      if (nodeOwners(i) .eq. localPet) then
-         if (nodeCoords(2*i-1) .ne. ownedNodeCoords(2*j-1)) correct=.false.    
-         if (nodeCoords(2*i) .ne. ownedNodeCoords(2*j)) correct=.false.    
+         if (nodeCoords(2*i-1) .ne. ownedNodeCoords(2*j-1)) correct=.false.
+         if (nodeCoords(2*i) .ne. ownedNodeCoords(2*j)) correct=.false.
          j=j+1
      endif
-  enddo  
+  enddo
   do i=1,numElems
-     if (elemCoords(2*i-1) .ne. ownedElemCoords(2*i-1)) correct=.false.    
-     if (elemCoords(2*i) .ne. ownedElemCoords(2*i)) correct=.false.    
+     if (elemCoords(2*i-1) .ne. ownedElemCoords(2*i-1)) correct=.false.
+     if (elemCoords(2*i) .ne. ownedElemCoords(2*i)) correct=.false.
   enddo
 
   ! deallocate node data
@@ -697,7 +708,7 @@ program ESMF_MeshUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! now it should indicate freed memory
-  if (.not. isMemFreed) correct=.false. ! Has been freed 
+  if (.not. isMemFreed) correct=.false. ! Has been freed
 
   !! Write mesh for debugging
   !! call ESMF_MeshWrite(mesh,"tmesh",rc=localrc)
@@ -708,7 +719,7 @@ program ESMF_MeshUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! endif for skip for != 4 procs
-  endif 
+  endif
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
@@ -740,7 +751,7 @@ program ESMF_MeshUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! check field
-  call ESMF_FieldValidate(field,rc=localrc) 
+  call ESMF_FieldValidate(field,rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
  ! Get rid of field
@@ -776,7 +787,7 @@ program ESMF_MeshUTest
 
   !! node ids
   allocate(nodeIds(numNodes))
-  nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+  nodeIds=(/1,2,3,4,5,6,7,8,9/)
 
   !! node Coords
   allocate(nodeCoords(numNodes*2))
@@ -796,10 +807,10 @@ program ESMF_MeshUTest
 
   ! Fill in elem data
   numElems=4
- 
+
   !! elem ids
   allocate(elemIds(numElems))
-  elemIds=(/1,2,3,4/) 
+  elemIds=(/1,2,3,4/)
 
   !! elem types
   allocate(elemTypes(numElems))
@@ -808,9 +819,9 @@ program ESMF_MeshUTest
 
   !! elem conn
   allocate(elemConn(numElems*4))
-  elemConn=(/1,2,5,4, & 
-             2,3,6,5, & 
-             4,5,8,7, & 
+  elemConn=(/1,2,5,4, &
+             2,3,6,5, &
+             4,5,8,7, &
              5,6,9,8/)
 
   ! Shouldn't be able to do this here before AddNodes()
@@ -842,7 +853,7 @@ program ESMF_MeshUTest
   elemTypes(1)=ESMF_MESHELEMTYPE_QUAD
 
   ! Try using a bad connectivity
-  elemConn(1)=5 
+  elemConn(1)=5
 
   ! Add Elements
   call ESMF_MeshAddElements(mesh,elemIds,elemTypes,elemConn,rc=localrc)
@@ -855,7 +866,7 @@ program ESMF_MeshUTest
   call ESMF_MeshAddElements(mesh,elemIds,elemTypes,elemConn,rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
- 
+
   ! deallocate node data
   deallocate(nodeIds)
   deallocate(nodeCoords)
@@ -876,7 +887,7 @@ program ESMF_MeshUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! endif for skip for >1 proc
-  endif 
+  endif
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
@@ -905,7 +916,7 @@ program ESMF_MeshUTest
   allocate (buf(1))
   call ESMF_MeshSerialize(mesh, buf, bufCount, offset,  &
     inquireflag=ESMF_INQUIREONLY, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE                            
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   deallocate (buf)
   bufCount=2*offset ! a little more room
@@ -916,6 +927,8 @@ program ESMF_MeshUTest
   offset=0
    call ESMF_MeshSerialize(mesh, buf, bufCount, offset, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  print *, 'ESMF_MeshUTest: serialized buffer size =', offset
 
   ! Deserialize
   offset=0
@@ -935,7 +948,7 @@ program ESMF_MeshUTest
   if (numOwnedElemsTst .ne. 0) correct=.false.
   if (spatialDim .ne. 2) correct=.false.
   if (parametricDim .ne. 2) correct=.false.
-  if (isMemFreed) correct=.false. 
+  if (isMemFreed) correct=.false.
 
   ! Make sure node distgrid is ok
   call ESMF_DistGridValidate(nodeDistgrid, rc=localrc)
@@ -1024,7 +1037,7 @@ endif
                         petList=petList, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-!  ! output 
+!  ! output
 !  do i=1,pntCount
 !     write(*,*) i," :: ",pntList(2*i-1),pntList(2*i)," >>>> pet=",petList(i)
 !  enddo
@@ -1049,7 +1062,7 @@ endif
   write(failMsg, *) "Incorrect result"
 
   !!!!!!!!!!!!!!!!!!!!!
-  ! 
+  !
   !              Mesh Ids
   !
   !  2.0   7 ------- 8 -------- 9
@@ -1062,14 +1075,14 @@ endif
   !        |         |          |
   !  0.0   1 ------- 2 -------- 3
   !
-  !       0.0       1.0        2.0 
+  !       0.0       1.0        2.0
   !
   !      Node Ids at corners
   !      Element Ids in centers
   !
   !!!
-  !      ( Everything owned by PET 0) 
-  !!!!! 
+  !      ( Everything owned by PET 0)
+  !!!!!
 
   ! init success flag
   rc=ESMF_SUCCESS
@@ -1088,7 +1101,7 @@ endif
 
   !! node ids
   allocate(nodeIds(numNodes))
-  nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+  nodeIds=(/1,2,3,4,5,6,7,8,9/)
 
   !! node Coords
   allocate(nodeCoords(numNodes*2))
@@ -1120,7 +1133,7 @@ endif
 
   !! elem ids
   allocate(elemIds(numElems))
-  elemIds=(/1,2,3,4/) 
+  elemIds=(/1,2,3,4/)
 
   !! elem types
   allocate(elemTypes(numElems))
@@ -1132,9 +1145,9 @@ endif
 
   !! elem conn
   allocate(elemConn(numElems*4))
-  elemConn=(/1,2,5,4, & 
-             2,3,6,5, & 
-             4,5,8,7, & 
+  elemConn=(/1,2,5,4, &
+             2,3,6,5, &
+             4,5,8,7, &
              5,6,9,8/)
 
   ! Add Elements
@@ -1145,22 +1158,22 @@ endif
   ! Create field to hold area
   areaField = ESMF_FieldCreate(mesh, typekind=ESMF_TYPEKIND_R8, meshloc=ESMF_MESHLOC_ELEMENT, &
                                 rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE 
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Get area
   call ESMF_FieldRegridGetArea(areaField, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE 
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! get pointer to area
-  call ESMF_FieldGet(areaField, 0, fieldAreaPtr,       & 
-       computationalLBound=cl, computationalUBound=cu, & 
+  call ESMF_FieldGet(areaField, 0, fieldAreaPtr,       &
+       computationalLBound=cl, computationalUBound=cu, &
         rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE 
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
 
   ! Init results
   correct=.true.
-   
+
   ! Check results
   if ((cu(1)-cl(1)+1) .ne. numElems) correct=.false.
 
@@ -1169,7 +1182,7 @@ endif
      if (fieldAreaPtr(i) .ne. elemAreas(j)) correct=.false.
      j=j+1
   enddo
-   
+
   ! deallocate elem data
   deallocate(elemIds)
   deallocate(elemTypes)
@@ -1179,14 +1192,14 @@ endif
 
   ! Destroy the area Field
   call ESMF_FieldDestroy(areaField, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE  
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Destroy the Mesh
   call ESMF_MeshDestroy(mesh, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE  
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! endif for skip for >1 proc
-  endif 
+  endif
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
@@ -1205,39 +1218,39 @@ endif
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Setup lists
-  if (petCount .eq. 1) then  
+  if (petCount .eq. 1) then
      allocate(nodeIds(9))
-     nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+     nodeIds=(/1,2,3,4,5,6,7,8,9/)
 
       allocate(elemIds(4))
-      elemIds=(/1,2,3,4/) 
+      elemIds=(/1,2,3,4/)
 
-  else if (petCount .eq. 4) then  
+  else if (petCount .eq. 4) then
       if (localPet .eq. 0) then
         allocate(elemIds(1))
         elemIds(1)=4
-        
+
         allocate(nodeIds(4))
         nodeIds=(/5,6,8,9/)
-        
+
      else if (localPet .eq. 1) then
         allocate(elemIds(1))
         elemIds(1)=3
-        
+
         allocate(nodeIds(2))
         nodeIds=(/7,4/)
-        
+
      else if (localPet .eq. 2) then
         allocate(elemIds(1))
         elemIds(1)=2
-        
+
         allocate(nodeIds(2))
         nodeIds=(/2,3/)
-        
+
      else if (localPet .eq. 3) then
         allocate(elemIds(1))
         elemIds(1)=1
-        
+
         allocate(nodeIds(1))
         nodeIds=(/1/)
      endif
@@ -1247,7 +1260,7 @@ endif
   ! Create node Distgrid
   nodedistgrid=ESMF_DistGridCreate(nodeIds, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
- 
+
   ! Create element Distgrid
   elemdistgrid=ESMF_DistGridCreate(elemIds, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -1272,7 +1285,7 @@ endif
                                  localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
- 
+
 
   ! Deallocate
   deallocate(elemIds)
@@ -1316,17 +1329,17 @@ endif
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Setup lists
-  if (petCount .eq. 1) then  
+  if (petCount .eq. 1) then
      allocate(nodeIds(9))
-     nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+     nodeIds=(/1,2,3,4,5,6,7,8,9/)
 
       allocate(elemIds(4))
-      elemIds=(/1,2,3,4/) 
-  else if (petCount .eq. 4) then  
+      elemIds=(/1,2,3,4/)
+  else if (petCount .eq. 4) then
      if (localPet .eq. 0) then
         allocate(elemIds(1))
         elemIds(1)=4
-        
+
         allocate(nodeIds(5))
         nodeIds=(/5,6,8,9,7/)  ! Put node 7 here because home
                                ! element (3) isn't here
@@ -1334,21 +1347,21 @@ endif
       else if (localPet .eq. 1) then
         allocate(elemIds(1))
         elemIds(1)=3
-        
+
         allocate(nodeIds(1))
-        nodeIds=(/4/)        
-        
+        nodeIds=(/4/)
+
      else if (localPet .eq. 2) then
         allocate(elemIds(1))
         elemIds(1)=2
-        
+
         allocate(nodeIds(2))
         nodeIds=(/2,3/)
-         
+
      else if (localPet .eq. 3) then
         allocate(elemIds(1))
         elemIds(1)=1
-        
+
         allocate(nodeIds(1))
         nodeIds=(/1/)
      endif
@@ -1358,7 +1371,7 @@ endif
   ! Create node Distgrid
   nodedistgrid=ESMF_DistGridCreate(nodeIds, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
- 
+
   ! Create element Distgrid
   elemdistgrid=ESMF_DistGridCreate(elemIds, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -1375,7 +1388,7 @@ endif
                                  localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
- 
+
   ! Make sure elems in elemIds are the same as local elems in mesh2
    sizeOfList=size(elemIds)
    call c_esmc_meshcheckelemlist(mesh2%this, sizeOfList, elemIds, &
@@ -1426,11 +1439,11 @@ endif
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Setup lists
-  if (petCount .eq. 1) then  
+  if (petCount .eq. 1) then
       allocate(elemIds(4))
-      elemIds=(/1,2,3,4/) 
+      elemIds=(/1,2,3,4/)
 
-  else if (petCount .eq. 4) then  
+  else if (petCount .eq. 4) then
      if (localPet .eq. 0) then
         allocate(elemIds(1))
         elemIds(1)=4
@@ -1438,18 +1451,18 @@ endif
      else if (localPet .eq. 1) then
         allocate(elemIds(1))
         elemIds(1)=3
-        
+
      else if (localPet .eq. 2) then
         allocate(elemIds(1))
         elemIds(1)=2
-         
+
      else if (localPet .eq. 3) then
         allocate(elemIds(1))
         elemIds(1)=1
-        
+
      endif
   endif
- 
+
 
   ! Create element Distgrid
   elemdistgrid=ESMF_DistGridCreate(elemIds, rc=localrc)
@@ -1507,26 +1520,26 @@ endif
    if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Setup lists
-  if (petCount .eq. 1) then  
+  if (petCount .eq. 1) then
       allocate(nodeIds(16))
-     nodeIds=(/1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16/) 
+     nodeIds=(/1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16/)
 
-  else if (petCount .eq. 4) then  
+  else if (petCount .eq. 4) then
      if (localPet .eq. 0) then
 
         allocate(nodeIds(13))
-        nodeIds=(/4,5,6,7,8,9,10,11,12,13,14,15,16/) 
+        nodeIds=(/4,5,6,7,8,9,10,11,12,13,14,15,16/)
 
      else if (localPet .eq. 1) then
 
         allocate(nodeIds(1))
-        nodeIds=(/1/)        
-        
+        nodeIds=(/1/)
+
      else if (localPet .eq. 2) then
-        
+
         allocate(nodeIds(1))
         nodeIds=(/2/)
-        
+
      else if (localPet .eq. 3) then
         allocate(nodeIds(1))
         nodeIds=(/3/)
@@ -1537,7 +1550,7 @@ endif
   ! Create node Distgrid
    nodedistgrid=ESMF_DistGridCreate(nodeIds, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
- 
+
   ! Create redisted mesh
   mesh2=ESMF_MeshCreate(mesh, nodalDistgrid=nodedistgrid, &
                         rc=localrc)
@@ -1567,7 +1580,7 @@ endif
 
   ! Make sure the global number of elements is still the same
   if (globalNumOwnedElems(1) .ne. 10) correct=.false.
- 
+
    !write(*,*) localPet, " number of local elems=",localnumOwnedElems(1)
   !write(*,*) localPet, " number of global elems=",globalnumOwnedElems(1)
 
@@ -1606,11 +1619,11 @@ endif
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
    ! Setup lists
-  if (petCount .eq. 1) then  
+  if (petCount .eq. 1) then
      allocate(nodeIds(12))
-     nodeIds=(/1,2,3,4,5,6,7,8,9,10,11,12/) 
+     nodeIds=(/1,2,3,4,5,6,7,8,9,10,11,12/)
 
-  else if (petCount .eq. 4) then  
+  else if (petCount .eq. 4) then
      if (localPet .eq. 0) then
 
         allocate(nodeIds(7))
@@ -1619,13 +1632,13 @@ endif
      else if (localPet .eq. 1) then
 
         allocate(nodeIds(2))
-        nodeIds=(/4,11/)        
-        
+        nodeIds=(/4,11/)
+
      else if (localPet .eq. 2) then
-        
+
         allocate(nodeIds(2))
         nodeIds=(/2,3/)
-        
+
      else if (localPet .eq. 3) then
         allocate(nodeIds(1))
         nodeIds=(/1/)
@@ -1636,7 +1649,7 @@ endif
   ! Create node Distgrid
    nodedistgrid=ESMF_DistGridCreate(nodeIds, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-  
+
 
   ! Create redisted mesh
   mesh2=ESMF_MeshCreate(mesh, nodalDistgrid=nodedistgrid, &
@@ -1685,7 +1698,7 @@ endif
   call createTestMesh3x3(mesh, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
- 
+
   ! Create redisted mesh
   mesh2=ESMF_MeshCreate(mesh, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -1744,7 +1757,7 @@ endif
                                    rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
- 
+
   ! Create redisted mesh
   mesh2=ESMF_MeshCreate(mesh, nodalDistgrid=nodedistgrid, &
      elementDistgrid=elemdistgrid, rc=localrc)
@@ -1758,7 +1771,7 @@ endif
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! check field
-  call ESMF_FieldValidate(nodeField,rc=localrc) 
+  call ESMF_FieldValidate(nodeField,rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Get Field info
@@ -1789,7 +1802,7 @@ endif
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! check field
-  call ESMF_FieldValidate(elemField,rc=localrc) 
+  call ESMF_FieldValidate(elemField,rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Get Field info
@@ -1838,7 +1851,7 @@ endif
   ! initialize check variables
   correct=.false.
   rc=ESMF_FAILURE
- 
+
   ! Do test
   call test_mesh_create_gt_1localde(correct, rc)
 
@@ -1876,11 +1889,11 @@ endif
                     ownedNodeCoords=ownedNodeCoords, &
                     rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-  
+
   ! Check coords
   if (petCount .eq. 1) then
       if (numOwnedNodes .ne. 9) correct=.false.
-    
+
       if (.not. ALL(ownedNodeCoords .eq. &
              (/0.0,0.0, &
                  10.0,0.0, &
@@ -1916,7 +1929,7 @@ endif
                        (/0.0,20.0, &
                        10.0,20.0/))) correct=.false.
 
-     else 
+     else
        if (numOwnedNodes .ne. 1) correct=.false.
 
         if (.not. ALL(ownedNodeCoords .eq. &
@@ -1994,7 +2007,7 @@ endif
   ! Create dual mesh
   meshDual=ESMF_MeshCreateDual(mesh, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-  
+
  ! call ESMF_MeshWrite(mesh, filename="mesh", rc=rc)
  ! call ESMF_MeshWrite(meshDual, filename="meshDual", rc=rc)
 
@@ -2028,11 +2041,11 @@ endif
   !call ESMF_MeshWrite(mesh, filename="meshPH", rc=rc)
 
   ! Setup lists
-  if (petCount .eq. 1) then  
+  if (petCount .eq. 1) then
       allocate(elemIds(5))
-      elemIds=(/1,2,3,4,5/) 
+      elemIds=(/1,2,3,4,5/)
 
-  else if (petCount .eq. 4) then  
+  else if (petCount .eq. 4) then
      if (localPet .eq. 0) then
         allocate(elemIds(1))
         elemIds(1)=4
@@ -2040,15 +2053,15 @@ endif
      else if (localPet .eq. 1) then
         allocate(elemIds(2))
         elemIds=(/3,5/)
-        
+
      else if (localPet .eq. 2) then
         allocate(elemIds(1))
         elemIds(1)=2
-        
+
      else if (localPet .eq. 3) then
         allocate(elemIds(1))
         elemIds(1)=1
-        
+
      endif
   endif
 
@@ -2106,7 +2119,7 @@ endif
   ! Create dual mesh
   meshDual=ESMF_MeshCreateDual(mesh, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-  
+
 
   !call ESMF_MeshWrite(meshDual, filename="meshDual", rc=rc)
 
@@ -2186,39 +2199,39 @@ endif
   rc=ESMF_SUCCESS
 
   ! Setup lists
-  if (petCount .eq. 1) then  
+  if (petCount .eq. 1) then
      allocate(nodeIds(9))
-     nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+     nodeIds=(/1,2,3,4,5,6,7,8,9/)
 
       allocate(elemIds(4))
-      elemIds=(/1,2,3,4/) 
+      elemIds=(/1,2,3,4/)
 
-  else if (petCount .eq. 4) then  
+  else if (petCount .eq. 4) then
       if (localPet .eq. 0) then
         allocate(elemIds(1))
         elemIds(1)=4
-        
+
         allocate(nodeIds(4))
         nodeIds=(/5,6,8,9/)
-        
+
      else if (localPet .eq. 1) then
         allocate(elemIds(1))
         elemIds(1)=3
-        
+
         allocate(nodeIds(2))
         nodeIds=(/7,4/)
-        
+
      else if (localPet .eq. 2) then
         allocate(elemIds(1))
         elemIds(1)=2
-        
+
         allocate(nodeIds(2))
         nodeIds=(/2,3/)
-        
+
      else if (localPet .eq. 3) then
         allocate(elemIds(1))
         elemIds(1)=1
-        
+
         allocate(nodeIds(1))
         nodeIds=(/1/)
      endif
@@ -2228,7 +2241,7 @@ endif
   ! Create node Distgrid
   nodedistgrid=ESMF_DistGridCreate(nodeIds, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
- 
+
   ! Create element Distgrid
   elemdistgrid=ESMF_DistGridCreate(elemIds, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -2277,7 +2290,7 @@ endif
   if (.not. nodalIsPresent .or.  elementIsPresent) then
      correct=.false.
   endif
-  
+
   ! Get rid of Mesh
   call ESMF_MeshDestroy(mesh, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -2298,7 +2311,7 @@ endif
   if (nodalIsPresent .or.  .not. elementIsPresent) then
      correct=.false.
   endif
-  
+
   ! Get rid of Mesh
   call ESMF_MeshDestroy(mesh, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -2318,7 +2331,7 @@ endif
   if (nodalIsPresent .or. elementIsPresent) then
      correct=.false.
   endif
-  
+
   ! Get rid of Mesh
   call ESMF_MeshDestroy(mesh, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -2354,7 +2367,7 @@ endif
 
 
   ! Create test mesh
-  call createTestMesh3x3(mesh, rc=localrc)  
+  call createTestMesh3x3(mesh, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
 #if 0
@@ -2364,13 +2377,13 @@ endif
   ! Create Mesh structure
   mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, rc=localrc)
     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
- 
+
    ! Fill in node data
   numNodes=9
- 
+
   !! node ids
   allocate(nodeIds(numNodes))
-  nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+  nodeIds=(/1,2,3,4,5,6,7,8,9/)
 
   !! node Coords
   allocate(nodeCoords(numNodes*2))
@@ -2383,11 +2396,11 @@ endif
                0.0,2.0, &
                1.0,2.0, &
                2.0,2.0 /)
- 
+
    !! node owners
   allocate(nodeOwners(numNodes))
   nodeOwners=0 ! everything on proc 0
- 
+
   ! Add nodes
   call ESMF_MeshAddNodes(mesh,nodeIds,nodeCoords,nodeOwners,rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -2403,7 +2416,7 @@ endif
 
   !! elem ids
    allocate(elemIds(numElems))
-   elemIds=(/1,2,3,4/) 
+   elemIds=(/1,2,3,4/)
 
   !! elem types
    allocate(elemTypes(numElems))
@@ -2415,9 +2428,9 @@ endif
 
   !! elem conn
     allocate(elemConn(numElems*4))
-  elemConn=(/1,2,5,4, & 
-             2,3,6,5, & 
-             4,5,8,7, & 
+  elemConn=(/1,2,5,4, &
+             2,3,6,5, &
+             4,5,8,7, &
              5,6,9,8/)
 
   ! Add Elements
@@ -2434,11 +2447,11 @@ endif
   !! Write mesh for debugging
   !call ESMF_MeshWrite(mesh,"tmesh",rc=localrc)
   !if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-  
+
 !  call ESMF_MeshDestroy(mesh, rc=rc)
 
   ! endif for skip for >1 proc
-  endif 
+  endif
 #endif
 
 
@@ -2449,14 +2462,14 @@ endif
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
    ! check field
-  call ESMF_FieldValidate(field,rc=localrc) 
+  call ESMF_FieldValidate(field,rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
 
   call ESMF_MeshSetMOAB(.false., rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-#endif 
+#endif
 
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
@@ -2500,15 +2513,15 @@ endif
 
   ! Get mask info
   call ESMF_MeshGet(mesh, &
-       elemMaskArray=maskArray, & 
+       elemMaskArray=maskArray, &
        elemAreaArray=areaArray, &
        rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! get pointer to mask
-  call ESMF_FieldGet(maskField, 0, maskPtr,       & 
+  call ESMF_FieldGet(maskField, 0, maskPtr,       &
        rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE 
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Check mask output
   if (petCount .eq. 1) then
@@ -2529,9 +2542,9 @@ endif
   endif
 
   ! get pointer to area
-  call ESMF_FieldGet(areaField, 0, areaPtr,       & 
+  call ESMF_FieldGet(areaField, 0, areaPtr,       &
        rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE 
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Check area output
   if (petCount .eq. 1) then
@@ -2553,11 +2566,11 @@ endif
 
   ! Destroy the mask Field
   call ESMF_FieldDestroy(maskField, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE  
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Destroy the area Field
   call ESMF_FieldDestroy(areaField, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE  
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Get rid of Mesh
   call ESMF_MeshDestroy(mesh, rc=localrc)
@@ -2584,11 +2597,11 @@ contains
 
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  ! 
-  ! Creates the following mesh on 
-  ! 1 or 4 PETs. Returns an error 
+  !
+  ! Creates the following mesh on
+  ! 1 or 4 PETs. Returns an error
   ! if run on other than 1 or 4 PETs
-  ! 
+  !
   !              Mesh Ids
   !
   !   2.0   7 ------- 8 -------- 9
@@ -2601,13 +2614,13 @@ contains
   !         |         |          |
   !   0.0   1 ------- 2 -------- 3
   !
-  !        0.0       1.0        2.0 
+  !        0.0       1.0        2.0
   !
   !      Node Ids at corners
   !      Element Ids in centers
-  ! 
-  !!!!! 
-  ! 
+  !
+  !!!!!
+  !
   ! The owners for 1 PET are all Pet 0.
   ! The owners for 4 PETs are as follows:
   !
@@ -2623,11 +2636,11 @@ contains
   !        |         |          |
   !   0.0  0 ------- 0 -------- 1
   !
-  !       0.0       1.0        2.0 
+  !       0.0       1.0        2.0
   !
   !      Node Owners at corners
   !      Element Owners in centers
-  ! 
+  !
 subroutine createTestMesh1(mesh, rc)
   type(ESMF_Mesh), intent(out) :: mesh
   integer :: rc
@@ -2654,8 +2667,8 @@ subroutine createTestMesh1(mesh, rc)
      return
   endif
 
- 
-  ! Setup mesh info depending on the 
+
+  ! Setup mesh info depending on the
   ! number of PETs
   if (petCount .eq. 1) then
 
@@ -2664,8 +2677,8 @@ subroutine createTestMesh1(mesh, rc)
 
      !! node ids
      allocate(nodeIds(numNodes))
-     nodeIds=(/1,2,3,4,5,6,7,8,9/) 
-     
+     nodeIds=(/1,2,3,4,5,6,7,8,9/)
+
      !! node Coords
      allocate(nodeCoords(numNodes*2))
      nodeCoords=(/0.0,0.0, &
@@ -2688,7 +2701,7 @@ subroutine createTestMesh1(mesh, rc)
 
       !! elem ids
       allocate(elemIds(numElems))
-      elemIds=(/1,2,3,4/) 
+      elemIds=(/1,2,3,4/)
 
       !! elem types
       allocate(elemTypes(numElems))
@@ -2696,9 +2709,9 @@ subroutine createTestMesh1(mesh, rc)
 
       !! elem conn
       allocate(elemConn(numElems*4))
-      elemConn=(/1,2,5,4, & 
-                 2,3,6,5, & 
-                 4,5,8,7, & 
+      elemConn=(/1,2,5,4, &
+                 2,3,6,5, &
+                 4,5,8,7, &
                  5,6,9,8/)
 
    else if (petCount .eq. 4) then
@@ -2710,7 +2723,7 @@ subroutine createTestMesh1(mesh, rc)
 
        !! node ids
        allocate(nodeIds(numNodes))
-       nodeIds=(/1,2,4,5/) 
+       nodeIds=(/1,2,4,5/)
 
        !! node Coords
        allocate(nodeCoords(numNodes*2))
@@ -2728,12 +2741,12 @@ subroutine createTestMesh1(mesh, rc)
 
        !! elem ids
        allocate(elemIds(numElems))
-       elemIds=(/1/) 
+       elemIds=(/1/)
 
        !! elem type
        allocate(elemTypes(numElems))
        elemTypes=ESMF_MESHELEMTYPE_QUAD
- 
+
        !! elem conn
        allocate(elemConn(numElems*4))
        elemConn=(/1,2,4,3/)
@@ -2744,7 +2757,7 @@ subroutine createTestMesh1(mesh, rc)
 
        !! node ids
        allocate(nodeIds(numNodes))
-       nodeIds=(/2,3,5,6/) 
+       nodeIds=(/2,3,5,6/)
 
        !! node Coords
        allocate(nodeCoords(numNodes*2))
@@ -2755,14 +2768,14 @@ subroutine createTestMesh1(mesh, rc)
 
        !! node owners
        allocate(nodeOwners(numNodes))
-       nodeOwners=(/0,1,0,1/) 
+       nodeOwners=(/0,1,0,1/)
 
        ! Fill in elem data
        numElems=1
 
        !! elem ids
        allocate(elemIds(numElems))
-       elemIds=(/2/) 
+       elemIds=(/2/)
 
        !! elem type
        allocate(elemTypes(numElems))
@@ -2778,7 +2791,7 @@ subroutine createTestMesh1(mesh, rc)
 
        !! node ids
        allocate(nodeIds(numNodes))
-       nodeIds=(/4,5,7,8/) 
+       nodeIds=(/4,5,7,8/)
 
        !! node Coords
        allocate(nodeCoords(numNodes*2))
@@ -2789,14 +2802,14 @@ subroutine createTestMesh1(mesh, rc)
 
         !! node owners
        allocate(nodeOwners(numNodes))
-       nodeOwners=(/0,0,2,2/) 
+       nodeOwners=(/0,0,2,2/)
 
        ! Fill in elem data
        numElems=1
 
        !! elem ids
        allocate(elemIds(numElems))
-       elemIds=(/3/) 
+       elemIds=(/3/)
 
        !! elem type
        allocate(elemTypes(numElems))
@@ -2804,15 +2817,15 @@ subroutine createTestMesh1(mesh, rc)
 
        !! elem conn
        allocate(elemConn(numElems*4))
-       elemConn=(/1,2,4,3/)  
-     else 
+       elemConn=(/1,2,4,3/)
+     else
         ! Fill in node data
         numNodes=4
         numOwnedNodes=1
 
        !! node ids
        allocate(nodeIds(numNodes))
-       nodeIds=(/5,6,8,9/) 
+       nodeIds=(/5,6,8,9/)
 
        !! node Coords
        allocate(nodeCoords(numNodes*2))
@@ -2823,14 +2836,14 @@ subroutine createTestMesh1(mesh, rc)
 
        !! node owners
        allocate(nodeOwners(numNodes))
-       nodeOwners=(/0,1,2,3/) 
+       nodeOwners=(/0,1,2,3/)
 
        ! Fill in elem data
        numElems=1
 
        !! elem ids
        allocate(elemIds(numElems))
-       elemIds=(/4/) 
+       elemIds=(/4/)
 
        !! elem type
        allocate(elemTypes(numElems))
@@ -2838,10 +2851,10 @@ subroutine createTestMesh1(mesh, rc)
 
        !! elem conn
        allocate(elemConn(numElems*4))
-       elemConn=(/1,2,4,3/)  
+       elemConn=(/1,2,4,3/)
      endif
    endif
- 
+
    ! Create Mesh structure in 1 step
    mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
         coordSys=ESMF_COORDSYS_CART, &
@@ -2855,7 +2868,7 @@ subroutine createTestMesh1(mesh, rc)
    deallocate(nodeIds)
    deallocate(nodeCoords)
    deallocate(nodeOwners)
-   
+
    ! deallocate elem data
    deallocate(elemIds)
    deallocate(elemTypes)
@@ -2866,11 +2879,11 @@ end subroutine createTestMesh1
 
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  ! 
-  ! Creates the following mesh on 
-  ! 1 or 4 PETs. Returns an error 
+  !
+  ! Creates the following mesh on
+  ! 1 or 4 PETs. Returns an error
   ! if run on other than 1 or 4 PETs
-  ! 
+  !
   !              Mesh Ids
   !
   !   20.0   7 ------- 8 -------- 9
@@ -2883,13 +2896,13 @@ end subroutine createTestMesh1
   !          |         |          |
   !   0.0    1 ------- 2 -------- 3
   !
-  !        0.0       10.0        20.0 
+  !        0.0       10.0        20.0
   !
   !      Node Ids at corners
   !      Element Ids in centers
-  ! 
-  !!!!! 
-  ! 
+  !
+  !!!!!
+  !
   ! The owners for 1 PET are all Pet 0.
   ! The owners for 4 PETs are as follows:
   !
@@ -2905,11 +2918,11 @@ end subroutine createTestMesh1
   !         |         |          |
   !   0.0   0 ------- 0 -------- 1
   !
-  !        0.0       10.0       20.0 
+  !        0.0       10.0       20.0
   !
   !      Node Owners at corners
   !      Element Owners in centers
-  ! 
+  !
 subroutine createTestMeshSphDeg(mesh, rc)
   type(ESMF_Mesh), intent(out) :: mesh
   integer :: rc
@@ -2938,7 +2951,7 @@ subroutine createTestMeshSphDeg(mesh, rc)
      return
   endif
 
-  ! Setup mesh info depending on the 
+  ! Setup mesh info depending on the
   ! number of PETs
   if (petCount .eq. 1) then
 
@@ -2947,8 +2960,8 @@ subroutine createTestMeshSphDeg(mesh, rc)
 
      !! node ids
      allocate(nodeIds(numNodes))
-     nodeIds=(/1,2,3,4,5,6,7,8,9/) 
-     
+     nodeIds=(/1,2,3,4,5,6,7,8,9/)
+
      !! node Coords
      allocate(nodeCoords(numNodes*2))
      nodeCoords=(/0.0,0.0, &
@@ -2971,7 +2984,7 @@ subroutine createTestMeshSphDeg(mesh, rc)
 
       !! elem ids
       allocate(elemIds(numElems))
-      elemIds=(/1,2,3,4/) 
+      elemIds=(/1,2,3,4/)
 
       !! elem types
       allocate(elemTypes(numElems))
@@ -2987,9 +3000,9 @@ subroutine createTestMeshSphDeg(mesh, rc)
 
       !! elem conn
       allocate(elemConn(numElems*4))
-      elemConn=(/1,2,5,4, & 
-                 2,3,6,5, & 
-                 4,5,8,7, & 
+      elemConn=(/1,2,5,4, &
+                 2,3,6,5, &
+                 4,5,8,7, &
                  5,6,9,8/)
 
    else if (petCount .eq. 4) then
@@ -3001,7 +3014,7 @@ subroutine createTestMeshSphDeg(mesh, rc)
 
        !! node ids
        allocate(nodeIds(numNodes))
-       nodeIds=(/1,2,4,5/) 
+       nodeIds=(/1,2,4,5/)
 
        !! node Coords
        allocate(nodeCoords(numNodes*2))
@@ -3019,7 +3032,7 @@ subroutine createTestMeshSphDeg(mesh, rc)
 
        !! elem ids
        allocate(elemIds(numElems))
-       elemIds=(/1/) 
+       elemIds=(/1/)
 
        !! elem type
        allocate(elemTypes(numElems))
@@ -3044,7 +3057,7 @@ subroutine createTestMeshSphDeg(mesh, rc)
 
        !! node ids
        allocate(nodeIds(numNodes))
-       nodeIds=(/2,3,5,6/) 
+       nodeIds=(/2,3,5,6/)
 
        !! node Coords
        allocate(nodeCoords(numNodes*2))
@@ -3055,14 +3068,14 @@ subroutine createTestMeshSphDeg(mesh, rc)
 
        !! node owners
        allocate(nodeOwners(numNodes))
-       nodeOwners=(/0,1,0,1/) 
+       nodeOwners=(/0,1,0,1/)
 
        ! Fill in elem data
        numElems=1
 
        !! elem ids
        allocate(elemIds(numElems))
-       elemIds=(/2/) 
+       elemIds=(/2/)
 
        !! elem type
        allocate(elemTypes(numElems))
@@ -3086,7 +3099,7 @@ subroutine createTestMeshSphDeg(mesh, rc)
 
        !! node ids
        allocate(nodeIds(numNodes))
-       nodeIds=(/4,5,7,8/) 
+       nodeIds=(/4,5,7,8/)
 
        !! node Coords
        allocate(nodeCoords(numNodes*2))
@@ -3097,14 +3110,14 @@ subroutine createTestMeshSphDeg(mesh, rc)
 
        !! node owners
        allocate(nodeOwners(numNodes))
-       nodeOwners=(/0,0,2,2/) 
+       nodeOwners=(/0,0,2,2/)
 
        ! Fill in elem data
        numElems=1
 
        !! elem ids
        allocate(elemIds(numElems))
-       elemIds=(/3/) 
+       elemIds=(/3/)
 
       !! elem mask
       allocate(elemMask(numElems))
@@ -3120,15 +3133,15 @@ subroutine createTestMeshSphDeg(mesh, rc)
 
        !! elem conn
        allocate(elemConn(numElems*4))
-       elemConn=(/1,2,4,3/)  
-     else 
+       elemConn=(/1,2,4,3/)
+     else
         ! Fill in node data
         numNodes=4
         numOwnedNodes=1
 
        !! node ids
        allocate(nodeIds(numNodes))
-       nodeIds=(/5,6,8,9/) 
+       nodeIds=(/5,6,8,9/)
 
        !! node Coords
        allocate(nodeCoords(numNodes*2))
@@ -3139,14 +3152,14 @@ subroutine createTestMeshSphDeg(mesh, rc)
 
        !! node owners
        allocate(nodeOwners(numNodes))
-       nodeOwners=(/0,1,2,3/) 
+       nodeOwners=(/0,1,2,3/)
 
        ! Fill in elem data
        numElems=1
 
        !! elem ids
        allocate(elemIds(numElems))
-       elemIds=(/4/) 
+       elemIds=(/4/)
 
        !! elem type
        allocate(elemTypes(numElems))
@@ -3162,11 +3175,11 @@ subroutine createTestMeshSphDeg(mesh, rc)
 
        !! elem conn
        allocate(elemConn(numElems*4))
-       elemConn=(/1,2,4,3/)  
+       elemConn=(/1,2,4,3/)
      endif
    endif
 
-   
+
    ! Create Mesh structure in 1 step
    mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
         nodeIds=nodeIds, nodeCoords=nodeCoords, &
@@ -3180,7 +3193,7 @@ subroutine createTestMeshSphDeg(mesh, rc)
    deallocate(nodeIds)
    deallocate(nodeCoords)
    deallocate(nodeOwners)
-   
+
    ! deallocate elem data
    deallocate(elemIds)
    deallocate(elemTypes)
@@ -3191,7 +3204,7 @@ end subroutine createTestMeshSphDeg
 
 
 !
-!  2.5        8        10 --------11   
+!  2.5        8        10 --------11
 !          /     \   /            |
 !  2.1   7         9              12
 !        |         |      5       /
@@ -3203,8 +3216,8 @@ end subroutine createTestMeshSphDeg
 !        |         |  2   \  |
 ! -0.1   1 ------- 2 ------- 3
 !
-!      -0.1       1.0       2.1   2.5 
-! 
+!      -0.1       1.0       2.1   2.5
+!
 !        Node Id labels at corners
 !       Element Id labels in centers
 subroutine createTestMeshPH(mesh, rc)
@@ -3242,7 +3255,7 @@ subroutine createTestMeshPH(mesh, rc)
 
      ! Allocate and fill the node id array.
      allocate(nodeIds(numNodes))
-     nodeIds=(/1,2,3,4,5,6,7,8,9,10,11,12/) 
+     nodeIds=(/1,2,3,4,5,6,7,8,9,10,11,12/)
 
      ! Allocate and fill node coordinate array.
      ! Since this is a 2D Mesh the size is 2x the
@@ -3277,7 +3290,7 @@ subroutine createTestMeshPH(mesh, rc)
 
      ! Allocate and fill the element id array.
      allocate(elemIds(numTotElems))
-     elemIds=(/1,2,3,4,5/) 
+     elemIds=(/1,2,3,4,5/)
 
 
      ! Allocate and fill the element topology type array.
@@ -3302,10 +3315,10 @@ subroutine createTestMeshPH(mesh, rc)
 
 
      ! Allocate and fill the element connection type array.
-     ! Note that entries in this array refer to the 
+     ! Note that entries in this array refer to the
       ! positions in the nodeIds, etc. arrays and that
       ! the order and number of entries for each element
-     ! reflects that given in the Mesh options 
+     ! reflects that given in the Mesh options
      ! section for the corresponding entry
      ! in the elemTypes array.
      allocate(elemConn(numElemConn))
@@ -3323,7 +3336,7 @@ subroutine createTestMeshPH(mesh, rc)
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/1,2,4,5/) 
+       nodeIds=(/1,2,4,5/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -3349,10 +3362,10 @@ subroutine createTestMeshPH(mesh, rc)
        numTotElems=numTriElems+numQuadElems+numPentElems+numHexElems
        numElemConn=3*numTriElems+4*numQuadElems+ &
             5*numPentElems+6*numHexElems
-       
+
        ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/1/) 
+        elemIds=(/1/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -3376,7 +3389,7 @@ subroutine createTestMeshPH(mesh, rc)
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/2,3,5,6/) 
+       nodeIds=(/2,3,5,6/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -3405,8 +3418,8 @@ subroutine createTestMeshPH(mesh, rc)
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/2,3/) 
- 
+       elemIds=(/2,3/)
+
         ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
        elemTypes=(/ESMF_MESHELEMTYPE_TRI, & ! elem id 2
@@ -3430,7 +3443,7 @@ subroutine createTestMeshPH(mesh, rc)
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/4,5,7,8,9/) 
+        nodeIds=(/4,5,7,8,9/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -3462,7 +3475,7 @@ subroutine createTestMeshPH(mesh, rc)
 
         ! Allocate and fill the element id array.
           allocate(elemIds(numTotElems))
-        elemIds=(/4/) 
+        elemIds=(/4/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -3484,7 +3497,7 @@ subroutine createTestMeshPH(mesh, rc)
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/5,6,9,10,11,12/) 
+        nodeIds=(/5,6,9,10,11,12/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -3505,7 +3518,7 @@ subroutine createTestMeshPH(mesh, rc)
                      3, & ! node id 10
                      3, & ! node id 11
                      3/)  ! node id 12
- 
+
 
         ! Set the number of each type of element, plus tot and num conn.
         numQuadElems=0
@@ -3519,7 +3532,7 @@ subroutine createTestMeshPH(mesh, rc)
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/5/)  
+        elemIds=(/5/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -3552,7 +3565,7 @@ subroutine createTestMeshPH(mesh, rc)
    deallocate(nodeIds)
    deallocate(nodeCoords)
    deallocate(nodeOwners)
-   
+
    ! deallocate elem data
    deallocate(elemIds)
    deallocate(elemTypes)
@@ -3563,11 +3576,11 @@ end subroutine createTestMeshPH
 
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  ! 
-  ! Creates the following mesh on 
-  ! 1 or 4 PETs. Returns an error 
+  !
+  ! Creates the following mesh on
+  ! 1 or 4 PETs. Returns an error
   ! if run on other than 1 or 4 PETs
-  ! 
+  !
   !              Mesh Ids
   !
   !   2.0   7 ------- 8 -------- 9
@@ -3580,13 +3593,13 @@ end subroutine createTestMeshPH
   !         |         |          |
   !   0.0   1 ------- 2 -------- 3
   !
-  !        0.0       1.0        2.0 
+  !        0.0       1.0        2.0
   !
   !      Node Ids at corners
   !      Element Ids in centers
-  ! 
-  !!!!! 
-  ! 
+  !
+  !!!!!
+  !
   ! The owners for 1 PET are all Pet 0.
   ! The owners for 4 PETs are as follows:
   !
@@ -3602,11 +3615,11 @@ end subroutine createTestMeshPH
   !        |         |          |
   !   0.0  0 ------- 0 -------- 1
   !
-  !       0.0       1.0        2.0 
+  !       0.0       1.0        2.0
   !
   !      Node Owners at corners
   !      Element Owners in centers
-  ! 
+  !
 subroutine createTestMeshForDual(mesh, rc)
   type(ESMF_Mesh), intent(out) :: mesh
   integer :: rc
@@ -3635,7 +3648,7 @@ subroutine createTestMeshForDual(mesh, rc)
   endif
 
 
-  ! Setup mesh info depending on the 
+  ! Setup mesh info depending on the
   ! number of PETs
   if (petCount .eq. 1) then
 
@@ -3644,8 +3657,8 @@ subroutine createTestMeshForDual(mesh, rc)
 
      !! node ids
      allocate(nodeIds(numNodes))
-     nodeIds=(/1,2,3,4,5,6,7,8,9/) 
-     
+     nodeIds=(/1,2,3,4,5,6,7,8,9/)
+
      !! node Coords
      allocate(nodeCoords(numNodes*2))
      nodeCoords=(/0.0,0.0, &
@@ -3668,7 +3681,7 @@ subroutine createTestMeshForDual(mesh, rc)
 
       !! elem ids
       allocate(elemIds(numElems))
-      elemIds=(/1,2,3,4/) 
+      elemIds=(/1,2,3,4/)
 
       !! elem types
       allocate(elemTypes(numElems))
@@ -3683,9 +3696,9 @@ subroutine createTestMeshForDual(mesh, rc)
 
       !! elem conn
       allocate(elemConn(numElems*4))
-      elemConn=(/1,2,5,4, & 
-                 2,3,6,5, & 
-                 4,5,8,7, & 
+      elemConn=(/1,2,5,4, &
+                 2,3,6,5, &
+                 4,5,8,7, &
                  5,6,9,8/)
 
    else if (petCount .eq. 4) then
@@ -3697,7 +3710,7 @@ subroutine createTestMeshForDual(mesh, rc)
 
        !! node ids
        allocate(nodeIds(numNodes))
-       nodeIds=(/1,2,4,5/) 
+       nodeIds=(/1,2,4,5/)
 
        !! node Coords
        allocate(nodeCoords(numNodes*2))
@@ -3715,7 +3728,7 @@ subroutine createTestMeshForDual(mesh, rc)
 
        !! elem ids
        allocate(elemIds(numElems))
-       elemIds=(/1/) 
+       elemIds=(/1/)
 
        !! elem type
        allocate(elemTypes(numElems))
@@ -3735,7 +3748,7 @@ subroutine createTestMeshForDual(mesh, rc)
 
        !! node ids
        allocate(nodeIds(numNodes))
-       nodeIds=(/2,3,5,6/) 
+       nodeIds=(/2,3,5,6/)
 
        !! node Coords
        allocate(nodeCoords(numNodes*2))
@@ -3746,14 +3759,14 @@ subroutine createTestMeshForDual(mesh, rc)
 
        !! node owners
        allocate(nodeOwners(numNodes))
-       nodeOwners=(/0,1,0,1/) 
+       nodeOwners=(/0,1,0,1/)
 
        ! Fill in elem data
        numElems=1
 
        !! elem ids
        allocate(elemIds(numElems))
-       elemIds=(/2/) 
+       elemIds=(/2/)
 
        !! elem type
        allocate(elemTypes(numElems))
@@ -3773,7 +3786,7 @@ subroutine createTestMeshForDual(mesh, rc)
 
        !! node ids
        allocate(nodeIds(numNodes))
-       nodeIds=(/4,5,7,8/) 
+       nodeIds=(/4,5,7,8/)
 
        !! node Coords
        allocate(nodeCoords(numNodes*2))
@@ -3784,14 +3797,14 @@ subroutine createTestMeshForDual(mesh, rc)
 
        !! node owners
        allocate(nodeOwners(numNodes))
-       nodeOwners=(/0,0,2,2/) 
+       nodeOwners=(/0,0,2,2/)
 
        ! Fill in elem data
        numElems=1
 
        !! elem ids
        allocate(elemIds(numElems))
-       elemIds=(/3/) 
+       elemIds=(/3/)
 
        !! elem type
        allocate(elemTypes(numElems))
@@ -3803,15 +3816,15 @@ subroutine createTestMeshForDual(mesh, rc)
 
        !! elem conn
        allocate(elemConn(numElems*4))
-       elemConn=(/1,2,4,3/)  
-     else 
+       elemConn=(/1,2,4,3/)
+     else
         ! Fill in node data
         numNodes=4
         numOwnedNodes=1
 
        !! node ids
        allocate(nodeIds(numNodes))
-       nodeIds=(/5,6,8,9/) 
+       nodeIds=(/5,6,8,9/)
 
        !! node Coords
        allocate(nodeCoords(numNodes*2))
@@ -3822,14 +3835,14 @@ subroutine createTestMeshForDual(mesh, rc)
 
        !! node owners
        allocate(nodeOwners(numNodes))
-       nodeOwners=(/0,1,2,3/) 
+       nodeOwners=(/0,1,2,3/)
 
        ! Fill in elem data
        numElems=1
 
        !! elem ids
        allocate(elemIds(numElems))
-       elemIds=(/4/) 
+       elemIds=(/4/)
 
        !! elem type
        allocate(elemTypes(numElems))
@@ -3841,10 +3854,10 @@ subroutine createTestMeshForDual(mesh, rc)
 
        !! elem conn
        allocate(elemConn(numElems*4))
-       elemConn=(/1,2,4,3/)  
+       elemConn=(/1,2,4,3/)
      endif
    endif
-   
+
    ! Create Mesh structure in 1 step
    mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
         coordSys=ESMF_COORDSYS_CART, &
@@ -3859,7 +3872,7 @@ subroutine createTestMeshForDual(mesh, rc)
    deallocate(nodeIds)
    deallocate(nodeCoords)
    deallocate(nodeOwners)
-   
+
    ! deallocate elem data
    deallocate(elemIds)
    deallocate(elemTypes)
@@ -3871,11 +3884,11 @@ end subroutine createTestMeshForDual
 
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  ! 
-  ! Creates the following mesh on 
-  ! 1 or 4 PETs. Returns an error 
+  !
+  ! Creates the following mesh on
+  ! 1 or 4 PETs. Returns an error
   ! if run on other than 1 or 4 PETs
-  ! 
+  !
   !                     Mesh Ids
   !
   !   3.0   13 ------ 14 ------- 15 ------- 16
@@ -3891,14 +3904,14 @@ end subroutine createTestMeshForDual
   !   0.5   |    1    |    2     |    3     |
   !         |         |          |          |
   !   0.0   1 ------- 2 -------- 3 -------- 4
-  !            
+  !
   !        0.0  0.5  1.0  1.5   2.0  2.5   3.0
    !
   !               Node Ids at corners
   !              Element Ids in centers
-  ! 
-   !!!!! 
-  ! 
+  !
+   !!!!!
+  !
   ! The owners for 1 PET are all Pet 0.
   ! The owners for 4 PETs are as follows:
   !
@@ -3922,7 +3935,7 @@ end subroutine createTestMeshForDual
   !
   !               Node Owners at corners
   !              Element Owners in centers
-  ! 
+  !
 
 subroutine createTestMesh3x3(mesh, rc)
   type(ESMF_Mesh), intent(out) :: mesh
@@ -3951,9 +3964,9 @@ subroutine createTestMesh3x3(mesh, rc)
      rc=ESMF_FAILURE
      return
   endif
-  
 
-  ! Setup mesh info depending on the 
+
+  ! Setup mesh info depending on the
   ! number of PETs
   if (petCount .eq. 1) then
 
@@ -3964,8 +3977,8 @@ subroutine createTestMesh3x3(mesh, rc)
      allocate(nodeIds(numNodes))
      nodeIds=(/1,2,3,4,5,6,7,8, &
                9,10,11,12,13,14,&
-               15,16/) 
-     
+               15,16/)
+
      !! node Coords
      allocate(nodeCoords(numNodes*2))
      nodeCoords=(/0.0,0.0, & ! 1
@@ -3984,7 +3997,7 @@ subroutine createTestMesh3x3(mesh, rc)
                  1.0,3.0, &  ! 14
                  2.0,3.0, &  ! 15
                  3.0,3.0 /)  ! 16
- 
+
 
       !! node owners
       allocate(nodeOwners(numNodes))
@@ -3999,7 +4012,7 @@ subroutine createTestMesh3x3(mesh, rc)
 
       !! elem ids
       allocate(elemIds(numElems))
-      elemIds=(/1,2,3,4,5,6,7,8,9,10/) 
+      elemIds=(/1,2,3,4,5,6,7,8,9,10/)
 
       !! elem types
       allocate(elemTypes(numElems))
@@ -4050,13 +4063,13 @@ subroutine createTestMesh3x3(mesh, rc)
      !! node ids
      allocate(nodeIds(numNodes))
      nodeIds=(/1,2,5,6/)
-     
+
      !! node Coords
      allocate(nodeCoords(numNodes*2))
      nodeCoords=(/0.0,0.0, & ! 1
                  1.0,0.0, &  ! 2
                  0.0,1.0, &  ! 5
-                 1.0,1.0 /)  ! 6 
+                 1.0,1.0 /)  ! 6
 
       !! node owners
       allocate(nodeOwners(numNodes))
@@ -4067,10 +4080,10 @@ subroutine createTestMesh3x3(mesh, rc)
       numQuadElems=1
       numElems=numTriElems+numQuadElems
       numElemConns=3*numTriElems+4*numQuadElems
- 
+
       !! elem ids
       allocate(elemIds(numElems))
-      elemIds=(/1/) 
+      elemIds=(/1/)
 
       !! elem types
       allocate(elemTypes(numElems))
@@ -4092,7 +4105,7 @@ subroutine createTestMesh3x3(mesh, rc)
      !! node ids
      allocate(nodeIds(numNodes))
      nodeIds=(/2,3,4,6,7,8/)
-     
+
      !! node Coords
      allocate(nodeCoords(numNodes*2))
      nodeCoords=(/1.0,0.0, &  ! 2
@@ -4102,7 +4115,7 @@ subroutine createTestMesh3x3(mesh, rc)
                   2.0,1.0, &  ! 7
                   3.0,1.0 /)  ! 8
 
- 
+
 
       !! node owners
       allocate(nodeOwners(numNodes))
@@ -4150,19 +4163,19 @@ subroutine createTestMesh3x3(mesh, rc)
                9,10,11, &
                13,14,15/)
 
-     
+
      !! node Coords
      allocate(nodeCoords(numNodes*2))
      nodeCoords=(/0.0,1.0, &  ! 5
                    1.0,1.0, &  ! 6
                   2.0,1.0, &  ! 7
-                  0.0,2.0, &  ! 9 
+                  0.0,2.0, &  ! 9
                   1.0,2.0, &  ! 10
                   2.0,2.0, &  ! 11
                   0.0,3.0, &  ! 13
                   1.0,3.0, &  ! 14
                   2.0,3.0/)  ! 15
- 
+
 
       !! node owners
       allocate(nodeOwners(numNodes))
@@ -4212,11 +4225,11 @@ subroutine createTestMesh3x3(mesh, rc)
 
      ! Fill in node data
      numNodes=6
- 
+
      !! node ids
      allocate(nodeIds(numNodes))
      nodeIds=(/7,8,11,12,15,16/)
-     
+
      !! node Coords
      allocate(nodeCoords(numNodes*2))
      nodeCoords=(/2.0,1.0, &  ! 7
@@ -4225,7 +4238,7 @@ subroutine createTestMesh3x3(mesh, rc)
                   3.0,2.0, &  ! 12
                   2.0,3.0, &  ! 15
                   3.0,3.0 /)  ! 16
- 
+
 
       !! node owners
       allocate(nodeOwners(numNodes))
@@ -4241,10 +4254,10 @@ subroutine createTestMesh3x3(mesh, rc)
       numQuadElems=1
       numElems=numTriElems+numQuadElems
       numElemConns=3*numTriElems+4*numQuadElems
- 
+
       !! elem ids
       allocate(elemIds(numElems))
-      elemIds=(/6,9,10/) 
+      elemIds=(/6,9,10/)
 
       !! elem types
       allocate(elemTypes(numElems))
@@ -4266,7 +4279,7 @@ subroutine createTestMesh3x3(mesh, rc)
      endif
    endif
 
-   
+
    ! Create Mesh structure in 1 step
    mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
         coordSys=ESMF_COORDSYS_CART, &
@@ -4281,7 +4294,7 @@ subroutine createTestMesh3x3(mesh, rc)
    deallocate(nodeIds)
    deallocate(nodeCoords)
    deallocate(nodeOwners)
-   
+
    ! deallocate elem data
    deallocate(elemIds)
    deallocate(elemTypes)
@@ -4291,10 +4304,10 @@ subroutine createTestMesh3x3(mesh, rc)
 end subroutine createTestMesh3x3
 
 !
-!  2.5        8        10 --------11   
+!  2.5        8        10 --------11
 !          /     \         \      |
 !  2.1   7         9           \  12
-!        |         | \    5       
+!        |         | \    5
 !        |    4    |   \
 !        |         |      \
 !  1.0   4 ------- 5 ------- 6
@@ -4303,8 +4316,8 @@ end subroutine createTestMesh3x3
 !        |         |  2   \  |
 ! -0.1   1 ------- 2 ------- 3
 !
-!      -0.1       1.0       2.1   2.5 
-! 
+!      -0.1       1.0       2.1   2.5
+!
 !        Node Id labels at corners
 !       Element Id labels in centers
 subroutine createTestMeshMultiElem(mesh, rc)
@@ -4341,7 +4354,7 @@ subroutine createTestMeshMultiElem(mesh, rc)
 
      ! Allocate and fill the node id array.
      allocate(nodeIds(numNodes))
-     nodeIds=(/1,2,3,4,5,6,7,8,9,10,11,12/) 
+     nodeIds=(/1,2,3,4,5,6,7,8,9,10,11,12/)
 
       ! Allocate and fill node coordinate array.
      ! Since this is a 2D Mesh the size is 2x the
@@ -4376,7 +4389,7 @@ subroutine createTestMeshMultiElem(mesh, rc)
 
      ! Allocate and fill the element id array.
      allocate(elemIds(numTotElems))
-     elemIds=(/1,2,3,4,5/) 
+     elemIds=(/1,2,3,4,5/)
 
 
      ! Allocate and fill the element topology type array.
@@ -4389,10 +4402,10 @@ subroutine createTestMeshMultiElem(mesh, rc)
 
 
      ! Allocate and fill the element connection type array.
-      ! Note that entries in this array refer to the 
+      ! Note that entries in this array refer to the
      ! positions in the nodeIds, etc. arrays and that
      ! the order and number of entries for each element
-     ! reflects that given in the Mesh options 
+     ! reflects that given in the Mesh options
      ! section for the corresponding entry
      ! in the elemTypes array.
      allocate(elemConn(numElemConn))
@@ -4410,7 +4423,7 @@ subroutine createTestMeshMultiElem(mesh, rc)
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/1,2,4,5/) 
+       nodeIds=(/1,2,4,5/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -4436,10 +4449,10 @@ subroutine createTestMeshMultiElem(mesh, rc)
        numTotElems=numTriElems+numQuadElems+numPentElems+numMultiElems
        numElemConn=3*numTriElems+4*numQuadElems+ &
              5*numPentElems+7*numMultiElems
-       
+
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/1/) 
+       elemIds=(/1/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -4456,7 +4469,7 @@ subroutine createTestMeshMultiElem(mesh, rc)
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/2,3,5,6/) 
+       nodeIds=(/2,3,5,6/)
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -4482,10 +4495,10 @@ subroutine createTestMeshMultiElem(mesh, rc)
        numTotElems=numTriElems+numQuadElems+numPentElems+numMultiElems
        numElemConn=3*numTriElems+4*numQuadElems+ &
             5*numPentElems+7*numMultiElems
- 
+
         ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
-       elemIds=(/2,3/) 
+       elemIds=(/2,3/)
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -4503,7 +4516,7 @@ subroutine createTestMeshMultiElem(mesh, rc)
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-         nodeIds=(/4,5,7,8,9/) 
+         nodeIds=(/4,5,7,8,9/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -4523,7 +4536,7 @@ subroutine createTestMeshMultiElem(mesh, rc)
                      2, & ! node id 7
                      2, & ! node id 8
                      2/)  ! node id 9
- 
+
        ! Set the number of each type of element, plus tot and num conn.
        numQuadElems=0
        numTriElems=0
@@ -4535,7 +4548,7 @@ subroutine createTestMeshMultiElem(mesh, rc)
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/4/) 
+        elemIds=(/4/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -4551,7 +4564,7 @@ subroutine createTestMeshMultiElem(mesh, rc)
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/5,6,9,10,11,12/) 
+        nodeIds=(/5,6,9,10,11,12/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -4563,7 +4576,7 @@ subroutine createTestMeshMultiElem(mesh, rc)
                      1.5,2.5, &  ! node id 10
                      2.5,2.5, &  ! node id 11
                      2.5,2.1 /)  ! node id 12
- 
+
         ! Allocate and fill the node owner array.
         allocate(nodeOwners(numNodes))
         nodeOwners=(/0, & ! node id 5
@@ -4572,8 +4585,8 @@ subroutine createTestMeshMultiElem(mesh, rc)
                      3, & ! node id 10
                      3, & ! node id 11
                      3/)  ! node id 12
- 
- 
+
+
         ! Set the number of each type of element, plus tot and num conn.
         numQuadElems=0
          numTriElems=0
@@ -4583,10 +4596,10 @@ subroutine createTestMeshMultiElem(mesh, rc)
         numElemConn=3*numTriElems+4*numQuadElems+ &
              5*numPentElems+7*numMultiElems
 
- 
+
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/5/)  
+        elemIds=(/5/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -4611,7 +4624,7 @@ subroutine createTestMeshMultiElem(mesh, rc)
    deallocate(nodeIds)
    deallocate(nodeCoords)
    deallocate(nodeOwners)
-   
+
    ! deallocate elem data
    deallocate(elemIds)
    deallocate(elemTypes)
@@ -4620,11 +4633,11 @@ subroutine createTestMeshMultiElem(mesh, rc)
 end subroutine createTestMeshMultiElem
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  ! 
-  ! Creates the following mesh on 
-  ! 1 or 4 PETs. Returns an error 
+  !
+  ! Creates the following mesh on
+  ! 1 or 4 PETs. Returns an error
   ! if run on other than 1 or 4 PETs
-  ! 
+  !
   !                     Mesh Ids
   !
   !   3.0   13 ------ 14 ------- 15 ------- 16
@@ -4640,14 +4653,14 @@ end subroutine createTestMeshMultiElem
   !   0.5   |    1    |    2     |    3     |
   !         |         |          |          |
   !   0.0   1 ------- 2 -------- 3 -------- 4
-  !            
+  !
   !        0.0  0.5  1.0  1.5   2.0  2.5   3.0
    !
   !               Node Ids at corners
   !              Element Ids in centers
-  ! 
-   !!!!! 
-  ! 
+  !
+   !!!!!
+  !
   ! The owners for 1 PET are all Pet 0.
   ! The owners for 4 PETs are as follows:
   !
@@ -4671,7 +4684,7 @@ end subroutine createTestMeshMultiElem
   !
    !               Node Owners at corners
   !              Element Owners in centers
-  ! 
+  !
 
 subroutine createTestMesh3x3_notris(mesh, rc)
   type(ESMF_Mesh), intent(out) :: mesh
@@ -4700,9 +4713,9 @@ subroutine createTestMesh3x3_notris(mesh, rc)
       rc=ESMF_FAILURE
      return
   endif
-  
 
-  ! Setup mesh info depending on the 
+
+  ! Setup mesh info depending on the
   ! number of PETs
   if (petCount .eq. 1) then
 
@@ -4713,8 +4726,8 @@ subroutine createTestMesh3x3_notris(mesh, rc)
      allocate(nodeIds(numNodes))
      nodeIds=(/1,2,3,4,5,6,7,8, &
                9,10,11,12,13,14,&
-                15,16/) 
-     
+                15,16/)
+
      !! node Coords
      allocate(nodeCoords(numNodes*2))
      nodeCoords=(/0.0,0.0, & ! 1
@@ -4733,7 +4746,7 @@ subroutine createTestMesh3x3_notris(mesh, rc)
                  1.0,3.0, &  ! 14
                  2.0,3.0, &  ! 15
                  3.0,3.0 /)  ! 16
- 
+
 
       !! node owners
       allocate(nodeOwners(numNodes))
@@ -4748,7 +4761,7 @@ subroutine createTestMesh3x3_notris(mesh, rc)
 
       !! elem ids
       allocate(elemIds(numElems))
-      elemIds=(/1,2,3,4,5,6,7,8,9/) 
+      elemIds=(/1,2,3,4,5,6,7,8,9/)
 
       !! elem types
       allocate(elemTypes(numElems))
@@ -4796,13 +4809,13 @@ subroutine createTestMesh3x3_notris(mesh, rc)
      !! node ids
      allocate(nodeIds(numNodes))
      nodeIds=(/1,2,5,6/)
-     
+
      !! node Coords
      allocate(nodeCoords(numNodes*2))
      nodeCoords=(/0.0,0.0, & ! 1
                  1.0,0.0, &  ! 2
                  0.0,1.0, &  ! 5
-                 1.0,1.0 /)  ! 6 
+                 1.0,1.0 /)  ! 6
 
       !! node owners
       allocate(nodeOwners(numNodes))
@@ -4813,10 +4826,10 @@ subroutine createTestMesh3x3_notris(mesh, rc)
       numQuadElems=1
       numElems=numTriElems+numQuadElems
       numElemConns=3*numTriElems+4*numQuadElems
- 
+
       !! elem ids
       allocate(elemIds(numElems))
-      elemIds=(/1/) 
+      elemIds=(/1/)
 
       !! elem types
       allocate(elemTypes(numElems))
@@ -4838,7 +4851,7 @@ subroutine createTestMesh3x3_notris(mesh, rc)
      !! node ids
      allocate(nodeIds(numNodes))
      nodeIds=(/2,3,4,6,7,8/)
-     
+
      !! node Coords
      allocate(nodeCoords(numNodes*2))
      nodeCoords=(/1.0,0.0, &  ! 2
@@ -4848,7 +4861,7 @@ subroutine createTestMesh3x3_notris(mesh, rc)
                   2.0,1.0, &  ! 7
                   3.0,1.0 /)  ! 8
 
-  
+
 
       !! node owners
       allocate(nodeOwners(numNodes))
@@ -4896,19 +4909,19 @@ subroutine createTestMesh3x3_notris(mesh, rc)
                9,10,11, &
                13,14,15/)
 
-     
+
      !! node Coords
      allocate(nodeCoords(numNodes*2))
      nodeCoords=(/0.0,1.0, &  ! 5
                    1.0,1.0, &  ! 6
                   2.0,1.0, &  ! 7
-                  0.0,2.0, &  ! 9 
+                  0.0,2.0, &  ! 9
                   1.0,2.0, &  ! 10
                   2.0,2.0, &  ! 11
                   0.0,3.0, &  ! 13
                   1.0,3.0, &  ! 14
                   2.0,3.0/)  ! 15
- 
+
 
       !! node owners
       allocate(nodeOwners(numNodes))
@@ -4958,11 +4971,11 @@ subroutine createTestMesh3x3_notris(mesh, rc)
 
      ! Fill in node data
      numNodes=6
- 
+
      !! node ids
      allocate(nodeIds(numNodes))
      nodeIds=(/7,8,11,12,15,16/)
-     
+
      !! node Coords
      allocate(nodeCoords(numNodes*2))
      nodeCoords=(/2.0,1.0, &  ! 7
@@ -4971,7 +4984,7 @@ subroutine createTestMesh3x3_notris(mesh, rc)
                   3.0,2.0, &  ! 12
                   2.0,3.0, &  ! 15
                   3.0,3.0 /)  ! 16
- 
+
 
       !! node owners
        allocate(nodeOwners(numNodes))
@@ -4987,10 +5000,10 @@ subroutine createTestMesh3x3_notris(mesh, rc)
       numQuadElems=2
       numElems=numTriElems+numQuadElems
       numElemConns=3*numTriElems+4*numQuadElems
- 
+
       !! elem ids
       allocate(elemIds(numElems))
-      elemIds=(/6,9/) 
+      elemIds=(/6,9/)
 
       !! elem types
       allocate(elemTypes(numElems))
@@ -5009,7 +5022,7 @@ subroutine createTestMesh3x3_notris(mesh, rc)
      endif
    endif
 
-   
+
    ! Create Mesh structure in 1 step
    mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
         coordSys=ESMF_COORDSYS_CART, &
@@ -5024,7 +5037,7 @@ subroutine createTestMesh3x3_notris(mesh, rc)
    deallocate(nodeIds)
    deallocate(nodeCoords)
    deallocate(nodeOwners)
-   
+
    ! deallocate elem data
    deallocate(elemIds)
    deallocate(elemTypes)
@@ -5035,11 +5048,11 @@ end subroutine createTestMesh3x3_notris
 
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  ! 
-  ! Creates the following mesh on 
-  ! 1 or 4 PETs. Returns an error 
+  !
+  ! Creates the following mesh on
+  ! 1 or 4 PETs. Returns an error
   ! if run on other than 1 or 4 PETs
-  ! 
+  !
   !                     Mesh Ids
   !
   !   3.0   13 ------ 14 ------- 15 ------- 16
@@ -5055,14 +5068,14 @@ end subroutine createTestMesh3x3_notris
   !   0.5   |    1    |    2     |    3     |
   !         |         |          |          |
   !   0.0   1 ------- 2 -------- 3 -------- 4
-  !            
+  !
   !        0.0  0.5  1.0  1.5   2.0  2.5   3.0
    !
   !               Node Ids at corners
   !              Element Ids in centers
-  ! 
-   !!!!! 
-  ! 
+  !
+   !!!!!
+  !
   ! The owners for 1 PET are all Pet 0.
   ! The owners for 4 PETs are as follows:
   !
@@ -5086,7 +5099,7 @@ end subroutine createTestMesh3x3_notris
   !
   !               Node Owners at corners
   !              Element Owners in centers
-  ! 
+  !
 
 subroutine test_mesh_create_gt_1localde(correct, rc)
   type(ESMF_Mesh) :: mesh
@@ -5124,9 +5137,9 @@ subroutine test_mesh_create_gt_1localde(correct, rc)
      rc=ESMF_FAILURE
      return
   endif
-  
 
-  ! Setup mesh info depending on the 
+
+  ! Setup mesh info depending on the
   ! number of PETs
   if (petCount .eq. 1) then
 
@@ -5137,8 +5150,8 @@ subroutine test_mesh_create_gt_1localde(correct, rc)
      allocate(nodeIds(numNodes))
      nodeIds=(/1,2,3,4,5,6,7,8, &
                9,10,11,12,13,14,&
-               15,16/) 
-     
+               15,16/)
+
 
      !! node Coords
      allocate(nodeCoords(numNodes*2))
@@ -5158,7 +5171,7 @@ subroutine test_mesh_create_gt_1localde(correct, rc)
                  1.0,3.0, &  ! 14
                  2.0,3.0, &  ! 15
                  3.0,3.0 /)  ! 16
- 
+
 
       !! node owners
       allocate(nodeOwners(numNodes))
@@ -5166,8 +5179,8 @@ subroutine test_mesh_create_gt_1localde(correct, rc)
 
       !! Build node localDE lists
       nodeLocalDECount=2
-      allocate(nodeArbSeqIndexL(nodeLocalDeCount)) 
-  
+      allocate(nodeArbSeqIndexL(nodeLocalDeCount))
+
       !! Allocate and fill first list
       allocate(nodeArbSeqIndexL(1)%ptr(6))
       nodeArbSeqIndexL(1)%ptr=(/1,2,3,4,5,6/)
@@ -5183,7 +5196,7 @@ subroutine test_mesh_create_gt_1localde(correct, rc)
 
       !! elem ids
       allocate(elemIds(numElems))
-      elemIds=(/1,2,3,4,5,6,7,8,9,10/) 
+      elemIds=(/1,2,3,4,5,6,7,8,9,10/)
 
       !! elem types
       allocate(elemTypes(numElems))
@@ -5226,8 +5239,8 @@ subroutine test_mesh_create_gt_1localde(correct, rc)
 
       !! Build node localDE lists
       elemLocalDECount=2
-      allocate(elemArbSeqIndexL(elemLocalDeCount)) 
-  
+      allocate(elemArbSeqIndexL(elemLocalDeCount))
+
       !! Allocate and fill first list
       allocate(elemArbSeqIndexL(1)%ptr(4))
       elemArbSeqIndexL(1)%ptr=(/1,2,3,4/)
@@ -5246,13 +5259,13 @@ subroutine test_mesh_create_gt_1localde(correct, rc)
      !! node ids
      allocate(nodeIds(numNodes))
      nodeIds=(/1,2,5,6/)
-     
+
      !! node Coords
      allocate(nodeCoords(numNodes*2))
      nodeCoords=(/0.0,0.0, & ! 1
                  1.0,0.0, &  ! 2
                  0.0,1.0, &  ! 5
-                 1.0,1.0 /)  ! 6 
+                 1.0,1.0 /)  ! 6
 
       !! node owners
       allocate(nodeOwners(numNodes))
@@ -5260,8 +5273,8 @@ subroutine test_mesh_create_gt_1localde(correct, rc)
 
       !! Build node localDE lists
       nodeLocalDECount=2
-      allocate(nodeArbSeqIndexL(nodeLocalDeCount)) 
-  
+      allocate(nodeArbSeqIndexL(nodeLocalDeCount))
+
       !! Allocate and fill first list
       allocate(nodeArbSeqIndexL(1)%ptr(2))
       nodeArbSeqIndexL(1)%ptr=(/1,2/)
@@ -5274,10 +5287,10 @@ subroutine test_mesh_create_gt_1localde(correct, rc)
       numQuadElems=1
       numElems=numTriElems+numQuadElems
       numElemConns=3*numTriElems+4*numQuadElems
- 
+
       !! elem ids
       allocate(elemIds(numElems))
-      elemIds=(/1/) 
+      elemIds=(/1/)
 
       !! elem types
       allocate(elemTypes(numElems))
@@ -5293,8 +5306,8 @@ subroutine test_mesh_create_gt_1localde(correct, rc)
 
       !! Build node localDE lists
       elemLocalDECount=1
-      allocate(elemArbSeqIndexL(elemLocalDeCount)) 
-  
+      allocate(elemArbSeqIndexL(elemLocalDeCount))
+
       !! Allocate and fill first list
       allocate(elemArbSeqIndexL(1)%ptr(1))
       elemArbSeqIndexL(1)%ptr=(/1/)
@@ -5307,7 +5320,7 @@ subroutine test_mesh_create_gt_1localde(correct, rc)
      !! node ids
      allocate(nodeIds(numNodes))
      nodeIds=(/2,3,4,6,7,8/)
-     
+
      !! node Coords
      allocate(nodeCoords(numNodes*2))
      nodeCoords=(/1.0,0.0, &  ! 2
@@ -5317,7 +5330,7 @@ subroutine test_mesh_create_gt_1localde(correct, rc)
                   2.0,1.0, &  ! 7
                   3.0,1.0 /)  ! 8
 
- 
+
 
       !! node owners
       allocate(nodeOwners(numNodes))
@@ -5331,8 +5344,8 @@ subroutine test_mesh_create_gt_1localde(correct, rc)
 
       !! Build node localDE lists
       nodeLocalDECount=2
-      allocate(nodeArbSeqIndexL(nodeLocalDeCount)) 
-  
+      allocate(nodeArbSeqIndexL(nodeLocalDeCount))
+
       !! Allocate and fill first list
       allocate(nodeArbSeqIndexL(1)%ptr(2))
       nodeArbSeqIndexL(1)%ptr=(/3,4/)
@@ -5370,8 +5383,8 @@ subroutine test_mesh_create_gt_1localde(correct, rc)
 
       !! Build node localDE lists
       elemLocalDECount=2
-      allocate(elemArbSeqIndexL(elemLocalDeCount)) 
-  
+      allocate(elemArbSeqIndexL(elemLocalDeCount))
+
       !! Allocate and fill first list
       allocate(elemArbSeqIndexL(1)%ptr(1))
       elemArbSeqIndexL(1)%ptr=(/2/)
@@ -5390,19 +5403,19 @@ subroutine test_mesh_create_gt_1localde(correct, rc)
                9,10,11, &
                13,14,15/)
 
-     
+
      !! node Coords
      allocate(nodeCoords(numNodes*2))
      nodeCoords=(/0.0,1.0, &  ! 5
                    1.0,1.0, &  ! 6
                   2.0,1.0, &  ! 7
-                  0.0,2.0, &  ! 9 
+                  0.0,2.0, &  ! 9
                   1.0,2.0, &  ! 10
                   2.0,2.0, &  ! 11
                   0.0,3.0, &  ! 13
                   1.0,3.0, &  ! 14
                   2.0,3.0/)  ! 15
- 
+
 
       !! node owners
       allocate(nodeOwners(numNodes))
@@ -5418,8 +5431,8 @@ subroutine test_mesh_create_gt_1localde(correct, rc)
 
       !! Build node localDE lists
       nodeLocalDECount=2
-      allocate(nodeArbSeqIndexL(nodeLocalDeCount)) 
-  
+      allocate(nodeArbSeqIndexL(nodeLocalDeCount))
+
       !! Allocate and fill first list
       allocate(nodeArbSeqIndexL(1)%ptr(2))
       nodeArbSeqIndexL(1)%ptr=(/9,10/)
@@ -5461,8 +5474,8 @@ subroutine test_mesh_create_gt_1localde(correct, rc)
 
       !! Build node localDE lists
       elemLocalDECount=2
-      allocate(elemArbSeqIndexL(elemLocalDeCount)) 
-  
+      allocate(elemArbSeqIndexL(elemLocalDeCount))
+
       !! Allocate and fill first list
       allocate(elemArbSeqIndexL(1)%ptr(3))
       elemArbSeqIndexL(1)%ptr=(/4,5,7/)
@@ -5474,11 +5487,11 @@ subroutine test_mesh_create_gt_1localde(correct, rc)
 
      ! Fill in node data
      numNodes=6
- 
+
      !! node ids
      allocate(nodeIds(numNodes))
      nodeIds=(/7,8,11,12,15,16/)
-     
+
      !! node Coords
      allocate(nodeCoords(numNodes*2))
      nodeCoords=(/2.0,1.0, &  ! 7
@@ -5487,7 +5500,7 @@ subroutine test_mesh_create_gt_1localde(correct, rc)
                   3.0,2.0, &  ! 12
                   2.0,3.0, &  ! 15
                   3.0,3.0 /)  ! 16
- 
+
 
       !! node owners
       allocate(nodeOwners(numNodes))
@@ -5500,8 +5513,8 @@ subroutine test_mesh_create_gt_1localde(correct, rc)
 
       !! Build node localDE lists
       nodeLocalDECount=1
-      allocate(nodeArbSeqIndexL(nodeLocalDeCount)) 
-  
+      allocate(nodeArbSeqIndexL(nodeLocalDeCount))
+
       !! Allocate and fill first list
       allocate(nodeArbSeqIndexL(1)%ptr(4))
       nodeArbSeqIndexL(1)%ptr=(/11,12,15,16/)
@@ -5511,10 +5524,10 @@ subroutine test_mesh_create_gt_1localde(correct, rc)
       numQuadElems=1
       numElems=numTriElems+numQuadElems
       numElemConns=3*numTriElems+4*numQuadElems
- 
+
       !! elem ids
       allocate(elemIds(numElems))
-      elemIds=(/6,9,10/) 
+      elemIds=(/6,9,10/)
 
       !! elem types
       allocate(elemTypes(numElems))
@@ -5536,8 +5549,8 @@ subroutine test_mesh_create_gt_1localde(correct, rc)
 
       !! Build node localDE lists
       elemLocalDECount=2
-      allocate(elemArbSeqIndexL(elemLocalDeCount)) 
-  
+      allocate(elemArbSeqIndexL(elemLocalDeCount))
+
       !! Allocate and fill first list
       allocate(elemArbSeqIndexL(1)%ptr(1))
       elemArbSeqIndexL(1)%ptr=(/6/)
@@ -5576,7 +5589,7 @@ subroutine test_mesh_create_gt_1localde(correct, rc)
    deallocate(nodeIds)
    deallocate(nodeCoords)
    deallocate(nodeOwners)
-   
+
    ! deallocate elem data
    deallocate(elemIds)
    deallocate(elemTypes)
@@ -5604,7 +5617,7 @@ subroutine test_mesh_create_gt_1localde(correct, rc)
   if (rc .ne. ESMF_SUCCESS) return
 
   ! check field
-  call ESMF_FieldValidate(nodeField, rc=rc) 
+  call ESMF_FieldValidate(nodeField, rc=rc)
   if (rc .ne. ESMF_SUCCESS) return
 
   ! Get Field info
@@ -5624,7 +5637,7 @@ subroutine test_mesh_create_gt_1localde(correct, rc)
   if (rc .ne. ESMF_SUCCESS) return
 
   ! check field
-  call ESMF_FieldValidate(elemField, rc=rc) 
+  call ESMF_FieldValidate(elemField, rc=rc)
   if (rc .ne. ESMF_SUCCESS) return
 
   ! Get Field info
@@ -5664,11 +5677,11 @@ end subroutine test_mesh_create_gt_1localde
 
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  ! 
-  ! Creates the following mesh on 
-  ! 1 or 4 PETs. Returns an error 
+  !
+  ! Creates the following mesh on
+  ! 1 or 4 PETs. Returns an error
   ! if run on other than 1 or 4 PETs
-  ! 
+  !
   !                     Mesh Ids
   !
   !   3.0   * ------- *          * -------  *
@@ -5676,22 +5689,22 @@ end subroutine test_mesh_create_gt_1localde
   !   2.5   |    7    |          |     /    |
   !         |         |          |  /    9  |
   !   2.0   * ------- *          * -------  *
-  !         
-  !   1.5   
-  !         
+  !
+  !   1.5
+  !
   !   1.0   * ------- *          * -------- *
   !         |         |          |          |
   !   0.5   |    1    |          |    3     |
   !         |         |          |          |
   !   0.0   * ------- *          * -------- 4
-  !            
+  !
   !        0.0  0.5  1.0  1.5   2.0  2.5   3.0
   !
   !               Node Ids at corners
   !              Element Ids in centers
-  ! 
-   !!!!! 
-  ! 
+  !
+   !!!!!
+  !
   ! The owners for 1 PET are all Pet 0.
   ! The owners for 4 PETs are as follows:
   !
@@ -5702,20 +5715,20 @@ end subroutine test_mesh_create_gt_1localde
   !   2.5   |    2    |          |     /    |
   !         |         |          |  /    2  |
   !   2.0   * ------- *          * -------  *
-  !         
-  !   1.5   
-  !         
+  !
+  !   1.5
+  !
   !   1.0   * ------- *          * -------- *
   !         |         |          |          |
   !   0.5   |    0    |          |    1     |
   !         |         |          |          |
   !   0.0   * ------- *          * -------- 4
-  !            
+  !
   !        0.0  0.5  1.0  1.5   2.0  2.5   3.0
   !
   !               Node Owners at corners
   !              Element Owners in centers
-  ! 
+  !
 
 subroutine test_mesh_create_easy_elems(correct, rc)
   type(ESMF_Mesh) :: mesh
@@ -5741,9 +5754,9 @@ subroutine test_mesh_create_easy_elems(correct, rc)
      rc=ESMF_FAILURE
      return
   endif
-  
 
-  ! Setup mesh info depending on the 
+
+  ! Setup mesh info depending on the
   ! number of PETs
   if (petCount .eq. 1) then
 
@@ -5755,7 +5768,7 @@ subroutine test_mesh_create_easy_elems(correct, rc)
 
       !! elem ids
       allocate(elemIds(numElems))
-      elemIds=(/1,3,7,9,10/) 
+      elemIds=(/1,3,7,9,10/)
 
       !! elem types
       allocate(elemTypes(numElems))
@@ -5772,7 +5785,7 @@ subroutine test_mesh_create_easy_elems(correct, rc)
       elemCoords(:,3)=(/0.5,2.5/)   ! 7
       elemCoords(:,4)=(/2.75,2.25/) ! 9
       elemCoords(:,5)=(/2.25,2.75/) ! 10
-     
+
      !! elem corner Coords
      allocate(elemCornerCoords(2,numElemCorners))
      elemCornerCoords(:,1)=(/0.0,0.0/) ! 1
@@ -5793,7 +5806,7 @@ subroutine test_mesh_create_easy_elems(correct, rc)
      elemCornerCoords(:,16)=(/2.0,2.0/)  ! 10
      elemCornerCoords(:,17)=(/3.0,3.0/)  ! 10
      elemCornerCoords(:,18)=(/2.0,3.0 /)  ! 10
- 
+
    else if (petCount .eq. 4) then
      ! Setup mesh data depending on PET
      if (localPet .eq. 0) then
@@ -5806,7 +5819,7 @@ subroutine test_mesh_create_easy_elems(correct, rc)
 
       !! elem ids
       allocate(elemIds(numElems))
-      elemIds=(/1/) 
+      elemIds=(/1/)
 
       !! elem types
       allocate(elemTypes(numElems))
@@ -5816,7 +5829,7 @@ subroutine test_mesh_create_easy_elems(correct, rc)
       allocate(elemCoords(2,numElems))
       elemCoords(:,1)=(/0.5,0.5/) ! 1
 
-     
+
      !! elem corner Coords
      allocate(elemCornerCoords(2,numElemCorners))
      elemCornerCoords(:,1)=(/0.0,0.0/)  ! 1
@@ -5834,7 +5847,7 @@ subroutine test_mesh_create_easy_elems(correct, rc)
 
       !! elem ids
       allocate(elemIds(numElems))
-      elemIds=(/3/) 
+      elemIds=(/3/)
 
       !! elem types
       allocate(elemTypes(numElems))
@@ -5861,7 +5874,7 @@ subroutine test_mesh_create_easy_elems(correct, rc)
 
       !! elem ids
       allocate(elemIds(numElems))
-      elemIds=(/7,9,10/) 
+      elemIds=(/7,9,10/)
 
       !! elem types
       allocate(elemTypes(numElems))
@@ -5919,7 +5932,7 @@ subroutine test_mesh_create_easy_elems(correct, rc)
         elementCornerCoords=elemCornerCoords, &
         rc=rc)
    if (rc /= ESMF_SUCCESS) return
-   
+
    ! deallocate elem data
    deallocate(elemIds)
    deallocate(elemTypes)
@@ -5938,11 +5951,11 @@ end subroutine test_mesh_create_easy_elems
 
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  ! 
-  ! Creates the following mesh on 
-  ! 1 or 4 PETs. Returns an error 
+  !
+  ! Creates the following mesh on
+  ! 1 or 4 PETs. Returns an error
   ! if run on other than 1 or 4 PETs
-  ! 
+  !
   !                     Mesh Ids
   !
   !   3.0   * ------- *          * ------- *
@@ -5950,22 +5963,22 @@ end subroutine test_mesh_create_easy_elems
   !   2.5   |    7    |          |    9    |
   !         |         |          |         |
   !   2.0   * ------- *          * ------- *
-  !         
-  !   1.5   
-  !         
+  !
+  !   1.5
+  !
   !   1.0   * ------- *          * ------- *
   !         |         |          |         |
   !   0.5   |    1    |          |    3    |
   !         |         |          |         |
   !   0.0   * ------- *          * ------- *
-  !            
+  !
   !        0.0  0.5  1.0  1.5   2.0  2.5  3.0
   !
   !               Node Ids at corners
   !              Element Ids in centers
-  ! 
-   !!!!! 
-  ! 
+  !
+   !!!!!
+  !
   ! The owners for 1 PET are all Pet 0.
   ! The owners for 4 PETs are as follows:
   !
@@ -5976,20 +5989,20 @@ end subroutine test_mesh_create_easy_elems
   !   2.5   |    2    |          |    2    |
   !         |         |          |         |
   !   2.0   * ------- *          * ------- *
-  !         
-  !   1.5   
-  !         
+  !
+  !   1.5
+  !
   !   1.0   * ------- *          * --------*
   !         |         |          |         |
   !   0.5   |    0    |          |    1    |
   !         |         |          |         |
   !   0.0   * ------- *          * --------*
-  !            
+  !
   !        0.0  0.5  1.0  1.5   2.0  2.5  3.0
   !
   !               Node Owners at corners
   !              Element Owners in centers
-  ! 
+  !
 
 subroutine test_mesh_create_ee_1type(correct, rc)
   type(ESMF_Mesh) :: mesh
@@ -6012,9 +6025,9 @@ subroutine test_mesh_create_ee_1type(correct, rc)
      rc=ESMF_FAILURE
      return
   endif
-  
 
-  ! Setup mesh info depending on the 
+
+  ! Setup mesh info depending on the
   ! number of PETs
   if (petCount .eq. 1) then
 
@@ -6023,7 +6036,7 @@ subroutine test_mesh_create_ee_1type(correct, rc)
 
       !! elem ids
       allocate(elemIds(numElems))
-      elemIds=(/1,3,7,9/) 
+      elemIds=(/1,3,7,9/)
 
       !! elem coords
       allocate(elemCoords(2,numElems))
@@ -6031,7 +6044,7 @@ subroutine test_mesh_create_ee_1type(correct, rc)
       elemCoords(:,2)=(/2.5,0.5/)   ! 3
       elemCoords(:,3)=(/0.5,2.5/)   ! 7
       elemCoords(:,4)=(/2.5,2.5/) ! 9
-     
+
      !! elem corner Coords
      allocate(elemCornerCoords(2,4,numElems))
      elemCornerCoords(:,1,1)=(/0.0,0.0/)  ! 1
@@ -6053,7 +6066,7 @@ subroutine test_mesh_create_ee_1type(correct, rc)
      elemCornerCoords(:,2,4)=(/3.0,2.0/)  ! 9
      elemCornerCoords(:,3,4)=(/3.0,3.0/)  ! 9
      elemCornerCoords(:,4,4)=(/2.0,3.0/)  ! 9
- 
+
    else if (petCount .eq. 4) then
      ! Setup mesh data depending on PET
      if (localPet .eq. 0) then
@@ -6063,12 +6076,12 @@ subroutine test_mesh_create_ee_1type(correct, rc)
 
       !! elem ids
       allocate(elemIds(numElems))
-      elemIds=(/1/) 
+      elemIds=(/1/)
 
       !! elem coords
       allocate(elemCoords(2,numElems))
       elemCoords(:,1)=(/0.5,0.5/) ! 1
-     
+
      !! elem corner Coords
      allocate(elemCornerCoords(2,4,numElems))
      elemCornerCoords(:,1,1)=(/0.0,0.0/)  ! 1
@@ -6083,7 +6096,7 @@ subroutine test_mesh_create_ee_1type(correct, rc)
 
       !! elem ids
       allocate(elemIds(numElems))
-      elemIds=(/3/) 
+      elemIds=(/3/)
 
       !! elem coords
       allocate(elemCoords(2,numElems))
@@ -6103,7 +6116,7 @@ subroutine test_mesh_create_ee_1type(correct, rc)
 
       !! elem ids
       allocate(elemIds(numElems))
-      elemIds=(/7,9/) 
+      elemIds=(/7,9/)
 
       !! elem coords
       allocate(elemCoords(2,numElems))
@@ -6148,7 +6161,7 @@ subroutine test_mesh_create_ee_1type(correct, rc)
         elementCornerCoords=elemCornerCoords, &
         rc=rc)
    if (rc /= ESMF_SUCCESS) return
-   
+
    ! deallocate elem data
    deallocate(elemIds)
    deallocate(elemCoords)
@@ -6165,4 +6178,3 @@ end subroutine test_mesh_create_ee_1type
 
 
 end program ESMF_MeshUTest
-

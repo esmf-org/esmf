@@ -24366,7 +24366,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! return successfully
     if (matchResult == 1) then
        ESMF_GridMatch = ESMF_GRIDMATCH_EXACT
     else
@@ -24398,6 +24397,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
     endif
 
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end function ESMF_GridMatch
