@@ -64,6 +64,7 @@ module ESMF_StateReconcile2Mod
 
   use ESMF_InfoMod, only : ESMF_Info, ESMF_InfoBaseGetHandle, ESMF_InfoUpdate
   use ESMF_InfoCacheMod
+  use ESMF_TraceMod !tdk:trace
 
   implicit none
   private
@@ -1783,6 +1784,10 @@ contains
 
     ! -------------------------------------------------------------------------
 
+    call ESMF_TraceRegionEnter("ESMF_ReconcileExchgItems", rc=localrc) !tdk:trace
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return !tdk:trace
+    call ESMF_VMLogMemInfo(prefix="entering ESMF_ReconcileExchgItems", rc=localrc) !tdk:trace
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return !tdk:trace
     localrc = ESMF_RC_NOT_IMPL
 
     call ESMF_VMGet(vm, localPet=mypet, petCount=npets, rc=localrc)
@@ -1900,6 +1905,8 @@ contains
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
 
+    call ESMF_VMLogMemInfo(prefix="after ESMF_VMAllToAllV", rc=localrc) !tdk:trace
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return !tdk:trace
     deallocate (buffer_send, counts_send, offsets_send,  &
         stat=memstat)
     if (ESMF_LogFoundDeallocError (memstat, ESMF_ERR_PASSTHRU,  &
@@ -1928,6 +1935,10 @@ contains
     end do
 
     rc = localrc
+    call ESMF_VMLogMemInfo(prefix="exiting ESMF_ReconcileExchgItems", rc=localrc) !tdk:trace
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return !tdk:trace
+    call ESMF_TraceRegionExit("ESMF_ReconcileExchgItems", rc=localrc) !tdk:trace
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return !tdk:trace
 
   contains
 
