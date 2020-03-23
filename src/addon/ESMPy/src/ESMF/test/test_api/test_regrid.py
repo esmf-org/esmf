@@ -334,7 +334,7 @@ class TestRegrid(TestBase):
         _ = ESMF.Regrid(srcfield, dstfield, filename=filename,
                         regrid_method=ESMF.RegridMethod.BILINEAR,
                         unmapped_action=ESMF.UnmappedAction.IGNORE,
-                        file_mode=ESMF.FileMode.WITHAUX, 
+                        filemode=ESMF.FileMode.WITHAUX,
                         src_file=grid1, dst_file=grid2,
                         src_file_type=ESMF.FileFormat.SCRIP, 
                         dst_file_type=ESMF.FileFormat.SCRIP)
