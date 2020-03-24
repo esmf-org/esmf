@@ -5726,13 +5726,14 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     endif
 
     if (.not.existflag) then
+      ! if not specialized -> use default method to execute the exchange
+      ! Conditionally enter VMEpoch
       if (.not. is%wrap%srcDstOverlap) then
         call ESMF_VMEpochEnter(epoch=ESMF_VMEPOCH_BUFFER, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       endif
-      ! if not specialized -> use default method to:
-      ! execute the regrid operation
+      ! call the SMM consistent with CplSets present or not
       if (is%wrap%cplSetCount > 1) then
         do i=1, is%wrap%cplSetCount
           routeHandleIsCreated = ESMF_RouteHandleIsCreated( &
@@ -5762,6 +5763,12 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         endif
       endif
+      ! Next update the TimeStamp metadata on the export Fields....
+      call ExecuteUpdatePackets(is%wrap%srcFieldList, is%wrap%dstFieldList, &
+        is%wrap%updatePackets, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      ! Conditionally exit VMEpoch
       if (.not. is%wrap%srcDstOverlap) then
         call ESMF_VMEpochExit(rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -5775,6 +5782,11 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       endif
     else
+      ! Next update the TimeStamp metadata on the export Fields....
+      call ExecuteUpdatePackets(is%wrap%srcFieldList, is%wrap%dstFieldList, &
+        is%wrap%updatePackets, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       if (btest(verbosity,14)) then
         call ESMF_LogWrite(trim(name)//&
           ": called specialized label_ExecuteRouteHandle", &
@@ -5792,12 +5804,6 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
         time0=time
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
     endif
-
-    ! Next update the TimeStamp metadata on the export Fields....
-    call ExecuteUpdatePackets(is%wrap%srcFieldList, is%wrap%dstFieldList, &
-      is%wrap%updatePackets, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle diagnostic
     if (btest(diagnostic,6)) then
