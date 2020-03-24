@@ -3051,7 +3051,7 @@ void VMK::epochFinal(){
 #ifdef VM_EPOCHLOG_on
     std::stringstream msg;
     msg << "epochBuffer:" << __LINE__ << " ready to clear outstanding comm:"
-    << " dst=" << its->first << " size=" << size
+    << " dst=" << getVas(lpid[its->first]) << " size=" << size
     << " buffer=" << buffer;
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
 #endif
@@ -3075,7 +3075,7 @@ void VMK::epochExit(bool keepAlloc){
 #ifdef VM_EPOCHLOG_on
         std::stringstream msg;
         msg << "epochBuffer:" << __LINE__ << " ready to post non-blocking send:"
-          << " dst=" << its->first << " size=" << size
+          << " dst=" << getVas(lpid[its->first]) << " size=" << size
           << " buffer=" << buffer;
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
 #endif
@@ -3090,7 +3090,8 @@ void VMK::epochExit(bool keepAlloc){
       if (sm->streamBuffer.size() > 0){
         std::stringstream msg;
         msg << "epochBuffer:" << __LINE__ << " ready to post non-blocking send:"
-        << " dst=" << its->first << " size=" << sm->streamBuffer.size()
+        << " dst=" << getVas(lpid[its->first]) 
+        << " size=" << sm->streamBuffer.size()
         << " buffer=" << (void *)sm->streamBuffer.data();
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
 #endif
@@ -3671,7 +3672,7 @@ int VMK::recv(void *message, int size, int source, commhandle **ch, int tag){
 #ifdef VM_EPOCHLOG_on
         std::stringstream msg;
         msg << "epochBuffer:" << __LINE__ << " ready to probe:"
-        << " src=" << source;
+        << " src=" << getVas(lpid[source]);
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
 #endif
         int defaultTag = getDefaultTag(source,mypet);
@@ -3688,7 +3689,8 @@ int VMK::recv(void *message, int size, int source, commhandle **ch, int tag){
 #ifdef VM_EPOCHLOG_on
         msg.str(""); // clear
         msg << "epochBuffer:" << __LINE__ << " ready to post blocking recv:"
-        << " src=" << source << " size=" << rm->streamBuffer.size()
+        << " src=" << getVas(lpid[source])
+        << " size=" << rm->streamBuffer.size()
         << " streamBuffer=" << (void *)rm->streamBuffer.data();
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
 #endif
