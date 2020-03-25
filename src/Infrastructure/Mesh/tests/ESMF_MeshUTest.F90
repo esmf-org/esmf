@@ -1269,24 +1269,18 @@ endif
   ! Create redisted mesh
   mesh2=ESMF_MeshCreate(mesh, nodalDistgrid=nodedistgrid, &
     elementDistgrid=elemdistgrid, rc=localrc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
+  ! if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Make sure nodes in nodeIds are the same as local nodes in mesh2
-   sizeOfList=size(nodeIds)
-   call c_esmc_meshchecknodelist(mesh2%this, sizeOfList, nodeIds, &
-                                 localrc)
+  sizeOfList=size(nodeIds)
+  call c_esmc_meshchecknodelist(mesh2%this, sizeOfList, nodeIds, localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
 
   ! Make sure elems in elemIds are the same as local elems in mesh2
-   sizeOfList=size(elemIds)
-   call c_esmc_meshcheckelemlist(mesh2%this, sizeOfList, elemIds, &
-                                 localrc)
+  sizeOfList=size(elemIds)
+  call c_esmc_meshcheckelemlist(mesh2%this, sizeOfList, elemIds, localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-
 
   ! Deallocate
   deallocate(elemIds)
