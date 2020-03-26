@@ -986,8 +986,6 @@ void MeshCap::meshserialize(char *buffer, int *length, int *offset,
     }
   }
 
-  if (*inquireflag != ESMF_INQUIREONLY) std::cout << ESMC_METHOD << ": offset = " << *offset << std::endl;
-
   if (rc!=NULL) *rc=ESMF_SUCCESS;
 }
 
