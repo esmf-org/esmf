@@ -40,6 +40,8 @@ module ESMF_FieldGatherMod
     use ESMF_StaggerLocMod
     use ESMF_GridMod
     use ESMF_MeshMod
+    use ESMF_XGridMod
+    use ESMF_XGridGetMod
     use ESMF_GeomBaseMod
     use ESMF_FieldMod
     use ESMF_FieldGetMod
@@ -156,6 +158,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! local variables
     type(ESMF_Grid)                 :: grid
     type(ESMF_Mesh)                 :: mesh
+    type(ESMF_XGrid)                :: xgrid
     type(ESMF_GeomType_Flag)        :: geomtype
     type(ESMF_TypeKind_Flag)        :: typekind
     type(ESMF_StaggerLoc)           :: staggerloc
@@ -245,6 +248,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           rcToReturn=rc)
         return ! bail out
       endif
+    elseif (geomtype==ESMF_GEOMTYPE_XGRID) then
+      call ESMF_FieldGet(field, xgrid=xgrid, localDeCount=ldeCount, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT)) &
+        return ! bail out
+      call ESMF_XGridGet(xgrid, mesh=mesh, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT)) &
+        return ! bail out
+      call ESMF_MeshGet(mesh, spatialDim=dimCount, &
+        numOwnedElements=numOwnedPoints, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT)) &
+        return ! bail out
     else
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
         msg="Unsupported geomtype detected.", &
