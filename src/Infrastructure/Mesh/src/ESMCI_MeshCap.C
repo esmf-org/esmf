@@ -1470,8 +1470,6 @@ MeshCap *MeshCap::meshcreateredist(MeshCap **src_meshpp, int *num_node_gids, int
   mc->mesh=mesh;
   mc->mbmesh=mbmesh;
 
-  printf("MeshCap created is_esmf_mesh = %d\n", mc->is_esmf_mesh);
-
   // Output new MeshCap
   return mc;
 }

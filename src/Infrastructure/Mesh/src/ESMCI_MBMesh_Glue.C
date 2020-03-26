@@ -2022,10 +2022,6 @@ void MBMesh_destroy(void **mbmpp, int *rc) {
     // Get Moab Mesh wrapper
     MBMesh *mbmp=*((MBMesh **)mbmpp);
 
-    // get the indexed pcomm object from the interface
-    ParallelComm *pcomm = ParallelComm::get_pcomm(mbm p->mesh, 0);
-    delete pcomm;
-
     // Get rid of MBMesh
     delete mbmp;
 
@@ -3463,6 +3459,7 @@ void MBMesh_createredistnodes(void **src_meshpp, int *num_node_gids, int *node_g
         }
         // if elem is not in elem_to_proc_list, need to assign to a processor
         if (ehi == ehe)
+          // send to same proc as a node surrounding the element
           Throw() << "Elem %d not found in elem_to_proc_list, will not redist", elem_id;
       }
     } catch(std::exception &x) {
@@ -3476,9 +3473,6 @@ void MBMesh_createredistnodes(void **src_meshpp, int *num_node_gids, int *node_g
       }
     }
 
-
-    // Verify that all nodes are being sent to the processors defined by the DistGrid
-
     // if not split mesh, then just do the usual thing
     if (!mesh->is_split) {
       create_mbmesh_redist_elem(mesh, &elem_to_proc_list, &outmesh);
@@ -3488,6 +3482,9 @@ void MBMesh_createredistnodes(void **src_meshpp, int *num_node_gids, int *node_g
                                   ESMC_CONTEXT, rc);
       throw ESMC_RC_NOT_IMPL;
     }
+
+    // Verify that all node ownership is as defined by the DistGrid
+    // use set_node_owners (maybe also set_elem_owners_wo_list, but might already happen in create_mbmesh_redist_elem)
 
   } catch(std::exception &x) {
     // catch Mesh exception return code

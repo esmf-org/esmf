@@ -95,7 +95,7 @@ void create_mbmesh_redist_elem(MBMesh *src_mesh,
   MBMesh_write(&mbptr, fname, &localrc, len);
 #endif
 
-#if 0
+#ifdef DEBUG
   // Debug print of elem to proc lcist
   for (int i=0; i<elem_to_proc_list->size(); i++) {
     EntityHandle eh=(*elem_to_proc_list)[i].eh;
@@ -124,7 +124,6 @@ void create_mbmesh_redist_elem(MBMesh *src_mesh,
   // setup parallel comm, destroyed in MBMesh destructor
   ParallelComm *pcomm= new ParallelComm(out_mesh->mesh, mpi_comm);
   
-  printf("ParallelComm created\n");
   int merr;
 
   Range elems;
