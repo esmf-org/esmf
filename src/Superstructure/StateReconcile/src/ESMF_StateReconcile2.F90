@@ -1897,6 +1897,8 @@ contains
 
     ! AlltoAllV
 
+    call ESMF_VMLogMemInfo(prefix="before ESMF_VMAllToAllV", rc=localrc) !tdk:trace
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return !tdk:trace
     call ESMF_VMAllToAllV (vm,  &
         sendData=buffer_send, sendCounts=counts_send, sendOffsets=offsets_send,  &
         recvData=recv_buffer, recvCounts=counts_recv, recvOffsets=offsets_recv,  &
