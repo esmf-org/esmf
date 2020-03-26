@@ -35,6 +35,7 @@
 #include "ESMCI_LogErr.h"
 
 #include "MBTagConventions.hpp"
+#include "moab/ParallelComm.hpp"
 
 // #define ESMF_REGRID_DEBUG_MAP_ANY
 
@@ -73,7 +74,12 @@ void create_mbmesh_redist_elem(MBMesh *src_mesh,
 #define ESMC_METHOD "create_mbmesh_redist_elem()"
 
   // Get Parallel Information
-      int localrc;
+  int localrc;
+  MPI_Comm mpi_comm;
+  mpi_comm=VM::getCurrent(&localrc)->getMpi_c();
+  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+    throw localrc;  // bail out with exception
+
   int num_proc = VM::getCurrent(&localrc)->getPetCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
     throw localrc;  // bail out with exception
@@ -114,6 +120,21 @@ void create_mbmesh_redist_elem(MBMesh *src_mesh,
 
   // Redist elems to new mesh
   create_mbmesh_redist_elem_move_elems(src_mesh, elem_to_proc_list, &out_gid_to_vert, out_mesh);
+
+  // setup parallel comm, destroyed in MBMesh destructor
+  ParallelComm *pcomm= new ParallelComm(out_mesh->mesh, mpi_comm);
+  
+  printf("ParallelComm created\n");
+  int merr;
+
+  Range elems;
+  merr=out_mesh->mesh->get_entities_by_dimension(0, out_mesh->pdim, elems);
+  MBMESH_CHECK_ERR(merr, localrc);
+  
+  // Resolve object sharing like in Mesh->Commit()
+  merr = pcomm->resolve_shared_ents(0, elems, out_mesh->pdim, out_mesh->pdim-1);
+  MBMESH_CHECK_ERR(merr, localrc);
+
 
   // Output new mesh
   *_out_mesh=out_mesh;

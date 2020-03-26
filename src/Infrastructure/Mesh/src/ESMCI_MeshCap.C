@@ -985,7 +985,7 @@ void MeshCap::meshserialize(char *buffer, int *length, int *offset,
     }
   }
 
-  if (*inquireflag != ESMF_INQUIREONLY) std::cout << ESMC_METHOD << ": offset = " << *offset << std::endl;
+  // if (*inquireflag != ESMF_INQUIREONLY) std::cout << ESMC_METHOD << ": offset = " << *offset << std::endl;
 
   if (rc!=NULL) *rc=ESMF_SUCCESS;
 }
@@ -1459,7 +1459,6 @@ MeshCap *MeshCap::meshcreateredist(MeshCap **src_meshpp, int *num_node_gids, int
                         num_elem_gids, elem_gids, &mbmesh, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return NULL;
-    return NULL;
   }
 
 
@@ -1470,6 +1469,8 @@ MeshCap *MeshCap::meshcreateredist(MeshCap **src_meshpp, int *num_node_gids, int
   mc->is_esmf_mesh=is_esmf_mesh;
   mc->mesh=mesh;
   mc->mbmesh=mbmesh;
+
+  printf("MeshCap created is_esmf_mesh = %d\n", mc->is_esmf_mesh);
 
   // Output new MeshCap
   return mc;

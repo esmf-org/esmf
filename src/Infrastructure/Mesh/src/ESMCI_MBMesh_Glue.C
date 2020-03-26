@@ -2012,21 +2012,18 @@ void MBMesh_destroy(void **mbmpp, int *rc) {
 
   try {
 
-  // Initialize the parallel environment for mesh (if not already done)
-    {
- int localrc;
- int rc;
-  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
- if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-   throw localrc;  // bail out with exception
-    }
+    // Initialize the parallel environment for mesh (if not already done)
+    int localrc;
+    int rc;
+    ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception
 
     // Get Moab Mesh wrapper
     MBMesh *mbmp=*((MBMesh **)mbmpp);
 
     // get the indexed pcomm object from the interface
-    ParallelComm *pcomm = ParallelComm::get_pcomm(mbmp->mesh, 0);
-
+    ParallelComm *pcomm = ParallelComm::get_pcomm(mbm p->mesh, 0);
     delete pcomm;
 
     // Get rid of MBMesh
