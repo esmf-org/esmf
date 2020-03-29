@@ -3069,7 +3069,6 @@ void MBMesh_createredistelems(void **src_meshpp, int *num_elem_gids, int *elem_g
 
     // Dereference
     MBMesh *mesh=static_cast<MBMesh*> (*src_meshpp);
-    MBMesh *outmesh=static_cast<MBMesh*> (*output_meshpp);
 
     // list to pass into create_mbmesh_redist_elem
     std::vector<EH_Comm_Pair> elem_to_proc_list;
@@ -3198,10 +3197,9 @@ void MBMesh_createredistelems(void **src_meshpp, int *num_elem_gids, int *elem_g
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // if not split mesh, then just do the usual thing
+    MBMesh *outmesh;
     if (!mesh->is_split) {
       create_mbmesh_redist_elem(mesh, &elem_to_proc_list, &outmesh);
-
-
     } else {
       // should error out in Fortran layer but throw here just in case
       ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
@@ -3209,6 +3207,10 @@ void MBMesh_createredistelems(void **src_meshpp, int *num_elem_gids, int *elem_g
                                   ESMC_CONTEXT, rc);
       throw ESMC_RC_NOT_IMPL;
     }
+
+    // return the mbmesh as a void*
+    *output_meshpp=static_cast<void*> (outmesh);
+
 
   } catch(std::exception &x) {
     // catch Mesh exception return code
@@ -3249,7 +3251,6 @@ void MBMesh_createredistnodes(void **src_meshpp, int *num_node_gids, int *node_g
 
     // Dereference
     MBMesh *mesh=static_cast<MBMesh*> (*src_meshpp);
-    MBMesh *outmesh=static_cast<MBMesh*> (*output_meshpp);
 
     // list to pass into create_mbmesh_redist_node
     std::vector<EH_Comm_Pair> node_to_proc_list;
@@ -3491,6 +3492,7 @@ void MBMesh_createredistnodes(void **src_meshpp, int *num_node_gids, int *node_g
     }
 
     // if not split mesh, then just do the usual thing
+    MBMesh *outmesh;
     if (!mesh->is_split) {
       create_mbmesh_redist_elem(mesh, &elem_to_proc_list, &outmesh);
     } else {
@@ -3502,6 +3504,9 @@ void MBMesh_createredistnodes(void **src_meshpp, int *num_node_gids, int *node_g
 
     // Verify that all node ownership is as defined by the DistGrid
     // use set_node_owners (maybe also set_elem_owners_wo_list, but might already happen in create_mbmesh_redist_elem)
+
+    // return the mbmesh as a void*
+    *output_meshpp=static_cast<void*> (outmesh);
 
   } catch(std::exception &x) {
     // catch Mesh exception return code
@@ -3544,7 +3549,6 @@ void MBMesh_createredist(void **src_meshpp, int *num_node_gids, int *node_gids,
 
     // Dereference
     MBMesh *mesh=static_cast<MBMesh*> (*src_meshpp);
-    MBMesh *outmesh=static_cast<MBMesh*> (*output_meshpp);
 
     // list to pass into create_mbmesh_redist_node
     std::vector<EH_Comm_Pair> node_to_proc_list;
@@ -3788,6 +3792,7 @@ void MBMesh_createredist(void **src_meshpp, int *num_node_gids, int *node_gids,
     // Verify that all nodes are being sent to the processors defined by the DistGrid
 
     // if not split mesh, then just do the usual thing
+    MBMesh *outmesh;
     if (!mesh->is_split) {
       create_mbmesh_redist_elem(mesh, &elem_to_proc_list, &outmesh);
     } else {
@@ -3795,6 +3800,118 @@ void MBMesh_createredist(void **src_meshpp, int *num_node_gids, int *node_gids,
        "- split nodes are not yet handled in the MBMesh",
                                   ESMC_CONTEXT, rc);
       throw ESMC_RC_NOT_IMPL;
+    }
+
+    // Verify that all node ownership is as defined by the DistGrid
+    // use set_node_owners (maybe also set_elem_owners_wo_list, but might already happen in create_mbmesh_redist_elem)
+
+    // return the mbmesh as a void*
+    *output_meshpp=static_cast<void*> (outmesh);
+
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                           "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
+
+  if (rc!=NULL) *rc=ESMF_SUCCESS;
+}
+
+
+// This method verifies that nodes in node_gids array are the same as the local nodes in meshpp, otherwise
+// it returns an error (used to test MeshRedist()).
+// To do this check make sure the number of nodes in both cases are the same and that every
+// entry in node_gids is contained in meshpp
+void MBMesh_checknodelist(void **meshpp, int *_num_node_gids, int *node_gids,
+                                             int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh_checknodelist()"
+
+  try {
+
+    int localrc, merr;
+    VM *vm = VM::getCurrent(&localrc);
+    int petCount = vm->getPetCount();
+    int localPet = vm->getLocalPet();
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;
+
+    // Dereference
+    MBMesh *mesh=static_cast<MBMesh*> (*meshpp);
+
+    // For convenience deref number
+    int num_node_gids=*_num_node_gids;
+
+    // list of the Mesh node gids
+    std::vector<UInt> local_gids;
+
+    // Loop through counting local nodes
+    Range nodes;
+    merr=mesh->mesh->get_entities_by_dimension(0,0,nodes);
+    if (merr != MB_SUCCESS) {
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+        moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+    }
+
+    local_gids.reserve(nodes.size());
+    int num_local_nodes=0;
+    Range::iterator si = nodes.begin(), se = nodes.end();
+    for (; si != se; ++si) {
+      const EntityHandle node = *si;
+
+      int node_owner;
+      merr=mesh->mesh->tag_get_data(mesh->owner_tag, &node, 1, &node_owner);
+
+      // only consider local nodes
+      if (node_owner == localPet) { ++num_local_nodes;}
+
+      int gid;
+      MBMesh_get_gid(mesh, node, &gid);
+      local_gids.push_back(gid);
+    }
+
+    // See if number of local nodes is the same
+    if (num_node_gids != num_local_nodes) {
+      Throw() << "Number of local nodes in mesh ("<<num_local_nodes<<
+                 ") different that number in list ("<<num_node_gids<<")";
+    }
+
+
+    // Loop making sure nodes are all here
+    for (int i=0; i<num_node_gids; i++) {
+      std::vector<UInt>::iterator ni = std::find(local_gids.begin(), local_gids.end(), node_gids[i]);
+
+      if (ni == local_gids.end()) {
+        Throw() << "Node "<<node_gids[i]<<" not found in Mesh.";
+      }
+
+      // Get the node
+      const EntityHandle node = *ni;
+
+      // Check if it's locally owned
+      int node_owner;
+      merr=mesh->mesh->tag_get_data(mesh->owner_tag, &node, 1, &node_owner);
+
+      if (node_owner != localPet) {
+        Throw() << "Node "<<node_gids[i]<<" in Mesh, but not local.";
+      }
     }
 
   } catch(std::exception &x) {
@@ -3822,6 +3939,256 @@ void MBMesh_createredist(void **src_meshpp, int *num_node_gids, int *node_gids,
   if (rc!=NULL) *rc=ESMF_SUCCESS;
 }
 
+
+// This method verifies that elems in elem_gids array are the same as the local elems in meshpp, otherwise
+// it returns an error (used to test MeshRedist()).
+// To do this check make sure the number of elems in both cases are the same and that every
+// entry in elem_gids is contained in meshpp
+void MBMesh_checkelemlist(void **meshpp, int *_num_elem_gids, int *elem_gids,
+                                             int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh_checkelemlist()"
+
+  try {
+
+    // Initialize the parallel environment for mesh (if not already done)
+    int localrc, merr;
+    VM *vm = VM::getCurrent(&localrc);
+    int petCount = vm->getPetCount();
+    int localPet = vm->getLocalPet();
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;
+
+    // Dereference
+    MBMesh *mesh=static_cast<MBMesh*> (*meshpp);
+
+    // For convenience deref number
+    int num_elem_gids=*_num_elem_gids;
+
+    // list of the Mesh elem gids
+    std::vector<UInt> local_gids;
+
+    Range elems;
+
+    // Loop through counting local elems
+    int num_local_elems=0;
+    merr=mesh->mesh->get_entities_by_dimension(0,mesh->pdim,elems);
+    if (merr != MB_SUCCESS) {
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+        moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+    }
+
+    local_gids.reserve(elems.size());
+
+    Range::iterator si = elems.begin(), se = elems.end();
+    for (; si != se; ++si) {
+      const EntityHandle elem = *si;
+
+      // Don't do split elements
+//      if (!mesh->is_split && (elem.get_id() > meshp->max_non_split_id)) continue;
+
+      int elem_owner;
+      merr=mesh->mesh->tag_get_data(mesh->owner_tag, &elem, 1, &elem_owner);
+
+      if (elem_owner == localPet) num_local_elems++;
+
+      int gid;
+      MBMesh_get_gid(mesh, elem, &gid);
+      local_gids.push_back(gid);
+    }
+
+    // See if number of local elems is the same
+    if (num_elem_gids != num_local_elems) {
+      Throw() << "Number of local elems in mesh ("<<num_local_elems<<
+                 ") different that number in list ("<<num_elem_gids<<")";
+    }
+
+    // Loop making sure elems are all here
+    for (int i=0; i<num_elem_gids; i++) {
+      std::vector<UInt>::iterator ni = std::find(local_gids.begin(), local_gids.end(), elem_gids[i]);
+
+      if (ni == local_gids.end()) {
+        Throw() << "Node "<<elem_gids[i]<<" not found in Mesh.";
+      }
+
+      // Get the node
+      const EntityHandle elem = *ni;
+
+      // Check if it's locally owned
+      int elem_owner;
+      merr=mesh->mesh->tag_get_data(mesh->owner_tag, &elem, 1, &elem_owner);
+
+      if (elem_owner != localPet) {
+        Throw() << "Elem "<<elem_gids[i]<<" in Mesh, but not local.";
+      }
+    }
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                           "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
+
+  if (rc!=NULL) *rc=ESMF_SUCCESS;
+}
+
+#if 0
+void MBMesh_FitOnVM(Mesh **meshpp,
+                       VM **new_vm,
+                       int *rc)
+{
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_MeshFitOnVM()"
+  int localrc;
+
+   try {
+
+     // Initialize the parallel environment for mesh (if not already done)
+     {
+       ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+       if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+         throw localrc;  // bail out with exception
+     }
+
+     // Get Pointer to Mesh
+     ThrowRequire(meshpp);
+     Mesh *mesh = *meshpp;
+
+     // Get current VM
+     VM *curr_vm=VM::getCurrent(&localrc);
+     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+       throw localrc;  // bail out with exception
+
+     // Get current VM size
+     int curr_vm_size=curr_vm->getPetCount();
+
+     // Get current VM rank
+     int curr_vm_rank=curr_vm->getLocalPet();
+
+     // Describe mapping of current PET
+     int new_vm_rank=-1; // if there is no pet, set to -1
+     if ((ESMC_NOT_PRESENT_FILTER(new_vm) != ESMC_NULL_POINTER) && *new_vm) {
+       new_vm_rank=(*new_vm)->getLocalPet();
+     }
+
+     // Allocate array
+     int *rank_map=new int[curr_vm_size];
+
+     // Create array mapping from current vm to input vm
+     localrc=curr_vm->allgather(&new_vm_rank,rank_map,sizeof(int));
+     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+       throw localrc;  // bail out with exception
+
+#if 0
+     // debug output
+     for (int p=0; p<curr_vm_size; p++) {
+       printf("%d# %d to %d\n",curr_vm_rank,p,rank_map[p]);
+     }
+#endif
+
+     // Change proc numbers in mesh
+     mesh->map_proc_numbers(curr_vm_size, rank_map);
+
+    // Free map
+    delete [] rank_map;
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
+  // Set return code
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+} // ESMCI_MeshFitOnVM
+
+ // Change the proc numbers in a mesh to correspond to a different set. This isn't to 
+ // merge procs into one another, but to map them to different number. E.g. if they 
+ // are being switched to a different VM or MPI_COMM.
+ void Mesh::map_proc_numbers(int num_procs, int *proc_map) {
+
+     // Loop through nodes changing owners to owners in new VM
+     MeshDB::iterator ni = this->node_begin_all(), ne = this->node_end_all();
+     for (; ni != ne; ++ni) {
+       MeshObj &node=*ni;
+
+       // Get original owner
+       UInt orig_owner=node.get_owner();
+
+       // Error check owner
+       if ((orig_owner < 0) || (orig_owner > num_procs-1)) {
+         Throw()<<" mesh node owner rank outside current vm";
+       }
+
+       // map to new owner rank in new vm
+       int new_owner=proc_map[orig_owner];
+
+       // Make sure that the new one is ok
+       if (new_owner < 0) {
+         Throw()<<" mesh node owner outside of new vm";
+       }
+
+       // Set new owner
+       node.set_owner((UInt)new_owner);
+     }
+
+
+     // Loop through elems changing owners to owners in new VM
+     MeshDB::iterator ei = this->elem_begin_all(), ee = this->elem_end_all();
+     for (; ei != ee; ++ei) {
+       MeshObj &elem=*ei;
+
+       // Get original owner
+       UInt orig_owner=elem.get_owner();
+
+       // Error check owner
+       if ((orig_owner < 0) || (orig_owner > num_procs-1)) {
+         Throw()<<" mesh element owner rank outside current vm";
+       }
+
+       // map to new owner rank in new vm
+       int new_owner=proc_map[orig_owner];
+
+       // Make sure that the new one is ok
+       if (new_owner < 0) {
+         Throw()<<" mesh element owner outside of new vm";
+       }
+
+       // Set new owner
+       elem.set_owner((UInt)new_owner);
+     }
+
+     // Change CommReg
+     CommReg::map_proc_numbers(num_procs, proc_map);
+
+     // Remove ghosting, because it would be wrong now that procs have changed.
+     RemoveGhost();
+ }
+
+
+#endif
 
 
 #endif // ESMF_MOAB

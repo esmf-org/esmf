@@ -4655,7 +4655,7 @@ void ESMCI_meshcreateredistelems(Mesh **src_meshpp, int *num_elem_gids, int *ele
 void ESMCI_meshcreateredistnodes(Mesh **src_meshpp, int *num_node_gids, int *node_gids,
                                                     Mesh **output_meshpp, int *rc) {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_meshcreateredistelems()"
+#define ESMC_METHOD "ESMCI_meshcreateredistnodes()"
 
   try {
 

@@ -123,7 +123,7 @@ void create_mbmesh_redist_elem(MBMesh *src_mesh,
 
   // setup parallel comm, destroyed in MBMesh destructor
   ParallelComm *pcomm= new ParallelComm(out_mesh->mesh, mpi_comm);
-  
+
   int merr;
 
   Range elems;
@@ -133,7 +133,6 @@ void create_mbmesh_redist_elem(MBMesh *src_mesh,
   // Resolve object sharing like in Mesh->Commit()
   merr = pcomm->resolve_shared_ents(0, elems, out_mesh->pdim, out_mesh->pdim-1);
   MBMESH_CHECK_ERR(merr, localrc);
-
 
   // Output new mesh
   *_out_mesh=out_mesh;
