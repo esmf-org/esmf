@@ -1538,8 +1538,11 @@ contains
     integer,         allocatable ::   id_recv(:)
 
     logical, parameter :: debug = .false.
+    logical, parameter :: meminfo = .true. !tdk:debug
 
     localrc = ESMF_RC_NOT_IMPL
+
+    if (meminfo) call ESMF_VMLogMemInfo ('entering ESMF_ReconcileExchgIDInfo')
 
     call ESMF_VMGet(vm, localPet=mypet, petCount=npets, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1584,6 +1587,8 @@ contains
           rcToReturn=rc)) return
       id_info(i)%needed = .false.
     end do
+
+    if (meminfo) call ESMF_VMLogMemInfo ('tp ESMF_ReconcileExchgIDInfo - after id_info allocate and VMIDCreate')
 
     ! First, compute counts and displacements for AllToAllV calls.  Note that
     ! sending displacements are always zero, since each PET is broadcasting
@@ -1637,6 +1642,8 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
+
+    if (meminfo) call ESMF_VMLogMemInfo ('tp ESMF_ReconcileExchgIDInfo - after VMAllGatherV for Base Ids')
 
     ipos = 0
     do, i=0, npets-1
@@ -1729,6 +1736,8 @@ contains
 
     rc = localrc
 
+    if (meminfo) call ESMF_VMLogMemInfo ('exiting ESMF_ReconcileExchgIDInfo')
+
   end subroutine ESMF_ReconcileExchgIDInfo
 
 !------------------------------------------------------------------------------
@@ -1781,13 +1790,12 @@ contains
     logical, parameter :: debug = .false.
 
     character(len=ESMF_MAXSTR) :: logmsg
+    logical, parameter :: meminfo = .true. !tdk:debug
 
     ! -------------------------------------------------------------------------
 
-    call ESMF_TraceRegionEnter("ESMF_ReconcileExchgItems", rc=localrc) !tdk:trace
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return !tdk:trace
-    call ESMF_VMLogMemInfo(prefix="entering ESMF_ReconcileExchgItems", rc=localrc) !tdk:trace
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return !tdk:trace
+    if (meminfo) call ESMF_VMLogMemInfo("entering ESMF_ReconcileExchgItems")
+
     localrc = ESMF_RC_NOT_IMPL
 
     call ESMF_VMGet(vm, localPet=mypet, petCount=npets, rc=localrc)
@@ -1897,8 +1905,6 @@ contains
 
     ! AlltoAllV
 
-    call ESMF_VMLogMemInfo(prefix="before ESMF_VMAllToAllV", rc=localrc) !tdk:trace
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return !tdk:trace
     call ESMF_VMAllToAllV (vm,  &
         sendData=buffer_send, sendCounts=counts_send, sendOffsets=offsets_send,  &
         recvData=recv_buffer, recvCounts=counts_recv, recvOffsets=offsets_recv,  &
@@ -1907,8 +1913,8 @@ contains
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
 
-    call ESMF_VMLogMemInfo(prefix="after ESMF_VMAllToAllV", rc=localrc) !tdk:trace
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return !tdk:trace
+    if (meminfo) call ESMF_VMLogMemInfo("tp ESMF_ReconcileExchgItems: after ESMF_VMAllToAllV")
+
     deallocate (buffer_send, counts_send, offsets_send,  &
         stat=memstat)
     if (ESMF_LogFoundDeallocError (memstat, ESMF_ERR_PASSTHRU,  &
@@ -1937,10 +1943,8 @@ contains
     end do
 
     rc = localrc
-    call ESMF_VMLogMemInfo(prefix="exiting ESMF_ReconcileExchgItems", rc=localrc) !tdk:trace
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return !tdk:trace
-    call ESMF_TraceRegionExit("ESMF_ReconcileExchgItems", rc=localrc) !tdk:trace
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return !tdk:trace
+
+    if (meminfo) call ESMF_VMLogMemInfo("exiting ESMF_ReconcileExchgItems")
 
   contains
 
