@@ -87,6 +87,8 @@ void MBMesh_checkelemlist(void **meshpp, int *_num_elem_gids, int *elem_gids,
                                            int *rc);
 void MBMesh_checknodelist(void **meshpp, int *_num_node_gids, int *node_gids,
                                              int *rc);
+void mbmesh_set_node_owners(MBMesh *mesh, DDir<> ndir);
+
 void MBMesh_getarea(void **mbmpp, int *num_elem, double *elem_areas, int *rc);
 
 

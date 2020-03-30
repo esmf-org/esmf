@@ -1207,6 +1207,9 @@ endif
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
+
+#if 0
+
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test Mesh Create Redist"
@@ -1268,7 +1271,7 @@ endif
   elemdistgrid=ESMF_DistGridCreate(elemIds, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-print *, "rc = ", rc
+print *, localPet, "# rc = ", rc
 
   ! Create redisted mesh
   mesh2=ESMF_MeshCreate(mesh, nodalDistgrid=nodedistgrid, &
@@ -1276,21 +1279,21 @@ print *, "rc = ", rc
   ! if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-print *, "rc = ", rc
+print *, localPet, "# rc = ", rc
 
   ! Make sure nodes in nodeIds are the same as local nodes in mesh2
   sizeOfList=size(nodeIds)
   call c_esmc_meshchecknodelist(mesh2%this, sizeOfList, nodeIds, localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-print *, "rc = ", rc
+print *, localPet, "# rc = ", rc
 
   ! Make sure elems in elemIds are the same as local elems in mesh2
   sizeOfList=size(elemIds)
   call c_esmc_meshcheckelemlist(mesh2%this, sizeOfList, elemIds, localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-print *, "rc = ", rc
+print *, localPet, "# rc = ", rc
 
   ! Deallocate
   deallocate(elemIds)
@@ -1302,7 +1305,7 @@ print *, "rc = ", rc
                     spatialDim=spatialDim, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-print *, "rc = ", rc
+print *, localPet, "# rc = ", rc
 
   ! Get rid of Meshs
   call ESMF_MeshDestroy(mesh, rc=localrc)
@@ -1321,7 +1324,6 @@ print *, "rc = ", rc
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
-#if 0
 
   !-----------------------------------------------------------------------------
   !NEX_UTest

@@ -3555,9 +3555,9 @@ void MBMesh_createredist(void **src_meshpp, int *num_node_gids, int *node_gids,
     std::vector<EH_Comm_Pair> elem_to_proc_list;
 
     // distributed directory to determine node destinations
-    DDir<> edir;
-    std::vector<UInt> e_lids(*num_node_gids, 0);
-    std::vector<UInt> e_gids(*num_node_gids, 0);
+    DDir<> ndir;
+    std::vector<UInt> n_lids(*num_node_gids, 0);
+    std::vector<UInt> n_gids(*num_node_gids, 0);
   
     // list of the Mesh node gids
     std::vector<UInt> src_gids;
@@ -3601,24 +3601,24 @@ void MBMesh_createredist(void **src_meshpp, int *num_node_gids, int *node_gids,
     // load the distributed directory
     try {
       for (int i=0; i<*num_node_gids; i++) {
-        e_lids[i]=i;
+        n_lids[i]=i;
         if (node_gids[i]>=0) {
-          e_gids[i]=node_gids[i];
+          n_gids[i]=node_gids[i];
         } else {
-          e_gids[i]=0;
+          n_gids[i]=0;
         }
       }
   
       if (*num_node_gids) {
-        edir.Create(*num_node_gids, &e_gids[0], &e_lids[0]);
+        ndir.Create(*num_node_gids, &n_gids[0], &n_lids[0]);
       } else {
-        edir.Create(0, (UInt*) NULL, (UInt *)NULL);
+        ndir.Create(0, (UInt*) NULL, (UInt *)NULL);
       }
 
       if (num_src_gids) {
-        edir.RemoteGID(num_src_gids, &src_gids[0], &src_gids_proc[0], &src_gids_lids[0]);
+        ndir.RemoteGID(num_src_gids, &src_gids[0], &src_gids_proc[0], &src_gids_lids[0]);
       } else {
-        edir.RemoteGID(0, (UInt *)NULL, (UInt *)NULL, (UInt *)NULL);
+        ndir.RemoteGID(0, (UInt *)NULL, (UInt *)NULL, (UInt *)NULL);
       }
     } catch(std::exception &x) {
       // catch Mesh exception return code
@@ -3788,9 +3788,6 @@ void MBMesh_createredist(void **src_meshpp, int *num_node_gids, int *node_gids,
       }
     }
 
-
-    // Verify that all nodes are being sent to the processors defined by the DistGrid
-
     // if not split mesh, then just do the usual thing
     MBMesh *outmesh;
     if (!mesh->is_split) {
@@ -3803,7 +3800,7 @@ void MBMesh_createredist(void **src_meshpp, int *num_node_gids, int *node_gids,
     }
 
     // Verify that all node ownership is as defined by the DistGrid
-    // use set_node_owners (maybe also set_elem_owners_wo_list, but might already happen in create_mbmesh_redist_elem)
+    mbmesh_set_node_owners(outmesh, ndir);
 
     // return the mbmesh as a void*
     *output_meshpp=static_cast<void*> (outmesh);
@@ -4047,6 +4044,96 @@ void MBMesh_checkelemlist(void **meshpp, int *_num_elem_gids, int *elem_gids,
 
   if (rc!=NULL) *rc=ESMF_SUCCESS;
 }
+
+// Assign node owners in output_mesh using ndir
+void mbmesh_set_node_owners(MBMesh *mesh, DDir<> ndir) {
+  Trace __trace("mbmesh_set_node_owners()");
+
+
+  int localrc, merr;
+
+  // Get a list of the Mesh nodes with gids
+  Range nodes;
+  std::vector<UInt> gids;
+
+  // get mesh nodes and gids
+  try {
+    merr=mesh->mesh->get_entities_by_dimension(0,0,nodes);
+    if (merr != MB_SUCCESS) {
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+        moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+    }
+  
+    gids.reserve(nodes.size());
+
+    // Loop through objects getting ids
+    Range::iterator si = nodes.begin(), se = nodes.end();
+    for (; si != se; ++si) {
+      const EntityHandle node = *si;
+      int gid;
+      MBMesh_get_gid(mesh, node, &gid);
+      gids.push_back(gid);
+    }
+  } catch(std::exception &x) {
+    // catch Mesh exception return code
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            x.what(), ESMC_CONTEXT, &localrc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            "UNKNOWN", ESMC_CONTEXT, &localrc);
+    }
+  }
+
+  // Get number of gids
+  UInt num_src_gids=gids.size();
+  std::vector<UInt> src_gids_proc(num_src_gids, 0);
+  std::vector<UInt> src_gids_lids(num_src_gids, 0);
+
+  // Get where each element is to go
+  try {
+    if (num_src_gids) {
+      ndir.RemoteGID(num_src_gids, &gids[0], &src_gids_proc[0], &src_gids_lids[0]);
+    } else {
+      ndir.RemoteGID(0, (UInt *)NULL, (UInt *)NULL, (UInt *)NULL);
+    }
+  } catch(std::exception &x) {
+    // catch Mesh exception return code
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            x.what(), ESMC_CONTEXT, &localrc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            "UNKNOWN", ESMC_CONTEXT, &localrc);
+    }
+  }
+
+
+
+  // Loop setting owner
+  try {
+    int nodeowners[nodes.size()];
+    for (int i = 0; i < num_src_gids; ++i) nodeowners[i] = src_gids_proc[i];
+
+    // Set Owners
+    merr=mesh->mesh->tag_set_data(mesh->owner_tag, nodes, nodeowners);
+    if (merr != MB_SUCCESS) {
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+         moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+    }
+  } catch(std::exception &x) {
+    // catch Mesh exception return code
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            x.what(), ESMC_CONTEXT, &localrc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            "UNKNOWN", ESMC_CONTEXT, &localrc);
+    }
+  }
+
+}
+
 
 #if 0
 void MBMesh_FitOnVM(Mesh **meshpp,
