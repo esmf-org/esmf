@@ -2368,6 +2368,7 @@ contains
     integer :: memstat
     integer :: nitems_local(1)
     integer :: mypet, npets
+    character(len=ESMF_MAXSTR) :: logmsg !tdk:p
 
     localrc = ESMF_RC_NOT_IMPL
 
@@ -2408,6 +2409,8 @@ contains
     else
       nitems_local(1) = 0
     end if
+    write(logmsg, *) nitems_local !tdk:p
+    call ESMF_LogWrite("nitems_local="//trim(logmsg)) !tdk:p
 
     ! All PETs send their item counts to all the other PETs for recv array sizing.
     allocate (nitems_all(0:npets-1), stat=memstat)
