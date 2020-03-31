@@ -1013,9 +1013,7 @@ bool Info::isSetNull(key_t &key) const {
     }
     ESMF_INFO_CATCH_JSON
   }
-  catch (ESMCI::esmc_error &exc_esmf) {
-    ESMC_ERRPASSTHRU(exc_esmf);
-  }
+  ESMC_CATCH_ERRPASSTHRU
   return ret;
 }
 
