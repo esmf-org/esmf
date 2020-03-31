@@ -1430,7 +1430,7 @@ namespace ESMCI {
                 if (has_key) {
                   bool is_null = false;
                   try {
-                    is_null = info->isSetNull(key);
+                    is_null = info->isNull(key);
                   } catch (ESMCI::esmc_error &exc) {
                     if (ESMC_LogDefault.MsgFoundError(exc.getReturnCode(), ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
                   }

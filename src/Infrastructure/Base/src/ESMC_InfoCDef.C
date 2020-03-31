@@ -296,7 +296,7 @@ void ESMC_InfoIsSet(ESMCI::Info *info, char *key, int &isSet, int &esmc_rc) {
   ESMC_CHECK_INIT(info, esmc_rc)
   std::string local_key(key);
   try {
-    isSet = info->isSetNull(local_key);
+    isSet = !(info->isNull(local_key));
     esmc_rc = ESMF_SUCCESS;
   }
   ESMC_CATCH_ISOC

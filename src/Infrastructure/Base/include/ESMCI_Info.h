@@ -145,7 +145,7 @@ public:
   bool isDirty() const {return this->dirty;}
   void setDirty(bool flag) {this->dirty = flag;}
 
-  bool isSetNull(key_t &key) const;
+  bool isNull(key_t &key) const;
 
   void parse(key_t &input);
 

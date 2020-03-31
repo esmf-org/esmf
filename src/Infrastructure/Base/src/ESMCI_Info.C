@@ -1003,13 +1003,13 @@ void Info::parse(key_t& input) {
 }
 
 #undef  ESMC_METHOD
-#define ESMC_METHOD "Info::isSetNull()"
-bool Info::isSetNull(key_t &key) const {
+#define ESMC_METHOD "Info::isNull()"
+bool Info::isNull(key_t &key) const {
   bool ret;
   try {
     json::json_pointer jp = this->formatKey(key);
     try {
-      ret = !(this->getStorageRef().at(jp).is_null());
+      ret = this->getStorageRef().at(jp).is_null();
     }
     ESMF_INFO_CATCH_JSON
   }
