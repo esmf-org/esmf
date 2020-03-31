@@ -1539,6 +1539,7 @@ contains
 
     logical, parameter :: debug = .false.
     logical, parameter :: meminfo = .true. !tdk:debug
+    character(len=ESMF_MAXSTR) :: logmsg !tdk:debug
 
     localrc = ESMF_RC_NOT_IMPL
 
@@ -1571,6 +1572,13 @@ contains
 
     ! Broadcast each Id to all the other PETs.  Since the number of items per
     ! PET can vary, use AllToAllV.
+
+    write(logmsg, *) minval(nitems_buf) !tdk:p
+    call ESMF_LogWrite("min nitems_buf: "//trim(logmsg)) !tdk:p
+    write(logmsg, *) sum(nitems_buf)/size(nitems_buf) !tdk:p
+    call ESMF_LogWrite("mean nitems_buf: "//trim(logmsg)) !tdk:p
+    write(logmsg, *) maxval(nitems_buf) !tdk:p
+    call ESMF_LogWrite("max nitems_buf: "//trim(logmsg)) !tdk:p
 
     do, i=0, npets-1
       allocate (  &
