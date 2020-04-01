@@ -74,7 +74,7 @@ module NUOPC_Driver
     type(NUOPC_RunSequence), pointer  :: runSeq(:)  ! size may increase dynamic.
     integer                           :: runPhaseToRunSeqMap(10)
     ! - clock
-    type(ESMF_Clock)                  :: driverClock  ! clock of the parent
+    type(ESMF_Clock)                  :: parentClock  ! clock of the parent
     ! - temporary variables
     type(type_PhaseMapParser), pointer:: modelPhaseMap(:)
     type(type_PhaseMapParser), pointer:: connectorPhaseMap(:,:)
@@ -2710,11 +2710,11 @@ module NUOPC_Driver
     ! set the driverClock member in the internal state
     ! this is the incoming clock from the parent driver
     ! do this in alignment with model and mediator components
-    is%wrap%driverClock = clock
+    is%wrap%parentClock = clock
     
     ! SPECIALIZE required: label_SetRunClock
     ! -> first check for the label with phase index
-    call ESMF_MethodExecute(driver, label=label_SetRunClock, index=phase, &
+    call ESMF_MethodExecute(driver, label=label_SetRunClock, index=runPhase, &
       existflag=existflag, userRc=userrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -2939,10 +2939,9 @@ module NUOPC_Driver
     ! Implement the default explicit timekeeping rules.
     
     ! local variables
-    type(type_InternalState)  :: is
     character(ESMF_MAXSTR)    :: name
+    type(ESMF_Clock)          :: parentClock
     logical                   :: clockIsCreated
-    type(ESMF_TimeInterval)   :: timeStep
 
     rc = ESMF_SUCCESS
 
@@ -2951,21 +2950,19 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
-    ! query component for its internal state
-    nullify(is%wrap)
-    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
+    ! query component for parent clock
+    call NUOPC_DriverGet(driver, parentClock=parentClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! see if the parent clock can be used
-    clockIsCreated = ESMF_ClockIsCreated(is%wrap%driverClock, rc=rc)
+    clockIsCreated = ESMF_ClockIsCreated(parentClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     if (clockIsCreated) then
-      ! check and set the driver clock against the parent clock, force timeStep
-      call NUOPC_CompCheckSetClock(driver, is%wrap%driverClock, &
-        forceTimeStep=.true., rc=rc)
+      ! check and set the driver clock against the parent clock
+      call NUOPC_CompCheckSetClock(driver, parentClock, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -4676,10 +4673,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverGet()
-  recursive subroutine NUOPC_DriverGet(driver, slotCount, rc)
+  recursive subroutine NUOPC_DriverGet(driver, slotCount, parentClock, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
     integer,             intent(out), optional :: slotCount
+    type(ESMF_Clock),    intent(out), optional :: parentClock
     integer,             intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -4709,6 +4707,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! slotCount
     if (present(slotCount)) then
       slotCount = size(is%wrap%runSeq)
+    endif
+    
+    ! parentClock
+    if (present(parentClock)) then
+      parentClock = is%wrap%parentClock
     endif
     
   end subroutine
