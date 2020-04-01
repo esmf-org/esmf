@@ -3257,9 +3257,9 @@ void MBMesh_createredistnodes(void **src_meshpp, int *num_node_gids, int *node_g
     std::vector<EH_Comm_Pair> elem_to_proc_list;
 
     // distributed directory to determine node destinations
-    DDir<> edir;
-    std::vector<UInt> e_lids(*num_node_gids, 0);
-    std::vector<UInt> e_gids(*num_node_gids, 0);
+    DDir<> ndir;
+    std::vector<UInt> n_lids(*num_node_gids, 0);
+    std::vector<UInt> n_gids(*num_node_gids, 0);
   
     // list of the Mesh node gids
     std::vector<UInt> src_gids;
@@ -3303,16 +3303,16 @@ void MBMesh_createredistnodes(void **src_meshpp, int *num_node_gids, int *node_g
     // load the distributed directory
     try {
       for (int i=0; i<*num_node_gids; i++) {
-        e_lids[i]=i;
+        n_lids[i]=i;
         if (node_gids[i]>=0) {
-          e_gids[i]=node_gids[i];
+          n_gids[i]=node_gids[i];
         } else {
-          e_gids[i]=0;
+          n_gids[i]=0;
         }
       }
   
       if (*num_node_gids) {
-        edir.Create(*num_node_gids, &e_gids[0], &e_lids[0]);
+        edir.Create(*num_node_gids, &n_gids[0], &n_lids[0]);
       } else {
         edir.Create(0, (UInt*) NULL, (UInt *)NULL);
       }
