@@ -35,13 +35,16 @@ namespace ESMCI {
 #if defined ESMF_MOAB
 
   public:
-    int sdim, pdim; // dimensions MAYBE I SHOULD NAME THESE MORE SIMILAR TO WHAT IN OTHER MESH
-    int orig_sdim;
+    int pdim; 
+    int sdim; // Spatial dim of coordinates (after conversion), maybe change to cart_sdim? 
+    int orig_sdim;  // Original spatial dim before converting
     ESMC_CoordSys_Flag coordsys;
 
     Interface *mesh; // Moab mesh  MAYBE I SHOULD NAME ThIS SOMETHING ELSE????
 
-    int num_verts;
+    int num_verts; // number of verts this processor
+
+    // eventualy get rid of this
     EntityHandle *verts; // Temporary storage for element create
 
     int num_elems; // number of elems on this processor
@@ -58,7 +61,7 @@ namespace ESMCI {
     Tag node_mask_tag;
     Tag node_mask_val_tag;
 
-    bool has_elem_frac;
+    bool has_elem_frac; // TODO: Get rid of this
     Tag  elem_frac_tag;
 
     bool has_elem_mask;
@@ -82,10 +85,86 @@ namespace ESMCI {
 
     void CreateGhost();
 
+
+    // Mesh from inputs
+    MBMesh(int _pdim, int _orig_sdim, ESMC_CoordSys_Flag _coordSys);
+
+    // Add one node
+    EntityHandle add_node(double *orig_coords, int gid, int orig_pos, int owner);
+
+    // Add one elem
+    EntityHandle add_elem(EntityType elem_type, int num_nodes, EntityHandle *nodes, 
+                          int gid, int orig_pos, int owner);
+
+
+    // Change owner
+    void set_owner(EntityHandle eh, int owner);
+
+    // Get owner
+    int get_owner(EntityHandle eh);
+
+    // Get original position
+    int get_orig_pos(EntityHandle eh);
+
+    // Get gid
+    int get_gid(EntityHandle eh);
+
+    // Turn on node masking for this mesh
+    void setup_node_mask();
+
+    // Set node mask value
+    void set_node_mask_val(EntityHandle eh, int mask_val);
+
+    // Set node coords
+    void set_node_coords(EntityHandle eh, double *orig_coords);
+
+    // Turn on elem masking
+    void setup_elem_mask();
+
+    // Set a mask value 
+    void set_elem_mask_val(EntityHandle eh, int mask_val);
+
+    // Setup elem areas
+    void setup_elem_area();
+
+    // Set an elem area value
+    void set_elem_area(EntityHandle eh, double area);
+
+    // Setup elem coords
+    void setup_elem_coords();
+
+    // Set coords in an elem
+    void set_elem_coords(EntityHandle eh, double *orig_coords);
+
+    // Do halo communication on all node tags
+    void halo_comm_nodes_all_tags(bool do_internal_coords=false);
+
+    // Do halo communication on all elem tags
+    void halo_comm_elems_all_tags();
+
+    // Setup MBMesh to operate in parallel by resolving shared ents, etc. 
+    void setup_parallel();
+
+    // If the mesh has changed, update parallel (NOT TESTED!)
+    void update_parallel();
+
+    // Output mesh nodes for debugging
+    void debug_output_nodes();
+
+    // Output mesh elems for debugging
+    void debug_output_elems();
+
+// DEPRECATED 
+// TODO: Get rid of verts array
+// Call after all nodes have been added to setup verts array
+    void setup_verts_array();
+
 #endif
 
+    // Create empty mesh
     MBMesh();
 
+    // Get rid of mesh
     ~MBMesh();
 
   };

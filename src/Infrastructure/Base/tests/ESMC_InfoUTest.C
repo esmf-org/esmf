@@ -1160,6 +1160,28 @@ void test_bit_overflow(int& rc, char failMsg[]) {
   rc = ESMF_SUCCESS;
 };
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "test_isNull()"
+void test_isNull(int& rc, char failMsg[]) {
+  rc = ESMF_FAILURE;
+
+  ESMCI::Info info;
+
+  try {
+    info.set("/NUOPC/Instance/One", json(), false);
+    info.set("/NUOPC/Instance/Two", json(55), false);
+    if (!info.isNull("/NUOPC/Instance/One")) {
+      return finalizeFailure(rc, failMsg, "should be null");
+    }
+    if (info.isNull("/NUOPC/Instance/Two")) {
+      return finalizeFailure(rc, failMsg, "should not be null");
+    }
+  }
+  ESMC_CATCH_ERRPASSTHRU
+
+  rc = ESMF_SUCCESS;
+};
+
 int main(void) {
 
   char name[80];
@@ -1175,155 +1197,162 @@ int main(void) {
 
   //---------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Info testConstructor");
+  strcpy(name, "testConstructor");
   testConstructor(rc, failMsg);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //---------------------------------------------------------------------------
 
   //---------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Info testErase");
+  strcpy(name, "testErase");
   testErase(rc, failMsg);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //---------------------------------------------------------------------------
 
   //---------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Info testSetGet");
+  strcpy(name, "testSetGet");
   testSetGet(rc, failMsg);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //---------------------------------------------------------------------------
 
   //---------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Info testSetGetErrorHandling");
+  strcpy(name, "testSetGetErrorHandling");
   testSetGetErrorHandling(rc, failMsg);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //---------------------------------------------------------------------------
 
   //---------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Info testUpdate");
+  strcpy(name, "testUpdate");
   testUpdate(rc, failMsg);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //---------------------------------------------------------------------------
 
   //---------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Info testHasKey");
+  strcpy(name, "testHasKey");
   testHasKey(rc, failMsg);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //---------------------------------------------------------------------------
 
   //---------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Info testGet");
+  strcpy(name, "testGet");
   testGet(rc, failMsg);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //---------------------------------------------------------------------------
 
   //---------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Info testbroadcastInfo");
+  strcpy(name, "testbroadcastInfo");
   testbroadcastInfo(rc, failMsg);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //---------------------------------------------------------------------------
 
   //---------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Info testFormatKey");
+  strcpy(name, "testFormatKey");
   testFormatKey(rc, failMsg);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //---------------------------------------------------------------------------
 
   //---------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Info testDumpLength");
+  strcpy(name, "testDumpLength");
   testDumpLength(rc, failMsg);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //---------------------------------------------------------------------------
 
   //---------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Info testSerializeDeserialize");
+  strcpy(name, "testSerializeDeserialize");
   testSerializeDeserialize(rc, failMsg);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //---------------------------------------------------------------------------
 
   //---------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Info testSerializeDeserialize2");
+  strcpy(name, "testSerializeDeserialize2");
   testSerializeDeserialize2(rc, failMsg);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //---------------------------------------------------------------------------
 
   //---------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Info testSetGetIndex");
+  strcpy(name, "testSetGetIndex");
   testSetGetIndex(rc, failMsg);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //---------------------------------------------------------------------------
 
   //---------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Info test_get_attpack_count");
+  strcpy(name, "test_get_attpack_count");
   test_get_attpack_count(rc, failMsg);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //---------------------------------------------------------------------------
 
   //---------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Info test_update_json_attribute_count_map");
+  strcpy(name, "test_update_json_attribute_count_map");
   test_update_json_attribute_count_map(rc, failMsg);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //---------------------------------------------------------------------------
 
   //---------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Info testInquire");
+  strcpy(name, "testInquire");
   testInquire(rc, failMsg);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //---------------------------------------------------------------------------
 
   //---------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Info test_update_json_pointer");
+  strcpy(name, "test_update_json_pointer");
   test_update_json_pointer(rc, failMsg);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //---------------------------------------------------------------------------
 
   //---------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Info testGetObjectIndex");
+  strcpy(name, "testGetObjectIndex");
   testGetObjectIndex(rc, failMsg);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //---------------------------------------------------------------------------
 
   //---------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Info testGetInfoObject");
+  strcpy(name, "testGetInfoObject");
   testGetInfoObject(rc, failMsg);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //---------------------------------------------------------------------------
 
   //---------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Info test_find_by_index");
+  strcpy(name, "test_find_by_index");
   test_find_by_index(rc, failMsg);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //---------------------------------------------------------------------------
 
   //---------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Info test_implicit_conversion");
+  strcpy(name, "test_implicit_conversion");
   test_implicit_conversion(rc, failMsg);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //---------------------------------------------------------------------------
 
   //---------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Info test_bit_overflow");
+  strcpy(name, "test_bit_overflow");
   test_bit_overflow(rc, failMsg);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //---------------------------------------------------------------------------
+
+  //---------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "test_isNull");
+  test_isNull(rc, failMsg);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //---------------------------------------------------------------------------
 

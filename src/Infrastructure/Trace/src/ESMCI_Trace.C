@@ -1428,8 +1428,16 @@ namespace ESMCI {
                   if (ESMC_LogDefault.MsgFoundError(exc.getReturnCode(), ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
                 }
                 if (has_key) {
+                  bool is_null = false;
                   try {
-                    *(element.second) = info->getvec<std::string>(key, true);
+                    is_null = info->isNull(key);
+                  } catch (ESMCI::esmc_error &exc) {
+                    if (ESMC_LogDefault.MsgFoundError(exc.getReturnCode(), ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
+                  }
+                  try {
+                    if (!is_null) {
+                      *(element.second) = info->getvec<std::string>(key, true);
+                    }
                   } catch (ESMCI::esmc_error &exc) {
                     if (ESMC_LogDefault.MsgFoundError(exc.getReturnCode(), ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
                   }
