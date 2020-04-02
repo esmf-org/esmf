@@ -1581,6 +1581,7 @@ contains
     call ESMF_LogWrite("max nitems_buf: "//trim(logmsg)) !tdk:p
 
     do, i=0, npets-1
+      !tdk:bc: alter vmid to use an integer here insted of the vmid object
       allocate (  &
           id_info(i)%  id  (0:nitems_buf(i)), &
           id_info(i)%vmid  (0:nitems_buf(i)), &
