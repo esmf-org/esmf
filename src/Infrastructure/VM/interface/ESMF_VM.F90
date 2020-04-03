@@ -36,6 +36,7 @@ module ESMF_VMMod
   use ESMF_UtilTypesMod     ! ESMF utility types
   use ESMF_InitMacrosMod    ! ESMF initializer macros
   use ESMF_LogErrMod        ! ESMF error handling
+  use ESMF_F90InterfaceMod  ! ESMF F90-C++ interface helper
   use ESMF_IOUtilMod        ! ESMF I/O utility layer
       
   implicit none
@@ -201,7 +202,8 @@ module ESMF_VMMod
   public ESMF_VMSendVMId
   public ESMF_VMRecvVMId
   public ESMF_VMBcastVMId
-
+  public ESMF_VMTranslateVMId
+  
   public ESMF_CommHandleGetInit
 
 !EOPI
@@ -9885,6 +9887,58 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMSendVMId
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMTranslateVMId()"
+!BOPI
+! !IROUTINE: ESMF_VMTranslateVMId - Translate ESMF_VMId array to integer ids
+
+! !INTERFACE:
+  subroutine ESMF_VMTranslateVMId(vm, vmIds, ids, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)            :: vm
+    type(ESMF_VMId),  target, intent(in)            :: vmIds(:)
+    integer,          target, intent(out)           :: ids(:)
+    integer,                  intent(out), optional :: rc
+!         
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_InterArray)   :: idsAux       ! helper variable
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Check that size of vmIds and ids arrays match
+    if (size(vmIDs) /= size(ids)) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
+        msg="size(vmIDs) must match size(ids)", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+
+    ! Deal with (optional) array arguments
+    idsAux = ESMF_InterArrayCreate(ids, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Call into the C++ interface.
+    call c_ESMC_VMTranslateVMId(vm, vmIds, idsAux, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMTranslateVMId
 !------------------------------------------------------------------------------
 
 
