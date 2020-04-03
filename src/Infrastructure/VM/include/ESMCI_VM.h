@@ -82,8 +82,8 @@ namespace ESMCI {
 // ESMCI::VMId methods:
 // VMId VMIdCreate(int *rc);      // allocates memory for vmKey member
 // void VMIdDestroy(VMId *vmID, int *rc); // frees memory for vmKey memb
-bool VMIdCompare(VMId *vmID1, VMId *vmID2);
-bool VMIdLessThan(VMId *vmID1, VMId *vmID2);
+bool VMIdCompare(const VMId *vmID1, const VMId *vmID2);
+bool VMIdLessThan(const VMId *vmID1, const VMId *vmID2);
 int VMIdCopy(VMId *vmIDdst, VMId *vmIDsrc);
 // void VMIdGet(VMId *vmID, int *localID, char *key, int key_len, int *rc);
 // void VMIdSet(VMId *vmID, int  localID, char *key, int key_len, int *rc);
