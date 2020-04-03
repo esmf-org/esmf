@@ -1895,6 +1895,8 @@ int VM::translateVMId(
       MPI_Group subGroup;
       MPI_Group_incl(mpiGroup, petList.size(), &(petList[0]), &subGroup);
       MPI_Comm_create_group(mpiComm, subGroup, 99, &(helper2[i].subComm));
+      // clean-up
+      MPI_Group_free(&subGroup);
     }
     
     // development log
@@ -1950,6 +1952,8 @@ int VM::translateVMId(
       for (unsigned k=0; k<helper2[i].count; k++){
         helper1[helper2[i].indexH1+k].id = localIdTemp+k;
       }
+      // clean-up
+      MPI_Comm_free(&(helper2[i].subComm));
     }
     
     // finish up by filling the globally unique integer id into the idsArray
@@ -1958,6 +1962,9 @@ int VM::translateVMId(
     }
     
   } // elementCount > 0
+  
+  // clean-up
+  MPI_Group_free(&mpiGroup);
   
   // return successfully
   rc = ESMF_SUCCESS;
