@@ -39,6 +39,7 @@
 #include "ESMCI_VM.h"
 
 // include higher level, 3rd party or system headers
+#include <map>
 #include <vector>
 #include <string>
 #include <cstdlib>
@@ -57,6 +58,7 @@
 
 using std::string;
 using std::vector;
+using std::map;
 
 
 //-----------------------------------------------------------------------------
@@ -128,27 +130,83 @@ static bool esmfFinalized = false;
 //-----------------------------------------------------------------------------
 
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::VMIdKeyCompare()"
+#define ESMC_METHOD "ESMCI::VMKeyCompare()"
 static bool VMKeyCompare(unsigned char *vmKey1, unsigned char *vmKey2){
   int i;
-#if 0
-  std::cout << ESMC_METHOD << ": entered" << std::endl;
-#endif
   for (i=0; i<vmKeyWidth; i++)
     if (vmKey1[i] != vmKey2[i]){
-#if 0
-      std::cout << ESMC_METHOD << "loop broke with i = " << i
-        << ", vmKeyWidth = " << vmKeyWidth << std::endl;
-#endif
       break;
     }
   if (i==vmKeyWidth) return true;
-#if 0
-  else
-    std::cout << ESMC_METHOD  << ": vmKey1[" << i << "] = " << vmKey1[i]
-        << " != vmKey2[" << i << "] = " << vmKey2[i] << std::endl;
-#endif
   return false;
+}
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMKeyLessThan()"
+static bool VMKeyLessThan(unsigned char *vmKey1, unsigned char *vmKey2){
+  // notice that left most VAS bits set leads to less than condition
+  // this is so that where this is used in a sort, the desired order is 
+  // achieved
+  int i;
+  for (i=0; i<vmKeyWidth; i++)
+    if (vmKey1[i] != vmKey2[i]){
+      break;
+    }
+  if (i==vmKeyWidth) return false;  // case of equality
+  // now compare the first byte where a difference was found
+  if ((int)vmKey1[i] > (int)vmKey2[i]) return true;  // left most bits set in vmKey1, not vmKey2
+  return false;
+}
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMKeyFirstBitFromLeft()"
+static unsigned VMKeyFirstBitFromLeft(unsigned char *vmKey){
+  // a value returned of vmKeyWidth * 8 indicates that no bit was set
+  int i;
+  for (i=0; i<vmKeyWidth; i++)
+    if (vmKey[i] > 0){
+      break;
+    }
+  if (i==vmKeyWidth) return (unsigned) vmKeyWidth * 8; // indicating no bit set
+  unsigned offSet = (unsigned)i * 8;
+  unsigned char testByte = 128; // first bit from left set
+  unsigned index;
+  unsigned upper = 8;
+  if (i==vmKeyWidth-1) upper -= vmKeyOff;
+  for (index=0; index<upper; index++){
+    if (vmKey[i] & testByte) break;
+    testByte = testByte >> 1;  // shift the set bit one to the right
+  }
+  return offSet+index;
+}
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMKeyVasList()"
+static void VMKeyVasList(unsigned char *vmKey, vector<unsigned> &vasList){
+  vasList.clear();  // clear the vector
+  for (int i=0; i<vmKeyWidth; i++){
+    if (vmKey[i] > 0){
+      // there is at least one bit set in this byte
+      unsigned char testByte = 128; // first bit from left set
+      unsigned upper = 8;
+      if (i==vmKeyWidth-1) upper -= vmKeyOff;
+      for (unsigned index=0; index<upper; index++){
+#if 0
+{
+  std::stringstream msg;
+  msg << "VMKeyVasList i="<<i<<" index="<<index<<" vmKey[i]="<<(int)vmKey[i]
+    <<" testByte="<<(int)testByte<<" (vmKey[i] & testByte)="<< (vmKey[i] & testByte);
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+}
+#endif    
+        if (vmKey[i] & testByte){
+          // index byte is set
+          vasList.push_back(i*8+index);
+        }
+        testByte = testByte >> 1;  // shift the set bit one to the right
+      }
+    }
+  }
 }
 
 #undef  ESMC_METHOD
@@ -402,7 +460,7 @@ void VMId::log(
   char digits[64];
   char msg[256];
   std::stringstream info;
-  info << "  vmKeyWidth = " << vmKeyWidth;
+  info << "  vmKeyWidth = " << vmKeyWidth << " vmKeyOff = " << vmKeyOff;
   sprintf(msg, "%s - VMId: %s", prefix.c_str(), info.str().c_str());
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
   info.str(""); // clear info
@@ -667,25 +725,50 @@ bool VMIdCompare(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-#if 0
-  std::cout << ESMC_METHOD << ": entered" << std::endl;
-#endif
   if (vmID1==NULL || vmID2==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       "- Invalid vmIDs", ESMC_CONTEXT, NULL);
     return false;    // bail out
   }
   if (vmID1->localID != vmID2->localID){
-#if 0
-    std::cout << ESMC_METHOD << ": localID " << vmID1->localID << " != " << vmID2->localID << std::endl;
-#endif
     return false;
   }
-  bool match = VMKeyCompare(vmID1->vmKey, vmID2->vmKey);
-#if 0
-  if (!match) std::cout << ESMC_METHOD << ": keys don't compare" << std::endl;
-#endif
-  return match;
+  return VMKeyCompare(vmID1->vmKey, vmID2->vmKey);
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMIdLessThan()"
+//BOPI
+// !IROUTINE:  ESMCI::VMIdLessThan
+//
+// !INTERFACE:
+bool VMIdLessThan(
+//
+// !RETURN VALUE:
+//    bool indicating vmID1 < vmID2
+//
+// !ARGUMENTS:
+//
+  VMId *vmID1,
+  VMId *vmID2
+  ){
+//
+// !DESCRIPTION:
+//    Compare two {\tt ESMC\_VMId} objects with less than.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  if (vmID1==NULL || vmID2==NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      "- Invalid vmIDs", ESMC_CONTEXT, NULL);
+    return false;    // bail out
+  }
+  if (VMKeyLessThan(vmID1->vmKey, vmID2->vmKey)) return true;
+  if (vmID1->localID < vmID2->localID) return true;
+  return false;
 }
 //-----------------------------------------------------------------------------
 
@@ -1613,6 +1696,269 @@ int VM::bcastVMId(
   }
   delete[] local_ids;
 
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VM::translateVMId()"
+//BOPI
+// !IROUTINE:  ESMCI::VM::translateVMId
+//
+// !INTERFACE:
+int VM::translateVMId(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  VMId **vmIDs,                 // in  - VMId
+  ESMCI::InterArray<int> *ids   // out - ids
+  ){
+//
+// !DESCRIPTION:
+//    Construct globally unique integer ids for the {\tt ESMCI::VMId} elements.
+// The number of elements in the vmIDs, and ids arrays must be identical. There
+// is no check of this condition possible on this level!
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  if (ids->dimCount != 1){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+      "ids must enter with one dimension",
+      ESMC_CONTEXT, &rc);
+    return rc;
+  }
+  
+  int elementCount=ids->extent[0];
+  int *idsArray = ids->array;
+  int petCount = getPetCount();
+  int localPet = getLocalPet();
+  MPI_Comm mpiComm = getMpi_c();
+  MPI_Group mpiGroup;
+  MPI_Comm_group(mpiComm, &mpiGroup);
+  
+  if (elementCount > 0){
+    // there is work to be done...
+
+    struct Helper1{
+      VMId *vmID;
+      int index;
+      int id;
+      bool operator==(Helper1 cmp){
+        return VMIdCompare(vmID,cmp.vmID);
+      }
+      bool operator<(Helper1 cmp){
+        return VMIdLessThan(vmID,cmp.vmID);
+      }
+      bool vmKeyEqual(Helper1 cmp){
+        return VMKeyCompare(vmID->vmKey,cmp.vmID->vmKey);
+      }
+      unsigned getRootVas(){
+        // The position of bits in the vmKey corresponds to VAS index. Left most
+        // bit that is set is defined here as root VAS index.
+        return VMKeyFirstBitFromLeft(vmID->vmKey);
+      }
+      void getVasList(vector<unsigned> &vasList){
+        VMKeyVasList(vmID->vmKey, vasList);
+      }
+    };
+    
+    // set up helper1 vector and sort
+    vector<Helper1> helper1(elementCount);
+    for (int i=0; i<elementCount; i++){
+      helper1[i].vmID = vmIDs[i];
+      helper1[i].index = i;
+    }
+    sort(helper1.begin(), helper1.end());
+    
+    // development log
+    for (unsigned i=0; i<helper1.size(); i++){
+      std::stringstream prefix;
+      prefix << "sorted helper1[" << i << "]";
+      helper1[i].vmID->log(prefix.str());
+    }
+    
+    // record the unique helper1 index in idsArray for later back reference
+    int ii = 0; // init
+    idsArray[helper1[0].index] = ii; // spin up
+    for (unsigned i=1; i<helper1.size(); i++){
+      if (!(helper1[i] == helper1[i-1])) ++ii;
+      idsArray[helper1[i].index] = ii;
+    }
+    
+    // cut out duplicate elements from sorted helper1 vector
+    helper1.erase(unique(helper1.begin(),helper1.end()),helper1.end());
+  
+    // development log
+    for (unsigned i=0; i<helper1.size(); i++){
+      std::stringstream prefix;
+      prefix << "unique helper1[" << i << "]";
+      helper1[i].vmID->log(prefix.str());
+    }
+    
+    struct Helper2{
+      unsigned indexH1; // index into helper1 vector
+      unsigned count;   // number of different localIDs within the same vmKey
+      MPI_Comm subComm; // communicator across participating PETs as per vmKey
+      int rootPet;      // the root PET for this vmKey within current VM
+      int subRootPet;   // the root PET for this vmKey within subComm
+      Helper2(int index){
+        indexH1 = index;
+        count = 1;
+        subComm = MPI_COMM_NULL;
+        rootPet = -1;
+        subRootPet = -1;
+      }
+    };
+    
+    // setup helper2 to only reference elements in helper1 with unique vmKey
+    vector<Helper2> helper2;
+    helper2.reserve(helper1.size());  // maximum possible size
+    helper2.push_back(Helper2(0));
+    for (unsigned i=1; i<helper1.size(); i++){
+      if (helper1[i].vmKeyEqual(helper1[i-1])){
+        // same vmKey -> count this to previous helper2 element
+        helper2.back().count++;
+      }else{
+        // new vmKey -> add a new helper2 element
+        helper2.push_back(Helper2(i));
+      }
+    }
+      
+    // development log
+    for (unsigned i=0; i<helper2.size(); i++){
+      std::stringstream msg;
+      msg << "helper2[" << i << "] - indexH1=" << helper2[i].indexH1
+        << " - count=" << helper2[i].count;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+    
+    map<unsigned,unsigned> vasToPetMap;
+    // The global VAS index is equal to the rank in the MPI_COMM_WORLD. It also
+    // correspnds to the bits in order of the vmKey. This is mapped against the
+    // local PET index.
+    for (int i=0; i<petCount; i++)
+      vasToPetMap[getVas(i)] = i;
+
+    // development log
+    map<unsigned,unsigned>::iterator it;
+    for (it=vasToPetMap.begin(); it!=vasToPetMap.end(); ++it){
+      std::stringstream msg;
+      msg << "vasToPetMap - vas=" << it->first
+        << " - pet=" << it->second;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+        
+    // determine rootPet for each entry in helper2, sum up totalLocalIds, and
+    // create mpiComm to handle the respective vmKey PET subspace
+    int totalLocalIds = 0; // init
+    for (unsigned i=0; i<helper2.size(); i++){
+      unsigned rootVas = helper1[helper2[i].indexH1].getRootVas();
+      helper2[i].rootPet = vasToPetMap[rootVas];
+      if (helper2[i].rootPet == localPet){
+        totalLocalIds += helper2[i].count;
+      }
+      vector<unsigned> vasList;
+      helper1[helper2[i].indexH1].getVasList(vasList);
+      // development log
+      for (unsigned i=0; i<vasList.size(); i++){
+        std::stringstream msg;
+        msg << "vasList[" << i << "]=" << vasList[i];
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      }
+      vector<int> petList;
+      petList.reserve(vasList.size());  // only edge cases might have less PETs
+      unsigned kk = 0;
+      for (unsigned k=0; k<vasList.size(); k++){
+        if (vasToPetMap.find(vasList[k]) != vasToPetMap.end()){
+          // the VAS exists in the current VM
+          petList.push_back(vasToPetMap[vasList[k]]);
+          if (petList[kk]==helper2[i].rootPet)
+            helper2[i].subRootPet=kk;
+          // development log
+          std::stringstream msg;
+          msg << "petList["<<kk<<"]=" << petList[kk];
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          // end development log
+          ++kk;
+        }
+      }
+      MPI_Group subGroup;
+      MPI_Group_incl(mpiGroup, petList.size(), &(petList[0]), &subGroup);
+      MPI_Comm_create_group(mpiComm, subGroup, 99, &(helper2[i].subComm));
+    }
+    
+    // development log
+    for (unsigned i=0; i<helper2.size(); i++){
+      std::stringstream msg;
+      msg << "helper2[" << i << "] - indexH1=" << helper2[i].indexH1
+        << " - count=" << helper2[i].count 
+        << " - rootPet=" << helper2[i].rootPet;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+    {
+      std::stringstream msg;
+      msg << "totalLocalIds=" << totalLocalIds;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+    
+    // AllGather() the totalLocalIds
+    vector<int> totalLocalIdsList(petCount);
+    allgather(&totalLocalIds, &(totalLocalIdsList[0]), sizeof(int));
+    
+    // development log
+    for (unsigned i=0; i<totalLocalIdsList.size(); i++){
+      std::stringstream msg;
+      msg << "totalLocalIdsList[" << i << "]=" << totalLocalIdsList[i];
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+    
+    // determine beginning value of localId
+    unsigned localId = 0;
+    for (int i=0; i<localPet; i++){
+      localId += totalLocalIdsList[i];
+    }
+    
+    // development log
+    {
+      std::stringstream msg;
+      msg << "localId=" << localId;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+    
+    // determine globally unique integer indices for all the entries in helper2
+    for (unsigned i=0; i<helper2.size(); i++){
+      unsigned localIdTemp;
+      if (helper2[i].rootPet == localPet){
+        // rootPet for this id
+        localIdTemp = localId;
+        localId += helper2[i].count;
+      }
+      // broadcast localIdTemp from root to all other participating PETs
+      MPI_Bcast(&localIdTemp, sizeof(unsigned), MPI_BYTE, helper2[i].subRootPet,
+        helper2[i].subComm);
+      // all PETs can fill in the globally unique integer id
+      for (unsigned k=0; k<helper2[i].count; k++){
+        helper1[helper2[i].indexH1+k].id = localIdTemp+k;
+      }
+    }
+    
+    // finish up by filling the globally unique integer id into the idsArray
+    for (int i=0; i<elementCount; i++){
+      idsArray[i] = helper1[idsArray[i]].id;
+    }
+    
+  } // elementCount > 0
+  
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
