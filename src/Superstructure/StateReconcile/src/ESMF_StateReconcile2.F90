@@ -671,7 +671,7 @@ enddo  !tdk:p
 !   \item[vmid]
       !tdk:last: rename argument to vm_intid
 !     !tdk:doc: change documentation to account for the integer change
-      The object VMIds of this PETs State itself (in element 0) and the items
+!      The object VMIds of this PETs State itself (in element 0) and the items
 !     contained within it.  It does not return the IDs of nested State
 !     items.  Note that since VMId is a deep object class, the vmid array
 !     has aliases to existing VMId objects, rather than copies of them.
