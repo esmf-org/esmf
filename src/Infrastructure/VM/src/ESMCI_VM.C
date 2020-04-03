@@ -716,8 +716,8 @@ bool VMIdCompare(
 //
 // !ARGUMENTS:
 //
-  VMId *vmID1,
-  VMId *vmID2
+  const VMId *vmID1,
+  const VMId *vmID2
   ){
 //
 // !DESCRIPTION:
@@ -752,8 +752,8 @@ bool VMIdLessThan(
 //
 // !ARGUMENTS:
 //
-  VMId *vmID1,
-  VMId *vmID2
+  const VMId *vmID1,
+  const VMId *vmID2
   ){
 //
 // !DESCRIPTION:
@@ -1753,21 +1753,21 @@ int VM::translateVMId(
       VMId *vmID;
       int index;
       int id;
-      bool operator==(Helper1 cmp){
+      bool operator==(const Helper1 &cmp)const{
         return VMIdCompare(vmID,cmp.vmID);
       }
-      bool operator<(Helper1 cmp){
+      bool operator<(const Helper1 &cmp)const{
         return VMIdLessThan(vmID,cmp.vmID);
       }
-      bool vmKeyEqual(Helper1 cmp){
+      bool vmKeyEqual(const Helper1 &cmp)const{
         return VMKeyCompare(vmID->vmKey,cmp.vmID->vmKey);
       }
-      unsigned getRootVas(){
+      unsigned getRootVas()const{
         // The position of bits in the vmKey corresponds to VAS index. Left most
         // bit that is set is defined here as root VAS index.
         return VMKeyFirstBitFromLeft(vmID->vmKey);
       }
-      void getVasList(vector<unsigned> &vasList){
+      void getVasList(vector<unsigned> &vasList)const{
         VMKeyVasList(vmID->vmKey, vasList);
       }
     };
@@ -1870,9 +1870,9 @@ int VM::translateVMId(
       vector<unsigned> vasList;
       helper1[helper2[i].indexH1].getVasList(vasList);
       // development log
-      for (unsigned i=0; i<vasList.size(); i++){
+      for (unsigned k=0; k<vasList.size(); k++){
         std::stringstream msg;
-        msg << "vasList[" << i << "]=" << vasList[i];
+        msg << "vasList[" << k << "]=" << vasList[k];
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
       }
       vector<int> petList;
