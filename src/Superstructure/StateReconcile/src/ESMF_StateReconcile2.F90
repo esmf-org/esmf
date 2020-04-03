@@ -102,7 +102,7 @@ module ESMF_StateReconcile2Mod
 
   type ESMF_ReconcileIDInfo
     integer,         pointer :: id(:) => null ()
-    type(ESMF_VMId), pointer :: vmid(:) => null ()
+    integer,         pointer :: vmid(:) => null ()
     logical,         pointer :: needed(:) => null ()
     character,       pointer :: item_buffer(:) => null ()
   end type
@@ -367,11 +367,11 @@ contains
         rcToReturn=rc)) return
     if (meminfo) call ESMF_VMLogMemInfo ('after Step 1 - constructed send Id/VMId info')
 
-!=== start test and demonstrate ESMF_VMTranslateVMId() =========================
-do i=lbound(vmids_send,1),ubound(vmids_send,1)
-  write (prefixStr,*) "vmids_send(",i,")="
-  call ESMF_VMIdLog(vmids_send(i), prefix=trim(prefixStr), rc=localrc)
-enddo
+!=== start test and demonstrate ESMF_VMTranslateVMId() =========================  !tdk:p
+do i=lbound(vmids_send,1),ubound(vmids_send,1)  !tdk:p
+  write (prefixStr,*) "vmids_send(",i,")="  !tdk:p
+  call ESMF_VMIdLog(vmids_send(i), prefix=trim(prefixStr), rc=localrc)  !tdk:p
+enddo  !tdk:p
 
     allocate(vmintids_send(lbound(vmids_send,1):ubound(vmids_send,1)))
     call ESMF_VMTranslateVMId(vm, vmIds=vmids_send, ids=vmintids_send, &
@@ -380,11 +380,11 @@ enddo
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
 
-do i=lbound(vmids_send,1),ubound(vmids_send,1)
-  write (prefixStr,*) "vmintid=",vmintids_send(i),"vmids_send(",i,")="
-  call ESMF_VMIdLog(vmids_send(i), prefix=trim(prefixStr), rc=localrc)
-enddo
-!=== end test and demonstrate ESMF_VMTranslateVMId() ===========================
+do i=lbound(vmids_send,1),ubound(vmids_send,1) !tdk:p
+  write (prefixStr,*) "vmintid=",vmintids_send(i),"vmids_send(",i,")=" !tdk:p
+  call ESMF_VMIdLog(vmids_send(i), prefix=trim(prefixStr), rc=localrc) !tdk:p
+enddo  !tdk:p
+!=== end test and demonstrate ESMF_VMTranslateVMId() ===========================  !tdk:p
 
     ! 2.) All PETs send their items Ids and VMIds to all the other PETs,
     ! then create local directories of which PETs have which ids/VMIds.
@@ -400,7 +400,7 @@ enddo
     call ESMF_ReconcileExchgIDInfo (vm,  &
         nitems_buf=nitems_buf,  &
         id=ids_send,  &
-        vmid=vmids_send,  &
+        vmid=vmintids_send,  &
         id_info=id_info, &
         rc=localrc)
     if (debug)  &
@@ -426,7 +426,7 @@ enddo
 
     call ESMF_ReconcileCompareNeeds (vm,  &
           id=  ids_send,  &
-        vmid=vmids_send,  &
+        vmid=vmintids_send,  &
         id_info=id_info,  &
         rc=localrc)
     if (debug)  &
@@ -531,7 +531,9 @@ enddo
         end if
         call ESMF_ReconcileDeserialize (state, vm,  &
             obj_buffer=items_recv(i)%cptr,  &
-            vm_ids=id_info(i)%vmid,  &
+            vm_intids=id_info(i)%vmid,  &
+            vm_ids=vmids_send, &
+            vm_ids_asints=vmintids_send, &
             attreconflag=attreconflag, rc=localrc)
       else
         localrc = ESMF_SUCCESS
@@ -571,12 +573,6 @@ enddo
     end if
 
     do, i=0, ubound (id_info, 1)
-      if (associated (id_info(i)%vmid)) then
-        call ESMF_VMIdDestroy (id_info(i)%vmid, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT,  &
-            rcToReturn=rc)) return
-      end if
       if (associated (id_info(i)%id)) then
         deallocate (id_info(i)%id, id_info(i)%vmid, id_info(i)%needed,  &
             stat=memstat)
@@ -610,10 +606,11 @@ enddo
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
 
-    call ESMF_ReconcileZappedProxies (state, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
-        rcToReturn=rc)) return
+    !tdk:rm
+    !call ESMF_ReconcileZappedProxies (state, localrc)
+    !if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    !    ESMF_CONTEXT,  &
+    !    rcToReturn=rc)) return
 
     ! 8.) Attributes on the State itself
 
@@ -653,7 +650,7 @@ enddo
 ! !ARGUMENTS:
     type(ESMF_VM),     intent(in)   :: vm
     integer,           intent(in)   :: id(0:)
-    type(ESMF_VMId),   intent(in)   :: vmid(0:)
+    integer,           intent(in)   :: vmid(0:)
     type(ESMF_ReconcileIDInfo), intent(inout) :: id_info(0:)
     integer,           intent(out)  :: rc
 !
@@ -672,7 +669,9 @@ enddo
 !     contained within it.  It does not return the IDs of nested State
 !     items.
 !   \item[vmid]
-!     The object VMIds of this PETs State itself (in element 0) and the items
+      !tdk:last: rename argument to vm_intid
+!     !tdk:doc: change documentation to account for the integer change
+      The object VMIds of this PETs State itself (in element 0) and the items
 !     contained within it.  It does not return the IDs of nested State
 !     items.  Note that since VMId is a deep object class, the vmid array
 !     has aliases to existing VMId objects, rather than copies of them.
@@ -694,7 +693,7 @@ enddo
 
     type NeedsList_t
       integer          :: id
-      type(ESMF_VMId)  :: vmid
+      integer          :: vmid
       logical, pointer :: offerers(:) => null ()
       integer, pointer :: position(:) => null ()
       type(NeedsList_t), pointer :: next => null ()
@@ -745,7 +744,7 @@ enddo
 ! print *, '  PET', mypet, ': setting needed to .true.', j, k
         do, k = 1, ubound (id, 1)
           if (id(k) == id_info(i)%id(j)) then
-            if (ESMF_VMIdCompare (vmid(k), id_info(i)%vmid(j))) then
+            if (vmid(k) == id_info(i)%vmid(j)) then
 ! print *, '  PET', mypet, ': setting needed to .false.', j, k
               needed = .false.
               exit
@@ -844,7 +843,7 @@ enddo
       type(NeedsList_t),  pointer :: needs_list_1  ! intent(inout)
       integer,         intent(in) :: pet_1
       integer,         intent(in) :: id_1
-      type(ESMF_VMId), intent(in) :: vmid_1
+      integer,         intent(in) :: vmid_1
       integer,         intent(in) :: position
       integer,         intent(out):: rc_1
 
@@ -885,7 +884,7 @@ enddo
       needslist_p => needs_list_1
       do
         if (id_1 == needslist_p%id .and.  &
-            ESMF_VMIdCompare (vmid_1, needslist_p%vmid)) then
+            vmid_1 == needslist_p%vmid) then
 ! print *, 'pet', mypet, ': needs_list_insert: marking match and returing'
           needslist_p%offerers(pet_1) = .true.
           needslist_p%position(pet_1) = position
@@ -1027,14 +1026,16 @@ enddo
 ! !IROUTINE: ESMF_ReconcileDeserialize
 !
 ! !INTERFACE:
-  subroutine ESMF_ReconcileDeserialize (state, vm, obj_buffer, vm_ids,  &
-      attreconflag, rc)
+  subroutine ESMF_ReconcileDeserialize (state, vm, obj_buffer, vm_intids,  &
+      vm_ids, vm_ids_asints, attreconflag, rc)
 !
 ! !ARGUMENTS:
     type (ESMF_State), intent(inout):: state
     type (ESMF_VM),    intent(in)   :: vm
-    character,         pointer      :: obj_buffer(:) ! intent(in)
-    type(ESMF_VMId),   pointer      :: vm_ids(:)     ! intent(in)
+    character,         pointer      :: obj_buffer(:)    ! intent(in)
+    integer,           pointer      :: vm_intids(:)     ! intent(in)
+    type(ESMF_VMId),   pointer      :: vm_ids(:)        ! intent(in)
+    integer, intent(in), dimension(:) :: vm_ids_asints(:) ! intent(in)
     type(ESMF_AttReconcileFlag),intent(in)   :: attreconflag
     integer,           intent(out)  :: rc
 !
@@ -1055,7 +1056,7 @@ enddo
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !EOPI
-
+    !tdk:doc: lots of argument changes. make sure everything is consistent.
     integer :: localrc
     integer :: memstat
 
@@ -1069,9 +1070,10 @@ enddo
     integer :: needs_count
     integer, allocatable :: offset_table(:), type_table(:)
 
-    integer :: i, idx
+    integer :: i, idx, idx_to_assign, jj
     integer :: stateitem_type
     character(ESMF_MAXSTR) :: errstring
+    logical :: found
 
     integer :: mypet
 
@@ -1096,12 +1098,16 @@ enddo
       print *, ESMF_METHOD, ': PET', mypet, ', needs_count =', needs_count
     end if
 
-    if (needs_count /= ubound (vm_ids, 1)) then
+    if (needs_count /= ubound (vm_intids, 1)) then
       write (errstring, '(a,i0,a,i0)') 'size mismatch: needs_count = ', needs_count, ', vm_ids =', ubound (vm_ids, 1)
       call ESMF_LogWrite (msg=errstring, logmsgFlag=ESMF_LOGMSG_ERROR, ESMF_CONTEXT)
       if (ESMF_LogFoundError(ESMF_RC_INTNRL_INCONS, msg='needs_count /= ubound (vm_ids, 1)', &
           ESMF_CONTEXT,  &
           rcToReturn=rc)) return
+    end if
+    if (size(vm_ids) /= size(vm_ids_asints)) then
+      if (ESMF_LogFoundError(ESMF_FAILURE, msg="VM index maps not same length", &
+        ESMF_CONTEXT)) return  ! bail out
     end if
 
     ! Deserialize offset and type tables
@@ -1146,6 +1152,20 @@ enddo
     buffer_offset = ESMF_SIZEOF_DEFINT * (2 + 2*needs_count) ! Skip past count, pad, and offset/type tables
     do, i=1, needs_count
 
+      ! Find the VM to assign for the deserialized objects.
+      found = .false.
+      do, jj=1, size(vm_ids)
+        if (vm_intids(i) == vm_ids_asints(jj)) then
+          idx_to_assign = jj
+          found = .true.
+          exit
+        end if
+      end do
+      if (.not. found) then
+        if (ESMF_LogFoundError(ESMF_FAILURE, msg="index not found for VM mapping", &
+          ESMF_CONTEXT)) return  ! bail out
+      end if
+
       ! Item type
       stateitem_type = type_table(i)
       if (debug) then
@@ -1166,7 +1186,7 @@ enddo
               ESMF_CONTEXT,  &
               rcToReturn=rc)) return
 
-          call c_ESMC_SetVMId(fieldbundle%this, vm_ids(i), localrc)
+          call c_ESMC_SetVMId(fieldbundle%this, vm_ids(idx_to_assign), localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT,  &
               rcToReturn=rc)) return
@@ -1192,7 +1212,7 @@ enddo
             print *, "created field, ready to set id and add to local state"
           end if
 !!DEBUG "created field, ready to set id and add to local state"
-          call c_ESMC_SetVMId(field%ftypep, vm_ids(i), localrc)
+          call c_ESMC_SetVMId(field%ftypep, vm_ids(idx_to_assign), localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT,  &
               rcToReturn=rc)) return
@@ -1221,7 +1241,7 @@ enddo
               ESMF_CONTEXT,  &
               rcToReturn=rc)) return
 
-          call c_ESMC_SetVMId(array, vm_ids(i), localrc)
+          call c_ESMC_SetVMId(array, vm_ids(idx_to_assign), localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT,  &
               rcToReturn=rc)) return
@@ -1249,7 +1269,7 @@ enddo
               ESMF_CONTEXT,  &
               rcToReturn=rc)) return
 
-          call c_ESMC_SetVMId(arraybundle, vm_ids(i), localrc)
+          call c_ESMC_SetVMId(arraybundle, vm_ids(idx_to_assign), localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT,  &
               rcToReturn=rc)) return
@@ -1271,7 +1291,7 @@ enddo
               ESMF_CONTEXT,  &
               rcToReturn=rc)) return
 
-          call c_ESMC_SetVMId(substate%statep, vm_ids(i), localrc)
+          call c_ESMC_SetVMId(substate%statep, vm_ids(idx_to_assign), localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT,  &
               rcToReturn=rc)) return
@@ -1516,7 +1536,7 @@ enddo
     type(ESMF_VM),          intent(in)  :: vm
     integer,                intent(in)  :: nitems_buf(0:)
     integer,                intent(in)  :: id(0:)
-    type(ESMF_VMId),        intent(in)  :: vmid(0:)
+    integer,                intent(in)  :: vmid(0:)
     type(ESMF_ReconcileIDInfo), intent(inout) :: id_info(0:)
     integer,                intent(out) :: rc
 !
@@ -1535,6 +1555,7 @@ enddo
 !     contained within it.  It does not return the IDs of nested State
 !     items.
 !   \item[vmid]
+!     tdk:doc: edit to account for integers. consider renaming to vm_intid
 !     The object VMIds of this PETs State itself (in element 0) and the items
 !     contained within it.  It does not return the IDs of nested State
 !     items.  Note that since VMId is a deep object class, the vmid array
@@ -1556,7 +1577,7 @@ enddo
     integer :: i, ipos
     integer :: memstat
 
-    integer,         allocatable ::   id_recv(:)
+    integer, allocatable :: id_recv(:), vm_intids_recv(:)
 
     logical, parameter :: debug = .false.
     logical, parameter :: meminfo = .true. !tdk:debug
@@ -1602,17 +1623,12 @@ enddo
     call ESMF_LogWrite("max nitems_buf: "//trim(logmsg)) !tdk:p
 
     do, i=0, npets-1
-      !tdk:bc: alter vmid to use an integer here insted of the vmid object
       allocate (  &
           id_info(i)%  id  (0:nitems_buf(i)), &
           id_info(i)%vmid  (0:nitems_buf(i)), &
           id_info(i)%needed(  nitems_buf(i)), &
           stat=memstat)
       if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT,  &
-          rcToReturn=rc)) return
-      call ESMF_VMIdCreate (id_info(i)%vmid, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT,  &
           rcToReturn=rc)) return
       id_info(i)%needed = .false.
@@ -1653,10 +1669,10 @@ enddo
       end do
     end if
 
-    ! Exchange Ids
+    ! Exchange Base Ids -------------------------------------------------------
+    !tdk:optimize: consolidate with VMId exchange
 
-    allocate (id_recv(0:sum (counts_buf_recv+1)-1),  &
-        stat=memstat)
+    allocate(id_recv(0:sum (counts_buf_recv+1)-1), stat=memstat)
     if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
@@ -1680,6 +1696,28 @@ enddo
       id_info(i)%id = id_recv(ipos:ipos+counts_buf_recv(i)-1)
       ipos = ipos + counts_buf_recv(i)
     end do
+    
+    ! Exchange VMIds ----------------------------------------------------------
+
+    allocate(vm_intids_recv(0:sum (counts_buf_recv+1)-1), stat=memstat)
+    if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    call ESMF_VMAllGatherV (vm,  &
+        sendData=vmid, sendCount=size(vmid),  &
+        recvData=id_recv, recvCounts=counts_buf_recv, recvOffsets=displs_buf_recv,  &
+        rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+
+    if (meminfo) call ESMF_VMLogMemInfo ('tp ESMF_ReconcileExchgIDInfo - after VMAllGatherV for Base Ids')
+
+    ipos = 0
+    do, i=0, npets-1
+      id_info(i)%vmid = id_recv(ipos:ipos+counts_buf_recv(i)-1)
+      ipos = ipos + counts_buf_recv(i)
+    end do
 
 !    if (debug) then
 !      do, j=0, npets-1
@@ -1693,8 +1731,7 @@ enddo
 !      end do
 !    end if
 
-    ! Exchange VMIds
-
+!tdk:last: probably remove this code since i won't be reimplementing
 #if 0
     if (trace) then
       call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
@@ -1730,7 +1767,7 @@ enddo
           rcToReturn=rc)) return
       ipos = ipos + counts_buf_recv(i)
     end do
-#else
+!else
 ! VMBcastVMId version
     if (trace) then
       call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
