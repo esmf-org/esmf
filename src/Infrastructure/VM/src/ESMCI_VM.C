@@ -1870,9 +1870,9 @@ int VM::translateVMId(
       vector<unsigned> vasList;
       helper1[helper2[i].indexH1].getVasList(vasList);
       // development log
-      for (unsigned i=0; i<vasList.size(); i++){
+      for (unsigned k=0; k<vasList.size(); k++){
         std::stringstream msg;
-        msg << "vasList[" << i << "]=" << vasList[i];
+        msg << "vasList[" << k << "]=" << vasList[k];
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
       }
       vector<int> petList;
