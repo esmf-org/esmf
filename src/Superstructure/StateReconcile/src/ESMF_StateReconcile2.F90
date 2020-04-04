@@ -367,24 +367,13 @@ contains
         rcToReturn=rc)) return
     if (meminfo) call ESMF_VMLogMemInfo ('after Step 1 - constructed send Id/VMId info')
 
-!=== start test and demonstrate ESMF_VMTranslateVMId() =========================  !tdk:p
-do i=lbound(vmids_send,1),ubound(vmids_send,1)  !tdk:p
-  write (prefixStr,*) "vmids_send(",i,")="  !tdk:p
-  call ESMF_VMIdLog(vmids_send(i), prefix=trim(prefixStr), rc=localrc)  !tdk:p
-enddo  !tdk:p
-
+    ! Translate VMIds to integers for unique identification for reconcile
     allocate(vmintids_send(lbound(vmids_send,1):ubound(vmids_send,1)))
     call ESMF_VMTranslateVMId(vm, vmIds=vmids_send, ids=vmintids_send, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
-
-do i=lbound(vmids_send,1),ubound(vmids_send,1) !tdk:p
-  write (prefixStr,*) "vmintid=",vmintids_send(i),"vmids_send(",i,")=" !tdk:p
-  call ESMF_VMIdLog(vmids_send(i), prefix=trim(prefixStr), rc=localrc) !tdk:p
-enddo  !tdk:p
-!=== end test and demonstrate ESMF_VMTranslateVMId() ===========================  !tdk:p
 
     ! 2.) All PETs send their items Ids and VMIds to all the other PETs,
     ! then create local directories of which PETs have which ids/VMIds.
