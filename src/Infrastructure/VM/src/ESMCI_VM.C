@@ -1779,13 +1779,15 @@ int VM::translateVMId(
       helper1[i].index = i;
     }
     sort(helper1.begin(), helper1.end());
-    
+
+#if 0
     // development log
     for (unsigned i=0; i<helper1.size(); i++){
       std::stringstream prefix;
       prefix << "sorted helper1[" << i << "]";
       helper1[i].vmID->log(prefix.str());
     }
+#endif
     
     // record the unique helper1 index in idsArray for later back reference
     int ii = 0; // init
@@ -1797,13 +1799,15 @@ int VM::translateVMId(
     
     // cut out duplicate elements from sorted helper1 vector
     helper1.erase(unique(helper1.begin(),helper1.end()),helper1.end());
-  
+
+#if 0
     // development log
     for (unsigned i=0; i<helper1.size(); i++){
       std::stringstream prefix;
       prefix << "unique helper1[" << i << "]";
       helper1[i].vmID->log(prefix.str());
     }
+#endif
     
     struct Helper2{
       unsigned indexH1; // index into helper1 vector
@@ -1833,7 +1837,8 @@ int VM::translateVMId(
         helper2.push_back(Helper2(i));
       }
     }
-      
+
+#if 0
     // development log
     for (unsigned i=0; i<helper2.size(); i++){
       std::stringstream msg;
@@ -1841,6 +1846,7 @@ int VM::translateVMId(
         << " - count=" << helper2[i].count;
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
     }
+#endif
     
     map<unsigned,unsigned> vasToPetMap;
     // The global VAS index is equal to the rank in the MPI_COMM_WORLD. It also
@@ -1849,6 +1855,7 @@ int VM::translateVMId(
     for (int i=0; i<petCount; i++)
       vasToPetMap[getVas(i)] = i;
 
+#if 0
     // development log
     map<unsigned,unsigned>::iterator it;
     for (it=vasToPetMap.begin(); it!=vasToPetMap.end(); ++it){
@@ -1857,6 +1864,7 @@ int VM::translateVMId(
         << " - pet=" << it->second;
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
     }
+#endif
         
     // determine rootPet for each entry in helper2, sum up totalLocalIds, and
     // create mpiComm to handle the respective vmKey PET subspace
@@ -1869,12 +1877,14 @@ int VM::translateVMId(
       }
       vector<unsigned> vasList;
       helper1[helper2[i].indexH1].getVasList(vasList);
+#if 0
       // development log
       for (unsigned k=0; k<vasList.size(); k++){
         std::stringstream msg;
         msg << "vasList[" << k << "]=" << vasList[k];
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
       }
+#endif
       vector<int> petList;
       petList.reserve(vasList.size());  // only edge cases might have less PETs
       unsigned kk = 0;
@@ -1884,11 +1894,13 @@ int VM::translateVMId(
           petList.push_back(vasToPetMap[vasList[k]]);
           if (petList[kk]==helper2[i].rootPet)
             helper2[i].subRootPet=kk;
+#if 0
           // development log
           std::stringstream msg;
           msg << "petList["<<kk<<"]=" << petList[kk];
           ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
           // end development log
+#endif
           ++kk;
         }
       }
@@ -1898,7 +1910,8 @@ int VM::translateVMId(
       // clean-up
       MPI_Group_free(&subGroup);
     }
-    
+
+#if 0
     // development log
     for (unsigned i=0; i<helper2.size(); i++){
       std::stringstream msg;
@@ -1912,30 +1925,35 @@ int VM::translateVMId(
       msg << "totalLocalIds=" << totalLocalIds;
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
     }
+#endif
     
     // AllGather() the totalLocalIds
     vector<int> totalLocalIdsList(petCount);
     allgather(&totalLocalIds, &(totalLocalIdsList[0]), sizeof(int));
-    
+
+#if 0
     // development log
     for (unsigned i=0; i<totalLocalIdsList.size(); i++){
       std::stringstream msg;
       msg << "totalLocalIdsList[" << i << "]=" << totalLocalIdsList[i];
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
     }
+#endif
     
     // determine beginning value of localId
     unsigned localId = 0;
     for (int i=0; i<localPet; i++){
       localId += totalLocalIdsList[i];
     }
-    
+
+#if 0
     // development log
     {
       std::stringstream msg;
       msg << "localId=" << localId;
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
     }
+#endif
     
     // determine globally unique integer indices for all the entries in helper2
     for (unsigned i=0; i<helper2.size(); i++){
