@@ -39,7 +39,7 @@ module ESMF_FieldSMMFromFileUTestMod
     rc = ESMF_FAILURE
 
     ! Generate the netCDF weights file.
-    call ESMF_RegridWeightGenFile(srcFile, dstFile, weightFile, rc=localrc)
+    call ESMF_RegridWeightGenFile(srcFile, dstFile, weightFile=weightFile, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return
 

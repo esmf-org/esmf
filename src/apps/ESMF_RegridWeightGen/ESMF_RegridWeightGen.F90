@@ -49,7 +49,7 @@ program ESMF_RegridWeightGenApp
   type(ESMF_FileFormat_Flag) :: srcFileType, dstFileType
   type(ESMF_RegridMethod_Flag) :: methodflag
   type(ESMF_ExtrapMethod_Flag) :: extrapMethodFlag
-  character(len=ESMF_MAXPATHLEN) :: commandbuf1(4)
+  character(len=ESMF_MAXPATHLEN) :: commandbuf1(5)
   character(len=MAXNAMELEN)  :: commandbuf3(9)
   integer            :: commandbuf2(24)
   integer            :: ind, pos
@@ -75,6 +75,8 @@ program ESMF_RegridWeightGenApp
   logical            :: useSrcCorner, useDstCorner
   logical            :: useTilePathFlag
   integer            :: meshdim
+  logical            :: writerhfile, writewgtfile
+  character(len=ESMF_MAXPATHLEN) :: rhfile
 
 
   
@@ -172,15 +174,31 @@ program ESMF_RegridWeightGenApp
       call ESMF_UtilGetArg(ind+1, argvalue=dstfile)
     endif
      
+    writewgtfile = .false.
     call ESMF_UtilGetArgIndex('-w', argindex=ind, rc=rc)
     if (ind == -1) call ESMF_UtilGetArgIndex('--weight', argindex=ind, rc=rc)
     if (ind == -1) then
+      wgtfile = " "
+    else
+      writewgtfile = .true.
+      call ESMF_UtilGetArg(ind+1, argvalue=wgtfile)
+    endif
+
+    writerhfile = .false.
+    call ESMF_UtilGetArgIndex('-rh', argindex=ind, rc=rc)
+    if (ind == -1) call ESMF_UtilGetArgIndex('--rhfile', argindex=ind, rc=rc)
+    if (ind == -1) then
+      rhfile = " "
+    else
+      writerhfile = .true.
+      call ESMF_UtilGetArg(ind+1, argvalue=rhfile)
+    endif
+
+    if (.not. writewgtfile .and. .not. writerhfile) then
       write(*,*)
-      print *, "ERROR: The required argument [-w|--weight] is missing."
+      print *, "ERROR: Either a weight file (-w) or a routehandle file (-rh) must be specified."
       print *, "Use the --help argument to see an explanation of usage."
       call ESMF_Finalize(endflag=ESMF_END_ABORT)
-    else      
-      call ESMF_UtilGetArg(ind+1, argvalue=wgtfile)
     endif
 
     call ESMF_UtilGetArgIndex('-m', argindex=ind, rc=rc)
@@ -778,7 +796,8 @@ program ESMF_RegridWeightGenApp
     commandbuf1(1)=srcfile
     commandbuf1(2)=dstfile
     commandbuf1(3)=wgtfile
-    commandbuf1(4)=tilePath
+    commandbuf1(4)=rhfile
+    commandbuf1(5)=tilePath
     commandbuf3(1)=srcMeshName
     commandbuf3(2)=dstMeshName
     commandbuf3(3)=srcVarName
@@ -933,7 +952,20 @@ program ESMF_RegridWeightGenApp
     srcfile = commandbuf1(1)
     dstfile = commandbuf1(2)
     wgtfile = commandbuf1(3)
-    tilePath = commandbuf1(4)
+    if (wgtfile .eq. ' ') then 
+      writewgtfile = .false.
+    else 
+      writewgtfile = .true.
+    endif
+
+    rhfile = commandbuf1(4)
+    if (rhfile .eq. ' ') then 
+      writerhfile = .false.
+    else 
+      writerhfile = .true.
+    endif
+
+    tilePath = commandbuf1(5)
     if (tilePath .eq. ' ') then 
        useTilePathFlag = .false.
     else 
@@ -1000,54 +1032,173 @@ program ESMF_RegridWeightGenApp
   write(*,*) "extrapNumLevels=",extrapNumLevels
 #endif
 
-  if (useTilePathFlag) then
-      call ESMF_RegridWeightGen(srcfile, dstfile, wgtfile, regridmethod=methodflag, &
-                            polemethod = pole, regridPoleNPnts = poleptrs, unmappedaction = unmappedaction, &
-                            srcFileType = srcFileType, dstFileType = dstFileType, &
-                            ignoreDegenerate = ignoreDegenerate, &
-                            lineType=lineType, &
-                            normType=normType, &
-                            extrapMethod=extrapMethodFlag, &
-                            extrapNumSrcPnts=extrap_num_src_pnts, &
-                            extrapDistExponent=extrap_dist_exponent, &
-                            extrapNumLevels=extrapNumLevels, &
-                            srcRegionalFlag = srcIsRegional, dstRegionalFlag = dstIsRegional, &
-                            srcMeshname = srcMeshname, dstMeshname = dstMeshname, &
-                            srcMissingvalueFlag = srcMissingValue, srcMissingvalueVar = srcVarName, &
-                            dstMissingvalueFlag = dstMissingValue, dstMissingvalueVar = dstVarName, &
-                            useSrcCoordFlag = useSrcCoordVar, useDstCoordFlag = useDstCoordVar, &
-                            srcCoordinateVars = srcCoordNames, dstCoordinateVars = dstCoordNames, &
-                            useUserAreaFlag = userAreaFlag, largefileFlag = largeFileFlag, &
-                            netcdf4FileFlag = netcdf4FileFlag,  &
-                            weightOnlyFlag  = weightOnlyFlag, &
-                            useSrcCornerFlag = useSrcCorner, &
-                            useDstCornerFlag = useDstCorner, &
-                            tileFilePath = trim(tilePath), &
-                            verboseFlag = .true., rc = rc)
+if (writewgtfile) then
+  if (writerhfile) then
+    if (useTilePathFlag) then
+        call ESMF_RegridWeightGen(srcfile, dstfile, &
+                              weightFile=wgtfile, rhFile=rhfile, &
+                              regridmethod=methodflag, &
+                              polemethod = pole, regridPoleNPnts = poleptrs,  unmappedaction = unmappedaction, &
+                              srcFileType = srcFileType, dstFileType = dstFileType,   &
+                              ignoreDegenerate = ignoreDegenerate, &
+                              lineType=lineType, &
+                              normType=normType, &
+                              extrapMethod=extrapMethodFlag, &
+                              extrapNumSrcPnts=extrap_num_src_pnts, &
+                              extrapDistExponent=extrap_dist_exponent, &
+                              extrapNumLevels=extrapNumLevels, &
+                              srcRegionalFlag = srcIsRegional, dstRegionalFlag =  dstIsRegional, &
+                              srcMeshname = srcMeshname, dstMeshname = dstMeshname,   &
+                              srcMissingvalueFlag = srcMissingValue,  srcMissingvalueVar = srcVarName, &
+                              dstMissingvalueFlag = dstMissingValue,  dstMissingvalueVar = dstVarName, &
+                              useSrcCoordFlag = useSrcCoordVar, useDstCoordFlag =   useDstCoordVar, &
+                              srcCoordinateVars = srcCoordNames, dstCoordinateVars  = dstCoordNames, &
+                              useUserAreaFlag = userAreaFlag, largefileFlag =   largeFileFlag, &
+                              netcdf4FileFlag = netcdf4FileFlag,  &
+                              weightOnlyFlag  = weightOnlyFlag, &
+                              useSrcCornerFlag = useSrcCorner, &
+                              useDstCornerFlag = useDstCorner, &
+                              tileFilePath = trim(tilePath), &
+                              verboseFlag = .true., rc = rc)
+    else
+        call ESMF_RegridWeightGen(srcfile, dstfile, &
+                              weightFile=wgtfile, rhFile=rhfile, &
+                              regridmethod=methodflag, &
+                              polemethod = pole, regridPoleNPnts = poleptrs,  unmappedaction = unmappedaction, &
+                              srcFileType = srcFileType, dstFileType = dstFileType,   &
+                              ignoreDegenerate = ignoreDegenerate, &
+                              lineType=lineType, &
+                              normType=normType, &
+                              extrapMethod=extrapMethodFlag, &
+                              extrapNumSrcPnts=extrap_num_src_pnts, &
+                              extrapDistExponent=extrap_dist_exponent, &
+                              extrapNumLevels=extrapNumLevels, &
+                              srcRegionalFlag = srcIsRegional, dstRegionalFlag =  dstIsRegional, &
+                              srcMeshname = srcMeshname, dstMeshname = dstMeshname,   &
+                              srcMissingvalueFlag = srcMissingValue,  srcMissingvalueVar = srcVarName, &
+                              dstMissingvalueFlag = dstMissingValue,  dstMissingvalueVar = dstVarName, &
+                              useSrcCoordFlag = useSrcCoordVar, useDstCoordFlag =   useDstCoordVar, &
+                              srcCoordinateVars = srcCoordNames, dstCoordinateVars  = dstCoordNames, &
+                              useUserAreaFlag = userAreaFlag, largefileFlag =   largeFileFlag, &
+                              netcdf4FileFlag = netcdf4FileFlag,  &
+                              weightOnlyFlag  = weightOnlyFlag, &
+                              useSrcCornerFlag = useSrcCorner, &
+                              useDstCornerFlag = useDstCorner, &
+                              verboseFlag = .true., rc = rc)
+    endif
   else
-      call ESMF_RegridWeightGen(srcfile, dstfile, wgtfile, regridmethod=methodflag, &
-                            polemethod = pole, regridPoleNPnts = poleptrs, unmappedaction = unmappedaction, &
-                            srcFileType = srcFileType, dstFileType = dstFileType, &
-                            ignoreDegenerate = ignoreDegenerate, &
-                            lineType=lineType, &
-                            normType=normType, &
-                            extrapMethod=extrapMethodFlag, &
-                            extrapNumSrcPnts=extrap_num_src_pnts, &
-                            extrapDistExponent=extrap_dist_exponent, &
-                            extrapNumLevels=extrapNumLevels, &
-                            srcRegionalFlag = srcIsRegional, dstRegionalFlag = dstIsRegional, &
-                            srcMeshname = srcMeshname, dstMeshname = dstMeshname, &
-                            srcMissingvalueFlag = srcMissingValue, srcMissingvalueVar = srcVarName, &
-                            dstMissingvalueFlag = dstMissingValue, dstMissingvalueVar = dstVarName, &
-                            useSrcCoordFlag = useSrcCoordVar, useDstCoordFlag = useDstCoordVar, &
-                            srcCoordinateVars = srcCoordNames, dstCoordinateVars = dstCoordNames, &
-                            useUserAreaFlag = userAreaFlag, largefileFlag = largeFileFlag, &
-                            netcdf4FileFlag = netcdf4FileFlag,  &
-                            weightOnlyFlag  = weightOnlyFlag, &
-                            useSrcCornerFlag = useSrcCorner, &
-                            useDstCornerFlag = useDstCorner, &
-                            verboseFlag = .true., rc = rc)
+    if (useTilePathFlag) then
+        call ESMF_RegridWeightGen(srcfile, dstfile, weightFile=wgtfile, &
+                              regridmethod=methodflag, &
+                              polemethod = pole, regridPoleNPnts = poleptrs,  unmappedaction = unmappedaction, &
+                              srcFileType = srcFileType, dstFileType = dstFileType,   &
+                              ignoreDegenerate = ignoreDegenerate, &
+                              lineType=lineType, &
+                              normType=normType, &
+                              extrapMethod=extrapMethodFlag, &
+                              extrapNumSrcPnts=extrap_num_src_pnts, &
+                              extrapDistExponent=extrap_dist_exponent, &
+                              extrapNumLevels=extrapNumLevels, &
+                              srcRegionalFlag = srcIsRegional, dstRegionalFlag =  dstIsRegional, &
+                              srcMeshname = srcMeshname, dstMeshname = dstMeshname,   &
+                              srcMissingvalueFlag = srcMissingValue,  srcMissingvalueVar = srcVarName, &
+                              dstMissingvalueFlag = dstMissingValue,  dstMissingvalueVar = dstVarName, &
+                              useSrcCoordFlag = useSrcCoordVar, useDstCoordFlag =   useDstCoordVar, &
+                              srcCoordinateVars = srcCoordNames, dstCoordinateVars  = dstCoordNames, &
+                              useUserAreaFlag = userAreaFlag, largefileFlag =   largeFileFlag, &
+                              netcdf4FileFlag = netcdf4FileFlag,  &
+                              weightOnlyFlag  = weightOnlyFlag, &
+                              useSrcCornerFlag = useSrcCorner, &
+                              useDstCornerFlag = useDstCorner, &
+                              tileFilePath = trim(tilePath), &
+                              verboseFlag = .true., rc = rc)
+    else
+        call ESMF_RegridWeightGen(srcfile, dstfile, weightFile=wgtfile, &
+                              regridmethod=methodflag, &
+                              polemethod = pole, regridPoleNPnts = poleptrs,  unmappedaction = unmappedaction, &
+                              srcFileType = srcFileType, dstFileType = dstFileType,   &
+                              ignoreDegenerate = ignoreDegenerate, &
+                              lineType=lineType, &
+                              normType=normType, &
+                              extrapMethod=extrapMethodFlag, &
+                              extrapNumSrcPnts=extrap_num_src_pnts, &
+                              extrapDistExponent=extrap_dist_exponent, &
+                              extrapNumLevels=extrapNumLevels, &
+                              srcRegionalFlag = srcIsRegional, dstRegionalFlag =  dstIsRegional, &
+                              srcMeshname = srcMeshname, dstMeshname = dstMeshname,   &
+                              srcMissingvalueFlag = srcMissingValue,  srcMissingvalueVar = srcVarName, &
+                              dstMissingvalueFlag = dstMissingValue,  dstMissingvalueVar = dstVarName, &
+                              useSrcCoordFlag = useSrcCoordVar, useDstCoordFlag =   useDstCoordVar, &
+                              srcCoordinateVars = srcCoordNames, dstCoordinateVars  = dstCoordNames, &
+                              useUserAreaFlag = userAreaFlag, largefileFlag =   largeFileFlag, &
+                              netcdf4FileFlag = netcdf4FileFlag,  &
+                              weightOnlyFlag  = weightOnlyFlag, &
+                              useSrcCornerFlag = useSrcCorner, &
+                              useDstCornerFlag = useDstCorner, &
+                              verboseFlag = .true., rc = rc)
+    endif
   endif
+else
+  if (writerhfile) then
+    if (useTilePathFlag) then
+        call ESMF_RegridWeightGen(srcfile, dstfile, &
+                              rhFile=rhfile, &
+                              regridmethod=methodflag, &
+                              polemethod = pole, regridPoleNPnts = poleptrs,  unmappedaction = unmappedaction, &
+                              srcFileType = srcFileType, dstFileType = dstFileType,   &
+                              ignoreDegenerate = ignoreDegenerate, &
+                              lineType=lineType, &
+                              normType=normType, &
+                              extrapMethod=extrapMethodFlag, &
+                              extrapNumSrcPnts=extrap_num_src_pnts, &
+                              extrapDistExponent=extrap_dist_exponent, &
+                              extrapNumLevels=extrapNumLevels, &
+                              srcRegionalFlag = srcIsRegional, dstRegionalFlag =  dstIsRegional, &
+                              srcMeshname = srcMeshname, dstMeshname = dstMeshname,   &
+                              srcMissingvalueFlag = srcMissingValue,  srcMissingvalueVar = srcVarName, &
+                              dstMissingvalueFlag = dstMissingValue,  dstMissingvalueVar = dstVarName, &
+                              useSrcCoordFlag = useSrcCoordVar, useDstCoordFlag =   useDstCoordVar, &
+                              srcCoordinateVars = srcCoordNames, dstCoordinateVars  = dstCoordNames, &
+                              useUserAreaFlag = userAreaFlag, largefileFlag =   largeFileFlag, &
+                              netcdf4FileFlag = netcdf4FileFlag,  &
+                              weightOnlyFlag  = weightOnlyFlag, &
+                              useSrcCornerFlag = useSrcCorner, &
+                              useDstCornerFlag = useDstCorner, &
+                              tileFilePath = trim(tilePath), &
+                              verboseFlag = .true., rc = rc)
+    else
+        call ESMF_RegridWeightGen(srcfile, dstfile, &
+                              rhFile=rhfile, &
+                              regridmethod=methodflag, &
+                              polemethod = pole, regridPoleNPnts = poleptrs,  unmappedaction = unmappedaction, &
+                              srcFileType = srcFileType, dstFileType = dstFileType,   &
+                              ignoreDegenerate = ignoreDegenerate, &
+                              lineType=lineType, &
+                              normType=normType, &
+                              extrapMethod=extrapMethodFlag, &
+                              extrapNumSrcPnts=extrap_num_src_pnts, &
+                              extrapDistExponent=extrap_dist_exponent, &
+                              extrapNumLevels=extrapNumLevels, &
+                              srcRegionalFlag = srcIsRegional, dstRegionalFlag =  dstIsRegional, &
+                              srcMeshname = srcMeshname, dstMeshname = dstMeshname,   &
+                              srcMissingvalueFlag = srcMissingValue,  srcMissingvalueVar = srcVarName, &
+                              dstMissingvalueFlag = dstMissingValue,  dstMissingvalueVar = dstVarName, &
+                              useSrcCoordFlag = useSrcCoordVar, useDstCoordFlag =   useDstCoordVar, &
+                              srcCoordinateVars = srcCoordNames, dstCoordinateVars  = dstCoordNames, &
+                              useUserAreaFlag = userAreaFlag, largefileFlag =   largeFileFlag, &
+                              netcdf4FileFlag = netcdf4FileFlag,  &
+                              weightOnlyFlag  = weightOnlyFlag, &
+                              useSrcCornerFlag = useSrcCorner, &
+                              useDstCornerFlag = useDstCorner, &
+                              verboseFlag = .true., rc = rc)
+    endif
+  else
+    write(*,*)
+    print *, "ERROR: Either a weight file (-w) or a routehandle file (-rh) must be specified."
+    print *, "Use the --help argument to see an explanation of usage."
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  endif
+endif
 
   if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
 
@@ -1089,6 +1240,7 @@ contains
     print *, "Usage: ESMF_RegridWeightGen --source|-s src_grid_filename" 
     print *, "                           --destination|-d dst_grid_filename"
     print *, "                      --weight|-w out_weight_file "
+    print *, "                      [--rhfile|-rh out_routehandle_file]"
     print *, "                      [--method|-m bilinear|patch|neareststod|nearestdtos|conserve|conserve2nd]"
     print *, "                      [--pole|-p all|none|teeth|<N>]"
     print *, "                      [--line_type|-l cartesian|greatcircle]"
@@ -1124,6 +1276,8 @@ contains
     print *, "--destination or -d - a required argument specifying the destination grid"
     print *, "                      file name"
     print *, "--weight or -w - a required argument specifying the output regridding weight"
+    print *, "                 file name"
+    print *, "--rhfile or -rh - an optional argument specifying the output routehandle"
     print *, "                 file name"
     print *, "--method or -m - an optional argument specifying which interpolation method is"
     print *, "                 used.  The default method is bilinear."
