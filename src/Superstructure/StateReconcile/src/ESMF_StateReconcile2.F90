@@ -596,10 +596,10 @@ contains
         rcToReturn=rc)) return
 
     !tdk:rm
-    call ESMF_ReconcileZappedProxies (state, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
-        rcToReturn=rc)) return
+    !call ESMF_ReconcileZappedProxies (state, localrc)
+    !if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    !    ESMF_CONTEXT,  &
+    !    rcToReturn=rc)) return
 
     ! 8.) Attributes on the State itself
 
