@@ -32,10 +32,13 @@ class ESMP_Field(ct.Structure):
 class ESMP_GridStruct(ct.Structure):
     _fields_ = [("ptr", ct.c_void_p)]
 
+class ESMP_LocStream(ct.Structure):
+    _fields_ = [("ptr", ct.c_void_p)]
+
 class ESMP_Mesh(ct.Structure):
     _fields_ = [("ptr", ct.c_void_p)]
 
-class ESMP_LocStream(ct.Structure):
+class ESMP_RouteHandle(ct.Structure):
     _fields_ = [("ptr", ct.c_void_p)]
 
 class ESMP_VM(ct.Structure):
@@ -1923,7 +1926,7 @@ def ESMP_FieldRegridGetArea(field):
 
 
 _ESMF.ESMC_FieldRegridRelease.restype = ct.c_int
-_ESMF.ESMC_FieldRegridRelease.argtypes = [ct.POINTER(ct.c_void_p)]
+_ESMF.ESMC_FieldRegridRelease.argtypes = [ct.POINTER(ESMP_RouteHandle)]
 
 def ESMP_FieldRegridRelease(routehandle):
     """
@@ -1963,7 +1966,7 @@ _ESMF.ESMC_FieldRegridStore.argtypes = [ct.c_void_p,              # srcField
                                         ct.c_void_p,              # dstField
                                         OptionalStructPointer,    # srcMaskValues
                                         OptionalStructPointer,    # dstMaskValues
-                                        ct.POINTER(ct.c_void_p),  # routehandle
+                                        ct.POINTER(ESMP_RouteHandle),  # routehandle
                                         OptionalNamedConstant,    # regridmethod
                                         OptionalNamedConstant,    # polemethod
                                         ct.POINTER(ct.c_void_p),  # regridPoleNPnts
@@ -2006,7 +2009,7 @@ def ESMP_FieldRegridStore(srcField,
     documentation.
     """
 
-    routehandle = ct.c_void_p(1)
+    routehandle = ESMP_RouteHandle()
     if regridPoleNPnts:
         regridPoleNPnts_ct = ct.byref(ct.c_void_p(regridPoleNPnts))
     else:
@@ -2077,7 +2080,7 @@ _ESMF.ESMC_FieldRegridStoreFile.argtypes = [ct.c_void_p, ct.c_void_p,
                                             ct.c_char_p,
                                             OptionalStructPointer,
                                             OptionalStructPointer,
-                                            ct.POINTER(ct.c_void_p),
+                                            ct.POINTER(ESMP_RouteHandle),
                                             OptionalNamedConstant,
                                             OptionalNamedConstant,
                                             ct.POINTER(ct.c_void_p),
@@ -2146,7 +2149,7 @@ def ESMP_FieldRegridStoreFile(srcField, dstField, filename,
         ESMP_Field (optional)               :: srcFracField\n
         ESMP_Field (optional)               :: dstFracField\n
     """
-    routehandle = ct.c_void_p(0)
+    routehandle = ESMP_RouteHandle()
     if regridPoleNPnts:
         regridPoleNPnts_ct = ct.byref(ct.c_void_p(regridPoleNPnts))
     else:
@@ -2204,7 +2207,7 @@ def ESMP_FieldRegridStoreFile(srcField, dstField, filename,
     return routehandle
 
 _ESMF.ESMC_FieldRegrid.restype = ct.c_int
-_ESMF.ESMC_FieldRegrid.argtypes = [ct.c_void_p, ct.c_void_p, ct.c_void_p,
+_ESMF.ESMC_FieldRegrid.argtypes = [ct.c_void_p, ct.c_void_p, ESMP_RouteHandle,
                                    OptionalNamedConstant]
 
 def ESMP_FieldRegrid(srcField, dstField, routehandle, zeroregion=None):
@@ -2226,7 +2229,7 @@ def ESMP_FieldRegrid(srcField, dstField, routehandle, zeroregion=None):
 
 _ESMF.ESMC_FieldSMMStore.restype = ct.c_int
 _ESMF.ESMC_FieldSMMStore.argtypes = [ct.c_void_p, ct.c_void_p, ct.c_char_p,
-                                     ct.c_void_p, ct.c_bool,
+                                     ct.POINTER(ESMP_RouteHandle), ct.c_bool,
                                      ct.POINTER(ct.c_int), ct.POINTER(ct.c_int)]
 @deprecated
 def ESMP_FieldSMMStore(srcField, dstField, filename,
@@ -2246,7 +2249,7 @@ def ESMP_FieldSMMStore(srcField, dstField, filename,
         ESMP_Field                          :: srcField\n
         ESMP_Field                          :: dstField\n
     """
-    routehandle = ct.c_void_p(0)
+    routehandle = ESMP_RouteHandle()
     b_filename = filename.encode('utf-8')
 
     rc = _ESMF.ESMC_FieldSMMStore(srcField.struct.ptr,
@@ -2261,6 +2264,7 @@ def ESMP_FieldSMMStore(srcField, dstField, filename,
 
     return routehandle
 
+#### File Inquiry Utilities ##############################################
 _ESMF.ESMC_ScripInq.restype = None
 _ESMF.ESMC_ScripInq.argtypes = [Py3Char,
                                 np.ctypeslib.ndpointer(dtype=np.int32),
@@ -2311,3 +2315,39 @@ def ESMP_GridspecInq(filename):
         raise ValueError('ESMC_GridspecInq() failed with rc = '+str(rc)+'.    '+
                          constants._errmsg)
     return rank, ndims, grid_dims
+
+#### RouteHandle #####################################################
+
+_ESMF.ESMC_RouteHandleCreateFromFile.restype = ESMP_RouteHandle
+_ESMF.ESMC_RouteHandleCreateFromFile.argtypes = [Py3Char]
+def ESMP_RouteHandleCreateFromFile(filename):
+    """
+    Preconditions: ESMP has been initialized.\n
+    Postconditions: An ESMP_RouteHandle has been created.\n
+    Arguments:\n
+        :RETURN: ESMP_RouteHandle           :: routehandle\n
+        String                              :: filename\n
+    """
+    lrc = ct.c_int(0)
+
+    routehandle = _ESMF.ESMC_RouteHandleCreateFromFile(filename, ct.byref(lrc))
+    rc = lrc.value
+    if rc != constants._ESMP_SUCCESS:
+        raise NameError('ESMC_RouteHandleCreateFromFile() failed with rc = '+str(rc))
+    return routehandle
+
+_ESMF.ESMC_RouteHandleWrite.restype = ct.c_int
+_ESMF.ESMC_RouteHandleWrite.argtypes = [ESMP_RouteHandle, Py3Char]
+def ESMP_RouteHandleWrite(routehandle, filename):
+    """
+    Preconditions: A RouteHandle has been created.\n
+    Postconditions: A file has been written with the RouteHandle information.\n
+    Arguments:\n
+        String                              :: filename\n
+    """
+
+    rc = _ESMF.ESMC_RouteHandleWrite(routehandle, filename)
+    if rc != constants._ESMP_SUCCESS:
+        raise NameError('ESMC_RouteHandleWrite() failed with rc = '+str(rc))
+    return
+

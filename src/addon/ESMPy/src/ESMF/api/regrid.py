@@ -33,7 +33,8 @@ class Regrid(object):
 
     *OPTIONAL:*
 
-    :param string filename: path to the output netCDF weight file
+    :param string filename: path to the output netCDF weight file.
+    :param string rh_filename: path to the output RouteHandle file.
     :param ndarray src_mask_values: a numpy array of values that should be
         considered masked value on the source :class:`~ESMF.api.field.Field`.
     :param ndarray dst_mask_values: a numpy array of values that should be
@@ -96,7 +97,8 @@ class Regrid(object):
     """
 
     @initialize
-    def __init__(self, srcfield=None, dstfield=None, filename=None, src_mask_values=None,
+    def __init__(self, srcfield=None, dstfield=None, filename=None, rh_filename=None, 
+                 src_mask_values=None,
                  dst_mask_values=None, regrid_method=None, pole_method=None,
                  regrid_pole_npoints=None, line_type=None, norm_type=None, extrap_method=None,
                  extrap_num_src_pnts=None, extrap_dist_exponent=None, unmapped_action=None,
@@ -187,6 +189,9 @@ class Regrid(object):
             # ctypes
             if factors:
                 self._handle_factors_(fil, fl, num_factors)
+
+        if rh_filename is not None:
+            ESMP_RouteHandleWrite(self._routehandle, rh_filename)
 
         self._srcfield = srcfield
         self._dstfield = dstfield
@@ -525,12 +530,22 @@ class RegridFromFile(object):
         may be overwritten by this call.
     :param string filename: the name of the file from which to retrieve the
         weights.
+    :param string rh_filename: the name of the file from which to retrieve the
+        routehandle information.
     """
 
     @initialize
-    def __init__(self, srcfield, dstfield, filename):
+    def __init__(self, srcfield, dstfield, filename=None, rh_filename=None):
 
-        self._routehandle = ESMP_FieldSMMStore(srcfield, dstfield, filename)
+        if (filename is not None) and (rh_filename is not None):
+            raise ValueError('only a regrid file or a routehandle file can be specified')
+        elif (filename is None) and (rh_filename is None):
+            raise ValueError('either a regrid file or a routehandle file must be specified')
+
+        if filename is not None:
+            self._routehandle = ESMP_FieldSMMStore(srcfield, dstfield, filename)
+        elif rh_filename is not None:
+            self._routehandle = ESMP_RouteHandleCreateFromFile(rh_filename)
 
         # Holds arbitrary metadata if needed by the client.
         self._meta = {}
