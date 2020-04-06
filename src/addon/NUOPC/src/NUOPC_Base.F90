@@ -68,6 +68,7 @@ module NUOPC_Base
   
   ! internal Utility API
   public NUOPC_ChopString                 ! method
+  public NUOPC_LogPetList                 ! method
 
 !==============================================================================
 ! 
@@ -4668,6 +4669,53 @@ module NUOPC_Base
     enddo
     chopStringList(count+1) = trim(string(j:len(string)))
     deallocate(chopPos)
+    
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: NUOPC_LogPetList - Chop a string into sub-strings
+! !INTERFACE:
+  subroutine NUOPC_LogPetList(petList, name, rc)
+! !ARGUMENTS:
+    integer                        :: petList(:)
+    character(*)                   :: name
+    integer, intent(out), optional :: rc
+! !DESCRIPTION:
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[petList]
+!     The petList to be logged.
+!   \item[name]
+!     The component name that is calling this method.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+  !-----------------------------------------------------------------------------
+    ! local variables
+    character(ESMF_MAXSTR)  :: petListBuffer(100)
+    integer                 :: k, lineCount, localrc
+    
+    if (size(petList) <= 1000) then
+      ! have the resources to print the entire petList
+      write (petListBuffer, "(10I7)") petList
+      lineCount = size(petList)/10
+      if ((size(petList)/10)*10 /= size(petList)) &
+        lineCount = lineCount + 1
+      do k=1, lineCount
+        call ESMF_LogWrite(petListBuffer(k), ESMF_LOGMSG_INFO, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU,&
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      enddo
+    endif
     
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
