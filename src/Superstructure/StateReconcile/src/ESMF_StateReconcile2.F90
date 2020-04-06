@@ -292,9 +292,9 @@ contains
     integer, pointer :: nitems_buf(:)
     type (ESMF_StateItemWrap), pointer :: siwrap(:)
 
-    integer,         pointer :: ids_send(:), itemtypes_send(:)
+    integer,         pointer :: ids_send(:), itemtypes_send(:), vm_ids_asints(:)
     type(ESMF_VMId), pointer :: vmids_send(:)
-    integer, allocatable     :: vmintids_send(:)
+    integer, allocatable, target :: vmintids_send(:)
 
     type(ESMF_ReconcileIDInfo), allocatable :: id_info(:)
 
@@ -311,7 +311,10 @@ contains
 
     character(160)  :: prefixStr
 
+    ! -------------------------------------------------------------------------
+
     localrc = ESMF_RC_NOT_IMPL
+    nullify(vm_ids_asints)
 
     call ESMF_VMGet(vm, localPet=mypet, petCount=npets, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -518,11 +521,12 @@ contains
           print *, '    items_recv(', lbound (items_recv(i)%cptr),  &
               ':', ubound (items_recv(i)%cptr), ')'
         end if
+        vm_ids_asints => vmintids_send
         call ESMF_ReconcileDeserialize (state, vm,  &
             obj_buffer=items_recv(i)%cptr,  &
             vm_intids=id_info(i)%vmid,  &
             vm_ids=vmids_send, &
-            vm_ids_asints=vmintids_send, &
+            vm_ids_asints=vm_ids_asints, &
             attreconflag=attreconflag, rc=localrc)
       else
         localrc = ESMF_SUCCESS
@@ -1024,7 +1028,7 @@ contains
     character,         pointer      :: obj_buffer(:)    ! intent(in)
     integer,           pointer      :: vm_intids(:)     ! intent(in)
     type(ESMF_VMId),   pointer      :: vm_ids(:)        ! intent(in)
-    integer, intent(in), dimension(:) :: vm_ids_asints(:) ! intent(in)
+    integer,           pointer      :: vm_ids_asints(:) ! intent(int)
     type(ESMF_AttReconcileFlag),intent(in)   :: attreconflag
     integer,           intent(out)  :: rc
 !
@@ -1096,8 +1100,12 @@ contains
     end if
     if (size(vm_ids) /= size(vm_ids_asints)) then
       if (ESMF_LogFoundError(ESMF_FAILURE, msg="VM index maps not same length", &
-        ESMF_CONTEXT)) return  ! bail out
+        ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
     end if
+    write(errstring, *) "size(vm_ids)=", size(vm_ids) !tdk:p
+    call ESMF_LogWrite(trim(errstring)) !tdk:p
+
+    ! -------------------------------------------------------------------------
 
     ! Deserialize offset and type tables
     if (debug) then
@@ -1143,16 +1151,22 @@ contains
 
       ! Find the VM to assign for the deserialized objects.
       found = .false.
-      do, jj=1, size(vm_ids)
+      do, jj=lbound(vm_ids, 1), ubound(vm_ids, 1)
         if (vm_intids(i) == vm_ids_asints(jj)) then
           idx_to_assign = jj
           found = .true.
           exit
         end if
       end do
-      if (.not. found) then
+      if (found .eqv. .false.) then
         if (ESMF_LogFoundError(ESMF_FAILURE, msg="index not found for VM mapping", &
-          ESMF_CONTEXT)) return  ! bail out
+          ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
+      end if
+      if (found) then
+        if (idx_to_assign > size(vm_ids)) then
+          if (ESMF_LogFoundError(ESMF_FAILURE, msg="vm_ids too small", &
+            ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
+        end if
       end if
 
       ! Item type
