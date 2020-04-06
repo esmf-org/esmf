@@ -127,6 +127,36 @@ contains
 
 !==============================================================================
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ReconcileCheckVMIds"
+subroutine ESMF_ReconcileCheckVMIds(toCheck, rc)
+    !tdk:doc
+    integer, target, intent(in) :: toCheck(:)
+    integer, intent(out) :: rc
+
+    integer :: unique_count, ii, jj, sub_unique_count
+
+    unique_count = 0
+    do ii=lbound(toCheck,1), ubound(toCheck,1)
+      sub_unique_count = 0
+      do jj=lbound(toCheck,1), ubound(toCheck,1)
+        if (toCheck(ii) == toCheck(jj)) then
+          sub_unique_count = sub_unique_count + 1
+        end if
+      end do
+      if (sub_unique_count == 1) then
+        unique_count = unique_count + 1
+      end if
+    end do
+
+    if (size(toCheck) == unique_count) then
+      rc = ESMF_SUCCESS
+    else
+      if (ESMF_LogFoundError(ESMF_FAILURE, msg="values in toCheck not unique", &
+              ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
+    end if
+end subroutine ESMF_ReconcileCheckVMIds
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -310,6 +340,7 @@ contains
     logical, parameter :: trace = .false.
 
     character(160)  :: prefixStr
+    character(len=ESMF_MAXSTR) :: logmsg
 
     ! -------------------------------------------------------------------------
 
@@ -377,6 +408,11 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
+
+    write(logmsg, *) "vmintids_send=", vmintids_send !tdk:p
+    call ESMF_LogWrite(trim(logmsg)) !tdk:p
+    call ESMF_ReconcileCheckVMIds(vmintids_send, localrc)  !tdk:debug
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return !tdk:debug
 
     ! 2.) All PETs send their items Ids and VMIds to all the other PETs,
     ! then create local directories of which PETs have which ids/VMIds.
@@ -1159,6 +1195,10 @@ contains
         end if
       end do
       if (found .eqv. .false.) then
+        write(errstring, *) "vm_intids(i)=", vm_intids(i) !tdk:p
+        call ESMF_LogWrite(trim(errstring)) !tdk:p
+        write(errstring, *) "vm_ids_asints=", vm_ids_asints !tdk:p
+        call ESMF_LogWrite(trim(errstring)) !tdk:p
         if (ESMF_LogFoundError(ESMF_FAILURE, msg="index not found for VM mapping", &
           ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
       end if
