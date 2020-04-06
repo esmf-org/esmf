@@ -4700,21 +4700,26 @@ module NUOPC_Base
 !EOPI
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR)  :: petListBuffer(100)
-    integer                 :: k, lineCount, localrc
+    character(len=80)       :: petListBuffer
+    integer                 :: i, lineCount, extra, localrc
+
+    lineCount = size(petList)/10
+    extra = size(petList) - (size(petList)/10)*10
     
-    if (size(petList) <= 1000) then
-      ! have the resources to print the entire petList
-      write (petListBuffer, "(10I7)") petList
-      lineCount = size(petList)/10
-      if ((size(petList)/10)*10 /= size(petList)) &
-        lineCount = lineCount + 1
-      do k=1, lineCount
-        call ESMF_LogWrite(petListBuffer(k), ESMF_LOGMSG_INFO, rc=localrc)
-        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU,&
-          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-          return  ! bail out
-      enddo
+    do i=1, lineCount
+      write (petListBuffer, "(10I7)") petList((i-1)*10+1:i+10)
+      call ESMF_LogWrite(petListBuffer, ESMF_LOGMSG_INFO, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU,&
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    enddo
+    
+    if (extra>0) then
+      write (petListBuffer, "(10I7)") petList((i-1)*10+1:(i-1)*10+extra)
+      call ESMF_LogWrite(petListBuffer, ESMF_LOGMSG_INFO, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU,&
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
     endif
     
     ! return successfully
