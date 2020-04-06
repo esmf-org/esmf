@@ -1471,85 +1471,164 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)
     endif
 
-    if (useSrcMask .and. useDstMask) then
-      call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
-              srcMaskValues = maskvals, dstMaskValues = maskvals, &
-              unmappedaction=localUnmappedaction, &
-              ignoreDegenerate=localIgnoreDegenerate, &
-              routehandle=rhandle, &
-              factorIndexList=factorIndexList, factorList=factorList, &
-              srcFracField=srcFracField, dstFracField=dstFracField, &
-              regridmethod = localRegridMethod, &
-              polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
-              lineType=localLineType, &
-              normType=localNormType, &
-              extrapMethod=extrapMethod, &
-              extrapNumSrcPnts=extrapNumSrcPnts, &
-              extrapDistExponent=extrapDistExponent, &
-              extrapNumLevels=extrapNumLevels, &
-              rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-    else if (useSrcMask) then
-      call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
-              srcMaskValues = maskvals, &
-              unmappedaction=localUnmappedaction, &
-              ignoreDegenerate=localIgnoreDegenerate, &
-              routehandle=rhandle, &
-              factorIndexList=factorIndexList, factorList=factorList, &
-              srcFracField=srcFracField, dstFracField=dstFracField, &
-              regridmethod = localRegridMethod, &
-              polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
-              lineType=localLineType, &
-              normType=localNormType, &
-              extrapMethod=extrapMethod, &
-              extrapNumSrcPnts=extrapNumSrcPnts, &
-              extrapDistExponent=extrapDistExponent, &
-              extrapNumLevels=extrapNumLevels, &
-              rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-    else if (useDstMask) then
-      call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
-              dstMaskValues = maskvals, &
-              unmappedaction=localUnmappedaction, &
-              ignoreDegenerate=localIgnoreDegenerate, &
-              routehandle=rhandle, &
-              factorIndexList=factorIndexList, factorList=factorList, &
-              srcFracField=srcFracField, dstFracField=dstFracField, &
-              regridmethod = localRegridMethod, &
-              polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
-              lineType=locallineType, &
-              normType=localNormType, &
-              extrapMethod=extrapMethod, &
-              extrapNumSrcPnts=extrapNumSrcPnts, &
-              extrapDistExponent=extrapDistExponent, &
-              extrapNumLevels=extrapNumLevels, &
-              rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-    else        
-      call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
-              unmappedaction=localUnmappedaction, &
-              ignoreDegenerate=localIgnoreDegenerate, &
-              routehandle=rhandle, &
-              factorIndexList=factorIndexList, factorList=factorList, &
-              srcFracField=srcFracField, dstFracField=dstFracField, &
-              regridmethod = localRegridMethod, &
-              polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
-              lineType=locallineType, &
-              normType=localNormType, &
-              extrapMethod=extrapMethod, &
-              extrapNumSrcPnts=extrapNumSrcPnts, &
-              extrapDistExponent=extrapDistExponent, &
-              extrapNumLevels=extrapNumLevels, &
-              rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present (rhFile)) then
+      if (useSrcMask .and. useDstMask) then
+        call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
+                srcMaskValues = maskvals, dstMaskValues = maskvals, &
+                unmappedaction=localUnmappedaction, &
+                ignoreDegenerate=localIgnoreDegenerate, &
+                routehandle=rhandle, &
+                factorIndexList=factorIndexList, factorList=factorList, &
+                srcFracField=srcFracField, dstFracField=dstFracField, &
+                regridmethod = localRegridMethod, &
+                polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
+                lineType=localLineType, &
+                normType=localNormType, &
+                extrapMethod=extrapMethod, &
+                extrapNumSrcPnts=extrapNumSrcPnts, &
+                extrapDistExponent=extrapDistExponent, &
+                extrapNumLevels=extrapNumLevels, &
+                rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+      else if (useSrcMask) then
+        call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
+                srcMaskValues = maskvals, &
+                unmappedaction=localUnmappedaction, &
+                ignoreDegenerate=localIgnoreDegenerate, &
+                routehandle=rhandle, &
+                factorIndexList=factorIndexList, factorList=factorList, &
+                srcFracField=srcFracField, dstFracField=dstFracField, &
+                regridmethod = localRegridMethod, &
+                polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
+                lineType=localLineType, &
+                normType=localNormType, &
+                extrapMethod=extrapMethod, &
+                extrapNumSrcPnts=extrapNumSrcPnts, &
+                extrapDistExponent=extrapDistExponent, &
+                extrapNumLevels=extrapNumLevels, &
+                rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+      else if (useDstMask) then
+        call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
+                dstMaskValues = maskvals, &
+                unmappedaction=localUnmappedaction, &
+                ignoreDegenerate=localIgnoreDegenerate, &
+                routehandle=rhandle, &
+                factorIndexList=factorIndexList, factorList=factorList, &
+                srcFracField=srcFracField, dstFracField=dstFracField, &
+                regridmethod = localRegridMethod, &
+                polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
+                lineType=locallineType, &
+                normType=localNormType, &
+                extrapMethod=extrapMethod, &
+                extrapNumSrcPnts=extrapNumSrcPnts, &
+                extrapDistExponent=extrapDistExponent, &
+                extrapNumLevels=extrapNumLevels, &
+                rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+      else        
+        call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
+                unmappedaction=localUnmappedaction, &
+                ignoreDegenerate=localIgnoreDegenerate, &
+                routehandle=rhandle, &
+                factorIndexList=factorIndexList, factorList=factorList, &
+                srcFracField=srcFracField, dstFracField=dstFracField, &
+                regridmethod = localRegridMethod, &
+                polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
+                lineType=locallineType, &
+                normType=localNormType, &
+                extrapMethod=extrapMethod, &
+                extrapNumSrcPnts=extrapNumSrcPnts, &
+                extrapDistExponent=extrapDistExponent, &
+                extrapNumLevels=extrapNumLevels, &
+                rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+    else
+      if (useSrcMask .and. useDstMask) then
+        call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
+                srcMaskValues = maskvals, dstMaskValues = maskvals, &
+                unmappedaction=localUnmappedaction, &
+                ignoreDegenerate=localIgnoreDegenerate, &
+                factorIndexList=factorIndexList, factorList=factorList, &
+                srcFracField=srcFracField, dstFracField=dstFracField, &
+                regridmethod = localRegridMethod, &
+                polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
+                lineType=localLineType, &
+                normType=localNormType, &
+                extrapMethod=extrapMethod, &
+                extrapNumSrcPnts=extrapNumSrcPnts, &
+                extrapDistExponent=extrapDistExponent, &
+                extrapNumLevels=extrapNumLevels, &
+                rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+      else if (useSrcMask) then
+        call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
+                srcMaskValues = maskvals, &
+                unmappedaction=localUnmappedaction, &
+                ignoreDegenerate=localIgnoreDegenerate, &
+                factorIndexList=factorIndexList, factorList=factorList, &
+                srcFracField=srcFracField, dstFracField=dstFracField, &
+                regridmethod = localRegridMethod, &
+                polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
+                lineType=localLineType, &
+                normType=localNormType, &
+                extrapMethod=extrapMethod, &
+                extrapNumSrcPnts=extrapNumSrcPnts, &
+                extrapDistExponent=extrapDistExponent, &
+                extrapNumLevels=extrapNumLevels, &
+                rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+      else if (useDstMask) then
+        call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
+                dstMaskValues = maskvals, &
+                unmappedaction=localUnmappedaction, &
+                ignoreDegenerate=localIgnoreDegenerate, &
+                factorIndexList=factorIndexList, factorList=factorList, &
+                srcFracField=srcFracField, dstFracField=dstFracField, &
+                regridmethod = localRegridMethod, &
+                polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
+                lineType=locallineType, &
+                normType=localNormType, &
+                extrapMethod=extrapMethod, &
+                extrapNumSrcPnts=extrapNumSrcPnts, &
+                extrapDistExponent=extrapDistExponent, &
+                extrapNumLevels=extrapNumLevels, &
+                rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+      else        
+        call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
+                unmappedaction=localUnmappedaction, &
+                ignoreDegenerate=localIgnoreDegenerate, &
+                factorIndexList=factorIndexList, factorList=factorList, &
+                srcFracField=srcFracField, dstFracField=dstFracField, &
+                regridmethod = localRegridMethod, &
+                polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
+                lineType=locallineType, &
+                normType=localNormType, &
+                extrapMethod=extrapMethod, &
+                extrapNumSrcPnts=extrapNumSrcPnts, &
+                extrapDistExponent=extrapDistExponent, &
+                extrapNumLevels=extrapNumLevels, &
+                rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
     endif
 #ifdef DOBENCHMARK
     call ESMF_VMBarrier(vm)
