@@ -136,7 +136,8 @@ program ESMF_RegridWeightGenApp
   !   then broadcast the results to the rest of the Pets
   !
   if (PetNo == 0) then
-    call ESMF_UtilGetArgIndex('--help', argindex=ind)
+    call ESMF_UtilGetArgIndex('-h', argindex=ind)
+    if (ind == -1) call ESMF_UtilGetArgIndex('--help', argindex=ind)
     if (ind /= -1) then
           call PrintUsage()
       terminateProg=.true.
@@ -185,8 +186,7 @@ program ESMF_RegridWeightGenApp
     endif
 
     writerhfile = .false.
-    call ESMF_UtilGetArgIndex('-rh', argindex=ind, rc=rc)
-    if (ind == -1) call ESMF_UtilGetArgIndex('--rhfile', argindex=ind, rc=rc)
+    call ESMF_UtilGetArgIndex('--routehandle', argindex=ind, rc=rc)
     if (ind == -1) then
       rhfile = " "
     else
