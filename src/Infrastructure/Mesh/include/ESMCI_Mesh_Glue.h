@@ -98,6 +98,10 @@ void ESMCI_meshfreememory(Mesh **meshpp, int *rc);
 
 void ESMCI_meshget(Mesh **meshpp, int *num_nodes, int *num_elements, int *rc);
 
+void ESMCI_MeshGetNodeCount(Mesh *meshpp, int *nodeCount, int *rc);
+void ESMCI_MeshGetElemCount(Mesh *meshpp, int *elemCount, int *rc);
+void ESMCI_MeshGetElemConnCount(Mesh *meshpp, int *elemConnCount, int *rc);
+
 
 void ESMCI_meshcreatenodedistgrid(Mesh **meshpp, int *ngrid, int *num_lnodes, int *rc);
 

@@ -4741,6 +4741,13 @@ end function ESMF_MeshEmptyCreate
 !
 ! !INTERFACE:
       subroutine ESMF_MeshGet(mesh, parametricDim, spatialDim, &
+                   nodeCount, nodeIds, nodeCoords, nodeOwners, &
+                   nodeMaskIsPresent, nodeMask,&
+                   elementCount, elementIds, elementTypes, &
+                   elementConnCount, elementConn, &
+                   elementMaskIsPresent,elementMask, &
+                   elementAreaIsPresent, elementArea, &
+                   elementCoordsIsPresent, elementCoords, &
                    nodalDistgridIsPresent, nodalDistgrid, &
                    elementDistgridIsPresent, elementDistgrid, &
                    numOwnedNodes, ownedNodeCoords, &
@@ -4754,6 +4761,23 @@ end function ESMF_MeshEmptyCreate
     type(ESMF_Mesh),          intent(in)            :: mesh
     integer,                  intent(out), optional :: parametricDim
     integer,                  intent(out), optional :: spatialDim
+    integer,                  intent(out), optional :: nodeCount
+    integer,                  intent(out), optional :: nodeIds(:)
+    real(ESMF_KIND_R8),       intent(out), optional :: nodeCoords(:)
+    integer,                  intent(out), optional :: nodeOwners(:)
+    logical,                  intent(out), optional :: nodeMaskIsPresent
+    integer,                  intent(out), optional :: nodeMask(:)
+    integer,                  intent(out), optional :: elementCount
+    integer,                  intent(out), optional :: elementIds(:)
+    integer,                  intent(out), optional :: elementTypes(:)
+    integer,                  intent(out), optional :: elementConnCount
+    integer,                  intent(out), optional :: elementConn(:)
+    logical,                  intent(out), optional :: elementMaskIsPresent
+    integer,                  intent(out), optional :: elementMask(:)
+    logical,                  intent(out), optional :: elementAreaIsPresent
+    real(ESMF_KIND_R8),       intent(out), optional :: elementArea(:)
+    logical,                  intent(out), optional :: elementCoordsIsPresent
+    real(ESMF_KIND_R8),       intent(out), optional :: elementCoords(:)
     logical,                  intent(out), optional :: nodalDistgridIsPresent
     type(ESMF_DistGrid),      intent(out), optional :: nodalDistgrid
     logical,                  intent(out), optional :: elementDistgridIsPresent
@@ -4785,6 +4809,55 @@ end function ESMF_MeshEmptyCreate
 ! The number of coordinate dimensions needed to describe the locations of the nodes
 ! making up the Mesh. For a manifold, the spatial dimension can be larger than the
 ! parametric dim (e.g. the 2D surface of a sphere in 3D space), but it can't be smaller.
+! \item [{[nodeCount]}]
+! The number of local nodes in the mesh (both owned and shared with another PET).
+! \item [{[nodeIds]}]
+! An array of ids for each local node in the mesh. The nodeIds array should be of size nodeCount.
+! \item [{[nodeCoords]}]
+! An array of  coordinates for each local node in the mesh. The nodeCoords array should be of size (spatialDim*nodeCount).
+! \item [{[nodeOwners]}]
+! An array of the PET numbers that own each local node in the mesh. The nodeOwners array should be of size nodeCount.
+! \item [{[nodeMaskIsPresent]}]
+! .true. if node masking was set in mesh, .false. otherwise.
+! \item [{[nodeMask]}]
+! An array of mask values for each local node in the mesh. The nodeOwners array should be of size nodeCount.
+! \item [{[elementCount]}]
+! The number of local elements in the mesh (both owned and shared with another PET).
+! \item [{[elementIds]}]
+! An array of ids for each local element in the mesh. The elementIds array should be of size elementCount.
+! \item [{[elementTypes]}]
+! An array of types for each local element in the mesh. Please see
+! section~\ref{const:meshelemtype} for the list of options. The elementTypes array should be of size elementCount.
+! \item [{[elementConnCount]}]
+! The number of entries elementConn array. Provided as a convenience.
+! \item[elementConn]
+!         An array containing the indexes of the sets of nodes to be connected together to form the
+!         elements to be created on this PET. The entries in this list are NOT node global ids,
+!         but rather each entry is a local index (1 based) into the list of nodes to be
+!         created on this PET by this call.
+!         In other words, an entry of 1 indicates that this element contains the node
+!         described by {\tt nodeIds(1)}, {\tt nodeCoords(1)}, etc. on this PET. It is also
+!         important to note that the order of the nodes in an element connectivity list
+!         matters. Please see Section~\ref{const:meshelemtype} for diagrams illustrating
+!         the correct order of nodes in a element. This input consists of a 1D array with
+!         a total size equal to the sum of the number of nodes contained in each element on
+!         this PET (also provided by elementConnCount). The number of nodes in each element 
+!         is implied by its element type in
+!         {\tt elementTypes}. The nodes for each element
+!         are in sequence in this array (e.g. the nodes for element 1 are elementConn(1),
+!         elementConn(2), etc.).
+! \item [{[elementMaskIsPresent]}]
+! .true. if element masking was set in mesh, .false. otherwise.
+! \item [{[elementMask]}]
+! An array of mask values for each local element in the mesh. The elementMask array should be of size elementCount.
+! \item [{[elementAreaIsPresent]}]
+! .true. if element areas were set in mesh, .false. otherwise.
+! \item [{[elementArea]}]
+! An array of area values for each local element in the mesh. The elementArea array should be of size elementCount.
+! \item [{[elementCoordsIsPresent]}]
+! .true. if element coordinates were set in mesh, .false. otherwise.
+! \item [{[elementCoords]}]
+! An array of coordinate values for each local element in the mesh. The elementCoord array should be of size (spatialDim*elementCount).
 ! \item [{[nodalDistgridIsPresent]}]
 ! .true. if nodalDistgrid was set in Mesh object, .false. otherwise.
 ! \item [{[nodalDistgrid]}]
@@ -4856,6 +4929,7 @@ end function ESMF_MeshEmptyCreate
     ! isn't asking for something that requires a fully created mesh
     if (mesh%status .ne. ESMF_MESHSTATUS_COMPLETE) then
 
+       ! Check one set of variables
        if (present(parametricDim) .or. &
             present(spatialDim) .or. &
             present(numOwnedNodes) .or. &
@@ -4871,9 +4945,81 @@ end function ESMF_MeshEmptyCreate
                ESMF_CONTEXT, rcToReturn=rc)
           return
        endif
+
+       ! Check another set, just so the length of the if isn't so big
+       if (present(nodeCount) .or. &
+            present(nodeIds) .or. &
+            present(nodeCoords) .or. &
+            present(nodeOwners) .or. &
+            present(nodeMaskIsPresent) .or. &
+            present(nodeMask)) then
+
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+               msg="- the mesh has not been fully created", &
+               ESMF_CONTEXT, rcToReturn=rc)
+          return
+       endif
+
+
+       ! Check another set, just so the length of the if isn't so big
+       if (present(elementCount) .or. &
+            present(elementIds) .or. &
+            present(elementTypes) .or. &
+            present(elementConnCount) .or. &
+            present(elementConn) .or. &
+            present(elementMaskIsPresent) .or. &
+            present(elementMask) .or. &
+            present(elementAreaIsPresent) .or. &
+            present(elementArea) .or. &
+            present(elementCoordsIsPresent) .or. &
+            present(elementCoords)) then
+
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+               msg="- the mesh has not been fully created", &
+               ESMF_CONTEXT, rcToReturn=rc)
+          return
+       endif
     endif
 
-    !!! Get information from Mesh !!!
+
+    ! XMRKX !
+    ! TODO: Rearrange all the info gets below to fit in to the 3 categories below 
+    
+    !!!!!!!! Get Misc info from Mesh !!!!!!!!
+
+    !!!!!!!! Get Node info from Mesh !!!!!!!!
+
+    ! Get Node Count
+    if (present(nodeCount)) then
+       ! Make call to get info
+       call C_ESMC_MeshGetNodeCount(mesh, &
+            nodeCount, localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    !!!!!!!! Get Elem info from Mesh !!!!!!!!
+
+    ! Get Element Count
+    if (present(elementCount)) then
+       ! Make call to get info
+       call C_ESMC_MeshGetElemCount(mesh, &
+            elementCount, localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! Get Element Connection Count
+    if (present(elementConnCount)) then
+       ! Make call to get info
+       call C_ESMC_MeshGetElemConnCount(mesh, &
+            elementConnCount, localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+
+
 
     ! Get node coords
     if (present(ownedNodeCoords)) then

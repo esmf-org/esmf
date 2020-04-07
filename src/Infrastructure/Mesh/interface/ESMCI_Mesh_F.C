@@ -286,6 +286,22 @@ extern "C" void FTN_X(c_esmc_meshget)(MeshCap **meshpp, int *num_nodes, int *num
 }
 
 
+extern "C" void FTN_X(c_esmc_meshgetnodecount)(MeshCap **meshpp, int *nodeCount, int *rc){
+
+  (*meshpp)->getNodeCount(nodeCount, rc);
+}
+
+
+extern "C" void FTN_X(c_esmc_meshgetelemcount)(MeshCap **meshpp, int *elemCount, int *rc){
+
+  (*meshpp)->getElemCount(elemCount, rc);
+}
+
+extern "C" void FTN_X(c_esmc_meshgetelemconncount)(MeshCap **meshpp, int *elemConnCount, int *rc){
+
+  (*meshpp)->getElemConnCount(elemConnCount, rc);
+}
+
 
 extern "C" void FTN_X(c_esmc_meshcreatenodedistgrid)(MeshCap **meshpp, int *ngrid, int *num_lnodes, int *rc) {
 

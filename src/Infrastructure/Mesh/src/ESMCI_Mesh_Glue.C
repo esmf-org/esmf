@@ -1875,6 +1875,59 @@ void ESMCI_meshget(Mesh **meshpp, int *num_nodes, int *num_elements, int *rc){
     if(rc != NULL) *rc = ESMF_SUCCESS;
 }
 
+void ESMCI_MeshGetNodeCount(Mesh *mesh, int *nodeCount, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_MeshGetNodeCount()"
+
+    *nodeCount = mesh->num_nodes();
+
+    if(rc != NULL) *rc = ESMF_SUCCESS;
+}
+
+
+void ESMCI_MeshGetElemCount(Mesh *mesh, int *elemCount, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_MeshGetElemCount()"
+
+    *elemCount = mesh->num_elems();
+
+    if(rc != NULL) *rc = ESMF_SUCCESS;
+}
+
+
+void ESMCI_MeshGetElemConnCount(Mesh *mesh, int *_elemConnCount, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_MeshGetElemConnCount()"
+
+  // Init output
+  *_elemConnCount = 0;
+
+  // Doesn't work with split meshes right now
+  if (mesh->is_split) {
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+       " Can't get elem connection count from mesh containing >4 elements.",
+                                       ESMC_CONTEXT, rc)) return;
+  }
+
+  // Loop summing number of nodes per element
+  int elemConnCount=0;
+  Mesh::iterator ei = mesh->elem_begin(), ee = mesh->elem_end();
+  for (; ei != ee; ++ei) {
+    MeshObj &elem = *ei;
+
+    // Get topology of element
+    const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(elem);
+
+    // Add number of nodes for this elem to connection count
+    elemConnCount += topo->num_nodes;
+  }
+
+  // Output
+  *_elemConnCount = elemConnCount;
+  if(rc != NULL) *rc = ESMF_SUCCESS;
+}
+
+
 
 
 void ESMCI_meshcreatenodedistgrid(Mesh **meshpp, int *ngrid, int *num_lnodes, int *rc) {

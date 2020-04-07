@@ -851,6 +851,56 @@ void MeshCap::meshget(int *num_nodes, int *num_elements, int *rc){
 }
 
 
+
+void MeshCap::getNodeCount(int *nodeCount, int *rc){
+#undef ESMC_METHOD
+#define ESMC_METHOD "MeshCap::meshget()"
+
+  // Call into func. depending on mesh type
+  if (is_esmf_mesh) {
+    ESMCI_MeshGetNodeCount(mesh, nodeCount, rc);
+  } else {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+       "- this functionality is not currently supported using MOAB",
+                                  ESMC_CONTEXT, rc);
+    return;
+  }
+}
+
+
+void MeshCap::getElemCount(int *elemCount, int *rc){
+#undef ESMC_METHOD
+#define ESMC_METHOD "MeshCap::meshget()"
+
+  // Call into func. depending on mesh type
+  if (is_esmf_mesh) {
+    ESMCI_MeshGetElemCount(mesh, elemCount, rc);
+  } else {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+       "- this functionality is not currently supported using MOAB",
+                                  ESMC_CONTEXT, rc);
+    return;
+  }
+}
+
+
+void MeshCap::getElemConnCount(int *elemConnCount, int *rc){
+#undef ESMC_METHOD
+#define ESMC_METHOD "MeshCap::meshget()"
+
+  // Call into func. depending on mesh type
+  if (is_esmf_mesh) {
+    ESMCI_MeshGetElemConnCount(mesh, elemConnCount, rc);
+  } else {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+       "- this functionality is not currently supported using MOAB",
+                                  ESMC_CONTEXT, rc);
+    return;
+  }
+}
+
+
+
 void MeshCap::meshcreatenodedistgrid(int *ngrid, int *num_lnodes, int *rc) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::meshcreatenodedistgrid()"

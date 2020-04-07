@@ -277,6 +277,11 @@
      static MeshCap *merge(MeshCap **srcmeshpp, MeshCap **dstmeshpp,
                            int*rc);
 
+
+     void getNodeCount(int *nodeCount, int *rc);
+     void getElemCount(int *elemCount, int *rc);
+     void getElemConnCount(int *elemConnCount, int *rc);
+
      void meshsetfrac(double * fraction,
                       int*rc);
 
