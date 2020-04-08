@@ -4707,7 +4707,7 @@ module NUOPC_Base
     extra = size(petList) - (size(petList)/10)*10
     
     do i=1, lineCount
-      write (petListBuffer, "(10I7)") petList((i-1)*10+1:i+10)
+      write (petListBuffer, "(10I7)") petList((i-1)*10+1:i*10)
       call ESMF_LogWrite(petListBuffer, ESMF_LOGMSG_INFO, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU,&
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
