@@ -1499,7 +1499,7 @@ int VM::alltoallvVMId(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   int localrc;
 
-  int petCount = GlobalVM->getNpets();
+  int petCount = getPetCount();
   int send_sum=0, recv_sum=0;
   for (int i=0; i<petCount; i++) {
     send_sum += sendcounts[i];
@@ -1607,9 +1607,9 @@ int VM::allgathervVMId(
       return rc;
     }
   }
-  int petCount = GlobalVM->getNpets();
-  int mypet    = GlobalVM->getMypet();
-  if (sendcount != recvcounts[mypet]){
+  int petCount = getPetCount();
+  int localPet = getLocalPet();
+  if (sendcount != recvcounts[localPet]){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "- non-matching send/recv count", ESMC_CONTEXT, &rc);
     return rc;
@@ -1618,16 +1618,15 @@ int VM::allgathervVMId(
   // TODO: Convert this to a real AllGatherV
 
   // Each PET copies its send data into its receive area, then broadcast
-  for (int i=0; i<recvcounts[mypet]; i++) {
-    int localrc = VMIdCopy (recvvmid[recvoffsets[mypet]+i], sendvmid[i]);
-    if (localrc != ESMF_SUCCESS){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-        "- Bad VMIdCopy", ESMC_CONTEXT, &rc);
-      return rc;
-    }
+  for (int i=0; i<recvcounts[localPet]; i++) {
+    int localrc = VMIdCopy(recvvmid[recvoffsets[localPet]+i], sendvmid[i]);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, &rc)) return rc;
   }
   for (int root=0; root<petCount; root++) {
-    bcastVMId(recvvmid+recvoffsets[root], recvcounts[root], root);
+    int localrc = bcastVMId(recvvmid+recvoffsets[root], recvcounts[root], root);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, &rc)) return rc;
   }
 
   // return successfully
