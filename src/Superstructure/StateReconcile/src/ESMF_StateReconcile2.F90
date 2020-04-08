@@ -291,7 +291,7 @@ contains
     integer, pointer :: nitems_buf(:)
     type (ESMF_StateItemWrap), pointer :: siwrap(:)
 
-    integer,         pointer :: ids_send(:), itemtypes_send(:), vm_ids_asints(:)
+    integer,         pointer :: ids_send(:), itemtypes_send(:)
     type(ESMF_VMId), pointer :: vmids_send(:)
     integer, allocatable, target :: vmintids_send(:)
 
@@ -316,7 +316,6 @@ contains
     ! -------------------------------------------------------------------------
 
     localrc = ESMF_RC_NOT_IMPL
-    nullify(vm_ids_asints)
 
     call ESMF_VMGet(vm, localPet=mypet, petCount=npets, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -372,11 +371,12 @@ contains
         rcToReturn=rc)) return
     if (meminfo) call ESMF_VMLogMemInfo ('after Step 1 - constructed send Id/VMId info')
 
+!tdk:rm
 !=== start test and demonstrate ESMF_VMTranslateVMId() =========================
-do i=lbound(vmids_send,1),ubound(vmids_send,1)
-  write (prefixStr,*) "vmids_send(",i,")="
-  call ESMF_VMIdLog(vmids_send(i), prefix=trim(prefixStr), rc=localrc)
-enddo
+!do i=lbound(vmids_send,1),ubound(vmids_send,1)
+!  write (prefixStr,*) "vmids_send(",i,")="
+!  call ESMF_VMIdLog(vmids_send(i), prefix=trim(prefixStr), rc=localrc)
+!enddo
 
     call ESMF_VMTranslateVMId(vm, vmIds=vmids_send, ids=vmintids_send, &
       vmIdMap=vmIdMap, rc=localrc)
@@ -384,19 +384,28 @@ enddo
       ESMF_CONTEXT,  &
       rcToReturn=rc)) return
 
-do i=lbound(vmids_send,1),ubound(vmids_send,1)
-  write (prefixStr,*) "vmintid=",vmintids_send(i),"vmids_send(",i,")="
-  call ESMF_VMIdLog(vmids_send(i), prefix=trim(prefixStr), rc=localrc)
-enddo
-write (prefixStr,*) "size(vmIdMap)=",size(vmIdMap)
-call ESMF_LogWrite(prefixStr, ESMF_LOGMSG_INFO, rc=localrc)
-do i=lbound(vmIdMap,1),ubound(vmIdMap,1)
-  write (prefixStr,*) "vmIdMap(",i,")="
-  call ESMF_VMIdLog(vmIdMap(i), prefix=trim(prefixStr), rc=localrc)
-enddo
+    ! VM integer ids should always start with 1
+    do i=lbound(vmintids_send,1),ubound(vmintids_send,1)
+      if (vmintids_send(i) == 0) then
+        if (ESMF_LogFoundError(ESMF_FAILURE, msg="A zero VM integer id was encountered", &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      end if
+    enddo
+
+!tdk:rm
+!do i=lbound(vmids_send,1),ubound(vmids_send,1)
+!  write (prefixStr,*) "vmintid=",vmintids_send(i),"vmids_send(",i,")="
+!  call ESMF_VMIdLog(vmids_send(i), prefix=trim(prefixStr), rc=localrc)
+!enddo
+!write (prefixStr,*) "size(vmIdMap)=",size(vmIdMap)
+!call ESMF_LogWrite(prefixStr, ESMF_LOGMSG_INFO, rc=localrc)
+!do i=lbound(vmIdMap,1),ubound(vmIdMap,1)
+!  write (prefixStr,*) "vmIdMap(",i,")="
+!  call ESMF_VMIdLog(vmIdMap(i), prefix=trim(prefixStr), rc=localrc)
+!enddo
 ! don't forget to clean-up deep allocations when done with vmIdMap:
-call ESMF_VMIdDestroy(vmIdMap, rc=localrc)
-deallocate(vmIdMap)
+!call ESMF_VMIdDestroy(vmIdMap, rc=localrc)
+!deallocate(vmIdMap)
 !=== end test and demonstrate ESMF_VMTranslateVMId() ===========================
 
     ! 2.) All PETs send their items Ids and VMIds to all the other PETs,
@@ -542,12 +551,11 @@ deallocate(vmIdMap)
           print *, '    items_recv(', lbound (items_recv(i)%cptr),  &
               ':', ubound (items_recv(i)%cptr), ')'
         end if
-        vm_ids_asints => vmintids_send
         call ESMF_ReconcileDeserialize (state, vm,  &
             obj_buffer=items_recv(i)%cptr,  &
             vm_intids=id_info(i)%vmid,  &
             vm_ids=vmids_send, &
-            vm_ids_asints=vm_ids_asints, &
+            vmIdMap=vmIdMap, &
             attreconflag=attreconflag, rc=localrc)
       else
         localrc = ESMF_SUCCESS
@@ -602,6 +610,14 @@ deallocate(vmIdMap)
             rcToReturn=rc)) return
       end if
     end do
+
+    call ESMF_VMIdDestroy(vmIdMap, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    deallocate (vmIdMap, stat=memstat)
+    if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
 
     deallocate (id_info, stat=memstat)
     if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
@@ -1041,7 +1057,7 @@ deallocate(vmIdMap)
 !
 ! !INTERFACE:
   subroutine ESMF_ReconcileDeserialize (state, vm, obj_buffer, vm_intids,  &
-      vm_ids, vm_ids_asints, attreconflag, rc)
+      vm_ids, vmIdMap, attreconflag, rc)
 !
 ! !ARGUMENTS:
     type (ESMF_State), intent(inout):: state
@@ -1049,7 +1065,7 @@ deallocate(vmIdMap)
     character,         pointer      :: obj_buffer(:)    ! intent(in)
     integer,           pointer      :: vm_intids(:)     ! intent(in)
     type(ESMF_VMId),   pointer      :: vm_ids(:)        ! intent(in)
-    integer,           pointer      :: vm_ids_asints(:) ! intent(int)
+    type(ESMF_VMId)                 :: vmIdMap(:)       ! intent(in)
     type(ESMF_AttReconcileFlag),intent(in)   :: attreconflag
     integer,           intent(out)  :: rc
 !
@@ -1084,7 +1100,7 @@ deallocate(vmIdMap)
     integer :: needs_count
     integer, allocatable :: offset_table(:), type_table(:)
 
-    integer :: i, idx, idx_to_assign, jj
+    integer :: i, idx
     integer :: stateitem_type
     character(ESMF_MAXSTR) :: errstring
     logical :: found
@@ -1119,12 +1135,6 @@ deallocate(vmIdMap)
           ESMF_CONTEXT,  &
           rcToReturn=rc)) return
     end if
-    if (size(vm_ids) /= size(vm_ids_asints)) then
-      if (ESMF_LogFoundError(ESMF_FAILURE, msg="VM index maps not same length", &
-        ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
-    end if
-    write(errstring, *) "size(vm_ids)=", size(vm_ids) !tdk:p
-    call ESMF_LogWrite(trim(errstring)) !tdk:p
 
     ! -------------------------------------------------------------------------
 
@@ -1170,32 +1180,6 @@ deallocate(vmIdMap)
     buffer_offset = ESMF_SIZEOF_DEFINT * (2 + 2*needs_count) ! Skip past count, pad, and offset/type tables
     do, i=1, needs_count
 
-      ! Find the VM to assign for the deserialized objects.
-      found = .false.
-      do, jj=lbound(vm_ids, 1), ubound(vm_ids, 1)
-        if (vm_intids(i) == vm_ids_asints(jj)) then
-          idx_to_assign = jj
-          found = .true.
-          exit
-        end if
-      end do
-      if (found .eqv. .false.) then
-        write(errstring, *) "vm_intids=", vm_intids !tdk:p
-        call ESMF_LogWrite(trim(errstring)) !tdk:p
-        write(errstring, *) "vm_intids(i)=", vm_intids(i) !tdk:p
-        call ESMF_LogWrite(trim(errstring)) !tdk:p
-        write(errstring, *) "vm_ids_asints=", vm_ids_asints !tdk:p
-        call ESMF_LogWrite(trim(errstring)) !tdk:p
-        if (ESMF_LogFoundError(ESMF_FAILURE, msg="index not found for VM mapping", &
-          ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
-      end if
-      if (found) then
-        if (idx_to_assign > size(vm_ids)) then
-          if (ESMF_LogFoundError(ESMF_FAILURE, msg="vm_ids too small", &
-            ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
-        end if
-      end if
-
       ! Item type
       stateitem_type = type_table(i)
       if (debug) then
@@ -1216,7 +1200,7 @@ deallocate(vmIdMap)
               ESMF_CONTEXT,  &
               rcToReturn=rc)) return
 
-          call c_ESMC_SetVMId(fieldbundle%this, vm_ids(idx_to_assign), localrc)
+          call c_ESMC_SetVMId(fieldbundle%this, vmIdMap(vm_intids(i)), localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT,  &
               rcToReturn=rc)) return
@@ -1242,7 +1226,7 @@ deallocate(vmIdMap)
             print *, "created field, ready to set id and add to local state"
           end if
 !!DEBUG "created field, ready to set id and add to local state"
-          call c_ESMC_SetVMId(field%ftypep, vm_ids(idx_to_assign), localrc)
+          call c_ESMC_SetVMId(field%ftypep, vmIdMap(vm_intids(i)), localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT,  &
               rcToReturn=rc)) return
@@ -1271,7 +1255,7 @@ deallocate(vmIdMap)
               ESMF_CONTEXT,  &
               rcToReturn=rc)) return
 
-          call c_ESMC_SetVMId(array, vm_ids(idx_to_assign), localrc)
+          call c_ESMC_SetVMId(array, vmIdMap(vm_intids(i)), localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT,  &
               rcToReturn=rc)) return
@@ -1299,7 +1283,7 @@ deallocate(vmIdMap)
               ESMF_CONTEXT,  &
               rcToReturn=rc)) return
 
-          call c_ESMC_SetVMId(arraybundle, vm_ids(idx_to_assign), localrc)
+          call c_ESMC_SetVMId(arraybundle, vmIdMap(vm_intids(i)), localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT,  &
               rcToReturn=rc)) return
@@ -1321,7 +1305,7 @@ deallocate(vmIdMap)
               ESMF_CONTEXT,  &
               rcToReturn=rc)) return
 
-          call c_ESMC_SetVMId(substate%statep, vm_ids(idx_to_assign), localrc)
+          call c_ESMC_SetVMId(substate%statep, vmIdMap(vm_intids(i)), localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT,  &
               rcToReturn=rc)) return
@@ -1366,9 +1350,6 @@ deallocate(vmIdMap)
 #endif
 
     end do ! needs_count
-
-    !call ESMF_InfoCacheReassembleFields(state, localrc) !tdk:remove
-    !if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return !tdk:remove
 
     if (trace) then
       print *, '    pet', mypet,  &
