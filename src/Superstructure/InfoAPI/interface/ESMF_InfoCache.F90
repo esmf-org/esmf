@@ -246,30 +246,33 @@ subroutine ESMF_InfoCacheReassembleField(target, state, rc)
 
   rc = ESMF_FAILURE
 
-  infoh = ESMF_InfoBaseGetHandle(target%ftypep%base)
+  if (target%ftypep%status .eq. ESMF_FIELDSTATUS_GRIDSET .or. &
+      target%ftypep%status .eq. ESMF_FIELDSTATUS_COMPLETE) then
+    infoh = ESMF_InfoBaseGetHandle(target%ftypep%base)
 
-  call ESMF_InfoGet(infoh, "/_esmf_state_reconcile/should_serialize_geom", &
-    should_serialize_geom, rc=rc)
-  if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (.not. should_serialize_geom) then
-    call ESMF_InfoGet(infoh, "/_esmf_state_reconcile/field_archetype_id", &
-      base_id, rc=rc)
+    call ESMF_InfoGet(infoh, "/_esmf_state_reconcile/should_serialize_geom", &
+      should_serialize_geom, rc=rc)
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-    found = ESMF_InfoCacheFindField(state, archetype_field, base_id, rc)
-    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    if (.not. should_serialize_geom) then
+      call ESMF_InfoGet(infoh, "/_esmf_state_reconcile/field_archetype_id", &
+        base_id, rc=rc)
+      if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-    if (.not. found) then
-      if (ESMF_LogFoundError(ESMF_FAILURE, msg="Archetype Field not found", &
-        ESMF_CONTEXT, rcToReturn=rc)) return
+      found = ESMF_InfoCacheFindField(state, archetype_field, base_id, rc)
+      if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+      if (.not. found) then
+        if (ESMF_LogFoundError(ESMF_FAILURE, msg="Archetype Field not found", &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      end if
+
+      target%ftypep%geombase = archetype_field%ftypep%geombase
     end if
 
-    target%ftypep%geombase = archetype_field%ftypep%geombase
+    call ESMF_InfoRemove(infoh, "_esmf_state_reconcile", rc=rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
-
-  call ESMF_InfoRemove(infoh, "_esmf_state_reconcile", rc=rc)
-  if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   rc = ESMF_SUCCESS
 end subroutine
