@@ -911,6 +911,20 @@
 
 !------------------------------------------------------------------------------
 !
+  type ESMF_FileMode_Flag
+#ifndef ESMF_NO_SEQUENCE
+  sequence
+#endif
+ ! private
+    integer :: filemode
+  end type
+
+  type(ESMF_FileMode_Flag), parameter :: &
+        ESMF_FILEMODE_BASIC = ESMF_FileMode_Flag(0), &
+        ESMF_FILEMODE_WITHAUX = ESMF_FileMode_Flag(1)
+
+!------------------------------------------------------------------------------
+!
 !     ! File status type (for ESMF_xxxWrite status input)
 
       type ESMF_FileStatus_Flag
@@ -1213,6 +1227,8 @@
              ESMF_FILEFORMAT_CFGRID, ESMF_FILEFORMAT_MOSAIC, &
              ESMF_FILEFORMAT_UNKNOWN, ESMF_FILEFORMAT_TILE
 
+      public ESMF_FileMode_Flag, ESMF_FILEMODE_BASIC, ESMF_FILEMODE_WITHAUX
+
       public ESMF_FileStatus_Flag, ESMF_FILESTATUS_UNKNOWN,   &
                                   ESMF_FILESTATUS_OLD,       &
                                   ESMF_FILESTATUS_NEW,       &
@@ -1270,6 +1286,7 @@ interface operator (==)
   module procedure ESMF_ioeq
   module procedure ESMF_RegridPoleEq
   module procedure ESMF_FileFormatEq
+  module procedure ESMF_FileModeEq
   module procedure ESMF_FileStatusEq
   module procedure ESMF_RegridMethodEq
   module procedure ESMF_ExtrapMethodEq
@@ -1293,6 +1310,7 @@ interface operator (/=)
   module procedure ESMF_unmappedactionne
   module procedure ESMF_RegridPoleNe
   module procedure ESMF_FileFormatNe
+  module procedure ESMF_FileModeNe
   module procedure ESMF_FileStatusNe
   module procedure ESMF_RegridMethodNe
   module procedure ESMF_ExtrapMethodNe
@@ -1900,9 +1918,34 @@ end function ESMF_FileFormatEq
 
 end function ESMF_FileFormatNe
 
-
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FileModeEq"
+function ESMF_FileModeEq(FileMode1, FileMode2)
+
+  logical :: ESMF_FileModeEq
+
+  type (ESMF_FileMode_Flag), intent(in) :: FileMode1, FileMode2
+
+  ESMF_FileModeEq = (FileMode1%filemode == FileMode2%filemode)
+
+end function ESMF_FileModeEq
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FileModeNe"
+function ESMF_FileModeNe(FileMode1, FileMode2)
+
+  logical :: ESMF_FileModeNe
+
+  type (ESMF_FileMode_Flag), intent(in) :: FileMode1, FileMode2
+
+  ESMF_FileModeNe = (FileMode1%filemode /= FileMode2%filemode)
+
+end function ESMF_FileModeNe
+!------------------------------------------------------------------------------
+
 ! function to compare/assign two ESMF_FileStatus_Flags
+!------------------------------------------------------------------------------
 
 subroutine ESMF_FileStatusAs(fs1, fs2)
  type(ESMF_FileStatus_Flag), intent(out) :: fs1

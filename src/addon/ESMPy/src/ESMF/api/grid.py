@@ -314,6 +314,8 @@ class Grid(object):
             else:
                 raise TypeError('pole_kind is not a recognized type, please use a list, tuple or numpy array')
             self._pole_kind = pole_kind
+        else:
+            self._pole_kind = None
 
         # size, type and rank of the grid for bookeeping of coordinates 
         self._size = [None]

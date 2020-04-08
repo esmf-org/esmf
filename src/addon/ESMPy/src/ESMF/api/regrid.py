@@ -102,8 +102,8 @@ class Regrid(object):
                  dst_mask_values=None, regrid_method=None, pole_method=None,
                  regrid_pole_npoints=None, line_type=None, norm_type=None, extrap_method=None,
                  extrap_num_src_pnts=None, extrap_dist_exponent=None, unmapped_action=None,
-                 ignore_degenerate=None, create_rh=None, src_frac_field=None,
-                 dst_frac_field=None, factors=False):
+                 ignore_degenerate=None, create_rh=None, filemode=None, src_file=None, dst_file=None,
+                 src_file_type=None, dst_file_type=None, src_frac_field=None, dst_frac_field=None, factors=False):
 
         # Confirm the ESMF compiler will suport in-memory factor retrieval
         if factors and not constants._ESMF_USE_INMEM_FACTORS:
@@ -149,6 +149,11 @@ class Regrid(object):
                 unmappedaction=unmapped_action,
                 ignoreDegenerate=ignore_degenerate,
                 createRH=create_rh,
+                filemode=filemode,
+                srcFile=src_file,
+                dstFile=dst_file,
+                srcFileType=src_file_type,
+                dstFileType=dst_file_type,
                 srcFracField=src_frac_field,
                 dstFracField=dst_frac_field
             )
@@ -206,6 +211,11 @@ class Regrid(object):
         self._extrap_dist_exponent = extrap_dist_exponent
         self._unmapped_action = unmapped_action
         self._ignore_degenerate = ignore_degenerate
+        self._Print = filemode
+        self._src_file = src_file
+        self._dst_file = dst_file
+        self._src_file_type = src_file_type
+        self._dst_file_type = dst_file_type
         self._src_frac_field = src_frac_field
         self._dst_frac_field = dst_frac_field
 
@@ -271,6 +281,14 @@ class Regrid(object):
         return self._dstfield
 
     @property
+    def dst_file(self):
+        return self._dst_file
+
+    @property
+    def dst_file_type(self):
+        return self._dst_file_type
+
+    @property
     def dst_frac_field(self):
         return self._dst_frac_field
 
@@ -289,6 +307,10 @@ class Regrid(object):
     @property
     def extrap_dist_exponent(self):
         return self._extrap_dist_exponent
+
+    @property
+    def filemode(self):
+        return self._filemode
 
     @property
     def finalized(self):
@@ -331,6 +353,14 @@ class Regrid(object):
     @property
     def srcfield(self):
         return self._srcfield
+
+    @property
+    def src_file(self):
+        return self._src_file
+
+    @property
+    def src_file_type(self):
+        return self._src_file_type
 
     @property
     def src_frac_field(self):
