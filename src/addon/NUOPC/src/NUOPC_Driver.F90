@@ -74,7 +74,7 @@ module NUOPC_Driver
     type(NUOPC_RunSequence), pointer  :: runSeq(:)  ! size may increase dynamic.
     integer                           :: runPhaseToRunSeqMap(10)
     ! - clock
-    type(ESMF_Clock)                  :: driverClock  ! clock of the parent
+    type(ESMF_Clock)                  :: parentClock  ! clock of the parent
     ! - temporary variables
     type(type_PhaseMapParser), pointer:: modelPhaseMap(:)
     type(type_PhaseMapParser), pointer:: connectorPhaseMap(:,:)
@@ -496,8 +496,6 @@ module NUOPC_Driver
     integer                   :: i, j, k, l, cIndex
     character(ESMF_MAXSTR)    :: iString, jString, lString
     character(ESMF_MAXSTR)    :: compName, stateName
-    character(ESMF_MAXSTR)    :: petListBuffer(100)
-    integer                   :: lineCount
     integer, pointer          :: i_petList(:), j_petList(:), c_petList(:)
     logical                   :: existflag
     logical                   :: clockIsCreated
@@ -2714,11 +2712,11 @@ module NUOPC_Driver
     ! set the driverClock member in the internal state
     ! this is the incoming clock from the parent driver
     ! do this in alignment with model and mediator components
-    is%wrap%driverClock = clock
+    is%wrap%parentClock = clock
     
     ! SPECIALIZE required: label_SetRunClock
     ! -> first check for the label with phase index
-    call ESMF_MethodExecute(driver, label=label_SetRunClock, index=phase, &
+    call ESMF_MethodExecute(driver, label=label_SetRunClock, index=runPhase, &
       existflag=existflag, userRc=userrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -2943,10 +2941,9 @@ module NUOPC_Driver
     ! Implement the default explicit timekeeping rules.
     
     ! local variables
-    type(type_InternalState)  :: is
     character(ESMF_MAXSTR)    :: name
+    type(ESMF_Clock)          :: parentClock
     logical                   :: clockIsCreated
-    type(ESMF_TimeInterval)   :: timeStep
 
     rc = ESMF_SUCCESS
 
@@ -2955,21 +2952,19 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
-    ! query component for its internal state
-    nullify(is%wrap)
-    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
+    ! query component for parent clock
+    call NUOPC_DriverGet(driver, parentClock=parentClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! see if the parent clock can be used
-    clockIsCreated = ESMF_ClockIsCreated(is%wrap%driverClock, rc=rc)
+    clockIsCreated = ESMF_ClockIsCreated(parentClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     if (clockIsCreated) then
-      ! check and set the driver clock against the parent clock, force timeStep
-      call NUOPC_CompCheckSetClock(driver, is%wrap%driverClock, &
-        forceTimeStep=.true., rc=rc)
+      ! check and set the driver clock against the parent clock
+      call NUOPC_CompCheckSetClock(driver, parentClock, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -3600,8 +3595,7 @@ module NUOPC_Driver
     character(ESMF_MAXSTR)          :: name
     type(type_InternalState)        :: is
     type(ComponentMapEntry)         :: cmEntry
-    integer                         :: stat, i, k, lineCount
-    character(ESMF_MAXSTR)          :: petListBuffer(100)
+    integer                         :: stat, i
     character(ESMF_MAXSTR)          :: msgString, lString
     integer                         :: verbosity
 
@@ -3651,20 +3645,10 @@ module NUOPC_Driver
         if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
-        
-        if (size(cmEntry%wrap%petList) <= 1000) then
-          ! have the resources to print the entire petList
-          write (petListBuffer, "(10I7)") cmEntry%wrap%petList
-          lineCount = size(cmEntry%wrap%petList)/10
-          if ((size(cmEntry%wrap%petList)/10)*10 /= size(cmEntry%wrap%petList))&
-            lineCount = lineCount + 1
-          do k=1, lineCount
-            call ESMF_LogWrite(petListBuffer(k), ESMF_LOGMSG_INFO, rc=localrc)
-            if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU,&
-              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-              return  ! bail out
-          enddo
-        endif
+        call NUOPC_LogPetList(cmEntry%wrap%petList, name=name, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
       else
         write (msgString,"(A)") trim(name)//" - Creating model component "//&
           trim(cmEntry%wrap%label)//" without petList."
@@ -3773,8 +3757,7 @@ module NUOPC_Driver
     character(ESMF_MAXSTR)          :: name
     type(type_InternalState)        :: is
     type(ComponentMapEntry)         :: cmEntry
-    integer                         :: stat, i, k, lineCount
-    character(ESMF_MAXSTR)          :: petListBuffer(100)
+    integer                         :: stat, i
     character(ESMF_MAXSTR)          :: msgString, lString
     integer                         :: verbosity
 
@@ -3824,20 +3807,10 @@ module NUOPC_Driver
         if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
-        
-        if (size(cmEntry%wrap%petList) <= 1000) then
-          ! have the resources to print the entire petList
-          write (petListBuffer, "(10I7)") cmEntry%wrap%petList
-          lineCount = size(cmEntry%wrap%petList)/10
-          if ((size(cmEntry%wrap%petList)/10)*10 /= size(cmEntry%wrap%petList))&
-            lineCount = lineCount + 1
-          do k=1, lineCount
-            call ESMF_LogWrite(petListBuffer(k), ESMF_LOGMSG_INFO, rc=localrc)
-            if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU,&
-              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-              return  ! bail out
-          enddo
-        endif
+        call NUOPC_LogPetList(cmEntry%wrap%petList, name=name, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
       else
         write (msgString,"(A)") trim(name)//" - Creating model component "//&
           trim(cmEntry%wrap%label)//" without petList."
@@ -3951,8 +3924,7 @@ module NUOPC_Driver
     integer, pointer                :: connectorPetListTemp(:)
     integer, pointer                :: connectorPetListTemp2(:)
     integer, pointer                :: srcPetList(:), dstPetList(:)
-    integer                         :: k, l, cIndex, lineCount
-    character(ESMF_MAXSTR)          :: petListBuffer(100)
+    integer                         :: k, l, cIndex
     character(ESMF_MAXSTR)          :: msgString, lString
     type(ESMF_VM)                   :: vm
     logical                         :: isPresent
@@ -4036,19 +4008,10 @@ module NUOPC_Driver
         if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
-        if (size(connectorPetList) <= 1000) then
-          ! have the resources to print the entire petList
-          write (petListBuffer, "(10I7)") connectorPetList
-          lineCount = size(connectorPetList)/10
-          if ((size(connectorPetList)/10)*10 /= size(connectorPetList)) &
-            lineCount = lineCount + 1
-          do k=1, lineCount
-            call ESMF_LogWrite(petListBuffer(k), ESMF_LOGMSG_INFO, rc=localrc)
-            if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU,&
-              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-              return  ! bail out
-          enddo
-        endif
+        call NUOPC_LogPetList(connectorPetList, name=name, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
       endif
       cmEntry%wrap%connector = ESMF_CplCompCreate(&
         name=trim(cmEntry%wrap%label), petList=connectorPetList, rc=localrc)
@@ -4660,10 +4623,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverGet()
-  recursive subroutine NUOPC_DriverGet(driver, slotCount, rc)
+  recursive subroutine NUOPC_DriverGet(driver, slotCount, parentClock, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
     integer,             intent(out), optional :: slotCount
+    type(ESMF_Clock),    intent(out), optional :: parentClock
     integer,             intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -4693,6 +4657,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! slotCount
     if (present(slotCount)) then
       slotCount = size(is%wrap%runSeq)
+    endif
+    
+    ! parentClock
+    if (present(parentClock)) then
+      parentClock = is%wrap%parentClock
     endif
     
   end subroutine

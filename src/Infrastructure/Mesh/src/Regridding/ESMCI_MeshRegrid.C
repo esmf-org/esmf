@@ -635,10 +635,16 @@ static void _create_pointlist_of_points_not_in_wmat(PointList *pointlist, WMat &
      // Advance to next position before wi is invalidated by erase
      ++wi;
 
-     // If gid isn't in mesh, then erase it
+     // If gid isn't in mesh or isn't local, then erase it
      Mesh::MeshObjIDMap::iterator mi =  mesh.map_find(MeshObj::NODE, gid);
+     // If it isn't in mesh then erase
      if (mi == mesh.map_end(MeshObj::NODE)) {
        regrid_wts.weights.erase(tmp_wi);
+     } else { // If it is in the mesh, but isn't local, then erase it
+       MeshObj &node=*mi;
+       if (!GetAttr(node).is_locally_owned()) {
+         regrid_wts.weights.erase(tmp_wi);
+       }
      }
    }
  }

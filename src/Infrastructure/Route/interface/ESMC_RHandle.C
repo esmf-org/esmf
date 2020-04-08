@@ -42,6 +42,30 @@ extern "C" {
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RouteHandleCreateFromFile()"
+ESMC_RouteHandle ESMC_RouteHandleCreateFromFile(char *filename, int *rc){
+
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
+  
+  // typecast into ESMCI type
+  ESMC_RouteHandle rh;
+  rh.ptr = NULL;
+
+  // call into ESMCI method  
+  rh.ptr = reinterpret_cast<void *>(ESMCI::RouteHandle::create(filename, &localrc));
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) return rh;  // bail out
+
+  // return successfully
+  if (rc) *rc = ESMF_SUCCESS;
+  return rh;
+}  
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_RouteHandlePrint()"
 int ESMC_RouteHandlePrint(ESMC_RouteHandle rh){
 
@@ -54,6 +78,29 @@ int ESMC_RouteHandlePrint(ESMC_RouteHandle rh){
 
   // call into ESMCI method  
   localrc = rhp->print();
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;  // bail out
+    
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}  
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RouteHandleWrite()"
+int ESMC_RouteHandleWrite(ESMC_RouteHandle rh, char *filename){
+
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // typecast into ESMCI type
+  ESMCI::RouteHandle *rhp = (ESMCI::RouteHandle *)(rh.ptr);
+
+  // call into ESMCI method  
+  localrc = rhp->write(filename);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;  // bail out
     

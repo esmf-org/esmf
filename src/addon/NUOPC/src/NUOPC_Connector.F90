@@ -2948,6 +2948,9 @@ call ESMF_PointerLog(gridListE%keyGrid%this, &
           call ESMF_FieldGet(providerField, mesh=mesh, meshloc=meshloc, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call ESMF_MeshGet(mesh, elementDistgrid=providerDG, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           if (sharedGeom) then
             ! set the shared Mesh on the acceptor side
             call ESMF_FieldEmptySet(acceptorField, mesh=mesh, meshloc=meshloc, &
@@ -2956,8 +2959,8 @@ call ESMF_PointerLog(gridListE%keyGrid%this, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           else
             ! not sharedGeom -> must transfer
-            call ESMF_MeshGet(mesh, elementDistgrid=providerDG, &
-              nodalDistgrid=providerDG_nodal, name=geomobjname, rc=rc)
+            call ESMF_MeshGet(mesh, nodalDistgrid=providerDG_nodal, &
+              name=geomobjname, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             ! see if provider mesh has been dealt with before
@@ -4996,7 +4999,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     integer, allocatable              :: auxList(:)
     integer                           :: srcPetCount, dstPetCount
     type(ESMF_VM)                     :: vm, srcVM, dstVM
-    character(ESMF_MAXSTR)            :: fieldName
+    character(ESMF_MAXSTR)            :: fieldName, lString
     character(len=240)                :: msgString
     logical                           :: createNewPacket
     logical                           :: mismatch
@@ -5145,8 +5148,13 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
         if (k>0) upE%sendToPets(1:k) = auxList(1:k)  ! transfer the elements
         if (btest(verbosity,12)) then
-          write(msgString,*) "upE%sendToPets=", upE%sendToPets
+          write (lString, *) size(upE%sendToPets)
+          write(msgString,*) "upE%sendToPets list of size "//&
+            trim(adjustl(lString))//" :"
           call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+          call NUOPC_LogPetList(upE%sendToPets, name="", rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
         endif   
