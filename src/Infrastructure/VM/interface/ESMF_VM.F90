@@ -9856,7 +9856,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                  intent(out),  optional  :: rc           
 !
 ! !DESCRIPTION:
-!   Receive {\tt ESMF\_VMId}.
+!   Send {\tt ESMF\_VMId}.
 !
 !   The arguments are:
 !   \begin{description}
@@ -9906,16 +9906,45 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_VMId), allocatable, intent(out), optional :: vmIdMap(:)
     integer,                      intent(out), optional :: rc
 !         
+! !DESCRIPTION:
+!   Translate list of {\tt ESMF\_VMId} into integer {\tt ids}. The returned
+!   {\tt ids} are globally unique across {\tt vm}. The {\tt ids} start at 1
+!   and can directly be used to index into the {\tt vmIdMap} which is provided
+!   identically on every PET.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm]
+!        {\tt ESMF\_VM} object.
+!   \item[vmIds]
+!        Local list of {\tt ESMF\_VMId} objects to be translated.
+!   \item[ids]
+!        Local list of generated globally unique integers within {\tt vm},
+!        corresponding to the {\tt vmIds}. The size of the returned argument
+!        will be identical to the locally provided {\tt vmIds} argument.
+!        The integer {\tt ids} start at 1.
+!   \item[{[vmIdMap}]]
+!        Global list of unique {\tt ESMF\_VMId} objects provided in {\tt vmIds}
+!        across all PETs within {\tt vm}. The order of objects corresponds to
+!        the numbering of the integer {\tt ids}. This list can therefore be
+!        used to map every integer id to the corresponding {\tt ESMF\_VMId}
+!        object. The size of the returned argument will be identical to the
+!        total number of unique {\tt ESMF\_VMId} objects provided across the
+!        {\tt vm}, and the lower bound is 1.
+!   \item[{[rc]}]
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
 !EOPI
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    type(ESMF_InterArray)   :: idsAux       ! helper variable
-    integer, allocatable    :: rootVMIdI(:) ! helper variable
-    type(ESMF_InterArray)   :: rootVmIds    ! helper variable
-    integer                 :: rootVmIdCount! helper variable
-    type(ESMF_VMId), allocatable  :: localVmIds(:)
+    integer                 :: localrc        ! local return code
+    type(ESMF_InterArray)   :: idsAux         ! interface variable
+    integer, allocatable    :: rootVMIdI(:)   ! local index of ids PET is root
+    type(ESMF_InterArray)   :: rootVmIds      ! interface variable
+    integer                 :: rootVmIdCount  ! local number of ids PET is root
+    type(ESMF_VMId), allocatable  :: localVmIds(:)  ! local list of vmIDs root
     integer                 :: i, petCount, totalRootCount
-    integer, allocatable    :: rootCounts(:), recvOffsets(:)
+    integer, allocatable    :: rootCounts(:), recvOffsets(:)  ! gatherV vars
     
 
     ! initialize return code; assume routine not implemented
