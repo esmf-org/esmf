@@ -309,6 +309,8 @@ contains
     logical, parameter :: trace = .false.
 
     character(160)  :: prefixStr
+    type(ESMF_VMId), allocatable :: vmIdMap(:)
+
     character(len=ESMF_MAXSTR) :: logmsg
 
     ! -------------------------------------------------------------------------
@@ -370,13 +372,32 @@ contains
         rcToReturn=rc)) return
     if (meminfo) call ESMF_VMLogMemInfo ('after Step 1 - constructed send Id/VMId info')
 
-    ! Translate VMIds to integers for unique identification for reconcile
-    allocate(vmintids_send(lbound(vmids_send,1):ubound(vmids_send,1)))
+!=== start test and demonstrate ESMF_VMTranslateVMId() =========================
+do i=lbound(vmids_send,1),ubound(vmids_send,1)
+  write (prefixStr,*) "vmids_send(",i,")="
+  call ESMF_VMIdLog(vmids_send(i), prefix=trim(prefixStr), rc=localrc)
+enddo
+
     call ESMF_VMTranslateVMId(vm, vmIds=vmids_send, ids=vmintids_send, &
-      rc=localrc)
+      vmIdMap=vmIdMap, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
-        rcToReturn=rc)) return
+      ESMF_CONTEXT,  &
+      rcToReturn=rc)) return
+
+do i=lbound(vmids_send,1),ubound(vmids_send,1)
+  write (prefixStr,*) "vmintid=",vmintids_send(i),"vmids_send(",i,")="
+  call ESMF_VMIdLog(vmids_send(i), prefix=trim(prefixStr), rc=localrc)
+enddo
+write (prefixStr,*) "size(vmIdMap)=",size(vmIdMap)
+call ESMF_LogWrite(prefixStr, ESMF_LOGMSG_INFO, rc=localrc)
+do i=lbound(vmIdMap,1),ubound(vmIdMap,1)
+  write (prefixStr,*) "vmIdMap(",i,")="
+  call ESMF_VMIdLog(vmIdMap(i), prefix=trim(prefixStr), rc=localrc)
+enddo
+! don't forget to clean-up deep allocations when done with vmIdMap:
+call ESMF_VMIdDestroy(vmIdMap, rc=localrc)
+deallocate(vmIdMap)
+!=== end test and demonstrate ESMF_VMTranslateVMId() ===========================
 
     ! 2.) All PETs send their items Ids and VMIds to all the other PETs,
     ! then create local directories of which PETs have which ids/VMIds.
@@ -1705,7 +1726,7 @@ contains
       id_info(i)%id = id_recv(ipos:ipos+counts_buf_recv(i)-1)
       ipos = ipos + counts_buf_recv(i)
     end do
-    
+
     ! Exchange VMIds ----------------------------------------------------------
 
     allocate(vm_intids_recv(0:sum (counts_buf_recv+1)-1), stat=memstat)

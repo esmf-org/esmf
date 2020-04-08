@@ -153,7 +153,8 @@ class VM : public VMK {   // inherits from ESMCI::VMK class
     int sendVMId(VMId *vmid, int dest);
     int recvVMId(VMId *vmid, int source);
     int bcastVMId(VMId **vmid, int count, int root);
-    int translateVMId(VMId **vmids, ESMCI::InterArray<int> *ids);
+    int translateVMId(VMId **vmids, ESMCI::InterArray<int> *ids,
+      ESMCI::InterArray<int> *rootVmIds, int *rootVmIdCount);
     int allgathervVMId(VMId **sendvmid, int  sendcount,
       VMId **recvvmid, int *recvcounts, int *recvoffsets);
     int alltoallvVMId(VMId **sendvmid, int *sendcounts, int *sendoffsets,

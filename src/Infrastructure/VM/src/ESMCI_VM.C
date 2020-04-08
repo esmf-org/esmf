@@ -12,6 +12,7 @@
 #define ESMC_FILENAME "ESMCI_VM.C"
 //==============================================================================
 #define GARBAGE_COLLECTION_LOG_off
+#define TRANSLATE_VMID_LOG_off
 //==============================================================================
 //
 // VM class implementation (body) file
@@ -1499,7 +1500,7 @@ int VM::alltoallvVMId(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   int localrc;
 
-  int petCount = GlobalVM->getNpets();
+  int petCount = getPetCount();
   int send_sum=0, recv_sum=0;
   for (int i=0; i<petCount; i++) {
     send_sum += sendcounts[i];
@@ -1607,9 +1608,9 @@ int VM::allgathervVMId(
       return rc;
     }
   }
-  int petCount = GlobalVM->getNpets();
-  int mypet    = GlobalVM->getMypet();
-  if (sendcount != recvcounts[mypet]){
+  int petCount = getPetCount();
+  int localPet = getLocalPet();
+  if (sendcount != recvcounts[localPet]){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "- non-matching send/recv count", ESMC_CONTEXT, &rc);
     return rc;
@@ -1618,16 +1619,15 @@ int VM::allgathervVMId(
   // TODO: Convert this to a real AllGatherV
 
   // Each PET copies its send data into its receive area, then broadcast
-  for (int i=0; i<recvcounts[mypet]; i++) {
-    int localrc = VMIdCopy (recvvmid[recvoffsets[mypet]+i], sendvmid[i]);
-    if (localrc != ESMF_SUCCESS){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-        "- Bad VMIdCopy", ESMC_CONTEXT, &rc);
-      return rc;
-    }
+  for (int i=0; i<recvcounts[localPet]; i++) {
+    int localrc = VMIdCopy(recvvmid[recvoffsets[localPet]+i], sendvmid[i]);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, &rc)) return rc;
   }
   for (int root=0; root<petCount; root++) {
-    bcastVMId(recvvmid+recvoffsets[root], recvcounts[root], root);
+    int localrc = bcastVMId(recvvmid+recvoffsets[root], recvcounts[root], root);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, &rc)) return rc;
   }
 
   // return successfully
@@ -1717,14 +1717,19 @@ int VM::translateVMId(
 //
 // !ARGUMENTS:
 //
-  VMId **vmIDs,                 // in  - VMId
-  ESMCI::InterArray<int> *ids   // out - ids
+  VMId **vmIDs,                       // in  - VMId
+  ESMCI::InterArray<int> *ids,        // out - ids
+  ESMCI::InterArray<int> *rootVmIds,  // out - indices of vmIds local PET is root
+  int *rootVmIdCount                  // out - number of vmIds local PET is root
   ){
 //
 // !DESCRIPTION:
 //    Construct globally unique integer ids for the {\tt ESMCI::VMId} elements.
 // The number of elements in the vmIDs, and ids arrays must be identical. There
-// is no check of this condition possible on this level!
+// is no check of this condition possible on this level, and it is an assumption
+// made to be true!
+//    The rootVmIds object is created and filled with indices pointing into the
+// local vmIDs array for those entries for which the local PET is root.
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -1738,7 +1743,7 @@ int VM::translateVMId(
     return rc;
   }
   
-  int elementCount=ids->extent[0];
+  int elementCount = ids->extent[0];
   int *idsArray = ids->array;
   int petCount = getPetCount();
   int localPet = getLocalPet();
@@ -1746,6 +1751,9 @@ int VM::translateVMId(
   MPI_Group mpiGroup;
   MPI_Comm_group(mpiComm, &mpiGroup);
   
+  *rootVmIdCount = 0; // initialize
+  int *rootVmIdsArray = rootVmIds->array;
+
   if (elementCount > 0){
     // there is work to be done...
 
@@ -1780,7 +1788,7 @@ int VM::translateVMId(
     }
     sort(helper1.begin(), helper1.end());
 
-#if 0
+#ifdef TRANSLATE_VMID_LOG_on
     // development log
     for (unsigned i=0; i<helper1.size(); i++){
       std::stringstream prefix;
@@ -1788,7 +1796,7 @@ int VM::translateVMId(
       helper1[i].vmID->log(prefix.str());
     }
 #endif
-    
+
     // record the unique helper1 index in idsArray for later back reference
     int ii = 0; // init
     idsArray[helper1[0].index] = ii; // spin up
@@ -1800,7 +1808,7 @@ int VM::translateVMId(
     // cut out duplicate elements from sorted helper1 vector
     helper1.erase(unique(helper1.begin(),helper1.end()),helper1.end());
 
-#if 0
+#ifdef TRANSLATE_VMID_LOG_on
     // development log
     for (unsigned i=0; i<helper1.size(); i++){
       std::stringstream prefix;
@@ -1808,7 +1816,7 @@ int VM::translateVMId(
       helper1[i].vmID->log(prefix.str());
     }
 #endif
-    
+
     struct Helper2{
       unsigned indexH1; // index into helper1 vector
       unsigned count;   // number of different localIDs within the same vmKey
@@ -1838,7 +1846,7 @@ int VM::translateVMId(
       }
     }
 
-#if 0
+#ifdef TRANSLATE_VMID_LOG_on
     // development log
     for (unsigned i=0; i<helper2.size(); i++){
       std::stringstream msg;
@@ -1847,15 +1855,15 @@ int VM::translateVMId(
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
     }
 #endif
-    
+
     map<unsigned,unsigned> vasToPetMap;
     // The global VAS index is equal to the rank in the MPI_COMM_WORLD. It also
-    // correspnds to the bits in order of the vmKey. This is mapped against the
+    // corresponds to the bits in order of the vmKey. This is mapped against the
     // local PET index.
     for (int i=0; i<petCount; i++)
       vasToPetMap[getVas(i)] = i;
 
-#if 0
+#ifdef TRANSLATE_VMID_LOG_on
     // development log
     map<unsigned,unsigned>::iterator it;
     for (it=vasToPetMap.begin(); it!=vasToPetMap.end(); ++it){
@@ -1865,7 +1873,7 @@ int VM::translateVMId(
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
     }
 #endif
-        
+
     // determine rootPet for each entry in helper2, sum up totalLocalIds, and
     // create mpiComm to handle the respective vmKey PET subspace
     int totalLocalIds = 0; // init
@@ -1877,7 +1885,7 @@ int VM::translateVMId(
       }
       vector<unsigned> vasList;
       helper1[helper2[i].indexH1].getVasList(vasList);
-#if 0
+#ifdef TRANSLATE_VMID_LOG_on
       // development log
       for (unsigned k=0; k<vasList.size(); k++){
         std::stringstream msg;
@@ -1894,7 +1902,7 @@ int VM::translateVMId(
           petList.push_back(vasToPetMap[vasList[k]]);
           if (petList[kk]==helper2[i].rootPet)
             helper2[i].subRootPet=kk;
-#if 0
+#ifdef TRANSLATE_VMID_LOG_on
           // development log
           std::stringstream msg;
           msg << "petList["<<kk<<"]=" << petList[kk];
@@ -1911,7 +1919,19 @@ int VM::translateVMId(
       MPI_Group_free(&subGroup);
     }
 
-#if 0
+    // deal with rootVmIds
+    *rootVmIdCount = totalLocalIds; // return this value to caller
+    int j=0;
+    for (unsigned i=0; i<helper2.size(); i++){
+      if (helper2[i].rootPet == localPet){
+        // rootPet for this id  -> fill into rootVmIdsArray
+        for (unsigned k=0; k<helper2[i].count; k++){
+          rootVmIdsArray[j++]=helper1[helper2[i].indexH1+k].index;
+        }
+      }
+    }
+
+#ifdef TRANSLATE_VMID_LOG_on
     // development log
     for (unsigned i=0; i<helper2.size(); i++){
       std::stringstream msg;
@@ -1926,12 +1946,12 @@ int VM::translateVMId(
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
     }
 #endif
-    
+
     // AllGather() the totalLocalIds
     vector<int> totalLocalIdsList(petCount);
     allgather(&totalLocalIds, &(totalLocalIdsList[0]), sizeof(int));
 
-#if 0
+#ifdef TRANSLATE_VMID_LOG_on
     // development log
     for (unsigned i=0; i<totalLocalIdsList.size(); i++){
       std::stringstream msg;
@@ -1939,14 +1959,14 @@ int VM::translateVMId(
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
     }
 #endif
-    
+
     // determine beginning value of localId
     unsigned localId = 0;
     for (int i=0; i<localPet; i++){
       localId += totalLocalIdsList[i];
     }
 
-#if 0
+#ifdef TRANSLATE_VMID_LOG_on
     // development log
     {
       std::stringstream msg;
@@ -1954,7 +1974,7 @@ int VM::translateVMId(
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
     }
 #endif
-    
+
     // determine globally unique integer indices for all the entries in helper2
     for (unsigned i=0; i<helper2.size(); i++){
       unsigned localIdTemp;
