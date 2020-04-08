@@ -9897,18 +9897,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_VMTranslateVMId - Translate ESMF_VMId array to integer ids
 
 ! !INTERFACE:
-  subroutine ESMF_VMTranslateVMId(vm, vmIds, ids, rc)
+  subroutine ESMF_VMTranslateVMId(vm, vmIds, ids, vmIdMap, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)            :: vm
-    type(ESMF_VMId),  target, intent(in)            :: vmIds(:)
-    integer,          target, intent(out)           :: ids(:)
-    integer,                  intent(out), optional :: rc
+    type(ESMF_VM),                intent(in)            :: vm
+    type(ESMF_VMId), pointer,     intent(in)            :: vmIds(:)
+    integer,         allocatable, intent(out)           :: ids(:)
+    type(ESMF_VMId), allocatable, intent(out), optional :: vmIdMap(:)
+    integer,                      intent(out), optional :: rc
 !         
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     type(ESMF_InterArray)   :: idsAux       ! helper variable
+    integer, allocatable    :: rootVMIdI(:) ! helper variable
+    type(ESMF_InterArray)   :: rootVmIds    ! helper variable
+    integer                 :: rootVmIdCount! helper variable
+    type(ESMF_VMId), allocatable  :: localVmIds(:)
+    integer                 :: i, petCount, totalRootCount
+    integer, allocatable    :: rootCounts(:), recvOffsets(:)
+    
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -9917,23 +9925,92 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
-    ! Check that size of vmIds and ids arrays match
-    if (size(vmIDs) /= size(ids)) then
-      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
-        msg="size(vmIDs) must match size(ids)", &
-        ESMF_CONTEXT, rcToReturn=rc)
-      return
-    endif
-
-    ! Deal with (optional) array arguments
+    ! Allocate ids(:) array, ensuring matching bounds with vmIDs(:) array
+    allocate(ids(lbound(vmIds,1):ubound(vmIds,1)))
+    
+    ! Deal with integer array argument
     idsAux = ESMF_InterArrayCreate(ids, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Prepare rootVMId helper arrays
+    allocate(rootVMIdI(size(vmIds)))  ! large enough
+    rootVmIds = ESMF_InterArrayCreate(rootVMIdI, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface.
-    call c_ESMC_VMTranslateVMId(vm, vmIds, idsAux, localrc)
+    call c_ESMC_VMTranslateVMId(vm, vmIds, idsAux, rootVmIds, rootVmIdCount, &
+      localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! Shift integer ids from base 0 to base 1 for more standard Fortran use
+    do i=lbound(ids,1),ubound(ids,1)
+      ids(i) = ids(i) + 1
+    enddo
+    
+    if (present(vmIdMap)) then
+      ! Must construct vmIdMap
+
+      ! Set up localVmIds array for which local PET is root
+      allocate(localVmIds(rootVmIdCount))
+      call ESMF_VMIdCreate(localVmIds, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      do i=1, rootVmIdCount
+        call ESMF_VMIdCopy(source=(/vmIds(rootVMIdI(i))/), &
+          dest=localVmIds(i:i), rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      enddo
+
+      ! AllGather rootCounts from all PETs
+      call ESMF_VMGet(vm, petCount=petCount, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      allocate(rootCounts(petCount), recvOffsets(petCount))
+      call ESMF_VMAllGather(vm, sendData=(/rootVmIdCount/), recvData=rootCounts, &
+        count=1, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      
+      ! Determine totalRootCount across all PETs, and offsets for AllGatherV
+      totalRootCount = 0
+      do i=1, petCount
+        recvOffsets(i) = totalRootCount
+        totalRootCount = totalRootCount + rootCounts(i)
+      enddo
+      
+      ! Prepare final vmIdMap to hold totalRootCount many vmIDs
+      allocate(vmIdMap(totalRootCount))
+      call ESMF_VMIdCreate(vmIdMap, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      
+      ! Finally AllGatherV the vmIDs
+      call ESMF_VMAllGatherV(vm, &
+        sendData=localVmIds, sendCount=size(localVmIds), &
+        recvData=vmIdMap, recvCounts=rootCounts, recvOffsets=recvOffsets, &
+        rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      
+      ! Local clean-up
+      call ESMF_VMIdDestroy(localVmIds, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      deallocate(localVmIds, rootCounts)
+    endif
+    
+    ! Garbage collection
+    call ESMF_InterArrayDestroy(idsAux, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterArrayDestroy(rootVmIds, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    deallocate(rootVMIdI)
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS

@@ -1717,14 +1717,18 @@ int VM::translateVMId(
 //
 // !ARGUMENTS:
 //
-  VMId **vmIDs,                 // in  - VMId
-  ESMCI::InterArray<int> *ids   // out - ids
+  VMId **vmIDs,                       // in  - VMId
+  ESMCI::InterArray<int> *ids,        // out - ids
+  ESMCI::InterArray<int> *rootVmIds,  // out - indices of vmIds local PET is root
+  int *rootVmIdCount                  // out - number of vmIds local PET is root
   ){
 //
 // !DESCRIPTION:
 //    Construct globally unique integer ids for the {\tt ESMCI::VMId} elements.
 // The number of elements in the vmIDs, and ids arrays must be identical. There
 // is no check of this condition possible on this level!
+// The rootVmIds object is created and filled with indices pointing into the
+// local vmIDs array for those entries that the local PET is root.
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -1738,13 +1742,16 @@ int VM::translateVMId(
     return rc;
   }
   
-  int elementCount=ids->extent[0];
+  int elementCount = ids->extent[0];
   int *idsArray = ids->array;
   int petCount = getPetCount();
   int localPet = getLocalPet();
   MPI_Comm mpiComm = getMpi_c();
   MPI_Group mpiGroup;
   MPI_Comm_group(mpiComm, &mpiGroup);
+  
+  *rootVmIdCount = 0; // initialize
+  int *rootVmIdsArray = rootVmIds->array;
   
   if (elementCount > 0){
     // there is work to be done...
@@ -1844,7 +1851,7 @@ int VM::translateVMId(
     
     map<unsigned,unsigned> vasToPetMap;
     // The global VAS index is equal to the rank in the MPI_COMM_WORLD. It also
-    // correspnds to the bits in order of the vmKey. This is mapped against the
+    // corresponds to the bits in order of the vmKey. This is mapped against the
     // local PET index.
     for (int i=0; i<petCount; i++)
       vasToPetMap[getVas(i)] = i;
@@ -1897,6 +1904,18 @@ int VM::translateVMId(
       MPI_Comm_create_group(mpiComm, subGroup, 99, &(helper2[i].subComm));
       // clean-up
       MPI_Group_free(&subGroup);
+    }
+
+    // deal with rootVmIds
+    *rootVmIdCount = totalLocalIds; // return this value to caller
+    int j=0;
+    for (unsigned i=0; i<helper2.size(); i++){
+      if (helper2[i].rootPet == localPet){
+        // rootPet for this id  -> fill into rootVmIdsArray
+        for (unsigned k=0; k<helper2[i].count; k++){
+          rootVmIdsArray[j++]=helper1[helper2[i].indexH1+k].index;
+        }
+      }
     }
     
     // development log
