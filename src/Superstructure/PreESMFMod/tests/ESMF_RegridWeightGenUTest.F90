@@ -49,7 +49,7 @@ program ESMF_RegridWeightGenUTest
 
   logical :: correct
   type(ESMF_VM) :: vm
-  character(len=256) :: srcfile, dstfile, wgtfile, rhfile
+  character(len=256) :: srcfile, dstfile, wgtfile
   type(ESMF_PoleMethod_Flag) :: pole
   type(ESMF_FileFormat_Flag) :: srcFileType, dstFileType
   type(ESMF_RegridMethod_Flag) :: methodflag
@@ -71,7 +71,7 @@ program ESMF_RegridWeightGenUTest
   
   !----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "RegridWeightGen bilinear routehandle Test"
+  write(name, *) "RegridWeightGen bilinear Test"
   write(failmsg, *) "Did not return ESMF_SUCCESS"
 
   srcfile = 'data/T42_grid.nc'
@@ -84,8 +84,7 @@ program ESMF_RegridWeightGenUTest
   methodflag = ESMF_REGRIDMETHOD_BILINEAR
   unmappedaction = ESMF_UNMAPPEDACTION_ERROR
 
-  call ESMF_RegridWeightGen(srcfile, dstfile, &
-       weightFile=wgtfile, regridmethod=methodflag, &
+  call ESMF_RegridWeightGen(srcfile, dstfile, wgtfile, regridmethod=methodflag, &
        polemethod = pole, unmappedaction = unmappedaction, &
        srcFileType = srcFileType, dstFileType = dstFileType, &
        verboseFlag = .true., rc=rc)
@@ -99,70 +98,13 @@ program ESMF_RegridWeightGenUTest
 
   !----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "RegridWeightGen weightfile and routehandle file Test"
-  write(failmsg, *) "Did not return ESMF_SUCCESS"
-
-  rhfile = 'data/routehandle.dat'
-
-  call ESMF_RegridWeightGen(srcfile, dstfile, &
-       weightFile=wgtfile, rhfile=rhfile, regridmethod=methodflag, &
-       polemethod = pole, unmappedaction = unmappedaction, &
-       srcFileType = srcFileType, dstFileType = dstFileType, &
-       verboseFlag = .true., rc=rc)
-
-#ifdef ESMF_NETCDF
-  call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
-#else
-  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
-#endif
-
-  !----------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "RegridWeightGen just routehandle file Test"
-  write(failmsg, *) "Did not return ESMF_SUCCESS"
-
-  call ESMF_RegridWeightGen(srcfile, dstfile, &
-       rhfile=rhfile, regridmethod=methodflag, &
-       polemethod = pole, unmappedaction = unmappedaction, &
-       srcFileType = srcFileType, dstFileType = dstFileType, &
-       verboseFlag = .true., rc=rc)
-
-#ifdef ESMF_NETCDF
-  call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
-#else
-  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
-#endif
-
-  !----------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "RegridWeightGen no file fail Test"
-  write(failmsg, *) "Did not return ESMF_RC_ARG_WRONG"
-
-  call ESMF_RegridWeightGen(srcfile, dstfile, &
-       regridmethod=methodflag, &
-       polemethod = pole, unmappedaction = unmappedaction, &
-       srcFileType = srcFileType, dstFileType = dstFileType, &
-       verboseFlag = .true., rc=rc)
-
-#ifdef ESMF_NETCDF
-  call ESMF_Test(((rc.eq.ESMF_RC_ARG_WRONG)), name, failMsg, result, ESMF_SRCLINE)
-#else
-  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
-#endif
-
-  !----------------------------------------------------------------------------
-  !NEX_UTest
   write(name, *) "RegridWeightGen patch Test"
   write(failmsg, *) "Did not return ESMF_SUCCESS"
 
   methodflag = ESMF_REGRIDMETHOD_PATCH
   wgtfile = 'data/T42_ll2.5_patch.nc'
 
-  call ESMF_RegridWeightGen(srcfile, dstfile, &
-       weightFile=wgtfile, regridmethod=methodflag, &
+  call ESMF_RegridWeightGen(srcfile, dstfile, wgtfile, regridmethod=methodflag, &
        polemethod = pole, unmappedaction = unmappedaction, &
        srcFileType = srcFileType, dstFileType = dstFileType, &
        verboseFlag = .true., rc=rc)
@@ -184,8 +126,7 @@ program ESMF_RegridWeightGenUTest
   unmappedaction = ESMF_UNMAPPEDACTION_IGNORE
   wgtfile = 'data/T42_ll2.5_conserve.nc'
 
-  call ESMF_RegridWeightGen(srcfile, dstfile, &
-       weightFile=wgtfile, regridmethod=methodflag, &
+  call ESMF_RegridWeightGen(srcfile, dstfile, wgtfile, regridmethod=methodflag, &
        polemethod = pole, unmappedaction = unmappedaction, &
        srcFileType = srcFileType, dstFileType = dstFileType, &
        verboseFlag = .true., rc=rc)
