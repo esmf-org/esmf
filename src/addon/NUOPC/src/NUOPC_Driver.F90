@@ -496,8 +496,6 @@ module NUOPC_Driver
     integer                   :: i, j, k, l, cIndex
     character(ESMF_MAXSTR)    :: iString, jString, lString
     character(ESMF_MAXSTR)    :: compName, stateName
-    character(ESMF_MAXSTR)    :: petListBuffer(100)
-    integer                   :: lineCount
     integer, pointer          :: i_petList(:), j_petList(:), c_petList(:)
     logical                   :: existflag
     logical                   :: clockIsCreated
@@ -3597,8 +3595,7 @@ module NUOPC_Driver
     character(ESMF_MAXSTR)          :: name
     type(type_InternalState)        :: is
     type(ComponentMapEntry)         :: cmEntry
-    integer                         :: stat, i, k, lineCount
-    character(ESMF_MAXSTR)          :: petListBuffer(100)
+    integer                         :: stat, i
     character(ESMF_MAXSTR)          :: msgString, lString
     integer                         :: verbosity
 
@@ -3648,20 +3645,10 @@ module NUOPC_Driver
         if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
-        
-        if (size(cmEntry%wrap%petList) <= 1000) then
-          ! have the resources to print the entire petList
-          write (petListBuffer, "(10I7)") cmEntry%wrap%petList
-          lineCount = size(cmEntry%wrap%petList)/10
-          if ((size(cmEntry%wrap%petList)/10)*10 /= size(cmEntry%wrap%petList))&
-            lineCount = lineCount + 1
-          do k=1, lineCount
-            call ESMF_LogWrite(petListBuffer(k), ESMF_LOGMSG_INFO, rc=localrc)
-            if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU,&
-              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-              return  ! bail out
-          enddo
-        endif
+        call NUOPC_LogPetList(cmEntry%wrap%petList, name=name, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
       else
         write (msgString,"(A)") trim(name)//" - Creating model component "//&
           trim(cmEntry%wrap%label)//" without petList."
@@ -3770,8 +3757,7 @@ module NUOPC_Driver
     character(ESMF_MAXSTR)          :: name
     type(type_InternalState)        :: is
     type(ComponentMapEntry)         :: cmEntry
-    integer                         :: stat, i, k, lineCount
-    character(ESMF_MAXSTR)          :: petListBuffer(100)
+    integer                         :: stat, i
     character(ESMF_MAXSTR)          :: msgString, lString
     integer                         :: verbosity
 
@@ -3821,20 +3807,10 @@ module NUOPC_Driver
         if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
-        
-        if (size(cmEntry%wrap%petList) <= 1000) then
-          ! have the resources to print the entire petList
-          write (petListBuffer, "(10I7)") cmEntry%wrap%petList
-          lineCount = size(cmEntry%wrap%petList)/10
-          if ((size(cmEntry%wrap%petList)/10)*10 /= size(cmEntry%wrap%petList))&
-            lineCount = lineCount + 1
-          do k=1, lineCount
-            call ESMF_LogWrite(petListBuffer(k), ESMF_LOGMSG_INFO, rc=localrc)
-            if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU,&
-              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-              return  ! bail out
-          enddo
-        endif
+        call NUOPC_LogPetList(cmEntry%wrap%petList, name=name, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
       else
         write (msgString,"(A)") trim(name)//" - Creating model component "//&
           trim(cmEntry%wrap%label)//" without petList."
@@ -3948,8 +3924,7 @@ module NUOPC_Driver
     integer, pointer                :: connectorPetListTemp(:)
     integer, pointer                :: connectorPetListTemp2(:)
     integer, pointer                :: srcPetList(:), dstPetList(:)
-    integer                         :: k, l, cIndex, lineCount
-    character(ESMF_MAXSTR)          :: petListBuffer(100)
+    integer                         :: k, l, cIndex
     character(ESMF_MAXSTR)          :: msgString, lString
     type(ESMF_VM)                   :: vm
     logical                         :: isPresent
@@ -4033,19 +4008,10 @@ module NUOPC_Driver
         if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
-        if (size(connectorPetList) <= 1000) then
-          ! have the resources to print the entire petList
-          write (petListBuffer, "(10I7)") connectorPetList
-          lineCount = size(connectorPetList)/10
-          if ((size(connectorPetList)/10)*10 /= size(connectorPetList)) &
-            lineCount = lineCount + 1
-          do k=1, lineCount
-            call ESMF_LogWrite(petListBuffer(k), ESMF_LOGMSG_INFO, rc=localrc)
-            if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU,&
-              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-              return  ! bail out
-          enddo
-        endif
+        call NUOPC_LogPetList(connectorPetList, name=name, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
       endif
       cmEntry%wrap%connector = ESMF_CplCompCreate(&
         name=trim(cmEntry%wrap%label), petList=connectorPetList, rc=localrc)

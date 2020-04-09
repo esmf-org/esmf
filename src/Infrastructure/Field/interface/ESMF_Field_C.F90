@@ -1157,6 +1157,11 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                     unmappedaction, &
                                     ignoreDegenerate, &
                                     createRoutehandle, &
+                                    filemode, &
+                                    srcFile, &
+                                    dstFile, &
+                                    dstFileType, &
+                                    srcFileType, &
                                     srcFracField, &
                                     dstFracField, &
                                     rc)
@@ -1187,8 +1192,16 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     type(ESMF_UnmappedAction_Flag)          :: unmappedaction
     logical                                 :: ignoreDegenerate
     logical, optional                       :: createRoutehandle
+
+    type(ESMF_FileMode_Flag),   optional    :: filemode
+    character(len=*),           optional    :: srcFile
+    character(len=*),           optional    :: dstFile
+    type(ESMF_FileFormat_Flag), optional    :: srcFileType
+    type(ESMF_FileFormat_Flag), optional    :: dstFileType
+
     type(ESMF_Field)                        :: srcFracField
     type(ESMF_Field)                        :: dstFracField
+
     integer                                 :: rc
 
     integer :: localrc
@@ -1196,6 +1209,8 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
 
     real(ESMF_KIND_R8), pointer :: localFactorList(:)
     integer(ESMF_KIND_I4), pointer :: localFactorIndexList(:,:)
+    
+    type(ESMF_FileMode_Flag) :: filemode_local
     
     ! initialize return code; assume routine not implemented
     rc = ESMF_RC_NOT_IMPL
@@ -1262,8 +1277,26 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     endif
 
     ! write the weights to file
-    call ESMF_SparseMatrixWrite(localFactorList, localFactorIndexList, &
-                                fileName, rc=localrc)
+    filemode_local = ESMF_FILEMODE_BASIC
+    if (present(filemode)) then
+      filemode_local = filemode
+    endif
+    
+    if (filemode_local == ESMF_FILEMODE_BASIC) then
+      call ESMF_SparseMatrixWrite(localFactorList, localFactorIndexList, &
+                                  fileName, rc=localrc)
+    elseif (filemode_local == ESMF_FILEMODE_WITHAUX) then
+      call ESMF_OutputScripWeightFile(fileName, &
+                                      localFactorList, localFactorIndexList, &
+                                      srcFile=srcFile, dstFile=dstFile, &
+                                      srcFileType=srcFileType, &
+                                      dstFileType=dstFileType, &
+                                      rc=localrc)
+    else
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_VAL_OUTOFRANGE, &
+                            msg="- filemode not recognized", &
+                            ESMF_CONTEXT, rcToReturn=rc)
+    endif
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

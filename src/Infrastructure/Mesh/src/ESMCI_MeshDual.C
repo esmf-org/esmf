@@ -1077,8 +1077,13 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
         // If at the center, so would be a zero vector skip...
         if ((tmp_coords[0]==center[0]) &&
             (tmp_coords[1]==center[1]) &&
-            (tmp_coords[2]==center[2])) continue;
-   
+            (tmp_coords[2]==center[2])) {
+
+          // Move to next elem and go back to top...
+          ++el; // Very important otherwise will get stuck in loop
+          continue;
+        }
+
         // Otherwise make this the new point
         max_elem_id=elem_id;
         max_elem_coords[0]=tmp_coords[0];

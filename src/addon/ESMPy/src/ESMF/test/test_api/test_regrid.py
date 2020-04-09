@@ -305,7 +305,67 @@ class TestRegrid(TestBase):
         mgr.barrier()
 
     @attr('parallel')
-    def test_field_regrid_from_file(self):
+    def test_field_regrid_file3(self):
+        import os
+        DD = os.path.join(os.getcwd(), "test/data")
+        if not os.path.isdir(DD):
+            os.makedirs(DD)
+        from ESMF.util.cache_data import cache_data_file
+        cache_data_file(os.path.join(DD, "ll2.5deg_grid.nc"))
+        cache_data_file(os.path.join(DD, "T42_grid.nc"))
+
+        mgr = Manager()
+        filename = 'esmpy_test_field_regrid_file3.nc'
+        if local_pet() == 0:
+            path = os.path.join(os.getcwd(), filename)
+            if os.path.isfile(path):
+                os.remove(path)
+        mgr.barrier()
+
+        grid1 = "test/data/ll2.5deg_grid.nc"
+        srcgrid = ESMF.Grid(filename=grid1, filetype=ESMF.FileFormat.SCRIP)
+
+        grid2 = "test/data/T42_grid.nc"
+        dstgrid = ESMF.Grid(filename=grid2, filetype=ESMF.FileFormat.SCRIP)
+
+        srcfield = ESMF.Field(srcgrid)
+        dstfield = ESMF.Field(dstgrid)
+
+        _ = ESMF.Regrid(srcfield, dstfield, filename=filename,
+                        regrid_method=ESMF.RegridMethod.BILINEAR,
+                        unmapped_action=ESMF.UnmappedAction.IGNORE,
+                        filemode=ESMF.FileMode.WITHAUX,
+                        src_file=grid1, dst_file=grid2,
+                        src_file_type=ESMF.FileFormat.SCRIP,
+                        dst_file_type=ESMF.FileFormat.SCRIP)
+        mgr.barrier()
+
+        self.assertTrue(os.path.exists(filename))
+
+        src_size = 10368
+        dst_size = 8192
+        self.assertWeightFileIsRational(filename, src_size, dst_size)
+        mgr.barrier()
+
+        # Confirm auxiliary variables exist in the file
+        try:
+            from netCDF4 import Dataset
+        except ImportError:
+            pass
+        else:
+            ds = Dataset(filename)
+            try:
+                vars = ds.variables.keys()
+                try:
+                    self.assertGreater(len(vars), 3)
+                except AssertionError:
+                    print(vars)
+                    raise
+            finally:
+                ds.close()
+
+    @attr('parallel')
+    def test_field_regrid_file3(self):
         mgr = Manager()
         filename = 'esmpy_test_field_from_file.nc'
         path = os.path.join(os.getcwd(), filename)
@@ -325,14 +385,14 @@ class TestRegrid(TestBase):
 
         lons = np.linspace(-120, 120, 20)
         lats = np.linspace(-60, 60, 20)
-        
+
         # parallel coordinates
         slons_par = lons[srcgrid.lower_bounds[ESMF.StaggerLoc.CENTER][0]:srcgrid.upper_bounds[ESMF.StaggerLoc.CENTER][0]]
         slats_par = lats[srcgrid.lower_bounds[ESMF.StaggerLoc.CENTER][1]:srcgrid.upper_bounds[ESMF.StaggerLoc.CENTER][1]]
-        
+
         # make sure to use indexing='ij' as ESMPy backend uses matrix indexing (not Cartesian)
         lonm, latm = np.meshgrid(slons_par, slats_par, indexing='ij')
-        
+
         srcGridCoordLon[:] = lonm
         srcGridCoordLat[:] = latm
 
@@ -343,17 +403,17 @@ class TestRegrid(TestBase):
         # Get and set the source grid coordinates.
         dstGridCoordLon = dstgrid.get_coords(0)
         dstGridCoordLat = dstgrid.get_coords(1)
-        
+
         lons = np.linspace(-120, 120, 10)
         lats = np.linspace(-60, 60, 10)
-        
+
         # parallel coordinates
         dlons_par = lons[dstgrid.lower_bounds[ESMF.StaggerLoc.CENTER][0]:dstgrid.upper_bounds[ESMF.StaggerLoc.CENTER][0]]
         dlats_par = lats[dstgrid.lower_bounds[ESMF.StaggerLoc.CENTER][1]:dstgrid.upper_bounds[ESMF.StaggerLoc.CENTER][1]]
-        
+
         # make sure to use indexing='ij' as ESMPy backend uses matrix indexing (not Cartesian)
         lonm, latm = np.meshgrid(dlons_par, dlats_par, indexing='ij')
-        
+
         dstGridCoordLon[:] = lonm
         dstGridCoordLat[:] = latm
 
@@ -390,6 +450,97 @@ class TestRegrid(TestBase):
         destfield = regridS2D(srcfield, dstfield)
 
         self.assertWeightFileIsRational(filename, 20*20, 10*10)
+        self.assertTrue(np.all(srcfield.data[:,:] == 24))
+        self.assertNumpyAllClose(xctfield.data, dstfield.data)
+        mgr.barrier()
+
+    @attr('parallel')
+    def test_field_regrid_file4(self):
+        mgr = Manager()
+        filename = 'routehandlefile.nc'
+        path = os.path.join(os.getcwd(), filename)
+        if local_pet() == 0:
+            path = os.path.join(os.getcwd(), filename)
+            if os.path.isfile(path):
+                os.remove(path)
+        mgr.barrier()
+
+        srcgrid = ESMF.Grid(np.array([20, 20]),
+                            staggerloc=ESMF.StaggerLoc.CENTER,
+                            coord_sys=ESMF.CoordSys.CART)
+
+        # Get and set the source grid coordinates.
+        srcGridCoordLon = srcgrid.get_coords(0)
+        srcGridCoordLat = srcgrid.get_coords(1)
+
+        lons = np.linspace(-120, 120, 20)
+        lats = np.linspace(-60, 60, 20)
+
+        # parallel coordinates
+        slons_par = lons[srcgrid.lower_bounds[ESMF.StaggerLoc.CENTER][0]:srcgrid.upper_bounds[ESMF.StaggerLoc.CENTER][0]]
+        slats_par = lats[srcgrid.lower_bounds[ESMF.StaggerLoc.CENTER][1]:srcgrid.upper_bounds[ESMF.StaggerLoc.CENTER][1]]
+
+        # make sure to use indexing='ij' as ESMPy backend uses matrix indexing (not Cartesian)
+        lonm, latm = np.meshgrid(slons_par, slats_par, indexing='ij')
+
+        srcGridCoordLon[:] = lonm
+        srcGridCoordLat[:] = latm
+
+        dstgrid = ESMF.Grid(np.array([10, 10]),
+                             staggerloc=ESMF.StaggerLoc.CENTER,
+                             coord_sys=ESMF.CoordSys.CART)
+
+        # Get and set the source grid coordinates.
+        dstGridCoordLon = dstgrid.get_coords(0)
+        dstGridCoordLat = dstgrid.get_coords(1)
+
+        lons = np.linspace(-120, 120, 10)
+        lats = np.linspace(-60, 60, 10)
+
+        # parallel coordinates
+        dlons_par = lons[dstgrid.lower_bounds[ESMF.StaggerLoc.CENTER][0]:dstgrid.upper_bounds[ESMF.StaggerLoc.CENTER][0]]
+        dlats_par = lats[dstgrid.lower_bounds[ESMF.StaggerLoc.CENTER][1]:dstgrid.upper_bounds[ESMF.StaggerLoc.CENTER][1]]
+
+        # make sure to use indexing='ij' as ESMPy backend uses matrix indexing (not Cartesian)
+        lonm, latm = np.meshgrid(dlons_par, dlats_par, indexing='ij')
+
+        dstGridCoordLon[:] = lonm
+        dstGridCoordLat[:] = latm
+
+
+        srcfield = ESMF.Field(srcgrid)
+        dstfield = ESMF.Field(dstgrid)
+        xctfield = ESMF.Field(dstgrid)
+
+        srcfield.data[:,:] = 24
+        xctfield.data[:,:] = 24
+        dstfield.data[:,:] = 0
+
+        self.assertTrue(np.all(srcfield.data[:,:] == 24))
+        self.assertTrue(np.all(dstfield.data[:,:] == 0))
+
+        regridS2D = ESMF.Regrid(srcfield, dstfield,
+                        rh_filename=filename,
+                        regrid_method=ESMF.RegridMethod.BILINEAR,
+                        unmapped_action=ESMF.UnmappedAction.ERROR,
+                        create_rh=True,
+                        ignore_degenerate=False)
+        mgr.barrier()
+
+        self.assertTrue(os.path.exists(filename))
+
+        self.assertTrue(np.all(srcfield.data[:,:] == 24))
+        self.assertNumpyAllClose(xctfield.data, dstfield.data)
+
+        regridS2D = ESMF.RegridFromFile(srcfield, dstfield, rh_filename=filename)
+        mgr.barrier()
+
+        self.assertTrue(np.all(srcfield.data[:,:] == 24))
+        self.assertNumpyAllClose(xctfield.data, dstfield.data)
+
+        destfield = regridS2D(srcfield, dstfield)
+
+        # self.assertWeightFileIsRational(filename, 20*20, 10*10)
         self.assertTrue(np.all(srcfield.data[:,:] == 24))
         self.assertNumpyAllClose(xctfield.data, dstfield.data)
         mgr.barrier()
