@@ -8,7 +8,7 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
-#define ESMC_FILENAME "./src/Infrastructure/Base/src/ESMC_InfoCDef.C"
+#define ESMC_FILENAME "ESMC_InfoCDef.C"
 
 // Info C-Fortran method implementation (body) file
 
@@ -48,9 +48,14 @@ extern "C" {
 // Helper Functions
 //-----------------------------------------------------------------------------
 
-ESMCI::Info *baseAddressToInfo(const long int &baseAddress) {
+ESMC_Base *baseAddressToBase(const long int &baseAddress) {
   void *v = (void *) baseAddress;
   ESMC_Base *base = reinterpret_cast<ESMC_Base *>(v);
+  return base;
+}
+
+ESMCI::Info *baseAddressToInfo(const long int &baseAddress) {
+  ESMC_Base *base = baseAddressToBase(baseAddress);
   ESMCI::Info *info = base->ESMC_BaseGetInfo();
   return info;
 }
@@ -106,6 +111,20 @@ void ESMC_InfoCopyForAttribute(const ESMCI::Info* src, ESMCI::Info* dst, int &es
   esmc_rc = ESMF_FAILURE;
   try {
     dst->getStorageRefWritable() = src->getStorageRef();
+    esmc_rc = ESMF_SUCCESS;
+  }
+  ESMC_CATCH_ISOC
+}
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_InfoCopyForAttributeReference()"
+void ESMC_InfoCopyForAttributeReference(const long int &src_base_address, const long int &dst_base_address, int &esmc_rc) {
+  esmc_rc = ESMF_FAILURE;
+  try {
+    ESMC_Base *src_base = baseAddressToBase(src_base_address);
+    ESMC_Base *dst_base = baseAddressToBase(dst_base_address);
+    dst_base->ESMC_BaseDeleteInfo();
+    dst_base->ESMC_BaseSetInfo(src_base->ESMC_BaseGetInfo());
     esmc_rc = ESMF_SUCCESS;
   }
   ESMC_CATCH_ISOC

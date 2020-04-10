@@ -199,6 +199,7 @@ public ESMF_InfoBroadcast
 
 public c_info_base_sync
 public c_info_copyforattribute
+public c_info_copyforattribute_reference
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------

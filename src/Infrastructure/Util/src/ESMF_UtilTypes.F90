@@ -688,8 +688,7 @@
 
       type(ESMF_AttCopy_Flag), parameter ::  &
         ESMF_ATTCOPY_REFERENCE = ESMF_AttCopy_Flag(0), &
-        ESMF_ATTCOPY_VALUE = ESMF_AttCopy_Flag(1), &
-        ESMF_ATTCOPY_HYBRID = ESMF_AttCopy_Flag(2)
+        ESMF_ATTCOPY_VALUE = ESMF_AttCopy_Flag(1)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_AttGetCountFlag
@@ -1097,6 +1096,10 @@
              ESMF_PIN_DE_TO_SSI, &
              ESMF_PIN_DE_TO_SSI_CONTIG
              
+      public ESMF_AttCopy_Flag, &
+             ESMF_ATTCOPY_REFERENCE, &
+             ESMF_ATTCOPY_VALUE
+
       public ESMF_AttGetCountFlag, &
              ESMF_ATTGETCOUNT_ATTRIBUTE, &
              ESMF_ATTGETCOUNT_ATTPACK, &
