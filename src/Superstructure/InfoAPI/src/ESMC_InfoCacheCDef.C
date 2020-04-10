@@ -96,7 +96,7 @@ void collect_geom_base_objects(const json &infoDescStorage, esmc_infocache_t &in
             parent_info->set("_esmf_state_reconcile/should_serialize_geom",
                              should_serialize_geom, false);
             parent_info->set("_esmf_state_reconcile/geom_type",
-                             should_serialize_geom, false);
+                             geom_type, false);
             if (!should_serialize_geom) {
               parent_info->set<int>("_esmf_state_reconcile/field_archetype_id",
                                fieldCache->at(index)->ESMC_BaseGetID(), false);

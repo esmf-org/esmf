@@ -232,7 +232,11 @@ contains
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
 
+     !tdk:todo: i think i need to use VMIds when searching for a Field here
      call ESMF_InfoCacheReassembleFields(state, localrc) !tdk:bc
+     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+     call ESMF_InfoCacheReassembleFieldsFinalize(state, localrc)
      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
 #if 0

@@ -244,6 +244,7 @@ subroutine ESMF_InfoCacheReassembleField(target, state, rc)
   integer :: base_id
   type(ESMF_Field) :: archetype_field
   character(:), allocatable :: geom_type
+  type(ESMF_InfoDescribe) :: idesc
 
   rc = ESMF_FAILURE
 
@@ -262,6 +263,17 @@ subroutine ESMF_InfoCacheReassembleField(target, state, rc)
 
       found = ESMF_InfoCacheFindField(state, archetype_field, base_id, rc)
       if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+#if 0
+      call idesc%Initialize(createInfo=.true., addObjectInfo=.true., rc=rc)
+      if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+      call idesc%Update(archetype_field, "", rc=rc)
+      if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_LogWrite(ESMF_InfoDump(idesc%info, indent=4), rc=rc)
+      if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+      call idesc%Destroy(rc=rc)
+      if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+#endif
 
       if (.not. found) then
         if (ESMF_LogFoundError(ESMF_FAILURE, msg="Archetype Field not found", &
@@ -288,11 +300,94 @@ subroutine ESMF_InfoCacheReassembleField(target, state, rc)
       end if
     end if
 
-    call ESMF_InfoRemove(infoh, "_esmf_state_reconcile", rc=rc)
-    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
   rc = ESMF_SUCCESS
+end subroutine
+
+! -----------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoCacheReassembleFieldsFinalize()"
+recursive subroutine ESMF_InfoCacheReassembleFieldsFinalize(target, rc)
+  type(ESMF_State), intent(inout) :: target
+  integer, intent(out) :: rc
+
+  type(ESMF_FieldBundle) :: fb
+  type(ESMF_Field) :: field
+  type(ESMF_StateItem_Flag), dimension(:), allocatable :: stateTypes
+  character(len=ESMF_MAXSTR), dimension(:), allocatable :: stateNames
+  integer :: ii, itemCount, jj
+  type(ESMF_State) :: state
+  character(len=ESMF_MAXSTR) :: curr_field_name
+  integer :: field_count
+  character(len=ESMF_MAXSTR), dimension(:), allocatable :: field_name_list
+  type(ESMF_Info) :: infoh
+  logical :: isPresent
+
+  rc = ESMF_SUCCESS
+
+  call ESMF_StateGet(target, itemCount=itemCount, rc=rc)
+  if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  allocate(stateTypes(itemCount), stateNames(itemCount))
+
+  call ESMF_StateGet(target, itemTypeList=stateTypes, itemNameList=stateNames, rc=rc)
+  if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  do ii=1,itemCount
+    select case (stateTypes(ii)%ot)
+      case(ESMF_STATEITEM_STATE%ot)
+        call ESMF_StateGet(target, trim(stateNames(ii)), state, rc=rc)
+        if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call ESMF_InfoCacheReassembleFieldsFinalize(state, rc)
+        if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+      case(ESMF_STATEITEM_FIELD%ot)
+        call ESMF_StateGet(target, trim(stateNames(ii)), field, rc=rc)
+        if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+        infoh = ESMF_InfoBaseGetHandle(field%ftypep%base)
+
+        isPresent = ESMF_InfoIsPresent(infoh, "_esmf_state_reconcile", rc=rc)
+        if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+        if (isPresent) then
+          call ESMF_InfoRemove(infoh, "_esmf_state_reconcile", rc=rc)
+          if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+        end if
+      case(ESMF_STATEITEM_FIELDBUNDLE%ot)
+        call ESMF_StateGet(target, trim(stateNames(ii)), fb, rc=rc)
+        if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call ESMF_FieldBundleGet(fb, fieldCount=field_count, rc=rc)
+        if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+        allocate(field_name_list(field_count))
+
+        call ESMF_FieldBundleGet(fb, fieldNameList=field_name_list, rc=rc)
+        if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+        do jj=1,field_count
+          call ESMF_FieldBundleGet(fb, trim(field_name_list(jj)), field=field, rc=rc)
+          if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+          infoh = ESMF_InfoBaseGetHandle(field%ftypep%base)
+
+          isPresent = ESMF_InfoIsPresent(infoh, "_esmf_state_reconcile", rc=rc)
+          if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+          if (isPresent) then
+            call ESMF_InfoRemove(infoh, "_esmf_state_reconcile", rc=rc)
+            if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+          end if
+        end do
+
+        deallocate(field_name_list)
+    end select
+  end do
+
+  deallocate(stateTypes, stateNames)
 end subroutine
 
 ! -----------------------------------------------------------------------------
