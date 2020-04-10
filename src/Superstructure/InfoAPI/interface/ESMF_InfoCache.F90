@@ -240,9 +240,10 @@ subroutine ESMF_InfoCacheReassembleField(target, state, rc)
   integer, intent(out) :: rc
 
   logical :: should_serialize_geom, found
-  type(ESMF_Info) :: infoh
+  type(ESMF_Info) :: infoh, infoh_found
   integer :: base_id
   type(ESMF_Field) :: archetype_field
+  character(:), allocatable :: geom_type
 
   rc = ESMF_FAILURE
 
@@ -267,7 +268,24 @@ subroutine ESMF_InfoCacheReassembleField(target, state, rc)
           ESMF_CONTEXT, rcToReturn=rc)) return
       end if
 
-      target%ftypep%geombase = archetype_field%ftypep%geombase
+      infoh_found = ESMF_InfoBaseGetHandle(archetype_field%ftypep%base)
+      if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+      call ESMF_InfoGetCharAlloc(infoh_found, "/_esmf_state_reconcile/geom_type", geom_type, rc=rc)
+      if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+      if (geom_type == "Grid") then
+        target%ftypep%geombase%gbcp%grid = archetype_field%ftypep%geombase%gbcp%grid
+      else if (geom_type == "Mesh") then
+        target%ftypep%geombase%gbcp%mesh = archetype_field%ftypep%geombase%gbcp%mesh
+      else if (geom_type == "XGrid") then
+        target%ftypep%geombase%gbcp%xgrid = archetype_field%ftypep%geombase%gbcp%xgrid
+      else if (geom_type == "LocStream") then
+        target%ftypep%geombase%gbcp%locstream = archetype_field%ftypep%geombase%gbcp%locstream
+      else
+        if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, msg="Bad geom_type: "//trim(geom_type), &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      end if
     end if
 
     call ESMF_InfoRemove(infoh, "_esmf_state_reconcile", rc=rc)
