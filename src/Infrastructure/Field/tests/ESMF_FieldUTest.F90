@@ -77,17 +77,15 @@
       type(ESMF_ArraySpec)            :: arrayspec8
       real(ESMF_KIND_R8), dimension(:,:,:), allocatable :: fptr
       real(ESMF_KIND_R4), dimension(:,:), pointer :: lsfptrR4Out
-      type(ESMF_Grid) :: grid, grid2, grid8, grid9
+      type(ESMF_Grid) :: grid, grid2, grid8
       real(ESMF_KIND_R8), dimension(:), pointer :: lsfptr,lsfptrOut
-      type(ESMF_Field) :: f2, f3, f4, f5, f6, fls, fS, f7, f8, f9, f10
+      type(ESMF_Field) :: f2, f3, f4, f5, f6, fls, fS, f7, f8
       real(ESMF_KIND_R4), allocatable :: farray(:,:)
       type(ESMF_FieldStatus_Flag) :: fstatus
       integer :: ulb(1), uub(1)
       character (len = 20) :: gname, gname3
       character (len = 20) :: fname, fname1, fname2
       logical :: correct
-      type(ESMF_DistGrid) :: dg1
-      integer :: dimCount
 
 #endif
 !-------------------------------------------------------------------------------
@@ -260,6 +258,7 @@
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       call ESMF_FieldDestroy(fieldAlias, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
 
 #ifdef ESMF_TESTEXHAUSTIVE
 
@@ -983,42 +982,6 @@
 
       call ESMF_FieldDestroy(f8, rc=rc)
       call ESMF_GridDestroy(grid8, rc=rc)
-
-      !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
-      write(name, *) "FieldDestroy with a GeomBase reference"
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-
-      ! Test that a GeomBase reference is still valid after the target Field is
-      ! destroyed.
-
-      dg1 = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/10,10/), rc=rc)
-      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      grid9 = ESMF_GridCreate(distgrid=dg1, rc=rc)
-      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-      f9 = ESMF_FieldCreate(grid9, ESMF_TYPEKIND_R8, rc=rc)
-      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-      f10 = ESMF_FieldCreate(grid9, ESMF_TYPEKIND_R8, rc=rc)
-      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-      f10%ftypep%geombase = f9%ftypep%geombase
-
-      call ESMF_FieldDestroy(f9, rc=rc)
-      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-      call ESMF_GeomBaseGet(f10%ftypep%geombase, dimCount=dimCount, rc=rc)
-      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-      call ESMF_Test((dimCount==2), name, failMsg, result, ESMF_SRCLINE)
-
-      call ESMF_FieldDestroy(f10, rc=rc)
-      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      call ESMF_GridDestroy(grid9, rc=rc)
-      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      call ESMF_DistGridDestroy(dg1, rc=rc)
-      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 #endif
 
       !------------------------------------------------------------------------
