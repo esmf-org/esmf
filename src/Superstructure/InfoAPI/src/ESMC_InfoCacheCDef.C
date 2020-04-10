@@ -80,18 +80,22 @@ void collect_geom_base_objects(const json &infoDescStorage, esmc_infocache_t &in
       // Pointer is null if base not found
       std::size_t index = 0;
       ESMC_Base *ibase = findBase(*base, infoCache, index);
+      std::string geom_type;
       if (it.value().at("is_geom") && !ibase) {
         should_serialize_geom = true;
         infoCache.push_back(base);
         assert(fieldCache);
         assert(parentBase);
         fieldCache->push_back(parentBase);
+        geom_type = it.value().at("esmf_type");
       }
       if (parentBase) {
         ESMCI::Info *parent_info = parentBase->ESMC_BaseGetInfo();
         try {
           if (!parent_info->hasKey("_esmf_state_reconcile")) {
             parent_info->set("_esmf_state_reconcile/should_serialize_geom",
+                             should_serialize_geom, false);
+            parent_info->set("_esmf_state_reconcile/geom_type",
                              should_serialize_geom, false);
             if (!should_serialize_geom) {
               parent_info->set<int>("_esmf_state_reconcile/field_archetype_id",

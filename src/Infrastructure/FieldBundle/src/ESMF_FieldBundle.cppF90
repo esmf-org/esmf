@@ -6523,8 +6523,9 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       if(bp%status == ESMF_FBSTATUS_GRIDSET) then
+        !tdk:todo: what is this? i didn't think field bundles had geometries or bases
         call ESMF_GeomBaseSerialize(bp%geombase, buffer, length, offset, &
-                                 lattreconflag, linquireflag, localrc)
+                                 lattreconflag, linquireflag, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return

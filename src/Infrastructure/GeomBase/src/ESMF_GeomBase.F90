@@ -1375,7 +1375,8 @@ end subroutine ESMF_GeomBaseGet
 !
 ! !INTERFACE:
       subroutine ESMF_GeomBaseSerialize(geombase, buffer, length, offset, &
-                                        attreconflag, inquireflag, rc)
+                                        attreconflag, inquireflag, skipGeomObj, &
+                                        rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GeomBase), intent(inout) :: geombase
@@ -1384,6 +1385,7 @@ end subroutine ESMF_GeomBaseGet
       integer, intent(inout) :: offset
       type(ESMF_AttReconcileFlag), intent(in), optional :: attreconflag
       type(ESMF_InquireFlag), intent(in), optional :: inquireflag
+      logical, intent(in), optional :: skipGeomObj
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1415,12 +1417,17 @@ end subroutine ESMF_GeomBaseGet
 !     \end{description}
 !
 !EOPI
+    !tdk:doc: skipGeomObj
     type(ESMF_GeomBaseClass),pointer :: gbcp
     integer :: localrc
     type(ESMF_AttReconcileFlag) :: lattreconflag
     type(ESMF_InquireFlag) :: linquireflag
 
     integer :: geomobj_loffset
+
+    logical :: local_skipGeomObj
+
+    ! ----------
 
     ! Initialize return code; assume failure until success is certain
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1440,6 +1447,14 @@ end subroutine ESMF_GeomBaseGet
     else
       linquireflag = ESMF_NOINQUIRE
     end if
+
+    if (present(skipGeomObj)) then
+      local_skipGeomObj = skipGeomObj
+    else
+      local_skipGeomObj = .false.
+    end if
+
+    ! ----------
 
     ! Get GeomBaseClass
     gbcp=>geombase%gbcp
@@ -1464,50 +1479,53 @@ end subroutine ESMF_GeomBaseGet
     offset = offset + 4
     ! print *, ESMF_METHOD, ': offset at start of Geom object =', offset
 
-    ! Get info depending on type
-    select case(gbcp%type%type)
+    ! Do nothing with the GeomBase's attached geometry object if we are skipping
+    if (.not. local_skipGeomObj) then
+      ! Get info depending on type
+      select case(gbcp%type%type)
 
-       case (ESMF_GEOMTYPE_GRID%type) ! Grid
-          call ESMF_GridSerialize(grid=gbcp%grid, buffer=buffer, &
-                     length=length, offset=offset, &
-                     attreconflag=lattreconflag, inquireflag=linquireflag, &
-                     rc=localrc)
-          if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
+         case (ESMF_GEOMTYPE_GRID%type) ! Grid
+            call ESMF_GridSerialize(grid=gbcp%grid, buffer=buffer, &
+                       length=length, offset=offset, &
+                       attreconflag=lattreconflag, inquireflag=linquireflag, &
+                       rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                                   ESMF_ERR_PASSTHRU, &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
+
+         case  (ESMF_GEOMTYPE_MESH%type)
+             call ESMF_MeshSerialize(mesh=gbcp%mesh, buffer=buffer, &
+                       length=length, offset=offset, &
+                       inquireflag=linquireflag, &
+                       rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                                   ESMF_ERR_PASSTHRU, &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
+
+         case  (ESMF_GEOMTYPE_LOCSTREAM%type)
+            call ESMF_LocStreamSerialize(locstream=gbcp%locstream, &
+                        buffer=buffer,length=length, offset=offset, &
+                        inquireflag=linquireflag, &
+                        rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                                   ESMF_ERR_PASSTHRU, &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
+
+         case  (ESMF_GEOMTYPE_XGRID%type)
+            call ESMF_XGridSerialize(xgrid=gbcp%xgrid, &
+                        buffer=buffer,length=length, offset=offset, &
+                        inquireflag=linquireflag, &
+                        rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                                   ESMF_ERR_PASSTHRU, &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
+
+         case default
+           if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, &
+                                 msg=" Bad type value", &
                                  ESMF_CONTEXT, rcToReturn=rc)) return
-
-       case  (ESMF_GEOMTYPE_MESH%type)
-           call ESMF_MeshSerialize(mesh=gbcp%mesh, buffer=buffer, &
-                     length=length, offset=offset, &
-                     inquireflag=linquireflag, &
-                     rc=localrc)
-          if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
-
-       case  (ESMF_GEOMTYPE_LOCSTREAM%type)
-          call ESMF_LocStreamSerialize(locstream=gbcp%locstream, &
-                      buffer=buffer,length=length, offset=offset, &
-                      inquireflag=linquireflag, &
-                      rc=localrc)
-          if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
-
-       case  (ESMF_GEOMTYPE_XGRID%type)
-          call ESMF_XGridSerialize(xgrid=gbcp%xgrid, &
-                      buffer=buffer,length=length, offset=offset, &
-                      inquireflag=linquireflag, &
-                      rc=localrc)
-          if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
-
-       case default
-         if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, &
-                               msg=" Bad type value", &
-                               ESMF_CONTEXT, rcToReturn=rc)) return
-    end select
+      end select
+    end if
 
     ! Set length of the serialized object
     ! print *, ESMF_METHOD, ': offset after geom object serialize =', offset
@@ -1528,7 +1546,8 @@ end subroutine ESMF_GeomBaseGet
 ! !IROUTINE: ESMF_GeomBaseDeserialize - Deserialize a byte stream into a GeomBase
 !
 ! !INTERFACE:
-      function ESMF_GeomBaseDeserialize(buffer, offset, attreconflag, rc)
+      function ESMF_GeomBaseDeserialize(buffer, offset, attreconflag, skipGeomObj, &
+                                        rc)
 !
 ! !RETURN VALUE:
       type(ESMF_GeomBase) :: ESMF_GeomBaseDeserialize
@@ -1537,6 +1556,7 @@ end subroutine ESMF_GeomBaseGet
       character, pointer, dimension(:) :: buffer
       integer, intent(inout) :: offset
       type(ESMF_AttReconcileFlag), optional :: attreconflag
+      logical, intent(in), optional :: skipGeomObj
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1560,6 +1580,7 @@ end subroutine ESMF_GeomBaseGet
 !     \end{description}
 !
 !EOPI
+    !tdk:doc: skipGeomObj
     type(ESMF_GeomBaseClass),pointer :: gbcp
     integer :: localrc
     type(ESMF_AttReconcileFlag) :: lattreconflag
@@ -1580,6 +1601,10 @@ end subroutine ESMF_GeomBaseGet
     logical, parameter :: trace = .false.
     character(ESMF_MAXSTR) :: grid_name
 
+    logical :: local_skipGeomObj
+
+    ! ----------
+
     ! Initialize return code; assume failure until success is certain
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
@@ -1589,6 +1614,14 @@ end subroutine ESMF_GeomBaseGet
     else
       lattreconflag = ESMF_ATTRECONCILE_OFF
     endif
+
+    if (present(skipGeomObj)) then
+      local_skipGeomObj = skipGeomObj
+    else
+      local_skipGeomObj = .false.
+    end if
+
+    ! ----------
 
     ! allocate GeomBase type
     allocate(gbcp, stat=localrc)
@@ -1612,107 +1645,111 @@ end subroutine ESMF_GeomBaseGet
             ESMF_UtilStringInt2String (geomobj_len), ESMF_CONTEXT)
     offset = offset + 4
 
-    ! Get info depending on type
-    select case(gbcp%type%type)
+    ! Do nothing with the GeomBase's attached geometry object if we are skipping
+    if (.not. local_skipGeomObj) then
+      ! Get info depending on type
+      select case(gbcp%type%type)
 
-       case (ESMF_GEOMTYPE_GRID%type) ! Grid
+         case (ESMF_GEOMTYPE_GRID%type) ! Grid
 
-          ! Peek into the serialized Base to see if this Grid ID/VMId already exists
+            ! Peek into the serialized Base to see if this Grid ID/VMId already exists
 
-          if (trace) call ESMF_LogWrite (msg='creating a VMId for peek', ESMF_CONTEXT)
-          call ESMF_VMIdCreate (vmid_temp, localrc)
-          if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
-
-          if (trace)  &
-              call ESMF_LogWrite (msg='deserialize the VMId for peek.  Offset =' // &
-                  ESMF_UtilStringInt2String (offset), ESMF_CONTEXT)
-          offset_temp = offset
-          call ESMF_BaseDeserializeIDVMId (buffer, offset_temp,  &
-                                 id_temp, vmid_temp, objname_temp, localrc)
-          if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
-          if (trace)  &
-              call ESMF_LogWrite (msg='searching for object: ' // objname_temp, ESMF_CONTEXT)
-          call c_esmc_vmgetobject (grid_temp%this,  &
-              id_temp, vmid_temp,  objname_temp, ESMF_PROXYYES,  &
-              object_found, localrc)
-          if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
-
-          if (trace) call ESMF_LogWrite (msg='Destroy temp VMId')
-          call ESMF_VMIdDestroy (vmid_temp, localrc)
-          if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
-
-          if (trace) call ESMF_LogWrite (msg='shared object_found flag = ' //  &
-              merge (".true. ", ".false.", object_found == ESMF_TRUE))
-          if (ENABLE_SHARED_GRID_SUPPORT .and. object_found == ESMF_TRUE) then
-            gbcp%grid = grid_temp
-            gbcp%grid%isInit = ESMF_INIT_CREATED
-            if (trace) then
-              call ESMF_GridGet (gbcp%grid, name=grid_name, rc=localrc)
-              if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
-              call ESMF_LogWrite (msg='Grid linked for sharing: ' // grid_name, ESMF_CONTEXT)
-            end if
-! TODO: (increment Base and/or VM refCount?, etc.  Gerhard says not yet.)
-            offset = offset + geomobj_len
-          else
-            gbcp%grid=ESMF_GridDeserialize(buffer=buffer, &
-                offset=offset, attreconflag=lattreconflag,  &
-                rc=localrc)
+            if (trace) call ESMF_LogWrite (msg='creating a VMId for peek', ESMF_CONTEXT)
+            call ESMF_VMIdCreate (vmid_temp, localrc)
             if (ESMF_LogFoundError(localrc, &
                                    ESMF_ERR_PASSTHRU, &
                                    ESMF_CONTEXT, rcToReturn=rc)) return
-          end if
 
-       case  (ESMF_GEOMTYPE_MESH%type)
-          gbcp%mesh=ESMF_MeshDeserialize(buffer=buffer, &
-              offset=offset, rc=localrc)
-          if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
+            if (trace)  &
+                call ESMF_LogWrite (msg='deserialize the VMId for peek.  Offset =' // &
+                    ESMF_UtilStringInt2String (offset), ESMF_CONTEXT)
+            offset_temp = offset
+            call ESMF_BaseDeserializeIDVMId (buffer, offset_temp,  &
+                                   id_temp, vmid_temp, objname_temp, localrc)
+            if (ESMF_LogFoundError(localrc, &
+                                   ESMF_ERR_PASSTHRU, &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
+            if (trace)  &
+                call ESMF_LogWrite (msg='searching for object: ' // objname_temp, ESMF_CONTEXT)
+            call c_esmc_vmgetobject (grid_temp%this,  &
+                id_temp, vmid_temp,  objname_temp, ESMF_PROXYYES,  &
+                object_found, localrc)
+            if (ESMF_LogFoundError(localrc, &
+                                   ESMF_ERR_PASSTHRU, &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
+
+            if (trace) call ESMF_LogWrite (msg='Destroy temp VMId')
+            call ESMF_VMIdDestroy (vmid_temp, localrc)
+            if (ESMF_LogFoundError(localrc, &
+                                   ESMF_ERR_PASSTHRU, &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
+
+            if (trace) call ESMF_LogWrite (msg='shared object_found flag = ' //  &
+                merge (".true. ", ".false.", object_found == ESMF_TRUE))
+            !tdk:todo: how is ENABLE_SHARED_GRID_SUPPORT used? should we remove it?
+            if (ENABLE_SHARED_GRID_SUPPORT .and. object_found == ESMF_TRUE) then
+              gbcp%grid = grid_temp
+              gbcp%grid%isInit = ESMF_INIT_CREATED
+              if (trace) then
+                call ESMF_GridGet (gbcp%grid, name=grid_name, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                                   ESMF_ERR_PASSTHRU, &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
+                call ESMF_LogWrite (msg='Grid linked for sharing: ' // grid_name, ESMF_CONTEXT)
+              end if
+! TODO: (increment Base and/or VM refCount?, etc.  Gerhard says not yet.)
+              offset = offset + geomobj_len
+            else
+              gbcp%grid=ESMF_GridDeserialize(buffer=buffer, &
+                  offset=offset, attreconflag=lattreconflag,  &
+                  rc=localrc)
+              if (ESMF_LogFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
+            end if
+
+         case  (ESMF_GEOMTYPE_MESH%type)
+            gbcp%mesh=ESMF_MeshDeserialize(buffer=buffer, &
+                offset=offset, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                                   ESMF_ERR_PASSTHRU, &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+         case  (ESMF_GEOMTYPE_LOCSTREAM%type)
+            gbcp%locstream=ESMF_LocStreamDeserialize(buffer=buffer, &
+                offset=offset, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                                   ESMF_ERR_PASSTHRU, &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
+
+         case  (ESMF_GEOMTYPE_XGRID%type)
+            gbcp%xgrid=ESMF_XGridDeserialize(buffer=buffer, &
+                offset=offset, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                                   ESMF_ERR_PASSTHRU, &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
+
+         case default
+           if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, &
+                                 msg=" Bad type value", &
                                  ESMF_CONTEXT, rcToReturn=rc)) return
+      end select
+    end if
 
 
-       case  (ESMF_GEOMTYPE_LOCSTREAM%type)
-          gbcp%locstream=ESMF_LocStreamDeserialize(buffer=buffer, &
-              offset=offset, rc=localrc)
-          if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
+    ! Set pointer
+    ESMF_GeomBaseDeserialize%gbcp=>gbcp
 
-       case  (ESMF_GEOMTYPE_XGRID%type)
-          gbcp%xgrid=ESMF_XGridDeserialize(buffer=buffer, &
-              offset=offset, rc=localrc)
-          if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
+    ! Add reference to this object into ESMF garbage collection table
+    call c_ESMC_VMAddFObject(ESMF_GeomBaseDeserialize, ESMF_ID_GEOMBASE%objectID)
 
-       case default
-         if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, &
-                               msg=" Bad type value", &
-                               ESMF_CONTEXT, rcToReturn=rc)) return
-    end select
+    ! Set init status
+    ESMF_INIT_SET_CREATED(ESMF_GeomBaseDeserialize)
 
+    if  (present(rc)) rc = ESMF_SUCCESS
 
-      ! Set pointer
-      ESMF_GeomBaseDeserialize%gbcp=>gbcp
-
-      ! Add reference to this object into ESMF garbage collection table
-      call c_ESMC_VMAddFObject(ESMF_GeomBaseDeserialize, ESMF_ID_GEOMBASE%objectID)
-
-     ! Set init status
-      ESMF_INIT_SET_CREATED(ESMF_GeomBaseDeserialize)
-
-      if  (present(rc)) rc = ESMF_SUCCESS
-
-      end function ESMF_GeomBaseDeserialize
+    end function ESMF_GeomBaseDeserialize
 
 
 

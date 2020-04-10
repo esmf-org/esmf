@@ -474,7 +474,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_InquireFlag) :: linquireflag
 
       type(ESMF_Info) :: infoh
-      logical :: should_serialize_geom
+      logical :: should_serialize_geom, skipGeomObj
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -521,13 +521,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call ESMF_FieldGetSerializeFlag(fp, should_serialize_geom, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+        !tdk:todo: could rename to should_serialize_geom and change logic to allow its name to be skipGeomObj
         if (should_serialize_geom) then
-          call ESMF_GeomBaseSerialize(fp%geombase, buffer, length, offset, &
-                                      lattreconflag, linquireflag, localrc)
-          if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
+          skipGeomObj = .false.
+        else
+          skipGeomObj = .true.
         end if
+
+        call ESMF_GeomBaseSerialize(fp%geombase, buffer, length, offset, &
+                                    lattreconflag, linquireflag, skipGeomObj, &
+                                    localrc)
+        if (ESMF_LogFoundError(localrc, &
+                               ESMF_ERR_PASSTHRU, &
+                               ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       if (fp%status .eq. ESMF_FIELDSTATUS_COMPLETE) then
@@ -591,7 +597,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_AttReconcileFlag) :: lattreconflag
 
       type(ESMF_Info) :: infoh
-      logical :: should_serialize_geom
+      logical :: should_serialize_geom, skipGeomObj
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -643,12 +649,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
         if (should_serialize_geom) then
-          fp%geombase=ESMF_GeomBaseDeserialize(buffer, offset, &
-                                              lattreconflag, localrc)
-          if (ESMF_LogFoundError(localrc, &
-                                     ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+          skipGeomObj = .false.
+        else
+          skipGeomObj = .true.
         end if
+
+        fp%geombase=ESMF_GeomBaseDeserialize(buffer, offset, &
+                                            lattreconflag, skipGeomObj, &
+                                            localrc)
+        if (ESMF_LogFoundError(localrc, &
+                                   ESMF_ERR_PASSTHRU, &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       if (fp%status .eq. ESMF_FIELDSTATUS_COMPLETE) then
