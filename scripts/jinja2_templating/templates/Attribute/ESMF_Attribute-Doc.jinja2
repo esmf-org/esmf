@@ -99,16 +99,14 @@
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeCopy()
-!     subroutine ESMF_AttributeCopy(target1, target2, rc)
+!     subroutine ESMF_AttributeCopy(target1, target2, attcopy, rc)
 !
 ! !ARGUMENTS:
-!     type(<object>),         intent(in)            :: target1
-!     type(<object>),         intent(in)            :: target2
-!     integer,                intent(out), optional :: rc
-!
-!tdk:doc: attcopy flag was added back in for FV3. the HYBRID flag was removed
-{% set removed_parameters = ["attcopy"] %}
-{% include "ESMF_Attribute-Doc-Status.jinja2" %}{{ "" }}
+!     type(<object>),          intent(in)            :: target1
+!     type(<object>),          intent(in)            :: target2
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!     type(ESMF_AttCopy_Flag), intent(in),  optional :: attcopy
+!     integer,                 intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Copy an Attribute hierarchy from \texttt{target1} to \texttt{target2}.
@@ -123,6 +121,9 @@
 !           An {\tt Attribute}-bearing ESMF object.
 !     \item [target2]
 !           An {\tt Attribute}-bearing ESMF object.
+!     \item [{[attcopy]}]
+!           A flag to determine if the copy is by value (the default) or reference.
+!           This flag is documented in section \ref{const:attcopy}.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}

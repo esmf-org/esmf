@@ -1890,6 +1890,18 @@
       print *, trim(outConstantChar) @\
  @\
       !mtag_nex @\
+      ! Confirm copy by reference is indeed a reference @\
+      call ESMF_AttributeSet(mname##A, name="RefTest", value="imaref", rc=rc) @\
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT) @\
+      call ESMF_AttributeGet(mname##Alias, name="RefTest", value=outConstantChar, rc=rc) @\
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Setting a constant character Attribute on mobj Test" @\
+      call ESMF_Test((trim(outConstantChar)=="imaref"), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+       !---------------------------------------------------------------------- @\
+  @\
+      !mtag_nex @\
       ! Get the Attribute count from a mobj Test @\
       call ESMF_AttributeGet(mname##Alias, count=count, rc=rc) @\
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
