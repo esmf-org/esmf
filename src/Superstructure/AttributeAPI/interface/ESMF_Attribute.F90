@@ -923,6 +923,7 @@ contains  !====================================================================
 !     type(<object>),         intent(in)            :: target2
 !     integer,                intent(out), optional :: rc
 !
+!tdk:doc: attcopy flag was added back in for FV3. the HYBRID flag was removed
 ! !STATUS:
 !     The following parameters were removed in ESMF version 8.1:
 !     \begin{itemize}
@@ -39686,330 +39687,693 @@ end subroutine ESMF_AttributeRemoveAttPackLocStream
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeCopyArrayToArray"
-subroutine ESMF_AttributeCopyArrayToArray(src, dst, keywordEnforcer, rc)
-  ! 39.11.6 - attcopy removed
+subroutine ESMF_AttributeCopyArrayToArray(src, dst, keywordEnforcer, attcopy, rc)
   type(ESMF_Array), intent(in) :: src
   type(ESMF_Array), intent(inout) :: dst
-  type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  type(ESMF_AttCopy_Flag), optional :: attcopy
   integer, intent(inout), optional :: rc
 
   integer :: localrc
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: isrc, idst
+  type(ESMF_AttCopy_Flag) :: local_attcopy
+  type(ESMF_Base) :: src_base, dst_base
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  if (present(attcopy)) then
+    local_attcopy = attcopy
+  else
+    local_attcopy = ESMF_ATTCOPY_VALUE
+  end if
 
   ! Check object initialization
   ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, src, localrc)
   ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, dst, localrc)
-  isrc = eidesc%GetInfo(src, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-  idst = eidesc%GetInfo(dst, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  call c_info_copyforattribute(isrc%ptr, idst%ptr, localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_attcopy%value == ESMF_ATTCOPY_VALUE%value) then
+    isrc = eidesc%GetInfo(src, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    idst = eidesc%GetInfo(dst, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call c_info_copyforattribute(isrc%ptr, idst%ptr, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else if (local_attcopy%value == ESMF_ATTCOPY_REFERENCE%value) then
+    call eidesc%Initialize(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call eidesc%Update(src, "", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    src_base = eidesc%GetCurrentBase(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call eidesc%Update(dst, "", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    dst_base = eidesc%GetCurrentBase(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call eidesc%Destroy(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call c_info_copyforattribute_reference(src_base%this%ptr, dst_base%this%ptr, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    if (ESMF_LogFoundError(ESMF_FAILURE, msg="Flag not recognized", ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeCopyArrayToArray
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeCopyArrayBundleToArrayBundle"
-subroutine ESMF_AttributeCopyArrayBundleToArrayBundle(src, dst, keywordEnforcer, rc)
-  ! 39.11.6 - attcopy removed
+subroutine ESMF_AttributeCopyArrayBundleToArrayBundle(src, dst, keywordEnforcer, attcopy, rc)
   type(ESMF_ArrayBundle), intent(in) :: src
   type(ESMF_ArrayBundle), intent(inout) :: dst
-  type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  type(ESMF_AttCopy_Flag), optional :: attcopy
   integer, intent(inout), optional :: rc
 
   integer :: localrc
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: isrc, idst
+  type(ESMF_AttCopy_Flag) :: local_attcopy
+  type(ESMF_Base) :: src_base, dst_base
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  if (present(attcopy)) then
+    local_attcopy = attcopy
+  else
+    local_attcopy = ESMF_ATTCOPY_VALUE
+  end if
 
   ! Check object initialization
   ESMF_INIT_CHECK_DEEP(ESMF_ArrayBundleGetInit, src, localrc)
   ESMF_INIT_CHECK_DEEP(ESMF_ArrayBundleGetInit, dst, localrc)
-  isrc = eidesc%GetInfo(src, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-  idst = eidesc%GetInfo(dst, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  call c_info_copyforattribute(isrc%ptr, idst%ptr, localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_attcopy%value == ESMF_ATTCOPY_VALUE%value) then
+    isrc = eidesc%GetInfo(src, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    idst = eidesc%GetInfo(dst, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call c_info_copyforattribute(isrc%ptr, idst%ptr, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else if (local_attcopy%value == ESMF_ATTCOPY_REFERENCE%value) then
+    call eidesc%Initialize(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call eidesc%Update(src, "", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    src_base = eidesc%GetCurrentBase(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call eidesc%Update(dst, "", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    dst_base = eidesc%GetCurrentBase(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call eidesc%Destroy(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call c_info_copyforattribute_reference(src_base%this%ptr, dst_base%this%ptr, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    if (ESMF_LogFoundError(ESMF_FAILURE, msg="Flag not recognized", ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeCopyArrayBundleToArrayBundle
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeCopyCplCompToCplComp"
-subroutine ESMF_AttributeCopyCplCompToCplComp(src, dst, keywordEnforcer, rc)
-  ! 39.11.6 - attcopy removed
+subroutine ESMF_AttributeCopyCplCompToCplComp(src, dst, keywordEnforcer, attcopy, rc)
   type(ESMF_CplComp), intent(in) :: src
   type(ESMF_CplComp), intent(inout) :: dst
-  type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  type(ESMF_AttCopy_Flag), optional :: attcopy
   integer, intent(inout), optional :: rc
 
   integer :: localrc
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: isrc, idst
+  type(ESMF_AttCopy_Flag) :: local_attcopy
+  type(ESMF_Base) :: src_base, dst_base
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  if (present(attcopy)) then
+    local_attcopy = attcopy
+  else
+    local_attcopy = ESMF_ATTCOPY_VALUE
+  end if
 
   ! Check object initialization
   ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, src, localrc)
   ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, dst, localrc)
-  isrc = eidesc%GetInfo(src, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-  idst = eidesc%GetInfo(dst, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  call c_info_copyforattribute(isrc%ptr, idst%ptr, localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_attcopy%value == ESMF_ATTCOPY_VALUE%value) then
+    isrc = eidesc%GetInfo(src, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    idst = eidesc%GetInfo(dst, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call c_info_copyforattribute(isrc%ptr, idst%ptr, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else if (local_attcopy%value == ESMF_ATTCOPY_REFERENCE%value) then
+    call eidesc%Initialize(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call eidesc%Update(src, "", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    src_base = eidesc%GetCurrentBase(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call eidesc%Update(dst, "", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    dst_base = eidesc%GetCurrentBase(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call eidesc%Destroy(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call c_info_copyforattribute_reference(src_base%this%ptr, dst_base%this%ptr, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    if (ESMF_LogFoundError(ESMF_FAILURE, msg="Flag not recognized", ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeCopyCplCompToCplComp
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeCopyGridCompToGridComp"
-subroutine ESMF_AttributeCopyGridCompToGridComp(src, dst, keywordEnforcer, rc)
-  ! 39.11.6 - attcopy removed
+subroutine ESMF_AttributeCopyGridCompToGridComp(src, dst, keywordEnforcer, attcopy, rc)
   type(ESMF_GridComp), intent(in) :: src
   type(ESMF_GridComp), intent(inout) :: dst
-  type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  type(ESMF_AttCopy_Flag), optional :: attcopy
   integer, intent(inout), optional :: rc
 
   integer :: localrc
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: isrc, idst
+  type(ESMF_AttCopy_Flag) :: local_attcopy
+  type(ESMF_Base) :: src_base, dst_base
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  if (present(attcopy)) then
+    local_attcopy = attcopy
+  else
+    local_attcopy = ESMF_ATTCOPY_VALUE
+  end if
 
   ! Check object initialization
   ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, src, localrc)
   ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, dst, localrc)
-  isrc = eidesc%GetInfo(src, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-  idst = eidesc%GetInfo(dst, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  call c_info_copyforattribute(isrc%ptr, idst%ptr, localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_attcopy%value == ESMF_ATTCOPY_VALUE%value) then
+    isrc = eidesc%GetInfo(src, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    idst = eidesc%GetInfo(dst, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call c_info_copyforattribute(isrc%ptr, idst%ptr, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else if (local_attcopy%value == ESMF_ATTCOPY_REFERENCE%value) then
+    call eidesc%Initialize(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call eidesc%Update(src, "", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    src_base = eidesc%GetCurrentBase(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call eidesc%Update(dst, "", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    dst_base = eidesc%GetCurrentBase(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call eidesc%Destroy(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call c_info_copyforattribute_reference(src_base%this%ptr, dst_base%this%ptr, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    if (ESMF_LogFoundError(ESMF_FAILURE, msg="Flag not recognized", ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeCopyGridCompToGridComp
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeCopySciCompToSciComp"
-subroutine ESMF_AttributeCopySciCompToSciComp(src, dst, keywordEnforcer, rc)
-  ! 39.11.6 - attcopy removed
+subroutine ESMF_AttributeCopySciCompToSciComp(src, dst, keywordEnforcer, attcopy, rc)
   type(ESMF_SciComp), intent(in) :: src
   type(ESMF_SciComp), intent(inout) :: dst
-  type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  type(ESMF_AttCopy_Flag), optional :: attcopy
   integer, intent(inout), optional :: rc
 
   integer :: localrc
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: isrc, idst
+  type(ESMF_AttCopy_Flag) :: local_attcopy
+  type(ESMF_Base) :: src_base, dst_base
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  if (present(attcopy)) then
+    local_attcopy = attcopy
+  else
+    local_attcopy = ESMF_ATTCOPY_VALUE
+  end if
 
   ! Check object initialization
   ESMF_INIT_CHECK_DEEP(ESMF_SciCompGetInit, src, localrc)
   ESMF_INIT_CHECK_DEEP(ESMF_SciCompGetInit, dst, localrc)
-  isrc = eidesc%GetInfo(src, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-  idst = eidesc%GetInfo(dst, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  call c_info_copyforattribute(isrc%ptr, idst%ptr, localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_attcopy%value == ESMF_ATTCOPY_VALUE%value) then
+    isrc = eidesc%GetInfo(src, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    idst = eidesc%GetInfo(dst, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call c_info_copyforattribute(isrc%ptr, idst%ptr, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else if (local_attcopy%value == ESMF_ATTCOPY_REFERENCE%value) then
+    call eidesc%Initialize(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call eidesc%Update(src, "", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    src_base = eidesc%GetCurrentBase(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call eidesc%Update(dst, "", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    dst_base = eidesc%GetCurrentBase(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call eidesc%Destroy(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call c_info_copyforattribute_reference(src_base%this%ptr, dst_base%this%ptr, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    if (ESMF_LogFoundError(ESMF_FAILURE, msg="Flag not recognized", ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeCopySciCompToSciComp
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeCopyDistGridToDistGrid"
-subroutine ESMF_AttributeCopyDistGridToDistGrid(src, dst, keywordEnforcer, rc)
-  ! 39.11.6 - attcopy removed
+subroutine ESMF_AttributeCopyDistGridToDistGrid(src, dst, keywordEnforcer, attcopy, rc)
   type(ESMF_DistGrid), intent(in) :: src
   type(ESMF_DistGrid), intent(inout) :: dst
-  type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  type(ESMF_AttCopy_Flag), optional :: attcopy
   integer, intent(inout), optional :: rc
 
   integer :: localrc
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: isrc, idst
+  type(ESMF_AttCopy_Flag) :: local_attcopy
+  type(ESMF_Base) :: src_base, dst_base
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  if (present(attcopy)) then
+    local_attcopy = attcopy
+  else
+    local_attcopy = ESMF_ATTCOPY_VALUE
+  end if
 
   ! Check object initialization
   ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, src, localrc)
   ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, dst, localrc)
-  isrc = eidesc%GetInfo(src, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-  idst = eidesc%GetInfo(dst, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  call c_info_copyforattribute(isrc%ptr, idst%ptr, localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_attcopy%value == ESMF_ATTCOPY_VALUE%value) then
+    isrc = eidesc%GetInfo(src, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    idst = eidesc%GetInfo(dst, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call c_info_copyforattribute(isrc%ptr, idst%ptr, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else if (local_attcopy%value == ESMF_ATTCOPY_REFERENCE%value) then
+    call eidesc%Initialize(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call eidesc%Update(src, "", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    src_base = eidesc%GetCurrentBase(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call eidesc%Update(dst, "", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    dst_base = eidesc%GetCurrentBase(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call eidesc%Destroy(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call c_info_copyforattribute_reference(src_base%this%ptr, dst_base%this%ptr, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    if (ESMF_LogFoundError(ESMF_FAILURE, msg="Flag not recognized", ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeCopyDistGridToDistGrid
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeCopyFieldToField"
-subroutine ESMF_AttributeCopyFieldToField(src, dst, keywordEnforcer, rc)
-  ! 39.11.6 - attcopy removed
+subroutine ESMF_AttributeCopyFieldToField(src, dst, keywordEnforcer, attcopy, rc)
   type(ESMF_Field), intent(in) :: src
   type(ESMF_Field), intent(inout) :: dst
-  type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  type(ESMF_AttCopy_Flag), optional :: attcopy
   integer, intent(inout), optional :: rc
 
   integer :: localrc
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: isrc, idst
+  type(ESMF_AttCopy_Flag) :: local_attcopy
+  type(ESMF_Base) :: src_base, dst_base
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  if (present(attcopy)) then
+    local_attcopy = attcopy
+  else
+    local_attcopy = ESMF_ATTCOPY_VALUE
+  end if
 
   ! Check object initialization
   ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, src, localrc)
   ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, dst, localrc)
-  isrc = eidesc%GetInfo(src, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-  idst = eidesc%GetInfo(dst, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  call c_info_copyforattribute(isrc%ptr, idst%ptr, localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_attcopy%value == ESMF_ATTCOPY_VALUE%value) then
+    isrc = eidesc%GetInfo(src, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    idst = eidesc%GetInfo(dst, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call c_info_copyforattribute(isrc%ptr, idst%ptr, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else if (local_attcopy%value == ESMF_ATTCOPY_REFERENCE%value) then
+    call eidesc%Initialize(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call eidesc%Update(src, "", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    src_base = eidesc%GetCurrentBase(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call eidesc%Update(dst, "", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    dst_base = eidesc%GetCurrentBase(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call eidesc%Destroy(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call c_info_copyforattribute_reference(src_base%this%ptr, dst_base%this%ptr, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    if (ESMF_LogFoundError(ESMF_FAILURE, msg="Flag not recognized", ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeCopyFieldToField
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeCopyFieldBundleToFieldBundle"
-subroutine ESMF_AttributeCopyFieldBundleToFieldBundle(src, dst, keywordEnforcer, rc)
-  ! 39.11.6 - attcopy removed
+subroutine ESMF_AttributeCopyFieldBundleToFieldBundle(src, dst, keywordEnforcer, attcopy, rc)
   type(ESMF_FieldBundle), intent(in) :: src
   type(ESMF_FieldBundle), intent(inout) :: dst
-  type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  type(ESMF_AttCopy_Flag), optional :: attcopy
   integer, intent(inout), optional :: rc
 
   integer :: localrc
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: isrc, idst
+  type(ESMF_AttCopy_Flag) :: local_attcopy
+  type(ESMF_Base) :: src_base, dst_base
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  if (present(attcopy)) then
+    local_attcopy = attcopy
+  else
+    local_attcopy = ESMF_ATTCOPY_VALUE
+  end if
 
   ! Check object initialization
   ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit, src, localrc)
   ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit, dst, localrc)
-  isrc = eidesc%GetInfo(src, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-  idst = eidesc%GetInfo(dst, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  call c_info_copyforattribute(isrc%ptr, idst%ptr, localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_attcopy%value == ESMF_ATTCOPY_VALUE%value) then
+    isrc = eidesc%GetInfo(src, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    idst = eidesc%GetInfo(dst, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call c_info_copyforattribute(isrc%ptr, idst%ptr, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else if (local_attcopy%value == ESMF_ATTCOPY_REFERENCE%value) then
+    call eidesc%Initialize(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call eidesc%Update(src, "", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    src_base = eidesc%GetCurrentBase(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call eidesc%Update(dst, "", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    dst_base = eidesc%GetCurrentBase(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call eidesc%Destroy(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call c_info_copyforattribute_reference(src_base%this%ptr, dst_base%this%ptr, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    if (ESMF_LogFoundError(ESMF_FAILURE, msg="Flag not recognized", ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeCopyFieldBundleToFieldBundle
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeCopyGridToGrid"
-subroutine ESMF_AttributeCopyGridToGrid(src, dst, keywordEnforcer, rc)
-  ! 39.11.6 - attcopy removed
+subroutine ESMF_AttributeCopyGridToGrid(src, dst, keywordEnforcer, attcopy, rc)
   type(ESMF_Grid), intent(in) :: src
   type(ESMF_Grid), intent(inout) :: dst
-  type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  type(ESMF_AttCopy_Flag), optional :: attcopy
   integer, intent(inout), optional :: rc
 
   integer :: localrc
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: isrc, idst
+  type(ESMF_AttCopy_Flag) :: local_attcopy
+  type(ESMF_Base) :: src_base, dst_base
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  if (present(attcopy)) then
+    local_attcopy = attcopy
+  else
+    local_attcopy = ESMF_ATTCOPY_VALUE
+  end if
 
   ! Check object initialization
   ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, src, localrc)
   ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, dst, localrc)
-  isrc = eidesc%GetInfo(src, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-  idst = eidesc%GetInfo(dst, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  call c_info_copyforattribute(isrc%ptr, idst%ptr, localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_attcopy%value == ESMF_ATTCOPY_VALUE%value) then
+    isrc = eidesc%GetInfo(src, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    idst = eidesc%GetInfo(dst, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call c_info_copyforattribute(isrc%ptr, idst%ptr, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else if (local_attcopy%value == ESMF_ATTCOPY_REFERENCE%value) then
+    call eidesc%Initialize(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call eidesc%Update(src, "", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    src_base = eidesc%GetCurrentBase(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call eidesc%Update(dst, "", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    dst_base = eidesc%GetCurrentBase(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call eidesc%Destroy(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call c_info_copyforattribute_reference(src_base%this%ptr, dst_base%this%ptr, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    if (ESMF_LogFoundError(ESMF_FAILURE, msg="Flag not recognized", ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeCopyGridToGrid
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeCopyStateToState"
-subroutine ESMF_AttributeCopyStateToState(src, dst, keywordEnforcer, rc)
-  ! 39.11.6 - attcopy removed
+subroutine ESMF_AttributeCopyStateToState(src, dst, keywordEnforcer, attcopy, rc)
   type(ESMF_State), intent(in) :: src
   type(ESMF_State), intent(inout) :: dst
-  type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  type(ESMF_AttCopy_Flag), optional :: attcopy
   integer, intent(inout), optional :: rc
 
   integer :: localrc
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: isrc, idst
+  type(ESMF_AttCopy_Flag) :: local_attcopy
+  type(ESMF_Base) :: src_base, dst_base
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  if (present(attcopy)) then
+    local_attcopy = attcopy
+  else
+    local_attcopy = ESMF_ATTCOPY_VALUE
+  end if
 
   ! Check object initialization
   ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit, src, localrc)
   ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit, dst, localrc)
-  isrc = eidesc%GetInfo(src, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-  idst = eidesc%GetInfo(dst, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  call c_info_copyforattribute(isrc%ptr, idst%ptr, localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_attcopy%value == ESMF_ATTCOPY_VALUE%value) then
+    isrc = eidesc%GetInfo(src, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    idst = eidesc%GetInfo(dst, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call c_info_copyforattribute(isrc%ptr, idst%ptr, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else if (local_attcopy%value == ESMF_ATTCOPY_REFERENCE%value) then
+    call eidesc%Initialize(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call eidesc%Update(src, "", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    src_base = eidesc%GetCurrentBase(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call eidesc%Update(dst, "", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    dst_base = eidesc%GetCurrentBase(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call eidesc%Destroy(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call c_info_copyforattribute_reference(src_base%this%ptr, dst_base%this%ptr, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    if (ESMF_LogFoundError(ESMF_FAILURE, msg="Flag not recognized", ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeCopyStateToState
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeCopyLocStreamToLocStream"
-subroutine ESMF_AttributeCopyLocStreamToLocStream(src, dst, keywordEnforcer, rc)
-  ! 39.11.6 - attcopy removed
+subroutine ESMF_AttributeCopyLocStreamToLocStream(src, dst, keywordEnforcer, attcopy, rc)
   type(ESMF_LocStream), intent(in) :: src
   type(ESMF_LocStream), intent(inout) :: dst
-  type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  type(ESMF_AttCopy_Flag), optional :: attcopy
   integer, intent(inout), optional :: rc
 
   integer :: localrc
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: isrc, idst
+  type(ESMF_AttCopy_Flag) :: local_attcopy
+  type(ESMF_Base) :: src_base, dst_base
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  if (present(attcopy)) then
+    local_attcopy = attcopy
+  else
+    local_attcopy = ESMF_ATTCOPY_VALUE
+  end if
 
   ! Check object initialization
   ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit, src, localrc)
   ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit, dst, localrc)
-  isrc = eidesc%GetInfo(src, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-  idst = eidesc%GetInfo(dst, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  call c_info_copyforattribute(isrc%ptr, idst%ptr, localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_attcopy%value == ESMF_ATTCOPY_VALUE%value) then
+    isrc = eidesc%GetInfo(src, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    idst = eidesc%GetInfo(dst, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call c_info_copyforattribute(isrc%ptr, idst%ptr, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else if (local_attcopy%value == ESMF_ATTCOPY_REFERENCE%value) then
+    call eidesc%Initialize(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call eidesc%Update(src, "", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    src_base = eidesc%GetCurrentBase(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call eidesc%Update(dst, "", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    dst_base = eidesc%GetCurrentBase(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call eidesc%Destroy(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call c_info_copyforattribute_reference(src_base%this%ptr, dst_base%this%ptr, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    if (ESMF_LogFoundError(ESMF_FAILURE, msg="Flag not recognized", ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeCopyLocStreamToLocStream

@@ -62,6 +62,14 @@ interface
     type(C_PTR), value :: idst
     integer(C_INT), intent(inout) :: rc
   end subroutine
+
+  subroutine c_info_copyforattribute_reference(src_base_address, dst_base_address, rc) bind(C, name="ESMC_InfoCopyForAttributeReference")
+    use iso_c_binding
+    implicit none
+    integer(C_LONG) :: src_base_address
+    integer(C_LONG) :: dst_base_address
+    integer(C_INT), intent(inout) :: rc
+  end subroutine
   
   !=============================================================================
 

@@ -136,6 +136,7 @@ class ESMC_Base
     // accessor to Info
     ESMCI::Info *ESMC_BaseGetInfo(void) const {return info;}
     void ESMC_BaseSetInfo(ESMCI::Info *orig) {info = orig; infoalias=true;}
+    void ESMC_BaseDeleteInfo(void) {if (!infoalias) delete info;}
 
     // accessors to unique ID
     void ESMC_BaseSetID(int id);
