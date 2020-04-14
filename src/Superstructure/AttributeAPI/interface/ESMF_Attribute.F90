@@ -39688,8 +39688,8 @@ end subroutine ESMF_AttributeRemoveAttPackLocStream
 subroutine ESMF_AttributeCopyArrayToArray(src, dst, keywordEnforcer, attcopy, rc)
   type(ESMF_Array), intent(in) :: src
   type(ESMF_Array), intent(inout) :: dst
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  type(ESMF_AttCopy_Flag), intent(in) optional :: attcopy
+type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+  type(ESMF_AttCopy_Flag), intent(in), optional :: attcopy
   integer, intent(out), optional :: rc
 
   integer :: localrc
@@ -39751,8 +39751,8 @@ end subroutine ESMF_AttributeCopyArrayToArray
 subroutine ESMF_AttributeCopyArrayBundleToArrayBundle(src, dst, keywordEnforcer, attcopy, rc)
   type(ESMF_ArrayBundle), intent(in) :: src
   type(ESMF_ArrayBundle), intent(inout) :: dst
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  type(ESMF_AttCopy_Flag), intent(in) optional :: attcopy
+type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+  type(ESMF_AttCopy_Flag), intent(in), optional :: attcopy
   integer, intent(out), optional :: rc
 
   integer :: localrc
@@ -39814,8 +39814,8 @@ end subroutine ESMF_AttributeCopyArrayBundleToArrayBundle
 subroutine ESMF_AttributeCopyCplCompToCplComp(src, dst, keywordEnforcer, attcopy, rc)
   type(ESMF_CplComp), intent(in) :: src
   type(ESMF_CplComp), intent(inout) :: dst
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  type(ESMF_AttCopy_Flag), intent(in) optional :: attcopy
+type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+  type(ESMF_AttCopy_Flag), intent(in), optional :: attcopy
   integer, intent(out), optional :: rc
 
   integer :: localrc
@@ -39877,8 +39877,8 @@ end subroutine ESMF_AttributeCopyCplCompToCplComp
 subroutine ESMF_AttributeCopyGridCompToGridComp(src, dst, keywordEnforcer, attcopy, rc)
   type(ESMF_GridComp), intent(in) :: src
   type(ESMF_GridComp), intent(inout) :: dst
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  type(ESMF_AttCopy_Flag), intent(in) optional :: attcopy
+type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+  type(ESMF_AttCopy_Flag), intent(in), optional :: attcopy
   integer, intent(out), optional :: rc
 
   integer :: localrc
@@ -39940,8 +39940,8 @@ end subroutine ESMF_AttributeCopyGridCompToGridComp
 subroutine ESMF_AttributeCopySciCompToSciComp(src, dst, keywordEnforcer, attcopy, rc)
   type(ESMF_SciComp), intent(in) :: src
   type(ESMF_SciComp), intent(inout) :: dst
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  type(ESMF_AttCopy_Flag), intent(in) optional :: attcopy
+type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+  type(ESMF_AttCopy_Flag), intent(in), optional :: attcopy
   integer, intent(out), optional :: rc
 
   integer :: localrc
@@ -40003,8 +40003,8 @@ end subroutine ESMF_AttributeCopySciCompToSciComp
 subroutine ESMF_AttributeCopyDistGridToDistGrid(src, dst, keywordEnforcer, attcopy, rc)
   type(ESMF_DistGrid), intent(in) :: src
   type(ESMF_DistGrid), intent(inout) :: dst
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  type(ESMF_AttCopy_Flag), intent(in) optional :: attcopy
+type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+  type(ESMF_AttCopy_Flag), intent(in), optional :: attcopy
   integer, intent(out), optional :: rc
 
   integer :: localrc
@@ -40066,8 +40066,8 @@ end subroutine ESMF_AttributeCopyDistGridToDistGrid
 subroutine ESMF_AttributeCopyFieldToField(src, dst, keywordEnforcer, attcopy, rc)
   type(ESMF_Field), intent(in) :: src
   type(ESMF_Field), intent(inout) :: dst
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  type(ESMF_AttCopy_Flag), intent(in) optional :: attcopy
+type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+  type(ESMF_AttCopy_Flag), intent(in), optional :: attcopy
   integer, intent(out), optional :: rc
 
   integer :: localrc
@@ -40129,8 +40129,8 @@ end subroutine ESMF_AttributeCopyFieldToField
 subroutine ESMF_AttributeCopyFieldBundleToFieldBundle(src, dst, keywordEnforcer, attcopy, rc)
   type(ESMF_FieldBundle), intent(in) :: src
   type(ESMF_FieldBundle), intent(inout) :: dst
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  type(ESMF_AttCopy_Flag), intent(in) optional :: attcopy
+type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+  type(ESMF_AttCopy_Flag), intent(in), optional :: attcopy
   integer, intent(out), optional :: rc
 
   integer :: localrc
@@ -40192,8 +40192,8 @@ end subroutine ESMF_AttributeCopyFieldBundleToFieldBundle
 subroutine ESMF_AttributeCopyGridToGrid(src, dst, keywordEnforcer, attcopy, rc)
   type(ESMF_Grid), intent(in) :: src
   type(ESMF_Grid), intent(inout) :: dst
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  type(ESMF_AttCopy_Flag), intent(in) optional :: attcopy
+type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+  type(ESMF_AttCopy_Flag), intent(in), optional :: attcopy
   integer, intent(out), optional :: rc
 
   integer :: localrc
@@ -40255,8 +40255,8 @@ end subroutine ESMF_AttributeCopyGridToGrid
 subroutine ESMF_AttributeCopyStateToState(src, dst, keywordEnforcer, attcopy, rc)
   type(ESMF_State), intent(in) :: src
   type(ESMF_State), intent(inout) :: dst
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  type(ESMF_AttCopy_Flag), intent(in) optional :: attcopy
+type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+  type(ESMF_AttCopy_Flag), intent(in), optional :: attcopy
   integer, intent(out), optional :: rc
 
   integer :: localrc
@@ -40318,8 +40318,8 @@ end subroutine ESMF_AttributeCopyStateToState
 subroutine ESMF_AttributeCopyLocStreamToLocStream(src, dst, keywordEnforcer, attcopy, rc)
   type(ESMF_LocStream), intent(in) :: src
   type(ESMF_LocStream), intent(inout) :: dst
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  type(ESMF_AttCopy_Flag), intent(in) optional :: attcopy
+type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+  type(ESMF_AttCopy_Flag), intent(in), optional :: attcopy
   integer, intent(out), optional :: rc
 
   integer :: localrc

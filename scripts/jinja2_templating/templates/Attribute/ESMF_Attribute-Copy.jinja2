@@ -7,8 +7,8 @@
 subroutine {{ method_name }}{{ arglist }}
   type(ESMF_{{ et }}), intent(in) :: src
   type(ESMF_{{ et_dst }}), intent(inout) :: dst
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  type(ESMF_AttCopy_Flag), intent(in) optional :: attcopy
+type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+  type(ESMF_AttCopy_Flag), intent(in), optional :: attcopy
   integer, intent(out), optional :: rc
 
   integer :: localrc
