@@ -313,13 +313,17 @@ contains
     logical, parameter :: trace = .false.
 
     character(160)  :: prefixStr
-    type(ESMF_VMId), allocatable :: vmIdMap(:)
+    type(ESMF_VMId), allocatable, target :: vmIdMap(:)
+    type(ESMF_VMId), pointer :: vmIdMap_ptr(:)
 
     character(len=ESMF_MAXSTR) :: logmsg
+
+    type(ESMF_InfoCache) :: info_cache
 
     ! -------------------------------------------------------------------------
 
     localrc = ESMF_RC_NOT_IMPL
+    nullify(vmIdMap_ptr)
 
     call ESMF_VMGet(vm, localPet=mypet, petCount=npets, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -411,6 +415,20 @@ contains
 !call ESMF_VMIdDestroy(vmIdMap, rc=localrc)
 !deallocate(vmIdMap)
 !=== end test and demonstrate ESMF_VMTranslateVMId() ===========================
+
+    ! Update Field metadata for unique geometries
+    ! -------------------------------------------------------------------------
+    vmIdMap_ptr => vmIdMap
+
+    call info_cache%Initialize(localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call info_cache%UpdateGeoms(state, vmIdMap_ptr, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call info_cache%Destroy(localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    ! -------------------------------------------------------------------------
 
     ! 2.) All PETs send their items Ids and VMIds to all the other PETs,
     ! then create local directories of which PETs have which ids/VMIds.
@@ -2248,8 +2266,6 @@ contains
     type(ESMF_RouteHandle),     pointer :: rhandlep
     type(ESMF_StateClass),      pointer :: statep
 
-    type(ESMF_InfoCache) :: info_cache
-
     integer :: localrc
     integer :: i
     integer :: memstat
@@ -2393,18 +2409,6 @@ contains
       end select
 
     end do
-
-    ! Update Field metadata for unique geometries
-    ! -------------------------------------------------------------------------
-    call info_cache%Initialize(localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-    call info_cache%UpdateGeoms(state, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-    call info_cache%Destroy(localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-    ! -------------------------------------------------------------------------
 
     rc = ESMF_SUCCESS
 

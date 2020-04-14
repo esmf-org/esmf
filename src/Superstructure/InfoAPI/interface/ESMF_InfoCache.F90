@@ -118,15 +118,16 @@ end subroutine ESMF_InfoCacheDestroy
 !tdk:comm
 !tdk:todo: consider renaming to UpdateFields since it's actually their metadata that's updated
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoCache%ESMF_InfoCacheUpdateGeoms()"
-subroutine ESMF_InfoCacheUpdateGeoms(self, target, rc)
+#define ESMF_METHOD "ESMF_InfoCacheUpdateGeoms()"
+subroutine ESMF_InfoCacheUpdateGeoms(self, target, vmIdMap, rc)
   class(ESMF_InfoCache), intent(inout) :: self
   type(ESMF_State), intent(in) :: target
+  type(ESMF_VMId), dimension(:), pointer, intent(in) :: vmIdMap
   integer, intent(out) :: rc
 
   type(ESMF_InfoDescribe) :: idesc
 
-  call idesc%Initialize(createInfo=.true., addBaseAddress=.true., rc=rc)
+  call idesc%Initialize(createInfo=.true., addBaseAddress=.true., vmIdMap=vmIdMap, rc=rc)
   if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   call idesc%Update(target, "", rc=rc)
@@ -144,9 +145,10 @@ end subroutine ESMF_InfoCacheUpdateGeoms
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoCacheFindField()"
-recursive function ESMF_InfoCacheFindField(target, foundField, baseID, rc) result(found)
+recursive function ESMF_InfoCacheFindField(target, foundField, intVmId, baseID, rc) result(found)
   type(ESMF_State), intent(in) :: target
   type(ESMF_Field), intent(out) :: foundField
+  integer, intent(in) :: intVmId
   integer, intent(in) :: baseID
   integer, intent(out) :: rc
   logical :: found
@@ -155,11 +157,13 @@ recursive function ESMF_InfoCacheFindField(target, foundField, baseID, rc) resul
   type(ESMF_Field) :: field
   type(ESMF_StateItem_Flag), dimension(:), allocatable :: stateTypes
   character(len=ESMF_MAXSTR), dimension(:), allocatable :: stateNames
-  integer :: ii, itemCount, jj
+  integer :: ii, itemCount, jj, curr_integer_vmid
   type(ESMF_State) :: state
   character(len=ESMF_MAXSTR) :: curr_field_name
   integer :: curr_field_base_id, field_count
   character(len=ESMF_MAXSTR), dimension(:), allocatable :: field_name_list
+  type(ESMF_Info) :: infoh
+  logical :: is_present
 
   found = .false.
   rc = ESMF_SUCCESS
@@ -178,7 +182,7 @@ recursive function ESMF_InfoCacheFindField(target, foundField, baseID, rc) resul
         call ESMF_StateGet(target, trim(stateNames(ii)), state, rc=rc)
         if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-        found = ESMF_InfoCacheFindField(state, foundField, baseID, rc)
+        found = ESMF_InfoCacheFindField(state, foundField, intVmId, baseID, rc)
         if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
         if (found) return
@@ -192,10 +196,21 @@ recursive function ESMF_InfoCacheFindField(target, foundField, baseID, rc) resul
         call ESMF_BaseGetID(field%ftypep%base, curr_field_base_id, rc=rc)
         if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-        if (curr_field_base_id==baseID) then
-          found = .true.
-          foundField = field
-          return
+        infoh = ESMF_InfoBaseGetHandle(field%ftypep%base)
+
+        is_present = ESMF_InfoIsPresent(infoh, "_esmf_state_reconcile", rc=rc)
+        if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+        if (is_present) then
+          call ESMF_InfoGet(infoh, "_esmf_state_reconcile/integer_vmid", &
+            curr_integer_vmid, rc=rc)
+          if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+          if (curr_field_base_id==baseID .and. curr_integer_vmid==intVmId) then
+            found = .true.
+            foundField = field
+            return
+          end if
         end if
       case(ESMF_STATEITEM_FIELDBUNDLE%ot)
         call ESMF_StateGet(target, trim(stateNames(ii)), fb, rc=rc)
@@ -216,10 +231,21 @@ recursive function ESMF_InfoCacheFindField(target, foundField, baseID, rc) resul
           call ESMF_BaseGetID(field%ftypep%base, curr_field_base_id, rc=rc)
           if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-          if (curr_field_base_id==baseID) then
-            found = .true.
-            foundField = field
-            return
+          infoh = ESMF_InfoBaseGetHandle(field%ftypep%base)
+
+          is_present = ESMF_InfoIsPresent(infoh, "_esmf_state_reconcile", rc=rc)
+          if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+          if (is_present) then
+            call ESMF_InfoGet(infoh, "/_esmf_state_reconcile/integer_vmid", &
+              curr_integer_vmid, rc=rc)
+            if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+            if (curr_field_base_id==baseID .and. curr_integer_vmid==intVmId) then
+              found = .true.
+              foundField = field
+              return
+            end if
           end if
         end do
 
@@ -241,10 +267,11 @@ subroutine ESMF_InfoCacheReassembleField(target, state, rc)
 
   logical :: should_serialize_geom, found
   type(ESMF_Info) :: infoh, infoh_found
-  integer :: base_id
+  integer :: base_id, integer_vmid
   type(ESMF_Field) :: archetype_field
   character(:), allocatable :: geom_type
   type(ESMF_InfoDescribe) :: idesc
+  character(len=ESMF_MAXSTR) :: errmsg
 
   rc = ESMF_FAILURE
 
@@ -261,13 +288,14 @@ subroutine ESMF_InfoCacheReassembleField(target, state, rc)
         base_id, rc=rc)
       if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-      found = ESMF_InfoCacheFindField(state, archetype_field, base_id, rc)
+      call ESMF_InfoGet(infoh, "/_esmf_state_reconcile/field_archetype_integer_vmid", &
+              integer_vmid, rc=rc)
       if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
 #if 0
       call idesc%Initialize(createInfo=.true., addObjectInfo=.true., rc=rc)
       if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-      call idesc%Update(archetype_field, "", rc=rc)
+      call idesc%Update(state, "", rc=rc)
       if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
       call ESMF_LogWrite(ESMF_InfoDump(idesc%info, indent=4), rc=rc)
       if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -275,7 +303,14 @@ subroutine ESMF_InfoCacheReassembleField(target, state, rc)
       if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 #endif
 
+      found = ESMF_InfoCacheFindField(state, archetype_field, integer_vmid, base_id, rc)
+      if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
       if (.not. found) then
+        !write(errmsg, *) "integer_vmid=", integer_vmid
+        !call ESMF_LogWrite(trim(errmsg))
+        !write(errmsg, *) "base_id=", base_id
+        !call ESMF_LogWrite(trim(errmsg))
         if (ESMF_LogFoundError(ESMF_FAILURE, msg="Archetype Field not found", &
           ESMF_CONTEXT, rcToReturn=rc)) return
       end if

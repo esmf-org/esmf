@@ -82,6 +82,8 @@ type, public :: ESMF_InfoDescribe
   logical :: addObjectInfo = .false.  ! If true, add ESMF_Info map for each object
   !tdk:rename: to recursive
   logical :: createInfo = .true.  ! If true, also recurse objects with members (i.e. ArrayBundle)
+  type(ESMF_VMId), dimension(:), pointer :: vmIdMap  ! Used to also get a unique integer identifier for an object's VM
+  
   
   logical :: is_initialized = .false.  ! If true, the object is initialized
   type(ESMF_Base) :: curr_base  ! Holds a reference to the current update object's base. Will change when recursively updating
@@ -123,12 +125,14 @@ contains !=====================================================================
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoDescribeInitialize()"
-subroutine ESMF_InfoDescribeInitialize(self, addBaseAddress, addObjectInfo, createInfo, searchCriteria, rc)
+subroutine ESMF_InfoDescribeInitialize(self, addBaseAddress, addObjectInfo, createInfo, &
+    searchCriteria, vmIdMap, rc)
   class(ESMF_InfoDescribe), intent(inout) :: self
   logical, intent(in), optional :: addBaseAddress
   logical, intent(in), optional :: addObjectInfo
   logical, intent(in), optional :: createInfo
   type(ESMF_Info), target, intent(in), optional :: searchCriteria
+  type(ESMF_VMId), dimension(:), pointer, intent(in), optional :: vmIdMap
   integer, intent(inout), optional :: rc
   integer :: localrc
 
@@ -140,6 +144,7 @@ subroutine ESMF_InfoDescribeInitialize(self, addBaseAddress, addObjectInfo, crea
   endif
 
   nullify(self%searchCriteria)
+  nullify(self%vmIdMap)
   if (present(searchCriteria)) then
     self%addBaseAddress = .true.
     self%addObjectInfo = .true.
@@ -154,13 +159,22 @@ subroutine ESMF_InfoDescribeInitialize(self, addBaseAddress, addObjectInfo, crea
     self%info = ESMF_InfoCreate(rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
+  if (present(vmIdMap)) then
+    if (associated(vmIdMap)) then
+      self%vmIdMap => vmIdMap
+    else
+      if (ESMF_LogFoundError(ESMF_FAILURE, msg="vmIdMap pointer provided but it is not associated", &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    end if
+  end if
+
   self%is_initialized = .true.
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoDescribeInitialize
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoDescribe%ESMF_InfoDescribeDestroy()"
+#define ESMF_METHOD "ESMF_InfoDescribeDestroy()"
 subroutine ESMF_InfoDescribeDestroy(self, rc)
   class(ESMF_InfoDescribe), intent(inout) :: self
   integer, intent(inout), optional :: rc
@@ -176,6 +190,7 @@ subroutine ESMF_InfoDescribeDestroy(self, rc)
   endif
 
   nullify(self%searchCriteria)
+  nullify(self%vmIdMap)
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoDescribeDestroy
@@ -321,6 +336,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   type(ESMF_Info) :: object_info
   character(len=9), dimension(4), parameter :: geom_etypes = (/"Grid     ", "Mesh     ", "LocStream", "XGrid    "/)
   integer(C_INT) :: found_as_int
+  type(ESMF_VMId) :: curr_vmid
+  logical :: vmids_are_equal
 
   localrc = ESMF_FAILURE
   if (.not. self%is_initialized) then
@@ -359,6 +376,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end if
 
     allocate(character(len(trim(root_key))+len(l_uname)+1)::local_root_key)
+    !tdk:todo: add an isPresent check for this local_root_key. it needs to be unique.
     local_root_key = trim(root_key)//"/"//l_uname
 
     call ESMF_InfoSet(self%info, local_root_key//"/base_name", trim(name), force=.false., rc=localrc)
@@ -403,6 +421,32 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(uname)) then
       allocate(character(len(l_uname))::uname)
       uname = l_uname
+    end if
+
+    if (associated(self%vmIdMap)) then
+      call ESMF_LogWrite("self%vmIdMap is associated") !tdk:p
+      if (l_base_is_valid) then
+        call ESMF_BaseGetVMId(base, curr_vmid, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+        do ii=1,size(self%vmIdMap)
+          vmids_are_equal = ESMF_VMIdCompare(curr_vmid, self%vmIdMap(ii), rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+          if (vmids_are_equal) exit
+        end do
+
+        if (.not. vmids_are_equal) then
+          if (ESMF_LogFoundError(ESMF_FAILURE, msg="VMId not found", ESMF_CONTEXT, &
+            rcToReturn=rc)) return
+        end if
+
+        call ESMF_InfoSet(self%info, local_root_key//"/vmIdInt", ii, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+      end if
+    else
+      call ESMF_InfoSetNULL(self%info, local_root_key//"/vmIdInt", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
     end if
 
     if (associated(self%searchCriteria)) then
