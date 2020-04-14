@@ -2613,7 +2613,6 @@ end function ESMF_MeshCreateFromFile
     endif
 
 
- ! XMRKX
     ! The ElemId is the global ID.  The myStartElmt is the starting Element ID(-1), and the
     ! element IDs will be from startElmt to startElmt+ElemCnt-1
     ! The ElemConn() contains the four corner node IDs for each element and it is organized
@@ -4916,6 +4915,12 @@ end function ESMF_MeshEmptyCreate
     integer :: infoTypeElemArrays(maxElemArrays)
     integer,parameter :: infoTypeElem_Mask=1
     integer,parameter :: infoTypeElem_Area=2
+    type(ESMF_InterArray) :: elementIdsIA
+    type(ESMF_InterArray) :: elementTypesIA
+    type(ESMF_InterArray) :: elementConnIA
+    type(ESMF_InterArray) :: elementMaskIA
+    type(ESMF_InterArray) :: elementAreaIA
+    type(ESMF_InterArray) :: elementCoordsIA
 
     ! Init local rc
     localrc = ESMF_SUCCESS
@@ -5018,6 +5023,92 @@ end function ESMF_MeshEmptyCreate
             ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
+
+    ! Get information about whether various elem information is present
+    if (present(elementMaskIsPresent) .or. &
+        present(elementAreaIsPresent) .or. &
+        present(elementCoordsIsPresent)) then
+
+!TODO: Implement this and nodeMask check!!!!
+
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+               msg=" this functionality hasn't been implemented yet. ", &
+               ESMF_CONTEXT, rcToReturn=rc)
+          return
+
+    endif
+
+   ! Get elem creation info
+    if (present(elementIds) .or. &
+        present(elementTypes) .or. &
+        present(elementConn) .or. &
+        present(elementMask) .or. &
+        present(elementArea) .or. &
+        present(elementCoords)) then
+
+       ! Create interface arrays
+        elementIdsIA = ESMF_InterArrayCreate(elementIds, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return       
+
+        elementTypesIA = ESMF_InterArrayCreate(elementTypes, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return       
+
+        elementConnIA = ESMF_InterArrayCreate(elementConn, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return       
+
+        elementMaskIA = ESMF_InterArrayCreate(elementMask, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return       
+
+        elementAreaIA = ESMF_InterArrayCreate(farray1DR8=elementArea, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return       
+
+        elementCoordsIA = ESMF_InterArrayCreate(farray1DR8=elementCoords, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return       
+
+
+       ! Call into C
+       call C_ESMC_MeshGetElemCreateInfo(mesh, &
+            elementIdsIA, elementTypesIA, &
+            elementConnIA, elementMaskIA, &
+            elementAreaIA, elementCoordsIA, &
+            localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Destroy interface arrays
+       call ESMF_InterArrayDestroy(elementIdsIA, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       call ESMF_InterArrayDestroy(elementTypesIA, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       call ESMF_InterArrayDestroy(elementConnIA, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       call ESMF_InterArrayDestroy(elementMaskIA, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       call ESMF_InterArrayDestroy(elementAreaIA, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       call ESMF_InterArrayDestroy(elementCoordsIA, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    
+
+!!! STOPPED HERE !!!
 
 
 

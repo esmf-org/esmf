@@ -101,6 +101,13 @@ void ESMCI_meshget(Mesh **meshpp, int *num_nodes, int *num_elements, int *rc);
 void ESMCI_MeshGetNodeCount(Mesh *meshpp, int *nodeCount, int *rc);
 void ESMCI_MeshGetElemCount(Mesh *meshpp, int *elemCount, int *rc);
 void ESMCI_MeshGetElemConnCount(Mesh *meshpp, int *elemConnCount, int *rc);
+void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
+                                 ESMCI::InterArray<int> *elemIds,
+                                 ESMCI::InterArray<int> *elemTypes,
+                                 ESMCI::InterArray<int> *elemConn,
+                                 ESMCI::InterArray<int> *elemMask,
+                                 ESMCI::InterArray<ESMC_R8> *elemArea,
+                                 ESMCI::InterArray<ESMC_R8> *elemCoords, int *rc);
 
 
 void ESMCI_meshcreatenodedistgrid(Mesh **meshpp, int *ngrid, int *num_lnodes, int *rc);

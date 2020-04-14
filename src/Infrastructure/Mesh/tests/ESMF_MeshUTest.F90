@@ -6248,8 +6248,6 @@ subroutine test_1_width_DE_GtoM(correct, rc)
   ! Init correct
   correct=.true.
 
-! XMRKX !
-
   ! Create Grid
   grid=ESMF_GridCreateNoPeriDimUfrm( &
 !       maxIndex=(/6,6/), &
@@ -6458,9 +6456,11 @@ subroutine  test_mesh_get_create_info(correct, rc)
   type(ESMF_Field) :: nodeField, elemField
   integer :: i
   integer :: numNodesTst, numElemsTst,numElemConnsTst
+  integer,allocatable :: elemIdsTst(:)
+  integer,allocatable :: elemTypesTst(:)
+  integer,allocatable :: elemConnTst(:)
+  real(ESMF_KIND_R8),allocatable :: elemAreasTst(:)
 
-
- ! XMRKX
 
   ! get global VM
   call ESMF_VMGetGlobal(vm, rc=rc)
@@ -6810,17 +6810,6 @@ subroutine  test_mesh_get_create_info(correct, rc)
    if (rc /= ESMF_SUCCESS) return
 
 
-   ! deallocate node data
-   deallocate(nodeIds)
-   deallocate(nodeCoords)
-   deallocate(nodeOwners)
-
-   ! deallocate elem data
-   deallocate(elemIds)
-   deallocate(elemTypes)
-   deallocate(elemCoords)
-   deallocate(elemConn)
-
    ! Init correct to true before looking for problems
    correct=.true.
 
@@ -6841,6 +6830,60 @@ subroutine  test_mesh_get_create_info(correct, rc)
    !write(*,*) "numNodes=",numNodes,numNodesTst
    !write(*,*) "numElems=",numElems,numElemsTst
    !write(*,*) "numElemConns=",numElemConns,numElemConnsTst
+
+   ! Allocate space for tst arrays
+   allocate(elemIdsTst(numElemsTst))
+   allocate(elemTypesTst(numElemsTst))
+   allocate(elemConnTst(numElemConnsTst))
+   allocate(elemAreasTst(numElemsTst))
+
+ ! XMRKX
+
+   ! Get Information
+   call ESMF_MeshGet(mesh, &
+        elementIds=elemIdsTst, &
+        elementTypes=elemTypesTst, &
+        elementConn=elemConnTst, &
+        ! elementArea=elemAreasTst, & Not implemented yet
+        rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+
+   ! Check elem ids
+   do i=1,numElemsTst
+      if (elemIds(i) .ne. elemIdsTst(i)) correct=.false.
+   enddo
+
+   ! Check elem Types
+   do i=1,numElemsTst
+      if (elemTypes(i) .ne. elemTypesTst(i)) correct=.false.
+   enddo
+
+   ! Check elem Connections
+   do i=1,numElemConnsTst
+      if (elemConn(i) .ne. elemConnTst(i)) correct=.false.
+   enddo
+
+
+   ! Debugging
+   !write(*,*) "elemConn   =",elemConn
+   !write(*,*) "elemConnTst=",elemConnTst
+
+   ! deallocate node data
+   deallocate(nodeIds)
+   deallocate(nodeCoords)
+   deallocate(nodeOwners)
+
+   ! deallocate elem data
+   deallocate(elemIds)
+   deallocate(elemTypes)
+   deallocate(elemCoords)
+   deallocate(elemConn)
+
+   ! Deallocate tst Arrays
+   deallocate(elemIdsTst)
+   deallocate(elemTypesTst)
+   deallocate(elemConnTst)
+   deallocate(elemAreasTst)
 
    ! Get rid of Mesh
    call ESMF_MeshDestroy(mesh, rc=rc)

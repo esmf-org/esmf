@@ -281,6 +281,12 @@
      void getNodeCount(int *nodeCount, int *rc);
      void getElemCount(int *elemCount, int *rc);
      void getElemConnCount(int *elemConnCount, int *rc);
+     void getElemCreateInfo(ESMCI::InterArray<int> *elemIds,
+                                     ESMCI::InterArray<int> *elemTypes,
+                                     ESMCI::InterArray<int> *elemConn,
+                                     ESMCI::InterArray<int> *elemMask,
+                                     ESMCI::InterArray<ESMC_R8> *elemArea,
+                                     ESMCI::InterArray<ESMC_R8> *elemCoords, int *rc);
 
      void meshsetfrac(double * fraction,
                       int*rc);
