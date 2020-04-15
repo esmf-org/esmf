@@ -9954,6 +9954,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
+    ! Confirm the lower bound is 0 for the vmIds array. It is zero-bounded in
+    ! StateReconcile which is the primary client for this subroutine.
+    if (lbound(vmIds,1)/=0) then
+      if (ESMF_LogFoundError(ESMF_FAILURE, msg="lbound must be 0 for vmIds", &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    end if
+
     ! Allocate ids(:) array, ensuring matching bounds with vmIDs(:) array
     allocate(ids(lbound(vmIds,1):ubound(vmIds,1)))
     
