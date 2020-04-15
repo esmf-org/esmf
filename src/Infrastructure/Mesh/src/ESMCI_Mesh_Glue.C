@@ -2156,6 +2156,176 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
   if(rc != NULL) *rc = ESMF_SUCCESS;
 }
 
+/* XMRKX */
+void ESMCI_MeshGetNodeCreateInfo(Mesh *mesh,
+                                 ESMCI::InterArray<int> *nodeIds,
+                                 ESMCI::InterArray<ESMC_R8> *nodeCoords,
+                                 ESMCI::InterArray<int> *nodeOwners,
+                                 ESMCI::InterArray<int> *nodeMask,
+                                 int *rc){
+
+#undef ESMC_METHOD
+#define ESMC_METHOD "ESMCI_MeshGetNodeCreateInfo()"
+
+  // Try-catch block around main part of method
+  try {
+
+    
+    ////// Get some handy information //////
+    int num_nodes=mesh->num_nodes();
+    int orig_sdim=mesh->orig_spatial_dim;
+
+    ////// Error check input arrays //////
+
+    // If nodeIds array exists, error check
+    if (present(nodeIds)) {
+      // Error checking
+      if (nodeIds->dimCount !=1) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+          " nodeIds array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
+      }
+
+      if (nodeIds->extent[0] != num_nodes) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+        " nodeIds array must be of size nodeCount", ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+    }
+
+    // If nodeIds array exists, error check
+    if (present(nodeCoords)) {
+      // Error checking
+      if (nodeCoords->dimCount !=1) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+          " nodeCoords array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
+      }
+
+      if (nodeCoords->extent[0] != orig_sdim*num_nodes) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+        " nodeCoords array must be of size spatialDim*nodeCount", ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+    }
+
+
+    // If nodeOwners array exists, error check
+    if (present(nodeOwners)) {
+      // Error checking
+      if (nodeOwners->dimCount !=1) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+          " nodeOwners array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
+      }
+
+      if (nodeOwners->extent[0] != num_nodes) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+        " nodeOwners array must be of size nodeCount", ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+    }
+
+
+    // If nodeMask array exists, error check
+    if (present(nodeMask)) {
+      int localrc;
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+       " getting nodeMask has not been implemented.", ESMC_CONTEXT,  &localrc)) throw localrc;
+    }
+
+
+    ////// Get ordered list of nodes ////// 
+    std::vector<std::pair<int,MeshObj *> > sorted_nodes;
+    sorted_nodes.reserve(num_nodes);
+
+    // Loop over nodes
+    Mesh::iterator ni = mesh->node_begin(), ne = mesh->node_end();
+    for (; ni != ne; ++ni) {
+      MeshObj *node = &(*ni);
+      
+      // get data index
+      int index = node->get_data_index();
+      
+      // Add to list
+      sorted_nodes.push_back(std::make_pair(index, node));      
+    }
+
+    // sort by data index
+    std::sort(sorted_nodes.begin(), sorted_nodes.end());
+
+
+    
+    ////// Fill info in arrays using sorted_nodes //////
+
+    // If it was passed in, fill nodeIds array
+    if (present(nodeIds)) {
+      // Get array into which to put ids
+      int *nodeIds_array=nodeIds->array;
+      
+      // Loop through nodes
+      for (int i=0; i<sorted_nodes.size(); i++) {
+        MeshObj *node=sorted_nodes[i].second;
+        nodeIds_array[i]=node->get_id();
+      }
+    }
+
+    // If it was passed in, fill nodeCoords array
+    if (present(nodeCoords)) {
+
+      // Get pointer to mesh node coords data
+      MEField<> *node_coords=mesh->GetField("orig_coordinates");
+      if (!node_coords) {
+        node_coords = mesh->GetCoordField();
+      }
+
+      // Get array into which to put ids
+      ESMC_R8 *nodeCoords_array=nodeCoords->array;
+      
+      // Loop through nodes
+      int j=0;
+      for (int i=0; i<sorted_nodes.size(); i++) {
+        // Get node
+        MeshObj *node=sorted_nodes[i].second;
+
+        // Get coords for node
+        double *coords = node_coords->data(*node);
+
+        // Copy to output array
+        for (int d=0; d<orig_sdim; d++) {
+          nodeCoords_array[j]=coords[d];
+          j++;
+        }
+      }
+    }
+
+    // If it was passed in, fill nodeOwners array
+    if (present(nodeOwners)) {
+      // Get array into which to put ids
+      int *nodeOwners_array=nodeOwners->array;
+      
+      // Loop through nodes
+      for (int i=0; i<sorted_nodes.size(); i++) {
+        MeshObj *node=sorted_nodes[i].second;
+        nodeOwners_array[i]=node->get_owner();
+      }
+    }
+
+
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+          " Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+  
+  // We've gotten to bottom successfully, so return success
+  if(rc != NULL) *rc = ESMF_SUCCESS;
+}
+
 
 
 void ESMCI_meshcreatenodedistgrid(Mesh **meshpp, int *ngrid, int *num_lnodes, int *rc) {

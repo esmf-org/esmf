@@ -4921,6 +4921,10 @@ end function ESMF_MeshEmptyCreate
     type(ESMF_InterArray) :: elementMaskIA
     type(ESMF_InterArray) :: elementAreaIA
     type(ESMF_InterArray) :: elementCoordsIA
+    type(ESMF_InterArray) :: nodeIdsIA
+    type(ESMF_InterArray) :: nodeCoordsIA
+    type(ESMF_InterArray) :: nodeOwnersIA
+    type(ESMF_InterArray) :: nodeMaskIA
 
     ! Init local rc
     localrc = ESMF_SUCCESS
@@ -4986,7 +4990,6 @@ end function ESMF_MeshEmptyCreate
        endif
     endif
 
-
     ! XMRKX !
     ! TODO: Rearrange all the info gets below to fit in to the 3 categories below 
     
@@ -5002,6 +5005,65 @@ end function ESMF_MeshEmptyCreate
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
     endif
+
+    ! Get information about whether node mask is present
+    if (present(nodeMaskIsPresent)) then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+               msg=" this functionality hasn't been implemented yet. ", &
+               ESMF_CONTEXT, rcToReturn=rc)
+          return
+    endif
+
+    ! Get node creation info
+    if (present(nodeIds) .or. &
+        present(nodeCoords) .or. &
+        present(nodeOwners) .or. &
+        present(nodeMask)) then
+
+       ! Create interface arrays
+        nodeIdsIA = ESMF_InterArrayCreate(nodeIds, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return       
+
+        nodeCoordsIA = ESMF_InterArrayCreate(farray1DR8=nodeCoords, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return       
+
+        nodeOwnersIA = ESMF_InterArrayCreate(nodeOwners, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return       
+
+        nodeMaskIA = ESMF_InterArrayCreate(nodeMask, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return       
+
+       ! Call into C
+       call C_ESMC_MeshGetNodeCreateInfo(mesh, &
+            nodeIdsIA, nodeCoordsIA, &
+            nodeOwnersIA, nodeMaskIA, &
+            localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Destroy interface arrays
+       call ESMF_InterArrayDestroy(nodeIdsIA, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       call ESMF_InterArrayDestroy(nodeCoordsIA, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       call ESMF_InterArrayDestroy(nodeOwnersIA, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       call ESMF_InterArrayDestroy(nodeMaskIA, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+
 
     !!!!!!!! Get Elem info from Mesh !!!!!!!!
 
@@ -5109,8 +5171,6 @@ end function ESMF_MeshEmptyCreate
     
 
 !!! STOPPED HERE !!!
-
-
 
     ! Get node coords
     if (present(ownedNodeCoords)) then

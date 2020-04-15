@@ -6454,13 +6454,15 @@ subroutine  test_mesh_get_create_info(correct, rc)
   type(ESMF_VM) :: vm
   type(ESMF_DistGrid) :: nodeDistgrid, elemDistgrid
   type(ESMF_Field) :: nodeField, elemField
-  integer :: i
+  integer :: i,j,k
   integer :: numNodesTst, numElemsTst,numElemConnsTst
   integer,allocatable :: elemIdsTst(:)
   integer,allocatable :: elemTypesTst(:)
   integer,allocatable :: elemConnTst(:)
   real(ESMF_KIND_R8),allocatable :: elemAreasTst(:)
-
+  integer,allocatable :: nodeIdsTst(:)
+  real(ESMF_KIND_R8),allocatable :: nodeCoordsTst(:)
+  integer,allocatable :: nodeOwnersTst(:)
 
   ! get global VM
   call ESMF_VMGetGlobal(vm, rc=rc)
@@ -6832,21 +6834,50 @@ subroutine  test_mesh_get_create_info(correct, rc)
    !write(*,*) "numElemConns=",numElemConns,numElemConnsTst
 
    ! Allocate space for tst arrays
+   allocate(nodeIdsTst(numNodesTst))
+   allocate(nodeCoordsTst(2*numNodesTst))
+   allocate(nodeOwnersTst(numNodesTst))
    allocate(elemIdsTst(numElemsTst))
    allocate(elemTypesTst(numElemsTst))
    allocate(elemConnTst(numElemConnsTst))
    allocate(elemAreasTst(numElemsTst))
 
- ! XMRKX
 
+ ! XMRKX
    ! Get Information
    call ESMF_MeshGet(mesh, &
+        nodeIds=nodeIdsTst, &
+        nodeCoords=nodeCoordsTst, &
+        nodeOwners=nodeOwnersTst, &
         elementIds=elemIdsTst, &
         elementTypes=elemTypesTst, &
         elementConn=elemConnTst, &
         ! elementArea=elemAreasTst, & Not implemented yet
         rc=rc)
    if (rc /= ESMF_SUCCESS) return
+
+   ! Check node ids
+   do i=1,numNodesTst
+      if (nodeIds(i) .ne. nodeIdsTst(i)) correct=.false.
+   enddo
+
+   ! Check node Coords
+   k=1
+   do i=1,numNodesTst ! Loop over nodes
+      do j=1,2 ! Loop over coord spatial dim
+         if (nodeCoords(k) .ne. nodeCoordsTst(k)) correct=.false.
+         k=k+1
+      enddo
+   enddo
+
+   ! Check node Owners
+   do i=1,numNodesTst
+      if (nodeOwners(i) .ne. nodeOwnersTst(i)) correct=.false.
+   enddo
+
+   ! Debugging
+   ! write(*,*) "nodeOwners   =",nodeOwners
+   ! write(*,*) "nodeOwnersTst=",nodeOwnersTst
 
    ! Check elem ids
    do i=1,numElemsTst
@@ -6864,9 +6895,6 @@ subroutine  test_mesh_get_create_info(correct, rc)
    enddo
 
 
-   ! Debugging
-   !write(*,*) "elemConn   =",elemConn
-   !write(*,*) "elemConnTst=",elemConnTst
 
    ! deallocate node data
    deallocate(nodeIds)
@@ -6880,6 +6908,9 @@ subroutine  test_mesh_get_create_info(correct, rc)
    deallocate(elemConn)
 
    ! Deallocate tst Arrays
+   deallocate(nodeIdsTst)
+   deallocate(nodeCoordsTst)
+   deallocate(nodeOwnersTst)
    deallocate(elemIdsTst)
    deallocate(elemTypesTst)
    deallocate(elemConnTst)
