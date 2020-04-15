@@ -49,6 +49,10 @@ program ESMF_InfoCacheUTest
   type(ESMF_FieldBundle) :: fb
   type(ESMF_State) :: state
   type(ESMF_InfoDescribe) :: idesc
+  integer, dimension(:), allocatable :: ids
+  type(ESMF_VMId), dimension(0:0), target :: vmIds
+  type(ESMF_VMId), dimension(:), pointer :: vmIds_ptr, vmIdMap_ptr
+  type(ESMF_VMId), dimension(:), allocatable, target :: vmIdMap
 
   !----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)  ! calls ESMF_Initialize() internally
@@ -78,7 +82,7 @@ program ESMF_InfoCacheUTest
 
   !----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "UpdateGeoms for State"
+  write(name, *) "Update for State"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   rc = ESMF_FAILURE
 
@@ -100,10 +104,23 @@ program ESMF_InfoCacheUTest
   state = ESMF_StateCreate(fieldbundleList=(/fb/), rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+  ! Create the vmIdMap
+  ! ---------------------------------------------------------------------------
+  call ESMF_BaseGetVMId(field%ftypep%base, vmIds(0), rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  vmIds_ptr => vmIds
+
+  call ESMF_VMTranslateVMId(vm, vmIds_ptr, ids, vmIdMap=vmIdMap, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  vmIdMap_ptr => vmIdMap
+  ! ---------------------------------------------------------------------------
+
   call info_cache%Initialize(rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call info_cache%UpdateGeoms(state, rc)
+  call info_cache%UpdateGeoms(state, vmIdMap_ptr, rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call idesc%Initialize(createInfo=.true., addObjectInfo=.true., rc=rc)
@@ -114,6 +131,9 @@ program ESMF_InfoCacheUTest
 
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !----------------------------------------------------------------------------
+
+  call ESMF_VMIdDestroy(vmIdMap, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call idesc%Destroy(rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)

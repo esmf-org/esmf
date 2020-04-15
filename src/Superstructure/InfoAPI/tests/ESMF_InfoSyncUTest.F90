@@ -174,6 +174,11 @@ program ESMF_InfoSyncUTest
     call ESMF_InfoSet(infoh, "fvarname", "field2", rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+    ! Add some Field finding metadata for testing. This is StateReconcile
+    ! specific.
+    call ESMF_InfoSet(infoh, "/_esmf_state_reconcile/integer_vmid", 567, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
     infoh = ESMF_InfoGetHandle(field3, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
@@ -271,7 +276,7 @@ program ESMF_InfoSyncUTest
   call ESMF_BaseGetID(field2%ftypep%base, find_base_id, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  found = ESMF_InfoCacheFindField(state, foundField, find_base_id, rc)
+  found = ESMF_InfoCacheFindField(state, foundField, 567, find_base_id, rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(foundField, name=found_field_name, rc=rc)
