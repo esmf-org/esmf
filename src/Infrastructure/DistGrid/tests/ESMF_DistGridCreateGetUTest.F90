@@ -483,6 +483,13 @@ program ESMF_DistGridCreateGetUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
+  write(name, *) "DistGridGet() - localDe -> de and tile"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridGet(distgrid, localDe=0, de=de, tile=tile, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
   write(name, *) "DistGridGet() - indexList(:)"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   allocate(indexList(indexCountPDe(1,localDeToDeMap(0))))
