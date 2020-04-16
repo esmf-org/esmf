@@ -2627,9 +2627,7 @@ endif
   correct=.true.
   rc=ESMF_SUCCESS
 
-  ! Create Test mesh
   call test_mesh_get_create_info(correct, rc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
