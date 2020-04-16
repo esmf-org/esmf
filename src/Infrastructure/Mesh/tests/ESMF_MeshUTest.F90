@@ -943,7 +943,7 @@ program ESMF_MeshUTest
   call ESMF_MeshGet(mesh2, nodalDistgrid=nodeDistgrid, elementDistgrid=elemDistgrid, &
                    numOwnedNodes=numOwnedNodesTst, numOwnedElements=numOwnedElemsTst, &
                    spatialDim=spatialDim, parametricDim=parametricDim, &
-                   isMemFreed=isMemFreed, rc=localrc)
+                   isMemFreed=isMemFreed,  coordSys=coordSys, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! check results
@@ -952,6 +952,7 @@ program ESMF_MeshUTest
   if (spatialDim .ne. 2) correct=.false.
   if (parametricDim .ne. 2) correct=.false.
   if (isMemFreed) correct=.false.
+  if (coordSys .ne. ESMF_COORDSYS_CART) correct=.false.
 
   ! Make sure node distgrid is ok
   call ESMF_DistGridValidate(nodeDistgrid, rc=localrc)
