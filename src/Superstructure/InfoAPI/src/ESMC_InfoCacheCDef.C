@@ -189,7 +189,6 @@ void update_field_metadata_by_geom(const json &infoDescStorage, esmc_basecache_t
 
 extern "C" {
 
-//tdk:todo: try and make this return a return code instead of the pointer
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoCacheInitialize()"
 ESMCI::esmc_basecache_t* ESMC_InfoCacheInitialize(void) {
