@@ -441,11 +441,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             rcToReturn=rc)) return
         end if
 
-        call ESMF_InfoSet(self%info, local_root_key//"/vmIdInt", ii, rc=localrc)
+        call ESMF_InfoSet(self%info, local_root_key//"/vmid_int", ii, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
       end if
     else
-      call ESMF_InfoSetNULL(self%info, local_root_key//"/vmIdInt", rc=localrc)
+      call ESMF_InfoSetNULL(self%info, local_root_key//"/vmid_int", rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
     end if
 
