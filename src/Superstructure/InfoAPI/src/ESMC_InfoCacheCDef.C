@@ -206,8 +206,8 @@ int ESMC_InfoCacheDestroy(ESMCI::esmc_basecache_t *infoCache) {
 }
 
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_InfoCacheUpdateGeoms()"
-int ESMC_InfoCacheUpdateGeoms(ESMCI::esmc_basecache_t *infoCache, ESMCI::Info *infoDesc) {
+#define ESMC_METHOD "ESMC_InfoCacheUpdateFields()"
+int ESMC_InfoCacheUpdateFields(ESMCI::esmc_basecache_t *infoCache, ESMCI::Info *infoDesc) {
   ESMC_CHECK_INIT_INFOCACHE(infoCache)
   int esmc_rc = ESMF_FAILURE;
   try {

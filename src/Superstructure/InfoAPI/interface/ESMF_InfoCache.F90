@@ -60,13 +60,13 @@ function c_infocache_destroy(infoCache) bind(C, name="ESMC_InfoCacheDestroy")
   integer(C_INT) :: c_infocache_destroy
 end function c_infocache_destroy
 
-function c_infocache_updategeoms(infoCache, infoDesc) bind(C, name="ESMC_InfoCacheUpdateGeoms")
+function c_infocache_updatefields(infoCache, infoDesc) bind(C, name="ESMC_InfoCacheUpdateFields")
   use iso_c_binding, only : C_PTR, C_INT
   implicit none
   type(C_PTR), value :: infoCache
   type(C_PTR), value :: infoDesc
-  integer(C_INT) :: c_infocache_updategeoms
-end function c_infocache_updategeoms
+  integer(C_INT) :: c_infocache_updatefields
+end function c_infocache_updatefields
 
 end interface ! ===============================================================
 
@@ -74,10 +74,10 @@ type, public :: ESMF_InfoCache
   type(C_PTR) :: ptr = C_NULL_PTR
 contains
   procedure, private, pass :: ESMF_InfoCacheInitialize, ESMF_InfoCacheDestroy, &
-   ESMF_InfoCacheUpdateGeoms
+   ESMF_InfoCacheUpdateFields
   generic, public :: Initialize => ESMF_InfoCacheInitialize
   generic, public :: Destroy => ESMF_InfoCacheDestroy
-  generic, public :: UpdateGeoms => ESMF_InfoCacheUpdateGeoms
+  generic, public :: UpdateFields => ESMF_InfoCacheUpdateFields
 end type ESMF_InfoCache
 
 contains ! ====================================================================
@@ -115,11 +115,9 @@ end subroutine ESMF_InfoCacheDestroy
 
 ! -----------------------------------------------------------------------------
 
-!tdk:comm
-!tdk:todo: consider renaming to UpdateFields since it's actually their metadata that's updated
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoCacheUpdateGeoms()"
-subroutine ESMF_InfoCacheUpdateGeoms(self, target, vmIdMap, rc)
+#define ESMF_METHOD "ESMF_InfoCacheUpdateFields()"
+subroutine ESMF_InfoCacheUpdateFields(self, target, vmIdMap, rc)
   class(ESMF_InfoCache), intent(inout) :: self
   type(ESMF_State), intent(in) :: target
   type(ESMF_VMId), dimension(:), pointer, intent(in) :: vmIdMap
@@ -133,13 +131,13 @@ subroutine ESMF_InfoCacheUpdateGeoms(self, target, vmIdMap, rc)
   call idesc%Update(target, "", rc=rc)
   if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  rc = c_infocache_updategeoms(self%ptr, idesc%info%ptr)
+  rc = c_infocache_updatefields(self%ptr, idesc%info%ptr)
   if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   call idesc%Destroy(rc=rc)
   if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-end subroutine ESMF_InfoCacheUpdateGeoms
+end subroutine ESMF_InfoCacheUpdateFields
 
 ! -----------------------------------------------------------------------------
 

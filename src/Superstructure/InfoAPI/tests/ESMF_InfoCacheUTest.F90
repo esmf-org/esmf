@@ -120,7 +120,7 @@ program ESMF_InfoCacheUTest
   call info_cache%Initialize(rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call info_cache%UpdateGeoms(state, vmIdMap_ptr, rc)
+  call info_cache%UpdateFields(state, vmIdMap_ptr, rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call idesc%Initialize(createInfo=.true., addObjectInfo=.true., rc=rc)

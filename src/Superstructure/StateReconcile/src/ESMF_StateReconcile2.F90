@@ -423,7 +423,7 @@ contains
     call info_cache%Initialize(localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call info_cache%UpdateGeoms(state, vmIdMap_ptr, localrc)
+    call info_cache%UpdateFields(state, vmIdMap_ptr, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
     call info_cache%Destroy(localrc)
