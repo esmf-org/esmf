@@ -80,10 +80,8 @@ type, public :: ESMF_InfoDescribe
   type(ESMF_Info) :: info
   logical :: addBaseAddress = .false.  ! If true, add the object's base address
   logical :: addObjectInfo = .false.  ! If true, add ESMF_Info map for each object
-  !tdk:rename: to recursive
   logical :: createInfo = .true.  ! If true, also recurse objects with members (i.e. ArrayBundle)
   type(ESMF_VMId), dimension(:), pointer :: vmIdMap  ! Used to also get a unique integer identifier for an object's VM
-  
   
   logical :: is_initialized = .false.  ! If true, the object is initialized
   type(ESMF_Base) :: curr_base  ! Holds a reference to the current update object's base. Will change when recursively updating
@@ -376,7 +374,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end if
 
     allocate(character(len(trim(root_key))+len(l_uname)+1)::local_root_key)
-    !tdk:todo: add an isPresent check for this local_root_key. it needs to be unique.
     local_root_key = trim(root_key)//"/"//l_uname
 
     call ESMF_InfoSet(self%info, local_root_key//"/base_name", trim(name), force=.false., rc=localrc)
@@ -424,7 +421,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end if
 
     if (associated(self%vmIdMap)) then
-      call ESMF_LogWrite("self%vmIdMap is associated") !tdk:p
       if (l_base_is_valid) then
         call ESMF_BaseGetVMId(base, curr_vmid, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -608,7 +604,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   if (self%found) then
-    !tdk:todo: should we add a duplicate check?
 !    if (associated(self%foundField)) then
 !      if (ESMF_LogFoundError(ESMF_FAILURE, msg="Field already found", ESMF_CONTEXT, rcToReturn=rc)) return
 !    end if

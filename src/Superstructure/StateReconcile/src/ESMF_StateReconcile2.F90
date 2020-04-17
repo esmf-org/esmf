@@ -64,7 +64,6 @@ module ESMF_StateReconcile2Mod
 
   use ESMF_InfoMod, only : ESMF_Info, ESMF_InfoBaseGetHandle, ESMF_InfoUpdate
   use ESMF_InfoCacheMod
-  use ESMF_TraceMod !tdk:trace
 
   implicit none
   private
@@ -211,7 +210,7 @@ contains
       lattreconflag = attreconflag
     endif
     !tdk:todo: what do we do about attribute reconcile when they are required? recommend just leaving on
-    lattreconflag = ESMF_ATTRECONCILE_ON !tdk:bc
+    lattreconflag = ESMF_ATTRECONCILE_ON
 
 #if 0
     call idesc%Initialize(createInfo=.true., addObjectInfo=.true., rc=localrc)
@@ -232,8 +231,7 @@ contains
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
 
-     !tdk:todo: i think i need to use VMIds when searching for a Field here
-     call ESMF_InfoCacheReassembleFields(state, localrc) !tdk:bc
+     call ESMF_InfoCacheReassembleFields(state, localrc)
      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
      call ESMF_InfoCacheReassembleFieldsFinalize(state, localrc)
@@ -379,13 +377,8 @@ contains
         rcToReturn=rc)) return
     if (meminfo) call ESMF_VMLogMemInfo ('after Step 1 - constructed send Id/VMId info')
 
-!tdk:rm
-!=== start test and demonstrate ESMF_VMTranslateVMId() =========================
-!do i=lbound(vmids_send,1),ubound(vmids_send,1)
-!  write (prefixStr,*) "vmids_send(",i,")="
-!  call ESMF_VMIdLog(vmids_send(i), prefix=trim(prefixStr), rc=localrc)
-!enddo
-
+    ! Translate VmId objects to an integer representation to minimize memory
+    ! usage. This is also beneficial for performance.
     call ESMF_VMTranslateVMId(vm, vmIds=vmids_send, ids=vmintids_send, &
       vmIdMap=vmIdMap, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -399,22 +392,6 @@ contains
           ESMF_CONTEXT, rcToReturn=rc)) return
       end if
     enddo
-
-!tdk:rm
-!do i=lbound(vmids_send,1),ubound(vmids_send,1)
-!  write (prefixStr,*) "vmintid=",vmintids_send(i),"vmids_send(",i,")="
-!  call ESMF_VMIdLog(vmids_send(i), prefix=trim(prefixStr), rc=localrc)
-!enddo
-!write (prefixStr,*) "size(vmIdMap)=",size(vmIdMap)
-!call ESMF_LogWrite(prefixStr, ESMF_LOGMSG_INFO, rc=localrc)
-!do i=lbound(vmIdMap,1),ubound(vmIdMap,1)
-!  write (prefixStr,*) "vmIdMap(",i,")="
-!  call ESMF_VMIdLog(vmIdMap(i), prefix=trim(prefixStr), rc=localrc)
-!enddo
-! don't forget to clean-up deep allocations when done with vmIdMap:
-!call ESMF_VMIdDestroy(vmIdMap, rc=localrc)
-!deallocate(vmIdMap)
-!=== end test and demonstrate ESMF_VMTranslateVMId() ===========================
 
     ! Update Field metadata for unique geometries
     ! -------------------------------------------------------------------------
@@ -1614,7 +1591,7 @@ contains
 
     logical, parameter :: debug = .false.
     logical, parameter :: meminfo = .true. !tdk:debug
-    character(len=ESMF_MAXSTR) :: logmsg !tdk:debug
+    character(len=ESMF_MAXSTR) :: logmsg
 
     localrc = ESMF_RC_NOT_IMPL
 
@@ -1645,16 +1622,18 @@ contains
           rcToReturn=rc)) return
     end if
 
+#if 0
+    ! Log some information about the number of items in the state.
+    write(logmsg, *) minval(nitems_buf)
+    call ESMF_LogWrite("min nitems_buf: "//trim(logmsg))
+    write(logmsg, *) sum(nitems_buf)/size(nitems_buf)
+    call ESMF_LogWrite("mean nitems_buf: "//trim(logmsg))
+    write(logmsg, *) maxval(nitems_buf)
+    call ESMF_LogWrite("max nitems_buf: "//trim(logmsg))
+#endif
+
     ! Broadcast each Id to all the other PETs.  Since the number of items per
     ! PET can vary, use AllToAllV.
-
-    write(logmsg, *) minval(nitems_buf) !tdk:p
-    call ESMF_LogWrite("min nitems_buf: "//trim(logmsg)) !tdk:p
-    write(logmsg, *) sum(nitems_buf)/size(nitems_buf) !tdk:p
-    call ESMF_LogWrite("mean nitems_buf: "//trim(logmsg)) !tdk:p
-    write(logmsg, *) maxval(nitems_buf) !tdk:p
-    call ESMF_LogWrite("max nitems_buf: "//trim(logmsg)) !tdk:p
-
     do, i=0, npets-1
       allocate (  &
           id_info(i)%  id  (0:nitems_buf(i)), &
@@ -2446,7 +2425,6 @@ contains
     integer :: memstat
     integer :: nitems_local(1)
     integer :: mypet, npets
-    character(len=ESMF_MAXSTR) :: logmsg !tdk:p
 
     localrc = ESMF_RC_NOT_IMPL
 
@@ -2487,8 +2465,6 @@ contains
     else
       nitems_local(1) = 0
     end if
-    write(logmsg, *) nitems_local !tdk:p
-    call ESMF_LogWrite("nitems_local="//trim(logmsg)) !tdk:p
 
     ! All PETs send their item counts to all the other PETs for recv array sizing.
     allocate (nitems_all(0:npets-1), stat=memstat)

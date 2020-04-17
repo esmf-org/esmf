@@ -45,7 +45,7 @@ program ESMF_InfoCacheUTest
   type(ESMF_InfoCache) :: info_cache
   type(ESMF_DistGrid) :: distgrid
   type(ESMF_Grid) :: grid
-  type(ESMF_Field) :: field, field2
+  type(ESMF_Field) :: field, field2, field_empty
   type(ESMF_FieldBundle) :: fb
   type(ESMF_State) :: state
   type(ESMF_InfoDescribe) :: idesc
@@ -53,6 +53,8 @@ program ESMF_InfoCacheUTest
   type(ESMF_VMId), dimension(0:0), target :: vmIds
   type(ESMF_VMId), dimension(:), pointer :: vmIds_ptr, vmIdMap_ptr
   type(ESMF_VMId), dimension(:), allocatable, target :: vmIdMap
+  logical :: actual_sdflag_archetype, actual_sdflag_referencer
+  type(ESMF_Info) :: infoh
 
   !----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)  ! calls ESMF_Initialize() internally
@@ -98,10 +100,15 @@ program ESMF_InfoCacheUTest
   field2 = ESMF_FieldCreate(grid, ESMF_TYPEKIND_I8, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  fb = ESMF_FieldBundleCreate(fieldList=(/field, field2/), rc=rc)
+  field_empty = ESMF_FieldEmptyCreate(rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  state = ESMF_StateCreate(fieldbundleList=(/fb/), rc=rc)
+  fb = ESMF_FieldBundleCreate(fieldList=(/field, field2, field_empty/), rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  state = ESMF_StateCreate(fieldbundleList=(/fb/), &
+                           fieldList=(/field, field2, field_empty/), &
+                           rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   ! Create the vmIdMap
@@ -129,7 +136,32 @@ program ESMF_InfoCacheUTest
   call idesc%Update(state, "", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  call ESMF_LogWrite("idesc dump=", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_LogWrite(ESMF_InfoDump(idesc%info, indent=2), rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  infoh = ESMF_InfoGetHandle(field, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_InfoGet(infoh, &
+                    "/_esmf_state_reconcile/should_serialize_geom", &
+                    actual_sdflag_archetype, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  infoh = ESMF_InfoGetHandle(field2, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_InfoGet(infoh, &
+                    "/_esmf_state_reconcile/should_serialize_geom", &
+                    actual_sdflag_referencer, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_Test((rc==ESMF_SUCCESS &
+                  .and. actual_sdflag_archetype &
+                  .and. .not. actual_sdflag_referencer), &
+                 name, failMsg, result, ESMF_SRCLINE)
   !----------------------------------------------------------------------------
 
   call ESMF_VMIdDestroy(vmIdMap, rc=rc)
