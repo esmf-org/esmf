@@ -71,6 +71,8 @@ program ESMF_MeshUTest
   type(ESMF_Field)  ::  maskField
   type(ESMF_Array)  ::  maskArray
   type(ESMF_Array)  ::  areaArray
+  type(ESMF_Array)  :: elemArray(2)
+  
   logical :: isMemFreed
   integer :: bufCount, offset
   character, pointer :: buf(:)
@@ -2491,7 +2493,7 @@ endif
 
   ! Create Mask Field
   maskField = ESMF_FieldCreate(mesh, ESMF_TYPEKIND_I4, &
-       meshloc=ESMF_MESHLOC_ELEMENT, &
+       meshloc=ESMF_MESHLOC_ELEMENT, name="mask", &
        rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -2502,7 +2504,7 @@ endif
 
   ! Create Area Field
   areaField = ESMF_FieldCreate(mesh, ESMF_TYPEKIND_R8, &
-       meshloc=ESMF_MESHLOC_ELEMENT, &
+       meshloc=ESMF_MESHLOC_ELEMENT, name="area", &
        rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -2517,6 +2519,13 @@ endif
        elemAreaArray=areaArray, &
        rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  call ESMF_MeshWriteVTK(mesh, "elemArrayTst", &
+         elemArray1=maskArray, elemArray2=areaArray, &
+         rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
 
   ! get pointer to mask
   call ESMF_FieldGet(maskField, 0, maskPtr,       &
