@@ -15,13 +15,13 @@
 !==============================================================================
 
 !BOE
-! \subsubsection{Get Handle}
+! \subsubsection{Retrieve an Info Handle}
 ! \label{get_info_handle_from_esmf_object}
 ! This example demonstrates how to retrieve an \texttt{ESMF\_Info} object handle
 ! from an ESMF object. \texttt{ESMF\_Info} handles are a view into the object's
-! \texttt{ESMF\_Info} storage and should not be created/destroyed as the \texttt{ESMF\_Info}'s
-! lifetime is determined by its host object's lifetime. Destroying the host object
-! will leave a handle in an undefined state.
+! \texttt{ESMF\_Info} storage and should \textbf{\textit{not}} be created/destroyed
+! as the \texttt{ESMF\_Info}'s lifetime is determined by its host object's lifetime.
+! Destroying the host object will leave a handle in an undefined state.
 !EOE
 
     program ESMF_InfoGetHandleEx
@@ -81,7 +81,6 @@
 !EOC
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
-    nullify(farrayPtr)
     farrayPtr => farray
     array = ESMF_ArrayCreate(distgrid, farrayPtr, rc=rc)
 !EOC
