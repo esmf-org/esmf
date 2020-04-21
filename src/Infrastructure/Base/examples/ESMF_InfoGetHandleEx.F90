@@ -45,8 +45,7 @@
     type(ESMF_DistGrid) :: distgrid
     type(ESMF_Array) :: array
     type(ESMF_Info) :: infoh
-    real(ESMF_KIND_R8), dimension(10,10), target :: farray
-    real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)
+    real(ESMF_KIND_R8), dimension(10,10) :: farray
     integer :: rc
 !EOC
     type(ESMF_VM) :: vm
@@ -81,8 +80,7 @@
 !EOC
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
-    farrayPtr => farray
-    array = ESMF_ArrayCreate(distgrid, farrayPtr, rc=rc)
+    array = ESMF_ArrayCreate(distgrid, farray, indexflag=ESMF_INDEX_DELOCAL, rc=rc)
 !EOC
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
