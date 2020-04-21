@@ -66,12 +66,12 @@
 \input{../Infrastructure/VM/doc/VM_desc}
 #endif
 
-%\subsection{Constants}
-%#ifdef STANDALONE
-%\input{VM_options}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/VM/doc/VM_options}
-%#endif
+\subsection{Constants}
+#ifdef STANDALONE
+\input{VM_options}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/VM/doc/VM_options}
+#endif
 
 \subsection{Use and Examples}
 #ifdef STANDALONE

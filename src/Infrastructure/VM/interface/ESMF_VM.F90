@@ -3987,8 +3987,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[vm]}]
 !        {\tt ESMF\_VM} object. Defaults to the current VM.
 !   \item[{[epoch]}]
-!        The epoch to be entered. See section ... for a complete list 
-!        of options. Defaults to {\tt ESMF\_VMEPOCH\_NONE}.
+!        The epoch to be entered. See section \ref{const:vmepoch_flag} for a
+!        complete list of options. Defaults to {\tt ESMF\_VMEPOCH\_NONE}.
 !   \item[{[rc]}]
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
