@@ -56,6 +56,7 @@ interface ESMF_InfoCreate
   module procedure ESMF_InfoCreateEmpty
   module procedure ESMF_InfoCreateByKey
   module procedure ESMF_InfoCreateByParse
+  module procedure ESMF_InfoCreateFromInfo
 ! !DESCRIPTION:
 ! This interface provides a single entry point for \texttt{ESMF\_Info} create
 ! functions.
@@ -162,9 +163,9 @@ private
 public operator(==)
 public operator(/=)
 {% set suffixes = ["","Create","Destroy","Get","GetCharAlloc", "GetAlloc","Set",
-                   "Remove","BaseGetHandle","PointerGetHandle","Copy","SetNULL",
-                   "SetDirty","IsSet","IsPresent","Print","Dump","Update","ReadJSON",
-                   "WriteJSON","Broadcast"] %}
+                   "Remove","BaseGetHandle","PointerGetHandle","SetNULL","SetDirty",
+                   "IsSet","IsPresent","Print","Dump","Update","ReadJSON","WriteJSON",
+                   "Broadcast"] %}
 {% for suffix in suffixes %}
 public ESMF_Info{{ suffix }}
 {% endfor %}
@@ -307,6 +308,47 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   if (present(rc)) rc = ESMF_FAILURE
 
   {{ method_name }}%ptr = c_info_create_by_key(info%ptr, trim(key)//C_NULL_CHAR, localrc)
+  {{ esmf_lfe }}
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end function {{ method_name }}
+
+! -----------------------------------------------------------------------------
+
+{% set method_name = "ESMF_InfoCreateFromInfo" %}
+#undef  ESMF_METHOD
+#define ESMF_METHOD "{{ method_name }}()"
+!BOP
+! !IROUTINE: {{ method_name }} - Create an Info object from another Info object
+!
+! !INTERFACE:
+  ! Private name; call using {{ doc_generic_method }}()
+function {{ method_name }}(info, keywordEnforcer, rc)
+! !ARGUMENTS:
+  type(ESMF_Info), intent(in) :: info
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  integer, intent(out), optional :: rc
+! !RETURN VALUE:
+  type(ESMF_Info) :: {{ method_name }}
+!
+! !DESCRIPTION:
+!     Create an \texttt{ESMF\_Info} object from another \texttt{ESMF\_Info} object.
+!     The returned object is a deep copy of the source object.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [info]
+!       The \texttt{ESMF\Info} object acting as the source data.
+{{ doc_rc }}
+!     \end{description}
+!EOP
+
+  integer :: localrc
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_FAILURE
+
+  {{ method_name }}%ptr = c_info_copy(info%ptr, localrc)
   {{ esmf_lfe }}
 
   if (present(rc)) rc = ESMF_SUCCESS
@@ -1495,45 +1537,6 @@ function {{ method_name }}(ptr) result(info)
 
 end function {{ method_name }}
 
-! -----------------------------------------------------------------------------
-
-{% set method_name = "ESMF_InfoCopy" %}
-#undef  ESMF_METHOD
-#define ESMF_METHOD "{{ method_name }}()"
-!BOP
-! !IROUTINE: {{ method_name }} - Copy an Info object
-!
-! !INTERFACE:
-function {{ method_name }}(info, keywordEnforcer, rc) result(info_copy)
-! !ARGUMENTS:
-  type(ESMF_Info), intent(in) :: info
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  integer, intent(out), optional :: rc
-! !RETURN VALUE:
-  type(ESMF_Info) :: info_copy
-!
-! !DESCRIPTION:
-!     Copy an \texttt{ESMF\_Info} object.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-{{ doc_info }}
-{{ doc_rc }}
-!     \end{description}
-!EOP
-
-  integer :: localrc
-
-  localrc = ESMF_FAILURE
-  if (present(rc)) rc = ESMF_FAILURE
-
-  info_copy%ptr = c_info_copy(info%ptr, localrc)
-  {{ esmf_lfe }}
-
-  if (present(rc)) rc = ESMF_SUCCESS
-end function {{ method_name }}
-
 !------------------------------------------------------------------------------
 
 {% set method_name = "ESMF_InfoDump" %}
@@ -1563,7 +1566,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[key]}]
 {{ doc_key }}
 !     \item [{[indent]}]
-!       Default is 0. Specify a "pretty print" indentation for the JSON output string.
+!       Default is 0. Specifying an indentation greater than 0 will result in a
+!       "pretty print" for JSON output string (string includes new line breaks).
 {{ doc_rc }}
 !     \end{description}
 !EOP

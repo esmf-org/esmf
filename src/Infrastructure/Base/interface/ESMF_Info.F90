@@ -70,6 +70,7 @@ interface ESMF_InfoCreate
   module procedure ESMF_InfoCreateEmpty
   module procedure ESMF_InfoCreateByKey
   module procedure ESMF_InfoCreateByParse
+  module procedure ESMF_InfoCreateFromInfo
 ! !DESCRIPTION:
 ! This interface provides a single entry point for \texttt{ESMF\_Info} create
 ! functions.
@@ -185,7 +186,6 @@ public ESMF_InfoSet
 public ESMF_InfoRemove
 public ESMF_InfoBaseGetHandle
 public ESMF_InfoPointerGetHandle
-public ESMF_InfoCopy
 public ESMF_InfoSetNULL
 public ESMF_InfoSetDirty
 public ESMF_InfoIsSet
@@ -328,6 +328,47 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   if (present(rc)) rc = ESMF_SUCCESS
 end function ESMF_InfoCreateByKey
+
+! -----------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoCreateFromInfo()"
+!BOP
+! !IROUTINE: ESMF_InfoCreateFromInfo - Create an Info object from another Info object
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_InfoCreate()
+function ESMF_InfoCreateFromInfo(info, keywordEnforcer, rc)
+! !ARGUMENTS:
+  type(ESMF_Info), intent(in) :: info
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  integer, intent(out), optional :: rc
+! !RETURN VALUE:
+  type(ESMF_Info) :: ESMF_InfoCreateFromInfo
+!
+! !DESCRIPTION:
+!     Create an \texttt{ESMF\_Info} object from another \texttt{ESMF\_Info} object.
+!     The returned object is a deep copy of the source object.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [info]
+!       The \texttt{ESMF\Info} object acting as the source data.
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOP
+
+  integer :: localrc
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_FAILURE
+
+  ESMF_InfoCreateFromInfo%ptr = c_info_copy(info%ptr, localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end function ESMF_InfoCreateFromInfo
 
 ! -----------------------------------------------------------------------------
 
@@ -3889,7 +3930,7 @@ end subroutine ESMF_InfoInquire
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [target]
+!     \item [host]
 !       Target ESMF object. Overloaded for:
 !       \begin{itemize}
 !         \item \texttt{ESMF\_Array}
@@ -3964,45 +4005,6 @@ function ESMF_InfoPointerGetHandle(ptr) result(info)
 
 end function ESMF_InfoPointerGetHandle
 
-! -----------------------------------------------------------------------------
-
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoCopy()"
-!BOP
-! !IROUTINE: ESMF_InfoCopy - Copy an Info object
-!
-! !INTERFACE:
-function ESMF_InfoCopy(info, keywordEnforcer, rc) result(info_copy)
-! !ARGUMENTS:
-  type(ESMF_Info), intent(in) :: info
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  integer, intent(out), optional :: rc
-! !RETURN VALUE:
-  type(ESMF_Info) :: info_copy
-!
-! !DESCRIPTION:
-!     Copy an \texttt{ESMF\_Info} object.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-!       Target \texttt{ESMF\_Info} object.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOP
-
-  integer :: localrc
-
-  localrc = ESMF_FAILURE
-  if (present(rc)) rc = ESMF_FAILURE
-
-  info_copy%ptr = c_info_copy(info%ptr, localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (present(rc)) rc = ESMF_SUCCESS
-end function ESMF_InfoCopy
-
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
@@ -4032,7 +4034,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
 !       for an overview of the key format.
 !     \item [{[indent]}]
-!       Default is 0. Specify a "pretty print" indentation for the JSON output string.
+!       Default is 0. Specifying an indentation greater than 0 will result in a
+!       "pretty print" for JSON output string (string includes new line breaks).
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
