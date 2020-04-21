@@ -14,7 +14,7 @@
 #include "ESMCI_VM.h"
 
 #define VM_MEMLOG_off
-#define VM_EPOCHLOG_on
+#define VM_EPOCHLOG_off
 
 // On SunOS systems there are a couple of macros that need to be set
 // in order to get POSIX compliant functions IPC, pthreads, gethostid
