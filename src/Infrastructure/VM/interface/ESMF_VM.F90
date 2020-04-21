@@ -4049,7 +4049,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                  intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!   End a prevously started VM epoch.
+!   Exit the current VM epoch.
 !
 !   The arguments are:
 !   \begin{description}
