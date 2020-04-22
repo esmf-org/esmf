@@ -123,7 +123,9 @@ void ESMC_InfoCopyForAttributeReference(const long int &src_base_address, const 
   try {
     ESMC_Base *src_base = baseAddressToBase(src_base_address);
     ESMC_Base *dst_base = baseAddressToBase(dst_base_address);
-    dst_base->ESMC_BaseDeleteInfo();
+    // This is a memory leak but required for some applications. There needs to
+    // be a way to track referencers and delete when those are finished.
+//    dst_base->ESMC_BaseDeleteInfo();
     dst_base->ESMC_BaseSetInfo(src_base->ESMC_BaseGetInfo());
     esmc_rc = ESMF_SUCCESS;
   }
