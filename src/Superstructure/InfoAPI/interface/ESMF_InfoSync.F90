@@ -91,6 +91,7 @@ interface ESMF_InfoGetHandle
   module procedure ESMF_InfoGetHandleGrid
   module procedure ESMF_InfoGetHandleState
   module procedure ESMF_InfoGetHandleLocStream
+  module procedure ESMF_InfoGetHandleMesh
 end interface
 
 contains !=====================================================================
@@ -562,5 +563,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   if (present(rc)) rc = ESMF_SUCCESS
 end function ESMF_InfoGetHandleLocStream
+
+! Note: Documentation stub located in ESMF_InfoMod
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoGetHandleMesh()"
+function ESMF_InfoGetHandleMesh(host, keywordEnforcer, rc) result(info)
+  type(ESMF_Mesh), intent(in) :: host
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  integer, intent(inout), optional :: rc
+  type(ESMF_Info) :: info
+
+  integer :: localrc
+  type(ESMF_InfoDescribe) :: eidesc
+
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+  info = eidesc%GetInfo(host, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end function ESMF_InfoGetHandleMesh
 
 end module ESMF_InfoSyncMod

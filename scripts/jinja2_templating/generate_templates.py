@@ -77,7 +77,8 @@ META['TEMPLATEFOLDER'] = TEMPLATEFOLDER
 
 # ESMF objects that require overloading. Must inherit from Base.
 ESMF_TYPES = ["Array", "ArrayBundle", "CplComp", "GridComp", "SciComp",
-              "DistGrid", "Field", "FieldBundle", "Grid", "State", "LocStream"]
+              "DistGrid", "Field", "FieldBundle", "Grid", "State", "LocStream",
+              "Mesh"]
 META['ESMF_TYPES'] = ESMF_TYPES
 
 # Objects holding a reference to Info objects

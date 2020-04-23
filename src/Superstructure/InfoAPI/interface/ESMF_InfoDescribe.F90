@@ -84,10 +84,10 @@ contains
   procedure, private :: updateGeneric, ESMF_InfoDescribeIntialize
   procedure, private, nopass :: getInfoArray, getInfoArrayBundle, getInfoCplComp, &
    getInfoGridComp, getInfoSciComp, getInfoDistGrid, getInfoField, getInfoFieldBundle, &
-   getInfoGrid, getInfoState, getInfoLocStream
+   getInfoGrid, getInfoState, getInfoLocStream, getInfoMesh
   generic, public :: GetInfo => getInfoArray, getInfoArrayBundle, getInfoCplComp, getInfoGridComp, &
    getInfoSciComp, getInfoDistGrid, getInfoField, getInfoFieldBundle, getInfoGrid, &
-   getInfoState, getInfoLocStream
+   getInfoState, getInfoLocStream, getInfoMesh
   generic, public :: Initialize => ESMF_InfoDescribeIntialize
   generic, public :: Destroy => ESMF_InfoDescribeDestroy
   generic, public :: Print => ESMF_InfoDescribePrint
@@ -666,11 +666,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-  ! call ESMF_MeshGet(target, name=name, rc=localrc)
-  ! if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  call ESMF_MeshGet(target, name=name, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  newbase%this = -1
-  call self%updateGeneric(root_key, "__invalid_mesh_base__", etype, newbase, base_is_valid=.false., rc=localrc)
+  newbase%this%ptr = target%this%ptr
+  call self%updateGeneric(root_key, name, etype, newbase, base_is_valid=.true., rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   if (present(rc)) rc = ESMF_SUCCESS
@@ -1138,5 +1138,30 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   if (present(rc)) rc = ESMF_SUCCESS
 end function getInfoLocStream
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoDescribe%getInfoMesh()"
+function getInfoMesh(target, keywordEnforcer, rc) result(info)
+  use iso_c_binding, only : C_NULL_PTR
+  type(ESMF_Mesh), intent(in) :: target
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  integer, intent(inout), optional :: rc
+  type(ESMF_Info) :: info
+  type(ESMF_InfoDescribe) :: eidesc
+  integer :: localrc
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  info%ptr = C_NULL_PTR
+  call eidesc%Initialize(createInfo=.false., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  call eidesc%Update(target, "", rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  info = eidesc%GetCurrentInfo(rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  call eidesc%Destroy(rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (present(rc)) rc = ESMF_SUCCESS
+end function getInfoMesh
 
 end module ESMF_InfoDescribeMod

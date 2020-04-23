@@ -3944,6 +3944,7 @@ end subroutine ESMF_InfoInquire
 !         \item \texttt{ESMF\_Grid}
 !         \item \texttt{ESMF\_State}
 !         \item \texttt{ESMF\_LocStream}
+!         \item \texttt{ESMF\_Mesh}
 !       \end{itemize}
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
