@@ -512,10 +512,16 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
        Context ctxt; ctxt.flip();
        MEField<> *elem_mask = mesh.RegisterField("elem_mask",
                   MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+       MEField<> *elem_mask_val = mesh.RegisterField("elem_mask_val",
+                  MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
 
      } else {
        IOField<NodalField> *node_mask;
        node_mask = mesh.RegisterNodalField(mesh, "mask", 1);
+       node_mask->set_output_status(true);
+       IOField<NodalField> *node_mask_val;
+       node_mask_val = mesh.RegisterNodalField(mesh, "node_mask_val", 1);
+       node_mask_val->set_output_status(true);
      }
    }
 
@@ -593,6 +599,9 @@ Par::Out() << "\tnot in mesh!!" << std::endl;
      if (isConserve) {
        // Get mask field on elems
       MEField<> *elem_mask=mesh.GetField("elem_mask");
+      if (!elem_mask) Throw() << "Missing elem_mask field.";
+      MEField<> *elem_mask_val=mesh.GetField("elem_mask_val");
+      if (!elem_mask_val) Throw() << "Missing elem_mask val field.";
 
        // Loop elemets of the grid.  Here we loop all elements, both owned and not.
        for(gci->toBeg(); !gci->isDone(); gci->adv()) {
@@ -611,9 +620,11 @@ Par::Out() << "\tnot in mesh!!" << std::endl;
 
          // Get mask data
          double *m=elem_mask->data(elem);
+         double *emv=elem_mask_val->data(elem);
 
          // Init in case is not locally owned
          *m=0.0;
+         *emv=0.0;
 
          // Only put it in if it's locally owned
          if (!GetAttr(elem).is_locally_owned()) continue;
@@ -623,6 +634,9 @@ Par::Out() << "\tnot in mesh!!" << std::endl;
 
          // Get Mask value from grid
          gci->getItem(ESMC_GRIDITEM_MASK, &gm);
+
+         // Set elem mask val
+         *emv=gm;
 
          // See if gm matches any mask values
          bool mask=false;
@@ -642,11 +656,16 @@ Par::Out() << "\tnot in mesh!!" << std::endl;
          }
        }
      } else {
-       // Get mask field on elems
+       // Get mask field on nodes
       MEField<> *node_mask=mesh.GetField("mask");
+      if (!node_mask) Throw() << "Missing node mask field.";
+      MEField<> *node_mask_val=mesh.GetField("node_mask_val");
+      if (!node_mask_val) Throw() << "Missing node_mask_val field.";
+      
 
        for (ni = mesh.node_begin(); ni != ne; ++ni) {
          double *m = node_mask->data(*ni);
+         double *nmv = node_mask_val->data(*ni);
 
          UInt lid = ngid2lid[ni->get_id()]; // we set this above when creating the node
 
@@ -659,6 +678,9 @@ Par::Out() << "\tnot in mesh!!" << std::endl;
 
            // Get Mask value from grid
            gni->getItem(ESMC_GRIDITEM_MASK, &gm);
+
+           // Set mask value
+           *nmv=gm;
 
            // See if gm matches any mask values
            bool mask=false;
@@ -679,6 +701,7 @@ Par::Out() << "\tnot in mesh!!" << std::endl;
 
          } else { // set to Null value to be ghosted later
            *m=0.0;
+           *nmv=0.0;
          }
        } // ni
      }

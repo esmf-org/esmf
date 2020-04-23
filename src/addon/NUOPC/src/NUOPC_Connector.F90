@@ -4999,7 +4999,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     integer, allocatable              :: auxList(:)
     integer                           :: srcPetCount, dstPetCount
     type(ESMF_VM)                     :: vm, srcVM, dstVM
-    character(ESMF_MAXSTR)            :: fieldName
+    character(ESMF_MAXSTR)            :: fieldName, lString
     character(len=240)                :: msgString
     logical                           :: createNewPacket
     logical                           :: mismatch
@@ -5148,8 +5148,13 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
         if (k>0) upE%sendToPets(1:k) = auxList(1:k)  ! transfer the elements
         if (btest(verbosity,12)) then
-          write(msgString,*) "upE%sendToPets=", upE%sendToPets
+          write (lString, *) size(upE%sendToPets)
+          write(msgString,*) "upE%sendToPets list of size "//&
+            trim(adjustl(lString))//" :"
           call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+          call NUOPC_LogPetList(upE%sendToPets, name="", rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
         endif   

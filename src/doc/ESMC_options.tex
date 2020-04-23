@@ -38,9 +38,8 @@ The valid values are:
       approached from both sides.
 \end{description}
 
-{\tt type(ESMC\_ExtrapMethod\_Flag)}
+{\tt subsection(ESMC\_ExtrapMethod\_Flag)}
 \label{opt:cextrapmethod}
-
 {\sf DESCRIPTION:\\}
 Specify which extrapolation method to use on unmapped destination points after 
 regridding.
@@ -70,6 +69,23 @@ The valid values are:
 
 \subsection{ESMC\_FILEFORMAT}
 This flag is documented in section \ref{const:cfileformat}.
+
+{\tt subsection(ESMC\_FileMode\_Flag)}
+\label{opt:cfilemode}
+{\sf DESCRIPTION:\\}
+Specify which mode to use when writing a weight file.
+
+The type of this flag is:
+
+{\tt type(ESMC\_FileMode\_Flag)}
+
+The valid values are:
+\begin{description}
+\item [ESMC\_FILEMODE\_BASIC]
+      Indicates that only the factorList and factorIndexList should be written. 
+\item [ESMC\_FILEMODE\_WITHAUX]
+      Indicates that grid center coordinates should also be written.
+\end{description}
 
 \subsection{ESMC\_GRIDITEM}
 This flag is documented in section \ref{const:cgriditem}.

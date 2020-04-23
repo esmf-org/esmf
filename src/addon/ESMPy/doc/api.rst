@@ -41,6 +41,7 @@ Named constants                                             Description
 =========================================================== ==============================
 :class:`CoordSys<ESMF.api.constants.CoordSys>`              Specify the coordinate system of a :class:`~ESMF.api.grid.Grid`
 :class:`FileFormat<ESMF.api.constants.FileFormat>`          Specify the format of a data file
+:class:`FileMode<ESMF.api.constants.FileMode>`              Specify the mode of a data file
 :class:`GridItem<ESMF.api.constants.GridItem>`              Specify a mask or area item on a :class:`~ESMF.api.grid.Grid`
 :class:`LineType<ESMF.api.constants.LineType>`              Specify the type of line that connects two points on a sphere
 :class:`LogKind<ESMF.api.constants.LogKind>`                Specify how much logging should be done
