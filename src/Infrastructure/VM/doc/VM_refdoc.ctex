@@ -66,12 +66,12 @@
 \input{../Infrastructure/VM/doc/VM_desc}
 #endif
 
-%\subsection{Constants}
-%#ifdef STANDALONE
-%\input{VM_options}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/VM/doc/VM_options}
-%#endif
+\subsection{Constants}
+#ifdef STANDALONE
+\input{VM_options}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/VM/doc/VM_options}
+#endif
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
@@ -82,10 +82,10 @@
 \input{ESMF_VMUserMpiEx_fapi}
 \input{ESMF_VMUserMpiCommEx_fapi}
 \input{ESMF_VMUserMpiCommMultiEx_fapi}
-\input{ESMF_VMComponentEx_fapi}
 \input{ESMF_VMSendVMRecvEx_fapi}
 \input{ESMF_VMScatterVMGatherEx_fapi}
 \input{ESMF_VMAllFullReduceEx_fapi}
+\input{ESMF_VMNonBlockingEx_fapi}
 \input{ESMF_VMHigherRankDataEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/VM/doc/VM_usage}
