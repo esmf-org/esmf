@@ -70,6 +70,7 @@ interface ESMF_InfoCreate
   module procedure ESMF_InfoCreateEmpty
   module procedure ESMF_InfoCreateByKey
   module procedure ESMF_InfoCreateByParse
+  module procedure ESMF_InfoCreateFromInfo
 ! !DESCRIPTION:
 ! This interface provides a single entry point for \texttt{ESMF\_Info} create
 ! functions.
@@ -185,7 +186,6 @@ public ESMF_InfoSet
 public ESMF_InfoRemove
 public ESMF_InfoBaseGetHandle
 public ESMF_InfoPointerGetHandle
-public ESMF_InfoCopy
 public ESMF_InfoSetNULL
 public ESMF_InfoSetDirty
 public ESMF_InfoIsSet
@@ -254,11 +254,11 @@ end function ESMF_InfoNotEqual
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_InfoCreate()
-function ESMF_InfoCreateEmpty(rc) result(info)
+function ESMF_InfoCreateEmpty(rc)
 ! !ARGUMENTS:
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 ! !RETURN VALUE:
-  type(ESMF_Info) :: info
+  type(ESMF_Info) :: ESMF_InfoCreateEmpty
 !
 ! !DESCRIPTION:
 !     Create an \texttt{ESMF\_Info} object. This object must be destroyed using
@@ -276,7 +276,7 @@ function ESMF_InfoCreateEmpty(rc) result(info)
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_FAILURE
 
-  info%ptr = c_info_create(localrc)
+  ESMF_InfoCreateEmpty%ptr = c_info_create(localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   if (present(rc)) rc = ESMF_SUCCESS
@@ -287,26 +287,28 @@ end function ESMF_InfoCreateEmpty
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoCreateByKey()"
 !BOP
-! !IROUTINE: ESMF_InfoCreate - Create a new Info object from another Info object
+! !IROUTINE: ESMF_InfoCreate - Create a new Info object using a key
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_InfoCreate()
-function ESMF_InfoCreateByKey(srcInfo, key, keywordEnforcer, rc) result(info)
+function ESMF_InfoCreateByKey(info, key, keywordEnforcer, rc)
 ! !ARGUMENTS:
-  type(ESMF_Info), intent(in) :: srcInfo
+  type(ESMF_Info), intent(in) :: info
   character(len=*), intent(in) :: key
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 ! !RETURN VALUE:
-  type(ESMF_Info) :: info
+  type(ESMF_Info) :: ESMF_InfoCreateByKey
 !
 ! !DESCRIPTION:
-!     Create an \texttt{ESMF\_Info} object from a location in \textit{srcInfo}
-!     defined by \textit{key}. Returned object is a copy.
+!     Create an \texttt{ESMF\_Info} object from a location in \textit{info}
+!     defined by \textit{key}. Returned object is a deep copy. The value associated
+!     with \texttt{key} must be a nested object (i.e. a collection of key/value
+!     pairs).
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [srcInfo]
+!     \item [info]
 !       The \texttt{ESMF\_Info} object providing source data.
 !     \item [key]
 !       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
@@ -321,11 +323,52 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_FAILURE
 
-  info%ptr = c_info_create_by_key(srcInfo%ptr, trim(key)//C_NULL_CHAR, localrc)
+  ESMF_InfoCreateByKey%ptr = c_info_create_by_key(info%ptr, trim(key)//C_NULL_CHAR, localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   if (present(rc)) rc = ESMF_SUCCESS
 end function ESMF_InfoCreateByKey
+
+! -----------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoCreateFromInfo()"
+!BOP
+! !IROUTINE: ESMF_InfoCreateFromInfo - Create an Info object from another Info object
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_InfoCreate()
+function ESMF_InfoCreateFromInfo(info, keywordEnforcer, rc)
+! !ARGUMENTS:
+  type(ESMF_Info), intent(in) :: info
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  integer, intent(out), optional :: rc
+! !RETURN VALUE:
+  type(ESMF_Info) :: ESMF_InfoCreateFromInfo
+!
+! !DESCRIPTION:
+!     Create an \texttt{ESMF\_Info} object from another \texttt{ESMF\_Info} object.
+!     The returned object is a deep copy of the source object.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [info]
+!       The \texttt{ESMF\Info} object acting as the source data.
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOP
+
+  integer :: localrc
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_FAILURE
+
+  ESMF_InfoCreateFromInfo%ptr = c_info_copy(info%ptr, localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end function ESMF_InfoCreateFromInfo
 
 ! -----------------------------------------------------------------------------
 
@@ -336,20 +379,20 @@ end function ESMF_InfoCreateByKey
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_InfoCreate()
-function ESMF_InfoCreateByParse(payload, keywordEnforcer, rc) result(info)
+function ESMF_InfoCreateByParse(jsonString, keywordEnforcer, rc)
 ! !ARGUMENTS:
-  character(len=*), intent(in) :: payload
+  character(len=*), intent(in) :: jsonString
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 ! !RETURN VALUE:
-  type(ESMF_Info) :: info
+  type(ESMF_Info) :: ESMF_InfoCreateByParse
 !
 ! !DESCRIPTION:
 !     Create an \texttt{ESMF\_Info} object by parsing a JSON-formatted string.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [payload]
+!     \item [jsonString]
 !       The string to parse.
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -361,7 +404,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_FAILURE
 
-  info%ptr = c_info_create_by_parse(trim(payload)//C_NULL_CHAR, localrc)
+  ESMF_InfoCreateByParse%ptr = c_info_create_by_parse(trim(jsonString)//C_NULL_CHAR, localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   if (present(rc)) rc = ESMF_SUCCESS
@@ -381,7 +424,7 @@ subroutine ESMF_InfoDestroy(info, keywordEnforcer, rc)
 ! !ARGUMENTS:
   type(ESMF_Info), intent(inout) :: info
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Destroy an \texttt{ESMF\_Info} object. Destroying an \texttt{ESMF\_Info}
@@ -434,7 +477,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   logical, intent(in), optional :: force
   integer, intent(in), optional :: idx
   character(len=*), intent(in), optional :: pkey
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Set a value in an \texttt{ESMF\_Info} object using a key. List values are
@@ -528,7 +571,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   logical, intent(in), optional :: force
   integer, intent(in), optional :: idx
   character(len=*), intent(in), optional :: pkey
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Set a value in an \texttt{ESMF\_Info} object using a key. List values are
@@ -622,7 +665,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   logical, intent(in), optional :: force
   integer, intent(in), optional :: idx
   character(len=*), intent(in), optional :: pkey
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Set a value in an \texttt{ESMF\_Info} object using a key. List values are
@@ -716,7 +759,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   logical, intent(in), optional :: force
   integer, intent(in), optional :: idx
   character(len=*), intent(in), optional :: pkey
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Set a value in an \texttt{ESMF\_Info} object using a key. List values are
@@ -810,7 +853,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   logical, intent(in), optional :: force
   integer, intent(in), optional :: idx
   character(len=*), intent(in), optional :: pkey
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Set a value in an \texttt{ESMF\_Info} object using a key. List values are
@@ -904,7 +947,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   logical, intent(in), optional :: force
   integer, intent(in), optional :: idx
   character(len=*), intent(in), optional :: pkey
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Set a value in an \texttt{ESMF\_Info} object using a key. List values are
@@ -1002,7 +1045,7 @@ subroutine ESMF_InfoSetArrayR4(info, key, values, keywordEnforcer, force, pkey, 
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   logical, intent(in), optional :: force
   character(len=*), intent(in), optional :: pkey
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Set a value list in an \texttt{ESMF\_Info} object using a key.
@@ -1085,7 +1128,7 @@ subroutine ESMF_InfoSetArrayR8(info, key, values, keywordEnforcer, force, pkey, 
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   logical, intent(in), optional :: force
   character(len=*), intent(in), optional :: pkey
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Set a value list in an \texttt{ESMF\_Info} object using a key.
@@ -1168,7 +1211,7 @@ subroutine ESMF_InfoSetArrayI4(info, key, values, keywordEnforcer, force, pkey, 
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   logical, intent(in), optional :: force
   character(len=*), intent(in), optional :: pkey
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Set a value list in an \texttt{ESMF\_Info} object using a key.
@@ -1251,7 +1294,7 @@ subroutine ESMF_InfoSetArrayI8(info, key, values, keywordEnforcer, force, pkey, 
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   logical, intent(in), optional :: force
   character(len=*), intent(in), optional :: pkey
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Set a value list in an \texttt{ESMF\_Info} object using a key.
@@ -1334,7 +1377,7 @@ subroutine ESMF_InfoSetArrayCH(info, key, values, keywordEnforcer, force, pkey, 
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   logical, intent(in), optional :: force
   character(len=*), intent(in), optional :: pkey
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Set a value list in an \texttt{ESMF\_Info} object using a key.
@@ -1420,7 +1463,7 @@ subroutine ESMF_InfoSetArrayLG(info, key, values, keywordEnforcer, force, pkey, 
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   logical, intent(in), optional :: force
   character(len=*), intent(in), optional :: pkey
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Set a value list in an \texttt{ESMF\_Info} object using a key.
@@ -1510,7 +1553,7 @@ subroutine ESMF_InfoSetNULL(info, key, keywordEnforcer, force, rc)
   character(len=*), intent(in) :: key
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   logical, intent(in), optional :: force
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Set a value to null \cite{json_for_modern_cpp_null}.
@@ -1564,7 +1607,7 @@ subroutine ESMF_InfoSetINFO(info, key, value, keywordEnforcer, force, rc)
   type(ESMF_Info), intent(in) :: value
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   logical, intent(in), optional :: force
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Set a value to the contents of an \texttt{ESMF\_Info} object. A copy of
@@ -1624,7 +1667,7 @@ subroutine ESMF_InfoSetDirty(info, flag, keywordEnforcer, rc)
   type(ESMF_Info), intent(inout) :: info
   logical, intent(in) :: flag
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 ! !DESCRIPTION:
 !     Change the dirty state of an \texttt{ESMF\_Info} object.
 !
@@ -1677,7 +1720,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   real(ESMF_KIND_R4), intent(in), optional :: default
   integer, intent(in), optional :: idx
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Get a value from an \texttt{ESMF\_Info} object using a key. If the key is
@@ -1780,7 +1823,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   real(ESMF_KIND_R8), intent(in), optional :: default
   integer, intent(in), optional :: idx
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Get a value from an \texttt{ESMF\_Info} object using a key. If the key is
@@ -1883,7 +1926,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer(ESMF_KIND_I4), intent(in), optional :: default
   integer, intent(in), optional :: idx
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Get a value from an \texttt{ESMF\_Info} object using a key. If the key is
@@ -1986,7 +2029,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer(ESMF_KIND_I8), intent(in), optional :: default
   integer, intent(in), optional :: idx
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Get a value from an \texttt{ESMF\_Info} object using a key. If the key is
@@ -2089,7 +2132,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   character(len=*), intent(in), optional :: default
   integer, intent(in), optional :: idx
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Get a value from an \texttt{ESMF\_Info} object using a key. If the key is
@@ -2186,7 +2229,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   character(len=*), intent(in), optional :: default
   integer, intent(in), optional :: idx
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Get a value from an \texttt{ESMF\_Info} object using a key. If the key is
@@ -2279,7 +2322,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   logical, intent(in), optional :: default
   integer, intent(in), optional :: idx
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Get a value from an \texttt{ESMF\_Info} object using a key. If the key is
@@ -2379,17 +2422,17 @@ end subroutine ESMF_InfoGetLG
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_InfoGet()
-subroutine ESMF_InfoGetArrayR4(info, key, values, keywordEnforcer, itemcount, attnestflag, scalarToArray, rc)
+subroutine ESMF_InfoGetArrayR4(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
 
 ! !ARGUMENTS:
   type(ESMF_Info), intent(in) :: info
   character(len=*), intent(in) :: key
   real(ESMF_KIND_R4), dimension(:), intent(out) :: values
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  integer, intent(out), optional :: itemcount
+  integer, intent(out), optional :: itemCount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(in), optional :: scalarToArray
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Get a value list from an \texttt{ESMF\_Info} object using a key. If the key
@@ -2416,7 +2459,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       for an overview of the key format.
 !     \item [values]
 !       The output value list associated with the key.
-!     \item [{[itemcount]}]
+!     \item [{[itemCount]}]
 !       The number of items in \textit{values}.
 !     \item [{[attnestflag]}]
 !       Default is \texttt{ESMF\_ATTNEST\_OFF}. Setting to \texttt{ESMF\_ATTNEST\_ON}
@@ -2431,7 +2474,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 
   integer :: localrc
-  integer(C_INT) :: recursive, local_itemcount, local_scalarToArray_forC
+  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC
   logical :: local_scalarToArray
 
   local_scalarToArray = .false.
@@ -2453,11 +2496,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   end if
 
   ! Get the array size from the info store
-  call ESMF_InfoGet(info, key=key, size=local_itemcount, attnestflag=attnestflag, &
+  call ESMF_InfoGet(info, key=key, size=local_itemCount, attnestflag=attnestflag, &
     rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  if (local_itemcount /= SIZE(values)) then
+  if (local_itemCount /= SIZE(values)) then
     if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="values allocation size does not match size in Info storage", ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -2466,13 +2509,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     info%ptr, &
     trim(key)//C_NULL_CHAR, &
     values, &
-    local_itemcount, &
+    local_itemCount, &
     localrc, &
     recursive, &
     local_scalarToArray_forC)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  if (present(itemcount)) itemcount = local_itemcount
+  if (present(itemCount)) itemCount = local_itemCount
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoGetArrayR4
 #undef  ESMF_METHOD
@@ -2482,17 +2525,17 @@ end subroutine ESMF_InfoGetArrayR4
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_InfoGetAlloc()
-subroutine ESMF_InfoGetArrayR4Alloc(info, key, values, keywordEnforcer, itemcount, attnestflag, scalarToArray, rc)
+subroutine ESMF_InfoGetArrayR4Alloc(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
 
 ! !ARGUMENTS:
   type(ESMF_Info), intent(in) :: info
   character(len=*), intent(in) :: key
   real(ESMF_KIND_R4), dimension(:),  allocatable, intent(out) :: values
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  integer, intent(out), optional :: itemcount
+  integer, intent(out), optional :: itemCount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(in), optional :: scalarToArray
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Get a value list from an \texttt{ESMF\_Info} object using a key. If the key
@@ -2519,7 +2562,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       for an overview of the key format.
 !     \item [values]
 !       The output value list associated with the key.
-!     \item [{[itemcount]}]
+!     \item [{[itemCount]}]
 !       The number of items in \textit{values}.
 !     \item [{[attnestflag]}]
 !       Default is \texttt{ESMF\_ATTNEST\_OFF}. Setting to \texttt{ESMF\_ATTNEST\_ON}
@@ -2534,7 +2577,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 
   integer :: localrc
-  integer(C_INT) :: recursive, local_itemcount, local_scalarToArray_forC
+  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC
   logical :: local_scalarToArray
 
   local_scalarToArray = .false.
@@ -2556,23 +2599,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   end if
 
   ! Get the array size from the info store
-  call ESMF_InfoGet(info, key=key, size=local_itemcount, attnestflag=attnestflag, &
+  call ESMF_InfoGet(info, key=key, size=local_itemCount, attnestflag=attnestflag, &
     rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! Allocate the outgoing storage array and call into C to fill the array
-  allocate(values(local_itemcount))
+  allocate(values(local_itemCount))
   call c_info_get_array_R4(&
     info%ptr, &
     trim(key)//C_NULL_CHAR, &
     values, &
-    local_itemcount, &
+    local_itemCount, &
     localrc, &
     recursive, &
     local_scalarToArray_forC)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  if (present(itemcount)) itemcount = local_itemcount
+  if (present(itemCount)) itemCount = local_itemCount
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoGetArrayR4Alloc
 #undef  ESMF_METHOD
@@ -2582,17 +2625,17 @@ end subroutine ESMF_InfoGetArrayR4Alloc
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_InfoGet()
-subroutine ESMF_InfoGetArrayR8(info, key, values, keywordEnforcer, itemcount, attnestflag, scalarToArray, rc)
+subroutine ESMF_InfoGetArrayR8(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
 
 ! !ARGUMENTS:
   type(ESMF_Info), intent(in) :: info
   character(len=*), intent(in) :: key
   real(ESMF_KIND_R8), dimension(:), intent(out) :: values
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  integer, intent(out), optional :: itemcount
+  integer, intent(out), optional :: itemCount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(in), optional :: scalarToArray
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Get a value list from an \texttt{ESMF\_Info} object using a key. If the key
@@ -2619,7 +2662,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       for an overview of the key format.
 !     \item [values]
 !       The output value list associated with the key.
-!     \item [{[itemcount]}]
+!     \item [{[itemCount]}]
 !       The number of items in \textit{values}.
 !     \item [{[attnestflag]}]
 !       Default is \texttt{ESMF\_ATTNEST\_OFF}. Setting to \texttt{ESMF\_ATTNEST\_ON}
@@ -2634,7 +2677,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 
   integer :: localrc
-  integer(C_INT) :: recursive, local_itemcount, local_scalarToArray_forC
+  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC
   logical :: local_scalarToArray
 
   local_scalarToArray = .false.
@@ -2656,11 +2699,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   end if
 
   ! Get the array size from the info store
-  call ESMF_InfoGet(info, key=key, size=local_itemcount, attnestflag=attnestflag, &
+  call ESMF_InfoGet(info, key=key, size=local_itemCount, attnestflag=attnestflag, &
     rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  if (local_itemcount /= SIZE(values)) then
+  if (local_itemCount /= SIZE(values)) then
     if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="values allocation size does not match size in Info storage", ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -2669,13 +2712,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     info%ptr, &
     trim(key)//C_NULL_CHAR, &
     values, &
-    local_itemcount, &
+    local_itemCount, &
     localrc, &
     recursive, &
     local_scalarToArray_forC)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  if (present(itemcount)) itemcount = local_itemcount
+  if (present(itemCount)) itemCount = local_itemCount
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoGetArrayR8
 #undef  ESMF_METHOD
@@ -2685,17 +2728,17 @@ end subroutine ESMF_InfoGetArrayR8
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_InfoGetAlloc()
-subroutine ESMF_InfoGetArrayR8Alloc(info, key, values, keywordEnforcer, itemcount, attnestflag, scalarToArray, rc)
+subroutine ESMF_InfoGetArrayR8Alloc(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
 
 ! !ARGUMENTS:
   type(ESMF_Info), intent(in) :: info
   character(len=*), intent(in) :: key
   real(ESMF_KIND_R8), dimension(:),  allocatable, intent(out) :: values
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  integer, intent(out), optional :: itemcount
+  integer, intent(out), optional :: itemCount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(in), optional :: scalarToArray
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Get a value list from an \texttt{ESMF\_Info} object using a key. If the key
@@ -2722,7 +2765,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       for an overview of the key format.
 !     \item [values]
 !       The output value list associated with the key.
-!     \item [{[itemcount]}]
+!     \item [{[itemCount]}]
 !       The number of items in \textit{values}.
 !     \item [{[attnestflag]}]
 !       Default is \texttt{ESMF\_ATTNEST\_OFF}. Setting to \texttt{ESMF\_ATTNEST\_ON}
@@ -2737,7 +2780,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 
   integer :: localrc
-  integer(C_INT) :: recursive, local_itemcount, local_scalarToArray_forC
+  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC
   logical :: local_scalarToArray
 
   local_scalarToArray = .false.
@@ -2759,23 +2802,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   end if
 
   ! Get the array size from the info store
-  call ESMF_InfoGet(info, key=key, size=local_itemcount, attnestflag=attnestflag, &
+  call ESMF_InfoGet(info, key=key, size=local_itemCount, attnestflag=attnestflag, &
     rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! Allocate the outgoing storage array and call into C to fill the array
-  allocate(values(local_itemcount))
+  allocate(values(local_itemCount))
   call c_info_get_array_R8(&
     info%ptr, &
     trim(key)//C_NULL_CHAR, &
     values, &
-    local_itemcount, &
+    local_itemCount, &
     localrc, &
     recursive, &
     local_scalarToArray_forC)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  if (present(itemcount)) itemcount = local_itemcount
+  if (present(itemCount)) itemCount = local_itemCount
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoGetArrayR8Alloc
 #undef  ESMF_METHOD
@@ -2785,17 +2828,17 @@ end subroutine ESMF_InfoGetArrayR8Alloc
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_InfoGet()
-subroutine ESMF_InfoGetArrayI4(info, key, values, keywordEnforcer, itemcount, attnestflag, scalarToArray, rc)
+subroutine ESMF_InfoGetArrayI4(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
 
 ! !ARGUMENTS:
   type(ESMF_Info), intent(in) :: info
   character(len=*), intent(in) :: key
   integer(ESMF_KIND_I4), dimension(:), intent(out) :: values
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  integer, intent(out), optional :: itemcount
+  integer, intent(out), optional :: itemCount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(in), optional :: scalarToArray
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Get a value list from an \texttt{ESMF\_Info} object using a key. If the key
@@ -2822,7 +2865,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       for an overview of the key format.
 !     \item [values]
 !       The output value list associated with the key.
-!     \item [{[itemcount]}]
+!     \item [{[itemCount]}]
 !       The number of items in \textit{values}.
 !     \item [{[attnestflag]}]
 !       Default is \texttt{ESMF\_ATTNEST\_OFF}. Setting to \texttt{ESMF\_ATTNEST\_ON}
@@ -2837,7 +2880,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 
   integer :: localrc
-  integer(C_INT) :: recursive, local_itemcount, local_scalarToArray_forC
+  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC
   logical :: local_scalarToArray
 
   local_scalarToArray = .false.
@@ -2859,11 +2902,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   end if
 
   ! Get the array size from the info store
-  call ESMF_InfoGet(info, key=key, size=local_itemcount, attnestflag=attnestflag, &
+  call ESMF_InfoGet(info, key=key, size=local_itemCount, attnestflag=attnestflag, &
     rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  if (local_itemcount /= SIZE(values)) then
+  if (local_itemCount /= SIZE(values)) then
     if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="values allocation size does not match size in Info storage", ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -2872,13 +2915,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     info%ptr, &
     trim(key)//C_NULL_CHAR, &
     values, &
-    local_itemcount, &
+    local_itemCount, &
     localrc, &
     recursive, &
     local_scalarToArray_forC)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  if (present(itemcount)) itemcount = local_itemcount
+  if (present(itemCount)) itemCount = local_itemCount
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoGetArrayI4
 #undef  ESMF_METHOD
@@ -2888,17 +2931,17 @@ end subroutine ESMF_InfoGetArrayI4
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_InfoGetAlloc()
-subroutine ESMF_InfoGetArrayI4Alloc(info, key, values, keywordEnforcer, itemcount, attnestflag, scalarToArray, rc)
+subroutine ESMF_InfoGetArrayI4Alloc(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
 
 ! !ARGUMENTS:
   type(ESMF_Info), intent(in) :: info
   character(len=*), intent(in) :: key
   integer(ESMF_KIND_I4), dimension(:),  allocatable, intent(out) :: values
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  integer, intent(out), optional :: itemcount
+  integer, intent(out), optional :: itemCount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(in), optional :: scalarToArray
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Get a value list from an \texttt{ESMF\_Info} object using a key. If the key
@@ -2925,7 +2968,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       for an overview of the key format.
 !     \item [values]
 !       The output value list associated with the key.
-!     \item [{[itemcount]}]
+!     \item [{[itemCount]}]
 !       The number of items in \textit{values}.
 !     \item [{[attnestflag]}]
 !       Default is \texttt{ESMF\_ATTNEST\_OFF}. Setting to \texttt{ESMF\_ATTNEST\_ON}
@@ -2940,7 +2983,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 
   integer :: localrc
-  integer(C_INT) :: recursive, local_itemcount, local_scalarToArray_forC
+  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC
   logical :: local_scalarToArray
 
   local_scalarToArray = .false.
@@ -2962,23 +3005,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   end if
 
   ! Get the array size from the info store
-  call ESMF_InfoGet(info, key=key, size=local_itemcount, attnestflag=attnestflag, &
+  call ESMF_InfoGet(info, key=key, size=local_itemCount, attnestflag=attnestflag, &
     rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! Allocate the outgoing storage array and call into C to fill the array
-  allocate(values(local_itemcount))
+  allocate(values(local_itemCount))
   call c_info_get_array_I4(&
     info%ptr, &
     trim(key)//C_NULL_CHAR, &
     values, &
-    local_itemcount, &
+    local_itemCount, &
     localrc, &
     recursive, &
     local_scalarToArray_forC)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  if (present(itemcount)) itemcount = local_itemcount
+  if (present(itemCount)) itemCount = local_itemCount
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoGetArrayI4Alloc
 #undef  ESMF_METHOD
@@ -2988,17 +3031,17 @@ end subroutine ESMF_InfoGetArrayI4Alloc
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_InfoGet()
-subroutine ESMF_InfoGetArrayI8(info, key, values, keywordEnforcer, itemcount, attnestflag, scalarToArray, rc)
+subroutine ESMF_InfoGetArrayI8(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
 
 ! !ARGUMENTS:
   type(ESMF_Info), intent(in) :: info
   character(len=*), intent(in) :: key
   integer(ESMF_KIND_I8), dimension(:), intent(out) :: values
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  integer, intent(out), optional :: itemcount
+  integer, intent(out), optional :: itemCount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(in), optional :: scalarToArray
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Get a value list from an \texttt{ESMF\_Info} object using a key. If the key
@@ -3025,7 +3068,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       for an overview of the key format.
 !     \item [values]
 !       The output value list associated with the key.
-!     \item [{[itemcount]}]
+!     \item [{[itemCount]}]
 !       The number of items in \textit{values}.
 !     \item [{[attnestflag]}]
 !       Default is \texttt{ESMF\_ATTNEST\_OFF}. Setting to \texttt{ESMF\_ATTNEST\_ON}
@@ -3040,7 +3083,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 
   integer :: localrc
-  integer(C_INT) :: recursive, local_itemcount, local_scalarToArray_forC
+  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC
   logical :: local_scalarToArray
 
   local_scalarToArray = .false.
@@ -3062,11 +3105,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   end if
 
   ! Get the array size from the info store
-  call ESMF_InfoGet(info, key=key, size=local_itemcount, attnestflag=attnestflag, &
+  call ESMF_InfoGet(info, key=key, size=local_itemCount, attnestflag=attnestflag, &
     rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  if (local_itemcount /= SIZE(values)) then
+  if (local_itemCount /= SIZE(values)) then
     if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="values allocation size does not match size in Info storage", ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -3075,13 +3118,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     info%ptr, &
     trim(key)//C_NULL_CHAR, &
     values, &
-    local_itemcount, &
+    local_itemCount, &
     localrc, &
     recursive, &
     local_scalarToArray_forC)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  if (present(itemcount)) itemcount = local_itemcount
+  if (present(itemCount)) itemCount = local_itemCount
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoGetArrayI8
 #undef  ESMF_METHOD
@@ -3091,17 +3134,17 @@ end subroutine ESMF_InfoGetArrayI8
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_InfoGetAlloc()
-subroutine ESMF_InfoGetArrayI8Alloc(info, key, values, keywordEnforcer, itemcount, attnestflag, scalarToArray, rc)
+subroutine ESMF_InfoGetArrayI8Alloc(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
 
 ! !ARGUMENTS:
   type(ESMF_Info), intent(in) :: info
   character(len=*), intent(in) :: key
   integer(ESMF_KIND_I8), dimension(:),  allocatable, intent(out) :: values
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  integer, intent(out), optional :: itemcount
+  integer, intent(out), optional :: itemCount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(in), optional :: scalarToArray
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Get a value list from an \texttt{ESMF\_Info} object using a key. If the key
@@ -3128,7 +3171,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       for an overview of the key format.
 !     \item [values]
 !       The output value list associated with the key.
-!     \item [{[itemcount]}]
+!     \item [{[itemCount]}]
 !       The number of items in \textit{values}.
 !     \item [{[attnestflag]}]
 !       Default is \texttt{ESMF\_ATTNEST\_OFF}. Setting to \texttt{ESMF\_ATTNEST\_ON}
@@ -3143,7 +3186,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 
   integer :: localrc
-  integer(C_INT) :: recursive, local_itemcount, local_scalarToArray_forC
+  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC
   logical :: local_scalarToArray
 
   local_scalarToArray = .false.
@@ -3165,23 +3208,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   end if
 
   ! Get the array size from the info store
-  call ESMF_InfoGet(info, key=key, size=local_itemcount, attnestflag=attnestflag, &
+  call ESMF_InfoGet(info, key=key, size=local_itemCount, attnestflag=attnestflag, &
     rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! Allocate the outgoing storage array and call into C to fill the array
-  allocate(values(local_itemcount))
+  allocate(values(local_itemCount))
   call c_info_get_array_I8(&
     info%ptr, &
     trim(key)//C_NULL_CHAR, &
     values, &
-    local_itemcount, &
+    local_itemCount, &
     localrc, &
     recursive, &
     local_scalarToArray_forC)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  if (present(itemcount)) itemcount = local_itemcount
+  if (present(itemCount)) itemCount = local_itemCount
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoGetArrayI8Alloc
 #undef  ESMF_METHOD
@@ -3191,17 +3234,17 @@ end subroutine ESMF_InfoGetArrayI8Alloc
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_InfoGet()
-subroutine ESMF_InfoGetArrayCH(info, key, values, keywordEnforcer, itemcount, attnestflag, scalarToArray, rc)
+subroutine ESMF_InfoGetArrayCH(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
 
 ! !ARGUMENTS:
   type(ESMF_Info), intent(in) :: info
   character(len=*), intent(in) :: key
   character(len=*), dimension(:), intent(out) :: values
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  integer, intent(out), optional :: itemcount
+  integer, intent(out), optional :: itemCount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(in), optional :: scalarToArray
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Get a value list from an \texttt{ESMF\_Info} object using a key. If the key
@@ -3228,7 +3271,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       for an overview of the key format.
 !     \item [values]
 !       The output value list associated with the key.
-!     \item [{[itemcount]}]
+!     \item [{[itemCount]}]
 !       The number of items in \textit{values}.
 !     \item [{[attnestflag]}]
 !       Default is \texttt{ESMF\_ATTNEST\_OFF}. Setting to \texttt{ESMF\_ATTNEST\_ON}
@@ -3243,7 +3286,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 
   integer :: localrc
-  integer(C_INT) :: recursive, local_itemcount, local_scalarToArray_forC
+  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC
   integer :: ii
   logical :: is_array
   logical :: local_scalarToArray
@@ -3267,7 +3310,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   end if
 
   ! Get the array size from the info store
-  call ESMF_InfoGet(info, key=key, size=local_itemcount, attnestflag=attnestflag, &
+  call ESMF_InfoGet(info, key=key, size=local_itemCount, attnestflag=attnestflag, &
     isArray=is_array, &
     rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -3278,12 +3321,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
-  if (local_itemcount /= SIZE(values)) then
+  if (local_itemCount /= SIZE(values)) then
     if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="values allocation size does not match size in Info storage", ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
   ! Allocate the outgoing storage array and call into C to fill the array
-  do ii=1,local_itemcount
+  do ii=1,local_itemCount
     if (.not. is_array .and. local_scalarToArray) then
       call ESMF_InfoGetCH(info, key, values(ii), attnestflag=attnestflag, rc=localrc)
     else
@@ -3292,7 +3335,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   enddo
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  if (present(itemcount)) itemcount = local_itemcount
+  if (present(itemCount)) itemCount = local_itemCount
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoGetArrayCH
 #undef  ESMF_METHOD
@@ -3302,17 +3345,17 @@ end subroutine ESMF_InfoGetArrayCH
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_InfoGetAlloc()
-subroutine ESMF_InfoGetArrayCHAlloc(info, key, values, keywordEnforcer, itemcount, attnestflag, scalarToArray, rc)
+subroutine ESMF_InfoGetArrayCHAlloc(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
 
 ! !ARGUMENTS:
   type(ESMF_Info), intent(in) :: info
   character(len=*), intent(in) :: key
   character(len=*), dimension(:),  allocatable, intent(out) :: values
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  integer, intent(out), optional :: itemcount
+  integer, intent(out), optional :: itemCount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(in), optional :: scalarToArray
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Get a value list from an \texttt{ESMF\_Info} object using a key. If the key
@@ -3339,7 +3382,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       for an overview of the key format.
 !     \item [values]
 !       The output value list associated with the key.
-!     \item [{[itemcount]}]
+!     \item [{[itemCount]}]
 !       The number of items in \textit{values}.
 !     \item [{[attnestflag]}]
 !       Default is \texttt{ESMF\_ATTNEST\_OFF}. Setting to \texttt{ESMF\_ATTNEST\_ON}
@@ -3354,7 +3397,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 
   integer :: localrc
-  integer(C_INT) :: recursive, local_itemcount, local_scalarToArray_forC
+  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC
   integer :: ii
   logical :: is_array
   logical :: local_scalarToArray
@@ -3378,7 +3421,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   end if
 
   ! Get the array size from the info store
-  call ESMF_InfoGet(info, key=key, size=local_itemcount, attnestflag=attnestflag, &
+  call ESMF_InfoGet(info, key=key, size=local_itemCount, attnestflag=attnestflag, &
     isArray=is_array, &
     rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -3390,8 +3433,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   end if
 
   ! Allocate the outgoing storage array and call into C to fill the array
-  allocate(values(local_itemcount))
-  do ii=1,local_itemcount
+  allocate(values(local_itemCount))
+  do ii=1,local_itemCount
     if (.not. is_array .and. local_scalarToArray) then
       call ESMF_InfoGetCH(info, key, values(ii), attnestflag=attnestflag, rc=localrc)
     else
@@ -3400,7 +3443,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   enddo
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  if (present(itemcount)) itemcount = local_itemcount
+  if (present(itemCount)) itemCount = local_itemCount
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoGetArrayCHAlloc
 #undef  ESMF_METHOD
@@ -3410,17 +3453,17 @@ end subroutine ESMF_InfoGetArrayCHAlloc
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_InfoGet()
-subroutine ESMF_InfoGetArrayLG(info, key, values, keywordEnforcer, itemcount, attnestflag, scalarToArray, rc)
+subroutine ESMF_InfoGetArrayLG(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
 
 ! !ARGUMENTS:
   type(ESMF_Info), intent(in) :: info
   character(len=*), intent(in) :: key
   logical, dimension(:), intent(out) :: values
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  integer, intent(out), optional :: itemcount
+  integer, intent(out), optional :: itemCount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(in), optional :: scalarToArray
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Get a value list from an \texttt{ESMF\_Info} object using a key. If the key
@@ -3447,7 +3490,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       for an overview of the key format.
 !     \item [values]
 !       The output value list associated with the key.
-!     \item [{[itemcount]}]
+!     \item [{[itemCount]}]
 !       The number of items in \textit{values}.
 !     \item [{[attnestflag]}]
 !       Default is \texttt{ESMF\_ATTNEST\_OFF}. Setting to \texttt{ESMF\_ATTNEST\_ON}
@@ -3462,7 +3505,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 
   integer :: localrc
-  integer(C_INT) :: recursive, local_itemcount, local_scalarToArray_forC
+  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC
   integer :: ii
   logical(C_BOOL), dimension(:), allocatable :: local_values
   logical :: local_scalarToArray
@@ -3486,21 +3529,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   end if
 
   ! Get the array size from the info store
-  call ESMF_InfoGet(info, key=key, size=local_itemcount, attnestflag=attnestflag, &
+  call ESMF_InfoGet(info, key=key, size=local_itemCount, attnestflag=attnestflag, &
     rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  if (local_itemcount /= SIZE(values)) then
+  if (local_itemCount /= SIZE(values)) then
     if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="values allocation size does not match size in Info storage", ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
   ! Allocate the outgoing storage array and call into C to fill the array
-  allocate(local_values(local_itemcount))
+  allocate(local_values(local_itemCount))
   call c_info_get_array_LG(&
     info%ptr, &
     trim(key)//C_NULL_CHAR, &
     local_values, &
-    local_itemcount, &
+    local_itemCount, &
     localrc, &
     recursive, &
     local_scalarToArray_forC)
@@ -3511,7 +3554,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   enddo
   deallocate(local_values)
 
-  if (present(itemcount)) itemcount = local_itemcount
+  if (present(itemCount)) itemCount = local_itemCount
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoGetArrayLG
 #undef  ESMF_METHOD
@@ -3521,17 +3564,17 @@ end subroutine ESMF_InfoGetArrayLG
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_InfoGetAlloc()
-subroutine ESMF_InfoGetArrayLGAlloc(info, key, values, keywordEnforcer, itemcount, attnestflag, scalarToArray, rc)
+subroutine ESMF_InfoGetArrayLGAlloc(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
 
 ! !ARGUMENTS:
   type(ESMF_Info), intent(in) :: info
   character(len=*), intent(in) :: key
   logical, dimension(:),  allocatable, intent(out) :: values
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  integer, intent(out), optional :: itemcount
+  integer, intent(out), optional :: itemCount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(in), optional :: scalarToArray
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Get a value list from an \texttt{ESMF\_Info} object using a key. If the key
@@ -3558,7 +3601,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       for an overview of the key format.
 !     \item [values]
 !       The output value list associated with the key.
-!     \item [{[itemcount]}]
+!     \item [{[itemCount]}]
 !       The number of items in \textit{values}.
 !     \item [{[attnestflag]}]
 !       Default is \texttt{ESMF\_ATTNEST\_OFF}. Setting to \texttt{ESMF\_ATTNEST\_ON}
@@ -3573,7 +3616,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 
   integer :: localrc
-  integer(C_INT) :: recursive, local_itemcount, local_scalarToArray_forC
+  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC
   integer :: ii
   logical(C_BOOL), dimension(:), allocatable :: local_values
   logical :: local_scalarToArray
@@ -3597,18 +3640,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   end if
 
   ! Get the array size from the info store
-  call ESMF_InfoGet(info, key=key, size=local_itemcount, attnestflag=attnestflag, &
+  call ESMF_InfoGet(info, key=key, size=local_itemCount, attnestflag=attnestflag, &
     rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! Allocate the outgoing storage array and call into C to fill the array
-  allocate(values(local_itemcount))
-  allocate(local_values(local_itemcount))
+  allocate(values(local_itemCount))
+  allocate(local_values(local_itemCount))
   call c_info_get_array_LG(&
     info%ptr, &
     trim(key)//C_NULL_CHAR, &
     local_values, &
-    local_itemcount, &
+    local_itemCount, &
     localrc, &
     recursive, &
     local_scalarToArray_forC)
@@ -3619,7 +3662,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   enddo
   deallocate(local_values)
 
-  if (present(itemcount)) itemcount = local_itemcount
+  if (present(itemCount)) itemCount = local_itemCount
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoGetArrayLGAlloc
 !------------------------------------------------------------------------------
@@ -3645,7 +3688,7 @@ end subroutine ESMF_InfoGetArrayLGAlloc
 !  logical, intent(out), optional :: isPresent
 !  logical, intent(out), optional :: isStructured
 !  logical, intent(out), optional :: isNull
-!  integer, intent(inout), optional :: rc
+!  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Inquire an \texttt{ESMF\_Info} object for metadata.
@@ -3738,7 +3781,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   logical, intent(out), optional :: isStructured
   logical, intent(out), optional :: isNull
   logical, intent(in), optional :: attrCompliance
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, esmc_typekind, local_size
   type(ESMF_Info) :: inq, inq2
@@ -3873,11 +3916,11 @@ end subroutine ESMF_InfoInquire
 ! !IROUTINE: ESMF_InfoGetHandle - Get an Info handle from an ESMF object
 !
 ! !INTERFACE:
-!function ESMF_InfoGetHandle(target, keywordEnforcer, rc) result(info)
+!function ESMF_InfoGetHandle(host, keywordEnforcer, rc) result(info)
 ! !ARGUMENTS:
-!  type(ESMF_*), intent(inout) :: target
+!  type(ESMF_*), intent(inout) :: host
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!  integer, intent(inout), optional :: rc
+!  integer, intent(out), optional :: rc
 ! !RETURN VALUE:
 !  type(ESMF_Info) :: info
 !
@@ -3887,7 +3930,7 @@ end subroutine ESMF_InfoInquire
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [target]
+!     \item [host]
 !       Target ESMF object. Overloaded for:
 !       \begin{itemize}
 !         \item \texttt{ESMF\_Array}
@@ -3901,6 +3944,7 @@ end subroutine ESMF_InfoInquire
 !         \item \texttt{ESMF\_Grid}
 !         \item \texttt{ESMF\_State}
 !         \item \texttt{ESMF\_LocStream}
+!         \item \texttt{ESMF\_Mesh}
 !       \end{itemize}
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -3962,45 +4006,6 @@ function ESMF_InfoPointerGetHandle(ptr) result(info)
 
 end function ESMF_InfoPointerGetHandle
 
-! -----------------------------------------------------------------------------
-
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoCopy()"
-!BOP
-! !IROUTINE: ESMF_InfoCopy - Copy an Info object
-!
-! !INTERFACE:
-function ESMF_InfoCopy(info, keywordEnforcer, rc) result(info_copy)
-! !ARGUMENTS:
-  type(ESMF_Info), intent(in) :: info
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  integer, intent(inout), optional :: rc
-! !RETURN VALUE:
-  type(ESMF_Info) :: info_copy
-!
-! !DESCRIPTION:
-!     Copy an \texttt{ESMF\_Info} object.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-!       Target \texttt{ESMF\_Info} object.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOP
-
-  integer :: localrc
-
-  localrc = ESMF_FAILURE
-  if (present(rc)) rc = ESMF_FAILURE
-
-  info_copy%ptr = c_info_copy(info%ptr, localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (present(rc)) rc = ESMF_SUCCESS
-end function ESMF_InfoCopy
-
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
@@ -4015,7 +4020,7 @@ function ESMF_InfoDump(info, keywordEnforcer, key, indent, rc) result(output)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   character(*), intent(in), optional :: key
   integer, intent(in), optional :: indent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 ! RESULT:
   character(:), allocatable :: output
 !
@@ -4030,7 +4035,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
 !       for an overview of the key format.
 !     \item [{[indent]}]
-!       Default is 0. Specify a "pretty print" indentation for the JSON output string.
+!       Default is 0. Specifying an indentation greater than 0 will result in a
+!       "pretty print" for JSON output string (string includes new line breaks).
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -4078,7 +4084,7 @@ subroutine ESMF_InfoRemove(info, keyParent, keywordEnforcer, keyChild, attnestfl
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   character(len=*), intent(in), optional :: keyChild
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Remove a key-value pair from an \texttt{ESMF\_Info} object.
@@ -4142,7 +4148,7 @@ function ESMF_InfoIsPresent(info, key, keywordEnforcer, attnestflag, isPointer, 
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(in), optional :: isPointer
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 ! !RETURN VALUE:
   logical :: is_present
 !
@@ -4222,7 +4228,7 @@ function ESMF_InfoIsSet(info, key, keywordEnforcer, rc) result(is_set)
   type(ESMF_Info), intent(in) :: info
   character(len=*), intent(in) :: key
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 ! !RETURN VALUE:
   logical :: is_set
 !
@@ -4273,7 +4279,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   character(*), intent(in), optional :: preString
   character(*), intent(out), optional :: unit
   integer, intent(in), optional :: indent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Print \texttt{ESMF\_Info} contents in JSON format.
@@ -4330,12 +4336,13 @@ end subroutine ESMF_InfoPrint
 ! !IROUTINE: ESMF_InfoUpdate - Update the contents of an Info object
 !
 ! !INTERFACE:
-subroutine ESMF_InfoUpdate(lhs, rhs, keywordEnforcer, rc)
+subroutine ESMF_InfoUpdate(lhs, rhs, keywordEnforcer, attr_compliance, rc)
 ! !ARGUMENTS:
   type(ESMF_Info), intent(inout) :: lhs
   type(ESMF_Info), intent(in) :: rhs
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  integer, intent(inout), optional :: rc
+  logical, intent(in), optional :: attr_compliance
+  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Update the contents of \textit{lhs} using the contents of \textit{rhs}. The
@@ -4356,11 +4363,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 
   integer :: localrc
+  integer :: attr_compliance_int
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_FAILURE
+  attr_compliance_int = 0  ! .false.
+  if (present(attr_compliance)) then
+    if (attr_compliance) then
+      attr_compliance_int = 1  ! .true.
+    end if
+  end if
 
-  call c_info_update(lhs%ptr, rhs%ptr, localrc)
+  call c_info_update(lhs%ptr, rhs%ptr, attr_compliance_int, localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   if (present(rc)) rc = ESMF_SUCCESS
@@ -4378,7 +4392,7 @@ function ESMF_InfoReadJSON(filename, keywordEnforcer, rc) result(info_r)
 ! !ARGUMENTS:
   character(len=*), intent(in) :: filename
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 ! !RETURN VALUE:
   type(ESMF_Info) :: info_r
 !
@@ -4421,7 +4435,7 @@ subroutine ESMF_InfoWriteJSON(info, filename, keywordEnforcer, rc)
   type(ESMF_Info), intent(in) :: info
   character(len=*), intent(in) :: filename
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Write \texttt{ESMF\_Info} contents to file using the JSON format.
@@ -4462,7 +4476,7 @@ subroutine ESMF_InfoBroadcast(info, rootPet, keywordEnforcer, rc)
   type(ESMF_Info), intent(inout) :: info
   integer, intent(in) :: rootPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Broadcast an \texttt{ESMF\_Info} object collectively across the current VM.
@@ -4504,28 +4518,30 @@ end subroutine ESMF_InfoBroadcast
 ! \label{esmf_infosync}
 !
 ! !INTERFACE:
-!subroutine ESMF_InfoSync(target, rootPet, vm, keywordEnforcer, markClean, &
+!subroutine ESMF_InfoSync(host, rootPet, vm, keywordEnforcer, markClean, &
 !   rc)
 ! !ARGUMENTS:
-!  type(ESMF_*), intent(inout) :: target
+!  type(ESMF_*), intent(inout) :: host
 !  integer, intent(in) :: rootPet
 !  type(ESMF_VM), intent(in) :: vm
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !  logical, intent(in), optional :: markClean
-!  integer, intent(inout), optional :: rc
+!  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Synchronize \texttt{ESMF\_Info} contents collectively across the current VM.
 !     Contents on the \textit{rootPet} are set as the contents on matching objects
 !     sharing the VM. An attempt is made to optimize by only communicating updated
-!     contents (i.e. something set or modified).
+!     contents (i.e. something set or modified). This subroutine will traverse
+!     the ESMF object hierarchy associated with \texttt{host} (i.e. Arrays in
+!     an ArrayBundle, Fields in a FieldBundle, etc.).
 !
 !     Users interested in broadcasting only the \texttt{ESMF\_Info} object should
 !     consult the \texttt{ESMF\_InfoBroadcast} documentation \ref{esmf_infobroadcast}.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [target]
+!     \item [host]
 !       Target ESMF object. Overloaded for:
 !       \begin{itemize}
 !         \item \texttt{ESMF\_State}

@@ -261,7 +261,7 @@
 ! Copying the \texttt{ESMF\_Info} object requires the copy to be destroyed/deallocated.
 !EOE
 !BOC
-    infoCopy = ESMF_InfoCopy(info, rc=rc)
+    infoCopy = ESMF_InfoCreate(info, rc=rc)
 !EOC
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE

@@ -123,7 +123,9 @@ void ESMC_InfoCopyForAttributeReference(const long int &src_base_address, const 
   try {
     ESMC_Base *src_base = baseAddressToBase(src_base_address);
     ESMC_Base *dst_base = baseAddressToBase(dst_base_address);
-    dst_base->ESMC_BaseDeleteInfo();
+    // This is a memory leak but required for some applications. There needs to
+    // be a way to track referencers and delete when those are finished.
+//    dst_base->ESMC_BaseDeleteInfo();
     dst_base->ESMC_BaseSetInfo(src_base->ESMC_BaseGetInfo());
     esmc_rc = ESMF_SUCCESS;
   }
@@ -323,12 +325,18 @@ void ESMC_InfoIsSet(ESMCI::Info *info, char *key, int &isSet, int &esmc_rc) {
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoUpdate()"
-void ESMC_InfoUpdate(ESMCI::Info *lhs, ESMCI::Info *rhs, int &esmc_rc) {
-  ESMC_CHECK_INIT(lhs, esmc_rc)
-  ESMC_CHECK_INIT(rhs, esmc_rc)
+void ESMC_InfoUpdate(ESMCI::Info *to_update, ESMCI::Info *new_contents,
+    int &attr_compliance_int, int &esmc_rc) {
+  ESMC_CHECK_INIT(to_update, esmc_rc)
+  ESMC_CHECK_INIT(new_contents, esmc_rc)
   esmc_rc = ESMF_FAILURE;
+  bool attr_compliance = attr_compliance_int == 1;
   try {
-    lhs->update(*rhs);
+    if (attr_compliance) {
+      to_update->update_for_attribute(*new_contents);
+    } else {
+      to_update->update(*new_contents);
+    }
     esmc_rc = ESMF_SUCCESS;
   }
   ESMC_CATCH_ISOC

@@ -41,8 +41,11 @@ program ESMF_InfoDescribeUTest
   type(ESMF_VM) :: vm
 
   type(ESMF_InfoDescribe) :: eidesc_create_destroy, eidesc_create_info, eidesc_create_info2, &
-                        eidesc_create_background, eidesc_double_init
+    eidesc_create_background, eidesc_double_init, eidesc_mesh
   logical :: isPresent
+  type(ESMF_Mesh) :: mesh
+  type(ESMF_Info) :: infoh, infoh2
+  character(:), allocatable :: actual
 
   !----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)  ! calls ESMF_Initialize() internally
@@ -110,6 +113,39 @@ program ESMF_InfoDescribeUTest
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call eidesc_create_info2%Destroy(rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  
+  !----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Mesh is enabled"
+  write(failMsg, *) "Did not succeed"
+  rc = ESMF_FAILURE
+
+  call eidesc_mesh%Initialize(createInfo=.true., addBaseAddress=.true., rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  
+  mesh = ESMF_MeshEmptyCreate(rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  infoh = ESMF_InfoGetHandle(mesh, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  
+  call ESMF_InfoSet(infoh, "special", "mesh attribute", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  
+  call eidesc_mesh%Update(mesh, "", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  
+  infoh2 = eidesc_mesh%GetInfo(mesh, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  
+  call ESMF_InfoGetCharAlloc(infoh2, "special", actual, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_Test((eidesc_mesh%curr_base_is_valid .and. actual=="mesh attribute"), &
+    name, failMsg, result, ESMF_SRCLINE)
+
+  call eidesc_mesh%Destroy(rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !------------------------------------------------------------------------------

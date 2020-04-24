@@ -63,7 +63,7 @@ call ESMF_InfoGet(info, "aKey", aKeyValue, rc=rc)
 
 \subsection{Key Format Overview}
 \label{info_key_format}
-Keys in the \texttt{ESMF\_Info} class use the JSON Pointer syntax \cite{json_for_modern_cpp_json_pointer}. A forward slash is prepended to string keys if it does not exist. Hence, \texttt{"aKey"} and \texttt{"/aKey"} are equivalent. Note the indexing aspect of the JSON Pointer syntax is not supported.
+A key in the \texttt{ESMF\_Info} interface provides the location of a value to retrieve from the key-value storage. Keys in the \texttt{ESMF\_Info} class use the JSON Pointer syntax \cite{json_for_modern_cpp_json_pointer}. A forward slash is prepended to string keys if it does not exist. Hence, \texttt{"aKey"} and \texttt{"/aKey"} are equivalent. Note the indexing aspect of the JSON Pointer syntax is not supported.
 
 Every ”key” argument in the \texttt{ESMF\_Info} class uses pathing following the JSON Pointer syntax [6]. A forward slash is prepended to string keys if it does not exist. Hence, "aKey" and "/aKey" are equivalent. Note the indexing aspect of the JSON Pointer syntax is not supported (i.e. “/my\_list~1”).
 

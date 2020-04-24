@@ -79,8 +79,8 @@ contains !=====================================================================
 ! Note: Documentation stub located in ESMF_InfoMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "{{ method_name }}()"
-subroutine {{ method_name }}(target, rootPet, vm, keywordEnforcer, markClean, rc)
-  type(ESMF_{{ et }}), intent(inout) :: target
+subroutine {{ method_name }}(host, rootPet, vm, keywordEnforcer, markClean, rc)
+  type(ESMF_{{ et }}), intent(inout) :: host
   integer, intent(in) :: rootPet
   type(ESMF_VM), intent(in) :: vm
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -104,7 +104,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   call eidesc%Initialize(addBaseAddress=.true., addObjectInfo=.false., rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  call eidesc%Update(target, "", rc=localrc)
+  call eidesc%Update(host, "", rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   call c_info_base_sync(eidesc%info%ptr, rootPet, eptr%ptr, local_markClean, localrc)
@@ -125,8 +125,8 @@ end subroutine {{ method_name }}
 ! Note: Documentation stub located in ESMF_InfoMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoGetHandle{{ esmf_type }}()"
-function ESMF_InfoGetHandle{{ esmf_type }}(target, keywordEnforcer, rc) result(info)
-  type(ESMF_{{ esmf_type }}), intent(in) :: target
+function ESMF_InfoGetHandle{{ esmf_type }}(host, keywordEnforcer, rc) result(info)
+  type(ESMF_{{ esmf_type }}), intent(in) :: host
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(inout), optional :: rc
   type(ESMF_Info) :: info
@@ -136,7 +136,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-  info = eidesc%GetInfo(target, rc=localrc)
+  info = eidesc%GetInfo(host, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   if (present(rc)) rc = ESMF_SUCCESS

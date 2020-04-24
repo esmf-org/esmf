@@ -15,13 +15,13 @@
 !==============================================================================
 
 !BOE
-! \subsubsection{Get Handle}
+! \subsubsection{Retrieve an Info Handle}
 ! \label{get_info_handle_from_esmf_object}
 ! This example demonstrates how to retrieve an \texttt{ESMF\_Info} object handle
 ! from an ESMF object. \texttt{ESMF\_Info} handles are a view into the object's
-! \texttt{ESMF\_Info} storage and should not be created/destroyed as the \texttt{ESMF\_Info}'s
-! lifetime is determined by its host object's lifetime. Destroying the host object
-! will leave a handle in an undefined state.
+! \texttt{ESMF\_Info} storage and should \textbf{\textit{not}} be created/destroyed
+! as the \texttt{ESMF\_Info}'s lifetime is determined by its host object's lifetime.
+! Destroying the host object will leave a handle in an undefined state.
 !EOE
 
     program ESMF_InfoGetHandleEx
@@ -45,8 +45,7 @@
     type(ESMF_DistGrid) :: distgrid
     type(ESMF_Array) :: array
     type(ESMF_Info) :: infoh
-    real(ESMF_KIND_R8), dimension(10,10), target :: farray
-    real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)
+    real(ESMF_KIND_R8), dimension(10,10) :: farray
     integer :: rc
 !EOC
     type(ESMF_VM) :: vm
@@ -81,9 +80,7 @@
 !EOC
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
-    nullify(farrayPtr)
-    farrayPtr => farray
-    array = ESMF_ArrayCreate(distgrid, farrayPtr, rc=rc)
+    array = ESMF_ArrayCreate(distgrid, farray, indexflag=ESMF_INDEX_DELOCAL, rc=rc)
 !EOC
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE

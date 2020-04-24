@@ -1182,6 +1182,37 @@ void test_isNull(int& rc, char failMsg[]) {
   rc = ESMF_SUCCESS;
 };
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "test_update_for_attribute()"
+void test_update_for_attribute(int& rc, char failMsg[]) {
+  rc = ESMF_FAILURE;
+
+  ESMCI::Info to_update;
+  ESMCI::Info new_contents;
+
+  try {
+    to_update.set("/NUOPC/Instance/One", json(44), false);
+
+    new_contents.set("/NUOPC/Instance/One", json(66), false);
+    new_contents.set("/NUOPC/Instance/Two", json(55), false);
+    new_contents.set("/ESMF/General/Three", json(987), false);
+
+    to_update.update_for_attribute(new_contents);
+    if (!to_update.get<int>("/NUOPC/Instance/One")==66) {
+      return finalizeFailure(rc, failMsg, "wrong value 66");
+    }
+    if (!to_update.get<int>("/NUOPC/Instance/Two")==55) {
+      return finalizeFailure(rc, failMsg, "wrong value 55");
+    }
+    if (!to_update.get<int>("/ESMF/General/Three")==987) {
+      return finalizeFailure(rc, failMsg, "wrong value 987");
+    }
+  }
+  ESMC_CATCH_ERRPASSTHRU
+
+  rc = ESMF_SUCCESS;
+};
+
 int main(void) {
 
   char name[80];
@@ -1353,6 +1384,13 @@ int main(void) {
   //NEX_UTest
   strcpy(name, "test_isNull");
   test_isNull(rc, failMsg);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //---------------------------------------------------------------------------
+
+  //---------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "test_update_for_attribute");
+  test_update_for_attribute(rc, failMsg);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //---------------------------------------------------------------------------
 

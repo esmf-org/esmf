@@ -46,6 +46,7 @@ use ESMF_FieldBundleMod
 use ESMF_GridMod
 use ESMF_StateMod
 use ESMF_LocStreamMod
+use ESMF_MeshMod
 
 implicit none
 
@@ -105,6 +106,7 @@ interface ESMF_AttributeAdd
   module procedure ESMF_AttributeAddAttPackStdGrid
   module procedure ESMF_AttributeAddAttPackStdState
   module procedure ESMF_AttributeAddAttPackStdLocStream
+  module procedure ESMF_AttributeAddAttPackStdMesh
 end interface
 
 interface ESMF_AttributeSet
@@ -240,6 +242,18 @@ interface ESMF_AttributeSet
   module procedure ESMF_AttributeSetAttPackLocStreamCHList
   module procedure ESMF_AttributeSetAttPackLocStreamLG
   module procedure ESMF_AttributeSetAttPackLocStreamLGList
+  module procedure ESMF_AttributeSetAttPackMeshR4
+  module procedure ESMF_AttributeSetAttPackMeshR4List
+  module procedure ESMF_AttributeSetAttPackMeshR8
+  module procedure ESMF_AttributeSetAttPackMeshR8List
+  module procedure ESMF_AttributeSetAttPackMeshI4
+  module procedure ESMF_AttributeSetAttPackMeshI4List
+  module procedure ESMF_AttributeSetAttPackMeshI8
+  module procedure ESMF_AttributeSetAttPackMeshI8List
+  module procedure ESMF_AttributeSetAttPackMeshCH
+  module procedure ESMF_AttributeSetAttPackMeshCHList
+  module procedure ESMF_AttributeSetAttPackMeshLG
+  module procedure ESMF_AttributeSetAttPackMeshLGList
   module procedure ESMF_AttributeSetObjArrayR4
   module procedure ESMF_AttributeSetObjArrayR4List
   module procedure ESMF_AttributeSetObjArrayR8
@@ -372,6 +386,18 @@ interface ESMF_AttributeSet
   module procedure ESMF_AttributeSetObjLocStreamCHList
   module procedure ESMF_AttributeSetObjLocStreamLG
   module procedure ESMF_AttributeSetObjLocStreamLGList
+  module procedure ESMF_AttributeSetObjMeshR4
+  module procedure ESMF_AttributeSetObjMeshR4List
+  module procedure ESMF_AttributeSetObjMeshR8
+  module procedure ESMF_AttributeSetObjMeshR8List
+  module procedure ESMF_AttributeSetObjMeshI4
+  module procedure ESMF_AttributeSetObjMeshI4List
+  module procedure ESMF_AttributeSetObjMeshI8
+  module procedure ESMF_AttributeSetObjMeshI8List
+  module procedure ESMF_AttributeSetObjMeshCH
+  module procedure ESMF_AttributeSetObjMeshCHList
+  module procedure ESMF_AttributeSetObjMeshLG
+  module procedure ESMF_AttributeSetObjMeshLGList
 end interface
 
 interface ESMF_AttributeGet
@@ -507,6 +533,18 @@ interface ESMF_AttributeGet
   module procedure ESMF_AttributeGetAttPackLocStreamCHList
   module procedure ESMF_AttributeGetAttPackLocStreamLG
   module procedure ESMF_AttributeGetAttPackLocStreamLGList
+  module procedure ESMF_AttributeGetAttPackMeshR4
+  module procedure ESMF_AttributeGetAttPackMeshR4List
+  module procedure ESMF_AttributeGetAttPackMeshR8
+  module procedure ESMF_AttributeGetAttPackMeshR8List
+  module procedure ESMF_AttributeGetAttPackMeshI4
+  module procedure ESMF_AttributeGetAttPackMeshI4List
+  module procedure ESMF_AttributeGetAttPackMeshI8
+  module procedure ESMF_AttributeGetAttPackMeshI8List
+  module procedure ESMF_AttributeGetAttPackMeshCH
+  module procedure ESMF_AttributeGetAttPackMeshCHList
+  module procedure ESMF_AttributeGetAttPackMeshLG
+  module procedure ESMF_AttributeGetAttPackMeshLGList
   module procedure ESMF_AttributeGetObjArrayR4
   module procedure ESMF_AttributeGetObjArrayR4List
   module procedure ESMF_AttributeGetObjArrayR8
@@ -639,6 +677,18 @@ interface ESMF_AttributeGet
   module procedure ESMF_AttributeGetObjLocStreamCHList
   module procedure ESMF_AttributeGetObjLocStreamLG
   module procedure ESMF_AttributeGetObjLocStreamLGList
+  module procedure ESMF_AttributeGetObjMeshR4
+  module procedure ESMF_AttributeGetObjMeshR4List
+  module procedure ESMF_AttributeGetObjMeshR8
+  module procedure ESMF_AttributeGetObjMeshR8List
+  module procedure ESMF_AttributeGetObjMeshI4
+  module procedure ESMF_AttributeGetObjMeshI4List
+  module procedure ESMF_AttributeGetObjMeshI8
+  module procedure ESMF_AttributeGetObjMeshI8List
+  module procedure ESMF_AttributeGetObjMeshCH
+  module procedure ESMF_AttributeGetObjMeshCHList
+  module procedure ESMF_AttributeGetObjMeshLG
+  module procedure ESMF_AttributeGetObjMeshLGList
   module procedure ESMF_AttributeGetCountArray
   module procedure ESMF_AttributeGetCountArrayBundle
   module procedure ESMF_AttributeGetCountCplComp
@@ -650,6 +700,7 @@ interface ESMF_AttributeGet
   module procedure ESMF_AttributeGetCountGrid
   module procedure ESMF_AttributeGetCountState
   module procedure ESMF_AttributeGetCountLocStream
+  module procedure ESMF_AttributeGetCountMesh
   module procedure ESMF_AttributeGetCountAttPackArray
   module procedure ESMF_AttributeGetCountAttPackArrayBundle
   module procedure ESMF_AttributeGetCountAttPackCplComp
@@ -661,6 +712,7 @@ interface ESMF_AttributeGet
   module procedure ESMF_AttributeGetCountAttPackGrid
   module procedure ESMF_AttributeGetCountAttPackState
   module procedure ESMF_AttributeGetCountAttPackLocStream
+  module procedure ESMF_AttributeGetCountAttPackMesh
   module procedure ESMF_AttributeGetInfoByNamAPArray
   module procedure ESMF_AttributeGetInfoByNamAPArrayBundle
   module procedure ESMF_AttributeGetInfoByNamAPCplComp
@@ -672,6 +724,7 @@ interface ESMF_AttributeGet
   module procedure ESMF_AttributeGetInfoByNamAPGrid
   module procedure ESMF_AttributeGetInfoByNamAPState
   module procedure ESMF_AttributeGetInfoByNamAPLocStream
+  module procedure ESMF_AttributeGetInfoByNamAPMesh
   module procedure ESMF_AttributeGetInfoByNamArray
   module procedure ESMF_AttributeGetInfoByNamArrayBundle
   module procedure ESMF_AttributeGetInfoByNamCplComp
@@ -683,6 +736,7 @@ interface ESMF_AttributeGet
   module procedure ESMF_AttributeGetInfoByNamGrid
   module procedure ESMF_AttributeGetInfoByNamState
   module procedure ESMF_AttributeGetInfoByNamLocStream
+  module procedure ESMF_AttributeGetInfoByNamMesh
   module procedure ESMF_AttributeGetInfoByNumArray
   module procedure ESMF_AttributeGetInfoByNumArrayBundle
   module procedure ESMF_AttributeGetInfoByNumCplComp
@@ -694,6 +748,7 @@ interface ESMF_AttributeGet
   module procedure ESMF_AttributeGetInfoByNumGrid
   module procedure ESMF_AttributeGetInfoByNumState
   module procedure ESMF_AttributeGetInfoByNumLocStream
+  module procedure ESMF_AttributeGetInfoByNumMesh
 end interface
 
 interface ESMF_AttributeGetAttPack
@@ -708,6 +763,7 @@ interface ESMF_AttributeGetAttPack
   module procedure ESMF_AttributeGetAttPackGrid
   module procedure ESMF_AttributeGetAttPackState
   module procedure ESMF_AttributeGetAttPackLocStream
+  module procedure ESMF_AttributeGetAttPackMesh
 end interface
 
 interface ESMF_AttributeRemove
@@ -722,6 +778,7 @@ interface ESMF_AttributeRemove
   module procedure ESMF_AttributeRemoveAttPackGrid
   module procedure ESMF_AttributeRemoveAttPackState
   module procedure ESMF_AttributeRemoveAttPackLocStream
+  module procedure ESMF_AttributeRemoveAttPackMesh
 end interface
 
 interface ESMF_AttributeCopy
@@ -736,6 +793,7 @@ interface ESMF_AttributeCopy
   module procedure ESMF_AttributeCopyGridToGrid
   module procedure ESMF_AttributeCopyStateToState
   module procedure ESMF_AttributeCopyLocStreamToLocStream
+  module procedure ESMF_AttributeCopyMeshToMesh
 end interface
 
 interface ESMF_AttributeUpdate
@@ -759,6 +817,7 @@ interface ESMF_AttributeRead
   module procedure ESMF_AttributeReadGrid
   module procedure ESMF_AttributeReadState
   module procedure ESMF_AttributeReadLocStream
+  module procedure ESMF_AttributeReadMesh
 end interface
 
 interface ESMF_AttributeWrite
@@ -773,6 +832,7 @@ interface ESMF_AttributeWrite
   module procedure ESMF_AttributeWriteGrid
   module procedure ESMF_AttributeWriteState
   module procedure ESMF_AttributeWriteLocStream
+  module procedure ESMF_AttributeWriteMesh
 end interface
 
 !------------------------------------------------------------------------------
@@ -819,6 +879,7 @@ contains  !====================================================================
 !     \item \texttt{ESMF\_Grid}
 !     \item \texttt{ESMF\_State}
 !     \item \texttt{ESMF\_LocStream}
+!     \item \texttt{ESMF\_Mesh}
 !     \end{description}
 !
 !     The arguments are:
@@ -884,6 +945,7 @@ contains  !====================================================================
 !     \item \texttt{ESMF\_Grid}
 !     \item \texttt{ESMF\_State}
 !     \item \texttt{ESMF\_LocStream}
+!     \item \texttt{ESMF\_Mesh}
 !     \end{description}
 !
 !     The arguments are:
@@ -941,6 +1003,7 @@ contains  !====================================================================
 !     \item \texttt{ESMF\_Grid}
 !     \item \texttt{ESMF\_State}
 !     \item \texttt{ESMF\_LocStream}
+!     \item \texttt{ESMF\_Mesh}
 !     \end{description}
 !
 !     \textit{NOTE: Copies between different ESMF object types are not possible.}
@@ -997,6 +1060,7 @@ contains  !====================================================================
 !     \item \texttt{ESMF\_Grid}
 !     \item \texttt{ESMF\_State}
 !     \item \texttt{ESMF\_LocStream}
+!     \item \texttt{ESMF\_Mesh}
 !     \end{description}
 !
 !     Supported types for <value> and <defaultvalue> are:
@@ -1073,6 +1137,7 @@ contains  !====================================================================
 !     \item \texttt{ESMF\_Grid}
 !     \item \texttt{ESMF\_State}
 !     \item \texttt{ESMF\_LocStream}
+!     \item \texttt{ESMF\_Mesh}
 !     \end{description}
 !
 !     Supported types for <valueList> and <defaultvalueList> are:
@@ -1155,6 +1220,7 @@ contains  !====================================================================
 !     \item \texttt{ESMF\_Grid}
 !     \item \texttt{ESMF\_State}
 !     \item \texttt{ESMF\_LocStream}
+!     \item \texttt{ESMF\_Mesh}
 !     \end{description}
 !
 !     Supported types for <value> and <defaultvalue> are:
@@ -1239,6 +1305,7 @@ contains  !====================================================================
 !     \item \texttt{ESMF\_Grid}
 !     \item \texttt{ESMF\_State}
 !     \item \texttt{ESMF\_LocStream}
+!     \item \texttt{ESMF\_Mesh}
 !     \end{description}
 !
 !     Supported types for <valueList> and <defaultvalueList> are:
@@ -1313,6 +1380,7 @@ contains  !====================================================================
 !     \item \texttt{ESMF\_Grid}
 !     \item \texttt{ESMF\_State}
 !     \item \texttt{ESMF\_LocStream}
+!     \item \texttt{ESMF\_Mesh}
 !     \end{description}
 !
 !     The arguments are:
@@ -1379,6 +1447,7 @@ contains  !====================================================================
 !     \item \texttt{ESMF\_Grid}
 !     \item \texttt{ESMF\_State}
 !     \item \texttt{ESMF\_LocStream}
+!     \item \texttt{ESMF\_Mesh}
 !     \end{description}
 !
 !     The arguments are:
@@ -1443,6 +1512,7 @@ contains  !====================================================================
 !     \item \texttt{ESMF\_Grid}
 !     \item \texttt{ESMF\_State}
 !     \item \texttt{ESMF\_LocStream}
+!     \item \texttt{ESMF\_Mesh}
 !     \end{description}
 !
 !     The arguments are:
@@ -1515,6 +1585,7 @@ contains  !====================================================================
 !     \item \texttt{ESMF\_Grid}
 !     \item \texttt{ESMF\_State}
 !     \item \texttt{ESMF\_LocStream}
+!     \item \texttt{ESMF\_Mesh}
 !     \end{description}
 !
 !     The arguments are:
@@ -1583,6 +1654,7 @@ contains  !====================================================================
 !     \item \texttt{ESMF\_Grid}
 !     \item \texttt{ESMF\_State}
 !     \item \texttt{ESMF\_LocStream}
+!     \item \texttt{ESMF\_Mesh}
 !     \end{description}
 !
 !     The arguments are:
@@ -1659,6 +1731,7 @@ contains  !====================================================================
 !     \item \texttt{ESMF\_Grid}
 !     \item \texttt{ESMF\_State}
 !     \item \texttt{ESMF\_LocStream}
+!     \item \texttt{ESMF\_Mesh}
 !     \end{description}
 !
 !     The arguments are:
@@ -1732,6 +1805,7 @@ contains  !====================================================================
 !     \item \texttt{ESMF\_Grid}
 !     \item \texttt{ESMF\_State}
 !     \item \texttt{ESMF\_LocStream}
+!     \item \texttt{ESMF\_Mesh}
 !     \end{description}
 !
 !     The arguments are:
@@ -1792,6 +1866,7 @@ contains  !====================================================================
 !     \item \texttt{ESMF\_Grid}
 !     \item \texttt{ESMF\_State}
 !     \item \texttt{ESMF\_LocStream}
+!     \item \texttt{ESMF\_Mesh}
 !     \end{description}
 !
 !     The arguments are:
@@ -1836,6 +1911,7 @@ contains  !====================================================================
 !     \item \texttt{ESMF\_Grid}
 !     \item \texttt{ESMF\_State}
 !     \item \texttt{ESMF\_LocStream}
+!     \item \texttt{ESMF\_Mesh}
 !     \end{description}
 !
 !     The arguments are:
@@ -1896,6 +1972,7 @@ contains  !====================================================================
 !     \item \texttt{ESMF\_Grid}
 !     \item \texttt{ESMF\_State}
 !     \item \texttt{ESMF\_LocStream}
+!     \item \texttt{ESMF\_Mesh}
 !     \end{description}
 !
 !     The arguments are:
@@ -1955,6 +2032,7 @@ contains  !====================================================================
 !     \item \texttt{ESMF\_Grid}
 !     \item \texttt{ESMF\_State}
 !     \item \texttt{ESMF\_LocStream}
+!     \item \texttt{ESMF\_Mesh}
 !     \end{description}
 !
 !     Supported types for <value> and <defaultvalue> are:
@@ -2019,6 +2097,7 @@ contains  !====================================================================
 !     \item \texttt{ESMF\_Grid}
 !     \item \texttt{ESMF\_State}
 !     \item \texttt{ESMF\_LocStream}
+!     \item \texttt{ESMF\_Mesh}
 !     \end{description}
 !
 !     Supported types for <valueList> and <defaultvalueList> are:
@@ -2089,6 +2168,7 @@ contains  !====================================================================
 !     \item \texttt{ESMF\_Grid}
 !     \item \texttt{ESMF\_State}
 !     \item \texttt{ESMF\_LocStream}
+!     \item \texttt{ESMF\_Mesh}
 !     \end{description}
 !
 !     Supported types for <value> and <defaultvalue> are:
@@ -2161,6 +2241,7 @@ contains  !====================================================================
 !     \item \texttt{ESMF\_Grid}
 !     \item \texttt{ESMF\_State}
 !     \item \texttt{ESMF\_LocStream}
+!     \item \texttt{ESMF\_Mesh}
 !     \end{description}
 !
 !     Supported types for <valueList> and <defaultvalueList> are:
@@ -2277,6 +2358,7 @@ contains  !====================================================================
 !     \item \texttt{ESMF\_Grid}
 !     \item \texttt{ESMF\_State}
 !     \item \texttt{ESMF\_LocStream}
+!     \item \texttt{ESMF\_Mesh}
 !     \end{description}
 !
 !     The arguments are:
@@ -2855,6 +2937,34 @@ subroutine ESMF_AttributeAddAttPackStdLocStream(target, convention, purpose, att
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeAddAttPackStdLocStream
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeAddAttPackStdMesh"
+subroutine ESMF_AttributeAddAttPackStdMesh(target, convention, purpose, attrList, nestConvention, nestPurpose, attpack, rc)
+  type(ESMF_Mesh), intent(inout) :: target
+  character(len=*), intent(in) :: convention
+  character(len=*), intent(in) :: purpose
+  character(len=*), dimension(:), intent(in), optional :: attrList
+  character(len=*), intent(in), optional :: nestConvention
+  character(len=*), intent(in), optional :: nestPurpose
+  type(ESMF_AttPack), intent(out), optional :: attpack
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc
+  type(ESMF_Info) :: info
+  type(ESMF_InfoDescribe) :: eidesc
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+  info = eidesc%GetInfo(target, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call ESMF_AttributeAddAttPackStdInfo(info, convention, purpose, attrList, nestConvention, nestPurpose, attpack, localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeAddAttPackStdMesh
 
 !==============================================================================
 ! ESMF_AttributeSet
@@ -18436,6 +18546,1422 @@ subroutine ESMF_AttributeSetObjLocStreamLGList(target, name, valueList, conventi
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeSetObjLocStreamLGList
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeSetAttPackMeshR4()"
+subroutine ESMF_AttributeSetAttPackMeshR4(target, name, value, attpack, keywordEnforcer, itemcount, attnestflag, rc)
+  ! 39.11.35/37 - Target is a NOOP only the attpack is used; itemcount is NOOP; attnestflag is NOOP
+  type(ESMF_Mesh), intent(in) :: target
+  character(len=*), intent(in) :: name
+  real(ESMF_KIND_R4), intent(in) :: value
+  type(ESMF_AttPack), intent(inout) :: attpack
+type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+  integer, intent(in), optional :: itemcount
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc
+  character(:), allocatable :: pkey
+  type(ESMF_Info) :: info
+  logical :: is_present
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  pkey = attpack%formatKey(rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  info = attpack%getPayload(rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+!  is_present = ESMF_InfoIsPresent(info, TRIM(pkey)//"/"//TRIM(name), attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+!  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  is_present = .true.
+
+  if (is_present) then
+    call ESMF_InfoSet(info, TRIM(name), value, force=ESMF_ATTR_DEFAULT_FORCE, pkey=TRIM(pkey), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="Attribute must be added before it is set", ESMF_CONTEXT, rcToReturn=rc)) return
+  endif
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeSetAttPackMeshR4
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeSetObjMeshR4()"
+subroutine ESMF_AttributeSetObjMeshR4(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
+  ! 39.11.38/40 - attPackInstanceName is NOOP
+  type(ESMF_Mesh), intent(inout) :: target
+  character(len=*), intent(in) :: name
+  real(ESMF_KIND_R4), intent(in) :: value
+  character(len=*), intent(in), optional :: convention
+  character(len=*), intent(in), optional :: purpose
+  character(len=*), intent(in), optional :: attPackInstanceName
+  integer, intent(in), optional :: itemcount
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(inout), optional :: rc
+
+  integer :: len_key, localrc
+  character(:), allocatable :: key, pkey
+  type(ESMF_Info) :: info
+  type(ESMF_InfoDescribe) :: eidesc
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+  logical :: is_present
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  info = eidesc%GetInfo(target, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (local_attnestflag%value == ESMF_ATTNEST_ON%value) then
+    call ESMF_InfoFormatKey(pkey, "", localrc, convention=convention, purpose=purpose)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+!    is_present = ESMF_InfoIsPresent(info, TRIM(pkey)//"/"//TRIM(name), attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+!    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    is_present = .true.
+
+    if (is_present) then
+      call ESMF_InfoSet(info, name, value, force=ESMF_ATTR_DEFAULT_FORCE, pkey=pkey, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="Attribute must be added before it is set", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  else
+    call ESMF_InfoFormatKey(key, name, localrc, convention=convention, purpose=purpose)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+!    is_present = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+!    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    is_present = .true.
+
+    if (is_present) then
+      call ESMF_InfoSet(info, key, value, force=ESMF_ATTR_DEFAULT_FORCE, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="Attribute must be added before it is set", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  end if
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeSetObjMeshR4
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeSetAttPackMeshR4List()"
+subroutine ESMF_AttributeSetAttPackMeshR4List(target, name, valueList, attpack, keywordEnforcer, itemcount, attnestflag, rc)
+  ! 39.11.35/37 - Target is a NOOP only the attpack is used; itemcount is NOOP; attnestflag is NOOP
+  type(ESMF_Mesh), intent(in) :: target
+  character(len=*), intent(in) :: name
+  real(ESMF_KIND_R4), dimension(:), intent(in) :: valueList
+  type(ESMF_AttPack), intent(inout) :: attpack
+type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+  integer, intent(in), optional :: itemcount
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc
+  character(:), allocatable :: pkey
+  type(ESMF_Info) :: info
+  logical :: is_present
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  pkey = attpack%formatKey(rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  info = attpack%getPayload(rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+!  is_present = ESMF_InfoIsPresent(info, TRIM(pkey)//"/"//TRIM(name), attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+!  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  is_present = .true.
+
+  if (is_present) then
+    call ESMF_InfoSet(info, TRIM(name), valueList, force=ESMF_ATTR_DEFAULT_FORCE, pkey=TRIM(pkey), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="Attribute must be added before it is set", ESMF_CONTEXT, rcToReturn=rc)) return
+  endif
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeSetAttPackMeshR4List
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeSetObjMeshR4List()"
+subroutine ESMF_AttributeSetObjMeshR4List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
+  ! 39.11.38/40 - attPackInstanceName is NOOP
+  type(ESMF_Mesh), intent(inout) :: target
+  character(len=*), intent(in) :: name
+  real(ESMF_KIND_R4), dimension(:), intent(in) :: valueList
+  character(len=*), intent(in), optional :: convention
+  character(len=*), intent(in), optional :: purpose
+  character(len=*), intent(in), optional :: attPackInstanceName
+  integer, intent(in), optional :: itemcount
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(inout), optional :: rc
+
+  integer :: len_key, localrc
+  character(:), allocatable :: key, pkey
+  type(ESMF_Info) :: info
+  type(ESMF_InfoDescribe) :: eidesc
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+  logical :: is_present
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  info = eidesc%GetInfo(target, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (local_attnestflag%value == ESMF_ATTNEST_ON%value) then
+    call ESMF_InfoFormatKey(pkey, "", localrc, convention=convention, purpose=purpose)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+!    is_present = ESMF_InfoIsPresent(info, TRIM(pkey)//"/"//TRIM(name), attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+!    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    is_present = .true.
+
+    if (is_present) then
+      call ESMF_InfoSet(info, name, valueList, force=ESMF_ATTR_DEFAULT_FORCE, pkey=pkey, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="Attribute must be added before it is set", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  else
+    call ESMF_InfoFormatKey(key, name, localrc, convention=convention, purpose=purpose)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+!    is_present = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+!    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    is_present = .true.
+
+    if (is_present) then
+      call ESMF_InfoSet(info, key, valueList, force=ESMF_ATTR_DEFAULT_FORCE, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="Attribute must be added before it is set", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  end if
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeSetObjMeshR4List
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeSetAttPackMeshR8()"
+subroutine ESMF_AttributeSetAttPackMeshR8(target, name, value, attpack, keywordEnforcer, itemcount, attnestflag, rc)
+  ! 39.11.35/37 - Target is a NOOP only the attpack is used; itemcount is NOOP; attnestflag is NOOP
+  type(ESMF_Mesh), intent(in) :: target
+  character(len=*), intent(in) :: name
+  real(ESMF_KIND_R8), intent(in) :: value
+  type(ESMF_AttPack), intent(inout) :: attpack
+type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+  integer, intent(in), optional :: itemcount
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc
+  character(:), allocatable :: pkey
+  type(ESMF_Info) :: info
+  logical :: is_present
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  pkey = attpack%formatKey(rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  info = attpack%getPayload(rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+!  is_present = ESMF_InfoIsPresent(info, TRIM(pkey)//"/"//TRIM(name), attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+!  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  is_present = .true.
+
+  if (is_present) then
+    call ESMF_InfoSet(info, TRIM(name), value, force=ESMF_ATTR_DEFAULT_FORCE, pkey=TRIM(pkey), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="Attribute must be added before it is set", ESMF_CONTEXT, rcToReturn=rc)) return
+  endif
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeSetAttPackMeshR8
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeSetObjMeshR8()"
+subroutine ESMF_AttributeSetObjMeshR8(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
+  ! 39.11.38/40 - attPackInstanceName is NOOP
+  type(ESMF_Mesh), intent(inout) :: target
+  character(len=*), intent(in) :: name
+  real(ESMF_KIND_R8), intent(in) :: value
+  character(len=*), intent(in), optional :: convention
+  character(len=*), intent(in), optional :: purpose
+  character(len=*), intent(in), optional :: attPackInstanceName
+  integer, intent(in), optional :: itemcount
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(inout), optional :: rc
+
+  integer :: len_key, localrc
+  character(:), allocatable :: key, pkey
+  type(ESMF_Info) :: info
+  type(ESMF_InfoDescribe) :: eidesc
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+  logical :: is_present
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  info = eidesc%GetInfo(target, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (local_attnestflag%value == ESMF_ATTNEST_ON%value) then
+    call ESMF_InfoFormatKey(pkey, "", localrc, convention=convention, purpose=purpose)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+!    is_present = ESMF_InfoIsPresent(info, TRIM(pkey)//"/"//TRIM(name), attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+!    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    is_present = .true.
+
+    if (is_present) then
+      call ESMF_InfoSet(info, name, value, force=ESMF_ATTR_DEFAULT_FORCE, pkey=pkey, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="Attribute must be added before it is set", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  else
+    call ESMF_InfoFormatKey(key, name, localrc, convention=convention, purpose=purpose)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+!    is_present = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+!    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    is_present = .true.
+
+    if (is_present) then
+      call ESMF_InfoSet(info, key, value, force=ESMF_ATTR_DEFAULT_FORCE, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="Attribute must be added before it is set", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  end if
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeSetObjMeshR8
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeSetAttPackMeshR8List()"
+subroutine ESMF_AttributeSetAttPackMeshR8List(target, name, valueList, attpack, keywordEnforcer, itemcount, attnestflag, rc)
+  ! 39.11.35/37 - Target is a NOOP only the attpack is used; itemcount is NOOP; attnestflag is NOOP
+  type(ESMF_Mesh), intent(in) :: target
+  character(len=*), intent(in) :: name
+  real(ESMF_KIND_R8), dimension(:), intent(in) :: valueList
+  type(ESMF_AttPack), intent(inout) :: attpack
+type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+  integer, intent(in), optional :: itemcount
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc
+  character(:), allocatable :: pkey
+  type(ESMF_Info) :: info
+  logical :: is_present
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  pkey = attpack%formatKey(rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  info = attpack%getPayload(rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+!  is_present = ESMF_InfoIsPresent(info, TRIM(pkey)//"/"//TRIM(name), attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+!  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  is_present = .true.
+
+  if (is_present) then
+    call ESMF_InfoSet(info, TRIM(name), valueList, force=ESMF_ATTR_DEFAULT_FORCE, pkey=TRIM(pkey), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="Attribute must be added before it is set", ESMF_CONTEXT, rcToReturn=rc)) return
+  endif
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeSetAttPackMeshR8List
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeSetObjMeshR8List()"
+subroutine ESMF_AttributeSetObjMeshR8List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
+  ! 39.11.38/40 - attPackInstanceName is NOOP
+  type(ESMF_Mesh), intent(inout) :: target
+  character(len=*), intent(in) :: name
+  real(ESMF_KIND_R8), dimension(:), intent(in) :: valueList
+  character(len=*), intent(in), optional :: convention
+  character(len=*), intent(in), optional :: purpose
+  character(len=*), intent(in), optional :: attPackInstanceName
+  integer, intent(in), optional :: itemcount
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(inout), optional :: rc
+
+  integer :: len_key, localrc
+  character(:), allocatable :: key, pkey
+  type(ESMF_Info) :: info
+  type(ESMF_InfoDescribe) :: eidesc
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+  logical :: is_present
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  info = eidesc%GetInfo(target, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (local_attnestflag%value == ESMF_ATTNEST_ON%value) then
+    call ESMF_InfoFormatKey(pkey, "", localrc, convention=convention, purpose=purpose)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+!    is_present = ESMF_InfoIsPresent(info, TRIM(pkey)//"/"//TRIM(name), attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+!    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    is_present = .true.
+
+    if (is_present) then
+      call ESMF_InfoSet(info, name, valueList, force=ESMF_ATTR_DEFAULT_FORCE, pkey=pkey, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="Attribute must be added before it is set", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  else
+    call ESMF_InfoFormatKey(key, name, localrc, convention=convention, purpose=purpose)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+!    is_present = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+!    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    is_present = .true.
+
+    if (is_present) then
+      call ESMF_InfoSet(info, key, valueList, force=ESMF_ATTR_DEFAULT_FORCE, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="Attribute must be added before it is set", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  end if
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeSetObjMeshR8List
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeSetAttPackMeshI4()"
+subroutine ESMF_AttributeSetAttPackMeshI4(target, name, value, attpack, keywordEnforcer, itemcount, attnestflag, rc)
+  ! 39.11.35/37 - Target is a NOOP only the attpack is used; itemcount is NOOP; attnestflag is NOOP
+  type(ESMF_Mesh), intent(in) :: target
+  character(len=*), intent(in) :: name
+  integer(ESMF_KIND_I4), intent(in) :: value
+  type(ESMF_AttPack), intent(inout) :: attpack
+type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+  integer, intent(in), optional :: itemcount
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc
+  character(:), allocatable :: pkey
+  type(ESMF_Info) :: info
+  logical :: is_present
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  pkey = attpack%formatKey(rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  info = attpack%getPayload(rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+!  is_present = ESMF_InfoIsPresent(info, TRIM(pkey)//"/"//TRIM(name), attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+!  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  is_present = .true.
+
+  if (is_present) then
+    call ESMF_InfoSet(info, TRIM(name), value, force=ESMF_ATTR_DEFAULT_FORCE, pkey=TRIM(pkey), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="Attribute must be added before it is set", ESMF_CONTEXT, rcToReturn=rc)) return
+  endif
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeSetAttPackMeshI4
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeSetObjMeshI4()"
+subroutine ESMF_AttributeSetObjMeshI4(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
+  ! 39.11.38/40 - attPackInstanceName is NOOP
+  type(ESMF_Mesh), intent(inout) :: target
+  character(len=*), intent(in) :: name
+  integer(ESMF_KIND_I4), intent(in) :: value
+  character(len=*), intent(in), optional :: convention
+  character(len=*), intent(in), optional :: purpose
+  character(len=*), intent(in), optional :: attPackInstanceName
+  integer, intent(in), optional :: itemcount
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(inout), optional :: rc
+
+  integer :: len_key, localrc
+  character(:), allocatable :: key, pkey
+  type(ESMF_Info) :: info
+  type(ESMF_InfoDescribe) :: eidesc
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+  logical :: is_present
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  info = eidesc%GetInfo(target, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (local_attnestflag%value == ESMF_ATTNEST_ON%value) then
+    call ESMF_InfoFormatKey(pkey, "", localrc, convention=convention, purpose=purpose)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+!    is_present = ESMF_InfoIsPresent(info, TRIM(pkey)//"/"//TRIM(name), attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+!    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    is_present = .true.
+
+    if (is_present) then
+      call ESMF_InfoSet(info, name, value, force=ESMF_ATTR_DEFAULT_FORCE, pkey=pkey, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="Attribute must be added before it is set", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  else
+    call ESMF_InfoFormatKey(key, name, localrc, convention=convention, purpose=purpose)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+!    is_present = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+!    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    is_present = .true.
+
+    if (is_present) then
+      call ESMF_InfoSet(info, key, value, force=ESMF_ATTR_DEFAULT_FORCE, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="Attribute must be added before it is set", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  end if
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeSetObjMeshI4
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeSetAttPackMeshI4List()"
+subroutine ESMF_AttributeSetAttPackMeshI4List(target, name, valueList, attpack, keywordEnforcer, itemcount, attnestflag, rc)
+  ! 39.11.35/37 - Target is a NOOP only the attpack is used; itemcount is NOOP; attnestflag is NOOP
+  type(ESMF_Mesh), intent(in) :: target
+  character(len=*), intent(in) :: name
+  integer(ESMF_KIND_I4), dimension(:), intent(in) :: valueList
+  type(ESMF_AttPack), intent(inout) :: attpack
+type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+  integer, intent(in), optional :: itemcount
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc
+  character(:), allocatable :: pkey
+  type(ESMF_Info) :: info
+  logical :: is_present
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  pkey = attpack%formatKey(rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  info = attpack%getPayload(rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+!  is_present = ESMF_InfoIsPresent(info, TRIM(pkey)//"/"//TRIM(name), attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+!  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  is_present = .true.
+
+  if (is_present) then
+    call ESMF_InfoSet(info, TRIM(name), valueList, force=ESMF_ATTR_DEFAULT_FORCE, pkey=TRIM(pkey), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="Attribute must be added before it is set", ESMF_CONTEXT, rcToReturn=rc)) return
+  endif
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeSetAttPackMeshI4List
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeSetObjMeshI4List()"
+subroutine ESMF_AttributeSetObjMeshI4List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
+  ! 39.11.38/40 - attPackInstanceName is NOOP
+  type(ESMF_Mesh), intent(inout) :: target
+  character(len=*), intent(in) :: name
+  integer(ESMF_KIND_I4), dimension(:), intent(in) :: valueList
+  character(len=*), intent(in), optional :: convention
+  character(len=*), intent(in), optional :: purpose
+  character(len=*), intent(in), optional :: attPackInstanceName
+  integer, intent(in), optional :: itemcount
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(inout), optional :: rc
+
+  integer :: len_key, localrc
+  character(:), allocatable :: key, pkey
+  type(ESMF_Info) :: info
+  type(ESMF_InfoDescribe) :: eidesc
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+  logical :: is_present
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  info = eidesc%GetInfo(target, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (local_attnestflag%value == ESMF_ATTNEST_ON%value) then
+    call ESMF_InfoFormatKey(pkey, "", localrc, convention=convention, purpose=purpose)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+!    is_present = ESMF_InfoIsPresent(info, TRIM(pkey)//"/"//TRIM(name), attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+!    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    is_present = .true.
+
+    if (is_present) then
+      call ESMF_InfoSet(info, name, valueList, force=ESMF_ATTR_DEFAULT_FORCE, pkey=pkey, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="Attribute must be added before it is set", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  else
+    call ESMF_InfoFormatKey(key, name, localrc, convention=convention, purpose=purpose)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+!    is_present = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+!    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    is_present = .true.
+
+    if (is_present) then
+      call ESMF_InfoSet(info, key, valueList, force=ESMF_ATTR_DEFAULT_FORCE, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="Attribute must be added before it is set", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  end if
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeSetObjMeshI4List
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeSetAttPackMeshI8()"
+subroutine ESMF_AttributeSetAttPackMeshI8(target, name, value, attpack, keywordEnforcer, itemcount, attnestflag, rc)
+  ! 39.11.35/37 - Target is a NOOP only the attpack is used; itemcount is NOOP; attnestflag is NOOP
+  type(ESMF_Mesh), intent(in) :: target
+  character(len=*), intent(in) :: name
+  integer(ESMF_KIND_I8), intent(in) :: value
+  type(ESMF_AttPack), intent(inout) :: attpack
+type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+  integer, intent(in), optional :: itemcount
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc
+  character(:), allocatable :: pkey
+  type(ESMF_Info) :: info
+  logical :: is_present
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  pkey = attpack%formatKey(rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  info = attpack%getPayload(rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+!  is_present = ESMF_InfoIsPresent(info, TRIM(pkey)//"/"//TRIM(name), attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+!  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  is_present = .true.
+
+  if (is_present) then
+    call ESMF_InfoSet(info, TRIM(name), value, force=ESMF_ATTR_DEFAULT_FORCE, pkey=TRIM(pkey), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="Attribute must be added before it is set", ESMF_CONTEXT, rcToReturn=rc)) return
+  endif
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeSetAttPackMeshI8
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeSetObjMeshI8()"
+subroutine ESMF_AttributeSetObjMeshI8(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
+  ! 39.11.38/40 - attPackInstanceName is NOOP
+  type(ESMF_Mesh), intent(inout) :: target
+  character(len=*), intent(in) :: name
+  integer(ESMF_KIND_I8), intent(in) :: value
+  character(len=*), intent(in), optional :: convention
+  character(len=*), intent(in), optional :: purpose
+  character(len=*), intent(in), optional :: attPackInstanceName
+  integer, intent(in), optional :: itemcount
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(inout), optional :: rc
+
+  integer :: len_key, localrc
+  character(:), allocatable :: key, pkey
+  type(ESMF_Info) :: info
+  type(ESMF_InfoDescribe) :: eidesc
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+  logical :: is_present
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  info = eidesc%GetInfo(target, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (local_attnestflag%value == ESMF_ATTNEST_ON%value) then
+    call ESMF_InfoFormatKey(pkey, "", localrc, convention=convention, purpose=purpose)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+!    is_present = ESMF_InfoIsPresent(info, TRIM(pkey)//"/"//TRIM(name), attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+!    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    is_present = .true.
+
+    if (is_present) then
+      call ESMF_InfoSet(info, name, value, force=ESMF_ATTR_DEFAULT_FORCE, pkey=pkey, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="Attribute must be added before it is set", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  else
+    call ESMF_InfoFormatKey(key, name, localrc, convention=convention, purpose=purpose)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+!    is_present = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+!    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    is_present = .true.
+
+    if (is_present) then
+      call ESMF_InfoSet(info, key, value, force=ESMF_ATTR_DEFAULT_FORCE, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="Attribute must be added before it is set", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  end if
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeSetObjMeshI8
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeSetAttPackMeshI8List()"
+subroutine ESMF_AttributeSetAttPackMeshI8List(target, name, valueList, attpack, keywordEnforcer, itemcount, attnestflag, rc)
+  ! 39.11.35/37 - Target is a NOOP only the attpack is used; itemcount is NOOP; attnestflag is NOOP
+  type(ESMF_Mesh), intent(in) :: target
+  character(len=*), intent(in) :: name
+  integer(ESMF_KIND_I8), dimension(:), intent(in) :: valueList
+  type(ESMF_AttPack), intent(inout) :: attpack
+type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+  integer, intent(in), optional :: itemcount
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc
+  character(:), allocatable :: pkey
+  type(ESMF_Info) :: info
+  logical :: is_present
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  pkey = attpack%formatKey(rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  info = attpack%getPayload(rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+!  is_present = ESMF_InfoIsPresent(info, TRIM(pkey)//"/"//TRIM(name), attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+!  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  is_present = .true.
+
+  if (is_present) then
+    call ESMF_InfoSet(info, TRIM(name), valueList, force=ESMF_ATTR_DEFAULT_FORCE, pkey=TRIM(pkey), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="Attribute must be added before it is set", ESMF_CONTEXT, rcToReturn=rc)) return
+  endif
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeSetAttPackMeshI8List
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeSetObjMeshI8List()"
+subroutine ESMF_AttributeSetObjMeshI8List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
+  ! 39.11.38/40 - attPackInstanceName is NOOP
+  type(ESMF_Mesh), intent(inout) :: target
+  character(len=*), intent(in) :: name
+  integer(ESMF_KIND_I8), dimension(:), intent(in) :: valueList
+  character(len=*), intent(in), optional :: convention
+  character(len=*), intent(in), optional :: purpose
+  character(len=*), intent(in), optional :: attPackInstanceName
+  integer, intent(in), optional :: itemcount
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(inout), optional :: rc
+
+  integer :: len_key, localrc
+  character(:), allocatable :: key, pkey
+  type(ESMF_Info) :: info
+  type(ESMF_InfoDescribe) :: eidesc
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+  logical :: is_present
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  info = eidesc%GetInfo(target, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (local_attnestflag%value == ESMF_ATTNEST_ON%value) then
+    call ESMF_InfoFormatKey(pkey, "", localrc, convention=convention, purpose=purpose)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+!    is_present = ESMF_InfoIsPresent(info, TRIM(pkey)//"/"//TRIM(name), attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+!    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    is_present = .true.
+
+    if (is_present) then
+      call ESMF_InfoSet(info, name, valueList, force=ESMF_ATTR_DEFAULT_FORCE, pkey=pkey, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="Attribute must be added before it is set", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  else
+    call ESMF_InfoFormatKey(key, name, localrc, convention=convention, purpose=purpose)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+!    is_present = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+!    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    is_present = .true.
+
+    if (is_present) then
+      call ESMF_InfoSet(info, key, valueList, force=ESMF_ATTR_DEFAULT_FORCE, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="Attribute must be added before it is set", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  end if
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeSetObjMeshI8List
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeSetAttPackMeshCH()"
+subroutine ESMF_AttributeSetAttPackMeshCH(target, name, value, attpack, keywordEnforcer, itemcount, attnestflag, rc)
+  ! 39.11.35/37 - Target is a NOOP only the attpack is used; itemcount is NOOP; attnestflag is NOOP
+  type(ESMF_Mesh), intent(in) :: target
+  character(len=*), intent(in) :: name
+  character(len=*), intent(in) :: value
+  type(ESMF_AttPack), intent(inout) :: attpack
+type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+  integer, intent(in), optional :: itemcount
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc
+  character(:), allocatable :: pkey
+  type(ESMF_Info) :: info
+  logical :: is_present
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  pkey = attpack%formatKey(rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  info = attpack%getPayload(rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+!  is_present = ESMF_InfoIsPresent(info, TRIM(pkey)//"/"//TRIM(name), attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+!  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  is_present = .true.
+
+  if (is_present) then
+    call ESMF_InfoSet(info, TRIM(name), value, force=ESMF_ATTR_DEFAULT_FORCE, pkey=TRIM(pkey), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="Attribute must be added before it is set", ESMF_CONTEXT, rcToReturn=rc)) return
+  endif
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeSetAttPackMeshCH
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeSetObjMeshCH()"
+subroutine ESMF_AttributeSetObjMeshCH(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
+  ! 39.11.38/40 - attPackInstanceName is NOOP
+  type(ESMF_Mesh), intent(inout) :: target
+  character(len=*), intent(in) :: name
+  character(len=*), intent(in) :: value
+  character(len=*), intent(in), optional :: convention
+  character(len=*), intent(in), optional :: purpose
+  character(len=*), intent(in), optional :: attPackInstanceName
+  integer, intent(in), optional :: itemcount
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(inout), optional :: rc
+
+  integer :: len_key, localrc
+  character(:), allocatable :: key, pkey
+  type(ESMF_Info) :: info
+  type(ESMF_InfoDescribe) :: eidesc
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+  logical :: is_present
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  info = eidesc%GetInfo(target, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (local_attnestflag%value == ESMF_ATTNEST_ON%value) then
+    call ESMF_InfoFormatKey(pkey, "", localrc, convention=convention, purpose=purpose)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+!    is_present = ESMF_InfoIsPresent(info, TRIM(pkey)//"/"//TRIM(name), attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+!    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    is_present = .true.
+
+    if (is_present) then
+      call ESMF_InfoSet(info, name, value, force=ESMF_ATTR_DEFAULT_FORCE, pkey=pkey, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="Attribute must be added before it is set", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  else
+    call ESMF_InfoFormatKey(key, name, localrc, convention=convention, purpose=purpose)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+!    is_present = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+!    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    is_present = .true.
+
+    if (is_present) then
+      call ESMF_InfoSet(info, key, value, force=ESMF_ATTR_DEFAULT_FORCE, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="Attribute must be added before it is set", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  end if
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeSetObjMeshCH
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeSetAttPackMeshCHList()"
+subroutine ESMF_AttributeSetAttPackMeshCHList(target, name, valueList, attpack, keywordEnforcer, itemcount, attnestflag, rc)
+  ! 39.11.35/37 - Target is a NOOP only the attpack is used; itemcount is NOOP; attnestflag is NOOP
+  type(ESMF_Mesh), intent(in) :: target
+  character(len=*), intent(in) :: name
+  character(len=*), dimension(:), intent(in) :: valueList
+  type(ESMF_AttPack), intent(inout) :: attpack
+type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+  integer, intent(in), optional :: itemcount
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc
+  character(:), allocatable :: pkey
+  type(ESMF_Info) :: info
+  logical :: is_present
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  pkey = attpack%formatKey(rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  info = attpack%getPayload(rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+!  is_present = ESMF_InfoIsPresent(info, TRIM(pkey)//"/"//TRIM(name), attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+!  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  is_present = .true.
+
+  if (is_present) then
+    call ESMF_InfoSet(info, TRIM(name), valueList, force=ESMF_ATTR_DEFAULT_FORCE, pkey=TRIM(pkey), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="Attribute must be added before it is set", ESMF_CONTEXT, rcToReturn=rc)) return
+  endif
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeSetAttPackMeshCHList
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeSetObjMeshCHList()"
+subroutine ESMF_AttributeSetObjMeshCHList(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
+  ! 39.11.38/40 - attPackInstanceName is NOOP
+  type(ESMF_Mesh), intent(inout) :: target
+  character(len=*), intent(in) :: name
+  character(len=*), dimension(:), intent(in) :: valueList
+  character(len=*), intent(in), optional :: convention
+  character(len=*), intent(in), optional :: purpose
+  character(len=*), intent(in), optional :: attPackInstanceName
+  integer, intent(in), optional :: itemcount
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(inout), optional :: rc
+
+  integer :: len_key, localrc
+  character(:), allocatable :: key, pkey
+  type(ESMF_Info) :: info
+  type(ESMF_InfoDescribe) :: eidesc
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+  logical :: is_present
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  info = eidesc%GetInfo(target, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (local_attnestflag%value == ESMF_ATTNEST_ON%value) then
+    call ESMF_InfoFormatKey(pkey, "", localrc, convention=convention, purpose=purpose)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+!    is_present = ESMF_InfoIsPresent(info, TRIM(pkey)//"/"//TRIM(name), attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+!    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    is_present = .true.
+
+    if (is_present) then
+      call ESMF_InfoSet(info, name, valueList, force=ESMF_ATTR_DEFAULT_FORCE, pkey=pkey, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="Attribute must be added before it is set", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  else
+    call ESMF_InfoFormatKey(key, name, localrc, convention=convention, purpose=purpose)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+!    is_present = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+!    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    is_present = .true.
+
+    if (is_present) then
+      call ESMF_InfoSet(info, key, valueList, force=ESMF_ATTR_DEFAULT_FORCE, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="Attribute must be added before it is set", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  end if
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeSetObjMeshCHList
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeSetAttPackMeshLG()"
+subroutine ESMF_AttributeSetAttPackMeshLG(target, name, value, attpack, keywordEnforcer, itemcount, attnestflag, rc)
+  ! 39.11.35/37 - Target is a NOOP only the attpack is used; itemcount is NOOP; attnestflag is NOOP
+  type(ESMF_Mesh), intent(in) :: target
+  character(len=*), intent(in) :: name
+  logical, intent(in) :: value
+  type(ESMF_AttPack), intent(inout) :: attpack
+type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+  integer, intent(in), optional :: itemcount
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc
+  character(:), allocatable :: pkey
+  type(ESMF_Info) :: info
+  logical :: is_present
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  pkey = attpack%formatKey(rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  info = attpack%getPayload(rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+!  is_present = ESMF_InfoIsPresent(info, TRIM(pkey)//"/"//TRIM(name), attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+!  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  is_present = .true.
+
+  if (is_present) then
+    call ESMF_InfoSet(info, TRIM(name), value, force=ESMF_ATTR_DEFAULT_FORCE, pkey=TRIM(pkey), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="Attribute must be added before it is set", ESMF_CONTEXT, rcToReturn=rc)) return
+  endif
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeSetAttPackMeshLG
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeSetObjMeshLG()"
+subroutine ESMF_AttributeSetObjMeshLG(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
+  ! 39.11.38/40 - attPackInstanceName is NOOP
+  type(ESMF_Mesh), intent(inout) :: target
+  character(len=*), intent(in) :: name
+  logical, intent(in) :: value
+  character(len=*), intent(in), optional :: convention
+  character(len=*), intent(in), optional :: purpose
+  character(len=*), intent(in), optional :: attPackInstanceName
+  integer, intent(in), optional :: itemcount
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(inout), optional :: rc
+
+  integer :: len_key, localrc
+  character(:), allocatable :: key, pkey
+  type(ESMF_Info) :: info
+  type(ESMF_InfoDescribe) :: eidesc
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+  logical :: is_present
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  info = eidesc%GetInfo(target, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (local_attnestflag%value == ESMF_ATTNEST_ON%value) then
+    call ESMF_InfoFormatKey(pkey, "", localrc, convention=convention, purpose=purpose)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+!    is_present = ESMF_InfoIsPresent(info, TRIM(pkey)//"/"//TRIM(name), attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+!    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    is_present = .true.
+
+    if (is_present) then
+      call ESMF_InfoSet(info, name, value, force=ESMF_ATTR_DEFAULT_FORCE, pkey=pkey, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="Attribute must be added before it is set", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  else
+    call ESMF_InfoFormatKey(key, name, localrc, convention=convention, purpose=purpose)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+!    is_present = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+!    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    is_present = .true.
+
+    if (is_present) then
+      call ESMF_InfoSet(info, key, value, force=ESMF_ATTR_DEFAULT_FORCE, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="Attribute must be added before it is set", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  end if
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeSetObjMeshLG
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeSetAttPackMeshLGList()"
+subroutine ESMF_AttributeSetAttPackMeshLGList(target, name, valueList, attpack, keywordEnforcer, itemcount, attnestflag, rc)
+  ! 39.11.35/37 - Target is a NOOP only the attpack is used; itemcount is NOOP; attnestflag is NOOP
+  type(ESMF_Mesh), intent(in) :: target
+  character(len=*), intent(in) :: name
+  logical, dimension(:), intent(in) :: valueList
+  type(ESMF_AttPack), intent(inout) :: attpack
+type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+  integer, intent(in), optional :: itemcount
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc
+  character(:), allocatable :: pkey
+  type(ESMF_Info) :: info
+  logical :: is_present
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  pkey = attpack%formatKey(rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  info = attpack%getPayload(rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+!  is_present = ESMF_InfoIsPresent(info, TRIM(pkey)//"/"//TRIM(name), attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+!  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  is_present = .true.
+
+  if (is_present) then
+    call ESMF_InfoSet(info, TRIM(name), valueList, force=ESMF_ATTR_DEFAULT_FORCE, pkey=TRIM(pkey), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="Attribute must be added before it is set", ESMF_CONTEXT, rcToReturn=rc)) return
+  endif
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeSetAttPackMeshLGList
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeSetObjMeshLGList()"
+subroutine ESMF_AttributeSetObjMeshLGList(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
+  ! 39.11.38/40 - attPackInstanceName is NOOP
+  type(ESMF_Mesh), intent(inout) :: target
+  character(len=*), intent(in) :: name
+  logical, dimension(:), intent(in) :: valueList
+  character(len=*), intent(in), optional :: convention
+  character(len=*), intent(in), optional :: purpose
+  character(len=*), intent(in), optional :: attPackInstanceName
+  integer, intent(in), optional :: itemcount
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(inout), optional :: rc
+
+  integer :: len_key, localrc
+  character(:), allocatable :: key, pkey
+  type(ESMF_Info) :: info
+  type(ESMF_InfoDescribe) :: eidesc
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+  logical :: is_present
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  info = eidesc%GetInfo(target, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (local_attnestflag%value == ESMF_ATTNEST_ON%value) then
+    call ESMF_InfoFormatKey(pkey, "", localrc, convention=convention, purpose=purpose)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+!    is_present = ESMF_InfoIsPresent(info, TRIM(pkey)//"/"//TRIM(name), attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+!    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    is_present = .true.
+
+    if (is_present) then
+      call ESMF_InfoSet(info, name, valueList, force=ESMF_ATTR_DEFAULT_FORCE, pkey=pkey, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="Attribute must be added before it is set", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  else
+    call ESMF_InfoFormatKey(key, name, localrc, convention=convention, purpose=purpose)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+!    is_present = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+!    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    is_present = .true.
+
+    if (is_present) then
+      call ESMF_InfoSet(info, key, valueList, force=ESMF_ATTR_DEFAULT_FORCE, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="Attribute must be added before it is set", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  end if
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeSetObjMeshLGList
+
 !==============================================================================
 ! ESMF_AttributeGet
 !==============================================================================
@@ -24973,6 +26499,600 @@ subroutine ESMF_AttributeGetObjLocStreamLG(target, name, value, defaultvalue, co
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjLocStreamLG
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeGetAttPackMeshR4()"
+subroutine ESMF_AttributeGetAttPackMeshR4(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
+  ! 39.11.7
+  type(ESMF_Mesh), intent(in) :: target
+  character(len=*), intent(in) :: name
+  type(ESMF_AttPack), intent(inout) :: attpack
+  real(ESMF_KIND_R4), intent(out) :: value
+  real(ESMF_KIND_R4), intent(in), optional :: defaultvalue
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  logical, intent(out), optional :: isPresent
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc
+  character(:), allocatable :: key
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+  logical, parameter :: debug = .false.
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  key = attpack%formatKey(name=name, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (debug) then
+    call ESMF_LogWrite(ESMF_METHOD//": key="//TRIM(key), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
+
+  if (present(isPresent)) then
+    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  endif
+
+  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeGetAttPackMeshR4
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeGetObjMeshR4()"
+subroutine ESMF_AttributeGetObjMeshR4(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
+  ! 39.11.11 - attPackInstanceName is NOOP
+  type(ESMF_Mesh), intent(in) :: target
+  character(len=*), intent(in) :: name
+  real(ESMF_KIND_R4), intent(out) :: value
+  real(ESMF_KIND_R4), intent(in), optional :: defaultvalue
+  character(len=*), optional, intent(in) :: convention
+  character(len=*), optional, intent(in) :: purpose
+  character(len=*), optional, intent(in) :: attPackInstanceName
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  logical, intent(out), optional :: isPresent
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc
+  character(:), allocatable :: key
+  type(ESMF_InfoDescribe) :: eidesc
+  type(ESMF_Info) :: info
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  call ESMF_InfoFormatKey(key, name, localrc, convention=convention, purpose=purpose)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  info = eidesc%GetInfo(target, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(isPresent)) then
+    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  endif
+
+  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  deallocate(key)
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeGetObjMeshR4
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeGetAttPackMeshR8()"
+subroutine ESMF_AttributeGetAttPackMeshR8(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
+  ! 39.11.7
+  type(ESMF_Mesh), intent(in) :: target
+  character(len=*), intent(in) :: name
+  type(ESMF_AttPack), intent(inout) :: attpack
+  real(ESMF_KIND_R8), intent(out) :: value
+  real(ESMF_KIND_R8), intent(in), optional :: defaultvalue
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  logical, intent(out), optional :: isPresent
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc
+  character(:), allocatable :: key
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+  logical, parameter :: debug = .false.
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  key = attpack%formatKey(name=name, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (debug) then
+    call ESMF_LogWrite(ESMF_METHOD//": key="//TRIM(key), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
+
+  if (present(isPresent)) then
+    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  endif
+
+  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeGetAttPackMeshR8
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeGetObjMeshR8()"
+subroutine ESMF_AttributeGetObjMeshR8(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
+  ! 39.11.11 - attPackInstanceName is NOOP
+  type(ESMF_Mesh), intent(in) :: target
+  character(len=*), intent(in) :: name
+  real(ESMF_KIND_R8), intent(out) :: value
+  real(ESMF_KIND_R8), intent(in), optional :: defaultvalue
+  character(len=*), optional, intent(in) :: convention
+  character(len=*), optional, intent(in) :: purpose
+  character(len=*), optional, intent(in) :: attPackInstanceName
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  logical, intent(out), optional :: isPresent
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc
+  character(:), allocatable :: key
+  type(ESMF_InfoDescribe) :: eidesc
+  type(ESMF_Info) :: info
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  call ESMF_InfoFormatKey(key, name, localrc, convention=convention, purpose=purpose)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  info = eidesc%GetInfo(target, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(isPresent)) then
+    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  endif
+
+  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  deallocate(key)
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeGetObjMeshR8
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeGetAttPackMeshI4()"
+subroutine ESMF_AttributeGetAttPackMeshI4(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
+  ! 39.11.7
+  type(ESMF_Mesh), intent(in) :: target
+  character(len=*), intent(in) :: name
+  type(ESMF_AttPack), intent(inout) :: attpack
+  integer(ESMF_KIND_I4), intent(out) :: value
+  integer(ESMF_KIND_I4), intent(in), optional :: defaultvalue
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  logical, intent(out), optional :: isPresent
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc
+  character(:), allocatable :: key
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+  logical, parameter :: debug = .false.
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  key = attpack%formatKey(name=name, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (debug) then
+    call ESMF_LogWrite(ESMF_METHOD//": key="//TRIM(key), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
+
+  if (present(isPresent)) then
+    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  endif
+
+  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeGetAttPackMeshI4
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeGetObjMeshI4()"
+subroutine ESMF_AttributeGetObjMeshI4(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
+  ! 39.11.11 - attPackInstanceName is NOOP
+  type(ESMF_Mesh), intent(in) :: target
+  character(len=*), intent(in) :: name
+  integer(ESMF_KIND_I4), intent(out) :: value
+  integer(ESMF_KIND_I4), intent(in), optional :: defaultvalue
+  character(len=*), optional, intent(in) :: convention
+  character(len=*), optional, intent(in) :: purpose
+  character(len=*), optional, intent(in) :: attPackInstanceName
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  logical, intent(out), optional :: isPresent
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc
+  character(:), allocatable :: key
+  type(ESMF_InfoDescribe) :: eidesc
+  type(ESMF_Info) :: info
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  call ESMF_InfoFormatKey(key, name, localrc, convention=convention, purpose=purpose)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  info = eidesc%GetInfo(target, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(isPresent)) then
+    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  endif
+
+  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  deallocate(key)
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeGetObjMeshI4
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeGetAttPackMeshI8()"
+subroutine ESMF_AttributeGetAttPackMeshI8(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
+  ! 39.11.7
+  type(ESMF_Mesh), intent(in) :: target
+  character(len=*), intent(in) :: name
+  type(ESMF_AttPack), intent(inout) :: attpack
+  integer(ESMF_KIND_I8), intent(out) :: value
+  integer(ESMF_KIND_I8), intent(in), optional :: defaultvalue
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  logical, intent(out), optional :: isPresent
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc
+  character(:), allocatable :: key
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+  logical, parameter :: debug = .false.
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  key = attpack%formatKey(name=name, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (debug) then
+    call ESMF_LogWrite(ESMF_METHOD//": key="//TRIM(key), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
+
+  if (present(isPresent)) then
+    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  endif
+
+  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeGetAttPackMeshI8
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeGetObjMeshI8()"
+subroutine ESMF_AttributeGetObjMeshI8(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
+  ! 39.11.11 - attPackInstanceName is NOOP
+  type(ESMF_Mesh), intent(in) :: target
+  character(len=*), intent(in) :: name
+  integer(ESMF_KIND_I8), intent(out) :: value
+  integer(ESMF_KIND_I8), intent(in), optional :: defaultvalue
+  character(len=*), optional, intent(in) :: convention
+  character(len=*), optional, intent(in) :: purpose
+  character(len=*), optional, intent(in) :: attPackInstanceName
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  logical, intent(out), optional :: isPresent
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc
+  character(:), allocatable :: key
+  type(ESMF_InfoDescribe) :: eidesc
+  type(ESMF_Info) :: info
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  call ESMF_InfoFormatKey(key, name, localrc, convention=convention, purpose=purpose)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  info = eidesc%GetInfo(target, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(isPresent)) then
+    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  endif
+
+  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  deallocate(key)
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeGetObjMeshI8
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeGetAttPackMeshCH()"
+subroutine ESMF_AttributeGetAttPackMeshCH(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
+  ! 39.11.7
+  type(ESMF_Mesh), intent(in) :: target
+  character(len=*), intent(in) :: name
+  type(ESMF_AttPack), intent(inout) :: attpack
+  character(len=*), intent(out) :: value
+  character(len=*), intent(in), optional :: defaultvalue
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  logical, intent(out), optional :: isPresent
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc
+  character(:), allocatable :: key
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+  logical, parameter :: debug = .false.
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  key = attpack%formatKey(name=name, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (debug) then
+    call ESMF_LogWrite(ESMF_METHOD//": key="//TRIM(key), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
+
+  if (present(isPresent)) then
+    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  endif
+
+  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeGetAttPackMeshCH
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeGetObjMeshCH()"
+subroutine ESMF_AttributeGetObjMeshCH(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
+  ! 39.11.11 - attPackInstanceName is NOOP
+  type(ESMF_Mesh), intent(in) :: target
+  character(len=*), intent(in) :: name
+  character(len=*), intent(out) :: value
+  character(len=*), intent(in), optional :: defaultvalue
+  character(len=*), optional, intent(in) :: convention
+  character(len=*), optional, intent(in) :: purpose
+  character(len=*), optional, intent(in) :: attPackInstanceName
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  logical, intent(out), optional :: isPresent
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc
+  character(:), allocatable :: key
+  type(ESMF_InfoDescribe) :: eidesc
+  type(ESMF_Info) :: info
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  call ESMF_InfoFormatKey(key, name, localrc, convention=convention, purpose=purpose)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  info = eidesc%GetInfo(target, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(isPresent)) then
+    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  endif
+
+  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  deallocate(key)
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeGetObjMeshCH
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeGetAttPackMeshLG()"
+subroutine ESMF_AttributeGetAttPackMeshLG(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
+  ! 39.11.7
+  type(ESMF_Mesh), intent(in) :: target
+  character(len=*), intent(in) :: name
+  type(ESMF_AttPack), intent(inout) :: attpack
+  logical, intent(out) :: value
+  logical, intent(in), optional :: defaultvalue
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  logical, intent(out), optional :: isPresent
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc
+  character(:), allocatable :: key
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+  logical, parameter :: debug = .false.
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  key = attpack%formatKey(name=name, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (debug) then
+    call ESMF_LogWrite(ESMF_METHOD//": key="//TRIM(key), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
+
+  if (present(isPresent)) then
+    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  endif
+
+  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeGetAttPackMeshLG
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeGetObjMeshLG()"
+subroutine ESMF_AttributeGetObjMeshLG(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
+  ! 39.11.11 - attPackInstanceName is NOOP
+  type(ESMF_Mesh), intent(in) :: target
+  character(len=*), intent(in) :: name
+  logical, intent(out) :: value
+  logical, intent(in), optional :: defaultvalue
+  character(len=*), optional, intent(in) :: convention
+  character(len=*), optional, intent(in) :: purpose
+  character(len=*), optional, intent(in) :: attPackInstanceName
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  logical, intent(out), optional :: isPresent
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc
+  character(:), allocatable :: key
+  type(ESMF_InfoDescribe) :: eidesc
+  type(ESMF_Info) :: info
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  call ESMF_InfoFormatKey(key, name, localrc, convention=convention, purpose=purpose)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  info = eidesc%GetInfo(target, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(isPresent)) then
+    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  endif
+
+  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  deallocate(key)
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeGetObjMeshLG
 !==============================================================================
 ! ESMF_AttributeGet (Lists)
 !==============================================================================
@@ -34084,6 +36204,834 @@ subroutine ESMF_AttributeGetObjLocStreamLGList(target, name, valueList, defaultv
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjLocStreamLGList
 
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeGetAttPackMeshR4List()"
+subroutine ESMF_AttributeGetAttPackMeshR4List(target, name, attpack, valueList, defaultvalueList, attnestflag, itemcount, isPresent, rc)
+  ! 39.11.9
+  type(ESMF_Mesh), intent(in) :: target
+  character(len=*), intent(in) :: name
+  type(ESMF_AttPack), intent(inout) :: attpack
+  real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
+  real(ESMF_KIND_R4), dimension(:), intent(in), optional :: defaultvalueList
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(out), optional :: itemcount
+  logical, intent(out), optional :: isPresent
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc, ii, local_itemcount
+  logical :: local_isPresent
+  character(:), allocatable :: key
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  key = attpack%formatKey(name=name, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(isPresent)) isPresent = local_isPresent
+
+  if (present(defaultvalueList)) then
+    if (SIZE(defaultvalueList) /= SIZE(valueList)) then
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="SIZE(defaultvalueList) /= SIZE(valueList)", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  endif
+
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key, valueList, itemcount=local_itemcount, attnestflag=local_attnestflag, scalarToArray=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present(itemcount)) itemcount = local_itemcount
+  else
+    if (present(defaultvalueList)) then
+      do ii=1,size(defaultvalueList)
+        if (present(itemcount)) itemcount = 0
+        valueList(ii) = defaultvalueList(ii)
+      enddo
+      if (present(itemcount)) itemcount = SIZE(defaultvalueList)
+    else
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_NOTSET, msg="The key '"//TRIM(name)//"' is not present and no default value is provided", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  endif
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeGetAttPackMeshR4List
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeGetObjMeshR4List()"
+subroutine ESMF_AttributeGetObjMeshR4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
+  ! 39.11.13 - attPackInstanceName is NOOP
+  type(ESMF_Mesh), intent(in) :: target
+  character(len=*), intent(in) :: name
+  real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
+  real(ESMF_KIND_R4), dimension(:), intent(in), optional :: defaultvalueList
+  character(len=*), intent(in), optional :: convention
+  character(len=*), intent(in), optional :: purpose
+  character(len=*), intent(in), optional :: attPackInstanceName
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(out), optional :: itemcount
+  logical, intent(out), optional :: isPresent
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc, ii, local_itemcount
+  logical :: local_isPresent
+  character(:), allocatable :: key
+  type(ESMF_Info) :: info
+  type(ESMF_InfoDescribe) :: eidesc
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  call ESMF_InfoFormatKey(key, name, localrc, convention=convention, purpose=purpose)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  info = eidesc%GetInfo(target, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  local_isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(isPresent)) isPresent = local_isPresent
+
+  if (present(defaultvalueList)) then
+    if (SIZE(defaultvalueList) /= SIZE(valueList)) then
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="SIZE(defaultvalueList) /= SIZE(valueList)", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  endif
+
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key, valueList, itemcount=local_itemcount, attnestflag=local_attnestflag, scalarToArray=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present(itemcount)) itemcount = local_itemcount
+  else
+    if (present(defaultvalueList)) then
+      do ii=1,size(defaultvalueList)
+        valueList(ii) = defaultvalueList(ii)
+      enddo
+      if (present(itemcount)) itemcount = size(defaultvalueList)
+    else
+      if (present(itemcount)) itemcount = 0
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_NOTSET, msg="The key '"//trim(name)//"' is not present and no default value is provided", &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  endif
+
+  deallocate(key)
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeGetObjMeshR4List
+
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeGetAttPackMeshR8List()"
+subroutine ESMF_AttributeGetAttPackMeshR8List(target, name, attpack, valueList, defaultvalueList, attnestflag, itemcount, isPresent, rc)
+  ! 39.11.9
+  type(ESMF_Mesh), intent(in) :: target
+  character(len=*), intent(in) :: name
+  type(ESMF_AttPack), intent(inout) :: attpack
+  real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
+  real(ESMF_KIND_R8), dimension(:), intent(in), optional :: defaultvalueList
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(out), optional :: itemcount
+  logical, intent(out), optional :: isPresent
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc, ii, local_itemcount
+  logical :: local_isPresent
+  character(:), allocatable :: key
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  key = attpack%formatKey(name=name, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(isPresent)) isPresent = local_isPresent
+
+  if (present(defaultvalueList)) then
+    if (SIZE(defaultvalueList) /= SIZE(valueList)) then
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="SIZE(defaultvalueList) /= SIZE(valueList)", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  endif
+
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key, valueList, itemcount=local_itemcount, attnestflag=local_attnestflag, scalarToArray=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present(itemcount)) itemcount = local_itemcount
+  else
+    if (present(defaultvalueList)) then
+      do ii=1,size(defaultvalueList)
+        if (present(itemcount)) itemcount = 0
+        valueList(ii) = defaultvalueList(ii)
+      enddo
+      if (present(itemcount)) itemcount = SIZE(defaultvalueList)
+    else
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_NOTSET, msg="The key '"//TRIM(name)//"' is not present and no default value is provided", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  endif
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeGetAttPackMeshR8List
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeGetObjMeshR8List()"
+subroutine ESMF_AttributeGetObjMeshR8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
+  ! 39.11.13 - attPackInstanceName is NOOP
+  type(ESMF_Mesh), intent(in) :: target
+  character(len=*), intent(in) :: name
+  real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
+  real(ESMF_KIND_R8), dimension(:), intent(in), optional :: defaultvalueList
+  character(len=*), intent(in), optional :: convention
+  character(len=*), intent(in), optional :: purpose
+  character(len=*), intent(in), optional :: attPackInstanceName
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(out), optional :: itemcount
+  logical, intent(out), optional :: isPresent
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc, ii, local_itemcount
+  logical :: local_isPresent
+  character(:), allocatable :: key
+  type(ESMF_Info) :: info
+  type(ESMF_InfoDescribe) :: eidesc
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  call ESMF_InfoFormatKey(key, name, localrc, convention=convention, purpose=purpose)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  info = eidesc%GetInfo(target, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  local_isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(isPresent)) isPresent = local_isPresent
+
+  if (present(defaultvalueList)) then
+    if (SIZE(defaultvalueList) /= SIZE(valueList)) then
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="SIZE(defaultvalueList) /= SIZE(valueList)", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  endif
+
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key, valueList, itemcount=local_itemcount, attnestflag=local_attnestflag, scalarToArray=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present(itemcount)) itemcount = local_itemcount
+  else
+    if (present(defaultvalueList)) then
+      do ii=1,size(defaultvalueList)
+        valueList(ii) = defaultvalueList(ii)
+      enddo
+      if (present(itemcount)) itemcount = size(defaultvalueList)
+    else
+      if (present(itemcount)) itemcount = 0
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_NOTSET, msg="The key '"//trim(name)//"' is not present and no default value is provided", &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  endif
+
+  deallocate(key)
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeGetObjMeshR8List
+
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeGetAttPackMeshI4List()"
+subroutine ESMF_AttributeGetAttPackMeshI4List(target, name, attpack, valueList, defaultvalueList, attnestflag, itemcount, isPresent, rc)
+  ! 39.11.9
+  type(ESMF_Mesh), intent(in) :: target
+  character(len=*), intent(in) :: name
+  type(ESMF_AttPack), intent(inout) :: attpack
+  integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
+  integer(ESMF_KIND_I4), dimension(:), intent(in), optional :: defaultvalueList
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(out), optional :: itemcount
+  logical, intent(out), optional :: isPresent
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc, ii, local_itemcount
+  logical :: local_isPresent
+  character(:), allocatable :: key
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  key = attpack%formatKey(name=name, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(isPresent)) isPresent = local_isPresent
+
+  if (present(defaultvalueList)) then
+    if (SIZE(defaultvalueList) /= SIZE(valueList)) then
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="SIZE(defaultvalueList) /= SIZE(valueList)", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  endif
+
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key, valueList, itemcount=local_itemcount, attnestflag=local_attnestflag, scalarToArray=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present(itemcount)) itemcount = local_itemcount
+  else
+    if (present(defaultvalueList)) then
+      do ii=1,size(defaultvalueList)
+        if (present(itemcount)) itemcount = 0
+        valueList(ii) = defaultvalueList(ii)
+      enddo
+      if (present(itemcount)) itemcount = SIZE(defaultvalueList)
+    else
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_NOTSET, msg="The key '"//TRIM(name)//"' is not present and no default value is provided", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  endif
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeGetAttPackMeshI4List
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeGetObjMeshI4List()"
+subroutine ESMF_AttributeGetObjMeshI4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
+  ! 39.11.13 - attPackInstanceName is NOOP
+  type(ESMF_Mesh), intent(in) :: target
+  character(len=*), intent(in) :: name
+  integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
+  integer(ESMF_KIND_I4), dimension(:), intent(in), optional :: defaultvalueList
+  character(len=*), intent(in), optional :: convention
+  character(len=*), intent(in), optional :: purpose
+  character(len=*), intent(in), optional :: attPackInstanceName
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(out), optional :: itemcount
+  logical, intent(out), optional :: isPresent
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc, ii, local_itemcount
+  logical :: local_isPresent
+  character(:), allocatable :: key
+  type(ESMF_Info) :: info
+  type(ESMF_InfoDescribe) :: eidesc
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  call ESMF_InfoFormatKey(key, name, localrc, convention=convention, purpose=purpose)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  info = eidesc%GetInfo(target, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  local_isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(isPresent)) isPresent = local_isPresent
+
+  if (present(defaultvalueList)) then
+    if (SIZE(defaultvalueList) /= SIZE(valueList)) then
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="SIZE(defaultvalueList) /= SIZE(valueList)", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  endif
+
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key, valueList, itemcount=local_itemcount, attnestflag=local_attnestflag, scalarToArray=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present(itemcount)) itemcount = local_itemcount
+  else
+    if (present(defaultvalueList)) then
+      do ii=1,size(defaultvalueList)
+        valueList(ii) = defaultvalueList(ii)
+      enddo
+      if (present(itemcount)) itemcount = size(defaultvalueList)
+    else
+      if (present(itemcount)) itemcount = 0
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_NOTSET, msg="The key '"//trim(name)//"' is not present and no default value is provided", &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  endif
+
+  deallocate(key)
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeGetObjMeshI4List
+
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeGetAttPackMeshI8List()"
+subroutine ESMF_AttributeGetAttPackMeshI8List(target, name, attpack, valueList, defaultvalueList, attnestflag, itemcount, isPresent, rc)
+  ! 39.11.9
+  type(ESMF_Mesh), intent(in) :: target
+  character(len=*), intent(in) :: name
+  type(ESMF_AttPack), intent(inout) :: attpack
+  integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
+  integer(ESMF_KIND_I8), dimension(:), intent(in), optional :: defaultvalueList
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(out), optional :: itemcount
+  logical, intent(out), optional :: isPresent
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc, ii, local_itemcount
+  logical :: local_isPresent
+  character(:), allocatable :: key
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  key = attpack%formatKey(name=name, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(isPresent)) isPresent = local_isPresent
+
+  if (present(defaultvalueList)) then
+    if (SIZE(defaultvalueList) /= SIZE(valueList)) then
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="SIZE(defaultvalueList) /= SIZE(valueList)", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  endif
+
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key, valueList, itemcount=local_itemcount, attnestflag=local_attnestflag, scalarToArray=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present(itemcount)) itemcount = local_itemcount
+  else
+    if (present(defaultvalueList)) then
+      do ii=1,size(defaultvalueList)
+        if (present(itemcount)) itemcount = 0
+        valueList(ii) = defaultvalueList(ii)
+      enddo
+      if (present(itemcount)) itemcount = SIZE(defaultvalueList)
+    else
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_NOTSET, msg="The key '"//TRIM(name)//"' is not present and no default value is provided", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  endif
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeGetAttPackMeshI8List
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeGetObjMeshI8List()"
+subroutine ESMF_AttributeGetObjMeshI8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
+  ! 39.11.13 - attPackInstanceName is NOOP
+  type(ESMF_Mesh), intent(in) :: target
+  character(len=*), intent(in) :: name
+  integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
+  integer(ESMF_KIND_I8), dimension(:), intent(in), optional :: defaultvalueList
+  character(len=*), intent(in), optional :: convention
+  character(len=*), intent(in), optional :: purpose
+  character(len=*), intent(in), optional :: attPackInstanceName
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(out), optional :: itemcount
+  logical, intent(out), optional :: isPresent
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc, ii, local_itemcount
+  logical :: local_isPresent
+  character(:), allocatable :: key
+  type(ESMF_Info) :: info
+  type(ESMF_InfoDescribe) :: eidesc
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  call ESMF_InfoFormatKey(key, name, localrc, convention=convention, purpose=purpose)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  info = eidesc%GetInfo(target, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  local_isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(isPresent)) isPresent = local_isPresent
+
+  if (present(defaultvalueList)) then
+    if (SIZE(defaultvalueList) /= SIZE(valueList)) then
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="SIZE(defaultvalueList) /= SIZE(valueList)", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  endif
+
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key, valueList, itemcount=local_itemcount, attnestflag=local_attnestflag, scalarToArray=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present(itemcount)) itemcount = local_itemcount
+  else
+    if (present(defaultvalueList)) then
+      do ii=1,size(defaultvalueList)
+        valueList(ii) = defaultvalueList(ii)
+      enddo
+      if (present(itemcount)) itemcount = size(defaultvalueList)
+    else
+      if (present(itemcount)) itemcount = 0
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_NOTSET, msg="The key '"//trim(name)//"' is not present and no default value is provided", &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  endif
+
+  deallocate(key)
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeGetObjMeshI8List
+
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeGetAttPackMeshCHList()"
+subroutine ESMF_AttributeGetAttPackMeshCHList(target, name, attpack, valueList, defaultvalueList, attnestflag, itemcount, isPresent, rc)
+  ! 39.11.9
+  type(ESMF_Mesh), intent(in) :: target
+  character(len=*), intent(in) :: name
+  type(ESMF_AttPack), intent(inout) :: attpack
+  character(len=*), dimension(:), intent(out) :: valueList
+  character(len=*), dimension(:), intent(in), optional :: defaultvalueList
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(out), optional :: itemcount
+  logical, intent(out), optional :: isPresent
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc, ii, local_itemcount
+  logical :: local_isPresent
+  character(:), allocatable :: key
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  key = attpack%formatKey(name=name, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(isPresent)) isPresent = local_isPresent
+
+  if (present(defaultvalueList)) then
+    if (SIZE(defaultvalueList) /= SIZE(valueList)) then
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="SIZE(defaultvalueList) /= SIZE(valueList)", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  endif
+
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key, valueList, itemcount=local_itemcount, attnestflag=local_attnestflag, scalarToArray=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present(itemcount)) itemcount = local_itemcount
+  else
+    if (present(defaultvalueList)) then
+      do ii=1,size(defaultvalueList)
+        if (present(itemcount)) itemcount = 0
+        valueList(ii) = defaultvalueList(ii)
+      enddo
+      if (present(itemcount)) itemcount = SIZE(defaultvalueList)
+    else
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_NOTSET, msg="The key '"//TRIM(name)//"' is not present and no default value is provided", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  endif
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeGetAttPackMeshCHList
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeGetObjMeshCHList()"
+subroutine ESMF_AttributeGetObjMeshCHList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
+  ! 39.11.13 - attPackInstanceName is NOOP
+  type(ESMF_Mesh), intent(in) :: target
+  character(len=*), intent(in) :: name
+  character(len=*), dimension(:), intent(out) :: valueList
+  character(len=*), dimension(:), intent(in), optional :: defaultvalueList
+  character(len=*), intent(in), optional :: convention
+  character(len=*), intent(in), optional :: purpose
+  character(len=*), intent(in), optional :: attPackInstanceName
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(out), optional :: itemcount
+  logical, intent(out), optional :: isPresent
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc, ii, local_itemcount
+  logical :: local_isPresent
+  character(:), allocatable :: key
+  type(ESMF_Info) :: info
+  type(ESMF_InfoDescribe) :: eidesc
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  call ESMF_InfoFormatKey(key, name, localrc, convention=convention, purpose=purpose)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  info = eidesc%GetInfo(target, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  local_isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(isPresent)) isPresent = local_isPresent
+
+  if (present(defaultvalueList)) then
+    if (SIZE(defaultvalueList) /= SIZE(valueList)) then
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="SIZE(defaultvalueList) /= SIZE(valueList)", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  endif
+
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key, valueList, itemcount=local_itemcount, attnestflag=local_attnestflag, scalarToArray=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present(itemcount)) itemcount = local_itemcount
+  else
+    if (present(defaultvalueList)) then
+      do ii=1,size(defaultvalueList)
+        valueList(ii) = defaultvalueList(ii)
+      enddo
+      if (present(itemcount)) itemcount = size(defaultvalueList)
+    else
+      if (present(itemcount)) itemcount = 0
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_NOTSET, msg="The key '"//trim(name)//"' is not present and no default value is provided", &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  endif
+
+  deallocate(key)
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeGetObjMeshCHList
+
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeGetAttPackMeshLGList()"
+subroutine ESMF_AttributeGetAttPackMeshLGList(target, name, attpack, valueList, defaultvalueList, attnestflag, itemcount, isPresent, rc)
+  ! 39.11.9
+  type(ESMF_Mesh), intent(in) :: target
+  character(len=*), intent(in) :: name
+  type(ESMF_AttPack), intent(inout) :: attpack
+  logical, dimension(:), intent(out) :: valueList
+  logical, dimension(:), intent(in), optional :: defaultvalueList
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(out), optional :: itemcount
+  logical, intent(out), optional :: isPresent
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc, ii, local_itemcount
+  logical :: local_isPresent
+  character(:), allocatable :: key
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  key = attpack%formatKey(name=name, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(isPresent)) isPresent = local_isPresent
+
+  if (present(defaultvalueList)) then
+    if (SIZE(defaultvalueList) /= SIZE(valueList)) then
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="SIZE(defaultvalueList) /= SIZE(valueList)", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  endif
+
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key, valueList, itemcount=local_itemcount, attnestflag=local_attnestflag, scalarToArray=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present(itemcount)) itemcount = local_itemcount
+  else
+    if (present(defaultvalueList)) then
+      do ii=1,size(defaultvalueList)
+        if (present(itemcount)) itemcount = 0
+        valueList(ii) = defaultvalueList(ii)
+      enddo
+      if (present(itemcount)) itemcount = SIZE(defaultvalueList)
+    else
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_NOTSET, msg="The key '"//TRIM(name)//"' is not present and no default value is provided", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  endif
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeGetAttPackMeshLGList
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeGetObjMeshLGList()"
+subroutine ESMF_AttributeGetObjMeshLGList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
+  ! 39.11.13 - attPackInstanceName is NOOP
+  type(ESMF_Mesh), intent(in) :: target
+  character(len=*), intent(in) :: name
+  logical, dimension(:), intent(out) :: valueList
+  logical, dimension(:), intent(in), optional :: defaultvalueList
+  character(len=*), intent(in), optional :: convention
+  character(len=*), intent(in), optional :: purpose
+  character(len=*), intent(in), optional :: attPackInstanceName
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(out), optional :: itemcount
+  logical, intent(out), optional :: isPresent
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc, ii, local_itemcount
+  logical :: local_isPresent
+  character(:), allocatable :: key
+  type(ESMF_Info) :: info
+  type(ESMF_InfoDescribe) :: eidesc
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  call ESMF_InfoFormatKey(key, name, localrc, convention=convention, purpose=purpose)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  info = eidesc%GetInfo(target, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  local_isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(isPresent)) isPresent = local_isPresent
+
+  if (present(defaultvalueList)) then
+    if (SIZE(defaultvalueList) /= SIZE(valueList)) then
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="SIZE(defaultvalueList) /= SIZE(valueList)", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  endif
+
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key, valueList, itemcount=local_itemcount, attnestflag=local_attnestflag, scalarToArray=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present(itemcount)) itemcount = local_itemcount
+  else
+    if (present(defaultvalueList)) then
+      do ii=1,size(defaultvalueList)
+        valueList(ii) = defaultvalueList(ii)
+      enddo
+      if (present(itemcount)) itemcount = size(defaultvalueList)
+    else
+      if (present(itemcount)) itemcount = 0
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_NOTSET, msg="The key '"//trim(name)//"' is not present and no default value is provided", &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  endif
+
+  deallocate(key)
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeGetObjMeshLGList
+
 !==============================================================================
 ! ESMF_AttributeGet (Inquire)
 !==============================================================================
@@ -38510,6 +41458,408 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackLocStream
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeGetCountMesh()"
+subroutine ESMF_AttributeGetCountMesh(target, count, keywordEnforcer, convention, purpose, attcountflag, attnestflag, rc)
+  ! 39.11.15
+  type(ESMF_Mesh), intent(in) :: target
+  integer, intent(inout) :: count
+type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+  character(len=*), intent(in), optional :: convention
+  character(len=*), intent(in), optional :: purpose
+  type(ESMF_AttGetCountFlag), intent(in), optional :: attcountflag
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(inout), optional :: rc
+
+  type(ESMF_Info) :: info
+  type(ESMF_AttGetCountFlag) :: l_attcountflag
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+  type(ESMF_InfoDescribe) :: eidesc
+  integer :: countSingle, countTotal, attPackCount, localrc, attPackCountTotal
+  character(:), allocatable :: key
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  if (present(attcountflag)) then
+    l_attcountflag = attcountflag
+  else
+    l_attcountflag = ESMF_ATTGETCOUNT_ATTRIBUTE
+  end if
+
+  if (present(convention)) then
+    call ESMF_InfoFormatKey(key, "", localrc, convention=convention, purpose=purpose)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    key = ""
+  end if
+
+  info = eidesc%GetInfo(target, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call ESMF_InfoGet(info, key=key, attrCount=countSingle, attrCountTotal=countTotal, &
+    attPackCount=attPackCount, attnestflag=local_attnestflag, attrCompliance=.true., &
+    rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(attcountflag)) then
+    l_attcountflag = attcountflag
+  else
+    l_attcountflag = ESMF_ATTGETCOUNT_ATTRIBUTE
+  end if
+
+  if (l_attcountflag%value==ESMF_ATTGETCOUNT_ATTRIBUTE%value) then
+    if (local_attnestflag%value==ESMF_ATTNEST_ON%value) then
+      count = countTotal
+    else
+      count = countSingle
+    end if
+  else if (l_attcountflag%value==ESMF_ATTGETCOUNT_TOTAL%value) then
+    count = countTotal
+  else if (l_attcountflag%value==ESMF_ATTGETCOUNT_ATTPACK%value) then
+    count = attPackCount
+  else
+    if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeGetCountMesh
+
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeGetCountAttPackMesh()"
+subroutine ESMF_AttributeGetCountAttPackMesh(target, attpack, count, keywordEnforcer, attcountflag, attnestflag, rc)
+  type(ESMF_Mesh), intent(in) :: target
+  type(ESMF_AttPack), intent(inout) :: attpack
+  integer, intent(inout) :: count
+type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+  type(ESMF_AttGetCountFlag), intent(in), optional :: attcountflag
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(inout), optional :: rc
+
+  type(ESMF_AttGetCountFlag) :: l_attcountflag
+  integer :: countSingle, countTotal, attPackCount, localrc
+  character(:), allocatable :: key
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  call ESMF_InfoGet(attpack%getPayload(), key=attpack%formatKey(), attrCount=countSingle, &
+    attrCountTotal=countTotal, attPackCount=attPackCount, attnestflag=local_attnestflag, &
+    attrCompliance=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(attcountflag)) then
+    l_attcountflag = attcountflag
+  else
+    l_attcountflag = ESMF_ATTGETCOUNT_ATTRIBUTE
+  end if
+
+  if (l_attcountflag%value==ESMF_ATTGETCOUNT_ATTRIBUTE%value) then
+    count = countSingle
+  else if (l_attcountflag%value==ESMF_ATTGETCOUNT_TOTAL%value) then
+    count = countTotal
+  else if (l_attcountflag%value==ESMF_ATTGETCOUNT_ATTPACK%value) then
+    count = attPackCount
+  else
+    if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeGetCountAttPackMesh
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeGetInfoByNamAPMesh()"
+subroutine ESMF_AttributeGetInfoByNamAPMesh(target, name, attpack, keywordEnforcer, attnestflag, typekind, itemCount, isPresent, rc)
+  ! 39.11.16
+  type(ESMF_Mesh), intent(in) :: target
+  character(len=*), intent(in) :: name
+  type(ESMF_AttPack), intent(inout) :: attpack
+type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
+  integer, intent(out), optional :: itemCount
+  logical, intent(out), optional :: isPresent
+  integer, intent(inout), optional :: rc
+
+  integer :: countSingle, localrc
+  character(:), allocatable :: key
+  logical :: is_present, is_structured, is_null
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  key = attpack%formatKey(name=name, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (.not. present(typekind) .and. .not. present(itemCount) .and. .not. present(isPresent)) then
+    if (ESMF_LogFoundError(ESMF_RC_ATTR_NOTSET, msg="Missing query argument. Nothing to do", ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
+
+  is_present = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(isPresent)) isPresent = is_present
+
+  if (is_present) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=itemCount, attnestflag=local_attnestflag, &
+      typekind=typekind, isStructured=is_structured, isNull=is_null, attrCompliance=.true., &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    if (.not. is_structured) then
+      if (present(itemCount)) then
+        if (is_null) then
+          itemCount = 0
+        else
+          itemCount = 1
+        endif
+      end if
+    end if
+  else
+    if (present(itemCount)) itemCount = 0
+    if (present(typekind)) typekind = ESMF_NOKIND
+  end if
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeGetInfoByNamAPMesh
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeGetInfoByNamMesh()"
+subroutine ESMF_AttributeGetInfoByNamMesh(target, name, keywordEnforcer, convention, purpose, attPackInstanceName, attnestflag, typekind, itemCount, isPresent, rc)
+  ! 39.11.17
+  type(ESMF_Mesh), intent(in) :: target
+  character(len=*), intent(in) :: name
+type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+  character(len=*), intent(in), optional :: convention
+  character(len=*), intent(in), optional :: purpose
+  character(len=*), intent(in), optional :: attPackInstanceName
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
+  integer, intent(out), optional :: itemCount
+  logical, intent(out), optional :: isPresent
+  integer, intent(inout), optional :: rc
+
+  integer :: countSingle, localrc
+  character(:), allocatable :: key
+  logical :: is_present, is_structured, is_null
+  type(ESMF_Info) :: info
+  type(ESMF_InfoDescribe) :: eidesc
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  call ESMF_InfoFormatKey(key, name, localrc, convention=convention, purpose=purpose)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (.not. present(typekind) .and. .not. present(itemCount) .and. .not. present(isPresent)) then
+    if (ESMF_LogFoundError(ESMF_RC_ATTR_NOTSET, msg="Missing query argument. Nothing to do", ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
+
+  info = eidesc%GetInfo(target, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  is_present = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(isPresent)) isPresent = is_present
+
+  if (is_present) then
+    call ESMF_InfoGet(info, key=key, size=itemCount, attnestflag=local_attnestflag, &
+      typekind=typekind, isStructured=is_structured, isNull=is_null, attrCompliance=.true., &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    if (.not. is_structured) then
+      if (present(itemCount)) then
+        if (is_null) then
+          itemCount = 0
+        else
+          itemCount = 1
+        endif
+      end if
+    end if
+  else
+    if (present(itemCount)) itemCount = 0
+    if (present(typekind)) typekind = ESMF_NOKIND
+  end if
+
+  deallocate(key)
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeGetInfoByNamMesh
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeGetInfoByNumMesh()"
+subroutine ESMF_AttributeGetInfoByNumMesh(target, attributeIndex, name, convention, purpose, attnestflag, typekind, itemCount, isPresent, rc)
+  ! 39.11.18: removed attPackInstanceName
+  type(ESMF_Mesh), intent(in) :: target
+  integer, intent(in) :: attributeIndex
+  character(len=*), intent(out) :: name
+  character(len=*), intent(in), optional :: convention
+  character(len=*), intent(in), optional :: purpose
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
+  integer, intent(out), optional :: itemCount
+  logical, intent(out), optional :: isPresent
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc
+  character(:), allocatable :: key
+  type(ESMF_Info) :: info
+  type(ESMF_InfoDescribe) :: eidesc
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+  logical :: is_structured, is_null
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  call ESMF_InfoFormatKey(key, "", localrc, convention=convention, purpose=purpose)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  info = eidesc%GetInfo(target, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call ESMF_InfoGet(info, key=key, size=itemCount, typekind=typekind, &
+    idx=attributeIndex, ikey=name, isPresent=isPresent, isNull=is_null, attnestflag=local_attnestflag, &
+    isStructured=is_structured, attrCompliance=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (.not. is_structured) then
+    if (present(itemCount)) then
+      if (is_null) then
+        itemCount = 0
+      else
+        itemCount = 1
+      endif
+    end if
+  end if
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeGetInfoByNumMesh
+
+!==============================================================================
+! ESMF_AttributeGetAttPack
+!==============================================================================
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeGetAttPackMesh()"
+subroutine ESMF_AttributeGetAttPackMesh(target, convention, purpose, keywordEnforcer, attpack, attnestflag, isPresent, rc)
+  ! 39.11.21
+  type(ESMF_Mesh), intent(in) :: target
+  character(len=*), intent(in) :: convention
+  character(len=*), intent(in) :: purpose
+type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+  type(ESMF_AttPack), intent(inout), optional :: attpack
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  logical, intent(out), optional :: isPresent
+  integer, intent(out), optional :: rc
+
+  integer :: localrc
+  character(:), allocatable :: key
+  logical :: is_present
+  type(ESMF_Info) :: info
+  type(ESMF_InfoDescribe) :: eidesc
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+  logical, parameter :: debug = .false.
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  info = eidesc%GetInfo(target, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (debug) then
+    call ESMF_LogWrite(ESMF_METHOD//": convention="//TRIM(convention))
+    call ESMF_LogWrite(ESMF_METHOD//": purpose="//TRIM(purpose))
+    call ESMF_LogWrite(ESMF_METHOD//": Info Dump="//ESMF_InfoDump(info, rc=localrc), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
+
+  key = "/"//TRIM(convention)//"/"//TRIM(purpose)
+  is_present = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(isPresent)) then
+    isPresent = is_present
+  end if
+
+  ! If the attpack object is provided but it does not exist, then bail out since
+  ! the attpack will never be initialized properly
+  if (.not. is_present) then
+    if (present(attpack)) then
+      if (.not. present(isPresent)) then
+        if (debug) then
+          call ESMF_LogWrite(ESMF_METHOD//": convention="//TRIM(convention))
+          call ESMF_LogWrite(ESMF_METHOD//": purpose="//TRIM(purpose))
+        end if
+        if (ESMF_LogFoundError(ESMF_RC_NOT_FOUND, msg="convention/purpose not found and attpack object present", &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      end if
+    end if
+  end if
+
+  if (is_present) then
+    if (present(attpack)) then
+      call attpack%initialize(info, convention=convention, purpose=purpose, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+      if (debug) then
+        call ESMF_LogWrite(ESMF_METHOD//": attpack%root_key="//TRIM(attpack%root_key), rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+      end if
+    end if
+  end if
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeGetAttPackMesh
 !==============================================================================
 ! ESMF_AttributeRemove
 !==============================================================================
@@ -39679,6 +43029,112 @@ subroutine ESMF_AttributeRemoveAttPackLocStream(target, name, attpack, conventio
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeRemoveAttPackLocStream
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeRemoveAttPackMesh()"
+subroutine ESMF_AttributeRemoveAttPackMesh(target, name, attpack, convention, purpose, attnestflag, rc)
+  ! 39.11.33- removed attpackinstancename
+  type(ESMF_Mesh), intent(inout) :: target
+  character(len=*), intent(in), optional :: name
+  type(ESMF_AttPack), intent(inout), optional :: attpack
+  character(len=*), intent(in), optional :: convention
+  character(len=*), intent(in), optional :: purpose
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc, purpsize
+  type(ESMF_InfoDescribe) :: eidesc
+  type(ESMF_Info) :: info
+  character(:), allocatable :: keyParent, keyChild, keyParent2, keyChild2
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+  logical, parameter :: debug = .false.
+  character(len=ESMF_MAXSTR) :: logmsg
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  if (present(attnestflag)) then
+    local_attnestflag = attnestflag
+  else
+    local_attnestflag = ESMF_ATTR_DEFAULT_ATTNEST
+  end if
+
+  ! If attpack, use target as info source
+  if (present(attpack)) then
+    info = attpack%getPayload()
+  else
+    ! If no attpack, use target as info source
+    info = eidesc%GetInfo(target, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
+
+  if (debug) then
+    call ESMF_LogWrite(ESMF_METHOD//": info dump=...", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_LogWrite(ESMF_InfoDump(info, rc=localrc), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
+
+  ! If a name is provided, use this as the key to remove
+  if (present(name)) then
+    keyChild = name
+
+    if (present(attpack)) then
+      keyParent = attpack%formatKey(rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      call ESMF_InfoFormatKey(keyParent, "", localrc, convention=convention, purpose=purpose)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    end if
+
+    call ESMF_InfoRemove(info, keyParent, keyChild=keyChild, attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! Otherwise, remove the whole attpack
+  else
+    if (.not. present(attpack)) then
+      if (.not. present(convention)) then
+        if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, msg="No name, attpack, or conv/purp provided. Nothing to remove.", &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        call ESMF_InfoRemove(info, TRIM(convention), keyChild=TRIM(purpose), attnestflag=local_attnestflag, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+        ! Check for conventions with no purposes
+        call ESMF_InfoGet(info, key=TRIM(convention), size=purpsize, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+        ! If there are no purposes, the convention is orphaned and should be removed
+        if (purpsize == 0) then
+          call ESMF_InfoRemove(info, "", keyChild=TRIM(convention), rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+        end if
+      end if
+    else
+      keyParent = attpack%formatKey(rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+      call parse_json_pointer(keyParent, keyParent2, keyChild2)
+
+      call ESMF_InfoRemove(info, keyParent2, keyChild=keyChild2, attnestflag=local_attnestflag, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Check for conventions with no purposes
+      call ESMF_InfoGet(info, key=TRIM(keyParent2), size=purpsize, attnestflag=local_attnestflag, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! If there are no purposes, the convention is orphaned and should be removed
+      if (purpsize == 0) then
+        call ESMF_InfoRemove(info, "", keyChild=TRIM(keyParent2(2:)), attnestflag=local_attnestflag, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+      end if
+    end if
+  endif
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeRemoveAttPackMesh
+
 !==============================================================================
 ! ESMF_AttributeCopy ==========================================================
 !==============================================================================
@@ -40375,6 +43831,69 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeCopyLocStreamToLocStream
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeCopyMeshToMesh"
+subroutine ESMF_AttributeCopyMeshToMesh(src, dst, keywordEnforcer, attcopy, rc)
+  type(ESMF_Mesh), intent(in) :: src
+  type(ESMF_Mesh), intent(inout) :: dst
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  type(ESMF_AttCopy_Flag), intent(in), optional :: attcopy
+  integer, intent(out), optional :: rc
+
+  integer :: localrc
+  type(ESMF_InfoDescribe) :: eidesc
+  type(ESMF_Info) :: isrc, idst
+  type(ESMF_AttCopy_Flag) :: local_attcopy
+  type(ESMF_Base) :: src_base, dst_base
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  if (present(attcopy)) then
+    local_attcopy = attcopy
+  else
+    local_attcopy = ESMF_ATTCOPY_VALUE
+  end if
+
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, src, localrc)
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, dst, localrc)
+
+  if (local_attcopy%value == ESMF_ATTCOPY_VALUE%value) then
+    isrc = eidesc%GetInfo(src, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    idst = eidesc%GetInfo(dst, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call c_info_copyforattribute(isrc%ptr, idst%ptr, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else if (local_attcopy%value == ESMF_ATTCOPY_REFERENCE%value) then
+    call eidesc%Initialize(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call eidesc%Update(src, "", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    src_base = eidesc%GetCurrentBase(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call eidesc%Update(dst, "", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    dst_base = eidesc%GetCurrentBase(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call eidesc%Destroy(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call c_info_copyforattribute_reference(src_base%this%ptr, dst_base%this%ptr, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    if (ESMF_LogFoundError(ESMF_FAILURE, msg="Flag not recognized", ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeCopyMeshToMesh
 !==============================================================================
 ! ESMF_AttributeRead ==========================================================
 !==============================================================================
@@ -40730,6 +44249,38 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeReadLocStream
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeReadMesh()"
+subroutine ESMF_AttributeReadMesh(target, filename, keywordenforcer, rc)
+  ! 39.11.32 - removed schemaFileName
+  type(ESMF_Mesh), intent(inout) :: target
+  character(len=*), intent(in) :: fileName
+type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc
+  type(ESMF_InfoDescribe) :: eidesc
+  type(ESMF_Info) :: isrc, idst
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  isrc = ESMF_InfoReadJSON(filename, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  idst = eidesc%GetInfo(target, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call ESMF_InfoDestroy(idst, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  idst%ptr = isrc%ptr
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeReadMesh
 
 !==============================================================================
 ! ESMF_AttributeUpdate
@@ -41381,6 +44932,53 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeWriteLocStream
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeWriteMesh()"
+subroutine ESMF_AttributeWriteMesh(target, filename, keywordenforcer, convention, purpose, attwriteflag, rc)
+  ! 39.11.42 - attwrite flag only supports JSON
+  type(ESMF_Mesh), intent(inout) :: target
+  character(len=*), intent(in) :: fileName
+type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+  character(len=*), intent(in), optional :: convention
+  character(len=*), intent(in), optional :: purpose
+  type(ESMF_AttWriteFlag), intent(in), optional :: attwriteflag
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc
+  type(ESMF_InfoDescribe) :: eidesc
+  type(ESMF_Info) :: info, isrc
+  character(:), allocatable :: key
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, target, rc)
+
+  isrc = eidesc%GetInfo(target, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(convention)) then
+    call ESMF_InfoFormatKey(key, "", localrc, convention=convention, purpose=purpose)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    info = ESMF_InfoCreate(isrc, key, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    info = isrc
+  endif
+
+  call ESMF_InfoWriteJSON(info, filename, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(convention)) then
+    deallocate(key)
+    call ESMF_InfoDestroy(info, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  endif
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeWriteMesh
 
 subroutine ESMF_AttPackStreamJSON(attpack, output, rc)
   type(ESMF_AttPack), intent(in) :: attpack

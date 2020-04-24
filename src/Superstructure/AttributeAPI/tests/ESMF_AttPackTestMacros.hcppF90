@@ -466,11 +466,11 @@
        ! Add a duplicate attpack. Ensure mappig is identical after adding. @\
        info_handle = ESMF_InfoGetHandle(mname, rc=rc) @\
        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT) @\
-       info_desired = ESMF_InfoCopy(info_handle, rc=rc) @\
+       info_desired = ESMF_InfoCreate(info_handle, rc=rc) @\
        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT) @\
        call ESMF_AttributeAdd(mname, convention=nestconv, purpose=nestpurp, & @\
          attrList=attpackListTNames2, nestConvention=conv, nestPurpose=purp, rc=rc) @\
-       info_actual = ESMF_InfoCopy(info_handle, rc=rc) @\
+       info_actual = ESMF_InfoCreate(info_handle, rc=rc) @\
        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT) @\
        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT) @\
        write(failMsg, *) "Did not return ESMF_SUCCESS" @\

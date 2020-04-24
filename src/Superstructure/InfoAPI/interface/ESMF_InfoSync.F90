@@ -91,6 +91,7 @@ interface ESMF_InfoGetHandle
   module procedure ESMF_InfoGetHandleGrid
   module procedure ESMF_InfoGetHandleState
   module procedure ESMF_InfoGetHandleLocStream
+  module procedure ESMF_InfoGetHandleMesh
 end interface
 
 contains !=====================================================================
@@ -102,8 +103,8 @@ contains !=====================================================================
 ! Note: Documentation stub located in ESMF_InfoMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoSyncState()"
-subroutine ESMF_InfoSyncState(target, rootPet, vm, keywordEnforcer, markClean, rc)
-  type(ESMF_State), intent(inout) :: target
+subroutine ESMF_InfoSyncState(host, rootPet, vm, keywordEnforcer, markClean, rc)
+  type(ESMF_State), intent(inout) :: host
   integer, intent(in) :: rootPet
   type(ESMF_VM), intent(in) :: vm
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -127,7 +128,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   call eidesc%Initialize(addBaseAddress=.true., addObjectInfo=.false., rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  call eidesc%Update(target, "", rc=localrc)
+  call eidesc%Update(host, "", rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   call c_info_base_sync(eidesc%info%ptr, rootPet, eptr%ptr, local_markClean, localrc)
@@ -142,8 +143,8 @@ end subroutine ESMF_InfoSyncState
 ! Note: Documentation stub located in ESMF_InfoMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoSyncCplComp()"
-subroutine ESMF_InfoSyncCplComp(target, rootPet, vm, keywordEnforcer, markClean, rc)
-  type(ESMF_CplComp), intent(inout) :: target
+subroutine ESMF_InfoSyncCplComp(host, rootPet, vm, keywordEnforcer, markClean, rc)
+  type(ESMF_CplComp), intent(inout) :: host
   integer, intent(in) :: rootPet
   type(ESMF_VM), intent(in) :: vm
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -167,7 +168,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   call eidesc%Initialize(addBaseAddress=.true., addObjectInfo=.false., rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  call eidesc%Update(target, "", rc=localrc)
+  call eidesc%Update(host, "", rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   call c_info_base_sync(eidesc%info%ptr, rootPet, eptr%ptr, local_markClean, localrc)
@@ -182,8 +183,8 @@ end subroutine ESMF_InfoSyncCplComp
 ! Note: Documentation stub located in ESMF_InfoMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoSyncGridComp()"
-subroutine ESMF_InfoSyncGridComp(target, rootPet, vm, keywordEnforcer, markClean, rc)
-  type(ESMF_GridComp), intent(inout) :: target
+subroutine ESMF_InfoSyncGridComp(host, rootPet, vm, keywordEnforcer, markClean, rc)
+  type(ESMF_GridComp), intent(inout) :: host
   integer, intent(in) :: rootPet
   type(ESMF_VM), intent(in) :: vm
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -207,7 +208,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   call eidesc%Initialize(addBaseAddress=.true., addObjectInfo=.false., rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  call eidesc%Update(target, "", rc=localrc)
+  call eidesc%Update(host, "", rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   call c_info_base_sync(eidesc%info%ptr, rootPet, eptr%ptr, local_markClean, localrc)
@@ -222,8 +223,8 @@ end subroutine ESMF_InfoSyncGridComp
 ! Note: Documentation stub located in ESMF_InfoMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoSyncSciComp()"
-subroutine ESMF_InfoSyncSciComp(target, rootPet, vm, keywordEnforcer, markClean, rc)
-  type(ESMF_SciComp), intent(inout) :: target
+subroutine ESMF_InfoSyncSciComp(host, rootPet, vm, keywordEnforcer, markClean, rc)
+  type(ESMF_SciComp), intent(inout) :: host
   integer, intent(in) :: rootPet
   type(ESMF_VM), intent(in) :: vm
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -247,7 +248,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   call eidesc%Initialize(addBaseAddress=.true., addObjectInfo=.false., rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  call eidesc%Update(target, "", rc=localrc)
+  call eidesc%Update(host, "", rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   call c_info_base_sync(eidesc%info%ptr, rootPet, eptr%ptr, local_markClean, localrc)
@@ -262,8 +263,8 @@ end subroutine ESMF_InfoSyncSciComp
 ! Note: Documentation stub located in ESMF_InfoMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoSyncField()"
-subroutine ESMF_InfoSyncField(target, rootPet, vm, keywordEnforcer, markClean, rc)
-  type(ESMF_Field), intent(inout) :: target
+subroutine ESMF_InfoSyncField(host, rootPet, vm, keywordEnforcer, markClean, rc)
+  type(ESMF_Field), intent(inout) :: host
   integer, intent(in) :: rootPet
   type(ESMF_VM), intent(in) :: vm
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -287,7 +288,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   call eidesc%Initialize(addBaseAddress=.true., addObjectInfo=.false., rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  call eidesc%Update(target, "", rc=localrc)
+  call eidesc%Update(host, "", rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   call c_info_base_sync(eidesc%info%ptr, rootPet, eptr%ptr, local_markClean, localrc)
@@ -302,8 +303,8 @@ end subroutine ESMF_InfoSyncField
 ! Note: Documentation stub located in ESMF_InfoMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoSyncFieldBundle()"
-subroutine ESMF_InfoSyncFieldBundle(target, rootPet, vm, keywordEnforcer, markClean, rc)
-  type(ESMF_FieldBundle), intent(inout) :: target
+subroutine ESMF_InfoSyncFieldBundle(host, rootPet, vm, keywordEnforcer, markClean, rc)
+  type(ESMF_FieldBundle), intent(inout) :: host
   integer, intent(in) :: rootPet
   type(ESMF_VM), intent(in) :: vm
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -327,7 +328,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   call eidesc%Initialize(addBaseAddress=.true., addObjectInfo=.false., rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  call eidesc%Update(target, "", rc=localrc)
+  call eidesc%Update(host, "", rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   call c_info_base_sync(eidesc%info%ptr, rootPet, eptr%ptr, local_markClean, localrc)
@@ -346,8 +347,8 @@ end subroutine ESMF_InfoSyncFieldBundle
 ! Note: Documentation stub located in ESMF_InfoMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoGetHandleArray()"
-function ESMF_InfoGetHandleArray(target, keywordEnforcer, rc) result(info)
-  type(ESMF_Array), intent(in) :: target
+function ESMF_InfoGetHandleArray(host, keywordEnforcer, rc) result(info)
+  type(ESMF_Array), intent(in) :: host
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(inout), optional :: rc
   type(ESMF_Info) :: info
@@ -357,7 +358,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-  info = eidesc%GetInfo(target, rc=localrc)
+  info = eidesc%GetInfo(host, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   if (present(rc)) rc = ESMF_SUCCESS
@@ -366,8 +367,8 @@ end function ESMF_InfoGetHandleArray
 ! Note: Documentation stub located in ESMF_InfoMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoGetHandleArrayBundle()"
-function ESMF_InfoGetHandleArrayBundle(target, keywordEnforcer, rc) result(info)
-  type(ESMF_ArrayBundle), intent(in) :: target
+function ESMF_InfoGetHandleArrayBundle(host, keywordEnforcer, rc) result(info)
+  type(ESMF_ArrayBundle), intent(in) :: host
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(inout), optional :: rc
   type(ESMF_Info) :: info
@@ -377,7 +378,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-  info = eidesc%GetInfo(target, rc=localrc)
+  info = eidesc%GetInfo(host, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   if (present(rc)) rc = ESMF_SUCCESS
@@ -386,8 +387,8 @@ end function ESMF_InfoGetHandleArrayBundle
 ! Note: Documentation stub located in ESMF_InfoMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoGetHandleCplComp()"
-function ESMF_InfoGetHandleCplComp(target, keywordEnforcer, rc) result(info)
-  type(ESMF_CplComp), intent(in) :: target
+function ESMF_InfoGetHandleCplComp(host, keywordEnforcer, rc) result(info)
+  type(ESMF_CplComp), intent(in) :: host
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(inout), optional :: rc
   type(ESMF_Info) :: info
@@ -397,7 +398,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-  info = eidesc%GetInfo(target, rc=localrc)
+  info = eidesc%GetInfo(host, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   if (present(rc)) rc = ESMF_SUCCESS
@@ -406,8 +407,8 @@ end function ESMF_InfoGetHandleCplComp
 ! Note: Documentation stub located in ESMF_InfoMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoGetHandleGridComp()"
-function ESMF_InfoGetHandleGridComp(target, keywordEnforcer, rc) result(info)
-  type(ESMF_GridComp), intent(in) :: target
+function ESMF_InfoGetHandleGridComp(host, keywordEnforcer, rc) result(info)
+  type(ESMF_GridComp), intent(in) :: host
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(inout), optional :: rc
   type(ESMF_Info) :: info
@@ -417,7 +418,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-  info = eidesc%GetInfo(target, rc=localrc)
+  info = eidesc%GetInfo(host, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   if (present(rc)) rc = ESMF_SUCCESS
@@ -426,8 +427,8 @@ end function ESMF_InfoGetHandleGridComp
 ! Note: Documentation stub located in ESMF_InfoMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoGetHandleSciComp()"
-function ESMF_InfoGetHandleSciComp(target, keywordEnforcer, rc) result(info)
-  type(ESMF_SciComp), intent(in) :: target
+function ESMF_InfoGetHandleSciComp(host, keywordEnforcer, rc) result(info)
+  type(ESMF_SciComp), intent(in) :: host
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(inout), optional :: rc
   type(ESMF_Info) :: info
@@ -437,7 +438,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-  info = eidesc%GetInfo(target, rc=localrc)
+  info = eidesc%GetInfo(host, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   if (present(rc)) rc = ESMF_SUCCESS
@@ -446,8 +447,8 @@ end function ESMF_InfoGetHandleSciComp
 ! Note: Documentation stub located in ESMF_InfoMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoGetHandleDistGrid()"
-function ESMF_InfoGetHandleDistGrid(target, keywordEnforcer, rc) result(info)
-  type(ESMF_DistGrid), intent(in) :: target
+function ESMF_InfoGetHandleDistGrid(host, keywordEnforcer, rc) result(info)
+  type(ESMF_DistGrid), intent(in) :: host
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(inout), optional :: rc
   type(ESMF_Info) :: info
@@ -457,7 +458,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-  info = eidesc%GetInfo(target, rc=localrc)
+  info = eidesc%GetInfo(host, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   if (present(rc)) rc = ESMF_SUCCESS
@@ -466,8 +467,8 @@ end function ESMF_InfoGetHandleDistGrid
 ! Note: Documentation stub located in ESMF_InfoMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoGetHandleField()"
-function ESMF_InfoGetHandleField(target, keywordEnforcer, rc) result(info)
-  type(ESMF_Field), intent(in) :: target
+function ESMF_InfoGetHandleField(host, keywordEnforcer, rc) result(info)
+  type(ESMF_Field), intent(in) :: host
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(inout), optional :: rc
   type(ESMF_Info) :: info
@@ -477,7 +478,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-  info = eidesc%GetInfo(target, rc=localrc)
+  info = eidesc%GetInfo(host, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   if (present(rc)) rc = ESMF_SUCCESS
@@ -486,8 +487,8 @@ end function ESMF_InfoGetHandleField
 ! Note: Documentation stub located in ESMF_InfoMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoGetHandleFieldBundle()"
-function ESMF_InfoGetHandleFieldBundle(target, keywordEnforcer, rc) result(info)
-  type(ESMF_FieldBundle), intent(in) :: target
+function ESMF_InfoGetHandleFieldBundle(host, keywordEnforcer, rc) result(info)
+  type(ESMF_FieldBundle), intent(in) :: host
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(inout), optional :: rc
   type(ESMF_Info) :: info
@@ -497,7 +498,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-  info = eidesc%GetInfo(target, rc=localrc)
+  info = eidesc%GetInfo(host, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   if (present(rc)) rc = ESMF_SUCCESS
@@ -506,8 +507,8 @@ end function ESMF_InfoGetHandleFieldBundle
 ! Note: Documentation stub located in ESMF_InfoMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoGetHandleGrid()"
-function ESMF_InfoGetHandleGrid(target, keywordEnforcer, rc) result(info)
-  type(ESMF_Grid), intent(in) :: target
+function ESMF_InfoGetHandleGrid(host, keywordEnforcer, rc) result(info)
+  type(ESMF_Grid), intent(in) :: host
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(inout), optional :: rc
   type(ESMF_Info) :: info
@@ -517,7 +518,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-  info = eidesc%GetInfo(target, rc=localrc)
+  info = eidesc%GetInfo(host, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   if (present(rc)) rc = ESMF_SUCCESS
@@ -526,8 +527,8 @@ end function ESMF_InfoGetHandleGrid
 ! Note: Documentation stub located in ESMF_InfoMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoGetHandleState()"
-function ESMF_InfoGetHandleState(target, keywordEnforcer, rc) result(info)
-  type(ESMF_State), intent(in) :: target
+function ESMF_InfoGetHandleState(host, keywordEnforcer, rc) result(info)
+  type(ESMF_State), intent(in) :: host
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(inout), optional :: rc
   type(ESMF_Info) :: info
@@ -537,7 +538,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-  info = eidesc%GetInfo(target, rc=localrc)
+  info = eidesc%GetInfo(host, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   if (present(rc)) rc = ESMF_SUCCESS
@@ -546,8 +547,8 @@ end function ESMF_InfoGetHandleState
 ! Note: Documentation stub located in ESMF_InfoMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoGetHandleLocStream()"
-function ESMF_InfoGetHandleLocStream(target, keywordEnforcer, rc) result(info)
-  type(ESMF_LocStream), intent(in) :: target
+function ESMF_InfoGetHandleLocStream(host, keywordEnforcer, rc) result(info)
+  type(ESMF_LocStream), intent(in) :: host
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(inout), optional :: rc
   type(ESMF_Info) :: info
@@ -557,10 +558,30 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-  info = eidesc%GetInfo(target, rc=localrc)
+  info = eidesc%GetInfo(host, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   if (present(rc)) rc = ESMF_SUCCESS
 end function ESMF_InfoGetHandleLocStream
+
+! Note: Documentation stub located in ESMF_InfoMod
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoGetHandleMesh()"
+function ESMF_InfoGetHandleMesh(host, keywordEnforcer, rc) result(info)
+  type(ESMF_Mesh), intent(in) :: host
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  integer, intent(inout), optional :: rc
+  type(ESMF_Info) :: info
+
+  integer :: localrc
+  type(ESMF_InfoDescribe) :: eidesc
+
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+  info = eidesc%GetInfo(host, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end function ESMF_InfoGetHandleMesh
 
 end module ESMF_InfoSyncMod

@@ -521,14 +521,14 @@ program ESMF_InfoUTest
 
   !----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "ESMF_InfoCopy"
+  write(name, *) "ESMF_InfoCreateFromInfo"
   write(failMsg, *) "Did not copy Info"
   rc = ESMF_FAILURE
 
   info_copy_src = ESMF_InfoCreate(rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  info_copy_dst = ESMF_InfoCopy(info_copy_src, rc=rc)
+  info_copy_dst = ESMF_InfoCreate(info_copy_src, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_InfoSet(info_copy_dst, "a-key", 22, rc=rc)

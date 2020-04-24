@@ -8,7 +8,7 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
-#define ESMC_FILENAME "./src/Infrastructure/Base/src/ESMCI_Info.C"
+#define ESMC_FILENAME "ESMCI_Info.C"
 
 // Attribute method implementation (body) file
 
@@ -225,6 +225,7 @@ void update_json_pointer(json &j, json **jdp, const json::json_pointer &key,
   // Test: test_update_json_pointer (for const overload)
   // Notes:
   // Throws: json::out_of_range when key not found
+  //tdk:todo: this should not be **jdp but just a single pointer
   try {
     *jdp = &(j.at(key));
   } catch (json::out_of_range &e) {
@@ -245,7 +246,7 @@ void update_json_pointer(json &j, json **jdp, const json::json_pointer &key,
 #define ESMC_METHOD "update_json_pointer(<const> + container)"
 void update_json_pointer(json &j, json **jdp, const json::json_pointer &key,
                          bool recursive, json **container) {
-  // Test: test_update_json_pointer (for const overload)
+  // Test: test_update_json_pointer
   // Notes:
   // Throws: json::out_of_range when key not found
   try {
@@ -1253,12 +1254,49 @@ template void Info::set<std::vector<std::string>>(key_t&, std::vector<std::strin
 #undef  ESMC_METHOD
 #define ESMC_METHOD "Info::update()"
 void Info::update(const Info &info) {
-  const json& r_j = info.getStorageRef();
   try {
-    this->getStorageRefWritable().update(r_j);
+    this->getStorageRefWritable().update(info.getStorageRef());
   }
   ESMF_INFO_CATCH_JSON;
   this->dirty = true;
+};
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "Info::update_for_attribute()"
+void do_update_for_attribute(json &to_update, const json &new_contents) {
+  //tdk:order
+  check_is_object(to_update);
+  check_is_object(new_contents);
+  for (json::const_iterator nc=new_contents.cbegin(); nc!=new_contents.cend(); nc++) {
+    const json *location_nc = nullptr;
+    json *location_tu = nullptr;
+    bool is_in = isIn(nc.key(), to_update);
+    if (is_in) {
+      if (nc.value().is_object()) {
+        do_update_for_attribute(to_update.at(nc.key()), nc.value());
+      } else {
+        to_update[nc.key()] = nc.value();
+      }
+    } else {
+      to_update[nc.key()] = nc.value();
+    }
+  }
+}
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "Info::update_for_attribute()"
+void Info::update_for_attribute(const Info &info) {
+  //tdk:doc:  check InfoUpdate docs to make sure the behavior is clear with replacement
+  // Test: test_update_for_attribute
+  // Throws: esmc_error
+  try {
+    const json &new_contents = info.getStorageRef();
+    json &to_update = this->getStorageRefWritable();
+    do_update_for_attribute(to_update, new_contents);
+  }
+  ESMF_INFO_CATCH_JSON;
+  //tdk:todo: should the dirty flag be set here?
+  this->dirty = false;
 };
 
 #undef  ESMC_METHOD
