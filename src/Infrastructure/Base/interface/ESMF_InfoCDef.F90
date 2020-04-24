@@ -13,7 +13,7 @@ interface
     use iso_c_binding
     implicit none
     type(C_PTR), value :: info
-    integer(C_INT), intent(inout) :: rc
+    integer(C_INT), intent(out) :: rc
     type(C_PTR) :: c_info_copy
   end function c_info_copy
 
@@ -22,7 +22,7 @@ interface
   function c_info_create(rc) bind(C, name="ESMC_InfoCreate")
     use iso_c_binding
     implicit none
-    integer(C_INT), intent(inout) :: rc
+    integer(C_INT), intent(out) :: rc
     type(C_PTR) :: c_info_create
   end function c_info_create
 
@@ -31,7 +31,7 @@ interface
     implicit none
     type(C_PTR), value, intent(in) :: srcInfo
     character(C_CHAR), intent(in) :: key(*)
-    integer(C_INT), intent(inout) :: rc
+    integer(C_INT), intent(out) :: rc
     type(C_PTR) :: c_info_create_by_key
   end function c_info_create_by_key
 
@@ -39,7 +39,7 @@ interface
     use iso_c_binding
     implicit none
     character(C_CHAR), intent(in) :: payload(*)
-    integer(C_INT), intent(inout) :: rc
+    integer(C_INT), intent(out) :: rc
     type(C_PTR) :: c_info_create_by_parse
   end function c_info_create_by_parse
 
@@ -50,7 +50,7 @@ interface
     implicit none
     type(C_PTR), value :: info
     integer(C_INT), intent(in) :: rootPet
-    integer(C_INT), intent(inout) :: rc
+    integer(C_INT), intent(out) :: rc
   end subroutine
 
   !=============================================================================
@@ -60,7 +60,7 @@ interface
     implicit none
     type(C_PTR), value :: isrc
     type(C_PTR), value :: idst
-    integer(C_INT), intent(inout) :: rc
+    integer(C_INT), intent(out) :: rc
   end subroutine
 
   subroutine c_info_copyforattribute_reference(src_base_address, dst_base_address, rc) bind(C, name="ESMC_InfoCopyForAttributeReference")
@@ -68,7 +68,7 @@ interface
     implicit none
     integer(C_LONG) :: src_base_address
     integer(C_LONG) :: dst_base_address
-    integer(C_INT), intent(inout) :: rc
+    integer(C_INT), intent(out) :: rc
   end subroutine
   
   !=============================================================================
@@ -77,7 +77,7 @@ interface
     use iso_c_binding
     implicit none
     type(C_PTR), value :: info
-    integer(C_INT), intent(inout) :: rc
+    integer(C_INT), intent(out) :: rc
   end subroutine c_info_destroy
 
   !=============================================================================
@@ -87,7 +87,7 @@ interface
     implicit none
     type(C_PTR), value :: info
     character(C_CHAR), intent(out) :: output(*)
-    integer(C_INT), intent(inout) :: rc
+    integer(C_INT), intent(out) :: rc
     integer(C_INT), intent(in) :: indent
   end subroutine c_info_dump
 
@@ -96,7 +96,7 @@ interface
     implicit none
     type(C_PTR), value :: info
     integer(C_INT), intent(out) :: dump_length
-    integer(C_INT), intent(inout) :: rc
+    integer(C_INT), intent(out) :: rc
     integer(C_INT), intent(in) :: indent
   end subroutine c_info_dump_len
 
@@ -109,7 +109,7 @@ interface
     character(C_CHAR), intent(in) :: keyParent(*)
     character(C_CHAR), intent(in) :: keyChild(*)
     logical(C_BOOL), intent(in) :: recursive
-    integer(C_INT), intent(inout) :: rc
+    integer(C_INT), intent(out) :: rc
   end subroutine c_info_erase
 
   !=============================================================================
@@ -123,7 +123,7 @@ interface
     integer(C_INT), intent(in) :: recursive
     type(C_PTR), value :: idx
     integer(C_INT), intent(in) :: attr_compliance
-    integer(C_INT), intent(inout) :: rc
+    integer(C_INT), intent(out) :: rc
   end subroutine c_info_inquire
 
   !=============================================================================
@@ -145,7 +145,7 @@ interface
     type(C_PTR), value :: info
     character(C_CHAR), intent(in) :: key(*)
     integer(C_INT), intent(inout) :: res
-    integer(C_INT), intent(inout) :: rc
+    integer(C_INT), intent(out) :: rc
     integer(C_INT), intent(in) :: recursive
     integer(C_INT), intent(in) :: isptr
   end subroutine c_info_is_present
@@ -158,17 +158,18 @@ interface
     type(C_PTR), value :: info
     character(C_CHAR), intent(in) :: key(*)
     integer(C_INT), intent(inout) :: is_set_c
-    integer(C_INT), intent(inout) :: rc
+    integer(C_INT), intent(out) :: rc
   end subroutine c_info_is_set
 
   !=============================================================================
 
-  subroutine c_info_update(lhs, rhs, rc) bind(C, name="ESMC_InfoUpdate")
+  subroutine c_info_update(lhs, rhs, attr_compliance_int, rc) bind(C, name="ESMC_InfoUpdate")
     use iso_c_binding
     implicit none
     type(C_PTR), value :: lhs
     type(C_PTR), value :: rhs
-    integer(C_INT), intent(inout) :: rc
+    integer(C_INT), intent(in) :: attr_compliance_int
+    integer(C_INT), intent(out) :: rc
   end subroutine c_info_update
 
   !=============================================================================
@@ -180,7 +181,7 @@ interface
     integer(C_INT), intent(in) :: rootPet
     integer(C_LONG), intent(in) :: vmAddress
     integer(C_INT), intent(in) :: markClean
-    integer(C_INT), intent(inout) :: rc
+    integer(C_INT), intent(out) :: rc
   end subroutine
 
   !=============================================================================
@@ -190,7 +191,7 @@ interface
     implicit none
     type(C_PTR), value :: info
     character(C_CHAR), intent(in) :: filename(*)
-    integer(C_INT), intent(inout) :: rc
+    integer(C_INT), intent(out) :: rc
   end subroutine c_info_read_json
 
   subroutine c_info_write_json(info, filename, rc) bind(C, name="ESMC_InfoWriteJSON")
@@ -198,7 +199,7 @@ interface
     implicit none
     type(C_PTR), value :: info
     character(C_CHAR), intent(in) :: filename(*)
-    integer(C_INT), intent(inout) :: rc
+    integer(C_INT), intent(out) :: rc
   end subroutine c_info_write_json
 
   !=============================================================================
@@ -210,7 +211,7 @@ interface
     character(C_CHAR), intent(in) :: key(*)
     character(C_CHAR), intent(inout) :: value(*)
     integer(C_INT), intent(in) :: vlen
-    integer(C_INT), intent(inout) :: rc
+    integer(C_INT), intent(out) :: rc
     type(C_PTR), value :: default, idx
     integer(C_INT), intent(in) :: recursive
     integer(C_INT), intent(in) :: strlen_only
@@ -225,7 +226,7 @@ interface
     character(kind=C_CHAR), intent(in) :: key(*)
     type(C_PTR), value :: value
     logical(C_BOOL), intent(in) :: force
-    integer(C_INT), intent(inout) :: rc
+    integer(C_INT), intent(out) :: rc
   end subroutine c_info_set_INFO
 
   subroutine c_info_set_NULL(info, key, force, rc) bind(C, name="ESMC_InfoSetNULL")
@@ -234,7 +235,7 @@ interface
     type(C_PTR), value :: info
     character(kind=C_CHAR), intent(in) :: key(*)
     logical(C_BOOL), intent(in) :: force
-    integer(C_INT), intent(inout) :: rc
+    integer(C_INT), intent(out) :: rc
   end subroutine c_info_set_NULL
 
   subroutine c_info_set_array_CH(info, key, itemcount, force, rc, pkey) bind(C, name="ESMC_InfoSetArrayCH")
@@ -244,7 +245,7 @@ interface
     character(kind=C_CHAR), intent(in) :: key(*)
     integer(C_INT), intent(in) :: itemcount
     logical(C_BOOL), intent(in) :: force
-    integer(C_INT), intent(inout) :: rc
+    integer(C_INT), intent(out) :: rc
     character(kind=C_CHAR), intent(in) :: pkey(*)
   end subroutine c_info_set_array_CH
 
@@ -255,7 +256,7 @@ interface
     implicit none
     type(C_PTR), value :: info
     integer(C_INT), intent(in) :: flag
-    integer(C_INT), intent(in) :: rc
+    integer(C_INT), intent(out) :: rc
   end subroutine c_info_set_dirty
 
 end interface

@@ -4336,11 +4336,12 @@ end subroutine ESMF_InfoPrint
 ! !IROUTINE: ESMF_InfoUpdate - Update the contents of an Info object
 !
 ! !INTERFACE:
-subroutine ESMF_InfoUpdate(lhs, rhs, keywordEnforcer, rc)
+subroutine ESMF_InfoUpdate(lhs, rhs, keywordEnforcer, attr_compliance, rc)
 ! !ARGUMENTS:
   type(ESMF_Info), intent(inout) :: lhs
   type(ESMF_Info), intent(in) :: rhs
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  logical, intent(in), optional :: attr_compliance
   integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -4362,11 +4363,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 
   integer :: localrc
+  integer :: attr_compliance_int
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_FAILURE
+  attr_compliance_int = 0  ! .false.
+  if (present(attr_compliance)) then
+    if (attr_compliance) then
+      attr_compliance_int = 1  ! .true.
+    end if
+  end if
 
-  call c_info_update(lhs%ptr, rhs%ptr, localrc)
+  call c_info_update(lhs%ptr, rhs%ptr, attr_compliance_int, localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   if (present(rc)) rc = ESMF_SUCCESS

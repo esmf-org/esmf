@@ -1311,7 +1311,7 @@ contains
     integer :: mypet, npets
     integer :: offset
     type(ESMF_InquireFlag) :: inqflag
-    type(ESMF_Info) :: lhs, rhs
+    type(ESMF_Info) :: base_info, base_temp_info
 
     logical, parameter :: debug = .false.
 
@@ -1420,9 +1420,10 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        lhs = ESMF_InfoBaseGetHandle(base_temp)
-        rhs = ESMF_InfoBaseGetHandle(base)
-        call ESMF_InfoUpdate(lhs, rhs, rc=localrc)
+        base_temp_info = ESMF_InfoBaseGetHandle(base_temp)
+        base_info = ESMF_InfoBaseGetHandle(base)
+        call ESMF_InfoUpdate(base_info, base_temp_info, attr_compliance=.true., &
+          rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
