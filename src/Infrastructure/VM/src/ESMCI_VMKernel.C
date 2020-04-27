@@ -58,6 +58,7 @@
 #else
 #include <csignal>
 #endif
+#include <limits.h>
 
 using namespace std;
 
@@ -1254,6 +1255,20 @@ void *VMK::startup(class VMKPlan *vmp,
 #if (VERBOSITY > 9)
   vmp->vmkplan_print();
 #endif
+  
+  {
+    size_t default_stack_size;
+    pthread_attr_t pthreadAttrs;
+    pthread_attr_init(&pthreadAttrs);
+    pthread_attr_getstacksize(&pthreadAttrs, &default_stack_size);
+    std::stringstream msg;
+    msg << "PTHREAD_STACK_MIN: " << PTHREAD_STACK_MIN
+      << "  _POSIX_THREAD_ATTR_STACKSIZE: " << _POSIX_THREAD_ATTR_STACKSIZE
+      << "  default_stack_size: " << default_stack_size;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
+  
+  
   // enter a vm derived from current vm according to the VMKPlan
   // need as many spawn_args as there are threads to be spawned from this pet
   // this is so that each spawned thread does not have to be worried about this
