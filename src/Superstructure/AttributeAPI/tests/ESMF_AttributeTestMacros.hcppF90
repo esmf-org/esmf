@@ -1939,6 +1939,15 @@
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
       !------------------------------------------------------------------------ @\
  @\
+       !mtag_nex @\
+       ! Copy mdesc Attribute by reference to self Test @\
+       call ESMF_AttributeCopy(mname##A, mname##A, & @\
+         attcopy=ESMF_ATTCOPY_REFERENCE, rc=rc) @\
+       write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+       write(name, *) "Copy mdesc Attribute by reference to self Test" @\
+       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+       !------------------------------------------------------------------------ @\
+  @\
       call mobj##Destroy(mname##A, rc=rc) @\
       call mobj##Destroy(mname##Alias, rc=rc) @\
       call mobj##Destroy(mname##Hybrid, rc=rc) @\

@@ -43175,7 +43175,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call c_info_copyforattribute(isrc%ptr, idst%ptr, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else if (local_attcopy%value == ESMF_ATTCOPY_REFERENCE%value) then
-    call eidesc%Initialize(rc=localrc)
+    call eidesc%Initialize(createInfo=.false., rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
     call eidesc%Update(src, "", rc=localrc)
@@ -43238,7 +43238,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call c_info_copyforattribute(isrc%ptr, idst%ptr, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else if (local_attcopy%value == ESMF_ATTCOPY_REFERENCE%value) then
-    call eidesc%Initialize(rc=localrc)
+    call eidesc%Initialize(createInfo=.false., rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
     call eidesc%Update(src, "", rc=localrc)
@@ -43301,7 +43301,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call c_info_copyforattribute(isrc%ptr, idst%ptr, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else if (local_attcopy%value == ESMF_ATTCOPY_REFERENCE%value) then
-    call eidesc%Initialize(rc=localrc)
+    call eidesc%Initialize(createInfo=.false., rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
     call eidesc%Update(src, "", rc=localrc)
@@ -43364,7 +43364,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call c_info_copyforattribute(isrc%ptr, idst%ptr, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else if (local_attcopy%value == ESMF_ATTCOPY_REFERENCE%value) then
-    call eidesc%Initialize(rc=localrc)
+    call eidesc%Initialize(createInfo=.false., rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
     call eidesc%Update(src, "", rc=localrc)
@@ -43427,7 +43427,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call c_info_copyforattribute(isrc%ptr, idst%ptr, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else if (local_attcopy%value == ESMF_ATTCOPY_REFERENCE%value) then
-    call eidesc%Initialize(rc=localrc)
+    call eidesc%Initialize(createInfo=.false., rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
     call eidesc%Update(src, "", rc=localrc)
@@ -43490,7 +43490,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call c_info_copyforattribute(isrc%ptr, idst%ptr, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else if (local_attcopy%value == ESMF_ATTCOPY_REFERENCE%value) then
-    call eidesc%Initialize(rc=localrc)
+    call eidesc%Initialize(createInfo=.false., rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
     call eidesc%Update(src, "", rc=localrc)
@@ -43553,7 +43553,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call c_info_copyforattribute(isrc%ptr, idst%ptr, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else if (local_attcopy%value == ESMF_ATTCOPY_REFERENCE%value) then
-    call eidesc%Initialize(rc=localrc)
+    call eidesc%Initialize(createInfo=.false., rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
     call eidesc%Update(src, "", rc=localrc)
@@ -43616,7 +43616,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call c_info_copyforattribute(isrc%ptr, idst%ptr, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else if (local_attcopy%value == ESMF_ATTCOPY_REFERENCE%value) then
-    call eidesc%Initialize(rc=localrc)
+    call eidesc%Initialize(createInfo=.false., rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
     call eidesc%Update(src, "", rc=localrc)
@@ -43679,7 +43679,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call c_info_copyforattribute(isrc%ptr, idst%ptr, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else if (local_attcopy%value == ESMF_ATTCOPY_REFERENCE%value) then
-    call eidesc%Initialize(rc=localrc)
+    call eidesc%Initialize(createInfo=.false., rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
     call eidesc%Update(src, "", rc=localrc)
@@ -43742,7 +43742,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call c_info_copyforattribute(isrc%ptr, idst%ptr, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else if (local_attcopy%value == ESMF_ATTCOPY_REFERENCE%value) then
-    call eidesc%Initialize(rc=localrc)
+    call eidesc%Initialize(createInfo=.false., rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
     call eidesc%Update(src, "", rc=localrc)
@@ -43805,7 +43805,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call c_info_copyforattribute(isrc%ptr, idst%ptr, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else if (local_attcopy%value == ESMF_ATTCOPY_REFERENCE%value) then
-    call eidesc%Initialize(rc=localrc)
+    call eidesc%Initialize(createInfo=.false., rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
     call eidesc%Update(src, "", rc=localrc)
@@ -43868,7 +43868,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call c_info_copyforattribute(isrc%ptr, idst%ptr, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else if (local_attcopy%value == ESMF_ATTCOPY_REFERENCE%value) then
-    call eidesc%Initialize(rc=localrc)
+    call eidesc%Initialize(createInfo=.false., rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
     call eidesc%Update(src, "", rc=localrc)
