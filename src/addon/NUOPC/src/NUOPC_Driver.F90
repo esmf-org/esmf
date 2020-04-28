@@ -2468,7 +2468,7 @@ module NUOPC_Driver
           if (btest(verbosity,11)) then
             write(msgString, "(A,I4,A)") &
               trim(name)//": component ", i, "="//trim(compName)//&
-              ", dataComplete: "//trim(valueString)
+              ", dataComplete (local): "//trim(valueString)
             call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -2492,6 +2492,15 @@ module NUOPC_Driver
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) &
             return  ! bail out
+
+          if (btest(verbosity,11)) then
+            write(msgString, "(A,I4,A,L)") &
+              trim(name)//": component ", i, "="//trim(compName)//&
+              ", dataComplete (global): ", (helperOut==petCount)
+            call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
 
           if (helperOut == petCount) cycle ! skip to next i
           allComplete = .false. ! hit toggles -> prevents exit on outer loop
@@ -2566,6 +2575,15 @@ module NUOPC_Driver
             line=__LINE__, file=trim(name)//":"//FILENAME)) &
             return  ! bail out
           
+          if (btest(verbosity,11)) then
+            write(msgString, "(A,I4,A)") &
+              trim(name)//": component ", i, "="//trim(compName)//&
+              ", someProgress (local): "//trim(valueString)
+            call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
+
           ! make sure there is a consistent view across all PETs
           helperIn = 0
           if (trim(valueString)=="true") helperIn = 1
@@ -2577,6 +2595,15 @@ module NUOPC_Driver
             
           if (helperOut > 0) someProgress=.true. ! toggle flag
             
+          if (btest(verbosity,11)) then
+            write(msgString, "(A,I4,A,L)") &
+              trim(name)//": component ", i, "="//trim(compName)//&
+              ", someProgress (global): ", someProgress
+            call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
+
         endif
       enddo
       
