@@ -305,6 +305,7 @@ class VMK{
     
     // get() calls
     int getLocalPet() const {return mypet;}
+    int getLocalPe() const;
     int getPetCount() const {return npets;}
     int getSsiCount() const {return ssiCount;}
     int getSsiMinPetCount() const {return ssiMinPetCount;}

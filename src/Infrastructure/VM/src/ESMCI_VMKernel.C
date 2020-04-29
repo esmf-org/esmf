@@ -45,6 +45,11 @@
 #undef _XOPEN_SOURCE_EXTENDED
 #endif
 
+// Where available use the sched header
+#if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
+#include <sched.h>
+#endif
+
 // Standard headers
 #include <cstdio>
 #include <cstdlib>
@@ -2107,6 +2112,14 @@ void VMK::print()const{
   printf("--- VMK::print() end ---\n");
 }
 
+
+int VMK::getLocalPe()const{
+#if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
+  return sched_getcpu();
+#else
+  return -1;
+#endif
+}
 
 int VMK::getNpets(){
   return npets;
