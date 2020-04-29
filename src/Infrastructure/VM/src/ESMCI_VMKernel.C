@@ -86,6 +86,9 @@ using namespace std;
 // Note that SIGUSR2 interferes with LAM!
 #endif
 #endif
+// Pthread stack sizes
+#define VM_PTHREAD_STACKSIZE_SERVICE  (4194304) //  4MiB for service threads
+#define VM_PTHREAD_STACKSIZE_USER    (20971520) // 20MiB for user threads
 
 #if defined (ESMF_OS_MinGW)
 // Windows equivalent to POSIX getpid(2)
@@ -137,7 +140,8 @@ typedef struct{
   int released;
 }vmkt_t;
 
-int vmkt_create(vmkt_t *vmkt, void *(*vmkt_spawn)(void *), void *arg){
+int vmkt_create(vmkt_t *vmkt, void *(*vmkt_spawn)(void *), void *arg,
+  bool service){
   vmkt->flag = 0;     // initialize
   vmkt->released = 0; // initialize
 #ifndef ESMF_NO_PTHREADS
@@ -153,6 +157,33 @@ int vmkt_create(vmkt_t *vmkt, void *(*vmkt_spawn)(void *), void *arg){
   pthread_mutex_init(&(vmkt->mut_extra2), NULL);
   pthread_mutex_lock(&(vmkt->mut_extra2));
   pthread_cond_init(&(vmkt->cond_extra2), NULL);
+  if (_POSIX_THREAD_ATTR_STACKSIZE){
+    // this Pthread implementation supports stack size attribute
+    pthread_attr_t pthreadAttrs;
+    pthread_attr_init(&pthreadAttrs);
+    if (service){
+      // setting stack size for a service thread
+      pthread_attr_setstacksize(&pthreadAttrs,
+        (size_t)VM_PTHREAD_STACKSIZE_SERVICE);
+    }else{
+      // setting stack size for a user thread
+      size_t default_stack_size;
+      pthread_attr_getstacksize(&pthreadAttrs, &default_stack_size);
+      if (default_stack_size < (size_t)VM_PTHREAD_STACKSIZE_USER){
+        pthread_attr_setstacksize(&pthreadAttrs,
+          (size_t)VM_PTHREAD_STACKSIZE_USER);
+      }
+    }
+#if (VERBOSITY > 0)
+    size_t stack_size;
+    pthread_attr_getstacksize(&pthreadAttrs, &stack_size);
+    std::stringstream msg;
+    msg << "service: " << service
+      << "  PTHREAD_STACK_MIN: " << PTHREAD_STACK_MIN << " bytes"
+      << "  stack_size: " << stack_size << " bytes";
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+#endif
+  }
   int error = pthread_create(&(vmkt->tid), NULL, vmkt_spawn, arg);
   if (!error){ // only wait if the thread was successfully created
     pthread_cond_wait(&(vmkt->cond0), &(vmkt->mut0));   // back-sync #1
@@ -1255,20 +1286,6 @@ void *VMK::startup(class VMKPlan *vmp,
 #if (VERBOSITY > 9)
   vmp->vmkplan_print();
 #endif
-  
-  {
-    size_t default_stack_size;
-    pthread_attr_t pthreadAttrs;
-    pthread_attr_init(&pthreadAttrs);
-    pthread_attr_getstacksize(&pthreadAttrs, &default_stack_size);
-    std::stringstream msg;
-    msg << "PTHREAD_STACK_MIN: " << PTHREAD_STACK_MIN
-      << "  _POSIX_THREAD_ATTR_STACKSIZE: " << _POSIX_THREAD_ATTR_STACKSIZE
-      << "  default_stack_size: " << default_stack_size;
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
-  }
-  
-  
   // enter a vm derived from current vm according to the VMKPlan
   // need as many spawn_args as there are threads to be spawned from this pet
   // this is so that each spawned thread does not have to be worried about this
@@ -1407,11 +1424,12 @@ void *VMK::startup(class VMKPlan *vmp,
             if (mypet==k){
               // mypet (k) contributes to this pet (i)
               // mypet does not spawn but contributes -> spawn blocker thread
-              *rc = vmkt_create(&(sarg[0].vmkt), vmk_block, (void *)&sarg[0]);
+              *rc = vmkt_create(&(sarg[0].vmkt), vmk_block, (void *)&sarg[0],
+                true);  // service thread
               if (*rc) return NULL;  // could not create pthread -> bail out
               // also spawn sigcatcher thread
-              *rc = vmkt_create(&(sarg[0].vmkt_extra), vmk_sigcatcher, 
-                (void *)&sarg[0]);
+              *rc = vmkt_create(&(sarg[0].vmkt_extra), vmk_sigcatcher,
+                (void *)&sarg[0], true);  // service thread
 #if (VERBOSITY > 5)
               fprintf(stderr, "parent thread is back from vmkt_create()s "
                 "for vmk_block and vmk_sigcatcher\n");
@@ -1881,7 +1899,8 @@ void *VMK::startup(class VMKPlan *vmp,
       // ...finally spawn threads from this pet...
       // in the thread-based case the VM cannot be constructured until the
       // pthreadID is known!
-      *rc = vmkt_create(&(sarg[i].vmkt), vmk_spawn, (void *)&sarg[i]);
+      *rc = vmkt_create(&(sarg[i].vmkt), vmk_spawn, (void *)&sarg[i],
+        false); // not a service thread
       if (*rc) return NULL;  // could not create pthread -> bail out
     }
   }
