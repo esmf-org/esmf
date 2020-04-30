@@ -2531,17 +2531,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   subroutine ESMF_ArrayBundleSMM(srcArrayBundle, dstArrayBundle, &
-    routehandle, keywordEnforcer, zeroregion, termorderflag, checkflag, rc)
+    routehandle, keywordEnforcer, &
+    zeroregion, & ! DEPRECATED ARGUMENT
+    zeroregionflag, termorderflag, checkflag, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle),    intent(in),    optional :: srcArrayBundle
-    type(ESMF_ArrayBundle),    intent(inout), optional :: dstArrayBundle
-    type(ESMF_RouteHandle),    intent(inout)           :: routehandle
+    type(ESMF_ArrayBundle),    intent(in),         optional :: srcArrayBundle
+    type(ESMF_ArrayBundle),    intent(inout),      optional :: dstArrayBundle
+    type(ESMF_RouteHandle),    intent(inout)                :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Region_Flag),    intent(in),    optional :: zeroregion
-    type(ESMF_TermOrder_Flag), intent(in),    optional :: termorderflag(:)
-    logical,                   intent(in),    optional :: checkflag
-    integer,                   intent(out),   optional :: rc
+    type(ESMF_Region_Flag),    intent(in), optional :: zeroregion ! DEPRECATED ARGUMENT
+    type(ESMF_Region_Flag),    intent(in), target, optional :: zeroregionflag(:)
+    type(ESMF_TermOrder_Flag), intent(in), target, optional :: termorderflag(:)
+    logical,                   intent(in),         optional :: checkflag
+    integer,                   intent(out),        optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -2551,6 +2554,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[7.0.0] Added argument {\tt termorderflag}.
 !              The new argument gives the user control over the order in which
 !              the src terms are summed up.
+! \item[8.1.0] Added argument {\tt zeroregionflag}, and deprecated
+!              {\tt zeroregion}. The new argument allows greater flexibility
+!              in setting the zero region for individual ArrayBundle members.
 ! \end{description}
 ! \end{itemize}
 !
@@ -2574,7 +2580,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     {\tt ESMF\_ArrayBundle} with destination data.
 !   \item [routehandle]
 !     Handle to the precomputed Route.
-!   \item [{[zeroregion]}]
+!   \item [{[zeroregion]}] 
 !     If set to {\tt ESMF\_REGION\_TOTAL} {\em (default)} the total regions of 
 !     all DEs in all Arrays in {\tt dstArrayBundle} will be initialized to zero 
 !     before updating the elements with the results of the sparse matrix 
@@ -2585,6 +2591,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     zero out those elements in the destination Arrays that will be updated
 !     by the sparse matrix multiplication. See section \ref{const:region}
 !     for a complete list of valid settings.
+!   \item [{[zeroregionflag]}] 
+!     If set to {\tt ESMF\_REGION\_TOTAL} {\em (default)} the total regions of 
+!     all DEs in the destination Array will be initialized to zero 
+!     before updating the elements with the results of the sparse matrix 
+!     multiplication. If set to {\tt ESMF\_REGION\_EMPTY} the elements in the
+!     destination Array will not be modified prior to the sparse
+!     matrix multiplication and results will be added to the incoming element
+!     values. A setting of {\tt ESMF\_REGION\_SELECT} will only
+!     zero out those elements in the destination Array that will be updated
+!     by the sparse matrix multiplication. See section \ref{const:region}
+!     for a complete list of valid settings.
+!     The size of this array argument must either be 1 or equal the number of
+!     Arrays in the {\tt srcArrayBundle} and {\tt dstArrayBundle} arguments. In
+!     the latter case, the zero region for each Array SMM operation is
+!     indicated separately. If only one zero region element is specified, it is
+!     used for {\em all} Array pairs.
 !   \item [{[termorderflag]}]
 !     Specifies the order of the source side terms in all of the destination
 !     sums. The {\tt termorderflag} only affects the order of terms during 
@@ -2614,7 +2636,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                   :: localrc      ! local return code
     type(ESMF_ArrayBundle)    :: opt_srcArrayBundle ! helper variable
     type(ESMF_ArrayBundle)    :: opt_dstArrayBundle ! helper variable
-    type(ESMF_Region_Flag)    :: opt_zeroregion     ! helper variable
+    type(ESMF_Region_Flag), pointer    :: opt_zeroregion(:) ! helper variable
+    type(ESMF_Region_Flag), target     :: def_zeroregion(1) ! helper variable
+    type(ESMF_TermOrder_Flag), pointer :: opt_termorder(:)  ! helper variable
+    type(ESMF_TermOrder_Flag), target  :: def_termorder(1)  ! helper variable
     type(ESMF_Logical)        :: opt_checkflag      ! helper variable
     integer                   :: zeroRegionFlag_len ! helper variable
     integer                   :: termOrderFlag_len  ! helper variable
@@ -2641,32 +2666,58 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
-    
-    ! Set default flags
-    opt_zeroregion = ESMF_REGION_TOTAL
-    if (present(zeroregion)) opt_zeroregion = zeroregion
+
+    ! Deal with optional arguments and defaults
+    ! - zeroregionflag
+    def_zeroregion = ESMF_REGION_TOTAL
+    if (present(zeroregionflag)) then
+      if (size(zeroregionflag)==0) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
+          msg="Size of 'zeroregionflag' argument must not be zero.", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return ! bail out
+      endif
+      opt_zeroregion => zeroregionflag
+    else
+      opt_zeroregion => def_zeroregion
+    endif
+    zeroRegionFlag_len = size(opt_zeroregion)
+    ! - termorderflag
+    def_termorder = ESMF_TERMORDER_FREE
+    if (present(termorderflag)) then
+      if (size(termorderflag)==0) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
+          msg="Size of 'termorderflag' argument must not be zero.", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return ! bail out
+      endif
+      opt_termorder => termorderflag
+    else
+      opt_termorder => def_termorder
+    endif
+    termOrderFlag_len = size(opt_termorder)
+    ! - checkflag
     opt_checkflag = ESMF_FALSE
     if (present(checkflag)) opt_checkflag = checkflag
     
-    zeroRegionFlag_len = 1
-    
-    if (present(termorderflag)) then
-      termOrderFlag_len = size(termorderflag)
-      ! Call into the C++ interface, which will sort out optional arguments
-      call c_ESMC_ArrayBundleSMM(opt_srcArrayBundle, opt_dstArrayBundle,&
-        routehandle, opt_zeroregion, zeroRegionFlag_len, termorderflag, &
-        termOrderFlag_len, opt_checkflag, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    else
-      termOrderFlag_len = 0
-      ! Call into the C++ interface, which will sort out optional arguments
-      call c_ESMC_ArrayBundleSMM(opt_srcArrayBundle, opt_dstArrayBundle,&
-        routehandle, opt_zeroregion, zeroRegionFlag_len, termOrderFlag_len, &
-        termOrderFlag_len, opt_checkflag, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
+    !TODO: remove this block once 'zeroregion' has been removed from API
+    ! Handle deprecated 'zeroregion' argument while still supported
+    if (present(zeroregion)) then
+      if (present(zeroregionflag)) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+          msg="The 'zeroregion' and 'zeroregionflag' arguments must not both"//&
+          " be specified.", ESMF_CONTEXT, rcToReturn=rc)
+        return ! bail out
+      endif
+      def_zeroregion = zeroregion
     endif
+    
+    ! Call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_ArrayBundleSMM(opt_srcArrayBundle, opt_dstArrayBundle,&
+      routehandle, opt_zeroregion(1), zeroRegionFlag_len, opt_termorder(1), &
+      termOrderFlag_len, opt_checkflag, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
