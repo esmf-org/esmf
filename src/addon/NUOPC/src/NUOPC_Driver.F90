@@ -2155,7 +2155,6 @@ module NUOPC_Driver
     type(ESMF_Clock)        :: internalClock
     logical                 :: internalflag
     logical                 :: areServicesSet
-    type(ESMF_VM)           :: vm
     ! initialize out arguments
     rc = ESMF_SUCCESS
     if (present(execFlag)) execFlag = .false.
@@ -2224,40 +2223,56 @@ module NUOPC_Driver
         if (.not.internalflag) then
           ! Ensure that Attributes are consistent across all the PETs of the
           ! component that just executed.
-
-          !TODO: The Update() is only needed if there are child PETs that are 
-          !TODO: going to pause for PE-reuse via user level threading. Figure
-          !TODO: out how to detect this, and make Update() call conditional.
-
-          !TODO: Should be calling with all master PETs (those processes that go
-          !TODO: on to execute child code), for better Update() performance. For
-          !TODO: now just call with first PET as root, because that always will
-          !TODO: work (because first PET always is passed to child component).
-        
-          call ESMF_VMGetCurrent(vm=vm, rc=rc)
+          call consistentComponentAttributes(is%wrap%modelComp(i), &
+            is%wrap%modelPetLists(i)%ptr, name, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          if (associated(is%wrap%modelPetLists(i)%ptr)) then
-            ! use the petList to restrict the number of PETs across which the
-            ! update is synchronizing
-            call ESMF_AttributeUpdate(is%wrap%modelComp(i), vm, &
-              rootList=is%wrap%modelPetLists(i)%ptr(1:1), &
-              petList=is%wrap%modelPetLists(i)%ptr, reconcile=.true., &
-              rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-              return  ! bail out
-          else
-            ! no petList was specified -> update across all PETs
-            call ESMF_AttributeUpdate(is%wrap%modelComp(i), vm, &
-              rootList=(/0/), reconcile=.true., rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-              return  ! bail out
-          endif
         endif
       endif
     enddo
+  end subroutine
+
+  !-----------------------------------------------------------------------------
+  
+  subroutine consistentComponentAttributes(comp, petList, name, rc)
+    type(ESMF_GridComp)     :: comp
+    integer, pointer        :: petList(:)
+    character(*)            :: name
+    integer, intent(out)    :: rc
+    ! local variables
+    type(ESMF_VM)           :: vm
+    ! initialize out arguments
+    rc = ESMF_SUCCESS
+  
+    !TODO: The Update() is only needed if there are child PETs that are 
+    !TODO: going to pause for PE-reuse via user level threading. Figure
+    !TODO: out how to detect this, and make Update() call conditional.
+
+    !TODO: Should be calling with all master PETs (those processes that go
+    !TODO: on to execute child code), for better Update() performance. For
+    !TODO: now just call with first PET as root, because that always will
+    !TODO: work (because first PET always is passed to child component).
+    
+    call ESMF_VMGetCurrent(vm=vm, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    if (associated(petList)) then
+      ! use the petList to restrict the number of PETs across which the
+      ! update is synchronizing
+      call ESMF_AttributeUpdate(comp, vm, &
+        rootList=petList(1:1), petList=petList, reconcile=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    else
+      ! no petList was specified -> update across all PETs
+      call ESMF_AttributeUpdate(comp, vm, &
+        rootList=(/0/), reconcile=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
   end subroutine
 
   !-----------------------------------------------------------------------------
@@ -2468,7 +2483,7 @@ module NUOPC_Driver
           if (btest(verbosity,11)) then
             write(msgString, "(A,I4,A)") &
               trim(name)//": component ", i, "="//trim(compName)//&
-              ", dataComplete: "//trim(valueString)
+              ", dataComplete (local): "//trim(valueString)
             call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -2492,6 +2507,15 @@ module NUOPC_Driver
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) &
             return  ! bail out
+
+          if (btest(verbosity,11)) then
+            write(msgString, "(A,I4,A,L)") &
+              trim(name)//": component ", i, "="//trim(compName)//&
+              ", dataComplete (global): ", (helperOut==petCount)
+            call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
 
           if (helperOut == petCount) cycle ! skip to next i
           allComplete = .false. ! hit toggles -> prevents exit on outer loop
@@ -2559,6 +2583,15 @@ module NUOPC_Driver
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
             
+          if (i>0) then
+            ! Ensure that Attributes are consistent across all the PETs of the
+            ! component that just executed.
+            call consistentComponentAttributes(is%wrap%modelComp(i), &
+              is%wrap%modelPetLists(i)%ptr, name, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
+
           ! check model InitializeDataProgress Attribute if progress made
           call NUOPC_CompAttributeGet(is%wrap%modelComp(i), &
             name="InitializeDataProgress", value=valueString, rc=rc)
@@ -2566,6 +2599,15 @@ module NUOPC_Driver
             line=__LINE__, file=trim(name)//":"//FILENAME)) &
             return  ! bail out
           
+          if (btest(verbosity,11)) then
+            write(msgString, "(A,I4,A)") &
+              trim(name)//": component ", i, "="//trim(compName)//&
+              ", someProgress (local): "//trim(valueString)
+            call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
+
           ! make sure there is a consistent view across all PETs
           helperIn = 0
           if (trim(valueString)=="true") helperIn = 1
@@ -2577,6 +2619,15 @@ module NUOPC_Driver
             
           if (helperOut > 0) someProgress=.true. ! toggle flag
             
+          if (btest(verbosity,11)) then
+            write(msgString, "(A,I4,A,L)") &
+              trim(name)//": component ", i, "="//trim(compName)//&
+              ", someProgress (global): ", someProgress
+            call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
+
         endif
       enddo
       

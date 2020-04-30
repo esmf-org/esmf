@@ -503,9 +503,9 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
-  void FTN_X(c_esmc_vmget)(ESMCI::VM **vm, int *localPet, int *petCount, 
-    int *peCount, int *ssiCount, int *ssiMinPetCount, int *ssiMaxPetCount,
-    int *ssiLocalPetCount, int *mpiCommunicator,
+  void FTN_X(c_esmc_vmget)(ESMCI::VM **vm, int *localPet, int *localPe, 
+    int *petCount, int *peCount, int *ssiCount, int *ssiMinPetCount,
+    int *ssiMaxPetCount, int *ssiLocalPetCount, int *mpiCommunicator,
     ESMC_Logical *pthreadsEnabledFlag, ESMC_Logical *openMPEnabledFlag,
     ESMC_Logical *ssiSharedMemoryEnabledFlag, int *rc){
 #undef  ESMC_METHOD
@@ -519,6 +519,8 @@ extern "C" {
     // fill return values
     if (ESMC_NOT_PRESENT_FILTER(localPet) != ESMC_NULL_POINTER)
       *localPet = (*vm)->getLocalPet();
+    if (ESMC_NOT_PRESENT_FILTER(localPe) != ESMC_NULL_POINTER)
+      *localPe = (*vm)->getLocalPe();
     if (ESMC_NOT_PRESENT_FILTER(petCount) != ESMC_NULL_POINTER)
       *petCount = (*vm)->getPetCount();
     if (ESMC_NOT_PRESENT_FILTER(peCount) != ESMC_NULL_POINTER){
