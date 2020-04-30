@@ -2616,7 +2616,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_ArrayBundle)    :: opt_dstArrayBundle ! helper variable
     type(ESMF_Region_Flag)    :: opt_zeroregion     ! helper variable
     type(ESMF_Logical)        :: opt_checkflag      ! helper variable
-    integer                   :: len                ! helper variable
+    integer                   :: zeroRegionFlag_len ! helper variable
+    integer                   :: termOrderFlag_len  ! helper variable
     
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2647,19 +2648,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     opt_checkflag = ESMF_FALSE
     if (present(checkflag)) opt_checkflag = checkflag
     
+    zeroRegionFlag_len = 1
+    
     if (present(termorderflag)) then
-      len = size(termorderflag)
+      termOrderFlag_len = size(termorderflag)
       ! Call into the C++ interface, which will sort out optional arguments
       call c_ESMC_ArrayBundleSMM(opt_srcArrayBundle, opt_dstArrayBundle,&
-        routehandle, opt_zeroregion, termorderflag, len, opt_checkflag, &
-        localrc)
+        routehandle, opt_zeroregion, zeroRegionFlag_len, termorderflag, &
+        termOrderFlag_len, opt_checkflag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
-      len = 0
+      termOrderFlag_len = 0
       ! Call into the C++ interface, which will sort out optional arguments
       call c_ESMC_ArrayBundleSMM(opt_srcArrayBundle, opt_dstArrayBundle,&
-        routehandle, opt_zeroregion, len, len, opt_checkflag, localrc)
+        routehandle, opt_zeroregion, zeroRegionFlag_len, termOrderFlag_len, &
+        termOrderFlag_len, opt_checkflag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
