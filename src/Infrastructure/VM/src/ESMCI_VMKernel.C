@@ -78,7 +78,7 @@ using namespace std;
 #include "ESMCI_LogErr.h"
 
 // macros used within this source file
-#define VERBOSITY             (0)       // 0: off, 10: max
+#define VERBOSITY             (1)       // 0: off, 10: max
 #define VM_TID_MPI_TAG        (10)      // mpi tag used to send/recv TID
 #ifdef SIGRTMIN
 #define VM_SIG1               (SIGRTMIN)  // avoid sigusr1 and sigusr2 if avail.
@@ -162,6 +162,7 @@ int vmkt_create(vmkt_t *vmkt, void *(*vmkt_spawn)(void *), void *arg,
   pthread_mutex_init(&(vmkt->mut_extra2), NULL);
   pthread_mutex_lock(&(vmkt->mut_extra2));
   pthread_cond_init(&(vmkt->cond_extra2), NULL);
+  pthread_attr_t *pthreadAttrsPtr = NULL;
   if (_POSIX_THREAD_ATTR_STACKSIZE){
     // this Pthread implementation supports stack size attribute
     pthread_attr_t pthreadAttrs;
@@ -188,8 +189,9 @@ int vmkt_create(vmkt_t *vmkt, void *(*vmkt_spawn)(void *), void *arg,
       << "  stack_size: " << stack_size << " bytes";
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
 #endif
+    pthreadAttrsPtr = &pthreadAttrs;
   }
-  int error = pthread_create(&(vmkt->tid), NULL, vmkt_spawn, arg);
+  int error = pthread_create(&(vmkt->tid), pthreadAttrsPtr, vmkt_spawn, arg);
   if (!error){ // only wait if the thread was successfully created
     pthread_cond_wait(&(vmkt->cond0), &(vmkt->mut0));   // back-sync #1
     pthread_cond_wait(&(vmkt->cond_extra2), &(vmkt->mut_extra2)); // back-s. #2
