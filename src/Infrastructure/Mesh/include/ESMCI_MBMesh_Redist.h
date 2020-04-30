@@ -14,7 +14,9 @@
 // Take out if MOAB isn't being used
 #if defined ESMF_MOAB
 
-#include <Mesh/include/ESMCI_MBMesh.h>
+#include "Mesh/include/ESMCI_MBMesh.h"
+
+#include "Mesh/include/Legacy/ESMCI_DDir.h"
 
 #include "ESMCI_PointList.h"
 
@@ -101,6 +103,11 @@ struct PL_Comm_Pair {
   }
 };
 
+// individual entry points from the glue layer to the mesh cap
+void mbmesh_redist_elem(MBMesh *src_mesh, int *num_elem_gids, int *elem_gids, MBMesh **out_mesh);
+void mbmesh_redist_node(MBMesh *src_mesh, int *num_node_gids, int *node_gids, MBMesh **out_mesh);
+void mbmesh_redist(MBMesh *src_mesh, int *num_node_gids, int *node_gids, int *num_elem_gids, int *elem_gids, MBMesh **out_mesh);
+
 // This creates src and dst rendezvous meshes where the overlap is based on elements
 void create_mbmesh_redist_elem(MBMesh *src_mesh, 
                                std::vector<EH_Comm_Pair> *elem_to_proc_list, 
@@ -110,6 +117,9 @@ void create_pointlist_redist_point(PointList *src_pl,
                                    std::vector<PL_Comm_Pair> *point_to_proc_list,
                                    PointList **_out_pl);
 
+// split element handling that needs to be called from the glue layer
+void mbmesh_expand_split_elem_ids(MBMesh *mesh, int num_elem_gids, int *elem_gids, int *_num_elem_gids_ws, int **_elem_gids_ws, std::map<int,int> &split_to_orig_id);
+void mbmesh_set_split_orig_id_map(MBMesh *src_mesh, MBMesh *output_mesh);
 
 } //namespace
 

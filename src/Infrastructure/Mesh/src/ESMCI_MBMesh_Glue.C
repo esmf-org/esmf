@@ -58,8 +58,8 @@ using namespace ESMCI;
 // #define DEBUG_ELEM_COORDS
 // #define DEBUG_OWNED
 
-extern "C" void FTN_X(f_esmf_getmeshdistgrid)(int*, int*, int*, int*);
 
+extern "C" void FTN_X(f_esmf_getmeshdistgrid)(int*, int*, int*, int*);
 
 void MBMesh_create(void **mbmpp,
                       int *pdim, int *sdim,
@@ -191,7 +191,7 @@ void MBMesh_addnodes(void **mbmpp, int *num_nodes, int *nodeId,
    try {
 
      // Get Moab Mesh wrapper
-     MBMesh *mbmp=*((MBMesh **)mbmpp);
+      MBMesh *mbmp=static_cast<MBMesh*> (*mbmpp);
 
      //Get MOAB Mesh
      Interface *moab_mesh=mbmp->mesh;
@@ -671,8 +671,8 @@ void MBMesh_addelements(void **mbmpp,
     // MOAB error return
     int merr;
 
-     // Get Moab Mesh wrapper
-    MBMesh *mbmp=*((MBMesh **)mbmpp);
+    // Get Moab Mesh wrapper
+    MBMesh *mbmp=static_cast<MBMesh*> (*mbmpp);
 
     //Get MOAB Mesh
     Interface *moab_mesh=mbmp->mesh;
@@ -1457,153 +1457,6 @@ void MBMesh_addelements(void **mbmpp,
       }
 #endif
 
-
-#if 0
-  // Time loops
-  {
-   /* XMRKX */
-    double beg_tm=MPI_Wtime();
-
-    // Get a range containing all elements
-    Range all_elem;
-    merr=moab_mesh->get_entities_by_dimension(0,mbmp->pdim,all_elem);
-
-    // Put into vector
-    for(Range::iterator it=all_elem.begin(); it !=all_elem.end(); it++) {
-      const EntityHandle eh=*it;
-
-    }
-
-    double end_tm=MPI_Wtime();
-
-    printf("MOAB time to loop through elems=%f\n",end_tm-beg_tm);
-
-  }
-#endif
-
-#if 0
-
-  // Perhaps commit will be a separate call, but for now commit the mesh here.
-  mesh.build_sym_comm_rel(MeshObj::NODE);
-  mesh.Commit();
-
-  // Set Mask values
-  if (has_elem_mask) {
-    // Get Fields
-    MEField<> *elem_mask_val=mesh.GetField("elem_mask_val");
-    MEField<> *elem_mask=mesh.GetField("elem_mask");
-
-    // Get mask value array
-    int *elemMask=elemMaskII->array;
-
-    // Loop through elements setting values
-    // Here we depend on the fact that data index for elements
-    // is set as the position in the local array above
-    Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
-    for (; ei != ee; ++ei) {
-      MeshObj &elem = *ei;
-       if (!GetAttr(elem).is_locally_owned()) continue;
-
-      // Set mask value to input array
-      double *mv=elem_mask_val->data(elem);
-      int data_index = elem.get_data_index();
-      *mv=(double)elemMask[data_index];
-
-        // Init mask to 0.0
-      double *m=elem_mask->data(elem);
-      *m=0.0;
-     }
-  }
-
-
-  // Set area values
-   if (has_elem_area) {
-
-    // Get Fields
-    MEField<> *elem_area=mesh.GetField("elem_area");
-
-    // Loop through elements setting values
-    // Here we depend on the fact that data index for elements
-    // is set as the position in the local array above
-    Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
-    for (; ei != ee; ++ei) {
-      MeshObj &elem = *ei;
-      if (!GetAttr(elem).is_locally_owned()) continue;
-
-      // Set mask value to input array
-      double *av=elem_area->data(elem);
-      int data_index = elem.get_data_index();
-      *av=(double)elemArea[data_index];
-    }
-  }
-
-
-  // Set coordinate values
-  if (has_elem_coords) {
-
-    if (coordSys == ESMC_COORDSYS_CART) {
-      // Get Field
-      MEField<> *elem_coords=mesh.GetField("elem_coordinates");
-
-      // Get some useful information
-      int sdim = mesh.spatial_dim();
-
-      // Loop through elements setting values
-      // Here we depend on the fact that data index for elements
-      // is set as the position in the local array above
-      Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
-      for (; ei != ee; ++ei) {
-        MeshObj &elem = *ei;
-        if (!GetAttr(elem).is_locally_owned()) continue;
-
-        // Set coordinate value to input array
-        double *coords=elem_coords->data(elem);
-        int data_index = sdim*elem.get_data_index();
-        for (int i = 0; i < sdim; ++i) {
-          coords[i] = elemCoords[data_index+i];
-         }
-        // printf("eid=%d coords=%f %f %f %f ind=%d\n",elem.get_id(),coords[0],coords[1],elemCoords[data_index+0],elemCoords[data_index+1],data_index);
-      }
-     } else {
-      // Get Fields
-      MEField<> *elem_coords=mesh.GetField("elem_coordinates");
-      MEField<> *elem_orig_coords=mesh.GetField("elem_orig_coordinates");
-
-      // Get some useful information
-      int sdim = mesh.spatial_dim();
-
-      // Loop through elements setting values
-      // Here we depend on the fact that data index for elements
-      // is set as the position in the local array above
-      Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
-      for (; ei != ee; ++ei) {
-        MeshObj &elem = *ei;
-        if (!GetAttr(elem).is_locally_owned()) continue;
-
-        // Save original coordinates
-        double *orig_coords=elem_orig_coords->data(elem);
-        int data_index = orig_sdim*elem.get_data_index();
-        for (int i = 0; i < orig_sdim; ++i) {
-          orig_coords[i] = elemCoords[data_index+i];
-        }
-
-        // Convert and save Cartesian coordinates
-        double *coords = elem_coords->data(elem);
-        ESMCI_CoordSys_ConvertToCart(coordSys, orig_sdim,
-                                     orig_coords, coords);
-
-        // printf("eid=%d coords=%f %f %f %f ind=%d\n",elem.get_id(),coords[0],coords[1],elemCoords[data_index+0],elemCoords[data_index+1],data_index);
-       }
-
-
-    }
-
-
-
- /* XMRKX */
-  }
-#endif
-
   // Get rid of extra memory for split elements
   if (is_split_local) {
     if (elemConn_wsplit != NULL) delete [] elemConn_wsplit;
@@ -1666,7 +1519,7 @@ void MBMesh_turnonnodemask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg, 
     }
 
     // Get Moab Mesh wrapper
-    MBMesh *mbmp=*((MBMesh **)mbmpp);
+    MBMesh *mbmp=static_cast<MBMesh*> (*mbmpp);
 
     //Get MOAB Mesh
     Interface *moab_mesh=mbmp->mesh;
@@ -1771,7 +1624,7 @@ void MBMesh_turnonnodemask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg, 
     }
 
     // Get Moab Mesh wrapper
-    MBMesh *mbmp=*((MBMesh **)mbmpp);
+    MBMesh *mbmp=static_cast<MBMesh*> (*mbmpp);
 
     //Get MOAB Mesh
     Interface *moab_mesh=mbmp->mesh;
@@ -1843,7 +1696,7 @@ void MBMesh_turnonelemmask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg, 
     }
 
     // Get Moab Mesh wrapper
-    MBMesh *mbmp=*((MBMesh **)mbmpp);
+    MBMesh *mbmp=static_cast<MBMesh*> (*mbmpp);
 
     //Get MOAB Mesh
     Interface *moab_mesh=mbmp->mesh;
@@ -1949,7 +1802,7 @@ void MBMesh_turnonelemmask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg, 
     }
 
     // Get Moab Mesh wrapper
-    MBMesh *mbmp=*((MBMesh **)mbmpp);
+    MBMesh *mbmp=static_cast<MBMesh*> (*mbmpp);
 
     //Get MOAB Mesh
     Interface *moab_mesh=mbmp->mesh;
@@ -2020,7 +1873,7 @@ void MBMesh_destroy(void **mbmpp, int *rc) {
       throw localrc;  // bail out with exception
 
     // Get Moab Mesh wrapper
-    MBMesh *mbmp=*((MBMesh **)mbmpp);
+    MBMesh *mbmp=static_cast<MBMesh*> (*mbmpp);
 
     // Get rid of MBMesh
     delete mbmp;
@@ -2083,7 +1936,7 @@ void MBMesh_write(void **mbmpp, char *fname, int *rc,
 
 
     // Get Moab Mesh wrapper
-    MBMesh *mbmp=*((MBMesh **)mbmpp);
+    MBMesh *mbmp=static_cast<MBMesh*> (*mbmpp);
 
     //Get MOAB Mesh
     Interface *moab_mesh=mbmp->mesh;
@@ -2143,7 +1996,7 @@ void MBMesh_createnodedistgrid(void **mbmpp, int *ngrid, int *num_lnodes, int *r
       throw localrc;  // bail out with exception
 
     // Get Moab Mesh wrapper
-    MBMesh *mbmp=*((MBMesh **)mbmpp);
+    MBMesh *mbmp=static_cast<MBMesh*> (*mbmpp);
 
     //Get MOAB Mesh
     Interface *moab_mesh=mbmp->mesh;
@@ -2324,7 +2177,7 @@ void MBMesh_createelemdistgrid(void **mbmpp, int *egrid, int *num_lelems, int *r
 #endif
 
     // Get Moab Mesh wrapper
-    MBMesh *mbmp=*((MBMesh **)mbmpp);
+    MBMesh *mbmp=static_cast<MBMesh*> (*mbmpp);
 
     // Get list of elem gids in order
     getElemGIDS(mbmp, egids);
@@ -2380,7 +2233,7 @@ void getElems(void **mbmpp, std::vector<EntityHandle> &ehs) {
     throw localrc;  // bail out with exception
 
   // Get Moab Mesh wrapper
-  MBMesh *mbmp=*((MBMesh **)mbmpp);
+  MBMesh *mbmp=static_cast<MBMesh*> (*mbmpp);
 
   //Get MOAB Mesh
   Interface *moab_mesh=mbmp->mesh;
@@ -2458,7 +2311,7 @@ void MBMesh_getlocalelemcoords(void **mbmpp, double *ecoords,
     try {
 
       // Get Moab Mesh wrapper
-      MBMesh *mbmp=*((MBMesh **)mbmpp);
+      MBMesh *mbmp=static_cast<MBMesh*> (*mbmpp);
 
       // Make sure that there are element coords
       if (!mbmp->has_elem_coords) {
@@ -2573,7 +2426,7 @@ void MBMesh_getarea(void **mbmpp, int *num_elem, double *elem_areas, int *rc) {
 
 
     // Get Moab Mesh wrapper
-    MBMesh *mbmp=*((MBMesh **)mbmpp);
+    MBMesh *mbmp=static_cast<MBMesh*> (*mbmpp);
 
     //Get MOAB Mesh
     Interface *moab_mesh=mbmp->mesh;
@@ -2738,7 +2591,7 @@ void getNodes(void **mbmpp, std::vector<EntityHandle> &nodes) {
     throw localrc;  // bail out with exception
 
   // Get Moab Mesh wrapper
-  MBMesh *mbmp=*((MBMesh **)mbmpp);
+  MBMesh *mbmp=static_cast<MBMesh*> (*mbmpp);
 
   //Get MOAB Mesh
   Interface *moab_mesh=mbmp->mesh;
@@ -2812,7 +2665,7 @@ void MBMesh_getlocalcoords(void **mbmpp, double *ncoords, int *_orig_sdim, int *
 
   try {
     // Get Moab Mesh wrapper
-    MBMesh *mbmp=*((MBMesh **)mbmpp);
+    MBMesh *mbmp=static_cast<MBMesh*> (*mbmpp);
 
     //Get MOAB Mesh
     Interface *moab_mesh=mbmp->mesh;
@@ -2914,7 +2767,7 @@ void MBMesh_serialize(void **mbmpp, char *buffer, int *length,
     if (rc) *rc = ESMC_RC_NOT_IMPL;
 
     // Get Moab Mesh wrapper
-    MBMesh *mbmp=*((MBMesh **)mbmpp);
+    MBMesh *mbmp=static_cast<MBMesh*> (*mbmpp);
 
     //Get MOAB Mesh
     Interface *mesh=mbmp->mesh;
@@ -3060,157 +2913,40 @@ void MBMesh_createredistelems(void **src_meshpp, int *num_elem_gids, int *elem_g
 #define ESMC_METHOD "MBMesh_createredistelems()"
 
   try {
-    int localrc, merr;
-    VM *vm = VM::getCurrent(&localrc);
-    int petCount = vm->getPetCount();
-    int localPet = vm->getLocalPet();
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-      throw localrc;
+    int localrc;
 
     // Dereference
     MBMesh *mesh=static_cast<MBMesh*> (*src_meshpp);
+    MBMesh *out_mesh=static_cast<MBMesh*> (*output_meshpp);
 
-    // list to pass into create_mbmesh_redist_elem
-    std::vector<EH_Comm_Pair> elem_to_proc_list;
+    if (mesh->is_split) {
+      // If split mesh expand ids
+      int num_elem_gids_ws;
+      int *elem_gids_ws=NULL;
+      std::map<int,int> split_to_orig_id;
 
-    // distributed directory to determine element destinations
-    DDir<> edir;
-    std::vector<UInt> e_lids(*num_elem_gids, 0);
-    std::vector<UInt> e_gids(*num_elem_gids, 0);
-  
-    // list of the Mesh elem gids
-    std::vector<UInt> gids;
-    gids.reserve(mesh->num_elems);
-  
-    Range elems;
+      mbmesh_expand_split_elem_ids(mesh, *num_elem_gids, elem_gids, &num_elem_gids_ws, &elem_gids_ws, split_to_orig_id);
 
-    // get mesh elements and gids
-    try {
-      merr=mesh->mesh->get_entities_by_dimension(0,mesh->pdim,elems);
-      if (merr != MB_SUCCESS) {
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-          moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-      }
-  
-      // Loop through objects getting ids
-      Range::iterator si = elems.begin(), se = elems.end();
-      for (; si != se; ++si) {
-        const EntityHandle elem = *si;
-        int gid;
-        MBMesh_get_gid(mesh, elem, &gid);
-        gids.push_back(gid);
-      }
-    } catch(std::exception &x) {
-      // catch Mesh exception return code
-      if (x.what()) {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                              x.what(), ESMC_CONTEXT, rc);
-      } else {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                              "UNKNOWN", ESMC_CONTEXT, rc);
-      }
-    }
+      mbmesh_redist_elem(mesh, &num_elem_gids_ws, elem_gids_ws, &out_mesh);
+ 
+      out_mesh->is_split=mesh->is_split;
+      out_mesh->max_non_split_id=mesh->max_non_split_id;
+      out_mesh->split_to_orig_id=split_to_orig_id;
 
-    // vectors of element destinations
-    UInt num_src_gids=gids.size();
-    std::vector<UInt> src_gids_proc(num_src_gids, 0);
-    std::vector<UInt> src_gids_lids(num_src_gids, 0);
+      // RLO: not sure we need this now?
+      // mbmesh_set_split_orig_id_map(mesh, out_mesh);
 
-    // load the distributed directory
-    try {
-      for (int i=0; i<*num_elem_gids; i++) {
-        e_lids[i]=i;
-        if (elem_gids[i]>=0) {
-          e_gids[i]=elem_gids[i];
-        } else {
-          e_gids[i]=0;
-        }
-      }
-  
-      if (*num_elem_gids) {
-        edir.Create(*num_elem_gids, &e_gids[0], &e_lids[0]);
-      } else {
-        edir.Create(0, (UInt*) NULL, (UInt *)NULL);
-      }
-    } catch(std::exception &x) {
-      // catch Mesh exception return code
-      if (x.what()) {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                              x.what(), ESMC_CONTEXT, rc);
-      } else {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                              "UNKNOWN", ESMC_CONTEXT, rc);
-      }
-    }
+      // calculate split_id_to_frac map from other info
+      // calc_split_id_to_frac(out_mesh);
 
-    // Get element destinations
-    try {
-      if (num_src_gids) {
-        edir.RemoteGID(num_src_gids, &gids[0], &src_gids_proc[0], &src_gids_lids[0]);
-      } else {
-        edir.RemoteGID(0, (UInt *)NULL, (UInt *)NULL, (UInt *)NULL);
-      }
-
-      // Loop through objects getting ids
-      Range::iterator si = elems.begin(), se = elems.end();
-      int i = 0;
-      for (; si != se; ++si) {
-        const EntityHandle elem = *si;
-        EH_Comm_Pair ecp(elem, src_gids_proc[i]);
-        elem_to_proc_list.push_back(ecp);
-        ++i;
-      } // for si
-
-
-    } catch(std::exception &x) {
-      // catch Mesh exception return code
-      if (x.what()) {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                              x.what(), ESMC_CONTEXT, rc);
-      } else {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                              "UNKNOWN", ESMC_CONTEXT, rc);
-      }
-    }
-
-#if 0
-    // print the vectors
-    printf("%d# src_gids_proc [%d] = [", localPet, src_gids_proc.size());
-    for (int i=0; i<src_gids_proc.size(); ++i) {
-      printf("%d, ", src_gids_proc[i]);
-    }
-    printf("]\n");
-
-    printf("%d# src_gids_lids [%d] = [", localPet, src_gids_lids.size());
-    for (int i=0; i<src_gids_lids.size(); ++i) {
-      printf("%d, ", src_gids_lids[i]);
-    }
-    printf("]\n");
-
-    printf("%d# gids          [%d] = [", localPet, gids.size());
-    for (int i=0; i<gids.size(); ++i) {
-      printf("%d, ", gids[i]);
-    }
-    printf("]\n");
-#endif
-
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    // if not split mesh, then just do the usual thing
-    MBMesh *outmesh;
-    if (!mesh->is_split) {
-      create_mbmesh_redist_elem(mesh, &elem_to_proc_list, &outmesh);
+      // Free split gids
+      if (elem_gids_ws !=NULL) delete [] elem_gids_ws;
     } else {
-      // should error out in Fortran layer but throw here just in case
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-       "- split elements are not yet handled in the MBMesh",
-                                  ESMC_CONTEXT, rc);
-      throw ESMC_RC_NOT_IMPL;
+      mbmesh_redist_elem(mesh, num_elem_gids, elem_gids, &out_mesh);
     }
 
     // return the mbmesh as a void*
-    *output_meshpp=static_cast<void*> (outmesh);
-
+    *output_meshpp=static_cast<void*> (out_mesh);
 
   } catch(std::exception &x) {
     // catch Mesh exception return code
@@ -3234,6 +2970,7 @@ void MBMesh_createredistelems(void **src_meshpp, int *num_elem_gids, int *elem_g
   }
 
   if (rc!=NULL) *rc=ESMF_SUCCESS;
+
 }
 
 void MBMesh_createredistnodes(void **src_meshpp, int *num_node_gids, int *node_gids,
@@ -3242,271 +2979,23 @@ void MBMesh_createredistnodes(void **src_meshpp, int *num_node_gids, int *node_g
 #define ESMC_METHOD "MBMesh_createredistnodes()"
 
   try {
-    int localrc, merr;
-    VM *vm = VM::getCurrent(&localrc);
-    int petCount = vm->getPetCount();
-    int localPet = vm->getLocalPet();
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-      throw localrc;
+    int localrc;
 
     // Dereference
     MBMesh *mesh=static_cast<MBMesh*> (*src_meshpp);
+    MBMesh *out_mesh=static_cast<MBMesh*> (*output_meshpp);
 
-    // list to pass into create_mbmesh_redist_node
-    std::vector<EH_Comm_Pair> node_to_proc_list;
-    std::vector<EH_Comm_Pair> elem_to_proc_list;
+    mbmesh_redist_node(mesh, num_node_gids, node_gids, &out_mesh);
 
-    // distributed directory to determine node destinations
-    DDir<> ndir;
-    std::vector<UInt> n_lids(*num_node_gids, 0);
-    std::vector<UInt> n_gids(*num_node_gids, 0);
-  
-    // list of the Mesh node gids
-    std::vector<UInt> src_gids;
-  
-    Range nodes, elems;
+    // split element handling
+    out_mesh->is_split=mesh->is_split;
 
-    // get mesh nodes and gids
-    try {
-      merr=mesh->mesh->get_entities_by_dimension(0,0,nodes);
-      if (merr != MB_SUCCESS) {
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-          moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-      }
-  
-      src_gids.reserve(nodes.size());
-
-      // Loop through objects getting ids
-      Range::iterator si = nodes.begin(), se = nodes.end();
-      for (; si != se; ++si) {
-        const EntityHandle node = *si;
-        int gid;
-        MBMesh_get_gid(mesh, node, &gid);
-        src_gids.push_back(gid);
-      }
-    } catch(std::exception &x) {
-      // catch Mesh exception return code
-      if (x.what()) {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                              x.what(), ESMC_CONTEXT, rc);
-      } else {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                              "UNKNOWN", ESMC_CONTEXT, rc);
-      }
+    if (out_mesh->is_split) {
+      mbmesh_set_split_orig_id_map(mesh, out_mesh);
+      out_mesh->max_non_split_id=mesh->max_non_split_id;
+      // RLO: not sure we need this if above is used
+      // out_mesh->split_to_orig_id=mesh->split_to_orig_id;
     }
-
-    // vectors of node destinations
-    UInt num_src_gids=src_gids.size();
-    std::vector<UInt> src_gids_proc(num_src_gids, 0);
-    std::vector<UInt> src_gids_lids(num_src_gids, 0);
-
-    // load the distributed directory
-    try {
-      for (int i=0; i<*num_node_gids; i++) {
-        n_lids[i]=i;
-        if (node_gids[i]>=0) {
-          n_gids[i]=node_gids[i];
-        } else {
-          n_gids[i]=0;
-        }
-      }
-  
-      if (*num_node_gids) {
-        edir.Create(*num_node_gids, &n_gids[0], &n_lids[0]);
-      } else {
-        edir.Create(0, (UInt*) NULL, (UInt *)NULL);
-      }
-
-      if (num_src_gids) {
-        edir.RemoteGID(num_src_gids, &src_gids[0], &src_gids_proc[0], &src_gids_lids[0]);
-      } else {
-        edir.RemoteGID(0, (UInt *)NULL, (UInt *)NULL, (UInt *)NULL);
-      }
-    } catch(std::exception &x) {
-      // catch Mesh exception return code
-      if (x.what()) {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                              x.what(), ESMC_CONTEXT, rc);
-      } else {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                              "UNKNOWN", ESMC_CONTEXT, rc);
-      }
-    }
-
-    // Get node destinations
-    try {
-      // Loop through objects getting ids
-      Range::iterator si = nodes.begin(), se = nodes.end();
-      int i = 0;
-      for (; si != se; ++si) {
-        const EntityHandle node = *si;
-        EH_Comm_Pair ecp(node, src_gids_proc[i]);
-        node_to_proc_list.push_back(ecp);
-        ++i;
-      } // for si
-
-
-    } catch(std::exception &x) {
-      // catch Mesh exception return code
-      if (x.what()) {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                              x.what(), ESMC_CONTEXT, rc);
-      } else {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                              "UNKNOWN", ESMC_CONTEXT, rc);
-      }
-    }
-
-#define print_ddir_off
-#ifdef print_ddir
-    // print the vectors
-    printf("%d# src_gids_proc [%d] = [", localPet, src_gids_proc.size());
-    for (int i=0; i<src_gids_proc.size(); ++i) {
-      printf("%d, ", src_gids_proc[i]);
-    }
-    printf("]\n");
-
-    printf("%d# src_gids_lids [%d] = [", localPet, src_gids_lids.size());
-    for (int i=0; i<src_gids_lids.size(); ++i) {
-      printf("%d, ", src_gids_lids[i]);
-    }
-    printf("]\n");
-
-    printf("%d# gids          [%d] = [", localPet, src_gids.size());
-    for (int i=0; i<src_gids.size(); ++i) {
-      printf("%d, ", src_gids[i]);
-    }
-    printf("]\n");
-#endif
-
-    // Create elem_to_proc_list from node_to_proc_list
-    try {
-      // Loop through objects getting ids
-      Range::iterator si = nodes.begin(), se = nodes.end();
-      int i = 0;
-      for (; si != se; ++si) {
-        const EntityHandle node = *si;
-        int node_owner;
-        merr=mesh->mesh->tag_get_data(mesh->owner_tag, &node, 1, &node_owner);
-
-        // only consider local nodes
-        if (node_owner != localPet) { ++i; continue;}
-
-#define print_nodelems_off
-#ifdef print_nodelems
-  int node_id;
-  MBMesh_get_gid(mesh, node, &node_id);
-  printf("%d# Node %d connects to Elements ", localPet, node_id);
-#endif
-        // Loop elements attached to this node
-        Range elems_on_node;
-        merr=mesh->mesh->get_adjacencies(&node, 1, mesh->pdim, false, elems_on_node);
-        if (merr != MB_SUCCESS) {
-          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-            moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-        }
-        Range::iterator eni = elems_on_node.begin(), ene = elems_on_node.end();
-        for (; eni != ene; ++eni) {
-          const EntityHandle elem_on_node = *eni;
-          int elem_owner;
-          merr=mesh->mesh->tag_get_data(mesh->owner_tag, &elem_on_node, 1, &elem_owner);
-
-          // only consider local elements
-          if (elem_owner != localPet) continue;
-#ifdef print_nodelems
-  int elem_id;
-  MBMesh_get_gid(mesh, elem_on_node, &elem_id);
-  printf("%d, ", elem_id);
-#endif
-          // add to elem_to_proc_list
-          EH_Comm_Pair ecp(elem_on_node, src_gids_proc[i]);
-          std::vector<EH_Comm_Pair>::iterator ehf = find(elem_to_proc_list.begin(), elem_to_proc_list.end(), ecp);
-          if (ehf == elem_to_proc_list.end())
-            elem_to_proc_list.push_back(ecp);
-        } // for eni
-#ifdef print_nodelems
-  printf("\n");
-#endif
-      ++i;
-      } // for si
-
-    } catch(std::exception &x) {
-      // catch Mesh exception return code
-      if (x.what()) {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                              x.what(), ESMC_CONTEXT, rc);
-      } else {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                              "UNKNOWN", ESMC_CONTEXT, rc);
-      }
-    }
-
-
-#define print_elemtoproclist_off
-#ifdef print_elemtoproclist
-  std::vector<EH_Comm_Pair>::iterator ehi = elem_to_proc_list.begin(), ehe = elem_to_proc_list.end();
-  for (; ehi != ehe; ++ehi) {
-    int idtocheck = -1;
-    MBMesh_get_gid(mesh, ehi->eh, &idtocheck);
-    printf("%d# Elem %d proc %d\n", localPet, idtocheck, ehi->proc);
-  }
-#endif
-
-    // loop through elements looking for ones that haven't been assigned
-    try {
-      merr=mesh->mesh->get_entities_by_dimension(0, mesh->pdim, elems);
-      if (merr != MB_SUCCESS) {
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-          moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-      }
-
-      // Loop through elems
-      Range::iterator ei = elems.begin(), ee = elems.end();
-      for (; ei != ee; ++ei) {
-        const EntityHandle elem = *ei;
-        int elem_id;
-        MBMesh_get_gid(mesh, elem, &elem_id);
-
-        // Loop through elem_to_proc_list
-        std::vector<EH_Comm_Pair>::iterator ehi = elem_to_proc_list.begin(), ehe = elem_to_proc_list.end();
-        for (; ehi != ehe; ++ehi) {
-          int idtocheck = -1;
-          MBMesh_get_gid(mesh, ehi->eh, &idtocheck);
-          // if elem is in elem_to_proc_list it is already assigned
-          if (elem_id == idtocheck) break;
-        }
-        // if elem is not in elem_to_proc_list, need to assign to a processor
-        if (ehi == ehe)
-          // send to same proc as a node surrounding the element
-          Throw() << "Elem %d not found in elem_to_proc_list, will not redist", elem_id;
-      }
-    } catch(std::exception &x) {
-      // catch Mesh exception return code
-      if (x.what()) {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                              x.what(), ESMC_CONTEXT, rc);
-      } else {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                              "UNKNOWN", ESMC_CONTEXT, rc);
-      }
-    }
-
-    // if not split mesh, then just do the usual thing
-    MBMesh *outmesh;
-    if (!mesh->is_split) {
-      create_mbmesh_redist_elem(mesh, &elem_to_proc_list, &outmesh);
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-       "- split nodes are not yet handled in the MBMesh",
-                                  ESMC_CONTEXT, rc);
-      throw ESMC_RC_NOT_IMPL;
-    }
-
-    // Verify that all node ownership is as defined by the DistGrid
-    // use set_node_owners (maybe also set_elem_owners_wo_list, but might already happen in create_mbmesh_redist_elem)
-
-    // return the mbmesh as a void*
-    *output_meshpp=static_cast<void*> (outmesh);
 
   } catch(std::exception &x) {
     // catch Mesh exception return code
@@ -3528,7 +3017,6 @@ void MBMesh_createredistnodes(void **src_meshpp, int *num_node_gids, int *node_g
                            "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
-
 
   if (rc!=NULL) *rc=ESMF_SUCCESS;
 }
@@ -3540,270 +3028,40 @@ void MBMesh_createredist(void **src_meshpp, int *num_node_gids, int *node_gids,
 #define ESMC_METHOD "MBMesh_createredist()"
 
   try {
-    int localrc, merr;
-    VM *vm = VM::getCurrent(&localrc);
-    int petCount = vm->getPetCount();
-    int localPet = vm->getLocalPet();
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-      throw localrc;
+    int localrc;
 
     // Dereference
     MBMesh *mesh=static_cast<MBMesh*> (*src_meshpp);
+    MBMesh *out_mesh=static_cast<MBMesh*> (*output_meshpp);
 
-    // list to pass into create_mbmesh_redist_node
-    std::vector<EH_Comm_Pair> node_to_proc_list;
-    std::vector<EH_Comm_Pair> elem_to_proc_list;
+    if (mesh->is_split) {
+      // If split mesh expand ids
+      int num_elem_gids_ws;
+      int *elem_gids_ws=NULL;
+      std::map<int,int> split_to_orig_id;
 
-    // distributed directory to determine node destinations
-    DDir<> ndir;
-    std::vector<UInt> n_lids(*num_node_gids, 0);
-    std::vector<UInt> n_gids(*num_node_gids, 0);
-  
-    // list of the Mesh node gids
-    std::vector<UInt> src_gids;
-  
-    Range nodes, elems;
+      mbmesh_expand_split_elem_ids(mesh, *num_elem_gids, elem_gids, &num_elem_gids_ws, &elem_gids_ws, split_to_orig_id);
 
-    // get mesh nodes and gids
-    try {
-      merr=mesh->mesh->get_entities_by_dimension(0,0,nodes);
-      if (merr != MB_SUCCESS) {
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-          moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-      }
-  
-      src_gids.reserve(nodes.size());
+      mbmesh_redist(mesh, num_node_gids, node_gids, &num_elem_gids_ws, elem_gids_ws, &out_mesh);
+ 
+      out_mesh->is_split=mesh->is_split;
+      out_mesh->max_non_split_id=mesh->max_non_split_id;
+      out_mesh->split_to_orig_id=split_to_orig_id;
 
-      // Loop through objects getting ids
-      Range::iterator si = nodes.begin(), se = nodes.end();
-      for (; si != se; ++si) {
-        const EntityHandle node = *si;
-        int gid;
-        MBMesh_get_gid(mesh, node, &gid);
-        src_gids.push_back(gid);
-      }
-    } catch(std::exception &x) {
-      // catch Mesh exception return code
-      if (x.what()) {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                              x.what(), ESMC_CONTEXT, rc);
-      } else {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                              "UNKNOWN", ESMC_CONTEXT, rc);
-      }
-    }
+      // RLO: not sure we need this now?
+      // mbmesh_set_split_orig_id_map(mesh, out_mesh);
 
-    // vectors of node destinations
-    UInt num_src_gids=src_gids.size();
-    std::vector<UInt> src_gids_proc(num_src_gids, 0);
-    std::vector<UInt> src_gids_lids(num_src_gids, 0);
+      // calculate split_id_to_frac map from other info
+      // calc_split_id_to_frac(out_mesh);
 
-    // load the distributed directory
-    try {
-      for (int i=0; i<*num_node_gids; i++) {
-        n_lids[i]=i;
-        if (node_gids[i]>=0) {
-          n_gids[i]=node_gids[i];
-        } else {
-          n_gids[i]=0;
-        }
-      }
-  
-      if (*num_node_gids) {
-        ndir.Create(*num_node_gids, &n_gids[0], &n_lids[0]);
-      } else {
-        ndir.Create(0, (UInt*) NULL, (UInt *)NULL);
-      }
-
-      if (num_src_gids) {
-        ndir.RemoteGID(num_src_gids, &src_gids[0], &src_gids_proc[0], &src_gids_lids[0]);
-      } else {
-        ndir.RemoteGID(0, (UInt *)NULL, (UInt *)NULL, (UInt *)NULL);
-      }
-    } catch(std::exception &x) {
-      // catch Mesh exception return code
-      if (x.what()) {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                              x.what(), ESMC_CONTEXT, rc);
-      } else {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                              "UNKNOWN", ESMC_CONTEXT, rc);
-      }
-    }
-
-    // Get node destinations
-    try {
-      // Loop through objects getting ids
-      Range::iterator si = nodes.begin(), se = nodes.end();
-      int i = 0;
-      for (; si != se; ++si) {
-        const EntityHandle node = *si;
-        EH_Comm_Pair ecp(node, src_gids_proc[i]);
-        node_to_proc_list.push_back(ecp);
-        ++i;
-      } // for si
-
-
-    } catch(std::exception &x) {
-      // catch Mesh exception return code
-      if (x.what()) {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                              x.what(), ESMC_CONTEXT, rc);
-      } else {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                              "UNKNOWN", ESMC_CONTEXT, rc);
-      }
-    }
-
-#define print_ddir_off
-#ifdef print_ddir
-    // print the vectors
-    printf("%d# src_gids_proc [%d] = [", localPet, src_gids_proc.size());
-    for (int i=0; i<src_gids_proc.size(); ++i) {
-      printf("%d, ", src_gids_proc[i]);
-    }
-    printf("]\n");
-
-    printf("%d# src_gids_lids [%d] = [", localPet, src_gids_lids.size());
-    for (int i=0; i<src_gids_lids.size(); ++i) {
-      printf("%d, ", src_gids_lids[i]);
-    }
-    printf("]\n");
-
-    printf("%d# gids          [%d] = [", localPet, src_gids.size());
-    for (int i=0; i<src_gids.size(); ++i) {
-      printf("%d, ", src_gids[i]);
-    }
-    printf("]\n");
-#endif
-
-    // Create elem_to_proc_list from node_to_proc_list
-    try {
-      // Loop through objects getting ids
-      Range::iterator si = nodes.begin(), se = nodes.end();
-      int i = 0;
-      for (; si != se; ++si) {
-        const EntityHandle node = *si;
-        int node_owner;
-        merr=mesh->mesh->tag_get_data(mesh->owner_tag, &node, 1, &node_owner);
-
-        // only consider local nodes
-        if (node_owner != localPet) { ++i; continue;}
-
-#define print_nodelems_off
-#ifdef print_nodelems
-  int node_id;
-  MBMesh_get_gid(mesh, node, &node_id);
-  printf("%d# Node %d connects to Elements ", localPet, node_id);
-#endif
-        // Loop elements attached to this node
-        Range elems_on_node;
-        merr=mesh->mesh->get_adjacencies(&node, 1, mesh->pdim, false, elems_on_node);
-        if (merr != MB_SUCCESS) {
-          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-            moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-        }
-        Range::iterator eni = elems_on_node.begin(), ene = elems_on_node.end();
-        for (; eni != ene; ++eni) {
-          const EntityHandle elem_on_node = *eni;
-          int elem_owner;
-          merr=mesh->mesh->tag_get_data(mesh->owner_tag, &elem_on_node, 1, &elem_owner);
-
-          // only consider local elements
-          if (elem_owner != localPet) continue;
-#ifdef print_nodelems
-  int elem_id;
-  MBMesh_get_gid(mesh, elem_on_node, &elem_id);
-  printf("%d, ", elem_id);
-#endif
-          // add to elem_to_proc_list
-          EH_Comm_Pair ecp(elem_on_node, src_gids_proc[i]);
-          std::vector<EH_Comm_Pair>::iterator ehf = find(elem_to_proc_list.begin(), elem_to_proc_list.end(), ecp);
-          if (ehf == elem_to_proc_list.end())
-            elem_to_proc_list.push_back(ecp);
-        } // for eni
-#ifdef print_nodelems
-  printf("\n");
-#endif
-      ++i;
-      } // for si
-
-    } catch(std::exception &x) {
-      // catch Mesh exception return code
-      if (x.what()) {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                              x.what(), ESMC_CONTEXT, rc);
-      } else {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                              "UNKNOWN", ESMC_CONTEXT, rc);
-      }
-    }
-
-
-#define print_elemtoproclist_off
-#ifdef print_elemtoproclist
-  std::vector<EH_Comm_Pair>::iterator ehi = elem_to_proc_list.begin(), ehe = elem_to_proc_list.end();
-  for (; ehi != ehe; ++ehi) {
-    int idtocheck = -1;
-    MBMesh_get_gid(mesh, ehi->eh, &idtocheck);
-    printf("%d# Elem %d proc %d\n", localPet, idtocheck, ehi->proc);
-  }
-#endif
-
-    // loop through elements looking for ones that haven't been assigned
-    try {
-      merr=mesh->mesh->get_entities_by_dimension(0, mesh->pdim, elems);
-      if (merr != MB_SUCCESS) {
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-          moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-      }
-
-      // Loop through elems
-      Range::iterator ei = elems.begin(), ee = elems.end();
-      for (; ei != ee; ++ei) {
-        const EntityHandle elem = *ei;
-        int elem_id;
-        MBMesh_get_gid(mesh, elem, &elem_id);
-
-        // Loop through elem_to_proc_list
-        std::vector<EH_Comm_Pair>::iterator ehi = elem_to_proc_list.begin(), ehe = elem_to_proc_list.end();
-        for (; ehi != ehe; ++ehi) {
-          int idtocheck = -1;
-          MBMesh_get_gid(mesh, ehi->eh, &idtocheck);
-          // if elem is in elem_to_proc_list it is already assigned
-          if (elem_id == idtocheck) break;
-        }
-        // if elem is not in elem_to_proc_list, need to assign to a processor
-        if (ehi == ehe)
-          Throw() << "Elem %d not found in elem_to_proc_list, will not redist", elem_id;
-      }
-    } catch(std::exception &x) {
-      // catch Mesh exception return code
-      if (x.what()) {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                              x.what(), ESMC_CONTEXT, rc);
-      } else {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                              "UNKNOWN", ESMC_CONTEXT, rc);
-      }
-    }
-
-    // if not split mesh, then just do the usual thing
-    MBMesh *outmesh;
-    if (!mesh->is_split) {
-      create_mbmesh_redist_elem(mesh, &elem_to_proc_list, &outmesh);
+      // Free split gids
+      if (elem_gids_ws !=NULL) delete [] elem_gids_ws;
     } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-       "- split nodes are not yet handled in the MBMesh",
-                                  ESMC_CONTEXT, rc);
-      throw ESMC_RC_NOT_IMPL;
+      mbmesh_redist(mesh, num_node_gids, node_gids, num_elem_gids, elem_gids, &out_mesh);
     }
-
-    // Verify that all node ownership is as defined by the DistGrid
-    mbmesh_set_node_owners(outmesh, ndir);
 
     // return the mbmesh as a void*
-    *output_meshpp=static_cast<void*> (outmesh);
+    *output_meshpp=static_cast<void*> (out_mesh);
 
 
   } catch(std::exception &x) {
@@ -3827,8 +3085,8 @@ void MBMesh_createredist(void **src_meshpp, int *num_node_gids, int *node_gids,
     return;
   }
 
-
   if (rc!=NULL) *rc=ESMF_SUCCESS;
+
 }
 
 
@@ -3856,9 +3114,6 @@ void MBMesh_checknodelist(void **meshpp, int *_num_node_gids, int *node_gids,
     // For convenience deref number
     int num_node_gids=*_num_node_gids;
 
-    // list of the Mesh node gids
-    std::vector<UInt> local_gids;
-
     // Loop through counting local nodes
     Range nodes;
     merr=mesh->mesh->get_entities_by_dimension(0,0,nodes);
@@ -3867,7 +3122,11 @@ void MBMesh_checknodelist(void **meshpp, int *_num_node_gids, int *node_gids,
         moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
     }
 
+    // list of the Mesh node gids
+    std::vector<UInt> local_gids, local_owners;
     local_gids.reserve(nodes.size());
+    local_owners.reserve(nodes.size());
+
     int num_local_nodes=0;
     Range::iterator si = nodes.begin(), se = nodes.end();
     for (; si != se; ++si) {
@@ -3877,11 +3136,19 @@ void MBMesh_checknodelist(void **meshpp, int *_num_node_gids, int *node_gids,
       merr=mesh->mesh->tag_get_data(mesh->owner_tag, &node, 1, &node_owner);
 
       // only consider local nodes
-      if (node_owner == localPet) { ++num_local_nodes;}
+      if (node_owner == localPet) { 
+        ++num_local_nodes;
 
-      int gid;
-      MBMesh_get_gid(mesh, node, &gid);
-      local_gids.push_back(gid);
+        int gid;
+        MBMesh_get_gid(mesh, node, &gid);
+        local_gids.push_back(gid);
+
+        local_owners.push_back(node_owner);
+#undef print_nodeowners
+#ifdef print_nodeowners
+        printf("%d# checknodes - node %d owner %d\n", localPet, gid, elem_owner);
+#endif
+      }
     }
 
     // See if number of local nodes is the same
@@ -3899,15 +3166,8 @@ void MBMesh_checknodelist(void **meshpp, int *_num_node_gids, int *node_gids,
         Throw() << "Node "<<node_gids[i]<<" not found in Mesh.";
       }
 
-      // Get the node
-      const EntityHandle node = *ni;
-
-      // Check if it's locally owned
-      int node_owner;
-      merr=mesh->mesh->tag_get_data(mesh->owner_tag, &node, 1, &node_owner);
-
-      if (node_owner != localPet) {
-        Throw() << "Node "<<node_gids[i]<<" in Mesh, but not local.";
+      if (local_owners[ni-local_gids.begin()] != localPet) {
+        Throw() << "Node "<<node_gids[i]<<" in Mesh, but not local." << local_owners[ni-local_gids.begin()] << "  " << localPet;
       }
     }
 
@@ -3962,21 +3222,21 @@ void MBMesh_checkelemlist(void **meshpp, int *_num_elem_gids, int *elem_gids,
     // For convenience deref number
     int num_elem_gids=*_num_elem_gids;
 
-    // list of the Mesh elem gids
-    std::vector<UInt> local_gids;
-
-    Range elems;
 
     // Loop through counting local elems
-    int num_local_elems=0;
+    Range elems;
     merr=mesh->mesh->get_entities_by_dimension(0,mesh->pdim,elems);
     if (merr != MB_SUCCESS) {
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
         moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
     }
 
+    // list of the Mesh elem gids
+    std::vector<UInt> local_gids, local_owners;
     local_gids.reserve(elems.size());
+    local_owners.reserve(elems.size());
 
+    int num_local_elems=0;
     Range::iterator si = elems.begin(), se = elems.end();
     for (; si != se; ++si) {
       const EntityHandle elem = *si;
@@ -3986,12 +3246,24 @@ void MBMesh_checkelemlist(void **meshpp, int *_num_elem_gids, int *elem_gids,
 
       int elem_owner;
       merr=mesh->mesh->tag_get_data(mesh->owner_tag, &elem, 1, &elem_owner);
+      if (merr != MB_SUCCESS) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+          moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+      }
 
-      if (elem_owner == localPet) num_local_elems++;
+      if (elem_owner == localPet) {
+        num_local_elems++;
 
-      int gid;
-      MBMesh_get_gid(mesh, elem, &gid);
-      local_gids.push_back(gid);
+        int gid;
+        MBMesh_get_gid(mesh, elem, &gid);
+        local_gids.push_back(gid);
+
+        local_owners.push_back(elem_owner);
+#undef print_elemowners
+#ifdef print_elemowners
+        printf("%d# checkelems - elem %d owner %d\n", localPet, gid, elem_owner);
+#endif
+      }
     }
 
     // See if number of local elems is the same
@@ -4008,15 +3280,8 @@ void MBMesh_checkelemlist(void **meshpp, int *_num_elem_gids, int *elem_gids,
         Throw() << "Node "<<elem_gids[i]<<" not found in Mesh.";
       }
 
-      // Get the node
-      const EntityHandle elem = *ni;
-
-      // Check if it's locally owned
-      int elem_owner;
-      merr=mesh->mesh->tag_get_data(mesh->owner_tag, &elem, 1, &elem_owner);
-
-      if (elem_owner != localPet) {
-        Throw() << "Elem "<<elem_gids[i]<<" in Mesh, but not local.";
+      if (local_owners[ni-local_gids.begin()] != localPet) {
+        Throw() << "Elem "<<elem_gids[i]<<" in Mesh, but not local." << local_owners[ni-local_gids.begin()] << "  " << localPet;
       }
     }
 
@@ -4044,96 +3309,6 @@ void MBMesh_checkelemlist(void **meshpp, int *_num_elem_gids, int *elem_gids,
 
   if (rc!=NULL) *rc=ESMF_SUCCESS;
 }
-
-// Assign node owners in output_mesh using ndir
-void mbmesh_set_node_owners(MBMesh *mesh, DDir<> ndir) {
-  Trace __trace("mbmesh_set_node_owners()");
-
-
-  int localrc, merr;
-
-  // Get a list of the Mesh nodes with gids
-  Range nodes;
-  std::vector<UInt> gids;
-
-  // get mesh nodes and gids
-  try {
-    merr=mesh->mesh->get_entities_by_dimension(0,0,nodes);
-    if (merr != MB_SUCCESS) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-        moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-    }
-  
-    gids.reserve(nodes.size());
-
-    // Loop through objects getting ids
-    Range::iterator si = nodes.begin(), se = nodes.end();
-    for (; si != se; ++si) {
-      const EntityHandle node = *si;
-      int gid;
-      MBMesh_get_gid(mesh, node, &gid);
-      gids.push_back(gid);
-    }
-  } catch(std::exception &x) {
-    // catch Mesh exception return code
-    if (x.what()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            x.what(), ESMC_CONTEXT, &localrc);
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            "UNKNOWN", ESMC_CONTEXT, &localrc);
-    }
-  }
-
-  // Get number of gids
-  UInt num_src_gids=gids.size();
-  std::vector<UInt> src_gids_proc(num_src_gids, 0);
-  std::vector<UInt> src_gids_lids(num_src_gids, 0);
-
-  // Get where each element is to go
-  try {
-    if (num_src_gids) {
-      ndir.RemoteGID(num_src_gids, &gids[0], &src_gids_proc[0], &src_gids_lids[0]);
-    } else {
-      ndir.RemoteGID(0, (UInt *)NULL, (UInt *)NULL, (UInt *)NULL);
-    }
-  } catch(std::exception &x) {
-    // catch Mesh exception return code
-    if (x.what()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            x.what(), ESMC_CONTEXT, &localrc);
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            "UNKNOWN", ESMC_CONTEXT, &localrc);
-    }
-  }
-
-
-
-  // Loop setting owner
-  try {
-    int nodeowners[nodes.size()];
-    for (int i = 0; i < num_src_gids; ++i) nodeowners[i] = src_gids_proc[i];
-
-    // Set Owners
-    merr=mesh->mesh->tag_set_data(mesh->owner_tag, nodes, nodeowners);
-    if (merr != MB_SUCCESS) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-         moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-    }
-  } catch(std::exception &x) {
-    // catch Mesh exception return code
-    if (x.what()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            x.what(), ESMC_CONTEXT, &localrc);
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            "UNKNOWN", ESMC_CONTEXT, &localrc);
-    }
-  }
-
-}
-
 
 #if 0
 void MBMesh_FitOnVM(Mesh **meshpp,
@@ -4209,6 +3384,7 @@ void MBMesh_FitOnVM(Mesh **meshpp,
   // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
+
 } // ESMCI_MeshFitOnVM
 
  // Change the proc numbers in a mesh to correspond to a different set. This isn't to 
@@ -4274,8 +3450,137 @@ void MBMesh_FitOnVM(Mesh **meshpp,
      RemoveGhost();
  }
 
-
 #endif
 
+///////////////////////////////////   helper functions   ///////////////////////////////////////
+
+
+
+#if 0
+
+void mbmesh_calc_split_id_to_frac(MBMesh *mesh) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "mbmesh_calc_split_id_to_frac()"
+
+  // Declare polygon information
+#define  MAX_NUM_POLY_COORDS  60
+#define  MAX_NUM_POLY_NODES_2D  30  // MAX_NUM_POLY_COORDS/2
+#define  MAX_NUM_POLY_NODES_3D  20  // MAX_NUM_POLY_COORDS/3
+  int num_poly_nodes;
+  double poly_coords[MAX_NUM_POLY_COORDS];
+  double tmp_coords[MAX_NUM_POLY_COORDS];
+
+
+  // Get useful info
+  int sdim=mesh->sdim;
+  MEField<> *cfield = mesh->GetCoordField();
+
+  // Setup map to hold total areas
+  std::map<UInt,double> orig_id_to_area;
+
+  // Loop gathering split,orig id pairs
+  std::vector<UInt> split_ids;
+  std::vector<UInt> orig_ids;
+
+  std::map<int,int>::iterator mi=mesh->split_to_orig_id.begin();
+  std::map<int,int>::iterator me=mesh->split_to_orig_id.end();
+  for ( ; mi != me; mi++) {
+    // Get split element id
+    split_ids.push_back(mi->first);
+
+    // Get original element id
+    orig_ids.push_back(mi->second);
+
+    // Get uniqued list of original ids and set to zero
+    orig_id_to_area[mi->second]=0.0;
+  }
+
+  // also add orig_id to orig_id pairs that are part of each split polygon
+  std::map<int,double>::iterator otai=orig_id_to_area.begin();
+  std::map<int,double>::iterator otae=orig_id_to_area.end();
+  for ( ; otai != otae; otai++) {
+    // Get split element id
+    split_ids.push_back(otai->first);
+
+    // Get original element id
+    orig_ids.push_back(otai->first);
+  }
+
+
+  // Loop split triangles set their area and sum into original polygon area
+  for (int i=0; i<split_ids.size(); i++) {
+
+    // Get split element id
+    UInt s_id=split_ids[i];
+
+    // Get original element id
+    UInt o_id=orig_ids[i];
+
+
+    //  Find the corresponding Mesh element
+    Mesh::MeshObjIDMap::iterator ei = mesh->map_find(MeshObj::ELEMENT, s_id);
+    if (ei == mesh->map_end(MeshObj::ELEMENT)) {
+      Throw() << "Element not in mesh";
+    }
+
+    // Get the element
+    const MeshObj &elem = *ei;
+
+    // Compute area depending on dimensions
+    double area;
+    if (sdim==2) {
+      get_elem_coords_2D_ccw(&elem, cfield, MAX_NUM_POLY_NODES_2D, tmp_coords, &num_poly_nodes, poly_coords);
+      remove_0len_edges2D(&num_poly_nodes, poly_coords);
+      area=area_of_flat_2D_polygon(num_poly_nodes, poly_coords);
+    } else if (sdim==3) {
+      get_elem_coords_3D_ccw(&elem, cfield, MAX_NUM_POLY_NODES_3D, tmp_coords, &num_poly_nodes, poly_coords);
+      remove_0len_edges3D(&num_poly_nodes, poly_coords);
+      area=great_circle_area(num_poly_nodes, poly_coords);
+    }
+
+    // Set area in split_id_to_frac
+    mesh->split_id_to_frac[s_id]=area;
+
+    // Sum to original polygon area
+    //  Find the corresponding orig id
+    std::map<UInt,double>::iterator oi = orig_id_to_area.find(o_id);
+    // If not in map yet then complain
+    if (oi == orig_id_to_area.end()) {
+      Throw() << "orig id no in map!!! \n";
+    }
+
+    // Add to original polygon total
+    oi->second += area;
+  }
+
+
+  // Loop again dividing to get fractional area
+  for (int i=0; i<split_ids.size(); i++) {
+
+    // Get split element id
+    UInt s_id=split_ids[i];
+
+    // Get original element id
+    UInt o_id=orig_ids[i];
+
+    // Find total area
+    std::map<UInt,double>::iterator oi = orig_id_to_area.find(o_id);
+    if (oi == orig_id_to_area.end()) {
+      Throw() << "Origianl id not found in map! \n";
+    }
+    double total_area=oi->second;
+
+
+    // Find entry to split id
+    std::map<UInt,double>::iterator si = mesh->split_id_to_frac.find(s_id);
+    if (si == mesh->split_id_to_frac.end()) {
+      Throw() << "Split id not found in map! \n";
+    }
+
+    // Divide to get fraction
+    si->second=si->second/total_area;
+
+  }
+#endif
 
 #endif // ESMF_MOAB

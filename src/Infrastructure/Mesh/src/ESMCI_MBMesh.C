@@ -606,6 +606,8 @@ void MBMesh::update_parallel() {
   // index 0 should return the one created inside MBMesh_addelements                                                
   ParallelComm *pcomm = ParallelComm::get_pcomm(this->mesh, 0);
 
+  pcomm->set_debug_verbosity(10);
+
   // Get current list of elements
   Range elems;
   merr=mesh->get_entities_by_dimension(0, pdim, elems);
