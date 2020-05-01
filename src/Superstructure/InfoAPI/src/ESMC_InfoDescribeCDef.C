@@ -31,10 +31,8 @@ static const char *const version = "$Id$";
 
 //namespace ESMCI {}  // namespace ESMCI
 
-//tdk:todo: add nullptr init checks
 extern "C" {
 
-  //tdk:todo: consider removing the search capability; was a dramatic failure for unknown reasons
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoDescribeSearch()"
 int ESMC_InfoDescribeSearch(ESMCI::Info *toSearch, char *rootKey, ESMCI::Info *searchCriteria, int &found) {
