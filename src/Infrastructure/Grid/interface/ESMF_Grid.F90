@@ -3343,7 +3343,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          if (copyAttributes) then
              lhs = ESMF_InfoPointerGetHandle(newGrid%this)
              rhs = ESMF_InfoPointerGetHandle(grid%this)
-             call ESMF_InfoUpdate(lhs, rhs, rc=localrc)
+             call ESMF_InfoUpdate(lhs, rhs, recursive=.true., rc=localrc)
              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
          endif

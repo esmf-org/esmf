@@ -225,7 +225,6 @@ void update_json_pointer(json &j, json **jdp, const json::json_pointer &key,
   // Test: test_update_json_pointer (for const overload)
   // Notes:
   // Throws: json::out_of_range when key not found
-  //tdk:todo: this should not be **jdp but just a single pointer
   try {
     *jdp = &(j.at(key));
   } catch (json::out_of_range &e) {
@@ -1263,20 +1262,25 @@ void Info::update(const Info &info) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "Info::update_for_attribute()"
 void do_update_for_attribute(json &to_update, const json &new_contents) {
-  //tdk:order
   check_is_object(to_update);
   check_is_object(new_contents);
+  // Loop over the key/values in the root object
   for (json::const_iterator nc=new_contents.cbegin(); nc!=new_contents.cend(); nc++) {
     const json *location_nc = nullptr;
     json *location_tu = nullptr;
+    // Check if the new content key is in the object to update
     bool is_in = isIn(nc.key(), to_update);
     if (is_in) {
+      // If the new content value is and object, we descend into it for the
+      // recursive update.
       if (nc.value().is_object()) {
         do_update_for_attribute(to_update.at(nc.key()), nc.value());
       } else {
+        // Otherwise we replace the value if it exists.
         to_update[nc.key()] = nc.value();
       }
     } else {
+      // Insert the new key into the map.
       to_update[nc.key()] = nc.value();
     }
   }
@@ -1285,7 +1289,6 @@ void do_update_for_attribute(json &to_update, const json &new_contents) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "Info::update_for_attribute()"
 void Info::update_for_attribute(const Info &info) {
-  //tdk:doc:  check InfoUpdate docs to make sure the behavior is clear with replacement
   // Test: test_update_for_attribute
   // Throws: esmc_error
   try {
@@ -1294,7 +1297,8 @@ void Info::update_for_attribute(const Info &info) {
     do_update_for_attribute(to_update, new_contents);
   }
   ESMF_INFO_CATCH_JSON;
-  //tdk:todo: should the dirty flag be set here?
+  // Data is considered not dirty after the update since this is primarily used
+  // by StateReconcile.
   this->dirty = false;
 };
 
