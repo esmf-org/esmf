@@ -10,7 +10,7 @@ ESMF_F90DEFAULT         = ifort
 ESMF_CXXDEFAULT         = clang
 ESMF_CPPDEFAULT         = clang -E -P -x c
 
-ESMF_CXXCOMPILEOPTS    += -x c++ -mmacosx-version-min=10.6
+ESMF_CXXCOMPILEOPTS    += -x c++ -mmacosx-version-min=10.7
 
 ############################################################
 # Default MPI setting.
@@ -18,6 +18,8 @@ ESMF_CXXCOMPILEOPTS    += -x c++ -mmacosx-version-min=10.6
 ifeq ($(ESMF_COMM),default)
 export ESMF_COMM := mpiuni
 endif
+
+ESMF_CXXCOMPILECPPFLAGS+= -stdlib=libc++
 
 ############################################################
 # MPI dependent settings.
@@ -192,7 +194,7 @@ ifeq ($(ESMF_LIBGSTDCXX),libstdc++.dylib)
 ESMF_LIBGSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.a)
 endif
 ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBGSTDCXX)) -L$(dir $(ESMF_LIBSTDCXX))
-ESMF_F90LINKLIBS  += -lstdc++ -lc++
+ESMF_F90LINKLIBS  +=  -lc++
 
 ############################################################
 # Blank out variables to prevent rpath encoding
