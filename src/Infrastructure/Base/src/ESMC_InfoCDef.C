@@ -326,13 +326,13 @@ void ESMC_InfoIsSet(ESMCI::Info *info, char *key, int &isSet, int &esmc_rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoUpdate()"
 void ESMC_InfoUpdate(ESMCI::Info *to_update, ESMCI::Info *new_contents,
-    int &attr_compliance_int, int &esmc_rc) {
+    int &recursive_int, int &esmc_rc) {
   ESMC_CHECK_INIT(to_update, esmc_rc)
   ESMC_CHECK_INIT(new_contents, esmc_rc)
   esmc_rc = ESMF_FAILURE;
-  bool attr_compliance = attr_compliance_int == 1;
+  bool recursive = recursive_int == 1;
   try {
-    if (attr_compliance) {
+    if (recursive) {
       to_update->update_for_attribute(*new_contents);
     } else {
       to_update->update(*new_contents);

@@ -1511,7 +1511,7 @@ contains
 
         base_temp_info = ESMF_InfoBaseGetHandle(base_temp)
         base_info = ESMF_InfoBaseGetHandle(base)
-        call ESMF_InfoUpdate(base_info, base_temp_info, attr_compliance=.true., &
+        call ESMF_InfoUpdate(base_info, base_temp_info, recursive=.true., &
           rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &

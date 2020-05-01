@@ -810,7 +810,7 @@
     integer :: offset, myOrigCount
     logical :: i_send, i_recv
     integer :: memstat
-    type(ESMF_Info) :: lhs, rhs
+    type(ESMF_Info) :: base_info, base_temp_info
 
     ! check input variables
     ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -963,9 +963,10 @@ petloop:  &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
 
-            lhs = ESMF_InfoBaseGetHandle(base)
-            rhs = ESMF_InfoBaseGetHandle(state%statep%base)
-            call ESMF_InfoUpdate(lhs, rhs, rc=localrc)
+            base_info = ESMF_InfoBaseGetHandle(base)
+            base_temp_info = ESMF_InfoBaseGetHandle(state%statep%base)
+            call ESMF_InfoUpdate(base_info, base_temp_info, recursive=.true., &
+              rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return

@@ -4336,20 +4336,23 @@ end subroutine ESMF_InfoPrint
 ! !IROUTINE: ESMF_InfoUpdate - Update the contents of an Info object
 !
 ! !INTERFACE:
-subroutine ESMF_InfoUpdate(lhs, rhs, keywordEnforcer, attr_compliance, rc)
+subroutine ESMF_InfoUpdate(lhs, rhs, keywordEnforcer, recursive, rc)
 ! !ARGUMENTS:
   type(ESMF_Info), intent(inout) :: lhs
   type(ESMF_Info), intent(in) :: rhs
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  logical, intent(in), optional :: attr_compliance
+  logical, intent(in), optional :: recursive
   integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Update the contents of \textit{lhs} using the contents of \textit{rhs}. The
-!     operation inserts or overwrites any key present in \textit{rhs} with its
-!     respective value in \textit{lhs}. Otherwise, the contents of \textit{lhs}
-!     is left unaltered.See the JSON documentation for implementation details
-!     \cite{json_for_modern_cpp_update}.
+!     operation inserts or overwrites any key in \textit{lhs} if it exists in \textit{rhs}.
+!     Otherwise, the contents of \textit{lhs} is left unaltered. See the JSON
+!     documentation for implementation details \cite{json_for_modern_cpp_update}.
+!     If \textit{recursive} is \textit{.true.} (default is \texttt{.false.}),
+!     nested objects will be updated by their component key/values. Otherwise,
+!     the first instance or top-level key is replaced without the child contents
+!     being updated element-by-element.
 !
 !     The arguments are:
 !     \begin{description}
@@ -4357,24 +4360,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       The \texttt{ESMF\_Info} object to update.
 !     \item [rhs]
 !       The \texttt{ESMF\_Info} object whose contents are used to update \textit{lhs}.
+!     \item [{[recursive]}]
+!       Default is \texttt{.false.}. If \texttt{.true.}, descend into nested objects
+!       and recursively update the contents.
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !EOP
 
   integer :: localrc
-  integer :: attr_compliance_int
+  integer :: recursive_int
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_FAILURE
-  attr_compliance_int = 0  ! .false.
-  if (present(attr_compliance)) then
-    if (attr_compliance) then
-      attr_compliance_int = 1  ! .true.
+  recursive_int = 0  ! .false.
+  if (present(recursive)) then
+    if (recursive) then
+      recursive_int = 1  ! .true.
     end if
   end if
 
-  call c_info_update(lhs%ptr, rhs%ptr, attr_compliance_int, localrc)
+  call c_info_update(lhs%ptr, rhs%ptr, recursive_int, localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   if (present(rc)) rc = ESMF_SUCCESS
