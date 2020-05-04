@@ -45,17 +45,16 @@ program ESMF_ArrayInfoUTest
   character(ESMF_MAXSTR) :: name
 
   character(ESMF_MAXSTR) :: key = "foo"
-  integer               :: rc, petCount, ii, nloops = 100
-  type(ESMF_VM)         :: vm
+  integer                :: rc, petCount, ii, nloops = 100
+  type(ESMF_VM)          :: vm
   ! cumulative result: count failures; no failures equals "all pass"
-  integer               :: result = 0
+  integer                :: result = 0
 
   integer(ESMF_KIND_I4) :: desired = 999, actual
-  type(ESMF_Info) :: info, info2
-  type(ESMF_Array)      :: array
-  type(ESMF_DistGrid)   :: distgrid
-  real(ESMF_KIND_R8)    :: farray2D(10,10)
-
+  type(ESMF_Info) :: info, info2, infoh
+  type(ESMF_Array) :: array, array2
+  type(ESMF_DistGrid) :: distgrid, distgrid2
+  real(ESMF_KIND_R8) :: farray2D(10,10)
   logical :: failed
 
   !----------------------------------------------------------------------------
@@ -116,6 +115,35 @@ program ESMF_ArrayInfoUTest
   end do
 
   call ESMF_Test((.not. failed), name, failMsg, result, ESMF_SRCLINE)
+  !----------------------------------------------------------------------------
+
+  !----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Deleting a host object and using a handle/view"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  rc = ESMF_FAILURE
+  failed = .false.
+
+  distgrid2 = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/10,10/), rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  array2 = ESMF_ArrayCreate(distgrid2, farray2D, ESMF_INDEX_GLOBAL, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  infoh = ESMF_InfoGetHandle(array2, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_ArrayDestroy(array2, noGarbage=.false., rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_InfoSet(infoh, "key", "value", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_Test(rc==ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+  call ESMF_DistGridDestroy(distgrid2, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !----------------------------------------------------------------------------
 
   !----------------------------------------------------------------------------
   call ESMF_TestEnd(ESMF_SRCLINE) ! calls ESMF_Finalize() internally

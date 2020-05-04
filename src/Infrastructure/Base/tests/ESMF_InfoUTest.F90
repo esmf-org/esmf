@@ -266,7 +266,7 @@ program ESMF_InfoUTest
   !NEX_UTest
   ! Test creating and destroying a bunch of attributes
   rc = ESMF_FAILURE
-  write(name, *) "ESMF_Info Create+Destroy Loop"
+  write(name, *) "Create+Destroy Loop"
   write(failMsg, *) "Failure during loop test"
 
   do i=1, 100000
@@ -443,7 +443,7 @@ program ESMF_InfoUTest
 
   !----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "ESMF_Info Array Setting/Getting"
+  write(name, *) "Array Setting/Getting"
   write(failMsg, *) "Array operations failed"
   failed = .false.
 
@@ -473,7 +473,7 @@ program ESMF_InfoUTest
 
   !----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "ESMF_Info Implicit Conversion w/ Array"
+  write(name, *) "Implicit Conversion w/ Array"
   write(failMsg, *) "Did not throw proper error"
   failed = .false.
 
@@ -577,7 +577,7 @@ program ESMF_InfoUTest
 
   !----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "ESMF_Info Logical Scalar"
+  write(name, *) "Logical Scalar"
   write(failMsg, *) "Did not set/get logical type"
   rc = ESMF_FAILURE
 
@@ -602,7 +602,7 @@ program ESMF_InfoUTest
 
   !----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "ESMF_Info Test Type Checking"
+  write(name, *) "Test Type Checking"
   write(failMsg, *) "Did not catch type error"
   rc = ESMF_FAILURE
 
@@ -623,7 +623,7 @@ program ESMF_InfoUTest
 
   !----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "ESMF_Info Set/Get Object"
+  write(name, *) "Set/Get Object"
   write(failMsg, *) "Did not set/get Info object"
   rc = ESMF_FAILURE
   failed = .false.
@@ -667,7 +667,7 @@ program ESMF_InfoUTest
 
   !----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "ESMF_Info Create By Parse"
+  write(name, *) "Create By Parse"
   write(failMsg, *) "Did not create Info by parse"
   rc = ESMF_FAILURE
   failed = .false.
@@ -825,7 +825,7 @@ program ESMF_InfoUTest
 
   !----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "ESMF_Info Check Initialization"
+  write(name, *) "Check Initialization"
   write(failMsg, *) "Did not handle uninitialized object"
   rc = ESMF_FAILURE
   failed = .false.
@@ -837,7 +837,7 @@ program ESMF_InfoUTest
 
   !----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "ESMF_Info Dirty State"
+  write(name, *) "Dirty State"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   rc = ESMF_FAILURE
   failed = .false.
@@ -860,7 +860,7 @@ program ESMF_InfoUTest
 
   !----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "ESMF_Info Implicit Conversion"
+  write(name, *) "Implicit Conversion"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   rc = ESMF_FAILURE
   failed = .false.
@@ -880,7 +880,7 @@ program ESMF_InfoUTest
 
   !----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "ESMF_Info Implicit Conversion w/ Scalar to List"
+  write(name, *) "Implicit Conversion w/ Scalar to List"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   rc = ESMF_FAILURE
   failed = .false.

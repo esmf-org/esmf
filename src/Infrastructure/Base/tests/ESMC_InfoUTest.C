@@ -1198,13 +1198,13 @@ void test_update_for_attribute(int& rc, char failMsg[]) {
     new_contents.set("/ESMF/General/Three", json(987), false);
 
     to_update.update_for_attribute(new_contents);
-    if (!to_update.get<int>("/NUOPC/Instance/One")==66) {
+    if (!(to_update.get<int>("/NUOPC/Instance/One")==66)) {
       return finalizeFailure(rc, failMsg, "wrong value 66");
     }
-    if (!to_update.get<int>("/NUOPC/Instance/Two")==55) {
+    if (!(to_update.get<int>("/NUOPC/Instance/Two")==55)) {
       return finalizeFailure(rc, failMsg, "wrong value 55");
     }
-    if (!to_update.get<int>("/ESMF/General/Three")==987) {
+    if (!(to_update.get<int>("/ESMF/General/Three")==987)) {
       return finalizeFailure(rc, failMsg, "wrong value 987");
     }
   }
