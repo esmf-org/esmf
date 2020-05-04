@@ -6260,6 +6260,7 @@ print *, "found match:"// &
     integer                         :: extrapNumSrcPnts
     real                            :: extrapDistExponent
     integer                         :: extrapNumLevels
+    logical                         :: extrapNumLevelsINC
     logical                         :: ignoreDegenerate
     type(ESMF_PoleMethod_Flag)      :: polemethod
     integer                         :: regridPoleNPnts
@@ -6661,6 +6662,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
         extrapNumSrcPnts = 8 ! default
         extrapDistExponent = 2.0 ! default
         extrapNumLevels = 1 ! default
+        extrapNumLevelsINC = .true. ! user value not found
         do j=2, size(chopStringList)
           if (index(chopStringList(j),"extrapnumsrcpnts=")==1) then
             call NUOPC_ChopString(chopStringList(j), chopChar="=", &
@@ -6703,9 +6705,16 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
             endif
             deallocate(chopSubString) ! local garbage collection
+            extrapNumLevelsINC = .false.
             exit ! skip the rest of the loop after first hit
           endif
         enddo
+        if ((extrapMethod.eq.ESMF_EXTRAPMETHOD_CREEP) .and. extrapNumLevelsINC) then
+          call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+            msg="User must set extrapNumLevels when extrapMethod=ESMF_EXTRAPMETHOD_CREEP!", &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+          return  ! bail out
+        endif
       endif
 
       ! determine "ignoreDegenerate"
