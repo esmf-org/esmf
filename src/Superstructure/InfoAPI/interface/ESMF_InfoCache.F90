@@ -356,7 +356,7 @@ recursive subroutine ESMF_InfoCacheReassembleFieldsFinalize(target, rc)
   integer :: field_count
   character(len=ESMF_MAXSTR), dimension(:), allocatable :: field_name_list
   type(ESMF_Info) :: infoh
-  logical :: isPresent
+  logical :: isPresent, isPacked
 
   rc = ESMF_SUCCESS
 
@@ -398,23 +398,26 @@ recursive subroutine ESMF_InfoCacheReassembleFieldsFinalize(target, rc)
 
         allocate(field_name_list(field_count))
 
-        call ESMF_FieldBundleGet(fb, fieldNameList=field_name_list, rc=rc)
+        call ESMF_FieldBundleGet(fb, fieldNameList=field_name_list, isPacked=isPacked, &
+          rc=rc)
         if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-        do jj=1,field_count
-          call ESMF_FieldBundleGet(fb, trim(field_name_list(jj)), field=field, rc=rc)
-          if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-          infoh = ESMF_InfoBaseGetHandle(field%ftypep%base)
-
-          isPresent = ESMF_InfoIsPresent(infoh, "_esmf_state_reconcile", rc=rc)
-          if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-          if (isPresent) then
-            call ESMF_InfoRemove(infoh, "_esmf_state_reconcile", rc=rc)
+        if (.not. isPacked) then
+          do jj=1,field_count
+            call ESMF_FieldBundleGet(fb, trim(field_name_list(jj)), field=field, rc=rc)
             if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-          end if
-        end do
+
+            infoh = ESMF_InfoBaseGetHandle(field%ftypep%base)
+
+            isPresent = ESMF_InfoIsPresent(infoh, "_esmf_state_reconcile", rc=rc)
+            if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+            if (isPresent) then
+              call ESMF_InfoRemove(infoh, "_esmf_state_reconcile", rc=rc)
+              if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+            end if
+          end do
+        end if
 
         deallocate(field_name_list)
     end select
@@ -440,6 +443,7 @@ recursive subroutine ESMF_InfoCacheReassembleFields(target, rc)
   character(len=ESMF_MAXSTR) :: curr_field_name
   integer :: field_count
   character(len=ESMF_MAXSTR), dimension(:), allocatable :: field_name_list
+  logical :: isPacked
 
   rc = ESMF_SUCCESS
 
@@ -474,16 +478,19 @@ recursive subroutine ESMF_InfoCacheReassembleFields(target, rc)
 
         allocate(field_name_list(field_count))
 
-        call ESMF_FieldBundleGet(fb, fieldNameList=field_name_list, rc=rc)
+        call ESMF_FieldBundleGet(fb, fieldNameList=field_name_list, isPacked=isPacked, &
+          rc=rc)
         if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-        do jj=1,field_count
-          call ESMF_FieldBundleGet(fb, trim(field_name_list(jj)), field=field, rc=rc)
-          if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+        if (.not. isPacked) then
+          do jj=1,field_count
+            call ESMF_FieldBundleGet(fb, trim(field_name_list(jj)), field=field, rc=rc)
+            if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-          call ESMF_InfoCacheReassembleField(field, target, rc)
-          if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-        end do
+            call ESMF_InfoCacheReassembleField(field, target, rc)
+            if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+          end do
+        end if
 
         deallocate(field_name_list)
     end select

@@ -828,16 +828,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer :: localrc
   character(*), parameter :: etype = "FieldBundle"
   character(:), allocatable :: uname
+  logical :: isPacked
+  type(ESMF_Info) :: infoh
 
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-  call ESMF_FieldBundleGet(target, name=name, rc=localrc)
+  call ESMF_FieldBundleGet(target, name=name, isPacked=isPacked, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   call self%updateGeneric(root_key, name, etype, target%this%base, uname=uname, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  if (self%createInfo) then
+  infoh = ESMF_InfoBaseGetHandle(target%this%base)
+
+  call ESMF_InfoSet(infoh, root_key//"/"//uname//"/is_packed", isPacked, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (self%createInfo .and. .not. isPacked) then
     call self%FillMembers(target, root_key//"/"//uname//"/members", rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
     deallocate(uname)
