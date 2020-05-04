@@ -336,6 +336,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer(C_INT) :: found_as_int
   type(ESMF_VMId) :: curr_vmid
   logical :: vmids_are_equal
+  character(len=ESMF_MAXSTR) :: logmsg
 
   localrc = ESMF_FAILURE
   if (.not. self%is_initialized) then
@@ -420,6 +421,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       uname = l_uname
     end if
 
+    ! If a VM identifier map is provided and the current Base object is valid,
+    ! search the map for its integer identifier.
     if (associated(self%vmIdMap)) then
       if (l_base_is_valid) then
         call ESMF_BaseGetVMId(base, curr_vmid, rc=localrc)
@@ -433,8 +436,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         end do
 
         if (.not. vmids_are_equal) then
-          if (ESMF_LogFoundError(ESMF_FAILURE, msg="VMId not found", ESMF_CONTEXT, &
-            rcToReturn=rc)) return
+          if (ESMF_LogFoundError(ESMF_FAILURE, msg="VMId not found", ESMF_CONTEXT, rcToReturn=rc)) return
         end if
 
         call ESMF_InfoSet(self%info, local_root_key//"/vmid_int", ii, rc=localrc)
