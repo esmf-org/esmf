@@ -17,25 +17,26 @@
 !------------------------------------------------------------------------------
 !BOE
 !
-! \subsubsection{Communication - Non-blocking behavior and VMEpochs}
+! \subsubsection{Communication - Non-blocking option and VMEpochs}
 !
 ! The VM communication methods offer the option to execute in non-blocking
-! mode. In this mode the calls return immediatly on each local PET. A separate
-! synchronization call is needed to assure completion of the data transfer.
+! mode. In this mode, both sending and receving calls return immediatly on each
+! local PET. A separate synchronization call is needed to assure completion of
+! the data transfer.
 !
 ! The separation of initiation and completion of the data transfer provides
 ! the opportunity for the underlying communication system to progress 
-! concurrently with other operations on the same PET. This can have profound
-! impact on the performance of an algorithm that requires both computation and
-! communication.
+! concurrently with other operations on the same PET. This can be leveraged to
+! have profound impact on the performance of an algorithm that requires both
+! computation and communication.
 !
 ! Another critical application of the non-blocking communication mode is the
 ! prevention of deadlocks. In the default blocking mode, a receiving method
 ! will not return until the data transfer has completed. Sending methods may
 ! also not return, especially if the message being sent is above the 
 ! implementation dependent internal buffer size. This behavior makes it often
-! very difficult, if not impossible, to write safe algorithms that require
-! communication between a group of PETs, and are guaranteed to not deadlock. 
+! hard, if not impossible, to write safe algorithms that guarantee to not
+! deadlock when communicating between a group of PETs.
 ! Using the communication calls in non-blocking mode simplifies this problem
 ! immensely.
 ! 
@@ -177,7 +178,7 @@ program ESMF_VMNonBlockingEx
 !BOE
 ! Initiate the data transfer between {\tt src} PET and {\tt dst} PET, but this
 ! time also pass the {\tt commhandle} variable of type {\tt ESMF\_CommHandle}.
-! Here send two message between {\tt src}{ and {\tt dst} in order to have
+! Here send two message between {\tt src} and {\tt dst} in order to have
 ! different outstanding messages to wait for.
 !EOE
 
@@ -279,8 +280,9 @@ program ESMF_VMNonBlockingEx
   call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
 
 !BOE
-! For cases where multiple messages are being sent between the same {\tt src}
-! {\tt dst} pairs using non-blocking communications, performance can often
+! For cases where multiple messages are being sent between the same
+! {\tt src}-{\tt dst}
+! pairs using non-blocking communications, performance can often
 ! be improved by aggregating individual messages. An extra buffer
 ! is needed to hold the collected messages, resulting in only a single data
 ! transfer for each PET pair. In many cases this can significantly reduce the
