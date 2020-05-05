@@ -75,8 +75,8 @@ end interface
 !==============================================================================
 !==============================================================================
 
-!tdk:optimize: where the info storage may be passed in and reused during a search. probably change info to be a pointer
 type, public :: ESMF_InfoDescribe
+  ! TODO:describe_search: Use a pointer to avoid rebuilding the internal storage with a repeat search.
   type(ESMF_Info) :: info
   logical :: addBaseAddress = .false.  ! If true, add the object's base address
   logical :: addObjectInfo = .false.  ! If true, add ESMF_Info map for each object
@@ -87,6 +87,8 @@ type, public :: ESMF_InfoDescribe
   type(ESMF_Base) :: curr_base  ! Holds a reference to the current update object's base. Will change when recursively updating
   logical :: curr_base_is_valid = .false.  ! If true, the object's base is valid (i.e. can be reinterpret casted)
   logical :: curr_base_is_geom = .false.  ! If true, the Base is for an ESMF Geometry object
+
+  ! TODO:describe_search: These parameters used by search and should not be used in practice.
   type(ESMF_Info), pointer :: searchCriteria ! If associated use these Info contents to find an object
   logical :: found = .false. ! Used internally when finding objects
   type(ESMF_Field) :: foundField ! Used when finding Fields
@@ -904,7 +906,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   allocate(targetList(targetCount))
 
-  !tdk:note: if search criteria implemented this must used a name list to get the field since this is deallocated
+  ! TODO:describe_search: This must use a name list to get the Field reference since the Field list is deallocated by scope.
   call ESMF_FieldBundleGet(target, fieldList=targetList, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 

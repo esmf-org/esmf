@@ -316,31 +316,6 @@ json::iterator find_by_index(json &j, const std::size_t index_target, bool recur
   return ret;
 }
 
-//tdk:todo: can i remove this function?
-#undef  ESMC_METHOD
-#define ESMC_METHOD "update_json_pointer(<non-const> + container)"
-void update_json_pointer(json &j, json **jdp, int index, bool recursive,
-  json **container) {
-  // Test: test_update_json_pointer (for const overload)
-  // Notes:
-  // Throws: json::out_of_range when key not found
-  try {
-//    *jdp = &(j.at(key));
-//    *container = &j;
-  } catch (json::out_of_range &e) {
-    if (recursive) {
-      for (json::iterator it=j.begin(); it!=j.end(); it++) {
-        if (it.value().is_object()) {
-//          update_json_pointer(it.value(), jdp, index, true, container);
-        }
-      }
-    }
-    if (!*jdp) {
-      throw(e);
-    }
-  }
-}
-
 #undef  ESMC_METHOD
 #define ESMC_METHOD "handleHasKey()"
 bool handleHasKey(const Info &info, const json::json_pointer &jpkey, bool force) {
