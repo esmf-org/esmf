@@ -606,7 +606,7 @@ void MBMesh::update_parallel() {
   // index 0 should return the one created inside MBMesh_addelements                                                
   ParallelComm *pcomm = ParallelComm::get_pcomm(this->mesh, 0);
 
-  pcomm->set_debug_verbosity(10);
+  pcomm->set_debug_verbosity(0);
 
   // Get current list of elements
   Range elems;
@@ -907,7 +907,7 @@ void MBMesh::debug_output_nodes() {
   }
 
   // Loop over nodes outputting information
-  for (Range::iterator it=nodes.begin(); it != nodes.end(); it++) {
+  for (Range::const_iterator it=nodes.begin(); it != nodes.end(); it++) {
     EntityHandle node=*it;
 
     // Output info
@@ -963,7 +963,7 @@ void MBMesh::debug_output_elems() {
   }
 
   // Loop over nodes outputting information
-  for (Range::iterator it=elems.begin(); it != elems.end(); it++) {
+  for (Range::const_iterator it=elems.begin(); it != elems.end(); it++) {
     EntityHandle elem=*it;
 
     // Output info
@@ -1019,7 +1019,7 @@ void MBMesh::setup_verts_array() {
 
   // Loop over nodes filling array
   int i=0;
-  for (Range::iterator it=nodes.begin(); it != nodes.end(); it++) {
+  for (Range::const_iterator it=nodes.begin(); it != nodes.end(); it++) {
     EntityHandle node=*it;
 
     verts[i]=node;

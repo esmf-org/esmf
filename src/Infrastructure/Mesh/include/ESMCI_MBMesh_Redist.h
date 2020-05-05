@@ -120,6 +120,7 @@ void create_pointlist_redist_point(PointList *src_pl,
 // split element handling that needs to be called from the glue layer
 void mbmesh_expand_split_elem_ids(MBMesh *mesh, int num_elem_gids, int *elem_gids, int *_num_elem_gids_ws, int **_elem_gids_ws, std::map<int,int> &split_to_orig_id);
 void mbmesh_set_split_orig_id_map(MBMesh *src_mesh, MBMesh *output_mesh);
+void mbmesh_calc_split_id_to_frac(MBMesh *mesh);
 
 } //namespace
 

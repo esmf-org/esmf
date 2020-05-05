@@ -191,7 +191,7 @@ void MBMesh_addnodes(void **mbmpp, int *num_nodes, int *nodeId,
    try {
 
      // Get Moab Mesh wrapper
-      MBMesh *mbmp=static_cast<MBMesh*> (*mbmpp);
+      MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
 
      //Get MOAB Mesh
      Interface *moab_mesh=mbmp->mesh;
@@ -366,7 +366,7 @@ void MBMesh_addnodes(void **mbmpp, int *num_nodes, int *nodeId,
     merr=mbmp->mesh->get_entities_by_dimension(0, 0, nodes);
     MBMESH_CHECK_ERR(merr, localrc);
     
-    for(Range::iterator it=nodes.begin(); it !=nodes.end(); it++) {
+    for(Range::const_iterator it=nodes.begin(); it !=nodes.end(); it++) {
       const EntityHandle *node=&(*it);
     
       int nid;
@@ -672,7 +672,7 @@ void MBMesh_addelements(void **mbmpp,
     int merr;
 
     // Get Moab Mesh wrapper
-    MBMesh *mbmp=static_cast<MBMesh*> (*mbmpp);
+    MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
 
     //Get MOAB Mesh
     Interface *moab_mesh=mbmp->mesh;
@@ -1394,7 +1394,7 @@ void MBMesh_addelements(void **mbmpp,
     merr=mbmp->mesh->get_entities_by_dimension(0, mbmp->pdim, elems);
     MBMESH_CHECK_ERR(merr, localrc);
     
-    for(Range::iterator it=elems.begin(); it !=elems.end(); it++) {
+    for(Range::const_iterator it=elems.begin(); it !=elems.end(); it++) {
       const EntityHandle *elem=&(*it);
     
       int eid;
@@ -1519,7 +1519,7 @@ void MBMesh_turnonnodemask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg, 
     }
 
     // Get Moab Mesh wrapper
-    MBMesh *mbmp=static_cast<MBMesh*> (*mbmpp);
+    MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
 
     //Get MOAB Mesh
     Interface *moab_mesh=mbmp->mesh;
@@ -1624,7 +1624,7 @@ void MBMesh_turnonnodemask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg, 
     }
 
     // Get Moab Mesh wrapper
-    MBMesh *mbmp=static_cast<MBMesh*> (*mbmpp);
+    MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
 
     //Get MOAB Mesh
     Interface *moab_mesh=mbmp->mesh;
@@ -1696,7 +1696,7 @@ void MBMesh_turnonelemmask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg, 
     }
 
     // Get Moab Mesh wrapper
-    MBMesh *mbmp=static_cast<MBMesh*> (*mbmpp);
+    MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
 
     //Get MOAB Mesh
     Interface *moab_mesh=mbmp->mesh;
@@ -1802,7 +1802,7 @@ void MBMesh_turnonelemmask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg, 
     }
 
     // Get Moab Mesh wrapper
-    MBMesh *mbmp=static_cast<MBMesh*> (*mbmpp);
+    MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
 
     //Get MOAB Mesh
     Interface *moab_mesh=mbmp->mesh;
@@ -1873,7 +1873,7 @@ void MBMesh_destroy(void **mbmpp, int *rc) {
       throw localrc;  // bail out with exception
 
     // Get Moab Mesh wrapper
-    MBMesh *mbmp=static_cast<MBMesh*> (*mbmpp);
+    MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
 
     // Get rid of MBMesh
     delete mbmp;
@@ -1936,7 +1936,7 @@ void MBMesh_write(void **mbmpp, char *fname, int *rc,
 
 
     // Get Moab Mesh wrapper
-    MBMesh *mbmp=static_cast<MBMesh*> (*mbmpp);
+    MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
 
     //Get MOAB Mesh
     Interface *moab_mesh=mbmp->mesh;
@@ -1996,7 +1996,7 @@ void MBMesh_createnodedistgrid(void **mbmpp, int *ngrid, int *num_lnodes, int *r
       throw localrc;  // bail out with exception
 
     // Get Moab Mesh wrapper
-    MBMesh *mbmp=static_cast<MBMesh*> (*mbmpp);
+    MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
 
     //Get MOAB Mesh
     Interface *moab_mesh=mbmp->mesh;
@@ -2009,7 +2009,7 @@ void MBMesh_createnodedistgrid(void **mbmpp, int *ngrid, int *num_lnodes, int *r
     merr=mbmp->mesh->get_entities_by_dimension(0,0,range_node);
     MBMESH_CHECK_ERR(merr, localrc);
 
-    for(Range::iterator it=range_node.begin(); it !=range_node.end(); it++) {
+    for(Range::const_iterator it=range_node.begin(); it !=range_node.end(); it++) {
       const EntityHandle *node=&(*it);
 
       // Get owner
@@ -2104,7 +2104,7 @@ void getElemGIDS(MBMesh *mbmp, std::vector<int> &egids) {
 
   // Loop through elements putting into list
   std::vector<std::pair<int,int> > pos_and_gids;
-  for(Range::iterator it=range_elem.begin(); it !=range_elem.end(); it++) {
+  for(Range::const_iterator it=range_elem.begin(); it !=range_elem.end(); it++) {
     const EntityHandle *elemp=(&*it);
 
     // Get owner
@@ -2177,7 +2177,7 @@ void MBMesh_createelemdistgrid(void **mbmpp, int *egrid, int *num_lelems, int *r
 #endif
 
     // Get Moab Mesh wrapper
-    MBMesh *mbmp=static_cast<MBMesh*> (*mbmpp);
+    MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
 
     // Get list of elem gids in order
     getElemGIDS(mbmp, egids);
@@ -2233,7 +2233,7 @@ void getElems(void **mbmpp, std::vector<EntityHandle> &ehs) {
     throw localrc;  // bail out with exception
 
   // Get Moab Mesh wrapper
-  MBMesh *mbmp=static_cast<MBMesh*> (*mbmpp);
+  MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
 
   //Get MOAB Mesh
   Interface *moab_mesh=mbmp->mesh;
@@ -2252,7 +2252,7 @@ void getElems(void **mbmpp, std::vector<EntityHandle> &ehs) {
 
   // Loop through elements putting into list
   std::vector<std::pair<int,EntityHandle> > pos_and_elems;
-  for(Range::iterator it=range_elem.begin(); it !=range_elem.end(); it++) {
+  for(Range::const_iterator it=range_elem.begin(); it !=range_elem.end(); it++) {
     const EntityHandle *elemp=(&*it);
     EntityHandle elem=*it;
 
@@ -2311,7 +2311,7 @@ void MBMesh_getlocalelemcoords(void **mbmpp, double *ecoords,
     try {
 
       // Get Moab Mesh wrapper
-      MBMesh *mbmp=static_cast<MBMesh*> (*mbmpp);
+      MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
 
       // Make sure that there are element coords
       if (!mbmp->has_elem_coords) {
@@ -2426,7 +2426,7 @@ void MBMesh_getarea(void **mbmpp, int *num_elem, double *elem_areas, int *rc) {
 
 
     // Get Moab Mesh wrapper
-    MBMesh *mbmp=static_cast<MBMesh*> (*mbmpp);
+    MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
 
     //Get MOAB Mesh
     Interface *moab_mesh=mbmp->mesh;
@@ -2591,7 +2591,7 @@ void getNodes(void **mbmpp, std::vector<EntityHandle> &nodes) {
     throw localrc;  // bail out with exception
 
   // Get Moab Mesh wrapper
-  MBMesh *mbmp=static_cast<MBMesh*> (*mbmpp);
+  MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
 
   //Get MOAB Mesh
   Interface *moab_mesh=mbmp->mesh;
@@ -2610,7 +2610,7 @@ void getNodes(void **mbmpp, std::vector<EntityHandle> &nodes) {
 
   // Loop through nodes putting into list
   std::vector<std::pair<int,EntityHandle> > pos_and_nodes;
-  for(Range::iterator it=range_node.begin(); it !=range_node.end(); it++) {
+  for(Range::const_iterator it=range_node.begin(); it !=range_node.end(); it++) {
     const EntityHandle *nodep=(&*it);
     EntityHandle node=*it;
 
@@ -2665,7 +2665,7 @@ void MBMesh_getlocalcoords(void **mbmpp, double *ncoords, int *_orig_sdim, int *
 
   try {
     // Get Moab Mesh wrapper
-    MBMesh *mbmp=static_cast<MBMesh*> (*mbmpp);
+    MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
 
     //Get MOAB Mesh
     Interface *moab_mesh=mbmp->mesh;
@@ -2767,7 +2767,7 @@ void MBMesh_serialize(void **mbmpp, char *buffer, int *length,
     if (rc) *rc = ESMC_RC_NOT_IMPL;
 
     // Get Moab Mesh wrapper
-    MBMesh *mbmp=static_cast<MBMesh*> (*mbmpp);
+    MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
 
     //Get MOAB Mesh
     Interface *mesh=mbmp->mesh;
@@ -2916,9 +2916,10 @@ void MBMesh_createredistelems(void **src_meshpp, int *num_elem_gids, int *elem_g
     int localrc;
 
     // Dereference
-    MBMesh *mesh=static_cast<MBMesh*> (*src_meshpp);
-    MBMesh *out_mesh=static_cast<MBMesh*> (*output_meshpp);
+    MBMesh *mesh=reinterpret_cast<MBMesh*> (*src_meshpp);
+    MBMesh *out_mesh=reinterpret_cast<MBMesh*> (*output_meshpp);
 
+#if 1
     if (mesh->is_split) {
       // If split mesh expand ids
       int num_elem_gids_ws;
@@ -2928,25 +2929,36 @@ void MBMesh_createredistelems(void **src_meshpp, int *num_elem_gids, int *elem_g
       mbmesh_expand_split_elem_ids(mesh, *num_elem_gids, elem_gids, &num_elem_gids_ws, &elem_gids_ws, split_to_orig_id);
 
       mbmesh_redist_elem(mesh, &num_elem_gids_ws, elem_gids_ws, &out_mesh);
- 
+
       out_mesh->is_split=mesh->is_split;
       out_mesh->max_non_split_id=mesh->max_non_split_id;
       out_mesh->split_to_orig_id=split_to_orig_id;
 
-      // RLO: not sure we need this now?
-      // mbmesh_set_split_orig_id_map(mesh, out_mesh);
-
       // calculate split_id_to_frac map from other info
-      // calc_split_id_to_frac(out_mesh);
+      mbmesh_calc_split_id_to_frac(out_mesh);
 
-      // Free split gids
+      // free split gids
       if (elem_gids_ws !=NULL) delete [] elem_gids_ws;
     } else {
       mbmesh_redist_elem(mesh, num_elem_gids, elem_gids, &out_mesh);
+      out_mesh->is_split=mesh->is_split;
     }
+#else
+    mbmesh_redist_elem(mesh, num_elem_gids, elem_gids, &out_mesh);
+
+    // split element handling
+    out_mesh->is_split=mesh->is_split;
+
+    if (out_mesh->is_split) {
+      mbmesh_set_split_orig_id_map(mesh, out_mesh);
+      out_mesh->max_non_split_id=mesh->max_non_split_id;
+      // RLO: not sure we need this if above is used
+      // out_mesh->split_to_orig_id=mesh->split_to_orig_id;
+    }
+#endif
 
     // return the mbmesh as a void*
-    *output_meshpp=static_cast<void*> (out_mesh);
+    *output_meshpp=reinterpret_cast<void*> (out_mesh);
 
   } catch(std::exception &x) {
     // catch Mesh exception return code
@@ -2982,8 +2994,8 @@ void MBMesh_createredistnodes(void **src_meshpp, int *num_node_gids, int *node_g
     int localrc;
 
     // Dereference
-    MBMesh *mesh=static_cast<MBMesh*> (*src_meshpp);
-    MBMesh *out_mesh=static_cast<MBMesh*> (*output_meshpp);
+    MBMesh *mesh=reinterpret_cast<MBMesh*> (*src_meshpp);
+    MBMesh *out_mesh=reinterpret_cast<MBMesh*> (*output_meshpp);
 
     mbmesh_redist_node(mesh, num_node_gids, node_gids, &out_mesh);
 
@@ -2996,6 +3008,9 @@ void MBMesh_createredistnodes(void **src_meshpp, int *num_node_gids, int *node_g
       // RLO: not sure we need this if above is used
       // out_mesh->split_to_orig_id=mesh->split_to_orig_id;
     }
+
+  // convert the out_mesh back to a void*
+  *output_meshpp = reinterpret_cast<void *> (out_mesh);
 
   } catch(std::exception &x) {
     // catch Mesh exception return code
@@ -3031,9 +3046,10 @@ void MBMesh_createredist(void **src_meshpp, int *num_node_gids, int *node_gids,
     int localrc;
 
     // Dereference
-    MBMesh *mesh=static_cast<MBMesh*> (*src_meshpp);
-    MBMesh *out_mesh=static_cast<MBMesh*> (*output_meshpp);
+    MBMesh *mesh=reinterpret_cast<MBMesh*> (*src_meshpp);
+    MBMesh *out_mesh=reinterpret_cast<MBMesh*> (*output_meshpp);
 
+#if 1
     if (mesh->is_split) {
       // If split mesh expand ids
       int num_elem_gids_ws;
@@ -3048,20 +3064,31 @@ void MBMesh_createredist(void **src_meshpp, int *num_node_gids, int *node_gids,
       out_mesh->max_non_split_id=mesh->max_non_split_id;
       out_mesh->split_to_orig_id=split_to_orig_id;
 
-      // RLO: not sure we need this now?
-      // mbmesh_set_split_orig_id_map(mesh, out_mesh);
-
       // calculate split_id_to_frac map from other info
-      // calc_split_id_to_frac(out_mesh);
+      mbmesh_calc_split_id_to_frac(out_mesh);
 
       // Free split gids
       if (elem_gids_ws !=NULL) delete [] elem_gids_ws;
     } else {
       mbmesh_redist(mesh, num_node_gids, node_gids, num_elem_gids, elem_gids, &out_mesh);
+      out_mesh->is_split=mesh->is_split;
     }
+#else
+    mbmesh_redist(mesh, num_node_gids, node_gids, num_elem_gids, elem_gids, &out_mesh);
+
+    // split element handling
+    out_mesh->is_split=mesh->is_split;
+
+    if (out_mesh->is_split) {
+      mbmesh_set_split_orig_id_map(mesh, out_mesh);
+      out_mesh->max_non_split_id=mesh->max_non_split_id;
+      // RLO: not sure we need this if above is used
+      // out_mesh->split_to_orig_id=mesh->split_to_orig_id;
+    }
+#endif
 
     // return the mbmesh as a void*
-    *output_meshpp=static_cast<void*> (out_mesh);
+    *output_meshpp=reinterpret_cast<void*> (out_mesh);
 
 
   } catch(std::exception &x) {
@@ -3109,7 +3136,7 @@ void MBMesh_checknodelist(void **meshpp, int *_num_node_gids, int *node_gids,
       throw localrc;
 
     // Dereference
-    MBMesh *mesh=static_cast<MBMesh*> (*meshpp);
+    MBMesh *mesh=reinterpret_cast<MBMesh*> (*meshpp);
 
     // For convenience deref number
     int num_node_gids=*_num_node_gids;
@@ -3128,7 +3155,7 @@ void MBMesh_checknodelist(void **meshpp, int *_num_node_gids, int *node_gids,
     local_owners.reserve(nodes.size());
 
     int num_local_nodes=0;
-    Range::iterator si = nodes.begin(), se = nodes.end();
+    Range::const_iterator si = nodes.begin(), se = nodes.end();
     for (; si != se; ++si) {
       const EntityHandle node = *si;
 
@@ -3160,7 +3187,7 @@ void MBMesh_checknodelist(void **meshpp, int *_num_node_gids, int *node_gids,
 
     // Loop making sure nodes are all here
     for (int i=0; i<num_node_gids; i++) {
-      std::vector<UInt>::iterator ni = std::find(local_gids.begin(), local_gids.end(), node_gids[i]);
+      std::vector<UInt>::const_iterator ni = std::find(local_gids.begin(), local_gids.end(), node_gids[i]);
 
       if (ni == local_gids.end()) {
         Throw() << "Node "<<node_gids[i]<<" not found in Mesh.";
@@ -3217,7 +3244,7 @@ void MBMesh_checkelemlist(void **meshpp, int *_num_elem_gids, int *elem_gids,
       throw localrc;
 
     // Dereference
-    MBMesh *mesh=static_cast<MBMesh*> (*meshpp);
+    MBMesh *mesh=reinterpret_cast<MBMesh*> (*meshpp);
 
     // For convenience deref number
     int num_elem_gids=*_num_elem_gids;
@@ -3237,12 +3264,16 @@ void MBMesh_checkelemlist(void **meshpp, int *_num_elem_gids, int *elem_gids,
     local_owners.reserve(elems.size());
 
     int num_local_elems=0;
-    Range::iterator si = elems.begin(), se = elems.end();
+    Range::const_iterator si = elems.begin(), se = elems.end();
     for (; si != se; ++si) {
       const EntityHandle elem = *si;
 
+      // Get element id
+      int elem_id;
+      MBMesh_get_gid(mesh, elem, &elem_id);
+
       // Don't do split elements
-//      if (!mesh->is_split && (elem.get_id() > meshp->max_non_split_id)) continue;
+     if (mesh->is_split && (elem_id > mesh->max_non_split_id)) continue;
 
       int elem_owner;
       merr=mesh->mesh->tag_get_data(mesh->owner_tag, &elem, 1, &elem_owner);
@@ -3274,7 +3305,7 @@ void MBMesh_checkelemlist(void **meshpp, int *_num_elem_gids, int *elem_gids,
 
     // Loop making sure elems are all here
     for (int i=0; i<num_elem_gids; i++) {
-      std::vector<UInt>::iterator ni = std::find(local_gids.begin(), local_gids.end(), elem_gids[i]);
+      std::vector<UInt>::const_iterator ni = std::find(local_gids.begin(), local_gids.end(), elem_gids[i]);
 
       if (ni == local_gids.end()) {
         Throw() << "Node "<<elem_gids[i]<<" not found in Mesh.";
@@ -3450,137 +3481,6 @@ void MBMesh_FitOnVM(Mesh **meshpp,
      RemoveGhost();
  }
 
-#endif
-
-///////////////////////////////////   helper functions   ///////////////////////////////////////
-
-
-
-#if 0
-
-void mbmesh_calc_split_id_to_frac(MBMesh *mesh) {
-#undef  ESMC_METHOD
-#define ESMC_METHOD "mbmesh_calc_split_id_to_frac()"
-
-  // Declare polygon information
-#define  MAX_NUM_POLY_COORDS  60
-#define  MAX_NUM_POLY_NODES_2D  30  // MAX_NUM_POLY_COORDS/2
-#define  MAX_NUM_POLY_NODES_3D  20  // MAX_NUM_POLY_COORDS/3
-  int num_poly_nodes;
-  double poly_coords[MAX_NUM_POLY_COORDS];
-  double tmp_coords[MAX_NUM_POLY_COORDS];
-
-
-  // Get useful info
-  int sdim=mesh->sdim;
-  MEField<> *cfield = mesh->GetCoordField();
-
-  // Setup map to hold total areas
-  std::map<UInt,double> orig_id_to_area;
-
-  // Loop gathering split,orig id pairs
-  std::vector<UInt> split_ids;
-  std::vector<UInt> orig_ids;
-
-  std::map<int,int>::iterator mi=mesh->split_to_orig_id.begin();
-  std::map<int,int>::iterator me=mesh->split_to_orig_id.end();
-  for ( ; mi != me; mi++) {
-    // Get split element id
-    split_ids.push_back(mi->first);
-
-    // Get original element id
-    orig_ids.push_back(mi->second);
-
-    // Get uniqued list of original ids and set to zero
-    orig_id_to_area[mi->second]=0.0;
-  }
-
-  // also add orig_id to orig_id pairs that are part of each split polygon
-  std::map<int,double>::iterator otai=orig_id_to_area.begin();
-  std::map<int,double>::iterator otae=orig_id_to_area.end();
-  for ( ; otai != otae; otai++) {
-    // Get split element id
-    split_ids.push_back(otai->first);
-
-    // Get original element id
-    orig_ids.push_back(otai->first);
-  }
-
-
-  // Loop split triangles set their area and sum into original polygon area
-  for (int i=0; i<split_ids.size(); i++) {
-
-    // Get split element id
-    UInt s_id=split_ids[i];
-
-    // Get original element id
-    UInt o_id=orig_ids[i];
-
-
-    //  Find the corresponding Mesh element
-    Mesh::MeshObjIDMap::iterator ei = mesh->map_find(MeshObj::ELEMENT, s_id);
-    if (ei == mesh->map_end(MeshObj::ELEMENT)) {
-      Throw() << "Element not in mesh";
-    }
-
-    // Get the element
-    const MeshObj &elem = *ei;
-
-    // Compute area depending on dimensions
-    double area;
-    if (sdim==2) {
-      get_elem_coords_2D_ccw(&elem, cfield, MAX_NUM_POLY_NODES_2D, tmp_coords, &num_poly_nodes, poly_coords);
-      remove_0len_edges2D(&num_poly_nodes, poly_coords);
-      area=area_of_flat_2D_polygon(num_poly_nodes, poly_coords);
-    } else if (sdim==3) {
-      get_elem_coords_3D_ccw(&elem, cfield, MAX_NUM_POLY_NODES_3D, tmp_coords, &num_poly_nodes, poly_coords);
-      remove_0len_edges3D(&num_poly_nodes, poly_coords);
-      area=great_circle_area(num_poly_nodes, poly_coords);
-    }
-
-    // Set area in split_id_to_frac
-    mesh->split_id_to_frac[s_id]=area;
-
-    // Sum to original polygon area
-    //  Find the corresponding orig id
-    std::map<UInt,double>::iterator oi = orig_id_to_area.find(o_id);
-    // If not in map yet then complain
-    if (oi == orig_id_to_area.end()) {
-      Throw() << "orig id no in map!!! \n";
-    }
-
-    // Add to original polygon total
-    oi->second += area;
-  }
-
-
-  // Loop again dividing to get fractional area
-  for (int i=0; i<split_ids.size(); i++) {
-
-    // Get split element id
-    UInt s_id=split_ids[i];
-
-    // Get original element id
-    UInt o_id=orig_ids[i];
-
-    // Find total area
-    std::map<UInt,double>::iterator oi = orig_id_to_area.find(o_id);
-    if (oi == orig_id_to_area.end()) {
-      Throw() << "Origianl id not found in map! \n";
-    }
-    double total_area=oi->second;
-
-
-    // Find entry to split id
-    std::map<UInt,double>::iterator si = mesh->split_id_to_frac.find(s_id);
-    if (si == mesh->split_id_to_frac.end()) {
-      Throw() << "Split id not found in map! \n";
-    }
-
-    // Divide to get fraction
-    si->second=si->second/total_area;
-
-  }
 #endif
 
 #endif // ESMF_MOAB

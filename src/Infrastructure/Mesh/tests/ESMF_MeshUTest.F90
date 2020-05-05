@@ -1501,7 +1501,7 @@ endif
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
-! mbmesh - moab check from update_parallel fails and hangs the test
+! mbmesh - moab check from update_parallel fails check and hangs the test
 #if 1
   !-----------------------------------------------------------------------------
   !NEX_UTest
@@ -1578,8 +1578,8 @@ endif
   ! Make sure the global number of elements is still the same
   if (globalNumOwnedElems(1) .ne. 10) correct=.false.
 
-   !write(*,*) localPet, " number of local elems=",localnumOwnedElems(1)
-  !write(*,*) localPet, " number of global elems=",globalnumOwnedElems(1)
+  ! write(*,*) localPet, " number of local elems=",localnumOwnedElems(1)
+  ! write(*,*) localPet, " number of global elems=",globalnumOwnedElems(1)
 
   ! Try accessing coordinates
   allocate(elemCoords(spatialDim*localNumOwnedElems(1)))
@@ -1603,7 +1603,7 @@ endif
   !-----------------------------------------------------------------------------
 #endif
 
-! mbmesh - moab check from update_parallel fails and hangs the test
+! mbmesh - moab check from update_parallel fails check and hangs the test
 ! also if this test is enabled sometimes the following test will fail??
 #if 0
 
@@ -1723,7 +1723,8 @@ endif
   ! Make sure the global number of elements is still the same
   if (globalNumOwnedElems(1) .ne. 10) correct=.false.
 
-  print *, "globalNumOwnedElems(1) = ", globalNumOwnedElems(1)
+  write(*,*) localPet, " number of local elems=",localnumOwnedElems(1)
+  write(*,*) localPet, " number of global elems=",globalnumOwnedElems(1)
 
   ! Get rid of Meshs
   call ESMF_MeshDestroy(mesh, rc=localrc)
@@ -2032,8 +2033,6 @@ endif
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
-! mbmesh - this test segfaults with invalid memory reference, probably due to split elems
-#if 0
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Mesh Create and then Redist with a pentagon and hexagon element"
@@ -2105,7 +2104,6 @@ endif
 
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
-#endif
 
   !-----------------------------------------------------------------------------
   ! NOTE THAT MeshCreateDual IS CURRENTLY AN INTERNAL INTERFACE AND NOT INTENDED FOR PUBLIC USE
