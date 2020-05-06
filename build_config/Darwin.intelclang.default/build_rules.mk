@@ -10,7 +10,7 @@ ESMF_F90DEFAULT         = ifort
 ESMF_CXXDEFAULT         = clang
 ESMF_CPPDEFAULT         = clang -E -P -x c
 
-ESMF_CXXCOMPILEOPTS    += -x c++ -mmacosx-version-min=10.7
+ESMF_CXXCOMPILEOPTS    += -x c++ -mmacosx-version-min=10.7 -stdlib=libc++
 
 ############################################################
 # Default MPI setting.
