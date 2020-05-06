@@ -327,9 +327,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   logical, intent(in), optional :: base_is_valid
   character(:), allocatable, optional :: uname
   integer, intent(inout), optional :: rc
+
   integer :: id_base
   character(:), allocatable :: c_id_base, l_uname
-
   character(:), allocatable :: local_root_key
   integer :: localrc, ii
   logical :: l_base_is_valid
@@ -841,15 +841,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   call self%updateGeneric(root_key, name, etype, target%this%base, uname=uname, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  infoh = ESMF_InfoBaseGetHandle(target%this%base)
-
-  call ESMF_InfoSet(infoh, root_key//"/"//uname//"/is_packed", isPacked, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (self%createInfo .and. .not. isPacked) then
-    call self%FillMembers(target, root_key//"/"//uname//"/members", rc=localrc)
+  if (self%createInfo) then
+    call ESMF_InfoSet(self%info, root_key//"/"//uname//"/is_packed", isPacked, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-    deallocate(uname)
+
+    if (.not. isPacked) then
+      call self%FillMembers(target, root_key//"/"//uname//"/members", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+      deallocate(uname)
+    endif
   endif
 
   if (present(rc)) rc = ESMF_SUCCESS

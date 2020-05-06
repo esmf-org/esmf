@@ -262,7 +262,9 @@ void ESMC_InfoIsEqual(ESMCI::Info *lhs, ESMCI::Info *rhs, int &res, int &esmc_rc
   try {
 
 #if defined (__INTEL_COMPILER)
-    //tdk:todo: this fix is temporary. it is obviously inefficient.
+    // TODO: This is not efficient but required for a peculiar situation with
+    //  Intel and Intel MPI. I think it has something to do with unsigned integer
+    //  and integer comparison following deserialization.
     bool local_res = lhs->getStorageRef().dump() == rhs->getStorageRef().dump();
 #else
     bool local_res = lhs->getStorageRef() == rhs->getStorageRef();

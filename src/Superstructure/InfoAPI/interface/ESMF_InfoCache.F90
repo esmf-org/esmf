@@ -87,7 +87,7 @@ contains ! ====================================================================
 ! -----------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoCache%ESMF_InfoCacheInitialize()"
+#define ESMF_METHOD "ESMF_InfoCacheInitialize()"
 subroutine ESMF_InfoCacheInitialize(self, rc)
   class(ESMF_InfoCache), intent(inout) :: self
   integer, intent(out) :: rc
@@ -101,7 +101,7 @@ end subroutine ESMF_InfoCacheInitialize
 ! -----------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoCache%ESMF_InfoCacheDestroy()"
+#define ESMF_METHOD "ESMF_InfoCacheDestroy()"
 subroutine ESMF_InfoCacheDestroy(self, rc)
   class(ESMF_InfoCache), intent(inout) :: self
   integer, intent(out) :: rc
@@ -117,11 +117,33 @@ end subroutine ESMF_InfoCacheDestroy
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoCacheUpdateFields()"
+!BOPI
+! !IROUTINE: ESMF_InfoCacheUpdateFields - Update Field metadata for StateReconcile optimizations
+!
+! !INTERFACE:
 subroutine ESMF_InfoCacheUpdateFields(self, target, vmIdMap, rc)
+! !ARGUMENTS:
   class(ESMF_InfoCache), intent(inout) :: self
   type(ESMF_State), intent(in) :: target
   type(ESMF_VMId), dimension(:), pointer, intent(in) :: vmIdMap
   integer, intent(out) :: rc
+!
+! !DESCRIPTION:
+!     Traverse the object hierarchy of \textit{target} updating Field attributes
+!     for StateReconcile optimizations.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [self]
+!       Class instance.
+!     \item [target]
+!       Target \texttt{ESMF\_State} to traverse recursively.
+!     \item [vmIdMap]
+!       An \texttt{ESMF\_VMId} map as computed by \texttt{ESMF\_VMTranslateVMId}.
+!     \item [rc]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOPI
 
   type(ESMF_InfoDescribe) :: idesc
 
@@ -143,14 +165,39 @@ end subroutine ESMF_InfoCacheUpdateFields
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoCacheFindField()"
+!BOPI
+! !IROUTINE: ESMF_InfoCacheFindField - Find the first instance of a Field in a State
+!
+! !INTERFACE:
 recursive function ESMF_InfoCacheFindField(target, foundField, intVmId, baseID, rc) result(found)
+! !ARGUMENTS:
   type(ESMF_State), intent(in) :: target
   type(ESMF_Field), intent(out) :: foundField
   integer, intent(in) :: intVmId
   integer, intent(in) :: baseID
   integer, intent(out) :: rc
+! !RETURN VALUE:
   logical :: found
-
+!
+! !DESCRIPTION:
+!     Find the first instance of an \texttt{ESMF\_Field} by recursively searching
+!     the \texttt{ESMF\_State}. Returns true if the field is found. False if not.
+!     The found field is only valid if this function returns true.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [target]
+!       State to search.
+!     \item [foundField]
+!       Found field object. Only valid if this function returns true.
+!     \item [intVmId]
+!       \texttt{ESMF\_VM} identifier as computed by \texttt{ESMF\_VMTranslateVMId}.
+!     \item [baseID]
+!       \texttt{ESMF\_Base} identifier.
+!     \item [rc]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOPI
   type(ESMF_FieldBundle) :: fb
   type(ESMF_Field) :: field
   type(ESMF_StateItem_Flag), dimension(:), allocatable :: stateTypes
@@ -258,11 +305,31 @@ end function
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoCacheReassembleField()"
+!BOPI
+! !IROUTINE: ESMF_InfoCacheReassembleField - Reconstruct a Field using a State
+!
+! !INTERFACE:
 subroutine ESMF_InfoCacheReassembleField(target, state, rc)
+! !ARGUMENTS:
   type(ESMF_Field), intent(inout) :: target
   type(ESMF_State), intent(inout) :: state
   integer, intent(out) :: rc
-
+!
+! !DESCRIPTION:
+!     Reassemble a Field using its attribute metadata and object data retrieved
+!     from an input State. This method assumes Field attributes in the input
+!     State have been updated using \texttt{ESMF\_InfoCacheUpdateFields}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [target]
+!       Input Field.
+!     \item [state]
+!       Inpute State.
+!     \item [rc]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOPI
   logical :: should_serialize_geom, found
   type(ESMF_Info) :: infoh, infoh_found
   integer :: base_id, integer_vmid
@@ -342,10 +409,27 @@ end subroutine
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoCacheReassembleFieldsFinalize()"
+!BOPI
+! !IROUTINE: ESMF_InfoCacheReassembleFieldsFinalize - Remove custom attributes used for StateReconcile optimizations
+!
+! !INTERFACE:
 recursive subroutine ESMF_InfoCacheReassembleFieldsFinalize(target, rc)
+! !ARGUMENTS:
   type(ESMF_State), intent(inout) :: target
   integer, intent(out) :: rc
-
+!
+! !DESCRIPTION:
+!     Remove custom attributes in the target State used for \texttt{ESMF\_StateReconcile} !
+!     optimizations.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [target]
+!       Input State.
+!     \item [rc]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOPI
   type(ESMF_FieldBundle) :: fb
   type(ESMF_Field) :: field
   type(ESMF_StateItem_Flag), dimension(:), allocatable :: stateTypes
@@ -430,10 +514,27 @@ end subroutine
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoCacheReassembleFields()"
+!BOPI
+! !IROUTINE: ESMF_InfoCacheReassembleFields - Reassemble all Fields in a State
+!
+! !INTERFACE:
 recursive subroutine ESMF_InfoCacheReassembleFields(target, rc)
+! !ARGUMENTS:
   type(ESMF_State), intent(inout) :: target
   integer, intent(out) :: rc
-
+!
+! !DESCRIPTION:
+!     Iterate recursively over the target State and call \texttt{ESMF\_InfoCacheReassembleField}
+!     on each Field.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [target]
+!       Input State.
+!     \item [rc]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOPI
   type(ESMF_FieldBundle) :: fb
   type(ESMF_Field) :: field
   type(ESMF_StateItem_Flag), dimension(:), allocatable :: stateTypes

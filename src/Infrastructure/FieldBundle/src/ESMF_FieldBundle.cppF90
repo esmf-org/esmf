@@ -6523,7 +6523,9 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       if(bp%status == ESMF_FBSTATUS_GRIDSET) then
-        !tdk:todo: what is this? i didn't think field bundles had geometries or bases
+        ! NOTE: A small optimization for StateReconcile is possible by removing
+        !  this extra GeomBase serialization/deserialization. According to Fei,
+        !  this just references the first Field.
         call ESMF_GeomBaseSerialize(bp%geombase, buffer, length, offset, &
                                  lattreconflag, linquireflag, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -6531,7 +6533,6 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
           ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
-      ! TODO: decide if these need to be sent before or after
       do i = 1, fieldCount
           call ESMF_FieldSerialize(l_fieldList(i), buffer, length, offset, &
                                   attreconflag=lattreconflag, &

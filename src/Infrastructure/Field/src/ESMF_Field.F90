@@ -180,12 +180,30 @@ contains
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldGetSerializeFlag"
+!BOPI
+! !IROUTINE: ESMF_FieldGetSerializeFlag - Get logical flag from attributes determining serialization action
+!
+! !INTERFACE:
 subroutine ESMF_FieldGetSerializeFlag(ftypep, theFlag, rc)
+! !ARGUMENTS:
   type(ESMF_FieldType), intent(in) :: ftypep
   logical, intent(out) :: theFlag
   integer, intent(out) :: rc
-  !tdk:doc
-
+!
+! !DESCRIPTION:
+!     Get the logical flag in the object's attributes indicating if the object
+!     should be serialized.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [ftypep]
+!       Type holding the attribute handle.
+!     \item [theFlag]
+!       Output logical flag.
+!     \item [rc]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOPI
   type(ESMF_Info) :: infoh
   logical :: isPresent
 
