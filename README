@@ -309,7 +309,7 @@ ESMF provides mpirun scripts for a wide range of system configurations. These
 are used by ESMF by default or can be set by the user via the ESMF_MPIRUN
 environment variable. The best way to see how the existing scripts are used
 on the supported platforms is to go to the "Supported Platforms" web page at
-https://www.earthsystemcog.org/projects/esmf/platforms_7_0_0 and follow the link
+https://www.earthsystemcog.org/projects/esmf/platforms_8_0_1 and follow the link
 for the platform of interest. Each test report contains the output of 
 "gmake info", which lists the settings of the ESMF_MPIxxx environment variables.
 
