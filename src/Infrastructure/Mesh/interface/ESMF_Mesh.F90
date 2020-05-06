@@ -5709,6 +5709,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       call c_ESMC_MeshInfoSerialize(intMeshFreed, &
               mesh%spatialDim, mesh%parametricDim, &
               intIsPresentNDG, intIsPresentEDG, &
+              mesh%coordSys, &
               buffer, length, offset,linquireflag, localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
@@ -5799,6 +5800,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_AttReconcileFlag) :: lattreconflag
       integer :: intMeshFreed, spatialDim, parametricDim
       integer :: intIsPresentNDG, intIsPresentEDG
+      type(ESMF_CoordSys_Flag) :: coordSys
 
        ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -5815,6 +5817,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       call c_ESMC_MeshInfoDeserialize(intMeshFreed, &
            spatialDim, parametricDim, &
            intIsPresentNDG, intIsPresentEDG, &
+           coordSys, &
            buffer, offset, localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
@@ -5862,6 +5865,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_MeshDeserialize%numOwnedElements=0
       ESMF_MeshDeserialize%spatialDim=spatialDim
       ESMF_MeshDeserialize%parametricDim=parametricDim
+      ESMF_MeshDeserialize%coordSys=coordSys
 
       ! If exists serialize mesh
       if (.not. ESMF_MeshDeserialize%isCMeshFreed) then

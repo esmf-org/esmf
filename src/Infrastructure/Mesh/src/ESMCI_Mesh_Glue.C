@@ -2467,6 +2467,7 @@ void ESMCI_meshcreateelemdistgrid(Mesh **meshpp, int *egrid, int *num_lelems, in
 void ESMCI_meshinfoserialize(int *intMeshFreed,
                              int *spatialDim, int *parametricDim,
                              int *intIsPresentNDG, int *intIsPresentEDG,
+                             int *coordSys, 
                              char *buffer, int *length, int *offset,
                              ESMC_InquireFlag *inquireflag, int *localrc,
                              ESMCI_FortranStrLenArg buffer_l){
@@ -2480,7 +2481,7 @@ void ESMCI_meshinfoserialize(int *intMeshFreed,
     if (localrc) *localrc = ESMC_RC_NOT_IMPL;
 
     // TODO: verify length > vars.
-    int size = 5*sizeof(int);
+    int size = 6*sizeof(int);
     if (*inquireflag != ESMF_INQUIREONLY) {
       if ((*length - *offset) < size) {
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -2497,6 +2498,7 @@ void ESMCI_meshinfoserialize(int *intMeshFreed,
       *ip++ = *parametricDim;
       *ip++ = *intIsPresentNDG;
       *ip++ = *intIsPresentEDG;
+      *ip++ = *coordSys;
     }
 
      // Adjust offset
@@ -2515,6 +2517,7 @@ void ESMCI_meshinfoserialize(int *intMeshFreed,
 void ESMCI_meshinfodeserialize(int *intMeshFreed,
                                int *spatialDim, int *parametricDim,
                                int *intIsPresentNDG, int *intIsPresentEDG,
+                               int *coordSys, 
                                char *buffer, int *offset, int *localrc,
                                ESMCI_FortranStrLenArg buffer_l){
 
@@ -2535,9 +2538,10 @@ void ESMCI_meshinfodeserialize(int *intMeshFreed,
     *parametricDim=*ip++;
     *intIsPresentNDG=*ip++;
     *intIsPresentEDG=*ip++;
+    *coordSys=*ip++;
 
     // Adjust offset
-    *offset += 5*sizeof(int);
+    *offset += 6*sizeof(int);
 
 // printf("infoDEserialize offset = %d ispresentNDG = %d ispresent EDG = %d\n", 
   // *offset, *intIsPresentNDG, *intIsPresentEDG);
