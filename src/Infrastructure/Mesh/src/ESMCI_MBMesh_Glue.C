@@ -3316,6 +3316,123 @@ void MBMesh_checkelemlist(void **meshpp, int *_num_elem_gids, int *elem_gids,
       }
     }
 
+
+#undef debug_printentities
+#ifdef debug_printentities
+    {
+    Range nodes;
+    merr=mesh->mesh->get_entities_by_dimension(0,0,nodes);
+    if (merr != MB_SUCCESS) {
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+        moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+    }
+
+    Range::const_iterator ni = nodes.begin(), ne = nodes.end();
+    for (; ni != ne; ++ni) {
+      const EntityHandle ent = *ni;
+      int gid;
+      MBMesh_get_gid(mesh, ent, &gid);
+      int owner;
+      merr=mesh->mesh->tag_get_data(mesh->owner_tag, &ent, 1, &owner);
+      if (merr != MB_SUCCESS) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+          moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+      }
+
+      printf("%d# checkelems - node %d owner %d\n", localPet, gid, owner);
+    }
+
+    // Range edges;
+    // merr=mesh->mesh->get_entities_by_dimension(0,1,edges);
+    // if (merr != MB_SUCCESS) {
+    //   if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+    //     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+    // }
+    // 
+    // Range::const_iterator ei = edges.begin(), ee = edges.end();
+    // for (; ei != ee; ++ei) {
+    //   const EntityHandle ent = *ei;
+    //   int gid;
+    //   MBMesh_get_gid(mesh, ent, &gid);
+    //   int owner;
+    //   merr=mesh->mesh->tag_get_data(mesh->owner_tag, &ent, 1, &owner);
+    //   if (merr != MB_SUCCESS) {
+    //     if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+    //       moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+    //   }
+    // 
+    //   printf("%d# checkelems - edge %d owner %d\n", localPet, gid, owner);
+    // }
+
+    Range elems;
+    merr=mesh->mesh->get_entities_by_dimension(0,mesh->pdim,elems);
+    if (merr != MB_SUCCESS) {
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+        moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+    }
+
+    Range::const_iterator si = elems.begin(), se = elems.end();
+    for (; si != se; ++si) {
+      const EntityHandle ent = *si;
+      int gid;
+      MBMesh_get_gid(mesh, ent, &gid);
+      int owner;
+      merr=mesh->mesh->tag_get_data(mesh->owner_tag, &ent, 1, &owner);
+      if (merr != MB_SUCCESS) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+          moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+      }
+
+      printf("%d# checkelems - elem %d owner %d\n", localPet, gid, owner);
+    }
+    }
+#endif
+
+#undef debug_printmoabsharedinfo
+#ifdef debug_printmoabsharedinfo
+  MPI_Comm mpi_comm = vm->getMpi_c();
+
+
+  ParallelComm *pcomm = ParallelComm::get_pcomm(mesh->mesh, 0);
+
+  int nprocs = pcomm->size();
+  int rank = pcomm->rank();
+
+  Range shared_ents;
+  // Get entities shared with all other processors
+  merr = pcomm->get_shared_entities(-1, shared_ents);
+  MBMESH_CHECK_ERR(merr, localrc);
+  
+  // Filter shared entities with not not_owned, which means owned
+  Range owned_entities;
+  merr = pcomm->filter_pstatus(shared_ents, PSTATUS_NOT_OWNED, PSTATUS_NOT, -1, &owned_entities);
+  MBMESH_CHECK_ERR(merr, localrc);
+    
+  unsigned int nums[4] = {0}; // to store the owned entities per dimension
+  for (int i = 0; i < 4; i++)
+    // nums[i] = (nt)shared_ents.num_of_dimension(i);
+    nums[i] = (int)owned_entities.num_of_dimension(i);
+    
+  std::vector<int> rbuf(nprocs*4, 0);
+  MPI_Gather(nums, 4, MPI_INT, &rbuf[0], 4, MPI_INT, 0, mpi_comm);
+  // Print the stats gathered:
+  if (0 == rank) {
+    for (int i = 0; i < nprocs; i++)
+      std::cout << " Shared, owned entities on proc " << i << ": " << rbuf[4*i] << " verts, " <<
+          rbuf[4*i + 1] << " edges, " << rbuf[4*i + 2] << " faces, " << rbuf[4*i + 3] << " elements" << std::endl;
+  }
+#endif
+
+#define DEBUG_WRITE_MESH
+#ifdef DEBUG_WRITE_MESH
+  {void *mbptr = (void *) mesh;
+  int rc;
+  int len = 12; char fname[len];
+  sprintf(fname, "meshredist_%d", localPet);
+  MBMesh_write(&mbptr, fname, &rc, len);}
+#endif
+
+
   } catch(std::exception &x) {
     // catch Mesh exception return code
     if (x.what()) {

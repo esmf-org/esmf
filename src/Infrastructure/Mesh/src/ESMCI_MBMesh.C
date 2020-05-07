@@ -608,6 +608,13 @@ void MBMesh::update_parallel() {
 
   pcomm->set_debug_verbosity(0);
 
+  // strange errors with edges (in moab edges are processor boundaries) showed up with redistribution
+  // the best solution we found with the moab team was to remove edges after redist and prior to resolve_shared_ents
+  Range edges;
+  merr=mesh->get_entities_by_dimension(0, 1, edges);
+  MBMESH_CHECK_ERR(merr, localrc);
+  pcomm->delete_entities(edges);
+
   // Get current list of elements
   Range elems;
   merr=mesh->get_entities_by_dimension(0, pdim, elems);

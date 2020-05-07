@@ -200,7 +200,7 @@ int main(int argc, char *argv[]) {
   void *out_mesh;
 
   //----------------------------------------------------------------------------
-  //NEX_UTest_Multi_Proc_Only
+  //NEX_disable_UTest_Multi_Proc_Only
   // call redist algorithm
   void *meshv = static_cast<void*> (mesh);
   MBMesh_createredistnodes(&meshv, &num_node_gids, node_gids, &out_mesh, &rc);

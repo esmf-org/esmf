@@ -98,10 +98,10 @@ program ESMF_MeshUTest
 ! Special strings (Non-exhaustive and exhaustive) have been
 ! added to allow a script to count the number and types of unit tests.
 !-------------------------------------------------------------------------------
-  call ESMF_MeshSetMOAB(.true.)
+  call ESMF_MeshSetMOAB(.false.)
 
   !------------------------------------------------------------------------
-   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)  ! calls ESMF_Initialize() internally
+  call ESMF_TestStart(ESMF_SRCLINE, rc=rc)  ! calls ESMF_Initialize() internally
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   !------------------------------------------------------------------------
 
@@ -1501,8 +1501,6 @@ endif
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
-! mbmesh - moab check from update_parallel fails check and hangs the test
-#if 1
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test Mesh Create Redist with just node distgrid"
@@ -1601,11 +1599,6 @@ endif
 
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
-#endif
-
-! mbmesh - moab check from update_parallel fails check and hangs the test
-! also if this test is enabled sometimes the following test will fail??
-#if 0
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
@@ -1688,8 +1681,6 @@ endif
 
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
-#endif
-
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
@@ -1723,8 +1714,8 @@ endif
   ! Make sure the global number of elements is still the same
   if (globalNumOwnedElems(1) .ne. 10) correct=.false.
 
-  write(*,*) localPet, " number of local elems=",localnumOwnedElems(1)
-  write(*,*) localPet, " number of global elems=",globalnumOwnedElems(1)
+  ! write(*,*) localPet, " number of local elems=",localnumOwnedElems(1)
+  ! write(*,*) localPet, " number of global elems=",globalnumOwnedElems(1)
 
   ! Get rid of Meshs
   call ESMF_MeshDestroy(mesh, rc=localrc)
@@ -1959,7 +1950,7 @@ endif
   !-----------------------------------------------------------------------------
 
 ! mbmesh - this test segfaults with double free on ESMF_Finalize, due to elem coord retrieval
-#if 0
+#if 1
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
@@ -2142,10 +2133,10 @@ endif
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
-! this test hangs with mbmesh, easy elems fail
+! mbmesh - tests fail
 ! element triangulation in native create not yet migrated to mbmesh
 
-#if 0
+#if 1
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
