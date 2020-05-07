@@ -21,7 +21,7 @@ OptionName=value1[=spec1][,value2[=spec2][, ...]]
 
 OptionName and the value strings are case insensitive. There are single and multi-valued options as indicated in the table below. For single valued options only {\tt value1} is relevant. If the same option is listed multiple times, only the first occurrence will be used. If an option has a default value, it is indicated in the table. If a value requires additional specification via {\tt =spec} then the specifications are listed in the table.
 
-\begin{tabular}{|p{4cm}|p{5cm}|p{1cm}|p{35mm}|}
+\begin{longtable}{|p{4cm}|p{5cm}|p{1cm}|p{35mm}|}
      \hline\hline
      {\bf OptionName} & {\bf Definition} & {\bf Type} & {\bf Values}\\
      \hline\hline
@@ -41,5 +41,5 @@ OptionName and the value strings are case insensitive. There are single and mult
      {\tt unmappedAction} & The action to take when unmapped destination elements are encountered. & single & {\tt ignore}(default), {\tt error}\\ \hline
      {\tt zeroRegion} & The region of destination elements set to zero before adding the result of the sparse matrix multiplication. The available options support total, selective, or no zeroing of destination elements. & single & {\tt total}(default), {\tt select}, {\tt empty}\\ \hline
      \hline
-\end{tabular}
+\end{longtable}
 
