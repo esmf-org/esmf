@@ -6478,7 +6478,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
             else
               write (msgString,*) "Specified option '", &
                 trim(chopStringList(j)), &
-                "' is not a vailid choice. Defaulting to TOTAL for: '", &
+                "' is not a valid choice. Defaulting to TOTAL for: '", &
                 trim(chopStringList(1)), "'"
               call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_WARNING)
             endif
@@ -6506,7 +6506,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
             else
               write (msgString,*) "Specified option '", &
                 trim(chopStringList(j)), &
-                "' is not a vailid choice. Defaulting to FREE for: '", &
+                "' is not a valid choice. Defaulting to FREE for: '", &
                 trim(chopStringList(1)), "'"
               call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_WARNING)
             endif
@@ -6595,7 +6595,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
             else
               write (msgString,*) "Specified option '", &
                 trim(chopStringList(j)), &
-                "' is not a vailid choice. Defaulting to BILINEAR for: '", &
+                "' is not a valid choice. Defaulting to BILINEAR for: '", &
                 trim(chopStringList(1)), "'"
               call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_WARNING)
             endif
@@ -6621,7 +6621,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
         cycle ! advance to the next field pair, handle Redist further down
       endif
 
-      ! only Regid field pairs will proceed here...
+      ! only Regrid field pairs will proceed here...
       iRegrid = iRegrid+1
       zeroRegions(iRegrid) = zeroRegion ! record in the list used by Run
       termOrders(iRegrid) = termOrder ! record in the list used by Run
@@ -6649,7 +6649,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
             else
               write (msgString,*) "Specified option '", &
                 trim(chopStringList(j)), &
-                "' is not a vailid choice. Defaulting to NONE for: '", &
+                "' is not a valid choice. Defaulting to NONE for: '", &
                 trim(chopStringList(1)), "'"
               call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_WARNING)
             endif
@@ -6741,7 +6741,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
             else
               write (msgString,*) "Specified option '", &
                 trim(chopStringList(j)), &
-                "' is not a vailid choice. Defaulting to FALSE for: '", &
+                "' is not a valid choice. Defaulting to FALSE for: '", &
                 trim(chopStringList(1)), "'"
               call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_WARNING)
             endif
@@ -6783,7 +6783,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
             else
               write (msgString,*) "Specified option '", &
                 trim(chopStringList(j)), &
-                "' is not a vailid choice. Defaulting to NONE for: '", &
+                "' is not a valid choice. Defaulting to NONE for: '", &
                 trim(chopStringList(1)), "'"
               call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_WARNING)
             endif
@@ -6809,7 +6809,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
             else
               write (msgString,*) "Specified option '", &
                 trim(chopStringList(j)), &
-                "' is not a vailid choice. Defaulting to IGNORE for: '", &
+                "' is not a valid choice. Defaulting to IGNORE for: '", &
                 trim(chopStringList(1)), "'"
               call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_WARNING)
             endif
@@ -6875,7 +6875,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
             else
               write (msgString,*) "Specified option '", &
                 trim(chopStringList(j)), &
-                "' is not a vailid choice. Defaulting to OFF for: '", &
+                "' is not a valid choice. Defaulting to OFF for: '", &
                 trim(chopStringList(1)), "'"
               call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_WARNING)
             endif
