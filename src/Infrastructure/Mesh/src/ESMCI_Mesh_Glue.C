@@ -2198,7 +2198,7 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
       }
     }
 
-    // If it was passed in, fill elementArea array
+    // If it was passed in, fill elementMask array
     if (present(elemMask)) {
 
       // Get element mask value field (presence of this is checked above)
@@ -2359,11 +2359,29 @@ void ESMCI_MeshGetNodeCreateInfo(Mesh *mesh,
 
     // If nodeMask array exists, error check
     if (present(nodeMask)) {
-      int localrc;
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-       " getting nodeMask has not been implemented.", ESMC_CONTEXT,  &localrc)) throw localrc;
-    }
 
+      // Mask sure element mask is present
+      MEField<> *node_mask_val=mesh->GetField("node_mask_val");
+      if (!node_mask_val) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          " nodeMask being requested, but node masking has not been set in mesh", ESMC_CONTEXT,  &localrc)) throw localrc;
+      }
+
+
+      // Error checking
+      if (nodeMask->dimCount !=1) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+          " nodeMask array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
+      }
+
+      if (nodeMask->extent[0] != num_nodes) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+        " nodeMask array must be of size nodeCount", ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+    }
 
     ////// Get ordered list of nodes ////// 
     std::vector<std::pair<int,MeshObj *> > sorted_nodes;
@@ -2438,6 +2456,28 @@ void ESMCI_MeshGetNodeCreateInfo(Mesh *mesh,
       for (int i=0; i<sorted_nodes.size(); i++) {
         MeshObj *node=sorted_nodes[i].second;
         nodeOwners_array[i]=node->get_owner();
+      }
+    }
+
+    // If it was passed in, fill nodeMask array
+    if (present(nodeMask)) {
+
+      // Get node mask value field (presence of this is checked above)
+      MEField<> *node_mask_val=mesh->GetField("node_mask_val");
+
+      // Get array into which to put types
+      int *nodeMask_array=nodeMask->array;
+      
+      // Loop through elems
+      for (int i=0; i<sorted_nodes.size(); i++) {
+        // get node
+        MeshObj *node=sorted_nodes[i].second;
+
+        // Get nodes's mask value
+        double *mv=node_mask_val->data(*node);
+        
+        // Convert parametric dim and number of nodes to element type
+        nodeMask_array[i]=static_cast<int>(*mv);
       }
     }
 
