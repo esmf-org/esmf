@@ -697,8 +697,9 @@ extern "C" {
 
   void FTN_X(c_esmc_arraybundlesmm)(ESMCI::ArrayBundle **srcArraybundle,
     ESMCI::ArrayBundle **dstArraybundle, ESMCI::RouteHandle **routehandle,
-    ESMC_Region_Flag *zeroflag, ESMC_TermOrder_Flag *termorderflag,
-    int *termorderflag_len, ESMC_Logical *checkflag, int *rc){
+    ESMC_Region_Flag *zeroregionflag, int *zeroregionflag_len,
+    ESMC_TermOrder_Flag *termorderflag, int *termorderflag_len,
+    ESMC_Logical *checkflag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundlesmm()"
     // Initialize return code; assume routine not implemented
@@ -709,8 +710,8 @@ extern "C" {
       if (*checkflag == ESMF_TRUE) checkflagOpt = true;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(ESMCI::ArrayBundle::sparseMatMul(
-      *srcArraybundle, *dstArraybundle, routehandle, *zeroflag, 
-      termorderflag, *termorderflag_len, checkflagOpt),
+      *srcArraybundle, *dstArraybundle, routehandle, zeroregionflag,
+      *zeroregionflag_len, termorderflag, *termorderflag_len, checkflagOpt),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
