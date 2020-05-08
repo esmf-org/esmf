@@ -855,6 +855,7 @@ endif
 ifeq ($(origin ESMF_CXXCOMPILEOPTS_ENV), environment)
 ESMF_CXXCOMPILEOPTS = $(ESMF_CXXCOMPILEOPTS_ENV)
 endif
+ESMF_CXXCOMPILEOPTS += -DMUST_NOTUSE_MALLOC_TRIM
 ESMF_CXXCOMPILEOPTS += $(ESMF_CXXSTDFLAG) $(ESMF_CXXOPTFLAG) $(ESMF_SO_CXXCOMPILEOPTS)
 # - make sure environment variable gets prepended _once_
 ifeq ($(origin ESMF_CXXCOMPILEPATHS), environment)
