@@ -832,7 +832,7 @@ void VMK::construct(void *ssarg){
   }
 #endif
   nothreadsflag = sarg->nothreadsflag;
-  if (nothreadsflag) epochInit();  // start epoch support
+  epochInit();  // start epoch support
 
   // need a barrier here before any of the PETs get into user code...
   //barrier();
