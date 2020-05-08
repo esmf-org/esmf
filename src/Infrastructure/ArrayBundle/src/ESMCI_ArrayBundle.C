@@ -773,8 +773,9 @@ int ArrayBundle::halo(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
   // implemented via sparseMatMul
+  ESMC_Region_Flag zeroregionflag = ESMC_REGION_SELECT;
   localrc = sparseMatMul(arraybundle, arraybundle, routehandle,
-    ESMC_REGION_SELECT, NULL, 0, checkflag, true);
+    &zeroregionflag, 1, NULL, 0, checkflag, true);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
   
@@ -1059,8 +1060,9 @@ int ArrayBundle::redist(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
   // implemented via sparseMatMul
+  ESMC_Region_Flag zeroregionflag = ESMC_REGION_SELECT;
   localrc = sparseMatMul(srcArraybundle, dstArraybundle, routehandle,
-    ESMC_REGION_SELECT, NULL, 0, checkflag);
+    &zeroregionflag, 1, NULL, 0, checkflag);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
   
@@ -1335,7 +1337,7 @@ int ArrayBundle::sparseMatMulStore(
 }
 //-----------------------------------------------------------------------------
     
-    //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::ArrayBundle::sparseMatMul()"
 //BOPI
@@ -1352,12 +1354,13 @@ int ArrayBundle::sparseMatMul(
   ArrayBundle *srcArraybundle,          // in    - source ArrayBundle
   ArrayBundle *dstArraybundle,          // inout - destination ArrayBundle
   RouteHandle **routehandle,            // inout - handle to precomputed comm
-  ESMC_Region_Flag zeroflag,            // in    - ESMC_REGION_TOTAL:
+  ESMC_Region_Flag *zeroregionflag,     // in    - ESMC_REGION_TOTAL:
                                         //          -> zero out total region
                                         //         ESMC_REGION_SELECT:
                                         //          -> zero out target points
                                         //         ESMC_REGION_EMPTY:
                                         //          -> don't zero out any points
+  int zeroregionflag_len,               //       - elements in zeroregionflag
   ESMC_TermOrder_Flag *termorderflag,   // in    - ESMC_TERMORDER_FREE
                                         //         -> free partial sum order
                                         //       - ESMC_TERMORDER_SRCPET
@@ -1391,13 +1394,35 @@ int ArrayBundle::sparseMatMul(
     srcArraybundle->getVector(srcArrayVector, ESMC_ITEMORDER_ADDORDER);
     dstArraybundle->getVector(dstArrayVector, ESMC_ITEMORDER_ADDORDER);
     
-    // prepare termOrders vector
+    // prepare zeroRegion and termOrders vector
+    vector<ESMC_Region_Flag> zeroRegion;
     vector<ESMC_TermOrder_Flag> termOrders;
     int count=0;  // reset
     if (srcArraybundle != NULL){
       count = srcArraybundle->getCount();
     }else if (dstArraybundle != NULL){
       count = dstArraybundle->getCount();
+    }
+    if (zeroregionflag_len == 0 || zeroregionflag == NULL){
+      // set the default for all Array pairs
+      for (int i=0; i<count; i++)
+        zeroRegion.push_back(ESMC_REGION_TOTAL);
+    }else{
+      if (zeroregionflag_len == 1){
+        // set the single provided order for all Array pairs
+        for (int i=0; i<count; i++)
+          zeroRegion.push_back(*zeroregionflag);
+      }else if(zeroregionflag_len == count){
+        // copy the provided entries over
+        for (int i=0; i<count; i++)
+          zeroRegion.push_back(zeroregionflag[i]);
+      }else{
+        // inconsistency detected
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+          "incorrect number of elements provided in the zeroregionflag.", 
+          ESMC_CONTEXT, &rc);
+        return rc;  // bail out
+      }
     }
     if (termorderflag_len == 0 || termorderflag == NULL){
       // set the default for all Array pairs
@@ -1435,7 +1460,7 @@ int ArrayBundle::sparseMatMul(
           srcArray = srcArrayVector[i];
           dstArray = dstArrayVector[i];
           localrc = Array::sparseMatMul(srcArray, dstArray, routehandle,
-            ESMF_COMM_BLOCKING, NULL, NULL, zeroflag, termOrders[i],
+            ESMF_COMM_BLOCKING, NULL, NULL, zeroRegion[i], termOrders[i],
             checkflag, haloFlag);
           if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             ESMC_CONTEXT, &rc)) return rc;
@@ -1444,7 +1469,7 @@ int ArrayBundle::sparseMatMul(
         for (int i=0; i<srcArraybundle->getCount(); i++){
           srcArray = srcArrayVector[i];
           localrc = Array::sparseMatMul(srcArray, dstArray, routehandle,
-            ESMF_COMM_BLOCKING, NULL, NULL, zeroflag, termOrders[i],
+            ESMF_COMM_BLOCKING, NULL, NULL, zeroRegion[i], termOrders[i],
             checkflag, haloFlag);
           if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             ESMC_CONTEXT, &rc)) return rc;
@@ -1453,7 +1478,7 @@ int ArrayBundle::sparseMatMul(
         for (int i=0; i<dstArraybundle->getCount(); i++){
           dstArray = dstArrayVector[i];
           localrc = Array::sparseMatMul(srcArray, dstArray, routehandle,
-            ESMF_COMM_BLOCKING, NULL, NULL, zeroflag, termOrders[i],
+            ESMF_COMM_BLOCKING, NULL, NULL, zeroRegion[i], termOrders[i],
             checkflag, haloFlag);
           if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             ESMC_CONTEXT, &rc)) return rc;
@@ -1592,9 +1617,9 @@ int ArrayBundle::sparseMatMul(
 #endif
         }
       }
-      if (zeroflag!=ESMC_REGION_TOTAL)
+      if (zeroRegion[0]!=ESMC_REGION_TOTAL)
         filterBitField |= XXE::filterBitRegionTotalZero;  // filter reg. total zero
-      if (zeroflag!=ESMC_REGION_SELECT)
+      if (zeroRegion[0]!=ESMC_REGION_SELECT)
         filterBitField |= XXE::filterBitRegionSelectZero; // filter reg. select zero
       // execute XXE stream
       localrc = xxe->exec(rraCount, &(rraList[0]), &(vectorLength[0]), 

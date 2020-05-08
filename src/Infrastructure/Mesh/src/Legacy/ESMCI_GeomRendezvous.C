@@ -1040,6 +1040,12 @@ void GeomRend::prep_meshes() {
     dstmesh_rend.RegisterField("coordinates", dcoord.GetMEFamily(), MeshObj::ELEMENT,
                                dcoord.GetContext(), dcoord.dim());
 
+    MEField<> *dnm = dstmesh->GetField("mask");
+    if (dnm != NULL) {
+      dstmesh_rend.RegisterField("mask", dnm->GetMEFamily(),
+                                 MeshObj::ELEMENT, dnm->GetContext(), dnm->dim());
+    }
+
     MEField<> *dst_elem_mask = dstmesh->GetField("elem_mask");
     if (dst_elem_mask != NULL) {
       dstmesh_rend.RegisterField("elem_mask", dst_elem_mask->GetMEFamily(),
