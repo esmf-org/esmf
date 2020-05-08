@@ -1970,7 +1970,7 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
     
     ////// Get some handy information //////
     int num_elems=mesh->num_elems();
-
+    int orig_sdim=mesh->orig_spatial_dim;
 
 
     ////// Error check input arrays //////
@@ -1986,7 +1986,7 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
 
       if (elemIds->extent[0] != num_elems) {
         int localrc;
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
         " elementIds array must be of size elementCount", ESMC_CONTEXT, &localrc)) throw localrc;
       }
     }
@@ -2002,7 +2002,7 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
 
       if (elemTypes->extent[0] != num_elems) {
         int localrc;
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
         " elementTypes array must be of size elementCount", ESMC_CONTEXT, &localrc)) throw localrc;
       }
     }
@@ -2032,7 +2032,7 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
 
       if (elemConn->extent[0] != num_elem_conn) {
         int localrc;
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
         " elementConn array must be of size elementConnCount", ESMC_CONTEXT, &localrc)) throw localrc;
       }
     }
@@ -2040,24 +2040,81 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
 
     // If elemMask array exists, error check
     if (present(elemMask)) {
-      int localrc;
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-       " getting elementMask has not been implemented.", ESMC_CONTEXT,  &localrc)) throw localrc;
+
+      // Mask sure element mask is present
+      MEField<> *elem_mask_val=mesh->GetField("elem_mask_val");
+      if (!elem_mask_val) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          " elementMask being requested, but element masking has not been set in mesh", ESMC_CONTEXT,  &localrc)) throw localrc;
+      }
+
+
+      // Error checking
+      if (elemMask->dimCount !=1) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+          " elementMask array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
+      }
+
+      if (elemMask->extent[0] != num_elems) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+        " elementMask array must be of size elementCount", ESMC_CONTEXT, &localrc)) throw localrc;
+      }
     }
+
 
     // If elemArea array exists, error check
     if (present(elemArea)) {
-      int localrc;
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-       " getting elementArea has not been implemented.", ESMC_CONTEXT,  &localrc)) throw localrc;
+
+      // Mask sure element mask is present
+      MEField<> *elem_area=mesh->GetField("elem_area");
+      if (!elem_area) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          " elementArea being requested, but element areas have not been set in mesh", ESMC_CONTEXT,  &localrc)) throw localrc;
+      }
+
+      // Error checking
+      if (elemArea->dimCount !=1) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+          " elementArea array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
+      }
+
+      if (elemArea->extent[0] != num_elems) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+        " elementArea array must be of size elementCount", ESMC_CONTEXT, &localrc)) throw localrc;
+      }
     }
 
     // If elemCoords array exists, error check
     if (present(elemCoords)) {
-      int localrc;
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-       " getting elementCoords has not been implemented.", ESMC_CONTEXT,  &localrc)) throw localrc;
+
+      // Mask sure element mask is present
+      MEField<> *elem_coords=mesh->GetField("elem_coordinates");
+      if (!elem_coords) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          " elementCoords being requested, but element coords have not been set in mesh", ESMC_CONTEXT,  &localrc)) throw localrc;
+      }
+
+      // Error checking
+      if (elemCoords->dimCount !=1) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+          " elementCoords array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
+      }
+
+      if (elemCoords->extent[0] != orig_sdim*num_elems) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+        " elementCoords array must be of size spatialDim*elementCount", ESMC_CONTEXT, &localrc)) throw localrc;
+      }
     }
+
 
 
     ////// Get ordered list of elems ////// 
@@ -2141,6 +2198,79 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
       }
     }
 
+    // If it was passed in, fill elementArea array
+    if (present(elemMask)) {
+
+      // Get element mask value field (presence of this is checked above)
+      MEField<> *elem_mask_val=mesh->GetField("elem_mask_val");
+
+      // Get array into which to put types
+      int *elemMask_array=elemMask->array;
+      
+      // Loop through elems
+      for (int i=0; i<sorted_elems.size(); i++) {
+        // get element
+        MeshObj *elem=sorted_elems[i].second;
+
+        // Get elem's mask value
+        double *mv=elem_mask_val->data(*elem);
+        
+        // Convert parametric dim and number of nodes to element type
+        elemMask_array[i]=static_cast<int>(*mv);
+      }
+    }
+
+    // If it was passed in, fill elementArea array
+    if (present(elemArea)) {
+
+      // Get element mask value field (presence of this is checked above)
+      MEField<> *elem_area=mesh->GetField("elem_area");
+
+      // Get array into which to put types
+      ESMC_R8 *elemArea_array=elemArea->array;
+      
+      // Loop through elems
+      for (int i=0; i<sorted_elems.size(); i++) {
+        // get element
+        MeshObj *elem=sorted_elems[i].second;
+
+        // Get elem's mask value
+        double *area=elem_area->data(*elem);
+        
+        // Convert parametric dim and number of nodes to element type
+        elemArea_array[i]=*area;
+      }
+    }
+
+
+    // If it was passed in, fill elemCoords array
+    if (present(elemCoords)) {
+
+      // Get pointer to mesh elem coords data
+      MEField<> *elem_coords=mesh->GetField("orig_elem_coordinates");
+      if (!elem_coords) {
+        elem_coords=mesh->GetField("elem_coordinates");
+      }
+
+      // Get array into which to put ids
+      ESMC_R8 *elemCoords_array=elemCoords->array;
+      
+      // Loop through nodes
+      int j=0;
+      for (int i=0; i<sorted_elems.size(); i++) {
+        // Get elem
+        MeshObj *elem=sorted_elems[i].second;
+
+        // Get coords for elem
+        double *coords = elem_coords->data(*elem);
+
+        // Copy to output array
+        for (int d=0; d<orig_sdim; d++) {
+          elemCoords_array[j]=coords[d];
+          j++;
+        }
+      }
+    }
 
   }catch(int localrc){
     // catch standard ESMF return code
@@ -2188,7 +2318,7 @@ void ESMCI_MeshGetNodeCreateInfo(Mesh *mesh,
 
       if (nodeIds->extent[0] != num_nodes) {
         int localrc;
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
         " nodeIds array must be of size nodeCount", ESMC_CONTEXT, &localrc)) throw localrc;
       }
     }
@@ -2204,7 +2334,7 @@ void ESMCI_MeshGetNodeCreateInfo(Mesh *mesh,
 
       if (nodeCoords->extent[0] != orig_sdim*num_nodes) {
         int localrc;
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
         " nodeCoords array must be of size spatialDim*nodeCount", ESMC_CONTEXT, &localrc)) throw localrc;
       }
     }
@@ -2221,7 +2351,7 @@ void ESMCI_MeshGetNodeCreateInfo(Mesh *mesh,
 
       if (nodeOwners->extent[0] != num_nodes) {
         int localrc;
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
         " nodeOwners array must be of size nodeCount", ESMC_CONTEXT, &localrc)) throw localrc;
       }
     }
