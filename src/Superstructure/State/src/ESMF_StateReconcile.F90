@@ -963,8 +963,16 @@ petloop:  &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
 
-            base_info = ESMF_InfoBaseGetHandle(base)
-            base_temp_info = ESMF_InfoBaseGetHandle(state%statep%base)
+            base_info = ESMF_InfoBaseGetHandle(base, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+
+            base_temp_info = ESMF_InfoBaseGetHandle(state%statep%base, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+
             call ESMF_InfoUpdate(base_info, base_temp_info, recursive=.true., &
               rc=localrc)
             if (ESMF_LogFoundError(localrc, &
