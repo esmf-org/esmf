@@ -3959,9 +3959,11 @@ end subroutine ESMF_InfoInquire
 ! !IROUTINE: ESMF_InfoBaseGetHandle
 !
 ! !INTERFACE:
-function ESMF_InfoBaseGetHandle(base) result(info)
+function ESMF_InfoBaseGetHandle(base, keywordEnforcer, rc) result(info)
 ! !ARGUMENTS:
   type(ESMF_Base), intent(in) :: base
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  integer, intent(out), optional :: rc
 ! !RETURN VALUE:
   type(ESMF_Info) :: info
 !
@@ -3972,10 +3974,14 @@ function ESMF_InfoBaseGetHandle(base) result(info)
 !     \begin{description}
 !     \item [base]
 !       Target \texttt{ESMF\_Base} object.
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !EOPI
 
+  if (present(rc)) rc = ESMF_FAILURE
   info%ptr = c_info_base_get(base%this%ptr)
+  if (present(rc)) rc = ESMF_SUCCESS
 end function ESMF_InfoBaseGetHandle
 
 ! -----------------------------------------------------------------------------
@@ -3986,9 +3992,11 @@ end function ESMF_InfoBaseGetHandle
 ! !IROUTINE: ESMF_InfoPointerGetHandle
 !
 ! !INTERFACE:
-function ESMF_InfoPointerGetHandle(ptr) result(info)
+function ESMF_InfoPointerGetHandle(ptr, keywordEnforcer, rc) result(info)
 ! !ARGUMENTS:
   type(ESMF_Pointer), intent(in) :: ptr
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  integer, intent(out), optional :: rc
 ! !RETURN VALUE:
   type(ESMF_Info) :: info
 !
@@ -3999,11 +4007,14 @@ function ESMF_InfoPointerGetHandle(ptr) result(info)
 !     \begin{description}
 !     \item [base]
 !       Target \texttt{ESMF\_Pointer} object.
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !EOPI
 
+  if (present(rc)) rc = ESMF_FAILURE
   info%ptr = c_info_base_get(ptr%ptr)
-
+  if (present(rc)) rc = ESMF_SUCCESS
 end function ESMF_InfoPointerGetHandle
 
 !------------------------------------------------------------------------------

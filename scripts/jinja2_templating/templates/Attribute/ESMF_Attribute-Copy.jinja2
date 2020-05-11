@@ -31,13 +31,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   if (local_attcopy%value == ESMF_ATTCOPY_VALUE%value) then
 {% if et == "Info" %}
-    isrc = ESMF_InfoBaseGetHandle(src%base)
+    isrc = ESMF_InfoBaseGetHandle(src%base, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 {% else %}
     isrc = eidesc%GetInfo(src, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 {% endif %}
 {% if et_dst == "Info" %}
-    idst = ESMF_InfoBaseGetHandle(dst%base)
+    idst = ESMF_InfoBaseGetHandle(dst%base, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 {%else %}
     idst = eidesc%GetInfo(dst, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
