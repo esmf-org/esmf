@@ -15,11 +15,9 @@
 #include <stdio.h>
 #include <iostream>
 
-// ESMF header
 #include "ESMC.h"
-
-// ESMF Test header
 #include "ESMC_Test.h"
+#include "ESMCI_VM.h"
 
 // JSON header
 #include "json.hpp"
@@ -70,6 +68,8 @@ const long int* runGetPointer(const string& key, const json& j){
   return j.at(key).get_ptr<const json::number_integer_t*>();
 }
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "main()"
 int main(void) {
 
   // Test variables
@@ -366,6 +366,27 @@ int main(void) {
       refj.at("weather") == 45 &&
       (*storagep).value("woohoo", 777) != 33) failed = true;
   ESMC_Test(!failed, name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Equality operator between in-memory and parse");
+  strcpy(failMsg, "Wrong result");
+  failed = false;
+
+  json j1;
+  j1["22-State022"]["base_id"] = 22;
+  j1["22-State022"]["base_is_valid"] = true;
+  j1["22-State022"]["esmf_type"] = "State";
+  j1["22-State022"]["info"]["fvarname"] = "state";
+  j1["22-State022"]["members"]["14-Field014"]["base_id"] = 14;
+  j1["22-State022"]["members"]["14-Field014"]["base_is_valid"] = true;
+  j1["22-State022"]["members"]["14-Field014"]["esmf_type"] = "Field";
+  j1["22-State022"]["members"]["14-Field014"]["members"] = json::value_t::null;
+  j1["22-State022"]["members"]["14-Field014"]["info"]["fvarname"] = "field3";
+
+  json j3 = json::parse("{\"22-State022\":{\"base_id\":22,\"base_is_valid\":true,\"esmf_type\":\"State\",\"info\":{\"fvarname\":\"state\"},\"members\":{\"14-Field014\":{\"base_id\":14,\"base_is_valid\":true,\"esmf_type\":\"Field\",\"info\":{\"fvarname\":\"field3\"},\"members\":null}}}}");
+
+  ESMC_Test(j1==j3, name, failMsg, &result, __FILE__, __LINE__, 0);
 
   //----------------------------------------------------------------------------
   ESMC_TestEnd(__FILE__, __LINE__, 0);
