@@ -491,6 +491,9 @@ namespace ESMCI {
     for (int l=1; l<num_creep_levels; l++) {
 
 
+      //printf("%d# Level %d Beg\n",Par::Rank(),l);
+
+
       // Propagate prev level info to other procs
       // (TODO: Figure out for sure if I need to propogate the info at the
       //        last iteration, I don't think I need to.)
@@ -651,6 +654,8 @@ namespace ESMCI {
 
       // } // num creep nodes in level l
       //} //  num_donor_levels - dl
+
+      //printf("%d# Level %d End\n",Par::Rank(),l);
     }
 
     // Loop through last level adding weights
@@ -1109,6 +1114,12 @@ namespace ESMCI {
     comm.resetBuffers();
 
 
+    // Setup packed buff
+    int packed_buff_size=2048; // init to some size
+    UChar *packed_buff=NULL;
+    packed_buff=new UChar[packed_buff_size];
+
+
     // Pack points into buffers
     for (int p=0; p<num_nonempty_procs; p++) {
       UInt proc=snd_procs[p];
@@ -1125,9 +1136,14 @@ namespace ESMCI {
         // get size
         UInt packed_size=cnode->packed_size();
 
+        // Expand packed buff if necessary
+        if (packed_size > packed_buff_size) {
+          packed_buff_size=packed_size;
+          if (packed_buff != NULL) delete[] packed_buff;
+          packed_buff=new UChar[packed_buff_size];
+        }
+
         // Pack 
-        // TODO: Allocate this to a max
-        UChar packed_buff[1024];
         cnode->pack(packed_buff);
 
         // Push buf onto send struct
@@ -1151,9 +1167,12 @@ namespace ESMCI {
         // Look at the buffer to figure out what size to unpack
         UInt packed_size=CreepNode::packed_size_from_buff((UChar *)(b->get_current()));
 
-        // Pop information out of buffer
-        // TODO: Allocate this to a max
-        UChar packed_buff[1024];
+        // Expand packed buff if necessary
+        if (packed_size > packed_buff_size) {
+          packed_buff_size=packed_size;
+          if (packed_buff != NULL) delete[] packed_buff;
+          packed_buff=new UChar[packed_buff_size];
+        }
 
         // Get one CreepNode's info out of buffer
         b->pop(packed_buff, packed_size);
@@ -1190,10 +1209,11 @@ namespace ESMCI {
     }
 
 
-    // Deallocate list
-    // TODO: move this out of this subroutine so allocate/deallocate doesn't
+    // Deallocate memory
+    // TODO: move these out of this subroutine so allocate/deallocate doesn't
     //       happen every time
     if (snd_to_procs != NULL) delete [] snd_to_procs;
+    if (packed_buff != NULL) delete[] packed_buff;
   }
 
 
