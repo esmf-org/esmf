@@ -235,7 +235,7 @@ program ESMF_ArrayRedistPerfUTest
   write(msgString,*) "ArrayRedistStore() performance: ", dt, " seconds."
   call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
 #ifdef ESMF_BOPT_g
-  dtTest = 10.d0  ! 10s is expected to pass in debug mode
+  dtTest = 20.d0  ! 20s is expected to pass in debug mode
 #else
   dtTest = 2.d0   ! 2s is expected to pass in optimized mode
 #endif
