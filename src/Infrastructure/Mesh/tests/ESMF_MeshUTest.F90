@@ -29,7 +29,7 @@ program ESMF_MeshUTest
 !-----------------------------------------------------------------------------
 ! !USES:
   use ESMF_TestMod     ! test methods
-   use ESMF
+  use ESMF
   use ESMF_MeshMod
 
   implicit none
@@ -2620,7 +2620,7 @@ endif
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Mesh get of creation info (elementConn, etc.)"
+  write(name, *) "Mesh get/set of creation info (elementConn, etc.)"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! initialize check variables
@@ -6467,6 +6467,10 @@ subroutine  test_mesh_get_create_info(correct, rc)
   integer,allocatable :: nodeMaskTst(:)
   integer,allocatable :: elemMaskTst(:)
   real(ESMF_KIND_R8), allocatable :: elemCoordsTst(:)
+  logical :: nodeMaskIsPresentTst
+  logical :: elemMaskIsPresentTst
+  logical :: elemAreaIsPresentTst
+  logical :: elemCoordsIsPresentTst             
 
   ! get global VM
   call ESMF_VMGetGlobal(vm, rc=rc)
@@ -6901,6 +6905,29 @@ subroutine  test_mesh_get_create_info(correct, rc)
    !write(*,*) "numElems=",numElems,numElemsTst
    !write(*,*) "numElemConns=",numElemConns,numElemConnsTst
 
+
+   ! Get is present information
+   call ESMF_MeshGet(mesh, &
+        nodeMaskIsPresent=nodeMaskIsPresentTst, &
+        elementMaskIsPresent=elemMaskIsPresentTst, &
+        elementAreaIsPresent=elemAreaIsPresentTst, &
+        elementCoordsIsPresent=elemCoordsIsPresentTst, &
+        rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+
+   ! Debug
+   ! write(*,*) "nodeMaskIsPresent=",nodeMaskIsPresentTst
+   ! write(*,*) "elemMaskIsPresent=",elemMaskIsPresentTst
+   ! write(*,*) "elemAreaIsPresent=",elemAreaIsPresentTst
+   ! write(*,*) "elemCoordsIsPresent=",elemCoordsIsPresentTst
+
+   ! Check is present info
+   if (.not. nodeMaskIsPresentTst) correct=.false.
+   if (.not. elemMaskIsPresentTst) correct=.false.
+   if (.not. elemAreaIsPresentTst) correct=.false.
+   if (.not. elemCoordsIsPresentTst) correct=.false.
+
+
    ! Allocate space for tst arrays
    allocate(nodeIdsTst(numNodesTst))
    allocate(nodeCoordsTst(2*numNodesTst))
@@ -6997,6 +7024,81 @@ subroutine  test_mesh_get_create_info(correct, rc)
    ! write(*,*) "elemCoords   =",elemCoords
    ! write(*,*) "elemCoordsTst=",elemCoordsTst
 
+
+  ! Setup different mesh info to test MeshSet()
+  if (petCount .eq. 1) then
+
+      !! elem mask
+      elemMask=(/1,2,3,4,5,6,7,8,9,10/)
+
+      !! elem area
+      elemArea=(/10,20,30,40,50,60,70,80,90,100/)
+
+
+   else if (petCount .eq. 4) then
+     ! Setup mesh data depending on PET
+     if (localPet .eq. 0) then
+
+      !! elem mask
+      elemMask=(/1/)
+
+      !! elem area
+      elemArea=(/10/)
+
+     else if (localPet .eq. 1) then
+
+      !! elem mask
+      elemMask=(/2,3/)
+
+      !! elem area
+      elemArea=(/20,30/)
+
+     else if (localPet .eq. 2) then
+
+      !! elem mask
+      elemMask=(/4,5,7,8/)
+
+      !! elem area
+      elemArea=(/40,50,70,80/)
+
+     else if (localPet .eq. 3) then
+
+      !! elem mask
+      elemMask=(/6,9,10/)
+
+      !! elem area
+      elemArea=(/60,90,100/)
+     endif
+   endif
+
+   ! Set new version of information
+   call ESMF_MeshSet(mesh, &
+        elementMask=elemMask, & 
+        elementArea=elemArea, & 
+        rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+
+   ! Get new information
+   call ESMF_MeshGet(mesh, &
+        elementMask=elemMaskTst, & 
+        elementArea=elemAreaTst, & 
+        rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+
+   ! Check new elem mask info
+   do i=1,numElems
+      if (elemMask(i) .ne. elemMaskTst(i)) correct=.false.
+   enddo
+
+   ! Check new elem area info
+   do i=1,numElems
+      if (elemArea(i) .ne. elemAreaTst(i)) correct=.false.
+   enddo
+
+
+   ! Debugging
+   ! write(*,*) "elemMask   =",elemMask
+   ! write(*,*) "elemMaskTst=",elemMaskTst
 
 
    ! deallocate node data

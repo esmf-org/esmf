@@ -216,6 +216,7 @@ module ESMF_MeshMod
   public ESMF_MeshTurnOnNodeMask
   public ESMF_MeshTurnOffNodeMask
   public ESMF_MeshCreateDual  ! not a public interface for now
+  public ESMF_MeshSet
   public ESMF_MeshSetMOAB
   public ESMF_MeshSetIsCMeshFreed
   public ESMF_MeshGetIntPtr
@@ -4736,7 +4737,7 @@ end function ESMF_MeshEmptyCreate
 #undef ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshGet"
 !BOP
-! !IROUTINE: ESMF_MeshGet - Get object-wide Mesh information
+! !IROUTINE: ESMF_MeshGet - Get Mesh information
 !
 ! !INTERFACE:
       subroutine ESMF_MeshGet(mesh, parametricDim, spatialDim, &
@@ -4925,6 +4926,10 @@ end function ESMF_MeshEmptyCreate
     type(ESMF_InterArray) :: nodeCoordsIA
     type(ESMF_InterArray) :: nodeOwnersIA
     type(ESMF_InterArray) :: nodeMaskIA
+    integer :: nodeMaskIsPresentI
+    integer :: elemMaskIsPresentI
+    integer :: elemAreaIsPresentI
+    integer :: elemCoordsIsPresentI
 
     ! Init local rc
     localrc = ESMF_SUCCESS
@@ -5006,13 +5011,27 @@ end function ESMF_MeshEmptyCreate
             ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
-    ! Get information about whether node mask is present
+
+    ! Get information about whether various node information is present
     if (present(nodeMaskIsPresent)) then
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
-               msg=" this functionality hasn't been implemented yet. ", &
-               ESMF_CONTEXT, rcToReturn=rc)
-          return
+
+       ! Init integer variables for getting logical info from C
+       nodeMaskIsPresentI=0
+
+       ! Call into C
+       call C_ESMC_MeshGetNodeInfoPresence(mesh, &
+            nodeMaskIsPresentI, &
+            localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Set variables from C info
+       if (present(nodeMaskIsPresent)) then
+          nodeMaskIsPresent=.false.
+          if (nodeMaskIsPresentI .ne. 0) nodeMaskIsPresent=.true.
+       endif
     endif
+
 
     ! Get node creation info
     if (present(nodeIds) .or. &
@@ -5091,13 +5110,35 @@ end function ESMF_MeshEmptyCreate
         present(elementAreaIsPresent) .or. &
         present(elementCoordsIsPresent)) then
 
-!TODO: Implement this and nodeMask check!!!!
+       ! Init integer variables for getting logical info from C
+       elemMaskIsPresentI=0
+       elemAreaIsPresentI=0
+       elemCoordsIsPresentI=0
 
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
-               msg=" this functionality hasn't been implemented yet. ", &
-               ESMF_CONTEXT, rcToReturn=rc)
-          return
+       ! Call into C
+       call C_ESMC_MeshGetElemInfoPresence(mesh, &
+            elemMaskIsPresentI, &
+            elemAreaIsPresentI, &
+            elemCoordsIsPresentI, &
+            localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
+       ! Set variables from C info
+       if (present(elementMaskIsPresent)) then
+          elementMaskIsPresent=.false.
+          if (elemMaskIsPresentI .ne. 0) elementMaskIsPresent=.true.
+       endif
+
+       if (present(elementAreaIsPresent)) then
+          elementAreaIsPresent=.false.
+          if (elemAreaIsPresentI .ne. 0) elementAreaIsPresent=.true.
+       endif
+
+       if (present(elementCoordsIsPresent)) then
+          elementCoordsIsPresent=.false.
+          if (elemCoordsIsPresentI .ne. 0) elementCoordsIsPresent=.true.
+       endif
     endif
 
    ! Get elem creation info
@@ -5169,8 +5210,6 @@ end function ESMF_MeshEmptyCreate
             ESMF_CONTEXT, rcToReturn=rc)) return
     endif
     
-
-!!! STOPPED HERE !!!
 
     ! Get node coords
     if (present(ownedNodeCoords)) then
@@ -5889,6 +5928,117 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
      if  (present(rc)) rc = ESMF_SUCCESS
 
      end function ESMF_MeshDeserialize
+
+! -----------------------------------------------------------------------------
+#undef ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshSet"
+!BOP
+! !IROUTINE: ESMF_MeshSet - Set some Mesh information
+!
+! !INTERFACE:
+      subroutine ESMF_MeshSet(mesh, &
+           elementMask, elementArea, rc)
+!
+! !RETURN VALUE:
+!
+! !ARGUMENTS:
+    type(ESMF_Mesh),          intent(in)            :: mesh
+    integer,                  intent(in), optional :: elementMask(:)
+    real(ESMF_KIND_R8),       intent(in), optional :: elementArea(:)
+    integer,                  intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   This call allows the user to change the set of information that it's legal to alter after
+!   a mesh has been created. Currently, this call requires that the information has already
+!   been added to the mesh during creation. For example, you can only change the element mask
+!   information, if the mesh was initially created with element masking. 
+!
+! The arguments are:
+! \begin{description}
+! \item [mesh]
+! \item [{[elementMask]}]
+! An array of mask values for each local element in the mesh. The elementMask array should be of size elementCount.
+! \item [{[elementArea]}]
+! An array of area values for each local element in the mesh. The elementArea array should be of size elementCount.
+! \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+    integer  :: localrc
+    type(ESMF_InterArray) :: elementMaskIA
+    type(ESMF_InterArray) :: elementAreaIA
+
+    ! Init local rc
+    localrc = ESMF_SUCCESS
+
+    !!! Error check status of Mesh versus what's being asked for !!!
+
+    ! Make sure mesh is initialized
+    ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
+
+    ! If mesh has not been fully created, make sure that the user
+    ! isn't asking for something that requires a fully created mesh
+    if (mesh%status .ne. ESMF_MESHSTATUS_COMPLETE) then
+
+
+
+       ! Check another set, just so the length of the if isn't so big
+       if (present(elementMask) .or. &
+           present(elementArea)) then
+
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+               msg="- the mesh has not been fully created", &
+               ESMF_CONTEXT, rcToReturn=rc)
+          return
+       endif
+    endif
+
+    ! XMRKX !
+    !!!!!!!! Set Misc info in Mesh !!!!!!!!
+
+    !!!!!!!! Set Node info in Mesh !!!!!!!!
+
+    !!!!!!!! Set Elem info in Mesh !!!!!!!!
+
+    ! Set elem info
+    if (present(elementMask) .or. &
+        present(elementArea)) then
+
+       ! Create interface arrays
+        elementMaskIA = ESMF_InterArrayCreate(elementMask, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return       
+
+        elementAreaIA = ESMF_InterArrayCreate(farray1DR8=elementArea, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return       
+
+
+       ! Call into C
+       call C_ESMC_MeshSetElemInfo(mesh,  &
+            elementMaskIA, elementAreaIA, &
+            localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Destroy interface arrays
+       call ESMF_InterArrayDestroy(elementMaskIA, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       call ESMF_InterArrayDestroy(elementAreaIA, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+        
+    ! Error output
+    if (present(rc)) rc = localrc
+
+    end subroutine ESMF_MeshSet
+
+!------------------------------------------------------------------------------
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

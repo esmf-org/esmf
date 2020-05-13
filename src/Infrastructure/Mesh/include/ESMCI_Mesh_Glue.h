@@ -102,6 +102,12 @@ void ESMCI_MeshGetNodeCount(Mesh *meshpp, int *nodeCount, int *rc);
 void ESMCI_MeshGetElemCount(Mesh *meshpp, int *elemCount, int *rc);
 void ESMCI_MeshGetElemConnCount(Mesh *meshpp, int *elemConnCount, int *rc);
 
+void ESMCI_MeshGetElemInfoPresence(Mesh *mesh, 
+                                   int *elemMaskIsPresent,
+                                   int *elemAreaIsPresent,
+                                   int *elemCoordsIsPresent,
+                                   int *rc);
+
 void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
                                  ESMCI::InterArray<int> *elemIds,
                                  ESMCI::InterArray<int> *elemTypes,
@@ -109,6 +115,15 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
                                  ESMCI::InterArray<int> *elemMask,
                                  ESMCI::InterArray<ESMC_R8> *elemArea,
                                  ESMCI::InterArray<ESMC_R8> *elemCoords, int *rc);
+
+void ESMCI_MeshSetElemInfo(Mesh *mesh,
+                           ESMCI::InterArray<int> *elemMask,
+                           ESMCI::InterArray<ESMC_R8> *elemArea,
+                           int *rc);
+
+void ESMCI_MeshGetNodeInfoPresence(Mesh *mesh, 
+                                   int *nodeMaskIsPresent,
+                                   int *rc);
 
 void ESMCI_MeshGetNodeCreateInfo(Mesh *mesh,
                                  ESMCI::InterArray<int> *nodeIds,

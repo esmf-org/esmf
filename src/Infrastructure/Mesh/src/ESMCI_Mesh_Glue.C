@@ -1947,6 +1947,32 @@ static int _num_nodes_to_elem_type(int pdim, int num_nodes) {
 
 
 /* XMRKX */
+void ESMCI_MeshGetElemInfoPresence(Mesh *mesh, 
+                                   int *elemMaskIsPresent,
+                                   int *elemAreaIsPresent,
+                                   int *elemCoordsIsPresent,
+                                   int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_MeshGetElemInfoPresence()"
+
+  // Check if element mask is present
+  *elemMaskIsPresent=0;
+  if (mesh->GetField("elem_mask_val")) *elemMaskIsPresent=1;
+
+  // Check if element area is present
+  *elemAreaIsPresent=0;
+  if (mesh->GetField("elem_area")) *elemAreaIsPresent=1;
+
+  // Check if element coords are present
+  *elemCoordsIsPresent=0;
+  if (mesh->GetField("elem_coordinates")) *elemCoordsIsPresent=1;
+
+  // return success
+  if (rc != NULL) *rc = ESMF_SUCCESS;
+}
+
+
+
 void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
                                  ESMCI::InterArray<int> *elemIds,
                                  ESMCI::InterArray<int> *elemTypes,
@@ -1964,7 +1990,7 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
     if (mesh->is_split) {
       int localrc;
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-         " Can't get elem connection count from mesh containing >4 elements.",
+         " Can't currently get element info from a mesh containing >4 elements.",
                                        ESMC_CONTEXT, &localrc)) throw localrc;
     }
     
@@ -2136,7 +2162,6 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
     // sort by data index
     std::sort(sorted_elems.begin(), sorted_elems.end());
 
-
     
     ////// Fill info in arrays using sorted_elems //////
 
@@ -2215,7 +2240,7 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
         // Get elem's mask value
         double *mv=elem_mask_val->data(*elem);
         
-        // Convert parametric dim and number of nodes to element type
+        // Set elem mask in output array
         elemMask_array[i]=static_cast<int>(*mv);
       }
     }
@@ -2237,7 +2262,7 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
         // Get elem's mask value
         double *area=elem_area->data(*elem);
         
-        // Convert parametric dim and number of nodes to element type
+        // Set elem area in output array
         elemArea_array[i]=*area;
       }
     }
@@ -2286,7 +2311,188 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
   if(rc != NULL) *rc = ESMF_SUCCESS;
 }
 
+void ESMCI_MeshSetElemInfo(Mesh *mesh,
+                           ESMCI::InterArray<int> *elemMask,
+                           ESMCI::InterArray<ESMC_R8> *elemArea,
+                           int *rc){
+
+#undef ESMC_METHOD
+#define ESMC_METHOD "ESMCI_MeshSetElemInfo()"
+
+  // Try-catch block around main part of method
+  try {
+
+    // Doesn't work with split meshes right now
+    if (mesh->is_split) {
+      int localrc;
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                  " Can't currently set element info for a mesh containing >4 elements.",
+                          ESMC_CONTEXT, &localrc)) throw localrc;
+    }
+    
+    ////// Get some handy information //////
+    int num_elems=mesh->num_elems();
+    int orig_sdim=mesh->orig_spatial_dim;
+
+
+    ////// Error check input arrays //////
+
+    // If elemMask array exists, error check
+    if (present(elemMask)) {
+
+      // Mask sure element mask is present
+      MEField<> *elem_mask_val=mesh->GetField("elem_mask_val");
+      if (!elem_mask_val) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          " elementMask values being set, but element masking has not been set in mesh", ESMC_CONTEXT,  &localrc)) throw localrc;
+      }
+
+
+      // Error checking
+      if (elemMask->dimCount !=1) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+          " elementMask array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
+      }
+
+      if (elemMask->extent[0] != num_elems) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+        " elementMask array must be of size elementCount", ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+    }
+
+
+    // If elemArea array exists, error check
+    if (present(elemArea)) {
+
+      // Mask sure element mask is present
+      MEField<> *elem_area=mesh->GetField("elem_area");
+      if (!elem_area) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          " elementArea values being set, but element areas have not been set in mesh", ESMC_CONTEXT,  &localrc)) throw localrc;
+      }
+
+      // Error checking
+      if (elemArea->dimCount !=1) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+          " elementArea array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
+      }
+
+      if (elemArea->extent[0] != num_elems) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+        " elementArea array must be of size elementCount", ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+    }
+
+
+    ////// Get ordered list of elems ////// 
+    std::vector<std::pair<int,MeshObj *> > sorted_elems;
+    sorted_elems.reserve(num_elems);
+
+    // Loop over elems
+    Mesh::iterator ei = mesh->elem_begin(), ee = mesh->elem_end();
+    for (; ei != ee; ++ei) {
+      MeshObj *elem = &(*ei);
+      
+      // get data index
+      int index = elem->get_data_index();
+      
+      // Add to list
+      sorted_elems.push_back(std::make_pair(index, elem));      
+    }
+
+    // sort by data index
+    std::sort(sorted_elems.begin(), sorted_elems.end());
+
+
+    
+    ////// Set elem info from arrays using sorted_elems //////
+
+    // If it was passed in, fill elementMask array
+    if (present(elemMask)) {
+
+      // Get element mask value field (presence of this is checked above)
+      MEField<> *elem_mask_val=mesh->GetField("elem_mask_val");
+
+      // Get array from which to get mask values
+      int *elemMask_array=elemMask->array;
+      
+      // Loop through elems
+      for (int i=0; i<sorted_elems.size(); i++) {
+        // get element
+        MeshObj *elem=sorted_elems[i].second;
+
+        // Get pointer to elem's mask
+        double *mv=elem_mask_val->data(*elem);
+        
+        // Set elem mask value from input array
+        *mv=static_cast<double>(elemMask_array[i]);
+      }
+    }
+
+    // If it was passed in, fill elementArea array
+    if (present(elemArea)) {
+
+      // Get element area value field (presence of this is checked above)
+      MEField<> *elem_area=mesh->GetField("elem_area");
+
+      // Get array from which to get area values
+      ESMC_R8 *elemArea_array=elemArea->array;
+      
+      // Loop through elems
+      for (int i=0; i<sorted_elems.size(); i++) {
+        // get element
+        MeshObj *elem=sorted_elems[i].second;
+
+        // Get pointer to elem's area
+        double *area=elem_area->data(*elem);
+        
+        // Set elem area value from input array
+        *area=elemArea_array[i];
+      }
+    }
+
+
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+          " Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+  
+  // We've gotten to bottom successfully, so return success
+  if(rc != NULL) *rc = ESMF_SUCCESS;
+}
+
+
+
+
+
 /* XMRKX */
+void ESMCI_MeshGetNodeInfoPresence(Mesh *mesh, 
+                                   int *nodeMaskIsPresent,
+                                   int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_MeshGetNodeInfoPresence()"
+
+  // Check if node mask is present
+  *nodeMaskIsPresent=0;
+  if (mesh->GetField("node_mask_val")) *nodeMaskIsPresent=1;
+
+  // return success
+  if (rc != NULL) *rc = ESMF_SUCCESS;
+}
+
+
+
 void ESMCI_MeshGetNodeCreateInfo(Mesh *mesh,
                                  ESMCI::InterArray<int> *nodeIds,
                                  ESMCI::InterArray<ESMC_R8> *nodeCoords,
@@ -2360,7 +2566,7 @@ void ESMCI_MeshGetNodeCreateInfo(Mesh *mesh,
     // If nodeMask array exists, error check
     if (present(nodeMask)) {
 
-      // Mask sure element mask is present
+      // Mask sure node mask is present
       MEField<> *node_mask_val=mesh->GetField("node_mask_val");
       if (!node_mask_val) {
         int localrc;
