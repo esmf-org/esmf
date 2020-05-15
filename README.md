@@ -54,5 +54,3 @@ Demos, system tests, and use test cases, demonstrating how ESMF can be used in r
 
 Contributions from ESMF users are available at:
  * http://sourceforge.net/projects/esmfcontrib
-
-Please contact <esmf_support@ucar.edu> with any questions or problems.
