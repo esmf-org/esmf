@@ -534,7 +534,7 @@ endif
 #-------------------------------------------------------------------------------
 # Set ESMFMKFILE here in order to be available for installcheck target
 #-------------------------------------------------------------------------------
-ifndef ESMFMKFILE
+ifneq ($(ESMF_TESTESMFMKFILE),ON)
 export ESMFMKFILE = $(ESMF_INSTALL_LIBDIR_ABSPATH)/esmf.mk
 endif
 
