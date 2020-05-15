@@ -1,6 +1,6 @@
 ================================================================================
 
-                        README - ESMF 8.0.1 beta snapshot
+                        README - ESMF 8.0.1
 
                     Earth System Modeling Framework (ESMF)
 
@@ -435,7 +435,7 @@ Adding a New Platform
 4. Edit the ESMC_Conf.h file and look over the macro definitions.
 
 5. Once it is working, post it back on the esmfcontrib sourceforge site and
-   email esmf_support@ucar.edu so we can include it in our next
+   email <esmf_support@ucar.edu> so we can include it in our next
    release.
 
 
@@ -488,7 +488,7 @@ The ESMF Reference Manual contains information on the architecture of the ESMF,
 example code, and details of the API (Application Programming Interface).
 
 The ESMF library source code is also available for download at:
-        http://sourceforge.net/projects/esmf
+        https://github.com/esmf-org/esmf.git
 
 Follow the directions on that web page to download a tarball and for
 access to the ESMF CVS repository.  The Sourceforge site also contains 
@@ -501,7 +501,7 @@ realistic situations are available at:
 Contributions from ESMF users are available at:
         http://sourceforge.net/projects/esmfcontrib
 
-Please contact esmf_support@ucar.edu with any questions or problems.
+Please contact <esmf_support@ucar.edu> with any questions or problems.
 
 ================================================================================
 $Id$

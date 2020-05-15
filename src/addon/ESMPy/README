@@ -96,7 +96,7 @@ Documentation for the ESMPy library can also be found by running 'pydoc ESMF'
 from the terminal prompt in the top level ESMPy directory.
 
 
-Please contact <esmf_support@list.woc.noaa.gov> with any questions or problems.
+Please contact <esmf_support@ucar.edu> with any questions or problems.
 
 ================================================================================
 
@@ -105,7 +105,7 @@ REQUIREMENTS:
 
 The following packages are *required* to work with ESMPy:
 
--- ESMF installation - http://www.earthsystemmodeling.org/esmf_releases/non_public/ESMF_8_0_0/ESMF_usrdoc
+-- ESMF installation - http://www.earthsystemmodeling.org/download/data/releases.shtml
 -- python - http://python.org/
 -- numpy - http://numpy.scipy.org/
 
@@ -161,7 +161,7 @@ with the following command issued from the top level ESMPy directory:
 
     setenv PYTHONPATH <custom_install_location>/lib/*/site_packages
 
-Please contact esmf_support@list.woc.noaa.gov with any questions or problems.
+Please contact <esmf_support@ucar.edu> with any questions or problems.
 
 
 Anaconda Packages:
@@ -261,11 +261,11 @@ example code, and details of the API (Application Programming Interface).
 
 For more information on the ESMF_RegridWeightGen application, see the ESMF
 Reference Manual:
-http://www.earthsystemmodeling.org/esmf_releases/non_public/ESMF_8_0_0/ESMF_refdoc/node3.html
+http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_8_0_1/ESMF_refdoc/
 
 Contributions from ESMF users are available at:
         http://sourceforge.net/projects/esmfcontrib
 
-Please contact esmf_support@list.woc.noaa.gov with any questions or problems.
+Please contact <esmf_support@ucar.edu> with any questions or problems.
 
 # $Id$
