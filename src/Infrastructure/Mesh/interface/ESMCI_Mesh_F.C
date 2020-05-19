@@ -302,6 +302,15 @@ extern "C" void FTN_X(c_esmc_meshgetelemconncount)(MeshCap **meshpp, int *elemCo
   (*meshpp)->getElemConnCount(elemConnCount, rc);
 }
 
+extern "C" void FTN_X(c_esmc_meshgeteleminfopresence)(MeshCap **meshpp, 
+                                                      int *elemMaskIsPresent,
+                                                      int *elemAreaIsPresent,
+                                                      int *elemCoordsIsPresent,
+                                                      int *rc){
+
+  (*meshpp)->getElemInfoPresence(elemMaskIsPresent, elemAreaIsPresent, elemCoordsIsPresent, rc);
+}
+
 extern "C" void FTN_X(c_esmc_meshgetelemcreateinfo)(MeshCap **meshpp, 
                                                     ESMCI::InterArray<int> *elemIds,
                                                     ESMCI::InterArray<int> *elemTypes,
@@ -313,6 +322,24 @@ extern "C" void FTN_X(c_esmc_meshgetelemcreateinfo)(MeshCap **meshpp,
 
   (*meshpp)->getElemCreateInfo(elemIds, elemTypes, elemConn, elemMask, elemArea, elemCoords, rc);
 }
+
+extern "C" void FTN_X(c_esmc_meshseteleminfo)(MeshCap **meshpp, 
+                                                    ESMCI::InterArray<int> *elemMask,
+                                                    ESMCI::InterArray<ESMC_R8> *elemArea,
+                                                    int *rc){
+
+  (*meshpp)->setElemInfo(elemMask, elemArea, rc);
+}
+
+
+
+extern "C" void FTN_X(c_esmc_meshgetnodeinfopresence)(MeshCap **meshpp, 
+                                                      int *nodeMaskIsPresent,
+                                                      int *rc){
+
+  (*meshpp)->getNodeInfoPresence(nodeMaskIsPresent, rc);
+}
+
 
 extern "C" void FTN_X(c_esmc_meshgetnodecreateinfo)(MeshCap **meshpp, 
                                                     ESMCI::InterArray<int> *nodeIds,
