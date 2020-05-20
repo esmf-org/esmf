@@ -133,6 +133,7 @@
     static void meshinfoserialize(int *intMeshFreed,
                                   int *spatialDim, int *parametricDim,
                                   int *intIsPresentNDG, int *intIsPresentEDG,
+                                  int *coordSys, 
                                   char *buffer, int *length, int *offset,
                                   ESMC_InquireFlag *inquireflag, int *rc,
                                   ESMCI_FortranStrLenArg buffer_l);
@@ -141,6 +142,7 @@
     static void meshinfodeserialize(int *intMeshFreed,
                                     int *spatialDim, int *parametricDim,
                                     int *intIsPresentNDG, int *intIsPresentEDG,
+                                    int *coordSys, 
                                     char *buffer, int *offset, int *rc,
                                     ESMCI_FortranStrLenArg buffer_l);
 
@@ -282,12 +284,25 @@
      void getElemCount(int *elemCount, int *rc);
      void getElemConnCount(int *elemConnCount, int *rc);
 
+     void getElemInfoPresence(int *elemMaskIsPresent,
+                              int *elemAreaIsPresent,
+                              int *elemCoordsIsPresent,
+                              int *rc);
+
      void getElemCreateInfo(ESMCI::InterArray<int> *elemIds,
                                      ESMCI::InterArray<int> *elemTypes,
                                      ESMCI::InterArray<int> *elemConn,
                                      ESMCI::InterArray<int> *elemMask,
                                      ESMCI::InterArray<ESMC_R8> *elemArea,
                                      ESMCI::InterArray<ESMC_R8> *elemCoords, int *rc);
+
+
+     void setElemInfo(ESMCI::InterArray<int> *elemMask,
+                      ESMCI::InterArray<ESMC_R8> *elemArea,
+                      int *rc);
+
+     void getNodeInfoPresence(int *nodeMaskIsPresent,
+                              int *rc);
 
      void getNodeCreateInfo(ESMCI::InterArray<int> *nodeIds,
                             ESMCI::InterArray<ESMC_R8> *nodeCoords,

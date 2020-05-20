@@ -151,7 +151,7 @@ class ArrayBundle : public ESMC_Base {    // inherits from ESMC_Base class
       InterArray<int> *srcTermProcessing=NULL);
     static int sparseMatMul(ArrayBundle *srcArraybundle,
       ArrayBundle *dstArraybundle, RouteHandle **routehandle,
-      ESMC_Region_Flag zeroflag=ESMC_REGION_TOTAL,
+      ESMC_Region_Flag *zeroregionflag=NULL, int zeroregionflag_len=0,
       ESMC_TermOrder_Flag *termorderflag=NULL, int termorderflag_len=0,
       bool checkflag=false, bool haloFlag=false);  
     static int sparseMatMulRelease(RouteHandle *routehandle);

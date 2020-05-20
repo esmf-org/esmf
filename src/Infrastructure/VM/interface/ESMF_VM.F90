@@ -422,7 +422,7 @@ module ESMF_VMMod
 ! !PRIVATE MEMBER FUNCTIONS:
 !
       module procedure ESMF_VMGetDefault
-      module procedure ESMF_VMGetPetLocalInfo
+      module procedure ESMF_VMGetPetSpecific
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -4694,12 +4694,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMGetDefault()"
 !BOP
-! !IROUTINE: ESMF_VMGet - Get object-wide information from a VM
+! !IROUTINE: ESMF_VMGet - Get information from a VM
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMGet()
   recursive subroutine ESMF_VMGetDefault(vm, keywordEnforcer, localPet, &
-    petCount, peCount, ssiCount, ssiMinPetCount, ssiMaxPetCount, &
+    localPe, petCount, peCount, ssiCount, ssiMinPetCount, ssiMaxPetCount, &
     ssiLocalPetCount, mpiCommunicator, pthreadsEnabledFlag, openMPEnabledFlag, &
     ssiSharedMemoryEnabledFlag, rc)
 !
@@ -4707,6 +4707,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_VM),      intent(in)            :: vm
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out), optional :: localPet
+    integer,            intent(out), optional :: localPe
     integer,            intent(out), optional :: petCount
     integer,            intent(out), optional :: peCount
     integer,            intent(out), optional :: ssiCount
@@ -4732,6 +4733,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Added argument {\tt ssiSharedMemoryEnabledFlag} that allows the user to 
 !   query whether ESMF was compiled with support for shared memory 
 !   access between PETs on the same SSI.
+! \item[8.1.0] Added argument {\tt localPe} for easy access to the PE.
 ! \end{description}
 ! \end{itemize}
 !
@@ -4743,9 +4745,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[vm] 
 !        Queried {\tt ESMF\_VM} object.
 !   \item[{[localPet]}]
-!        Upon return this holds the local id of the PET that issued this call.
+!        Upon return this holds the id of the local PET that issued this call.
 !        The valid range of {\tt localPet} is $[0..petCount-1]$. A value of $-1$
 !        is returned on PETs that are not active under the specified {\tt vm}.
+!   \item[{[localPe]}]
+!        Upon return this holds the id of the PE on which the local PET is
+!        executing. The range of the returned value is platform specific and
+!        refers to the core or cpu id by which the PE is known to the operating
+!        system.
 !   \item[{[petCount]}]
 !        Upon return this holds the number of PETs running under {\tt vm}.
 !   \item[{[peCount]}]
@@ -4813,7 +4820,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (vm%this /= ESMF_NULL_POINTER) then
       ! Call into the C++ interface.
-      call c_ESMC_VMGet(vm, localPet, petCount, peCount, ssiCount, &
+      call c_ESMC_VMGet(vm, localPet, localPe, petCount, peCount, ssiCount, &
         ssiMinPetCount, ssiMaxPetCount, ssiLocalPetCount, mpiCommunicator, &
         pthreadsEnabledFlagArg, openMPEnabledFlagArg, &
         ssiSharedMemoryEnabledFlagArg, localrc)
@@ -4857,13 +4864,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_VMGetPetLocalInfo()"
+#define ESMF_METHOD "ESMF_VMGetPetSpecific()"
 !BOP
-! !IROUTINE: ESMF_VMGet - Get PET-local VM information
+! !IROUTINE: ESMF_VMGet - Get PET specific VM information
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMGet()
-  subroutine ESMF_VMGetPetLocalInfo(vm, pet, keywordEnforcer, peCount, &
+  subroutine ESMF_VMGetPetSpecific(vm, pet, keywordEnforcer, peCount, &
     accDeviceCount, ssiId, threadCount, threadId, vas, rc)
 !
 ! !ARGUMENTS:
@@ -4939,7 +4946,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_VMGetPetLocalInfo
+  end subroutine ESMF_VMGetPetSpecific
 !------------------------------------------------------------------------------
 
 
