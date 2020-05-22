@@ -2,34 +2,31 @@
 
 """
 ESMPy is a Python interface to the Earth System Modeling Framework (ESMF) 
-regridding utility. ESMF is software for
-building and coupling weather, climate, and related models. ESMF has a robust,
+regridding utility.  ESMF is software for
+building and coupling weather, climate, and related models.  ESMF has a robust,
 parallel and scalable remapping package, used to generate remapping weights.
-It can handle a wide variety of grids and options: logically rectangular grids,
-unstructured meshes and sets of unconnected points; regional or global grids;
-2D or 3D; and pole and masking options. ESMF also has capabilities to read grid
-information from NetCDF files in a variety of formats, including the
+It can handle a wide variety of grids and options:  logically rectangular grids, 
+unstructured meshes and observational data streams; regional or global grids; 2D or 3D; 
+and pole and masking options.  ESMF also has capabilities to read grid information
+from NetCDF files in a variety of formats, including the
 `Climate and Forecast (CF) V1.6 (a.k.a GridSpec) <http://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html>`_,
 `UGRID <https://github.com/ugrid-conventions/ugrid-conventions>`_,
-`ESMF Unstructured <http://www.earthsystemmodeling.org/esmf_releases/non_public/ESMF_8_0_0/ESMF_refdoc/node3.html#SECTION03028200000000000000>`_
+`ESMF Unstructured <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_8_0_0/ESMF_refdoc/node3.html#SECTION03028200000000000000>`_
 and
-`SCRIP <http://www.earthsystemmodeling.org/esmf_releases/non_public/ESMF_8_0_0/ESMF_refdoc/node3.html#SECTION03028100000000000000>`_
+`SCRIP <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_8_0_0/ESMF_refdoc/node3.html#SECTION03028100000000000000>`_
 conventions.
 
-ESMPy provides a :class:`~ESMF.api.grid.Grid` to represent single-tile logically
-rectangular coordinate data, a :class:`~ESMF.api.mesh.Mesh` for unstructured 
-coordinates, and a :class:`~ESMF.api.locstream.LocStream` for collections of
+ESMPy provides a :class:`~ESMF.api.grid.Grid` to represent single-tile logically rectangular coordinate
+data, a :class:`~ESMF.api.mesh.Mesh` for unstructured coordinates, and a LocStream for collections of
 unconnected points like observational data streams.
 ESMPy supports bilinear, nearest neighbor, higher order patch recovery, 
 first-order conservative and second-order conservative regridding. There is 
 also an option to ignore unmapped destination points, mask out points on either
 the source or destination, choose straight line or great circle paths when using
-spherical coordinates and extrapolate data to points outside of the destination
-domain. Regridding on the sphere takes place in 3D Cartesian space, so the pole
-problem is not an issue as it commonly is with many Earth system grid remapping
-softwares. :class:`~ESMF.api.grid.Grid` and :class:`~ESMF.api.mesh.Mesh` 
-objects can be created in 2D or 3D space, and 3D conservative regridding is 
-fully supported.
+spherical coordinates, create artificial poles and bipoles, and extrapolate data to points 
+outside of the destination domain. Regridding on the sphere takes place in 3D Cartesian space, 
+so the pole problem is not an issue as it commonly is with many Earth system grid remapping
+softwares.
 
 Regridding, also called remapping or interpolation, is the process of changing
 the grid underneath field data values while preserving the qualities of the
