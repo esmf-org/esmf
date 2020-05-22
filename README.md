@@ -20,7 +20,7 @@ Hello and welcome to ESMF.
 
  * To build ESMF from source consult the [Building ESMF](http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_usrdoc/node6.html#SECTION00064000000000000000) section of the [ESMF User's Guide](http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_usrdoc/node3.html).
  * For testing ESMF, see [Testing makefile targets](http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_usrdoc/node6.html#SECTION00064500000000000000).
- * Pre-built binaries for ESMF and ESMPy are also available on `conda-forge`:
+ * Pre-built binaries for ESMF and ESMPy are also available on `conda-forge` (_note Windows is not supported_):
 ```
 conda install -c conda-forge -n <env> esmf esmpy
 ```
