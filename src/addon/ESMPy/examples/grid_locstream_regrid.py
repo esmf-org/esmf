@@ -9,6 +9,11 @@
 # from ESMF.util.cache_data import cache_data_file
 # cache_data_file(os.path.join(DD, "ll1deg_grid.nc"))
 
+try:
+    from unittest import SkipTest
+except ImportError:
+    from nose import SkipTest
+
 import ESMF
 import numpy
 
@@ -24,8 +29,8 @@ domask=True
 if ESMF.pet_count() == 1:
     locstream = create_locstream_spherical_16(coord_sys=coord_sys, domask=domask)
 else:
-    if ESMF.pet_count() is not 4:
-        raise ValueError("processor count must be 4 or 1 for this example")
+    if constants._ESMF_MPIRUN_NP != 4:
+        raise SkipTest('processor count must be 4 or 1 for this example')
     else:
         locstream = create_locstream_spherical_16_parallel(coord_sys=coord_sys, domask=domask)
 

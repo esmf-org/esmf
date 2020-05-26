@@ -2,6 +2,11 @@
 field unit test file
 """
 
+try:
+    from unittest import SkipTest
+except ImportError:
+    from nose import SkipTest
+
 from ESMF import *
 from ESMF.interface.cbindings import *
 from ESMF.test.base import TestBase, attr
@@ -195,13 +200,12 @@ class TestField(TestBase):
             raise ValueError(
                 "The following combinations of parameters failed to create a proper Field: " + str(len(fail)))
 
-    @attr('serial')
     @attr('slow')
     def test_field_create_2d_mesh(self):
         parallel = False
-        if pet_count() > 1:
-            if pet_count() > 4:
-                raise NameError('MPI rank must be 4 in parallel mode!')
+        if constants._ESMF_MPIRUN_NP != 4:
+            raise SkipTest('This test must be run with 4 processors.')
+        else:
             parallel = True
 
         keywords = dict(
@@ -281,9 +285,9 @@ class TestField(TestBase):
     def test_field_uniqueness(self):
         # create mesh
         parallel = False
-        if pet_count() > 1:
-            if pet_count() > 4:
-                raise NameError('MPI rank must be 4 in parallel mode!')
+        if constants._ESMF_MPIRUN_NP != 4:
+            raise SkipTest('This test must be run with 4 processors.')
+        else:
             parallel = True
 
         mesh = None
@@ -401,9 +405,9 @@ class TestField(TestBase):
     def test_field_extradims_mesh(self):
         # create mesh
         parallel = False
-        if pet_count() > 1:
-            if pet_count() > 4:
-                raise NameError('MPI rank must be 4 in parallel mode!')
+        if constants._ESMF_MPIRUN_NP != 4:
+            raise SkipTest('This test must be run with 4 processors.')
+        else:
             parallel = True
 
         mesh = None
@@ -466,9 +470,9 @@ class TestField(TestBase):
     def test_field_slice_mesh(self):
         # create mesh
         parallel = False
-        if pet_count() > 1:
-            if pet_count() > 4:
-                raise NameError('MPI rank must be 4 in parallel mode!')
+        if constants._ESMF_MPIRUN_NP != 4:
+            raise SkipTest('This test must be run with 4 processors.')
+        else:
             parallel = True
 
         mesh = None
@@ -542,9 +546,9 @@ class TestField(TestBase):
     def disable_est_field_slice_mesh_extraindices(self):
         # create mesh
         parallel = False
-        if pet_count() > 1:
-            if pet_count() > 4:
-                raise NameError('MPI rank must be 4 in parallel mode!')
+        if constants._ESMF_MPIRUN_NP != 4:
+            raise SkipTest('This test must be run with 4 processors.')
+        else:
             parallel = True
 
         mesh = None
