@@ -128,30 +128,33 @@ if ESMF.local_pet() is 0:
     print ("ESMPy Grid Mesh Regridding Example")
     print ("  interpolation mean relative error = {0}".format(meanrelerr))
 
+    if os.path.isfile(os.path.join(os.getcwd(), filename)):
+        os.remove(os.path.join(os.getcwd(), filename))
+
 # set to 1 to output results
-if ESMF.pet_count() == 0:
-    import matplotlib.pyplot as plt
-    fig = plt.figure(1, (15, 6))
-    fig.suptitle('ESMPy Periodic Grids', fontsize=14, fontweight='bold')
-
-    ax = fig.add_subplot(1, 2, 1)
-    im = ax.imshow(srcfield.data, vmin=1, vmax=3, cmap='gist_ncar', aspect='auto',
-                   extent=[min(slons_par), max(slons_par), min(slats_par), max(slats_par)])
-    ax.set_xbound(lower=min(slons_par), upper=max(slons_par))
-    ax.set_ybound(lower=min(slats_par), upper=max(slats_par))
-    ax.set_xlabel("Longitude")
-    ax.set_ylabel("Latitude")
-    ax.set_title("Source Data")
-
-    ax = fig.add_subplot(1, 2, 2)
-    im = ax.imshow(dstfield.data, vmin=1, vmax=3, cmap='gist_ncar', aspect='auto',
-                   extent=[min(dlons_par), max(dlons_par), min(dlats_par), max(dlats_par)])
-    ax.set_xlabel("Longitude")
-    ax.set_ylabel("Latitude")
-    ax.set_title("Regrid Solution")
-
-    fig.subplots_adjust(right=0.8)
-    cbar_ax = fig.add_axes([0.9, 0.1, 0.01, 0.8])
-    fig.colorbar(im, cax=cbar_ax)
-
-    plt.show()
+# if ESMF.pet_count() == 0:
+#     import matplotlib.pyplot as plt
+#     fig = plt.figure(1, (15, 6))
+#     fig.suptitle('ESMPy Periodic Grids', fontsize=14, fontweight='bold')
+# 
+#     ax = fig.add_subplot(1, 2, 1)
+#     im = ax.imshow(srcfield.data, vmin=1, vmax=3, cmap='gist_ncar', aspect='auto',
+#                    extent=[min(slons_par), max(slons_par), min(slats_par), max(slats_par)])
+#     ax.set_xbound(lower=min(slons_par), upper=max(slons_par))
+#     ax.set_ybound(lower=min(slats_par), upper=max(slats_par))
+#     ax.set_xlabel("Longitude")
+#     ax.set_ylabel("Latitude")
+#     ax.set_title("Source Data")
+# 
+#     ax = fig.add_subplot(1, 2, 2)
+#     im = ax.imshow(dstfield.data, vmin=1, vmax=3, cmap='gist_ncar', aspect='auto',
+#                    extent=[min(dlons_par), max(dlons_par), min(dlats_par), max(dlats_par)])
+#     ax.set_xlabel("Longitude")
+#     ax.set_ylabel("Latitude")
+#     ax.set_title("Regrid Solution")
+# 
+#     fig.subplots_adjust(right=0.8)
+#     cbar_ax = fig.add_axes([0.9, 0.1, 0.01, 0.8])
+#     fig.colorbar(im, cax=cbar_ax)
+# 
+#     plt.show()

@@ -22,12 +22,10 @@ if parallel:
         raise ValueError("Cannot run parallel tests when ESMF is built with ESMF_COMM=mpiuni")
 
     # setup the constants
-    num_proc = 4
     rtestoutfile='run_regrid_from_file_parallel.log'
 
 constants._ESMF_MPIRUN + " -n "
-os.system(constants._ESMF_MPIRUN + " -n " + str(
-    num_proc) + " python " + rtestfile + " > " + rtestoutfile + " 2>&1")
+os.system(constants._ESMF_MPIRUN + " -n " + constants._ESMF_MPIRUN_NP + " python " + rtestfile + " > " + rtestoutfile + " 2>&1")
 
 # traverse output, find number of pass and fail and print report
 RTEST = open(rtestoutfile)

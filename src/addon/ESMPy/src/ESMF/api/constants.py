@@ -46,8 +46,8 @@ _ESMF_COMM_MPIUNI = -1
 _ESMF_VERSION = None
 
 # ESMF_MPIRUN
-_ESMF_MPIRUN = "mpirun"
-_ESMF_MPIRUN_NP = 4
+_ESMF_MPIRUN = None
+_ESMF_MPIRUN_NP = None
 
 #### NAMED CONSTANTS ##########################################################
 

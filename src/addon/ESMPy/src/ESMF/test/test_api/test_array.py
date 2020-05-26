@@ -110,7 +110,7 @@ class TestMaskedArray(TestBase):
 
     def test_slice2(self):
 
-        dataptr, lb, ub = self.make_maskedarray(np.array([10, 10], dtype=np.int32))
+        dataptr, lb, ub = self.make_maskedarray(np.array([100, 100], dtype=np.int32))
 
         array0 = MaskedArray(dataptr, None, TypeKind.R8, ub-lb)
 
