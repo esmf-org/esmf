@@ -22,7 +22,7 @@ Hello and welcome to ESMF.
  * For testing ESMF, see [Testing makefile targets](http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_usrdoc/node6.html#SECTION00064500000000000000).
  * Pre-built binaries for ESMF and ESMPy are also available on `conda-forge` (_note Windows is not supported_):
 ```
-conda install -c conda-forge -n <env> esmf esmpy
+conda create -c conda-forge -n <env> esmf esmpy
 ```
 
 ## Linking to ESMF
