@@ -36,17 +36,17 @@ Instructions on how to download the ESMPy code can be found at the `ESMPy Downlo
 Anaconda Packages
 ~~~~~~~~~~~~~~~~~
 
-ESMPy conda packages are available through the NESII channel:
+ESMPy conda packages are available through the ``conda-forge`` channel:
 
 .. code::
 
-    conda install -n esmpy -c nesii -c conda-forge esmpy
+    conda create -n <env> -c conda-forge esmpy
 
 Specific versions of the conda package can be installed like this:
 
 .. code::
 
-    conda create -n esmpy -c nesii -c conda-forge esmpy=7.1.0r
+    conda create -n <env> -c conda-forge esmpy=7.1.0r
 
 ----------------------------
 Installing ESMPy from Source
