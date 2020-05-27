@@ -93,7 +93,7 @@ class Regrid(object):
         are retrievable via :meth:`~ESMF.api.regrid.get_factors` or :meth:`~ESMF.api.regrid.get_weights_dict`.
         See the respective documentation on those methods for additional information.
         For more information on how ``ESMF`` treats factor retrieval see the
-        documentation for `ESMF_FieldRegridStore <http://www.earthsystemmodeling.org/esmf_releases/last_built/ESMF_refdoc/node5.html#SECTION050366000000000000000>`_.
+        documentation for `ESMF_FieldRegridStore <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_8_0_1/ESMF_refdoc/node5.html#SECTION050366000000000000000>`_.
     """
 
     @initialize
@@ -427,7 +427,7 @@ class Regrid(object):
         """
         Return factor and factor index arrays. These arrays will only be
         available if the ``Regrid`` object was initialized with ``factors=True``.
-        See the `ESMF documentation <http://www.earthsystemmodeling.org/esmf_releases/last_built/ESMF_refdoc/node5.html#SECTION050366000000000000000>`_
+        See the `ESMF documentation <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_8_0_1/ESMF_refdoc/node5.html#SECTION050366000000000000000>`_
         for additional information on these arrays (see below for indexing in
         Python though).
 
