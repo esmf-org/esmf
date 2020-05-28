@@ -4,7 +4,7 @@
 
 >Copyright (c) 2002-2020 University Corporation for Atmospheric Research, Massachusetts Institute of Technology, Geophysical Fluid Dynamics Laboratory, University of Michigan, National Centers for Environmental Prediction, Los Alamos National Laboratory, Argonne National Laboratory, NASA Goddard Space Flight Center. All rights reserved.
 
-Hello and welcome to ESMF.
+Welcome to ESMF!
 
  * The [ESMF User's Guide](http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_usrdoc/node3.html) contains information on building and installing ESMF.
  * The [ESMF Reference Manual](http://www.earthsystemmodeling.org/esmf_releases/last_built/ESMF_refdoc/) contains information on the architecture of ESMF,
