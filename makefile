@@ -650,8 +650,8 @@ install:
 	mkdir -p $(ESMF_INSTALL_MODDIR_ABSPATH)
 	cp -f $(ESMF_MODDIR)/*.mod $(ESMF_INSTALL_MODDIR_ABSPATH)
 	mkdir -p $(ESMF_INSTALL_LIBDIR_ABSPATH)
-	cp -f $(ESMF_LIBDIR)/lib*.* $(ESMF_INSTALL_LIBDIR_ABSPATH)
-	@for lib in $(wildcard $(ESMF_INSTALL_LIBDIR_ABSPATH)/lib*.dylib) foo ; do \
+	cp -f $(ESMF_LIBDIR)/libesmf*.* $(ESMF_INSTALL_LIBDIR_ABSPATH)
+	@for lib in $(wildcard $(ESMF_INSTALL_LIBDIR_ABSPATH)/libesmf*.dylib) foo ; do \
 	  if [ $$lib != "foo" ]; then \
 	    install_name_tool -id "$$lib" $$lib ; \
 	  fi ; \
