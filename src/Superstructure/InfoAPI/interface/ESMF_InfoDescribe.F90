@@ -10,7 +10,7 @@
 !
 !==============================================================================
 
-#define ESMF_FILENAME "ESMF_InfoDescribeMod.F90"
+#define ESMF_FILENAME "ESMF_InfoDescribe.F90"
 
 #include "ESMF_Macros.inc"
 #include "ESMF.h"
