@@ -1003,16 +1003,14 @@ ESMF_SED = $(ESMF_SEDDEFAULT)
 endif
 
 #-------------------------------------------------------------------------------
-# Add C++ standard string to compile options if the non-default is chosen.
-# Dependencies requiring a specific C++ standard should update the standard here
+# Add C++ standard string to compile options if non-system-default is chosen.
+# The ESMF default is currently C++11 because parts of ESMF require it.
 #-------------------------------------------------------------------------------
-ifneq ($(ESMF_YAMLCPP),OFF)
 ifeq ($(ESMF_CXXSTD),default)
 ESMF_CXXSTD = 11
 endif
-endif
 
-ifneq ($(ESMF_CXXSTD),default)
+ifneq ($(ESMF_CXXSTD),sysdefault)
 # Most compilers know the -std=c++XX flag. Overwrite in build_rules.mk if needed.
 ESMF_CXXSTDFLAG         = -std=c++$(ESMF_CXXSTD)
 ESMF_CXXCOMPILECPPFLAGS += -DESMF_CXXSTD=$(ESMF_CXXSTD)
