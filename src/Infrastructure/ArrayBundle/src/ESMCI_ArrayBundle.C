@@ -12,6 +12,7 @@
 #define ESMC_FILENAME "ESMCI_ArrayBundle.C"
 //==============================================================================
 #define AB_REDISTSTORE_LOG_off
+#define ABSMM_EXEC_INFO_on
 //==============================================================================
 //
 // ArrayBundle class implementation (body) file
@@ -1403,6 +1404,14 @@ int ArrayBundle::sparseMatMul(
     }else if (dstArraybundle != NULL){
       count = dstArraybundle->getCount();
     }
+#ifdef ABSMM_EXEC_INFO_on
+    {
+      std::stringstream msg;
+      msg << "ABSMM exec:" << __LINE__
+        << " count=" << count;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
     if (zeroregionflag_len == 0 || zeroregionflag == NULL){
       // set the default for all Array pairs
       for (int i=0; i<count; i++)
@@ -1448,6 +1457,10 @@ int ArrayBundle::sparseMatMul(
 
     // process according to the different routehandle types        
     if (rhType == ESMC_ARRAYXXE){
+#ifdef ABSMM_EXEC_INFO_on
+      ESMC_LogDefault.Write("ABSMM exec: ESMC_ARRAYXXE branch taken",
+        ESMC_LOGMSG_INFO);
+#endif
       // apply same routehandle to each src/dst Array pair
       if (srcArraybundle != NULL && dstArraybundle != NULL){
         if (srcArraybundle->getCount() != dstArraybundle->getCount()){
@@ -1488,6 +1501,10 @@ int ArrayBundle::sparseMatMul(
       rc = ESMF_SUCCESS;
       return rc;
     }else if(rhType == ESMC_ARRAYBUNDLEXXE){
+#ifdef ABSMM_EXEC_INFO_on
+      ESMC_LogDefault.Write("ABSMM exec: ESMC_ARRAYBUNDLEXXE branch taken",
+        ESMC_LOGMSG_INFO);
+#endif
       // prepare for relative run-time addressing (RRA)
       vector<char *> rraList;
       vector<int> vectorLength;
@@ -1581,8 +1598,8 @@ int ArrayBundle::sparseMatMul(
         filterBitField |= XXE::filterBitNbTestFinish; // set NbTestFinish filter
         filterBitField |= XXE::filterBitCancel;       // set Cancel filter    
         filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
-#ifdef SMMINFO_on
-        ESMC_LogDefault.Write("AB/SMM exec: TERMORDER_SRCPET (default)",
+#ifdef ABSMM_EXEC_INFO_on
+        ESMC_LogDefault.Write("ABSMM exec: TERMORDER_SRCPET (default)",
           ESMC_LOGMSG_INFO);
 #endif
       }else{
@@ -1590,16 +1607,16 @@ int ArrayBundle::sparseMatMul(
           filterBitField |= XXE::filterBitNbWaitFinish; // set NbWaitFinish filter
           filterBitField |= XXE::filterBitNbTestFinish; // set NbTestFinish filter
           filterBitField |= XXE::filterBitCancel;       // set Cancel filter
-#ifdef SMMINFO_on
-        ESMC_LogDefault.Write("AB/SMM exec: TERMORDER_SRCSEQ",
+#ifdef ABSMM_EXEC_INFO_on
+        ESMC_LogDefault.Write("ABSMM exec: TERMORDER_SRCSEQ",
           ESMC_LOGMSG_INFO);
 #endif
         }else if (termOrders[0] == ESMC_TERMORDER_SRCPET){
           filterBitField |= XXE::filterBitNbTestFinish; // set NbTestFinish filter
           filterBitField |= XXE::filterBitCancel;       // set Cancel filter    
           filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
-#ifdef SMMINFO_on
-          ESMC_LogDefault.Write("AB/SMM exec: TERMORDER_SRCPET",
+#ifdef ABSMM_EXEC_INFO_on
+          ESMC_LogDefault.Write("ABSMM exec: TERMORDER_SRCPET",
             ESMC_LOGMSG_INFO);
 #endif
         }else if (termOrders[0] == ESMC_TERMORDER_FREE){
@@ -1611,8 +1628,8 @@ int ArrayBundle::sparseMatMul(
           filterBitField |= XXE::filterBitNbTestFinish; // set NbTestFinish filter
           filterBitField |= XXE::filterBitCancel;       // set Cancel filter    
           filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
-#ifdef SMMINFO_on
-          ESMC_LogDefault.Write("AB/SMM exec: TERMORDER_FREE -> TERMORDER_SRCPET",
+#ifdef ABSMM_EXEC_INFO_on
+          ESMC_LogDefault.Write("ABSMM exec: TERMORDER_FREE -> TERMORDER_SRCPET",
             ESMC_LOGMSG_INFO);
 #endif
         }
