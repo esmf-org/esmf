@@ -473,7 +473,7 @@ void VMId::log(
     bitmap = bitmap << 8;
     ++k;
     if (k==4){
-      sprintf(digits, "%X", bitmap);
+      sprintf(digits, "%08X", bitmap);
       info << digits;
       bitmap=0;
       k=0;
@@ -481,7 +481,7 @@ void VMId::log(
   }
   if (k!=0){
     bitmap = bitmap << (3-k)*8;
-    sprintf(digits, "%X", bitmap);
+    sprintf(digits, "%08X", bitmap);
     info << digits;
   }
   sprintf(msg, "%s - VMId: %s", prefix.c_str(), info.str().c_str());
@@ -527,14 +527,14 @@ int VMId::print() const{
     bitmap = bitmap << 8;
     ++k;
     if (k==4){
-      printf("%X", bitmap);
+      printf("%08X", bitmap);
       bitmap=0;
       k=0;
     }
   }
   if (k!=0){
     bitmap = bitmap << (3-k)*8;
-    printf("%X\n", bitmap);
+    printf("%08X\n", bitmap);
   }
   std::cout << "  localID = " << localID << std::endl;
   std::cout << "--- ESMCI::VMId::print() end ---" << std::endl;
