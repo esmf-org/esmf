@@ -427,7 +427,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! If a VM identifier map is provided and the current Base object is valid,
     ! search the map for its integer identifier.
-    if (associated(self%vmIdMap)) then
+    if (associated(self%vmIdMap) .and. .not. self%curr_base_is_geom) then
       if (l_base_is_valid) then
         call ESMF_BaseGetVMId(base, curr_vmid, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return

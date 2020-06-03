@@ -121,7 +121,15 @@ void update_field_metadata_by_geom(const json &infoDescStorage, esmc_basecache_t
       // The geometry type is needed when reconstructing Fields. There is no
       // generic method on Fields to assign a geometry class.
       std::string geom_type;
-      curr_integer_vmid = it.value().at("vmid_int");
+      try {
+        json jvmid_int = it.value().at("vmid_int");
+        if (jvmid_int.is_null()) {
+          curr_integer_vmid = -1;
+        } else {
+          curr_integer_vmid = jvmid_int;
+        }
+      }
+      ESMF_INFO_CATCH_JSON
       if (it.value().at("is_geom")) {
         // Pointer is null if base not found. This searches the geometry Base cache
         // for an existing geometry Base.
