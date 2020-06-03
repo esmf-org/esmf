@@ -72,7 +72,7 @@ ESMC_Base* findBase(ESMC_Base &target, esmc_basecache_t &infoCache, std::size_t 
 #define ESMC_METHOD "update_field_metadata_by_geom()"
 void update_field_metadata_by_geom(const json &infoDescStorage, esmc_basecache_t &geomCache,
     ESMC_Base *parentBase, std::vector<int> *intVmIdCache, esmc_basecache_t *fieldCache) {
-  /*!
+   /*!
    * @brief Traverses the metadata hierarchy provided by infoDescStorage to identify
    *   unique geometry Bases. Field Info metadata is updated allowing Fields to
    *   be disconnected from their host Fields during StateReconcile. The Fields
@@ -118,18 +118,23 @@ void update_field_metadata_by_geom(const json &infoDescStorage, esmc_basecache_t
       base = baseAddressToBase(it.value().at("base_address"));
       // The index of the found geometry Base...if it is found.
       std::size_t index = 0;
-      // The geometry type is needed when reconstructing Fields. There is no
-      // generic method on Fields to assign a geometry class.
-      std::string geom_type;
+      // Geometries and other ESMF support objects may not provide an integer
+      // VM identifier. This happens in StateReconcile for example when top-level
+      // State objects are the synchronization target. Geometries may have a VM
+      // that differs from the top-level object VMs involved in StateReconcile.
       try {
         json jvmid_int = it.value().at("vmid_int");
         if (jvmid_int.is_null()) {
+          // Negative value indicates the VM integer identifier is null.
           curr_integer_vmid = -1;
         } else {
           curr_integer_vmid = jvmid_int;
         }
       }
       ESMF_INFO_CATCH_JSON
+      // The geometry type is needed when reconstructing Fields. There is no
+      // generic method on Fields to assign a geometry class.
+      std::string geom_type;
       if (it.value().at("is_geom")) {
         // Pointer is null if base not found. This searches the geometry Base cache
         // for an existing geometry Base.

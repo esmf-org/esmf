@@ -82,6 +82,7 @@ type, public :: ESMF_InfoDescribe
   logical :: addObjectInfo = .false.  ! If true, add ESMF_Info map for each object
   logical :: createInfo = .true.  ! If true, also recurse objects with members (i.e. ArrayBundle)
   type(ESMF_VMId), dimension(:), pointer :: vmIdMap  ! Used to also get a unique integer identifier for an object's VM
+  logical :: vmIdMapGeomExc = .false.  ! If true, do not search for geometry object VM identifiers in the VM identifier map
 
   logical :: is_initialized = .false.  ! If true, the object is initialized
   type(ESMF_Base) :: curr_base  ! Holds a reference to the current update object's base. Will change when recursively updating
@@ -126,13 +127,14 @@ contains !=====================================================================
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoDescribeInitialize()"
 subroutine ESMF_InfoDescribeInitialize(self, addBaseAddress, addObjectInfo, createInfo, &
-    searchCriteria, vmIdMap, rc)
+    searchCriteria, vmIdMap, vmIdMapGeomExc, rc)
   class(ESMF_InfoDescribe), intent(inout) :: self
   logical, intent(in), optional :: addBaseAddress
   logical, intent(in), optional :: addObjectInfo
   logical, intent(in), optional :: createInfo
   type(ESMF_Info), target, intent(in), optional :: searchCriteria
   type(ESMF_VMId), dimension(:), pointer, intent(in), optional :: vmIdMap
+  logical, intent(in), optional :: vmIdMapGeomExc
   integer, intent(inout), optional :: rc
   integer :: localrc
 
@@ -142,6 +144,7 @@ subroutine ESMF_InfoDescribeInitialize(self, addBaseAddress, addObjectInfo, crea
   if (self%is_initialized) then
     if (ESMF_LogFoundError(ESMF_FAILURE, msg="Object already initialized", ESMF_CONTEXT, rcToReturn=rc)) return
   endif
+
 
   nullify(self%searchCriteria)
   nullify(self%vmIdMap)
@@ -166,6 +169,9 @@ subroutine ESMF_InfoDescribeInitialize(self, addBaseAddress, addObjectInfo, crea
       if (ESMF_LogFoundError(ESMF_FAILURE, msg="vmIdMap pointer provided but it is not associated", &
         ESMF_CONTEXT, rcToReturn=rc)) return
     end if
+  end if
+  if (present(vmIdMapGeomExc)) then
+    self%vmIdMapGeomExc = vmIdMapGeomExc
   end if
 
   self%is_initialized = .true.
@@ -427,7 +433,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! If a VM identifier map is provided and the current Base object is valid,
     ! search the map for its integer identifier.
-    if (associated(self%vmIdMap) .and. .not. self%curr_base_is_geom) then
+    if (associated(self%vmIdMap) .and. (.not. self%vmIdMapGeomExc .and. self%curr_base_is_geom)) then
       if (l_base_is_valid) then
         call ESMF_BaseGetVMId(base, curr_vmid, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
