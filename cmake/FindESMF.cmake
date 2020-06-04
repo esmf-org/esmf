@@ -81,7 +81,7 @@ find_library(ESMFLIB NAMES esmf PATHS ${ESMF_LIBSDIR})
 # Prepare the compile options list
 string(REPLACE " " ";" COMPILEOPTS "${ESMF_F90COMPILEOPTS} ${ESMF_F90COMPILEPATHS} ${ESMF_F90COMPILEFREECPP} ${ESMF_F90COMPILECPPFLAGS}")
 
-# set the location of the library and its include (.mod) files
+# Set appropriate COMPILE and LINK options
 set_target_properties(ESMF PROPERTIES
        IMPORTED_LOCATION ${ESMFLIB}
        INTERFACE_COMPILE_OPTIONS "${COMPILEOPTS}"
