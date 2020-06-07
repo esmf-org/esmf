@@ -29,6 +29,8 @@
 #include "ESMCI_CoordSys.h"
 #include "ESMCI_Array.h"
 
+#include "ESMCI_TraceRegion.h"
+
 #include "Mesh/include/ESMCI_Mesh.h"
 #include "Mesh/include/Legacy/ESMCI_MeshRead.h"
 #include "Mesh/include/Regridding/ESMCI_MeshRegrid.h" //only for the conservative flag in add_elements
@@ -5114,6 +5116,9 @@ void ESMCI_meshcreateredistnodes(Mesh **src_meshpp, int *num_node_gids, int *nod
 
   try {
 
+    ESMCI::VM *vm = VM::getCurrent(NULL);
+
+
     // Initialize the parallel environment for mesh (if not already done)
     {
       int localrc;
@@ -5138,6 +5143,8 @@ void ESMCI_meshcreateredistnodes(Mesh **src_meshpp, int *num_node_gids, int *nod
       // dereference output mesh
       Mesh *output_mesh=*output_meshpp;
 
+vm->logMemInfo("before nvmesh split id postprocessing 2");
+ESMCI::TraceEventRegionEnter("nvmesh split id postprocessing 2", NULL);
       // if split mesh add info
       // output_mesh->is_split=src_mesh->is_split; // SET INSIDE MeshRedistNode()
       output_mesh->max_non_split_id=src_mesh->max_non_split_id;
@@ -5145,6 +5152,8 @@ void ESMCI_meshcreateredistnodes(Mesh **src_meshpp, int *num_node_gids, int *nod
 
       // calculate split_id_to_frac map from other info
       calc_split_id_to_frac(output_mesh);
+ESMCI::TraceEventRegionExit("nvmesh split id postprocessing 2", NULL);
+vm->logMemInfo("after nvmesh split id postprocessing 2");
 
 #if 0
       // DEBUG OUTPUT

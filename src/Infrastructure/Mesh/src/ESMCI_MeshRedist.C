@@ -21,6 +21,8 @@
 #include <Mesh/include/Legacy/ESMCI_ParEnv.h>
 #include <Mesh/include/Legacy/ESMCI_CommReg.h>
 
+#include "ESMCI_TraceRegion.h"
+
 #include <iostream>
 #include <fstream>
 #include <algorithm>
@@ -104,7 +106,12 @@ namespace ESMCI {
 
     Trace __trace("MeshRedistNode()");
 
+    ESMCI::VM *vm = VM::getCurrent(NULL);
 
+
+
+vm->logMemInfo("before nvmesh ddir initialization");
+ESMCI::TraceEventRegionEnter("nvmesh ddir initialization", NULL);
     // Create a distributed directory to figure out where
     // the nodes should go.
     DDir<> ndir;
@@ -126,7 +133,11 @@ namespace ESMCI {
     } else {
       ndir.Create(0, (UInt*) NULL, (UInt *)NULL);
     }
+ESMCI::TraceEventRegionExit("nvmesh ddir initialization", NULL);
+vm->logMemInfo("after nvmesh ddir initialization");
 
+vm->logMemInfo("before nvmesh ddir processing");
+ESMCI::TraceEventRegionEnter("nvmesh ddir processing", NULL);
     // Make a node id to proc map
     // Build map of node id to proc destination
     std::map<int,int> src_node_id_to_proc;
@@ -170,8 +181,11 @@ namespace ESMCI {
         src_node_id_to_proc[node->get_id()]=proc;
       }
     } // end. of block to get rid of memory for search vectors (e.g. src_gids)
+ESMCI::TraceEventRegionExit("nvmesh ddir processing", NULL);
+vm->logMemInfo("after nvmesh ddir processing");
 
-
+vm->logMemInfo("before nvmesh split id preprocessing");
+ESMCI::TraceEventRegionEnter("nvmesh split id preprocessing", NULL);
     // Invert split to orig id map
     std::multimap<UInt, MeshObj *> orig_id_to_split_elem;
     if (src_mesh->is_split) {
@@ -199,8 +213,12 @@ namespace ESMCI {
         }
       }
     }
+ESMCI::TraceEventRegionExit("nvmesh split id preprocessing", NULL);
+vm->logMemInfo("before nvmesh split id preprocessing");
 
 
+vm->logMemInfo("before nvmesh ddir processing 2");
+ESMCI::TraceEventRegionEnter("nvmesh ddir processing 2", NULL);
     // Find out what element to send to which proc to satisfy node requirement
     std::set<MRN_Search> to_snd;
     MeshDB::iterator ni = src_mesh->node_begin(), ne = src_mesh->node_end();
@@ -311,6 +329,8 @@ namespace ESMCI {
         }
       }
     }
+ESMCI::TraceEventRegionExit("nvmesh ddir processing 2", NULL);
+vm->logMemInfo("after nvmesh ddir processing 2");
 
 #if 0
       {
@@ -325,6 +345,8 @@ namespace ESMCI {
       }
 #endif
 
+vm->logMemInfo("before nvmesh communication");
+ESMCI::TraceEventRegionEnter("nvmesh communication", NULL);
     // Create Output Mesh
     Mesh *output_mesh=new Mesh();
 
@@ -337,8 +359,12 @@ namespace ESMCI {
     CommReg elemComm;
     redist_elems_from_set(src_mesh, to_snd,
                           output_mesh,  &elemComm);
+ESMCI::TraceEventRegionExit("nvmesh communication", NULL);
+vm->logMemInfo("after nvmesh communication");
 
 
+vm->logMemInfo("before nvmesh split id postprocessing");
+ESMCI::TraceEventRegionEnter("nvmesh split id postprocessing", NULL);
     // Set the split information in output_mesh
     // NOTE: that this is done outside the MeshRedist function
     //       in other MeshRedist cases, but it was more efficient
@@ -347,7 +373,11 @@ namespace ESMCI {
     if (output_mesh->is_split) {
       set_split_orig_id_map(src_mesh, output_mesh);
     }
+ESMCI::TraceEventRegionExit("nvmesh split id postprocessing", NULL);
+vm->logMemInfo("after nvmesh split id postprocessing");
 
+vm->logMemInfo("before nvmesh post processing");
+ESMCI::TraceEventRegionEnter("nvmesh post processing", NULL);
     // Assign element owners
     set_elem_owners_wo_list(output_mesh);
 
@@ -374,6 +404,8 @@ namespace ESMCI {
 
     // Send mesh fields (coords, etc) between src_mesh and output_mesh using elemComm
     send_mesh_fields(src_mesh, output_mesh, elemComm);
+ESMCI::TraceEventRegionExit("nvmesh post processing", NULL);
+vm->logMemInfo("after nvmesh post processing");
 
 #if 0
   {
