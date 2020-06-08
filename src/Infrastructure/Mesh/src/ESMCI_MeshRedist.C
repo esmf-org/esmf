@@ -214,7 +214,7 @@ ESMCI::TraceEventRegionEnter("nvmesh split id preprocessing", NULL);
       }
     }
 ESMCI::TraceEventRegionExit("nvmesh split id preprocessing", NULL);
-vm->logMemInfo("before nvmesh split id preprocessing");
+vm->logMemInfo("after nvmesh split id preprocessing");
 
 
 vm->logMemInfo("before nvmesh ddir processing 2");
