@@ -492,6 +492,11 @@ int ESMC_FieldGetBounds(ESMC_Field field,
                             enum ESMC_UnmappedAction_Flag *unmappedaction,
                             enum ESMC_Logical *ignoreDegenerate,
                             enum ESMC_Logical *create_rh,
+                            ESMC_FileMode_Flag *filemode,
+                            const char *srcFile,
+                            const char *dstFile,
+                            enum ESMC_FileFormat_Flag *srcFileType,
+                            enum ESMC_FileFormat_Flag *dstFileType,
                             ESMC_Field *srcFracField,
                             ESMC_Field *dstFracField){
 
@@ -515,7 +520,8 @@ int ESMC_FieldGetBounds(ESMC_Field field,
     localrc = ESMCI::Field::regridstorefile(fieldpsrc, fieldpdst, filename,
       srcMaskValues, dstMaskValues, &rhPtr, regridmethod,
       polemethod, regridPoleNPnts, lineType, normType, unmappedaction, 
-      ignoreDegenerate, create_rh, srcfracp, dstfracp);
+      ignoreDegenerate, create_rh, filemode, srcFile, dstFile, 
+      srcFileType, dstFileType, srcfracp, dstfracp);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;  // bail out
 

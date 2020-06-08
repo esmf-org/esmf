@@ -68,6 +68,7 @@ module NUOPC_Base
   
   ! internal Utility API
   public NUOPC_ChopString                 ! method
+  public NUOPC_LogPetList                 ! method
 
 !==============================================================================
 ! 
@@ -4667,6 +4668,58 @@ module NUOPC_Base
     enddo
     chopStringList(count+1) = trim(string(j:len(string)))
     deallocate(chopPos)
+    
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: NUOPC_LogPetList - Chop a string into sub-strings
+! !INTERFACE:
+  subroutine NUOPC_LogPetList(petList, name, rc)
+! !ARGUMENTS:
+    integer                        :: petList(:)
+    character(*)                   :: name
+    integer, intent(out), optional :: rc
+! !DESCRIPTION:
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[petList]
+!     The petList to be logged.
+!   \item[name]
+!     The component name that is calling this method.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+  !-----------------------------------------------------------------------------
+    ! local variables
+    character(len=80)       :: petListBuffer
+    integer                 :: i, lineCount, extra, localrc
+
+    lineCount = size(petList)/10
+    extra = size(petList) - (size(petList)/10)*10
+    
+    do i=1, lineCount
+      write (petListBuffer, "(10I7)") petList((i-1)*10+1:i*10)
+      call ESMF_LogWrite(petListBuffer, ESMF_LOGMSG_INFO, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU,&
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    enddo
+    
+    if (extra>0) then
+      write (petListBuffer, "(10I7)") petList((i-1)*10+1:(i-1)*10+extra)
+      call ESMF_LogWrite(petListBuffer, ESMF_LOGMSG_INFO, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU,&
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS

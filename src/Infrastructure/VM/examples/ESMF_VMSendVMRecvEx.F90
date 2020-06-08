@@ -40,9 +40,7 @@ program ESMF_VMSendVMRecvEx
   type(ESMF_VM):: vm
   integer:: localPet, petCount
   integer:: count, src, dst
-!BOC
   integer, allocatable:: localData(:)
-!EOC
   ! result code
   integer :: finalrc, result
   character(ESMF_MAXSTR) :: testname
@@ -68,6 +66,10 @@ program ESMF_VMSendVMRecvEx
   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+!BOE
+! Set up the {\tt localData} array.
+!EOE
+
 !BOC
   count = 10
   allocate(localData(count))
@@ -76,8 +78,12 @@ program ESMF_VMSendVMRecvEx
   enddo
 !EOC
  
-  src = 0
-  dst = petCount - 1
+!BOE
+! Carry out the data transfer between {\tt src} PET and {\tt dst} PET.
+!EOE
+
+  src = petCount - 1
+  dst = 0
 !BOC
   if (localPet==src) then
     call ESMF_VMSend(vm, sendData=localData, count=count, dstPet=dst, rc=rc)
@@ -95,6 +101,19 @@ program ESMF_VMSendVMRecvEx
     print *, 'localData for PET ',localPet,': ', localData(i)
   enddo 
 
+!BOE
+! Finally, on {\tt dst} PET, test the received data for correctness.
+!EOE
+
+!BOC
+  if (localPet==dst) then
+    do i=1, count
+      if (localData(i) /= src*100 + i) then
+        finalrc = ESMF_RC_VAL_WRONG
+      endif
+    enddo 
+  endif
+!EOC
 
   ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
   ! file that the scripts grep for.

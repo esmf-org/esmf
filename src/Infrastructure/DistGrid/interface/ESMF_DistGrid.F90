@@ -3376,10 +3376,14 @@ integer(ESMF_KIND_I8),target, intent(out), optional :: elementCountPDeI8(:)
 !     Same as {\tt elementCountPDe}, but of 64-bit integer kind.
 !   \item[{[localDeToDeMap]}]
 !     Global DE index for each local DE. Must enter allocated with
-!     {\tt shape(localDeToDeMap) == (/localDeCount/)}.
+!     {\tt shape(localDeToDeMap) == (/localDeCount/)}. It is recommended to
+!     use a lower bound of 0 for {\tt localDeToDeMap}, in order to support
+!     direct indexing into this map with a zero-based {\tt localDe} variable.
 !   \item[{[deToTileMap]}]
 !     Map each DE uniquely to a tile. Must enter allocated with
-!     {\tt shape(deToTileMap) == (/deCount/)}.
+!     {\tt shape(deToTileMap) == (/deCount/)}. It is recommended to
+!     use a lower bound of 0 for {\tt deToTileMap}, in order to support
+!     direct indexing into this map with a zero-based {\tt de} variable.
 !   \item[{[indexCountPDe]}]
 !     Number of indices for each dimension per DE. Must enter
 !     allocated with {\tt shape(indexCountPDe) == (/dimCount, deCount/)}.
@@ -3748,18 +3752,20 @@ integer(ESMF_KIND_I8),target, intent(out), optional :: seqIndexListI8(:)
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
-      ! query more information
-      allocate(localDeToDeMap(localDeCount))
-      allocate(deToTileMap(deCount))
-      call ESMF_DistGridGet(distgrid, localDeToDeMap=localDeToDeMap, &
-        deToTileMap=deToTileMap, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      ! now can determine return values
-      if (present(de)) de = localDeToDeMap(localDe)
-      if (present(tile)) tile = deToTileMap(localDeToDeMap(localDe)+1)
-      ! clean-up
-      deallocate(localDeToDeMap, deToTileMap)
+      if (present(de) .or. present(tile)) then
+        ! query more information
+        allocate(localDeToDeMap(0:localDeCount-1))
+        allocate(deToTileMap(0:deCount-1))
+        call ESMF_DistGridGet(distgrid, localDeToDeMap=localDeToDeMap, &
+          deToTileMap=deToTileMap, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! now can determine return values
+        if (present(de)) de = localDeToDeMap(localDe)
+        if (present(tile)) tile = deToTileMap(localDeToDeMap(localDe))
+        ! clean-up
+        deallocate(localDeToDeMap, deToTileMap)
+      endif
     endif
 
     ! Deal with (optional) array arguments

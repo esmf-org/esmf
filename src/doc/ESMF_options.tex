@@ -262,6 +262,24 @@ CF-conventions for unstructured grid data model. See section~\ref{sec:fileformat
 
 \end{description}
 
+\subsection{ESMF\_FILEMODE}
+\label{const:filemodeflag}
+{\sf DESCRIPTION:\\}
+This flag is used to indicate which mode to use when writing a weight file.
+
+The type of this flag is:
+
+{\tt type(ESMF\_FileMode\_Flag)}
+
+The valid values are:
+\begin{description}
+\item [ESMF\_FILEMODE\_BASIC]
+      Indicates that only the factorList and factorIndexList should be written.
+\item [ESMF\_FILEMODE\_WITHAUX]
+      Indicates that grid center coordinates should also be written.
+
+\end{description}
+
 \subsection{ESMF\_FILESTATUS}
 \label{const:filestatusflag}
 {\sf DESCRIPTION:\\}
@@ -1070,6 +1088,9 @@ The following named constants define the precise version of ESMF in use.
       Constant of type {\tt character} holding the exact release version string
       (e.g. "5.2.0r").
 \end{description}
+
+\subsection{ESMF\_VMEPOCH}
+This flag is documented in section \ref{const:vmepoch_flag}.
 
 \subsection{ESMF\_XGRIDSIDE}
 This flag is documented in section \ref{const:xgridside}.

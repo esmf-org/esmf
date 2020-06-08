@@ -12,7 +12,7 @@
 *.orig
 *.log
 #.Log
-PET*.
+PET*
 *.stdout
 *.out
 *.vtk

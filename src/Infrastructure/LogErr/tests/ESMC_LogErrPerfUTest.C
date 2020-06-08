@@ -159,8 +159,12 @@ int main(void){
   //----------------------------------------------------------------------------
   //NEX_UTest
   strcpy(name, "Threshold check for ESMCI::LogErr::MsgFoundError() 1000000x Test");
-  strcpy(failMsg, "MsgFoundError() performance problem");
-  dtTest = 5.e-8; // this is expected to pass even in debug mode
+#ifdef ESMF_BOPT_g
+  dtTest = 7.e-7;   // 700ns is expected to pass in debug mode
+#else
+  dtTest = 5.e-8;   // 50ns is expected to pass in optimized mode
+#endif
+  sprintf(failMsg, "MsgFoundError() performance problem %g > %g", dt, dtTest);
   ESMC_Test((dt<dtTest), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
     

@@ -5050,17 +5050,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   subroutine ESMF_FieldBundleSMM(srcFieldBundle, dstFieldBundle, &
-        routehandle, keywordEnforcer, zeroregion, termorderflag, checkflag, rc)
+    routehandle, keywordEnforcer, &
+    zeroregion, & ! DEPRECATED ARGUMENT
+    zeroregionflag, termorderflag, checkflag, rc)
 !
 ! !ARGUMENTS:
-        type(ESMF_FieldBundle), intent(in),    optional  :: srcFieldBundle
-        type(ESMF_FieldBundle), intent(inout), optional  :: dstFieldBundle
-        type(ESMF_RouteHandle), intent(inout)            :: routehandle
+    type(ESMF_FieldBundle),    intent(in),         optional :: srcFieldBundle
+    type(ESMF_FieldBundle),    intent(inout),      optional :: dstFieldBundle
+    type(ESMF_RouteHandle),    intent(inout)                :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-        type(ESMF_Region_Flag), intent(in),    optional  :: zeroregion
-        type(ESMF_TermOrder_Flag), intent(in), optional  :: termorderflag(:)
-        logical,                intent(in),    optional  :: checkflag
-        integer,                intent(out),   optional  :: rc
+    type(ESMF_Region_Flag),    intent(in), optional  :: zeroregion ! DEPRECATED ARGUMENT
+    type(ESMF_Region_Flag),    intent(in), target, optional :: zeroregionflag(:)
+    type(ESMF_TermOrder_Flag), intent(in),         optional :: termorderflag(:)
+    logical,                   intent(in),         optional :: checkflag
+    integer,                   intent(out),        optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -5070,6 +5073,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[7.0.0] Added argument {\tt termorderflag}.
 !              The new argument gives the user control over the order in which
 !              the src terms are summed up.
+! \item[8.1.0] Added argument {\tt zeroregionflag}, and deprecated
+!              {\tt zeroregion}. The new argument allows greater flexibility
+!              in setting the zero region for individual ArrayBundle members.
 ! \end{description}
 ! \end{itemize}
 !
@@ -5109,18 +5115,32 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     {\tt ESMF\_FieldBundle} with destination data.
 !   \item [routehandle]
 !     Handle to the precomputed Route.
-!   \item [{[zeroregion]}]
-!     If set to {\tt ESMF\_REGION\_TOTAL} {\em (default)} the total regions of
-!     all DEs in {\tt dstFieldBundle} will be initialized to zero before updating the 
-!     elements with the results of the sparse matrix multiplication. If set to
-!     {\tt ESMF\_REGION\_EMPTY} the elements in {\tt dstFieldBundle} will not be
-!     modified prior to the sparse matrix multiplication and results will be
-!     added to the incoming element values. Setting {\tt zeroregion} to 
-!
-!     {\tt ESMF\_REGION\_SELECT} will only zero out those elements in the 
-!     destination FieldBundle that will be updated by the sparse matrix
-!     multiplication. See section \ref{const:region} for a complete list of
-!     valid settings.
+!   \item [{[zeroregion]}] 
+!     If set to {\tt ESMF\_REGION\_TOTAL} {\em (default)} the total regions of 
+!     all DEs in all Fields in {\tt dstFieldBundle} will be initialized to zero 
+!     before updating the elements with the results of the sparse matrix 
+!     multiplication. If set to {\tt ESMF\_REGION\_EMPTY} the elements in the
+!     Fields in {\tt dstFieldBundle} will not be modified prior to the sparse
+!     matrix multiplication and results will be added to the incoming element
+!     values. Setting {\tt zeroregion} to {\tt ESMF\_REGION\_SELECT} will only
+!     zero out those elements in the destination Fields that will be updated
+!     by the sparse matrix multiplication. See section \ref{const:region}
+!   \item [{[zeroregionflag]}] 
+!     If set to {\tt ESMF\_REGION\_TOTAL} {\em (default)} the total regions of 
+!     all DEs in the destination Field will be initialized to zero 
+!     before updating the elements with the results of the sparse matrix 
+!     multiplication. If set to {\tt ESMF\_REGION\_EMPTY} the elements in the
+!     destination Field will not be modified prior to the sparse
+!     matrix multiplication and results will be added to the incoming element
+!     values. A setting of {\tt ESMF\_REGION\_SELECT} will only
+!     zero out those elements in the destination Field that will be updated
+!     by the sparse matrix multiplication. See section \ref{const:region}
+!     for a complete list of valid settings.
+!     The size of this array argument must either be 1 or equal the number of
+!     Fields in the {\tt srcFieldBundle} and {\tt dstFieldBundle} arguments. In
+!     the latter case, the zero region for each Field SMM operation is
+!     indicated separately. If only one zero region element is specified, it is
+!     used for {\em all} Field pairs.
 !   \item [{[termorderflag]}]
 !     Specifies the order of the source side terms in all of the destination
 !     sums. The {\tt termorderflag} only affects the order of terms during 
@@ -5149,10 +5169,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
         integer                 :: localrc      ! local return code
         
-        ! local variables to buffer optional arguments
-        type(ESMF_Region_Flag)   :: l_zeroregion
-        logical                 :: l_checkflag! helper variable
-
         ! local internal variables
         logical                 :: src_bundle
         logical                 :: dst_bundle
@@ -5167,12 +5183,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
         ! Check init status of arguments, deal with optional FieldBundle args
         ESMF_INIT_CHECK_DEEP_SHORT(ESMF_RouteHandleGetInit, routehandle, rc)
-
-        ! Set default flags
-        l_checkflag = ESMF_FALSE
-        if (present(checkflag)) l_checkflag = checkflag
-        l_zeroregion = ESMF_REGION_TOTAL
-        if (present(zeroregion)) l_zeroregion = zeroregion
 
         src_bundle = .true.
         if (present(srcFieldBundle)) then
@@ -5195,28 +5205,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! perform FieldBundle SMM
         if(src_bundle .and. dst_bundle) then
           call ESMF_ArrayBundleSMM(srcab, dstab, routehandle, &
-            zeroregion=l_zeroregion, termorderflag=termorderflag, &
-            checkflag=l_checkflag, rc=localrc)
+            zeroregion=zeroregion, zeroregionflag=zeroregionflag, &
+            termorderflag=termorderflag, checkflag=checkflag, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         else if(src_bundle .and. .not. dst_bundle) then
           call ESMF_ArrayBundleSMM(srcArrayBundle=srcab, &
             routehandle=routehandle, &
-            zeroregion=l_zeroregion, termorderflag=termorderflag, &
-            checkflag=l_checkflag, rc=localrc)
+            zeroregion=zeroregion, zeroregionflag=zeroregionflag, &
+            termorderflag=termorderflag, checkflag=checkflag, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         else if(.not. src_bundle .and. dst_bundle) then
           call ESMF_ArrayBundleSMM(dstArrayBundle=dstab, &
             routehandle=routehandle, &
-            zeroregion=l_zeroregion, termorderflag=termorderflag, &
-            checkflag=l_checkflag, rc=localrc)
+            zeroregion=zeroregion, zeroregionflag=zeroregionflag, &
+            termorderflag=termorderflag, checkflag=checkflag, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         else if(.not. src_bundle .and. .not. dst_bundle) then
           call ESMF_ArrayBundleSMM(routehandle=routehandle, &
-            zeroregion=l_zeroregion, termorderflag=termorderflag, &
-            checkflag=l_checkflag, rc=localrc)
+            zeroregion=zeroregion, zeroregionflag=zeroregionflag, &
+            termorderflag=termorderflag, checkflag=checkflag, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif

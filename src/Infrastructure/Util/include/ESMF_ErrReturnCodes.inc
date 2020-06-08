@@ -28,7 +28,7 @@ Special macro for use in ESM[F,C]_LogMsgFoundError(), e.g.
 
 #if 0
 Return codes are defined here; corresponding error messages are defined in
-ESMC_LogErrMsgs.C
+ESMCI_ErrMsgs.C
 #endif
 
 #if 0

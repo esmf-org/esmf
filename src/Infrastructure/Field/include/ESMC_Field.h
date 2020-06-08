@@ -868,8 +868,8 @@ int ESMC_FieldRegridStoreFile(
     ESMC_Field srcField,                           // in
     ESMC_Field dstField,                           // in
     const char *filename,                          // in
-    ESMC_InterArrayInt *srcMaskValues,              // in
-    ESMC_InterArrayInt *dstMaskValues,              // in
+    ESMC_InterArrayInt *srcMaskValues,             // in
+    ESMC_InterArrayInt *dstMaskValues,             // in
     ESMC_RouteHandle *routehandle,                 // inout
     enum ESMC_RegridMethod_Flag *regridmethod,     // in
     enum ESMC_PoleMethod_Flag *polemethod,         // in
@@ -879,6 +879,11 @@ int ESMC_FieldRegridStoreFile(
     enum ESMC_UnmappedAction_Flag *unmappedaction, // in
     enum ESMC_Logical *ignoreDegenerate,           // in
     enum ESMC_Logical *create_rh,                  // in
+    ESMC_FileMode_Flag *filemode,                  // in
+    const char *srcFile,                           // in
+    const char *dstFile,                           // in
+    enum ESMC_FileFormat_Flag *srcFileType,        // in
+    enum ESMC_FileFormat_Flag *dstFileType,        // in
     ESMC_Field *srcFracField,                      // out
     ESMC_Field *dstFracField);                     // out
 
@@ -941,6 +946,21 @@ int ESMC_FieldRegridStoreFile(
 //  \item[{create\_rh}]
 //    Specifies whether or not to create a routehandle, or just write weights to file.
 //    If not specified, defaults to {\tt ESMF\_TRUE}.
+//  \item[{filemode}]
+//    Specifies the mode to use when creating the weight file. Options are
+//    {\tt ESMC\_FILEMODE\_BASIC} and {\tt ESMC\_FILEMODE\_WITHAUX}, which will
+//    write a file that includes center coordinates of the grids. The default 
+//    value is {\tt ESMC\_FILEMODE\_BASIC}.
+//  \item[{srcFile}]
+//    The name of the source file used to create the {\tt ESMC\_Grid} used
+//    in this regridding operation.
+//  \item[{dstFile}]
+//    The name of the destination file used to create the {\tt ESMC\_Grid} used
+//    in this regridding operation.
+//  \item[{srcFileType}]
+//    The type of the file used to represent the source grid.
+//  \item[{dstFileType}]
+//    The type of the file used to represent the destination grid.
 //  \item [{[srcFracField]}]
 //    The fraction of each source cell participating in the regridding. Only
 //    valid when regridmethod is {\tt ESMC\_REGRIDMETHOD\_CONSERVE}.

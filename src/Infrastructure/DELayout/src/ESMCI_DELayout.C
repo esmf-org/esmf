@@ -3530,14 +3530,6 @@ XXE::~XXE(){
 
 
 //-----------------------------------------------------------------------------
-// utility function used by streamify
-template<typename T> void append(stringstream &streami, T value){
-  streami.write((char*)&value, sizeof(T));
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::XXE::streamify()"
 void XXE::streamify(stringstream &streami){
@@ -3736,15 +3728,18 @@ int XXE::exec(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-#ifdef XXE_EXEC_LOG_on
+#if (defined XXE_EXEC_LOG_on || defined XXE_EXEC_BUFFLOG_on)
   char msg[1024];
-  sprintf(msg, "ESMCI::XXE::exec(): START: opstream=%p, count=%d, "
-    "indexStart=%d, indexStop=%d",
+#endif
+
+#ifdef XXE_EXEC_LOG_on
+  sprintf(msg, "ESMCI::XXE::exec():%d START: opstream=%p, count=%d, "
+    "indexStart=%d, indexStop=%d", __LINE__,
     opstream, count, indexStart, indexStop);
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
   sprintf(msg, "ESMCI::XXE::exec(): START: sizeof(StreamElement)=%lu, "
-    "rraCount=%d, vectorLength=%d",
-    sizeof(StreamElement), rraCount, *vectorLength);
+    "sizeof(WtimerInfo)=%lu, rraCount=%d, vectorLength=%d",
+    sizeof(StreamElement), sizeof(WtimerInfo), rraCount, *vectorLength);
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
   sprintf(msg, "ESMCI::XXE::exec(): START'ed: filterBitField=0x%08x, "
     "finished=%p, cancelled=%p", filterBitField, finished, cancelled);
@@ -5431,6 +5426,10 @@ printf("gjt - DID NOT CANCEL commhandle\n");
     case wtimer:
       {
         xxeWtimerInfo = (WtimerInfo *)xxeElement;
+#ifdef XXE_EXEC_LOG_on
+        sprintf(msg, "XXE::xxeWtimerInfo: index=%d", xxeWtimerInfo->actualWtimerIndex);
+        ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+#endif
         int index = xxeWtimerInfo->actualWtimerIndex;
         double *wtime = &(xxeWtimerInfo->wtime);
         *wtime = 0.;                      // initialize

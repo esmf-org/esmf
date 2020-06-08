@@ -69,8 +69,7 @@ dstfield.data[...] = 1e20
 import os
 filename = "esmpy_example_weight_file_cs.nc"
 if ESMF.local_pet() == 0:
-    if os.path.isfile(
-        os.path.join(os.getcwd(), filename)):
+    if os.path.isfile(os.path.join(os.getcwd(), filename)):
         os.remove(os.path.join(os.getcwd(), filename))
 
 mg.barrier()
@@ -109,6 +108,9 @@ if ESMF.local_pet() is 0:
     print ("ESMPy cubed sphere regridding example")
     print ("  interpolation mean relative error = {0}".format(meanrelerr))
     print ("  interpolation max relative (pointwise) error = {0}".format(maxrelerr))
+
+    if os.path.isfile(os.path.join(os.getcwd(), filename)):
+        os.remove(os.path.join(os.getcwd(), filename))
 
     # assert (meanrelerr < 3e-3)
     # assert (maxrelerr < 4e-4)

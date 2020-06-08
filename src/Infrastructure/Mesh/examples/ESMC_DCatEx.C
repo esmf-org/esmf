@@ -62,7 +62,8 @@ int main(int argc, char *argv[]) {
   MPI_Init(&argc, &argv);
 
   Par::Init("CATLOG");
-  std::cout << "size=" << Par::Size() << std::endl;
+
+  std::cout << std::endl;
 
   Mesh catmesh;
 
@@ -71,11 +72,10 @@ int main(int argc, char *argv[]) {
   }
   std::string fname(argv[1]);
   UInt npart = atoi(argv[2]);
-  std::cout << "Collecting mesh " << argv[1] << " from " << npart << " poritions" << std::endl;
+  std::cout << "Collecting mesh " << argv[1] << " from " << npart << " portions" << std::endl;
   catmesh.set_filename("cat_" + fname);
 
   std::vector<Mesh*> srcmesh(npart);
-
 
   try {
     // Read in the meshes
@@ -84,21 +84,29 @@ int main(int argc, char *argv[]) {
       std::stringstream os;
       os << fname << "." << npart << "." << std::setw(vwidth) << std::setfill('0') << i;
       std::string src_name = os.str();
-      std::cout << "Reading file: " << src_name << '\n';
+      std::cout << "  Reading file: " << src_name << '\n';
       Mesh *mesh = new Mesh();
       ReadMesh(*mesh, src_name, false, ESMC_FILE_VTK);
       mesh->Commit();
       srcmesh[i] = mesh;
     }
+    std::cout << "...done."<< std::endl;
+    std::cout << std::endl;
 
     // Concatenate
+    std::cout << "Concatenating mesh...";
     MeshConcat(catmesh, srcmesh);
+    std::cout << "done."<< std::endl;
+    std::cout << std::endl;
+
 
     // Write the resulting concatenated file.
+    std::cout << "Writing concatenated mesh...";
     WriteMesh(catmesh, catmesh.filename(), 0, NULL, 0, NULL,
               1, 0.0, ESMC_FILE_VTK);
+    std::cout << "done."<< std::endl;
+    std::cout << std::endl;
 
-  
   } catch (std::runtime_error &ex) {
     std::cerr << "runtime exception:" << ex.what() << std::endl;
     Par::Abort();
@@ -111,6 +119,8 @@ int main(int argc, char *argv[]) {
   }
 
   Par::End();
+
+  MPI_Finalize();
 
   return 0;
 }

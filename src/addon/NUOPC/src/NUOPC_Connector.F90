@@ -62,6 +62,7 @@ module NUOPC_Connector
     integer                             :: dstFieldCount
     type(ESMF_RouteHandle)              :: rh
     type(ESMF_State)                    :: state
+    type(ESMF_Region_Flag), pointer     :: zeroRegions(:)
     type(ESMF_TermOrder_Flag), pointer  :: termOrders(:)
   end type
 
@@ -72,8 +73,10 @@ module NUOPC_Connector
     type(ESMF_Field), pointer           :: dstFieldList(:)
     integer                             :: srcFieldCount
     integer                             :: dstFieldCount    
+    logical                             :: srcDstOverlap
     type(ESMF_RouteHandle)              :: rh
     type(ESMF_State)                    :: state
+    type(ESMF_Region_Flag), pointer     :: zeroRegions(:)
     type(ESMF_TermOrder_Flag), pointer  :: termOrders(:)
     type(type_UpdatePacket), pointer    :: updatePackets
     integer                             :: cplSetCount
@@ -1685,6 +1688,7 @@ module NUOPC_Connector
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! clean starting condition for pointer member inside internal state
+    nullify(is%wrap%zeroRegions)
     nullify(is%wrap%termOrders)
 
     ! re-reconcile the States because they may have changed
@@ -1768,7 +1772,8 @@ module NUOPC_Connector
 
     ! clean starting condition for pointer member inside internal state   
     do i=1, is%wrap%cplSetCount
-      nullify(is%wrap%cplSet(i)%termOrders) 
+      nullify(is%wrap%cplSet(i)%zeroRegions)
+      nullify(is%wrap%cplSet(i)%termOrders)
     enddo
     
     ! prepare chopStringList
@@ -4874,14 +4879,18 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
             is%wrap%cplSet(i)%dstFields, &
             cplList=cplSetListTemp(i)%cplList(1:cplSetListTemp(i)%j-1), &
             rh=is%wrap%cplSet(i)%rh, &
-            termOrders=is%wrap%cplSet(i)%termOrders, name=name, rc=rc)
+            zeroRegions=is%wrap%cplSet(i)%zeroRegions, &
+            termOrders=is%wrap%cplSet(i)%termOrders, &
+            name=name, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         enddo
       else
         call FieldBundleCplStore(is%wrap%srcFields, is%wrap%dstFields, &
           cplList=cplListTemp(1:j-1), rh=is%wrap%rh, &
-          termOrders=is%wrap%termOrders, name=name, rc=rc)
+          zeroRegions=is%wrap%zeroRegions, &
+          termOrders=is%wrap%termOrders, &
+          name=name, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       endif
@@ -4902,6 +4911,12 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
       endif    
     endif
     
+    ! determine whether there is src/dst overlap on any PET
+    call DetermineSrcDstOverlap(is%wrap%srcFieldList, is%wrap%dstFieldList, &
+      is%wrap%srcDstOverlap, verbosity, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
     ! build Timestamp update packets
     !TODO: consider whether CplSet needs extra treatment here or not
     call BuildUpdatePackets(is%wrap%srcFieldList, is%wrap%dstFieldList, &
@@ -4985,6 +5000,93 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     
   !-----------------------------------------------------------------------------
 
+  subroutine DetermineSrcDstOverlap(srcFieldList, dstFieldList, srcDstOverlap, &
+    verbosity, rc)
+    type(ESMF_Field), pointer           :: srcFieldList(:)
+    type(ESMF_Field), pointer           :: dstFieldList(:)
+    logical,                intent(out) :: srcDstOverlap
+    integer,                intent(in)  :: verbosity
+    integer,                intent(out) :: rc
+    ! local variables
+    integer                           :: i, localPet
+    logical                           :: srcFlag, dstFlag
+    type(ESMF_VM)                     :: vm
+    character(ESMF_MAXSTR)            :: fieldName
+    character(len=240)                :: msgString
+    integer                           :: helperIn, helperOut
+
+    rc = ESMF_SUCCESS
+
+    srcFlag = .false.
+    dstFlag = .false.
+    do i=1, size(srcFieldList)
+      ! check srcField
+      call ESMF_FieldGet(srcFieldList(i), vm=vm, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      call ESMF_VMGet(vm, localPet=localPet, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      if (btest(verbosity,12)) then
+        call ESMF_FieldGet(srcFieldList(i), name=fieldName, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        write(msgString,*) "DetermineSrcDstOverlap: "//trim(fieldName)//&
+          ", srcLocalPet=", localPet
+        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      endif
+      if (localPet>-1) srcFlag = .true. ! localPet is a src
+      ! check dstField
+      call ESMF_FieldGet(dstFieldList(i), vm=vm, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      call ESMF_VMGet(vm, localPet=localPet, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      if (btest(verbosity,12)) then
+        call ESMF_FieldGet(dstFieldList(i), name=fieldName, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        write(msgString,*) "DetermineSrcDstOverlap: "//trim(fieldName)//&
+          ", dstLocalPet=", localPet
+        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      endif
+      if (localPet>-1) dstFlag = .true. ! localPet is a dst
+    enddo
+
+    helperIn = 0
+    if (srcFlag.and.dstFlag) helperIn=1
+    ! implement a logical OR operation based on REDUCE_SUM
+    call ESMF_VMGetCurrent(vm=vm, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    call ESMF_VMAllFullReduce(vm, sendData=(/helperIn/), &
+      recvData=helperOut, count=1, reduceflag=ESMF_REDUCE_SUM, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    
+    ! ready to determine srcDstOverlap globally
+    srcDstOverlap = .false. ! assume there is no overloap on any PET
+    if (helperOut > 0) then
+      ! there was overlap on at least one PET
+      srcDstOverlap = .true.
+    endif
+
+    if (btest(verbosity,12)) then
+      write(msgString,*) "DetermineSrcDstOverlap: srcDstOverlap=", srcDstOverlap
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    endif
+
+  end subroutine
+
+  !-----------------------------------------------------------------------------
+
   subroutine BuildUpdatePackets(srcFieldList, dstFieldList, updatePackets, &
     verbosity, rc)
     type(ESMF_Field), pointer           :: srcFieldList(:)
@@ -4999,7 +5101,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     integer, allocatable              :: auxList(:)
     integer                           :: srcPetCount, dstPetCount
     type(ESMF_VM)                     :: vm, srcVM, dstVM
-    character(ESMF_MAXSTR)            :: fieldName
+    character(ESMF_MAXSTR)            :: fieldName, lString
     character(len=240)                :: msgString
     logical                           :: createNewPacket
     logical                           :: mismatch
@@ -5148,8 +5250,13 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
         if (k>0) upE%sendToPets(1:k) = auxList(1:k)  ! transfer the elements
         if (btest(verbosity,12)) then
-          write(msgString,*) "upE%sendToPets=", upE%sendToPets
+          write (lString, *) size(upE%sendToPets)
+          write(msgString,*) "upE%sendToPets list of size "//&
+            trim(adjustl(lString))//" :"
           call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+          call NUOPC_LogPetList(upE%sendToPets, name="", rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
         endif   
@@ -5619,8 +5726,14 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     endif
 
     if (.not.existflag) then
-      ! if not specialized -> use default method to:
-      ! execute the regrid operation
+      ! if not specialized -> use default method to execute the exchange
+      ! Conditionally enter VMEpoch
+      if (.not. is%wrap%srcDstOverlap) then
+        call ESMF_VMEpochEnter(epoch=ESMF_VMEPOCH_BUFFER, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      endif
+      ! call the SMM consistent with CplSets present or not
       if (is%wrap%cplSetCount > 1) then
         do i=1, is%wrap%cplSetCount
           routeHandleIsCreated = ESMF_RouteHandleIsCreated( &
@@ -5631,7 +5744,9 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
             call ESMF_FieldBundleSMM(is%wrap%cplSet(i)%srcFields, &
               is%wrap%cplSet(i)%dstFields, &
               routehandle=is%wrap%cplSet(i)%rh, &
-              termorderflag=is%wrap%cplSet(i)%termOrders, rc=rc)
+              zeroregionflag=is%wrap%cplSet(i)%zeroRegions, &
+              termorderflag=is%wrap%cplSet(i)%termOrders, &
+              rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           endif
@@ -5642,10 +5757,22 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         if (routeHandleIsCreated) then
           call ESMF_FieldBundleSMM(is%wrap%srcFields, is%wrap%dstFields, &
-            routehandle=is%wrap%rh, termorderflag=is%wrap%termOrders, rc=rc)
+            routehandle=is%wrap%rh, zeroregionflag=is%wrap%zeroRegions, &
+            termorderflag=is%wrap%termOrders, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         endif
+      endif
+      ! Next update the TimeStamp metadata on the export Fields....
+      call ExecuteUpdatePackets(is%wrap%srcFieldList, is%wrap%dstFieldList, &
+        is%wrap%updatePackets, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      ! Conditionally exit VMEpoch
+      if (.not. is%wrap%srcDstOverlap) then
+        call ESMF_VMEpochExit(rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       endif
       if (btest(verbosity,14)) then
         call ESMF_LogWrite(trim(name)//&
@@ -5655,6 +5782,11 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       endif
     else
+      ! Next update the TimeStamp metadata on the export Fields....
+      call ExecuteUpdatePackets(is%wrap%srcFieldList, is%wrap%dstFieldList, &
+        is%wrap%updatePackets, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       if (btest(verbosity,14)) then
         call ESMF_LogWrite(trim(name)//&
           ": called specialized label_ExecuteRouteHandle", &
@@ -5672,12 +5804,6 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
         time0=time
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
     endif
-
-    ! Next update the TimeStamp metadata on the export Fields....
-    call ExecuteUpdatePackets(is%wrap%srcFieldList, is%wrap%dstFieldList, &
-      is%wrap%updatePackets, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle diagnostic
     if (btest(diagnostic,6)) then
@@ -5874,6 +6000,13 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
         noGarbage=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      if (associated(is%wrap%cplSet(i)%zeroRegions)) then
+        deallocate(is%wrap%cplSet(i)%zeroRegions, stat=stat)
+        if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
+          msg="Deallocation of zeroRegions list.", &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      endif
       if (associated(is%wrap%cplSet(i)%termOrders)) then
         deallocate(is%wrap%cplSet(i)%termOrders, stat=stat)
         if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
@@ -5913,6 +6046,13 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     call ESMF_StateDestroy(is%wrap%state, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    if (associated(is%wrap%zeroRegions)) then
+      deallocate(is%wrap%zeroRegions, stat=stat)
+      if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
+        msg="Deallocation of zeroRegions list.", &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (associated(is%wrap%termOrders)) then
       deallocate(is%wrap%termOrders, stat=stat)
       if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
@@ -6192,8 +6332,8 @@ print *, "found match:"// &
     
   !-----------------------------------------------------------------------------
 
-  subroutine FieldBundleCplStore(srcFB, dstFB, cplList, rh, termOrders, name, &
-    rc)
+  subroutine FieldBundleCplStore(srcFB, dstFB, cplList, rh, zeroRegions, &
+    termOrders, name, rc)
     ! This method will destroy srcFB/dstFB, and replace with newly created FBs.
     ! Order of fields in outgoing srcFB/dstFB may be different from incoming.
     ! Order of elements in termOrders matches those in outgoing srcFB/dstFB.
@@ -6201,6 +6341,7 @@ print *, "found match:"// &
     type(ESMF_FieldBundle),    intent(inout)         :: dstFB
     character(*)                                     :: cplList(:)
     type(ESMF_RouteHandle),    intent(inout)         :: rh
+    type(ESMF_Region_Flag),    pointer               :: zeroRegions(:)
     type(ESMF_TermOrder_Flag), pointer               :: termOrders(:)
     character(*),              intent(in)            :: name
     integer,                   intent(out), optional :: rc
@@ -6219,10 +6360,18 @@ print *, "found match:"// &
     character(ESMF_MAXSTR), pointer :: chopSubString(:), chopSubSubString(:)
     character(len=160)              :: msgString
     character(len=480)              :: tempString
+    type(ESMF_Region_Flag)          :: zeroRegion
+    type(ESMF_Region_Flag), pointer :: zeroRegionsRedist(:)
     type(ESMF_TermOrder_Flag)       :: termOrder
     type(ESMF_TermOrder_Flag), pointer :: termOrdersRedist(:)
     logical                         :: redistflag
     type(ESMF_RegridMethod_Flag)    :: regridmethod
+    type(ESMF_ExtrapMethod_Flag)    :: extrapMethod
+    integer                         :: extrapNumSrcPnts
+    real                            :: extrapDistExponent
+    integer                         :: extrapNumLevels
+    logical                         :: extrapNumLevelsINC
+    logical                         :: ignoreDegenerate
     type(ESMF_PoleMethod_Flag)      :: polemethod
     integer                         :: regridPoleNPnts
     type(ESMF_UnmappedAction_Flag)  :: unmappedaction
@@ -6257,6 +6406,11 @@ print *, "found match:"// &
       ! remap specific items
       logical                           :: redistflag 
       type(ESMF_RegridMethod_Flag)      :: regridmethod
+      type(ESMF_ExtrapMethod_Flag)      :: extrapMethod
+      integer                           :: extrapNumSrcPnts
+      real                              :: extrapDistExponent
+      integer                           :: extrapNumLevels
+      logical                           :: ignoreDegenerate
       type(ESMF_RouteHandle)            :: rh
       integer(ESMF_KIND_I4), pointer    :: factorIndexList(:,:)
       real(ESMF_KIND_R8), pointer       :: factorList(:)
@@ -6298,7 +6452,27 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
 
     ! if no fields in bundles, bail out
     if (count < 1) return
-    
+
+    ! consistency check the incoming "zeroRegions" argument
+    if (associated(zeroRegions)) then
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="The 'zeroRegions' argument must enter unassociated!", &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+      return  ! bail out
+    endif 
+    ! prepare "zeroRegions" list
+    allocate(zeroRegions(count), stat=stat)
+    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+      msg="Allocation of zeroRegions.", &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    ! prepare "zeroRegionsRedist" list
+    allocate(zeroRegionsRedist(count), stat=stat)
+    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+      msg="Allocation of zeroRegionsRedist.", &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
     ! consistency check the incoming "termOrders" argument
     if (associated(termOrders)) then
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
@@ -6396,6 +6570,34 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
 
+      ! determine "zeroRegion" which will be used by Run() method
+      zeroRegion = ESMF_REGION_TOTAL ! default
+      do j=2, size(chopStringList)
+        if (index(chopStringList(j),"zeroregion=")==1) then
+          call NUOPC_ChopString(chopStringList(j), chopChar="=", &
+            chopStringList=chopSubString, rc=localrc)
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+          if (size(chopSubString)>=2) then
+            if (trim(chopSubString(2))=="total") then
+              zeroRegion = ESMF_REGION_TOTAL
+            else if (trim(chopSubString(2))=="select") then
+              zeroRegion = ESMF_REGION_SELECT
+            else if (trim(chopSubString(2))=="empty") then
+              zeroRegion = ESMF_REGION_EMPTY
+            else
+              write (msgString,*) "Specified option '", &
+                trim(chopStringList(j)), &
+                "' is not a valid choice. Defaulting to TOTAL for: '", &
+                trim(chopStringList(1)), "'"
+              call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_WARNING)
+            endif
+          endif
+          deallocate(chopSubString) ! local garbage collection
+          exit ! skip the rest of the loop after first hit
+        endif
+      enddo
+
       ! determine "termOrder" which will be used by Run() method
       termOrder = ESMF_TERMORDER_FREE ! default
       do j=2, size(chopStringList)
@@ -6414,7 +6616,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
             else
               write (msgString,*) "Specified option '", &
                 trim(chopStringList(j)), &
-                "' is not a vailid choice. Defaulting to FREE for: '", &
+                "' is not a valid choice. Defaulting to FREE for: '", &
                 trim(chopStringList(1)), "'"
               call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_WARNING)
             endif
@@ -6503,7 +6705,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
             else
               write (msgString,*) "Specified option '", &
                 trim(chopStringList(j)), &
-                "' is not a vailid choice. Defaulting to BILINEAR for: '", &
+                "' is not a valid choice. Defaulting to BILINEAR for: '", &
                 trim(chopStringList(1)), "'"
               call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_WARNING)
             endif
@@ -6524,13 +6726,140 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
         if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
         iRedist = iRedist+1
+        zeroRegionsRedist(iRedist) = zeroRegion ! record in list to merge below
         termOrdersRedist(iRedist) = termOrder ! record in list to merge below
         cycle ! advance to the next field pair, handle Redist further down
       endif
 
-      ! only Regid field pairs will proceed here...
+      ! only Regrid field pairs will proceed here...
       iRegrid = iRegrid+1
+      zeroRegions(iRegrid) = zeroRegion ! record in the list used by Run
       termOrders(iRegrid) = termOrder ! record in the list used by Run
+
+      ! determine "extrapmethod" and extrapolation settings
+      extrapMethod = ESMF_EXTRAPMETHOD_NONE ! default
+      extrapNumSrcPnts = 0 ! default
+      extrapDistExponent = 0.0 ! default
+      extrapNumLevels = 0 ! default
+      do j=2, size(chopStringList)
+        if (index(chopStringList(j),"extrapmethod=")==1) then
+          call NUOPC_ChopString(chopStringList(j), chopChar="=", &
+            chopStringList=chopSubString, rc=localrc)
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+          if (size(chopSubString)>=2) then
+            if (trim(chopSubString(2))=="none") then
+              extrapMethod = ESMF_EXTRAPMETHOD_NONE
+            else if (trim(chopSubString(2))=="nearest_idavg") then
+              extrapMethod = ESMF_EXTRAPMETHOD_NEAREST_IDAVG
+            else if (trim(chopSubString(2))=="nearest_stod") then
+              extrapMethod = ESMF_EXTRAPMETHOD_NEAREST_STOD
+            else if (trim(chopSubString(2))=="creep") then
+              extrapMethod = ESMF_EXTRAPMETHOD_CREEP
+            else
+              write (msgString,*) "Specified option '", &
+                trim(chopStringList(j)), &
+                "' is not a valid choice. Defaulting to NONE for: '", &
+                trim(chopStringList(1)), "'"
+              call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_WARNING)
+            endif
+          endif
+          deallocate(chopSubString) ! local garbage collection
+          exit ! skip the rest of the loop after first hit
+        endif
+      enddo
+      if (extrapMethod.ne.ESMF_EXTRAPMETHOD_NONE) then
+        extrapNumSrcPnts = 8 ! default
+        extrapDistExponent = 2.0 ! default
+        extrapNumLevels = 1 ! default
+        extrapNumLevelsINC = .true. ! user value not found
+        do j=2, size(chopStringList)
+          if (index(chopStringList(j),"extrapnumsrcpnts=")==1) then
+            call NUOPC_ChopString(chopStringList(j), chopChar="=", &
+              chopStringList=chopSubString, rc=localrc)
+            if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+            if (size(chopSubString)>=2) then
+              extrapNumSrcPnts = ESMF_UtilString2Int(trim(chopSubString(2)), rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+            endif
+            deallocate(chopSubString) ! local garbage collection
+            exit ! skip the rest of the loop after first hit
+          endif
+        enddo
+        do j=2, size(chopStringList)
+          if (index(chopStringList(j),"extrapdistexponent=")==1) then
+            call NUOPC_ChopString(chopStringList(j), chopChar="=", &
+              chopStringList=chopSubString, rc=localrc)
+            if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+            if (size(chopSubString)>=2) then
+              extrapDistExponent = ESMF_UtilString2Real(trim(chopSubString(2)), rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+            endif
+            deallocate(chopSubString) ! local garbage collection
+            exit ! skip the rest of the loop after first hit
+          endif
+        enddo
+        do j=2, size(chopStringList)
+          if (index(chopStringList(j),"extrapnumlevels=")==1) then
+            call NUOPC_ChopString(chopStringList(j), chopChar="=", &
+              chopStringList=chopSubString, rc=localrc)
+            if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+            if (size(chopSubString)>=2) then
+              extrapNumLevels = ESMF_UtilString2Int(trim(chopSubString(2)), rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+            endif
+            deallocate(chopSubString) ! local garbage collection
+            extrapNumLevelsINC = .false.
+            exit ! skip the rest of the loop after first hit
+          endif
+        enddo
+        if ((extrapMethod.eq.ESMF_EXTRAPMETHOD_CREEP) .and. extrapNumLevelsINC) then
+          call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+            msg="User must set extrapNumLevels when extrapMethod=ESMF_EXTRAPMETHOD_CREEP!", &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+          return  ! bail out
+        endif
+      endif
+
+      ! determine "ignoreDegenerate"
+      ignoreDegenerate = .false. ! default
+      do j=2, size(chopStringList)
+        if (index(chopStringList(j),"ignoredegenerate=")==1) then
+          call NUOPC_ChopString(chopStringList(j), chopChar="=", &
+            chopStringList=chopSubString, rc=localrc)
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+          if (size(chopSubString)>=2) then
+            if (trim(chopSubString(2))=="on") then
+              ignoreDegenerate = .true.
+            else if (trim(chopSubString(2))=="off") then
+              ignoreDegenerate = .false.
+            else if (trim(chopSubString(2))=="yes") then
+              ignoreDegenerate = .true.
+            else if (trim(chopSubString(2))=="no") then
+              ignoreDegenerate = .false.
+            else if (trim(chopSubString(2))=="true") then
+              ignoreDegenerate = .true.
+            else if (trim(chopSubString(2))=="false") then
+              ignoreDegenerate = .false.
+            else
+              write (msgString,*) "Specified option '", &
+                trim(chopStringList(j)), &
+                "' is not a valid choice. Defaulting to FALSE for: '", &
+                trim(chopStringList(1)), "'"
+              call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_WARNING)
+            endif
+          endif
+          deallocate(chopSubString) ! local garbage collection
+          exit ! skip the rest of the loop after first hit
+        endif
+      enddo
 
       ! add Regrid field pair to the beginning of replacement srcFB and dstFB
       call ESMF_FieldBundleAdd(srcFB, (/srcFields(i)/), multiflag=.true., rc=localrc)
@@ -6564,7 +6893,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
             else
               write (msgString,*) "Specified option '", &
                 trim(chopStringList(j)), &
-                "' is not a vailid choice. Defaulting to NONE for: '", &
+                "' is not a valid choice. Defaulting to NONE for: '", &
                 trim(chopStringList(1)), "'"
               call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_WARNING)
             endif
@@ -6590,7 +6919,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
             else
               write (msgString,*) "Specified option '", &
                 trim(chopStringList(j)), &
-                "' is not a vailid choice. Defaulting to IGNORE for: '", &
+                "' is not a valid choice. Defaulting to IGNORE for: '", &
                 trim(chopStringList(1)), "'"
               call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_WARNING)
             endif
@@ -6656,7 +6985,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
             else
               write (msgString,*) "Specified option '", &
                 trim(chopStringList(j)), &
-                "' is not a vailid choice. Defaulting to OFF for: '", &
+                "' is not a valid choice. Defaulting to OFF for: '", &
                 trim(chopStringList(1)), "'"
               call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_WARNING)
             endif
@@ -6807,6 +7136,21 @@ call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO)
           ! test regridmethod
           rhListMatch = (rhListE%regridmethod==regridmethod)
           if (.not.rhListMatch) goto 123
+          ! test extrapMethod
+          rhListMatch = (rhListE%extrapMethod==extrapMethod)
+          if (.not.rhListMatch) goto 123
+          ! test extrapNumSrcPnts
+          rhListMatch = (rhListE%extrapNumSrcPnts==extrapNumSrcPnts)
+          if (.not.rhListMatch) goto 123
+          ! test extrapDistExponent
+          rhListMatch = (rhListE%extrapDistExponent==extrapDistExponent)
+          if (.not.rhListMatch) goto 123
+          ! test extrapNumLevels
+          rhListMatch = (rhListE%extrapNumLevels==extrapNumLevels)
+          if (.not.rhListMatch) goto 123
+          ! test ignoreDegenerate
+          rhListMatch = (rhListE%ignoreDegenerate.eqv.ignoreDegenerate)
+          if (.not.rhListMatch) goto 123
           ! test srcMaskValues
           rhListMatch = &
             (size(rhListE%srcMaskValues)==size(srcMaskValues))
@@ -6874,7 +7218,10 @@ call ESMF_LogWrite(trim(name)//&
             srcMaskValues=srcMaskValues, dstMaskValues=dstMaskValues, &
             regridmethod=regridmethod, &
             polemethod=polemethod, regridPoleNPnts=regridPoleNPnts, &
-            unmappedaction=unmappedaction, &
+            extrapMethod=extrapMethod, extrapNumSrcPnts=extrapNumSrcPnts, &
+            extrapDistExponent=extrapDistExponent, &
+            extrapNumLevels=extrapNumLevels, &
+            unmappedaction=unmappedaction, ignoreDegenerate=ignoreDegenerate, &
             srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, &
             routehandle=rhh, &
             factorIndexList=factorIndexList, factorList=factorList, &
@@ -6898,6 +7245,11 @@ call ESMF_LogWrite(trim(name)//&
           rhListE%dstUngriddedUBound=>dstUngriddedUBound
           rhListE%redistflag=redistflag
           rhListE%regridmethod=regridmethod
+          rhListE%extrapMethod=extrapMethod
+          rhListE%extrapNumSrcPnts=extrapNumSrcPnts
+          rhListE%extrapDistExponent=extrapDistExponent
+          rhListE%extrapNumLevels=extrapNumLevels
+          rhListE%ignoreDegenerate=ignoreDegenerate
           rhListE%rh=rhh
           rhListE%factorIndexList=>factorIndexList
           rhListE%factorList=>factorList
@@ -7041,8 +7393,9 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
 
-      ! append termOrdersRedist at the end of termOrders list
+      ! append zeroRegionRedist and termOrdersRedist
       do i=1, count
+        zeroRegions(iRegrid+i) = zeroRegionsRedist(i)
         termOrders(iRegrid+i) = termOrdersRedist(i)
       enddo
 
@@ -7051,6 +7404,7 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
     endif
 
     ! garbage collection
+    deallocate(zeroRegionsRedist)
     deallocate(termOrdersRedist)
     call ESMF_FieldBundleDestroy(srcFBRedist, noGarbage=.true., rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
