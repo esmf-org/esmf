@@ -409,6 +409,69 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
+  void FTN_X(c_esmc_vmepochenter)(ESMCI::VM **vm, vmEpoch *epoch, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmepochenter()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // start assuming local success
+    int localrc = ESMF_SUCCESS;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
+    try{
+      (*vm)->epochEnter(*epoch);
+    }catch(int localrc){
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc))
+        return; // bail out
+    }catch(std::exception &x){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, x.what(), ESMC_CONTEXT,
+        rc);
+      return; // bail out
+    }catch(...){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception", 
+        ESMC_CONTEXT, rc);
+      return;
+    }
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_vmepochexit)(ESMCI::VM **vm, ESMC_Logical *keepAlloc, 
+    int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmepochexit()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // start assuming local success
+    int localrc = ESMF_SUCCESS;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
+    // convert to bool
+    bool keepAllocOpt = true; // default
+    if (ESMC_NOT_PRESENT_FILTER(keepAlloc) != ESMC_NULL_POINTER)
+      if (*keepAlloc == ESMF_FALSE) keepAllocOpt = false;
+    try{
+      (*vm)->epochExit(keepAllocOpt);
+    }catch(int localrc){
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc))
+        return; // bail out
+    }catch(std::exception &x){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, x.what(), ESMC_CONTEXT,
+        rc);
+      return; // bail out
+    }catch(...){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception", 
+        ESMC_CONTEXT, rc);
+      return;
+    }
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
   void FTN_X(c_esmc_vmgather)(ESMCI::VM **vm, void *input, void *output,
     int *size, int *root, int *rc){
 #undef  ESMC_METHOD
@@ -503,9 +566,9 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
-  void FTN_X(c_esmc_vmget)(ESMCI::VM **vm, int *localPet, int *petCount, 
-    int *peCount, int *ssiCount, int *ssiMinPetCount, int *ssiMaxPetCount,
-    int *ssiLocalPetCount, int *mpiCommunicator,
+  void FTN_X(c_esmc_vmget)(ESMCI::VM **vm, int *localPet, int *localPe, 
+    int *petCount, int *peCount, int *ssiCount, int *ssiMinPetCount,
+    int *ssiMaxPetCount, int *ssiLocalPetCount, int *mpiCommunicator,
     ESMC_Logical *pthreadsEnabledFlag, ESMC_Logical *openMPEnabledFlag,
     ESMC_Logical *ssiSharedMemoryEnabledFlag, int *rc){
 #undef  ESMC_METHOD
@@ -519,6 +582,8 @@ extern "C" {
     // fill return values
     if (ESMC_NOT_PRESENT_FILTER(localPet) != ESMC_NULL_POINTER)
       *localPet = (*vm)->getLocalPet();
+    if (ESMC_NOT_PRESENT_FILTER(localPe) != ESMC_NULL_POINTER)
+      *localPe = (*vm)->getLocalPe();
     if (ESMC_NOT_PRESENT_FILTER(petCount) != ESMC_NULL_POINTER)
       *petCount = (*vm)->getPetCount();
     if (ESMC_NOT_PRESENT_FILTER(peCount) != ESMC_NULL_POINTER){

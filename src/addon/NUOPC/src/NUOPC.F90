@@ -90,6 +90,7 @@ module NUOPC
   public NUOPC_IsUpdated                  ! method
   public NUOPC_LogIntro                   ! method, internal use only
   public NUOPC_LogExtro                   ! method, internal use only
+  public NUOPC_LogPetList                 ! method, internal use only
   public NUOPC_NoOp                       ! method
   public NUOPC_Realize                    ! method
   public NUOPC_Reconcile                  ! method, internal use only 

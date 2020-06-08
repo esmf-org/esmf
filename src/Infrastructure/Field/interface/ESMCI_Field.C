@@ -168,10 +168,17 @@ void FTN_X(f_esmf_regridstorefile)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldp
   ESMC_UnmappedAction_Flag *unmappedaction,
   ESMC_Logical *ignoreDegenerate,
   ESMC_Logical *create_rh,
+  ESMC_FileMode_Flag *filemode,
+  const char *srcFile,
+  const char *dstFile,
+  ESMC_FileFormat_Flag *srcFileType,
+  ESMC_FileFormat_Flag *dstFileType,
   ESMCI::Field *srcfracfieldp,
   ESMCI::Field *dstfracfieldp,
   int *rc,
-  ESMCI_FortranStrLenArg flen
+  ESMCI_FortranStrLenArg flen,
+  ESMCI_FortranStrLenArg sflen,
+  ESMCI_FortranStrLenArg dflen
 );
 
 void FTN_X(f_esmf_regrid)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
@@ -1496,8 +1503,14 @@ namespace ESMCI {
     ESMC_UnmappedAction_Flag *unmappedAction,
     ESMC_Logical *ignoreDegenerate,
     ESMC_Logical *create_rh,
+    ESMC_FileMode_Flag *filemode,
+    const char *srcFile,
+    const char *dstFile,
+    ESMC_FileFormat_Flag *srcFileType,
+    ESMC_FileFormat_Flag *dstFileType,
     Field *srcFracField,
-    Field *dstFracField) {
+    Field *dstFracField
+) {
 //
 // !DESCRIPTION:
 //
@@ -1555,6 +1568,8 @@ namespace ESMCI {
     }
 
     std::string filename_local = filename;
+    std::string srcFilename = ""; if (srcFile) srcFilename = srcFile;
+    std::string dstFilename = ""; if (dstFile) dstFilename = dstFile;
     FTN_X(f_esmf_regridstorefile)(fieldpsrc, fieldpdst, filename,
                               srcMaskArray, &srcMaskLen,
                               dstMaskArray, &dstMaskLen,
@@ -1567,10 +1582,17 @@ namespace ESMCI {
                               unmappedAction,
                               ignoreDegenerate,
                               create_rh,
+                              filemode,
+                              srcFile,
+                              dstFile,
+                              srcFileType,
+                              dstFileType,
                               srcFracField,
                               dstFracField,
                               &localrc,
-                              filename_local.size());
+                              filename_local.size(),
+                              srcFilename.size(),
+                              dstFilename.size());
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) {
       if (sff_created) delete sff;

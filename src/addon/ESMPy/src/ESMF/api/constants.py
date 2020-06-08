@@ -46,8 +46,8 @@ _ESMF_COMM_MPIUNI = -1
 _ESMF_VERSION = None
 
 # ESMF_MPIRUN
-_ESMF_MPIRUN = "mpirun"
-_ESMF_MPIRUN_NP = 4
+_ESMF_MPIRUN = None
+_ESMF_MPIRUN_NP = None
 
 #### NAMED CONSTANTS ##########################################################
 
@@ -171,6 +171,20 @@ class FileFormat(IntEnum):
     GRIDSPEC = 6
     """
     Use the :ref:`UGRID single tile grid file format based on CF V1.6 conventions (a.k.a GRIDSPEC) <gridspec>`.
+    """
+
+# FileMode
+class FileMode(IntEnum):
+    """
+    Specify which mode to use when writing a weight file.
+    """
+    BASIC = 0
+    """
+    Indicates that only the factorList and factorIndexList should be written.
+    """
+    WITHAUX = 1
+    """
+    Indicates that grid center coordinates should also be written.
     """
 
 # GridItem

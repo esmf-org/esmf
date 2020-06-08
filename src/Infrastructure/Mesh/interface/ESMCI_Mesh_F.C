@@ -286,6 +286,72 @@ extern "C" void FTN_X(c_esmc_meshget)(MeshCap **meshpp, int *num_nodes, int *num
 }
 
 
+extern "C" void FTN_X(c_esmc_meshgetnodecount)(MeshCap **meshpp, int *nodeCount, int *rc){
+
+  (*meshpp)->getNodeCount(nodeCount, rc);
+}
+
+
+extern "C" void FTN_X(c_esmc_meshgetelemcount)(MeshCap **meshpp, int *elemCount, int *rc){
+
+  (*meshpp)->getElemCount(elemCount, rc);
+}
+
+extern "C" void FTN_X(c_esmc_meshgetelemconncount)(MeshCap **meshpp, int *elemConnCount, int *rc){
+
+  (*meshpp)->getElemConnCount(elemConnCount, rc);
+}
+
+extern "C" void FTN_X(c_esmc_meshgeteleminfopresence)(MeshCap **meshpp, 
+                                                      int *elemMaskIsPresent,
+                                                      int *elemAreaIsPresent,
+                                                      int *elemCoordsIsPresent,
+                                                      int *rc){
+
+  (*meshpp)->getElemInfoPresence(elemMaskIsPresent, elemAreaIsPresent, elemCoordsIsPresent, rc);
+}
+
+extern "C" void FTN_X(c_esmc_meshgetelemcreateinfo)(MeshCap **meshpp, 
+                                                    ESMCI::InterArray<int> *elemIds,
+                                                    ESMCI::InterArray<int> *elemTypes,
+                                                    ESMCI::InterArray<int> *elemConn,
+                                                    ESMCI::InterArray<int> *elemMask,
+                                                    ESMCI::InterArray<ESMC_R8> *elemArea,
+                                                    ESMCI::InterArray<ESMC_R8> *elemCoords,
+                                                    int *rc){
+
+  (*meshpp)->getElemCreateInfo(elemIds, elemTypes, elemConn, elemMask, elemArea, elemCoords, rc);
+}
+
+extern "C" void FTN_X(c_esmc_meshseteleminfo)(MeshCap **meshpp, 
+                                                    ESMCI::InterArray<int> *elemMask,
+                                                    ESMCI::InterArray<ESMC_R8> *elemArea,
+                                                    int *rc){
+
+  (*meshpp)->setElemInfo(elemMask, elemArea, rc);
+}
+
+
+
+extern "C" void FTN_X(c_esmc_meshgetnodeinfopresence)(MeshCap **meshpp, 
+                                                      int *nodeMaskIsPresent,
+                                                      int *rc){
+
+  (*meshpp)->getNodeInfoPresence(nodeMaskIsPresent, rc);
+}
+
+
+extern "C" void FTN_X(c_esmc_meshgetnodecreateinfo)(MeshCap **meshpp, 
+                                                    ESMCI::InterArray<int> *nodeIds,
+                                                    ESMCI::InterArray<ESMC_R8> *nodeCoords,
+                                                    ESMCI::InterArray<int> *nodeOwners,
+                                                    ESMCI::InterArray<int> *nodeMask,
+                                                    int *rc){
+
+  (*meshpp)->getNodeCreateInfo(nodeIds, nodeCoords, nodeOwners, nodeMask, rc);
+}
+
+
 
 extern "C" void FTN_X(c_esmc_meshcreatenodedistgrid)(MeshCap **meshpp, int *ngrid, int *num_lnodes, int *rc) {
 
@@ -301,15 +367,17 @@ extern "C" void FTN_X(c_esmc_meshcreateelemdistgrid)(MeshCap **meshpp, int *egri
 
 
 extern "C" void FTN_X(c_esmc_meshinfoserialize)(int *intMeshFreed,
-                int *spatialDim, int *parametricDim,
-                int *intIsPresentNDG, int *intIsPresentEDG,
-                char *buffer, int *length, int *offset,
-                ESMC_InquireFlag *inquireflag, int *rc,
-                ESMCI_FortranStrLenArg buffer_l){
+                                                int *spatialDim, int *parametricDim,
+                                                int *intIsPresentNDG, int *intIsPresentEDG,
+                                                int *coordSys, 
+                                                char *buffer, int *length, int *offset,
+                                                ESMC_InquireFlag *inquireflag, int *rc,
+                                                ESMCI_FortranStrLenArg buffer_l){
 
   MeshCap::meshinfoserialize(intMeshFreed,
                              spatialDim, parametricDim,
                              intIsPresentNDG, intIsPresentEDG,
+                             coordSys, 
                              buffer, length, offset,
                              inquireflag, rc,
                              buffer_l);
@@ -318,17 +386,19 @@ extern "C" void FTN_X(c_esmc_meshinfoserialize)(int *intMeshFreed,
 
 
 extern "C" void FTN_X(c_esmc_meshinfodeserialize)(int *intMeshFreed,
-                             int *spatialDim, int *parametricDim,
-                             int *intIsPresentNDG, int *intIsPresentEDG,
-                             char *buffer, int *offset,
-                             int *rc,
-                             ESMCI_FortranStrLenArg buffer_l){
+                                                  int *spatialDim, int *parametricDim,
+                                                  int *intIsPresentNDG, int *intIsPresentEDG,
+                                                  int *coordSys, 
+                                                  char *buffer, int *offset,
+                                                  int *rc,
+                                                  ESMCI_FortranStrLenArg buffer_l){
 
   MeshCap::meshinfodeserialize(intMeshFreed,
-                             spatialDim, parametricDim,
-                             intIsPresentNDG, intIsPresentEDG,
-                             buffer, offset, rc,
-                             buffer_l);
+                               spatialDim, parametricDim,
+                               intIsPresentNDG, intIsPresentEDG,
+                               coordSys, 
+                               buffer, offset, rc,
+                               buffer_l);
 }
 
 

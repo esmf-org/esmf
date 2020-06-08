@@ -123,6 +123,22 @@ module ESMF_VMMod
   public ESMF_PREF_INTER_SSI_MPI1
 
 !------------------------------------------------------------------------------
+  ! ESMF_VMEpoch_Flag
+  type ESMF_VMEpoch_Flag
+  private
+#ifdef ESMF_NO_INITIALIZERS
+    integer :: value
+#else
+    integer :: value = 0
+#endif
+  end type
+
+  type(ESMF_VMEpoch_Flag), parameter:: &
+    ESMF_VMEPOCH_NONE      = ESMF_VMEpoch_Flag(0), &
+    ESMF_VMEPOCH_BUFFER    = ESMF_VMEpoch_Flag(1)
+    
+  public ESMF_VMEpoch_Flag, ESMF_VMEPOCH_NONE, ESMF_VMEPOCH_BUFFER
+!------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 ! !PRIVATE MODULE VARIABLES:
@@ -148,6 +164,8 @@ module ESMF_VMMod
   public ESMF_VMBroadcast
   public ESMF_VMCommWait
   public ESMF_VMCommWaitAll
+  public ESMF_VMEpochEnter
+  public ESMF_VMEpochExit
   public ESMF_VMGather
   public ESMF_VMGatherV
   public ESMF_VMGet
@@ -422,7 +440,7 @@ module ESMF_VMMod
 ! !PRIVATE MEMBER FUNCTIONS:
 !
       module procedure ESMF_VMGetDefault
-      module procedure ESMF_VMGetPetLocalInfo
+      module procedure ESMF_VMGetPetSpecific
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -3944,6 +3962,144 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
 ! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMEpochEnter()"
+!BOP
+! !IROUTINE: ESMF_VMEpochEnter - Enter an ESMF epoch
+
+! !INTERFACE:
+  subroutine ESMF_VMEpochEnter(keywordEnforcer, vm, epoch, rc)
+!
+! !ARGUMENTS:
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_VM),            intent(in),  optional :: vm
+    type(ESMF_VMEpoch_Flag),  intent(in),  optional :: epoch
+    integer,                  intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Enter a specific VM epoch. VM epochs change low level communication behavior
+!   which can have significant performance implications. It is an error to call
+!   {\tt ESMF\_VMEpochEnter()} again before exiting a previous epoch with 
+!   {\tt ESMF\_VMEpochExit()}.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[{[vm]}]
+!        {\tt ESMF\_VM} object. Defaults to the current VM.
+!   \item[{[epoch]}]
+!        The epoch to be entered. See section \ref{const:vmepoch_flag} for a
+!        complete list of options. Defaults to {\tt ESMF\_VMEPOCH\_NONE}.
+!   \item[{[rc]}]
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_VM)           :: vm_opt
+    type(ESMF_VMEpoch_Flag) :: epoch_opt
+    
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! deal with optional arguments
+    if (present(vm)) then
+      vm_opt = vm
+    else
+      call ESMF_VMGetCurrent(vm_opt, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    if (present(epoch)) then
+      epoch_opt = epoch
+    else
+      epoch_opt = ESMF_VMEPOCH_NONE
+    endif
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm_opt, rc)
+
+    ! Call into the C++ interface
+    call c_ESMC_VMEpochEnter(vm_opt, epoch_opt, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMEpochEnter
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMEpochExit()"
+!BOP
+! !IROUTINE: ESMF_VMEpochExit - Exit an ESMF epoch
+
+! !INTERFACE:
+  subroutine ESMF_VMEpochExit(keywordEnforcer, vm, keepAlloc, rc)
+!
+! !ARGUMENTS:
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_VM),            intent(in),  optional :: vm
+    logical,                  intent(in),  optional :: keepAlloc
+    integer,                  intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Exit the current VM epoch.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[{[vm]}]
+!        {\tt ESMF\_VM} object. Defaults to the current VM.
+!   \item[{[keepAlloc]}]
+!        For {\tt .true.}, keep internal allocations to be reused during the 
+!        epoch phase. For {\tt .false.}, deallocate all internal buffers.
+!        The flag only affects the local PET. Defaults to {\tt .true.}.
+!   \item[{[rc]}]
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_VM)           :: vm_opt         ! helper variable
+    type(ESMF_Logical)      :: keepAlloc_opt  ! helper variable
+    
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! deal with optional arguments
+    if (present(vm)) then
+      vm_opt = vm
+    else
+      call ESMF_VMGetCurrent(vm_opt, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    keepAlloc_opt = ESMF_TRUE ! default
+    if (present(keepAlloc)) keepAlloc_opt = keepAlloc
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm_opt, rc)
+
+    ! Call into the C++ interface
+    call c_ESMC_VMEpochExit(vm_opt, keepAlloc_opt, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMEpochExit
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
 !BOP
 ! !IROUTINE: ESMF_VMGather - Gather data from across VM
 !
@@ -4694,12 +4850,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMGetDefault()"
 !BOP
-! !IROUTINE: ESMF_VMGet - Get object-wide information from a VM
+! !IROUTINE: ESMF_VMGet - Get information from a VM
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMGet()
   recursive subroutine ESMF_VMGetDefault(vm, keywordEnforcer, localPet, &
-    petCount, peCount, ssiCount, ssiMinPetCount, ssiMaxPetCount, &
+    localPe, petCount, peCount, ssiCount, ssiMinPetCount, ssiMaxPetCount, &
     ssiLocalPetCount, mpiCommunicator, pthreadsEnabledFlag, openMPEnabledFlag, &
     ssiSharedMemoryEnabledFlag, rc)
 !
@@ -4707,6 +4863,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_VM),      intent(in)            :: vm
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out), optional :: localPet
+    integer,            intent(out), optional :: localPe
     integer,            intent(out), optional :: petCount
     integer,            intent(out), optional :: peCount
     integer,            intent(out), optional :: ssiCount
@@ -4732,6 +4889,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Added argument {\tt ssiSharedMemoryEnabledFlag} that allows the user to 
 !   query whether ESMF was compiled with support for shared memory 
 !   access between PETs on the same SSI.
+! \item[8.1.0] Added argument {\tt localPe} for easy access to the PE.
 ! \end{description}
 ! \end{itemize}
 !
@@ -4743,9 +4901,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[vm] 
 !        Queried {\tt ESMF\_VM} object.
 !   \item[{[localPet]}]
-!        Upon return this holds the local id of the PET that issued this call.
+!        Upon return this holds the id of the local PET that issued this call.
 !        The valid range of {\tt localPet} is $[0..petCount-1]$. A value of $-1$
 !        is returned on PETs that are not active under the specified {\tt vm}.
+!   \item[{[localPe]}]
+!        Upon return this holds the id of the PE on which the local PET is
+!        executing. The range of the returned value is platform specific and
+!        refers to the core or cpu id by which the PE is known to the operating
+!        system.
 !   \item[{[petCount]}]
 !        Upon return this holds the number of PETs running under {\tt vm}.
 !   \item[{[peCount]}]
@@ -4813,7 +4976,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (vm%this /= ESMF_NULL_POINTER) then
       ! Call into the C++ interface.
-      call c_ESMC_VMGet(vm, localPet, petCount, peCount, ssiCount, &
+      call c_ESMC_VMGet(vm, localPet, localPe, petCount, peCount, ssiCount, &
         ssiMinPetCount, ssiMaxPetCount, ssiLocalPetCount, mpiCommunicator, &
         pthreadsEnabledFlagArg, openMPEnabledFlagArg, &
         ssiSharedMemoryEnabledFlagArg, localrc)
@@ -4857,13 +5020,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_VMGetPetLocalInfo()"
+#define ESMF_METHOD "ESMF_VMGetPetSpecific()"
 !BOP
-! !IROUTINE: ESMF_VMGet - Get PET-local VM information
+! !IROUTINE: ESMF_VMGet - Get PET specific VM information
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMGet()
-  subroutine ESMF_VMGetPetLocalInfo(vm, pet, keywordEnforcer, peCount, &
+  subroutine ESMF_VMGetPetSpecific(vm, pet, keywordEnforcer, peCount, &
     accDeviceCount, ssiId, threadCount, threadId, vas, rc)
 !
 ! !ARGUMENTS:
@@ -4939,7 +5102,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_VMGetPetLocalInfo
+  end subroutine ESMF_VMGetPetSpecific
 !------------------------------------------------------------------------------
 
 

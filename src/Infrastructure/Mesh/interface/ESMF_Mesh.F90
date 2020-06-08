@@ -216,6 +216,7 @@ module ESMF_MeshMod
   public ESMF_MeshTurnOnNodeMask
   public ESMF_MeshTurnOffNodeMask
   public ESMF_MeshCreateDual  ! not a public interface for now
+  public ESMF_MeshSet
   public ESMF_MeshSetMOAB
   public ESMF_MeshSetIsCMeshFreed
   public ESMF_MeshGetIntPtr
@@ -2613,7 +2614,6 @@ end function ESMF_MeshCreateFromFile
     endif
 
 
- ! XMRKX
     ! The ElemId is the global ID.  The myStartElmt is the starting Element ID(-1), and the
     ! element IDs will be from startElmt to startElmt+ElemCnt-1
     ! The ElemConn() contains the four corner node IDs for each element and it is organized
@@ -4737,10 +4737,17 @@ end function ESMF_MeshEmptyCreate
 #undef ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshGet"
 !BOP
-! !IROUTINE: ESMF_MeshGet - Get object-wide Mesh information
+! !IROUTINE: ESMF_MeshGet - Get Mesh information
 !
 ! !INTERFACE:
       subroutine ESMF_MeshGet(mesh, parametricDim, spatialDim, &
+                   nodeCount, nodeIds, nodeCoords, nodeOwners, &
+                   nodeMaskIsPresent, nodeMask,&
+                   elementCount, elementIds, elementTypes, &
+                   elementConnCount, elementConn, &
+                   elementMaskIsPresent,elementMask, &
+                   elementAreaIsPresent, elementArea, &
+                   elementCoordsIsPresent, elementCoords, &
                    nodalDistgridIsPresent, nodalDistgrid, &
                    elementDistgridIsPresent, elementDistgrid, &
                    numOwnedNodes, ownedNodeCoords, &
@@ -4754,6 +4761,23 @@ end function ESMF_MeshEmptyCreate
     type(ESMF_Mesh),          intent(in)            :: mesh
     integer,                  intent(out), optional :: parametricDim
     integer,                  intent(out), optional :: spatialDim
+    integer,                  intent(out), optional :: nodeCount
+    integer,                  intent(out), optional :: nodeIds(:)
+    real(ESMF_KIND_R8),       intent(out), optional :: nodeCoords(:)
+    integer,                  intent(out), optional :: nodeOwners(:)
+    logical,                  intent(out), optional :: nodeMaskIsPresent
+    integer,                  intent(out), optional :: nodeMask(:)
+    integer,                  intent(out), optional :: elementCount
+    integer,                  intent(out), optional :: elementIds(:)
+    integer,                  intent(out), optional :: elementTypes(:)
+    integer,                  intent(out), optional :: elementConnCount
+    integer,                  intent(out), optional :: elementConn(:)
+    logical,                  intent(out), optional :: elementMaskIsPresent
+    integer,                  intent(out), optional :: elementMask(:)
+    logical,                  intent(out), optional :: elementAreaIsPresent
+    real(ESMF_KIND_R8),       intent(out), optional :: elementArea(:)
+    logical,                  intent(out), optional :: elementCoordsIsPresent
+    real(ESMF_KIND_R8),       intent(out), optional :: elementCoords(:)
     logical,                  intent(out), optional :: nodalDistgridIsPresent
     type(ESMF_DistGrid),      intent(out), optional :: nodalDistgrid
     logical,                  intent(out), optional :: elementDistgridIsPresent
@@ -4785,6 +4809,55 @@ end function ESMF_MeshEmptyCreate
 ! The number of coordinate dimensions needed to describe the locations of the nodes
 ! making up the Mesh. For a manifold, the spatial dimension can be larger than the
 ! parametric dim (e.g. the 2D surface of a sphere in 3D space), but it can't be smaller.
+! \item [{[nodeCount]}]
+! The number of local nodes in the mesh (both owned and shared with another PET).
+! \item [{[nodeIds]}]
+! An array of ids for each local node in the mesh. The nodeIds array should be of size nodeCount.
+! \item [{[nodeCoords]}]
+! An array of  coordinates for each local node in the mesh. The nodeCoords array should be of size (spatialDim*nodeCount).
+! \item [{[nodeOwners]}]
+! An array of the PET numbers that own each local node in the mesh. The nodeOwners array should be of size nodeCount.
+! \item [{[nodeMaskIsPresent]}]
+! .true. if node masking was set in mesh, .false. otherwise.
+! \item [{[nodeMask]}]
+! An array of mask values for each local node in the mesh. The nodeOwners array should be of size nodeCount.
+! \item [{[elementCount]}]
+! The number of local elements in the mesh (both owned and shared with another PET).
+! \item [{[elementIds]}]
+! An array of ids for each local element in the mesh. The elementIds array should be of size elementCount.
+! \item [{[elementTypes]}]
+! An array of types for each local element in the mesh. Please see
+! section~\ref{const:meshelemtype} for the list of options. The elementTypes array should be of size elementCount.
+! \item [{[elementConnCount]}]
+! The number of entries elementConn array. Provided as a convenience.
+! \item[elementConn]
+!         An array containing the indexes of the sets of nodes to be connected together to form the
+!         elements to be created on this PET. The entries in this list are NOT node global ids,
+!         but rather each entry is a local index (1 based) into the list of nodes to be
+!         created on this PET by this call.
+!         In other words, an entry of 1 indicates that this element contains the node
+!         described by {\tt nodeIds(1)}, {\tt nodeCoords(1)}, etc. on this PET. It is also
+!         important to note that the order of the nodes in an element connectivity list
+!         matters. Please see Section~\ref{const:meshelemtype} for diagrams illustrating
+!         the correct order of nodes in a element. This input consists of a 1D array with
+!         a total size equal to the sum of the number of nodes contained in each element on
+!         this PET (also provided by elementConnCount). The number of nodes in each element 
+!         is implied by its element type in
+!         {\tt elementTypes}. The nodes for each element
+!         are in sequence in this array (e.g. the nodes for element 1 are elementConn(1),
+!         elementConn(2), etc.).
+! \item [{[elementMaskIsPresent]}]
+! .true. if element masking was set in mesh, .false. otherwise.
+! \item [{[elementMask]}]
+! An array of mask values for each local element in the mesh. The elementMask array should be of size elementCount.
+! \item [{[elementAreaIsPresent]}]
+! .true. if element areas were set in mesh, .false. otherwise.
+! \item [{[elementArea]}]
+! An array of area values for each local element in the mesh. The elementArea array should be of size elementCount.
+! \item [{[elementCoordsIsPresent]}]
+! .true. if element coordinates were set in mesh, .false. otherwise.
+! \item [{[elementCoords]}]
+! An array of coordinate values for each local element in the mesh. The elementCoord array should be of size (spatialDim*elementCount).
 ! \item [{[nodalDistgridIsPresent]}]
 ! .true. if nodalDistgrid was set in Mesh object, .false. otherwise.
 ! \item [{[nodalDistgrid]}]
@@ -4843,6 +4916,20 @@ end function ESMF_MeshEmptyCreate
     integer :: infoTypeElemArrays(maxElemArrays)
     integer,parameter :: infoTypeElem_Mask=1
     integer,parameter :: infoTypeElem_Area=2
+    type(ESMF_InterArray) :: elementIdsIA
+    type(ESMF_InterArray) :: elementTypesIA
+    type(ESMF_InterArray) :: elementConnIA
+    type(ESMF_InterArray) :: elementMaskIA
+    type(ESMF_InterArray) :: elementAreaIA
+    type(ESMF_InterArray) :: elementCoordsIA
+    type(ESMF_InterArray) :: nodeIdsIA
+    type(ESMF_InterArray) :: nodeCoordsIA
+    type(ESMF_InterArray) :: nodeOwnersIA
+    type(ESMF_InterArray) :: nodeMaskIA
+    integer :: nodeMaskIsPresentI
+    integer :: elemMaskIsPresentI
+    integer :: elemAreaIsPresentI
+    integer :: elemCoordsIsPresentI
 
     ! Init local rc
     localrc = ESMF_SUCCESS
@@ -4856,6 +4943,7 @@ end function ESMF_MeshEmptyCreate
     ! isn't asking for something that requires a fully created mesh
     if (mesh%status .ne. ESMF_MESHSTATUS_COMPLETE) then
 
+       ! Check one set of variables
        if (present(parametricDim) .or. &
             present(spatialDim) .or. &
             present(numOwnedNodes) .or. &
@@ -4871,9 +4959,257 @@ end function ESMF_MeshEmptyCreate
                ESMF_CONTEXT, rcToReturn=rc)
           return
        endif
+
+       ! Check another set, just so the length of the if isn't so big
+       if (present(nodeCount) .or. &
+            present(nodeIds) .or. &
+            present(nodeCoords) .or. &
+            present(nodeOwners) .or. &
+            present(nodeMaskIsPresent) .or. &
+            present(nodeMask)) then
+
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+               msg="- the mesh has not been fully created", &
+               ESMF_CONTEXT, rcToReturn=rc)
+          return
+       endif
+
+
+       ! Check another set, just so the length of the if isn't so big
+       if (present(elementCount) .or. &
+            present(elementIds) .or. &
+            present(elementTypes) .or. &
+            present(elementConnCount) .or. &
+            present(elementConn) .or. &
+            present(elementMaskIsPresent) .or. &
+            present(elementMask) .or. &
+            present(elementAreaIsPresent) .or. &
+            present(elementArea) .or. &
+            present(elementCoordsIsPresent) .or. &
+            present(elementCoords)) then
+
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+               msg="- the mesh has not been fully created", &
+               ESMF_CONTEXT, rcToReturn=rc)
+          return
+       endif
     endif
 
-    !!! Get information from Mesh !!!
+    ! XMRKX !
+    ! TODO: Rearrange all the info gets below to fit in to the 3 categories below 
+    
+    !!!!!!!! Get Misc info from Mesh !!!!!!!!
+
+    !!!!!!!! Get Node info from Mesh !!!!!!!!
+
+    ! Get Node Count
+    if (present(nodeCount)) then
+       ! Make call to get info
+       call C_ESMC_MeshGetNodeCount(mesh, &
+            nodeCount, localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+
+    ! Get information about whether various node information is present
+    if (present(nodeMaskIsPresent)) then
+
+       ! Init integer variables for getting logical info from C
+       nodeMaskIsPresentI=0
+
+       ! Call into C
+       call C_ESMC_MeshGetNodeInfoPresence(mesh, &
+            nodeMaskIsPresentI, &
+            localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Set variables from C info
+       if (present(nodeMaskIsPresent)) then
+          nodeMaskIsPresent=.false.
+          if (nodeMaskIsPresentI .ne. 0) nodeMaskIsPresent=.true.
+       endif
+    endif
+
+
+    ! Get node creation info
+    if (present(nodeIds) .or. &
+        present(nodeCoords) .or. &
+        present(nodeOwners) .or. &
+        present(nodeMask)) then
+
+       ! Create interface arrays
+        nodeIdsIA = ESMF_InterArrayCreate(nodeIds, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return       
+
+        nodeCoordsIA = ESMF_InterArrayCreate(farray1DR8=nodeCoords, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return       
+
+        nodeOwnersIA = ESMF_InterArrayCreate(nodeOwners, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return       
+
+        nodeMaskIA = ESMF_InterArrayCreate(nodeMask, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return       
+
+       ! Call into C
+       call C_ESMC_MeshGetNodeCreateInfo(mesh, &
+            nodeIdsIA, nodeCoordsIA, &
+            nodeOwnersIA, nodeMaskIA, &
+            localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Destroy interface arrays
+       call ESMF_InterArrayDestroy(nodeIdsIA, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       call ESMF_InterArrayDestroy(nodeCoordsIA, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       call ESMF_InterArrayDestroy(nodeOwnersIA, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       call ESMF_InterArrayDestroy(nodeMaskIA, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+
+
+    !!!!!!!! Get Elem info from Mesh !!!!!!!!
+
+    ! Get Element Count
+    if (present(elementCount)) then
+       ! Make call to get info
+       call C_ESMC_MeshGetElemCount(mesh, &
+            elementCount, localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! Get Element Connection Count
+    if (present(elementConnCount)) then
+       ! Make call to get info
+       call C_ESMC_MeshGetElemConnCount(mesh, &
+            elementConnCount, localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+
+    ! Get information about whether various elem information is present
+    if (present(elementMaskIsPresent) .or. &
+        present(elementAreaIsPresent) .or. &
+        present(elementCoordsIsPresent)) then
+
+       ! Init integer variables for getting logical info from C
+       elemMaskIsPresentI=0
+       elemAreaIsPresentI=0
+       elemCoordsIsPresentI=0
+
+       ! Call into C
+       call C_ESMC_MeshGetElemInfoPresence(mesh, &
+            elemMaskIsPresentI, &
+            elemAreaIsPresentI, &
+            elemCoordsIsPresentI, &
+            localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Set variables from C info
+       if (present(elementMaskIsPresent)) then
+          elementMaskIsPresent=.false.
+          if (elemMaskIsPresentI .ne. 0) elementMaskIsPresent=.true.
+       endif
+
+       if (present(elementAreaIsPresent)) then
+          elementAreaIsPresent=.false.
+          if (elemAreaIsPresentI .ne. 0) elementAreaIsPresent=.true.
+       endif
+
+       if (present(elementCoordsIsPresent)) then
+          elementCoordsIsPresent=.false.
+          if (elemCoordsIsPresentI .ne. 0) elementCoordsIsPresent=.true.
+       endif
+    endif
+
+   ! Get elem creation info
+    if (present(elementIds) .or. &
+        present(elementTypes) .or. &
+        present(elementConn) .or. &
+        present(elementMask) .or. &
+        present(elementArea) .or. &
+        present(elementCoords)) then
+
+       ! Create interface arrays
+        elementIdsIA = ESMF_InterArrayCreate(elementIds, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return       
+
+        elementTypesIA = ESMF_InterArrayCreate(elementTypes, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return       
+
+        elementConnIA = ESMF_InterArrayCreate(elementConn, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return       
+
+        elementMaskIA = ESMF_InterArrayCreate(elementMask, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return       
+
+        elementAreaIA = ESMF_InterArrayCreate(farray1DR8=elementArea, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return       
+
+        elementCoordsIA = ESMF_InterArrayCreate(farray1DR8=elementCoords, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return       
+
+
+       ! Call into C
+       call C_ESMC_MeshGetElemCreateInfo(mesh, &
+            elementIdsIA, elementTypesIA, &
+            elementConnIA, elementMaskIA, &
+            elementAreaIA, elementCoordsIA, &
+            localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Destroy interface arrays
+       call ESMF_InterArrayDestroy(elementIdsIA, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       call ESMF_InterArrayDestroy(elementTypesIA, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       call ESMF_InterArrayDestroy(elementConnIA, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       call ESMF_InterArrayDestroy(elementMaskIA, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       call ESMF_InterArrayDestroy(elementAreaIA, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       call ESMF_InterArrayDestroy(elementCoordsIA, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    
 
     ! Get node coords
     if (present(ownedNodeCoords)) then
@@ -5412,6 +5748,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       call c_ESMC_MeshInfoSerialize(intMeshFreed, &
               mesh%spatialDim, mesh%parametricDim, &
               intIsPresentNDG, intIsPresentEDG, &
+              mesh%coordSys, &
               buffer, length, offset,linquireflag, localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
@@ -5502,6 +5839,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_AttReconcileFlag) :: lattreconflag
       integer :: intMeshFreed, spatialDim, parametricDim
       integer :: intIsPresentNDG, intIsPresentEDG
+      type(ESMF_CoordSys_Flag) :: coordSys
 
        ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -5518,6 +5856,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       call c_ESMC_MeshInfoDeserialize(intMeshFreed, &
            spatialDim, parametricDim, &
            intIsPresentNDG, intIsPresentEDG, &
+           coordSys, &
            buffer, offset, localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
@@ -5565,6 +5904,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_MeshDeserialize%numOwnedElements=0
       ESMF_MeshDeserialize%spatialDim=spatialDim
       ESMF_MeshDeserialize%parametricDim=parametricDim
+      ESMF_MeshDeserialize%coordSys=coordSys
 
       ! If exists serialize mesh
       if (.not. ESMF_MeshDeserialize%isCMeshFreed) then
@@ -5588,6 +5928,117 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
      if  (present(rc)) rc = ESMF_SUCCESS
 
      end function ESMF_MeshDeserialize
+
+! -----------------------------------------------------------------------------
+#undef ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshSet"
+!BOP
+! !IROUTINE: ESMF_MeshSet - Set some Mesh information
+!
+! !INTERFACE:
+      subroutine ESMF_MeshSet(mesh, &
+           elementMask, elementArea, rc)
+!
+! !RETURN VALUE:
+!
+! !ARGUMENTS:
+    type(ESMF_Mesh),          intent(in)            :: mesh
+    integer,                  intent(in), optional :: elementMask(:)
+    real(ESMF_KIND_R8),       intent(in), optional :: elementArea(:)
+    integer,                  intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   This call allows the user to change the set of information that it's legal to alter after
+!   a mesh has been created. Currently, this call requires that the information has already
+!   been added to the mesh during creation. For example, you can only change the element mask
+!   information, if the mesh was initially created with element masking. 
+!
+! The arguments are:
+! \begin{description}
+! \item [mesh]
+! \item [{[elementMask]}]
+! An array of mask values for each local element in the mesh. The elementMask array should be of size elementCount.
+! \item [{[elementArea]}]
+! An array of area values for each local element in the mesh. The elementArea array should be of size elementCount.
+! \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+    integer  :: localrc
+    type(ESMF_InterArray) :: elementMaskIA
+    type(ESMF_InterArray) :: elementAreaIA
+
+    ! Init local rc
+    localrc = ESMF_SUCCESS
+
+    !!! Error check status of Mesh versus what's being asked for !!!
+
+    ! Make sure mesh is initialized
+    ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
+
+    ! If mesh has not been fully created, make sure that the user
+    ! isn't asking for something that requires a fully created mesh
+    if (mesh%status .ne. ESMF_MESHSTATUS_COMPLETE) then
+
+
+
+       ! Check another set, just so the length of the if isn't so big
+       if (present(elementMask) .or. &
+           present(elementArea)) then
+
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+               msg="- the mesh has not been fully created", &
+               ESMF_CONTEXT, rcToReturn=rc)
+          return
+       endif
+    endif
+
+    ! XMRKX !
+    !!!!!!!! Set Misc info in Mesh !!!!!!!!
+
+    !!!!!!!! Set Node info in Mesh !!!!!!!!
+
+    !!!!!!!! Set Elem info in Mesh !!!!!!!!
+
+    ! Set elem info
+    if (present(elementMask) .or. &
+        present(elementArea)) then
+
+       ! Create interface arrays
+        elementMaskIA = ESMF_InterArrayCreate(elementMask, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return       
+
+        elementAreaIA = ESMF_InterArrayCreate(farray1DR8=elementArea, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return       
+
+
+       ! Call into C
+       call C_ESMC_MeshSetElemInfo(mesh,  &
+            elementMaskIA, elementAreaIA, &
+            localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Destroy interface arrays
+       call ESMF_InterArrayDestroy(elementMaskIA, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       call ESMF_InterArrayDestroy(elementAreaIA, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+        
+    ! Error output
+    if (present(rc)) rc = localrc
+
+    end subroutine ESMF_MeshSet
+
+!------------------------------------------------------------------------------
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

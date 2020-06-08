@@ -127,6 +127,11 @@ namespace ESMCI{
                            ESMC_UnmappedAction_Flag *unmappedAction,
                            ESMC_Logical *ignoreDegenerate,
                            ESMC_Logical *create_rh,
+                           ESMC_FileMode_Flag *filemode,
+                           const char *srcFile,
+                           const char *dstFile,
+                           ESMC_FileFormat_Flag *srcFileType,
+                           ESMC_FileFormat_Flag *dstFileType,
                            Field *srcFracField, Field *dstFracField);
     static int regrid(Field *fieldsrc, Field *fielddst,
                       RouteHandle *routehandle, ESMC_Region_Flag *zeroRegion);

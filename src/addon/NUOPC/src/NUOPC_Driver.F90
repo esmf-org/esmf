@@ -496,8 +496,6 @@ module NUOPC_Driver
     integer                   :: i, j, k, l, cIndex
     character(ESMF_MAXSTR)    :: iString, jString, lString
     character(ESMF_MAXSTR)    :: compName, stateName
-    character(ESMF_MAXSTR)    :: petListBuffer(100)
-    integer                   :: lineCount
     integer, pointer          :: i_petList(:), j_petList(:), c_petList(:)
     logical                   :: existflag
     logical                   :: clockIsCreated
@@ -2155,7 +2153,6 @@ module NUOPC_Driver
     type(ESMF_Clock)        :: internalClock
     logical                 :: internalflag
     logical                 :: areServicesSet
-    type(ESMF_VM)           :: vm
     ! initialize out arguments
     rc = ESMF_SUCCESS
     if (present(execFlag)) execFlag = .false.
@@ -2224,38 +2221,56 @@ module NUOPC_Driver
         if (.not.internalflag) then
           ! Ensure that Attributes are consistent across all the PETs of the
           ! component that just executed.
-
-          !TODO: The Update() is only needed if there are child PETs that are 
-          !TODO: going to pause for PE-reuse via user level threading. Figure
-          !TODO: out how to detect this, and make Update() call conditional.
-
-          !TODO: Should be calling with all master PETs (those processes that go
-          !TODO: on to execute child code), for better Update() performance. For
-          !TODO: now just call with first PET as root, because that always will
-          !TODO: work (because first PET always is passed to child component).
-        
-          call ESMF_VMGetCurrent(vm=vm, rc=rc)
+          call consistentComponentAttributes(is%wrap%modelComp(i), &
+            is%wrap%modelPetLists(i)%ptr, name, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          if (associated(is%wrap%modelPetLists(i)%ptr)) then
-            ! Note (bekozi): petList is not supported in the Info backend for
-            ! AttributeUpdate since collective communication is used.
-            call ESMF_AttributeUpdate(is%wrap%modelComp(i), vm, &
-              rootList=is%wrap%modelPetLists(i)%ptr(1:1), rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-              return  ! bail out
-          else
-            ! no petList was specified -> update across all PETs
-            call ESMF_AttributeUpdate(is%wrap%modelComp(i), vm, &
-              rootList=(/0/), rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-              return  ! bail out
-          endif
         endif
       endif
     enddo
+  end subroutine
+
+  !-----------------------------------------------------------------------------
+
+  subroutine consistentComponentAttributes(comp, petList, name, rc)
+    type(ESMF_GridComp)     :: comp
+    integer, pointer        :: petList(:)
+    character(*)            :: name
+    integer, intent(out)    :: rc
+    ! local variables
+    type(ESMF_VM)           :: vm
+    ! initialize out arguments
+    rc = ESMF_SUCCESS
+
+    !TODO: The Update() is only needed if there are child PETs that are
+    !TODO: going to pause for PE-reuse via user level threading. Figure
+    !TODO: out how to detect this, and make Update() call conditional.
+
+    !TODO: Should be calling with all master PETs (those processes that go
+    !TODO: on to execute child code), for better Update() performance. For
+    !TODO: now just call with first PET as root, because that always will
+    !TODO: work (because first PET always is passed to child component).
+
+    call ESMF_VMGetCurrent(vm=vm, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    if (associated(petList)) then
+      ! use the petList to restrict the number of PETs across which the
+      ! update is synchronizing
+      call ESMF_AttributeUpdate(comp, vm, &
+        rootList=petList(1:1), rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    else
+      ! no petList was specified -> update across all PETs
+      call ESMF_AttributeUpdate(comp, vm, &
+        rootList=(/0/), rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
   end subroutine
 
   !-----------------------------------------------------------------------------
@@ -2466,7 +2481,7 @@ module NUOPC_Driver
           if (btest(verbosity,11)) then
             write(msgString, "(A,I4,A)") &
               trim(name)//": component ", i, "="//trim(compName)//&
-              ", dataComplete: "//trim(valueString)
+              ", dataComplete (local): "//trim(valueString)
             call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -2490,6 +2505,15 @@ module NUOPC_Driver
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) &
             return  ! bail out
+
+          if (btest(verbosity,11)) then
+            write(msgString, "(A,I4,A,L)") &
+              trim(name)//": component ", i, "="//trim(compName)//&
+              ", dataComplete (global): ", (helperOut==petCount)
+            call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
 
           if (helperOut == petCount) cycle ! skip to next i
           allComplete = .false. ! hit toggles -> prevents exit on outer loop
@@ -2557,6 +2581,15 @@ module NUOPC_Driver
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
             
+          if (i>0) then
+            ! Ensure that Attributes are consistent across all the PETs of the
+            ! component that just executed.
+            call consistentComponentAttributes(is%wrap%modelComp(i), &
+              is%wrap%modelPetLists(i)%ptr, name, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
+
           ! check model InitializeDataProgress Attribute if progress made
           call NUOPC_CompAttributeGet(is%wrap%modelComp(i), &
             name="InitializeDataProgress", value=valueString, rc=rc)
@@ -2564,6 +2597,15 @@ module NUOPC_Driver
             line=__LINE__, file=trim(name)//":"//FILENAME)) &
             return  ! bail out
           
+          if (btest(verbosity,11)) then
+            write(msgString, "(A,I4,A)") &
+              trim(name)//": component ", i, "="//trim(compName)//&
+              ", someProgress (local): "//trim(valueString)
+            call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
+
           ! make sure there is a consistent view across all PETs
           helperIn = 0
           if (trim(valueString)=="true") helperIn = 1
@@ -2575,6 +2617,15 @@ module NUOPC_Driver
             
           if (helperOut > 0) someProgress=.true. ! toggle flag
             
+          if (btest(verbosity,11)) then
+            write(msgString, "(A,I4,A,L)") &
+              trim(name)//": component ", i, "="//trim(compName)//&
+              ", someProgress (global): ", someProgress
+            call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
+
         endif
       enddo
       
@@ -3593,8 +3644,7 @@ module NUOPC_Driver
     character(ESMF_MAXSTR)          :: name
     type(type_InternalState)        :: is
     type(ComponentMapEntry)         :: cmEntry
-    integer                         :: stat, i, k, lineCount
-    character(ESMF_MAXSTR)          :: petListBuffer(100)
+    integer                         :: stat, i
     character(ESMF_MAXSTR)          :: msgString, lString
     integer                         :: verbosity
     type(ESMF_Info)                :: infoh
@@ -3645,20 +3695,10 @@ module NUOPC_Driver
         if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
-        
-        if (size(cmEntry%wrap%petList) <= 1000) then
-          ! have the resources to print the entire petList
-          write (petListBuffer, "(10I7)") cmEntry%wrap%petList
-          lineCount = size(cmEntry%wrap%petList)/10
-          if ((size(cmEntry%wrap%petList)/10)*10 /= size(cmEntry%wrap%petList))&
-            lineCount = lineCount + 1
-          do k=1, lineCount
-            call ESMF_LogWrite(petListBuffer(k), ESMF_LOGMSG_INFO, rc=localrc)
-            if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU,&
-              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-              return  ! bail out
-          enddo
-        endif
+        call NUOPC_LogPetList(cmEntry%wrap%petList, name=name, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
       else
         write (msgString,"(A)") trim(name)//" - Creating model component "//&
           trim(cmEntry%wrap%label)//" without petList."
@@ -3775,8 +3815,7 @@ module NUOPC_Driver
     character(ESMF_MAXSTR)          :: name
     type(type_InternalState)        :: is
     type(ComponentMapEntry)         :: cmEntry
-    integer                         :: stat, i, k, lineCount
-    character(ESMF_MAXSTR)          :: petListBuffer(100)
+    integer                         :: stat, i
     character(ESMF_MAXSTR)          :: msgString, lString
     integer                         :: verbosity
 
@@ -3826,20 +3865,10 @@ module NUOPC_Driver
         if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
-        
-        if (size(cmEntry%wrap%petList) <= 1000) then
-          ! have the resources to print the entire petList
-          write (petListBuffer, "(10I7)") cmEntry%wrap%petList
-          lineCount = size(cmEntry%wrap%petList)/10
-          if ((size(cmEntry%wrap%petList)/10)*10 /= size(cmEntry%wrap%petList))&
-            lineCount = lineCount + 1
-          do k=1, lineCount
-            call ESMF_LogWrite(petListBuffer(k), ESMF_LOGMSG_INFO, rc=localrc)
-            if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU,&
-              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-              return  ! bail out
-          enddo
-        endif
+        call NUOPC_LogPetList(cmEntry%wrap%petList, name=name, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
       else
         write (msgString,"(A)") trim(name)//" - Creating model component "//&
           trim(cmEntry%wrap%label)//" without petList."
@@ -3957,8 +3986,7 @@ module NUOPC_Driver
     integer, pointer                :: connectorPetListTemp(:)
     integer, pointer                :: connectorPetListTemp2(:)
     integer, pointer                :: srcPetList(:), dstPetList(:)
-    integer                         :: k, l, cIndex, lineCount
-    character(ESMF_MAXSTR)          :: petListBuffer(100)
+    integer                         :: k, l, cIndex
     character(ESMF_MAXSTR)          :: msgString, lString
     type(ESMF_VM)                   :: vm
     logical                         :: isPresent
@@ -4043,19 +4071,10 @@ module NUOPC_Driver
         if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
-        if (size(connectorPetList) <= 1000) then
-          ! have the resources to print the entire petList
-          write (petListBuffer, "(10I7)") connectorPetList
-          lineCount = size(connectorPetList)/10
-          if ((size(connectorPetList)/10)*10 /= size(connectorPetList)) &
-            lineCount = lineCount + 1
-          do k=1, lineCount
-            call ESMF_LogWrite(petListBuffer(k), ESMF_LOGMSG_INFO, rc=localrc)
-            if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU,&
-              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-              return  ! bail out
-          enddo
-        endif
+        call NUOPC_LogPetList(connectorPetList, name=name, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
       endif
       cmEntry%wrap%connector = ESMF_CplCompCreate(&
         name=trim(cmEntry%wrap%label), petList=connectorPetList, rc=localrc)
