@@ -57,19 +57,23 @@ struct Proc_Elem_Pair {
 
 struct EH_Comm_Pair {
   EntityHandle eh;
+  int id;
   int proc;
 
-  EH_Comm_Pair(EntityHandle _eh, int _proc) : eh(_eh), proc(_proc) {}
+  EH_Comm_Pair(EntityHandle _eh, int _id, int _proc) : eh(_eh), id(_id), proc(_proc) {}
 
   // Sort as obj <, proc
   bool operator< (const EH_Comm_Pair &other) const {
-    return eh != other.eh ?
-       eh < other.eh 
-     : proc < other.proc;
+    // replace with c++11
+    return std::tie(eh, id, proc) < std::tie(other.eh, other.id, other.proc);
+    // return eh != other.eh ?
+    //    eh < other.eh 
+    //  : proc < other.proc;
   }
 
   bool operator==(const EH_Comm_Pair &other) const {
     if (eh != other.eh) return false;
+    if (id != other.id) return false;
     if (proc != other.proc) return false;
     return true;
   }
@@ -77,6 +81,8 @@ struct EH_Comm_Pair {
   bool operator!=(const EH_Comm_Pair &rhs) const {
     return !(*this == rhs);
   }
+
+  inline int getID() const {return id;}
 };
 
 struct PL_Comm_Pair {

@@ -1632,7 +1632,7 @@ try {
       if (id != gid) {
 
         // add to elem_to_proc_list if not already present
-        EH_Comm_Pair ecp(split_elem, proc);
+        EH_Comm_Pair ecp(split_elem, id, proc);
         std::vector<EH_Comm_Pair>::const_iterator ehf = find(elem_to_proc_list.begin(), elem_to_proc_list.end(), ecp);
         if (ehf == elem_to_proc_list.end())
           elem_to_proc_list.push_back(ecp);
@@ -2304,7 +2304,7 @@ void mbmesh_initialize_elem_to_proc_list(MBMesh *mesh, const std::vector<UInt> &
       int elem_id;
       MBMesh_get_gid(mesh, elem, &elem_id);
 
-      EH_Comm_Pair ecp(elem, src_gids_proc[i]);
+      EH_Comm_Pair ecp(elem, elem_id, src_gids_proc[i]);
       std::vector<EH_Comm_Pair>::const_iterator ehf = find(elem_to_proc_list.begin(), elem_to_proc_list.end(), ecp);
       if (ehf == elem_to_proc_list.end())
         elem_to_proc_list.push_back(ecp);
@@ -2388,7 +2388,7 @@ void mbmesh_expand_elem_to_proc_list(MBMesh *mesh, const std::vector<UInt> &src_
         MBMesh_get_gid(mesh, elem_on_node, &elem_id);
 
         // add to elem_to_proc_list if not already present
-        EH_Comm_Pair ecp(elem_on_node, src_gids_proc[i]);
+        EH_Comm_Pair ecp(elem_on_node, elem_id, src_gids_proc[i]);
         std::vector<EH_Comm_Pair>::const_iterator ehf = find(elem_to_proc_list.begin(), elem_to_proc_list.end(), ecp);
         if (ehf == elem_to_proc_list.end())
           elem_to_proc_list.push_back(ecp);
@@ -2493,26 +2493,33 @@ void mbmesh_handle_unassigned_elements(MBMesh *mesh, std::multimap<int, EntityHa
     for (; ei != ee; ++ei) {
       const EntityHandle elem = *ei;
       int elem_id;
-
       MBMesh_get_gid(mesh, elem, &elem_id);
 
 #undef debug_missingelems
 #ifdef debug_missingelems
 printf("%d# elem %d\n", localPet, elem_id);
 #endif
-      // Loop through elem_to_proc_list
-      std::vector<EH_Comm_Pair>::const_iterator ehi = elem_to_proc_list.begin(), ehe = elem_to_proc_list.end();
-      for (; ehi != ehe; ++ehi) {
-        int idtocheck = -1;
-        MBMesh_get_gid(mesh, ehi->eh, &idtocheck);
-        // if elem is in elem_to_proc_list it is already assigned
-        if (elem_id == idtocheck) {
-          break;
-        }
-      }
+      // RLO: this loop resulted in O(n^2) behavior
+      // // Loop through elem_to_proc_list
+      // std::vector<EH_Comm_Pair>::const_iterator ehi = elem_to_proc_list.begin(), ehe = elem_to_proc_list.end();
+      // for (; ehi != ehe; ++ehi) {
+      //   int idtocheck = -1;
+      //   MBMesh_get_gid(mesh, ehi->eh, &idtocheck);
+      //   // if elem is in elem_to_proc_list it is already assigned
+      //   if (elem_id == idtocheck) {
+      //     break;
+      //   }
+      // }
+      // 
+      // // if elem is not in elem_to_proc_list, need to assign to a processor
+      // if (ehi == ehe) {
 
-      // if elem is not in elem_to_proc_list, need to assign to a processor
-      if (ehi == ehe) {
+      auto ehi = std::find_if(elem_to_proc_list.begin(), elem_to_proc_list.end(), 
+                             [&elem_id](const EH_Comm_Pair& obj) {return obj.getID() == elem_id;});
+      // if elem is already in elem_to_proc_list then we are good to go
+      if  (ehi != elem_to_proc_list.end()) continue;
+      else {
+
 #ifdef debug_missingelems
 printf("%d#   elem %d missing\n", localPet, elem_id);
 #endif
@@ -2542,7 +2549,7 @@ printf("%d# looping %d adj_elems\n", localPet, adj_elems.size());
 printf("%d#   FOUND - setting elem comm pair (%d,%d)\n", localPet, elem_id, annointed_proc);
 #endif
 
-            EH_Comm_Pair ecp(elem, annointed_proc);
+            EH_Comm_Pair ecp(elem, elem_id, annointed_proc);
             std::vector<EH_Comm_Pair>::const_iterator ehf = find(elem_to_proc_list.begin(), elem_to_proc_list.end(), ecp);
             if (ehf == elem_to_proc_list.end())
               elem_to_proc_list.push_back(ecp);
@@ -2563,33 +2570,44 @@ printf("%d#   FOUND - setting elem comm pair (%d,%d)\n", localPet, elem_id, anno
 printf("%d#   adj_elem_id %d\n", localPet, adj_elem_id);
 #endif
 
-            // Loop through elem_to_proc_list looking for match to adj_elem_id
-            std::vector<EH_Comm_Pair>::const_iterator ehi2 = elem_to_proc_list.begin(), ehe2 = elem_to_proc_list.end();
-            for (; ehi2 != ehe2; ++ehi2) {
-              int idtocheck2 = -1;
-              MBMesh_get_gid(mesh, ehi2->eh, &idtocheck2);
-              // if adj_elem_id matches something in elem_to_proc_list, we have found a processor
-#ifdef debug_missingelems
-printf("%d#     checking adj_elem_id %d idtocheck2 %d\n", localPet, adj_elem_id, idtocheck2);
-#endif
+            // Find a match in elem_to_proc_list for adj_elem_id
+            auto ehi2 = std::find_if(elem_to_proc_list.begin(), elem_to_proc_list.end(), 
+                                    [&adj_elem_id](const EH_Comm_Pair& obj) {return obj.getID() == adj_elem_id;});
+            if  (ehi2 == elem_to_proc_list.end()) {
+              Throw () "Could not find a suitable processor for this element";
+            } else {
+              annointed_proc = ehi2->proc;
+              found = true;
+            }
 
-                if (adj_elem_id == idtocheck2) {
-#ifdef debug_missingelems
-printf("%d#     match! adj_elem_id %d idtocheck2 %d\n", localPet, adj_elem_id, idtocheck2);
-#endif
-
-                annointed_proc = ehi2->proc;
-                found = true;
-                break;
-              }
-            } // ehi2
+// RLO: this loop resulted in O(n^2) behavior
+//             // Loop through elem_to_proc_list looking for match to adj_elem_id
+//             std::vector<EH_Comm_Pair>::const_iterator ehi2 = elem_to_proc_list.begin(), ehe2 = elem_to_proc_list.end();
+//             for (; ehi2 != ehe2; ++ehi2) {
+//               int idtocheck2 = -1;
+//               MBMesh_get_gid(mesh, ehi2->eh, &idtocheck2);
+//               // if adj_elem_id matches something in elem_to_proc_list, we have found a processor
+// #ifdef debug_missingelems
+// printf("%d#     checking adj_elem_id %d idtocheck2 %d\n", localPet, adj_elem_id, idtocheck2);
+// #endif
+// 
+//               if (adj_elem_id == idtocheck2) {
+// #ifdef debug_missingelems
+// printf("%d#     match! adj_elem_id %d idtocheck2 %d\n", localPet, adj_elem_id, idtocheck2);
+// #endif
+// 
+//                 annointed_proc = ehi2->proc;
+//                 found = true;
+//                 break;
+//               }
+//             } // ehi2
           } // else if not found
         } // nei
         // RLO: not sure if we should throw if no processor found or just assign to zero..
         if (nei == nee) {
           Throw () "Could not find a suitable processor for this element";
           // annointed_proc = 0;
-          // EH_Comm_Pair ecp(elem, 0);
+          // EH_Comm_Pair ecp(elem, elem_id, 0);
           // std::vector<EH_Comm_Pair>::const_iterator ehf = find(elem_to_proc_list.begin(), elem_to_proc_list.end(), ecp);
           // if (ehf == elem_to_proc_list.end())
           //   elem_to_proc_list.push_back(ecp);

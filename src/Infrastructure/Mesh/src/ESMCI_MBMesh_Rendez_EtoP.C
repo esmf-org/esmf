@@ -175,17 +175,8 @@ static void assign_elems_to_procs(MBMesh *mesh,
   std::vector<EntityHandle>::iterator si = elems->begin(), se = elems->end();
   for (; si != se; ++si) {
     EntityHandle &elem = *si;
-    
-    int id;
-#ifdef ESMF_REGRID_DEBUG_MAP_ANY
-    MBMesh_get_gid(mesh, elem, &id);
-#endif
-#ifdef ESMF_REGRID_DEBUG_MAP_ELEM1
-    MBMesh_get_gid(mesh, elem, &id);
-#endif
-#ifdef ESMF_REGRID_DEBUG_MAP_ELEM2
-    MBMesh_get_gid(mesh, elem, &id);
-#endif
+    int elem_id;
+    MBMesh_get_gid(mesh, elem, &elem_id);
 
     // Get bounding box for elem
     MBMesh_BBox ebox(mesh, elem, geom_tol, is_sph);
@@ -202,20 +193,20 @@ static void assign_elems_to_procs(MBMesh *mesh,
 
 // need to find object id and put into an if statement
 #ifdef ESMF_REGRID_DEBUG_MAP_ANY
-      printf("%d# Elem %d send to procs [", Par::Rank(), id);
+      printf("%d# Elem %d send to procs [", Par::Rank(), elem_id);
 #endif
 #ifdef ESMF_REGRID_DEBUG_MAP_ELEM1
     if (id==ESMF_REGRID_DEBUG_MAP_ELEM1)
-      printf("%d# Elem %d send to procs [", Par::Rank(), id);
+      printf("%d# Elem %d send to procs [", Par::Rank(), elem_id);
 #endif
 #ifdef ESMF_REGRID_DEBUG_MAP_ELEM2
     if (id==ESMF_REGRID_DEBUG_MAP_ELEM2)
-      printf("%d# Elem %d send to procs [", Par::Rank(), id);
+      printf("%d# Elem %d send to procs [", Par::Rank(), elem_id);
 #endif
 
     // Add to pattern
     for (int i = 0; i < numprocs; i++) {
-      EH_Comm_Pair ecp(elem, procs[i]);
+      EH_Comm_Pair ecp(elem, elem_id, procs[i]);
 
       std::vector<EH_Comm_Pair>::iterator lb =
         std::lower_bound(elem_to_proc_list->begin(), elem_to_proc_list->end(), ecp);
