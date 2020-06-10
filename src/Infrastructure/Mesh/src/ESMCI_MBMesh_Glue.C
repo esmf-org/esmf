@@ -32,7 +32,7 @@
 #include "ESMCI_VM.h"
 #include "ESMCI_CoordSys.h"
 
-#include "ESMCI_TraceRegion.h"
+#include "ESMCI_MeshCap.h"  // for profiling
 
 #include "Mesh/include/ESMCI_MathUtil.h"
 #include "Mesh/include/Regridding/ESMCI_MeshRegrid.h"
@@ -2994,21 +2994,14 @@ void MBMesh_createredistnodes(void **src_meshpp, int *num_node_gids, int *node_g
 #define ESMC_METHOD "MBMesh_createredistnodes()"
 
   try {
-    int localrc;
-
-    ESMCI::VM *vm = VM::getCurrent(&localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-      throw localrc;  // bail out with exception
-
     // Dereference
     MBMesh *mesh=reinterpret_cast<MBMesh*> (*src_meshpp);
     MBMesh *out_mesh=reinterpret_cast<MBMesh*> (*output_meshpp);
 
     mbmesh_redist_node(mesh, num_node_gids, node_gids, &out_mesh);
 
+    MESHREDIST_TRACE_ENTER("mbmesh split id postprocessing");
     // split element handling
-vm->logMemInfo("before mbmesh split id postprocessing");
-ESMCI::TraceEventRegionEnter("mbmesh split id postprocessing", NULL);
     out_mesh->is_split=mesh->is_split;
 
     if (out_mesh->is_split) {
@@ -3017,8 +3010,7 @@ ESMCI::TraceEventRegionEnter("mbmesh split id postprocessing", NULL);
       // RLO: not sure we need this if above is used
       // out_mesh->split_to_orig_id=mesh->split_to_orig_id;
     }
-ESMCI::TraceEventRegionExit("mbmesh split id postprocessing", NULL);
-vm->logMemInfo("after mbmesh split id postprocessing");
+    MESHREDIST_TRACE_EXIT("mbmesh split id postprocessing");
 
   // convert the out_mesh back to a void*
   *output_meshpp = reinterpret_cast<void *> (out_mesh);
