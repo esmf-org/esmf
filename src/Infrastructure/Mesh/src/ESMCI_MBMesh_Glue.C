@@ -71,6 +71,8 @@ void MBMesh_create(void **mbmpp,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_create()"
 
+  MESHCREATE_TRACE_ENTER("mbmesh create");
+
   // Init output
   *mbmpp=NULL;
 
@@ -175,6 +177,8 @@ void MBMesh_create(void **mbmpp,
     // Output mesh
     *mbmpp=(void *)mbmp;
 
+  MESHCREATE_TRACE_EXIT("mbmesh create");
+
     // Set return code
     if (rc!=NULL) *rc = ESMF_SUCCESS;
 
@@ -189,6 +193,7 @@ void MBMesh_addnodes(void **mbmpp, int *num_nodes, int *nodeId,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_addnodes()"
 
+  MESHCREATE_TRACE_ENTER("mbmesh addnodes");
 
   // Should we do exception handling in here, since MOAB doesn't???
    try {
@@ -408,6 +413,8 @@ void MBMesh_addnodes(void **mbmpp, int *num_nodes, int *nodeId,
        "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
+
+  MESHCREATE_TRACE_EXIT("mbmesh addnodes");
 
   // Set return code
    if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -636,6 +643,8 @@ void MBMesh_addelements(void **mbmpp,
 {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_addelements()"
+
+  MESHCREATE_TRACE_ENTER("mbmesh addelements");
 
    try {
 
@@ -1500,6 +1509,8 @@ void MBMesh_addelements(void **mbmpp,
       "- Caught unknown exception", ESMC_CONTEXT, rc);
      return;
   }
+
+  MESHCREATE_TRACE_EXIT("mbmesh addelements");
 
   // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;

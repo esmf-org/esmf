@@ -635,8 +635,6 @@ MeshCap *MeshCap::meshcreate(int *pdim, int *sdim,
 
   int localrc;
 
-  MESHCREATE_TRACE_ENTER("create");
-
   // Create mesh depending on the type
   Mesh *mesh;
   void *mbmesh;
@@ -670,8 +668,6 @@ MeshCap *MeshCap::meshcreate(int *pdim, int *sdim,
     mc->mbmesh=mbmesh;
   }
 
-  MESHCREATE_TRACE_EXIT("create");
-
   // Output new MeshCap
   return mc;
 }
@@ -683,8 +679,6 @@ void MeshCap::meshaddnodes(int *num_nodes, int *nodeId,
 {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::meshaddnodes()"
-
-  MESHCREATE_TRACE_ENTER("addnodes");
 
   // Call into func. depending on mesh type
   if (is_esmf_mesh) {
@@ -703,7 +697,6 @@ void MeshCap::meshaddnodes(int *num_nodes, int *nodeId,
       "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
 #endif
    }
-  MESHCREATE_TRACE_EXIT("addnodes");
 }
 
 
@@ -760,8 +753,6 @@ void MeshCap::meshaddelements(int *_num_elems, int *elemId, int *elemType, Inter
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::meshaddelements()"
 
-  MESHCREATE_TRACE_ENTER("addelements");
-
   // Call into func. depending on mesh type
   if (is_esmf_mesh) {
     ESMCI_meshaddelements(&mesh,
@@ -785,7 +776,6 @@ void MeshCap::meshaddelements(int *_num_elems, int *elemId, int *elemType, Inter
       "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
 #endif
   }
-  MESHCREATE_TRACE_EXIT("addelements");
 }
 
 

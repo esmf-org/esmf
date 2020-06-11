@@ -69,6 +69,7 @@ void ESMCI_meshcreate(Mesh **meshpp,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_meshcreate()"
 
+  MESHCREATE_TRACE_ENTER("nvmesh create");
 
    try {
 
@@ -140,6 +141,8 @@ void ESMCI_meshcreate(Mesh **meshpp,
     return;
   }
 
+  MESHCREATE_TRACE_EXIT("nvmesh create");
+
   // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
@@ -152,6 +155,8 @@ void ESMCI_meshaddnodes(Mesh **meshpp, int *num_nodes, int *nodeId,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_meshaddnodes()"
 {
+  MESHCREATE_TRACE_ENTER("nvmesh addnodes");
+
    try {
     Mesh *meshp = *meshpp;
     ThrowRequire(meshp);
@@ -342,6 +347,8 @@ void ESMCI_meshaddnodes(Mesh **meshpp, int *num_nodes, int *nodeId,
       "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
+
+  MESHCREATE_TRACE_EXIT("nvmesh addnodes");
 
   // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -692,6 +699,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
 #define ESMC_METHOD "ESMCI_meshaddelements()"
 
 {
+  MESHCREATE_TRACE_ENTER("nvmesh addelements");
    try {
 
   // Initialize the parallel environment for mesh (if not already done)
@@ -1546,6 +1554,8 @@ void ESMCI_meshaddelements(Mesh **meshpp,
       "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
+
+  MESHCREATE_TRACE_EXIT("nvmesh addelements");
 
   // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
