@@ -23,35 +23,7 @@
 #include "ESMC_Util.h"
 #include "ESMCI_Array.h"
 
-#include "ESMCI_TraceRegion.h"
-
-#ifdef ESMF_PROFILE_MESHREDIST
-#define MESHREDIST_TRACE_ENTER(name) {char before[100] = "before "; \
-  VM::getCurrent(NULL)->logMemInfo(strcat(before, name)); \
-  ESMCI::TraceEventRegionEnter(name, NULL);}
-#define MESHREDIST_TRACE_EXIT(name) {char after[100] = "after "; \
-  ESMCI::TraceEventRegionExit(name, NULL); \
-  VM::getCurrent(NULL)->logMemInfo(strcat(after, name));}
-#else
-#define MESHREDIST_TRACE_ENTER(name)
-#define MESHREDIST_TRACE_EXIT(name)
-#endif
-
-#define ESMF_PROFILE_MESHCREATE
-#ifdef ESMF_PROFILE_MESHCREATE
-#define MESHCREATE_TRACE_ENTER(name) {char before[100] = "before "; \
-  VM::getCurrent(NULL)->logMemInfo(strcat(before, name)); \
-  ESMCI::TraceEventRegionEnter(name, NULL);}
-#define MESHCREATE_TRACE_EXIT(name) {char after[100] = "after "; \
-  ESMCI::TraceEventRegionExit(name, NULL); \
-  VM::getCurrent(NULL)->logMemInfo(strcat(after, name));}
-#else
-#define MESHCREATE_TRACE_ENTER(name)
-#define MESHCREATE_TRACE_EXIT(name)
-#endif
-
-
- namespace ESMCI {
+namespace ESMCI {
 
   class MeshCap : public ESMC_Base {
 

@@ -28,7 +28,8 @@
 #include "ESMCI_GridToMesh.h"
 #include "ESMC_Util.h"
 #include "ESMCI_Array.h"
-#include "ESMCI_TraceRegion.h"
+
+#include "ESMCI_TraceMacros.h"  // for profiling
 
 #include "Mesh/include/Legacy/ESMCI_Exception.h"
 // #include "Mesh/include/Regridding/ESMCI_Interp.h"
@@ -249,11 +250,8 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp,
     }
     WMat dst_status;
 
-#ifdef ESMF_PROFILE_MESH_WEIGHTGEN_MBMESH
-    int localrc;
-    ESMCI_REGION_ENTER("MOAB Mesh Weight Generation", localrc)
-    VM::logMemInfo(std::string("before MOAB Mesh Weight Generation"));
-#endif
+
+    ESMCI_REGRID_TRACE_ENTER("MBMesh Weight Generation");
 
     // need to pass the pole_constraint_id for extrapolation
     //   |--> after pole handling implemented, which is after gridtombmesh
@@ -270,10 +268,8 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp,
                          set_dst_status, dst_status))
     Throw() << "Online regridding error" << std::endl;
 
-#ifdef ESMF_PROFILE_MESH_WEIGHTGEN_MBMESH
-    VM::logMemInfo(std::string("after MOAB Mesh Weight Generation"));
-    ESMCI_REGION_EXIT("MOAB Mesh Weight Generation", localrc)
-#endif
+
+    ESMCI_REGRID_TRACE_EXIT("MBMesh Weight Generation");
 
 // #define OUTPUT_WEIGHTS
 #ifdef OUTPUT_WEIGHTS
@@ -516,10 +512,7 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp,
     VM::logMemInfo(std::string("RegridCreate5.2"));
 #endif
 
-#ifdef ESMF_PROFILE_MESH_SMMSTORE_MBMESH
-    ESMCI_REGION_ENTER("MOAB Mesh ArraySMMStore", localrc)
-    VM::logMemInfo(std::string("before MOAB Mesh ArraySMMStore"));
-#endif
+    ESMCI_REGRID_TRACE_ENTER("MBMesh ArraySMMStore");
 
     // Build the ArraySMM
     if (*has_rh != 0) {
@@ -533,10 +526,7 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp,
         ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
     }
 
-#ifdef ESMF_PROFILE_MESH_SMMSTORE_MBMESH
-    VM::logMemInfo(std::string("after MOAB Mesh ArraySMMStore"));
-    ESMCI_REGION_EXIT("MOAB Mesh ArraySMMStore", localrc)
-#endif
+    ESMCI_REGRID_TRACE_EXIT("MBMesh ArraySMMStore");
 
 // #define DUMP_FACTORS_AFTER_SMM
 #ifdef DUMP_FACTORS_AFTER_SMM

@@ -34,7 +34,7 @@
 #include <ESMCI_VM.h>
 #include "ESMCI_LogErr.h"
 
-#include "ESMCI_MeshCap.h"  // for profiling
+#include "ESMCI_TraceMacros.h"  // for profiling
 
 #include "MBTagConventions.hpp"
 #include "moab/ParallelComm.hpp"
@@ -919,41 +919,41 @@ void mbmesh_redist_node(MBMesh *mesh, int *num_node_gids, int *node_gids, MBMesh
     std::vector<UInt> src_node_gids_proc;
     DDir<> ndir;
 
-    MESHREDIST_TRACE_ENTER("mbmesh split id preprocessing");
+    ESMCI_MESHREDIST_TRACE_ENTER("mbmesh split id preprocessing");
     // for split element handling
     std::multimap<int, EntityHandle> orig_id_to_split_elem;
     mbmesh_invert_split_to_orig_id_map(mesh, orig_id_to_split_elem);
-    MESHREDIST_TRACE_EXIT("mbmesh split id preprocessing");
+    ESMCI_MESHREDIST_TRACE_EXIT("mbmesh split id preprocessing");
 
-    MESHREDIST_TRACE_ENTER("mbmesh ddir initialization");
+    ESMCI_MESHREDIST_TRACE_ENTER("mbmesh ddir initialization");
     // find the processor owners of each node
     mbmesh_initialize_ndir(mesh, num_node_gids, node_gids, src_node_gids_proc, ndir);
-    MESHREDIST_TRACE_EXIT("mbmesh ddir initialization");
+    ESMCI_MESHREDIST_TRACE_EXIT("mbmesh ddir initialization");
 
-    MESHREDIST_TRACE_ENTER("mbmesh ddir processing");
+    ESMCI_MESHREDIST_TRACE_ENTER("mbmesh ddir processing");
     // expand the elem_to_proc_list to include nodal distgrid information
     mbmesh_expand_elem_to_proc_list(mesh, src_node_gids_proc, orig_id_to_split_elem, elem_to_proc_list);
 
     // loop through elements looking for ones that haven't been assigned
     //   assign them to the processor of one of their neighbors if possible
     mbmesh_handle_unassigned_elements(mesh, orig_id_to_split_elem, elem_to_proc_list);
-    MESHREDIST_TRACE_EXIT("mbmesh ddir processing");
+    ESMCI_MESHREDIST_TRACE_EXIT("mbmesh ddir processing");
 
-    MESHREDIST_TRACE_ENTER("mbmesh element communication");
+    ESMCI_MESHREDIST_TRACE_ENTER("mbmesh element communication");
     // move the elements
     create_mbmesh_redist_elem(mesh, &elem_to_proc_list, out_mesh);
-    MESHREDIST_TRACE_EXIT("mbmesh element communication");
+    ESMCI_MESHREDIST_TRACE_EXIT("mbmesh element communication");
 
-    MESHREDIST_TRACE_ENTER("mbmesh moab communication");
+    ESMCI_MESHREDIST_TRACE_ENTER("mbmesh moab communication");
     // update the shared entities
     (*out_mesh)->update_parallel();
-    MESHREDIST_TRACE_EXIT("mbmesh moab communication");
+    ESMCI_MESHREDIST_TRACE_EXIT("mbmesh moab communication");
 
-    MESHREDIST_TRACE_ENTER("mbmesh post processing");
+    ESMCI_MESHREDIST_TRACE_ENTER("mbmesh post processing");
     // reset the owners
     mbmesh_set_node_owners(*out_mesh, ndir);
     mbmesh_set_elem_owners_wo_list(*out_mesh);
-    MESHREDIST_TRACE_EXIT("mbmesh post processing");
+    ESMCI_MESHREDIST_TRACE_EXIT("mbmesh post processing");
 
   } catch(std::exception &x) {
     // catch Mesh exception return code

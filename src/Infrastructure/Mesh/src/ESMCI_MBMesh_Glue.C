@@ -32,7 +32,7 @@
 #include "ESMCI_VM.h"
 #include "ESMCI_CoordSys.h"
 
-#include "ESMCI_MeshCap.h"  // for profiling
+#include "ESMCI_TraceMacros.h"  // for profiling
 
 #include "Mesh/include/ESMCI_MathUtil.h"
 #include "Mesh/include/Regridding/ESMCI_MeshRegrid.h"
@@ -70,8 +70,6 @@ void MBMesh_create(void **mbmpp,
 {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_create()"
-
-  MESHCREATE_TRACE_ENTER("mbmesh create");
 
   // Init output
   *mbmpp=NULL;
@@ -177,8 +175,6 @@ void MBMesh_create(void **mbmpp,
     // Output mesh
     *mbmpp=(void *)mbmp;
 
-  MESHCREATE_TRACE_EXIT("mbmesh create");
-
     // Set return code
     if (rc!=NULL) *rc = ESMF_SUCCESS;
 
@@ -192,8 +188,6 @@ void MBMesh_addnodes(void **mbmpp, int *num_nodes, int *nodeId,
 {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_addnodes()"
-
-  MESHCREATE_TRACE_ENTER("mbmesh addnodes");
 
   // Should we do exception handling in here, since MOAB doesn't???
    try {
@@ -413,8 +407,6 @@ void MBMesh_addnodes(void **mbmpp, int *num_nodes, int *nodeId,
        "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
-
-  MESHCREATE_TRACE_EXIT("mbmesh addnodes");
 
   // Set return code
    if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -643,8 +635,6 @@ void MBMesh_addelements(void **mbmpp,
 {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_addelements()"
-
-  MESHCREATE_TRACE_ENTER("mbmesh addelements");
 
    try {
 
@@ -1509,8 +1499,6 @@ void MBMesh_addelements(void **mbmpp,
       "- Caught unknown exception", ESMC_CONTEXT, rc);
      return;
   }
-
-  MESHCREATE_TRACE_EXIT("mbmesh addelements");
 
   // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -3011,7 +2999,7 @@ void MBMesh_createredistnodes(void **src_meshpp, int *num_node_gids, int *node_g
 
     mbmesh_redist_node(mesh, num_node_gids, node_gids, &out_mesh);
 
-    MESHREDIST_TRACE_ENTER("mbmesh split id postprocessing");
+    ESMCI_MESHREDIST_TRACE_ENTER("mbmesh split id postprocessing");
     // split element handling
     out_mesh->is_split=mesh->is_split;
 
@@ -3021,7 +3009,7 @@ void MBMesh_createredistnodes(void **src_meshpp, int *num_node_gids, int *node_g
       // RLO: not sure we need this if above is used
       // out_mesh->split_to_orig_id=mesh->split_to_orig_id;
     }
-    MESHREDIST_TRACE_EXIT("mbmesh split id postprocessing");
+    ESMCI_MESHREDIST_TRACE_EXIT("mbmesh split id postprocessing");
 
   // convert the out_mesh back to a void*
   *output_meshpp = reinterpret_cast<void *> (out_mesh);
