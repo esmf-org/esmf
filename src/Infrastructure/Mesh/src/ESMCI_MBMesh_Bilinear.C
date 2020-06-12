@@ -36,6 +36,8 @@
 #include <ESMCI_VM.h>
 #include <ESMCI_LogErr.h>
 
+#include "ESMCI_TraceMacros.h"  // for profiling
+
 using std::vector;
 using std::iterator;
 
