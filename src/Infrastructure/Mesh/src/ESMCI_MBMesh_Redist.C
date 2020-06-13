@@ -161,11 +161,17 @@ void create_mbmesh_redist_elem(MBMesh *src_mesh,
 
   // Redist verts to new mesh
   std::map<int,EntityHandle> out_gid_to_vert;
+  ESMCI_RENDEZVOUS_TRACE_ENTER("MBMesh rendezvous redist elements move verts")
   create_mbmesh_redist_elem_move_verts(src_mesh, elem_to_proc_list, &out_gid_to_vert, out_mesh);
+  ESMCI_RENDEZVOUS_TRACE_EXIT("MBMesh rendezvous redist elements move verts")
 
   // Redist elems to new mesh
+  ESMCI_RENDEZVOUS_TRACE_ENTER("MBMesh rendezvous redist elements move elems")
   create_mbmesh_redist_elem_move_elems(src_mesh, elem_to_proc_list, &out_gid_to_vert, out_mesh);
+  ESMCI_RENDEZVOUS_TRACE_EXIT("MBMesh rendezvous redist elements move elems")
 
+
+  ESMCI_RENDEZVOUS_TRACE_ENTER("MBMesh rendezvous MOAB communication")
   // setup parallel comm, destroyed in MBMesh destructor
   ParallelComm *pcomm= new ParallelComm(out_mesh->mesh, mpi_comm);
 
@@ -178,6 +184,7 @@ void create_mbmesh_redist_elem(MBMesh *src_mesh,
   // Resolve object sharing like in Mesh->Commit()
   merr = pcomm->resolve_shared_ents(0, elems, out_mesh->pdim, out_mesh->pdim-1);
   MBMESH_CHECK_ERR(merr, localrc);
+  ESMCI_RENDEZVOUS_TRACE_EXIT("MBMesh rendezvous MOAB communication")
 
   // Output new mesh
   *_out_mesh=out_mesh;
@@ -365,7 +372,8 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
       throw localrc;  // bail out with exception
     
-    
+    ESMCI_RENDEZVOUS_TRACE_ENTER("MBMesh rendezvous redist elements move verts setup comm pattern")
+
     //// Get unique list of verts going to each proc ////
     // allocate set list
     std::set<int> *set_of_gids_per_proc=NULL;
@@ -427,7 +435,6 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
         j++;
        }
     }
-    
 
     // Create communication structure
     SparseMsg comm;
@@ -483,9 +490,14 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
     // Deallocate list of sets
     if (set_of_gids_per_proc != NULL) delete [] set_of_gids_per_proc;
 
+    ESMCI_RENDEZVOUS_TRACE_EXIT("MBMesh rendezvous redist elements move verts setup comm pattern")
+
+    ESMCI_RENDEZVOUS_TRACE_ENTER("MBMesh rendezvous redist elements move verts communication")
     // Communicate verts
     comm.communicate();
+    ESMCI_RENDEZVOUS_TRACE_EXIT("MBMesh rendezvous redist elements move verts communication")
 
+    ESMCI_RENDEZVOUS_TRACE_ENTER("MBMesh rendezvous redist elements move verts create verts")
      // Go through received buffers and create verts
     for (std::vector<UInt>::const_iterator p = comm.inProc_begin(); p != comm.inProc_end(); ++p) {
       UInt proc = *p;
@@ -528,6 +540,7 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
       verts[v]=mi->second;
       v++;
     }
+    ESMCI_RENDEZVOUS_TRACE_EXIT("MBMesh rendezvous redist elements move verts create verts")
 
     // Put into mesh
     out_mesh->num_verts=num_verts;
@@ -553,6 +566,8 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
       throw localrc;  // bail out with exception
     
+
+    ESMCI_RENDEZVOUS_TRACE_ENTER("MBMesh rendezvous redist elements move elems setup comm pattern")
 
     // Allocate size array
     UInt *size_per_proc=NULL;
@@ -640,10 +655,14 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
       // Put into send buffer
       b->push((UChar *)buff, (UInt)elem_comm_size);
     }
+    ESMCI_RENDEZVOUS_TRACE_EXIT("MBMesh rendezvous redist elements move elems setup comm pattern")
 
+    ESMCI_RENDEZVOUS_TRACE_ENTER("MBMesh rendezvous redist elements move elems communication")
     // Communicate elems
     comm.communicate();
+    ESMCI_RENDEZVOUS_TRACE_EXIT("MBMesh rendezvous redist elements move elems communication")
 
+    ESMCI_RENDEZVOUS_TRACE_ENTER("MBMesh rendezvous redist elements move elems create elems")
     // Track new elems, so we don't create copies
     std::map<int,EntityHandle> out_gid_to_elem; 
 
@@ -677,6 +696,8 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
         }
       }
     }
+    ESMCI_RENDEZVOUS_TRACE_EXIT("MBMesh rendezvous redist elements move elems create elems")
+
   }
 
   // Redist elems to new mesh

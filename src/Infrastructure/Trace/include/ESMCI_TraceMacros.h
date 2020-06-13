@@ -79,4 +79,16 @@
 #define ESMCI_DUALMESH_TRACE_EXIT(name)
 #endif
 
+#ifdef ESMF_PROFILE_RENDEZVOUS
+#define ESMCI_RENDEZVOUS_TRACE_ENTER(name) {char before[200] = "before "; \
+  VM::getCurrent(NULL)->logMemInfo(strcat(before, name)); \
+  ESMCI::TraceEventRegionEnter(name, NULL);}
+#define ESMCI_RENDEZVOUS_TRACE_EXIT(name) {char after[200] = "after "; \
+  ESMCI::TraceEventRegionExit(name, NULL); \
+  VM::getCurrent(NULL)->logMemInfo(strcat(after, name));}
+#else
+#define ESMCI_RENDEZVOUS_TRACE_ENTER(name)
+#define ESMCI_RENDEZVOUS_TRACE_EXIT(name)
+#endif
+
 #endif

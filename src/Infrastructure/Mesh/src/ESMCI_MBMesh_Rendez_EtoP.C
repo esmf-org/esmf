@@ -36,6 +36,8 @@
 #include "Mesh/include/Legacy/ESMCI_BBox.h"
 #include "ESMCI_PointList.h"
 
+#include "ESMCI_TraceMacros.h"  // for profiling
+
 // #define ESMF_REGRID_DEBUG_MAP_ELEM1 836800
 // #define ESMF_REGRID_DEBUG_MAP_ELEM2 836801
 // #define ESMF_REGRID_DEBUG_MAP_NODE 4323801
@@ -435,11 +437,13 @@ void create_rendez_mbmesh_etop(MBMesh *srcmesh, PointList *dstpl,
   bool is_sph = false;
   if (*map_type == MB_MAP_TYPE_GREAT_CIRCLE) is_sph = true;
 
+  ESMCI_RENDEZVOUS_TRACE_ENTER("MBMesh rendezvous comm pattern")
   // Compute communication pattern to build rendezvous meshes
   std::vector<EH_Comm_Pair> src_elem_to_proc_list;
   std::vector<PL_Comm_Pair> dst_point_to_proc_list;
   calc_rendez_comm_pattern(srcmesh, dstpl, 
       &src_elem_to_proc_list, &dst_point_to_proc_list, is_sph);
+  ESMCI_RENDEZVOUS_TRACE_EXIT("MBMesh rendezvous comm pattern")
 
 /*
   // Debug print of src list
@@ -468,10 +472,14 @@ void create_rendez_mbmesh_etop(MBMesh *srcmesh, PointList *dstpl,
 */
 
   // Create src rend mesh
+  ESMCI_RENDEZVOUS_TRACE_ENTER("MBMesh rendezvous redist elements")
   create_mbmesh_redist_elem(srcmesh, &src_elem_to_proc_list, _srcmesh_rendez);
+  ESMCI_RENDEZVOUS_TRACE_EXIT("MBMesh rendezvous redist elements")
 
   // Create dst rend mesh
+  ESMCI_RENDEZVOUS_TRACE_ENTER("MBMesh rendezvous redist points")
   create_pointlist_redist_point(dstpl, &dst_point_to_proc_list, _dstpl_rendez);
+  ESMCI_RENDEZVOUS_TRACE_EXIT("MBMesh rendezvous redist points")
 }
 
 #endif // ESMF_MOAB
