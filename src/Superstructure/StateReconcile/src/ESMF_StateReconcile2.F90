@@ -1128,9 +1128,9 @@ contains
     end if
 
     if (needs_count /= ubound (vm_intids, 1)) then
-      write (errstring, '(a,i0,a,i0)') 'size mismatch: needs_count = ', needs_count, ', vm_ids =', ubound (vm_ids, 1)
+      write (errstring, '(a,i0,a,i0)') 'size mismatch: needs_count = ', needs_count, ', vm_intids =', ubound (vm_intids, 1)
       call ESMF_LogWrite (msg=errstring, logmsgFlag=ESMF_LOGMSG_ERROR, ESMF_CONTEXT)
-      if (ESMF_LogFoundError(ESMF_RC_INTNRL_INCONS, msg='needs_count /= ubound (vm_ids, 1)', &
+      if (ESMF_LogFoundError(ESMF_RC_INTNRL_INCONS, msg='needs_count /= ubound (vm_intids, 1)', &
           ESMF_CONTEXT,  &
           rcToReturn=rc)) return
     end if
