@@ -1,0 +1,153 @@
+version: 2.1
+
+jobs:
+  build-esmf:
+    machine: true
+    environment:
+      - ESMF_DIR: $CIRCLE_WORKING_DIRECTORY/sandbox/esmf/src-git
+      - DOCKER_IMG: bekozi/esmf-ci
+      - TEST_RUNNER: esmf-test-runner
+    steps:
+#      - run:
+#          name: passthru-build-esmf
+#          command: exit 0
+      - run:
+          name: Checkout Code
+          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git $ESMF_DIR
+      - run:
+          name: make info
+          command: bash $ESMF_DIR/.circleci/sh/make-info.sh
+      - run:
+          name: make
+          command: bash $ESMF_DIR/.circleci/sh/make.sh
+      - run:
+          name: Test Environment Finalize
+          command: bash $ESMF_DIR/.circleci/sh/docker-push.sh
+  build-tests:
+    parameters:
+      target:
+        type: string
+    machine: true
+    environment:
+      - ESMF_DIR: $CIRCLE_WORKING_DIRECTORY/sandbox/esmf/src-git
+      - DOCKER_IMG: bekozi/esmf-ci
+      - TEST_RUNNER: esmf-test-runner
+    steps:
+#      - run:
+#          name: passthru-build-tests
+#          command: exit 0
+      - run:
+          name: Checkout Code
+          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git $ESMF_DIR
+      - run:
+          name: Test Environment Initialize
+          command: docker run --cpus=$(nproc) -dit --name "${TEST_RUNNER}" "${DOCKER_IMG}:${CIRCLE_BRANCH}"
+      - run:
+          name: make build_<< parameters.target >>
+          command: docker exec -t "${TEST_RUNNER}" bash -c "make build_<< parameters.target >> 2>&1 | tee esmf-make-build_<< parameters.target >>.out"
+      - run:
+          name: Test Environment Finalize
+          command: bash $ESMF_DIR/.circleci/sh/docker-push-tests.sh << parameters.target >>
+  run-tests:
+    parameters:
+      target:
+        type: string
+    machine: true
+    environment:
+      - ESMF_DIR: $CIRCLE_WORKING_DIRECTORY/sandbox/esmf/src-git
+      - DOCKER_IMG: bekozi/esmf-ci
+      - TEST_RUNNER: esmf-test-runner
+    steps:
+#      - run:
+#          name: passthru-run-tests
+#          command: exit 0
+      - run:
+          name: Checkout Code
+          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git $ESMF_DIR
+      - run:
+          name: Test Environment Initialize
+          command: docker run --cpus=$(nproc) -dit --name "${TEST_RUNNER}" "${DOCKER_IMG}:${CIRCLE_BRANCH}-<< parameters.target >>"
+      - run:
+          name: make run_<< parameters.target >>
+          command: docker exec -t "${TEST_RUNNER}" bash -c "make run_<< parameters.target >> 2>&1 | tee esmf-make-run_<< parameters.target >>.out"
+      - run:
+          name: Test Environment Finalize
+          command: bash $ESMF_DIR/.circleci/sh/docker-push-tests.sh  << parameters.target >>
+  build-docs:
+    environment:
+      - ESMF_DIR: $CIRCLE_WORKING_DIRECTORY/sandbox/esmf/src-git
+      - DOCKER_IMG: bekozi/esmf-doc
+    machine: true
+    steps:
+#      - run:
+#          name: passthru-build-docs
+#          command: exit 0
+      - run:
+          name: Checkout Code
+          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git $ESMF_DIR
+      - run:
+          name: Docker Build/Push
+          command: bash $ESMF_DIR/.circleci/sh/build-doc.sh
+  publish-docs:
+    docker:
+      - image: bekozi/esmf-doc:$CIRCLE_BRANCH
+    steps:
+      - run:
+          name: passthru-publish-docs
+          command: exit 0
+  external_demos:
+    machine: true
+    steps:
+      - run:
+          name: passthru-external_demos
+          command: exit 0
+  nuopc_protos:
+    machine: true
+    steps:
+      - run:
+          name: passthru-nuopc_protos
+          command: exit 0
+  bit-for-bit:
+    machine: true
+    steps:
+      - run:
+          name: passthru-bit-for-bit
+          command: exit 0
+
+workflows:
+  build-and-test:
+    jobs:
+      - build-esmf
+      - build-tests:
+          name: build_<< matrix.target >>
+          matrix:
+            parameters:
+              target: ["unit_tests", "system_tests", "examples"]
+          requires:
+            - build-esmf
+      - run-tests:
+          name: run_<< matrix.target >>
+          matrix:
+            parameters:
+              target: ["unit_tests", "system_tests", "examples"]
+          requires:
+            - build_<< matrix.target >>
+      - external_demos:
+          name: placeholder-external_demos
+          requires:
+            - run-tests
+      - nuopc_protos:
+          name: placeholder-nuopc-protos
+          requires:
+            - run-tests
+      - bit-for-bit:
+          name: placeholder-bit-for-bit
+          requires:
+            - run-tests
+  docs:
+    jobs:
+      - build-docs
+      - publish-docs:
+          name: placeholder-publish-docs
+          requires:
+            - build-docs
