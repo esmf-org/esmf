@@ -169,7 +169,7 @@ workflows:
       - esmpy-test:
           name: placeholder-esmpy-test
           requires:
-            - esmpy-build
+            - placeholder-esmpy-build
   docs:
     jobs:
       - build-docs
