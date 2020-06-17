@@ -878,11 +878,6 @@ void MBMesh::halo_comm_elems_all_tags() {
 
 
 MBMesh::~MBMesh() {
-
-  // Get the indexed pcomm object from the interface                                                                
-  // index 0 should return the one created inside MBMesh_addelements                                                
-  ParallelComm *pcomm = ParallelComm::get_pcomm(this->mesh, 0);
-  delete pcomm;
   
   // Get rid of MOAB mesh
   if (mesh != NULL) delete mesh;
@@ -1059,13 +1054,18 @@ void MBMesh::CreateGhost() {
   if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
     throw localrc;  // bail out with exception
 
-  // get the indexed pcomm object from the interface
-  // pass index 0, it will the one created inside MBMesh_addelements
-  ParallelComm *pcomm = ParallelComm::get_pcomm(this->mesh, 0);
-  
-  // this is already called in MBMesh_addelements
-  // merr = pcomm->resolve_shared_ents(0, elems, this->pdim, this->pdim-1);
-  // MBMESH_CHECK_ERR(merr, localrc);
+  // set up the MOAB parallel environment
+  ParallelComm *pcomm= new ParallelComm(mesh, mpi_comm);
+
+  // Get list of elements
+  Range elems;
+  merr=mesh->get_entities_by_dimension(0, pdim, elems);
+  MBMESH_CHECK_ERR(merr, localrc);
+    
+  // Resolve object sharing 
+  merr = pcomm->resolve_shared_ents(0, elems, pdim, pdim-1);
+  MBMESH_CHECK_ERR(merr, localrc);
+
 
 #ifdef DEBUG_MOAB_GHOST_EXCHANGE
   int nprocs = pcomm->size();
@@ -1137,10 +1137,6 @@ void MBMesh::CreateGhost() {
   merr = pcomm->exchange_tags(node_tags, node_tags, nodes);
   MBMESH_CHECK_ERR(merr, localrc);
 
-  Range elems;
-  merr=this->mesh->get_entities_by_dimension(0, this->pdim, elems);
-  MBMESH_CHECK_ERR(merr, localrc);
-
   merr = pcomm->exchange_tags(elem_tags, elem_tags, elems);
   MBMESH_CHECK_ERR(merr, localrc);
 
@@ -1176,8 +1172,10 @@ void MBMesh::CreateGhost() {
           rbuf[4*i + 1] << " edges, " << rbuf[4*i + 2] << " faces, " << rbuf[4*i + 3] << " elements" << endl;
     }
   }
-  
 #endif
+
+  // Get the indexed pcomm object from the interface
+  delete pcomm;
 
 }
 

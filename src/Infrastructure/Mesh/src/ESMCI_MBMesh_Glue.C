@@ -1376,18 +1376,7 @@ void MBMesh_addelements(void **mbmpp,
     mbmp->num_elems=num_elems;
 
     //// Setup parallel sharing ///
-
-    // setup parallel comm, destroyed in MBMesh destructor
-    ParallelComm *pcomm= new ParallelComm(moab_mesh, mpi_comm);
-  
-    Range elems;
-    merr=mbmp->mesh->get_entities_by_dimension(0, mbmp->pdim, elems);
-    MBMESH_CHECK_ERR(merr, localrc);
-    
-    // Resolve object sharing like in Mesh->Commit()
-    // merr = pcomm->resolve_shared_ents(0, mbmp->pdim, mbmp->pdim-1);
-    merr = pcomm->resolve_shared_ents(0, elems, mbmp->pdim, mbmp->pdim-1);
-    MBMESH_CHECK_ERR(merr, localrc);
+    // mbmp->setup_parallel();
 
 
 #ifdef DEBUG_ELEM_COORDS

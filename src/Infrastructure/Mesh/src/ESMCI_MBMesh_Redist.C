@@ -170,22 +170,6 @@ void create_mbmesh_redist_elem(MBMesh *src_mesh,
   create_mbmesh_redist_elem_move_elems(src_mesh, elem_to_proc_list, &out_gid_to_vert, out_mesh);
   ESMCI_RENDEZVOUS_TRACE_EXIT("MBMesh rendezvous redist elements move elems")
 
-
-  ESMCI_RENDEZVOUS_TRACE_ENTER("MBMesh rendezvous MOAB communication")
-  // setup parallel comm, destroyed in MBMesh destructor
-  ParallelComm *pcomm= new ParallelComm(out_mesh->mesh, mpi_comm);
-
-  int merr;
-
-  Range elems;
-  merr=out_mesh->mesh->get_entities_by_dimension(0, out_mesh->pdim, elems);
-  MBMESH_CHECK_ERR(merr, localrc);
-  
-  // Resolve object sharing like in Mesh->Commit()
-  merr = pcomm->resolve_shared_ents(0, elems, out_mesh->pdim, out_mesh->pdim-1);
-  MBMESH_CHECK_ERR(merr, localrc);
-  ESMCI_RENDEZVOUS_TRACE_EXIT("MBMesh rendezvous MOAB communication")
-
   // Output new mesh
   *_out_mesh=out_mesh;
 }
@@ -907,9 +891,6 @@ void mbmesh_redist_elem(MBMesh *mesh, int *num_elem_gids, int *elem_gids, MBMesh
     // move the elements
     create_mbmesh_redist_elem(mesh, &elem_to_proc_list, out_mesh);
 
-    // update the shared entities
-    (*out_mesh)->update_parallel();
-
     // reset the owners
     mbmesh_set_elem_owners(*out_mesh, edir);
     mbmesh_set_node_owners_wo_list(*out_mesh);
@@ -964,11 +945,6 @@ void mbmesh_redist_node(MBMesh *mesh, int *num_node_gids, int *node_gids, MBMesh
     // move the elements
     create_mbmesh_redist_elem(mesh, &elem_to_proc_list, out_mesh);
     ESMCI_MESHREDIST_TRACE_EXIT("mbmesh element communication");
-
-    ESMCI_MESHREDIST_TRACE_ENTER("mbmesh moab communication");
-    // update the shared entities
-    (*out_mesh)->update_parallel();
-    ESMCI_MESHREDIST_TRACE_EXIT("mbmesh moab communication");
 
     ESMCI_MESHREDIST_TRACE_ENTER("mbmesh post processing");
     // reset the owners
@@ -1026,8 +1002,6 @@ void mbmesh_redist(MBMesh *mesh, int *num_node_gids, int *node_gids, int *num_el
 
     // move the elements
     create_mbmesh_redist_elem(mesh, &elem_to_proc_list, out_mesh);
-
-    (*out_mesh)->update_parallel();
 
     // reset the owners
     mbmesh_set_node_owners(*out_mesh, ndir);
