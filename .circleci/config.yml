@@ -113,6 +113,24 @@ jobs:
       - run:
           name: passthru-bit-for-bit
           command: exit 0
+  esmpy-build:
+    machine: true
+    steps:
+      - run:
+          name: passthru-esmpy-build
+          command: exit 0
+  esmpy-test:
+    machine: true
+    steps:
+      - run:
+          name: passthru-esmpy-test
+          command: exit 0
+  esmpy-docs:
+    machine: true
+    steps:
+      - run:
+          name: passthru-esmpy-docs
+          command: exit 0
 
 workflows:
   build-and-test:
@@ -144,6 +162,14 @@ workflows:
           name: placeholder-bit-for-bit
           requires:
             - run-tests
+      - esmpy-build:
+          name: placeholder-esmpy-build
+          requires:
+            - build-esmf
+      - esmpy-test:
+          name: placeholder-esmpy-test
+          requires:
+            - esmpy-build
   docs:
     jobs:
       - build-docs
@@ -151,3 +177,5 @@ workflows:
           name: placeholder-publish-docs
           requires:
             - build-docs
+      - esmpy-docs:
+          name: placeholder-esmpy-docs
