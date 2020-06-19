@@ -650,11 +650,13 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
     // Track new elems, so we don't create copies
     std::map<int,EntityHandle> out_gid_to_elem; 
 
+
     // Go through received buffers and create verts
     for (std::vector<UInt>::const_iterator p = comm.inProc_begin(); p != comm.inProc_end(); ++p) {
       UInt proc = *p;
       SparseMsg::buffer *b = comm.getRecvBuffer(proc);
 
+      ESMCI_RENDEZVOUS_TRACE_ENTER("MBMesh rendezvous redist elements move elems create elems inner loop")
       while (!b->empty()) {
         char buff[MAX_ELEM_COMM_SIZE];
  
@@ -679,6 +681,8 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
           out_gid_to_elem[gid]=new_elem;          
         }
       }
+    ESMCI_RENDEZVOUS_TRACE_EXIT("MBMesh rendezvous redist elements move elems create elems inner loop")
+
     }
     ESMCI_RENDEZVOUS_TRACE_EXIT("MBMesh rendezvous redist elements move elems create elems")
 
