@@ -653,6 +653,8 @@ void MBMesh_addelements(void **mbmpp,
     // local rc code
     int localrc;
 
+    ESMCI_MESHCREATE_TRACE_ENTER("MBMesh addelems setup")
+
     // Do this for now instead of initing mesh parallel stuff
     // TODO: MAYBE EVENTUALLY PUT THIS INTO MBMesh???
     MPI_Comm mpi_comm;
@@ -838,6 +840,10 @@ void MBMesh_addelements(void **mbmpp,
       mbmp->has_elem_coords=true;
     }
 
+    ESMCI_MESHCREATE_TRACE_EXIT("MBMesh addelems setup")
+
+    ESMCI_MESHCREATE_TRACE_ENTER("MBMesh addelems split elem handling")
+
     // Variable indicating if any of the elements on this PET are split
     bool is_split_local=false;
 
@@ -930,6 +936,8 @@ void MBMesh_addelements(void **mbmpp,
       // printf("%d# beg_extra_ids=%d end=%d\n",Par::Rank(),beg_extra_ids,beg_extra_ids+num_extra_elem-1);
     }
 
+    ESMCI_MESHCREATE_TRACE_EXIT("MBMesh addelems split elem handling")
+
 #if 0
     // Don't currently support split elements with element coords
     if (mbmp->is_split && elemCoordsPresent) {
@@ -939,6 +947,9 @@ void MBMesh_addelements(void **mbmpp,
              ESMC_CONTEXT, &localrc)) throw localrc;
     }
 #endif
+
+    ESMCI_MESHCREATE_TRACE_ENTER("MBMesh addelems connectivity")
+
 
     // Get number of verts
     int num_verts = mbmp->num_verts;
@@ -1230,6 +1241,10 @@ void MBMesh_addelements(void **mbmpp,
       }
     }
 
+    ESMCI_MESHCREATE_TRACE_EXIT("MBMesh addelems connectivity")
+
+    ESMCI_MESHCREATE_TRACE_ENTER("MBMesh addelems add")
+
     // Now loop the elements and add them to the mesh.
     int cur_conn = 0;
     for (int e = 0; e < num_elems; ++e) {
@@ -1371,6 +1386,8 @@ void MBMesh_addelements(void **mbmpp,
 #endif
 
     } // for e
+
+    ESMCI_MESHCREATE_TRACE_EXIT("MBMesh addelems add")
 
     // Set number of local elems
     mbmp->num_elems=num_elems;
