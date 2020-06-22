@@ -16,4 +16,8 @@ WORKDIR src-git
 
 ENV ESMF_DIR=${HOME}/sandbox/esmf/src-git
 
+WORKDIR src/addon/NUOPC/doc
+RUN make localdoc 2>&1 | tee nuopc-make-localdoc.out
+
+WORKDIR ${ESMF_DIR}
 RUN make doc 2>&1 | tee esmf-make-doc.out
