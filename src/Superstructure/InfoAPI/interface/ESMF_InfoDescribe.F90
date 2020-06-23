@@ -176,7 +176,7 @@ function ESMF_InfoDescribeGetCurrentInfo(self, rc) result(info)
   info%ptr = C_NULL_PTR
   base = self%GetCurrentBase(rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-  info = ESMF_InfoBaseGetHandle(base, rc=localrc)
+  call ESMF_InfoGetFromBase(base, info, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   info%is_view = .true.
   if (present(rc)) rc = ESMF_SUCCESS
@@ -341,7 +341,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (self%addObjectInfo) then
       if (l_base_is_valid) then
-        object_info = ESMF_InfoBaseGetHandle(base, rc=localrc)
+        call ESMF_InfoGetFromBase(base, object_info, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_InfoSet(self%info, local_root_key//"/info", object_info, force=.false., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return

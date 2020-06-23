@@ -1420,12 +1420,12 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        base_temp_info = ESMF_InfoBaseGetHandle(base_temp, rc=localrc)
+        call ESMF_InfoGetFromBase(base_temp, base_temp_info, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        base_info = ESMF_InfoBaseGetHandle(base, rc=localrc)
+        call ESMF_InfoGetFromBase(base, base_info, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return

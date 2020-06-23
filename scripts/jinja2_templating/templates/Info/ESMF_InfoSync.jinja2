@@ -124,13 +124,12 @@ end subroutine {{ method_name }}
 
 ! Note: Documentation stub located in ESMF_InfoMod
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoGetFromHost{ esmf_type }}()"
-subroutine ESMF_InfoGetFromHost{{ esmf_type }}(host, info, keywordEnforcer, rc) result(info)
+#define ESMF_METHOD "ESMF_InfoGetFromHost{{ esmf_type }}()"
+subroutine ESMF_InfoGetFromHost{{ esmf_type }}(host, info, keywordEnforcer, rc)
   type(ESMF_{{ esmf_type }}), intent(in) :: host
   type(ESMF_Info), intent(out) :: info
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(inout), optional :: rc
-  type(ESMF_Info) :: info
 
   integer :: localrc
   type(ESMF_InfoDescribe) :: eidesc
@@ -141,7 +140,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   if (present(rc)) rc = ESMF_SUCCESS
-end subroutine ESMF_InfoGetHandle{{ esmf_type }}
+end subroutine ESMF_InfoGetFromHost{{ esmf_type }}
 {% endfor %}
 
 end module ESMF_InfoSyncMod

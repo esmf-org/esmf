@@ -3341,10 +3341,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        ! Copy Attributes
        if (present(copyAttributes)) then
          if (copyAttributes) then
-             lhs = ESMF_InfoPointerGetHandle(newGrid%this, rc=localrc)
+             call ESMF_InfoGetFromPointer(newGrid%this, lhs, rc=localrc)
              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
-             rhs = ESMF_InfoPointerGetHandle(grid%this, rc=localrc)
+             call ESMF_InfoGetFromPointer(grid%this, rhs, rc=localrc)
              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
              call ESMF_InfoUpdate(lhs, rhs, recursive=.true., rc=localrc)
