@@ -1308,49 +1308,89 @@ endif
 # For situations where PATH is not to be trusted for nc-config location.
 pathtype := ""
 ifdef ESMF_NETCDF
-pathtype := $(shell $(ESMF_DIR)/scripts/pathtype $(ESMF_NETCDF))
+  pathtype := $(shell $(ESMF_DIR)/scripts/pathtype $(ESMF_NETCDF))
 endif
 ifeq ($(pathtype),abs)
-# use the $(ESMF_NETCDF) contents as nc-config
-ESMF_NCCONFIG = $(ESMF_NETCDF)
+  # use the $(ESMF_NETCDF) contents as nc-config
+  ESMF_NCCONFIG = $(ESMF_NETCDF)
 endif
 ifeq ($(ESMF_NETCDF),nc-config)
-ESMF_NCCONFIG = $(ESMF_NETCDF)
+  ESMF_NCCONFIG = $(ESMF_NETCDF)
 endif
 ifdef ESMF_NCCONFIG
-ifneq ($(origin ESMF_NFCONFIG), environment)
-ifeq ($(shell $(ESMF_DIR)/scripts/available nf-config),nf-config)
-# There is an nf-config command in the user's path, use it
-ESMF_NFCONFIG = nf-config
-else
-# See if there is a nf-config command same place as nc-config
-ESMF_NFCONFIG = $(shell $(ESMF_NETCDF) --prefix)/bin/nf-config
-ifneq ($(shell $(ESMF_DIR)/scripts/exists $(ESMF_NFCONFIG)),$(ESMF_NFCONFIG))
-ESMF_NFCONFIG :=
-endif
-endif
-export ESMF_NFCONFIG
-endif
-ifneq ($(origin ESMF_NETCDF_INCLUDE), environment)
-ESMF_NETCDF_INCLUDE := $(shell $(ESMF_NCCONFIG) --includedir)
-export ESMF_NETCDF_INCLUDE
-endif
-ifneq ($(origin ESMF_NETCDF_LIBS), environment)
-ifdef ESMF_NFCONFIG
-ifeq ($(shell $(ESMF_DIR)/scripts/nfconfigtest $(ESMF_NFCONFIG)),working)
-# a working nf-config
-ESMF_NETCDF_LIBS    := $(shell $(ESMF_NFCONFIG) --flibs)
-else
-# not a working nf-config -> try manually setting
-ESMF_NETCDF_LIBS    := -lnetcdff
-endif
-else
-ESMF_NETCDF_LIBS    := $(shell $(ESMF_NCCONFIG) --flibs)
-endif
-ESMF_NETCDF_CONFIG_LIBS := $(shell $(ESMF_NCCONFIG) --libs)
-ESMF_NETCDF_LIBS   += $(ESMF_NETCDF_CONFIG_LIBS)
-endif
-export ESMF_NETCDF_LIBS
+  # Use nc-config, and potentially nf-config to determine correct NetCDF options
+  ifneq ($(origin ESMF_NFCONFIG), environment)
+    ifeq ($(pathtype),abs)
+      # nc-config was provided via absolute path -> look for NFCONFIG there first
+      ESMF_NFCONFIG := $(shell $(ESMF_NETCDF) --prefix)/bin/nf-config
+      ifeq ($(shell $(ESMF_DIR)/scripts/exists $(ESMF_NFCONFIG)),$(ESMF_NFCONFIG))
+        export ESMF_NFCONFIG
+      endif
+    endif
+    ifndef ESMF_NFCONFIG
+      ifeq ($(shell $(ESMF_DIR)/scripts/available nf-config),nf-config)
+        # There is an nf-config command in the user's path, use it
+        ESMF_NFCONFIG := nf-config
+      else
+        # Last attempt see if there is a nf-config command same place as nc-config
+        ESMF_NFCONFIG := $(shell $(ESMF_NETCDF) --prefix)/bin/nf-config
+        ifneq ($(shell $(ESMF_DIR)/scripts/exists $(ESMF_NFCONFIG)),$(ESMF_NFCONFIG))
+          ESMF_NFCONFIG :=
+        endif
+      endif
+    endif
+    export ESMF_NFCONFIG
+  endif
+  # NetCDF C options -------------------------------------------------------------
+  ifneq ($(origin ESMF_NETCDF_INCLUDE), environment)
+    # query nc-config for the include path
+    ESMF_NETCDF_INCLUDE := $(shell $(ESMF_NCCONFIG) --includedir)
+    export ESMF_NETCDF_INCLUDE
+  endif
+  ifneq ($(origin ESMF_NETCDF_LIBS), environment)
+    # query nc-config for the -lnetcdf* options
+    ESMF_NETCDF_LIBS := $(filter -lnetcdf%,$(shell $(ESMF_NCCONFIG) --libs))
+    export ESMF_NETCDF_LIBS
+  endif
+  ifneq ($(origin ESMF_NETCDF_LIBPATH), environment)
+    # query nc-config for the LIBPATH
+    ESMF_NETCDF_LIBPATH := $(shell $(ESMF_NCCONFIG) --libdir)
+    export ESMF_NETCDF_LIBPATH
+  endif
+  # NetCDF Fortran options -------------------------------------------------------
+  ifneq ($(origin ESMF_NETCDFF_INCLUDE), environment)
+    ifdef ESMF_NFCONFIG
+      ifeq ($(shell $(ESMF_DIR)/scripts/nfconfigtest $(ESMF_NFCONFIG)),working)
+        # a working nf-config -> access the include path
+        ESMF_NETCDFF_INCLUDE := $(shell $(ESMF_NFCONFIG) --includedir)
+      endif
+      export ESMF_NETCDFF_INCLUDE
+    endif
+  endif
+  ifneq ($(origin ESMF_NETCDFF_LIBS), environment)
+    ifdef ESMF_NFCONFIG
+      ifeq ($(shell $(ESMF_DIR)/scripts/nfconfigtest $(ESMF_NFCONFIG)),working)
+        # a working nf-config -> use it to get -lnetcdf* options
+        ESMF_NETCDFF_LIBS    := $(filter -lnetcdf%,$(shell $(ESMF_NFCONFIG) --flibs))
+      else
+        # not a working nf-config -> try manually guessing the correct -lnetcdf* option
+        ESMF_NETCDFF_LIBS    := -lnetcdff
+      endif
+    else
+      # no nf-config available -> use nc-config to get -lnetcdf* options
+      ESMF_NETCDFF_LIBS    := $(filter -lnetcdf%,$(shell $(ESMF_NCCONFIG) --flibs))
+    endif
+    export ESMF_NETCDFF_LIBS
+  endif
+  ifneq ($(origin ESMF_NETCDFF_LIBPATH), environment)
+    ifdef ESMF_NFCONFIG
+      ifeq ($(shell $(ESMF_DIR)/scripts/nfconfigtest $(ESMF_NFCONFIG)),working)
+        # a working nf-config -> extract the -L options out of the --flibs return value
+        ESMF_NETCDFF_LIBPATH := $(subst -L,,$(filter -L%,$(shell $(ESMF_NFCONFIG) --flibs)))
+      endif
+      export ESMF_NETCDFF_LIBPATH
+     endif
+  endif
 endif
 
 ifeq ($(ESMF_NETCDF),standard)
@@ -1368,31 +1408,33 @@ endif
 endif
 
 ifdef ESMF_NETCDF
-ESMF_CPPFLAGS             += -DESMF_NETCDF=1
-ifdef ESMF_NETCDF_INCLUDE
-ESMF_CXXCOMPILEPATHSTHIRD += -I$(ESMF_NETCDF_INCLUDE)
-ESMF_F90COMPILEPATHSTHIRD += -I$(ESMF_NETCDF_INCLUDE)
-endif
-ifdef ESMF_NETCDF_LIBS
-ESMF_CXXLINKLIBS          += $(ESMF_NETCDF_LIBS)
-ESMF_CXXLINKRPATHSTHIRD   += $(addprefix $(ESMF_CXXRPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_NETCDF_LIBS))))
-ESMF_F90LINKLIBS          += $(ESMF_NETCDF_LIBS)
-ESMF_F90LINKRPATHSTHIRD   += $(addprefix $(ESMF_F90RPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_NETCDF_LIBS))))
-endif
-ifdef ESMF_NETCDF_LIBPATH
-ifdef ESMF_NETCDF_FPATH
-ifneq ($(ESMF_NETCDF_CPATH),$(ESMF_NETCDF_FPATH))
-ESMF_CXXLINKPATHSTHIRD    += -L$(ESMF_NETCDF_FLIBPATH)
-ESMF_F90LINKPATHSTHIRD    += -L$(ESMF_NETCDF_FLIBPATH)
-ESMF_CXXLINKRPATHSTHIRD   += $(ESMF_CXXRPATHPREFIX)$(ESMF_NETCDF_FLIBPATH)
-ESMF_F90LINKRPATHSTHIRD   += $(ESMF_F90RPATHPREFIX)$(ESMF_NETCDF_FLIBPATH)
-endif
-endif
-ESMF_CXXLINKPATHSTHIRD    += -L$(ESMF_NETCDF_LIBPATH)
-ESMF_F90LINKPATHSTHIRD    += -L$(ESMF_NETCDF_LIBPATH)
-ESMF_CXXLINKRPATHSTHIRD   += $(ESMF_CXXRPATHPREFIX)$(ESMF_NETCDF_LIBPATH)
-ESMF_F90LINKRPATHSTHIRD   += $(ESMF_F90RPATHPREFIX)$(ESMF_NETCDF_LIBPATH)
-endif
+  ESMF_CPPFLAGS             += -DESMF_NETCDF=1
+  ifdef ESMF_NETCDF_INCLUDE
+    ESMF_CXXCOMPILEPATHSTHIRD += -I$(ESMF_NETCDF_INCLUDE)
+  endif
+  ifdef ESMF_NETCDFF_INCLUDE
+    ESMF_F90COMPILEPATHSTHIRD += -I$(ESMF_NETCDFF_INCLUDE)
+  endif
+  ifdef ESMF_NETCDF_LIBS
+    ESMF_CXXLINKLIBS          += $(ESMF_NETCDF_LIBS)
+    ESMF_F90LINKLIBS          += $(ESMF_NETCDF_LIBS)
+  endif
+  ifdef ESMF_NETCDFF_LIBS
+    ESMF_CXXLINKLIBS          += $(ESMF_NETCDFF_LIBS)
+    ESMF_F90LINKLIBS          += $(ESMF_NETCDFF_LIBS)
+  endif
+  ifdef ESMF_NETCDF_LIBPATH
+    ESMF_CXXLINKPATHSTHIRD    += $(addprefix -L,$(ESMF_NETCDF_LIBPATH))
+    ESMF_F90LINKPATHSTHIRD    += $(addprefix -L,$(ESMF_NETCDF_LIBPATH))
+    ESMF_CXXLINKRPATHSTHIRD   += $(addprefix $(ESMF_CXXRPATHPREFIX),$(ESMF_NETCDF_LIBPATH))
+    ESMF_F90LINKRPATHSTHIRD   += $(addprefix $(ESMF_F90RPATHPREFIX),$(ESMF_NETCDF_LIBPATH))
+  endif
+  ifdef ESMF_NETCDFF_LIBPATH
+    ESMF_CXXLINKPATHSTHIRD    += $(addprefix -L,$(ESMF_NETCDFF_LIBPATH))
+    ESMF_F90LINKPATHSTHIRD    += $(addprefix -L,$(ESMF_NETCDFF_LIBPATH))
+    ESMF_CXXLINKRPATHSTHIRD   += $(addprefix $(ESMF_CXXRPATHPREFIX),$(ESMF_NETCDFF_LIBPATH))
+    ESMF_F90LINKRPATHSTHIRD   += $(addprefix $(ESMF_F90RPATHPREFIX),$(ESMF_NETCDFF_LIBPATH))
+  endif
 endif
 
 #-------------------------------------------------------------------------------

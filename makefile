@@ -97,6 +97,7 @@ endif
 ifeq ($(pathtype),abs)
 	-@echo "--------------------------------------------------------------"
 	-@echo "NetCDF library version: `$(ESMF_NETCDF) --version`"
+	-@echo "NetCDF Fortran version: `$(ESMF_NFCONFIG) --version`"
 endif
 ifeq ($(ESMF_NETCDF),nc-config)
 	-@echo "--------------------------------------------------------------"
@@ -208,6 +209,18 @@ endif
           fi; \
 	  if [ -n "$(ESMF_NETCDF_LIBPATH)" ] ; then \
 	    echo "ESMF_NETCDF_LIBPATH:     $(ESMF_NETCDF_LIBPATH)" ; \
+          fi; \
+	  if [ -n "$(ESMF_NFCONFIG)" ] ; then \
+	    echo "ESMF_NFCONFIG:           $(ESMF_NFCONFIG)" ; \
+          fi; \
+	  if [ -n "$(ESMF_NETCDFF_INCLUDE)" ] ; then \
+	    echo "ESMF_NETCDFF_INCLUDE:    $(ESMF_NETCDFF_INCLUDE)" ; \
+          fi; \
+	  if [ -n "$(ESMF_NETCDFF_LIBS)" ] ; then \
+	    echo "ESMF_NETCDFF_LIBS:       $(ESMF_NETCDFF_LIBS)" ; \
+          fi; \
+	  if [ -n "$(ESMF_NETCDFF_LIBPATH)" ] ; then \
+	    echo "ESMF_NETCDFF_LIBPATH:    $(ESMF_NETCDFF_LIBPATH)" ; \
           fi; \
          fi
 	-@if [ -n "$(ESMF_PNETCDF)" ] ; then \
@@ -545,6 +558,18 @@ endif
           fi; \
 	  if [ -n "$(ESMF_NETCDF_LIBPATH)" ] ; then \
 	    echo "# ESMF_NETCDF_LIBPATH:    $(ESMF_NETCDF_LIBPATH)" >> $(MKINFO) ; \
+          fi; \
+	  if [ -n "$(ESMF_NFCONFIG)" ] ; then \
+	    echo "# ESMF_NFCONFIG:          $(ESMF_NFCONFIG)" >> $(MKINFO) ; \
+          fi; \
+	  if [ -n "$(ESMF_NETCDFF_INCLUDE)" ] ; then \
+	    echo "# ESMF_NETCDFF_INCLUDE:   $(ESMF_NETCDFF_INCLUDE)" >> $(MKINFO) ; \
+          fi; \
+	  if [ -n "$(ESMF_NETCDFF_LIBS)" ] ; then \
+	    echo "# ESMF_NETCDFF_LIBS:      $(ESMF_NETCDFF_LIBS)" >> $(MKINFO) ; \
+          fi; \
+	  if [ -n "$(ESMF_NETCDFF_LIBPATH)" ] ; then \
+	    echo "# ESMF_NETCDFF_LIBPATH:   $(ESMF_NETCDFF_LIBPATH)" >> $(MKINFO) ; \
           fi; \
          fi
 	-@if [ -n "$(ESMF_PNETCDF)" ] ; then \
