@@ -24,7 +24,7 @@
 ! Destroying the host object will leave a handle in an undefined state.
 !EOE
 
-    program ESMF_InfoGetHandleEx
+    program ESMF_InfoGetFromHostEx
 
 !==============================================================================
 !==============================================================================
@@ -55,15 +55,15 @@
 
 !------------------------------------------------------------------------------
 
-    write(failMsg, *) "Example ESMF_InfoGetHandleEx failure"
-    write(testname, *) "Example ESMF_InfoGetHandleEx"
+    write(failMsg, *) "Example ESMF_InfoGetFromHostEx failure"
+    write(testname, *) "Example ESMF_InfoGetFromHostEx"
 
     finalrc = ESMF_SUCCESS
 
 !------------------------------------------------------------------------------
 
 !   ! Initialize the Framework, and get the default VM
-    call ESMF_Initialize(vm=vm, defaultlogfilename="InfoGetHandleEx.Log", &
+    call ESMF_Initialize(vm=vm, defaultlogfilename="InfoGetFromHostEx.Log", &
                     logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     
@@ -88,7 +88,7 @@
 ! additional usage examples.
 !EOE
 !BOC
-    infoh = ESMF_InfoGetHandle(array, rc=rc)
+    call ESMF_InfoGetFromHost(array, infoh, rc=rc)
 !EOC
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
@@ -114,12 +114,12 @@
     call ESMF_Finalize(rc=rc)
     if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     if (finalrc .eq. ESMF_SUCCESS) then
-        print *, "PASS: ESMF_InfoGetHandleEx.F90"
+        print *, "PASS: ESMF_InfoGetFromHostEx.F90"
     else
-        print *, "FAIL: ESMF_InfoGetHandleEx.F90"
+        print *, "FAIL: ESMF_InfoGetFromHostEx.F90"
     end if
 
 !==============================================================================
 !==============================================================================
 
-    end program ESMF_InfoGetHandleEx
+    end program ESMF_InfoGetFromHostEx

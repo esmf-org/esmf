@@ -84,7 +84,7 @@ program ESMF_InfoSyncUTest
   distgrid2 = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/10,10/), rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  infoh = ESMF_InfoGetHandle(distgrid2, rc=rc)
+  call ESMF_InfoGetFromHost(distgrid2, infoh, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_InfoDestroy(infoh, rc=rc)
@@ -146,49 +146,49 @@ program ESMF_InfoSyncUTest
   !----------------------------------------------------------------------------
 
   if (localPet == rootPet) then
-    infoh = ESMF_InfoGetHandle(state, rc=rc)
+    call ESMF_InfoGetFromHost(state, infoh, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     call ESMF_InfoSet(infoh, "fvarname", "state", rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-    infoh = ESMF_InfoGetHandle(nested_state2, rc=rc)
+    call ESMF_InfoGetFromHost(nested_state2, infoh, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     call ESMF_InfoSet(infoh, "fvarname", "nested_state2", rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-    infoh = ESMF_InfoGetHandle(field, rc=rc)
+    call ESMF_InfoGetFromHost(field, infoh, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     call ESMF_InfoSet(infoh, "fvarname", "field", rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-    infoh = ESMF_InfoGetHandle(field2, rc=rc)
+    call ESMF_InfoGetFromHost(field2, infoh, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     call ESMF_InfoSet(infoh, "fvarname", "field2", rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-    infoh = ESMF_InfoGetHandle(field3, rc=rc)
+    call ESMF_InfoGetFromHost(field3, infoh, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     call ESMF_InfoSet(infoh, "fvarname", "field3", rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-    infoh = ESMF_InfoGetHandle(arr, rc=rc)
+    call ESMF_InfoGetFromHost(arr, infoh, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     call ESMF_InfoSet(infoh, "fvarname", "arr", rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-    infoh = ESMF_InfoGetHandle(ab, rc=rc)
+    call ESMF_InfoGetFromHost(ab, infoh, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     call ESMF_InfoSet(infoh, "fvarname", "ab", rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-    infoh = ESMF_InfoGetHandle(locstream, rc=rc)
+    call ESMF_InfoGetFromHost(locstream, infoh, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     call ESMF_InfoSet(infoh, "fvarname", "locstream", rc=rc)
@@ -235,7 +235,7 @@ program ESMF_InfoSyncUTest
   write(failMsg, *) "Did not remain dirty"
   rc = ESMF_FAILURE
 
-  infoh = ESMF_InfoGetHandle(locstream, rc=rc)
+  call ESMF_InfoGetFromHost(locstream, infoh, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_InfoGet(infoh, isDirty=isDirty, rc=rc)

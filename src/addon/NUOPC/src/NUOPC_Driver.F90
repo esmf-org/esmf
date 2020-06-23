@@ -3717,7 +3717,7 @@ module NUOPC_Driver
     
     ! optionally copy Attributes from info object to the newly created component
     if (present(info)) then
-      infoh = ESMF_InfoGetHandle(cmEntry%wrap%component, rc=localrc)
+      call ESMF_InfoGetFromHost(cmEntry%wrap%component, infoh, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -4172,7 +4172,7 @@ module NUOPC_Driver
 
     ! optionally copy Attributes from info object to the newly created component
     if (present(info)) then
-      infoh = ESMF_InfoGetHandle(cmEntry%wrap%connector, rc=localrc)
+      call ESMF_InfoGetFromHost(cmEntry%wrap%connector, infoh, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out

@@ -46,7 +46,7 @@ call ESMF_AttributeSet(array, "aKey", 15, rc=rc)
 \end{verbatim}
 With \texttt{ESMF\_Info}:
 \begin{verbatim}
-info = ESMF_InfoGetHandle(array, rc=rc)
+call ESMF_InfoGetFromHost(array, info, rc=rc)
 call ESMF_InfoSet(info, "aKey", 15, rc=rc)
 \end{verbatim}
 
@@ -57,7 +57,7 @@ call ESMF_AttributeGet(array, "aKey", aKeyValue, rc=rc)
 \end{verbatim}
 With \texttt{ESMF\_Info}:
 \begin{verbatim}
-info = ESMF_InfoGetHandle(array, rc=rc)
+call ESMF_InfoGetFromHost(array, info, rc=rc)
 call ESMF_InfoGet(info, "aKey", aKeyValue, rc=rc)
 \end{verbatim}
 

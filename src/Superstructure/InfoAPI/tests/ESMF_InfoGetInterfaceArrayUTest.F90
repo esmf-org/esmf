@@ -85,11 +85,11 @@ program ESMF_ArrayInfoUTest
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! Get the attribute object created with the array
-    info = ESMF_InfoGetHandle(array, rc=rc)
+    call ESMF_InfoGetFromHost(array, info, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! Get a different reference to the same attributes object
-    info2 = ESMF_InfoGetHandle(array, rc=rc)
+    call ESMF_InfoGetFromHost(array, info2, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! Set a key/value on the attributes object
@@ -130,7 +130,7 @@ program ESMF_ArrayInfoUTest
   array2 = ESMF_ArrayCreate(distgrid2, farray2D, ESMF_INDEX_GLOBAL, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  infoh = ESMF_InfoGetHandle(array2, rc=rc)
+  call ESMF_InfoGetFromHost(array2, infoh, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_ArrayDestroy(array2, noGarbage=.false., rc=rc)

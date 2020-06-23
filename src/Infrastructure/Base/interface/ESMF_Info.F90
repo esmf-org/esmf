@@ -492,7 +492,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical}
 !       \item \texttt{character(:)}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 !
 !     The arguments are:
 !     \begin{description}
@@ -586,7 +585,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical}
 !       \item \texttt{character(:)}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 !
 !     The arguments are:
 !     \begin{description}
@@ -680,7 +678,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical}
 !       \item \texttt{character(:)}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 !
 !     The arguments are:
 !     \begin{description}
@@ -774,7 +771,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical}
 !       \item \texttt{character(:)}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 !
 !     The arguments are:
 !     \begin{description}
@@ -868,7 +864,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical}
 !       \item \texttt{character(:)}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 !
 !     The arguments are:
 !     \begin{description}
@@ -962,7 +957,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical}
 !       \item \texttt{character(:)}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 !
 !     The arguments are:
 !     \begin{description}
@@ -1736,7 +1730,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical}
 !       \item \texttt{character(:)}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 !
 !     The arguments are:
 !     \begin{description}
@@ -1839,7 +1832,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical}
 !       \item \texttt{character(:)}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 !
 !     The arguments are:
 !     \begin{description}
@@ -1942,7 +1934,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical}
 !       \item \texttt{character(:)}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 !
 !     The arguments are:
 !     \begin{description}
@@ -2045,7 +2036,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical}
 !       \item \texttt{character(:)}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 !
 !     The arguments are:
 !     \begin{description}
@@ -2148,7 +2138,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical}
 !       \item \texttt{character(:)}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 !
 !     The arguments are:
 !     \begin{description}
@@ -2338,7 +2327,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical}
 !       \item \texttt{character(:)}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 !
 !     The arguments are:
 !     \begin{description}

@@ -99,13 +99,13 @@ program ESMF_AttributeUtilUTest
   call ESMF_AttributeCopy(src_fb, dst_fb, attcopy=ESMF_ATTCOPY_REFERENCE, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  infoh = ESMF_InfoGetHandle(src_fb, rc=rc)
+  call ESMF_InfoGetFromHost(src_fb, infoh, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_InfoSet(infoh, "/NetCDF/FV3/output_file", "out.nc", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  infoh2 = ESMF_InfoGetHandle(dst_fb, rc=rc)
+  call ESMF_InfoGetFromHost(dst_fb, infoh2, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_InfoGetCharAlloc(infoh2, "/NetCDF/FV3/output_file", actual, rc=rc)
