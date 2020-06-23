@@ -53,7 +53,7 @@
       use ESMF_IOUtilMod
       use ESMF_UtilCubedSphereMod
       use ESMF_IOFileTypeCheckMod
-      use ESMF_InfoMod, only : ESMF_Info, ESMF_InfoPointerGetHandle, ESMF_InfoUpdate
+      use ESMF_InfoMod, only : ESMF_Info, ESMF_InfoGetFromPointer, ESMF_InfoUpdate
 
 #ifdef ESMF_NETCDF
       use netcdf

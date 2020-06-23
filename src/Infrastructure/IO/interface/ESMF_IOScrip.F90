@@ -43,7 +43,7 @@
 #ifdef ESMF_NETCDF
       use netcdf
 #endif
-      use ESMF_InfoMod, only : ESMF_Info, ESMF_InfoSet, ESMF_InfoPointerGetHandle
+      use ESMF_InfoMod, only : ESMF_Info, ESMF_InfoSet, ESMF_InfoGetFromPointer
 
       implicit none
 

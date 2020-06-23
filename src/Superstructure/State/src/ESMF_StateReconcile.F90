@@ -54,7 +54,7 @@
       use ESMF_StateContainerMod
       use ESMF_StateItemMod
       use ESMF_InitMacrosMod
-      use ESMF_InfoMod, only : ESMF_Info, ESMF_InfoBaseGetHandle, ESMF_InfoUpdate
+      use ESMF_InfoMod, only : ESMF_Info, ESMF_InfoGetFromBase, ESMF_InfoUpdate
       implicit none
 
 !------------------------------------------------------------------------------
