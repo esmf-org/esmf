@@ -353,7 +353,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The arguments are:
 !     \begin{description}
 !     \item [info]
-!       The \texttt{ESMF\_Info} object acting as the source data.
+!       The \texttt{ESMF\Info} object acting as the source data.
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
