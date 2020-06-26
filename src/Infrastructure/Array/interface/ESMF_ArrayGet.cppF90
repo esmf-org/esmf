@@ -52,7 +52,6 @@ module ESMF_ArrayGetMod
   use ESMF_DistGridMod
   use ESMF_RHandleMod
   use ESMF_F90InterfaceMod  ! ESMF Fortran-C++ interface helper
-  use ESMF_InfoMod
 
   ! class sub modules
   use ESMF_ArrayCreateMod   ! contains the ESMF_Array derived type definition
