@@ -17,5 +17,8 @@ RUN make localdoc 2>&1 | tee ${ESMF_ARTIFACTS}/nuopc-make-doc.out
 WORKDIR ${ESMF_DIR}
 RUN make doc 2>&1 | tee ${ESMF_ARTIFACTS}/esmf-make-doc.out
 
-RUN zip -r ${ESMF_ARTIFACTS}/doc.zip doc src/addon/NUOPC/doc/*.pdf src/addon/NUOPC/doc/NUOPC_refdoc src/addon/NUOPC/doc/NUOPC_howtodoc
-RUN zip ${ESMF_ARTIFACTS}/doc.out.zip ${ESMF_ARTIFACTS}/*.out
+RUN cp -rv doc ${ESMF_ARTIFACTS}/doc-esmf
+RUN mkdir ${ESMF_ARTIFACTS}/doc-nuopc
+RUN cp -rv src/addon/NUOPC/doc/*.pdf src/addon/NUOPC/doc/NUOPC_refdoc src/addon/NUOPC/doc/NUOPC_howtodoc ${ESMF_ARTIFACTS}/doc-nuopc
+
+RUN zip -r ${ESMF_ARTIFACTS}/doc-artifacts.zip ${ESMF_ARTIFACTS}
