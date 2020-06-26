@@ -553,7 +553,6 @@ contains
 ^if !defined (noattributesversion) @\
       character(ESMF_MAXSTR) :: lvalue1, lvalue2 @\
       character(ESMF_MAXSTR) :: lobject, lname @\
-      type(ESMF_Logical) :: linkChange @\
 ^endif @\
       integer :: localrc @\
  @\
@@ -578,34 +577,6 @@ contains
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
                     ESMF_CONTEXT, rcToReturn=rc))  return @\
  @\
-^if !defined (noattributesversion) @\
-      !  link the Attribute hierarchies @\
-      linkChange = ESMF_TRUE @\
-      call c_ESMC_AttributeLink(state%statep%base,  & @\
-          mnameattbase, linkChange, localrc) @\
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
-                    ESMF_CONTEXT, rcToReturn=rc))  return @\
- @\
-      ! set the import and export Attributes on any item connected to this State @\
-      lobject = #mnameatt @\
-      lvalue1 = 'Import'  @\
-      lvalue2 = 'Export' @\
-      lname  = 'VariableIntent' @\
-      if (state%statep%st == ESMF_STATEINTENT_IMPORT) then @\
-        call c_ESMC_AttributeSetObjChrInTree(state%statep%base,  & @\
-           trim (lobject), trim (lname), trim (lvalue1), localrc) @\
-        if (ESMF_LogFoundError(localrc, & @\
-           ESMF_ERR_PASSTHRU, & @\
-           ESMF_CONTEXT, rcToReturn=rc)) return @\
-      else if (state%statep%st == ESMF_STATEINTENT_EXPORT) then @\
-        call c_ESMC_AttributeSetObjChrInTree(state%statep%base,  & @\
-           trim (lobject), trim (lname), trim (lvalue2), localrc) @\
-        if (ESMF_LogFoundError(localrc, & @\
-           ESMF_ERR_PASSTHRU, & @\
-           ESMF_CONTEXT, rcToReturn=rc)) return @\
-      endif @\
-^endif @\
-       @\
       if (present(rc)) rc = ESMF_SUCCESS @\
   end subroutine ESMF_StateAdd##mentryname##X
 
@@ -703,7 +674,6 @@ StateAddMacro(ESMF_State,OneState,nestedState,state,nestedState%statep%base)
 ^if !defined (noattributesversion) @\
       character(ESMF_MAXSTR) :: lvalue1, lvalue2 @\
       character(ESMF_MAXSTR) :: lobject, lname @\
-      type(ESMF_Logical) :: linkChange @\
 ^endif @\
  @\
       ! Initialize return code; assume routine not implemented @\
@@ -735,38 +705,6 @@ StateAddMacro(ESMF_State,OneState,nestedState,state,nestedState%statep%base)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc))  return @\
  @\
-^if !defined (noattributesversion) @\
-      ! link the Attribute hierarchies @\
-      linkChange = ESMF_TRUE @\
-      do i=1, localcount @\
-         call c_ESMC_AttributeLink(state%statep%base, & @\
-            mnameattbase, linkChange, localrc) @\
-         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
-                    ESMF_CONTEXT, rcToReturn=rc))  return @\
-      enddo @\
- @\
-      ! set the import and export Attributes on any item connected to this State @\
-      lobject = #mnameatt @\
-      lvalue1 = 'Import'  @\
-      lvalue2 = 'Export' @\
-      lname  = 'VariableIntent' @\
-      if (state%statep%st == ESMF_STATEINTENT_IMPORT) then @\
-        call c_ESMC_AttributeSetObjChrInTree(state%statep%base,  & @\
-          trim (lobject), trim (lname), trim (lvalue1), localrc) @\
-        if (ESMF_LogFoundError(localrc, & @\
-          ESMF_ERR_PASSTHRU, & @\
-          ESMF_CONTEXT, & @\
-          rcToReturn=rc)) return @\
-      else if (state%statep%st == ESMF_STATEINTENT_EXPORT) then @\
-        call c_ESMC_AttributeSetObjChrInTree(state%statep%base,  & @\
-          trim (lobject), trim (lname), trim (lvalue2), localrc) @\
-        if (ESMF_LogFoundError(localrc, & @\
-          ESMF_ERR_PASSTHRU, & @\
-          ESMF_CONTEXT, & @\
-          rcToReturn=rc)) return @\
-      endif @\
-^endif @\
-       @\
       if (present(rc)) rc = ESMF_SUCCESS @\
   end subroutine ESMF_StateAdd##mentryname##List
 
@@ -856,7 +794,6 @@ StateAddListMacro(ESMF_State,State,nestedStateList,state,nestedStateList(i)%stat
 ^if !defined (noattributesversion) @\
       character(ESMF_MAXSTR) :: lvalue1, lvalue2 @\
       character(ESMF_MAXSTR) :: lobject, lname @\
-      type(ESMF_Logical) :: linkChange @\
 ^endif @\
  @\
       ! Initialize return code; assume routine not implemented @\
@@ -883,38 +820,6 @@ StateAddListMacro(ESMF_State,State,nestedStateList,state,nestedStateList(i)%stat
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc))  return @\
  @\
-^if !defined (noattributesversion) @\
-      ! link the Attribute hierarchies @\
-      linkChange = ESMF_TRUE @\
-      do i=1, localcount @\
-         call c_ESMC_AttributeLink(state%statep%base, & @\
-            mnameattbase, linkChange, localrc) @\
-         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
-                    ESMF_CONTEXT, rcToReturn=rc))  return @\
-      enddo @\
- @\
-      ! set the import and export Attributes on any item connected to this State @\
-      lobject = #mnameatt @\
-      lvalue1 = 'Import'  @\
-      lvalue2 = 'Export' @\
-      lname  = 'VariableIntent' @\
-      if (state%statep%st == ESMF_STATEINTENT_IMPORT) then @\
-        call c_ESMC_AttributeSetObjChrInTree(state%statep%base,  & @\
-          trim (lobject), trim (lname), trim (lvalue1), localrc) @\
-        if (ESMF_LogFoundError(localrc, & @\
-          ESMF_ERR_PASSTHRU, & @\
-          ESMF_CONTEXT, & @\
-          rcToReturn=rc)) return @\
-      else if (state%statep%st == ESMF_STATEINTENT_EXPORT) then @\
-        call c_ESMC_AttributeSetObjChrInTree(state%statep%base,  & @\
-          trim (lobject), trim (lname), trim (lvalue2), localrc) @\
-        if (ESMF_LogFoundError(localrc, & @\
-          ESMF_ERR_PASSTHRU, & @\
-          ESMF_CONTEXT, & @\
-          rcToReturn=rc)) return @\
-      endif @\
-^endif @\
-       @\
       if (present(rc)) rc = ESMF_SUCCESS @\
   end subroutine ESMF_StateAddRp##mentryname##List
 

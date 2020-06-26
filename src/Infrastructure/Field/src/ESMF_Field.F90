@@ -550,7 +550,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_FieldType), pointer :: fp    ! field type
       integer staggerloc
       type(ESMF_AttReconcileFlag) :: lattreconflag
-      type(ESMF_Logical) :: linkChange
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -602,18 +601,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rcToReturn=rc)) return
-          
-          !  here we relink the Field Attribute hierarchy to the Attribute
-          !  hierarchy of the object in the GeomBase, Grid for now
-          if (lattreconflag%value == ESMF_ATTRECONCILE_ON%value .and. & 
-              fp%geombase%gbcp%type%type == ESMF_GEOMTYPE_GRID%type) then
-            linkChange = ESMF_TRUE
-            call c_ESMC_AttributeLink(fp%base, fp%geombase%gbcp%grid, linkChange, localrc)
-            if (ESMF_LogFoundError(localrc, &
-                                    ESMF_ERR_PASSTHRU, &
-                                    ESMF_CONTEXT, rcToReturn=rc)) return
-          endif
-
       endif
 
       if (fp%status .eq. ESMF_FIELDSTATUS_COMPLETE) then

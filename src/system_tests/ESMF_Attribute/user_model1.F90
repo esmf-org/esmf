@@ -382,9 +382,6 @@ module user_model1
                            convention=conv, purpose=purp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
-    ! link the component to the state
-    call ESMF_AttributeLink(comp, exportState, rc=rc)
-
 #if 0
     ! write out the Attributes
     call ESMF_AttributeWrite(comp, conv, purp, rc=rc)
@@ -460,7 +457,7 @@ module user_model1
         if (rc/=ESMF_SUCCESS) return ! bail out
 #if 1
         call ESMF_AttributeAdd(field, convention=conv, purpose=purp2, &
-                               attrList=attrList, count=2, &
+                               attrList=attrList, &
                                nestConvention=conv, nestPurpose=purp, rc=rc)
         call ESMF_AttributeSet(field, name='Coordinates', value='Latlon', &
                                convention=conv, purpose=purp2, rc=rc)
@@ -468,12 +465,7 @@ module user_model1
                                convention=conv, purpose=purp2, rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail out
 #endif
-        call ESMF_AttributeRemove(field, name=name3, convention="CF", &
-                                  purpose="General", rc=rc)
-        if (rc/=ESMF_SUCCESS) return ! bail out
     enddo
-
-    !print *, 'myPet = ', myPet
 
     ! Nothing happens in this run cycle for this simple example
 

@@ -941,7 +941,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         actualFlag = .false.  ! local PET is not for an actual member
       endif
     endif
-    
+
     if (actualFlag) then
 
       ! check init status of input parameters
@@ -1050,10 +1050,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                     ! fieldDimCount should be the same as the memDimCount
                     fieldDimCount = memDimCount
                     exit
-                  endif   
+                  endif
                endif
              enddo
-          endif           
+          endif
       endif
 
       if(fieldDimCount .lt. gridDimCount_norep) then
@@ -1190,7 +1190,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
       endif
-      
+
     endif ! - actualFlag
 
     ! Set return values.
@@ -1863,7 +1863,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_StaggerLoc)  :: localStaggerLoc
     type(ESMF_Index_Flag)   :: g_indexflag
     type(ESMF_GridDecompType) :: decompType
-    type(ESMF_Logical) :: linkChange
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -1935,13 +1934,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! remember that geombase was created internally
     ESMF_FieldCreateGridArraySpec%ftypep%geomb_internal = .true.
-
-    !  link the Attribute hierarchies
-    linkChange = ESMF_TRUE
-    call c_ESMC_AttributeLink(ESMF_FieldCreateGridArraySpec%ftypep%base, &
-                              grid, linkChange, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc))  return
 
     if(present(rc)) rc = ESMF_SUCCESS
 
@@ -2081,7 +2073,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_GeomBase) :: geombase
     type(ESMF_StaggerLoc) :: localStaggerloc
     type(ESMF_GridDecompType) :: decompType
-    type(ESMF_Logical) :: linkChange
     type(ESMF_Pointer)                    :: vmThis
     logical                               :: actualFlag
 
@@ -2102,9 +2093,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         actualFlag = .false.  ! local PET is not for an actual member
       endif
     endif
-    
+
     if (actualFlag) then
-    
+
       ! check init status of input parameters
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
       ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
@@ -2156,13 +2147,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! remember that geombase was created internally
       ESMF_FieldCreateGridArray%ftypep%geomb_internal = .true.
-
-      !  link the Attribute hierarchies
-      linkChange = ESMF_TRUE
-      call c_ESMC_AttributeLink(ESMF_FieldCreateGridArray%ftypep%base, &
-                              grid, linkChange, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc))  return
 
     endif ! - actualFlag
 
@@ -2339,7 +2323,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_GeomBase) :: geombase @\
     type(ESMF_StaggerLoc) :: localStaggerloc@\
     type(ESMF_GridDecompType)      :: decompType @\
-    type(ESMF_Logical) :: linkChange @\
 @\
     ! Initialize @\
     localrc = ESMF_RC_NOT_IMPL@\
@@ -2401,14 +2384,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
     ! remember that geombase was created internally @\
     ESMF_FieldCreateGridData##mrank##D##mtypekind%ftypep%geomb_internal = .true. @\
-@\
-    !  link the Attribute hierarchies @\
-    linkChange = ESMF_TRUE @\
-    call c_ESMC_AttributeLink( & @\
-      ESMF_FieldCreateGridData##mrank##D##mtypekind%ftypep%base, & @\
-      grid, linkChange, localrc) @\
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
-      ESMF_CONTEXT, rcToReturn=rc))  return @\
 @\
     if (present(rc)) rc = ESMF_SUCCESS @\
   end function ESMF_FieldCreateGridData##mrank##D##mtypekind  @\
@@ -2555,7 +2530,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_GeomBase) :: geombase @\
     type(ESMF_StaggerLoc) :: localStaggerloc@\
     type(ESMF_GridDecompType)      :: decompType @\
-    type(ESMF_Logical) :: linkChange @\
 @\
     ! Initialize @\
     localrc = ESMF_RC_NOT_IMPL@\
@@ -2615,14 +2589,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
     ! remember that geombase was created internally @\
     ESMF_FieldCreateGridDataPtr##mrank##D##mtypekind%ftypep%geomb_internal = .true. @\
-@\
-    !  link the Attribute hierarchies @\
-    linkChange = ESMF_TRUE @\
-    call c_ESMC_AttributeLink( & @\
-      ESMF_FieldCreateGridDataPtr##mrank##D##mtypekind%ftypep%base, & @\
-      grid, linkChange, localrc) @\
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
-       ESMF_CONTEXT, rcToReturn=rc))  return @\
 @\
     if (present(rc)) rc = ESMF_SUCCESS @\
   end function ESMF_FieldCreateGridDataPtr##mrank##D##mtypekind  @\

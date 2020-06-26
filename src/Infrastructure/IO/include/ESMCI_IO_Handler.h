@@ -39,6 +39,7 @@
 #include "ESMCI_VM.h"
 #include "ESMCI_Array.h"
 #include "ESMCI_Util.h"
+#include "ESMCI_Info.h"
 
 #include <cstdio>
 #include <string>
@@ -97,8 +98,8 @@ namespace ESMCI {
     virtual void arrayWrite(Array *arr_p, const char *name,
                             const std::vector<std::string> &dimLabels,
                             int *timeslice = NULL,
-                            const Attribute *varAttPack = NULL,
-                            const Attribute *gblAttPack = NULL,
+                            const ESMCI::Info *varAttPack = NULL,
+                            const ESMCI::Info *gblAttPack = NULL,
                             int *rc = NULL) = 0;
 
     // get() and set()

@@ -1145,7 +1145,7 @@ program ESMF_StateReconcileUTest
       write (fieldname, '(a,i4)') 'PET 0 Field', i
       call ESMF_AttributeGet (field_attr_new(i),  &
           name=trim (fieldname) // ' attribute',  &
-          value=attr_val(1),  &
+          valueList=attr_val,  &
           rc=rc)
       if (rc /= ESMF_SUCCESS) exit
       if (attr_val(1) /= i) then

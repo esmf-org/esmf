@@ -351,8 +351,7 @@ contains
               return  ! bail out
 
             if (isPresent) then
-                call ESMF_AttPackStreamJSON(attpack, flattenPackList=.true., &
-                    includeUnset=.false., includeLinks=.false., output=jsonstring, rc=localrc)
+                call ESMF_AttPackStreamJSON(attpack, output=jsonstring, rc=localrc)
                 if (ESMF_LogFoundError(localrc, &
                   line=__LINE__, &
                   file=FILENAME, &
@@ -522,8 +521,7 @@ contains
               return  ! bail out
 
             if (isPresent) then
-                call ESMF_AttPackStreamJSON(attpack, flattenPackList=.true., &
-                    includeUnset=.false., includeLinks=.false., output=jsonstring, rc=localrc)
+                call ESMF_AttPackStreamJSON(attpack, output=jsonstring, rc=localrc)
                 if (ESMF_LogFoundError(localrc, &
                   line=__LINE__, &
                   file=FILENAME, &
@@ -911,8 +909,7 @@ contains
                   return  ! bail out
 
               if (isPresent) then
-                  call ESMF_AttPackStreamJSON(attpack, flattenPackList=.true., &
-                    includeUnset=.false., includeLinks=.false., output=jsonstring, rc=localrc)
+                  call ESMF_AttPackStreamJSON(attpack, output=jsonstring, rc=localrc)
                   if (ESMF_LogFoundError(localrc, &
                       line=__LINE__, &
                       file=FILENAME, &
@@ -1737,8 +1734,7 @@ contains
                   return  ! bail out
 
             if (isPresent) then
-                call ESMF_AttPackStreamJSON(attpack, flattenPackList=.true., &
-                    includeUnset=.false., includeLinks=.false., output=jsonstring, rc=localrc)
+                call ESMF_AttPackStreamJSON(attpack, output=jsonstring, rc=localrc)
                 if (ESMF_LogFoundError(localrc, &
                   line=__LINE__, &
                   file=FILENAME, &
