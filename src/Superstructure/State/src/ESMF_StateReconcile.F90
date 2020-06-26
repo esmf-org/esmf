@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research, 
+! Copyright 2002-2020, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -29,12 +29,12 @@
 !
 ! !DESCRIPTION:
 !
-! The code in this file implements the Fortran function and subroutine 
+! The code in this file implements the Fortran function and subroutine
 !  interfaces to ensure that {\tt ESMF\_State} data is consistent across
-!  all PETs.  The intended use is by components that have subcomponents 
+!  all PETs.  The intended use is by components that have subcomponents
 !  which run on subsets of the couplers PET list.
 !  Objects that have been created on only a subset of the PETs cannot be
-!  identified to methods like Regrid or Redistribution since they have no 
+!  identified to methods like Regrid or Redistribution since they have no
 !  valid handles to identify them.  The code here communicates the missing
 !  object information to other PETs in the current VM.
 !
@@ -54,6 +54,7 @@
       use ESMF_StateContainerMod
       use ESMF_StateItemMod
       use ESMF_InitMacrosMod
+      use ESMF_InfoMod, only : ESMF_Info, ESMF_InfoGetFromBase, ESMF_InfoUpdate
       implicit none
 
 !------------------------------------------------------------------------------
@@ -101,7 +102,7 @@
 ! or if it introduces a bunch of run-time tests.  (hopefully the former.)
 ! For now, just comment out the whole mess.
 !#if 0
-!#define DEBUG  print *, mypet, 
+!#define DEBUG  print *, mypet,
 !#else
 !#define DEBUG !!
 !#define DEBUG if (.false.) then
@@ -123,7 +124,7 @@
       '$Id$'
 
 !==============================================================================
-! 
+!
 ! INTERFACE BLOCKS
 !
 !==============================================================================
@@ -149,13 +150,13 @@
       type(ESMF_State),            intent(inout)         :: state
       type(ESMF_VM),               intent(in),  optional :: vm
       type(ESMF_AttReconcileFlag), intent(in),  optional :: attreconflag
-      integer,                     intent(out), optional :: rc               
+      integer,                     intent(out), optional :: rc
 !
 !
 ! !DESCRIPTION:
 !     Must be called for any {\tt ESMF\_State} which contains ESMF objects
 !     that have not been created on all the {\tt PET}s of the currently
-!     running {\tt ESMF\_Component}.  
+!     running {\tt ESMF\_Component}.
 !     For example, if a coupler is operating on data
 !     which was created by another component that ran on only a subset
 !     of the couplers {\tt PET}s, the coupler must make this call first
@@ -207,7 +208,7 @@
 
 #if 0
     ! First remove all empty nested States from State
-    ! Doing this leads to much lower (factor petCount) complexity of the 
+    ! Doing this leads to much lower (factor petCount) complexity of the
     ! current ProxyCreate() code.
     call ESMF_StateZapEmptyNests(state, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -232,7 +233,7 @@
     ! on the PETs without those objects.  Eventually we might want to
     ! hash the ID lists so we can send a single number (or short list of
     ! numbers) instead of having to build and send the list each time.
-     
+
     ! Set the optional ESMF_AttReconcileFlag
     if(present(attreconflag)) then
       lattreconflag = attreconflag
@@ -247,28 +248,20 @@
     if (ESMF_LogFoundError(localrc, &
                               ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) return
-    
+
     ! This one sends missing objects from the PETs which contain them
     ! to the PETs which do not.
     call ESMF_StateProxyCreate(state, stateinfo, localvm, lattreconflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
                               ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) return
-    
+
     ! This frees resources which were allocated during the building of
     ! the information blocks during the InfoBuild call.
     call ESMF_StateInfoDrop(stateinfo, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
                               ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! Reset the change flags in the Attribute hierarchy
-    if (lattreconflag%value == ESMF_ATTRECONCILE_ON%value) then
-      call c_ESMC_AttributeUpdateReset(state%statep%base, localrc);
-      if (ESMF_LogFoundError(localrc, &
-                              ESMF_ERR_PASSTHRU, &
-                              ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
 
     call ESMF_ReconcileZappedProxies(state, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -282,7 +275,7 @@
 
     if (present(rc)) rc = ESMF_SUCCESS
 
- 
+
     end subroutine ESMF_StateReconcile_v1
 
 
@@ -299,8 +292,8 @@
       type(ESMF_State), intent(in) :: state
       type(ESMF_StateItemInfo), pointer :: stateInfoList(:)
       type(ESMF_VM), intent(in) :: vm
-      type(ESMF_AttReconcileFlag), intent(in) :: attreconflag        
-      integer, intent(out), optional :: rc               
+      type(ESMF_AttReconcileFlag), intent(in) :: attreconflag
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !
@@ -364,7 +357,7 @@
     ! make some initial space
     ! TODO: the current code only uses the first entry and hangs everything
     ! onto it.  eventually, have an info block for each distinct object in
-    ! the state. 
+    ! the state.
     allocate(stateInfoList(4), stat=memstat)
     if (ESMF_LogFoundAllocError(memstat, &
                                    msg="Allocating buffer for ID list", &
@@ -636,7 +629,7 @@
         if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rcToReturn=rc)) then
-        
+
 !!DEBUG "error -- i, offset, lbufsize = ", i, offset, lbufsize
 
            ! TODO: this is a bit too late; if offset has moved past the end
@@ -663,7 +656,7 @@
       end if
 
     end do ! pass
- 
+
     if (present(rc)) rc = ESMF_SUCCESS
     end subroutine ESMF_StateInfoBuild
 
@@ -678,7 +671,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_StateItemInfo), dimension(:), pointer :: stateInfoList
-      integer, intent(out), optional :: rc               
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !
@@ -691,7 +684,7 @@
 !     \item[stateInfoList]
 !       Array of info blocks, one for each object in the {\tt ESMF\_State}.
 !       Allocated by previous code, this routine traverses the blocks
-!       and frees all allocated space.  If no errors, this pointer 
+!       and frees all allocated space.  If no errors, this pointer
 !       returns nullified.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -731,7 +724,7 @@
                                  msg="Deallocating buffer for local buf list", &
                                        ESMF_CONTEXT, rcToReturn=rc)) return
     endif
-         
+
     if (associated(si%siwrap)) then
         deallocate(si%siwrap, stat=memstat)
         if (ESMF_LogFoundDeallocError(memstat, &
@@ -768,8 +761,8 @@
       type(ESMF_State), intent(inout) :: state
       type(ESMF_StateItemInfo), dimension(:), pointer :: stateInfoList
       type(ESMF_VM), intent(in) :: vm
-      type(ESMF_AttReconcileFlag), intent(in) :: attreconflag        
-      integer, intent(out), optional :: rc               
+      type(ESMF_AttReconcileFlag), intent(in) :: attreconflag
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !
@@ -817,6 +810,7 @@
     integer :: offset, myOrigCount
     logical :: i_send, i_recv
     integer :: memstat
+    type(ESMF_Info) :: base_info, base_temp_info
 
     ! check input variables
     ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -843,17 +837,17 @@ petloop:  &
 !!DEBUG "Outer loop, j = ", j
 
        !TODO: gjt: This moved down here as a temporary work-around after the
-       !TODO: gjt: container integration into State. The issue is that with 
+       !TODO: gjt: container integration into State. The issue is that with
        !TODO: gjt: the container underpinning new elements are inserted
        !TODO: gjt: alphabetically rather than appended at the end. This means
        !TODO: gjt: that when ESMF_StateInfoBuild() is called (below) it will
        !TODO: gjt: potentially mess up what is in the first myOrigCount
-       !TODO: gjt: elements. The long term solution is to _not_ call 
+       !TODO: gjt: elements. The long term solution is to _not_ call
        !TODO: gjt: ESMF_StateInfoBuild() over and over while receiving, but
        !TODO: gjt: instead use StateAdd() with relaxedflag when adding received
        !TODO: gjt: objects to the State.
        myOrigCount = si%mycount  ! current count on send side
-       
+
        ! each PET takes turns broadcasting to all
 
        i_send = mypet == j
@@ -969,11 +963,21 @@ petloop:  &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
 
-            call c_ESMC_AttributeCopy(base, state%statep%base, &
-              ESMF_ATTCOPY_VALUE, localrc)
+            call ESMF_InfoGetFromBase(base, base_info, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+
+            call ESMF_InfoGetFromBase(state%statep%base, base_temp_info, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+
+            call ESMF_InfoUpdate(base_info, base_temp_info, recursive=.true., &
+              rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
           endif
           attreconstart = 2
@@ -981,7 +985,7 @@ petloop:  &
           attreconstart = 1
         endif
 
-           !!! TODO: 
+           !!! TODO:
            !!!   make a combined object id list here, so only one copy of
            !!!   the missing object is sent.
 
@@ -990,15 +994,15 @@ petloop:  &
 itemloop:  do k=attreconstart, si%theircount
 !!DEBUG " checking remote id for object ", k, "value is ", si%idrecv(k)
              ihave = .false.
-             
+
 #define IHAVEOLD
 #ifdef IHAVEOLD
              do l=1, si%mycount
 !!DEBUG " checking local id for object ", l, "value is ", si%idsend(l)
                 ! cannot just print a vmid, have to call real print routine
-                !print *, "vm compare says ", ESMF_VMIdCompare(si%vmidrecv(k), si%vmidsend(l)) 
+                !print *, "vm compare says ", ESMF_VMIdCompare(si%vmidrecv(k), si%vmidsend(l))
                 if ((si%idrecv(k) .eq. si%idsend(l)) &
-                .and. & 
+                .and. &
      ESMF_VMIdCompare(si%vmidrecv(k), si%vmidsend(l)) ) then
                           ihave = .true.
 !!DEBUG "  objects match, no need to create proxy"
@@ -1009,28 +1013,28 @@ itemloop:  do k=attreconstart, si%theircount
              ! Only search back a fixed number of times (20), otherwise simply
              ! add object. This prevents the following loop from becoming more
              ! and more expensive.
-             
+
              !gjt -> turning this fixed size search on does not really help
              ! for the test code I was using. I believe that the complexity of
              ! the StateAdd() calls is also O(si%mycount)! Consequently this
              ! search here doesn't really matter much (from a complexity/
              ! scaling standpoint). It just comes in as an extra bit of factor!
-             
+
              llow = max(1, si%mycount - 20)
              do l=si%mycount, llow, -1
-               if ((si%idrecv(k) .eq. si%idsend(l)) .and. & 
+               if ((si%idrecv(k) .eq. si%idsend(l)) .and. &
      ESMF_VMIdCompare(si%vmidrecv(k), si%vmidsend(l)) ) then
                  ihave = .true.
                  exit
                endif
              enddo
 #endif
-             
+
 !!DEBUG "  end of match loop for remote object ", k, "ihave flag is ", ihave
              if (.not. ihave) then
-             
+
 !!DEBUG " need to create local proxy object"
-                offset = 0  
+                offset = 0
                 bptr => si%blindrecv(:,k)
                 select case (si%objrecv(k))
                    case (ESMF_ID_FIELDBUNDLE%objectID)
@@ -1155,7 +1159,7 @@ itemloop:  do k=attreconstart, si%theircount
                              msg="nested Substate add to local state", &
                              ESMF_CONTEXT, rcToReturn=rc)) return
 !!DEBUG "substate added to state"
-         
+
                   case (ESMF_STATEITEM_UNKNOWN%ot)
                     print *, "WARNING: unknown type"
                     call c_ESMC_StringDeserialize(thisname, &
@@ -1195,7 +1199,7 @@ itemloop:  do k=attreconstart, si%theircount
                                ESMF_CONTEXT, rcToReturn=rc)) return
            endif
 !!DEBUG "done deleting local space"
-           
+
            ! TODO:
            ! and now, i have a different local object list.   brute force
            ! rebuild my send list.   Once this code is stable, revisit this
@@ -1239,7 +1243,7 @@ itemloop:  do k=attreconstart, si%theircount
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state
-      integer, intent(out), optional :: rc               
+      integer, intent(out), optional :: rc
 
       integer :: localrc, i, iwrt
 !     integer :: oldcount
@@ -1252,7 +1256,7 @@ itemloop:  do k=attreconstart, si%theircount
       localrc = ESMF_RC_NOT_IMPL
 
       stypep => state%statep
-      
+
       iwrt = 1 ! initialize
       do i=1, stypep%datacount
         emptyNest = .false. ! reset
@@ -1261,12 +1265,6 @@ itemloop:  do k=attreconstart, si%theircount
           if (stypep%datalist(i)%datap%spp%datacount == 0) then
             ! nested State is empty
             emptyNest = .true.
-            linkChange = ESMF_TRUE
-            call c_ESMC_AttributeLinkRemove(stypep%base, stypep%datalist(i)%datap%spp%base, &
-              linkChange, localrc)
-           if (ESMF_LogFoundError(localrc, &
-             ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rcToReturn=rc)) return
           endif
 !print *, "gjt: zap empty nest in State"
         endif
@@ -1280,7 +1278,7 @@ itemloop:  do k=attreconstart, si%theircount
 !oldcount = stypep%datacount
       stypep%datacount = iwrt-1
 !print *, "gjt: reduced objects in State from", oldcount, " to ", stypep%datacount
-      
+
       if (present(rc)) rc = ESMF_SUCCESS
     end subroutine ESMF_StateZapEmptyNests
 #endif
@@ -1391,7 +1389,7 @@ itemloop:  do k=attreconstart, si%theircount
 
     stypep => state%statep
     zapList => stypep%zapList
-    
+
     itemList => null ()
     call ESMF_ContainerGet(container=stypep%stateContainer, itemList=itemList, &
       rc=localrc)
@@ -1409,7 +1407,7 @@ itemloop:  do k=attreconstart, si%theircount
           if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-          
+
           do k=1, size(zapList)
             if (zapList(k)%si%otype==ESMF_STATEITEM_FIELD) then
               call ESMF_FieldGet(zapList(k)%si%datap%fp, name=name, rc=localrc)
@@ -1422,7 +1420,7 @@ itemloop:  do k=attreconstart, si%theircount
 !print *, "ESMF_ReconcileZappedProxies() found: ", trim(name)
                 ! Bend pointers and copy contents to result in the desired
                 ! behavior for re-reconcile. From a user perspective of
-                ! Reconcile() proxies should persist when a State is 
+                ! Reconcile() proxies should persist when a State is
                 ! re-reconciled, and the same proxies are needed. Basically
                 ! a user should be able to hang on to a proxy.
                 tempField%ftypep => itemList(i)%si%datap%fp%ftypep
@@ -1444,5 +1442,3 @@ itemloop:  do k=attreconstart, si%theircount
   end subroutine ESMF_ReconcileZappedProxies
 
 end module ESMF_StateReconcileMod
-
-

@@ -1,0 +1,6 @@
+{% set pname = "ESMF_Attribute"~set_or_get~proc_suffix~et~t.esmf_suffix %}
+{% if d %}
+  {% set pname = pname~meta['LIST_TOKEN'] %}
+{% endif %}
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine {{ pname }}

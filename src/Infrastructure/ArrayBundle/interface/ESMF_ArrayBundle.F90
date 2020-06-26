@@ -83,6 +83,7 @@ module ESMF_ArrayBundleMod
   public ESMF_ArrayBundleCreate
   public ESMF_ArrayBundleDestroy
   public ESMF_ArrayBundleGet
+  public ESMF_ArrayBundleGetThis
   public ESMF_ArrayBundleHalo
   public ESMF_ArrayBundleHaloRelease
   public ESMF_ArrayBundleHaloStore
@@ -656,7 +657,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                 :: arrayCount, i
     type(ESMF_Pointer), allocatable :: arrayPointerList(:)
     integer                       :: len_name
-    type(ESMF_Logical)            :: linkChange
     type(ESMF_Logical)            :: multiflagArg
     type(ESMF_Logical)            :: relaxedflagArg
 
@@ -720,14 +720,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Garbage collection
     deallocate(arrayPointerList)
-
-    ! link the Attribute hierarchies
-    linkChange = ESMF_TRUE;
-    do i=1,arrayCount
-      call c_ESMC_AttributeLink(arraybundle, arrayList(i), linkChange, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc))  return
-    enddo
 
     ! Set return value
     ESMF_ArrayBundleCreate = arraybundle
@@ -1174,6 +1166,39 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   end subroutine ESMF_ArrayBundleGetList
 !------------------------------------------------------------------------------
 
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayBundleGetThis()"
+!BOPI
+! !IROUTINE: ESMF_ArrayBundleGetThis - Internal access routine for C++ pointer
+
+! !INTERFACE:
+subroutine ESMF_ArrayBundleGetThis(arrayBundle, this, rc)
+! !ARGUMENTS:
+  type(ESMF_ArrayBundle), intent(in) :: arrayBundle
+  type(ESMF_Pointer), intent(inout) :: this
+  integer, intent(inout), optional :: rc
+!
+! !DESCRIPTION:
+!     Internal access routine for C++ pointer.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[arrayBundle]
+!          Specified {\tt ESMF\_ArrayBundle} object.
+!     \item[this]
+!          C++ pointer.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  this = arrayBundle%this
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_ArrayBundleGetThis
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

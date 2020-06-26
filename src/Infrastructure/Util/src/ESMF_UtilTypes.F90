@@ -654,8 +654,7 @@
       end type
 
       type(ESMF_AttWriteFlag), parameter ::  &
-        ESMF_ATTWRITE_TAB = ESMF_AttWriteFlag(0), &
-        ESMF_ATTWRITE_XML = ESMF_AttWriteFlag(1)
+        ESMF_ATTWRITE_JSON = ESMF_AttWriteFlag(0)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_AttReconcileFlag
@@ -689,8 +688,7 @@
 
       type(ESMF_AttCopy_Flag), parameter ::  &
         ESMF_ATTCOPY_REFERENCE = ESMF_AttCopy_Flag(0), &
-        ESMF_ATTCOPY_VALUE = ESMF_AttCopy_Flag(1), &
-        ESMF_ATTCOPY_HYBRID = ESMF_AttCopy_Flag(2)
+        ESMF_ATTCOPY_VALUE = ESMF_AttCopy_Flag(1)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_AttGetCountFlag
@@ -708,8 +706,7 @@
       type(ESMF_AttGetCountFlag), parameter ::  &
         ESMF_ATTGETCOUNT_ATTRIBUTE = ESMF_AttGetCountFlag(0), &
         ESMF_ATTGETCOUNT_ATTPACK = ESMF_AttGetCountFlag(1), &
-        ESMF_ATTGETCOUNT_ATTLINK = ESMF_AttGetCountFlag(2), &
-        ESMF_ATTGETCOUNT_TOTAL = ESMF_AttGetCountFlag(3)
+        ESMF_ATTGETCOUNT_TOTAL = ESMF_AttGetCountFlag(2)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_AttNestFlag
@@ -1114,14 +1111,12 @@
              ESMF_PIN_DE_TO_SSI_CONTIG
              
       public ESMF_AttCopy_Flag, &
-             ESMF_ATTCOPY_HYBRID, &
              ESMF_ATTCOPY_REFERENCE, &
              ESMF_ATTCOPY_VALUE
-             
+
       public ESMF_AttGetCountFlag, &
              ESMF_ATTGETCOUNT_ATTRIBUTE, &
              ESMF_ATTGETCOUNT_ATTPACK, &
-             ESMF_ATTGETCOUNT_ATTLINK, &
              ESMF_ATTGETCOUNT_TOTAL
              
       public ESMF_AttReconcileFlag, &
@@ -1133,9 +1128,8 @@
              ESMF_ATTNEST_ON
              
       public ESMF_AttWriteFlag, &
-             ESMF_ATTWRITE_TAB, &
-             ESMF_ATTWRITE_XML
-             
+             ESMF_ATTWRITE_JSON
+
       public ESMF_ATT_GRIDDED_DIM_LABELS, &
              ESMF_ATT_UNGRIDDED_DIM_LABELS
 

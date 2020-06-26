@@ -1,0 +1,76 @@
+{% set set_or_get = "Copy" %}
+{% set proc_suffix = "" %}
+{% set arglist = "(src, dst, keywordEnforcer, attcopy, rc)" %}
+{% set method_name = "ESMF_AttributeCopy"~et~"To"~et_dst %}
+#undef  ESMF_METHOD
+#define ESMF_METHOD "{{ method_name }}"
+subroutine {{ method_name }}{{ arglist }}
+  type(ESMF_{{ et }}), intent(in) :: src
+  type(ESMF_{{ et_dst }}), intent(inout) :: dst
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  type(ESMF_AttCopy_Flag), intent(in), optional :: attcopy
+  integer, intent(out), optional :: rc
+
+  integer :: localrc
+  type(ESMF_InfoDescribe) :: eidesc
+  type(ESMF_Info) :: isrc, idst
+  type(ESMF_AttCopy_Flag) :: local_attcopy
+  type(ESMF_Base) :: src_base, dst_base
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  if (present(attcopy)) then
+    local_attcopy = attcopy
+  else
+    local_attcopy = ESMF_ATTCOPY_VALUE
+  end if
+
+  ! Check object initialization
+  ESMF_INIT_CHECK_DEEP(ESMF_{{ et }}GetInit, src, localrc)
+  ESMF_INIT_CHECK_DEEP(ESMF_{{ et_dst }}GetInit, dst, localrc)
+
+  if (local_attcopy%value == ESMF_ATTCOPY_VALUE%value) then
+{% if et == "Info" %}
+    call ESMF_InfoGetFromBase(src%base, isrc, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+{% else %}
+    isrc = eidesc%GetInfo(src, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+{% endif %}
+{% if et_dst == "Info" %}
+    call ESMF_InfoGetFromBase(dst%base, idst, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+{%else %}
+    idst = eidesc%GetInfo(dst, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+{% endif %}
+
+    call c_info_copyforattribute(isrc%ptr, idst%ptr, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else if (local_attcopy%value == ESMF_ATTCOPY_REFERENCE%value) then
+    call eidesc%Initialize(createInfo=.false., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call eidesc%Update(src, "", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    src_base = eidesc%GetCurrentBase(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call eidesc%Update(dst, "", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    dst_base = eidesc%GetCurrentBase(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call eidesc%Destroy(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call c_info_copyforattribute_reference(src_base%this%ptr, dst_base%this%ptr, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    if (ESMF_LogFoundError(ESMF_FAILURE, msg="Flag not recognized", ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine {{ method_name }}

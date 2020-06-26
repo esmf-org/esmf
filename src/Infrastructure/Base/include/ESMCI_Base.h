@@ -25,7 +25,68 @@
 class ESMC_Base;
 
 #include "ESMCI_VM.h"
-#include "ESMCI_Attribute.h"
+#include "ESMCI_Info.h"
+
+// Standard ESMC check error macros
+#define ESMC_CHECK_INIT(obj_to_check, esmc_rc_to_return) \
+  if (!obj_to_check) { \
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_NOT_CREATED, "Object pointer is null. Object has not been created appropriately.", ESMC_CONTEXT, &esmc_rc_to_return); \
+    return;}
+
+#define ESMC_CHECK_RC(name_rc, actual_rc, msg) {\
+  if (actual_rc != ESMF_SUCCESS) {\
+    ESMCI::esmc_error local_macro_error(name_rc, actual_rc, msg); \
+    if (ESMC_LogDefault.MsgFoundError(actual_rc, local_macro_error.what(), ESMC_CONTEXT, nullptr)) \
+      throw(local_macro_error);}}
+
+#define ESMC_CHECK_NULLPTR(target) \
+  if (!target) { \
+    ESMC_CHECK_RC("ESMF_RC_ARG_BAD", ESMC_RC_ARG_BAD, "Pointer may not be null") \
+  } \
+
+#define ESMC_ERRPASSTHRU(exc) {\
+  ESMC_LogDefault.MsgFoundError(exc.getReturnCode(), ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, nullptr); \
+  throw(exc);}
+
+#define ESMC_CATCH_ERRPASSTHRU \
+  catch (ESMCI::esmc_error &exc) {ESMC_ERRPASSTHRU(exc)}
+
+#define ESMC_CATCH_ISOC \
+  catch (ESMCI::esmc_error &exc) {\
+    ESMC_LogDefault.MsgFoundError(exc.getReturnCode(), ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, nullptr); \
+    esmc_rc = exc.getReturnCode();} \
+  catch(...) {\
+    std::string msg;\
+    if (esmc_rc == ESMF_SUCCESS) {\
+      msg = "Unhandled throw and return code is ESMF_SUCCESS. Changing return code to ESMF_FAILURE";\
+      esmc_rc = ESMF_FAILURE;} \
+    else {\
+      msg = "Unhandled throw";}\
+    ESMC_LogDefault.MsgFoundError(esmc_rc, msg, ESMC_CONTEXT, nullptr);}
+
+//-----------------------------------------------------------------------------
+
+namespace ESMCI {
+  class Info;
+
+  class esmc_error : public std::exception
+  {
+  public:
+  
+    esmc_error(const std::string &code_name, int esmc_rc, const std::string &msg);
+  
+    const std::string getCodeName() {return this->code_name;}
+  
+    int getReturnCode() {return this->esmc_rc;}
+  
+    const char* what() const noexcept {return this->msg.c_str();}
+  
+  private:
+    std::string msg;
+    int esmc_rc;
+    std::string code_name;
+  };
+}
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -40,9 +101,6 @@ class ESMC_Base;
 // !USES:
 
 // !PUBLIC TYPES:
- class ESMC_Base;
- class Attribute;
-
 class ESMC_Base
 {
   protected:
@@ -59,14 +117,15 @@ class ESMC_Base
     char            baseName[ESMF_MAXSTR];    // object name, unique over class 
     char            baseNameF90[ESMF_MAXSTR]; // same name, non-null terminated
     char            className[ESMF_MAXSTR];   // object class
-    ESMCI::Attribute* root;
-    bool            rootalias;
-
+    ESMCI::Info*    info;         // object's Info container
+    bool            infoalias;    // true if Info container is an alias
   private:
 
     // prevent accidental copying
     //ESMC_Base& operator=(const ESMC_Base&);
     ESMC_Base(const ESMC_Base&);
+
+    void constructInfo(ESMC_Base& base);
   
   public:
     int           classID;      // unique ID relative to this class
@@ -74,9 +133,10 @@ class ESMC_Base
     // required & optional standard interface methods for all ESMF classes.
     // should not instantiate a ESMC_Base object directly; must sub-class first.
 
-    // accessor to root
-    ESMCI::Attribute *ESMC_BaseGetRoot(void) const {return root;}
-    void ESMC_BaseSetRoot(ESMCI::Attribute *orig) {root = orig; rootalias=true;}
+    // accessor to Info
+    ESMCI::Info *ESMC_BaseGetInfo(void) const {return info;}
+    void ESMC_BaseSetInfo(ESMCI::Info *orig) {info = orig; infoalias=true;}
+    void ESMC_BaseDeleteInfo(void) {if (!infoalias) delete info;}
 
     // accessors to unique ID
     void ESMC_BaseSetID(int id);

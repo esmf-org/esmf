@@ -1303,14 +1303,13 @@ module NUOPC_Driver
             ! need to update the Component attributes across all PETs
             if (associated(is%wrap%modelPetLists(i)%ptr)) then
               call ESMF_AttributeUpdate(is%wrap%modelComp(i), vm, &
-                rootList=is%wrap%modelPetLists(i)%ptr(1:1), reconcile=.true., &
-                rc=rc)
+                rootList=is%wrap%modelPetLists(i)%ptr(1:1), rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
                 return  ! bail out
             else
               call ESMF_AttributeUpdate(is%wrap%modelComp(i), vm, &
-                rootList=(/0/), reconcile=.true., rc=rc)
+                rootList=(/0/), rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
                 return  ! bail out
@@ -1381,14 +1380,13 @@ module NUOPC_Driver
               ! need to update the Component attributes across all PETs
               if (associated(is%wrap%connectorPetLists(i,j)%ptr)) then
                 call ESMF_AttributeUpdate(is%wrap%connectorComp(i,j), vm, &
-                  rootList=is%wrap%connectorPetLists(i,j)%ptr(1:1), &
-                  reconcile=.true., rc=rc)
+                  rootList=is%wrap%connectorPetLists(i,j)%ptr(1:1), rc=rc)
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc))&
                   return  ! bail out
               else
                 call ESMF_AttributeUpdate(is%wrap%connectorComp(i,j), vm, &
-                  rootList=(/0/), reconcile=.true., rc=rc)
+                  rootList=(/0/), rc=rc)
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc))&
                   return  ! bail out
@@ -2233,7 +2231,7 @@ module NUOPC_Driver
   end subroutine
 
   !-----------------------------------------------------------------------------
-  
+
   subroutine consistentComponentAttributes(comp, petList, name, rc)
     type(ESMF_GridComp)     :: comp
     integer, pointer        :: petList(:)
@@ -2243,8 +2241,8 @@ module NUOPC_Driver
     type(ESMF_VM)           :: vm
     ! initialize out arguments
     rc = ESMF_SUCCESS
-  
-    !TODO: The Update() is only needed if there are child PETs that are 
+
+    !TODO: The Update() is only needed if there are child PETs that are
     !TODO: going to pause for PE-reuse via user level threading. Figure
     !TODO: out how to detect this, and make Update() call conditional.
 
@@ -2252,7 +2250,7 @@ module NUOPC_Driver
     !TODO: on to execute child code), for better Update() performance. For
     !TODO: now just call with first PET as root, because that always will
     !TODO: work (because first PET always is passed to child component).
-    
+
     call ESMF_VMGetCurrent(vm=vm, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -2260,14 +2258,14 @@ module NUOPC_Driver
       ! use the petList to restrict the number of PETs across which the
       ! update is synchronizing
       call ESMF_AttributeUpdate(comp, vm, &
-        rootList=petList(1:1), petList=petList, reconcile=.true., rc=rc)
+        rootList=petList(1:1), rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     else
       ! no petList was specified -> update across all PETs
       call ESMF_AttributeUpdate(comp, vm, &
-        rootList=(/0/), reconcile=.true., rc=rc)
+        rootList=(/0/), rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -3613,7 +3611,7 @@ module NUOPC_Driver
     end interface
     optional                                   :: compSetVMRoutine
     integer,             intent(in),  optional :: petList(:)
-    type(ESMF_Info),     intent(in),  optional :: info
+    type(ESMF_Info),    intent(in),  optional :: info
     type(ESMF_GridComp), intent(out), optional :: comp
     integer,             intent(out), optional :: rc 
 !
@@ -3649,6 +3647,7 @@ module NUOPC_Driver
     integer                         :: stat, i
     character(ESMF_MAXSTR)          :: msgString, lString
     integer                         :: verbosity
+    type(ESMF_Info)                :: infoh
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -3718,7 +3717,11 @@ module NUOPC_Driver
     
     ! optionally copy Attributes from info object to the newly created component
     if (present(info)) then
-      call ESMF_AttributeCopy(info, cmEntry%wrap%component, rc=localrc)
+      call ESMF_InfoGetFromHost(cmEntry%wrap%component, infoh, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_InfoSet(infoh, "", info, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -3736,12 +3739,16 @@ module NUOPC_Driver
         return  ! bail out
     endif
       
+#if 0
+!gjt: This seems redundant with the NUOPC_CompAttributeInit() call from inside
+!gjt: the NUOPC_ModelBase.F90 SetServices().
     ! add standard NUOPC GridComp Attribute Package to the modelComp
     call NUOPC_CompAttributeInit(cmEntry%wrap%component, kind="Model", &
       rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
+#endif
 
     ! Call the SetServices on the added component
     call ESMF_GridCompSetServices(cmEntry%wrap%component, &
@@ -3878,12 +3885,16 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
 
+#if 0
+!gjt: This seems redundant with the NUOPC_CompAttributeInit() call from inside
+!gjt: the NUOPC_ModelBase.F90 SetServices().
     ! add standard NUOPC GridComp Attribute Package to the modelComp
     call NUOPC_CompAttributeInit(cmEntry%wrap%component, kind="Model", &
       rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
+#endif
 
     ! Call the SetServices on the added component
     call NUOPC_CompSetServices(cmEntry%wrap%component, &
@@ -3939,7 +3950,7 @@ module NUOPC_Driver
     end interface
     optional                                   :: compSetVMRoutine
     integer, target,     intent(in),  optional :: petList(:)
-    type(ESMF_Info),     intent(in),  optional :: info
+    type(ESMF_Info),    intent(in),  optional :: info
     type(ESMF_CplComp),  intent(out), optional :: comp
     integer,             intent(out), optional :: rc 
 !
@@ -3980,6 +3991,7 @@ module NUOPC_Driver
     type(ESMF_VM)                   :: vm
     logical                         :: isPresent
     integer                         :: verbosity
+    type(ESMF_Info)                :: infoh
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -4160,7 +4172,11 @@ module NUOPC_Driver
 
     ! optionally copy Attributes from info object to the newly created component
     if (present(info)) then
-      call ESMF_AttributeCopy(info, cmEntry%wrap%connector, rc=localrc)
+      call ESMF_InfoGetFromHost(cmEntry%wrap%connector, infoh, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_InfoSet(infoh, "", info, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -4178,11 +4194,15 @@ module NUOPC_Driver
         return  ! bail out
     endif
 
+#if 0
+!gjt: This seems redundant with the NUOPC_CompAttributeInit() call from inside
+!gjt: the NUOPC_Connector.F90 SetServices().
     ! add standard NUOPC CplComp Attribute Package to the connectorComp
     call NUOPC_CompAttributeInit(cmEntry%wrap%connector, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
+#endif
 
     ! Call the SetServices on the added connector
     call ESMF_CplCompSetServices(cmEntry%wrap%connector, &
@@ -4213,20 +4233,18 @@ module NUOPC_Driver
         return  ! bail out
       if (associated(is%wrap%connectorPetLists(src,dst)%ptr)) then
         call ESMF_AttributeUpdate(is%wrap%connectorComp(src,dst), vm, &
-          rootList=is%wrap%connectorPetLists(src,dst)%ptr(1:1), &
-          reconcile=.true., rc=localrc)
+          rootList=is%wrap%connectorPetLists(src,dst)%ptr(1:1), rc=localrc)
         if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc))&
           return  ! bail out
       else
         call ESMF_AttributeUpdate(is%wrap%connectorComp(src,dst), vm, &
-          rootList=(/0/), reconcile=.true., rc=localrc)
+          rootList=(/0/), rc=localrc)
         if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc))&
           return  ! bail out
       endif
     endif
-
     ! must set the srcVM and dstVM inside Connector in case those are needed,
     ! e.g. when Connector advertises on behalf of src/dst during mirroring
     call ESMF_GridCompGet(srcComp, vmIsPresent=isPresent, vm=vm, rc=localrc)

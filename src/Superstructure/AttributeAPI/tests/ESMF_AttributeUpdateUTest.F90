@@ -379,6 +379,8 @@ module ESMF_AttributeUpdateUTestMod
     integer                     :: myPet
 
     integer, dimension(2)       :: rootList
+    type(ESMF_InfoDescribe) :: eidesc
+    character(:), allocatable :: idump
 
     rc = ESMF_SUCCESS
 
@@ -396,9 +398,40 @@ module ESMF_AttributeUpdateUTestMod
     call ESMF_AttributeUpdate(importState, vm, rootList=rootList, rc=rc)
     if (rc/=ESMF_SUCCESS) return
 
-    call ESMF_AttributeCopy(importState, exportState, &
-      attcopy=ESMF_ATTCOPY_REFERENCE, rc=rc)
+#if 0
+    eidesc = eidesc%Create(addBaseAddress=.true., addObjectInfo=.true., rc=rc)
     if (rc/=ESMF_SUCCESS) return
+    call eidesc%Update(exportState, "", rc=rc)
+    if (rc/=ESMF_SUCCESS) return
+    idump = ESMF_InfoDump(eidesc%info, rc=rc)
+    if (rc/=ESMF_SUCCESS) return
+    call ESMF_LogWrite("usercpl_run: exportState dump before copy=...", ESMF_LOGMSG_INFO, rc=rc)
+    if (rc/=ESMF_SUCCESS) return
+    call ESMF_LogWrite(idump, ESMF_LOGMSG_INFO, rc=rc)
+    if (rc/=ESMF_SUCCESS) return
+    call eidesc%Destroy(rc=rc)
+    if (rc/=ESMF_SUCCESS) return
+#endif
+
+    call ESMF_AttributeCopy(importState, exportState, rc=rc)
+    !call ESMF_AttributeCopy(importState, exportState, &
+    !  attcopy=ESMF_ATTCOPY_REFERENCE, rc=rc)
+    if (rc/=ESMF_SUCCESS) return
+
+#if 0
+    eidesc = eidesc%Create(addBaseAddress=.true., addObjectInfo=.true., rc=rc)
+    if (rc/=ESMF_SUCCESS) return
+    call eidesc%Update(exportState, "", rc=rc)
+    if (rc/=ESMF_SUCCESS) return
+    idump = ESMF_InfoDump(eidesc%info, rc=rc)
+    if (rc/=ESMF_SUCCESS) return
+    call ESMF_LogWrite("usercpl_run: exportState dump after copy=...", ESMF_LOGMSG_INFO, rc=rc)
+    if (rc/=ESMF_SUCCESS) return
+    call ESMF_LogWrite(idump, ESMF_LOGMSG_INFO, rc=rc)
+    if (rc/=ESMF_SUCCESS) return
+    call eidesc%Destroy(rc=rc)
+    if (rc/=ESMF_SUCCESS) return
+#endif
 
   end subroutine usercpl_run
 
@@ -612,6 +645,7 @@ program ESMF_AttributeUpdateUTest
     call ESMF_CplCompSetServices(cplcomp, userRoutine=usercpl_register, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+    call ESMF_LogWrite("Starting initialize block...")
     call ESMF_GridCompInitialize(gridcomp1, exportState=c1exp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     call ESMF_GridCompInitialize(gridcomp2, importState=c2imp, rc=rc)
@@ -620,15 +654,19 @@ program ESMF_AttributeUpdateUTest
       exportState=c2imp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+    call ESMF_LogWrite("Calling GridCompRun for gridcomp1...")
     call ESMF_GridCompRun(gridcomp1, exportState=c1exp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    call ESMF_LogWrite("Calling CplComprun...")
     call ESMF_CplCompRun(cplcomp, importState=c1exp, &
       exportState=c2imp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    call ESMF_LogWrite("Calling GridCompRun for gridcomp2...")
     call ESMF_GridCompRun(gridcomp2, importState=c2imp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! Now we can start doing some testing
+    call ESMF_LogWrite("Starting test block...")
     convESMF = 'ESMF'
     purpGen = 'General'
     name2 = 'StandardName'
@@ -659,14 +697,16 @@ program ESMF_AttributeUpdateUTest
                     name, failMsg, result, ESMF_SRCLINE)
 
     !EX_UTest_Multi_Proc_Only
+    write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+    write(name, *) "Getting an updated Attribute package Attribute value from a Field test"
+    call ESMF_LogWrite("Start: "//TRIM(name))
     call ESMF_AttributeGetAttPack(field, convention=convESMF, purpose=purp2, &
         attpack=attpack, rc=rc)
     call ESMF_AttributeGet(field, attrList(1), value=outVal, &
       convention=convESMF, purpose=purp2, rc=rc)
-    write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-    write(name, *) "Getting an updated Attribute package Attribute value from a Field test"
     call ESMF_Test((rc==ESMF_SUCCESS).and.(valueList(1)==outVal), &
                     name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_LogWrite("End: "//TRIM(name))
 
     !EX_UTest_Multi_Proc_Only
     call ESMF_AttributeGet(field, attrList(2), value=outVal, &

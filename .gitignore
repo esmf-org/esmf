@@ -48,8 +48,6 @@ src/Infrastructure/Util/doc/ESMC_ReturnCodes.tex
 src/Infrastructure/Util/src/ESMF_FortranWordsize.F90
 src/Infrastructure/Util/src/ESMF_TypeKindGet.F90
 src/Infrastructure/Util/src/ESMF_UtilSort.F90
-src/Superstructure/AttributeAPI/interface/ESMF_Attribute.F90
-src/Superstructure/AttributeAPI/interface/ESMF_AttributeInternals.F90
 src/Superstructure/AttributeAPI/tests/ESMF_AttPackABundleUTest.F90
 src/Superstructure/AttributeAPI/tests/ESMF_AttPackArrayUTest.F90
 src/Superstructure/AttributeAPI/tests/ESMF_AttPackCplCompUTest.F90
@@ -123,3 +121,21 @@ src/Infrastructure/Trace/preload/wrappers.o
 src/Infrastructure/Trace/preload/wrappers_io.o
 src/Infrastructure/Trace/preload/wrappers_mpi.o
 
+###############################################################################
+# CMake
+###############################################################################
+
+*/cmake-build-debug/*
+
+###############################################################################
+# ESMPy
+###############################################################################
+
+*.pyc
+*/__pychache__/*
+
+###############################################################################
+# IntelliJ
+###############################################################################
+
+*.idea

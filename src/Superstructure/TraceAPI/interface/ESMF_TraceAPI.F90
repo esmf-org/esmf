@@ -33,7 +33,7 @@ module ESMF_TraceAPIMod
   use ESMF_CplCompMod
   use ESMF_BaseMod
   use ESMF_VMMod
-  use ESMF_AttributeMod
+!  use ESMF_AttributeMod
   use ESMF_TimeMod
   use ESMF_ClockMod
   use ESMF_TraceMod

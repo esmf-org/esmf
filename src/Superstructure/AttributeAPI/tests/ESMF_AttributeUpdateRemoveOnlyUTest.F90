@@ -27,6 +27,7 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
 !  One solution would be to use the entire buffer that is passed from the root
 
   use ESMF
+  use ESMF_InfoSyncMod
 
   implicit none
 
@@ -288,6 +289,8 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
     integer, intent(out) :: rc
 
     type(ESMF_VM)         :: vm
+    type(ESMF_InfoDescribe)    :: eidesc
+    character(:), allocatable :: idump
 
     rc = ESMF_SUCCESS
 
@@ -340,7 +343,7 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
     if (rc/=ESMF_SUCCESS) return
 
     ! it's actually the CF/Extended (nested) package that contains "StandardName"
-    call ESMF_AttributeGetAttPack(field, "CF", "Extended", attpack=attpack, rc=status)
+    call ESMF_AttributeGetAttPack(field, "ESMF", "General", attpack=attpack, rc=status)
     if (rc/=ESMF_SUCCESS) return
 
     call ESMF_AttributeRemove(field, name=name2, attpack=attpack, rc=status)
@@ -379,8 +382,7 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
     call ESMF_AttributeUpdate(importState, vm, rootList=rootList, rc=rc)
     if (rc/=ESMF_SUCCESS) return
 
-    call ESMF_AttributeCopy(importState, exportState, &
-      attcopy=ESMF_ATTCOPY_REFERENCE, rc=rc)
+    call ESMF_AttributeCopy(importState, exportState, rc=rc)
     if (rc/=ESMF_SUCCESS) return
 
   end subroutine usercpl_run
@@ -608,8 +610,9 @@ program ESMF_AttributeUpdateRemoveOnlyUTest
 
     !EX_UTest_Multi_Proc_Only
     ! This Attribute actually lives in the CF/Extended (nested) Attpack
-    call ESMF_AttributeGetAttPack(field, convention="CF", &
-                         purpose="Extended", attpack=attpack, rc=rc)
+    call ESMF_AttributeGetAttPack(field, convention="ESMF", &
+                         purpose="General", attpack=attpack, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     call ESMF_AttributeGet(field, name2, attpack=attpack, &
                                            isPresent=isPresent, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
