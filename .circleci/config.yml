@@ -89,8 +89,9 @@ jobs:
 #          name: Docker Build/Push
 #          command: bash $ESMF_DIR/.circleci/sh/build-doc.sh
   publish-docs:
-    docker:
-      - image: bekozi/esmf-doc:$CIRCLE_BRANCH
+    machine: true
+#    docker:
+#      - image: bekozi/esmf-doc:$CIRCLE_BRANCH
     steps:
       - run:
           name: passthru-publish-docs
