@@ -25,9 +25,7 @@ program ESMF_SCompEx
 ! within a Component hierarchy.  The hierarchy includes Coupler, Gridded,
 ! and Science Components and Attributes are attached to the Science Components.
 ! For demonstrable purposes, we'll add some CIM Component attributes to
-! the Gridded Component.  However, for a complete example of the CIM
-! Attribute packages supplied by ESMF, see the example in the ESMF Attributes
-! section \ref{sec:attribute:usage:cimAttPack}.
+! the Gridded Component.
 !\end{sloppypar}
 !EOP
 
