@@ -63,7 +63,7 @@ module ESMF_DistGridMod
   sequence
 #endif
   private
-    type(ESMF_Pointer) :: this
+    type(ESMF_Pointer) :: thisq
     ESMF_INIT_DECLARE
   end type
 
@@ -3731,7 +3731,7 @@ integer(ESMF_KIND_I8),target, intent(out), optional :: seqIndexListI8(:)
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
-
+    
     ! Handle requests that are available on the Fortran side
     if (present(de) .or. present(tile)) then
       call ESMF_DistGridGet(distgrid, localDeCount=localDeCount, &
@@ -3767,7 +3767,7 @@ integer(ESMF_KIND_I8),target, intent(out), optional :: seqIndexListI8(:)
         deallocate(localDeToDeMap, deToTileMap)
       endif
     endif
-
+    
     ! Deal with (optional) array arguments
     seqIndexListAux = ESMF_InterArrayCreate(seqIndexList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &

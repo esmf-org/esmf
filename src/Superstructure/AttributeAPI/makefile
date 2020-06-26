@@ -13,7 +13,6 @@ include ${ESMF_DIR}/makefile
 # the DIRS line needs to contain all subdirectories which exist 
 #  directly below this directory, and have either library,
 #  example/test code, or documents which need to be generated.
-#DIRS	  = interface doc examples
 DIRS      = interface tests doc
 
 
