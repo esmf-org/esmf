@@ -76,7 +76,7 @@ jobs:
   build-docs:
     environment:
       - ESMF_DIR: $CIRCLE_WORKING_DIRECTORY/sandbox/esmf/src-git
-      - ESMF_ARTIFACTS: "artifacts"
+      - ESMF_ARTIFACTS: "/artifacts"
       - DOCKER_IMG: bekozi/esmf-doc
     machine: true
     steps:
