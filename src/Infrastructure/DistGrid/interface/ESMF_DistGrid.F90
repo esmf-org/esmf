@@ -63,7 +63,7 @@ module ESMF_DistGridMod
   sequence
 #endif
   private
-    type(ESMF_Pointer) :: thisq
+    type(ESMF_Pointer) :: this
     ESMF_INIT_DECLARE
   end type
 
