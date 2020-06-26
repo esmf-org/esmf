@@ -62,7 +62,7 @@
 #ifdef STANDALONE
 \input{Attribute_options}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Attribute/doc/Attribute_options}
+\input{../Superstructure/Attribute/doc/Attribute_options}
 #endif
 
 \subsection{Class API}
