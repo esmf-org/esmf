@@ -15551,6 +15551,7 @@ end subroutine CalculateConnection
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateMosaicReg()"
 !BOP
+!\label{API:GridCreateMosaicReg}
 ! !IROUTINE: ESMF_GridCreateMosaic - Create a multi-tile Grid object with regular decomposition using the grid definition from a GRIDSPEC Mosaic file.
 
 ! !INTERFACE:
