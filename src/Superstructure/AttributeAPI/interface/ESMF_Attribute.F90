@@ -89,9 +89,9 @@ type ESMF_AttPack
   character(:), allocatable :: root_key
   type(C_PTR) :: info = C_NULL_PTR
 contains
-  procedure :: initialize => attpack_initialize
-  procedure :: formatKey => attpack_formatKey
-  procedure :: getPayload => attpack_getPayload
+  procedure, private, pass :: initialize => attpack_initialize
+  procedure, private, pass :: formatKey => attpack_formatKey
+  procedure, private, pass :: getPayload => attpack_getPayload
 end type ESMF_AttPack
 
 interface ESMF_AttributeAdd
