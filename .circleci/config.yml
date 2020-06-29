@@ -8,21 +8,24 @@ jobs:
       - DOCKER_IMG: bekozi/esmf-ci
       - TEST_RUNNER: esmf-test-runner
     steps:
+#      - run:
+#          name: passthru-build-esmf
+#          command: exit 0
       - run:
-          name: passthru-build-esmf
-          command: exit 0
-#      - run:
-#          name: Checkout Code
-#          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git $ESMF_DIR
-#      - run:
-#          name: make info
-#          command: bash $ESMF_DIR/.circleci/sh/make-info.sh
-#      - run:
-#          name: make
-#          command: bash $ESMF_DIR/.circleci/sh/make.sh
-#      - run:
-#          name: Test Environment Finalize
-#          command: bash $ESMF_DIR/.circleci/sh/docker-push.sh
+          name: Checkout Code
+          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git $ESMF_DIR
+      - run:
+          name: make info
+          command: bash $ESMF_DIR/.circleci/sh/make-info.sh
+      - run:
+          name: make
+          command: bash $ESMF_DIR/.circleci/sh/make.sh
+      - run:
+          name: make
+          command: bash $ESMF_DIR/.circleci/sh/make-install.sh
+      - run:
+          name: Test Environment Finalize
+          command: bash $ESMF_DIR/.circleci/sh/docker-push.sh
   build-tests:
     parameters:
       target:
@@ -33,21 +36,21 @@ jobs:
       - DOCKER_IMG: bekozi/esmf-ci
       - TEST_RUNNER: esmf-test-runner
     steps:
+#      - run:
+#          name: passthru-build-tests
+#          command: exit 0
       - run:
-          name: passthru-build-tests
-          command: exit 0
-#      - run:
-#          name: Checkout Code
-#          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git $ESMF_DIR
-#      - run:
-#          name: Test Environment Initialize
-#          command: docker run --cpus=$(nproc) -dit --name "${TEST_RUNNER}" "${DOCKER_IMG}:${CIRCLE_BRANCH}"
-#      - run:
-#          name: make build_<< parameters.target >>
-#          command: docker exec -t "${TEST_RUNNER}" bash -c "make build_<< parameters.target >> 2>&1 | tee esmf-make-build_<< parameters.target >>.out"
-#      - run:
-#          name: Test Environment Finalize
-#          command: bash $ESMF_DIR/.circleci/sh/docker-push-tests.sh << parameters.target >>
+          name: Checkout Code
+          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git $ESMF_DIR
+      - run:
+          name: Test Environment Initialize
+          command: docker run --cpus=$(nproc) -dit --name "${TEST_RUNNER}" "${DOCKER_IMG}:${CIRCLE_BRANCH}"
+      - run:
+          name: make build_<< parameters.target >>
+          command: docker exec -t "${TEST_RUNNER}" bash -c "make build_<< parameters.target >> 2>&1 | tee esmf-make-build_<< parameters.target >>.out"
+      - run:
+          name: Test Environment Finalize
+          command: bash $ESMF_DIR/.circleci/sh/docker-push-tests.sh << parameters.target >>
   run-tests:
     parameters:
       target:
@@ -58,21 +61,21 @@ jobs:
       - DOCKER_IMG: bekozi/esmf-ci
       - TEST_RUNNER: esmf-test-runner
     steps:
+#      - run:
+#          name: passthru-run-tests
+#          command: exit 0
       - run:
-          name: passthru-run-tests
-          command: exit 0
-#      - run:
-#          name: Checkout Code
-#          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git $ESMF_DIR
-#      - run:
-#          name: Test Environment Initialize
-#          command: docker run --cpus=$(nproc) -dit --name "${TEST_RUNNER}" "${DOCKER_IMG}:${CIRCLE_BRANCH}-<< parameters.target >>"
-#      - run:
-#          name: make run_<< parameters.target >>
-#          command: docker exec -t "${TEST_RUNNER}" bash -c "make run_<< parameters.target >> 2>&1 | tee esmf-make-run_<< parameters.target >>.out"
-#      - run:
-#          name: Test Environment Finalize
-#          command: bash $ESMF_DIR/.circleci/sh/docker-push-tests.sh  << parameters.target >>
+          name: Checkout Code
+          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git $ESMF_DIR
+      - run:
+          name: Test Environment Initialize
+          command: docker run --cpus=$(nproc) -dit --name "${TEST_RUNNER}" "${DOCKER_IMG}:${CIRCLE_BRANCH}-<< parameters.target >>"
+      - run:
+          name: make run_<< parameters.target >>
+          command: docker exec -t "${TEST_RUNNER}" bash -c "make run_<< parameters.target >> 2>&1 | tee esmf-make-run_<< parameters.target >>.out"
+      - run:
+          name: Test Environment Finalize
+          command: bash $ESMF_DIR/.circleci/sh/docker-push-tests.sh  << parameters.target >>
   build-docs:
     environment:
       - ESMF_DIR: $CIRCLE_WORKING_DIRECTORY/sandbox/esmf/src-git
