@@ -1014,19 +1014,19 @@ static void _create_pointlist_of_points_not_in_wmat(PointList *pointlist, WMat &
       Mesh *tmp_dstmesh=NULL;
       if (dstpointlist == NULL) tmp_dstmesh=dstmesh;
 
-      ESMCI_REGRID_TRACE_ENTER("Native Mesh regrid interp 1");
+      ESMCI_REGRID_TRACE_ENTER("NativeMesh regrid interp 1");
       // Build the rendezvous grids
       Interp interp(srcmesh, srcpointlist, tmp_dstmesh, dstpointlist,
                     midmesh, false, *regridMethod,
                     set_dst_status, dst_status,
                     mtype, *unmappedaction);
-      ESMCI_REGRID_TRACE_EXIT("Native Mesh regrid interp 1");
+      ESMCI_REGRID_TRACE_EXIT("NativeMesh regrid interp 1");
 
 
-      ESMCI_REGRID_TRACE_ENTER("Native Mesh regrid interp 2");
+      ESMCI_REGRID_TRACE_ENTER("NativeMesh regrid interp 2");
       // Create the weight matrix
       interp(0, wts, set_dst_status, dst_status);
-      ESMCI_REGRID_TRACE_EXIT("Native Mesh regrid interp 2");
+      ESMCI_REGRID_TRACE_EXIT("NativeMesh regrid interp 2");
 
       // Release the Zoltan struct if we used it for the mid mesh
       if(midmesh) interp.release_zz();
@@ -1170,17 +1170,17 @@ static void _create_pointlist_of_points_not_in_wmat(PointList *pointlist, WMat &
     bool tmp_set_dst_status=false;
     WMat tmp_dst_status;
 
-    // ESMCI_REGRID_TRACE_ENTER("Native Mesh regrid csrv rendezvous");
+    // ESMCI_REGRID_TRACE_ENTER("NativeMesh regrid csrv rendezvous");
     // Build the rendezvous grids
     Interp interp(&dstmesh, NULL, &srcmesh, NULL, NULL, false, *regridMethod,
                   tmp_set_dst_status, tmp_dst_status,
                   MAP_TYPE_CART_APPROX, *unmappedaction);
-    // ESMCI_REGRID_TRACE_EXIT("Native Mesh regrid csrv rendezvous");
+    // ESMCI_REGRID_TRACE_EXIT("NativeMesh regrid csrv rendezvous");
 
-    // ESMCI_REGRID_TRACE_ENTER("Native Mesh regrid csrv search");
+    // ESMCI_REGRID_TRACE_ENTER("NativeMesh regrid csrv search");
     // Generate the backwards interpolation matrix
     interp(0, stw, tmp_set_dst_status, tmp_dst_status);
-    // ESMCI_REGRID_TRACE_EXIT("Native Mesh regrid csrv search");
+    // ESMCI_REGRID_TRACE_EXIT("NativeMesh regrid csrv search");
 
 
      // Factor out poles if they exist
@@ -1196,10 +1196,10 @@ static void _create_pointlist_of_points_not_in_wmat(PointList *pointlist, WMat &
       }
     }
 
-    // ESMCI_REGRID_TRACE_ENTER("Native Mesh regrid csrv calculate weights");
+    // ESMCI_REGRID_TRACE_ENTER("NativeMesh regrid csrv calculate weights");
     // L2 projection conservative interpolation
     interp.interpL2csrvM(stw, &wts, src_iwts, dst_iwts);
-    // ESMCI_REGRID_TRACE_EXIT("Native Mesh regrid csrv calculate weights");
+    // ESMCI_REGRID_TRACE_EXIT("NativeMesh regrid csrv calculate weights");
 
   // print out info of the iwts
   Mesh::iterator sni=srcmesh.node_begin(), sne=srcmesh.node_end();

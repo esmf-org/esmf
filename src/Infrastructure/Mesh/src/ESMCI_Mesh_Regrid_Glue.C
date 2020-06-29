@@ -205,7 +205,7 @@ void ESMCI_regrid_create(
     }
     WMat dst_status;
 
-    ESMCI_REGRID_TRACE_ENTER("Native Mesh Weight Generation");
+    ESMCI_REGRID_TRACE_ENTER("NativeMesh Weight Generation");
 
     // to do NEARESTDTOS just do NEARESTSTOD and invert results
     if (*regridMethod != ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) {
@@ -239,7 +239,7 @@ void ESMCI_regrid_create(
       }
     }
 
-    ESMCI_REGRID_TRACE_EXIT("Native Mesh Weight Generation");
+    ESMCI_REGRID_TRACE_EXIT("NativeMesh Weight Generation");
 
 #ifdef PROGRESSLOG_on
     ESMC_LogDefault.Write("c_esmc_regrid_create(): Done with weight generation... check unmapped dest,", ESMC_LOGMSG_INFO);
@@ -445,7 +445,7 @@ void ESMCI_regrid_create(
     VM::logMemInfo(std::string("RegridCreate5.2"));
 #endif
 
-    ESMCI_REGRID_TRACE_ENTER("Native Mesh ArraySMMStore");
+    ESMCI_REGRID_TRACE_ENTER("NativeMesh ArraySMMStore");
 
     // Build the ArraySMM
     if (*has_rh != 0) {
@@ -459,7 +459,7 @@ void ESMCI_regrid_create(
         ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
     }
 
-    ESMCI_REGRID_TRACE_EXIT("Native Mesh ArraySMMStore");
+    ESMCI_REGRID_TRACE_EXIT("NativeMesh ArraySMMStore");
 
 #ifdef PROGRESSLOG_on
     ESMC_LogDefault.Write("c_esmc_regrid_create(): Returned from ArraySMMStore().", ESMC_LOGMSG_INFO);

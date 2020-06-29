@@ -568,7 +568,7 @@ void MeshCap::regrid_create(
   // Call into func. depending on mesh type
   if (is_esmf_mesh) {
     int localrc;
-    ESMCI_REGRID_TRACE_ENTER("Native Mesh regrid");
+    ESMCI_REGRID_TRACE_ENTER("NativeMesh regrid");
     ESMCI_regrid_create((Mesh **)&mesh_src_p, arraysrcpp, plsrcpp,
                         (Mesh **)&mesh_dst_p, arraydstpp, pldstpp,
                         regridMethod,
@@ -588,7 +588,7 @@ void MeshCap::regrid_create(
                         has_udl, _num_udl, _tudl,
                         has_statusArray, statusArray,
                         &localrc);
-    ESMCI_REGRID_TRACE_EXIT("Native Mesh regrid");
+    ESMCI_REGRID_TRACE_EXIT("NativeMesh regrid");
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return;
   } else {
@@ -638,11 +638,11 @@ MeshCap *MeshCap::meshcreate(int *pdim, int *sdim,
   Mesh *mesh;
   void *mbmesh;
   if (_is_esmf_mesh) {
-    ESMCI_MESHCREATE_TRACE_ENTER("Native Mesh create");
+    ESMCI_MESHCREATE_TRACE_ENTER("NativeMesh create");
     ESMCI_meshcreate(&mesh,
                      pdim, sdim,
                      coordSys, &localrc);
-    ESMCI_MESHCREATE_TRACE_EXIT("Native Mesh create");
+    ESMCI_MESHCREATE_TRACE_EXIT("NativeMesh create");
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                        ESMC_CONTEXT, rc)) return NULL;
   } else {
@@ -685,12 +685,12 @@ void MeshCap::meshaddnodes(int *num_nodes, int *nodeId,
 
   // Call into func. depending on mesh type
   if (is_esmf_mesh) {
-    ESMCI_MESHCREATE_TRACE_ENTER("Native Mesh addnodes");
+    ESMCI_MESHCREATE_TRACE_ENTER("NativeMesh addnodes");
     ESMCI_meshaddnodes(&mesh, num_nodes, nodeId,
                        nodeCoord, nodeOwner, nodeMaskII,
                        _coordSys, _orig_sdim,
                        rc);
-    ESMCI_MESHCREATE_TRACE_EXIT("Native Mesh addnodes");
+    ESMCI_MESHCREATE_TRACE_EXIT("NativeMesh addnodes");
   } else {
 #if defined ESMF_MOAB
     ESMCI_MESHCREATE_TRACE_ENTER("MBMesh addnodes");
@@ -762,7 +762,7 @@ void MeshCap::meshaddelements(int *_num_elems, int *elemId, int *elemType, Inter
 
   // Call into func. depending on mesh type
   if (is_esmf_mesh) {
-    ESMCI_MESHCREATE_TRACE_ENTER("Native Mesh addelements");
+    ESMCI_MESHCREATE_TRACE_ENTER("NativeMesh addelements");
     ESMCI_meshaddelements(&mesh,
                           _num_elems, elemId, elemType, _elemMaskII ,
                           _areaPresent, elemArea,
@@ -770,7 +770,7 @@ void MeshCap::meshaddelements(int *_num_elems, int *elemId, int *elemType, Inter
                           _num_elemConn, elemConn, regridConserve,
                           _coordSys, _orig_sdim,
                           rc);
-    ESMCI_MESHCREATE_TRACE_EXIT("Native Mesh addelements");
+    ESMCI_MESHCREATE_TRACE_EXIT("NativeMesh addelements");
   } else {
  #if defined ESMF_MOAB
     ESMCI_MESHCREATE_TRACE_ENTER("MBMesh addelements");
@@ -1728,11 +1728,11 @@ MeshCap *MeshCap::meshcreatedual(MeshCap **src_meshpp, int *rc) {
   MBMesh *mbmesh;
   // Call into func. depending on mesh type
   if (is_esmf_mesh) {
-    ESMCI_DUALMESH_TRACE_ENTER("Native Mesh Dual Mesh Generation");
+    ESMCI_DUALMESH_TRACE_ENTER("NativeMesh Dual Mesh Generation");
     ESMCI_meshcreatedual(&((*src_meshpp)->mesh), &mesh, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return NULL;
-    ESMCI_DUALMESH_TRACE_EXIT("Native Mesh Dual Mesh Generation")
+    ESMCI_DUALMESH_TRACE_EXIT("NativeMesh Dual Mesh Generation")
   } else {
 #if defined ESMF_MOAB
     MBMesh *meshin = (MBMesh *)((*src_meshpp)->mbmesh);
