@@ -97,6 +97,7 @@ endif
 ifeq ($(pathtype),abs)
 	-@echo "--------------------------------------------------------------"
 	-@echo "NetCDF library version: `$(ESMF_NETCDF) --version`"
+	-@echo "NetCDF Fortran version: `$(ESMF_NFCONFIG) --version`"
 endif
 ifeq ($(ESMF_NETCDF),nc-config)
 	-@echo "--------------------------------------------------------------"
@@ -208,6 +209,18 @@ endif
           fi; \
 	  if [ -n "$(ESMF_NETCDF_LIBPATH)" ] ; then \
 	    echo "ESMF_NETCDF_LIBPATH:     $(ESMF_NETCDF_LIBPATH)" ; \
+          fi; \
+	  if [ -n "$(ESMF_NFCONFIG)" ] ; then \
+	    echo "ESMF_NFCONFIG:           $(ESMF_NFCONFIG)" ; \
+          fi; \
+	  if [ -n "$(ESMF_NETCDFF_INCLUDE)" ] ; then \
+	    echo "ESMF_NETCDFF_INCLUDE:    $(ESMF_NETCDFF_INCLUDE)" ; \
+          fi; \
+	  if [ -n "$(ESMF_NETCDFF_LIBS)" ] ; then \
+	    echo "ESMF_NETCDFF_LIBS:       $(ESMF_NETCDFF_LIBS)" ; \
+          fi; \
+	  if [ -n "$(ESMF_NETCDFF_LIBPATH)" ] ; then \
+	    echo "ESMF_NETCDFF_LIBPATH:    $(ESMF_NETCDFF_LIBPATH)" ; \
           fi; \
          fi
 	-@if [ -n "$(ESMF_PNETCDF)" ] ; then \
@@ -546,6 +559,18 @@ endif
 	  if [ -n "$(ESMF_NETCDF_LIBPATH)" ] ; then \
 	    echo "# ESMF_NETCDF_LIBPATH:    $(ESMF_NETCDF_LIBPATH)" >> $(MKINFO) ; \
           fi; \
+	  if [ -n "$(ESMF_NFCONFIG)" ] ; then \
+	    echo "# ESMF_NFCONFIG:          $(ESMF_NFCONFIG)" >> $(MKINFO) ; \
+          fi; \
+	  if [ -n "$(ESMF_NETCDFF_INCLUDE)" ] ; then \
+	    echo "# ESMF_NETCDFF_INCLUDE:   $(ESMF_NETCDFF_INCLUDE)" >> $(MKINFO) ; \
+          fi; \
+	  if [ -n "$(ESMF_NETCDFF_LIBS)" ] ; then \
+	    echo "# ESMF_NETCDFF_LIBS:      $(ESMF_NETCDFF_LIBS)" >> $(MKINFO) ; \
+          fi; \
+	  if [ -n "$(ESMF_NETCDFF_LIBPATH)" ] ; then \
+	    echo "# ESMF_NETCDFF_LIBPATH:   $(ESMF_NETCDFF_LIBPATH)" >> $(MKINFO) ; \
+          fi; \
          fi
 	-@if [ -n "$(ESMF_PNETCDF)" ] ; then \
 	  echo "# ESMF_PNETCDF:           $(ESMF_PNETCDF)" >> $(MKINFO) ; \
@@ -650,7 +675,12 @@ install:
 	mkdir -p $(ESMF_INSTALL_MODDIR_ABSPATH)
 	cp -f $(ESMF_MODDIR)/*.mod $(ESMF_INSTALL_MODDIR_ABSPATH)
 	mkdir -p $(ESMF_INSTALL_LIBDIR_ABSPATH)
-	cp -f $(ESMF_LIBDIR)/lib*.* $(ESMF_INSTALL_LIBDIR_ABSPATH)
+	cp -f $(ESMF_LIBDIR)/libesmf*.* $(ESMF_INSTALL_LIBDIR_ABSPATH)
+	@for lib in $(wildcard $(ESMF_INSTALL_LIBDIR_ABSPATH)/libesmf*.dylib) foo ; do \
+	  if [ $$lib != "foo" ]; then \
+	    install_name_tool -id "$$lib" $$lib ; \
+	  fi ; \
+	done
 ifeq ($(ESMF_TRACE_LIB_BUILD),ON)
 ifeq ($(ESMF_TRACE_BUILD_SHARED),ON)
 	$(MAKE) ESMF_PRELOADDIR=$(ESMF_INSTALL_LIBDIR_ABSPATH) build_preload_script

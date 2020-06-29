@@ -47,6 +47,7 @@ static const char *const version = "$Id$";
 
 namespace ESMCI {
 
+#define MV_FIX
 
 extern bool mathutil_debug;
 
@@ -83,7 +84,6 @@ struct Search_index {
   bool investigated;
   bool is_in;
   bool elem_masked;
-
 /*
   bool operator<(const Search_index &rhs) const
     { return sort_val < rhs.sort_val; }
@@ -798,10 +798,357 @@ BBox bbox_from_pl(PointList &dst_pl) {
   }
 
 
-// The main routine
-// dst_pl is assumed to only contain non-masked points
-  void OctSearch(const Mesh &src, PointList &dst_pl, MAP_TYPE mtype, UInt dst_obj_type, int unmappedaction, SearchResult &result, bool set_dst_status, WMat &dst_status, double stol, std::vector<int> *revised_dst_loc, OTree *box_in) {
-    Trace __trace("OctSearch(const Mesh &src, PointList &dst_pl, MAP_TYPE mtype, UInt dst_obj_type, SearchResult &result, double stol, std::vector<const MeshObj*> *revised_dst_loc, OTree *box_in)");
+  // Add a new result to the search and dst_status output lists
+  static void _add_to_search_results(MeshObj *src_elem, 
+                                     int dst_gid, double dst_pcoord[3], 
+                                     std::set<Search_result> &tmp_sr) {
+
+    // Setup temp. Search_node_result
+    Search_node_result snr;
+    snr.node=NULL;
+    snr.dst_gid=dst_gid;
+    snr.pcoord[0]=dst_pcoord[0];
+    snr.pcoord[1]=dst_pcoord[1];
+    snr.pcoord[2]=dst_pcoord[2];
+    
+    // Setup temp. Search_result
+    Search_result sr; 
+    sr.elem = src_elem;
+    
+    // See if there's already a result with the same elem
+    std::set<Search_result>::iterator sri =
+      tmp_sr.lower_bound(sr);
+    if (sri == tmp_sr.end() || *sri != sr) {
+      sr.nodes.push_back(snr);
+      tmp_sr.insert(sri, sr);
+    } else {
+      // std::cout << "second choice" << std::endl;
+      std::vector<Search_node_result> &r
+        = const_cast<std::vector<Search_node_result>&>(sri->nodes);
+      r.push_back(snr);
+      //std::cout << "size=" << sri->nodes.size() << std::endl;
+    }
+  }
+
+  // Add a new result to the dst_status output lists
+  static void _add_to_dst_status(bool src_elem_masked, 
+                                 int dst_gid,
+                                 WMat &dst_status) {
+
+      if (src_elem_masked) {
+        // Mark this as unmapped due to src masking
+           int dst_id=dst_gid;
+
+           // Set col info
+           WMat::Entry col(ESMC_REGRID_STATUS_SRC_MASKED,
+                               0, 0.0, 0);
+
+           // Set row info
+           WMat::Entry row(dst_id, 0, 0.0, 0);
+
+           // Put weights into weight matrix
+           dst_status.InsertRowMergeSingle(row, col);
+
+      } else {
+        // Mark this as mapped
+           int dst_id=dst_gid;
+
+           // Set col info
+           WMat::Entry col(ESMC_REGRID_STATUS_MAPPED,
+                               0, 0.0, 0);
+
+           // Set row info
+           WMat::Entry row(dst_id, 0, 0.0, 0);
+
+           // Put weights into weight matrix
+           dst_status.InsertRowMergeSingle(row, col);
+      }
+  }
+
+
+  // Get pcoord of a node in an elem
+  // pcoord needs to be of the same size as the paramtric dim of the mesh
+  static void _get_pcoord_from_node_and_elem(MeshObj *node, 
+                                             MeshObj *elem, double *_pcoord) {
+
+    // Get number of nodes in elem
+    const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(*elem);
+    int num_nodes_in_elem=topo->num_nodes;
+
+    // Figure out which corner input node is
+    int node_index_in_elem=-1;
+    for (int n = 0; n < num_nodes_in_elem; ++n){
+      if (node == elem->Relations[n].obj) {
+        node_index_in_elem=n;
+        break;
+      }
+    }
+
+    // Error check
+    if (node_index_in_elem < 0) Throw() << "node unexpectedly not found in elem";
+
+    // Get parametric dim of topo
+    int pdim=topo->parametric_dim;
+
+    // Translate into pcoords
+    const double *elem_node_pcoords=topo->node_coord();
+    const double *node_pcoords=elem_node_pcoords+node_index_in_elem*pdim;
+
+    // Copy into output array
+    for (int i=0; i<pdim; i++) {
+      _pcoord[i]=node_pcoords[i];
+    }
+  }
+
+
+  static void _get_elem_and_pcoord_from_node(MeshObj *node, MEField<> *src_mask_field_ptr,
+                                             MeshObj **_out_elem, bool *_out_elem_masked, double *_pcoord) {
+
+    // Loop and get minimum elem id attached to node and use that
+    int min_elem_id=std::numeric_limits<int>::max();
+    MeshObj *min_elem=NULL;
+    MeshObjRelationList::const_iterator el = MeshObjConn::find_relation(*node, MeshObj::ELEMENT);
+    while (el != node->Relations.end() && el->obj->get_type() == MeshObj::ELEMENT){
+      MeshObj *elem=el->obj;
+
+      // Skip masked elems
+      bool elem_masked=false;
+      if (src_mask_field_ptr) {
+        // Get number of nodes in elem
+        const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(*elem);
+        int num_nodes_in_elem=topo->num_nodes;
+
+        // Figure out which corner input node is
+        for (int n = 0; n < num_nodes_in_elem; ++n) {
+
+          // Get mesh object
+          MeshObj *node=elem->Relations[n].obj;
+
+          // Get mask data
+          double *m=src_mask_field_ptr->data(*node);
+
+          // Check masking
+          if (*m > 0.5) {
+            elem_masked=true;
+            break;
+          }
+        }
+      }
+
+      // skip to next if masked 
+      if (elem_masked) {
+        ++el;
+        continue;
+      }
+
+      // Get elem id
+      UInt elem_id=elem->get_id();      
+
+      // Update if less than min
+      if (elem_id < min_elem_id) {
+        min_elem_id=elem_id;
+        min_elem=elem;
+      }
+     
+      // Next element
+      ++el;
+    }
+
+
+    // If we haven't found one, then ignore masking and find the one with the lowest id
+    bool out_elem_masked=false;
+    if (min_elem == NULL) {
+      // Indicate that the output elem is masked
+      out_elem_masked=true;
+
+      // Loop for elem ignoring masking
+      MeshObjRelationList::const_iterator el = MeshObjConn::find_relation(*node, MeshObj::ELEMENT);
+      while (el != node->Relations.end() && el->obj->get_type() == MeshObj::ELEMENT){
+        MeshObj *elem=el->obj;
+        
+        // Get elem id
+        UInt elem_id=elem->get_id();      
+        
+        // Update if less than min
+        if (elem_id < min_elem_id) {
+          min_elem_id=elem_id;
+          min_elem=elem;
+        }
+        
+        // Next element
+        ++el;
+      }
+    }
+
+    // Make sure that we have an element
+    if (min_elem == NULL) {
+      Throw() << "We didn't find a masked or unmasked elem, something is wrong.";
+    }
+
+    // Get pcoords based on node and elem
+    _get_pcoord_from_node_and_elem(node, min_elem, _pcoord);
+    
+    // Output elem as well
+    *_out_elem=min_elem;
+    *_out_elem_masked=out_elem_masked;
+  }
+
+/* XMRKX */
+
+  struct NODE_PNT {
+    double coord[3];
+    int id;
+    MeshObj *node;
+
+
+    bool operator<(const NODE_PNT &rhs) const {
+      if (coord[0] != rhs.coord[0]) return coord[0] < rhs.coord[0];
+      if (coord[1] != rhs.coord[1]) return coord[1] < rhs.coord[1];
+      if (coord[2] != rhs.coord[2]) return coord[2] < rhs.coord[2];
+      return id < rhs.id; // Sort by id, so we find the lowest id for matching coords
+    }
+
+
+  }; 
+
+
+  static void _search_exact_point_match(const Mesh &c_src, PointList &dst_pl, 
+                                        std::vector<int> &dst_loc_again,
+                                        std::set<Search_result> &tmp_sr,
+                                        bool set_dst_status, WMat &dst_status) {
+    // Cast to non-const
+    Mesh &src=const_cast<Mesh &>(c_src);
+
+    // Get src field information
+    MEField<> *src_coord_field_ptr = src.GetCoordField();
+    MEField<> *src_mask_field_ptr = src.GetField("mask");
+    
+    // Get handy info from mesh
+    int sdim=src.spatial_dim();
+
+    // Fill point vector
+    std::vector<NODE_PNT> src_pnts;
+    src_pnts.reserve(src.num_nodes());
+    Mesh::iterator ni = src.node_begin(), ne = src.node_end();
+    for (; ni != ne; ++ni) {
+      MeshObj &node = *ni;
+
+      // Get node points
+      double *node_coord=src_coord_field_ptr->data(node);
+
+      // Fill struct 
+      NODE_PNT tmp_np;
+      tmp_np.coord[0]=node_coord[0];
+      tmp_np.coord[1]=node_coord[1];
+      tmp_np.coord[2]=(sdim == 3) ? node_coord[2] : 0.0;
+      tmp_np.id=node.get_id();
+      tmp_np.node=&node;
+
+      // Add to list
+      src_pnts.push_back(tmp_np);
+    }
+
+    // Sort 
+    std::sort(src_pnts.begin(),src_pnts.end());
+
+    // Loop through PointList adding things to dst_loc_again if they weren't found
+    dst_loc_again.reserve(dst_pl.get_curr_num_pts());
+    for(int i=0; i<dst_pl.get_curr_num_pts(); i++) {
+
+
+      // Get info out of point list
+      const double *pnt_crd=dst_pl.get_coord_ptr(i);
+      int pnt_id=dst_pl.get_id(i);
+
+      // DEBUG
+      //      if (pnt_id == 14) {
+      //  printf("dst pnt id=%d c=%f %f %f\n",pnt_id,pnt_crd[0],pnt_crd[1],pnt_crd[2]);
+      //}
+
+      // Match info 
+      bool match_found=false;
+      MeshObj *match_elem=NULL;
+      bool match_elem_masked=false;
+      double match_pcoord[3]={0.0,0.0,0.0};
+      
+      // See if it's an exact match to a point in the grid (identity grids)
+      Mesh::MeshObjIDMap::iterator mi =  src.map_find(MeshObj::NODE, pnt_id);
+      if (mi != src.map_end(MeshObj::NODE)) {
+        MeshObj *node=&*mi;
+        
+          // Node coords
+          double *node_crd = src_coord_field_ptr->data(*node);
+          
+          // If coords match then get info
+          if (pnt_crd[0] == node_crd[0]) {
+            if (pnt_crd[1] == node_crd[1]) {
+              if ((sdim==3) && (pnt_crd[2] == node_crd[2])) {
+                
+                _get_elem_and_pcoord_from_node(node, src_mask_field_ptr, &match_elem, &match_elem_masked,  match_pcoord);
+                
+                match_found=true;
+              }
+            }
+          }
+      }
+
+      // If no match yet, check for exact coordinate match but not exact id match
+      if (!match_found) {
+        NODE_PNT search_np;
+        search_np.coord[0]=pnt_crd[0];
+        search_np.coord[1]=pnt_crd[1];
+        search_np.coord[2]=(sdim == 3) ? pnt_crd[2] : 0.0;
+        search_np.id=-1;
+        std::vector<NODE_PNT>::iterator lb =
+          std::lower_bound(src_pnts.begin(), src_pnts.end(), search_np);
+        if (lb != src_pnts.end()) {
+          NODE_PNT tmp_np=*lb;
+          
+          // If coords match then get info
+          if (pnt_crd[0] == tmp_np.coord[0]) {
+            if (pnt_crd[1] == tmp_np.coord[1]) {
+              if ((sdim==3) && (pnt_crd[2] == tmp_np.coord[2])) {
+                
+                _get_elem_and_pcoord_from_node(tmp_np.node, src_mask_field_ptr, &match_elem, &match_elem_masked, match_pcoord);
+                
+                match_found=true;
+
+              }
+            }
+          }        
+        }
+      }
+     
+
+      // DEBUG
+      //if (pnt_id == 14) {
+      //  printf("dst pnt id=%d m_found=%d m_elem=%d  pc=%f %f %f\n",pnt_id,match_found,match_elem->get_id(),match_pcoord[0],match_pcoord[1],match_pcoord[2]);
+      //}
+
+      // If found, the save search info
+      if (match_found) {
+        
+        // If src elem that we've mapped to isn't masked, then add to result
+        if (!match_elem_masked) _add_to_search_results(match_elem, 
+                                                       pnt_id, match_pcoord, 
+                                                       tmp_sr);
+
+        // If we're supposed to be updating the dst status, then do that
+        if (set_dst_status)  _add_to_dst_status(match_elem_masked, 
+                                                pnt_id,
+                                                dst_status);
+
+      } else { // Not found yet, so put into list to search again
+        dst_loc_again.push_back(i);
+      }
+
+    }
+
+  }
+
+
+  void OctSearchInexact(const Mesh &src, PointList &dst_pl, MAP_TYPE mtype, UInt dst_obj_type, int unmappedaction, SearchResult &result, bool set_dst_status, WMat &dst_status, double stol, std::vector<int> *revised_dst_loc, OTree *box_in) {
+    Trace __trace("OctSearchInexact(const Mesh &src, PointList &dst_pl, MAP_TYPE mtype, UInt dst_obj_type, SearchResult &result, double stol, std::vector<const MeshObj*> *revised_dst_loc, OTree *box_in)");
 
   if (dst_pl.get_curr_num_pts() == 0)
     return;
@@ -826,6 +1173,25 @@ BBox bbox_from_pl(PointList &dst_pl) {
     Throw() << "Mesh and pointlist must have same spatial dim for search";
   }
 
+  // Pointer to list of destination points to investigate now.
+  std::vector<int> *dst_loc;
+
+  // vector to hold new loc list created out of point list (if necessary)
+  std::vector<int> dst_loc_new;
+
+  // Either create a new list of destination locs to investigate or use a list from a previous search
+  if (revised_dst_loc) dst_loc=revised_dst_loc; // Use list from previous search
+  else { // Create a new list from pointlist
+    dst_loc_new.reserve(dst_pl.get_curr_num_pts());
+
+    for(int i=0; i<dst_pl.get_curr_num_pts(); i++) {
+      dst_loc_new.push_back(i);
+    }
+
+    dst_loc=&dst_loc_new;
+  }
+
+
   // Fill search box tree
   OTree *box;
   if (!box_in) {
@@ -845,23 +1211,6 @@ BBox bbox_from_pl(PointList &dst_pl) {
     box->commit();
   } else box = box_in;
 
-  // Get list of destination points to look at.
-  std::vector<int> *dst_loc;
-
-  // vector to hold new location if necessary
-  std::vector<int> dst_loc_new;
-
-  // Either create a new one or use list from the finer search
-  if (revised_dst_loc) dst_loc=revised_dst_loc;
-  else {
-    dst_loc_new.reserve(dst_pl.get_curr_num_pts());
-
-    for(int i=0; i<dst_pl.get_curr_num_pts(); i++) {
-      dst_loc_new.push_back(i);
-    }
-
-    dst_loc=&dst_loc_new;
-  }
 
   // vector to hold loc to search in future
   std::vector<int> again;
@@ -917,110 +1266,64 @@ BBox bbox_from_pl(PointList &dst_pl) {
     if (!si.investigated) {
       again.push_back(loc);
     } else {
-      if (si.elem_masked) {
-        // Mark this as unmapped due to src masking
-        if (set_dst_status) {
-           int dst_id=si.snr.dst_gid;
+      // If src elem that we've mapped to isn't masked, then add to result
+      if (!si.elem_masked) _add_to_search_results(si.elem, 
+                                                   si.snr.dst_gid, si.snr.pcoord, 
+                                                   tmp_sr);
 
-           // Set col info
-           WMat::Entry col(ESMC_REGRID_STATUS_SRC_MASKED,
-                               0, 0.0, 0);
-
-           // Set row info
-           WMat::Entry row(dst_id, 0, 0.0, 0);
-
-           // Put weights into weight matrix
-           dst_status.InsertRowMergeSingle(row, col);
-        }
-
-        // This is actually handled at the top of regridding now, so that
-        // we have all the destination results on their home processor, but leave
-        // this in for now until we can take it out everywhere.
-        if (unmappedaction == ESMCI_UNMAPPEDACTION_ERROR) {
-          Throw() << " Some destination points cannot be mapped to source grid";
-        } else if (unmappedaction == ESMCI_UNMAPPEDACTION_IGNORE) {
-          // don't do anything
-        } else {
-          Throw() << " Unknown unmappedaction option";
-        }
-      } else {
-        // Mark this as mapped
-        if (set_dst_status) {
-           int dst_id=si.snr.dst_gid;
-
-           // Set col info
-           WMat::Entry col(ESMC_REGRID_STATUS_MAPPED,
-                               0, 0.0, 0);
-
-           // Set row info
-           WMat::Entry row(dst_id, 0, 0.0, 0);
-
-           // Put weights into weight matrix
-           dst_status.InsertRowMergeSingle(row, col);
-        }
-
-        Search_result sr; sr.elem = si.elem;
-        std::set<Search_result>::iterator sri =
-          tmp_sr.lower_bound(sr);
-        if (sri == tmp_sr.end() || *sri != sr) {
-          sr.nodes.push_back(si.snr);
-          tmp_sr.insert(sri, sr);
-        } else {
-          // std::cout << "second choice" << std::endl;
-          std::vector<Search_node_result> &r
-            = const_cast<std::vector<Search_node_result>&>(sri->nodes);
-          r.push_back(si.snr);
-          //std::cout << "size=" << sri->nodes.size() << std::endl;
-        }
-      }
+      // If we're supposed to be updating the dst status, then do that
+      if (set_dst_status)  _add_to_dst_status(si.elem_masked, 
+                                              si.snr.dst_gid,
+                                              dst_status);
     }
 
-  } // for dest nodes
+  } // interate over dst_loc
 
-  {
-    // Build seach res
-    std::set<Search_result>::iterator si =
-      tmp_sr.begin(), se = tmp_sr.end();
-
-    for (; si != se; ++si)
-      result.push_back(new Search_result(*si));
+  // Take temporary results and put into output results
+  std::set<Search_result>::iterator si = tmp_sr.begin(), se = tmp_sr.end();
+  for (; si != se; ++si) {
+    result.push_back(new Search_result(*si));
   }
 
+  // Shrink memory
   std::set<Search_result>().swap(tmp_sr);
   std::vector<int>().swap(*dst_loc);
 
+  // Stop if nothing else to search, or search again with a larger tol
   if (!again.empty()) {
-     if (stol > 1e-6) {
- /* XMRKX */
-       // Mark anything that hasn't been mapped as unmapped
-       if (set_dst_status) {
-         for (UInt p = 0; p < again.size(); ++p) {
-           int loc = again[p];
-           int dst_id=dst_pl.get_id(loc);
+    // Stop if tol is too big 
+    if (stol > 1e-6) {
 
-           // Set col info
-           WMat::Entry col(ESMC_REGRID_STATUS_OUTSIDE, 0,
-                               0.0, 0);
+      // Mark anything that hasn't been mapped as unmapped
+      if (set_dst_status) {
+        for (UInt p = 0; p < again.size(); ++p) {
+          int loc = again[p];
+          int dst_id=dst_pl.get_id(loc);
+          
+          // Set col info
+          WMat::Entry col(ESMC_REGRID_STATUS_OUTSIDE, 0,
+                          0.0, 0);
+          
+          // Set row info
+          WMat::Entry row(dst_id, 0, 0.0, 0);
+          
+          // Put weights into weight matrix
+          dst_status.InsertRowMergeSingle(row, col);
+        }
+      }
+      
+      // Mark as not found (NOT USED BECAUSE DOESN'T WORK IN PARALLEL, SO DONE HIGHER UP)
+      if (unmappedaction == ESMCI_UNMAPPEDACTION_ERROR) {
+        Throw() << " Some destination points cannot be mapped to source grid";
+      } else if (unmappedaction == ESMCI_UNMAPPEDACTION_IGNORE) {
+        // don't do anything
+      } else {
+        Throw() << " Unknown unmappedaction option";
+      }
 
-           // Set row info
-           WMat::Entry row(dst_id, 0, 0.0, 0);
-
-           // Put weights into weight matrix
-           dst_status.InsertRowMergeSingle(row, col);
-         }
-       }
-
-
-       if (unmappedaction == ESMCI_UNMAPPEDACTION_ERROR) {
-         Throw() << " Some destination points cannot be mapped to source grid";
-       } else if (unmappedaction == ESMCI_UNMAPPEDACTION_IGNORE) {
-         // don't do anything
-       } else {
-         Throw() << " Unknown unmappedaction option";
-       }
-     } else {
-       OctSearch(src, dst_pl, mtype, dst_obj_type, unmappedaction, result, set_dst_status, dst_status, stol*1e+2, &again, box);
-     }
+    } else { // Continue with a larger tol
+      OctSearchInexact(src, dst_pl, mtype, dst_obj_type, unmappedaction, result, set_dst_status, dst_status, stol*1e+2, &again, box);
+    }
   }
 
   // Exiting top of recursion, so do a few things before we leave
@@ -1034,5 +1337,41 @@ BBox bbox_from_pl(PointList &dst_pl) {
     delete box;
   }
 }
+
+  // Main search routine first looks for exact matches then inexact
+  void OctSearch(const Mesh &src, PointList &dst_pl, MAP_TYPE mtype, UInt dst_obj_type, int unmappedaction, SearchResult &result, bool set_dst_status, WMat &dst_status, double stol) {
+    Trace __trace("OctSearch(const Mesh &src, PointList &dst_pl, MAP_TYPE mtype, UInt dst_obj_type, SearchResult &result, double stol, std::vector<const MeshObj*> *revised_dst_loc, OTree *box_in)");
+
+  if (dst_pl.get_curr_num_pts() == 0) return;
+
+  // Get spatial dim  and error check
+  UInt sdim = src.spatial_dim();
+  if (sdim != dst_pl.get_coord_dim()) {
+    Throw() << "Mesh and pointlist must have same spatial dim for search";
+  }
+
+  // List of dst locations that weren't found
+  std::vector<int> dst_loc_not_found;
+
+  // Block so that tmp_sr goes away
+  {
+    // temp search results
+    std::set<Search_result> tmp_sr;
+
+    // Look for exact matches
+    _search_exact_point_match(src, dst_pl, dst_loc_not_found, tmp_sr, set_dst_status, dst_status);
+
+    // Add exact results to search results
+    std::set<Search_result>::iterator si = tmp_sr.begin(), se = tmp_sr.end();
+    for (; si != se; ++si)
+      result.push_back(new Search_result(*si));
+  }
+
+  // If there are any points left, do inexact search on those
+  if (!dst_loc_not_found.empty()) {
+    OctSearchInexact(src, dst_pl, mtype, dst_obj_type, unmappedaction, result, set_dst_status, dst_status, stol, &dst_loc_not_found, NULL);
+  }
+}
+
 
 } // namespace

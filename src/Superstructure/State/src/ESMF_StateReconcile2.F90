@@ -62,6 +62,8 @@ module ESMF_StateReconcile2Mod
   use ESMF_FieldBundleMod
   use ESMF_RHandleMod
 
+  use ESMF_InfoMod, only : ESMF_Info, ESMF_InfoGetFromBase, ESMF_InfoUpdate
+
   implicit none
   private
 
@@ -1309,6 +1311,7 @@ contains
     integer :: mypet, npets
     integer :: offset
     type(ESMF_InquireFlag) :: inqflag
+    type(ESMF_Info) :: base_info, base_temp_info
 
     logical, parameter :: debug = .false.
 
@@ -1417,8 +1420,18 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call c_ESMC_AttributeCopy(base_temp, base, &
-          ESMF_ATTCOPY_VALUE, localrc)
+        call ESMF_InfoGetFromBase(base_temp, base_temp_info, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call ESMF_InfoGetFromBase(base, base_info, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call ESMF_InfoUpdate(base_info, base_temp_info, recursive=.true., &
+          rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1429,12 +1442,6 @@ contains
             ESMF_CONTEXT, rcToReturn=rc)) return
       end if
     end do
-
-    ! Reset the change flags in the Attribute hierarchy
-    call c_ESMC_AttributeUpdateReset(base, localrc);
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
-        rcToReturn=rc)) return
 
     deallocate(buffer_local)
     deallocate(recv_sizes)

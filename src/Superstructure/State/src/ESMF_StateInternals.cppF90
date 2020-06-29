@@ -1310,34 +1310,10 @@ StateClsAddListMacro(ESMF_State, State, states, spp, STATE)
             case (ESMF_STATEITEM_FIELDBUNDLE%ot)
               sip%datap%fbp = ESMF_FieldBundleDeserialize(buffer, offset, &
                   attreconflag=lattreconflag, rc=localrc)
-              !  here we relink the State Attribute hierarchy to the FieldBundle
-              !  Attribute hierarchy, as they were linked before
-              if (lattreconflag == ESMF_ATTRECONCILE_ON) then
-                call c_ESMC_AttributeLink(sp%base, sip%datap%fbp%this%base, &
-                    linkChange, localrc)
-                if (ESMF_LogFoundError(localrc, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) then
-                  call ESMF_ContainerDestroy (sp%stateContainer, rc=localrc)
-                  return
-                endif
-              endif
 
             case (ESMF_STATEITEM_FIELD%ot)
               sip%datap%fp = ESMF_FieldDeserialize(buffer, offset, &
                 attreconflag=lattreconflag, rc=localrc)
-              !  here we relink the State Attribute hierarchy to the Field
-              !  Attribute hierarchy, as they were linked before
-              if (lattreconflag == ESMF_ATTRECONCILE_ON) then
-                call c_ESMC_AttributeLink(sp%base, sip%datap%fp%ftypep%base, &
-                    linkChange, localrc)
-                if (ESMF_LogFoundError(localrc, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) then
-                  call ESMF_ContainerDestroy (sp%stateContainer, rc=localrc)
-                  return
-                endif
-              endif
 
             case (ESMF_STATEITEM_ARRAY%ot)
               call c_ESMC_ArrayDeserialize(sip%datap%ap, buffer, offset, &
@@ -1351,18 +1327,6 @@ StateClsAddListMacro(ESMF_State, State, states, spp, STATE)
               subsubstate = ESMF_StateDeserialize(vm, buffer, offset, &
                                               attreconflag=lattreconflag, rc=localrc)
               sip%datap%spp => subsubstate%statep
-              !  here we relink the State Attribute hierarchy to the subState
-              !  Attribute hierarchy, as they were linked before
-              if (lattreconflag == ESMF_ATTRECONCILE_ON) then
-                call c_ESMC_AttributeLink(sp%base, sip%datap%spp%base, &
-                    linkChange, localrc)
-                if (ESMF_LogFoundError(localrc, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) then
-                  call ESMF_ContainerDestroy (sp%stateContainer, rc=localrc)
-                  return
-                endif
-              endif
 
 #if 0
             case (ESMF_STATEITEM_NAME%ot)

@@ -322,7 +322,7 @@ module NUOPC_Comp
     integer                                         :: k, itemCount
     character(len=80), allocatable                  :: valueSL(:)
     integer, allocatable                            :: valueIL(:)
-    
+
     if (present(rc)) rc = ESMF_SUCCESS
 
     ! query the Component for info
@@ -391,7 +391,7 @@ module NUOPC_Comp
         stringList(i)=trim(adjustl(tempString))
       endif
     enddo
-    
+
     freeFormat = NUOPC_FreeFormatCreate(stringList=stringList, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
@@ -959,6 +959,7 @@ module NUOPC_Comp
     integer                                         :: i, lineCount, tokenCount
     character(len=NUOPC_FreeFormatLen), allocatable :: tokenList(:)
     logical                                         :: addFlagOpt
+    logical                                         :: isPresent
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1008,6 +1009,18 @@ module NUOPC_Comp
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
+        else
+          call ESMF_AttributeGet(comp, trim(tokenList(1)), convention="NUOPC", &
+            purpose="Instance", isPresent=isPresent, rc=localrc)
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+          if (.not. isPresent) then
+            if (ESMF_LogFoundError(rcToCheck=ESMF_RC_ATTR_ITEMSOFF, &
+              msg="Attribute must be added before it is set. name="//trim(tokenList(1)), &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+          endif
         endif
         call NUOPC_CompAttributeSet(comp, name=trim(tokenList(1)), &
           value=trim(tokenList(3)), rc=localrc)
@@ -1091,6 +1104,7 @@ module NUOPC_Comp
     integer                                         :: i, lineCount, tokenCount
     character(len=NUOPC_FreeFormatLen), allocatable :: tokenList(:)
     logical                                         :: addFlagOpt
+    logical                                         :: isPresent
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1140,6 +1154,18 @@ module NUOPC_Comp
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
+        else
+          call ESMF_AttributeGet(comp, trim(tokenList(1)), convention="NUOPC", &
+            purpose="Instance", isPresent=isPresent, rc=localrc)
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+          if (.not. isPresent) then
+            if (ESMF_LogFoundError(rcToCheck=ESMF_RC_ATTR_ITEMSOFF, &
+              msg="Attribute must be added before it is set. name="//trim(tokenList(1)), &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+          endif
         endif
         call NUOPC_CompAttributeSet(comp, name=trim(tokenList(1)), &
           value=trim(tokenList(3)), rc=localrc)
@@ -1194,7 +1220,7 @@ module NUOPC_Comp
     ! Check for valid component kind
     if (trim(kind)=="Driver" .or. &
       trim(kind)=="Model" .or. trim(kind)=="Mediator") then
-      ! a valid component kind -> create the NUOPC/Component AttPack
+      ! The NUOPC/Component attributes
       allocate(attrList(8))
       attrList(1) = "Kind"
       attrList(2) = "Verbosity"
@@ -1204,13 +1230,8 @@ module NUOPC_Comp
       attrList(6) = "InitializePhaseMap"
       attrList(7) = "RunPhaseMap"
       attrList(8) = "FinalizePhaseMap"
-      call ESMF_AttributeAdd(comp, convention="CIM 1.5", &
-        purpose="ModelComp", rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-      call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="Component", &
-        attrList=attrList, nestConvention="CIM 1.5", &
-        nestPurpose="ModelComp", rc=localrc)
+      call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="Instance", &
+        attrList=attrList, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       deallocate(attrList, stat=stat)
@@ -1225,7 +1246,7 @@ module NUOPC_Comp
       return  ! bail out
     endif
 
-    ! Add more Attributes -> NUOPC/Driver, NUOPC/Model, NUOPC/Mediator AttPacks
+    ! Add NUOPC/Driver, NUOPC/Model, NUOPC/Mediator Attributes
     allocate(attrList(8))
     attrList(1) = "InternalInitializePhaseMap"  ! list of strings to map str to phase #
     attrList(2) = "InternalRunPhaseMap"  ! list of strings to map str to phase #
@@ -1236,9 +1257,8 @@ module NUOPC_Comp
     attrList(7) = "InitializeDataProgress"  ! values: strings "false"/"true"
     attrList(8) = "HierarchyProtocol"       ! strings
     ! add Attribute packages
-    call ESMF_AttributeAdd(comp, convention="NUOPC", purpose=trim(kind), &
-      attrList=attrList, nestConvention="NUOPC", nestPurpose="Component", &
-      rc=localrc)
+    call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="Instance", &
+      attrList=attrList, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     deallocate(attrList, stat=stat)
@@ -1246,12 +1266,6 @@ module NUOPC_Comp
       msg="Deallocation of attrList.", &
       line=__LINE__, &
       file=FILENAME, rcToReturn=rc)) return  ! bail out
-    
-    ! Highest level of the AttPack hierarchy (where users operate)
-    call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="Instance", &
-      nestConvention="NUOPC", nestPurpose=trim(kind), rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     
     ! set Attributes to defaults
     call NUOPC_CompAttributeSet(comp, &
@@ -1326,7 +1340,7 @@ module NUOPC_Comp
 
     if (present(rc)) rc = ESMF_SUCCESS
     
-    ! The NUOPC/Component level
+    ! The NUOPC/Component attributes
     allocate(attrList(8))
     attrList(1) = "Kind"
     attrList(2) = "Verbosity"
@@ -1336,11 +1350,8 @@ module NUOPC_Comp
     attrList(6) = "InitializePhaseMap"
     attrList(7) = "RunPhaseMap"
     attrList(8) = "FinalizePhaseMap"
-    call ESMF_AttributeAdd(comp, convention="ESG", purpose="General", rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-    call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="Component",   &
-      attrList=attrList, nestConvention="ESG", nestPurpose="General", rc=localrc)
+    call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="Instance",   &
+      attrList=attrList, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     deallocate(attrList, stat=stat)
@@ -1350,14 +1361,13 @@ module NUOPC_Comp
       file=FILENAME, &
       rcToReturn=rc)) return  ! bail out
     
-    ! Add more Attributes -> NUOPC/Connector AttPack
+    ! The NUOPC/Connector Attributes
     allocate(attrList(3))
     attrList(1) = "CplList"
     attrList(2) = "CplSetList"
     attrList(3) = "ConnectionOptions"
-    ! add Attribute packages
-    call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="Connector", &
-      attrList=attrList, nestConvention="NUOPC", nestPurpose="Component", rc=localrc)
+    call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="Instance", &
+      attrList=attrList, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     deallocate(attrList, stat=stat)
@@ -1365,14 +1375,8 @@ module NUOPC_Comp
       msg="Deallocation of attrList.", &
       line=__LINE__, &
       file=FILENAME, rcToReturn=rc)) return  ! bail out
-    
-    ! Highest level of the AttPack hierarchy (where users operate)
-    call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="Instance", &
-      nestConvention="NUOPC", nestPurpose="Connector", rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-    
-    ! set Attributes to defaults
+
+    ! set Attribute defaults
     call NUOPC_CompAttributeSet(comp, &
       name="Kind", value="Connector", &
       rc=localrc)
@@ -1391,7 +1395,7 @@ module NUOPC_Comp
     call NUOPC_CompAttributeSet(comp, &
       name="Diagnostic", value="0", &
       rc=localrc)
-      
+
   end subroutine
   !-----------------------------------------------------------------------------
 
@@ -2837,7 +2841,7 @@ module NUOPC_Comp
     character(len=40)         :: attributeName
     character(len=NUOPC_PhaseMapStringLength), pointer :: phases(:)
     logical                   :: isSet
-    
+
     if (present(rc)) rc = ESMF_SUCCESS
     
     ! query the Component for info
@@ -2892,9 +2896,9 @@ module NUOPC_Comp
     if (ESMF_LogFoundAllocError(statusToCheck=stat, &
       msg="Allocation of temporary data structure.", &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
-    if (itemCount > 0) then
+    if (isSet .and. (itemCount > 0)) then
       call ESMF_AttributeGet(comp, name=trim(attributeName), &
-        valueList=phases, convention="NUOPC", purpose="Instance", &
+        valueList=phases(1:itemcount), convention="NUOPC", purpose="Instance", &
         attnestflag=ESMF_ATTNEST_ON, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
@@ -3033,9 +3037,9 @@ module NUOPC_Comp
     if (ESMF_LogFoundAllocError(statusToCheck=stat, &
       msg="Allocation of temporary data structure.", &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
-    if (itemCount > 0) then
+    if (isSet .and. (itemCount > 0)) then
       call ESMF_AttributeGet(comp, name=trim(attributeName), &
-        valueList=phases, convention="NUOPC", purpose="Instance", &
+        valueList=phases(1:itemcount), convention="NUOPC", purpose="Instance", &
         attnestflag=ESMF_ATTNEST_ON, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
@@ -3176,9 +3180,9 @@ module NUOPC_Comp
       msg="Allocation of temporary data structure.", &
       line=__LINE__, file=trim(name)//":"//FILENAME, &
       rcToReturn=rc)) return  ! bail out
-    if (itemCount > 0) then
+    if (isSet .and. (itemCount > 0)) then
       call ESMF_AttributeGet(comp, name=trim(attributeName), &
-        valueList=phases, convention="NUOPC", purpose="Instance", &
+        valueList=phases(1:itemcount), convention="NUOPC", purpose="Instance", &
         attnestflag=ESMF_ATTNEST_ON, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out

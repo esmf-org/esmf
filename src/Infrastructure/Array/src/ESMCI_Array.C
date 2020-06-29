@@ -73,6 +73,7 @@
 #include "ESMCI_LogErr.h"
 #include "ESMCI_IO.h"
 #include "ESMCI_TraceRegion.h"
+#include "ESMCI_Info.h"
 
 #ifdef ASMM_STORE_DUMPSMM_on
 extern "C" {
@@ -3912,45 +3913,49 @@ int Array::write(
   }
 
   DistGrid *dg = getDistGrid();
+  ESMCI::Info *info_this = this->ESMC_BaseGetInfo();
+  ESMCI::Info *info_dg = dg->ESMC_BaseGetInfo();
   if ((convention.length() > 0) && (purpose.length() > 0)) {
-    if ((this->ESMC_BaseGetRoot()->getCountPack() == 0) && (dg->ESMC_BaseGetRoot()->getCountPack() == 0)) {
+    if ((info_this->getCountPack() == 0) && (info_dg->getCountPack() == 0)) {
       localrc = ESMF_RC_ATTR_NOTSET;
       if (ESMC_LogDefault.MsgFoundError(localrc, "No Array or DistGrid AttPacks found", ESMC_CONTEXT,
           &rc)) return rc;
     }
   }
 
+  // Key for the "attribute package"
+  const std::string key = "/"+convention+"/"+purpose;
+  bool has_convpurp = (convention.length() > 0) && (purpose.length() > 0);
+
   // If present, use Attributes at the DistGrid level for dimension names
-  Attribute *dimAttPack = NULL;
-  if ((convention.length() > 0) && (purpose.length() > 0)) {
-    std::vector<std::string> attPackNameList;
-    int attPackNameCount;
-    localrc = dg->ESMC_BaseGetRoot()->AttPackGet(
-        convention, purpose, "distgrid",
-        attPackNameList, attPackNameCount, ESMC_ATTNEST_ON);
-    if (localrc == ESMF_SUCCESS) {
-      dimAttPack = dg->ESMC_BaseGetRoot()->AttPackGet (
-          convention, purpose, "distgrid",
-          attPackNameList[0], ESMC_ATTNEST_ON);
+  ESMCI::Info *dimAttPack = nullptr;
+  if (has_convpurp) {
+    try {
+      if (info_dg->hasKey(key, true, false)) {
+        dimAttPack = new ESMCI::Info();
+        info_dg->get(*dimAttPack, key);
+      }
+    } catch (ESMCI::esmc_error &exc) {
+      ESMC_LogDefault.MsgFoundError(exc.getReturnCode(), exc.what(), ESMC_CONTEXT, &rc);
+      return rc;
     }
   }
 
   // If present, use Attributes at the Array level for variable attributes
-  Attribute *varAttPack = NULL;
-  if ((convention.length() > 0) && (purpose.length() > 0)) {
-    std::vector<std::string> attPackNameList;
-    int attPackNameCount;
-    localrc = this->ESMC_BaseGetRoot()->AttPackGet(
-        convention, purpose, "array",
-        attPackNameList, attPackNameCount, ESMC_ATTNEST_ON);
-    if (localrc == ESMF_SUCCESS) {
-      varAttPack = this->ESMC_BaseGetRoot()->AttPackGet (
-          convention, purpose, "array",
-          attPackNameList[0], ESMC_ATTNEST_ON);
+  ESMCI::Info *varAttPack = nullptr;
+  if (has_convpurp) {
+    try {
+      if (info_this->hasKey(key, true, false)) {
+        varAttPack = new ESMCI::Info();
+        info_this->get(*varAttPack, key);
+      }
+    } catch (ESMCI::esmc_error &exc) {
+      ESMC_LogDefault.MsgFoundError(exc.getReturnCode(), exc.what(), ESMC_CONTEXT, &rc);
+      return rc;
     }
   }
 
-  Attribute *gblAttPack = NULL;
+  ESMCI::Info *gblAttPack = nullptr;
 
   IO *newIO = IO::create(&rc);
   if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)){
@@ -10797,7 +10802,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
     // use the provided srcTermProcessing
 #ifdef ASMM_STORE_TUNELOG_on
     char msg[160];
-    sprintf(msg, "ASMM_STORE_TUNELOG: %d srcTermProcessingArg = %d"
+    sprintf(msg, "ASMM_STORE_TUNELOG:%d srcTermProcessingArg = %d"
       " was provided -> do not tune", __LINE__, *srcTermProcessingArg);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
@@ -10806,7 +10811,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
     // optimize srcTermProcessing
 #ifdef ASMM_STORE_TUNELOG_on
     char msg[160];
-    sprintf(msg, "ASMM_STORE_TUNELOG: %d srcTermProcessingArg was NOT"
+    sprintf(msg, "ASMM_STORE_TUNELOG:%d srcTermProcessingArg was NOT"
       " provided -> tuning...", __LINE__);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
@@ -10932,7 +10937,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
       srcTermProcessingOpt = srcTermProcessingOptList[petCount-1];
     }
 #ifdef ASMM_STORE_TUNELOG_on
-    sprintf(msg, "ASMM_STORE_TUNELOG: %d ... finished tuning, found"
+    sprintf(msg, "ASMM_STORE_TUNELOG:%d ... finished tuning, found"
       " srcTermProcessingOpt = %d", __LINE__, srcTermProcessingOpt);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
@@ -10982,7 +10987,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
     // use the provided pipelineDepthArg
 #ifdef ASMM_STORE_TUNELOG_on
     char msg[160];
-    sprintf(msg, "ASMM_STORE_TUNELOG: %d pipelineDepthArg = %d was provided"
+    sprintf(msg, "ASMM_STORE_TUNELOG:%d pipelineDepthArg = %d was provided"
       " -> do not tune", __LINE__, *pipelineDepthArg);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
@@ -10991,7 +10996,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
     // optimize pipeline depth
 #ifdef ASMM_STORE_TUNELOG_on
     char msg[160];
-    sprintf(msg, "ASMM_STORE_TUNELOG: %d pipelineDepthArg was NOT provided"
+    sprintf(msg, "ASMM_STORE_TUNELOG:%d pipelineDepthArg was NOT provided"
       " -> tuning...", __LINE__);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif

@@ -1,5 +1,10 @@
 # This example demonstrates how to regrid between a mesh and a locstream.
 
+try:
+    from unittest import SkipTest
+except ImportError:
+    from nose import SkipTest
+
 import ESMF
 import numpy
 
@@ -15,8 +20,8 @@ if ESMF.pet_count() == 1:
     mesh, _, _, _, _, _ = mesh_create_5()
     locstream = create_locstream_16()
 else:
-    if ESMF.pet_count() is not 4:
-        raise ValueError("processor count must be 4 or 1 for this example")
+    if constants._ESMF_MPIRUN_NP != 4:
+        raise SkipTest('processor count must be 4 or 1 for this example')
     else:
         mesh, _, _, _, _ = mesh_create_5_parallel()
         locstream = create_locstream_16_parallel()

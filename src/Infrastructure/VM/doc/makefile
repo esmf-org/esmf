@@ -30,7 +30,7 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 # These lists almost certainly will not be an exhaustive list of 
 # all of the dependent files, but even a partial listing  will be helpful.
 #
-REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE) VM_desc.tex VM_usage.tex VM_rest.tex VM_implnotes.tex
+REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE) VM_desc.tex VM_options.tex VM_usage.tex VM_rest.tex VM_implnotes.tex
 
 
 include $(ESMF_DIR)/makefile

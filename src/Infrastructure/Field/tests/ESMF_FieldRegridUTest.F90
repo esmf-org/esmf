@@ -1288,7 +1288,6 @@
 
       !------------------------------------------------------------------------
 
-
       !------------------------------------------------------------------------
       !EX_UTest
 
@@ -40554,21 +40553,21 @@ end subroutine test_regridSMMArbGrid
 
      ! Allocate and fill the node id array.
      allocate(nodeIds(numNodes))
-      nodeIds=(/1,2,3,4,5,6,7,8,9/)
+     nodeIds=(/1,2,3,4,5,6,7,8,9/)
 
      ! Allocate and fill node coordinate array.
      ! Since this is a 2D Mesh the size is 2x the
      ! number of nodes.
      allocate(nodeCoords(2*numNodes))
-     nodeCoords=(/0.5,0.5, & ! node id 1
-                   1.0,0.5, & ! node id 2
-                   2.1,0.5, & ! node id 3
-                  0.5, 1.0, & ! node id 4
-                   1.0, 1.0, & ! node id 5
-                   2.1, 1.0, & ! node id 6
-                  0.5, 2.1, & ! node id 7
-                   1.0, 2.1, & ! node id 8
-                   2.1, 2.1 /) ! node id 9
+     nodeCoords=(/ 0.0,1.25, & ! node id 1 
+                   1.0,1.25, & ! node id 2
+                   2.0,1.25, & ! node id 3
+                   0.0,1.75, & ! node id 4
+                    1.0,1.75, & ! node id 5
+                   2.0,1.75, & ! node id 6
+                   0.0,2.0, & ! node id 7
+                   1.0,2.0, & ! node id 8
+                   2.0,2.0 /) ! node id 9
 
      ! Allocate and fill the node owner array.
      ! Since this Mesh is all on PET 0, it's just set to all 0.
@@ -40576,10 +40575,10 @@ end subroutine test_regridSMMArbGrid
      nodeOwners=0 ! everything on PET 0
 
      ! Allocate and fill the node mask array.
-     ! Mask out node 9
+     ! (Mask point sticking out of src grid and point
+     !  uncovered by masked src point)
      allocate(nodeMask(numNodes))
-     nodeMask=(/0,0,0,0,0,0,0,0,0/)
-
+     nodeMask=(/0,0,0,2,0,0,0,0,0/)
 
      ! Set the number of each type of element, plus the total number.
      numQuadElems=3
@@ -40603,7 +40602,7 @@ end subroutine test_regridSMMArbGrid
      ! Allocate and fill the element connection type array.
      ! Note that entries in this array refer to the
      ! positions in the nodeIds, etc. arrays and that
-      ! the order and number of entries for each element
+     ! the order and number of entries for each element
      ! reflects that given in the Mesh options
      ! section for the corresponding entry
      ! in the elemTypes array.
@@ -40617,7 +40616,7 @@ end subroutine test_regridSMMArbGrid
 
  else if (petCount .eq. 4) then
      ! Setup mesh data depending on PET
-    if (localPET .eq. 0) then !!! This part only for PET 0
+     if (localPET .eq. 0) then !!! This part only for PET 0
        ! Set number of nodes
        numNodes=4
 
@@ -40629,10 +40628,10 @@ end subroutine test_regridSMMArbGrid
        ! Since this is a 2D Mesh the size is 2x the
        ! number of nodes.
        allocate(nodeCoords(2*numNodes))
-       nodeCoords=(/0.5, 0.5, & ! node id 1
-                     1.0, 0.5, & ! node id 2
-                    0.5,  1.0, & ! node id 4
-                     1.0,  1.0 /) ! node id 5
+       nodeCoords=(/ 0.0, 1.25, & ! node id 1 Put outside src grid
+                     1.0, 1.25, & ! node id 2
+                     0.0, 1.75, & ! node id 4
+                     1.0, 1.75 /) ! node id 5
 
        ! Allocate and fill the node owner array.
        allocate(nodeOwners(numNodes))
@@ -40641,11 +40640,11 @@ end subroutine test_regridSMMArbGrid
                     0, & ! node id 4
                     0/)  ! node id 5
 
-       ! Allocate and fill the node mask array.
+       ! Allocate and fill the node Mask array.
        allocate(nodeMask(numNodes))
        nodeMask=(/0, & ! node id 1
                   0, & ! node id 2
-                  0, & ! node id 4
+                  2, & ! node id 4
                   0/)  ! node id 5
 
        ! Set the number of each type of element, plus the total number.
@@ -40662,7 +40661,7 @@ end subroutine test_regridSMMArbGrid
        elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! elem id 1
 
        ! Allocate and fill the element connection type array.
-       ! Note that entry are local indices
+        ! Note that entry are local indices
        allocate(elemConn(4*numQuadElems+3*numTriElems))
        elemConn=(/1,2,4,3/) ! elem id 1
 
@@ -40678,10 +40677,10 @@ end subroutine test_regridSMMArbGrid
        ! Since this is a 2D Mesh the size is 2x the
        ! number of nodes.
        allocate(nodeCoords(2*numNodes))
-       nodeCoords=(/1.0,0.5, & ! node id 2
-                    2.1,0.5, & ! node id 3
-                    1.0, 1.0, & ! node id 5
-                    2.1, 1.0 /) ! node id 6
+       nodeCoords=(/1.0,1.25, & ! node id 2
+                    2.0,1.25, & ! node id 3
+                    1.0,1.75, & ! node id 5
+                    2.0,1.75 /) ! node id 6
 
        ! Allocate and fill the node owner array.
        allocate(nodeOwners(numNodes))
@@ -40711,7 +40710,7 @@ end subroutine test_regridSMMArbGrid
        elemTypes=(/ESMF_MESHELEMTYPE_TRI, & ! elem id 2
                    ESMF_MESHELEMTYPE_TRI/)  ! elem id 3
 
-       ! Allocate and fill the element connection type array.
+        ! Allocate and fill the element connection type array.
        allocate(elemConn(4*numQuadElems+3*numTriElems))
        elemConn=(/1,2,3, & ! elem id 2
                   2,4,3/)  ! elem id 3
@@ -40728,10 +40727,10 @@ end subroutine test_regridSMMArbGrid
         ! Since this is a 2D Mesh the size is 2x the
         ! number of nodes.
         allocate(nodeCoords(2*numNodes))
-        nodeCoords=(/0.5,1.0, & ! node id 4
-                      1.0,1.0, & ! node id 5
-                     0.5,2.1, & ! node id 7
-                      1.0,2.1 /) ! node id 8
+        nodeCoords=(/0.0,1.75, & ! node id 4
+                     1.0,1.75, & ! node id 5
+                     0.0,2.0, & ! node id 7
+                     1.0,2.0 /) ! node id 8
 
         ! Allocate and fill the node owner array.
         allocate(nodeOwners(numNodes))
@@ -40742,7 +40741,7 @@ end subroutine test_regridSMMArbGrid
 
         ! Allocate and fill the node mask array.
         allocate(nodeMask(numNodes))
-        nodeMask=(/0, & ! node id 4
+        nodeMask=(/2, & ! node id 4
                    0, & ! node id 5
                    0, & ! node id 7
                    0/)  ! node id 8
@@ -40750,7 +40749,7 @@ end subroutine test_regridSMMArbGrid
         ! Set the number of each type of element, plus the total number.
         numQuadElems=1
         numTriElems=0
-         numTotElems=numQuadElems+numTriElems
+        numTotElems=numQuadElems+numTriElems
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
@@ -40760,7 +40759,7 @@ end subroutine test_regridSMMArbGrid
         allocate(elemTypes(numTotElems))
         elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! elem id 4
 
-        ! Allocate and fill the element connection type array.
+         ! Allocate and fill the element connection type array.
         allocate(elemConn(4*numQuadElems+3*numTriElems))
         elemConn=(/1,2,4,3/) ! elem id 4
 
@@ -40776,10 +40775,10 @@ end subroutine test_regridSMMArbGrid
         ! Since this is a 2D Mesh the size is 2x the
         ! number of nodes.
         allocate(nodeCoords(2*numNodes))
-        nodeCoords=(/1.0,1.0, &  ! node id 5
-                     2.1,1.0, &  ! node id 6
-                     1.0,2.1, &  ! node id 8
-                     2.1,2.1 /)  ! node id 9
+        nodeCoords=(/1.0,1.75, &  ! node id 5
+                     2.0,1.75, &  ! node id 6
+                     1.0,2.0, &  ! node id 8
+                     2.0,2.0 /)  ! node id 9
 
         ! Allocate and fill the node owner array.
         allocate(nodeOwners(numNodes))
@@ -40788,12 +40787,13 @@ end subroutine test_regridSMMArbGrid
                      2, & ! node id 8
                      3/)  ! node id 9
 
-        ! Allocate and fill the node mask array.
+        ! Allocate and fill the node Mask array.
         allocate(nodeMask(numNodes))
         nodeMask=(/0, & ! node id 5
                    0, & ! node id 6
                    0, & ! node id 8
-                   0/)  ! node id 9
+                   0/)  ! node id 9  (Mask out point uncovered by masked src)
+
 
         ! Set the number of each type of element, plus the total number.
         numQuadElems=1
@@ -40808,11 +40808,12 @@ end subroutine test_regridSMMArbGrid
         allocate(elemTypes(numTotElems))
         elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! elem id 5
 
-        ! Allocate and fill the element connection type array.
+         ! Allocate and fill the element connection type array.
         allocate(elemConn(4*numQuadElems+3*numTriElems))
         elemConn=(/1,2,4,3/) ! elem id 5
        endif
-    endif
+   endif
+
 
    ! Create Mesh structure in 1 step
    srcMesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
@@ -41226,9 +41227,9 @@ end subroutine test_regridSMMArbGrid
      if (statusPtr(2) .ne. ESMF_REGRIDSTATUS_EXMAPPED) correct=.false.
      if (statusPtr(3) .ne. ESMF_REGRIDSTATUS_EXMAPPED) correct=.false.
      if (statusPtr(4) .ne. ESMF_REGRIDSTATUS_EXMAPPED) correct=.false.
-     if (statusPtr(5) .ne. ESMF_REGRIDSTATUS_MAPPED) correct=.false.
-     if (statusPtr(6) .ne. ESMF_REGRIDSTATUS_MAPPED) correct=.false.
-     if (statusPtr(7) .ne. ESMF_REGRIDSTATUS_EXMAPPED) correct=.false.
+     if (statusPtr(5) .ne. ESMF_REGRIDSTATUS_EXMAPPED) correct=.false.
+     if (statusPtr(6) .ne. ESMF_REGRIDSTATUS_EXMAPPED) correct=.false.
+     if (statusPtr(7) .ne. ESMF_REGRIDSTATUS_MAPPED) correct=.false.
      if (statusPtr(8) .ne. ESMF_REGRIDSTATUS_MAPPED) correct=.false.
      if (statusPtr(9) .ne. ESMF_REGRIDSTATUS_MAPPED) correct=.false.
 
@@ -41239,18 +41240,18 @@ end subroutine test_regridSMMArbGrid
         if (statusPtr(1) .ne. ESMF_REGRIDSTATUS_EXMAPPED) correct=.false.
         if (statusPtr(2) .ne. ESMF_REGRIDSTATUS_EXMAPPED) correct=.false.
         if (statusPtr(3) .ne. ESMF_REGRIDSTATUS_EXMAPPED) correct=.false.
-        if (statusPtr(4) .ne. ESMF_REGRIDSTATUS_MAPPED) correct=.false.
+        if (statusPtr(4) .ne. ESMF_REGRIDSTATUS_EXMAPPED) correct=.false.
 
      else if (localPET .eq. 1) then !!! This part only for PET 1
 
        ! Check status for nodeIds=(/X,3,X,6/)
        if (statusPtr(1) .ne. ESMF_REGRIDSTATUS_EXMAPPED) correct=.false.
-       if (statusPtr(2) .ne. ESMF_REGRIDSTATUS_MAPPED) correct=.false.
+       if (statusPtr(2) .ne. ESMF_REGRIDSTATUS_EXMAPPED) correct=.false.
 
     else if (localPET .eq. 2) then !!! This part only for PET 2
 
         ! Check status for nodeIds=(/X,X,7,8/)
-       if (statusPtr(1) .ne. ESMF_REGRIDSTATUS_EXMAPPED) correct=.false.
+       if (statusPtr(1) .ne. ESMF_REGRIDSTATUS_MAPPED) correct=.false.
        if (statusPtr(2) .ne. ESMF_REGRIDSTATUS_MAPPED) correct=.false.
 
      else if (localPET .eq. 3) then !!! This part only for PET 3

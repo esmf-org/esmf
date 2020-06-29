@@ -25,7 +25,7 @@ page gives a good overview of the functionality that is available through
 various interfaces to ESMF regridding.
 
 The `ESMF_RegridWeightGen application
-<http://www.earthsystemmodeling.org/esmf_releases/non_public/ESMF_8_0_0/ESMF_refdoc/node3.html#SECTION03020000000000000000>`_
+<http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_8_0_1/ESMF_refdoc/node3.html#SECTION03020000000000000000>`_
 is a command-line version of the functionality that is available through ESMPy.
 
 Please contact esmf_support@ucar.edu with any questions or problems.

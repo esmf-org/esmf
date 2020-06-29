@@ -554,7 +554,7 @@ class TestGrid(TestBase):
 
     def test_grid_mask(self):
 
-        max_index = np.array([12, 20])
+        max_index = np.array([120, 200])
 
         grid = Grid(max_index)
 

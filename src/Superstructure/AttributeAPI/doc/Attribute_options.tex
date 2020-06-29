@@ -1,0 +1,59 @@
+% $Id$
+
+\subsubsection{ESMF\_ATTCOPY}
+\label{const:attcopy}
+{\sf DESCRIPTION:\\}
+Indicates which type of copy behavior is used when copying ESMF Attribute objects.
+
+The type of this flag is:
+
+{\tt type(ESMF\_AttCopy\_Flag)}
+
+The valid values are:
+\begin{description}
+  \item[ESMF\_ATTCOPY\_REFERENCE]
+    The destination Attribute hierarchy becomes a reference copy of
+    the Attribute hierarchy of the source object. Any further changes to one
+    will also be reflected in the other.
+  \item[ESMF\_ATTCOPY\_VALUE]
+    All of the Attributes and Attribute packages of the source object will be
+    copied by value to the destination object. None of the Attribute links to
+    the Attribute hierarchies of other objects are copied to the
+    destination object.
+\end{description}
+
+\subsubsection{ESMF\_ATTGETCOUNT}
+\label{const:attgetcount}
+
+{\sf DESCRIPTION:\\}
+Indicates which type of Attribute object count to return.
+
+The type of this flag is:
+
+{\tt type(ESMF\_AttGetCountFlag)}
+
+The valid values are:
+\begin{description}
+	\item[ESMF\_ATTGETCOUNT\_ATTRIBUTE]
+	This option will allow the routine to return the number of single Attributes.
+	\item[ESMF\_ATTGETCOUNT\_ATTPACK]
+	This option will allow the routine to return the number of Attribute packages.
+	\item[ESMF\_ATTGETCOUNT\_TOTAL]
+	This option will allow the routine to return the total number of Attributes.
+\end{description}
+
+\subsubsection{ESMF\_ATTWRITE}
+\label{const:attwrite}
+
+{\sf DESCRIPTION:\\}
+Indicates which file format to use in the write operation.
+
+The type of this flag is:
+
+{\tt type(ESMF\_AttWriteFlag)}
+
+The valid values are:
+\begin{description}
+	\item[ESMF\_ATTWRITE\_JSON]
+	This option will allow the routine to write in JSON format.
+\end{description}

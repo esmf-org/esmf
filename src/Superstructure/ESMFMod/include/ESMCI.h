@@ -37,8 +37,9 @@
 #include "ESMCI_Alarm.h"
 #include "ESMCI_Clock.h"
 
-// attribute
-#include "ESMCI_Attribute.h"
+// info (attribute)
+//#include "ESMCI_Attribute.h"
+#include "ESMCI_Info.h"
 
 // local array, datamap
 #include "ESMCI_ArraySpec.h"

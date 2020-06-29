@@ -290,7 +290,10 @@
       ! test the serialize inquire-only option
       ! WARNING: This is testing an INTERNAL method.  It is NOT
       ! part of the supported ESMF user API!
-      attreconflag = ESMF_ATTRECONCILE_OFF
+
+      ! NOTE (bekozi): Changed this flag to ON when adding Info-JSON interface.
+      attreconflag = ESMF_ATTRECONCILE_ON
+
       buff_size = 1
       allocate (buffer(buff_size))
       offset1 = 0

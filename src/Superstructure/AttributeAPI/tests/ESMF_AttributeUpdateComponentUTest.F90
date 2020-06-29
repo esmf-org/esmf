@@ -524,7 +524,7 @@ program ESMF_AttributeUpdateUTest
 
     !EX_UTest_Multi_Proc_Only
     call ESMF_AttributeGetAttPack(gridcomp1, convention="Comp", purpose="Top", &
-        attpack=attpack, rc=rc)
+            attpack=attpack, rc=rc)
     call ESMF_AttributeGet(gridcomp1, "name1", value=outVal, attpack=attpack, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
     write(name, *) "PET ", localPet, ": Getting an updated Attribute value from a Component test: value = ", trim(outVal)
