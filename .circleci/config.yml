@@ -136,7 +136,7 @@ workflows:
   build-and-test-commit:
     jobs:
       - build-esmf
-      - should-run-tests
+      - should-run-tests:
           type: approval
           requires:
             - build-esmf
