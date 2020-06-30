@@ -56,7 +56,7 @@ jobs:
           name: Collect Artifacts
           command: bash $ESMF_DIR/.circleci/sh/collect-test-artifacts.sh << parameters.target >>
       - store_artifacts:
-          path: $ESMF_ARTIFACTS/test-artifacts.zip
+          path: /artifacts/test-artifacts.zip
           destination: << parameters.target >>-artifacts.zip
 
   build-docs:
