@@ -127,10 +127,31 @@ jobs:
           command: exit 0
 
 workflows:
+
+  build-and-test-commit:
+    filters:
+      branches:
+        ignore:
+          - master
+    jobs:
+      - build-esmf
+      - build-run-tests:
+          type: approval
+          name: build-run-<< matrix.target >>
+          matrix:
+            parameters:
+              target: ["unit_tests", "system_tests", "examples"]
+          requires:
+            - build-esmf
+
   build-and-test:
     triggers:
       - schedule:
           cron: "0 6 * * *"
+          filters:
+            branches:
+              only:
+                - master
     jobs:
       - build-esmf
       - build-run-tests:
@@ -158,9 +179,6 @@ workflows:
 #            - placeholder-esmpy-build
 
   docs:
-    triggers:
-      - schedule:
-          cron: "0 6 * * *"
     jobs:
       - build-docs
 #      - publish-docs:
