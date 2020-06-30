@@ -10,24 +10,24 @@ jobs:
       - DOCKER_IMG: bekozi/esmf
       - TEST_RUNNER: esmf-test-runner
     steps:
+      - run:
+          name: passthru-build-esmf
+          command: exit 0
 #      - run:
-#          name: passthru-build-esmf
-#          command: exit 0
-      - run:
-          name: Checkout Code
-          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git $ESMF_DIR
-      - run:
-          name: make info
-          command: bash $ESMF_DIR/.circleci/sh/make-info.sh
-      - run:
-          name: make
-          command: bash $ESMF_DIR/.circleci/sh/make.sh
-      - run:
-          name: make install
-          command: bash $ESMF_DIR/.circleci/sh/make-install.sh
-      - run:
-          name: Test Environment Finalize
-          command: bash $ESMF_DIR/.circleci/sh/docker-push.sh
+#          name: Checkout Code
+#          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git $ESMF_DIR
+#      - run:
+#          name: make info
+#          command: bash $ESMF_DIR/.circleci/sh/make-info.sh
+#      - run:
+#          name: make
+#          command: bash $ESMF_DIR/.circleci/sh/make.sh
+#      - run:
+#          name: make install
+#          command: bash $ESMF_DIR/.circleci/sh/make-install.sh
+#      - run:
+#          name: Test Environment Finalize
+#          command: bash $ESMF_DIR/.circleci/sh/docker-push.sh
 
   build-run-tests:
     parameters:
@@ -37,16 +37,15 @@ jobs:
       - image: bekozi/esmf:$CIRCLE_BRANCH
     resource_class: xlarge
     environment:
-      - ESMF_DIR: $CIRCLE_WORKING_DIRECTORY/sandbox/esmf/src-git
-      - ESMF_ARTIFACTS: $CIRCLE_WORKING_DIRECTORY/esmf-artifacts
+      - ESMF_ARTIFACTS: /esmf-artifacts
       - ESMF_OUTDIR: $ESMF_ARTIFACTS/test-artifacts
     steps:
 #      - run:
 #          name: passthru-build-tests
 #          command: exit 0
-      - run:
-          name: Checkout Code
-          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git $ESMF_DIR
+#      - run:
+#          name: Checkout Code
+#          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git $ESMF_DIR
       - run:
           name: Create Artifacts Directory
           command: mkdir -p $ESMF_OUTDIR
@@ -55,7 +54,7 @@ jobs:
           command: make build_<< parameters.target >> 2>&1 | tee $ESMF_OUTDIR/esmf-make-build_<< parameters.target >>.out
       - run:
           name: make run_<< parameters.target >>
-          command: docker exec -t "${TEST_RUNNER}" bash -c "make run_<< parameters.target >> 2>&1 | tee $ESMF_OUTDIR/esmf-make-run_<< parameters.target >>.out"
+          command: make run_<< parameters.target >> 2>&1 | tee $ESMF_OUTDIR/esmf-make-run_<< parameters.target >>.out
       - run:
           name: Collect Artifacts
           command: bash $ESMF_DIR/.circleci/sh/collect-test-artifacts.sh
@@ -157,9 +156,10 @@ workflows:
 #          name: placeholder-esmpy-test
 #          requires:
 #            - placeholder-esmpy-build
-  docs:
-    jobs:
-      - build-docs
+
+#  docs:
+#    jobs:
+#      - build-docs
 #      - publish-docs:
 #          name: placeholder-publish-docs
 #          requires:
