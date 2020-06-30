@@ -128,6 +128,9 @@ jobs:
 
 workflows:
   build-and-test:
+    triggers:
+      - schedule:
+          cron: "0 6 * * *"
     jobs:
       - build-esmf
       - build-run-tests:
@@ -155,6 +158,9 @@ workflows:
 #            - placeholder-esmpy-build
 
   docs:
+    triggers:
+      - schedule:
+          cron: "0 6 * * *"
     jobs:
       - build-docs
 #      - publish-docs:
