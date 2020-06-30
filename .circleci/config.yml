@@ -1,11 +1,13 @@
 version: 2.1
 
 jobs:
+
   build-esmf:
     machine: true
+    resource_class: xlarge
     environment:
       - ESMF_DIR: $CIRCLE_WORKING_DIRECTORY/sandbox/esmf/src-git
-      - DOCKER_IMG: bekozi/esmf-ci
+      - DOCKER_IMG: bekozi/esmf
       - TEST_RUNNER: esmf-test-runner
     steps:
 #      - run:
@@ -21,20 +23,23 @@ jobs:
           name: make
           command: bash $ESMF_DIR/.circleci/sh/make.sh
       - run:
-          name: make
+          name: make install
           command: bash $ESMF_DIR/.circleci/sh/make-install.sh
       - run:
           name: Test Environment Finalize
           command: bash $ESMF_DIR/.circleci/sh/docker-push.sh
-  build-tests:
+
+  build-run-tests:
     parameters:
       target:
         type: string
-    machine: true
+    docker:
+      - image: bekozi/esmf:$CIRCLE_BRANCH
+    resource_class: xlarge
     environment:
       - ESMF_DIR: $CIRCLE_WORKING_DIRECTORY/sandbox/esmf/src-git
-      - DOCKER_IMG: bekozi/esmf-ci
-      - TEST_RUNNER: esmf-test-runner
+      - ESMF_ARTIFACTS: $CIRCLE_WORKING_DIRECTORY/esmf-artifacts
+      - ESMF_OUTDIR: $ESMF_ARTIFACTS/test-artifacts
     steps:
 #      - run:
 #          name: passthru-build-tests
@@ -43,39 +48,21 @@ jobs:
           name: Checkout Code
           command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git $ESMF_DIR
       - run:
-          name: Test Environment Initialize
-          command: docker run --cpus=$(nproc) -dit --name "${TEST_RUNNER}" "${DOCKER_IMG}:${CIRCLE_BRANCH}"
+          name: Create Artifacts Directory
+          command: mkdir -p $ESMF_ARTIFACTS
       - run:
           name: make build_<< parameters.target >>
-          command: docker exec -t "${TEST_RUNNER}" bash -c "make build_<< parameters.target >> 2>&1 | tee esmf-make-build_<< parameters.target >>.out"
-      - run:
-          name: Test Environment Finalize
-          command: bash $ESMF_DIR/.circleci/sh/docker-push-tests.sh << parameters.target >>
-  run-tests:
-    parameters:
-      target:
-        type: string
-    machine: true
-    environment:
-      - ESMF_DIR: $CIRCLE_WORKING_DIRECTORY/sandbox/esmf/src-git
-      - DOCKER_IMG: bekozi/esmf-ci
-      - TEST_RUNNER: esmf-test-runner
-    steps:
-#      - run:
-#          name: passthru-run-tests
-#          command: exit 0
-      - run:
-          name: Checkout Code
-          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git $ESMF_DIR
-      - run:
-          name: Test Environment Initialize
-          command: docker run --cpus=$(nproc) -dit --name "${TEST_RUNNER}" "${DOCKER_IMG}:${CIRCLE_BRANCH}-<< parameters.target >>"
+          command: make build_<< parameters.target >> 2>&1 | tee $ESMF_OUTDIR/esmf-make-build_<< parameters.target >>.out
       - run:
           name: make run_<< parameters.target >>
-          command: docker exec -t "${TEST_RUNNER}" bash -c "make run_<< parameters.target >> 2>&1 | tee esmf-make-run_<< parameters.target >>.out"
+          command: docker exec -t "${TEST_RUNNER}" bash -c "make run_<< parameters.target >> 2>&1 | tee $ESMF_OUTDIR/esmf-make-run_<< parameters.target >>.out"
       - run:
-          name: Test Environment Finalize
-          command: bash $ESMF_DIR/.circleci/sh/docker-push-tests.sh  << parameters.target >>
+          name: Collect Artifacts
+          command: bash $ESMF_DIR/.circleci/sh/collect-test-artifacts.sh
+      - store_artifacts:
+          path: $ESMF_ARTIFACTS/test-artifacts.zip
+          destination: test-artifacts.zip
+
   build-docs:
     environment:
       - ESMF_DIR: $CIRCLE_WORKING_DIRECTORY/sandbox/esmf/src-git
@@ -98,6 +85,7 @@ jobs:
       - store_artifacts:
           path: /tmp/doc-artifacts.zip
           destination: doc-artifacts.zip
+
   publish-docs:
     machine: true
 #    docker:
@@ -106,36 +94,35 @@ jobs:
       - run:
           name: passthru-publish-docs
           command: exit 0
+
   external_demos:
     machine: true
     steps:
       - run:
           name: passthru-external_demos
           command: exit 0
-  nuopc_protos:
-    machine: true
-    steps:
-      - run:
-          name: passthru-nuopc_protos
-          command: exit 0
+
   bit-for-bit:
     machine: true
     steps:
       - run:
           name: passthru-bit-for-bit
           command: exit 0
+
   esmpy-build:
     machine: true
     steps:
       - run:
           name: passthru-esmpy-build
           command: exit 0
+
   esmpy-test:
     machine: true
     steps:
       - run:
           name: passthru-esmpy-test
           command: exit 0
+
   esmpy-docs:
     machine: true
     steps:
@@ -147,46 +134,35 @@ workflows:
   build-and-test:
     jobs:
       - build-esmf
-      - build-tests:
-          name: build_<< matrix.target >>
+      - build-run-tests:
+          name: build-run-<< matrix.target >>
           matrix:
             parameters:
               target: ["unit_tests", "system_tests", "examples"]
           requires:
             - build-esmf
-      - run-tests:
-          name: run_<< matrix.target >>
-          matrix:
-            parameters:
-              target: ["unit_tests", "system_tests", "examples"]
-          requires:
-            - build_<< matrix.target >>
-      - external_demos:
-          name: placeholder-external_demos
-          requires:
-            - run-tests
-      - nuopc_protos:
-          name: placeholder-nuopc-protos
-          requires:
-            - run-tests
-      - bit-for-bit:
-          name: placeholder-bit-for-bit
-          requires:
-            - run-tests
-      - esmpy-build:
-          name: placeholder-esmpy-build
-          requires:
-            - build-esmf
-      - esmpy-test:
-          name: placeholder-esmpy-test
-          requires:
-            - placeholder-esmpy-build
+#      - external_demos:
+#          name: placeholder-external_demos
+#          requires:
+#            - build-run-tests
+#      - bit-for-bit:
+#          name: placeholder-bit-for-bit
+#          requires:
+#            - build-run-tests
+#      - esmpy-build:
+#          name: placeholder-esmpy-build
+#          requires:
+#            - build-esmf
+#      - esmpy-test:
+#          name: placeholder-esmpy-test
+#          requires:
+#            - placeholder-esmpy-build
   docs:
     jobs:
       - build-docs
-      - publish-docs:
-          name: placeholder-publish-docs
-          requires:
-            - build-docs
-      - esmpy-docs:
-          name: placeholder-esmpy-docs
+#      - publish-docs:
+#          name: placeholder-publish-docs
+#          requires:
+#            - build-docs
+#      - esmpy-docs:
+#          name: placeholder-esmpy-docs
