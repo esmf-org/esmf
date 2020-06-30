@@ -43,9 +43,6 @@ jobs:
 #      - run:
 #          name: passthru-build-tests
 #          command: exit 0
-#      - run:
-#          name: Checkout Code
-#          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git $ESMF_DIR
       - run:
           name: Create Artifacts Directory
           command: mkdir -p $ESMF_OUTDIR
@@ -137,8 +134,7 @@ workflows:
           name: build-run-<< matrix.target >>
           matrix:
             parameters:
-              target: ["examples"]
-#              target: ["unit_tests", "system_tests", "examples"]
+              target: ["unit_tests", "system_tests", "examples"]
           requires:
             - build-esmf
 #      - external_demos:
