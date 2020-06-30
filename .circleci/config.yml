@@ -37,8 +37,8 @@ jobs:
       - image: bekozi/esmf:$CIRCLE_BRANCH
     resource_class: xlarge
     environment:
-      - ESMF_ARTIFACTS: /esmf-artifacts
-      - ESMF_OUTDIR: $ESMF_ARTIFACTS/test-artifacts
+      - ESMF_ARTIFACTS: /artifacts
+      - ESMF_OUTDIR: /artifacts/test-artifacts
     steps:
 #      - run:
 #          name: passthru-build-tests
@@ -46,23 +46,21 @@ jobs:
 #      - run:
 #          name: Checkout Code
 #          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git $ESMF_DIR
-      - run: tree -L 5
-      - run: echo $HOME
       - run:
           name: Create Artifacts Directory
           command: mkdir -p $ESMF_OUTDIR
       - run:
           name: make build_<< parameters.target >>
-          command: make build_<< parameters.target >> 2>&1 | tee $ESMF_OUTDIR/esmf-make-build_<< parameters.target >>.out
+          command: cd $ESMF_DIR && make build_<< parameters.target >> 2>&1 | tee $ESMF_OUTDIR/esmf-make-build_<< parameters.target >>.out
       - run:
           name: make run_<< parameters.target >>
-          command: make run_<< parameters.target >> 2>&1 | tee $ESMF_OUTDIR/esmf-make-run_<< parameters.target >>.out
+          command: cd $ESMF_DIR && make run_<< parameters.target >> 2>&1 | tee $ESMF_OUTDIR/esmf-make-run_<< parameters.target >>.out
       - run:
           name: Collect Artifacts
           command: bash $ESMF_DIR/.circleci/sh/collect-test-artifacts.sh
       - store_artifacts:
           path: $ESMF_ARTIFACTS/test-artifacts.zip
-          destination: test-artifacts.zip
+          destination: << parameters.target >>-artifacts.zip
 
   build-docs:
     environment:
