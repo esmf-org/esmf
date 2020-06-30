@@ -2,12 +2,14 @@
 set -Eeuxo pipefail
 
 : "${ESMF_ARTIFACTS?Need to set}"
+: "${ESMF_DIR?Need to set}"
 : "${1?Need to set}"
 
 TARGET=${1}
 TOCOLLECT=( "*.stdout" "*.Log" )
 DSTDIR="${ESMF_ARTIFACTS}/test-artifacts/${TARGET}"
 
+cd "${ESMF_DIR}"
 mkdir -p "${DSTDIR}"
 if [ "${TARGET}" == "examples" ]; then
   SRCDIR="examples"
