@@ -29,6 +29,11 @@ jobs:
           name: Test Environment Finalize
           command: bash $ESMF_DIR/.circleci/sh/docker-push.sh
 
+  should-run-tests:
+    machine: true
+    steps:
+      - run: exit 0
+
   build-run-tests:
     parameters:
       target:
