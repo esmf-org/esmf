@@ -153,6 +153,29 @@ extern "C" void FTN_X(c_esmc_meshaddnodes)(MeshCap **meshpp, int *num_nodes, int
 
 }
 
+extern "C" void FTN_X(c_esmc_meshcreatefromvtk)(MeshCap **meshpp, char *f90_filename, int *rc, ESMCI_FortranStrLenArg f90_filename_len) {
+
+
+  // Convert F90 name string to C++ string 
+  char *C_filename = NULL;
+  C_filename = ESMC_F90toCstring(f90_filename, f90_filename_len);
+  if (!C_filename && f90_filename_len){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+                                  " Not a valid string", ESMC_CONTEXT, rc);
+    return;
+  }
+
+
+  // Create Mesh depending on whether MOAB or not
+  if (Moab_on) {
+    *meshpp=MeshCap::MeshCreateFromVTK(C_filename, false, rc);
+  } else {
+    *meshpp=MeshCap::MeshCreateFromVTK(C_filename, true, rc);
+  }
+
+}
+
+
 extern "C" void FTN_X(c_esmc_meshwrite)(MeshCap **meshpp, char *fname, int *rc,
     ESMCI_FortranStrLenArg nlen) {
 
@@ -474,9 +497,16 @@ extern "C" void FTN_X(c_esmc_meshgetarea)(MeshCap **meshpp, int *num_elem, doubl
   (*meshpp)->meshgetarea(num_elem, elem_areas, rc);
 }
 
-extern "C" void FTN_X(c_esmc_meshgetdimensions)(MeshCap **meshpp, int *sdim, int *pdim, int *rc) {
+extern "C" void FTN_X(c_esmc_meshgetdimensions)(MeshCap **meshpp, int *sdim, int *pdim, int *orig_sdim, int *rc) {
 
-  (*meshpp)->meshgetdimensions(sdim, pdim, rc);
+  (*meshpp)->meshgetdimensions(sdim, pdim, orig_sdim, rc);
+
+}
+
+extern "C" void FTN_X(c_esmc_meshgetcoordsys)(MeshCap **meshpp, ESMC_CoordSys_Flag *coordSys, int *rc) {
+
+  (*meshpp)->getCoordSys(coordSys,rc);
+
 }
 
 extern "C" void FTN_X(c_esmc_meshgetcentroid)(MeshCap **meshpp, int *num_elem, double *elem_centroid, int *rc) {

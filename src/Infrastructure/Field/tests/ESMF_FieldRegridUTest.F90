@@ -811,6 +811,8 @@
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
+#endif
+
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test regrid with masks
@@ -827,6 +829,8 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
+
+#if 0
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test really coarse regrid
@@ -20946,7 +20950,7 @@ write(*,*) "LOCALRC=",localrc
 
    ! Create Mesh structure in 1 step
    srcMesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
-        coordSys=ESMF_COORDSYS_CART, &
+        coordSys=ESMF_COORDSYS_SPH_DEG, &
          nodeIds=nodeIds, nodeCoords=nodeCoords, &
          nodeOwners=nodeOwners, nodeMask=nodeMask, &
          elementIds=elemIds, elementTypes=elemTypes, &
@@ -20956,11 +20960,39 @@ write(*,*) "LOCALRC=",localrc
        return
    endif
 
-  ! Create source field
-  call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
+#if 0
+   !!!! Test mesh write/read !!!!
+   ! Write srcMesh
+   call ESMF_MeshWriteVTK(srcMesh, "meshRWTst", &
+        rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+       rc=ESMF_FAILURE
+       return
+   endif
+  
 
+   ! Destroy srcMesh
+   call ESMF_MeshDestroy(srcMesh, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+       rc=ESMF_FAILURE
+       return
+   endif
+
+   ! Test creating from VTK file
+   ! Read srcMesh
+   srcMesh=ESMF_MeshCreateFromVTK("meshRWTst", &
+        rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+       rc=ESMF_FAILURE
+       return
+   endif
+#endif
+
+   ! Create source field
+   call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
+   
    srcField = ESMF_FieldCreate(srcMesh, arrayspec, &
-                        name="source", rc=localrc)
+        name="source", rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
@@ -21282,7 +21314,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Create Mesh structure in 1 step
   dstMesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
-       coordSys=ESMF_COORDSYS_CART, &
+       coordSys=ESMF_COORDSYS_SPH_DEG, &
          nodeIds=nodeIds, nodeCoords=nodeCoords, &
          nodeOwners=nodeOwners, nodeMask=nodeMask, &
          elementIds=elemIds, elementTypes=elemTypes, &
@@ -21379,7 +21411,6 @@ write(*,*) "LOCALRC=",localrc
         i2=i2+1
      endif
   enddo
-
 
    ! deallocate node data
    deallocate(nodeIds)

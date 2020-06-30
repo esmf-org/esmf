@@ -65,6 +65,10 @@ void ESMCI_meshaddnodes(Mesh **meshpp, int *num_nodes, int *nodeId,
                             ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                             int *rc);
 
+void ESMCI_MeshCreateFromVTK(Mesh **meshpp,
+                             char *filename, 
+                             int *rc);
+
 void ESMCI_meshwrite(Mesh **meshpp, char *fname, int *rc,
                      ESMCI_FortranStrLenArg nlen);
 
@@ -101,6 +105,8 @@ void ESMCI_meshget(Mesh **meshpp, int *num_nodes, int *num_elements, int *rc);
 void ESMCI_MeshGetNodeCount(Mesh *meshpp, int *nodeCount, int *rc);
 void ESMCI_MeshGetElemCount(Mesh *meshpp, int *elemCount, int *rc);
 void ESMCI_MeshGetElemConnCount(Mesh *meshpp, int *elemConnCount, int *rc);
+
+void ESMCI_MeshGetCoordSys(Mesh *mesh, ESMC_CoordSys_Flag *coordSys, int *rc);
 
 void ESMCI_MeshGetElemInfoPresence(Mesh *mesh, 
                                    int *elemMaskIsPresent,
@@ -180,7 +186,7 @@ void ESMCI_getconnectivity(Mesh **meshpp, double *connCoord, int *nodesPerElem,
 
 void ESMCI_meshgetarea(Mesh **meshpp, int *num_elem, double *elem_areas, int *rc);
 
-void ESMCI_meshgetdimensions(Mesh **meshpp, int *sdim, int *pdim, int *rc);
+void ESMCI_meshgetdimensions(Mesh **meshpp, int *sdim, int *pdim, int *orig_sdim, int *rc);
 
 void ESMCI_meshgetcentroid(Mesh **meshpp, int *num_elem, double *elem_centroid, int *rc);
 

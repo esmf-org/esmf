@@ -901,6 +901,7 @@ static void _create_pointlist_of_points_not_in_wmat(PointList *pointlist, WMat &
     }
 
      // Output Mesh for Debugging
+#define ESMF_REGRID_DEBUG_WRITE_MESH
 #ifdef ESMF_REGRID_DEBUG_WRITE_MESH
     if (srcmesh != NULL) WriteMesh(*srcmesh, "src_rgd_mesh");
     else if (srcpointlist != NULL) srcpointlist->WriteVTK("src_rgd_mesh");

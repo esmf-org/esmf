@@ -154,7 +154,6 @@ void ESMCI_meshaddnodes(Mesh **meshpp, int *num_nodes, int *nodeId,
     int sdim = mesh.spatial_dim(); // spatial dim of mesh (after conversion to Cartesian)
     int orig_sdim = *_orig_sdim;   // original sdim (before conversion to Cartesian)
 
-
   // Initialize the parallel environment for mesh (if not already done)
     {
  int localrc;
@@ -1545,6 +1544,265 @@ void ESMCI_meshaddelements(Mesh **meshpp,
 
 }
 
+static int _VTK_to_addelement_elemType(int vtk_et) {
+enum {VTK_TRIANGLE=5, VTK_QUAD=9, VTK_TETRA=10, VTK_HEXAHEDRON=12};
+
+ if (vtk_et==5) return 3;
+ else if (vtk_et==9) return 4;
+ else if (vtk_et==10) return 10;
+ else if (vtk_et==12) return 12;
+ else Throw() << "Unrecognized VTK element type.";
+
+}
+
+
+void ESMCI_MeshCreateFromVTK(Mesh **_mesh,
+                             char *part_filename, 
+                             int *rc)
+{
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_MeshCreateFromnVTK()"
+  int localrc;
+
+  // Mesh to output
+  Mesh *mesh=NULL;
+
+   try {
+
+     // Initialize the parallel environment for mesh (if not already done)
+     ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+       throw localrc;  // bail out with exception
+
+     // Get parallel info
+     int rank = Par::Rank();
+     int psize = Par::Size();
+
+     // Construct complete filename
+     std::string filename;
+     std::string extension = ".vtk";
+     std::string fbase=std::string(part_filename);
+
+     // Construct filename based on processor count
+     if (psize > 1) {
+       std::ostringstream filename_str;
+       UInt ndec = numDecimal(psize);
+       filename_str << fbase << "." << psize << ".";
+       filename_str << std::setw(ndec) << std::setfill('0') << rank;
+       filename = filename_str.str() + extension;
+     } else filename = fbase + extension;
+
+    // Get header information
+    int coord_sys_int,pdim,orig_sdim;
+    int num_elems, num_nodes, conn_size;
+    bool node_mask_present=false;
+    bool elem_mask_present=false;
+    bool elem_area_present=false;
+    bool elem_coords_present=false;
+    ReadVTKMeshHeaderComplete(filename, coord_sys_int, pdim, orig_sdim, num_elems, num_nodes, conn_size, 
+                              node_mask_present, elem_mask_present, elem_area_present, elem_coords_present);
+    
+    // DEBUG
+#if 0
+    printf("coord_sys_int=%d pdim=%d orig_sdim=%d \n",coord_sys_int,pdim,orig_sdim);
+    printf("num_elems=%d num_nodes=%d conn_size=%d \n",num_elems,num_nodes,conn_size);
+    printf("node_mask_present=%d \n",node_mask_present);
+    printf("elem_mask_present=%d elem_area_present=%d elem_coords_present=%d \n",elem_mask_present,elem_area_present,elem_coords_present);
+#endif
+    
+    // convert int to coord_sys enum
+    ESMC_CoordSys_Flag coord_sys=static_cast<ESMC_CoordSys_Flag>(coord_sys_int);  
+
+    // Create Mesh structure
+    ESMCI_meshcreate(&mesh, &pdim, &orig_sdim,
+                     &coord_sys, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception
+
+
+    // Allocate space for mesh body information
+    int *nodeId=NULL;
+    if (num_nodes > 0) nodeId=new int[num_nodes];
+
+    double *nodeCoord=NULL;
+    if (num_nodes > 0) nodeCoord=new double[orig_sdim*num_nodes];
+
+    int *nodeOwner=NULL;
+    if (num_nodes > 0) nodeOwner=new int[num_nodes];
+
+    int *elemId=NULL;
+    if (num_elems > 0) elemId=new int[num_elems];
+
+    int *elemType=NULL;
+    if (num_elems > 0) elemType=new int[num_elems];
+
+    int *elemConn=NULL;
+    if (conn_size > 0) elemConn=new int[conn_size];
+
+    // Setup optional args
+    int *nodeMask=NULL;
+    if (node_mask_present) {
+      if (num_nodes > 0) nodeMask=new int[num_nodes];
+    }
+
+    int *elemMask=NULL;
+    if (elem_mask_present) {
+      if (num_elems > 0) elemMask=new int[num_elems];
+    }
+
+    double *elemArea=NULL;
+    if (elem_area_present) {
+      if (num_elems > 0) elemArea=new double[num_elems];
+    }
+
+    double *elemCoords=NULL;
+    if (elem_coords_present) {
+      if (num_elems > 0) elemCoords=new double[orig_sdim*num_elems];
+    }
+
+
+    // Get mesh body information from file
+    ReadVTKMeshBodyComplete(filename, 
+                            nodeId, nodeCoord, nodeOwner,
+                            elemId, elemType, elemConn, 
+                            nodeMask,elemMask,elemArea,elemCoords);
+
+    // DEBUG
+#if 0
+    printf("nodeId=\n");
+    for (int i=0; i<num_nodes; i++) {
+      printf(" %d\n",nodeId[i]);
+    }
+    printf("\n");
+
+
+    printf("nodeCoord=\n");
+    int k=0;
+    for (int i=0; i<num_nodes; i++) {
+      for (int d=0; d<orig_sdim; d++) {
+        printf(" %f",nodeCoord[k]);
+        k++;
+      }
+      printf("\n");
+    }
+    printf("\n");
+
+    printf("nodeOwner=\n");
+    for (int i=0; i<num_nodes; i++) {
+      printf(" %d\n",nodeOwner[i]);
+    }
+    printf("\n");
+#endif
+
+    // Setup optional node args
+    InterArray<int> *nodeMaskII=NULL;
+    if (node_mask_present) {
+        nodeMaskII=new InterArray<int>(nodeMask,1,&num_nodes);
+    }
+
+
+    // Call into node create
+    ESMCI_meshaddnodes(&mesh, 
+                       &num_nodes, nodeId, nodeCoord, nodeOwner, nodeMaskII,
+                       &coord_sys, &orig_sdim, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception
+
+
+    // Deallocate optional args
+    if (nodeMaskII != NULL) delete nodeMaskII;
+    if (nodeMask != NULL) delete [] nodeMask;
+
+    // Deallocate node information
+    if (nodeId != NULL) delete [] nodeId;
+    if (nodeCoord != NULL) delete [] nodeCoord;
+    if (nodeOwner != NULL) delete [] nodeOwner;
+
+
+    // Change elemType from VTK to what's expected by ESMCI_meshaddelements()
+    for (int i=0; i<num_elems; i++) {
+      elemType[i] =_VTK_to_addelement_elemType(elemType[i]);
+    }
+
+    // DEBUG
+#if 0
+    printf("elemType=\n");
+    for (int i=0; i<num_elems; i++) {
+      printf(" %d\n",elemType[i]);
+    }
+    printf("\n");
+#endif
+
+    // Change elemConn from base 0 to base 1
+    // ( expects elemConn to be base 1)
+    for (int i=0; i<conn_size; i++) {
+      elemConn[i] += 1;
+    }
+
+    // Setup optional elem args
+    InterArray<int> *elemMaskII=NULL;
+    if (elem_mask_present) {
+        elemMaskII=new InterArray<int>(elemMask,1,&num_elems);
+    }
+
+    int elem_area_present_int=0;
+    if (elem_area_present) elem_area_present_int=1;
+    int elem_coords_present_int=0;
+    if (elem_coords_present) elem_coords_present_int=1;
+
+
+    // Call into elem create
+    int regridConserve = ESMC_REGRID_CONSERVE_ON; // Always on
+    ESMCI_meshaddelements(&mesh,
+                          &num_elems, elemId, elemType, elemMaskII, 
+                          &elem_area_present_int, elemArea,
+                          &elem_coords_present_int, elemCoords,
+                          &conn_size, elemConn, &regridConserve,
+                          &coord_sys, &orig_sdim,
+                          &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception
+
+    // Deallocate optional elem information
+    if (elemMaskII != NULL) delete elemMaskII;
+    if (elemMask != NULL) delete [] elemMask;
+    if (elemArea != NULL) delete [] elemArea;
+    if (elemCoords != NULL) delete [] elemCoords;
+
+    // Deallocate elem information
+    if (elemId != NULL) delete [] elemId;
+    if (elemType != NULL) delete [] elemType;
+    if (elemConn != NULL) delete [] elemConn;
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          x.what(), ESMC_CONTEXT,rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          "UNKNOWN", ESMC_CONTEXT,rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
+   // Output mesh
+   *_mesh=mesh;
+
+  // Set return code
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+} // MeshCreateFromVTK()
+
 
 /**
  * Routines for reading in a test VTK mesh to fortran arrays (for testing the array interface)
@@ -1887,12 +2145,11 @@ void ESMCI_MeshGetNodeCount(Mesh *mesh, int *nodeCount, int *rc){
 void ESMCI_MeshGetElemCount(Mesh *mesh, int *elemCount, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_MeshGetElemCount()"
-
-    *elemCount = mesh->num_elems();
-
-    if(rc != NULL) *rc = ESMF_SUCCESS;
+  
+  *elemCount = mesh->num_elems();
+  
+  if(rc != NULL) *rc = ESMF_SUCCESS;
 }
-
 
 void ESMCI_MeshGetElemConnCount(Mesh *mesh, int *_elemConnCount, int *rc){
 #undef  ESMC_METHOD
@@ -1923,7 +2180,20 @@ void ESMCI_MeshGetElemConnCount(Mesh *mesh, int *_elemConnCount, int *rc){
 
   // Output
   *_elemConnCount = elemConnCount;
-  if(rc != NULL) *rc = ESMF_SUCCESS;
+
+  // Return success
+  if (rc != NULL) *rc = ESMF_SUCCESS;
+}
+
+void ESMCI_MeshGetCoordSys(Mesh *mesh, ESMC_CoordSys_Flag *coordSys, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_MeshGetCoordSys()"
+  
+  // DEFAULT FOR NOW
+  *coordSys = ESMC_COORDSYS_SPH_DEG;
+  
+  // Return success
+  if (rc != NULL) *rc = ESMF_SUCCESS;
 }
 
 // Convert the parametric dim and the number of nodes to a element type
@@ -4134,7 +4404,7 @@ void ESMCI_meshgetarea(Mesh **meshpp, int *num_elem, double *elem_areas, int *rc
 #undef  MAX_NUM_POLY_NODES_3D
 }
 
-void ESMCI_meshgetdimensions(Mesh **meshpp, int *sdim, int *pdim, int *rc) {
+void ESMCI_meshgetdimensions(Mesh **meshpp, int *sdim, int *pdim, int *orig_sdim, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_meshgetdimensions()"
   try{
@@ -4152,8 +4422,10 @@ void ESMCI_meshgetdimensions(Mesh **meshpp, int *sdim, int *pdim, int *rc) {
     Mesh &mesh = *meshp;
 
     // Get dimensions
-    if(sdim) *sdim=mesh.spatial_dim();
-    if(pdim) *pdim=mesh.parametric_dim();
+    if (sdim) *sdim=mesh.spatial_dim();
+    if (pdim) *pdim=mesh.parametric_dim();
+    if (orig_sdim) *orig_sdim=mesh.orig_spatial_dim;
+
   } catch(std::exception &x) {
     // catch Mesh exception return code
     if (x.what()) {

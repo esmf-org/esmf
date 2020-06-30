@@ -95,6 +95,9 @@
                       ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                       int *rc);
 
+    static MeshCap *MeshCreateFromVTK(char *filename,
+                                      bool _is_esmf_mesh, int *rc);
+      
     void meshwrite(char *fname, int *rc,
                    ESMCI_FortranStrLenArg nlen);
 
@@ -172,7 +175,7 @@
 
     void meshgetarea(int *num_elem, double *elem_areas, int *rc);
 
-    void meshgetdimensions(int *sdim, int *pdim, int *rc);
+    void meshgetdimensions(int *sdim, int *pdim, int *orig_sdim, int *rc);
 
     void meshgetcentroid(int *num_elem, double *elem_centroid, int *rc);
 
@@ -296,6 +299,8 @@
                                      ESMCI::InterArray<ESMC_R8> *elemArea,
                                      ESMCI::InterArray<ESMC_R8> *elemCoords, int *rc);
 
+
+     void getCoordSys(ESMC_CoordSys_Flag *coordSys, int *rc);
 
      void setElemInfo(ESMCI::InterArray<int> *elemMask,
                       ESMCI::InterArray<ESMC_R8> *elemArea,

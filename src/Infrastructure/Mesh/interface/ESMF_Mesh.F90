@@ -223,6 +223,8 @@ module ESMF_MeshMod
   public ESMF_MeshCreateFromIntPtr
   public ESMF_MeshCreateCubedSphere
   public ESMF_MeshEmptyCreate
+  public ESMF_MeshCreateFromVTK
+
 
 !EOPI
 !------------------------------------------------------------------------------
@@ -6191,6 +6193,107 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   end subroutine ESMF_MeshWrite
 !------------------------------------------------------------------------------
 
+!------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshCreateFromVTK()"
+!BOPI
+! !IROUTINE: ESMF_MeshCreateFromVTK - Read and create a mesh from a set of VTK files
+!
+! !INTERFACE:
+  function ESMF_MeshCreateFromVTK(filename, rc)
+
+!
+!
+! !RETURN VALUE:
+    type(ESMF_Mesh) :: ESMF_MeshCreateFromVTK
+
+!
+! !ARGUMENTS:
+      character (len=*), intent(in)          :: filename
+      integer,          intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Read and create a mesh from a set of VTK files.
+!
+!   \begin{description}
+!   \item[filename]
+!      The name of the input files. The actual format of the 
+!      names of the files should be: filename.N.R.vtk where N is the total
+!      number of files and R is a number from 0...N. This method needs
+!      to be called on N PETs.  
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    integer :: cart_sdim 
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+
+    ! Call into C to create mesh
+    call C_ESMC_MeshCreateFromVTK(ESMF_MeshCreateFromVTK%this, filename, &
+         localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+    ! Get dims
+    call C_ESMC_MeshGetDimensions(ESMF_MeshCreateFromVTK%this, &
+         cart_sdim, &
+         ESMF_MeshCreateFromVTK%parametricDim, &
+         ESMF_MeshCreateFromVTK%spatialDim, &
+         localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Get coordsys
+    call C_ESMC_MeshGetCoordSys(ESMF_MeshCreateFromVTK%this, &
+         ESMF_MeshCreateFromVTK%coordSys, &
+         localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Create nodal distgrid
+    call C_ESMC_MeshCreateNodeDistGrid( &
+         ESMF_MeshCreateFromVTK%this, &
+         ESMF_MeshCreateFromVTK%nodal_distgrid, &
+         ESMF_MeshCreateFromVTK%numOwnedNodes, &
+         localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Create elem distgrid
+    call C_ESMC_MeshCreateElemDistGrid( &
+         ESMF_MeshCreateFromVTK%this, &
+         ESMF_MeshCreateFromVTK%element_distgrid, &
+         ESMF_MeshCreateFromVTK%numOwnedElements, &
+         localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! The C side has been created
+    ESMF_MeshCreateFromVTK%isCMeshFreed=.false.
+
+    ! Can't happen here
+    ESMF_MeshCreateFromVTK%hasSplitElem=.false.
+
+    ! Set internal status of mesh to fully created
+    ESMF_MeshCreateFromVTK%status=ESMF_MESHSTATUS_COMPLETE
+
+    ! Set init status of mesh
+    ESMF_INIT_SET_CREATED(ESMF_MeshCreateFromVTK)
+
+    ! Output status
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function ESMF_MeshCreateFromVTK
+!------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------

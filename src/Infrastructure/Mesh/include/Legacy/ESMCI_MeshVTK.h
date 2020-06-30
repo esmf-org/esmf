@@ -52,6 +52,16 @@ void ReadVTKMeshBody(const std::string &filename, int *nodeId, double *nodeCoord
  */
 const MeshObjTopo *Vtk2Topo(UInt sdim, UInt vtk_type);
 
+// Get enough info to create a mesh
+ void ReadVTKMeshHeaderComplete(const std::string &filename, int &coord_sys, int &pdim, int &sdim, int &num_elems, int &num_nodes, int &conn_size, 
+                                bool &node_mask_present, bool &elem_mask_present, bool &elem_area_present, bool &elem_coords_present);
+
+void ReadVTKMeshBodyComplete(const std::string &filename, int *nodeId, double *nodeCoord, int *nodeOwner,
+                             int *elemId, int *elemType, int *elemConn, 
+                             // Optional args
+                             int *nodeMask=NULL, int *elemMask=NULL, double *elemArea=NULL, double *elemCoords=NULL);
+
+ 
 } // namespace
 
 #endif

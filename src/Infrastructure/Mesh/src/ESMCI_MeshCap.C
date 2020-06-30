@@ -673,6 +673,9 @@ MeshCap *MeshCap::meshcreate(int *pdim, int *sdim,
   return mc;
 }
 
+
+
+
 void MeshCap::meshaddnodes(int *num_nodes, int *nodeId,
                                double *nodeCoord, int *nodeOwner, InterArray<int> *nodeMaskII,
                                ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
@@ -698,6 +701,49 @@ void MeshCap::meshaddnodes(int *num_nodes, int *nodeId,
       "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
 #endif
    }
+}
+
+
+// returns NULL if unsuccessful
+// filename should be  a NULL terminated C style string. 
+MeshCap *MeshCap::MeshCreateFromVTK(char *filename,
+                                    bool _is_esmf_mesh, 
+                                    int *rc) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MeshCap::MeshCreateFromVTK()"
+
+  int localrc;
+
+
+  // Create mesh depending on the type
+  Mesh *mesh;
+  void *mbmesh;
+  if (_is_esmf_mesh) {
+    ESMCI_MeshCreateFromVTK(&mesh,
+                            filename, 
+                            &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                       ESMC_CONTEXT, rc)) return NULL;
+  } else {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+                                  " this functionality is not currently supported using MOAB",
+                                  ESMC_CONTEXT, rc);
+    return NULL;
+  }
+
+  // Create MeshCap
+  MeshCap *mc=new MeshCap();
+
+  // Set member variables
+  mc->is_esmf_mesh=_is_esmf_mesh;
+  if (_is_esmf_mesh) {
+    mc->mesh=mesh;
+  } else {
+    mc->mbmesh=mbmesh;
+  }
+
+  // Output new MeshCap
+  return mc;
 }
 
 
@@ -1307,13 +1353,13 @@ void MeshCap::meshgetarea(int *num_elem, double *elem_areas, int *rc) {
 }
 
 
-void MeshCap::meshgetdimensions(int *sdim, int *pdim, int *rc) {
+void MeshCap::meshgetdimensions(int *sdim, int *pdim, int *orig_sdim, int *rc) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::meshgetdimensions()"
 
   // Call into func. depending on mesh type
   if (is_esmf_mesh) {
-    ESMCI_meshgetdimensions(&mesh, sdim, pdim, rc);
+    ESMCI_meshgetdimensions(&mesh, sdim, pdim, orig_sdim, rc);
   } else {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
        "- this functionality is not currently supported using MOAB",
@@ -1321,6 +1367,22 @@ void MeshCap::meshgetdimensions(int *sdim, int *pdim, int *rc) {
     return;
   }
 }
+
+void MeshCap::getCoordSys(ESMC_CoordSys_Flag *coordSys, int *rc) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MeshCap::getCoordSys()"
+
+  // Call into func. depending on mesh type
+  if (is_esmf_mesh) {
+    ESMCI_MeshGetCoordSys(mesh, coordSys, rc);
+  } else {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+       "- this functionality is not currently supported using MOAB",
+                                  ESMC_CONTEXT, rc);
+    return;
+  }
+}
+
 
 void MeshCap::meshgetcentroid(int *num_elem, double *elem_centroid, int *rc) {
 #undef ESMC_METHOD

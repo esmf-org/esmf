@@ -41,6 +41,7 @@ void WriteMesh(const Mesh &mesh, const std::string &fbase,
                int nstep, double tstep, int file_type) 
 {
   Trace __trace("WriteMesh(const Mesh &mesh, const std::string &fbase, int nstep, double tstep)");
+
   // Manufacture this processors filename
   int rank = Par::Rank();
   int psize = Par::Size();
