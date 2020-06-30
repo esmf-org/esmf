@@ -10,9 +10,9 @@ jobs:
       - DOCKER_IMG: bekozi/esmf
       - TEST_RUNNER: esmf-test-runner
     steps:
-      - run:
-          name: passthru-build-esmf
-          command: exit 0
+#      - run:
+#          name: passthru-build-esmf
+#          command: exit 0
       - run:
           name: Checkout Code
           command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git $ESMF_DIR
