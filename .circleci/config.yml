@@ -4,7 +4,7 @@ jobs:
 
   build-esmf:
     machine: true
-    resource_class: large
+    resource_class: xlarge
     environment:
       - ESMF_DIR: $CIRCLE_WORKING_DIRECTORY/sandbox/esmf/src-git
       - DOCKER_IMG: bekozi/esmf
@@ -131,14 +131,17 @@ workflows:
   build-and-test-commit:
     jobs:
       - build-esmf
-      - build-run-tests:
+      - should-run-tests
           type: approval
+          requires:
+            - build-esmf
+      - build-run-tests:
           name: build-run-commit-<< matrix.target >>
           matrix:
             parameters:
               target: ["unit_tests", "system_tests", "examples"]
           requires:
-            - build-esmf
+            - should-run-tests
 
   build-and-test:
     triggers:
