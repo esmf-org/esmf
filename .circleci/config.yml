@@ -49,7 +49,7 @@ jobs:
           command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git $ESMF_DIR
       - run:
           name: Create Artifacts Directory
-          command: mkdir -p $ESMF_ARTIFACTS
+          command: mkdir -p $ESMF_OUTDIR
       - run:
           name: make build_<< parameters.target >>
           command: make build_<< parameters.target >> 2>&1 | tee $ESMF_OUTDIR/esmf-make-build_<< parameters.target >>.out
