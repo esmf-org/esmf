@@ -154,9 +154,9 @@ workflows:
 #          requires:
 #            - placeholder-esmpy-build
 
-#  docs:
-#    jobs:
-#      - build-docs
+  docs:
+    jobs:
+      - build-docs
 #      - publish-docs:
 #          name: placeholder-publish-docs
 #          requires:
