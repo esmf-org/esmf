@@ -3,6 +3,9 @@ FROM bekozi/esmf-netcdf
 ARG ESMF_BRANCH=""
 RUN echo "ESMF_BRANCH=${ESMF_BRANCH}"
 
+RUN apt-get --yes update && \
+    apt-get --yes install zip
+
 ENV PATH=${PATH}:${BB_MPICH_PREFIX}/bin
 
 WORKDIR ${HOME}/sandbox/esmf
