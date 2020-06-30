@@ -129,12 +129,12 @@ jobs:
 workflows:
 
   build-and-test-commit:
-    filters:
-      branches:
-        ignore:
-          - master
     jobs:
       - build-esmf
+        filters:
+          branches:
+            ignore:
+              - master
       - build-run-tests:
           type: approval
           name: build-run-<< matrix.target >>
