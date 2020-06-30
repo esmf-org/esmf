@@ -57,7 +57,7 @@ jobs:
           command: cd $ESMF_DIR && make run_<< parameters.target >> 2>&1 | tee $ESMF_OUTDIR/esmf-make-run_<< parameters.target >>.out
       - run:
           name: Collect Artifacts
-          command: bash $ESMF_DIR/.circleci/sh/collect-test-artifacts.sh
+          command: bash $ESMF_DIR/.circleci/sh/collect-test-artifacts.sh << parameters.target >>
       - store_artifacts:
           path: $ESMF_ARTIFACTS/test-artifacts.zip
           destination: << parameters.target >>-artifacts.zip
