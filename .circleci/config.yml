@@ -133,7 +133,7 @@ workflows:
       - build-esmf
       - build-run-tests:
           type: approval
-          name: build-run-<< matrix.target >>
+          name: build-run-commit-<< matrix.target >>
           matrix:
             parameters:
               target: ["unit_tests", "system_tests", "examples"]
