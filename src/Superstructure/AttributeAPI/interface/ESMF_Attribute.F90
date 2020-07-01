@@ -86,7 +86,7 @@ public ESMF_AttPack
 type(ESMF_AttNest_Flag), parameter :: ESMF_ATTR_DEFAULT_ATTNEST = ESMF_ATTNEST_ON
 
 type ESMF_AttPack
-  character(:), allocatable :: root_key
+  character(ESMF_MAXSTR) :: root_key
   type(C_PTR) :: info = C_NULL_PTR
 contains
   procedure, private, pass :: initialize => attpack_initialize
@@ -2432,17 +2432,14 @@ function attpack_formatKey(self, name, rc) result(key)
 
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
   localrc = ESMF_FAILURE
-  if (.not. allocated(self%root_key)) then
-    if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, msg="the root key must be allocated", ESMF_CONTEXT, rcToReturn=rc)) return
-  end if
   if (present(name)) then
     if (LEN(name) > 0) then
-        key = self%root_key//"/"//name
+        key = TRIM(self%root_key)//"/"//name
     else
-        key = self%root_key
+        key = TRIM(self%root_key)
     end if
   else
-    key = self%root_key
+    key = TRIM(self%root_key)
   end if
   if (present(rc)) rc = ESMF_SUCCESS
 end function attpack_formatKey
