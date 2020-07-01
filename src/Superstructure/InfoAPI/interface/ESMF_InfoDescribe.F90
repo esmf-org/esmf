@@ -47,6 +47,9 @@ use ESMF_XGridMod
 use ESMF_XGridGetMod
 use ESMF_LocStreamMod
 use ESMF_RHandleMod
+
+use iso_c_binding, only : C_NULL_PTR
+
 implicit none
 
 !==============================================================================
@@ -82,7 +85,7 @@ contains
   procedure, private, pass :: ESMF_InfoDescribeDestroy, ESMF_InfoDescribePrint, &
    ESMF_InfoDescribeGetCurrentBase, ESMF_InfoDescribeGetCurrentInfo
   procedure, private :: updateGeneric, ESMF_InfoDescribeIntialize
-  procedure, private, nopass :: getInfoArray, getInfoArrayBundle, getInfoCplComp, &
+  procedure, private, pass :: getInfoArray, getInfoArrayBundle, getInfoCplComp, &
    getInfoGridComp, getInfoSciComp, getInfoDistGrid, getInfoField, getInfoFieldBundle, &
    getInfoGrid, getInfoState, getInfoLocStream, getInfoMesh
   generic, public :: GetInfo => getInfoArray, getInfoArrayBundle, getInfoCplComp, getInfoGridComp, &
@@ -868,8 +871,8 @@ end subroutine
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "getInfoArray()"
-function getInfoArray(target, keywordEnforcer, rc) result(info)
-  use iso_c_binding, only : C_NULL_PTR
+function getInfoArray(self, target, keywordEnforcer, rc) result(info)
+  class(ESMF_InfoDescribe), intent(in) :: self
   type(ESMF_Array), intent(in) :: target
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(inout), optional :: rc
@@ -893,8 +896,8 @@ end function getInfoArray
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "getInfoArrayBundle()"
-function getInfoArrayBundle(target, keywordEnforcer, rc) result(info)
-  use iso_c_binding, only : C_NULL_PTR
+function getInfoArrayBundle(self, target, keywordEnforcer, rc) result(info)
+  class(ESMF_InfoDescribe), intent(in) :: self
   type(ESMF_ArrayBundle), intent(in) :: target
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(inout), optional :: rc
@@ -918,8 +921,8 @@ end function getInfoArrayBundle
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "getInfoCplComp()"
-function getInfoCplComp(target, keywordEnforcer, rc) result(info)
-  use iso_c_binding, only : C_NULL_PTR
+function getInfoCplComp(self, target, keywordEnforcer, rc) result(info)
+  class(ESMF_InfoDescribe), intent(in) :: self
   type(ESMF_CplComp), intent(in) :: target
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(inout), optional :: rc
@@ -943,8 +946,8 @@ end function getInfoCplComp
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "getInfoGridComp()"
-function getInfoGridComp(target, keywordEnforcer, rc) result(info)
-  use iso_c_binding, only : C_NULL_PTR
+function getInfoGridComp(self, target, keywordEnforcer, rc) result(info)
+  class(ESMF_InfoDescribe), intent(in) :: self
   type(ESMF_GridComp), intent(in) :: target
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(inout), optional :: rc
@@ -968,8 +971,8 @@ end function getInfoGridComp
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "getInfoSciComp()"
-function getInfoSciComp(target, keywordEnforcer, rc) result(info)
-  use iso_c_binding, only : C_NULL_PTR
+function getInfoSciComp(self, target, keywordEnforcer, rc) result(info)
+  class(ESMF_InfoDescribe), intent(in) :: self
   type(ESMF_SciComp), intent(in) :: target
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(inout), optional :: rc
@@ -993,8 +996,8 @@ end function getInfoSciComp
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "getInfoDistGrid()"
-function getInfoDistGrid(target, keywordEnforcer, rc) result(info)
-  use iso_c_binding, only : C_NULL_PTR
+function getInfoDistGrid(self, target, keywordEnforcer, rc) result(info)
+  class(ESMF_InfoDescribe), intent(in) :: self
   type(ESMF_DistGrid), intent(in) :: target
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(inout), optional :: rc
@@ -1018,8 +1021,8 @@ end function getInfoDistGrid
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "getInfoField()"
-function getInfoField(target, keywordEnforcer, rc) result(info)
-  use iso_c_binding, only : C_NULL_PTR
+function getInfoField(self, target, keywordEnforcer, rc) result(info)
+  class(ESMF_InfoDescribe), intent(in) :: self
   type(ESMF_Field), intent(in) :: target
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(inout), optional :: rc
@@ -1043,8 +1046,8 @@ end function getInfoField
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "getInfoFieldBundle()"
-function getInfoFieldBundle(target, keywordEnforcer, rc) result(info)
-  use iso_c_binding, only : C_NULL_PTR
+function getInfoFieldBundle(self, target, keywordEnforcer, rc) result(info)
+  class(ESMF_InfoDescribe), intent(in) :: self
   type(ESMF_FieldBundle), intent(in) :: target
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(inout), optional :: rc
@@ -1068,8 +1071,8 @@ end function getInfoFieldBundle
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "getInfoGrid()"
-function getInfoGrid(target, keywordEnforcer, rc) result(info)
-  use iso_c_binding, only : C_NULL_PTR
+function getInfoGrid(self, target, keywordEnforcer, rc) result(info)
+  class(ESMF_InfoDescribe), intent(in) :: self
   type(ESMF_Grid), intent(in) :: target
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(inout), optional :: rc
@@ -1093,8 +1096,8 @@ end function getInfoGrid
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "getInfoState()"
-function getInfoState(target, keywordEnforcer, rc) result(info)
-  use iso_c_binding, only : C_NULL_PTR
+function getInfoState(self, target, keywordEnforcer, rc) result(info)
+  class(ESMF_InfoDescribe), intent(in) :: self
   type(ESMF_State), intent(in) :: target
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(inout), optional :: rc
@@ -1118,8 +1121,8 @@ end function getInfoState
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "getInfoLocStream()"
-function getInfoLocStream(target, keywordEnforcer, rc) result(info)
-  use iso_c_binding, only : C_NULL_PTR
+function getInfoLocStream(self, target, keywordEnforcer, rc) result(info)
+  class(ESMF_InfoDescribe), intent(in) :: self
   type(ESMF_LocStream), intent(in) :: target
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(inout), optional :: rc
@@ -1143,8 +1146,8 @@ end function getInfoLocStream
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "getInfoMesh()"
-function getInfoMesh(target, keywordEnforcer, rc) result(info)
-  use iso_c_binding, only : C_NULL_PTR
+function getInfoMesh(self, target, keywordEnforcer, rc) result(info)
+  class(ESMF_InfoDescribe), intent(in) :: self
   type(ESMF_Mesh), intent(in) :: target
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(inout), optional :: rc
