@@ -2,7 +2,7 @@
 set -Eeuxo pipefail
 
 
-CMD='cd "${ESMPY_DIR}" && python setup.py build --ESMFMKFILE="${ESMFMKFILE}" 2>&1 /tmp/esmpy-build.out'
+CMD='cd "${ESMPY_DIR}" && python setup.py build --ESMFMKFILE="${ESMFMKFILE}" 2>&1 | tee /tmp/esmpy-build.out'
 docker exec -t "${TEST_RUNNER}" bash -c "${CMD}"
 
 CMD='cd "${ESMPY_DIR}" && python setup.py install 2>&1 | tee /tmp/esmpy-install.out'
