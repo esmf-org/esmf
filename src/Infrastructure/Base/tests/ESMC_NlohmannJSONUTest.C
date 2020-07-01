@@ -64,10 +64,6 @@ void print_vector(vector<int> vec) {
   cout << endl;
 }
 
-const long int* runGetPointer(const string& key, const json& j){
-  return j.at(key).get_ptr<const json::number_integer_t*>();
-}
-
 #undef  ESMC_METHOD
 #define ESMC_METHOD "main()"
 int main(void) {
@@ -166,7 +162,7 @@ int main(void) {
   strcpy(failMsg, "Pointer values are not equal");
   failed = false;
 
-  const long int *ptr2 = runGetPointer(key, j);
+  auto *ptr2 = j.at(key).get_ptr<const json::number_integer_t*>();
   if (*ptr != *ptr2) {
     failed = true;
   }
@@ -239,11 +235,11 @@ int main(void) {
   json src;
   src["something"] = 13;
 
-  long int *srcPtr = src.at("something").get_ptr<json::number_integer_t *>();
+  auto *srcPtr = src.at("something").get_ptr<json::number_integer_t *>();
 
   json dst(move(src));
 
-  long int *dstPtr = dst.at("something").get_ptr<json::number_integer_t *>();
+  auto *dstPtr = dst.at("something").get_ptr<json::number_integer_t *>();
 
   if (&*srcPtr != &*dstPtr) {
     failed = true;
