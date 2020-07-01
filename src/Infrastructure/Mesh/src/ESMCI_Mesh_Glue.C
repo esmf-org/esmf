@@ -2190,7 +2190,7 @@ void ESMCI_MeshGetCoordSys(Mesh *mesh, ESMC_CoordSys_Flag *coordSys, int *rc) {
 #define ESMC_METHOD "ESMCI_MeshGetCoordSys()"
   
   // DEFAULT FOR NOW
-  *coordSys = ESMC_COORDSYS_SPH_DEG;
+  *coordSys = ESMC_COORDSYS_SPH_RAD;
   
   // Return success
   if (rc != NULL) *rc = ESMF_SUCCESS;

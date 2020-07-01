@@ -2523,7 +2523,7 @@ endif
 
 
  ! Test Debug MeshWriteVTK()
- ! call ESMF_MeshWriteVTK(mesh, "elemArrayTst", &
+ !  call ESMF_MeshWriteVTK(mesh, "elemArrayTst", &
  !        elemArray1=maskArray, elemArray2=areaArray, &
  !        rc=localrc)
  ! if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -7596,7 +7596,7 @@ subroutine  test_mesh_write_read_vtk(correct, rc)
 
    ! Create Mesh structure in 1 step
    mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
-        coordSys=ESMF_COORDSYS_SPH_DEG, &
+        coordSys=ESMF_COORDSYS_SPH_RAD, &
         nodeIds=nodeIds, nodeCoords=nodeCoords, &
         nodeOwners=nodeOwners, nodeMask=nodeMask, &
         elementIds=elemIds,&
