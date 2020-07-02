@@ -306,9 +306,9 @@ contains
 
     integer :: i
 
-    logical, parameter :: debug = .false.
-    logical, parameter :: meminfo = .true. !tdk:debug
-    logical, parameter :: trace = .false.
+    logical, parameter :: debug = .true.
+    logical, parameter :: meminfo = .false. !tdk:debug
+    logical, parameter :: trace = .true.
 
     character(160)  :: prefixStr
     type(ESMF_VMId), allocatable, target :: vmIdMap(:)
