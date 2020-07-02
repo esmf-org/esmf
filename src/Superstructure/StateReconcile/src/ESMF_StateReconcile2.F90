@@ -306,9 +306,9 @@ contains
 
     integer :: i
 
-    logical, parameter :: debug = .true.
+    logical, parameter :: debug = .true. !tdk:debug
     logical, parameter :: meminfo = .false. !tdk:debug
-    logical, parameter :: trace = .true.
+    logical, parameter :: trace = .true. !tdk:debug
 
     character(160)  :: prefixStr
     type(ESMF_VMId), allocatable, target :: vmIdMap(:)
@@ -1878,7 +1878,7 @@ contains
     logical, parameter :: debug = .false.
 
     character(len=ESMF_MAXSTR) :: logmsg
-    logical, parameter :: meminfo = .true. !tdk:debug
+    logical, parameter :: meminfo = .false. !tdk:debug
 
     ! -------------------------------------------------------------------------
 
@@ -2015,7 +2015,7 @@ contains
       itemcount = counts_recv(i)
       if (itemcount > 0) then
         offset_pos = offsets_recv(i)
-#if 0
+#if 1
       ! Fortran 2003 version
         recv_items(i)%cptr(0:) => recv_buffer(offset_pos:offset_pos+itemcount-1)
 #else
