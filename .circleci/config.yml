@@ -143,6 +143,20 @@ jobs:
           name: passthru-esmpy-docs
           command: exit 0
 
+  osx-build-esmf:
+    macos:
+      xcode: "11.5"
+    environment:
+      - ESMF_DIR: $CIRCLE_WORKING_DIRECTORY/sandbox/esmf/src-git
+      - ESMF_CCI_SH: $CIRCLE_WORKING_DIRECTORY/sandbox/esmf/src-git/sh/osx
+    steps:
+      - run:
+          name: Checkout Code
+          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git $ESMF_DIR
+      - run:
+          name: make
+          command: bash $ESMF_CCI_SH/osx-build-esmf.sh
+
 workflows:
 
   build-and-test-commit:
@@ -205,3 +219,7 @@ workflows:
           name: placeholder-esmpy-docs
           requires:
             - should-build-docs
+
+  osx:
+    jobs:
+      - osx-build-esmf
