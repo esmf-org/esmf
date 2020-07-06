@@ -145,7 +145,7 @@ jobs:
 
   osx-build-esmf:
     macos:
-      xcode: "11.5"
+      xcode: "11.3.1"
     environment:
       - ESMF_DIR: $CIRCLE_WORKING_DIRECTORY/sandbox/esmf/src-git
       - ESMF_CCI_SH: $CIRCLE_WORKING_DIRECTORY/sandbox/esmf/src-git/sh/osx
