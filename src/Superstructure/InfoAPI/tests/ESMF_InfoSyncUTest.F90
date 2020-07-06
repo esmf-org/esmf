@@ -182,9 +182,6 @@ program ESMF_InfoSyncUTest
     call ESMF_InfoGetFromHost(field3, infoh, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-    infoh = ESMF_InfoGetHandle(field3, rc=rc)
-    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
     call ESMF_InfoSet(infoh, "fvarname", "field3", rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 

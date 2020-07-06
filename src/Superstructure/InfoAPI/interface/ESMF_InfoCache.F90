@@ -241,7 +241,8 @@ recursive function ESMF_InfoCacheFindField(target, foundField, intVmId, baseID, 
         call ESMF_BaseGetID(field%ftypep%base, curr_field_base_id, rc=rc)
         if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-        infoh = ESMF_InfoBaseGetHandle(field%ftypep%base)
+        call ESMF_InfoGetFromBase(field%ftypep%base, infoh, rc=rc)
+        if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
         is_present = ESMF_InfoIsPresent(infoh, "_esmf_state_reconcile", rc=rc)
         if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -276,7 +277,8 @@ recursive function ESMF_InfoCacheFindField(target, foundField, intVmId, baseID, 
           call ESMF_BaseGetID(field%ftypep%base, curr_field_base_id, rc=rc)
           if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-          infoh = ESMF_InfoBaseGetHandle(field%ftypep%base)
+          call ESMF_InfoGetFromBase(field%ftypep%base, infoh, rc=rc)
+          if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
           is_present = ESMF_InfoIsPresent(infoh, "_esmf_state_reconcile", rc=rc)
           if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -342,7 +344,8 @@ subroutine ESMF_InfoCacheReassembleField(target, state, rc)
 
   if (target%ftypep%status .eq. ESMF_FIELDSTATUS_GRIDSET .or. &
       target%ftypep%status .eq. ESMF_FIELDSTATUS_COMPLETE) then
-    infoh = ESMF_InfoBaseGetHandle(target%ftypep%base)
+    call ESMF_InfoGetFromBase(target%ftypep%base, infoh, rc=rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_InfoGet(infoh, "/_esmf_state_reconcile/should_serialize_geom", &
       should_serialize_geom, rc=rc)
@@ -380,7 +383,7 @@ subroutine ESMF_InfoCacheReassembleField(target, state, rc)
           ESMF_CONTEXT, rcToReturn=rc)) return
       end if
 
-      infoh_found = ESMF_InfoBaseGetHandle(archetype_field%ftypep%base)
+      call ESMF_InfoGetFromBase(archetype_field%ftypep%base, infoh_found, rc=rc)
       if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
       call ESMF_InfoGetCharAlloc(infoh_found, "/_esmf_state_reconcile/geom_type", geom_type, rc=rc)
@@ -464,7 +467,8 @@ recursive subroutine ESMF_InfoCacheReassembleFieldsFinalize(target, rc)
         call ESMF_StateGet(target, trim(stateNames(ii)), field, rc=rc)
         if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-        infoh = ESMF_InfoBaseGetHandle(field%ftypep%base)
+        call ESMF_InfoGetFromBase(field%ftypep%base, infoh, rc=rc)
+        if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
         isPresent = ESMF_InfoIsPresent(infoh, "_esmf_state_reconcile", rc=rc)
         if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -491,7 +495,8 @@ recursive subroutine ESMF_InfoCacheReassembleFieldsFinalize(target, rc)
             call ESMF_FieldBundleGet(fb, trim(field_name_list(jj)), field=field, rc=rc)
             if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-            infoh = ESMF_InfoBaseGetHandle(field%ftypep%base)
+            call ESMF_InfoGetFromBase(field%ftypep%base, infoh, rc=rc)
+            if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
             isPresent = ESMF_InfoIsPresent(infoh, "_esmf_state_reconcile", rc=rc)
             if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return

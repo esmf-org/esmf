@@ -58,7 +58,7 @@ module ESMF_FieldMod
   use ESMF_TimeMod
   use ESMF_InitMacrosMod
 
-  use ESMF_InfoMod, only : ESMF_Info, ESMF_InfoBaseGetHandle, ESMF_InfoGet, &
+  use ESMF_InfoMod, only : ESMF_Info, ESMF_InfoGetFromBase, ESMF_InfoGet, &
                            ESMF_InfoIsPresent
 
   implicit none
@@ -207,7 +207,8 @@ subroutine ESMF_FieldGetSerializeFlag(ftypep, theFlag, rc)
   type(ESMF_Info) :: infoh
   logical :: isPresent
 
-  infoh = ESMF_InfoBaseGetHandle(ftypep%base)
+  call ESMF_InfoGetFromBase(ftypep%base, infoh, rc=rc)
+  if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   isPresent = ESMF_InfoIsPresent(infoh, "_esmf_state_reconcile", rc=rc)
   if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return

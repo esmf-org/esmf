@@ -142,7 +142,7 @@ program ESMF_InfoCacheUTest
   call ESMF_LogWrite(ESMF_InfoDump(idesc%info, indent=2), rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  infoh = ESMF_InfoGetHandle(field, rc=rc)
+  call ESMF_InfoGetFromHost(field, infoh, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_InfoGet(infoh, &
@@ -150,7 +150,7 @@ program ESMF_InfoCacheUTest
                     actual_sdflag_archetype, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  infoh = ESMF_InfoGetHandle(field2, rc=rc)
+  call ESMF_InfoGetFromHost(field2, infoh, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_InfoGet(infoh, &
