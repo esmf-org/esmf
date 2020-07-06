@@ -33,7 +33,23 @@ jobs:
           command: bash $ESMF_DIR/.circleci/sh/docker-push.sh
 
   should-run-tests:
-    machine: true
+    docker:
+      - image: cimg/base:2020.01
+    resource_class: small
+    steps:
+      - run: exit 0
+
+  should-build-docs:
+    docker:
+      - image: cimg/base:2020.01
+    resource_class: small
+    steps:
+      - run: exit 0
+
+  should-run-osx:
+    docker:
+      - image: cimg/base:2020.01
+    resource_class: small
     steps:
       - run: exit 0
 
@@ -131,18 +147,18 @@ workflows:
 
   build-and-test-commit:
     jobs:
-      - build-esmf
       - should-run-tests:
           type: approval
+      - build-esmf:
           requires:
-            - build-esmf
+            - should-run-tests
       - build-run-tests:
           name: build-run-commit-<< matrix.target >>
           matrix:
             parameters:
               target: ["unit_tests", "system_tests", "examples"]
           requires:
-            - should-run-tests
+            - build-esmf
 
   build-and-test:
     triggers:
@@ -174,12 +190,18 @@ workflows:
 #          requires:
 #            - placeholder-esmpy-build
 
-#  docs:
-#    jobs:
-#      - build-docs
-#      - publish-docs:
-#          name: placeholder-publish-docs
-#          requires:
-#            - build-docs
-#      - esmpy-docs:
-#          name: placeholder-esmpy-docs
+  docs:
+    jobs:
+      - should-build-docs:
+          type: approval
+      - build-docs:
+          requires:
+            - should-build-docs
+      - publish-docs:
+          name: placeholder-publish-docs
+          requires:
+            - build-docs
+      - esmpy-docs:
+          name: placeholder-esmpy-docs
+          requires:
+            - should-build-docs
