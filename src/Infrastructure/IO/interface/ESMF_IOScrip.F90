@@ -43,7 +43,7 @@
 #ifdef ESMF_NETCDF
       use netcdf
 #endif
-      use ESMF_InfoMod, only : ESMF_Info, ESMF_InfoSet, ESMF_InfoPointerGetHandle
+      use ESMF_InfoMod, only : ESMF_Info, ESMF_InfoSet, ESMF_InfoGetFromPointer
 
       implicit none
 
@@ -175,7 +175,7 @@ subroutine ESMF_OutputWeightFile (weightFile, factorList, factorIndexList, rc)
     integer(ESMF_KIND_I4), allocatable, dimension(:,:,:) :: deBlockList
     type(ESMF_Info) :: idg
     type(ESMF_Pointer) :: ptr
-    
+
     ! ==============================================================================
 
     if (present(rc)) then
@@ -302,7 +302,7 @@ subroutine ESMF_OutputWeightFile (weightFile, factorList, factorIndexList, rc)
     call ESMF_DistGridGetThis(distgridFL, ptr, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) return
-    idg = ESMF_InfoPointerGetHandle(ptr, rc=localrc)
+    call ESMF_InfoGetFromPointer(ptr, idg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InfoSet(idg, "/netcdf/metadata/"//name, (/ value /), rc=localrc)

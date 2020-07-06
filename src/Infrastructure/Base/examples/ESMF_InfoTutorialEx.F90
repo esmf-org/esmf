@@ -170,7 +170,7 @@
 !EOC
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
-    print *, "the \texttt{ESMF\_Info} dump: "//output
+    print *, "the Info dump: "//output
 !EOC
 
 !------------------------------------------------------------------------------

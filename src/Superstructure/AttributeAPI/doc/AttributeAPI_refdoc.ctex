@@ -58,6 +58,13 @@
 %\input{../Infrastructure/Base/doc/AttributeAPI_desc}
 %#endif
 
+\subsection{Constants}
+#ifdef STANDALONE
+\input{Attribute_options}
+#elif defined(CONSTITUENT)
+\input{../Superstructure/Attribute/doc/Attribute_options}
+#endif
+
 \subsection{Class API}
 #ifdef STANDALONE
 \input{ESMF_Attribute_fapi}

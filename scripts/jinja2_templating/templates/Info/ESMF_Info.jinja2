@@ -163,7 +163,7 @@ private
 public operator(==)
 public operator(/=)
 {% set suffixes = ["","Create","Destroy","Get","GetCharAlloc", "GetAlloc","Set",
-                   "Remove","BaseGetHandle","PointerGetHandle","SetNULL","SetDirty",
+                   "Remove","GetFromBase","GetFromPointer","SetNULL","SetDirty",
                    "IsSet","IsPresent","Print","Dump","Update","ReadJSON","WriteJSON",
                    "Broadcast"] %}
 {% for suffix in suffixes %}
@@ -338,7 +338,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The arguments are:
 !     \begin{description}
 !     \item [info]
-!       The \texttt{ESMF\Info} object acting as the source data.
+!       The \texttt{ESMF\_Info} object acting as the source data.
 {{ doc_rc }}
 !     \end{description}
 !EOP
@@ -489,7 +489,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical}
 !       \item \texttt{character(:)}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 {% endif %}
 !
 !     The arguments are:
@@ -605,7 +604,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical, dimension(:)}
 !       \item \texttt{character(:), dimension(:)}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 {% endif %}
 !
 !     The arguments are:
@@ -926,7 +924,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical}
 !       \item \texttt{character(:)}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 {% endif %}
 !
 !     The arguments are:
@@ -1073,6 +1070,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Get a value list from an \texttt{ESMF\_Info} object using a key. If the key
 !     is not found, \textit{rc} will not equal \texttt{ESMF\_SUCCESS}. The returned
 !     value is always a copy.
+{% if not alloc %}
+!
+!     The length of \textit{values} must match its length in storage.
+{% endif %}
 !
 !     Overloaded \textit{values} for the following types:
 !     \begin{itemize}
@@ -1083,7 +1084,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical, dimension(:){% if alloc %}, allocatable{% endif %}}
 !       \item \texttt{character(:), dimension(:){% if alloc %}, allocatable{% endif %}}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 !
 !     The arguments are:
 !     \begin{description}
@@ -1450,22 +1450,21 @@ end subroutine {{ method_name }}
 ! GetHandle Documentation -----------------------------------------------------
 !------------------------------------------------------------------------------
 
-{% set doc_generic_method = "ESMF_InfoGetHandle" %}
+{% set doc_generic_method = "ESMF_InfoGetFromHost" %}
 !BOP
 ! !IROUTINE: {{ doc_generic_method }} - Get an Info handle from an ESMF object
 !
 ! !INTERFACE:
-!function {{ doc_generic_method }}(host, keywordEnforcer, rc) result(info)
+!subroutine {{ doc_generic_method }}(host, info, keywordEnforcer, rc)
 ! !ARGUMENTS:
 !  type(ESMF_*), intent(inout) :: host
+!  type(ESMF_Info), intent(out) :: info
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !  integer, intent(out), optional :: rc
-! !RETURN VALUE:
-!  type(ESMF_Info) :: info
 !
 ! !DESCRIPTION:
-!     Get a handle to an \texttt{ESMF\_Info} object. This object should not be
-!     destroyed.
+!     Get an \texttt{ESMF\_Info} object handle from a host ESMF object. The returned
+!     handle should not be destroyed.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1476,26 +1475,27 @@ end subroutine {{ method_name }}
 !         \item \texttt{ESMF\_{{ et }}}
 {% endfor %}
 !       \end{itemize}
+!     \item [info]
+!       Outgoing \texttt{ESMF\_Info} object.
 {{ doc_rc }}
 !     \end{description}
 !EOP
 
 ! =============================================================================
 
-{% set method_name = "ESMF_InfoBaseGetHandle" %}
+{% set method_name = "ESMF_InfoGetFromBase" %}
 #undef  ESMF_METHOD
 #define ESMF_METHOD "{{ method_name }}()"
 !BOPI
 ! !IROUTINE: {{ method_name }}
 !
 ! !INTERFACE:
-function {{ method_name }}(base, keywordEnforcer, rc) result(info)
+subroutine {{ method_name }}(base, info, keywordEnforcer, rc)
 ! !ARGUMENTS:
   type(ESMF_Base), intent(in) :: base
+  type(ESMF_Info), intent(out) :: info
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(out), optional :: rc
-! !RETURN VALUE:
-  type(ESMF_Info) :: info
 !
 ! !DESCRIPTION:
 !     Get an \texttt{ESMF\_Info} handle from an \texttt{ESMF\_Base} object.
@@ -1504,6 +1504,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \begin{description}
 !     \item [base]
 !       Target \texttt{ESMF\_Base} object.
+!     \item [info]
+!       Outgoing \texttt{ESMF\_Info} object.
 {{ doc_rc }}
 !     \end{description}
 !EOPI
@@ -1511,24 +1513,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   if (present(rc)) rc = ESMF_FAILURE
   info%ptr = c_info_base_get(base%this%ptr)
   if (present(rc)) rc = ESMF_SUCCESS
-end function {{ method_name }}
+end subroutine {{ method_name }}
 
 ! -----------------------------------------------------------------------------
 
-{% set method_name = "ESMF_InfoPointerGetHandle" %}
+{% set method_name = "ESMF_InfoGetFromPointer" %}
 #undef  ESMF_METHOD
 #define ESMF_METHOD "{{ method_name }}()"
 !BOPI
 ! !IROUTINE: {{ method_name }}
 !
 ! !INTERFACE:
-function {{ method_name }}(ptr, keywordEnforcer, rc) result(info)
+subroutine {{ method_name }}(ptr, info, keywordEnforcer, rc)
 ! !ARGUMENTS:
   type(ESMF_Pointer), intent(in) :: ptr
+  type(ESMF_Info), intent(out) :: info
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(out), optional :: rc
-! !RETURN VALUE:
-  type(ESMF_Info) :: info
 !
 ! !DESCRIPTION:
 !     Get an \texttt{ESMF\_Info} handle from an \texttt{ESMF\Pointer} object.
@@ -1537,6 +1538,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \begin{description}
 !     \item [base]
 !       Target \texttt{ESMF\_Pointer} object.
+!     \item [info]
+!       Outgoing \texttt{ESMF\_Info} object.
 {{ doc_rc }}
 !     \end{description}
 !EOPI
@@ -1544,7 +1547,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   if (present(rc)) rc = ESMF_FAILURE
   info%ptr = c_info_base_get(ptr%ptr)
   if (present(rc)) rc = ESMF_SUCCESS
-end function {{ method_name }}
+end subroutine {{ method_name }}
 
 !------------------------------------------------------------------------------
 

@@ -73,7 +73,7 @@ program ESMF_InfoDescribeUTest
   !----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Initialize/Destroy"
-  write(failMsg, *) "Did not succeed"
+  write(failMsg, *) "Did not sync successfully"
   rc = ESMF_FAILURE
 
   call eidesc_create_destroy%Initialize(rc=rc)
@@ -127,7 +127,7 @@ program ESMF_InfoDescribeUTest
   mesh = ESMF_MeshEmptyCreate(rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  infoh = ESMF_InfoGetHandle(mesh, rc=rc)
+  call ESMF_InfoGetFromHost(mesh, infoh, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
   call ESMF_InfoSet(infoh, "special", "mesh attribute", rc=rc)

@@ -29,7 +29,6 @@ use ESMF_VMMod
 use ESMF_InfoMod
 use ESMF_UtilTypesMod
 use ESMF_InfoDescribeMod
-use ESMF_InfoMod
 
 use iso_c_binding, only : C_PTR, C_NULL_PTR, C_INT, C_LONG
       
@@ -91,7 +90,7 @@ contains ! ====================================================================
 subroutine ESMF_InfoCacheInitialize(self, rc)
   class(ESMF_InfoCache), intent(inout) :: self
   integer, intent(out) :: rc
-  
+
   self%ptr = c_infocache_initialize()
 
   rc = ESMF_SUCCESS
@@ -105,10 +104,10 @@ end subroutine ESMF_InfoCacheInitialize
 subroutine ESMF_InfoCacheDestroy(self, rc)
   class(ESMF_InfoCache), intent(inout) :: self
   integer, intent(out) :: rc
-  
+
   rc = c_infocache_destroy(self%ptr)
   if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-  
+
   self%ptr = C_NULL_PTR
   
 end subroutine ESMF_InfoCacheDestroy

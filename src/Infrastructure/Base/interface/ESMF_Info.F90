@@ -184,8 +184,8 @@ public ESMF_InfoGetCharAlloc
 public ESMF_InfoGetAlloc
 public ESMF_InfoSet
 public ESMF_InfoRemove
-public ESMF_InfoBaseGetHandle
-public ESMF_InfoPointerGetHandle
+public ESMF_InfoGetFromBase
+public ESMF_InfoGetFromPointer
 public ESMF_InfoSetNULL
 public ESMF_InfoSetDirty
 public ESMF_InfoIsSet
@@ -353,7 +353,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The arguments are:
 !     \begin{description}
 !     \item [info]
-!       The \texttt{ESMF\Info} object acting as the source data.
+!       The \texttt{ESMF\_Info} object acting as the source data.
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -492,7 +492,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical}
 !       \item \texttt{character(:)}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 !
 !     The arguments are:
 !     \begin{description}
@@ -586,7 +585,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical}
 !       \item \texttt{character(:)}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 !
 !     The arguments are:
 !     \begin{description}
@@ -680,7 +678,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical}
 !       \item \texttt{character(:)}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 !
 !     The arguments are:
 !     \begin{description}
@@ -774,7 +771,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical}
 !       \item \texttt{character(:)}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 !
 !     The arguments are:
 !     \begin{description}
@@ -868,7 +864,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical}
 !       \item \texttt{character(:)}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 !
 !     The arguments are:
 !     \begin{description}
@@ -962,7 +957,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical}
 !       \item \texttt{character(:)}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 !
 !     The arguments are:
 !     \begin{description}
@@ -1059,7 +1053,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical, dimension(:)}
 !       \item \texttt{character(:), dimension(:)}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 !
 !     The arguments are:
 !     \begin{description}
@@ -1142,7 +1135,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical, dimension(:)}
 !       \item \texttt{character(:), dimension(:)}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 !
 !     The arguments are:
 !     \begin{description}
@@ -1225,7 +1217,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical, dimension(:)}
 !       \item \texttt{character(:), dimension(:)}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 !
 !     The arguments are:
 !     \begin{description}
@@ -1308,7 +1299,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical, dimension(:)}
 !       \item \texttt{character(:), dimension(:)}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 !
 !     The arguments are:
 !     \begin{description}
@@ -1391,7 +1381,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical, dimension(:)}
 !       \item \texttt{character(:), dimension(:)}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 !
 !     The arguments are:
 !     \begin{description}
@@ -1477,7 +1466,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical, dimension(:)}
 !       \item \texttt{character(:), dimension(:)}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 !
 !     The arguments are:
 !     \begin{description}
@@ -1736,7 +1724,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical}
 !       \item \texttt{character(:)}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 !
 !     The arguments are:
 !     \begin{description}
@@ -1839,7 +1826,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical}
 !       \item \texttt{character(:)}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 !
 !     The arguments are:
 !     \begin{description}
@@ -1942,7 +1928,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical}
 !       \item \texttt{character(:)}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 !
 !     The arguments are:
 !     \begin{description}
@@ -2045,7 +2030,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical}
 !       \item \texttt{character(:)}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 !
 !     The arguments are:
 !     \begin{description}
@@ -2148,7 +2132,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical}
 !       \item \texttt{character(:)}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 !
 !     The arguments are:
 !     \begin{description}
@@ -2338,7 +2321,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical}
 !       \item \texttt{character(:)}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 !
 !     The arguments are:
 !     \begin{description}
@@ -2439,6 +2421,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     is not found, \textit{rc} will not equal \texttt{ESMF\_SUCCESS}. The returned
 !     value is always a copy.
 !
+!     The length of \textit{values} must match its length in storage.
+!
 !     Overloaded \textit{values} for the following types:
 !     \begin{itemize}
 !       \item \texttt{integer(kind=ESMF\_KIND\_I4), dimension(:)}
@@ -2448,7 +2432,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical, dimension(:)}
 !       \item \texttt{character(:), dimension(:)}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 !
 !     The arguments are:
 !     \begin{description}
@@ -2551,7 +2534,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical, dimension(:), allocatable}
 !       \item \texttt{character(:), dimension(:), allocatable}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 !
 !     The arguments are:
 !     \begin{description}
@@ -2642,6 +2624,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     is not found, \textit{rc} will not equal \texttt{ESMF\_SUCCESS}. The returned
 !     value is always a copy.
 !
+!     The length of \textit{values} must match its length in storage.
+!
 !     Overloaded \textit{values} for the following types:
 !     \begin{itemize}
 !       \item \texttt{integer(kind=ESMF\_KIND\_I4), dimension(:)}
@@ -2651,7 +2635,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical, dimension(:)}
 !       \item \texttt{character(:), dimension(:)}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 !
 !     The arguments are:
 !     \begin{description}
@@ -2754,7 +2737,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical, dimension(:), allocatable}
 !       \item \texttt{character(:), dimension(:), allocatable}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 !
 !     The arguments are:
 !     \begin{description}
@@ -2845,6 +2827,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     is not found, \textit{rc} will not equal \texttt{ESMF\_SUCCESS}. The returned
 !     value is always a copy.
 !
+!     The length of \textit{values} must match its length in storage.
+!
 !     Overloaded \textit{values} for the following types:
 !     \begin{itemize}
 !       \item \texttt{integer(kind=ESMF\_KIND\_I4), dimension(:)}
@@ -2854,7 +2838,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical, dimension(:)}
 !       \item \texttt{character(:), dimension(:)}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 !
 !     The arguments are:
 !     \begin{description}
@@ -2957,7 +2940,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical, dimension(:), allocatable}
 !       \item \texttt{character(:), dimension(:), allocatable}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 !
 !     The arguments are:
 !     \begin{description}
@@ -3048,6 +3030,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     is not found, \textit{rc} will not equal \texttt{ESMF\_SUCCESS}. The returned
 !     value is always a copy.
 !
+!     The length of \textit{values} must match its length in storage.
+!
 !     Overloaded \textit{values} for the following types:
 !     \begin{itemize}
 !       \item \texttt{integer(kind=ESMF\_KIND\_I4), dimension(:)}
@@ -3057,7 +3041,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical, dimension(:)}
 !       \item \texttt{character(:), dimension(:)}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 !
 !     The arguments are:
 !     \begin{description}
@@ -3160,7 +3143,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical, dimension(:), allocatable}
 !       \item \texttt{character(:), dimension(:), allocatable}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 !
 !     The arguments are:
 !     \begin{description}
@@ -3251,6 +3233,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     is not found, \textit{rc} will not equal \texttt{ESMF\_SUCCESS}. The returned
 !     value is always a copy.
 !
+!     The length of \textit{values} must match its length in storage.
+!
 !     Overloaded \textit{values} for the following types:
 !     \begin{itemize}
 !       \item \texttt{integer(kind=ESMF\_KIND\_I4), dimension(:)}
@@ -3260,7 +3244,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical, dimension(:)}
 !       \item \texttt{character(:), dimension(:)}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 !
 !     The arguments are:
 !     \begin{description}
@@ -3371,7 +3354,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical, dimension(:), allocatable}
 !       \item \texttt{character(:), dimension(:), allocatable}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 !
 !     The arguments are:
 !     \begin{description}
@@ -3470,6 +3452,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     is not found, \textit{rc} will not equal \texttt{ESMF\_SUCCESS}. The returned
 !     value is always a copy.
 !
+!     The length of \textit{values} must match its length in storage.
+!
 !     Overloaded \textit{values} for the following types:
 !     \begin{itemize}
 !       \item \texttt{integer(kind=ESMF\_KIND\_I4), dimension(:)}
@@ -3479,7 +3463,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical, dimension(:)}
 !       \item \texttt{character(:), dimension(:)}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 !
 !     The arguments are:
 !     \begin{description}
@@ -3590,7 +3573,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \item \texttt{logical, dimension(:), allocatable}
 !       \item \texttt{character(:), dimension(:), allocatable}
 !     \end{itemize}
-!     \textit{Note that 32-bit data is converted to 64-bit \cite{json_for_modern_cpp_64bit_float}.}
 !
 !     The arguments are:
 !     \begin{description}
@@ -3913,20 +3895,19 @@ end subroutine ESMF_InfoInquire
 !------------------------------------------------------------------------------
 
 !BOP
-! !IROUTINE: ESMF_InfoGetHandle - Get an Info handle from an ESMF object
+! !IROUTINE: ESMF_InfoGetFromHost - Get an Info handle from an ESMF object
 !
 ! !INTERFACE:
-!function ESMF_InfoGetHandle(host, keywordEnforcer, rc) result(info)
+!subroutine ESMF_InfoGetFromHost(host, info, keywordEnforcer, rc)
 ! !ARGUMENTS:
 !  type(ESMF_*), intent(inout) :: host
+!  type(ESMF_Info), intent(out) :: info
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !  integer, intent(out), optional :: rc
-! !RETURN VALUE:
-!  type(ESMF_Info) :: info
 !
 ! !DESCRIPTION:
-!     Get a handle to an \texttt{ESMF\_Info} object. This object should not be
-!     destroyed.
+!     Get an \texttt{ESMF\_Info} object handle from a host ESMF object. The returned
+!     handle should not be destroyed.
 !
 !     The arguments are:
 !     \begin{description}
@@ -3946,6 +3927,8 @@ end subroutine ESMF_InfoInquire
 !         \item \texttt{ESMF\_LocStream}
 !         \item \texttt{ESMF\_Mesh}
 !       \end{itemize}
+!     \item [info]
+!       Outgoing \texttt{ESMF\_Info} object.
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3954,18 +3937,17 @@ end subroutine ESMF_InfoInquire
 ! =============================================================================
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoBaseGetHandle()"
+#define ESMF_METHOD "ESMF_InfoGetFromBase()"
 !BOPI
-! !IROUTINE: ESMF_InfoBaseGetHandle
+! !IROUTINE: ESMF_InfoGetFromBase
 !
 ! !INTERFACE:
-function ESMF_InfoBaseGetHandle(base, keywordEnforcer, rc) result(info)
+subroutine ESMF_InfoGetFromBase(base, info, keywordEnforcer, rc)
 ! !ARGUMENTS:
   type(ESMF_Base), intent(in) :: base
+  type(ESMF_Info), intent(out) :: info
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(out), optional :: rc
-! !RETURN VALUE:
-  type(ESMF_Info) :: info
 !
 ! !DESCRIPTION:
 !     Get an \texttt{ESMF\_Info} handle from an \texttt{ESMF\_Base} object.
@@ -3974,6 +3956,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \begin{description}
 !     \item [base]
 !       Target \texttt{ESMF\_Base} object.
+!     \item [info]
+!       Outgoing \texttt{ESMF\_Info} object.
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3982,23 +3966,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   if (present(rc)) rc = ESMF_FAILURE
   info%ptr = c_info_base_get(base%this%ptr)
   if (present(rc)) rc = ESMF_SUCCESS
-end function ESMF_InfoBaseGetHandle
+end subroutine ESMF_InfoGetFromBase
 
 ! -----------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoPointerGetHandle()"
+#define ESMF_METHOD "ESMF_InfoGetFromPointer()"
 !BOPI
-! !IROUTINE: ESMF_InfoPointerGetHandle
+! !IROUTINE: ESMF_InfoGetFromPointer
 !
 ! !INTERFACE:
-function ESMF_InfoPointerGetHandle(ptr, keywordEnforcer, rc) result(info)
+subroutine ESMF_InfoGetFromPointer(ptr, info, keywordEnforcer, rc)
 ! !ARGUMENTS:
   type(ESMF_Pointer), intent(in) :: ptr
+  type(ESMF_Info), intent(out) :: info
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(out), optional :: rc
-! !RETURN VALUE:
-  type(ESMF_Info) :: info
 !
 ! !DESCRIPTION:
 !     Get an \texttt{ESMF\_Info} handle from an \texttt{ESMF\Pointer} object.
@@ -4007,6 +3990,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \begin{description}
 !     \item [base]
 !       Target \texttt{ESMF\_Pointer} object.
+!     \item [info]
+!       Outgoing \texttt{ESMF\_Info} object.
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -4015,7 +4000,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   if (present(rc)) rc = ESMF_FAILURE
   info%ptr = c_info_base_get(ptr%ptr)
   if (present(rc)) rc = ESMF_SUCCESS
-end function ESMF_InfoPointerGetHandle
+end subroutine ESMF_InfoGetFromPointer
 
 !------------------------------------------------------------------------------
 

@@ -53,7 +53,7 @@
       use ESMF_IOUtilMod
       use ESMF_UtilCubedSphereMod
       use ESMF_IOFileTypeCheckMod
-      use ESMF_InfoMod, only : ESMF_Info, ESMF_InfoPointerGetHandle, ESMF_InfoUpdate
+      use ESMF_InfoMod, only : ESMF_Info, ESMF_InfoGetFromPointer, ESMF_InfoUpdate
 
 #ifdef ESMF_NETCDF
       use netcdf
@@ -3341,10 +3341,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        ! Copy Attributes
        if (present(copyAttributes)) then
          if (copyAttributes) then
-             lhs = ESMF_InfoPointerGetHandle(newGrid%this, rc=localrc)
+             call ESMF_InfoGetFromPointer(newGrid%this, lhs, rc=localrc)
              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
-             rhs = ESMF_InfoPointerGetHandle(grid%this, rc=localrc)
+             call ESMF_InfoGetFromPointer(grid%this, rhs, rc=localrc)
              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
              call ESMF_InfoUpdate(lhs, rhs, recursive=.true., rc=localrc)
@@ -15551,6 +15551,7 @@ end subroutine CalculateConnection
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateMosaicReg()"
 !BOP
+!\label{API:GridCreateMosaicReg}
 ! !IROUTINE: ESMF_GridCreateMosaic - Create a multi-tile Grid object with regular decomposition using the grid definition from a GRIDSPEC Mosaic file.
 
 ! !INTERFACE:

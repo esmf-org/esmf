@@ -1125,7 +1125,7 @@ void IO_NetCDF::destruct(void) {
           return localrc;
         }
       } else if (it_info.value().is_number_integer()) {
-        int64_t value_long = it_info.value().get<int64_t>();
+        long int value_long = it_info.value().get<long int>();
         ncerror = nc_put_att_long(netCdfFile, thisVar, attrname, NC_LONG, 1, &value_long);
         if (ncerror != NC_NOERR) {
           string errstr = string(": nc_put_att_long failure: ") + nc_strerror(ncerror);

@@ -464,7 +464,7 @@
  @\
        !mtag @\
        ! Add a duplicate attpack. Ensure mappig is identical after adding. @\
-       info_handle = ESMF_InfoGetHandle(mname, rc=rc) @\
+       call ESMF_InfoGetFromHost(mname, info_handle, rc=rc) @\
        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT) @\
        info_desired = ESMF_InfoCreate(info_handle, rc=rc) @\
        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT) @\

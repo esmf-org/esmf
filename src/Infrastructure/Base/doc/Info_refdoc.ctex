@@ -60,9 +60,9 @@
 
 \subsection{Usage and Examples}
 #ifdef STANDALONE
-\input{ESMF_InfoGetHandleEx_fapi}
+\input{ESMF_InfoGetFromHostEx_fapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Base/doc/ESMF_InfoGetHandleEx_fapi}
+\input{../Infrastructure/Base/doc/ESMF_InfoGetFromHostEx_fapi}
 #endif
 #ifdef STANDALONE
 \input{ESMF_InfoTutorialEx_fapi}

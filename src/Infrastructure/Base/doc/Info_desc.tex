@@ -2,7 +2,7 @@
 
 All ESMF base objects (i.e. Array, ArrayBundle, Field, FieldBundle, Grid, Mesh, DistGrid) contain a key-value attribute storage object called \texttt{ESMF\_Info}. \texttt{ESMF\_Info} objects may also be created independent of a base object. \texttt{ESMF\_Info} supports setting and getting key-value pairs where the \textit{key} is a string and the \textit{value} is a scalar or a list of common data types. An \texttt{ESMF\_Info} object may have a flat or nested data structure. The purpose of \texttt{ESMF\_Info} is to support I/O-compatible metadata structures (i.e. netCDF), internal record-keeping for model execution (NUOPC), and provide a mechanism for custom user metadata attributes.
 
-An overarching desgin concept for \texttt{ESMF\_Info} is interoperability. To achieve this goal, \texttt{ESMF\_Info} adopted the JSON (Javascript Object Notation) specification. Internally, \texttt{ESMF\_Info} uses \textit{JSON for Modern C++} \cite{json_for_modern_cpp} to manage its storage map. There are numerous resources for JSON on the web \cite{json}. Quoting from the \textit{json.org} site \cite{json} when it introduces the format:
+\texttt{ESMF\_Info} is designed for interoperability. To achieve this goal, \texttt{ESMF\_Info} adopted the JSON (Javascript Object Notation) specification. Internally, \texttt{ESMF\_Info} uses \textit{JSON for Modern C++} \cite{json_for_modern_cpp} to manage its storage map. There are numerous resources for JSON on the web \cite{json}. Quoting from the \textit{json.org} site \cite{json} when it introduces the format:
 \begin{quote}
     \textit{JSON (JavaScript Object Notation) is a lightweight data-interchange format. It is easy for humans to read and write. It is easy for machines to parse and generate. It is based on a subset of the JavaScript Programming Language Standard ECMA-262 3rd Edition - December 1999. JSON is a text format that is completely language independent but uses conventions that are familiar to programmers of the C-family of languages, including C, C++, C\#, Java, JavaScript, Perl, Python, and many others. These properties make JSON an ideal data-interchange language.}
     \textit{JSON is built on two structures:}
@@ -46,7 +46,7 @@ call ESMF_AttributeSet(array, "aKey", 15, rc=rc)
 \end{verbatim}
 With \texttt{ESMF\_Info}:
 \begin{verbatim}
-info = ESMF_InfoGetHandle(array, rc=rc)
+call ESMF_InfoGetFromHost(array, info, rc=rc)
 call ESMF_InfoSet(info, "aKey", 15, rc=rc)
 \end{verbatim}
 
@@ -57,7 +57,7 @@ call ESMF_AttributeGet(array, "aKey", aKeyValue, rc=rc)
 \end{verbatim}
 With \texttt{ESMF\_Info}:
 \begin{verbatim}
-info = ESMF_InfoGetHandle(array, rc=rc)
+call ESMF_InfoGetFromHost(array, info, rc=rc)
 call ESMF_InfoGet(info, "aKey", aKeyValue, rc=rc)
 \end{verbatim}
 
@@ -65,11 +65,11 @@ call ESMF_InfoGet(info, "aKey", aKeyValue, rc=rc)
 \label{info_key_format}
 A key in the \texttt{ESMF\_Info} interface provides the location of a value to retrieve from the key-value storage. Keys in the \texttt{ESMF\_Info} class use the JSON Pointer syntax \cite{json_for_modern_cpp_json_pointer}. A forward slash is prepended to string keys if it does not exist. Hence, \texttt{"aKey"} and \texttt{"/aKey"} are equivalent. Note the indexing aspect of the JSON Pointer syntax is not supported.
 
-Every ”key” argument in the \texttt{ESMF\_Info} class uses pathing following the JSON Pointer syntax [6]. A forward slash is prepended to string keys if it does not exist. Hence, "aKey" and "/aKey" are equivalent. Note the indexing aspect of the JSON Pointer syntax is not supported (i.e. “/my\_list~1”).
+Every "key" argument in the \texttt{ESMF\_Info} class uses pathing following the JSON Pointer syntax [6]. A forward slash is prepended to string keys if it does not exist. Hence, "aKey" and "/aKey" are equivalent. Note the indexing aspect of the JSON Pointer syntax is not supported (i.e. "/my\_list~1").
 
-Some examples for valid “key” arguments:
+Some examples for valid "key" arguments:
 \begin{itemize}
     \item \texttt{altitude} :: A simple key argument with no nesting.
     \item \texttt{/altitude} :: A simple key argument with no nesting with the prepended pointer forward slash.
-    \item \texttt{/altitude/height\_above\_mean\_sea\_level} :: A key for an attribute “height\_above\_mean\_sea\_level” nested in a map identified with key “altitude”.
+    \item \texttt{/altitude/height\_above\_mean\_sea\_level} :: A key for an attribute "height\_above\_mean\_sea\_level" nested in a map identified with key "altitude".
 \end{itemize}

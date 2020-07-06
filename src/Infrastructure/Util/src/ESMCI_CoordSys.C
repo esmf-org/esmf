@@ -90,8 +90,6 @@ const double ESMC_CoordSys_Rad2Deg=57.29577951308232286464772;
 }
 
 
-//// STOPPED HERE!!!!! ////
-
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_CoordSys_ConvertToCart"
@@ -131,11 +129,22 @@ template <class TYPE>
     double lat = in_coord[1];
 
     const double ninety = 90.0;
-    double theta = lon*ESMC_CoordSys_Deg2Rad;
-    double phi   = (ninety-lat)*ESMC_CoordSys_Deg2Rad;
-    cart_coord[0] = std::cos(theta)*std::sin(phi);
-    cart_coord[1] = std::sin(theta)*std::sin(phi);
-    cart_coord[2] = std::cos(phi);   
+    // Handle poles explicity otherwise won't necessarily be exact, if not poles, then calc using cos&sin
+    if (lat==ninety) { // North pole
+      cart_coord[0] = 0.0;
+      cart_coord[1] = 0.0;
+      cart_coord[2] = 1.0;
+    } else if (lat==-ninety) { // South pole
+      cart_coord[0] = 0.0;
+      cart_coord[1] = 0.0;
+      cart_coord[2] = -1.0;
+    } else {
+      double theta = lon*ESMC_CoordSys_Deg2Rad;
+      double phi   = (ninety-lat)*ESMC_CoordSys_Deg2Rad;
+      cart_coord[0] = std::cos(theta)*std::sin(phi);
+      cart_coord[1] = std::sin(theta)*std::sin(phi);
+      cart_coord[2] = std::cos(phi);   
+    }
 
     // If 3D Sph then multiply through by radius
     if (in_dim==3) {
