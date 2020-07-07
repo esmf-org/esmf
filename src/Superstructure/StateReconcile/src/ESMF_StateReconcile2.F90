@@ -212,14 +212,15 @@ contains
     !tdk:todo: what do we do about attribute reconcile when they are required? recommend just leaving on
     lattreconflag = ESMF_ATTRECONCILE_ON
 
-#if 0
+!tdk:debug
+#if 1
     call idesc%Initialize(createInfo=.true., addObjectInfo=.true., rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
     call idesc%Update(state, "", rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_LogWrite("InfoDescribe BEFORE state reconcile driver=", rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_LogWrite(ESMF_InfoDump(idesc%info, indent=4), rc=localrc)
+    call ESMF_LogWrite(ESMF_InfoDump(idesc%info), rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
     call idesc%Destroy(rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -237,14 +238,15 @@ contains
      call ESMF_InfoCacheReassembleFieldsFinalize(state, localrc)
      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-#if 0
+!tdk:debug
+#if 1
     call idesc2%Initialize(createInfo=.true., addObjectInfo=.true., rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
     call idesc2%Update(state, "", rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_LogWrite("InfoDescribe AFTER state reconcile driver=", rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_LogWrite(ESMF_InfoDump(idesc2%info, indent=4), rc=localrc)
+    call ESMF_LogWrite(ESMF_InfoDump(idesc2%info), rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
     call idesc2%Destroy(rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1599,7 +1601,7 @@ contains
     integer, allocatable :: id_recv(:), vm_intids_recv(:)
 
     logical, parameter :: debug = .false.
-    logical, parameter :: meminfo = .true. !tdk:debug
+    logical, parameter :: meminfo = .false. !tdk:debug
     character(len=ESMF_MAXSTR) :: logmsg
 
     localrc = ESMF_RC_NOT_IMPL
