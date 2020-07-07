@@ -155,20 +155,20 @@ jobs:
             - osx-cache-5
       - run:
           name: Create Brew Environment
-          command: brew install gcc
+          command: bash $HOME/sandbox/esmf/src-git/.circleci/sh/osx/osx-brew-install.sh
       - save_cache:
           key: osx-cache-5
           paths:
             - /usr/local/Cellar
       - run:
           name: make info
-          command: bash $ESMF_CCI_SH/osx-make-funcs.sh "info"
+          command: bash $HOME/sandbox/esmf/src-git/.circleci/sh/osx/osx-make-funcs.sh "info"
       - run:
           name: make
-          command: bash $ESMF_CCI_SH/osx-make-funcs.sh "make"
+          command: bash $HOME/sandbox/esmf/src-git/.circleci/sh/osx/osx-make-funcs.sh "make"
       - run:
           name: make install
-          command: bash $ESMF_CCI_SH/osx-make-funcs.sh "install"
+          command: bash $HOME/sandbox/esmf/src-git/.circleci/sh/osx/osx-make-funcs.sh "install"
 
 workflows:
 

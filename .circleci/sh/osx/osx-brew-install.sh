@@ -2,8 +2,8 @@
 set -Eeuxo pipefail
 
 # Only install if the cache has not been restored
-if [ ! -d ~/miniconda ]; then
-  exit 1
+if ! command -v gfortran; then
+  brew install gcc
 else
   echo "Using CircleCI cache"
 fi
