@@ -1543,18 +1543,18 @@ MeshCap *MeshCap::meshcreateredistelems(MeshCap **src_meshpp, int *num_elem_gids
   void *mbmesh = NULL;
 
   if (is_esmf_mesh) {
-    ESMCI_MESHREDIST_TRACE_ENTER("mbmesh redist (elements)");
+    ESMCI_MESHREDIST_TRACE_ENTER("MBMesh redist (elements)");
     ESMCI_meshcreateredistelems(&((*src_meshpp)->mesh), num_elem_gids, elem_gids,
                                 &mesh, &localrc);
-    ESMCI_MESHREDIST_TRACE_EXIT("mbmesh redist (elements)");
+    ESMCI_MESHREDIST_TRACE_EXIT("MBMesh redist (elements)");
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return NULL;
   } else {
 #if defined ESMF_MOAB
-    ESMCI_MESHREDIST_TRACE_ENTER("nvmesh redist (elements)");
+    ESMCI_MESHREDIST_TRACE_ENTER("NativeMesh redist (elements)");
     MBMesh_createredistelems(&((*src_meshpp)->mbmesh), num_elem_gids, elem_gids,
                                 &mbmesh, &localrc);
-    ESMCI_MESHREDIST_TRACE_EXIT("nvmesh redist (elements)");
+    ESMCI_MESHREDIST_TRACE_EXIT("NativeMesh redist (elements)");
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return NULL;
 #else
@@ -1592,18 +1592,18 @@ MeshCap *MeshCap::meshcreateredistnodes(MeshCap **src_meshpp,int *num_node_gids,
   void *mbmesh = NULL;
 
   if (is_esmf_mesh) {
-    ESMCI_MESHREDIST_TRACE_ENTER("nvmesh redist (nodes)");
+    ESMCI_MESHREDIST_TRACE_ENTER("NativeMesh redist (nodes)");
     ESMCI_meshcreateredistnodes(&((*src_meshpp)->mesh), num_node_gids, node_gids,
                                 &mesh, &localrc);
-    ESMCI_MESHREDIST_TRACE_EXIT("nvmesh redist (nodes)");
+    ESMCI_MESHREDIST_TRACE_EXIT("NativeMesh redist (nodes)");
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return NULL;
  } else {
 #if defined ESMF_MOAB
-    ESMCI_MESHREDIST_TRACE_ENTER("mbmesh redist (nodes)");
+    ESMCI_MESHREDIST_TRACE_ENTER("MBMesh redist (nodes)");
     MBMesh_createredistnodes(&((*src_meshpp)->mbmesh), num_node_gids, node_gids,
                                 &mbmesh, &localrc);
-    ESMCI_MESHREDIST_TRACE_EXIT("mbmesh redist (nodes)");
+    ESMCI_MESHREDIST_TRACE_EXIT("MBMesh redist (nodes)");
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return NULL;
 #else
@@ -1641,18 +1641,18 @@ MeshCap *MeshCap::meshcreateredist(MeshCap **src_meshpp, int *num_node_gids, int
   void *mbmesh = NULL;
 
   if (is_esmf_mesh) {
-    ESMCI_MESHREDIST_TRACE_ENTER("nvmesh redist");
+    ESMCI_MESHREDIST_TRACE_ENTER("NativeMesh redist");
     ESMCI_meshcreateredist(&((*src_meshpp)->mesh), num_node_gids, node_gids,
                            num_elem_gids, elem_gids, &mesh, &localrc);
-    ESMCI_MESHREDIST_TRACE_EXIT("nvmesh redist");
+    ESMCI_MESHREDIST_TRACE_EXIT("NativeMesh redist");
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return NULL;
   } else {
 #if defined ESMF_MOAB
-    ESMCI_MESHREDIST_TRACE_ENTER("mbmesh redist");
+    ESMCI_MESHREDIST_TRACE_ENTER("MBMesh redist");
     MBMesh_createredist(&((*src_meshpp)->mbmesh), num_node_gids, node_gids,
                         num_elem_gids, elem_gids, &mbmesh, &localrc);
-    ESMCI_MESHREDIST_TRACE_EXIT("mbmesh redist");
+    ESMCI_MESHREDIST_TRACE_EXIT("MBMesh redist");
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return NULL;
 #else

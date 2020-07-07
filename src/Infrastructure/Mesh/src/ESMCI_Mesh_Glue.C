@@ -5515,7 +5515,7 @@ void ESMCI_meshcreateredistnodes(Mesh **src_meshpp, int *num_node_gids, int *nod
       // dereference output mesh
       Mesh *output_mesh=*output_meshpp;
 
-      ESMCI_MESHREDIST_TRACE_ENTER("nvmesh split id postprocessing 2");
+      ESMCI_MESHREDIST_TRACE_ENTER("NativeMesh split id postprocessing 2");
       // if split mesh add info
       // output_mesh->is_split=src_mesh->is_split; // SET INSIDE MeshRedistNode()
       output_mesh->max_non_split_id=src_mesh->max_non_split_id;
@@ -5523,7 +5523,7 @@ void ESMCI_meshcreateredistnodes(Mesh **src_meshpp, int *num_node_gids, int *nod
 
       // calculate split_id_to_frac map from other info
       calc_split_id_to_frac(output_mesh);
-      ESMCI_MESHREDIST_TRACE_EXIT("nvmesh split id postprocessing 2");
+      ESMCI_MESHREDIST_TRACE_EXIT("NativeMesh split id postprocessing 2");
 
 #if 0
       // DEBUG OUTPUT

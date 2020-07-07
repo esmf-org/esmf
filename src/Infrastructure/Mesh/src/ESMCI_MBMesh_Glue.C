@@ -3005,7 +3005,7 @@ void MBMesh_createredistnodes(void **src_meshpp, int *num_node_gids, int *node_g
 
     mbmesh_redist_node(mesh, num_node_gids, node_gids, &out_mesh);
 
-    ESMCI_MESHREDIST_TRACE_ENTER("mbmesh split id postprocessing");
+    ESMCI_MESHREDIST_TRACE_ENTER("MBMesh split id postprocessing");
     // split element handling
     out_mesh->is_split=mesh->is_split;
 
@@ -3015,7 +3015,7 @@ void MBMesh_createredistnodes(void **src_meshpp, int *num_node_gids, int *node_g
       // RLO: not sure we need this if above is used
       // out_mesh->split_to_orig_id=mesh->split_to_orig_id;
     }
-    ESMCI_MESHREDIST_TRACE_EXIT("mbmesh split id postprocessing");
+    ESMCI_MESHREDIST_TRACE_EXIT("MBMesh split id postprocessing");
 
   // convert the out_mesh back to a void*
   *output_meshpp = reinterpret_cast<void *> (out_mesh);
