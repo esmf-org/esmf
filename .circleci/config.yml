@@ -159,7 +159,7 @@ jobs:
           command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git $ESMF_DIR
       - run:
           name: Create Conda Environment
-          command: bash $ESMF_CCI_SH/osx-create-conda-environment.sh
+          command: bash $ESMF_CCI_SH/osx-conda-create-environment.sh
       - run:
           name: Install ESMF Conda Dependencies
           command: bash $ESMF_CCI_SH/osx-conda-install-esmf.sh
