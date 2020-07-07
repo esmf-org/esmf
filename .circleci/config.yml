@@ -150,6 +150,8 @@ jobs:
       - ESMF_DIR: ~/sandbox/esmf/src-git
       - ESMF_CCI_SH: ~/sandbox/esmf/src-git/.circleci/sh/osx
       - CONDA_INSTALLDIR: ~/miniconda
+      - CONDA_EXE: ~/miniconda/bin/conda
+      - CONDA_ESMF: ~/miniconda/envs/esmf
     steps:
       - restore_cache:
           keys:
