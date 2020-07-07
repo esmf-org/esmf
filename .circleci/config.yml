@@ -147,20 +147,23 @@ jobs:
     macos:
       xcode: "11.3.1"
     environment:
-      - ESMF_DIR: ~/sandbox/esmf/src-git
-      - ESMF_CCI_SH: ~/sandbox/esmf/src-git/.circleci/sh/osx
+      - ESMF_DIR: $CIRCLE_WORKING_DIRECTORY/sandbox/esmf/src-git
+      - ESMF_CCI_SH: $CIRCLE_WORKING_DIRECTORY/sandbox/esmf/src-git/.circleci/sh/osx
     steps:
-      - restore_cache:
-          keys:
-            - osx-cache-4
+      - run:
+          name: ESMF_DIR
+          command: echo $ESMF_DIR
       - run:
           name: Checkout Code
-          command: bash $ESMF_CCI_SH/osx-git-clone.sh
+          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git $ESMF_DIR
+      - restore_cache:
+          keys:
+            - osx-cache-5
       - run:
           name: Create Brew Environment
           command: brew install gcc
       - save_cache:
-          key: osx-cache-4
+          key: osx-cache-5
           paths:
             - /usr/local/Cellar
       - run:
