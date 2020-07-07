@@ -149,13 +149,24 @@ jobs:
     environment:
       - ESMF_DIR: $CIRCLE_WORKING_DIRECTORY/sandbox/esmf/src-git
       - ESMF_CCI_SH: $CIRCLE_WORKING_DIRECTORY/sandbox/esmf/src-git/.circleci/sh/osx
+      - CONDA_INSTALLDIR: $CIRCLE_WORKING_DIRECTORY/miniconda
     steps:
+      - restore_cache:
+          keys:
+            - osx-cache
       - run:
           name: Checkout Code
           command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git $ESMF_DIR
       - run:
-          name: make
-          command: bash $ESMF_CCI_SH/osx-build-esmf.sh
+          name: Create Conda Environment
+          command: bash $ESMF_CCI_SH/osx-create-conda-environment.sh
+      - run:
+          name: Install ESMF Conda Dependencies
+          command: bash $ESMF_CCI_SH/osx-conda-install-esmf.sh
+      - save_cache:
+          key: osx-cache
+          paths:
+            - $CIRCLE_WORKING_DIRECTORY/miniconda
 
 workflows:
 
