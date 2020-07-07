@@ -147,9 +147,9 @@ jobs:
     macos:
       xcode: "11.3.1"
     environment:
-      - ESMF_DIR: $CIRCLE_WORKING_DIRECTORY/sandbox/esmf/src-git
-      - ESMF_CCI_SH: $CIRCLE_WORKING_DIRECTORY/sandbox/esmf/src-git/.circleci/sh/osx
-      - CONDA_INSTALLDIR: $CIRCLE_WORKING_DIRECTORY/miniconda
+      - ESMF_DIR: ~/sandbox/esmf/src-git
+      - ESMF_CCI_SH: ~/sandbox/esmf/src-git/.circleci/sh/osx
+      - CONDA_INSTALLDIR: ~/miniconda
     steps:
       - restore_cache:
           keys:
@@ -166,7 +166,7 @@ jobs:
       - save_cache:
           key: osx-cache
           paths:
-            - $CIRCLE_WORKING_DIRECTORY/miniconda
+            - ~/miniconda
 
 workflows:
 
