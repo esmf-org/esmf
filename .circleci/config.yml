@@ -152,12 +152,12 @@ jobs:
           command: export ESMF_DIR=$HOME/sandbox/esmf/src-git && git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git $ESMF_DIR
       - restore_cache:
           keys:
-            - osx-cache-5
+            - osx-cache-6
       - run:
           name: Create Brew Environment
           command: bash $HOME/sandbox/esmf/src-git/.circleci/sh/osx/osx-brew-install.sh
       - save_cache:
-          key: osx-cache-5
+          key: osx-cache-6
           paths:
             - /usr/local/Cellar
       - run:
