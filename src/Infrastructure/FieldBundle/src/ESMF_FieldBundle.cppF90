@@ -39,6 +39,7 @@ module ESMF_FieldBundleMod
   use ESMF_BaseMod          ! ESMF base class
   use ESMF_LogErrMod        ! ESMF error handling
   use ESMF_F90InterfaceMod  ! ESMF F90-C++ interface helper
+  use ESMF_UtilStringMod
   use ESMF_ArraySpecMod
   use ESMF_ArrayMod
   use ESMF_ArrayBundleMod
@@ -2878,7 +2879,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
         ! Clear the IO object (only need to do this for i > 1)
         if (i .gt. 1) call ESMF_IOClear(io)
         write(cnum,"(i3.3)") i
-        filename_num = trim (fileName) // cnum
+        filename_num = ESMF_StringConcat(trim (fileName) , cnum)
         call ESMF_FieldGet(fieldList(i), array=array, name=name, rc=localrc)
         errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,     &
             ESMF_CONTEXT, rcToReturn=rc)
@@ -6345,7 +6346,7 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
         ! Clear the IO object (only need to do this for i > 1)
         if (i .gt. 1) call ESMF_IOClear(io)
         write(cnum,"(i3.3)") i
-        filename_num = trim (fileName) // cnum
+        filename_num = ESMF_StringConcat(trim (fileName) , cnum)
         call ESMF_FieldGet(fieldList(i), array=array, name=name, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -6485,12 +6486,13 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (debug) then
-        call ESMF_LogWrite(ESMF_METHOD // ": Calling ESMF_BaseSerialize", &
+        call ESMF_LogWrite(&
+          ESMF_StringConcat(ESMF_METHOD , ": Calling ESMF_BaseSerialize"), &
           ESMF_LOGMSG_INFO, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
            ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
-        write(logmsg, *) ESMF_METHOD // ": offset (before)= ", offset
+        write(logmsg, *) ESMF_StringConcat(ESMF_METHOD , ": offset (before)= "), offset
         call ESMF_LogWrite(TRIM(logmsg), ESMF_LOGMSG_INFO, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
            ESMF_ERR_PASSTHRU, &
@@ -6505,12 +6507,12 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
          ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (debug) then
-        write(logmsg, *) ESMF_METHOD // ": offset (after)= ", offset
+        write(logmsg, *) ESMF_StringConcat(ESMF_METHOD , ": offset (after)= "), offset
         call ESMF_LogWrite(TRIM(logmsg), ESMF_LOGMSG_INFO, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
            ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
-         logmsg = ESMF_METHOD // ": Exited ESMF_BaseSerialize"
+         logmsg = ESMF_StringConcat(ESMF_METHOD , ": Exited ESMF_BaseSerialize")
          call ESMF_LogWrite(logmsg, ESMF_LOGMSG_INFO, rc=localrc)
          if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -6636,17 +6638,18 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (debug) then
-        call ESMF_LogWrite(ESMF_METHOD // ": Calling ESMF_BaseDeserialize", &
+        call ESMF_LogWrite(&
+           ESMF_StringConcat(ESMF_METHOD , ": Calling ESMF_BaseDeserialize"), &
            ESMF_LOGMSG_INFO, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
            ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
-        write(logmsg, *) ESMF_METHOD // ": buffer length= ", LEN(buffer)
+        write(logmsg, *) ESMF_StringConcat(ESMF_METHOD , ": buffer length= "), LEN(buffer)
         call ESMF_LogWrite(TRIM(logmsg), ESMF_LOGMSG_INFO, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
            ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
-        write(logmsg, *) ESMF_METHOD // ": offset= ", offset
+        write(logmsg, *) ESMF_StringConcat(ESMF_METHOD , ": offset= "), offset
         call ESMF_LogWrite(TRIM(logmsg), ESMF_LOGMSG_INFO, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
            ESMF_ERR_PASSTHRU, &
@@ -6661,7 +6664,7 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (debug) then
-        logmsg = ESMF_METHOD // ": Exited ESMF_BaseDeserialize"
+        logmsg = ESMF_StringConcat(ESMF_METHOD , ": Exited ESMF_BaseDeserialize")
         call ESMF_LogWrite(logmsg, ESMF_LOGMSG_INFO, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
            ESMF_ERR_PASSTHRU, &
