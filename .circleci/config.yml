@@ -150,7 +150,7 @@ jobs:
       - ESMF_DIR: ~/sandbox/esmf/src-git
       - ESMF_CCI_SH: ~/sandbox/esmf/src-git/.circleci/sh/osx
       - CONDA_INSTALLDIR: ~/miniconda
-      - CONDA_EXE: ~/miniconda/bin/conda
+      - CONDA_EXE: ~/miniconda/condabin/conda
       - CONDA_ESMF: ~/miniconda/envs/esmf
     steps:
       - restore_cache:
@@ -162,9 +162,6 @@ jobs:
       - run:
           name: Create Conda Environment
           command: bash $ESMF_CCI_SH/osx-conda-create-environment.sh
-      - run:
-          name: Install ESMF Conda Dependencies
-          command: bash $ESMF_CCI_SH/osx-conda-install-esmf.sh
       - save_cache:
           key: osx-cache
           paths:
