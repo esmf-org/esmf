@@ -5,7 +5,7 @@ set -Eeuxo pipefail
 
 # Only install if the cache has not been restored
 if [ ! -d "/path/to/dir" ]; then
-  wget https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh
+  curl https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh
   bash miniconda.sh -b -p "${CONDA_INSTALLDIR}"
   source "${CONDA_INSTALLDIR}/etc/profile.d/conda.sh"
   hash -r
