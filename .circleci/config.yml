@@ -143,32 +143,35 @@ jobs:
           name: passthru-esmpy-docs
           command: exit 0
 
-  osx-build-esmf:
+  osx-esmf:
     macos:
       xcode: "11.3.1"
     environment:
       - ESMF_DIR: ~/sandbox/esmf/src-git
       - ESMF_CCI_SH: ~/sandbox/esmf/src-git/.circleci/sh/osx
-      - CONDA_INSTALLDIR: ~/miniconda
-      - CONDA_EXE: ~/miniconda/condabin/conda
-      - CONDA_ESMF: ~/miniconda/envs/esmf
     steps:
-#      - restore_cache:
-#          keys:
-#            - osx-cache-3
+      - restore_cache:
+          keys:
+            - osx-cache-4
       - run:
           name: Checkout Code
-          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git $ESMF_DIR
-#      - run:
-#          name: Create Brew Environment
-#          command: brew install gcc mpich netcdf
-#      - save_cache:
-#          key: osx-cache-3
-#          paths:
-#            - ~/miniconda
+          command: bash $ESMF_CCI_SH/osx-git-clone.sh
+      - run:
+          name: Create Brew Environment
+          command: brew install gcc
+      - save_cache:
+          key: osx-cache-4
+          paths:
+            - /usr/local/Cellar
       - run:
           name: make info
           command: bash $ESMF_CCI_SH/osx-make-funcs.sh "info"
+      - run:
+          name: make
+          command: bash $ESMF_CCI_SH/osx-make-funcs.sh "make"
+      - run:
+          name: make install
+          command: bash $ESMF_CCI_SH/osx-make-funcs.sh "install"
 
 workflows:
 
@@ -235,4 +238,4 @@ workflows:
 
   osx:
     jobs:
-      - osx-build-esmf
+      - osx-esmf
