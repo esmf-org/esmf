@@ -155,7 +155,7 @@ jobs:
     steps:
       - restore_cache:
           keys:
-            - osx-cache
+            - osx-cache-2
       - run:
           name: Checkout Code
           command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git $ESMF_DIR
@@ -163,7 +163,7 @@ jobs:
           name: Create Conda Environment
           command: bash $ESMF_CCI_SH/osx-conda-create-environment.sh
       - save_cache:
-          key: osx-cache
+          key: osx-cache-2
           paths:
             - ~/miniconda
       - run:

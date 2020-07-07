@@ -11,7 +11,7 @@ if [ ! -d ~/miniconda ]; then
   hash -r
   bash -c "${CONDA_EXE} config --set always_yes yes --set changeps1 no"
   bash -c "${CONDA_EXE} update -q conda"
-  bash -c "${CONDA_EXE} create -n esmf -c conda-forge esmf esmpy"
+  bash -c "${CONDA_EXE} create -n esmf -c conda-forge binutils-meta c-compiler compilers cxx-compiler fortran-compiler esmf esmpy"
   bash -c "${CONDA_EXE} remove -n esmf --force esmf esmpy"
 else
   echo "Using CircleCI cache"
