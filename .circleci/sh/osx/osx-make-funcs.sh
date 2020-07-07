@@ -7,17 +7,17 @@ set -Eeuxo pipefail
 
 TARGET=${1}
 ARTIFACTS=/tmp/artifacts
-export PATH=${CONDA_ESMF}/bin:${PATH}
+#export PATH=${CONDA_ESMF}/bin:${PATH}
 
-export ESMF_COMM="mpich3"
+export ESMF_COMM="mpiuni"
 export ESMF_BOPT="g"
-export ESMF_NETCDF="nc-config"
-export ESMF_INSTALL_PREFIX=~/sandbox/esmf/install
-export ESMF_INSTALL_BINDIR="${ESMF_INSTALL_PREFIX}"/bin
-export ESMF_INSTALL_DOCDIR="${ESMF_INSTALL_PREFIX}"/doc
-export ESMF_INSTALL_HEADERDIR="${ESMF_INSTALL_PREFIX}"/include
-export ESMF_INSTALL_LIBDIR="${ESMF_INSTALL_PREFIX}"/lib
-export ESMF_INSTALL_MODDIR="${ESMF_INSTALL_PREFIX}"/mod
+#export ESMF_NETCDF="nc-config"
+#export ESMF_INSTALL_PREFIX=~/sandbox/esmf/install
+#export ESMF_INSTALL_BINDIR="${ESMF_INSTALL_PREFIX}"/bin
+#export ESMF_INSTALL_DOCDIR="${ESMF_INSTALL_PREFIX}"/doc
+#export ESMF_INSTALL_HEADERDIR="${ESMF_INSTALL_PREFIX}"/include
+#export ESMF_INSTALL_LIBDIR="${ESMF_INSTALL_PREFIX}"/lib
+#export ESMF_INSTALL_MODDIR="${ESMF_INSTALL_PREFIX}"/mod
 
 mkdir -p ${ARTIFACTS}
 cd "${ESMF_DIR}"

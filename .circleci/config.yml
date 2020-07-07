@@ -153,19 +153,19 @@ jobs:
       - CONDA_EXE: ~/miniconda/condabin/conda
       - CONDA_ESMF: ~/miniconda/envs/esmf
     steps:
-      - restore_cache:
-          keys:
-            - osx-cache-2
+#      - restore_cache:
+#          keys:
+#            - osx-cache-3
       - run:
           name: Checkout Code
           command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git $ESMF_DIR
-      - run:
-          name: Create Conda Environment
-          command: bash $ESMF_CCI_SH/osx-conda-create-environment.sh
-      - save_cache:
-          key: osx-cache-2
-          paths:
-            - ~/miniconda
+#      - run:
+#          name: Create Brew Environment
+#          command: brew install gcc mpich netcdf
+#      - save_cache:
+#          key: osx-cache-3
+#          paths:
+#            - ~/miniconda
       - run:
           name: make info
           command: bash $ESMF_CCI_SH/osx-make-funcs.sh "info"
