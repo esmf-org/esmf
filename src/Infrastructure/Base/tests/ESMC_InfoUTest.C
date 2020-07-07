@@ -120,7 +120,7 @@ void testConstructor(int& rc, char failMsg[]) {
   json src;
   src["foo"] = 112;
 
-  long int *srcPtr = src.at("foo").get_ptr<json::number_integer_t *>();
+  auto srcPtr = src.at("foo").get_ptr<const json::number_integer_t*>();
 
   Info dst(move(src));
 
@@ -129,7 +129,7 @@ void testConstructor(int& rc, char failMsg[]) {
   }
 
   try {
-    const long int *actual3 = dst.getPointer("foo")->get_ptr<const long int *>();
+    auto actual3 = dst.getPointer("foo")->get_ptr<const json::number_integer_t*>();
     if (*actual3 != 112) {
       return finalizeFailure(rc, failMsg, "Value bad after move");
     }
