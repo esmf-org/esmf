@@ -146,16 +146,13 @@ jobs:
   osx-esmf:
     macos:
       xcode: "11.3.1"
-    environment:
-      - ESMF_DIR: /sandbox/esmf/src-git
-      - ESMF_CCI_SH: /sandbox/esmf/src-git/.circleci/sh/osx
     steps:
       - run:
           name: ESMF_DIR
           command: echo $ESMF_DIR
       - run:
           name: Checkout Code
-          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git $ESMF_DIR
+          command: export ESMF_DIR=$HOME/sandbox/esmf/src-git && git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git $ESMF_DIR
       - restore_cache:
           keys:
             - osx-cache-5

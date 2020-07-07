@@ -2,11 +2,11 @@
 set -Eeuxo pipefail
 
 : "${1?Need to set}"
-: "${ESMF_DIR?Need to set}"
 
 TARGET=${1}
 ARTIFACTS=/tmp/artifacts
 
+export ESMF_DIR=${HOME}/sandbox/esmf/src-git
 export ESMF_COMM="mpiuni"
 export ESMF_BOPT="g"
 #export ESMF_NETCDF="nc-config"
