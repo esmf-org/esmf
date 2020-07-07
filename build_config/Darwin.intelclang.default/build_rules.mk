@@ -190,12 +190,6 @@ ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBSTDCXX))
 ESMF_F90LINKLIBS  += -lc++
 
 ############################################################
-# Blank out variables to prevent rpath encoding
-#
-ESMF_F90LINKRPATHS      =
-ESMF_CXXLINKRPATHS      =
-
-############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
 ESMF_F90LINKLIBS += -lm 
