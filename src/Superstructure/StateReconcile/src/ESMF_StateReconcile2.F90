@@ -212,15 +212,16 @@ contains
     !tdk:todo: what do we do about attribute reconcile when they are required? recommend just leaving on
     lattreconflag = ESMF_ATTRECONCILE_ON
 
-!tdk:debug
-#if 1
+#if 0
+    ! Log a JSON State representation -----------------------------------------
+
     call idesc%Initialize(createInfo=.true., addObjectInfo=.true., rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
     call idesc%Update(state, "", rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_LogWrite("InfoDescribe BEFORE state reconcile driver=", rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_LogWrite(ESMF_InfoDump(idesc%info), rc=localrc)
+    call ESMF_LogWrite("state_json_before="//ESMF_InfoDump(idesc%info), rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
     call idesc%Destroy(rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -238,15 +239,16 @@ contains
      call ESMF_InfoCacheReassembleFieldsFinalize(state, localrc)
      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-!tdk:debug
-#if 1
+#if 0
+    ! Log a JSON State representation -----------------------------------------
+
     call idesc2%Initialize(createInfo=.true., addObjectInfo=.true., rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
     call idesc2%Update(state, "", rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_LogWrite("InfoDescribe AFTER state reconcile driver=", rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_LogWrite(ESMF_InfoDump(idesc2%info), rc=localrc)
+    call ESMF_LogWrite("state_json_after="//ESMF_InfoDump(idesc2%info), rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
     call idesc2%Destroy(rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -319,6 +321,7 @@ contains
     character(len=ESMF_MAXSTR) :: logmsg
 
     type(ESMF_InfoCache) :: info_cache
+    type(ESMF_InfoDescribe) :: idesc
 
     ! -------------------------------------------------------------------------
 
@@ -394,11 +397,27 @@ contains
           ESMF_CONTEXT, rcToReturn=rc)) return
       end if
     enddo
+    vmIdMap_ptr => vmIdMap
+
+!tdk:debug
+#if 1
+    ! Log a JSON State representation -----------------------------------------
+
+    call idesc%Initialize(createInfo=.true., addObjectInfo=.true., vmIdMap=vmIdMap_ptr, &
+      vmIdMapGeomExc=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    call idesc%Update(state, "", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_LogWrite("InfoDescribe AFTER VMId collection=", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_LogWrite("state_json_after_vmid="//ESMF_InfoDump(idesc%info), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    call idesc%Destroy(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+#endif
 
     ! Update Field metadata for unique geometries
     ! -------------------------------------------------------------------------
-    vmIdMap_ptr => vmIdMap
-
     call info_cache%Initialize(localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 

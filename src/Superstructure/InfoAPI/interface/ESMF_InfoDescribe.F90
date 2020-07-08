@@ -344,7 +344,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   character(len=9), dimension(4), parameter :: geom_etypes = (/"Grid     ", "Mesh     ", "LocStream", "XGrid    "/)
   integer(C_INT) :: found_as_int
   type(ESMF_VMId) :: curr_vmid
-  logical :: vmids_are_equal
+  logical :: vmids_are_equal, should_search_for_vmid
   character(len=ESMF_MAXSTR) :: logmsg
 
   localrc = ESMF_FAILURE
@@ -433,25 +433,30 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! If a VM identifier map is provided and the current Base object is valid,
     ! search the map for its integer identifier.
-    if (associated(self%vmIdMap) .and. (.not. self%vmIdMapGeomExc .and. self%curr_base_is_geom)) then
-      if (l_base_is_valid) then
-        call ESMF_BaseGetVMId(base, curr_vmid, rc=localrc)
+    should_search_for_vmid = associated(self%vmIdMap)
+    if (.not. self%vmIdMapGeomExc .and. self%curr_base_is_geom) then
+      should_search_for_vmid = .false.
+    end if
+    if (.not. l_base_is_valid) then
+      should_search_for_vmid = .false.
+    end if
+    if (should_search_for_vmid) then
+      call ESMF_BaseGetVMId(base, curr_vmid, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+      do ii=1,size(self%vmIdMap)
+        vmids_are_equal = ESMF_VMIdCompare(curr_vmid, self%vmIdMap(ii), rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-        do ii=1,size(self%vmIdMap)
-          vmids_are_equal = ESMF_VMIdCompare(curr_vmid, self%vmIdMap(ii), rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+        if (vmids_are_equal) exit
+      end do
 
-          if (vmids_are_equal) exit
-        end do
-
-        if (.not. vmids_are_equal) then
-          if (ESMF_LogFoundError(ESMF_FAILURE, msg="VMId not found", ESMF_CONTEXT, rcToReturn=rc)) return
-        end if
-
-        call ESMF_InfoSet(self%info, local_root_key//"/vmid_int", ii, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+      if (.not. vmids_are_equal) then
+        if (ESMF_LogFoundError(ESMF_FAILURE, msg="VMId not found", ESMF_CONTEXT, rcToReturn=rc)) return
       end if
+
+      call ESMF_InfoSet(self%info, local_root_key//"/vmid_int", ii, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
     else
       call ESMF_InfoSetNULL(self%info, local_root_key//"/vmid_int", rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
