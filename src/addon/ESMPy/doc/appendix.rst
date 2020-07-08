@@ -24,6 +24,7 @@ Named Constants
 .. toctree::
 
     CoordSys
+    ExtrapMethod
     FileFormat
     FileMode
     GridItem
