@@ -231,8 +231,7 @@ workflows:
 #      - build-docs:
 #          requires:
 #            - should-build-docs
-      - publish-docs:
-          name: placeholder-publish-docs
+      - publish-docs
 #          requires:
 #            - build-docs
 #      - esmpy-docs:
