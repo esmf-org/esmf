@@ -107,13 +107,20 @@ jobs:
           destination: doc-artifacts.zip
 
   publish-docs:
-    machine: true
-#    docker:
-#      - image: bekozi/esmf-doc:$CIRCLE_BRANCH
+#    machine: true
+    docker:
+      - image: bekozi/esmf-doc:$CIRCLE_BRANCH
+    resource_class: small
     steps:
+#      - run:
+#          name: publish-docs
+#          command: exit 0
       - run:
-          name: passthru-publish-docs
-          command: exit 0
+          name: Checkout Code
+          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git esmf
+      - run:
+          name: Push to github.io
+          command: bash esmf/.circleci/sh/doc-push.sh
 
   external_demos:
     machine: true
@@ -219,20 +226,20 @@ workflows:
 
   docs:
     jobs:
-      - should-build-docs:
-          type: approval
-      - build-docs:
-          requires:
-            - should-build-docs
+#      - should-build-docs:
+#          type: approval
+#      - build-docs:
+#          requires:
+#            - should-build-docs
       - publish-docs:
           name: placeholder-publish-docs
-          requires:
-            - build-docs
-      - esmpy-docs:
-          name: placeholder-esmpy-docs
-          requires:
-            - should-build-docs
+#          requires:
+#            - build-docs
+#      - esmpy-docs:
+#          name: placeholder-esmpy-docs
+#          requires:
+#            - should-build-docs
 
-  osx:
-    jobs:
-      - osx-esmf
+#  osx:
+#    jobs:
+#      - osx-esmf
