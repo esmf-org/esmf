@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -Eeuxo pipefail
 
-: "${CIRCLE_BRANCH?Need to set}"
-
 DOC_ARTIFACTS="/tmp/artifacts"
 
 git config --global user.email "himanshu@ucar.edu"
@@ -21,8 +19,8 @@ cp -rf ./* ~/esmf-org.github.io/dev_docs/
 cd ~/esmf-org.github.io/
 git pull
 git add .
-git commit -m " pushing trunk ref doc build by CircleCI on `date` "
-git push origin "${CIRCLE_BRANCH}"
+git commit -m "ESMF doc build by CircleCI on `date`"
+git push origin master
 
 # NUOPC Docs ------------------------------------------------------------------
 
@@ -42,5 +40,5 @@ for i in  NUOPC_refdoc.pdf NUOPC_howtodoc.pdf
 cd ~/esmf-org.github.io/dev_docs
 git pull
 git add .
-git commit -m " pushing nuopc doc build by CircleCI on `date` "
-git push origin "${CIRCLE_BRANCH}"
+git commit -m "NUOPC doc build by CircleCI on `date`"
+git push origin master
