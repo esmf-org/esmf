@@ -570,7 +570,7 @@ contains
         if (debug) then
           print *, '    items_recv(', lbound (items_recv(i)%cptr),  &
               ':', ubound (items_recv(i)%cptr), ')'
-        end if
+            end if
         call ESMF_ReconcileDeserialize (state, vm,  &
             obj_buffer=items_recv(i)%cptr,  &
             vm_intids=id_info(i)%vmid,  &
