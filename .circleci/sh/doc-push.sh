@@ -5,6 +5,9 @@ set -Eeuxo pipefail
 
 DOC_ARTIFACTS="/tmp/artifacts"
 
+git config --global user.email "himanshu@ucar.edu"
+git config --global user.name "esmf-orgbot"
+
 cd
 
 # Clone the docs repository

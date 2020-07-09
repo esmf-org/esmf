@@ -113,8 +113,6 @@ jobs:
       - ESMF_ARTIFACTS: "/artifacts"
       - DOCKER_IMG: "bekozi/esmf-doc"
     machine: true
-#    docker:
-#      - image: bekozi/esmf-doc:$CIRCLE_BRANCH
     steps:
 #      - run:
 #          name: publish-docs
@@ -236,14 +234,14 @@ workflows:
 
   docs:
     jobs:
-      - should-build-docs:
-          type: approval
-      - build-docs:
-          requires:
-            - should-build-docs
-      - publish-docs:
-          requires:
-            - build-docs
+#      - should-build-docs:
+#          type: approval
+#      - build-docs:
+#          requires:
+#            - should-build-docs
+      - publish-docs
+#          requires:
+#            - build-docs
 #      - esmpy-docs:
 #          name: placeholder-esmpy-docs
 #          requires:
