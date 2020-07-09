@@ -238,10 +238,10 @@ workflows:
     jobs:
       - should-build-docs:
           type: approval
-      - build-docs
+      - build-docs:
           requires:
             - should-build-docs
-      - publish-docs
+      - publish-docs:
           requires:
             - build-docs
 #      - esmpy-docs:
