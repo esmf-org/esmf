@@ -2579,8 +2579,10 @@ contains
     integer :: i
     integer :: mypet, npets, pet
 
-    logical, parameter :: debug=.false.
+    logical, parameter :: debug=.true. !tdk:debug
     logical, parameter :: trace=.false.
+    character(len=ESMF_MAXSTR) :: logmsg
+    integer :: needs_count_debug
 
     localrc = ESMF_RC_NOT_IMPL
 
@@ -2845,9 +2847,23 @@ contains
           rcToReturn=rc)) return
       obj_buffer => id_info(pet)%item_buffer
 
+      if (debug) then
+        write(logmsg, *) "ESMF_SIZEOF_DEFINT=", ESMF_SIZEOF_DEFINT
+        call ESMF_LogWrite(trim(logmsg))
+        write(logmsg, *) "needs_count=", needs_count
+        call ESMF_LogWrite(trim(logmsg))
+      end if
+
       obj_buffer(0:ESMF_SIZEOF_DEFINT-1) = transfer (  &
           source=needs_count,  &
           mold  =obj_buffer(0:ESMF_SIZEOF_DEFINT-1))
+
+      if (debug) then
+        needs_count_debug = transfer(source=obj_buffer(0:ESMF_SIZEOF_DEFINT-1), &
+          mold=needs_count_debug)
+        write(logmsg, *) "needs_count_debug=", needs_count_debug
+        call ESMF_LogWrite(trim(logmsg))
+      end if
 
       ! space for needs_count, padding, and size/type table
       buffer_offset = ESMF_SIZEOF_DEFINT * (2 + needs_count*2)
