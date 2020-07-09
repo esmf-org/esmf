@@ -87,7 +87,7 @@ jobs:
     environment:
       - ESMF_DIR: $CIRCLE_WORKING_DIRECTORY/sandbox/esmf/src-git
       - ESMF_ARTIFACTS: "/artifacts"
-      - DOCKER_IMG: bekozi/esmf-doc
+      - DOCKER_IMG: "bekozi/esmf-doc"
     machine: true
     steps:
 #      - run:
@@ -107,10 +107,12 @@ jobs:
           destination: doc-artifacts.zip
 
   publish-docs:
+    environment:
+      - ESMF_ARTIFACTS: "/artifacts"
+      - DOCKER_IMG: "bekozi/esmf-doc"
     machine: true
 #    docker:
 #      - image: bekozi/esmf-doc:$CIRCLE_BRANCH
-    resource_class: small
     steps:
 #      - run:
 #          name: publish-docs
@@ -118,6 +120,12 @@ jobs:
       - run:
           name: Checkout Code
           command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git esmf
+      - run:
+          name: Extract Artifacts
+          command: bash $ESMF_DIR/.circleci/sh/extract-artifacts.sh
+      - run:
+          name: Prep Artifacts
+          command: cd /tmp && unzip doc-artifacts.zip
       - run:
           name: Push to github.io
           command: bash esmf/.circleci/sh/doc-push.sh
