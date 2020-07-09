@@ -219,6 +219,10 @@ workflows:
               target: ["unit_tests", "system_tests", "examples"]
           requires:
             - build-esmf
+      - build-docs
+      - publish-docs:
+          requires:
+            - build-docs
 #      - external_demos:
 #          name: placeholder-external_demos
 #          requires:
@@ -232,16 +236,13 @@ workflows:
 #          requires:
 #            - placeholder-esmpy-build
 
-  docs:
+  docs-commit:
     jobs:
-#      - should-build-docs:
-#          type: approval
-#      - build-docs:
-#          requires:
-#            - should-build-docs
-      - publish-docs
-#          requires:
-#            - build-docs
+      - should-build-docs:
+          type: approval
+      - build-docs:
+          requires:
+            - should-build-docs
 #      - esmpy-docs:
 #          name: placeholder-esmpy-docs
 #          requires:
