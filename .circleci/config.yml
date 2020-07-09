@@ -107,9 +107,9 @@ jobs:
           destination: doc-artifacts.zip
 
   publish-docs:
-#    machine: true
-    docker:
-      - image: bekozi/esmf-doc:$CIRCLE_BRANCH
+    machine: true
+#    docker:
+#      - image: bekozi/esmf-doc:$CIRCLE_BRANCH
     resource_class: small
     steps:
 #      - run:

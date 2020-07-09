@@ -2,8 +2,8 @@
 set -Eeuxo pipefail
 
 cd
-git clone git@github.com:esmf-org/esmf-org.github.io.git esmf
-cd esmf
+git clone git@github.com:esmf-org/esmf-org.github.io.git esmf-gio
+cd esmf-gio
 ssh -T git@github.com
 
 #cd ~/esmf/doc
