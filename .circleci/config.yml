@@ -122,7 +122,7 @@ jobs:
           command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git esmf
       - run:
           name: Extract Artifacts
-          command: bash $ESMF_DIR/.circleci/sh/extract-artifacts.sh
+          command: bash esmf/.circleci/sh/extract-artifacts.sh
       - run:
           name: Prep Artifacts
           command: cd /tmp && unzip doc-artifacts.zip
