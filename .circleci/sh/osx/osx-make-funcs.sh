@@ -3,6 +3,7 @@ set -Eeuxo pipefail
 
 : "${1?Need to set}"
 
+export PATH=~/miniconda:${PATH}
 TARGET=${1}
 ARTIFACTS=/tmp/artifacts
 
