@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -Eeuxo pipefail
+#set -Eeuxo pipefail
 
 CONDA_EXE=~/miniconda/condabin/conda
 
@@ -16,9 +16,7 @@ else
 fi
 
 # Test the default environment activation
-set +Eeuxo pipefail
-source ~/miniconda/etc/profile.d/conda.sh  # Script seems messy
-set -Eeuxo pipefail
+source ~/miniconda/etc/profile.d/conda.sh
 conda activate root
 if ! command -v gfortran; then
   echo "ERROR: no gfortran"
