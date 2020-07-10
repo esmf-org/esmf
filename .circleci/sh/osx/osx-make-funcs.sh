@@ -53,6 +53,7 @@ elif [ "${TARGET}" == "collect-test-results" ]; then
   cd ${ARTIFACTS}
   cd ..
   cp -rf ~/esmf/test ${ARTIFACTS} || echo "WARNING: no test directory. did tests run?"
+  cp -rf ~/esmf/examples ${ARTIFACTS} || echo "WARNING: no examples directory. did examples run?"
   zip -r osx-artifacts.zip osx-artifacts
 else
   echo "ERROR: command not recognized"
