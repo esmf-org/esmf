@@ -6,7 +6,7 @@ set -Eeuxo pipefail
 TARGET=${1}
 ARTIFACTS=/tmp/artifacts
 
-export ESMF_DIR=${HOME}/esmf
+export ESMF_DIR=~/esmf
 export ESMF_COMM="mpiuni"
 export ESMF_BOPT="g"
 #export ESMF_NETCDF="nc-config"
