@@ -205,7 +205,7 @@ workflows:
           type: approval
       - build-esmf:
           requires:
-            - should-run-tests
+            - should-run-linux
       - build-run-tests:
           name: build-run-commit-<< matrix.target >>
           matrix:
