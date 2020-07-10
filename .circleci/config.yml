@@ -162,6 +162,7 @@ jobs:
   osx-esmf:
     macos:
       xcode: "11.3.1"
+    resource_class: xlarge
     steps:
       - run:
           name: Checkout Code
@@ -190,7 +191,7 @@ jobs:
           name: make install
           command: bash ~/esmf/.circleci/sh/osx/osx-make-funcs.sh "install"
       - run:
-          name: make install
+          name: make check
           command: bash ~/esmf/.circleci/sh/osx/osx-make-funcs.sh "check"
       - run:
           name: Collect Test Artifacts
