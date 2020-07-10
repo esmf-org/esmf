@@ -265,7 +265,7 @@ workflows:
 #          requires:
 #            - should-build-docs
 
-  osx:
+  osx-commit:
     jobs:
       - should-run-osx:
           type: approval
