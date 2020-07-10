@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 
 source ~/miniconda/etc/profile.d/conda.sh
-conda activate root || exit 1
 
 set -Eeuxo pipefail
+
 : "${1?Need to set}"
+
+conda activate root
 
 TARGET=${1}
 ARTIFACTS=/tmp/osx-artifacts
@@ -51,7 +53,7 @@ elif [ "${TARGET}" == "check" ]; then
 elif [ "${TARGET}" == "collect-test-results" ]; then
   cd ${ARTIFACTS}
   cd ..
-  cp -rf ~/esmf/test ${ARTIFACTS}
+  cp -rf ~/esmf/test ${ARTIFACTS} || echo "WARNING: no test directory. did tests run?"
   zip -r osx-artifacts.zip osx-artifacts
 else
   echo "ERROR: command not recognized"
