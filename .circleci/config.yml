@@ -164,26 +164,26 @@ jobs:
     steps:
       - run:
           name: Checkout Code
-          command: export ESMF_DIR=$HOME/sandbox/esmf/src-git && git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git $ESMF_DIR
+          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git esmf
       - restore_cache:
           keys:
-            - osx-cache-6
+            - osx-cache-7
       - run:
           name: Create Brew Environment
-          command: bash $HOME/sandbox/esmf/src-git/.circleci/sh/osx/osx-brew-install.sh
+          command: bash esmf/.circleci/sh/osx/osx-brew-install.sh
       - save_cache:
-          key: osx-cache-6
+          key: osx-cache-7
           paths:
             - /usr/local/Cellar
       - run:
           name: make info
-          command: bash $HOME/sandbox/esmf/src-git/.circleci/sh/osx/osx-make-funcs.sh "info"
+          command: bash esmf/.circleci/sh/osx/osx-make-funcs.sh "info"
       - run:
           name: make
-          command: bash $HOME/sandbox/esmf/src-git/.circleci/sh/osx/osx-make-funcs.sh "make"
+          command: bash esmf/.circleci/sh/osx/osx-make-funcs.sh "make"
       - run:
           name: make install
-          command: bash $HOME/sandbox/esmf/src-git/.circleci/sh/osx/osx-make-funcs.sh "install"
+          command: bash esmf/.circleci/sh/osx/osx-make-funcs.sh "install"
 
 workflows:
 
@@ -248,6 +248,6 @@ workflows:
 #          requires:
 #            - should-build-docs
 
-#  osx:
-#    jobs:
-#      - osx-esmf
+  osx:
+    jobs:
+      - osx-esmf
