@@ -235,6 +235,7 @@ workflows:
       - publish-docs:
           requires:
             - build-docs
+      - osx-esmf
 #      - external_demos:
 #          name: placeholder-external_demos
 #          requires:
