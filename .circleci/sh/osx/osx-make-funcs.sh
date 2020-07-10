@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
-set -Eeuxo pipefail
 
 : "${1?Need to set}"
 
-export PATH=~/miniconda:${PATH}
+source ~/miniconda/etc/profile.d/conda.sh
+conda activate root || exit 1
+
 TARGET=${1}
 ARTIFACTS=/tmp/artifacts
 
 export ESMF_DIR=~/esmf
+export ESMF_COMPILER="gfortranclang"
 export ESMF_COMM="mpiuni"
 export ESMF_BOPT="g"
 #export ESMF_NETCDF="nc-config"
@@ -19,7 +21,7 @@ export ESMF_INSTALL_LIBDIR="${ESMF_INSTALL_PREFIX}/lib"
 export ESMF_INSTALL_MODDIR="${ESMF_INSTALL_PREFIX}/mod"
 
 mkdir -p ${ARTIFACTS}
-cd "${ESMF_DIR}"
+cd "${ESMF_DIR}" || exit 1
 
 function osx_esmf_make_info () {
   make info 2>&1 | tee ${ARTIFACTS}/esmf-make-info.out

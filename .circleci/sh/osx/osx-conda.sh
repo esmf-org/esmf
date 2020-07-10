@@ -22,11 +22,11 @@ if ! command -v gfortran; then
   echo "ERROR: no gfortran"
   exit 1
 fi
-if ! command -v gcc; then
+if ! command -v clang; then
   echo "ERROR: no gcc"
   exit 1
 fi
-if ! command -v g++; then
+if ! command -v clang++; then
   echo "ERROR: no g++"
   exit 1
 fi
