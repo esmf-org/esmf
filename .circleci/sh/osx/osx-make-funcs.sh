@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 
 source ~/miniconda/etc/profile.d/conda.sh
+conda activate root || exit 1
 
 set -Eeuxo pipefail
 
 : "${1?Need to set}"
-
-conda activate root
 
 TARGET=${1}
 ARTIFACTS=/tmp/osx-artifacts
