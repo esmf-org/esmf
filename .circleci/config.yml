@@ -79,6 +79,7 @@ jobs:
       - run:
           name: Collect Artifacts
           command: bash $ESMF_DIR/.circleci/sh/collect-test-artifacts.sh << parameters.target >>
+          when: always
       - store_artifacts:
           path: /artifacts/test-artifacts.zip
           destination: << parameters.target >>-artifacts.zip
@@ -188,6 +189,13 @@ jobs:
       - run:
           name: make install
           command: bash ~/esmf/.circleci/sh/osx/osx-make-funcs.sh "install"
+      - run:
+          name: Collect Test Artifacts
+          command: bash ~/esmf/.circleci/sh/osx/osx-make-funcs.sh "collect-test-results"
+          when: always
+      - store_artifacts:
+          path: /tmp/osx-artifacts.zip
+          destination: osx-artifacts.zip
 
 workflows:
 

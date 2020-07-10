@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 
-: "${1?Need to set}"
-
 source ~/miniconda/etc/profile.d/conda.sh
 conda activate root || exit 1
 
+set -Eeuxo pipefail
+: "${1?Need to set}"
+
 TARGET=${1}
-ARTIFACTS=/tmp/artifacts
+ARTIFACTS=/tmp/osx-artifacts
 
 export ESMF_DIR=~/esmf
 export ESMF_COMPILER="gfortranclang"
@@ -35,12 +36,23 @@ function osx_esmf_make_install () {
   make install 2>&1 | tee ${ARTIFACTS}/esmf-make-install.out
 }
 
+function osx_esmf_make_check () {
+  make check 2>&1 | tee ${ARTIFACTS}/esmf-make-check.out
+}
+
 if [ "${TARGET}" == "info" ]; then
   osx_esmf_make_info
 elif [ "${TARGET}" == "make" ]; then
   osx_esmf_make
 elif [ "${TARGET}" == "install" ]; then
   osx_esmf_make_install
+elif [ "${TARGET}" == "check" ]; then
+  osx_esmf_make_check
+elif [ "${TARGET}" == "collect-test-results" ]; then
+  cd ${ARTIFACTS}
+  cd ..
+  cp -rf ~/esmf/test ${ARTIFACTS}
+  zip -r osx-artifacts.zip osx-artifacts
 else
   echo "ERROR: command not recognized"
   exit 1
