@@ -32,7 +32,7 @@ jobs:
           name: Test Environment Finalize
           command: bash $ESMF_DIR/.circleci/sh/docker-push.sh
 
-  should-run-tests:
+  should-run-linux:
     docker:
       - image: cimg/base:2020.01
     resource_class: small
@@ -193,7 +193,7 @@ workflows:
 
   build-and-test-commit:
     jobs:
-      - should-run-tests:
+      - should-run-linux:
           type: approval
       - build-esmf:
           requires:
@@ -254,4 +254,8 @@ workflows:
 
   osx:
     jobs:
-      - osx-esmf
+      - should-run-osx:
+          type: approval
+      - osx-esmf:
+          requires:
+            - should-run-osx
