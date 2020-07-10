@@ -167,7 +167,7 @@ jobs:
           command: cd && git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git esmf
       - restore_cache:
           keys:
-            - osx-cache-8
+            - osx-cache-9
 #      - run:
 #          name: Create Brew Environment
 #          command: bash ~/esmf/.circleci/sh/osx/osx-brew-install.sh
@@ -175,7 +175,7 @@ jobs:
           name: Create Conda Environment
           command: bash ~/esmf/.circleci/sh/osx/osx-conda.sh
       - save_cache:
-          key: osx-cache-8
+          key: osx-cache-9
           paths:
             - ~/miniconda
 #            - /usr/local/Cellar
