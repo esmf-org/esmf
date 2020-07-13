@@ -1096,17 +1096,22 @@ contains
 !   \begin{description}
 !   \item[state]
 !     {\tt ESMF\_State} to add proxy objects to.
+!   \item[vm]
+!     {\tt ESMF\_VM} to use.
 !   \item[obj_buffer]
 !     Buffer of serialized State objects (intent(in))
+!   \item[vm_intids]
+!     Integer VM identifiers to use for reconcile communication operations.
 !   \item[vm_ids]
-!     VMIds to be associated with proxy objects (intent(in))
+!     VMIds to be associated with proxy objects.
+!   \item[vmIdMap]
+!     VMIds associated with the integer identifiers in \textit{vm_intids}.
 !   \item[attreconflag]
 !     Flag to indicate attribute reconciliation.
 !   \item[rc]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !EOPI
-    !tdk:doc: lots of argument changes. make sure everything is consistent.
     integer :: localrc
     integer :: memstat
 
