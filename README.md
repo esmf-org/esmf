@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/esmf-org/esmf.svg?branch=master)](https://travis-ci.org/esmf-org/esmf)  
+[![ESMF](https://circleci.com/gh/esmf-org/esmf.svg?style=svg)](http://www.earthsystemmodeling.org/esmf_releases/last_built/ESMF_refdoc/)  
 
 # Earth System Modeling Framework (ESMF)  
 
