@@ -43,7 +43,7 @@ def get_formatted_slice(slc, n_dims):
     return ret
 
 def get_none_or_slice(target, slc):
-    if target is None:
+    if isinstance(target, type(None)):
         ret = None
     else:
         ret = target[slc]
@@ -59,7 +59,7 @@ def get_none_or_ssslice(target, slc, stagger, rank):
     :return:
     """
 
-    if target is None:
+    if isinstance(target, type(None)):
         ret = None
     else:
         slc2 = None
@@ -81,7 +81,7 @@ def get_none_or_ssslice(target, slc, stagger, rank):
                 raise ValueError("Stagger location is invalid")
 
         elif rank == 3:
-            assert (len(slc) is 3)
+            assert (len(slc) == 3)
             if stagger == ESMF.StaggerLoc.CENTER_VCENTER:
                 slc2 = slc
             elif stagger == ESMF.StaggerLoc.EDGE1_VCENTER:
@@ -125,7 +125,7 @@ def get_none_or_bound(target, ind):
     :param stagger:
     :return:
     """
-    if target[ind] is None:
+    if isinstance(target[ind], type(None)):
         ret = None
     else:
         ret = np.array(target[ind].shape, dtype=np.int32)
@@ -137,7 +137,7 @@ def get_none_or_bound_list(target, ind):
     :param stagger:
     :return:
     """
-    if target[ind] is None:
+    if isinstance(target[ind], type(None)):
         ret = None
     else:
         temp = target[ind].shape

@@ -82,7 +82,7 @@ dstareafield.get_area()
 csrverr = 0
 srcmass = numpy.sum(numpy.abs(srcareafield.data * srcfracfield.data * srcfield.data))
 dstmass = numpy.sum(numpy.abs(dstareafield.data * dstfield.data))
-if dstmass is not 0:
+if dstmass != 0:
     csrverr = numpy.abs(srcmass - dstmass) / dstmass
 
 # compute the mean relative interpolation and conservation error
@@ -90,7 +90,7 @@ from operator import mul
 num_nodes = numpy.prod(xctfield.data.shape[:])
 relerr = 0
 meanrelerr = 0
-if num_nodes is not 0:
+if num_nodes != 0:
     ind = numpy.where((dstfield.data != 1e20) & (xctfield.data != 0) & (dstfracfield.data > .999))[0]
     relerr = numpy.sum(numpy.abs(dstfield.data[ind]/dstfracfield.data[ind] - xctfield.data[ind]) / numpy.abs(xctfield.data[ind]))
     meanrelerr = relerr / num_nodes
@@ -103,7 +103,7 @@ if ESMF.pet_count() > 1:
     dstmass = helpers.reduce_val(dstmass, op=constants.Reduce.SUM)
 
 # output the results from one processor only
-if ESMF.local_pet() is 0:
+if ESMF.local_pet() == 0:
     meanrelerr = relerr / num_nodes
     csrverr = numpy.abs(srcmass - dstmass) / dstmass
 

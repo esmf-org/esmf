@@ -134,7 +134,7 @@ regrid = ESMF.Regrid(srcfield, dstfield,
 dstfield = regrid(srcfield, dstfield, zero_region=ESMF.Region.SELECT)
 
 # output the results from one processor only
-if ESMF.local_pet() is 0:
+if ESMF.local_pet() == 0:
     print ("ESMPy UGRID to LatLon Regridding Example")
     # plot_error(xctfield, dstfield, uninitval=uninitval)
 

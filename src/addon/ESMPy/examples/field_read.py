@@ -48,4 +48,4 @@ regrid = ESMF.Regrid(srcfield, dstfield,
 dstfield = regrid(srcfield, dstfield)
 
 # Output the results from one processor only
-if ESMF.local_pet() is 0: print ("ESMPy Field Data Regridding Example Finished Successfully")
+if ESMF.local_pet() == 0: print ("ESMPy Field Data Regridding Example Finished Successfully")

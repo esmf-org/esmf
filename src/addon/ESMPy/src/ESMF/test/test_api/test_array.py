@@ -65,7 +65,7 @@ class TestMaskedArray(TestBase):
         Manager()
 
         # create a ctypes grid object to hold pointer and other info for ctypes layer
-        if array.dtype is not np.int32:
+        if not isinstance(array.dtype, np.int32):
             array = np.array(array, dtype=np.int32)
         esmfalloc = self.ctypesgrid(array)
 

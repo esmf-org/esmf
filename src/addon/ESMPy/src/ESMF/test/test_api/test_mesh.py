@@ -34,7 +34,7 @@ class TestMesh(TestBase):
         assert (np.all(xcoords == xcoords3))
         assert (np.all(ycoords == ycoords3))
 
-        if elemCoord is not None:
+        if not isinstance(elemCoord, type(None)):
             xelems = mesh.get_coords(0, 1)
             yelems = mesh.get_coords(1, 1)
 

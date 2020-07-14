@@ -89,7 +89,7 @@ class Manager(object):
 
         # If this is the first call, create the singleton object
         # and initialize its attributes.
-        if cls.__singleton is None:
+        if isinstance(cls.__singleton, type(None)):
             cls.__singleton = super(Manager, cls).__new__(cls)
             cls.__singleton.__esmp_initialized = False
             cls.__singleton.__esmp_finalized = False

@@ -74,7 +74,7 @@ class MaskedArray(ma.MaskedArray):
                                constants._ESMF2PythonType[dtype],
                                buffer, order="F")
 
-        if mask is None: mamask = [False] * np.prod(shape[:])
+        if isinstance(mask, type(None)): mamask = [False] * np.prod(shape[:])
         else: mamask = mask
 
         # create the new Field instance
@@ -128,7 +128,7 @@ class Array(np.ndarray):
         return obj
 
     def __array_finalize__(self, obj):
-        if obj is None: return
+        if isinstance(obj, type(None)): return
         # set instance metadata
         self.contents = getattr(obj, 'contents', None)
 
