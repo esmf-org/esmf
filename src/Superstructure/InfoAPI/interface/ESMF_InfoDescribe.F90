@@ -335,10 +335,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   character(:), allocatable, optional :: uname
   integer, intent(inout), optional :: rc
 
-  integer :: id_base
-  character(:), allocatable :: c_id_base, l_uname
-  character(:), allocatable :: local_root_key
-  integer :: localrc, ii
+  integer :: id_base, localrc, vmid_int, ii
+  character(:), allocatable :: c_id_base, l_uname, c_vmid, local_root_key
   logical :: l_base_is_valid
   type(ESMF_Info) :: object_info
   character(len=9), dimension(4), parameter :: geom_etypes = (/"Grid     ", "Mesh     ", "LocStream", "XGrid    "/)
@@ -371,20 +369,57 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   end do
 
   if (self%createInfo) then
+    ! If a VM identifier map is provided and the current Base object is valid,
+    ! search the map for its integer identifier.
+    should_search_for_vmid = associated(self%vmIdMap)
+    if (.not. self%vmIdMapGeomExc .and. self%curr_base_is_geom) then
+      should_search_for_vmid = .false.
+    end if
+    if (.not. l_base_is_valid) then
+      should_search_for_vmid = .false.
+    end if
+    if (should_search_for_vmid) then
+      call ESMF_BaseGetVMId(base, curr_vmid, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+      do vmid_int=1,size(self%vmIdMap)
+        vmids_are_equal = ESMF_VMIdCompare(curr_vmid, self%vmIdMap(vmid_int), rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+        if (vmids_are_equal) exit
+      end do
+
+      if (.not. vmids_are_equal) then
+        if (ESMF_LogFoundError(ESMF_FAILURE, msg="VMId not found", ESMF_CONTEXT, rcToReturn=rc)) return
+      end if
+    end if
+
     if (l_base_is_valid) then
       call ESMF_BaseGetId(base, id_base, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
       call itoa(id_base, c_id_base)
-      allocate(character(len(c_id_base)+len(trim(name))+1)::l_uname)
-      l_uname = c_id_base//"-"//trim(name)
-      deallocate(c_id_base)
+
+      if (should_search_for_vmid) then
+        call itoa(vmid_int, c_vmid)
+        l_uname = trim(c_vmid)//"-"//trim(c_id_base)//"-"//trim(name)
+      else
+        l_uname = trim(c_id_base)//"-"//trim(name)
+      end if
     else
-      allocate(character(len(trim(name)))::l_uname)
       l_uname = trim(name)
     end if
 
     allocate(character(len(trim(root_key))+len(l_uname)+1)::local_root_key)
     local_root_key = trim(root_key)//"/"//l_uname
+
+    if (should_search_for_vmid) then
+      call ESMF_InfoSet(self%info, local_root_key//"/vmid_int", vmid_int, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      call ESMF_InfoSetNULL(self%info, local_root_key//"/vmid_int", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    end if
 
     call ESMF_InfoSet(self%info, local_root_key//"/base_name", trim(name), force=.false., rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -429,37 +464,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(uname)) then
       allocate(character(len(l_uname))::uname)
       uname = l_uname
-    end if
-
-    ! If a VM identifier map is provided and the current Base object is valid,
-    ! search the map for its integer identifier.
-    should_search_for_vmid = associated(self%vmIdMap)
-    if (.not. self%vmIdMapGeomExc .and. self%curr_base_is_geom) then
-      should_search_for_vmid = .false.
-    end if
-    if (.not. l_base_is_valid) then
-      should_search_for_vmid = .false.
-    end if
-    if (should_search_for_vmid) then
-      call ESMF_BaseGetVMId(base, curr_vmid, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-      do ii=1,size(self%vmIdMap)
-        vmids_are_equal = ESMF_VMIdCompare(curr_vmid, self%vmIdMap(ii), rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-        if (vmids_are_equal) exit
-      end do
-
-      if (.not. vmids_are_equal) then
-        if (ESMF_LogFoundError(ESMF_FAILURE, msg="VMId not found", ESMF_CONTEXT, rcToReturn=rc)) return
-      end if
-
-      call ESMF_InfoSet(self%info, local_root_key//"/vmid_int", ii, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-    else
-      call ESMF_InfoSetNULL(self%info, local_root_key//"/vmid_int", rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
     end if
 
     if (associated(self%searchCriteria)) then
