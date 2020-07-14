@@ -372,7 +372,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! If a VM identifier map is provided and the current Base object is valid,
     ! search the map for its integer identifier.
     should_search_for_vmid = associated(self%vmIdMap)
-    if (.not. self%vmIdMapGeomExc .and. self%curr_base_is_geom) then
+    if (self%vmIdMapGeomExc .and. self%curr_base_is_geom) then
       should_search_for_vmid = .false.
     end if
     if (.not. l_base_is_valid) then
