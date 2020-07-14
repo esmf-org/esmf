@@ -203,10 +203,12 @@ class TestField(TestBase):
     @attr('slow')
     def test_field_create_2d_mesh(self):
         parallel = False
-        if constants._ESMF_MPIRUN_NP != 4:
-            raise SkipTest('This test must be run with 4 processors.')
-        else:
+        if pet_count() > 1:
             parallel = True
+
+        if parallel:
+            if constants._ESMF_MPIRUN_NP != 4:
+                raise SkipTest('This test must be run with 4 processors.')
 
         keywords = dict(
             meshloc=[MeshLoc.NODE, MeshLoc.ELEMENT],
@@ -283,12 +285,13 @@ class TestField(TestBase):
         return field
 
     def test_field_uniqueness(self):
-        # create mesh
         parallel = False
-        if constants._ESMF_MPIRUN_NP != 4:
-            raise SkipTest('This test must be run with 4 processors.')
-        else:
+        if pet_count() > 1:
             parallel = True
+
+        if parallel:
+            if constants._ESMF_MPIRUN_NP != 4:
+                raise SkipTest('This test must be run with 4 processors.')
 
         mesh = None
         if parallel:
@@ -403,12 +406,13 @@ class TestField(TestBase):
 
 
     def test_field_extradims_mesh(self):
-        # create mesh
         parallel = False
-        if constants._ESMF_MPIRUN_NP != 4:
-            raise SkipTest('This test must be run with 4 processors.')
-        else:
+        if pet_count() > 1:
             parallel = True
+
+        if parallel:
+            if constants._ESMF_MPIRUN_NP != 4:
+                raise SkipTest('This test must be run with 4 processors.')
 
         mesh = None
         if parallel:
@@ -466,14 +470,16 @@ class TestField(TestBase):
         assert (field2.grid.upper_bounds[0].tolist() == [5, 5])
         assert (field3.grid.upper_bounds[0].tolist() == [2, 2])
 
+    # slicing is disabled in parallel
     @attr('serial')
     def test_field_slice_mesh(self):
-        # create mesh
         parallel = False
-        if constants._ESMF_MPIRUN_NP != 4:
-            raise SkipTest('This test must be run with 4 processors.')
-        else:
+        if pet_count() > 1:
             parallel = True
+
+        if parallel:
+            if constants._ESMF_MPIRUN_NP != 4:
+                raise SkipTest('This test must be run with 4 processors.')
 
         mesh = None
         if parallel:
@@ -544,12 +550,13 @@ class TestField(TestBase):
 
     @attr('serial')
     def disable_est_field_slice_mesh_extraindices(self):
-        # create mesh
         parallel = False
-        if constants._ESMF_MPIRUN_NP != 4:
-            raise SkipTest('This test must be run with 4 processors.')
-        else:
+        if pet_count() > 1:
             parallel = True
+
+        if parallel:
+            if constants._ESMF_MPIRUN_NP != 4:
+                raise SkipTest('This test must be run with 4 processors.')
 
         mesh = None
         if parallel:

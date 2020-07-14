@@ -567,12 +567,13 @@ class TestRegrid(TestBase):
                 os.remove(path)
 
     def test_field_regrid_gridmesh(self):
-        # create mesh
         parallel = False
-        if constants._ESMF_MPIRUN_NP != 4:
-            raise SkipTest('This test must be run with 4 processors.')
-        else:
+        if pet_count() > 1:
             parallel = True
+
+        if parallel:
+            if constants._ESMF_MPIRUN_NP != 4:
+                raise SkipTest('This test must be run with 4 processors.')
 
         mesh = None
         if parallel:
@@ -611,12 +612,13 @@ class TestRegrid(TestBase):
 
     @attr('parallel')
     def test_field_regrid_zeroregion(self):
-        # create mesh
         parallel = False
-        if constants._ESMF_MPIRUN_NP != 4:
-            raise SkipTest('This test must be run with 4 processors.')
-        else:
+        if pet_count() > 1:
             parallel = True
+
+        if parallel:
+            if constants._ESMF_MPIRUN_NP != 4:
+                raise SkipTest('This test must be run with 4 processors.')
 
         mesh = None
         if parallel:
@@ -709,12 +711,13 @@ class TestRegrid(TestBase):
 
     @attr('parallel')
     def test_field_regrid_area(self):
-        # create mesh
         parallel = False
-        if constants._ESMF_MPIRUN_NP != 4:
-            raise SkipTest('This test must be run with 4 processors.')
-        else:
+        if pet_count() > 1:
             parallel = True
+
+        if parallel:
+            if constants._ESMF_MPIRUN_NP != 4:
+                raise SkipTest('This test must be run with 4 processors.')
 
         mesh = None
         if parallel:
@@ -751,10 +754,12 @@ class TestRegrid(TestBase):
     @attr('parallel')
     def test_field_regrid_periodic(self):
         parallel = False
-        if constants._ESMF_MPIRUN_NP != 4:
-            raise SkipTest('This test must be run with 4 processors.')
-        else:
+        if pet_count() > 1:
             parallel = True
+
+        if parallel:
+            if constants._ESMF_MPIRUN_NP != 4:
+                raise SkipTest('This test must be run with 4 processors.')
 
         # create a grid
         srcgrid = grid_create_from_bounds_periodic(60, 30, corners=True, domask=True)
@@ -1030,10 +1035,12 @@ class TestRegrid(TestBase):
     @attr('parallel')
     def test_grid_mesh_regrid_csrv_mask(self):
         parallel = False
-        if constants._ESMF_MPIRUN_NP != 4:
-            raise SkipTest('This test must be run with 4 processors.')
-        else:
+        if pet_count() > 1:
             parallel = True
+
+        if parallel:
+            if constants._ESMF_MPIRUN_NP != 4:
+                raise SkipTest('This test must be run with 4 processors.')
 
         # create a Mesh
         if parallel:
@@ -1086,10 +1093,12 @@ class TestRegrid(TestBase):
     @attr('parallel')
     def test_grid_mesh_regrid_csrv(self):
         parallel = False
-        if constants._ESMF_MPIRUN_NP != 4:
-            raise SkipTest('This test must be run with 4 processors.')
-        else:
+        if pet_count() > 1:
             parallel = True
+
+        if parallel:
+            if constants._ESMF_MPIRUN_NP != 4:
+                raise SkipTest('This test must be run with 4 processors.')
 
         # create a Mesh
         if parallel:
@@ -1140,10 +1149,12 @@ class TestRegrid(TestBase):
     @attr('parallel')
     def test_grid_mesh_regrid_mask(self):
         parallel = False
-        if constants._ESMF_MPIRUN_NP != 4:
-            raise SkipTest('This test must be run with 4 processors.')
-        else:
+        if pet_count() > 1:
             parallel = True
+
+        if parallel:
+            if constants._ESMF_MPIRUN_NP != 4:
+                raise SkipTest('This test must be run with 4 processors.')
 
         # create a grid
         grid = grid_create_from_bounds([0, 4], [0, 4], 8, 8, corners=True, domask=True)
@@ -1183,10 +1194,12 @@ class TestRegrid(TestBase):
     @attr('parallel')
     def test_grid_mesh_regrid(self):
         parallel = False
-        if constants._ESMF_MPIRUN_NP != 4:
-            raise SkipTest('This test must be run with 4 processors.')
-        else:
+        if pet_count() > 1:
             parallel = True
+
+        if parallel:
+            if constants._ESMF_MPIRUN_NP != 4:
+                raise SkipTest('This test must be run with 4 processors.')
 
         # create a grid
         grid = grid_create_from_bounds([0, 4], [0, 4], 8, 8, corners=True)
@@ -1225,10 +1238,12 @@ class TestRegrid(TestBase):
     @attr('parallel')
     def test_field_regrid_extrapolation(self):
         parallel = False
-        if constants._ESMF_MPIRUN_NP != 4:
-            raise SkipTest('This test must be run with 4 processors.')
-        else:
+        if pet_count() > 1:
             parallel = True
+
+        if parallel:
+            if constants._ESMF_MPIRUN_NP != 4:
+                raise SkipTest('This test must be run with 4 processors.')
 
         # create a grid
         grid = grid_create_from_bounds([0, 4], [0, 4], 8, 8, corners=True)
@@ -1270,10 +1285,12 @@ class TestRegrid(TestBase):
     @attr('parallel')
     def test_mesh_mesh_regrid(self):
         parallel = False
-        if constants._ESMF_MPIRUN_NP != 4:
-            raise SkipTest('This test must be run with 4 processors.')
-        else:
+        if pet_count() > 1:
             parallel = True
+
+        if parallel:
+            if constants._ESMF_MPIRUN_NP != 4:
+                raise SkipTest('This test must be run with 4 processors.')
 
         # create two unique Mesh objects
         if parallel:
@@ -1328,10 +1345,12 @@ class TestRegrid(TestBase):
     @attr('parallel')
     def est_grid_mesh_pentatri_regrid_csrv(self):
         parallel = False
-        if constants._ESMF_MPIRUN_NP != 4:
-            raise SkipTest('This test must be run with 4 processors.')
-        else:
+        if pet_count() > 1:
             parallel = True
+
+        if parallel:
+            if constants._ESMF_MPIRUN_NP != 4:
+                raise SkipTest('This test must be run with 4 processors.')
 
         # create a Mesh
         if parallel:
@@ -1435,10 +1454,12 @@ class TestRegrid(TestBase):
     @attr('parallel')
     def test_grid_mesh_pentatri_regrid_bilinear(self):
         parallel = False
-        if constants._ESMF_MPIRUN_NP != 4:
-            raise SkipTest('This test must be run with 4 processors.')
-        else:
+        if pet_count() > 1:
             parallel = True
+
+        if parallel:
+            if constants._ESMF_MPIRUN_NP != 4:
+                raise SkipTest('This test must be run with 4 processors.')
 
         # create a Mesh
         if parallel:
