@@ -68,7 +68,7 @@ enum ESMC_FileFormat_Flag {ESMC_FILEFORMAT_UNDEFINED, ESMC_FILEFORMAT_VTK,
                            ESMC_FILEFORMAT_ESMCGRID, ESMC_FILEFORMAT_UGRID,
                            ESMC_FILEFORMAT_GRIDSPEC};
 
-enum ESMC_FileMode_Flag {ESMC_FILEMODE_BASIC, ESMC_FILEMODE_WITHAUX};
+typedef enum ESMC_FileMode_Flag {ESMC_FILEMODE_BASIC, ESMC_FILEMODE_WITHAUX} ESMC_FileMode_Flag;
 
 // File status flag (for IO write functions)
 typedef enum ESMC_FileStatus_Flag { ESMC_FILESTATUS_UNKNOWN=0,

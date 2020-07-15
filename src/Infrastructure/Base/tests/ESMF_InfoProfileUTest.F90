@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2018, University Corporation for Atmospheric Research,
+! Copyright 2002-2020, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -62,7 +62,7 @@ program ESMF_InfoProfileUTest
   !----------------------------------------------------------------------------
 
   !----------------------------------------------------------------------------
-  !EX_UTest
+  !EX_Disabled_UTest
   ! Test setting and getting a bunch of attributes.
 
   rc = ESMF_FAILURE
@@ -125,7 +125,7 @@ program ESMF_InfoProfileUTest
   !----------------------------------------------------------------------------
 
   !----------------------------------------------------------------------------
-  !EX_UTest
+  !EX_Disabled_UTest
 
   ! Profile checking for attribute presence.
 

@@ -3654,13 +3654,13 @@ end subroutine ESMF_InfoGetArrayLGAlloc
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_InfoGet()
-!subroutine ESMF_InfoInquire(info, keywordEnforcer, key, size, jsonType, isArray, &
+!subroutine ESMF_InfoInquire(info, keywordEnforcer, size, key, jsonType, isArray, &
 !  isDirty, idx, typekind, ikey, isPresent, isStructured, isNull, rc)
 ! !ARGUMENTS:
 !  type(ESMF_Info), intent(in) :: info
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!  character(len=*), intent(in), optional :: key
 !  integer, intent(out), optional :: size
+!  character(len=*), intent(in), optional :: key
 !  character(len=*), intent(out), optional :: jsonType
 !  logical, intent(out), optional :: isArray
 !  logical, intent(out), optional :: isDirty
@@ -3679,9 +3679,6 @@ end subroutine ESMF_InfoGetArrayLGAlloc
 !     \begin{description}
 !     \item [info]
 !       Target \texttt{ESMF\_Info} object.
-!     \item [{[key]}]
-!       If provided, use this location as the origin instead of root. See section
-!       \ref{info_key_format} for an overview of the key format.
 !     \item [{[size]}]
 !       Returns the size of the target. The following rules apply:
 !       \begin{itemize}
@@ -3689,6 +3686,9 @@ end subroutine ESMF_InfoGetArrayLGAlloc
 !         \item If the target is a scalar, return \texttt{1}.
 !         \item If the target is an array, return its length.
 !       \end{itemize}
+!     \item [{[key]}]
+!       If provided, use this location as the origin instead of root. See section
+!       \ref{info_key_format} for an overview of the key format.
 !     \item [{[jsonType]}]
 !       Returns the JSON object type name \cite{json_for_modern_cpp_typename}.
 !     \item [{[isArray]}]
@@ -3740,14 +3740,14 @@ end subroutine ESMF_InfoGetArrayLGAlloc
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoInquire()"
-subroutine ESMF_InfoInquire(info, keywordEnforcer, key, size, attrCount, attrCountTotal, jsonType, &
+subroutine ESMF_InfoInquire(info, keywordEnforcer, size, key, attrCount, attrCountTotal, jsonType, &
   isArray, isDirty, attPackCount, attPackCountTotal, attnestflag, idx, typekind, &
   ikey, isPresent, isStructured, isNull, attrCompliance, rc)
 
   type(ESMF_Info), intent(in) :: info
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  character(len=*), intent(in), optional :: key
   integer(C_INT), intent(out), optional :: size
+  character(len=*), intent(in), optional :: key
   integer(C_INT), intent(out), optional :: attrCount
   integer(C_INT), intent(out), optional :: attrCountTotal
   character(len=*), intent(out), optional :: jsonType
