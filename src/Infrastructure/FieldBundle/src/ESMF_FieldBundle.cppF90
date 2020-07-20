@@ -3151,31 +3151,37 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end subroutine ESMF_FieldBundleRedistRelease
 
 !---------------------------------------------------------------------------- 
-!BOP 
-! !IROUTINE: ESMF_FieldBundleRedistStore - Precompute a FieldBundle redistribution with local factor argument 
-! 
-! !INTERFACE: 
-! ! Private name; call using ESMF_FieldBundleRedistStore() 
+!BOP
+! !IROUTINE: ESMF_FieldBundleRedistStore - Precompute a FieldBundle redistribution with local factor argument
+!
+! !INTERFACE:
+! ! Private name; call using ESMF_FieldBundleRedistStore()
 ! subroutine ESMF_FieldBundleRedistStore<type><kind>(srcFieldBundle, &
 !   dstFieldBundle, routehandle, factor, keywordEnforcer, &
-!   srcToDstTransposeMap, rc) 
-! 
-! !ARGUMENTS: 
-!   type(ESMF_FieldBundle),   intent(in)             :: srcFieldBundle  
-!   type(ESMF_FieldBundle),   intent(inout)          :: dstFieldBundle  
-!   type(ESMF_RouteHandle),   intent(inout)          :: routehandle
-!   <type>(ESMF_KIND_<kind>), intent(in)             :: factor
+!   ignoreUnmatchedIndicesFlag, srcToDstTransposeMap, rc)
+!
+! !ARGUMENTS:
+!   type(ESMF_FieldBundle),   intent(in)      :: srcFieldBundle
+!   type(ESMF_FieldBundle),   intent(inout)   :: dstFieldBundle
+!   type(ESMF_RouteHandle),   intent(inout)   :: routehandle
+!   <type>(ESMF_KIND_<kind>), intent(in)      :: factor
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!   integer,                  intent(in),   optional :: srcToDstTransposeMap(:)
-!   integer,                  intent(out),  optional :: rc 
+!   logical,          intent(in),    optional :: ignoreUnmatchedIndicesFlag(:)
+!   integer,          intent(in),    optional :: srcToDstTransposeMap(:)
+!   integer,          intent(out),   optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.1.0] Added argument {\tt ignoreUnmatchedIndicesFlag} to support cases
+!    where source and destination side do not cover the exact same index space.
+! \end{description}
 ! \end{itemize}
 !
-! !DESCRIPTION: 
-! 
+! !DESCRIPTION:
+!
 ! Store a FieldBundle redistribution operation from {\tt srcFieldBundle} to {\tt dstFieldBundle}. 
 ! PETs that
 ! specify a {\tt factor} argument must use the <type><kind> overloaded interface. Other 
@@ -3228,6 +3234,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       Handle to the precomputed Route. 
 ! \item [factor]
 !       Factor by which to multiply source data.
+!   \item [{[ignoreUnmatchedIndicesFlag]}] 
+!     If set to {.false.}, the {\em default}, source and destination side must
+!     cover the identical index space, using precisely matching sequence
+!     indices. If set to {.true.}, mismatching sequence indices between source
+!     and destination side are silently ignored.
+!     The size of this array argument must either be 1 or equal the number of
+!     Fields in the {\tt srcFieldBundle} and {\tt dstFieldBundle} arguments. In
+!     the latter case, the handling of unmatched indices is specified for each
+!     Field pair separately. If only one element is specified, it is
+!     used for {\em all} Field pairs.
 ! \item [{[srcToDstTransposeMap]}] 
 !       List with as many entries as there are dimensions in {\tt srcFieldBundle}. Each 
 ! entry maps the corresponding {\tt srcFieldBundle} dimension 
@@ -3247,18 +3263,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldBundleRedistStore()
-    subroutine ESMF_FieldBundleRedistStoreI4(srcFieldBundle, &
-      dstFieldBundle, routehandle, factor, keywordEnforcer, &
-      srcToDstTransposeMap, rc) 
+    subroutine ESMF_FieldBundleRedistStoreI4(srcFieldBundle, dstFieldBundle, &
+      routehandle, factor, keywordEnforcer, ignoreUnmatchedIndicesFlag, &
+      srcToDstTransposeMap, rc)
 
         ! input arguments 
-        type(ESMF_FieldBundle), intent(in)          :: srcFieldBundle  
-        type(ESMF_FieldBundle), intent(inout)       :: dstFieldBundle  
-        type(ESMF_RouteHandle), intent(inout)       :: routehandle
-        integer(ESMF_KIND_I4),  intent(in)          :: factor
+        type(ESMF_FieldBundle), intent(in)      :: srcFieldBundle
+        type(ESMF_FieldBundle), intent(inout)   :: dstFieldBundle
+        type(ESMF_RouteHandle), intent(inout)   :: routehandle
+        integer(ESMF_KIND_I4),  intent(in)      :: factor
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-        integer,              intent(in) , optional :: srcToDstTransposeMap(:)
-        integer,              intent(out), optional :: rc 
+        logical,          intent(in),  optional :: ignoreUnmatchedIndicesFlag(:)
+        integer,          intent(in) , optional :: srcToDstTransposeMap(:)
+        integer,          intent(out), optional :: rc 
 
 !EOPI
         ! local variables as temporary input/output arguments 
@@ -3302,6 +3319,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_ArrayBundleRedistStore(srcab, dstab, routehandle, factor, & 
+            ignoreUnmatchedIndicesFlag=ignoreUnmatchedIndicesFlag, &
             srcToDstTransposeMap=srcToDstTransposeMap, rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
@@ -3328,17 +3346,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldBundleRedistStore()
-    subroutine ESMF_FieldBundleRedistStoreI8(srcFieldBundle, dstFieldBundle, & 
-      routehandle, factor, keywordEnforcer, srcToDstTransposeMap, rc) 
+    subroutine ESMF_FieldBundleRedistStoreI8(srcFieldBundle, dstFieldBundle, &
+      routehandle, factor, keywordEnforcer, ignoreUnmatchedIndicesFlag, &
+      srcToDstTransposeMap, rc)
 
         ! input arguments 
-        type(ESMF_FieldBundle), intent(in)         :: srcFieldBundle  
-        type(ESMF_FieldBundle), intent(inout)      :: dstFieldBundle  
-        type(ESMF_RouteHandle), intent(inout)      :: routehandle
-        integer(ESMF_KIND_I8),  intent(in)         :: factor
+        type(ESMF_FieldBundle), intent(in)      :: srcFieldBundle
+        type(ESMF_FieldBundle), intent(inout)   :: dstFieldBundle
+        type(ESMF_RouteHandle), intent(inout)   :: routehandle
+        integer(ESMF_KIND_I8),  intent(in)      :: factor
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-        integer,             intent(in) , optional :: srcToDstTransposeMap(:)
-        integer,             intent(out), optional :: rc 
+        logical,          intent(in),  optional :: ignoreUnmatchedIndicesFlag(:)
+        integer,          intent(in) , optional :: srcToDstTransposeMap(:)
+        integer,          intent(out), optional :: rc
 
 !EOPI
         ! local variables as temporary input/output arguments 
@@ -3382,6 +3402,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_ArrayBundleRedistStore(srcab, dstab, routehandle, factor, & 
+            ignoreUnmatchedIndicesFlag=ignoreUnmatchedIndicesFlag, &
             srcToDstTransposeMap=srcToDstTransposeMap, rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
@@ -3408,17 +3429,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldBundleRedistStore()
-    subroutine ESMF_FieldBundleRedistStoreR4(srcFieldBundle, dstFieldBundle, & 
-      routehandle, factor, keywordEnforcer, srcToDstTransposeMap, rc) 
+    subroutine ESMF_FieldBundleRedistStoreR4(srcFieldBundle, dstFieldBundle, &
+      routehandle, factor, keywordEnforcer, ignoreUnmatchedIndicesFlag, &
+      srcToDstTransposeMap, rc)
 
         ! input arguments 
-        type(ESMF_FieldBundle), intent(in)          :: srcFieldBundle  
-        type(ESMF_FieldBundle), intent(inout)       :: dstFieldBundle  
-        type(ESMF_RouteHandle), intent(inout)       :: routehandle
-        real(ESMF_KIND_R4),   intent(in)            :: factor
+        type(ESMF_FieldBundle), intent(in)      :: srcFieldBundle
+        type(ESMF_FieldBundle), intent(inout)   :: dstFieldBundle
+        type(ESMF_RouteHandle), intent(inout)   :: routehandle
+        real(ESMF_KIND_R4),   intent(in)        :: factor
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-        integer,              intent(in) , optional :: srcToDstTransposeMap(:)
-        integer,              intent(out), optional :: rc 
+        logical,          intent(in),  optional :: ignoreUnmatchedIndicesFlag(:)
+        integer,          intent(in) , optional :: srcToDstTransposeMap(:)
+        integer,          intent(out), optional :: rc
 
 !EOPI
         ! local variables as temporary input/output arguments 
@@ -3462,6 +3485,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_ArrayBundleRedistStore(srcab, dstab, routehandle, factor, & 
+            ignoreUnmatchedIndicesFlag=ignoreUnmatchedIndicesFlag, &
             srcToDstTransposeMap=srcToDstTransposeMap, rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
@@ -3488,17 +3512,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldBundleRedistStore()
-    subroutine ESMF_FieldBundleRedistStoreR8(srcFieldBundle, dstFieldBundle, & 
-        routehandle, factor, keywordEnforcer, srcToDstTransposeMap, rc) 
+    subroutine ESMF_FieldBundleRedistStoreR8(srcFieldBundle, dstFieldBundle, &
+      routehandle, factor, keywordEnforcer, ignoreUnmatchedIndicesFlag, &
+      srcToDstTransposeMap, rc)
 
         ! input arguments 
-        type(ESMF_FieldBundle), intent(in)            :: srcFieldBundle  
-        type(ESMF_FieldBundle), intent(inout)         :: dstFieldBundle  
-        type(ESMF_RouteHandle), intent(inout)         :: routehandle
-        real(ESMF_KIND_R8),     intent(in)            :: factor
+        type(ESMF_FieldBundle), intent(in)      :: srcFieldBundle
+        type(ESMF_FieldBundle), intent(inout)   :: dstFieldBundle
+        type(ESMF_RouteHandle), intent(inout)   :: routehandle
+        real(ESMF_KIND_R8),     intent(in)      :: factor
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-        integer,                intent(in) , optional :: srcToDstTransposeMap(:)
-        integer,                intent(out), optional :: rc 
+        logical,          intent(in),  optional :: ignoreUnmatchedIndicesFlag(:)
+        integer,          intent(in) , optional :: srcToDstTransposeMap(:)
+        integer,          intent(out), optional :: rc
 
 !EOPI
         ! local variables as temporary input/output arguments 
@@ -3542,6 +3568,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_ArrayBundleRedistStore(srcab, dstab, routehandle, factor, & 
+            ignoreUnmatchedIndicesFlag=ignoreUnmatchedIndicesFlag, &
             srcToDstTransposeMap=srcToDstTransposeMap, rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
@@ -3561,28 +3588,37 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end subroutine ESMF_FieldBundleRedistStoreR8
 
 !---------------------------------------------------------------------------- 
-!BOP 
-! !IROUTINE: ESMF_FieldBundleRedistStore - Precompute a FieldBundle redistribution with local factor argument 
-! 
-! !INTERFACE: 
-! ! Private name; call using ESMF_FieldBundleRedistStore() 
-! subroutine ESMF_FieldBundleRedistStoreNF(srcFieldBundle, dstFieldBundle, & 
-!        routehandle, factor, keywordEnforcer, srcToDstTransposeMap, rc) 
-! 
-! !ARGUMENTS: 
-!   type(ESMF_FieldBundle), intent(in)             :: srcFieldBundle  
-!   type(ESMF_FieldBundle), intent(inout)          :: dstFieldBundle  
-!   type(ESMF_RouteHandle), intent(inout)          :: routehandle
-!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!   integer,                intent(in),   optional :: srcToDstTransposeMap(:)
-!   integer,                intent(out),  optional :: rc 
+^undef  ESMF_METHOD 
+^define ESMF_METHOD "ESMF_FieldBundleRedistStoreNF" 
+!BOP
+! !IROUTINE: ESMF_FieldBundleRedistStore - Precompute a FieldBundle redistribution without local factor argument
+!
+! !INTERFACE:
+! ! Private name; call using ESMF_FieldBundleRedistStore()
+  subroutine ESMF_FieldBundleRedistStoreNF(srcFieldBundle, dstFieldBundle, &
+    routehandle, keywordEnforcer, ignoreUnmatchedIndicesFlag, &
+    srcToDstTransposeMap, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_FieldBundle), intent(in)        :: srcFieldBundle
+    type(ESMF_FieldBundle), intent(inout)     :: dstFieldBundle
+    type(ESMF_RouteHandle), intent(inout)     :: routehandle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,          intent(in),    optional :: ignoreUnmatchedIndicesFlag(:)
+    integer,          intent(in),    optional :: srcToDstTransposeMap(:)
+    integer,          intent(out),   optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.1.0] Added argument {\tt ignoreUnmatchedIndicesFlag} to support cases
+!    where source and destination side do not cover the exact same index space.
+! \end{description}
 ! \end{itemize}
 !
-! !DESCRIPTION: 
+! !DESCRIPTION:
 !
 ! \begin{sloppypar}
 ! Store a FieldBundle redistribution operation from {\tt srcFieldBundle}
@@ -3619,11 +3655,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   See section \ref{RH:Reusability} for a more detailed discussion of
 !   RouteHandle reusability.
 !  
-! This method is overloaded for:\newline
-! {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},\newline 
-! {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}.
-! \newline
-!
 ! This call is collective across the current VM.  
 ! 
 ! For examples and associated documentation regarding this method see Section
@@ -3638,6 +3669,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       FieldBundle may be destroyed by this call. 
 ! \item [routehandle] 
 !       Handle to the precomputed Route. 
+!   \item [{[ignoreUnmatchedIndicesFlag]}] 
+!     If set to {.false.}, the {\em default}, source and destination side must
+!     cover the identical index space, using precisely matching sequence
+!     indices. If set to {.true.}, mismatching sequence indices between source
+!     and destination side are silently ignored.
+!     The size of this array argument must either be 1 or equal the number of
+!     Fields in the {\tt srcFieldBundle} and {\tt dstFieldBundle} arguments. In
+!     the latter case, the handling of unmatched indices is specified for each
+!     Field pair separately. If only one element is specified, it is
+!     used for {\em all} Field pairs.
 ! \item [{[srcToDstTransposeMap]}] 
 !       List with as many entries as there are dimensions in {\tt srcFieldBundle}. Each 
 ! entry maps the corresponding {\tt srcFieldBundle} dimension 
@@ -3649,26 +3690,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! 
 !EOP 
 !---------------------------------------------------------------------------- 
-
-^undef  ESMF_METHOD 
-^define ESMF_METHOD "ESMF_FieldBundleRedistStoreNF" 
-!BOPI
-! !IROUTINE: ESMF_FieldBundleRedistStore - Precompute a FieldBundle redistribution
-!
-! !INTERFACE:
-  ! Private name; call using ESMF_FieldBundleRedistStore()
-    subroutine ESMF_FieldBundleRedistStoreNF(srcFieldBundle, dstFieldBundle, & 
-      routehandle, keywordEnforcer, srcToDstTransposeMap, rc) 
-
-        ! input arguments 
-        type(ESMF_FieldBundle), intent(in)            :: srcFieldBundle  
-        type(ESMF_FieldBundle), intent(inout)         :: dstFieldBundle  
-        type(ESMF_RouteHandle), intent(inout)         :: routehandle
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-        integer,                intent(in) , optional :: srcToDstTransposeMap(:)
-        integer,                intent(out), optional :: rc 
-
-!EOPI
         ! local variables as temporary input/output arguments 
 
         ! internal local variables 
@@ -3719,6 +3740,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_ArrayBundleRedistStore(srcab, dstab, routehandle, & 
+            ignoreUnmatchedIndicesFlag=ignoreUnmatchedIndicesFlag, &
             srcToDstTransposeMap=srcToDstTransposeMap, rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
@@ -5330,22 +5352,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !---------------------------------------------------------------------------- 
 !BOP 
 ! !IROUTINE: ESMF_FieldBundleSMMStore - Precompute a FieldBundle sparse matrix multiplication with local factors
-! 
-! !INTERFACE: 
-! ! Private name; call using ESMF_FieldBundleSMMStore() 
+!
+! !INTERFACE:
+! ! Private name; call using ESMF_FieldBundleSMMStore()
 ! subroutine ESMF_FieldBundleSMMStore<type><kind>(srcFieldBundle, &
 !   dstFieldBundle,  routehandle, factorList, factorIndexList, &
-!   keywordEnforcer, srcTermProcessing, rc)
-! 
-! !ARGUMENTS: 
-!   type(ESMF_FieldBundle),   intent(in)            :: srcFieldBundle  
-!   type(ESMF_FieldBundle),   intent(inout)         :: dstFieldBundle  
-!   type(ESMF_RouteHandle),   intent(inout)         :: routehandle
-!   <type>(ESMF_KIND_<kind>), intent(in)            :: factorList(:) 
-!   integer,                  intent(in),           :: factorIndexList(:,:) 
+!   keywordEnforcer, ignoreUnmatchedIndicesFlag, srcTermProcessing, rc)
+!
+! !ARGUMENTS:
+!   type(ESMF_FieldBundle),   intent(in)      :: srcFieldBundle
+!   type(ESMF_FieldBundle),   intent(inout)   :: dstFieldBundle
+!   type(ESMF_RouteHandle),   intent(inout)   :: routehandle
+!   <type>(ESMF_KIND_<kind>), intent(in)      :: factorList(:)
+!   integer,                  intent(in),     :: factorIndexList(:,:)
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!   integer,                intent(inout), optional :: srcTermProcessing(:)
-!   integer,                  intent(out), optional :: rc 
+!   logical,          intent(in),    optional :: ignoreUnmatchedIndicesFlag(:)
+!   integer,          intent(inout), optional :: srcTermProcessing(:)
+!   integer,          intent(out),   optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -5356,6 +5379,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              The new argument gives the user access to the tuning parameter
 !              affecting the sparse matrix execution and bit-wise
 !              reproducibility.
+! \item[8.1.0] Added argument {\tt ignoreUnmatchedIndicesFlag} to support cases
+!    where the sparse matrix includes terms with source or destination sequence
+!    indices not present in the source or destination field.
 ! \end{description}
 ! \end{itemize}
 !
@@ -5448,6 +5474,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !     See section \ref{Array:SparseMatMul} for details on the definition of 
 !     {\em sequence indices} and {\em tensor sequence indices}.
+!
+!   \item [{[ignoreUnmatchedIndicesFlag]}] 
+!     If set to {.false.}, the {\em default}, source and destination side must
+!     cover all of the squence indices defined in the sparse matrix. An error
+!     will be returned if a sequence index in the sparse matrix does not match
+!     on either the source or destination side.
+!     If set to {.true.}, mismatching sequence indices are silently ignored.
+!     The size of this array argument must either be 1 or equal the number of
+!     Fieldss in the {\tt srcFieldBundle} and {\tt dstFieldBundle} arguments. In
+!     the latter case, the handling of unmatched indices is specified for each
+!     Field pair separately. If only one element is specified, it is
+!     used for {\em all} Field pairs.
+!
 ! \item [{[srcTermProcessing]}]
 !       Source term summing options for route handle creation. See
 !       {\tt ESMF\_FieldRegridStore} documentation for a full parameter description.
@@ -5472,17 +5511,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_FieldBundleSMMStore()
     subroutine ESMF_FieldBundleSMMStoreI4(srcFieldBundle, dstFieldBundle, & 
         routehandle, factorList, factorIndexList, keywordEnforcer, &
-        srcTermProcessing, rc)
+        ignoreUnmatchedIndicesFlag, srcTermProcessing, rc)
 
         ! input arguments 
-        type(ESMF_FieldBundle), intent(in)            :: srcFieldBundle  
-        type(ESMF_FieldBundle), intent(inout)         :: dstFieldBundle  
-        type(ESMF_RouteHandle), intent(inout)         :: routehandle
-        integer(ESMF_KIND_I4),  intent(in)            :: factorList(:)
-        integer,                intent(in)            :: factorIndexList(:,:) 
+        type(ESMF_FieldBundle), intent(in)      :: srcFieldBundle
+        type(ESMF_FieldBundle), intent(inout)   :: dstFieldBundle
+        type(ESMF_RouteHandle), intent(inout)   :: routehandle
+        integer(ESMF_KIND_I4),  intent(in)      :: factorList(:)
+        integer,                intent(in)      :: factorIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-        integer,             intent(inout), optional  :: srcTermProcessing(:)
-        integer,             intent(out),   optional  :: rc
+        logical,        intent(in),    optional :: ignoreUnmatchedIndicesFlag(:)
+        integer,        intent(inout), optional :: srcTermProcessing(:)
+        integer,        intent(out),   optional :: rc
 
 !EOPI
         ! local variables as temporary input/output arguments 
@@ -5526,7 +5566,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_ArrayBundleSMMStore(srcab, dstab, routehandle, factorList, &
-            factorIndexList, srcTermProcessing=srcTermProcessing, rc=localrc)
+            factorIndexList, &
+            ignoreUnmatchedIndicesFlag=ignoreUnmatchedIndicesFlag, &
+            srcTermProcessing=srcTermProcessing, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
             
@@ -5553,17 +5595,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_FieldBundleSMMStore()
     subroutine ESMF_FieldBundleSMMStoreI8(srcFieldBundle, dstFieldBundle, & 
       routehandle, factorList, factorIndexList, keywordEnforcer, &
-      srcTermProcessing, rc)
+      ignoreUnmatchedIndicesFlag, srcTermProcessing, rc)
 
         ! input arguments 
-        type(ESMF_FieldBundle), intent(in)            :: srcFieldBundle  
-        type(ESMF_FieldBundle), intent(inout)         :: dstFieldBundle  
-        type(ESMF_RouteHandle), intent(inout)         :: routehandle
-        integer(ESMF_KIND_I8),  intent(in)            :: factorList(:)
-        integer,                intent(in)            :: factorIndexList(:,:) 
+        type(ESMF_FieldBundle), intent(in)      :: srcFieldBundle
+        type(ESMF_FieldBundle), intent(inout)   :: dstFieldBundle
+        type(ESMF_RouteHandle), intent(inout)   :: routehandle
+        integer(ESMF_KIND_I8),  intent(in)      :: factorList(:)
+        integer,                intent(in)      :: factorIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-        integer,             intent(inout), optional  :: srcTermProcessing(:)
-        integer,             intent(out),   optional  :: rc
+        logical,        intent(in),    optional :: ignoreUnmatchedIndicesFlag(:)
+        integer,        intent(inout), optional :: srcTermProcessing(:)
+        integer,        intent(out),   optional :: rc
 
 !EOPI
         ! local variables as temporary input/output arguments 
@@ -5607,7 +5650,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_ArrayBundleSMMStore(srcab, dstab, routehandle, factorList, &
-            factorIndexList, srcTermProcessing=srcTermProcessing, rc=localrc)
+            factorIndexList, &
+            ignoreUnmatchedIndicesFlag=ignoreUnmatchedIndicesFlag, &
+            srcTermProcessing=srcTermProcessing, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
             
@@ -5634,17 +5679,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_FieldBundleSMMStore()
     subroutine ESMF_FieldBundleSMMStoreR4(srcFieldBundle, dstFieldBundle, & 
       routehandle, factorList, factorIndexList, keywordEnforcer, &
-      srcTermProcessing, rc)
+      ignoreUnmatchedIndicesFlag, srcTermProcessing, rc)
 
         ! input arguments 
-        type(ESMF_FieldBundle), intent(in)            :: srcFieldBundle  
-        type(ESMF_FieldBundle), intent(inout)         :: dstFieldBundle  
-        type(ESMF_RouteHandle), intent(inout)         :: routehandle
-        real(ESMF_KIND_R4),     intent(in)            :: factorList(:)
-        integer,                intent(in)            :: factorIndexList(:,:) 
+        type(ESMF_FieldBundle), intent(in)      :: srcFieldBundle
+        type(ESMF_FieldBundle), intent(inout)   :: dstFieldBundle
+        type(ESMF_RouteHandle), intent(inout)   :: routehandle
+        real(ESMF_KIND_R4),     intent(in)      :: factorList(:)
+        integer,                intent(in)      :: factorIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-        integer,             intent(inout), optional  :: srcTermProcessing(:)
-        integer,             intent(out),   optional  :: rc
+        logical,        intent(in),    optional :: ignoreUnmatchedIndicesFlag(:)
+        integer,        intent(inout), optional :: srcTermProcessing(:)
+        integer,        intent(out),   optional :: rc
 
 !EOPI
         ! local variables as temporary input/output arguments 
@@ -5688,7 +5734,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_ArrayBundleSMMStore(srcab, dstab, routehandle, factorList, &
-            factorIndexList, srcTermProcessing=srcTermProcessing, rc=localrc)
+            factorIndexList, &
+            ignoreUnmatchedIndicesFlag=ignoreUnmatchedIndicesFlag, &
+            srcTermProcessing=srcTermProcessing, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -5715,17 +5763,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_FieldBundleSMMStore()
     subroutine ESMF_FieldBundleSMMStoreR8(srcFieldBundle, dstFieldBundle, & 
       routehandle, factorList, factorIndexList, keywordEnforcer, &
-      srcTermProcessing, rc)
+      ignoreUnmatchedIndicesFlag, srcTermProcessing, rc)
 
         ! input arguments 
-        type(ESMF_FieldBundle), intent(in)            :: srcFieldBundle  
-        type(ESMF_FieldBundle), intent(inout)         :: dstFieldBundle  
-        type(ESMF_RouteHandle), intent(inout)         :: routehandle
-        real(ESMF_KIND_R8),     intent(in)            :: factorList(:)
-        integer,                intent(in)            :: factorIndexList(:,:) 
+        type(ESMF_FieldBundle), intent(in)      :: srcFieldBundle
+        type(ESMF_FieldBundle), intent(inout)   :: dstFieldBundle
+        type(ESMF_RouteHandle), intent(inout)   :: routehandle
+        real(ESMF_KIND_R8),     intent(in)      :: factorList(:)
+        integer,                intent(in)      :: factorIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-        integer,             intent(inout), optional  :: srcTermProcessing(:)
-        integer,             intent(out),   optional  :: rc
+        logical,        intent(in),    optional :: ignoreUnmatchedIndicesFlag(:)
+        integer,        intent(inout), optional :: srcTermProcessing(:)
+        integer,        intent(out),   optional :: rc
 
 !EOPI
         ! local variables as temporary input/output arguments 
@@ -5769,7 +5818,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_ArrayBundleSMMStore(srcab, dstab, routehandle, factorList, &
-            factorIndexList, srcTermProcessing=srcTermProcessing, rc=localrc)
+            factorIndexList, &
+            ignoreUnmatchedIndicesFlag=ignoreUnmatchedIndicesFlag, &
+            srcTermProcessing=srcTermProcessing, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -5796,15 +5847,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldBundleSMMStore()
     subroutine ESMF_FieldBundleSMMStoreNF(srcFieldBundle, dstFieldBundle, &
-        routehandle, keywordEnforcer, srcTermProcessing, rc)
+        routehandle, keywordEnforcer, ignoreUnmatchedIndicesFlag, &
+        srcTermProcessing, rc)
 
 ! !ARGUMENTS:
-        type(ESMF_FieldBundle), intent(in)            :: srcFieldBundle
-        type(ESMF_FieldBundle), intent(inout)         :: dstFieldBundle
-        type(ESMF_RouteHandle), intent(inout)         :: routehandle
+        type(ESMF_FieldBundle), intent(in)      :: srcFieldBundle
+        type(ESMF_FieldBundle), intent(inout)   :: dstFieldBundle
+        type(ESMF_RouteHandle), intent(inout)   :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-        integer,             intent(inout), optional  :: srcTermProcessing(:)
-        integer,             intent(out), optional    :: rc
+        logical,        intent(in),    optional :: ignoreUnmatchedIndicesFlag(:)
+        integer,        intent(inout), optional :: srcTermProcessing(:)
+        integer,        intent(out),   optional :: rc
 
 ! !STATUS:
 ! \begin{itemize}
@@ -5815,6 +5868,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              The new argument gives the user access to the tuning parameter
 !              affecting the sparse matrix execution and bit-wise
 !              reproducibility.
+! \item[8.1.0] Added argument {\tt ignoreUnmatchedIndicesFlag} to support cases
+!    where the sparse matrix includes terms with source or destination sequence
+!    indices not present in the source or destination field.
 ! \end{description}
 ! \end{itemize}
 !
@@ -5875,6 +5931,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       FieldBundle may be destroyed by this call. 
 ! \item [routehandle] 
 !       Handle to the precomputed Route. 
+!   \item [{[ignoreUnmatchedIndicesFlag]}] 
+!     If set to {.false.}, the {\em default}, source and destination side must
+!     cover all of the squence indices defined in the sparse matrix. An error
+!     will be returned if a sequence index in the sparse matrix does not match
+!     on either the source or destination side.
+!     If set to {.true.}, mismatching sequence indices are silently ignored.
+!     The size of this array argument must either be 1 or equal the number of
+!     Fieldss in the {\tt srcFieldBundle} and {\tt dstFieldBundle} arguments. In
+!     the latter case, the handling of unmatched indices is specified for each
+!     Field pair separately. If only one element is specified, it is
+!     used for {\em all} Field pairs.
 ! \item [{[srcTermProcessing]}]
 !       Source term summing options for route handle creation. See
 !       {\tt ESMF\_FieldRegridStore} documentation for a full parameter description.
@@ -5938,6 +6005,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_ArrayBundleSMMStore(srcab, dstab, routehandle, &
+            ignoreUnmatchedIndicesFlag=ignoreUnmatchedIndicesFlag, &
             srcTermProcessing=srcTermProcessing, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -5966,16 +6034,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
 ! ! Private name; call using ESMF_FieldBundleSMMStore()
     subroutine ESMF_FieldBundleSMMStoreFromFile(srcFieldBundle, dstFieldBundle, &
-      filename, routehandle, keywordEnforcer, srcTermProcessing, rc)
+      filename, routehandle, keywordEnforcer, ignoreUnmatchedIndicesFlag, &
+      srcTermProcessing, rc)
 
 ! ! ARGUMENTS:
-      type(ESMF_FieldBundle), intent(in)              :: srcFieldBundle
-      type(ESMF_FieldBundle), intent(inout)           :: dstFieldBundle
-      character(len=*),       intent(in)              :: filename
-      type(ESMF_RouteHandle), intent(inout)           :: routehandle
+      type(ESMF_FieldBundle), intent(in)        :: srcFieldBundle
+      type(ESMF_FieldBundle), intent(inout)     :: dstFieldBundle
+      character(len=*),       intent(in)        :: filename
+      type(ESMF_RouteHandle), intent(inout)     :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      integer,             intent(inout), optional    :: srcTermProcessing(:)
-      integer,             intent(out),   optional    :: rc
+      logical,          intent(in),    optional :: ignoreUnmatchedIndicesFlag(:)
+      integer,          intent(inout), optional :: srcTermProcessing(:)
+      integer,          intent(out),   optional :: rc
 
 !
 ! !DESCRIPTION:
@@ -6001,6 +6071,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! \item [routehandle]
 !       Handle to the {\tt ESMF\_RouteHandle}.
+!
+!   \item [{[ignoreUnmatchedIndicesFlag]}] 
+!     If set to {.false.}, the {\em default}, source and destination side must
+!     cover all of the squence indices defined in the sparse matrix. An error
+!     will be returned if a sequence index in the sparse matrix does not match
+!     on either the source or destination side.
+!     If set to {.true.}, mismatching sequence indices are silently ignored.
+!     The size of this array argument must either be 1 or equal the number of
+!     Fieldss in the {\tt srcFieldBundle} and {\tt dstFieldBundle} arguments. In
+!     the latter case, the handling of unmatched indices is specified for each
+!     Field pair separately. If only one element is specified, it is
+!     used for {\em all} Field pairs.
 !
 ! \item [{[srcTermProcessing]}]
 !       Source term summing options for route handle creation. See
@@ -6038,8 +6120,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! Generate routeHandle from factorList and factorIndexList
       call ESMF_FieldBundleSMMStore(srcFieldBundle, dstFieldBundle, routehandle, &
-        factorList, factorIndexList, srcTermProcessing=srcTermProcessing, &
-        rc=localrc)
+        factorList, factorIndexList, &
+        ignoreUnmatchedIndicesFlag=ignoreUnmatchedIndicesFlag, &
+        srcTermProcessing=srcTermProcessing, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
