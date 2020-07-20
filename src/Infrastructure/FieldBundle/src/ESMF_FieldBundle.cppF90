@@ -5076,7 +5076,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              the src terms are summed up.
 ! \item[8.1.0] Added argument {\tt zeroregionflag}, and deprecated
 !              {\tt zeroregion}. The new argument allows greater flexibility
-!              in setting the zero region for individual ArrayBundle members.
+!              in setting the zero region for individual FieldBundle members.
 ! \end{description}
 ! \end{itemize}
 !
