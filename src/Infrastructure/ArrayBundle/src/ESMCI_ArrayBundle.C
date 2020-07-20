@@ -1147,6 +1147,8 @@ int ArrayBundle::sparseMatMulStore(
   ArrayBundle *dstArraybundle,        // in    - destination ArrayBundle
   RouteHandle **routehandle,          // inout - handle to precomputed comm
   vector<SparseMatrix<ESMC_I4,ESMC_I4> > &sparseMatrix, // in - sparse matrix
+  ESMC_Logical *ignoreUnmatchedFlag,  // in    - unmatched indices handling
+  int len_ignoreUnmatchedFlag,        // in    - elements in ignoreUnmatched
   InterArray<int> *srcTermProcessing  // inout - srcTermProcessing parameters
   ){    
 //
@@ -1235,6 +1237,21 @@ int ArrayBundle::sparseMatMulStore(
         return rc;
       }
     }
+    // convert ignoreUnmatched to bool
+    if ((len_ignoreUnmatchedFlag!=1) && (len_ignoreUnmatchedFlag!=arrayCount)){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+        "ignoreUnmatchedFlag size must be 1 or arrayCount",
+        ESMC_CONTEXT, &rc);
+      return rc;
+    }
+    vector<bool> ignoreUnmatched(arrayCount);
+    if (len_ignoreUnmatchedFlag==1){
+      for (int i=0; i<arrayCount; i++)
+        ignoreUnmatched[i] = ignoreUnmatchedFlag[0];
+    }else{
+      for (int i=0; i<arrayCount; i++)
+        ignoreUnmatched[i] = ignoreUnmatchedFlag[i];
+    }
     // construct local matchList
     vector<int> matchList(arrayCount);
     vector<Array *> srcArrayVector;
@@ -1253,7 +1270,7 @@ int ArrayBundle::sparseMatMulStore(
         bool dstMatch = dstArray->isRHCompatible(dstArrayVector[j], &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc)) return rc;
-        if (srcMatch && dstMatch){
+        if (srcMatch && dstMatch && (ignoreUnmatched[i]==ignoreUnmatched[j])){
           // found match
           matchList[i] = matchList[j];
           break;
@@ -1313,7 +1330,7 @@ int ArrayBundle::sparseMatMulStore(
 //          localPet, i);
         RouteHandle *rh;
         localrc = Array::sparseMatMulStore(srcArray, dstArray, &rh, 
-          sparseMatrix, false, false, srcTermProcParameters[i]);
+          sparseMatrix, false, ignoreUnmatched[i], srcTermProcParameters[i]);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc)) return rc;
         // get a handle on the XXE stored in rh

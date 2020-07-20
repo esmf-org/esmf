@@ -611,9 +611,10 @@ extern "C" {
   }
  
   void FTN_X(c_esmc_arraybundlesmmstore)(ESMCI::ArrayBundle **srcArraybundle,
-    ESMCI::ArrayBundle **dstArraybundle, ESMCI::RouteHandle **routehandle, 
+    ESMCI::ArrayBundle **dstArraybundle, ESMCI::RouteHandle **routehandle,
     ESMC_TypeKind_Flag *typekindFactors, void *factorList, int *factorListCount,
-    ESMCI::InterArray<int> *factorIndexList, 
+    ESMCI::InterArray<int> *factorIndexList,
+    ESMC_Logical *ignoreUnmatchedFlag, int *len_ignoreUnmatchedFlag,
     ESMCI::InterArray<int> *srcTermProcessing, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundlesmmstore()"
@@ -659,7 +660,7 @@ extern "C" {
     // Call into the actual C++ method wrapped inside LogErr handling
     if (ESMC_LogDefault.MsgFoundError(ESMCI::ArrayBundle::sparseMatMulStore(
       *srcArraybundle, *dstArraybundle, routehandle, sparseMatrix,
-      srcTermProcessing),
+      ignoreUnmatchedFlag, *len_ignoreUnmatchedFlag, srcTermProcessing),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     
@@ -683,6 +684,7 @@ extern "C" {
 
   void FTN_X(c_esmc_arraybundlesmmstorenf)(ESMCI::ArrayBundle **srcArraybundle,
     ESMCI::ArrayBundle **dstArraybundle, ESMCI::RouteHandle **routehandle,
+    ESMC_Logical *ignoreUnmatchedFlag, int *len_ignoreUnmatchedFlag,
     ESMCI::InterArray<int> *srcTermProcessing, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundlesmmstorenf()"
@@ -693,7 +695,7 @@ extern "C" {
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(ESMCI::ArrayBundle::sparseMatMulStore(
       *srcArraybundle, *dstArraybundle, routehandle, sparseMatrix,
-      srcTermProcessing),
+      ignoreUnmatchedFlag, *len_ignoreUnmatchedFlag, srcTermProcessing),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
