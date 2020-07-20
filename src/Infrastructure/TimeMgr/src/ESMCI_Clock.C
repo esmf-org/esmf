@@ -676,6 +676,8 @@ int Clock::count=0;
       }
     }
 
+    if (userChangedDirection) userChangedDirection = false;
+
     return(rc);
 
  } // end Clock::advance
@@ -2061,6 +2063,8 @@ int Clock::count=0;
 
     // check new alarm to see if it's time to ring
     alarm->Alarm::checkRingTime(&rc);
+
+    if (userChangedDirection) userChangedDirection = false;
 
     return(rc);
 
