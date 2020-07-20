@@ -842,6 +842,8 @@ int ArrayBundle::redistStore(
   ArrayBundle *srcArraybundle,            // in    - source ArrayBundle
   ArrayBundle *dstArraybundle,            // in    - destination ArrayBundle
   RouteHandle **routehandle,              // inout - handle to precomputed comm
+  ESMC_Logical *ignoreUnmatchedFlag,      // in    - unmatched indices handling
+  int len_ignoreUnmatchedFlag,            // in    - elements in ignoreUnmatched
   InterArray<int> *srcToDstTransposeMap,  // in    - mapping src -> dst dims
   ESMC_TypeKind_Flag typekindFactor,      // in    - typekind of factor
   void *factor                            // in    - redist factor
@@ -900,6 +902,21 @@ int ArrayBundle::redistStore(
         ESMC_CONTEXT, &rc);
       return rc;
     }
+    // convert ignoreUnmatched to bool
+    if ((len_ignoreUnmatchedFlag!=1) && (len_ignoreUnmatchedFlag!=arrayCount)){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+        "ignoreUnmatchedFlag size must be 1 or arrayCount",
+        ESMC_CONTEXT, &rc);
+      return rc;
+    }
+    vector<bool> ignoreUnmatched(arrayCount);
+    if (len_ignoreUnmatchedFlag==1){
+      for (int i=0; i<arrayCount; i++)
+        ignoreUnmatched[i] = ignoreUnmatchedFlag[0];
+    }else{
+      for (int i=0; i<arrayCount; i++)
+        ignoreUnmatched[i] = ignoreUnmatchedFlag[i];
+    }
     // construct local matchList
     vector<int> matchList(arrayCount);
     vector<Array *> srcArrayVector;
@@ -918,7 +935,7 @@ int ArrayBundle::redistStore(
         bool dstMatch = dstArray->isRHCompatible(dstArrayVector[j], &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc)) return rc;
-        if (srcMatch && dstMatch){
+        if (srcMatch && dstMatch && (ignoreUnmatched[i]==ignoreUnmatched[j])){
           // found match
           matchList[i] = matchList[j];
           break;
@@ -988,7 +1005,7 @@ int ArrayBundle::redistStore(
 #endif
         RouteHandle *rh;
         localrc = Array::redistStore(srcArray, dstArray, &rh,
-          srcToDstTransposeMap, typekindFactor, factor);
+          srcToDstTransposeMap, typekindFactor, factor, ignoreUnmatched[i]);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc)) return rc;
         // get a handle on the XXE stored in rh
