@@ -1247,10 +1247,10 @@ int ArrayBundle::sparseMatMulStore(
     vector<bool> ignoreUnmatched(arrayCount);
     if (len_ignoreUnmatchedFlag==1){
       for (int i=0; i<arrayCount; i++)
-        ignoreUnmatched[i] = ignoreUnmatchedFlag[0];
+        ignoreUnmatched[i] = (ignoreUnmatchedFlag[0]==ESMF_TRUE);
     }else{
       for (int i=0; i<arrayCount; i++)
-        ignoreUnmatched[i] = ignoreUnmatchedFlag[i];
+        ignoreUnmatched[i] = (ignoreUnmatchedFlag[i]==ESMF_TRUE);
     }
     // construct local matchList
     vector<int> matchList(arrayCount);
