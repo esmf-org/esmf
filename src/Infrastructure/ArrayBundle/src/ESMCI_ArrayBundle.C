@@ -11,7 +11,7 @@
 //==============================================================================
 #define ESMC_FILENAME "ESMCI_ArrayBundle.C"
 //==============================================================================
-#define AB_REDISTSTORE_LOG_off
+#define AB_REDISTSTORE_LOG_on
 #define ABSMM_EXEC_INFO_on
 //==============================================================================
 //
@@ -912,10 +912,10 @@ int ArrayBundle::redistStore(
     vector<bool> ignoreUnmatched(arrayCount);
     if (len_ignoreUnmatchedFlag==1){
       for (int i=0; i<arrayCount; i++)
-        ignoreUnmatched[i] = ignoreUnmatchedFlag[0];
+        ignoreUnmatched[i] = (ignoreUnmatchedFlag[0]==ESMF_TRUE);
     }else{
       for (int i=0; i<arrayCount; i++)
-        ignoreUnmatched[i] = ignoreUnmatchedFlag[i];
+        ignoreUnmatched[i] = (ignoreUnmatchedFlag[i]==ESMF_TRUE);
     }
     // construct local matchList
     vector<int> matchList(arrayCount);
@@ -999,7 +999,7 @@ int ArrayBundle::redistStore(
         {
           std::stringstream msg;
           msg << "AB_REDISTSTORE_LOG:" << __LINE__ << " pair #" << i <<
-            " DOES require precompute!";
+            " DOES require precompute! ignoreUnmatched=" << ignoreUnmatched[i];
           ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
         }
 #endif
