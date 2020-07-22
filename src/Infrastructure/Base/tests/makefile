@@ -13,7 +13,6 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_BaseUTest \
                 $(ESMF_TESTDIR)/ESMC_NlohmannJSONUTest \
                 $(ESMF_TESTDIR)/ESMC_InfoUTest \
                 $(ESMF_TESTDIR)/ESMF_InfoUTest \
-                $(ESMF_TESTDIR)/ESMF_InfoProfileUTest \
                 $(ESMF_TESTDIR)/ESMF_InfoArrayUTest
 
 TESTS_RUN     = RUN_ESMF_BaseUTest \
@@ -21,7 +20,6 @@ TESTS_RUN     = RUN_ESMF_BaseUTest \
                 RUN_ESMC_NlohmannJSONUTest \
                 RUN_ESMC_InfoUTest \
                 RUN_ESMF_InfoUTest \
-                RUN_ESMF_InfoProfileUTest \
                 RUN_ESMF_InfoArrayUTest
 
 TESTS_RUN_UNI = RUN_ESMF_BaseUTestUNI \
@@ -29,7 +27,6 @@ TESTS_RUN_UNI = RUN_ESMF_BaseUTestUNI \
                 RUN_ESMC_NlohmannJSONUTestUNI \
                 RUN_ESMC_InfoUTestUNI \
                 RUN_ESMF_InfoUTestUNI \
-                RUN_ESMF_InfoProfileUTestUNI \
                 RUN_ESMF_InfoArrayUTestUNI
 
 include ${ESMF_DIR}/makefile
@@ -79,11 +76,11 @@ RUN_ESMF_InfoUTest:
 RUN_ESMF_InfoUTestUNI:
 	$(MAKE) TNAME=Info NP=1 ftest
 
-RUN_ESMF_InfoProfileUTest:
-	env ESMF_RUNTIME_PROFILE=ON $(MAKE) TNAME=InfoProfile NP=4 ftest
+# RUN_ESMF_InfoProfileUTest:
+# 	env ESMF_RUNTIME_PROFILE=ON $(MAKE) TNAME=InfoProfile NP=4 ftest
 
-RUN_ESMF_InfoProfileUTestUNI:
-	env ESMF_RUNTIME_PROFILE=ON $(MAKE) TNAME=InfoProfile NP=1 ftest
+# RUN_ESMF_InfoProfileUTestUNI:
+# 	env ESMF_RUNTIME_PROFILE=ON $(MAKE) TNAME=InfoProfile NP=1 ftest
 
 RUN_ESMF_InfoArrayUTest:
 	$(MAKE) TNAME=InfoArray NP=4 ftest

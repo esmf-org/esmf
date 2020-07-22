@@ -2322,17 +2322,38 @@ void ESMCI_MeshSetElemInfo(Mesh *mesh,
   // Try-catch block around main part of method
   try {
 
-    // Doesn't work with split meshes right now
-    if (mesh->is_split) {
+    // Setting element area doesn't work with split meshes right now
+    if (mesh->is_split && present(elemArea)) {
       int localrc;
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  " Can't currently set element info for a mesh containing >4 elements.",
+                  " element areas can't currently be set for a mesh containing >4 elements.",
                           ESMC_CONTEXT, &localrc)) throw localrc;
     }
     
     ////// Get some handy information //////
-    int num_elems=mesh->num_elems();
+
+    // Original spatial dim
     int orig_sdim=mesh->orig_spatial_dim;
+
+    // number of nonsplit elems
+    int num_nonsplit_elems;
+    if (mesh->is_split) {
+      num_nonsplit_elems=0;
+      Mesh::iterator ei = mesh->elem_begin(), ee = mesh->elem_end();
+      for (; ei != ee; ++ei) {
+        MeshObj *elem = &(*ei);
+      
+        // If it's a split element, then skip
+        if (elem->get_id() > mesh->max_non_split_id) continue;
+      
+        // Count
+        num_nonsplit_elems++;
+      }
+
+    } else {
+      num_nonsplit_elems=mesh->num_elems();
+    }
+
 
 
     ////// Error check input arrays //////
@@ -2356,7 +2377,7 @@ void ESMCI_MeshSetElemInfo(Mesh *mesh,
           " elementMask array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
       }
 
-      if (elemMask->extent[0] != num_elems) {
+      if (elemMask->extent[0] != num_nonsplit_elems) {
         int localrc;
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
         " elementMask array must be of size elementCount", ESMC_CONTEXT, &localrc)) throw localrc;
@@ -2382,7 +2403,7 @@ void ESMCI_MeshSetElemInfo(Mesh *mesh,
           " elementArea array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
       }
 
-      if (elemArea->extent[0] != num_elems) {
+      if (elemArea->extent[0] != num_nonsplit_elems) {
         int localrc;
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
         " elementArea array must be of size elementCount", ESMC_CONTEXT, &localrc)) throw localrc;
@@ -2392,12 +2413,15 @@ void ESMCI_MeshSetElemInfo(Mesh *mesh,
 
     ////// Get ordered list of elems ////// 
     std::vector<std::pair<int,MeshObj *> > sorted_elems;
-    sorted_elems.reserve(num_elems);
+    sorted_elems.reserve(num_nonsplit_elems);
 
     // Loop over elems
     Mesh::iterator ei = mesh->elem_begin(), ee = mesh->elem_end();
     for (; ei != ee; ++ei) {
       MeshObj *elem = &(*ei);
+
+      // If it's a split element, then skip
+      if (mesh->is_split && (elem->get_id() > mesh->max_non_split_id)) continue;
       
       // get data index
       int index = elem->get_data_index();
@@ -2422,7 +2446,7 @@ void ESMCI_MeshSetElemInfo(Mesh *mesh,
       // Get array from which to get mask values
       int *elemMask_array=elemMask->array;
       
-      // Loop through elems
+      // Loop through non split elems and fill
       for (int i=0; i<sorted_elems.size(); i++) {
         // get element
         MeshObj *elem=sorted_elems[i].second;
@@ -2433,7 +2457,74 @@ void ESMCI_MeshSetElemInfo(Mesh *mesh,
         // Set elem mask value from input array
         *mv=static_cast<double>(elemMask_array[i]);
       }
+
+      // If applicable, do split elems
+      if (mesh->is_split) {
+        // Loop through split elems copying original elem value set above
+        Mesh::iterator ei = mesh->elem_begin(), ee = mesh->elem_end();
+        for (; ei != ee; ++ei) {
+          MeshObj *elem = &(*ei);
+          
+          // If it's a non-split element, then skip
+          if (elem->get_id() <= mesh->max_non_split_id) continue;
+              
+          // Get original id
+          std::map<UInt,UInt>::iterator soi =  mesh->split_to_orig_id.find(elem->get_id());
+          if (soi == mesh->split_to_orig_id.end()) {
+            Throw() << "split element id not found in split to orig id map.";
+          } 
+          int orig_id=soi->second;
+
+          
+          // Get original elem
+          Mesh::MeshObjIDMap::iterator mi =  mesh->map_find(MeshObj::ELEMENT, orig_id);
+          if (mi == mesh->map_end(MeshObj::ELEMENT)) {
+            Throw() << "Element not in mesh";
+          }
+          
+          // Get the element
+          const MeshObj *orig_elem = &(*mi);
+
+          // Get pointer to split elem's mask
+          double *smv=elem_mask_val->data(*elem);
+
+          // Get pointer to orig elem's mask
+          double *omv=elem_mask_val->data(*orig_elem);
+
+          // Set the split element to the orignal element
+          *smv=*omv;
+        }
+      }
     }
+
+#if 0
+    // Debug
+    {
+      MEField<> *elem_mask_val=mesh->GetField("elem_mask_val");
+
+      Mesh::iterator ei = mesh->elem_begin(), ee = mesh->elem_end();
+      for (; ei != ee; ++ei) {
+        MeshObj *elem = &(*ei);
+        
+        // Get original id
+        int orig_id=-1;
+        std::map<UInt,UInt>::iterator soi =  mesh->split_to_orig_id.find(elem->get_id());
+        if (soi != mesh->split_to_orig_id.end()) {
+          orig_id=soi->second;
+        } 
+
+        // Get mask value
+        double *mv=elem_mask_val->data(*elem);
+
+        // Convert to int
+        int imv=(int)(*mv);
+
+        // print out values
+        printf("elem id=%d orig_id=%d mask_val=%d\n",elem->get_id(),orig_id,imv);
+      }
+    }
+#endif
+
 
     // If it was passed in, fill elementArea array
     if (present(elemArea)) {

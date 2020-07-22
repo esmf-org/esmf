@@ -1189,7 +1189,7 @@ int Alarm::count=0;
         // done processing changed flags, reset if necessary
         if (userChangedRingTime)     userChangedRingTime     = false;
         if (userChangedRingInterval) userChangedRingInterval = false;
-        if (clock->userChangedDirection) clock->userChangedDirection = false;
+        //if (clock->userChangedDirection) clock->userChangedDirection = false;
       }
 
       // ... then check if time to turn on alarm
@@ -1318,7 +1318,7 @@ int Alarm::count=0;
       // ... or non-sticky alarm, if user just changed clock direction to
       //   REVERSE ...
       if (clock->userChangedDirection) {
-        clock->userChangedDirection = false; // reset changed flag
+        //clock->userChangedDirection = false; // reset changed flag
         if (!sticky) {
           if (((positive && ringTime > (clock->currTime + clock->timeStep)) ||
               (!positive && ringTime < (clock->currTime + clock->timeStep))) &&

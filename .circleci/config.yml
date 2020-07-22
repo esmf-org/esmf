@@ -1,0 +1,274 @@
+version: 2.1
+
+jobs:
+
+  build-esmf:
+    machine: true
+    resource_class: xlarge
+    environment:
+      - ESMF_DIR: $CIRCLE_WORKING_DIRECTORY/sandbox/esmf/src-git
+      - DOCKER_IMG: bekozi/esmf
+      - TEST_RUNNER: esmf-test-runner
+    steps:
+#      - run:
+#          name: passthru-build-esmf
+#          command: exit 0
+      - run:
+          name: Checkout Code
+          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git $ESMF_DIR
+      - run:
+          name: make info
+          command: bash $ESMF_DIR/.circleci/sh/make-info.sh
+      - run:
+          name: make
+          command: bash $ESMF_DIR/.circleci/sh/make.sh
+      - run:
+          name: make install
+          command: bash $ESMF_DIR/.circleci/sh/make-install.sh
+      - run:
+          name: ESMPy Build + Install
+          command: bash $ESMF_DIR/.circleci/sh/esmpy-build-install.sh
+      - run:
+          name: Test Environment Finalize
+          command: bash $ESMF_DIR/.circleci/sh/docker-push.sh
+
+  should-run-linux:
+    docker:
+      - image: cimg/base:2020.01
+    resource_class: small
+    steps:
+      - run: exit 0
+
+  should-build-docs:
+    docker:
+      - image: cimg/base:2020.01
+    resource_class: small
+    steps:
+      - run: exit 0
+
+  should-run-osx:
+    docker:
+      - image: cimg/base:2020.01
+    resource_class: small
+    steps:
+      - run: exit 0
+
+  build-run-tests:
+    parameters:
+      target:
+        type: string
+    docker:
+      - image: bekozi/esmf:$CIRCLE_BRANCH
+    resource_class: xlarge
+    environment:
+      - ESMF_ARTIFACTS: /artifacts
+      - ESMF_OUTDIR: /artifacts/test-artifacts
+    steps:
+#      - run:
+#          name: passthru-build-tests
+#          command: exit 0
+      - run:
+          name: Create Artifacts Directory
+          command: mkdir -p $ESMF_OUTDIR
+      - run:
+          name: make build_<< parameters.target >>
+          command: cd $ESMF_DIR && make build_<< parameters.target >> 2>&1 | tee $ESMF_OUTDIR/esmf-make-build_<< parameters.target >>.out
+      - run:
+          name: make run_<< parameters.target >>
+          command: cd $ESMF_DIR && make run_<< parameters.target >> 2>&1 | tee $ESMF_OUTDIR/esmf-make-run_<< parameters.target >>.out
+      - run:
+          name: Collect Artifacts
+          command: bash $ESMF_DIR/.circleci/sh/collect-test-artifacts.sh << parameters.target >>
+          when: always
+      - store_artifacts:
+          path: /artifacts/test-artifacts.zip
+          destination: << parameters.target >>-artifacts.zip
+
+  build-docs:
+    environment:
+      - ESMF_ARTIFACTS: "/artifacts"
+      - DOCKER_IMG: "bekozi/esmf-doc"
+    machine: true
+    steps:
+#      - run:
+#          name: passthru-build-docs
+#          command: exit 0
+      - run:
+          name: Checkout Code
+          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git esmf
+      - run:
+          name: Docker Build
+          command: docker build -t "${DOCKER_IMG}:${CIRCLE_BRANCH}" --file "esmf/.circleci/docker/esmf-doc/Dockerfile" --build-arg ESMF_BRANCH="${CIRCLE_BRANCH}" .
+      - run:
+          name: Extract Artifacts
+          command: bash esmf/.circleci/sh/extract-artifacts.sh
+      - store_artifacts:
+          path: /tmp/doc-artifacts.zip
+          destination: doc-artifacts.zip
+      - run:
+          name: Docker Push
+          command: bash esmf/.circleci/sh/docker-push-docs.sh
+
+  publish-docs:
+    environment:
+      - ESMF_ARTIFACTS: "/artifacts"
+      - DOCKER_IMG: "bekozi/esmf-doc"
+    machine: true
+    steps:
+#      - run:
+#          name: publish-docs
+#          command: exit 0
+      - run:
+          name: Checkout Code
+          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git esmf
+      - run:
+          name: Extract Artifacts
+          command: bash esmf/.circleci/sh/extract-artifacts.sh
+      - run:
+          name: Prep Artifacts
+          command: cd /tmp && unzip doc-artifacts.zip
+      - run:
+          name: Push to github.io
+          command: bash esmf/.circleci/sh/doc-push.sh
+
+  external_demos:
+    machine: true
+    steps:
+      - run:
+          name: passthru-external_demos
+          command: exit 0
+
+  bit-for-bit:
+    machine: true
+    steps:
+      - run:
+          name: passthru-bit-for-bit
+          command: exit 0
+
+  esmpy-test:
+    machine: true
+    steps:
+      - run:
+          name: passthru-esmpy-test
+          command: exit 0
+
+  esmpy-docs:
+    machine: true
+    steps:
+      - run:
+          name: passthru-esmpy-docs
+          command: exit 0
+
+  osx-esmf:
+    macos:
+      xcode: "11.3.1"
+#    resource_class: large
+    steps:
+      - run:
+          name: Checkout Code
+          command: cd && git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git esmf
+      - restore_cache:
+          keys:
+            - osx-cache-10
+#      - run:
+#          name: Create Brew Environment
+#          command: bash ~/esmf/.circleci/sh/osx/osx-brew-install.sh
+      - run:
+          name: Create Conda Environment
+          command: bash ~/esmf/.circleci/sh/osx/osx-conda.sh
+      - save_cache:
+          key: osx-cache-10
+          paths:
+            - ~/miniconda
+#            - /usr/local/Cellar
+      - run:
+          name: make info
+          command: bash ~/esmf/.circleci/sh/osx/osx-make-funcs.sh "info"
+      - run:
+          name: make
+          command: bash ~/esmf/.circleci/sh/osx/osx-make-funcs.sh "make"
+      - run:
+          name: make install
+          command: bash ~/esmf/.circleci/sh/osx/osx-make-funcs.sh "install"
+#      - run:
+#          name: make check
+#          command: bash ~/esmf/.circleci/sh/osx/osx-make-funcs.sh "check"
+      - run:
+          name: Collect Test Artifacts
+          command: bash ~/esmf/.circleci/sh/osx/osx-make-funcs.sh "collect-test-results"
+          when: always
+      - store_artifacts:
+          path: /tmp/osx-artifacts.zip
+          destination: osx-artifacts.zip
+
+workflows:
+
+  build-and-test-commit:
+    jobs:
+      - should-run-linux:
+          type: approval
+      - build-esmf:
+          requires:
+            - should-run-linux
+      - build-run-tests:
+          name: build-run-commit-<< matrix.target >>
+          matrix:
+            parameters:
+              target: ["unit_tests", "system_tests", "examples"]
+          requires:
+            - build-esmf
+
+  build-and-test:
+    triggers:
+      - schedule:
+          cron: "0 6 * * *"
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+#      - osx-esmf
+#      - build-esmf
+#      - build-run-tests:
+#          name: build-run-<< matrix.target >>
+#          matrix:
+#            parameters:
+#              target: ["unit_tests", "system_tests", "examples"]
+#          requires:
+#            - build-esmf
+      - build-docs
+      - publish-docs:
+          requires:
+            - build-docs
+#      - external_demos:
+#          name: placeholder-external_demos
+#          requires:
+#            - build-run-tests
+#      - bit-for-bit:
+#          name: placeholder-bit-for-bit
+#          requires:
+#            - build-run-tests
+#      - esmpy-test:
+#          name: placeholder-esmpy-test
+#          requires:
+#            - placeholder-esmpy-build
+
+  docs-commit:
+    jobs:
+      - should-build-docs:
+          type: approval
+      - build-docs:
+          requires:
+            - should-build-docs
+#      - esmpy-docs:
+#          name: placeholder-esmpy-docs
+#          requires:
+#            - should-build-docs
+
+  osx-commit:
+    jobs:
+      - should-run-osx:
+          type: approval
+      - osx-esmf:
+          requires:
+            - should-run-osx
