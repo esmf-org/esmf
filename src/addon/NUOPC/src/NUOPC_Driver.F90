@@ -890,7 +890,7 @@ module NUOPC_Driver
               endif
               if (btest(verbosity,13)) then
                 write (msgString,"(A)") trim(name)//&
-                  " - Setting verbosity on created component to: "// &
+                  " - Setting Verbosity on created component to: "// &
                   trim(vString)
                 call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -5406,7 +5406,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             endif
             if (btest(verbosity,13)) then
               write (msgString,"(A)") trim(name)//&
-                " - Setting verbosity on created component to: "// &
+                " - Setting Verbosity on created component to: "// &
                 trim(vString)
               call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
