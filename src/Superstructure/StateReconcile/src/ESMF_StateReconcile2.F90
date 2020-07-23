@@ -126,6 +126,7 @@ contains
 
 !==============================================================================
 
+!tdk:todo: move StateReconcile doc stub over to state
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateReconcile2"
