@@ -126,55 +126,15 @@ contains
 
 !==============================================================================
 
-!tdk:todo: move StateReconcile doc stub over to state
 !------------------------------------------------------------------------------
+! NOTE: Documentation stub located in src/Superstructure/State/src/ESMF_StateAPI.cppF90
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateReconcile2"
-!BOP
-! !IROUTINE: ESMF_StateReconcile -- Reconcile State data across all PETs in a VM
-!
-! !INTERFACE:
-  subroutine ESMF_StateReconcile (state, vm, attreconflag, rc)
-!
-! !ARGUMENTS:
+  subroutine ESMF_StateReconcile (state, vm, rc)
     type(ESMF_State),            intent(inout)         :: state
     type(ESMF_VM),               intent(in),  optional :: vm
-    type(ESMF_AttReconcileFlag), intent(in),  optional :: attreconflag
     integer,                     intent(out), optional :: rc
-!
-!
-! !DESCRIPTION:
-!     Must be called for any {\tt ESMF\_State} which contains ESMF objects
-!     that have not been created on all the {\tt PET}s of the currently
-!     running {\tt ESMF\_Component}.
-!     For example, if a coupler is operating on data
-!     which was created by another component that ran on only a subset
-!     of the couplers {\tt PET}s, the coupler must make this call first
-!     before operating on any data inside that {\tt ESMF\_State}.
-!     After calling {\tt ESMF\_StateReconcile} all {\tt PET}s will have
-!     a common view of all objects contained in this {\tt ESMF\_State}.
-!     The option to reconcile the metadata associated with the objects
-!     contained in this {\tt ESMF\_State} also exists.  The default behavior
-!     for this capability is to {\it not} reconcile metadata unless told
-!     otherwise.
-!
-!     This call is collective across the specified VM.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[state]
-!       {\tt ESMF\_State} to reconcile.
-!     \item[{[vm]}]
-!       {\tt ESMF\_VM} for this {\tt ESMF\_Component}.  By default, it is set to the current vm.
-!     \item[{[attreconflag]}]
-!       Flag to tell if Attribute reconciliation is to be done as well as data reconciliation.
-!       This flag is documented in section \ref{const:attreconcile}.  Default is
-!       {\tt ESMF\_ATTRECONCILE\_OFF}.
-!     \item[{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
+
     integer :: localrc
     type(ESMF_VM) :: localvm
     type(ESMF_AttReconcileFlag) :: lattreconflag
@@ -205,12 +165,7 @@ contains
     ! (or short list of numbers) instead of having to build and send the
     ! list each time.
 
-    ! Set the optional ESMF_AttReconcileFlag
-    lattreconflag = ESMF_ATTRECONCILE_OFF
-    if(present(attreconflag)) then
-      lattreconflag = attreconflag
-    endif
-    !tdk:todo: what do we do about attribute reconcile when they are required? recommend just leaving on
+    ! Attributes must be reconciled to de-deduplicate Field geometries
     lattreconflag = ESMF_ATTRECONCILE_ON
 
 #if 0

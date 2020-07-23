@@ -3952,7 +3952,7 @@ module NUOPC_Base
 
     if (present(rc)) rc = ESMF_SUCCESS
 
-    call ESMF_StateReconcile(state, attreconflag=ESMF_ATTRECONCILE_ON, rc=localrc)
+    call ESMF_StateReconcile(state, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
