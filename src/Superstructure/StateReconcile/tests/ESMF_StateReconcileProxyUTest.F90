@@ -54,6 +54,8 @@ module subcomp_mod
     ! local variables
     type(ESMF_DistGrid) :: dg
     type(ESMF_Array)    :: array
+    type(ESMF_Grid)     :: grid
+    type(ESMF_Field)    :: field
     
     ! Initialize
     rc = ESMF_SUCCESS
@@ -71,6 +73,23 @@ module subcomp_mod
     if (rc/=ESMF_SUCCESS) return ! bail out
     
     call ESMF_StateAdd(estate, (/array/), rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    
+    grid = ESMF_GridCreate(dg, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    field = ESMF_FieldCreate(grid=grid, typekind=ESMF_TYPEKIND_R8, &
+      name="field1", rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    call ESMF_StateAdd(estate, (/field/), rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    field = ESMF_FieldCreate(grid=grid, typekind=ESMF_TYPEKIND_R8, &
+      name="field2", rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    call ESMF_StateAdd(estate, (/field/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
   end subroutine !--------------------------------------------------------------
@@ -159,6 +178,8 @@ program ESMF_StateReconcileProxyUTest
   type(ESMF_State)      :: exportState
   type(ESMF_Array)      :: array
   type(ESMF_DistGrid)   :: dg1, dg2
+  type(ESMF_Field)      :: field
+  type(ESMF_Grid)       :: g1, g2
   
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -208,9 +229,26 @@ program ESMF_StateReconcileProxyUTest
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
   ! Test whether dg1 and dg2 are aliases to the same DistGrid in memory
-  !NEX_removeUTest_Multi_Proc_Only
+  !NEX_UTest_Multi_Proc_Only
   write(name, *) "Ensure dg1 and dg2 are aliases to the same DistGrid Test"
   write(failMsg, *) "Found non-aliased DistGrid objects!"
+  call ESMF_Test((dg1==dg2), name, failMsg, result, ESMF_SRCLINE)
+
+  ! Extract the Grid from the two Field objects in the State
+  call ESMF_StateGet(exportState, "field1", field=field, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_FieldGet(field, grid=g1, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !-
+  call ESMF_StateGet(exportState, "field2", field=field, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_FieldGet(field, grid=g2, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  
+  ! Test whether g1 and g2 are aliases to the same Grid in memory
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Ensure g1 and g2 are aliases to the same Grid Test"
+  write(failMsg, *) "Found non-aliased Grid objects!"
   call ESMF_Test((dg1==dg2), name, failMsg, result, ESMF_SRCLINE)
 
   ! Sub component Finalize

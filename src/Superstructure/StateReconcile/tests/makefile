@@ -7,8 +7,8 @@ run_uni: run_unit_tests_uni
 LOCDIR	  = src/Superstructure/State/tests
 
 .NOTPARALLEL:
-TESTS_BUILD   =	$(ESMF_TESTDIR)/ESMF_StateReconcileUTest
-#                 $(ESMF_TESTDIR)/ESMF_StateReconcileProxyUTest
+TESTS_BUILD   =	$(ESMF_TESTDIR)/ESMF_StateReconcileUTest \
+                $(ESMF_TESTDIR)/ESMF_StateReconcileProxyUTest
 
 # TODO:FIELDINTEGRATION Restore State reconcile and other tests.
 #		$(ESMF_TESTDIR)/ESMF_StateUTest
@@ -16,7 +16,7 @@ TESTS_BUILD   =	$(ESMF_TESTDIR)/ESMF_StateReconcileUTest
 #		$(ESMF_TESTDIR)/ESMF_StateLimitUTest \
 
 TESTS_RUN     =	RUN_ESMF_StateReconcileUTest \
-#                 RUN_ESMF_StateReconcileProxyUTest \
+                RUN_ESMF_StateReconcileProxyUTest \
 #                 RUN_ESMF_StateLimitUTest \
 
 TESTS_RUN_UNI =	RUN_ESMF_StateReconcileUTestUNI \
