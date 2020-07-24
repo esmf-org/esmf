@@ -249,7 +249,7 @@ program ESMF_StateReconcileProxyUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Ensure g1 and g2 are aliases to the same Grid Test"
   write(failMsg, *) "Found non-aliased Grid objects!"
-  call ESMF_Test((dg1==dg2), name, failMsg, result, ESMF_SRCLINE)
+  call ESMF_Test((g1==g2), name, failMsg, result, ESMF_SRCLINE)
 
   ! Sub component Finalize
   call ESMF_GridCompFinalize(subcomp, exportState=exportState, rc=rc)
