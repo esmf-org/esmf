@@ -227,12 +227,14 @@ program ESMF_StateReconcileProxyUTest
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_ArrayGet(array, distgrid=dg2, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  
-  ! Test whether dg1 and dg2 are aliases to the same DistGrid in memory
-  !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Ensure dg1 and dg2 are aliases to the same DistGrid Test"
-  write(failMsg, *) "Found non-aliased DistGrid objects!"
-  call ESMF_Test((dg1==dg2), name, failMsg, result, ESMF_SRCLINE)
+
+  ! NOTE: This test is disabled until DistGrid aliasing is implemented in
+  ! StateReconcile.
+!  ! Test whether dg1 and dg2 are aliases to the same DistGrid in memory
+!  !NEX_disabled_UTest_Multi_Proc_Only
+!  write(name, *) "Ensure dg1 and dg2 are aliases to the same DistGrid Test"
+!  write(failMsg, *) "Found non-aliased DistGrid objects!"
+!  call ESMF_Test((dg1==dg2), name, failMsg, result, ESMF_SRCLINE)
 
   ! Extract the Grid from the two Field objects in the State
   call ESMF_StateGet(exportState, "field1", field=field, rc=rc)

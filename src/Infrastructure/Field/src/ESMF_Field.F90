@@ -540,7 +540,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call ESMF_FieldGetSerializeFlag(fp, should_serialize_geom, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-        !tdk:todo: could rename to should_serialize_geom and change logic to allow its name to be skipGeomObj
         if (should_serialize_geom) then
           skipGeomObj = .false.
         else

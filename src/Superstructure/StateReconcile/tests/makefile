@@ -10,18 +10,10 @@ LOCDIR	  = src/Superstructure/State/tests
 TESTS_BUILD   =	$(ESMF_TESTDIR)/ESMF_StateReconcileUTest \
                 $(ESMF_TESTDIR)/ESMF_StateReconcileProxyUTest
 
-# TODO:FIELDINTEGRATION Restore State reconcile and other tests.
-#		$(ESMF_TESTDIR)/ESMF_StateUTest
-#		$(ESMF_TESTDIR)/ESMF_StateReconcileUTest \
-#		$(ESMF_TESTDIR)/ESMF_StateLimitUTest \
-
 TESTS_RUN     =	RUN_ESMF_StateReconcileUTest \
-                RUN_ESMF_StateReconcileProxyUTest \
-#                 RUN_ESMF_StateLimitUTest \
+                RUN_ESMF_StateReconcileProxyUTest
 
-TESTS_RUN_UNI =	RUN_ESMF_StateReconcileUTestUNI \
-#                 RUN_ESMF_StateLimitUTestUNI \
-
+TESTS_RUN_UNI =	RUN_ESMF_StateReconcileUTestUNI
 
 include $(ESMF_DIR)/makefile
 
@@ -47,17 +39,3 @@ RUN_ESMF_StateReconcileUTestUNI:
 
 RUN_ESMF_StateReconcileProxyUTest:
 	$(MAKE) TNAME=StateReconcileProxy NP=4 ftest
-
-#       
-# StateLimit Unit Test
-#
-
-ESMF_UTEST_StateLimit_OBJS = ESMF_StateHelpers.o
-
-ESMF_StateLimitUTest.o: ESMF_StateHelpers.o
-
-RUN_ESMF_StateLimitUTest:
-	$(MAKE) TNAME=StateLimit NP=4 ftest
-
-RUN_ESMF_StateLimitUTestUNI:
-	$(MAKE) TNAME=StateLimit NP=1 ftest

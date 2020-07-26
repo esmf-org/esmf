@@ -8,15 +8,12 @@ LOCDIR	  = src/Superstructure/State/examples
 
 .NOTPARALLEL:
 EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_StateEx \
-                 $(ESMF_EXDIR)/ESMF_StateReconcileEx \
                  $(ESMF_EXDIR)/ESMF_StateReadWriteEx
 
 EXAMPLES_RUN   = run_ESMF_StateEx \
-                 run_ESMF_StateReconcileEx \
                  run_ESMF_StateReadWriteEx
 
 EXAMPLES_RUN_UNI = run_ESMF_StateEx_uni \
-                   run_ESMF_StateReconcileEx_uni \
                    run_ESMF_StateReadWriteEx_uni
                    
 include $(ESMF_DIR)/makefile
@@ -36,15 +33,6 @@ run_ESMF_StateEx:
 
 run_ESMF_StateEx_uni:
 	$(MAKE) EXNAME=State NP=1 exfrun
-
-#
-# ESMF_StateReconcileEx
-#
-run_ESMF_StateReconcileEx:
-	$(MAKE) EXNAME=StateReconcile NP=4 exfrun
-
-run_ESMF_StateReconcileEx_uni:
-	$(MAKE) EXNAME=StateReconcile NP=1 exfrun
 
 #
 # ESMF_StateReadWriteEx

@@ -1412,12 +1412,14 @@ end subroutine ESMF_GeomBaseGet
 !     \item[{[inquireflag]}]
 !           Flag to tell if serialization is to be done (ESMF_NOINQUIRE)
 !           or if this is simply a size inquiry (ESMF_INQUIREONLY)
+!     \item[{[skipGeomObj]}]
+!           Default is false. If true, do not serialize the underlying geometry
+!           object associated with this base.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOPI
-    !tdk:doc: skipGeomObj
     type(ESMF_GeomBaseClass),pointer :: gbcp
     integer :: localrc
     type(ESMF_AttReconcileFlag) :: lattreconflag
@@ -1575,12 +1577,14 @@ end subroutine ESMF_GeomBaseGet
 !           unread byte in the buffer.
 !     \item[{[attreconflag]}]
 !           Flag to tell if Attribute deserialization is to be done
+!     \item[{[skipGeomObj]}]
+!           Default is false. If true, do not serialize the underlying geometry
+!           object associated with this base.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOPI
-    !tdk:doc: skipGeomObj
     type(ESMF_GeomBaseClass),pointer :: gbcp
     integer :: localrc
     type(ESMF_AttReconcileFlag) :: lattreconflag

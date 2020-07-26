@@ -266,9 +266,9 @@ contains
 
     integer :: i
 
-    logical, parameter :: debug = .true. !tdk:debug
-    logical, parameter :: meminfo = .false. !tdk:debug
-    logical, parameter :: trace = .true. !tdk:debug
+    logical, parameter :: debug = .false.
+    logical, parameter :: meminfo = .false.
+    logical, parameter :: trace = .false.
 
     character(160)  :: prefixStr
     type(ESMF_VMId), allocatable, target :: vmIdMap(:)
@@ -355,8 +355,7 @@ contains
     enddo
     vmIdMap_ptr => vmIdMap
 
-!tdk:debug
-#if 1
+#if 0
     ! Log a JSON State representation -----------------------------------------
 
     call idesc%Initialize(createInfo=.true., addObjectInfo=.true., vmIdMap=vmIdMap_ptr, &
@@ -1581,7 +1580,7 @@ contains
     integer, allocatable :: id_recv(:), vm_intids_recv(:)
 
     logical, parameter :: debug = .false.
-    logical, parameter :: meminfo = .false. !tdk:debug
+    logical, parameter :: meminfo = .false.
     character(len=ESMF_MAXSTR) :: logmsg
 
     localrc = ESMF_RC_NOT_IMPL
@@ -1673,7 +1672,11 @@ contains
     end if
 
     ! Exchange Base Ids -------------------------------------------------------
-    !tdk:optimize: consolidate with VMId exchange
+
+    ! NOTE: The base id exchange could be combined with the integer VM Id
+    ! exchange below. Historically, they were separate because the VM Ids were
+    ! character strings. Now that the VM Ids used in reconcile are integers, they
+    ! could be both be exhchanged in the same AllToAll call.
 
     allocate(id_recv(0:sum (counts_buf_recv+1)-1), stat=memstat)
     if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
@@ -1734,7 +1737,9 @@ contains
 !      end do
 !    end if
 
-!tdk:last: probably remove this code since i won't be reimplementing
+! NOTE: This code is a non-collective approach to the base and VM id exchanges.
+! It will probably not be used, but AllToAll calls are notoriously problematic
+! with some MPI implementations.
 #if 0
     if (trace) then
       call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
@@ -1860,7 +1865,7 @@ contains
     logical, parameter :: debug = .false.
 
     character(len=ESMF_MAXSTR) :: logmsg
-    logical, parameter :: meminfo = .false. !tdk:debug
+    logical, parameter :: meminfo = .false.
 
     ! -------------------------------------------------------------------------
 
@@ -2540,7 +2545,7 @@ contains
     integer :: i
     integer :: mypet, npets, pet
 
-    logical, parameter :: debug=.true. !tdk:debug
+    logical, parameter :: debug=.false.
     logical, parameter :: trace=.false.
     character(len=ESMF_MAXSTR) :: logmsg
     integer :: needs_count_debug
