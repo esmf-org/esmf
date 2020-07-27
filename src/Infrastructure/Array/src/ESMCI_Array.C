@@ -8868,9 +8868,12 @@ template<typename SIT, typename DIT>
   // check that if tensorMixFlag is not set that the tensorElementCount matches
   if (!tensorMixFlag){
     if (srcArray->getTensorElementCount() != dstArray->getTensorElementCount()){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-        "w/o tensor mixing srcArray and dstArray tensorElementCount must"
-        " match", ESMC_CONTEXT, &rc);
+      std::stringstream msg;
+      msg << "w/o tensor mixing srcArray/dstArray tensorElementCount must match!"
+        " srcArray.tensorElementCount=" << srcArray->getTensorElementCount() <<
+        " dstArray.tensorElementCount=" << dstArray->getTensorElementCount();
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, msg.str(), ESMC_CONTEXT,
+        &rc);
       return rc;
     }
   }

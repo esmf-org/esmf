@@ -6365,6 +6365,8 @@ print *, "found match:"// &
     type(ESMF_TermOrder_Flag)       :: termOrder
     type(ESMF_TermOrder_Flag), pointer :: termOrdersRedist(:)
     logical                         :: redistflag
+    logical                         :: ignoreUnmatchedIndices
+    logical, allocatable            :: ignoreUnmatchedIndicesFlag(:)
     type(ESMF_RegridMethod_Flag)    :: regridmethod
     type(ESMF_ExtrapMethod_Flag)    :: extrapMethod
     integer                         :: extrapNumSrcPnts
@@ -6493,6 +6495,13 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     
+    ! prepare "ignoreUnmatchedIndicesFlag" list
+    allocate(ignoreUnmatchedIndicesFlag(count), stat=stat)
+    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+      msg="Allocation of ignoreUnmatchedIndicesFlag.", &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
     ! access the fields in the add order
     allocate(srcFields(count), dstFields(count), stat=stat)
     if (ESMF_LogFoundAllocError(statusToCheck=stat, &
@@ -6725,7 +6734,42 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
           multiflag=.true., rc=localrc)
         if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+        ! determine "ignoreUnmatchedIndices"
+        ignoreUnmatchedIndices = .false. ! default
+        do j=2, size(chopStringList)
+          if (index(chopStringList(j),"ignoreunmatchedindices=")==1) then
+            call NUOPC_ChopString(chopStringList(j), chopChar="=", &
+              chopStringList=chopSubString, rc=localrc)
+            if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+            if (size(chopSubString)>=2) then
+              if (trim(chopSubString(2))=="on") then
+                ignoreUnmatchedIndices = .true.
+              else if (trim(chopSubString(2))=="off") then
+                ignoreUnmatchedIndices = .false.
+              else if (trim(chopSubString(2))=="yes") then
+                ignoreUnmatchedIndices = .true.
+              else if (trim(chopSubString(2))=="no") then
+                ignoreUnmatchedIndices = .false.
+              else if (trim(chopSubString(2))=="true") then
+                ignoreUnmatchedIndices = .true.
+              else if (trim(chopSubString(2))=="false") then
+                ignoreUnmatchedIndices = .false.
+              else
+                write (msgString,*) "Specified option '", &
+                  trim(chopStringList(j)), &
+                  "' is not a valid choice. Defaulting to FALSE for: '", &
+                  trim(chopStringList(1)), "'"
+                call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_WARNING)
+              endif
+            endif
+            deallocate(chopSubString) ! local garbage collection
+            exit ! skip the rest of the loop after first hit
+          endif
+        enddo
+        ! keep record of Redist options
         iRedist = iRedist+1
+        ignoreUnmatchedIndicesFlag(iRedist) = ignoreUnmatchedIndices
         zeroRegionsRedist(iRedist) = zeroRegion ! record in list to merge below
         termOrdersRedist(iRedist) = termOrder ! record in list to merge below
         cycle ! advance to the next field pair, handle Redist further down
@@ -7360,7 +7404,8 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
 #endif
       ! call into ESMF for an optimized Redist pre-compute between FieldBundles
       call ESMF_FieldBundleRedistStore(srcFBRedist, dstFBRedist, &
-        routehandle=rhh, rc=localrc)
+        routehandle=rhh, ignoreUnmatchedIndicesFlag= &
+        ignoreUnmatchedIndicesFlag(1:count), rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
 
@@ -7404,6 +7449,7 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
     endif
 
     ! garbage collection
+    deallocate(ignoreUnmatchedIndicesFlag)
     deallocate(zeroRegionsRedist)
     deallocate(termOrdersRedist)
     call ESMF_FieldBundleDestroy(srcFBRedist, noGarbage=.true., rc=localrc)

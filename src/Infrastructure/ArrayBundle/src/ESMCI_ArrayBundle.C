@@ -12,7 +12,7 @@
 #define ESMC_FILENAME "ESMCI_ArrayBundle.C"
 //==============================================================================
 #define AB_REDISTSTORE_LOG_off
-#define ABSMM_EXEC_INFO_on
+#define ABSMM_EXEC_INFO_off
 //==============================================================================
 //
 // ArrayBundle class implementation (body) file
@@ -842,6 +842,8 @@ int ArrayBundle::redistStore(
   ArrayBundle *srcArraybundle,            // in    - source ArrayBundle
   ArrayBundle *dstArraybundle,            // in    - destination ArrayBundle
   RouteHandle **routehandle,              // inout - handle to precomputed comm
+  ESMC_Logical *ignoreUnmatchedFlag,      // in    - unmatched indices handling
+  int len_ignoreUnmatchedFlag,            // in    - elements in ignoreUnmatched
   InterArray<int> *srcToDstTransposeMap,  // in    - mapping src -> dst dims
   ESMC_TypeKind_Flag typekindFactor,      // in    - typekind of factor
   void *factor                            // in    - redist factor
@@ -900,6 +902,21 @@ int ArrayBundle::redistStore(
         ESMC_CONTEXT, &rc);
       return rc;
     }
+    // convert ignoreUnmatched to bool
+    if ((len_ignoreUnmatchedFlag!=1) && (len_ignoreUnmatchedFlag!=arrayCount)){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+        "ignoreUnmatchedFlag size must be 1 or arrayCount",
+        ESMC_CONTEXT, &rc);
+      return rc;
+    }
+    vector<bool> ignoreUnmatched(arrayCount);
+    if (len_ignoreUnmatchedFlag==1){
+      for (int i=0; i<arrayCount; i++)
+        ignoreUnmatched[i] = (ignoreUnmatchedFlag[0]==ESMF_TRUE);
+    }else{
+      for (int i=0; i<arrayCount; i++)
+        ignoreUnmatched[i] = (ignoreUnmatchedFlag[i]==ESMF_TRUE);
+    }
     // construct local matchList
     vector<int> matchList(arrayCount);
     vector<Array *> srcArrayVector;
@@ -918,7 +935,7 @@ int ArrayBundle::redistStore(
         bool dstMatch = dstArray->isRHCompatible(dstArrayVector[j], &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc)) return rc;
-        if (srcMatch && dstMatch){
+        if (srcMatch && dstMatch && (ignoreUnmatched[i]==ignoreUnmatched[j])){
           // found match
           matchList[i] = matchList[j];
           break;
@@ -982,13 +999,13 @@ int ArrayBundle::redistStore(
         {
           std::stringstream msg;
           msg << "AB_REDISTSTORE_LOG:" << __LINE__ << " pair #" << i <<
-            " DOES require precompute!";
+            " DOES require precompute! ignoreUnmatched=" << ignoreUnmatched[i];
           ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
         }
 #endif
         RouteHandle *rh;
         localrc = Array::redistStore(srcArray, dstArray, &rh,
-          srcToDstTransposeMap, typekindFactor, factor);
+          srcToDstTransposeMap, typekindFactor, factor, ignoreUnmatched[i]);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc)) return rc;
         // get a handle on the XXE stored in rh
@@ -1130,6 +1147,8 @@ int ArrayBundle::sparseMatMulStore(
   ArrayBundle *dstArraybundle,        // in    - destination ArrayBundle
   RouteHandle **routehandle,          // inout - handle to precomputed comm
   vector<SparseMatrix<ESMC_I4,ESMC_I4> > &sparseMatrix, // in - sparse matrix
+  ESMC_Logical *ignoreUnmatchedFlag,  // in    - unmatched indices handling
+  int len_ignoreUnmatchedFlag,        // in    - elements in ignoreUnmatched
   InterArray<int> *srcTermProcessing  // inout - srcTermProcessing parameters
   ){    
 //
@@ -1218,6 +1237,21 @@ int ArrayBundle::sparseMatMulStore(
         return rc;
       }
     }
+    // convert ignoreUnmatched to bool
+    if ((len_ignoreUnmatchedFlag!=1) && (len_ignoreUnmatchedFlag!=arrayCount)){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+        "ignoreUnmatchedFlag size must be 1 or arrayCount",
+        ESMC_CONTEXT, &rc);
+      return rc;
+    }
+    vector<bool> ignoreUnmatched(arrayCount);
+    if (len_ignoreUnmatchedFlag==1){
+      for (int i=0; i<arrayCount; i++)
+        ignoreUnmatched[i] = (ignoreUnmatchedFlag[0]==ESMF_TRUE);
+    }else{
+      for (int i=0; i<arrayCount; i++)
+        ignoreUnmatched[i] = (ignoreUnmatchedFlag[i]==ESMF_TRUE);
+    }
     // construct local matchList
     vector<int> matchList(arrayCount);
     vector<Array *> srcArrayVector;
@@ -1236,7 +1270,7 @@ int ArrayBundle::sparseMatMulStore(
         bool dstMatch = dstArray->isRHCompatible(dstArrayVector[j], &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc)) return rc;
-        if (srcMatch && dstMatch){
+        if (srcMatch && dstMatch && (ignoreUnmatched[i]==ignoreUnmatched[j])){
           // found match
           matchList[i] = matchList[j];
           break;
@@ -1296,7 +1330,7 @@ int ArrayBundle::sparseMatMulStore(
 //          localPet, i);
         RouteHandle *rh;
         localrc = Array::sparseMatMulStore(srcArray, dstArray, &rh, 
-          sparseMatrix, false, false, srcTermProcParameters[i]);
+          sparseMatrix, false, ignoreUnmatched[i], srcTermProcParameters[i]);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc)) return rc;
         // get a handle on the XXE stored in rh
