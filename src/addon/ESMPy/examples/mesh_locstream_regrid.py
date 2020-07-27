@@ -59,7 +59,7 @@ dstfield = regrid(srcfield, dstfield)
 num_nodes = numpy.prod(xctfield.data.shape[:])
 relerr = 0
 meanrelerr = 0
-if num_nodes is not 0:
+if num_nodes != 0:
     ind = numpy.where((dstfield.data != 1e20) & (xctfield.data != 0))[0]
     relerr = numpy.sum(numpy.abs(dstfield.data[ind] - xctfield.data[ind]) / numpy.abs(xctfield.data[ind]))
     meanrelerr = relerr / num_nodes
@@ -70,7 +70,7 @@ if ESMF.pet_count() > 1:
     num_nodes = helpers.reduce_val(num_nodes, op=constants.Reduce.SUM)
 
 # output the results from one processor only
-if ESMF.local_pet() is 0:
+if ESMF.local_pet() == 0:
     meanrelerr = relerr / num_nodes
     print ("ESMPy Grid Mesh Regridding Example")
     print ("  interpolation mean relative error = {0}".format(meanrelerr))

@@ -120,7 +120,7 @@ class TestField(TestBase):
                 grid = Grid(np.array([12, 12]),
                             num_peri_dims=a.periodic[0], periodic_dim=a.periodic[1], pole_dim=a.periodic[2],
                             coord_sys=a.coord_sys, coord_typekind=a.typekind_grid, staggerloc=a.staggerloc)
-                # if a.mask_values is not None and a.staggerloc is not None:
+                # if not isinstance(a.mask_values, type(None)) and not isinstance(a.staggerloc, None):
                 #     grid.add_item(GridItem.MASK, staggerloc=a.staggerloc)
                 #     for b in a.mask_values:
                 #         grid.mask[a.staggerloc][:, b] = b
@@ -129,7 +129,7 @@ class TestField(TestBase):
                               staggerloc=a.staggerloc, ndbounds=a.ndbounds)
 
                 field2 = None
-                if a.ndbounds is not None:
+                if not isinstance(a.ndbounds, type(None)):
                     if len(a.ndbounds) == 1:
                         field2 = field[7:9, 2:10, 1]
                     elif len(a.ndbounds) == 2:
@@ -173,7 +173,7 @@ class TestField(TestBase):
                 grid = Grid(np.array([12, 12, 12]),
                             num_peri_dims=a.periodic[0], periodic_dim=a.periodic[1], pole_dim=a.periodic[2],
                             coord_sys=a.coord_sys, coord_typekind=a.typekind_grid, staggerloc=a.staggerloc)
-                if a.mask_values is not None and a.staggerloc is not None:
+                if not isinstance(a.mask_values, type(None)) and not isinstance(a.staggerloc, type(None)):
                     grid.add_item(GridItem.MASK, staggerloc=a.staggerloc)
                     for b in a.mask_values:
                         grid.mask[a.staggerloc][:, :, b] = b
@@ -182,7 +182,7 @@ class TestField(TestBase):
                               staggerloc=a.staggerloc, ndbounds=a.ndbounds)
                 self.examine_field_attributes(field)
                 field2 = None
-                if a.ndbounds is not None:
+                if not isinstance(a.ndbounds, type(None)):
                     if len(a.ndbounds) == 1:
                         field2 = field[4:11, 7:9, 2:10, 1]
                     elif len(a.ndbounds) == 2:
@@ -203,10 +203,12 @@ class TestField(TestBase):
     @attr('slow')
     def test_field_create_2d_mesh(self):
         parallel = False
-        if constants._ESMF_MPIRUN_NP != 4:
-            raise SkipTest('This test must be run with 4 processors.')
-        else:
+        if pet_count() > 1:
             parallel = True
+
+        if parallel:
+            if constants._ESMF_MPIRUN_NP != 4:
+                raise SkipTest('This test must be run with 4 processors.')
 
         keywords = dict(
             meshloc=[MeshLoc.NODE, MeshLoc.ELEMENT],
@@ -283,12 +285,13 @@ class TestField(TestBase):
         return field
 
     def test_field_uniqueness(self):
-        # create mesh
         parallel = False
-        if constants._ESMF_MPIRUN_NP != 4:
-            raise SkipTest('This test must be run with 4 processors.')
-        else:
+        if pet_count() > 1:
             parallel = True
+
+        if parallel:
+            if constants._ESMF_MPIRUN_NP != 4:
+                raise SkipTest('This test must be run with 4 processors.')
 
         mesh = None
         if parallel:
@@ -403,12 +406,13 @@ class TestField(TestBase):
 
 
     def test_field_extradims_mesh(self):
-        # create mesh
         parallel = False
-        if constants._ESMF_MPIRUN_NP != 4:
-            raise SkipTest('This test must be run with 4 processors.')
-        else:
+        if pet_count() > 1:
             parallel = True
+
+        if parallel:
+            if constants._ESMF_MPIRUN_NP != 4:
+                raise SkipTest('This test must be run with 4 processors.')
 
         mesh = None
         if parallel:
@@ -466,14 +470,16 @@ class TestField(TestBase):
         assert (field2.grid.upper_bounds[0].tolist() == [5, 5])
         assert (field3.grid.upper_bounds[0].tolist() == [2, 2])
 
+    # slicing is disabled in parallel
     @attr('serial')
     def test_field_slice_mesh(self):
-        # create mesh
         parallel = False
-        if constants._ESMF_MPIRUN_NP != 4:
-            raise SkipTest('This test must be run with 4 processors.')
-        else:
+        if pet_count() > 1:
             parallel = True
+
+        if parallel:
+            if constants._ESMF_MPIRUN_NP != 4:
+                raise SkipTest('This test must be run with 4 processors.')
 
         mesh = None
         if parallel:
@@ -544,12 +550,13 @@ class TestField(TestBase):
 
     @attr('serial')
     def disable_est_field_slice_mesh_extraindices(self):
-        # create mesh
         parallel = False
-        if constants._ESMF_MPIRUN_NP != 4:
-            raise SkipTest('This test must be run with 4 processors.')
-        else:
+        if pet_count() > 1:
             parallel = True
+
+        if parallel:
+            if constants._ESMF_MPIRUN_NP != 4:
+                raise SkipTest('This test must be run with 4 processors.')
 
         mesh = None
         if parallel:

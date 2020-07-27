@@ -123,13 +123,13 @@ class Regrid(object):
 
         # Convert source and destination mask values to NumPy arrays if they
         # are present.
-        if src_mask_values is not None:
+        if not isinstance(src_mask_values, type(None)):
             src_mask_values = np.array(src_mask_values, dtype=np.int32)
-        if dst_mask_values is not None:
+        if not isinstance(dst_mask_values, type(None)):
             dst_mask_values = np.array(dst_mask_values, dtype=np.int32)
 
         # Write weights to file if requested.
-        if filename is not None:
+        if not isinstance(filename, type(None)):
             if constants._ESMF_COMM == constants._ESMF_COMM_MPIUNI:
                 msg = "Regrid(filename) requires PIO and does not work if ESMF has " \
                       "not been built with MPI support"
@@ -195,7 +195,7 @@ class Regrid(object):
             if factors:
                 self._handle_factors_(fil, fl, num_factors)
 
-        if rh_filename is not None:
+        if not isinstance(rh_filename, type(None)):
             ESMP_RouteHandleWrite(self._routehandle, rh_filename)
 
         self._srcfield = srcfield
@@ -410,7 +410,7 @@ class Regrid(object):
                 ESMP_FieldRegridRelease(self.routehandle)
 
                 # Also destroy factor allocations in Fortran
-                if self._ptr_fl is not None:
+                if not isinstance(self._ptr_fl, type(None)):
                     numfac = ct.c_int(self._num_factors)
                     self._factor_list = None
                     self._factor_index_list = None
@@ -567,14 +567,14 @@ class RegridFromFile(object):
     @initialize
     def __init__(self, srcfield, dstfield, filename=None, rh_filename=None):
 
-        if (filename is not None) and (rh_filename is not None):
+        if (not isinstance(filename, type(None))) and (not isinstance(rh_filename, type(None))):
             raise ValueError('only a regrid file or a routehandle file can be specified')
-        elif (filename is None) and (rh_filename is None):
+        elif (isinstance(filename, type(None))) and (isinstance(rh_filename, type(None))):
             raise ValueError('either a regrid file or a routehandle file must be specified')
 
-        if filename is not None:
+        if not isinstance(filename, type(None)):
             self._routehandle = ESMP_FieldSMMStore(srcfield, dstfield, filename)
-        elif rh_filename is not None:
+        elif not isinstance(rh_filename, type(None)):
             self._routehandle = ESMP_RouteHandleCreateFromFile(rh_filename)
 
         # Holds arbitrary metadata if needed by the client.

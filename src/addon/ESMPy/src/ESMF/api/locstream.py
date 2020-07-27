@@ -159,7 +159,7 @@ class LocStream(dict):
         # check types
         if not isinstance(value, (list, tuple, np.ndarray)):
             raise ValueError("type of value must be list, tuple, or numpy array")
-        if type(value) is not np.ndarray:
+        if not isinstance(value, np.ndarray):
             value = np.array(value)
         if len(value) != self.size:
             raise ValueError("value must be of length " + str(self.size))

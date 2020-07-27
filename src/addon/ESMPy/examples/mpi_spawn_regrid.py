@@ -80,7 +80,7 @@ def compute_error(dstfield, xctfield):
     num_nodes = reduce(mul, xctfield.shape)
     relerr = 0
     meanrelerr = 0
-    if num_nodes is not 0:
+    if num_nodes != 0:
         ind = numpy.where((dstfield != 1e20) & (xctfield != 0))[0]
         relerr = numpy.sum(
             numpy.abs(dstfield[ind] - xctfield[ind]) / numpy.abs(

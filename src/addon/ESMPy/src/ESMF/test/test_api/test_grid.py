@@ -78,14 +78,14 @@ class TestGrid(TestBase):
 
                 # ~~~~~~~~~~~~~~~~~~~~~~  MASK ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 # grid.mask[i] returns a numpy array containing the grid mask at the i'th stagger location
-                if grid.mask[i] is not None:
+                if not isinstance(grid.mask[i], type(None)):
                     assert (type(grid.mask[i]) is np.ndarray)
                     assert (
                         grid.mask[i].shape == tuple(np.array(grid.upper_bounds[i]) - np.array(grid.lower_bounds[i])))
 
                 # ~~~~~~~~~~~~~~~~~~~~~~  AREA ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 # grid.area[i] returns a numpy array containing the grid cell areas at the i'th stagger location
-                if grid.area[i] is not None:
+                if not isinstance(grid.area[i], type(None)):
                     assert (type(grid.area[i]) is np.ndarray)
                     assert (
                         grid.area[i].shape == tuple(np.array(grid.upper_bounds[i]) - np.array(grid.lower_bounds[i])))
