@@ -312,7 +312,7 @@
       ! part of the supported ESMF user API!
       buff_size = offset1 ! from previous inquiry
       allocate (buffer(buff_size))
-      buffer = char (z'42')
+      buffer = char (66)
       offset2 = 0
       call ESMF_BaseSerialize (base, buffer, offset2, &
           attreconflag, ESMF_NOINQUIRE, rc=rc)

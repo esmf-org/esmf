@@ -217,6 +217,22 @@ void FTN_X(c_esmc_xgridregrid_create)(MeshCap **meshsrcpp, MeshCap **meshdstpp,
                               rc);
 }
 
+void FTN_X(c_esmc_xgridregrid_createp)(MeshCap **meshsrcpp, MeshCap **meshdstpp,
+                   MeshCap **mesh,
+                   int *compute_midmesh,
+                   int *regridMethod, 
+                    int *unmappedaction,
+                   int *nentries, ESMCI::TempWeights **tweights,
+                   int*rc) {
+  FTN_X(c_esmc_xgridregrid_create)(meshsrcpp, meshdstpp,
+                   mesh,
+                   compute_midmesh,
+                   regridMethod, 
+                   unmappedaction,
+                   nentries, tweights,
+                   rc);
+}
+
 void FTN_X(c_esmc_copy_tempweights_xgrid)(ESMCI::TempWeights **_tw, int *ii, double *w) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "c_esmc_copy_tempweights_xgrid()"

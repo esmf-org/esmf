@@ -34,6 +34,8 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 
 ! !USES:
+  use iso_c_binding
+
   use ESMF_UtilTypesMod     ! ESMF utility types
   use ESMF_InitMacrosMod    ! ESMF initializer macros
   use ESMF_BaseMod          ! ESMF base class
@@ -230,6 +232,50 @@ module ESMF_ArrayMod
   end interface
 #endif
 
+!------------------------------------------------------------------------------
+! ! Interoperability interfaces
+
+#ifndef ESMF_NO_F2018ASSUMEDTYPE
+
+  interface
+
+    subroutine c_ESMC_ArraySMMStoreInd4(srcArray, dstArray, routehandle, &
+      typekindFactors, factorList, factorListCount, factorIndexList, &
+      ignoreUnmatched, srcTermProcessing, pipelineDepth, rc)
+      import                :: ESMF_Array, ESMF_RouteHandle
+      import                :: ESMF_TypeKind_Flag, ESMF_InterArray, ESMF_Logical
+      type(ESMF_Array)      :: srcArray, dstArray
+      type(ESMF_RouteHandle):: routehandle
+      type(ESMF_TypeKind_Flag):: typekindFactors
+      type(*)               :: factorList(*)
+      integer               :: factorListCount
+      type(ESMF_InterArray) :: factorIndexList
+      type(ESMF_Logical)    :: ignoreUnmatched
+      integer               :: srcTermProcessing, pipelineDepth
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_ArraySMMStoreInd8(srcArray, dstArray, routehandle, &
+      typekindFactors, factorList, factorListCount, factorIndexList, &
+      ignoreUnmatched, srcTermProcessing, pipelineDepth, rc)
+      import                :: ESMF_Array, ESMF_RouteHandle
+      import                :: ESMF_TypeKind_Flag, ESMF_InterArray, ESMF_Logical
+      type(ESMF_Array)      :: srcArray, dstArray
+      type(ESMF_RouteHandle):: routehandle
+      type(ESMF_TypeKind_Flag):: typekindFactors
+      type(*)               :: factorList(*)
+      integer               :: factorListCount
+      type(ESMF_InterArray) :: factorIndexList
+      type(ESMF_Logical)    :: ignoreUnmatched
+      integer               :: srcTermProcessing, pipelineDepth
+      integer               :: rc
+    end subroutine
+
+  end interface
+
+#endif
+
+!------------------------------------------------------------------------------
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -725,7 +771,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (dynamicMask%typeKey=="R8R8R8") then
         ! insert dynMaskState into RouteHandle for Fortran layer
         dynMaskStateR8R8R8%wrap => dynamicMask%dmsR8R8R8
-        call c_ESMC_RouteHandleSetAS(routehandle, dynMaskStateR8R8R8, localrc)
+        call c_ESMC_RouteHandleSetASR8R8R8(routehandle, dynMaskStateR8R8R8, &
+          localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! set required dynamic masking info for C++ layer
@@ -750,7 +797,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       else if (dynamicMask%typeKey=="R8R8R8V") then
         ! insert dynMaskState into RouteHandle for Fortran layer
         dynMaskStateR8R8R8V%wrap => dynamicMask%dmsR8R8R8V
-        call c_ESMC_RouteHandleSetAS(routehandle, dynMaskStateR8R8R8V, localrc)
+        call c_ESMC_RouteHandleSetASR8R8R8V(routehandle, dynMaskStateR8R8R8V, &
+          localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! set required dynamic masking info for C++ layer
@@ -774,7 +822,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       else if (dynamicMask%typeKey=="R4R8R4") then
         ! insert dynMaskState into RouteHandle for Fortran layer
         dynMaskStateR4R8R4%wrap => dynamicMask%dmsR4R8R4
-        call c_ESMC_RouteHandleSetAS(routehandle, dynMaskStateR4R8R4, localrc)
+        call c_ESMC_RouteHandleSetASR4R8R4(routehandle, dynMaskStateR4R8R4, &
+          localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! set required dynamic masking info for C++ layer
@@ -798,7 +847,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       else if (dynamicMask%typeKey=="R4R8R4V") then
         ! insert dynMaskState into RouteHandle for Fortran layer
         dynMaskStateR4R8R4V%wrap => dynamicMask%dmsR4R8R4V
-        call c_ESMC_RouteHandleSetAS(routehandle, dynMaskStateR4R8R4V, localrc)
+        call c_ESMC_RouteHandleSetASR4R8R4V(routehandle, dynMaskStateR4R8R4V, &
+          localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! set required dynamic masking info for C++ layer
@@ -822,7 +872,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       else if (dynamicMask%typeKey=="R4R4R4") then
         ! insert dynMaskState into RouteHandle for Fortran layer
         dynMaskStateR4R4R4%wrap => dynamicMask%dmsR4R4R4
-        call c_ESMC_RouteHandleSetAS(routehandle, dynMaskStateR4R4R4, localrc)
+        call c_ESMC_RouteHandleSetASR4R4R4(routehandle, dynMaskStateR4R4R4, &
+          localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! set required dynamic masking info for C++ layer
@@ -846,7 +897,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       else if (dynamicMask%typeKey=="R4R4R4V") then
         ! insert dynMaskState into RouteHandle for Fortran layer
         dynMaskStateR4R4R4V%wrap => dynamicMask%dmsR4R4R4V
-        call c_ESMC_RouteHandleSetAS(routehandle, dynMaskStateR4R4R4V, localrc)
+        call c_ESMC_RouteHandleSetASR4R4R4V(routehandle, dynMaskStateR4R4R4V, &
+          localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! set required dynamic masking info for C++ layer

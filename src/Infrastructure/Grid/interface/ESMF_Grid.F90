@@ -30910,7 +30910,7 @@ subroutine ESMF_OutputScripGridFile(filename, grid, rc)
     integer :: varsize
     integer :: ndims, dims(ESMF_MAXDIM)
     integer :: PetNo, PetCnt
-    integer, pointer :: Staggers(:)
+    type(ESMF_STAGGERLOC), allocatable :: Staggers(:)
     integer :: staggercnt, decount, xdim, ydim
     integer :: londim, londim1, latdim, latdim1, gridid
     integer :: rankid, fourid, varid1, varid2, varid3, varid4

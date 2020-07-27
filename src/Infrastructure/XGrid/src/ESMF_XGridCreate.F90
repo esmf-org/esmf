@@ -1048,7 +1048,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
     ! When there is only 1 grid per side, optimization can be done but it's not clear for multiple Grids.
     compute_midmesh = 0
     do i = 1, ngrid_a
-      call c_esmc_xgridregrid_create(meshAt(i), mesh, &
+      call c_esmc_xgridregrid_createP(meshAt(i), mesh, &
         tmpmesh, compute_midmesh, &
         ESMF_REGRIDMETHOD_CONSERVE, &
         ESMF_UNMAPPEDACTION_IGNORE, &
@@ -1080,7 +1080,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
       
       ! Now the reverse direction
 #ifndef BOB_XGRID_DEBUG
-      call c_esmc_xgridregrid_create(mesh, meshAt(i), &
+      call c_esmc_xgridregrid_createP(mesh, meshAt(i), &
         tmpmesh, compute_midmesh, &
         ESMF_REGRIDMETHOD_CONSERVE, &
         ESMF_UNMAPPEDACTION_IGNORE, &
@@ -1115,7 +1115,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
     ! now do the B side
     do i = 1, ngrid_b
 #ifndef BOB_XGRID_DEBUG
-      call c_esmc_xgridregrid_create(meshBt(i), mesh, &
+      call c_esmc_xgridregrid_createP(meshBt(i), mesh, &
         tmpmesh, compute_midmesh, &
         ESMF_REGRIDMETHOD_CONSERVE, &
         ESMF_UNMAPPEDACTION_IGNORE, &
@@ -1148,7 +1148,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
     
       ! Now the reverse direction
 #ifndef BOB_XGRID_DEBUG
-      call c_esmc_xgridregrid_create(mesh, meshBt(i), &
+      call c_esmc_xgridregrid_createP(mesh, meshBt(i), &
         tmpmesh, compute_midmesh, &
         ESMF_REGRIDMETHOD_CONSERVE, &
         ESMF_UNMAPPEDACTION_IGNORE, &

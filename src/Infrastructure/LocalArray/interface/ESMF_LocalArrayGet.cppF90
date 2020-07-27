@@ -194,6 +194,8 @@ module ESMF_LocalArrayGetMod
 !EOPI
 !------------------------------------------------------------------------------
 ! !USES:
+  use iso_c_binding
+
   use ESMF_UtilTypesMod     ! ESMF utility types
   use ESMF_InitMacrosMod    ! ESMF initializer macros
   use ESMF_BaseMod          ! ESMF base class
@@ -246,6 +248,26 @@ character(*), parameter, private :: version = &
 !EOPI
 end interface
 
+
+!------------------------------------------------------------------------------
+! ! Interoperability interfaces
+
+^ifndef ESMF_NO_F2018ASSUMEDTYPE
+
+  interface
+
+    subroutine c_ESMC_LocalArrayGetFPtr(larray, fptr, rc)
+      import                :: ESMF_LocalArray
+      type(ESMF_LocalArray) :: larray
+      type(*)               :: fptr
+      integer               :: rc
+    end subroutine
+
+  end interface
+
+^endif
+
+!------------------------------------------------------------------------------
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

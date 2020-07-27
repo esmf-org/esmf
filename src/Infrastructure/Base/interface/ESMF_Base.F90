@@ -47,6 +47,8 @@ module ESMF_BaseMod
 !
 !------------------------------------------------------------------------------
 ! !USES:
+  use iso_c_binding
+
   use ESMF_UtilTypesMod     ! ESMF utility types
   use ESMF_InitMacrosMod    ! ESMF initializer macros
   use ESMF_IOUtilMod        ! ESMF I/O utilities
@@ -127,7 +129,11 @@ module ESMF_BaseMod
       public ESMF_GetVM
       public ESMF_IsProxy
 
-!
+#ifndef ESMF_NO_F2018ASSUMEDTYPE
+      public c_ESMC_GetName, c_ESMC_GetId
+      public c_ESMC_GetVMId, c_ESMC_SetVMId
+      public c_ESMC_AttributeLinkRemove, c_ESMC_AttributeLink
+#endif
 
 !==============================================================================
 !
@@ -139,6 +145,62 @@ module ESMF_BaseMod
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
                '$Id$'
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+! ! Interoperability interfaces
+
+#ifndef ESMF_NO_F2018ASSUMEDTYPE
+
+  interface
+
+    subroutine c_ESMC_GetName(base, name, rc)
+      type(*)               :: base
+      character(*)          :: name
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_GetId(base, id, rc)
+      import                :: ESMF_VMId
+      type(*)               :: base
+      integer               :: id
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_GetVMId(base, vmid, rc)
+      import                :: ESMF_VMId
+      type(*)               :: base
+      type(ESMF_VMId)       :: vmid
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_SetVMId(base, vmid, rc)
+      import                :: ESMF_VMId
+      type(*)               :: base
+      type(ESMF_VMId)       :: vmid
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_AttributeLink(source, destination, linkChanges, rc)
+      import                :: ESMF_Logical
+      type(*)               :: source
+      type(*)               :: destination
+      type(ESMF_Logical)    :: linkChanges
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_AttributeLinkRemove(source, destination, linkChanges, rc)
+      import                :: ESMF_Logical
+      type(*)               :: source
+      type(*)               :: destination
+      type(ESMF_Logical)    :: linkChanges
+      integer               :: rc
+    end subroutine
+
+  end interface
+
+#endif
+
 !------------------------------------------------------------------------------
 
       contains

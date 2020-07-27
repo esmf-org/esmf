@@ -34,6 +34,8 @@ module ESMF_ArrayHaMod
 !------------------------------------------------------------------------------
 
 ! !USES:
+  use iso_c_binding
+
   use ESMF_UtilTypesMod     ! ESMF utility types
   use ESMF_InitMacrosMod    ! ESMF initializer macros
   use ESMF_BaseMod          ! ESMF base class
@@ -110,7 +112,34 @@ module ESMF_ArrayHaMod
 
   end interface
 
-      
+!------------------------------------------------------------------------------
+! ! Interoperability interfaces
+
+#ifndef ESMF_NO_F2018ASSUMEDTYPE
+
+  interface
+
+    subroutine c_ESMC_ArrayRedistStore(srcArray, dstArray, routehandle, &
+      srcToDstTransposeMap, typekind, factor, ignoreUnmatched, pipelineDepth, &
+      rc)
+      import                :: ESMF_Array, ESMF_RouteHandle
+      import                :: ESMF_InterArray, ESMF_TypeKind_Flag, ESMF_Logical
+      type(ESMF_Array)      :: srcArray, dstArray
+      type(ESMF_RouteHandle):: routehandle
+      type(ESMF_InterArray) :: srcToDstTransposeMap
+      type(ESMF_TypeKind_Flag):: typekind
+      type(*)               :: factor
+      type(ESMF_Logical)    :: ignoreUnmatched
+      integer               :: pipelineDepth
+      integer               :: rc
+    end subroutine
+
+  end interface
+
+#endif
+
+!------------------------------------------------------------------------------
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 

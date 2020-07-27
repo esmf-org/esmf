@@ -34,6 +34,8 @@ module ESMF_ContainerMod
 !------------------------------------------------------------------------------
 
 ! !USES:
+  use iso_c_binding
+  
   use ESMF_UtilTypesMod     ! ESMF utility types
   use ESMF_InitMacrosMod    ! ESMF initializer macros
   use ESMF_LogErrMod        ! ESMF error handling
@@ -90,6 +92,12 @@ module ESMF_ContainerMod
   public ESMF_ContainerGarbageOff
   public ESMF_ContainerGarbageClear
   public ESMF_ContainerGarbageGet
+  
+#ifndef ESMF_NO_F2018ASSUMEDTYPE
+  public ESMF_ContainerAddUDT
+  public ESMF_ContainerGetUDT
+  public ESMF_ContainerGetUDTByIndex
+#endif
   
 !EOPI
 !------------------------------------------------------------------------------
@@ -187,6 +195,45 @@ module ESMF_ContainerMod
 !   Query Container for garbage.
 !EOPI 
   end interface
+
+!------------------------------------------------------------------------------
+! ! Interoperability interfaces
+
+#ifndef ESMF_NO_F2018ASSUMEDTYPE
+
+  interface
+
+    subroutine ESMF_ContainerAddUDT(ptr, itemName, udtPtr, rc)
+      import                :: ESMF_ItemOrder_Flag
+      type(*)               :: ptr
+      character(*)          :: itemName
+      type(*)               :: udtPtr
+      integer               :: rc
+    end subroutine
+
+    subroutine ESMF_ContainerGetUDT(ptr, itemName, udtPtr, rc)
+      import                :: ESMF_ItemOrder_Flag
+      type(*)               :: ptr
+      character(*)          :: itemName
+      type(*)               :: udtPtr
+      integer               :: rc
+    end subroutine
+
+    subroutine ESMF_ContainerGetUDTByIndex(ptr, itemIndex, udtPtr, &
+      itemorderflag, rc)
+      import                :: ESMF_ItemOrder_Flag
+      type(*)               :: ptr
+      integer               :: itemIndex
+      type(*)               :: udtPtr
+      type(ESMF_ItemOrder_Flag):: itemorderflag
+      integer               :: rc
+    end subroutine
+
+  end interface
+
+#endif
+
+!------------------------------------------------------------------------------
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
