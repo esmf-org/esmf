@@ -11,8 +11,8 @@
 //==============================================================================
 #define ESMC_FILENAME "ESMCI_ArrayBundle.C"
 //==============================================================================
-#define AB_REDISTSTORE_LOG_on
-#define ABSMM_EXEC_INFO_on
+#define AB_REDISTSTORE_LOG_off
+#define ABSMM_EXEC_INFO_off
 //==============================================================================
 //
 // ArrayBundle class implementation (body) file
