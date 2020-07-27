@@ -190,9 +190,9 @@ jobs:
       - run:
           name: make install
           command: bash ~/esmf/.circleci/sh/osx/osx-make-funcs.sh "install"
-      - run:
-          name: make check
-          command: bash ~/esmf/.circleci/sh/osx/osx-make-funcs.sh "check"
+#      - run:
+#          name: make check
+#          command: bash ~/esmf/.circleci/sh/osx/osx-make-funcs.sh "check"
       - run:
           name: Collect Test Artifacts
           command: bash ~/esmf/.circleci/sh/osx/osx-make-funcs.sh "collect-test-results"
@@ -225,21 +225,21 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - develop
     jobs:
-      - build-esmf
-      - build-run-tests:
-          name: build-run-<< matrix.target >>
-          matrix:
-            parameters:
-              target: ["unit_tests", "system_tests", "examples"]
-          requires:
-            - build-esmf
+#      - osx-esmf
+#      - build-esmf
+#      - build-run-tests:
+#          name: build-run-<< matrix.target >>
+#          matrix:
+#            parameters:
+#              target: ["unit_tests", "system_tests", "examples"]
+#          requires:
+#            - build-esmf
       - build-docs
       - publish-docs:
           requires:
             - build-docs
-      - osx-esmf
 #      - external_demos:
 #          name: placeholder-external_demos
 #          requires:

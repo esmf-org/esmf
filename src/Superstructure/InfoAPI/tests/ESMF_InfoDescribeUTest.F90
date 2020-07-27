@@ -105,9 +105,9 @@ program ESMF_InfoDescribeUTest
   isPresent = ESMF_InfoIsPresent(eidesc_create_info%info, "b", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_Test(((isPresent .eqv. .false.) .and. \
-                  (eidesc_create_info2%addBaseAddress .eqv. .false.)), \
-                 name, failMsg, result, ESMF_SRCLINE)
+  call ESMF_Test(((isPresent .eqv. .false.) .and. &
+    (eidesc_create_info2%addBaseAddress .eqv. .false.)), &
+    name, failMsg, result, ESMF_SRCLINE)
 
   call eidesc_create_info%Destroy(rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)

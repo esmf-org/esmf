@@ -305,12 +305,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!     Free resources used by regrid objec
+!     Release resources associated with a regrid operation. After this call
+!     {\tt routehandle} becomes invalid.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [routehandle]
-!           Handle carrying the sparse matrix
+!       Handle to the precomputed Route.
 !     \item[{[noGarbage]}]
 !     If set to {\tt .TRUE.} the object will be fully destroyed and removed
 !     from the ESMF garbage collection system. Note however that under this 
