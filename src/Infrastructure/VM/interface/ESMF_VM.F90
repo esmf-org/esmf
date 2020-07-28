@@ -1109,7 +1109,7 @@ contains
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that reduces a contiguous data 
+!   Collective {\tt ESMF\_VM} communication call that reduces a contiguous data
 !   array of <type><kind> across the {\tt ESMF\_VM} object 
 !   into a single value of the same <type><kind>. The result is
 !   returned on all PETs. Different reduction operations can be specified.
@@ -1420,8 +1420,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
-!   from all PETs of an {\tt ESMF\_VM} object into an array on all PETs.
+!   Collective {\tt ESMF\_VM} communication call that gathers contiguous data
+!   of <type><kind> from all PETs of an {\tt ESMF\_VM} object into an array on
+!   each PET. The data received in {\tt recvData} is identical across all PETs.
+!   The {\tt count} elements sent from the {\tt sendData} array on PET {\tt i}
+!   are stored contiguously in the {\tt recvData} array starting at position
+!   {\tt i} $\times$ {\tt count} $+$ 1.
 !
 !   This method is overloaded for:
 !   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
@@ -1434,10 +1438,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        {\tt ESMF\_VM} object.
 !   \item[sendData]
 !        Contiguous data array holding data to be sent. All PETs must specify a
-!        valid source array.
+!        valid source array. The first {\tt count} elements on each PET are sent.
 !   \item[recvData] 
 !        Contiguous data array for data to be received. All PETs must specify a
-!        valid {\tt recvData} argument.
+!        valid {\tt recvData} argument large enough to accommodate the received
+!        data.
 !   \item[count] 
 !        Number of elements to be gathered from each PET. Must be the
 !        same on all PETs.
@@ -1837,8 +1842,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
-!   from all PETs of an {\tt ESMF\_VM} object into an array on all PETs.
+!   Collective {\tt ESMF\_VM} communication call that gathers contiguous data
+!   of <type><kind> from all PETs of an {\tt ESMF\_VM} object into an array on
+!   each PET. The data received in {\tt recvData} is identical across all PETs.
+!   The {\tt sendCount} elements sent from the {\tt sendData} array on PET
+!   {\tt i} are stored contiguously in the {\tt recvData} array starting at
+!   position {\tt recvOffsets(i)}.
 !
 !   This method is overloaded for:
 !   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
@@ -1862,9 +1871,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        PETs.
 !   \item[recvData] 
 !        Contiguous data array for data to be received. All PETs must specify a
-!        valid {\tt recvData} argument.
+!        valid {\tt recvData} argument large enough to accommodate the received
+!        data.
 !   \item[recvCounts] 
-!        Number of {\tt recvData} elements to be received from corresponding
+!        Number of {\tt recvData} elements to be received from the corresponding
 !        source PET.
 !   \item[recvOffsets] 
 !        Offsets in units of elements in {\tt recvData} marking the start of
@@ -2276,7 +2286,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that reduces a contiguous data 
+!   Collective {\tt ESMF\_VM} communication call that reduces a contiguous data
 !   array across the {\tt ESMF\_VM} object into a contiguous data array of the
 !   same <type><kind>. The result array is returned on all PETs. 
 !   Different reduction operations can be specified.
@@ -2656,9 +2666,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that performs a total exchange
-!   operation, sending pieces of the contiguous data buffer {\tt sendData} to
-!   all other PETs while receiving data into the contiguous data buffer
-!   {\tt recvData} from all other PETs.
+!   operation on the contiguous data of <type><kind>. PET {\tt i} sends
+!   contiguous {\tt sendCount} elements of its {\tt sendData} array to every
+!   PET, including itself. The {\tt sendCount} elements sent to PET {\tt j} are
+!   those starting at position {\tt j} $\times$ {\tt sendCount} $+$ 1, and are
+!   stored in {\tt recvData} on PET $j$ in position {\tt i} $\times$
+!   {\tt recvCount} $+$ 1.
 !
 !   This method is overloaded for:
 !   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
@@ -2682,7 +2695,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        each destination PET.
 !   \item[recvData] 
 !        Contiguous data array for data to be received. All PETs must specify a
-!        valid {\tt recvData} argument.
+!        valid {\tt recvData} argument large enough to accommodate the received
+!        data.
 !   \item[recvCount] 
 !        Number of {\tt recvData} elements to be received by local PET from
 !        each source PET.
@@ -2971,9 +2985,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that performs a total exchange
-!   operation, sending pieces of the contiguous data buffer {\tt sendData} to
-!   all other PETs while receiving data into the contiguous data buffer
-!   {\tt recvData} from all other PETs.
+!   operation on the contiguous data of <type><kind>. PET {\tt i} sends
+!   contiguous elements of its {\tt sendData} array to all PETs, including
+!   itself. The {\tt sendCount(j)} elements sent to PET {\tt j} are
+!   those starting at position {\tt sendOffsets(j)}, and are
+!   stored in {\tt recvData} on PET $j$ in position {\tt recvOffsets(i)}.
 !
 !   This method is overloaded for:
 !   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
@@ -3001,7 +3017,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        element sequence to be sent from local PET to destination PET.
 !   \item[recvData] 
 !        Contiguous data array for data to be received. All PETs must specify a
-!        valid {\tt recvData} argument.
+!        valid {\tt recvData} argument large enough to accommodate the received
+!        data.
 !   \item[recvCounts] 
 !        Number of {\tt recvData} elements to be received by local PET from
 !        source PET.
@@ -3480,8 +3497,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that broadcasts a contiguous 
-!   data array from {\tt rootPet} to all other PETs of the {\tt ESMF\_VM}
-!   object.
+!   data array of <type><kind> from {\tt rootPet} to all other PETs of the 
+!   {\tt ESMF\_VM} object. When the call returns, the {\tt bcstData} array
+!   on all PETs contains the same data as on {\tt rootPet}.
 !
 !   This method is overloaded for:
 !   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
@@ -3496,7 +3514,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[bcstData]
 !        Contiguous data array. On {\tt rootPet} {\tt bcstData} holds data that
 !        is to be broadcasted to all other PETs. On all other PETs 
-!        {\tt bcstData} is used to receive the broadcasted data.
+!        {\tt bcstData} is used to receive the broadcasted data and must be
+!        large enough to accommodate the received data.
 !   \item[count] 
 !        Number of elements in {/bcstData}. Must be the same on all PETs.
 !   \item[rootPet] 
@@ -4370,9 +4389,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
-!   from all PETs of an {\tt ESMF\_VM} object (including {\tt rootPet}) into an
-!   array on {\tt rootPet}.
+!   Collective {\tt ESMF\_VM} communication call that gathers contiguous data
+!   of <type><kind> from all PETs of an {\tt ESMF\_VM} object (including the 
+!   {\tt rootPet} itself) into an array on {\tt rootPet}.
+!   The {\tt count} elements sent from the {\tt sendData} array on PET {\tt i}
+!   are stored contiguously in the {\tt recvData} array on {\tt rootPet}
+!   starting at position {\tt i} $\times$ {\tt count} $+$ 1.
 !
 !   This method is overloaded for:
 !   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
@@ -4387,8 +4409,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        Contiguous data array holding data to be sent. All PETs must specify a
 !        valid source array.
 !   \item[recvData] 
-!        Contiguous data array for data to be received. Only the {\tt recvData}
-!        array specified by the {\tt rootPet} will be used by this method.
+!        Contiguous data array for data to be received. Only {\tt recvData}
+!        specified by the {\tt rootPet} will be used by this method, and must
+!        be large enough to accommodate the received data.
 !   \item[count] 
 !        Number of elements to be sent from each PET to {\tt rootPet}. Must be
 !        the same on all PETs.
@@ -4865,8 +4888,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
-!   from all PETs of an {\tt ESMF\_VM} object into an array on rootPet.
+!   Collective {\tt ESMF\_VM} communication call that gathers contiguous data
+!   of <type><kind> from all PETs of an {\tt ESMF\_VM} object (including the 
+!   {\tt rootPet} itself) into an array on {\tt rootPet}.
+!   The {\tt sendCount} elements sent from the {\tt sendData} array on PET
+!   {\tt i} are stored contiguously in the {\tt recvData} array on {\tt rootPet}
+!   starting at position {\tt recvOffsets(i)}.
 !
 !   This method is overloaded for:
 !   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
@@ -4889,8 +4916,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        Number of {\tt sendData} elements to send from local PET to all other
 !        PETs.
 !   \item[recvData] 
-!        Contiguous data array for data to be received. Only the {\tt recvData}
-!        array specified by the {\tt rootPet} will be used by this method.
+!        Contiguous data array for data to be received. Only {\tt recvData}
+!        specified by the {\tt rootPet} will be used by this method, and must
+!        be large enough to accommodate the received data.
 !   \item[recvCounts] 
 !        An integer array (of length group size, specified in VM object) containing 
 !        number of {\tt recvData} elements to be received from corresponding
@@ -5050,7 +5078,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMGatherVR8()"
 !BOPI
-! !IROUTINE: ESMF_VMGatherV - AllGatherV 8-byte reals
+! !IROUTINE: ESMF_VMGatherV - GatherV 8-byte reals
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMGatherV()
@@ -6476,7 +6504,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that reduces a contiguous data 
+!   Collective {\tt ESMF\_VM} communication call that reduces a contiguous data
 !   array across the {\tt ESMF\_VM} object into a contiguous data array of 
 !   the same <type><kind>. The result array is returned on {\tt rootPet}. 
 !   Different reduction operations can be specified.
@@ -6802,9 +6830,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that scatters contiguous data 
-!   from the {\tt rootPet} to all PETs across the {\tt ESMF\_VM} object
-!   (including {\tt rootPet}).
+!   Collective {\tt ESMF\_VM} communication call that scatters contiguous data
+!   of <type><kind> from {\tt rootPet} across all the PETs of an {\tt ESMF\_VM}
+!   object. Every PET, including {\tt rootPet}, receives a portion of the data.
+!   The {\tt count} number of elements received by PET {\tt i} originate from
+!   the {\tt sendData} array on {\tt rootPet}, starting at position {\tt i}
+!   $\times$ {\tt count} $+$ 1. Each PET stores the received contiguous data
+!   portion at the start of its {\tt recvData} array.
 !
 !   This method is overloaded for:
 !   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
@@ -6820,7 +6852,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        array specified by the {\tt rootPet} will be used by this method.
 !   \item[recvData] 
 !        Contiguous data array for data to be received. All PETs must specify a
-!        valid destination array.
+!        valid destination array large enough to accommodate the received data.
 !   \item[count] 
 !        Number of elements to be sent from {\tt rootPet} to each of the PETs.
 !        Must be the same on all PETs.
@@ -7226,9 +7258,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that scatters contiguous data 
-!   from the {\tt rootPet} to all PETs across the {\tt ESMF\_VM} object
-!   (including {\tt rootPet}).
+!   Collective {\tt ESMF\_VM} communication call that scatters contiguous data
+!   of <type><kind> from {\tt rootPet} across all the PETs of an {\tt ESMF\_VM}
+!   object. Every PET, including {\tt rootPet}, receives a portion of the data.
+!   The {\tt recvCount} number of elements received by PET {\tt i} originate
+!   from the {\tt sendData} array on {\tt rootPet}, starting at position
+!   {\tt sendOffsets(i)}. Each PET stores the received contiguous data
+!   portion at the start of its {\tt recvData} array.
 !
 !   This method is overloaded for:
 !   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
@@ -7249,7 +7285,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        element sequence to be sent to receive PET.
 !   \item[recvData] 
 !        Contiguous data array for data to be received. All PETs must specify a
-!        valid {\tt recvData} argument.
+!        valid {\tt recvData} argument large enough to accommodate the received
+!        data.
 !   \item[recvCount] 
 !        Number of {\tt recvData} elements to receive by local PET from
 !        {\tt rootPet}.
