@@ -140,8 +140,7 @@ extern "C" {
   void FTN_X(c_esmc_vmallgatherv)(ESMCI::VM **vm,
     void *sendData, int *sendCount,
     void *recvData, int *recvCounts, int *recvOffsets,
-    ESMC_TypeKind_Flag *dtk, int *rc,
-    ESMCI_FortranStrLenArg sendData_len, ESMCI_FortranStrLenArg recvData_len){
+    ESMC_TypeKind_Flag *dtk, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmallgatherv()"
     // Initialize return code; assume routine not implemented
@@ -164,10 +163,7 @@ extern "C" {
       vmt = vmR8;
       break;
     case ESMC_TYPEKIND_CHARACTER:
-      if (sendData_len == 1 && recvData_len == 1)
-        vmt = vmBYTE;
-      else
-        localrc = ESMF_RC_ARG_SIZE;  // TODO: fix this
+      vmt = vmBYTE;
       break;
     default:
       localrc = ESMC_RC_ARG_BAD;
@@ -285,8 +281,7 @@ extern "C" {
   void FTN_X(c_esmc_vmalltoallv)(ESMCI::VM **vm,
     void *sendData, int *sendCounts, int *sendOffsets,
     void *recvData, int *recvCounts, int *recvOffsets, 
-    ESMC_TypeKind_Flag *dtk, int *rc,
-    ESMCI_FortranStrLenArg sendData_len, ESMCI_FortranStrLenArg recvData_len){
+    ESMC_TypeKind_Flag *dtk, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmalltoallv()"
     // Initialize return code; assume routine not implemented
@@ -312,10 +307,7 @@ extern "C" {
       vmt = vmL4;
       break;
     case ESMC_TYPEKIND_CHARACTER:
-      if (sendData_len == 1 && recvData_len == 1)
-        vmt = vmBYTE;
-      else
-        localrc = ESMF_RC_ARG_SIZE;  // TODO: fix this
+      vmt = vmBYTE;
       break;
     default:
       localrc = ESMC_RC_ARG_BAD;

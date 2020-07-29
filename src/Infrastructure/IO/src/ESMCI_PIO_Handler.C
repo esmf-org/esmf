@@ -1589,6 +1589,22 @@ void PIO_Handler::attPackPut (
                            ESMF_RC_FILE_WRITE, (*rc))) return;
         break;
       }
+      case ESMC_TYPEKIND_I4: {
+        const std::vector<int> value = jcurr.get<std::vector<int>>();
+        piorc = pio_cpp_put_att_ints (pioFileDesc, vardesc,
+                                      it.key().c_str(), value.data(), size);
+        if (!CHECKPIOERROR(piorc, "Attempting to set I4 Attribute: " + it.key(),
+                           ESMF_RC_FILE_WRITE, (*rc))) return;
+        break;
+      }
+      case ESMC_TYPEKIND_R4: {
+        const std::vector<float> value = jcurr.get<std::vector<float>>();
+        piorc = pio_cpp_put_att_floats (pioFileDesc, vardesc,
+                                         it.key().c_str(), value.data(), size);
+        if (!CHECKPIOERROR(piorc, "Attempting to set R4 Attribute: " + it.key(),
+                           ESMF_RC_FILE_WRITE, (*rc))) return;
+        break;
+      }
       default:
         if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ATTR_NOTSET,
                                           "Attribute " + it.key() + " has unsupported value type",

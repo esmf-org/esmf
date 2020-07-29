@@ -125,37 +125,37 @@ class Mesh(object):
         # handle input arguments
         fromfile = False
         # in memory
-        if (parametric_dim is not None) or (spatial_dim is not None):
+        if (not isinstance(parametric_dim, type(None))) or (not isinstance(spatial_dim, type(None))):
             # parametric_dim and spatial_dim are required for in-memory mesh creation
-            if (parametric_dim is None) or (spatial_dim is None):
+            if (isinstance(parametric_dim, type(None))) or (isinstance(spatial_dim, type(None))):
                 warning.warn("both parametric_dim and spatial_dim must be specified")
             # raise warnings for the from-file options
-            if filename is not None:
+            if not isinstance(filename, type(None)):
                 warning.warn("filename is only used for meshes created from file, this argument will be ignored.")
-            if filetype is not None:
+            if not isinstance(filetype, type(None)):
                 warning.warn("filetype is only used for meshes created from file, this argument will be ignored.")
-            if convert_to_dual is not None:
+            if not isinstance(convert_to_dual, type(None)):
                 warning.warn("convert_to_dual is only used for meshes created from file, this argument will be ignored.")
-            if add_user_area is not None:
+            if not isinstance(add_user_area, type(None)):
                 warning.warn("add_user_area is only used for meshes created from file, this argument will be ignored.")
-            if meshname is not "":
+            if meshname != "":
                 warning.warn("meshname is only used for meshes created from file, this argument will be ignored.")
-            if mask_flag is not None:
+            if not isinstance(mask_flag, type(None)):
                 warning.warn("mask_flag is only used for meshes created from file, this argument will be ignored.")
-            if varname is not "":
+            if varname != "":
                 warning.warn("varname is only used for meshes created from file, this argument will be ignored.")
         # filename and filetype are required for from-file mesh creation
-        elif (filename is None) or (filetype is None):
+        elif (isinstance(filename, type(None))) or (isinstance(filetype, type(None))):
             raise MeshArgumentError ("must supply either parametric_dim and spatial_dim for an in-memory mesh or filename and filetype for a from-file mesh")
         # from file
         else:
             fromfile = True
             #raise warnings for all in-memory grid options
-            if parametric_dim is not None:
+            if not isinstance(parametric_dim, type(None)):
                 warning.warn("parametric_dim is only used for meshes created in memory, this argument will be ignored.")
-            if spatial_dim is not None:
+            if not isinstance(spatial_dim, type(None)):
                 warning.warn("spatial_dim is only used for meshes created in memory, this argument will be ignored.")
-            if coord_sys is not None:
+            if not isinstance(coord_sys, type(None)):
                 warning.warn("coord_sys is only used for meshes created in memory, this argument will be ignored.")
 
         # ctypes stuff
@@ -433,32 +433,32 @@ class Mesh(object):
 
         # initialize not fromfile variables
         self._element_count = element_count
-        if element_ids.dtype is not np.int32:
+        if not isinstance(element_ids.dtype, np.int32):
             self._element_ids = np.array(element_ids, dtype=np.int32)
         else:
             self._element_ids = element_ids
-        if element_types.dtype is not np.int32:
+        if not isinstance(element_types.dtype, np.int32):
             self._element_types = np.array(element_types, dtype=np.int32)
         else:
             self._element_types = element_types
-        if element_conn.dtype is not np.int32:
+        if not isinstance(element_conn.dtype, np.int32):
             self._element_conn = np.array(element_conn, dtype=np.int32)
         else:
             self._element_conn = element_conn
-        if element_mask is not None:
-            if element_mask.dtype is not np.int32:
+        if not isinstance(element_mask, type(None)):
+            if not isinstance(element_mask.dtype, np.int32):
                 self._element_mask = np.array(element_mask, dtype=np.int32)
             else:
                 self._element_mask = element_mask
             self._mask[1] = self._element_mask
-        if element_area is not None:
-            if element_area.dtype is not np.float64:
+        if not isinstance(element_area, type(None)):
+            if not isinstance(element_area.dtype, np.float64):
                 self._element_area = np.array(element_area, dtype=np.float64)
             else:
                 self._element_area = element_area
             self._area = self._element_area
-        if element_coords is not None:
-            if element_coords.dtype is not np.float64:
+        if not isinstance(element_coords, type(None)):
+            if not isinstance(element_coords.dtype, np.float64):
                 self._element_coords = np.array(element_coords, dtype=np.float64)
             else:
                 self._element_coords = element_coords
@@ -497,15 +497,15 @@ class Mesh(object):
         """
 
         self._node_count = node_count
-        if node_ids.dtype is not np.int32:
+        if not isinstance(node_ids.dtype, np.int32):
             self._node_ids = np.array(node_ids, dtype=np.int32)
         else:
             self._node_ids = node_ids
-        if node_coords.dtype is not np.float64:
+        if not isinstance(node_coords.dtype, np.float64):
             self._node_coords = np.array(node_coords, dtype=np.float64)
         else:
             self._node_coords = node_coords
-        if node_owners.dtype is not np.int32:
+        if not isinstance(node_owners.dtype, np.int32):
             self._node_owners = np.array(node_owners, dtype=np.int32)
         else:
             self._node_owners = node_owners

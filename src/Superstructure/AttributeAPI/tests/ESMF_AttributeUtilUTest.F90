@@ -54,6 +54,15 @@ program ESMF_AttributeUtilUTest
   type(ESMF_FieldBundle) :: src_fb, dst_fb
   type(ESMF_Info) :: infoh, infoh2
   character(:), allocatable :: actual
+  type(ESMF_Grid) :: grid
+  type(ESMF_Field) :: field,field2,field3,field4
+  integer :: i,j,count,ii,n
+  character(len=ESMF_MAXSTR) :: attname
+  type(ESMF_TYPEKIND_FLAG) :: tk
+  integer, pointer :: iptr(:)
+  integer, dimension(2) :: atos
+  real(ESMF_KIND_R4), dimension(4) :: arr
+  real(ESMF_KIND_R8), dimension(3) :: arr2
 
 !------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -115,6 +124,214 @@ program ESMF_AttributeUtilUTest
   ! Must abort to prevent possible hanging due to communications.
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   !----------------------------------------------------------------------------
+
+  !----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Setting scalars and arrays in loop"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  grid = ESMF_GridCreate(countsPerDEDim1=[180], &
+             & countsPerDEDim2=[91], &
+             & indexFlag=ESMF_INDEX_DELOCAL, &
+             & gridEdgeLWidth=[0,0], &
+             & gridEdgeUWidth=[1,1], &
+             & coordDep1=[1,2], &
+             & coordDep2=[1,2], &
+             & coordSys=ESMF_COORDSYS_SPH_RAD, &
+             & rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  field=ESMF_FieldCreate(grid,typekind=ESMF_TYPEKIND_R4,rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  field2=ESMF_FieldCreate(grid,typekind=ESMF_TYPEKIND_R4,rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  i=17
+  count=1
+  call ESMF_AttributeSet(field,name="bob",value=i,rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_AttributeGet(field,count=n,rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  do ii=1,n
+     call ESMF_AttributeGet(field,attributeIndex=ii,name=attname, &
+      typekind=tk, itemcount=count, rc=rc)
+     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+     allocate(iptr(count))
+
+     call ESMF_AttributeGet(field,  NAME=attname, itemcount=count, VALUELIST=iptr, RC=rc)
+     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+     call ESMF_AttributeSet(field2 , NAME=attname, itemcount=count, VALUELIST=iptr, RC=rc)
+     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+     deallocate(iptr)
+  enddo
+
+  call ESMF_AttributeSet(field2,name="bob",value=i,rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_AttributeGet(field2,name="bob",value=j,rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_Test((i==j), name, failMsg, result, ESMF_SRCLINE)
+  ! Must abort to prevent possible hanging due to communications.
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !----------------------------------------------------------------------------
+
+  !----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Array to scalar"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  field3=ESMF_FieldCreate(grid,typekind=ESMF_TYPEKIND_R4,rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  field4=ESMF_FieldCreate(grid,typekind=ESMF_TYPEKIND_R4,rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  i=17
+  count=1
+  call ESMF_AttributeSet(field3,name="bob",value=i,rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_AttributeGet(field3,count=n,rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  do ii=1,n
+     call ESMF_AttributeGet(field3,attributeIndex=ii,name=attname, &
+      typekind=tk, itemcount=count, rc=rc)
+     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+     allocate(iptr(count))
+
+     call ESMF_AttributeGet(field3,  NAME=attname, itemcount=count, VALUELIST=iptr, RC=rc)
+     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+     call ESMF_AttributeSet(field4 , NAME=attname, itemcount=count, VALUELIST=iptr, RC=rc)
+     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+     deallocate(iptr)
+  enddo
+
+  call ESMF_AttributeGet(field4,name="bob",value=j,rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_Test((i==j), name, failMsg, result, ESMF_SRCLINE)
+  ! Must abort to prevent possible hanging due to communications.
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !----------------------------------------------------------------------------
+
+  !----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Scalar from multi-valued array should error out"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  call ESMF_AttributeSet(field3,name="mv_array",valueList=(/ 1, 2, 3, 4, 5 /),rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_AttributeGet(field3,name="mv_array",value=j,rc=rc)
+  if (rc==ESMF_RC_ATTR_WRONGTYPE) rc = ESMF_SUCCESS
+
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  ! Must abort to prevent possible hanging due to communications.
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !----------------------------------------------------------------------------
+
+  !----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Multi-valued array from scalar should fail"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  call ESMF_AttributeSet(field3,name="a_scalar",value=999,rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_AttributeGet(field3,name="a_scalar",valueList=atos,rc=rc)
+  if (rc==ESMF_RC_ATTR_ITEMSOFF) rc = ESMF_SUCCESS
+
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  ! Must abort to prevent possible hanging due to communications.
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !----------------------------------------------------------------------------
+
+  !----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Set array and retrieve a type R4"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  call ESMF_AttributeSet(field3,name="arr",valueList=arr,rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_AttributeGet(field3,name="arr",typekind=tk,rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_Test((tk==ESMF_TYPEKIND_R4), name, failMsg, result, ESMF_SRCLINE)
+  ! Must abort to prevent possible hanging due to communications.
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !----------------------------------------------------------------------------
+
+  !----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Set array and retrieve a type R8"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  arr2(1) = HUGE(arr2)
+  arr2(2) = HUGE(arr2) - 2.0
+
+  call ESMF_AttributeSet(field3,name="arr2",valueList=arr2,rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_AttributeGet(field3,name="arr2",typekind=tk,rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_Test((tk==ESMF_TYPEKIND_R8), name, failMsg, result, ESMF_SRCLINE)
+  ! Must abort to prevent possible hanging due to communications.
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !----------------------------------------------------------------------------
+
+  !----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Mix R4 and R8 and return R8"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  arr2(1) = TINY(arr)
+  arr2(2) = HUGE(arr2)
+  ! Leave the third element uninitialized.
+
+  call ESMF_AttributeSet(field3,name="arr_mix",valueList=arr2,rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_AttributeGet(field3,name="arr_mix",typekind=tk,rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_Test((tk==ESMF_TYPEKIND_R8), name, failMsg, result, ESMF_SRCLINE)
+  ! Must abort to prevent possible hanging due to communications.
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !----------------------------------------------------------------------------
+
+  call ESMF_FieldBundleDestroy(src_fb, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_FieldBundleDestroy(dst_fb, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_FieldDestroy(field, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_FieldDestroy(field2, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_FieldDestroy(field3, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_FieldDestroy(field4, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_GridDestroy(grid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_TestEnd(ESMF_SRCLINE) ! calls ESMF_Finalize() internally
 

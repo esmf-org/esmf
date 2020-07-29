@@ -36,6 +36,7 @@ module ESMF_StateRemRepMod
 ! !USES:
       use ESMF_InitMacrosMod
       use ESMF_LogErrMod
+      use ESMF_BaseMod
       use ESMF_ContainerMod
       use ESMF_UtilStringMod
       use ESMF_UtilTypesMod

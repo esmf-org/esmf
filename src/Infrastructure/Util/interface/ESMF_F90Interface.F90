@@ -290,6 +290,8 @@ contains
     type(ESMF_InterArray)   :: array        ! opaque pointer to new C++ object
     integer, allocatable    :: len(:)
     integer                 :: checkCount
+    integer(ESMF_KIND_I8)   :: dummyI8
+    real(ESMF_KIND_R8)      :: dummyR8
     
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -414,7 +416,7 @@ contains
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         else
-          call c_ESMC_InterArrayCreate1DI8(array, 0, len, localrc)
+          call c_ESMC_InterArrayCreate1DI8(array, dummyI8, len, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
@@ -433,7 +435,7 @@ contains
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         else
-          call c_ESMC_InterArrayCreate2DI8(array, 0, len, localrc)
+          call c_ESMC_InterArrayCreate2DI8(array, dummyI8, len, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
@@ -452,7 +454,7 @@ contains
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         else
-          call c_ESMC_InterArrayCreate3DI8(array, 0, len, localrc)
+          call c_ESMC_InterArrayCreate3DI8(array, dummyI8, len, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
@@ -471,7 +473,7 @@ contains
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         else
-          call c_ESMC_InterArrayCreate1DR8(array, 0, len, localrc)
+          call c_ESMC_InterArrayCreate1DR8(array, dummyR8, len, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
@@ -490,7 +492,7 @@ contains
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         else
-          call c_ESMC_InterArrayCreate2DR8(array, 0, len, localrc)
+          call c_ESMC_InterArrayCreate2DR8(array, dummyR8, len, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
@@ -509,7 +511,7 @@ contains
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         else
-          call c_ESMC_InterArrayCreate3DR8(array, 0, len, localrc)
+          call c_ESMC_InterArrayCreate3DR8(array, dummyR8, len, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif

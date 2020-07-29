@@ -193,7 +193,7 @@ const char *ESMC_LogicalString(ESMC_Logical tf);
 
 extern "C" {
 void FTN_X(esmf_pointertoint)(int *n, short *s, ESMC_POINTER *len);
-void FTN_X(esmf_pointerdifference)(int *n, short *s1, short *s2, int *len);
+void FTN_X(esmf_pointerdifference)(long *n, short *s1, short *s2, int *len);
 void FTN_X(c_esmc_getcwd)(char *pathname, int *rc, ESMCI_FortranStrLenArg pathname_l);
 void FTN_X(c_esmc_makedirectory)(const char *pathname, int *mode, ESMC_Logical *relaxedFlag,
       int *rc, ESMCI_FortranStrLenArg pathname_l);

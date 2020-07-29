@@ -434,9 +434,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmf_f90ptrsizeprint)(char *p1, char *p2, int *rank, int *rc,
-    ESMCI_FortranStrLenArg p1_l,
-    ESMCI_FortranStrLenArg p2_l) {
+  void FTN_X(c_esmf_f90ptrsizeprint)(void *p1, void *p2, int *rank, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmf_f90ptrsizeprint()"
     // Initialize return code; assume routine not implemented
@@ -444,7 +442,7 @@ extern "C" {
     // compare actual size of Fortran dope vector computed at run time,
     // vs. the compile-time memory allocation in the LocalArray object.
     // -> only used in ESMF_F90ArrayPtrUTest.F90 for sanity check
-    int rsize = (int)(p2 - p1);
+    int rsize = (int)((char*)p2 - (char*)p1);
     int fixed = ESMF_FPTR_BASE_SIZE + ESMF_MAXDIM * ESMF_FPTR_PLUS_RANK;
       
     if (rsize > fixed) {

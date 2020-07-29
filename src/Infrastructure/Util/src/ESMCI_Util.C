@@ -624,7 +624,7 @@ extern "C" {
 //  2 ^ 32 apart so the result fits in to a standard integer return val.
 //
 // !ARGUMENTS:
-    int *n,            // in - number of expected bytes in a pointer
+    long *n,           // in - number of expected bytes in a pointer
     short *s1,         // in - F90 pointer of some kind
     short *s2,         // in - F90 pointer of some kind
     int *len) {        // out - that same value cast to an int

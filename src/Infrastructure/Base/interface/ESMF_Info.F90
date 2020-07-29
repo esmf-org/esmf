@@ -3700,7 +3700,7 @@ end subroutine ESMF_InfoGetArrayLGAlloc
 !       An integer index to use. This will index into an object type providing
 !       the primary mechanism for iteration.
 !     \item [{[typekind]}]
-!       Get the ESMF typekind for the target.
+!       Get the ESMF typekind for the target. The minimum typekind required to hold the value is returned.
 !     \item [{[ikey]}]
 !       If present, this will be set to the key's name for the current inquire.
 !       Useful when iterating using an index. This does \textit{not} return the full key

@@ -72,11 +72,11 @@ class Field(object):
                 meshloc=None,
                 ndbounds=None):
         # optional arguments
-        if staggerloc is None:
+        if isinstance(staggerloc, type(None)):
             staggerloc = StaggerLoc.CENTER
-        if typekind is None:
+        if isinstance(typekind, type(None)):
             typekind = TypeKind.R8
-        if meshloc is None:
+        if isinstance(meshloc, type(None)):
             meshloc = MeshLoc.NODE
 
         # extra levels?
@@ -88,7 +88,7 @@ class Field(object):
         try:
             local_ndbounds = ndbounds.tolist()
         except AttributeError:
-            if ndbounds is not None:
+            if not isinstance(ndbounds, type(None)):
                 local_ndbounds = list(ndbounds)
 
         # TODO: flip ndbounds
@@ -349,7 +349,7 @@ class Field(object):
         Release the memory associated with a :class:`~ESMF.api.field.Field`.
         """
         if hasattr(self, '_finalized'):
-            if self._finalized is False:
+            if self._finalized == False:
                 ESMP_FieldDestroy(self)
                 self._finalized = True
 
@@ -385,7 +385,7 @@ class Field(object):
         """
 
         import ESMF.api.constants as constants
-        if constants._ESMF_COMM is constants._ESMF_COMM_MPIUNI:
+        if constants._ESMF_COMM == constants._ESMF_COMM_MPIUNI:
             raise ImportError("Field.Read() requires PIO and does not work if ESMF has not been built with MPI support")
 
         assert (type(filename) is str)

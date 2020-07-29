@@ -45,6 +45,8 @@ module ESMF_LocalArrayCreateMod
 !EOPI
 !------------------------------------------------------------------------------
 ! !USES:
+  use iso_c_binding
+
   use ESMF_UtilTypesMod     ! ESMF utility types
   use ESMF_InitMacrosMod    ! ESMF initializer macros
   use ESMF_BaseMod          ! ESMF base class
@@ -53,8 +55,6 @@ module ESMF_LocalArrayCreateMod
 
   use ESMF_ArraySpecMod
   use ESMF_LocalArrayWrapperTypeMod ! contains the LAWrapper derived type
-
-  use ISO_C_BINDING
 
   implicit none
 
@@ -351,6 +351,58 @@ end interface
   end interface
 !------------------------------------------------------------------------------
 
+
+!------------------------------------------------------------------------------
+! ! Interoperability interfaces
+
+^ifndef ESMF_NO_F2018ASSUMEDTYPE
+
+  interface
+  
+    subroutine c_ESMC_LocalArraySetFPtr(larray, fptr, rc)
+      import                :: ESMF_LocalArray
+      type(ESMF_LocalArray) :: larray
+      type(*)               :: fptr
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_LocalArrayForceFPtr(larray, fptr, rc)
+      import                :: ESMF_LocalArray
+      type(ESMF_LocalArray) :: larray
+      type(*)               :: fptr
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_LocalArrayGetFPtr(larray, fptr, rc)
+      import                :: ESMF_LocalArray
+      type(ESMF_LocalArray) :: larray
+      type(*)               :: fptr
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_LocalArraySetBaseAddr(larray, fptr, rc)
+      import                :: ESMF_LocalArray
+      type(ESMF_LocalArray) :: larray
+      type(*)               :: fptr
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_LocalArraySetInfo(larray, fptr, base, counts, lbounds, &
+      ubounds, offsets, contig, dealloc, rc)
+      import                :: ESMF_LocalArray, ESMF_Logical
+      type(ESMF_LocalArray) :: larray
+      type(*)               :: fptr
+      type(*)               :: base
+      integer               :: counts(*), lbounds(*), ubounds(*), offsets(*)
+      type(ESMF_Logical)    :: contig, dealloc
+      integer               :: rc
+    end subroutine
+
+  end interface
+
+^endif
+
+!------------------------------------------------------------------------------
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

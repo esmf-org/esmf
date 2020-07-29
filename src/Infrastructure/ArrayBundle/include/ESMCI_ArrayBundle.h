@@ -139,6 +139,7 @@ class ArrayBundle : public ESMC_Base {    // inherits from ESMC_Base class
     static int haloRelease(RouteHandle *routehandle);
     static int redistStore(ArrayBundle *srcArraybundle,
       ArrayBundle *dstArraybundle, RouteHandle **routehandle,
+      ESMC_Logical *ignoreUnmatchedFlag, int len_ignoreUnmatchedFlag,
       InterArray<int> *srcToDstTransposeMap,
       ESMC_TypeKind_Flag typekindFactor = ESMF_NOKIND, void *factor = NULL);
     static int redist(ArrayBundle *srcArraybundle,
@@ -148,6 +149,7 @@ class ArrayBundle : public ESMC_Base {    // inherits from ESMC_Base class
     static int sparseMatMulStore(ArrayBundle *srcArraybundle,
       ArrayBundle *dstArraybundle, RouteHandle **routehandle,
       std::vector<SparseMatrix<ESMC_I4,ESMC_I4> > &sparseMatrix,
+      ESMC_Logical *ignoreUnmatchedFlag, int len_ignoreUnmatchedFlag,
       InterArray<int> *srcTermProcessing=NULL);
     static int sparseMatMul(ArrayBundle *srcArraybundle,
       ArrayBundle *dstArraybundle, RouteHandle **routehandle,

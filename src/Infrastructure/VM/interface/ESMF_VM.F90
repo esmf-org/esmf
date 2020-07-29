@@ -33,6 +33,8 @@ module ESMF_VMMod
 !
 !------------------------------------------------------------------------------
 ! !USES:
+  use iso_c_binding
+
   use ESMF_UtilTypesMod     ! ESMF utility types
   use ESMF_InitMacrosMod    ! ESMF initializer macros
   use ESMF_LogErrMod        ! ESMF error handling
@@ -95,6 +97,260 @@ module ESMF_VMMod
     module procedure ESMF_VMIdPrint_s
     module procedure ESMF_VMIdPrint_v
   end interface
+
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+! ! Interoperability interfaces
+
+#ifndef ESMF_NO_F2018ASSUMEDTYPE
+
+  interface
+  
+    subroutine c_ESMC_VMAllFullReduce(vm, input, output, count, dtk, op, rc)
+      import                :: ESMF_VM, ESMF_TypeKind_Flag, ESMF_Reduce_Flag
+      type(ESMF_VM)         :: vm
+      type(*)               :: input(*)
+      type(*)               :: output
+      integer               :: count
+      type(ESMF_TypeKind_Flag) :: dtk
+      type(ESMF_Reduce_Flag):: op
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_VMAllGather(vm, input, output, size, rc)
+      import                :: ESMF_VM
+      type(ESMF_VM)         :: vm
+      type(*)               :: input(*)
+      type(*)               :: output(*)
+      integer               :: size
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_VMAllGatherNB(vm, input, output, size, comm, rc)
+      import                :: ESMF_VM, ESMF_CommHandle
+      type(ESMF_VM)         :: vm
+      type(*)               :: input(*)
+      type(*)               :: output(*)
+      integer               :: size
+      type(ESMF_CommHandle) :: comm
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_VMAllGatherV(vm, sendData, sendCount, recvData, &
+      recvCounts, recvOffsets, dtk, rc)
+      import                :: ESMF_VM, ESMF_TypeKind_Flag
+      type(ESMF_VM)         :: vm
+      type(*)               :: sendData(*)
+      integer               :: sendCount
+      type(*)               :: recvData(*)
+      integer               :: recvCounts(*), recvOffsets(*)
+      type(ESMF_TypeKind_Flag) :: dtk
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_VMAllReduce(vm, input, output, count, dtk, op, rc)
+      import                :: ESMF_VM, ESMF_TypeKind_Flag, ESMF_Reduce_Flag
+      type(ESMF_VM)         :: vm
+      type(*)               :: input
+      type(*)               :: output
+      integer               :: count
+      type(ESMF_TypeKind_Flag) :: dtk
+      type(ESMF_Reduce_Flag):: op
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_VMAllToAll(vm, sendData, sendCount, recvData, recvCount,&
+      dtk, rc)
+      import                :: ESMF_VM, ESMF_TypeKind_Flag
+      type(ESMF_VM)         :: vm
+      type(*)               :: sendData(*)
+      integer               :: sendCount
+      type(*)               :: recvData(*)
+      integer               :: recvCount
+      type(ESMF_TypeKind_Flag) :: dtk
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_VMAllToAllV(vm, sendData, sendCounts, sendOffsets, &
+      recvData, recvCounts, recvOffsets, dtk, rc)
+      import                :: ESMF_VM, ESMF_TypeKind_Flag
+      type(ESMF_VM)         :: vm
+      type(*)               :: sendData(*)
+      integer               :: sendCounts(*), sendOffsets(*)
+      type(*)               :: recvData(*)
+      integer               :: recvCounts(*), recvOffsets(*)
+      type(ESMF_TypeKind_Flag) :: dtk
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_VMBroadcast(vm, bcstData, size, root, rc)
+      import                :: ESMF_VM
+      type(ESMF_VM)         :: vm
+      type(*)               :: bcstData(*)
+      integer               :: size
+      integer               :: root
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_VMBroadcastNB(vm, bcstData, size, root, comm, rc)
+      import                :: ESMF_VM, ESMF_CommHandle
+      type(ESMF_VM)         :: vm
+      type(*)               :: bcstData(*)
+      integer               :: size
+      integer               :: root
+      type(ESMF_CommHandle) :: comm
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_VMGather(vm, input, output, size, root, rc)
+      import                :: ESMF_VM
+      type(ESMF_VM)         :: vm
+      type(*)               :: input(*)
+      type(*)               :: output(*)
+      integer               :: size
+      integer               :: root
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_VMGatherNB(vm, input, output, size, root, comm, rc)
+      import                :: ESMF_VM, ESMF_CommHandle
+      type(ESMF_VM)         :: vm
+      type(*)               :: input(*)
+      type(*)               :: output(*)
+      integer               :: size
+      integer               :: root
+      type(ESMF_CommHandle) :: comm
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_VMGatherV(vm, sendData, sendCount, recvData, recvCounts, &
+      recvOffsets, dtk, root, rc)
+      import                :: ESMF_VM, ESMF_TypeKind_Flag
+      type(ESMF_VM)         :: vm
+      type(*)               :: sendData(*)
+      integer               :: sendCount
+      type(*)               :: recvData(*)
+      integer               :: recvCounts(*), recvOffsets(*)
+      type(ESMF_TypeKind_Flag) :: dtk
+      integer               :: root
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_VMRecv(vm, recvData, recvSize, src, rc)
+      import                :: ESMF_VM
+      type(ESMF_VM)         :: vm
+      type(*)               :: recvData(*)
+      integer               :: recvSize
+      integer               :: src
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_VMRecvNB(vm, recvData, recvSize, src, comm, rc)
+      import                :: ESMF_VM, ESMF_CommHandle
+      type(ESMF_VM)         :: vm
+      type(*)               :: recvData(*)
+      integer               :: recvSize
+      integer               :: src
+      type(ESMF_CommHandle) :: comm
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_VMReduce(vm, input, output, count, dtk, op, root, rc)
+      import                :: ESMF_VM, ESMF_TypeKind_Flag, ESMF_Reduce_Flag
+      type(ESMF_VM)         :: vm
+      type(*)               :: input(*)
+      type(*)               :: output(*)
+      integer               :: count
+      type(ESMF_TypeKind_Flag) :: dtk
+      type(ESMF_Reduce_Flag):: op
+      integer               :: root
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_VMScatter(vm, input, output, size, root, rc)
+      import                :: ESMF_VM
+      type(ESMF_VM)         :: vm
+      type(*)               :: input(*)
+      type(*)               :: output(*)
+      integer               :: size
+      integer               :: root
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_VMScatterNB(vm, input, output, size, root, comm, rc)
+      import                :: ESMF_VM, ESMF_CommHandle
+      type(ESMF_VM)         :: vm
+      type(*)               :: input(*)
+      type(*)               :: output(*)
+      integer               :: size
+      integer               :: root
+      type(ESMF_CommHandle) :: comm
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_VMScatterV(vm, sendData, sendCounts, sendOffsets, &
+      recvData, recvCount, dtk, root, rc)
+      import                :: ESMF_VM, ESMF_TypeKind_Flag
+      type(ESMF_VM)         :: vm
+      type(*)               :: sendData(*)
+      integer               :: sendCounts(*), sendOffsets(*)
+      type(*)               :: recvData(*)
+      integer               :: recvCount
+      type(ESMF_TypeKind_Flag) :: dtk
+      integer               :: root
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_VMSend(vm, sendData, sendSize, dst, rc)
+      import                :: ESMF_VM
+      type(ESMF_VM)         :: vm
+      type(*)               :: sendData(*)
+      integer               :: sendSize
+      integer               :: dst
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_VMSendNB(vm, sendData, sendSize, dst, comm, rc)
+      import                :: ESMF_VM, ESMF_CommHandle
+      type(ESMF_VM)         :: vm
+      type(*)               :: sendData(*)
+      integer               :: sendSize
+      integer               :: dst
+      type(ESMF_CommHandle) :: comm
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_VMSendRecv(vm, sendData, sendSize, dst, recvData, &
+      recvSize, src, rc)
+      import                :: ESMF_VM
+      type(ESMF_VM)         :: vm
+      type(*)               :: sendData(*)
+      integer               :: sendSize
+      integer               :: dst
+      type(*)               :: recvData(*)
+      integer               :: recvSize
+      integer               :: src
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_VMSendRecvNB(vm, sendData, sendSize, dst, recvData, &
+      recvSize, src, comm, rc)
+      import                :: ESMF_VM, ESMF_CommHandle
+      type(ESMF_VM)         :: vm
+      type(*)               :: sendData(*)
+      integer               :: sendSize
+      integer               :: dst
+      type(*)               :: recvData(*)
+      integer               :: recvSize
+      integer               :: src
+      type(ESMF_CommHandle) :: comm
+      integer               :: rc
+    end subroutine
+    
+  end interface
+
+#endif
 
 !------------------------------------------------------------------------------
 
@@ -855,7 +1111,7 @@ contains
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that reduces a contiguous data 
+!   Collective {\tt ESMF\_VM} communication call that reduces a contiguous data
 !   array of <type><kind> across the {\tt ESMF\_VM} object 
 !   into a single value of the same <type><kind>. The result is
 !   returned on all PETs. Different reduction operations can be specified.
@@ -952,13 +1208,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
     endif
     
-    if (count > 0) then
-      ! Call into the C++ interface.
-      call c_ESMC_VMAllFullReduce(vm, sendData(1), recvData, count, &
-        ESMF_TYPEKIND_I4, reduceflag, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
+    ! Call into the C++ interface.
+    call c_ESMC_VMAllFullReduce(vm, sendData, recvData, count, &
+      ESMF_TYPEKIND_I4, reduceflag, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -1013,13 +1267,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
     endif
     
-    if (count > 0) then
-      ! Call into the C++ interface.
-      call c_ESMC_VMAllFullReduce(vm, sendData(1), recvData, count, &
-        ESMF_TYPEKIND_I8, reduceflag, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
+    ! Call into the C++ interface.
+    call c_ESMC_VMAllFullReduce(vm, sendData, recvData, count, &
+      ESMF_TYPEKIND_I8, reduceflag, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -1074,13 +1326,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
     endif
 
-    if (count > 0) then
-      ! Call into the C++ interface.
-      call c_ESMC_VMAllFullReduce(vm, sendData(1), recvData, count, &
-        ESMF_TYPEKIND_R4, reduceflag, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
+    ! Call into the C++ interface.
+    call c_ESMC_VMAllFullReduce(vm, sendData, recvData, count, &
+      ESMF_TYPEKIND_R4, reduceflag, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -1135,13 +1385,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
     endif
 
-    if (count > 0) then
-      ! Call into the C++ interface.
-      call c_ESMC_VMAllFullReduce(vm, sendData(1), recvData, count, &
-        ESMF_TYPEKIND_R8, reduceflag, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
+    ! Call into the C++ interface.
+    call c_ESMC_VMAllFullReduce(vm, sendData, recvData, count, &
+      ESMF_TYPEKIND_R8, reduceflag, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -1174,8 +1422,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
-!   from all PETs of an {\tt ESMF\_VM} object into an array on all PETs.
+!   Collective {\tt ESMF\_VM} communication call that gathers contiguous data
+!   of <type><kind> from all PETs of an {\tt ESMF\_VM} object into an array on
+!   each PET. The data received in {\tt recvData} is identical across all PETs.
+!   The {\tt count} elements sent from the {\tt sendData} array on PET {\tt i}
+!   are stored contiguously in the {\tt recvData} array starting at position
+!   {\tt i} $\times$ {\tt count} $+$ 1.
 !
 !   This method is overloaded for:
 !   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
@@ -1188,10 +1440,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        {\tt ESMF\_VM} object.
 !   \item[sendData]
 !        Contiguous data array holding data to be sent. All PETs must specify a
-!        valid source array.
+!        valid source array. The first {\tt count} elements on each PET are sent.
 !   \item[recvData] 
 !        Contiguous data array for data to be received. All PETs must specify a
-!        valid {\tt recvData} argument.
+!        valid {\tt recvData} argument large enough to accommodate the received
+!        data.
 !   \item[count] 
 !        Number of elements to be gathered from each PET. Must be the
 !        same on all PETs.
@@ -1262,11 +1515,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     size = count * 4 ! 4 bytes
     ! Call into the C++ interface.
     if (blocking) then
-      call c_ESMC_VMAllGather(vm, sendData(1), recvData(1), size, localrc)
+      call c_ESMC_VMAllGather(vm, sendData, recvData, size, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
-      call c_ESMC_VMAllGatherNB(vm, sendData(1), recvData(1), size, &
+      call c_ESMC_VMAllGatherNB(vm, sendData, recvData, size, &
         localcommhandle, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1332,11 +1585,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     size = count * 8 ! 8 bytes
     ! Call into the C++ interface.
     if (blocking) then
-      call c_ESMC_VMAllGather(vm, sendData(1), recvData(1), size, localrc)
+      call c_ESMC_VMAllGather(vm, sendData, recvData, size, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
-      call c_ESMC_VMAllGatherNB(vm, sendData(1), recvData(1), size, &
+      call c_ESMC_VMAllGatherNB(vm, sendData, recvData, size, &
         localcommhandle, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1472,11 +1725,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     size = count * 8 ! 8 bytes
     ! Call into the C++ interface.
     if (blocking) then
-      call c_ESMC_VMAllGather(vm, sendData(1), recvData(1), size, localrc)
+      call c_ESMC_VMAllGather(vm, sendData, recvData, size, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
-      call c_ESMC_VMAllGatherNB(vm, sendData(1), recvData(1), size, &
+      call c_ESMC_VMAllGatherNB(vm, sendData, recvData, size, &
         localcommhandle, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1542,11 +1795,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     size = count * 4 ! 4 bytes
     ! Call into the C++ interface.
     if (blocking) then
-      call c_ESMC_VMAllGather(vm, sendData(1), recvData(1), size, localrc)
+      call c_ESMC_VMAllGather(vm, sendData, recvData, size, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
-      call c_ESMC_VMAllGatherNB(vm, sendData(1), recvData(1), size, &
+      call c_ESMC_VMAllGatherNB(vm, sendData, recvData, size, &
         localcommhandle, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1591,8 +1844,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
-!   from all PETs of an {\tt ESMF\_VM} object into an array on all PETs.
+!   Collective {\tt ESMF\_VM} communication call that gathers contiguous data
+!   of <type><kind> from all PETs of an {\tt ESMF\_VM} object into an array on
+!   each PET. The data received in {\tt recvData} is identical across all PETs.
+!   The {\tt sendCount} elements sent from the {\tt sendData} array on PET
+!   {\tt i} are stored contiguously in the {\tt recvData} array starting at
+!   position {\tt recvOffsets(i)}.
 !
 !   This method is overloaded for:
 !   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
@@ -1616,9 +1873,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        PETs.
 !   \item[recvData] 
 !        Contiguous data array for data to be received. All PETs must specify a
-!        valid {\tt recvData} argument.
+!        valid {\tt recvData} argument large enough to accommodate the received
+!        data.
 !   \item[recvCounts] 
-!        Number of {\tt recvData} elements to be received from corresponding
+!        Number of {\tt recvData} elements to be received from the corresponding
 !        source PET.
 !   \item[recvOffsets] 
 !        Offsets in units of elements in {\tt recvData} marking the start of
@@ -1692,7 +1950,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Call into the C++ interface.
     call c_ESMC_VMAllGatherV(vm, sendData, sendCount, &
-      recvData, recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_I4, localrc)
+      recvData, recvCounts, recvOffsets, ESMF_TYPEKIND_I4, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1752,7 +2010,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Call into the C++ interface.
     call c_ESMC_VMAllGatherV(vm, sendData, sendCount, &
-      recvData, recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_I8, localrc)
+      recvData, recvCounts, recvOffsets, ESMF_TYPEKIND_I8, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1812,7 +2070,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Call into the C++ interface.
     call c_ESMC_VMAllGatherV(vm, sendData, sendCount, &
-      recvData, recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_R4, localrc)
+      recvData, recvCounts, recvOffsets, ESMF_TYPEKIND_R4, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1872,7 +2130,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Call into the C++ interface.
     call c_ESMC_VMAllGatherV(vm, sendData, sendCount, &
-      recvData, recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_R8, localrc)
+      recvData, recvCounts, recvOffsets, ESMF_TYPEKIND_R8, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1931,10 +2189,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! Call into the C++ interface.
-    call c_ESMC_VMAllGatherV(vm,  &
-        sendData, sendCount, &
-        recvData, recvCounts(1), recvOffsets(1),  &
-        ESMF_TYPEKIND_CHARACTER, localrc)
+    call c_ESMC_VMAllGatherV(vm, sendData, sendCount, &
+      recvData, recvCounts, recvOffsets, ESMF_TYPEKIND_CHARACTER, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2032,7 +2288,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that reduces a contiguous data 
+!   Collective {\tt ESMF\_VM} communication call that reduces a contiguous data
 !   array across the {\tt ESMF\_VM} object into a contiguous data array of the
 !   same <type><kind>. The result array is returned on all PETs. 
 !   Different reduction operations can be specified.
@@ -2412,9 +2668,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that performs a total exchange
-!   operation, sending pieces of the contiguous data buffer {\tt sendData} to
-!   all other PETs while receiving data into the contiguous data buffer
-!   {\tt recvData} from all other PETs.
+!   operation on the contiguous data of <type><kind>. PET {\tt i} sends
+!   contiguous {\tt sendCount} elements of its {\tt sendData} array to every
+!   PET, including itself. The {\tt sendCount} elements sent to PET {\tt j} are
+!   those starting at position {\tt j} $\times$ {\tt sendCount} $+$ 1, and are
+!   stored in {\tt recvData} on PET $j$ in position {\tt i} $\times$
+!   {\tt recvCount} $+$ 1.
 !
 !   This method is overloaded for:
 !   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
@@ -2438,7 +2697,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        each destination PET.
 !   \item[recvData] 
 !        Contiguous data array for data to be received. All PETs must specify a
-!        valid {\tt recvData} argument.
+!        valid {\tt recvData} argument large enough to accommodate the received
+!        data.
 !   \item[recvCount] 
 !        Number of {\tt recvData} elements to be received by local PET from
 !        each source PET.
@@ -2727,9 +2987,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that performs a total exchange
-!   operation, sending pieces of the contiguous data buffer {\tt sendData} to
-!   all other PETs while receiving data into the contiguous data buffer
-!   {\tt recvData} from all other PETs.
+!   operation on the contiguous data of <type><kind>. PET {\tt i} sends
+!   contiguous elements of its {\tt sendData} array to all PETs, including
+!   itself. The {\tt sendCount(j)} elements sent to PET {\tt j} are
+!   those starting at position {\tt sendOffsets(j)}, and are
+!   stored in {\tt recvData} on PET $j$ in position {\tt recvOffsets(i)}.
 !
 !   This method is overloaded for:
 !   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
@@ -2757,7 +3019,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        element sequence to be sent from local PET to destination PET.
 !   \item[recvData] 
 !        Contiguous data array for data to be received. All PETs must specify a
-!        valid {\tt recvData} argument.
+!        valid {\tt recvData} argument large enough to accommodate the received
+!        data.
 !   \item[recvCounts] 
 !        Number of {\tt recvData} elements to be received by local PET from
 !        source PET.
@@ -2833,8 +3096,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! Call into the C++ interface.
-    call c_ESMC_VMAllToAllV(vm, sendData, sendCounts(1), sendOffsets(1), &
-      recvData, recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_I4, localrc)
+    call c_ESMC_VMAllToAllV(vm, sendData, sendCounts, sendOffsets, &
+      recvData, recvCounts, recvOffsets, ESMF_TYPEKIND_I4, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2894,8 +3157,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! Call into the C++ interface.
-    call c_ESMC_VMAllToAllV(vm, sendData, sendCounts(1), sendOffsets(1), &
-      recvData, recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_I8, localrc)
+    call c_ESMC_VMAllToAllV(vm, sendData, sendCounts, sendOffsets, &
+      recvData, recvCounts, recvOffsets, ESMF_TYPEKIND_I8, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2955,8 +3218,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! Call into the C++ interface.
-    call c_ESMC_VMAllToAllV(vm, sendData, sendCounts(1), sendOffsets(1), &
-      recvData, recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_R4, localrc)
+    call c_ESMC_VMAllToAllV(vm, sendData, sendCounts, sendOffsets, &
+      recvData, recvCounts, recvOffsets, ESMF_TYPEKIND_R4, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3016,8 +3279,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! Call into the C++ interface.
-    call c_ESMC_VMAllToAllV(vm, sendData, sendCounts(1), sendOffsets(1), &
-      recvData, recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_R8, localrc)
+    call c_ESMC_VMAllToAllV(vm, sendData, sendCounts, sendOffsets, &
+      recvData, recvCounts, recvOffsets, ESMF_TYPEKIND_R8, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3082,8 +3345,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! Call into the C++ interface.
-    call c_ESMC_VMAllToAllV(vm, sendData, sendCounts(1), sendOffsets(1), &
-      recvData, recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_CHARACTER, localrc)
+    call c_ESMC_VMAllToAllV(vm, sendData, sendCounts, sendOffsets, &
+      recvData, recvCounts, recvOffsets, ESMF_TYPEKIND_CHARACTER, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3144,8 +3407,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Call into the C++ interface.
     call c_ESMC_VMAllToAllV(vm,  &
-        sendData, sendCounts(1), sendOffsets(1), &
-        recvData, recvCounts(1), recvOffsets(1), &
+        sendData, sendCounts, sendOffsets, &
+        recvData, recvCounts, recvOffsets, &
         ESMF_TYPEKIND_LOGICAL, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -3236,8 +3499,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that broadcasts a contiguous 
-!   data array from {\tt rootPet} to all other PETs of the {\tt ESMF\_VM}
-!   object.
+!   data array of <type><kind> from {\tt rootPet} to all other PETs of the 
+!   {\tt ESMF\_VM} object. When the call returns, the {\tt bcstData} array
+!   on all PETs contains the same data as on {\tt rootPet}.
 !
 !   This method is overloaded for:
 !   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
@@ -3252,7 +3516,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[bcstData]
 !        Contiguous data array. On {\tt rootPet} {\tt bcstData} holds data that
 !        is to be broadcasted to all other PETs. On all other PETs 
-!        {\tt bcstData} is used to receive the broadcasted data.
+!        {\tt bcstData} is used to receive the broadcasted data and must be
+!        large enough to accommodate the received data.
 !   \item[count] 
 !        Number of elements in {/bcstData}. Must be the same on all PETs.
 !   \item[rootPet] 
@@ -3325,11 +3590,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       size = count * 4 ! 4 bytes
       ! Call into the C++ interface.
       if (blocking) then
-        call c_ESMC_VMBroadcast(vm, bcstData(1), size, rootPet, localrc)
+        call c_ESMC_VMBroadcast(vm, bcstData, size, rootPet, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
-        call c_ESMC_VMBroadcastNB(vm, bcstData(1), size, rootPet, localcommhandle, &
+        call c_ESMC_VMBroadcastNB(vm, bcstData, size, rootPet, localcommhandle, &
           localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -3397,11 +3662,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       size = count * 8 ! 8 bytes
       ! Call into the C++ interface.
       if (blocking) then
-        call c_ESMC_VMBroadcast(vm, bcstData(1), size, rootPet, localrc)
+        call c_ESMC_VMBroadcast(vm, bcstData, size, rootPet, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
-        call c_ESMC_VMBroadcastNB(vm, bcstData(1), size, rootPet, localcommhandle, &
+        call c_ESMC_VMBroadcastNB(vm, bcstData, size, rootPet, localcommhandle, &
           localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -3469,11 +3734,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       size = count * 4 ! 4 bytes
       ! Call into the C++ interface.
       if (blocking) then
-        call c_ESMC_VMBroadcast(vm, bcstData(1), size, rootPet, localrc)
+        call c_ESMC_VMBroadcast(vm, bcstData, size, rootPet, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
-        call c_ESMC_VMBroadcastNB(vm, bcstData(1), size, rootPet, localcommhandle, &
+        call c_ESMC_VMBroadcastNB(vm, bcstData, size, rootPet, localcommhandle, &
           localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -3540,11 +3805,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       size = count * 8 ! 8 bytes
       ! Call into the C++ interface.
       if (blocking) then
-        call c_ESMC_VMBroadcast(vm, bcstData(1), size, rootPet, localrc)
+        call c_ESMC_VMBroadcast(vm, bcstData, size, rootPet, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
-        call c_ESMC_VMBroadcastNB(vm, bcstData(1), size, rootPet, localcommhandle, &
+        call c_ESMC_VMBroadcastNB(vm, bcstData, size, rootPet, localcommhandle, &
           localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -3612,11 +3877,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       size = count * 4 ! 4 bytes
       ! Call into the C++ interface.
       if (blocking) then
-        call c_ESMC_VMBroadcast(vm, bcstData(1), size, rootPet, localrc)
+        call c_ESMC_VMBroadcast(vm, bcstData, size, rootPet, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
-        call c_ESMC_VMBroadcastNB(vm, bcstData(1), size, rootPet, localcommhandle, &
+        call c_ESMC_VMBroadcastNB(vm, bcstData, size, rootPet, localcommhandle, &
           localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -4126,9 +4391,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
-!   from all PETs of an {\tt ESMF\_VM} object (including {\tt rootPet}) into an
-!   array on {\tt rootPet}.
+!   Collective {\tt ESMF\_VM} communication call that gathers contiguous data
+!   of <type><kind> from all PETs of an {\tt ESMF\_VM} object (including the 
+!   {\tt rootPet} itself) into an array on {\tt rootPet}.
+!   The {\tt count} elements sent from the {\tt sendData} array on PET {\tt i}
+!   are stored contiguously in the {\tt recvData} array on {\tt rootPet}
+!   starting at position {\tt i} $\times$ {\tt count} $+$ 1.
 !
 !   This method is overloaded for:
 !   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
@@ -4143,8 +4411,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        Contiguous data array holding data to be sent. All PETs must specify a
 !        valid source array.
 !   \item[recvData] 
-!        Contiguous data array for data to be received. Only the {\tt recvData}
-!        array specified by the {\tt rootPet} will be used by this method.
+!        Contiguous data array for data to be received. Only {\tt recvData}
+!        specified by the {\tt rootPet} will be used by this method, and must
+!        be large enough to accommodate the received data.
 !   \item[count] 
 !        Number of elements to be sent from each PET to {\tt rootPet}. Must be
 !        the same on all PETs.
@@ -4218,11 +4487,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     size = count * 4 ! 4 bytes
     ! Call into the C++ interface.
     if (blocking) then
-      call c_ESMC_VMGather(vm, sendData(1), recvData(1), size, rootPet, localrc)
+      call c_ESMC_VMGather(vm, sendData, recvData, size, rootPet, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
-      call c_ESMC_VMGatherNB(vm, sendData(1), recvData(1), size, rootPet, &
+      call c_ESMC_VMGatherNB(vm, sendData, recvData, size, rootPet, &
         localcommhandle, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -4289,11 +4558,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     size = count * 8 ! 8 bytes
     ! Call into the C++ interface.
     if (blocking) then
-      call c_ESMC_VMGather(vm, sendData(1), recvData(1), size, rootPet, localrc)
+      call c_ESMC_VMGather(vm, sendData, recvData, size, rootPet, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
-      call c_ESMC_VMGatherNB(vm, sendData(1), recvData(1), size, rootPet, &
+      call c_ESMC_VMGatherNB(vm, sendData, recvData, size, rootPet, &
         localcommhandle, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -4360,11 +4629,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     size = count * 4 ! 4 bytes
     ! Call into the C++ interface.
     if (blocking) then
-      call c_ESMC_VMGather(vm, sendData(1), recvData(1), size, rootPet, localrc)
+      call c_ESMC_VMGather(vm, sendData, recvData, size, rootPet, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
-      call c_ESMC_VMGatherNB(vm, sendData(1), recvData(1), size, rootPet, &
+      call c_ESMC_VMGatherNB(vm, sendData, recvData, size, rootPet, &
         localcommhandle, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -4431,11 +4700,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     size = count * 8 ! 8 bytes
     ! Call into the C++ interface.
     if (blocking) then
-      call c_ESMC_VMGather(vm, sendData(1), recvData(1), size, rootPet, localrc)
+      call c_ESMC_VMGather(vm, sendData, recvData, size, rootPet, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
-      call c_ESMC_VMGatherNB(vm, sendData(1), recvData(1), size, rootPet, &
+      call c_ESMC_VMGatherNB(vm, sendData, recvData, size, rootPet, &
         localcommhandle, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -4502,11 +4771,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     size = count * 4 ! 4 bytes
     ! Call into the C++ interface.
     if (blocking) then
-      call c_ESMC_VMGather(vm, sendData(1), recvData(1), size, rootPet, localrc)
+      call c_ESMC_VMGather(vm, sendData, recvData, size, rootPet, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
-      call c_ESMC_VMGatherNB(vm, sendData(1), recvData(1), size, rootPet, &
+      call c_ESMC_VMGatherNB(vm, sendData, recvData, size, rootPet, &
         localcommhandle, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -4621,8 +4890,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
-!   from all PETs of an {\tt ESMF\_VM} object into an array on rootPet.
+!   Collective {\tt ESMF\_VM} communication call that gathers contiguous data
+!   of <type><kind> from all PETs of an {\tt ESMF\_VM} object (including the 
+!   {\tt rootPet} itself) into an array on {\tt rootPet}.
+!   The {\tt sendCount} elements sent from the {\tt sendData} array on PET
+!   {\tt i} are stored contiguously in the {\tt recvData} array on {\tt rootPet}
+!   starting at position {\tt recvOffsets(i)}.
 !
 !   This method is overloaded for:
 !   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
@@ -4645,8 +4918,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        Number of {\tt sendData} elements to send from local PET to all other
 !        PETs.
 !   \item[recvData] 
-!        Contiguous data array for data to be received. Only the {\tt recvData}
-!        array specified by the {\tt rootPet} will be used by this method.
+!        Contiguous data array for data to be received. Only {\tt recvData}
+!        specified by the {\tt rootPet} will be used by this method, and must
+!        be large enough to accommodate the received data.
 !   \item[recvCounts] 
 !        An integer array (of length group size, specified in VM object) containing 
 !        number of {\tt recvData} elements to be received from corresponding
@@ -4699,7 +4973,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Call into the C++ interface.
     call c_ESMC_VMGatherV(vm, sendData, sendCount, recvData, &
-      recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_I4, rootPet, localrc)
+      recvCounts, recvOffsets, ESMF_TYPEKIND_I4, rootPet, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4745,7 +5019,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Call into the C++ interface.
     call c_ESMC_VMGatherV(vm, sendData, sendCount, recvData, &
-      recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_I8, rootPet, localrc)
+      recvCounts, recvOffsets, ESMF_TYPEKIND_I8, rootPet, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4791,7 +5065,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Call into the C++ interface.
     call c_ESMC_VMGatherV(vm, sendData, sendCount, recvData, &
-      recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_R4, rootPet, localrc)
+      recvCounts, recvOffsets, ESMF_TYPEKIND_R4, rootPet, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4806,7 +5080,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMGatherVR8()"
 !BOPI
-! !IROUTINE: ESMF_VMGatherV - AllGatherV 8-byte reals
+! !IROUTINE: ESMF_VMGatherV - GatherV 8-byte reals
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMGatherV()
@@ -4837,7 +5111,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Call into the C++ interface.
     call c_ESMC_VMGatherV(vm, sendData, sendCount, recvData, &
-      recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_R8, rootPet, localrc)
+      recvCounts, recvOffsets, ESMF_TYPEKIND_R8, rootPet, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -5744,11 +6018,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       size = count * 4 ! 4 bytes
       ! Call into the C++ interface.
       if (blocking) then
-        call c_ESMC_VMRecv(vm, recvData(1), size, srcPet, localrc)
+        call c_ESMC_VMRecv(vm, recvData, size, srcPet, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
-        call c_ESMC_VMRecvNB(vm, recvData(1), size, srcPet, localcommhandle, localrc)
+        call c_ESMC_VMRecvNB(vm, recvData, size, srcPet, localcommhandle, &
+          localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
@@ -5816,11 +6091,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       size = count * 8 ! 8 bytes
       ! Call into the C++ interface.
       if (blocking) then
-        call c_ESMC_VMRecv(vm, recvData(1), size, srcPet, localrc)
+        call c_ESMC_VMRecv(vm, recvData, size, srcPet, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
-        call c_ESMC_VMRecvNB(vm, recvData(1), size, srcPet, localcommhandle, localrc)
+        call c_ESMC_VMRecvNB(vm, recvData, size, srcPet, localcommhandle, &
+          localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
@@ -5888,11 +6164,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       size = count * 4 ! 4 bytes
       ! Call into the C++ interface.
       if (blocking) then
-        call c_ESMC_VMRecv(vm, recvData(1), size, srcPet, localrc)
+        call c_ESMC_VMRecv(vm, recvData, size, srcPet, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       else
-        call c_ESMC_VMRecvNB(vm, recvData(1), size, srcPet, localcommhandle, localrc)
+        call c_ESMC_VMRecvNB(vm, recvData, size, srcPet, localcommhandle, &
+          localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
@@ -5960,11 +6237,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       size = count * 8 ! 8 bytes
       ! Call into the C++ interface.
       if (blocking) then
-        call c_ESMC_VMRecv(vm, recvData(1), size, srcPet, localrc)
+        call c_ESMC_VMRecv(vm, recvData, size, srcPet, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
-        call c_ESMC_VMRecvNB(vm, recvData(1), size, srcPet, localcommhandle, localrc)
+        call c_ESMC_VMRecvNB(vm, recvData, size, srcPet, localcommhandle, &
+          localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
@@ -6032,11 +6310,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       size = count * 4 ! 4 bytes
       ! Call into the C++ interface.
       if (blocking) then
-        call c_ESMC_VMRecv(vm, recvData(1), size, srcPet, localrc)
+        call c_ESMC_VMRecv(vm, recvData, size, srcPet, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
-        call c_ESMC_VMRecvNB(vm, recvData(1), size, srcPet, localcommhandle, localrc)
+        call c_ESMC_VMRecvNB(vm, recvData, size, srcPet, localcommhandle, &
+          localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
@@ -6108,7 +6387,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
-        call c_ESMC_VMRecvNB(vm, recvData, size, srcPet, localcommhandle, localrc)
+        call c_ESMC_VMRecvNB(vm, recvData, size, srcPet, localcommhandle, &
+          localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
@@ -6180,7 +6460,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
-        call c_ESMC_VMRecvNB(vm, recvData, size, srcPet, localcommhandle, localrc)
+        call c_ESMC_VMRecvNB(vm, recvData, size, srcPet, localcommhandle, &
+          localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
@@ -6225,7 +6506,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that reduces a contiguous data 
+!   Collective {\tt ESMF\_VM} communication call that reduces a contiguous data
 !   array across the {\tt ESMF\_VM} object into a contiguous data array of 
 !   the same <type><kind>. The result array is returned on {\tt rootPet}. 
 !   Different reduction operations can be specified.
@@ -6327,7 +6608,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (count > 0) then
       ! Call into the C++ interface.
-      call c_ESMC_VMReduce(vm, sendData(1), recvData(1), count, &
+      call c_ESMC_VMReduce(vm, sendData, recvData, count, &
         ESMF_TYPEKIND_I4, reduceflag, rootPet, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -6389,7 +6670,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (count > 0) then
       ! Call into the C++ interface.
-      call c_ESMC_VMReduce(vm, sendData(1), recvData(1), count, &
+      call c_ESMC_VMReduce(vm, sendData, recvData, count, &
         ESMF_TYPEKIND_I8, reduceflag, rootPet, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -6451,7 +6732,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (count > 0) then
       ! Call into the C++ interface.
-      call c_ESMC_VMReduce(vm, sendData(1), recvData(1), count, &
+      call c_ESMC_VMReduce(vm, sendData, recvData, count, &
         ESMF_TYPEKIND_R4, reduceflag, rootPet, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -6513,7 +6794,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (count > 0) then
       ! Call into the C++ interface.
-      call c_ESMC_VMReduce(vm, sendData(1), recvData(1), count, &
+      call c_ESMC_VMReduce(vm, sendData, recvData, count, &
         ESMF_TYPEKIND_R8, reduceflag, rootPet, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -6551,9 +6832,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that scatters contiguous data 
-!   from the {\tt rootPet} to all PETs across the {\tt ESMF\_VM} object
-!   (including {\tt rootPet}).
+!   Collective {\tt ESMF\_VM} communication call that scatters contiguous data
+!   of <type><kind> from {\tt rootPet} across all the PETs of an {\tt ESMF\_VM}
+!   object. Every PET, including {\tt rootPet}, receives a portion of the data.
+!   The {\tt count} number of elements received by PET {\tt i} originate from
+!   the {\tt sendData} array on {\tt rootPet}, starting at position {\tt i}
+!   $\times$ {\tt count} $+$ 1. Each PET stores the received contiguous data
+!   portion at the start of its {\tt recvData} array.
 !
 !   This method is overloaded for:
 !   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
@@ -6569,7 +6854,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        array specified by the {\tt rootPet} will be used by this method.
 !   \item[recvData] 
 !        Contiguous data array for data to be received. All PETs must specify a
-!        valid destination array.
+!        valid destination array large enough to accommodate the received data.
 !   \item[count] 
 !        Number of elements to be sent from {\tt rootPet} to each of the PETs.
 !        Must be the same on all PETs.
@@ -6643,11 +6928,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     size = count * 4 ! 4 bytes
     ! Call into the C++ interface.
     if (blocking) then
-      call c_ESMC_VMScatter(vm, sendData(1), recvData(1), size, rootPet, localrc)
+      call c_ESMC_VMScatter(vm, sendData, recvData, size, rootPet, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
-      call c_ESMC_VMScatterNB(vm, sendData(1), recvData(1), size, rootPet, &
+      call c_ESMC_VMScatterNB(vm, sendData, recvData, size, rootPet, &
         localcommhandle, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -6714,11 +6999,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     size = count * 8 ! 8 bytes
     ! Call into the C++ interface.
     if (blocking) then
-      call c_ESMC_VMScatter(vm, sendData(1), recvData(1), size, rootPet, localrc)
+      call c_ESMC_VMScatter(vm, sendData, recvData, size, rootPet, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
-      call c_ESMC_VMScatterNB(vm, sendData(1), recvData(1), size, rootPet, &
+      call c_ESMC_VMScatterNB(vm, sendData, recvData, size, rootPet, &
         localcommhandle, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -6785,11 +7070,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     size = count * 4 ! 4 bytes
     ! Call into the C++ interface.
     if (blocking) then
-      call c_ESMC_VMScatter(vm, sendData(1), recvData(1), size, rootPet, localrc)
+      call c_ESMC_VMScatter(vm, sendData, recvData, size, rootPet, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
-      call c_ESMC_VMScatterNB(vm, sendData(1), recvData(1), size, rootPet, &
+      call c_ESMC_VMScatterNB(vm, sendData, recvData, size, rootPet, &
         localcommhandle, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -6856,11 +7141,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     size = count * 8 ! 8 bytes
     ! Call into the C++ interface.
     if (blocking) then
-      call c_ESMC_VMScatter(vm, sendData(1), recvData(1), size, rootPet, localrc)
+      call c_ESMC_VMScatter(vm, sendData, recvData, size, rootPet, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
-      call c_ESMC_VMScatterNB(vm, sendData(1), recvData(1), size, rootPet, &
+      call c_ESMC_VMScatterNB(vm, sendData, recvData, size, rootPet, &
         localcommhandle, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -6927,11 +7212,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     size = count * 4 ! 4 bytes
     ! Call into the C++ interface.
     if (blocking) then
-      call c_ESMC_VMScatter(vm, sendData(1), recvData(1), size, rootPet, localrc)
+      call c_ESMC_VMScatter(vm, sendData, recvData, size, rootPet, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
-      call c_ESMC_VMScatterNB(vm, sendData(1), recvData(1), size, rootPet, &
+      call c_ESMC_VMScatterNB(vm, sendData, recvData, size, rootPet, &
         localcommhandle, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -6975,9 +7260,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that scatters contiguous data 
-!   from the {\tt rootPet} to all PETs across the {\tt ESMF\_VM} object
-!   (including {\tt rootPet}).
+!   Collective {\tt ESMF\_VM} communication call that scatters contiguous data
+!   of <type><kind> from {\tt rootPet} across all the PETs of an {\tt ESMF\_VM}
+!   object. Every PET, including {\tt rootPet}, receives a portion of the data.
+!   The {\tt recvCount} number of elements received by PET {\tt i} originate
+!   from the {\tt sendData} array on {\tt rootPet}, starting at position
+!   {\tt sendOffsets(i)}. Each PET stores the received contiguous data
+!   portion at the start of its {\tt recvData} array.
 !
 !   This method is overloaded for:
 !   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
@@ -6998,7 +7287,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        element sequence to be sent to receive PET.
 !   \item[recvData] 
 !        Contiguous data array for data to be received. All PETs must specify a
-!        valid {\tt recvData} argument.
+!        valid {\tt recvData} argument large enough to accommodate the received
+!        data.
 !   \item[recvCount] 
 !        Number of {\tt recvData} elements to receive by local PET from
 !        {\tt rootPet}.
@@ -7046,8 +7336,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
     ! Call into the C++ interface.
-    call c_ESMC_VMScatterV(vm, sendData(1), sendCounts(1), sendOffsets(1), &
-      recvData(1), recvCount, ESMF_TYPEKIND_I4, rootPet, localrc)
+    call c_ESMC_VMScatterV(vm, sendData, sendCounts, sendOffsets, &
+      recvData, recvCount, ESMF_TYPEKIND_I4, rootPet, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -7092,8 +7382,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
     ! Call into the C++ interface.
-    call c_ESMC_VMScatterV(vm, sendData(1), sendCounts(1), sendOffsets(1), &
-      recvData(1), recvCount, ESMF_TYPEKIND_I8, rootPet, localrc)
+    call c_ESMC_VMScatterV(vm, sendData, sendCounts, sendOffsets, &
+      recvData, recvCount, ESMF_TYPEKIND_I8, rootPet, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -7138,8 +7428,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
     ! Call into the C++ interface.
-    call c_ESMC_VMScatterV(vm, sendData(1), sendCounts(1), sendOffsets(1), &
-      recvData(1), recvCount, ESMF_TYPEKIND_R4, rootPet, localrc)
+    call c_ESMC_VMScatterV(vm, sendData, sendCounts, sendOffsets, &
+      recvData, recvCount, ESMF_TYPEKIND_R4, rootPet, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -7184,8 +7474,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
     ! Call into the C++ interface.
-    call c_ESMC_VMScatterV(vm, sendData(1), sendCounts(1), sendOffsets(1), &
-      recvData(1), recvCount, ESMF_TYPEKIND_R8, rootPet, localrc)
+    call c_ESMC_VMScatterV(vm, sendData, sendCounts, sendOffsets, &
+      recvData, recvCount, ESMF_TYPEKIND_R8, rootPet, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -7306,11 +7596,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       size = count * 4 ! 4 bytes
       ! Call into the C++ interface.
       if (blocking) then
-        call c_ESMC_VMSend(vm, sendData(1), size, dstPet, localrc)
+        call c_ESMC_VMSend(vm, sendData, size, dstPet, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
-        call c_ESMC_VMSendNB(vm, sendData(1), size, dstPet, localcommhandle, localrc)
+        call c_ESMC_VMSendNB(vm, sendData, size, dstPet, localcommhandle, &
+          localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
@@ -7377,11 +7668,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       size = count * 8 ! 8 bytes
       ! Call into the C++ interface.
       if (blocking) then
-        call c_ESMC_VMSend(vm, sendData(1), size, dstPet, localrc)
+        call c_ESMC_VMSend(vm, sendData, size, dstPet, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
-        call c_ESMC_VMSendNB(vm, sendData(1), size, dstPet, localcommhandle, localrc)
+        call c_ESMC_VMSendNB(vm, sendData, size, dstPet, localcommhandle, &
+          localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
@@ -7449,11 +7741,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       size = count * 4 ! 4 bytes
       ! Call into the C++ interface.
       if (blocking) then
-        call c_ESMC_VMSend(vm, sendData(1), size, dstPet, localrc)
+        call c_ESMC_VMSend(vm, sendData, size, dstPet, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
-        call c_ESMC_VMSendNB(vm, sendData(1), size, dstPet, localcommhandle, localrc)
+        call c_ESMC_VMSendNB(vm, sendData, size, dstPet, localcommhandle, &
+          localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
@@ -7521,11 +7814,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       size = count * 8 ! 8 bytes
       ! Call into the C++ interface.
       if (blocking) then
-        call c_ESMC_VMSend(vm, sendData(1), size, dstPet, localrc)
+        call c_ESMC_VMSend(vm, sendData, size, dstPet, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
-        call c_ESMC_VMSendNB(vm, sendData(1), size, dstPet, localcommhandle, localrc)
+        call c_ESMC_VMSendNB(vm, sendData, size, dstPet, localcommhandle, &
+          localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
@@ -7593,11 +7887,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       size = count * 4 ! 4 bytes
       ! Call into the C++ interface.
       if (blocking) then
-        call c_ESMC_VMSend(vm, sendData(1), size, dstPet, localrc)
+        call c_ESMC_VMSend(vm, sendData, size, dstPet, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
-        call c_ESMC_VMSendNB(vm, sendData(1), size, dstPet, localcommhandle, localrc)
+        call c_ESMC_VMSendNB(vm, sendData, size, dstPet, localcommhandle, &
+          localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
@@ -7669,7 +7964,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
-        call c_ESMC_VMSendNB(vm, sendData, size, dstPet, localcommhandle, localrc)
+        call c_ESMC_VMSendNB(vm, sendData, size, dstPet, localcommhandle, &
+          localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
@@ -7741,7 +8037,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
-        call c_ESMC_VMSendNB(vm, sendData, size, dstPet, localcommhandle, localrc)
+        call c_ESMC_VMSendNB(vm, sendData, size, dstPet, localcommhandle, &
+          localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
@@ -7886,13 +8183,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     recvSize = recvCount * 4 ! 4 bytes
     ! Call into the C++ interface.
     if (blocking) then
-      call c_ESMC_VMSendRecv(vm, sendData(1), sendSize, dstPet, &
-        recvData(1), recvSize, srcPet, localrc)
+      call c_ESMC_VMSendRecv(vm, sendData, sendSize, dstPet, &
+        recvData, recvSize, srcPet, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
-      call c_ESMC_VMSendRecvNB(vm, sendData(1), sendSize, dstPet, &
-        recvData(1), recvSize, srcPet, localcommhandle, localrc)
+      call c_ESMC_VMSendRecvNB(vm, sendData, sendSize, dstPet, &
+        recvData, recvSize, srcPet, localcommhandle, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Check if we need to pass back the commhandle
@@ -7962,13 +8259,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     recvSize = recvCount * 8 ! 8 bytes
     ! Call into the C++ interface.
     if (blocking) then
-      call c_ESMC_VMSendRecv(vm, sendData(1), sendSize, dstPet, &
-        recvData(1), recvSize, srcPet, localrc)
+      call c_ESMC_VMSendRecv(vm, sendData, sendSize, dstPet, &
+        recvData, recvSize, srcPet, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
-      call c_ESMC_VMSendRecvNB(vm, sendData(1), sendSize, dstPet, &
-        recvData(1), recvSize, srcPet, localcommhandle, localrc)
+      call c_ESMC_VMSendRecvNB(vm, sendData, sendSize, dstPet, &
+        recvData, recvSize, srcPet, localcommhandle, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Check if we need to pass back the commhandle
@@ -8038,13 +8335,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     recvSize = recvCount * 4 ! 4 bytes
     ! Call into the C++ interface.
     if (blocking) then
-      call c_ESMC_VMSendRecv(vm, sendData(1), sendSize, dstPet, &
-        recvData(1), recvSize, srcPet, localrc)
+      call c_ESMC_VMSendRecv(vm, sendData, sendSize, dstPet, &
+        recvData, recvSize, srcPet, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
-      call c_ESMC_VMSendRecvNB(vm, sendData(1), sendSize, dstPet, &
-        recvData(1), recvSize, srcPet, localcommhandle, localrc)
+      call c_ESMC_VMSendRecvNB(vm, sendData, sendSize, dstPet, &
+        recvData, recvSize, srcPet, localcommhandle, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Check if we need to pass back the commhandle
@@ -8114,13 +8411,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     recvSize = recvCount * 8 ! 8 bytes
     ! Call into the C++ interface.
     if (blocking) then
-      call c_ESMC_VMSendRecv(vm, sendData(1), sendSize, dstPet, &
-        recvData(1), recvSize, srcPet, localrc)
+      call c_ESMC_VMSendRecv(vm, sendData, sendSize, dstPet, &
+        recvData, recvSize, srcPet, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
-      call c_ESMC_VMSendRecvNB(vm, sendData(1), sendSize, dstPet, &
-        recvData(1), recvSize, srcPet, localcommhandle, localrc)
+      call c_ESMC_VMSendRecvNB(vm, sendData, sendSize, dstPet, &
+        recvData, recvSize, srcPet, localcommhandle, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Check if we need to pass back the commhandle
@@ -8190,13 +8487,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     recvSize = recvCount * 4 ! 4 bytes
     ! Call into the C++ interface.
     if (blocking) then
-      call c_ESMC_VMSendRecv(vm, sendData(1), sendSize, dstPet, &
-        recvData(1), recvSize, srcPet, localrc)
+      call c_ESMC_VMSendRecv(vm, sendData, sendSize, dstPet, &
+        recvData, recvSize, srcPet, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
-      call c_ESMC_VMSendRecvNB(vm, sendData(1), sendSize, dstPet, &
-        recvData(1), recvSize, srcPet, localcommhandle, localrc)
+      call c_ESMC_VMSendRecvNB(vm, sendData, sendSize, dstPet, &
+        recvData, recvSize, srcPet, localcommhandle, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Check if we need to pass back the commhandle
@@ -9630,10 +9927,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Call into the C++ interface
-    call c_ESMC_VMIdPrint(vmId, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    do i=1, size(vmId)
+      ! Call into the C++ interface
+      call c_ESMC_VMIdPrint(vmId(i), localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    enddo
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS

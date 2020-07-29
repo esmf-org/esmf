@@ -48,19 +48,19 @@ extern "C" {
 // Helper Functions
 //-----------------------------------------------------------------------------
 
-ESMC_Base *baseAddressToBase(const long int &baseAddress) {
+ESMC_Base *baseAddressToBase(const long long int &baseAddress) {
   void *v = (void *) baseAddress;
   ESMC_Base *base = reinterpret_cast<ESMC_Base *>(v);
   return base;
 }
 
-ESMCI::Info *baseAddressToInfo(const long int &baseAddress) {
+ESMCI::Info *baseAddressToInfo(const long long int &baseAddress) {
   ESMC_Base *base = baseAddressToBase(baseAddress);
   ESMCI::Info *info = base->ESMC_BaseGetInfo();
   return info;
 }
 
-void updateDirtyInfo(const json &inqstate, int *ctr, std::vector<long int> *base_addresses) {
+void updateDirtyInfo(const json &inqstate, int *ctr, std::vector<long long int> *base_addresses) {
   int l_ctr = 0;
   if (ctr) {
     l_ctr = *ctr;
@@ -87,7 +87,7 @@ void updateDirtyInfo(const json &inqstate, int *ctr, std::vector<long int> *base
 
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMC_BaseGetInfo()"
-ESMCI::Info* ESMC_BaseGetInfo(long int &baseAddress) {
+ESMCI::Info* ESMC_BaseGetInfo(long long int &baseAddress) {
   ESMC_Base *base = reinterpret_cast<ESMC_Base*>((void*)baseAddress);
   return base->ESMC_BaseGetInfo();
 }
@@ -118,7 +118,7 @@ void ESMC_InfoCopyForAttribute(const ESMCI::Info* src, ESMCI::Info* dst, int &es
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoCopyForAttributeReference()"
-void ESMC_InfoCopyForAttributeReference(const long int &src_base_address, const long int &dst_base_address, int &esmc_rc) {
+void ESMC_InfoCopyForAttributeReference(const long long int &src_base_address, const long long int &dst_base_address, int &esmc_rc) {
   esmc_rc = ESMF_FAILURE;
   try {
     ESMC_Base *src_base = baseAddressToBase(src_base_address);
@@ -346,7 +346,7 @@ void ESMC_InfoUpdate(ESMCI::Info *to_update, ESMCI::Info *new_contents,
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoBaseSyncDo"
-void ESMC_InfoBaseSyncDo(const std::vector<long int> &base_addresses, const int &rootPet, const long int &vmAddress, int &markClean, int &esmc_rc) {
+void ESMC_InfoBaseSyncDo(const std::vector<long long int> &base_addresses, const int &rootPet, const long long int &vmAddress, int &markClean, int &esmc_rc) {
   esmc_rc = ESMF_FAILURE;
   try {
     void *v = (void *)vmAddress;
@@ -424,14 +424,14 @@ void ESMC_InfoBaseSyncDo(const std::vector<long int> &base_addresses, const int 
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoBaseSync()"
-void ESMC_InfoBaseSync(ESMCI::Info *inqstate, int &rootPet, long int &vmAddress, int &markClean, int &esmc_rc) {
+void ESMC_InfoBaseSync(ESMCI::Info *inqstate, int &rootPet, long long int &vmAddress, int &markClean, int &esmc_rc) {
   ESMC_CHECK_INIT(inqstate, esmc_rc)
   esmc_rc = ESMF_FAILURE;
   try {
     const json &j_inqstate = inqstate->getStorageRef();
     int ctr = 0;
     updateDirtyInfo(j_inqstate, &ctr, nullptr);
-    std::vector<long int> base_addresses(ctr, 0);
+    std::vector<long long int> base_addresses(ctr, 0);
     updateDirtyInfo(j_inqstate, nullptr, &base_addresses);
     ESMC_InfoBaseSyncDo(base_addresses, rootPet, vmAddress, markClean, esmc_rc);
   }

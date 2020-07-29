@@ -3019,14 +3019,12 @@ end subroutine ESMF_AttributeSetAttPackArrayR4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjArrayR4()"
-subroutine ESMF_AttributeSetObjArrayR4(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjArrayR4(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Array), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -3137,14 +3135,12 @@ end subroutine ESMF_AttributeSetAttPackArrayR4List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjArrayR4List()"
-subroutine ESMF_AttributeSetObjArrayR4List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjArrayR4List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Array), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -3255,14 +3251,12 @@ end subroutine ESMF_AttributeSetAttPackArrayR8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjArrayR8()"
-subroutine ESMF_AttributeSetObjArrayR8(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjArrayR8(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Array), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -3373,14 +3367,12 @@ end subroutine ESMF_AttributeSetAttPackArrayR8List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjArrayR8List()"
-subroutine ESMF_AttributeSetObjArrayR8List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjArrayR8List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Array), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -3491,14 +3483,12 @@ end subroutine ESMF_AttributeSetAttPackArrayI4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjArrayI4()"
-subroutine ESMF_AttributeSetObjArrayI4(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjArrayI4(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Array), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -3609,14 +3599,12 @@ end subroutine ESMF_AttributeSetAttPackArrayI4List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjArrayI4List()"
-subroutine ESMF_AttributeSetObjArrayI4List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjArrayI4List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Array), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -3727,14 +3715,12 @@ end subroutine ESMF_AttributeSetAttPackArrayI8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjArrayI8()"
-subroutine ESMF_AttributeSetObjArrayI8(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjArrayI8(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Array), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -3845,14 +3831,12 @@ end subroutine ESMF_AttributeSetAttPackArrayI8List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjArrayI8List()"
-subroutine ESMF_AttributeSetObjArrayI8List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjArrayI8List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Array), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -3963,14 +3947,12 @@ end subroutine ESMF_AttributeSetAttPackArrayCH
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjArrayCH()"
-subroutine ESMF_AttributeSetObjArrayCH(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjArrayCH(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Array), intent(inout) :: target
   character(len=*), intent(in) :: name
   character(len=*), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -4081,14 +4063,12 @@ end subroutine ESMF_AttributeSetAttPackArrayCHList
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjArrayCHList()"
-subroutine ESMF_AttributeSetObjArrayCHList(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjArrayCHList(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Array), intent(inout) :: target
   character(len=*), intent(in) :: name
   character(len=*), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -4199,14 +4179,12 @@ end subroutine ESMF_AttributeSetAttPackArrayLG
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjArrayLG()"
-subroutine ESMF_AttributeSetObjArrayLG(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjArrayLG(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Array), intent(inout) :: target
   character(len=*), intent(in) :: name
   logical, intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -4317,14 +4295,12 @@ end subroutine ESMF_AttributeSetAttPackArrayLGList
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjArrayLGList()"
-subroutine ESMF_AttributeSetObjArrayLGList(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjArrayLGList(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Array), intent(inout) :: target
   character(len=*), intent(in) :: name
   logical, dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -4435,14 +4411,12 @@ end subroutine ESMF_AttributeSetAttPackArrayBundleR4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjArrayBundleR4()"
-subroutine ESMF_AttributeSetObjArrayBundleR4(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjArrayBundleR4(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_ArrayBundle), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -4553,14 +4527,12 @@ end subroutine ESMF_AttributeSetAttPackArrayBundleR4List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjArrayBundleR4List()"
-subroutine ESMF_AttributeSetObjArrayBundleR4List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjArrayBundleR4List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_ArrayBundle), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -4671,14 +4643,12 @@ end subroutine ESMF_AttributeSetAttPackArrayBundleR8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjArrayBundleR8()"
-subroutine ESMF_AttributeSetObjArrayBundleR8(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjArrayBundleR8(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_ArrayBundle), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -4789,14 +4759,12 @@ end subroutine ESMF_AttributeSetAttPackArrayBundleR8List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjArrayBundleR8List()"
-subroutine ESMF_AttributeSetObjArrayBundleR8List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjArrayBundleR8List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_ArrayBundle), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -4907,14 +4875,12 @@ end subroutine ESMF_AttributeSetAttPackArrayBundleI4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjArrayBundleI4()"
-subroutine ESMF_AttributeSetObjArrayBundleI4(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjArrayBundleI4(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_ArrayBundle), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -5025,14 +4991,12 @@ end subroutine ESMF_AttributeSetAttPackArrayBundleI4List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjArrayBundleI4List()"
-subroutine ESMF_AttributeSetObjArrayBundleI4List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjArrayBundleI4List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_ArrayBundle), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -5143,14 +5107,12 @@ end subroutine ESMF_AttributeSetAttPackArrayBundleI8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjArrayBundleI8()"
-subroutine ESMF_AttributeSetObjArrayBundleI8(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjArrayBundleI8(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_ArrayBundle), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -5261,14 +5223,12 @@ end subroutine ESMF_AttributeSetAttPackArrayBundleI8List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjArrayBundleI8List()"
-subroutine ESMF_AttributeSetObjArrayBundleI8List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjArrayBundleI8List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_ArrayBundle), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -5379,14 +5339,12 @@ end subroutine ESMF_AttributeSetAttPackArrayBundleCH
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjArrayBundleCH()"
-subroutine ESMF_AttributeSetObjArrayBundleCH(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjArrayBundleCH(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_ArrayBundle), intent(inout) :: target
   character(len=*), intent(in) :: name
   character(len=*), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -5497,14 +5455,12 @@ end subroutine ESMF_AttributeSetAttPackArrayBundleCHList
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjArrayBundleCHList()"
-subroutine ESMF_AttributeSetObjArrayBundleCHList(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjArrayBundleCHList(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_ArrayBundle), intent(inout) :: target
   character(len=*), intent(in) :: name
   character(len=*), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -5615,14 +5571,12 @@ end subroutine ESMF_AttributeSetAttPackArrayBundleLG
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjArrayBundleLG()"
-subroutine ESMF_AttributeSetObjArrayBundleLG(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjArrayBundleLG(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_ArrayBundle), intent(inout) :: target
   character(len=*), intent(in) :: name
   logical, intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -5733,14 +5687,12 @@ end subroutine ESMF_AttributeSetAttPackArrayBundleLGList
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjArrayBundleLGList()"
-subroutine ESMF_AttributeSetObjArrayBundleLGList(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjArrayBundleLGList(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_ArrayBundle), intent(inout) :: target
   character(len=*), intent(in) :: name
   logical, dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -5851,14 +5803,12 @@ end subroutine ESMF_AttributeSetAttPackCplCompR4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjCplCompR4()"
-subroutine ESMF_AttributeSetObjCplCompR4(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjCplCompR4(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_CplComp), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -5969,14 +5919,12 @@ end subroutine ESMF_AttributeSetAttPackCplCompR4List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjCplCompR4List()"
-subroutine ESMF_AttributeSetObjCplCompR4List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjCplCompR4List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_CplComp), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -6087,14 +6035,12 @@ end subroutine ESMF_AttributeSetAttPackCplCompR8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjCplCompR8()"
-subroutine ESMF_AttributeSetObjCplCompR8(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjCplCompR8(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_CplComp), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -6205,14 +6151,12 @@ end subroutine ESMF_AttributeSetAttPackCplCompR8List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjCplCompR8List()"
-subroutine ESMF_AttributeSetObjCplCompR8List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjCplCompR8List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_CplComp), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -6323,14 +6267,12 @@ end subroutine ESMF_AttributeSetAttPackCplCompI4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjCplCompI4()"
-subroutine ESMF_AttributeSetObjCplCompI4(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjCplCompI4(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_CplComp), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -6441,14 +6383,12 @@ end subroutine ESMF_AttributeSetAttPackCplCompI4List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjCplCompI4List()"
-subroutine ESMF_AttributeSetObjCplCompI4List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjCplCompI4List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_CplComp), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -6559,14 +6499,12 @@ end subroutine ESMF_AttributeSetAttPackCplCompI8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjCplCompI8()"
-subroutine ESMF_AttributeSetObjCplCompI8(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjCplCompI8(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_CplComp), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -6677,14 +6615,12 @@ end subroutine ESMF_AttributeSetAttPackCplCompI8List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjCplCompI8List()"
-subroutine ESMF_AttributeSetObjCplCompI8List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjCplCompI8List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_CplComp), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -6795,14 +6731,12 @@ end subroutine ESMF_AttributeSetAttPackCplCompCH
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjCplCompCH()"
-subroutine ESMF_AttributeSetObjCplCompCH(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjCplCompCH(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_CplComp), intent(inout) :: target
   character(len=*), intent(in) :: name
   character(len=*), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -6913,14 +6847,12 @@ end subroutine ESMF_AttributeSetAttPackCplCompCHList
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjCplCompCHList()"
-subroutine ESMF_AttributeSetObjCplCompCHList(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjCplCompCHList(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_CplComp), intent(inout) :: target
   character(len=*), intent(in) :: name
   character(len=*), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -7031,14 +6963,12 @@ end subroutine ESMF_AttributeSetAttPackCplCompLG
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjCplCompLG()"
-subroutine ESMF_AttributeSetObjCplCompLG(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjCplCompLG(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_CplComp), intent(inout) :: target
   character(len=*), intent(in) :: name
   logical, intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -7149,14 +7079,12 @@ end subroutine ESMF_AttributeSetAttPackCplCompLGList
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjCplCompLGList()"
-subroutine ESMF_AttributeSetObjCplCompLGList(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjCplCompLGList(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_CplComp), intent(inout) :: target
   character(len=*), intent(in) :: name
   logical, dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -7267,14 +7195,12 @@ end subroutine ESMF_AttributeSetAttPackGridCompR4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjGridCompR4()"
-subroutine ESMF_AttributeSetObjGridCompR4(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjGridCompR4(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_GridComp), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -7385,14 +7311,12 @@ end subroutine ESMF_AttributeSetAttPackGridCompR4List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjGridCompR4List()"
-subroutine ESMF_AttributeSetObjGridCompR4List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjGridCompR4List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_GridComp), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -7503,14 +7427,12 @@ end subroutine ESMF_AttributeSetAttPackGridCompR8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjGridCompR8()"
-subroutine ESMF_AttributeSetObjGridCompR8(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjGridCompR8(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_GridComp), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -7621,14 +7543,12 @@ end subroutine ESMF_AttributeSetAttPackGridCompR8List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjGridCompR8List()"
-subroutine ESMF_AttributeSetObjGridCompR8List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjGridCompR8List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_GridComp), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -7739,14 +7659,12 @@ end subroutine ESMF_AttributeSetAttPackGridCompI4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjGridCompI4()"
-subroutine ESMF_AttributeSetObjGridCompI4(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjGridCompI4(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_GridComp), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -7857,14 +7775,12 @@ end subroutine ESMF_AttributeSetAttPackGridCompI4List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjGridCompI4List()"
-subroutine ESMF_AttributeSetObjGridCompI4List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjGridCompI4List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_GridComp), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -7975,14 +7891,12 @@ end subroutine ESMF_AttributeSetAttPackGridCompI8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjGridCompI8()"
-subroutine ESMF_AttributeSetObjGridCompI8(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjGridCompI8(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_GridComp), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -8093,14 +8007,12 @@ end subroutine ESMF_AttributeSetAttPackGridCompI8List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjGridCompI8List()"
-subroutine ESMF_AttributeSetObjGridCompI8List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjGridCompI8List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_GridComp), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -8211,14 +8123,12 @@ end subroutine ESMF_AttributeSetAttPackGridCompCH
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjGridCompCH()"
-subroutine ESMF_AttributeSetObjGridCompCH(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjGridCompCH(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_GridComp), intent(inout) :: target
   character(len=*), intent(in) :: name
   character(len=*), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -8329,14 +8239,12 @@ end subroutine ESMF_AttributeSetAttPackGridCompCHList
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjGridCompCHList()"
-subroutine ESMF_AttributeSetObjGridCompCHList(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjGridCompCHList(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_GridComp), intent(inout) :: target
   character(len=*), intent(in) :: name
   character(len=*), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -8447,14 +8355,12 @@ end subroutine ESMF_AttributeSetAttPackGridCompLG
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjGridCompLG()"
-subroutine ESMF_AttributeSetObjGridCompLG(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjGridCompLG(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_GridComp), intent(inout) :: target
   character(len=*), intent(in) :: name
   logical, intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -8565,14 +8471,12 @@ end subroutine ESMF_AttributeSetAttPackGridCompLGList
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjGridCompLGList()"
-subroutine ESMF_AttributeSetObjGridCompLGList(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjGridCompLGList(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_GridComp), intent(inout) :: target
   character(len=*), intent(in) :: name
   logical, dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -8683,14 +8587,12 @@ end subroutine ESMF_AttributeSetAttPackSciCompR4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjSciCompR4()"
-subroutine ESMF_AttributeSetObjSciCompR4(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjSciCompR4(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_SciComp), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -8801,14 +8703,12 @@ end subroutine ESMF_AttributeSetAttPackSciCompR4List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjSciCompR4List()"
-subroutine ESMF_AttributeSetObjSciCompR4List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjSciCompR4List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_SciComp), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -8919,14 +8819,12 @@ end subroutine ESMF_AttributeSetAttPackSciCompR8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjSciCompR8()"
-subroutine ESMF_AttributeSetObjSciCompR8(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjSciCompR8(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_SciComp), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -9037,14 +8935,12 @@ end subroutine ESMF_AttributeSetAttPackSciCompR8List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjSciCompR8List()"
-subroutine ESMF_AttributeSetObjSciCompR8List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjSciCompR8List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_SciComp), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -9155,14 +9051,12 @@ end subroutine ESMF_AttributeSetAttPackSciCompI4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjSciCompI4()"
-subroutine ESMF_AttributeSetObjSciCompI4(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjSciCompI4(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_SciComp), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -9273,14 +9167,12 @@ end subroutine ESMF_AttributeSetAttPackSciCompI4List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjSciCompI4List()"
-subroutine ESMF_AttributeSetObjSciCompI4List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjSciCompI4List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_SciComp), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -9391,14 +9283,12 @@ end subroutine ESMF_AttributeSetAttPackSciCompI8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjSciCompI8()"
-subroutine ESMF_AttributeSetObjSciCompI8(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjSciCompI8(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_SciComp), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -9509,14 +9399,12 @@ end subroutine ESMF_AttributeSetAttPackSciCompI8List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjSciCompI8List()"
-subroutine ESMF_AttributeSetObjSciCompI8List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjSciCompI8List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_SciComp), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -9627,14 +9515,12 @@ end subroutine ESMF_AttributeSetAttPackSciCompCH
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjSciCompCH()"
-subroutine ESMF_AttributeSetObjSciCompCH(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjSciCompCH(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_SciComp), intent(inout) :: target
   character(len=*), intent(in) :: name
   character(len=*), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -9745,14 +9631,12 @@ end subroutine ESMF_AttributeSetAttPackSciCompCHList
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjSciCompCHList()"
-subroutine ESMF_AttributeSetObjSciCompCHList(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjSciCompCHList(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_SciComp), intent(inout) :: target
   character(len=*), intent(in) :: name
   character(len=*), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -9863,14 +9747,12 @@ end subroutine ESMF_AttributeSetAttPackSciCompLG
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjSciCompLG()"
-subroutine ESMF_AttributeSetObjSciCompLG(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjSciCompLG(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_SciComp), intent(inout) :: target
   character(len=*), intent(in) :: name
   logical, intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -9981,14 +9863,12 @@ end subroutine ESMF_AttributeSetAttPackSciCompLGList
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjSciCompLGList()"
-subroutine ESMF_AttributeSetObjSciCompLGList(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjSciCompLGList(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_SciComp), intent(inout) :: target
   character(len=*), intent(in) :: name
   logical, dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -10099,14 +9979,12 @@ end subroutine ESMF_AttributeSetAttPackDistGridR4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjDistGridR4()"
-subroutine ESMF_AttributeSetObjDistGridR4(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjDistGridR4(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_DistGrid), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -10217,14 +10095,12 @@ end subroutine ESMF_AttributeSetAttPackDistGridR4List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjDistGridR4List()"
-subroutine ESMF_AttributeSetObjDistGridR4List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjDistGridR4List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_DistGrid), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -10335,14 +10211,12 @@ end subroutine ESMF_AttributeSetAttPackDistGridR8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjDistGridR8()"
-subroutine ESMF_AttributeSetObjDistGridR8(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjDistGridR8(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_DistGrid), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -10453,14 +10327,12 @@ end subroutine ESMF_AttributeSetAttPackDistGridR8List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjDistGridR8List()"
-subroutine ESMF_AttributeSetObjDistGridR8List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjDistGridR8List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_DistGrid), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -10571,14 +10443,12 @@ end subroutine ESMF_AttributeSetAttPackDistGridI4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjDistGridI4()"
-subroutine ESMF_AttributeSetObjDistGridI4(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjDistGridI4(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_DistGrid), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -10689,14 +10559,12 @@ end subroutine ESMF_AttributeSetAttPackDistGridI4List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjDistGridI4List()"
-subroutine ESMF_AttributeSetObjDistGridI4List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjDistGridI4List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_DistGrid), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -10807,14 +10675,12 @@ end subroutine ESMF_AttributeSetAttPackDistGridI8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjDistGridI8()"
-subroutine ESMF_AttributeSetObjDistGridI8(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjDistGridI8(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_DistGrid), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -10925,14 +10791,12 @@ end subroutine ESMF_AttributeSetAttPackDistGridI8List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjDistGridI8List()"
-subroutine ESMF_AttributeSetObjDistGridI8List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjDistGridI8List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_DistGrid), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -11043,14 +10907,12 @@ end subroutine ESMF_AttributeSetAttPackDistGridCH
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjDistGridCH()"
-subroutine ESMF_AttributeSetObjDistGridCH(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjDistGridCH(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_DistGrid), intent(inout) :: target
   character(len=*), intent(in) :: name
   character(len=*), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -11161,14 +11023,12 @@ end subroutine ESMF_AttributeSetAttPackDistGridCHList
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjDistGridCHList()"
-subroutine ESMF_AttributeSetObjDistGridCHList(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjDistGridCHList(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_DistGrid), intent(inout) :: target
   character(len=*), intent(in) :: name
   character(len=*), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -11279,14 +11139,12 @@ end subroutine ESMF_AttributeSetAttPackDistGridLG
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjDistGridLG()"
-subroutine ESMF_AttributeSetObjDistGridLG(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjDistGridLG(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_DistGrid), intent(inout) :: target
   character(len=*), intent(in) :: name
   logical, intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -11397,14 +11255,12 @@ end subroutine ESMF_AttributeSetAttPackDistGridLGList
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjDistGridLGList()"
-subroutine ESMF_AttributeSetObjDistGridLGList(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjDistGridLGList(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_DistGrid), intent(inout) :: target
   character(len=*), intent(in) :: name
   logical, dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -11515,14 +11371,12 @@ end subroutine ESMF_AttributeSetAttPackFieldR4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjFieldR4()"
-subroutine ESMF_AttributeSetObjFieldR4(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjFieldR4(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Field), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -11633,14 +11487,12 @@ end subroutine ESMF_AttributeSetAttPackFieldR4List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjFieldR4List()"
-subroutine ESMF_AttributeSetObjFieldR4List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjFieldR4List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Field), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -11751,14 +11603,12 @@ end subroutine ESMF_AttributeSetAttPackFieldR8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjFieldR8()"
-subroutine ESMF_AttributeSetObjFieldR8(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjFieldR8(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Field), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -11869,14 +11719,12 @@ end subroutine ESMF_AttributeSetAttPackFieldR8List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjFieldR8List()"
-subroutine ESMF_AttributeSetObjFieldR8List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjFieldR8List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Field), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -11987,14 +11835,12 @@ end subroutine ESMF_AttributeSetAttPackFieldI4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjFieldI4()"
-subroutine ESMF_AttributeSetObjFieldI4(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjFieldI4(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Field), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -12105,14 +11951,12 @@ end subroutine ESMF_AttributeSetAttPackFieldI4List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjFieldI4List()"
-subroutine ESMF_AttributeSetObjFieldI4List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjFieldI4List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Field), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -12223,14 +12067,12 @@ end subroutine ESMF_AttributeSetAttPackFieldI8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjFieldI8()"
-subroutine ESMF_AttributeSetObjFieldI8(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjFieldI8(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Field), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -12341,14 +12183,12 @@ end subroutine ESMF_AttributeSetAttPackFieldI8List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjFieldI8List()"
-subroutine ESMF_AttributeSetObjFieldI8List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjFieldI8List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Field), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -12459,14 +12299,12 @@ end subroutine ESMF_AttributeSetAttPackFieldCH
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjFieldCH()"
-subroutine ESMF_AttributeSetObjFieldCH(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjFieldCH(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Field), intent(inout) :: target
   character(len=*), intent(in) :: name
   character(len=*), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -12577,14 +12415,12 @@ end subroutine ESMF_AttributeSetAttPackFieldCHList
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjFieldCHList()"
-subroutine ESMF_AttributeSetObjFieldCHList(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjFieldCHList(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Field), intent(inout) :: target
   character(len=*), intent(in) :: name
   character(len=*), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -12695,14 +12531,12 @@ end subroutine ESMF_AttributeSetAttPackFieldLG
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjFieldLG()"
-subroutine ESMF_AttributeSetObjFieldLG(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjFieldLG(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Field), intent(inout) :: target
   character(len=*), intent(in) :: name
   logical, intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -12813,14 +12647,12 @@ end subroutine ESMF_AttributeSetAttPackFieldLGList
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjFieldLGList()"
-subroutine ESMF_AttributeSetObjFieldLGList(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjFieldLGList(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Field), intent(inout) :: target
   character(len=*), intent(in) :: name
   logical, dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -12931,14 +12763,12 @@ end subroutine ESMF_AttributeSetAttPackFieldBundleR4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjFieldBundleR4()"
-subroutine ESMF_AttributeSetObjFieldBundleR4(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjFieldBundleR4(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_FieldBundle), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -13049,14 +12879,12 @@ end subroutine ESMF_AttributeSetAttPackFieldBundleR4List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjFieldBundleR4List()"
-subroutine ESMF_AttributeSetObjFieldBundleR4List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjFieldBundleR4List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_FieldBundle), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -13167,14 +12995,12 @@ end subroutine ESMF_AttributeSetAttPackFieldBundleR8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjFieldBundleR8()"
-subroutine ESMF_AttributeSetObjFieldBundleR8(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjFieldBundleR8(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_FieldBundle), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -13285,14 +13111,12 @@ end subroutine ESMF_AttributeSetAttPackFieldBundleR8List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjFieldBundleR8List()"
-subroutine ESMF_AttributeSetObjFieldBundleR8List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjFieldBundleR8List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_FieldBundle), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -13403,14 +13227,12 @@ end subroutine ESMF_AttributeSetAttPackFieldBundleI4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjFieldBundleI4()"
-subroutine ESMF_AttributeSetObjFieldBundleI4(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjFieldBundleI4(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_FieldBundle), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -13521,14 +13343,12 @@ end subroutine ESMF_AttributeSetAttPackFieldBundleI4List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjFieldBundleI4List()"
-subroutine ESMF_AttributeSetObjFieldBundleI4List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjFieldBundleI4List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_FieldBundle), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -13639,14 +13459,12 @@ end subroutine ESMF_AttributeSetAttPackFieldBundleI8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjFieldBundleI8()"
-subroutine ESMF_AttributeSetObjFieldBundleI8(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjFieldBundleI8(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_FieldBundle), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -13757,14 +13575,12 @@ end subroutine ESMF_AttributeSetAttPackFieldBundleI8List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjFieldBundleI8List()"
-subroutine ESMF_AttributeSetObjFieldBundleI8List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjFieldBundleI8List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_FieldBundle), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -13875,14 +13691,12 @@ end subroutine ESMF_AttributeSetAttPackFieldBundleCH
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjFieldBundleCH()"
-subroutine ESMF_AttributeSetObjFieldBundleCH(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjFieldBundleCH(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_FieldBundle), intent(inout) :: target
   character(len=*), intent(in) :: name
   character(len=*), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -13993,14 +13807,12 @@ end subroutine ESMF_AttributeSetAttPackFieldBundleCHList
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjFieldBundleCHList()"
-subroutine ESMF_AttributeSetObjFieldBundleCHList(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjFieldBundleCHList(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_FieldBundle), intent(inout) :: target
   character(len=*), intent(in) :: name
   character(len=*), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -14111,14 +13923,12 @@ end subroutine ESMF_AttributeSetAttPackFieldBundleLG
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjFieldBundleLG()"
-subroutine ESMF_AttributeSetObjFieldBundleLG(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjFieldBundleLG(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_FieldBundle), intent(inout) :: target
   character(len=*), intent(in) :: name
   logical, intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -14229,14 +14039,12 @@ end subroutine ESMF_AttributeSetAttPackFieldBundleLGList
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjFieldBundleLGList()"
-subroutine ESMF_AttributeSetObjFieldBundleLGList(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjFieldBundleLGList(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_FieldBundle), intent(inout) :: target
   character(len=*), intent(in) :: name
   logical, dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -14347,14 +14155,12 @@ end subroutine ESMF_AttributeSetAttPackGridR4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjGridR4()"
-subroutine ESMF_AttributeSetObjGridR4(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjGridR4(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Grid), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -14465,14 +14271,12 @@ end subroutine ESMF_AttributeSetAttPackGridR4List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjGridR4List()"
-subroutine ESMF_AttributeSetObjGridR4List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjGridR4List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Grid), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -14583,14 +14387,12 @@ end subroutine ESMF_AttributeSetAttPackGridR8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjGridR8()"
-subroutine ESMF_AttributeSetObjGridR8(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjGridR8(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Grid), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -14701,14 +14503,12 @@ end subroutine ESMF_AttributeSetAttPackGridR8List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjGridR8List()"
-subroutine ESMF_AttributeSetObjGridR8List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjGridR8List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Grid), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -14819,14 +14619,12 @@ end subroutine ESMF_AttributeSetAttPackGridI4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjGridI4()"
-subroutine ESMF_AttributeSetObjGridI4(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjGridI4(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Grid), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -14937,14 +14735,12 @@ end subroutine ESMF_AttributeSetAttPackGridI4List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjGridI4List()"
-subroutine ESMF_AttributeSetObjGridI4List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjGridI4List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Grid), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -15055,14 +14851,12 @@ end subroutine ESMF_AttributeSetAttPackGridI8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjGridI8()"
-subroutine ESMF_AttributeSetObjGridI8(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjGridI8(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Grid), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -15173,14 +14967,12 @@ end subroutine ESMF_AttributeSetAttPackGridI8List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjGridI8List()"
-subroutine ESMF_AttributeSetObjGridI8List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjGridI8List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Grid), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -15291,14 +15083,12 @@ end subroutine ESMF_AttributeSetAttPackGridCH
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjGridCH()"
-subroutine ESMF_AttributeSetObjGridCH(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjGridCH(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Grid), intent(inout) :: target
   character(len=*), intent(in) :: name
   character(len=*), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -15409,14 +15199,12 @@ end subroutine ESMF_AttributeSetAttPackGridCHList
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjGridCHList()"
-subroutine ESMF_AttributeSetObjGridCHList(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjGridCHList(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Grid), intent(inout) :: target
   character(len=*), intent(in) :: name
   character(len=*), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -15527,14 +15315,12 @@ end subroutine ESMF_AttributeSetAttPackGridLG
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjGridLG()"
-subroutine ESMF_AttributeSetObjGridLG(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjGridLG(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Grid), intent(inout) :: target
   character(len=*), intent(in) :: name
   logical, intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -15645,14 +15431,12 @@ end subroutine ESMF_AttributeSetAttPackGridLGList
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjGridLGList()"
-subroutine ESMF_AttributeSetObjGridLGList(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjGridLGList(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Grid), intent(inout) :: target
   character(len=*), intent(in) :: name
   logical, dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -15763,14 +15547,12 @@ end subroutine ESMF_AttributeSetAttPackStateR4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjStateR4()"
-subroutine ESMF_AttributeSetObjStateR4(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjStateR4(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_State), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -15881,14 +15663,12 @@ end subroutine ESMF_AttributeSetAttPackStateR4List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjStateR4List()"
-subroutine ESMF_AttributeSetObjStateR4List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjStateR4List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_State), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -15999,14 +15779,12 @@ end subroutine ESMF_AttributeSetAttPackStateR8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjStateR8()"
-subroutine ESMF_AttributeSetObjStateR8(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjStateR8(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_State), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -16117,14 +15895,12 @@ end subroutine ESMF_AttributeSetAttPackStateR8List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjStateR8List()"
-subroutine ESMF_AttributeSetObjStateR8List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjStateR8List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_State), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -16235,14 +16011,12 @@ end subroutine ESMF_AttributeSetAttPackStateI4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjStateI4()"
-subroutine ESMF_AttributeSetObjStateI4(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjStateI4(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_State), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -16353,14 +16127,12 @@ end subroutine ESMF_AttributeSetAttPackStateI4List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjStateI4List()"
-subroutine ESMF_AttributeSetObjStateI4List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjStateI4List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_State), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -16471,14 +16243,12 @@ end subroutine ESMF_AttributeSetAttPackStateI8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjStateI8()"
-subroutine ESMF_AttributeSetObjStateI8(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjStateI8(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_State), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -16589,14 +16359,12 @@ end subroutine ESMF_AttributeSetAttPackStateI8List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjStateI8List()"
-subroutine ESMF_AttributeSetObjStateI8List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjStateI8List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_State), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -16707,14 +16475,12 @@ end subroutine ESMF_AttributeSetAttPackStateCH
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjStateCH()"
-subroutine ESMF_AttributeSetObjStateCH(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjStateCH(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_State), intent(inout) :: target
   character(len=*), intent(in) :: name
   character(len=*), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -16825,14 +16591,12 @@ end subroutine ESMF_AttributeSetAttPackStateCHList
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjStateCHList()"
-subroutine ESMF_AttributeSetObjStateCHList(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjStateCHList(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_State), intent(inout) :: target
   character(len=*), intent(in) :: name
   character(len=*), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -16943,14 +16707,12 @@ end subroutine ESMF_AttributeSetAttPackStateLG
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjStateLG()"
-subroutine ESMF_AttributeSetObjStateLG(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjStateLG(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_State), intent(inout) :: target
   character(len=*), intent(in) :: name
   logical, intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -17061,14 +16823,12 @@ end subroutine ESMF_AttributeSetAttPackStateLGList
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjStateLGList()"
-subroutine ESMF_AttributeSetObjStateLGList(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjStateLGList(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_State), intent(inout) :: target
   character(len=*), intent(in) :: name
   logical, dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -17179,14 +16939,12 @@ end subroutine ESMF_AttributeSetAttPackLocStreamR4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjLocStreamR4()"
-subroutine ESMF_AttributeSetObjLocStreamR4(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjLocStreamR4(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_LocStream), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -17297,14 +17055,12 @@ end subroutine ESMF_AttributeSetAttPackLocStreamR4List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjLocStreamR4List()"
-subroutine ESMF_AttributeSetObjLocStreamR4List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjLocStreamR4List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_LocStream), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -17415,14 +17171,12 @@ end subroutine ESMF_AttributeSetAttPackLocStreamR8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjLocStreamR8()"
-subroutine ESMF_AttributeSetObjLocStreamR8(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjLocStreamR8(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_LocStream), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -17533,14 +17287,12 @@ end subroutine ESMF_AttributeSetAttPackLocStreamR8List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjLocStreamR8List()"
-subroutine ESMF_AttributeSetObjLocStreamR8List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjLocStreamR8List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_LocStream), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -17651,14 +17403,12 @@ end subroutine ESMF_AttributeSetAttPackLocStreamI4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjLocStreamI4()"
-subroutine ESMF_AttributeSetObjLocStreamI4(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjLocStreamI4(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_LocStream), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -17769,14 +17519,12 @@ end subroutine ESMF_AttributeSetAttPackLocStreamI4List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjLocStreamI4List()"
-subroutine ESMF_AttributeSetObjLocStreamI4List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjLocStreamI4List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_LocStream), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -17887,14 +17635,12 @@ end subroutine ESMF_AttributeSetAttPackLocStreamI8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjLocStreamI8()"
-subroutine ESMF_AttributeSetObjLocStreamI8(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjLocStreamI8(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_LocStream), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -18005,14 +17751,12 @@ end subroutine ESMF_AttributeSetAttPackLocStreamI8List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjLocStreamI8List()"
-subroutine ESMF_AttributeSetObjLocStreamI8List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjLocStreamI8List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_LocStream), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -18123,14 +17867,12 @@ end subroutine ESMF_AttributeSetAttPackLocStreamCH
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjLocStreamCH()"
-subroutine ESMF_AttributeSetObjLocStreamCH(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjLocStreamCH(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_LocStream), intent(inout) :: target
   character(len=*), intent(in) :: name
   character(len=*), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -18241,14 +17983,12 @@ end subroutine ESMF_AttributeSetAttPackLocStreamCHList
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjLocStreamCHList()"
-subroutine ESMF_AttributeSetObjLocStreamCHList(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjLocStreamCHList(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_LocStream), intent(inout) :: target
   character(len=*), intent(in) :: name
   character(len=*), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -18359,14 +18099,12 @@ end subroutine ESMF_AttributeSetAttPackLocStreamLG
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjLocStreamLG()"
-subroutine ESMF_AttributeSetObjLocStreamLG(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjLocStreamLG(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_LocStream), intent(inout) :: target
   character(len=*), intent(in) :: name
   logical, intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -18477,14 +18215,12 @@ end subroutine ESMF_AttributeSetAttPackLocStreamLGList
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjLocStreamLGList()"
-subroutine ESMF_AttributeSetObjLocStreamLGList(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjLocStreamLGList(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_LocStream), intent(inout) :: target
   character(len=*), intent(in) :: name
   logical, dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -18595,14 +18331,12 @@ end subroutine ESMF_AttributeSetAttPackMeshR4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjMeshR4()"
-subroutine ESMF_AttributeSetObjMeshR4(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjMeshR4(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Mesh), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -18713,14 +18447,12 @@ end subroutine ESMF_AttributeSetAttPackMeshR4List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjMeshR4List()"
-subroutine ESMF_AttributeSetObjMeshR4List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjMeshR4List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Mesh), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -18831,14 +18563,12 @@ end subroutine ESMF_AttributeSetAttPackMeshR8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjMeshR8()"
-subroutine ESMF_AttributeSetObjMeshR8(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjMeshR8(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Mesh), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -18949,14 +18679,12 @@ end subroutine ESMF_AttributeSetAttPackMeshR8List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjMeshR8List()"
-subroutine ESMF_AttributeSetObjMeshR8List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjMeshR8List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Mesh), intent(inout) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -19067,14 +18795,12 @@ end subroutine ESMF_AttributeSetAttPackMeshI4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjMeshI4()"
-subroutine ESMF_AttributeSetObjMeshI4(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjMeshI4(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Mesh), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -19185,14 +18911,12 @@ end subroutine ESMF_AttributeSetAttPackMeshI4List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjMeshI4List()"
-subroutine ESMF_AttributeSetObjMeshI4List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjMeshI4List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Mesh), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -19303,14 +19027,12 @@ end subroutine ESMF_AttributeSetAttPackMeshI8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjMeshI8()"
-subroutine ESMF_AttributeSetObjMeshI8(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjMeshI8(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Mesh), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -19421,14 +19143,12 @@ end subroutine ESMF_AttributeSetAttPackMeshI8List
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjMeshI8List()"
-subroutine ESMF_AttributeSetObjMeshI8List(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjMeshI8List(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Mesh), intent(inout) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -19539,14 +19259,12 @@ end subroutine ESMF_AttributeSetAttPackMeshCH
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjMeshCH()"
-subroutine ESMF_AttributeSetObjMeshCH(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjMeshCH(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Mesh), intent(inout) :: target
   character(len=*), intent(in) :: name
   character(len=*), intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -19657,14 +19375,12 @@ end subroutine ESMF_AttributeSetAttPackMeshCHList
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjMeshCHList()"
-subroutine ESMF_AttributeSetObjMeshCHList(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjMeshCHList(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Mesh), intent(inout) :: target
   character(len=*), intent(in) :: name
   character(len=*), dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -19775,14 +19491,12 @@ end subroutine ESMF_AttributeSetAttPackMeshLG
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjMeshLG()"
-subroutine ESMF_AttributeSetObjMeshLG(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjMeshLG(target, name, value, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Mesh), intent(inout) :: target
   character(len=*), intent(in) :: name
   logical, intent(in) :: value
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -19893,14 +19607,12 @@ end subroutine ESMF_AttributeSetAttPackMeshLGList
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSetObjMeshLGList()"
-subroutine ESMF_AttributeSetObjMeshLGList(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)
-  ! 39.11.38/40 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeSetObjMeshLGList(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)
   type(ESMF_Mesh), intent(inout) :: target
   character(len=*), intent(in) :: name
   logical, dimension(:), intent(in) :: valueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -19978,8 +19690,9 @@ subroutine ESMF_AttributeGetAttPackArrayR4(target, name, attpack, value, default
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -20005,23 +19718,35 @@ subroutine ESMF_AttributeGetAttPackArrayR4(target, name, attpack, value, default
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackArrayR4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjArrayR4()"
-subroutine ESMF_AttributeGetObjArrayR4(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjArrayR4(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_Array), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), intent(out) :: value
   real(ESMF_KIND_R4), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -20031,6 +19756,8 @@ subroutine ESMF_AttributeGetObjArrayR4(target, name, value, defaultvalue, conven
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -20054,8 +19781,22 @@ subroutine ESMF_AttributeGetObjArrayR4(target, name, value, defaultvalue, conven
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -20077,8 +19818,9 @@ subroutine ESMF_AttributeGetAttPackArrayR8(target, name, attpack, value, default
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -20104,23 +19846,35 @@ subroutine ESMF_AttributeGetAttPackArrayR8(target, name, attpack, value, default
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackArrayR8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjArrayR8()"
-subroutine ESMF_AttributeGetObjArrayR8(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjArrayR8(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_Array), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), intent(out) :: value
   real(ESMF_KIND_R8), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -20130,6 +19884,8 @@ subroutine ESMF_AttributeGetObjArrayR8(target, name, value, defaultvalue, conven
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -20153,8 +19909,22 @@ subroutine ESMF_AttributeGetObjArrayR8(target, name, value, defaultvalue, conven
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -20176,8 +19946,9 @@ subroutine ESMF_AttributeGetAttPackArrayI4(target, name, attpack, value, default
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -20203,23 +19974,35 @@ subroutine ESMF_AttributeGetAttPackArrayI4(target, name, attpack, value, default
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackArrayI4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjArrayI4()"
-subroutine ESMF_AttributeGetObjArrayI4(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjArrayI4(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_Array), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), intent(out) :: value
   integer(ESMF_KIND_I4), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -20229,6 +20012,8 @@ subroutine ESMF_AttributeGetObjArrayI4(target, name, value, defaultvalue, conven
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -20252,8 +20037,22 @@ subroutine ESMF_AttributeGetObjArrayI4(target, name, value, defaultvalue, conven
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -20275,8 +20074,9 @@ subroutine ESMF_AttributeGetAttPackArrayI8(target, name, attpack, value, default
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -20302,23 +20102,35 @@ subroutine ESMF_AttributeGetAttPackArrayI8(target, name, attpack, value, default
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackArrayI8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjArrayI8()"
-subroutine ESMF_AttributeGetObjArrayI8(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjArrayI8(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_Array), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), intent(out) :: value
   integer(ESMF_KIND_I8), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -20328,6 +20140,8 @@ subroutine ESMF_AttributeGetObjArrayI8(target, name, value, defaultvalue, conven
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -20351,8 +20165,22 @@ subroutine ESMF_AttributeGetObjArrayI8(target, name, value, defaultvalue, conven
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -20374,8 +20202,9 @@ subroutine ESMF_AttributeGetAttPackArrayCH(target, name, attpack, value, default
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -20401,23 +20230,35 @@ subroutine ESMF_AttributeGetAttPackArrayCH(target, name, attpack, value, default
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackArrayCH
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjArrayCH()"
-subroutine ESMF_AttributeGetObjArrayCH(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjArrayCH(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_Array), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), intent(out) :: value
   character(len=*), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -20427,6 +20268,8 @@ subroutine ESMF_AttributeGetObjArrayCH(target, name, value, defaultvalue, conven
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -20450,8 +20293,22 @@ subroutine ESMF_AttributeGetObjArrayCH(target, name, value, defaultvalue, conven
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -20473,8 +20330,9 @@ subroutine ESMF_AttributeGetAttPackArrayLG(target, name, attpack, value, default
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -20500,23 +20358,35 @@ subroutine ESMF_AttributeGetAttPackArrayLG(target, name, attpack, value, default
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackArrayLG
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjArrayLG()"
-subroutine ESMF_AttributeGetObjArrayLG(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjArrayLG(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_Array), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, intent(out) :: value
   logical, intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -20526,6 +20396,8 @@ subroutine ESMF_AttributeGetObjArrayLG(target, name, value, defaultvalue, conven
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -20549,8 +20421,22 @@ subroutine ESMF_AttributeGetObjArrayLG(target, name, value, defaultvalue, conven
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -20572,8 +20458,9 @@ subroutine ESMF_AttributeGetAttPackArrayBundleR4(target, name, attpack, value, d
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -20599,23 +20486,35 @@ subroutine ESMF_AttributeGetAttPackArrayBundleR4(target, name, attpack, value, d
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackArrayBundleR4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjArrayBundleR4()"
-subroutine ESMF_AttributeGetObjArrayBundleR4(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjArrayBundleR4(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_ArrayBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), intent(out) :: value
   real(ESMF_KIND_R4), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -20625,6 +20524,8 @@ subroutine ESMF_AttributeGetObjArrayBundleR4(target, name, value, defaultvalue, 
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -20648,8 +20549,22 @@ subroutine ESMF_AttributeGetObjArrayBundleR4(target, name, value, defaultvalue, 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -20671,8 +20586,9 @@ subroutine ESMF_AttributeGetAttPackArrayBundleR8(target, name, attpack, value, d
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -20698,23 +20614,35 @@ subroutine ESMF_AttributeGetAttPackArrayBundleR8(target, name, attpack, value, d
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackArrayBundleR8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjArrayBundleR8()"
-subroutine ESMF_AttributeGetObjArrayBundleR8(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjArrayBundleR8(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_ArrayBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), intent(out) :: value
   real(ESMF_KIND_R8), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -20724,6 +20652,8 @@ subroutine ESMF_AttributeGetObjArrayBundleR8(target, name, value, defaultvalue, 
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -20747,8 +20677,22 @@ subroutine ESMF_AttributeGetObjArrayBundleR8(target, name, value, defaultvalue, 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -20770,8 +20714,9 @@ subroutine ESMF_AttributeGetAttPackArrayBundleI4(target, name, attpack, value, d
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -20797,23 +20742,35 @@ subroutine ESMF_AttributeGetAttPackArrayBundleI4(target, name, attpack, value, d
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackArrayBundleI4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjArrayBundleI4()"
-subroutine ESMF_AttributeGetObjArrayBundleI4(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjArrayBundleI4(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_ArrayBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), intent(out) :: value
   integer(ESMF_KIND_I4), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -20823,6 +20780,8 @@ subroutine ESMF_AttributeGetObjArrayBundleI4(target, name, value, defaultvalue, 
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -20846,8 +20805,22 @@ subroutine ESMF_AttributeGetObjArrayBundleI4(target, name, value, defaultvalue, 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -20869,8 +20842,9 @@ subroutine ESMF_AttributeGetAttPackArrayBundleI8(target, name, attpack, value, d
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -20896,23 +20870,35 @@ subroutine ESMF_AttributeGetAttPackArrayBundleI8(target, name, attpack, value, d
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackArrayBundleI8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjArrayBundleI8()"
-subroutine ESMF_AttributeGetObjArrayBundleI8(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjArrayBundleI8(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_ArrayBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), intent(out) :: value
   integer(ESMF_KIND_I8), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -20922,6 +20908,8 @@ subroutine ESMF_AttributeGetObjArrayBundleI8(target, name, value, defaultvalue, 
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -20945,8 +20933,22 @@ subroutine ESMF_AttributeGetObjArrayBundleI8(target, name, value, defaultvalue, 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -20968,8 +20970,9 @@ subroutine ESMF_AttributeGetAttPackArrayBundleCH(target, name, attpack, value, d
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -20995,23 +20998,35 @@ subroutine ESMF_AttributeGetAttPackArrayBundleCH(target, name, attpack, value, d
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackArrayBundleCH
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjArrayBundleCH()"
-subroutine ESMF_AttributeGetObjArrayBundleCH(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjArrayBundleCH(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_ArrayBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), intent(out) :: value
   character(len=*), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -21021,6 +21036,8 @@ subroutine ESMF_AttributeGetObjArrayBundleCH(target, name, value, defaultvalue, 
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -21044,8 +21061,22 @@ subroutine ESMF_AttributeGetObjArrayBundleCH(target, name, value, defaultvalue, 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -21067,8 +21098,9 @@ subroutine ESMF_AttributeGetAttPackArrayBundleLG(target, name, attpack, value, d
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -21094,23 +21126,35 @@ subroutine ESMF_AttributeGetAttPackArrayBundleLG(target, name, attpack, value, d
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackArrayBundleLG
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjArrayBundleLG()"
-subroutine ESMF_AttributeGetObjArrayBundleLG(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjArrayBundleLG(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_ArrayBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, intent(out) :: value
   logical, intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -21120,6 +21164,8 @@ subroutine ESMF_AttributeGetObjArrayBundleLG(target, name, value, defaultvalue, 
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -21143,8 +21189,22 @@ subroutine ESMF_AttributeGetObjArrayBundleLG(target, name, value, defaultvalue, 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -21166,8 +21226,9 @@ subroutine ESMF_AttributeGetAttPackCplCompR4(target, name, attpack, value, defau
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -21193,23 +21254,35 @@ subroutine ESMF_AttributeGetAttPackCplCompR4(target, name, attpack, value, defau
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackCplCompR4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjCplCompR4()"
-subroutine ESMF_AttributeGetObjCplCompR4(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjCplCompR4(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_CplComp), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), intent(out) :: value
   real(ESMF_KIND_R4), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -21219,6 +21292,8 @@ subroutine ESMF_AttributeGetObjCplCompR4(target, name, value, defaultvalue, conv
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -21242,8 +21317,22 @@ subroutine ESMF_AttributeGetObjCplCompR4(target, name, value, defaultvalue, conv
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -21265,8 +21354,9 @@ subroutine ESMF_AttributeGetAttPackCplCompR8(target, name, attpack, value, defau
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -21292,23 +21382,35 @@ subroutine ESMF_AttributeGetAttPackCplCompR8(target, name, attpack, value, defau
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackCplCompR8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjCplCompR8()"
-subroutine ESMF_AttributeGetObjCplCompR8(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjCplCompR8(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_CplComp), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), intent(out) :: value
   real(ESMF_KIND_R8), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -21318,6 +21420,8 @@ subroutine ESMF_AttributeGetObjCplCompR8(target, name, value, defaultvalue, conv
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -21341,8 +21445,22 @@ subroutine ESMF_AttributeGetObjCplCompR8(target, name, value, defaultvalue, conv
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -21364,8 +21482,9 @@ subroutine ESMF_AttributeGetAttPackCplCompI4(target, name, attpack, value, defau
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -21391,23 +21510,35 @@ subroutine ESMF_AttributeGetAttPackCplCompI4(target, name, attpack, value, defau
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackCplCompI4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjCplCompI4()"
-subroutine ESMF_AttributeGetObjCplCompI4(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjCplCompI4(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_CplComp), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), intent(out) :: value
   integer(ESMF_KIND_I4), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -21417,6 +21548,8 @@ subroutine ESMF_AttributeGetObjCplCompI4(target, name, value, defaultvalue, conv
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -21440,8 +21573,22 @@ subroutine ESMF_AttributeGetObjCplCompI4(target, name, value, defaultvalue, conv
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -21463,8 +21610,9 @@ subroutine ESMF_AttributeGetAttPackCplCompI8(target, name, attpack, value, defau
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -21490,23 +21638,35 @@ subroutine ESMF_AttributeGetAttPackCplCompI8(target, name, attpack, value, defau
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackCplCompI8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjCplCompI8()"
-subroutine ESMF_AttributeGetObjCplCompI8(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjCplCompI8(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_CplComp), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), intent(out) :: value
   integer(ESMF_KIND_I8), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -21516,6 +21676,8 @@ subroutine ESMF_AttributeGetObjCplCompI8(target, name, value, defaultvalue, conv
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -21539,8 +21701,22 @@ subroutine ESMF_AttributeGetObjCplCompI8(target, name, value, defaultvalue, conv
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -21562,8 +21738,9 @@ subroutine ESMF_AttributeGetAttPackCplCompCH(target, name, attpack, value, defau
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -21589,23 +21766,35 @@ subroutine ESMF_AttributeGetAttPackCplCompCH(target, name, attpack, value, defau
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackCplCompCH
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjCplCompCH()"
-subroutine ESMF_AttributeGetObjCplCompCH(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjCplCompCH(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_CplComp), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), intent(out) :: value
   character(len=*), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -21615,6 +21804,8 @@ subroutine ESMF_AttributeGetObjCplCompCH(target, name, value, defaultvalue, conv
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -21638,8 +21829,22 @@ subroutine ESMF_AttributeGetObjCplCompCH(target, name, value, defaultvalue, conv
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -21661,8 +21866,9 @@ subroutine ESMF_AttributeGetAttPackCplCompLG(target, name, attpack, value, defau
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -21688,23 +21894,35 @@ subroutine ESMF_AttributeGetAttPackCplCompLG(target, name, attpack, value, defau
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackCplCompLG
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjCplCompLG()"
-subroutine ESMF_AttributeGetObjCplCompLG(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjCplCompLG(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_CplComp), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, intent(out) :: value
   logical, intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -21714,6 +21932,8 @@ subroutine ESMF_AttributeGetObjCplCompLG(target, name, value, defaultvalue, conv
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -21737,8 +21957,22 @@ subroutine ESMF_AttributeGetObjCplCompLG(target, name, value, defaultvalue, conv
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -21760,8 +21994,9 @@ subroutine ESMF_AttributeGetAttPackGridCompR4(target, name, attpack, value, defa
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -21787,23 +22022,35 @@ subroutine ESMF_AttributeGetAttPackGridCompR4(target, name, attpack, value, defa
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackGridCompR4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjGridCompR4()"
-subroutine ESMF_AttributeGetObjGridCompR4(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjGridCompR4(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_GridComp), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), intent(out) :: value
   real(ESMF_KIND_R4), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -21813,6 +22060,8 @@ subroutine ESMF_AttributeGetObjGridCompR4(target, name, value, defaultvalue, con
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -21836,8 +22085,22 @@ subroutine ESMF_AttributeGetObjGridCompR4(target, name, value, defaultvalue, con
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -21859,8 +22122,9 @@ subroutine ESMF_AttributeGetAttPackGridCompR8(target, name, attpack, value, defa
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -21886,23 +22150,35 @@ subroutine ESMF_AttributeGetAttPackGridCompR8(target, name, attpack, value, defa
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackGridCompR8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjGridCompR8()"
-subroutine ESMF_AttributeGetObjGridCompR8(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjGridCompR8(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_GridComp), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), intent(out) :: value
   real(ESMF_KIND_R8), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -21912,6 +22188,8 @@ subroutine ESMF_AttributeGetObjGridCompR8(target, name, value, defaultvalue, con
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -21935,8 +22213,22 @@ subroutine ESMF_AttributeGetObjGridCompR8(target, name, value, defaultvalue, con
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -21958,8 +22250,9 @@ subroutine ESMF_AttributeGetAttPackGridCompI4(target, name, attpack, value, defa
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -21985,23 +22278,35 @@ subroutine ESMF_AttributeGetAttPackGridCompI4(target, name, attpack, value, defa
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackGridCompI4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjGridCompI4()"
-subroutine ESMF_AttributeGetObjGridCompI4(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjGridCompI4(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_GridComp), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), intent(out) :: value
   integer(ESMF_KIND_I4), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -22011,6 +22316,8 @@ subroutine ESMF_AttributeGetObjGridCompI4(target, name, value, defaultvalue, con
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -22034,8 +22341,22 @@ subroutine ESMF_AttributeGetObjGridCompI4(target, name, value, defaultvalue, con
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -22057,8 +22378,9 @@ subroutine ESMF_AttributeGetAttPackGridCompI8(target, name, attpack, value, defa
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -22084,23 +22406,35 @@ subroutine ESMF_AttributeGetAttPackGridCompI8(target, name, attpack, value, defa
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackGridCompI8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjGridCompI8()"
-subroutine ESMF_AttributeGetObjGridCompI8(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjGridCompI8(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_GridComp), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), intent(out) :: value
   integer(ESMF_KIND_I8), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -22110,6 +22444,8 @@ subroutine ESMF_AttributeGetObjGridCompI8(target, name, value, defaultvalue, con
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -22133,8 +22469,22 @@ subroutine ESMF_AttributeGetObjGridCompI8(target, name, value, defaultvalue, con
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -22156,8 +22506,9 @@ subroutine ESMF_AttributeGetAttPackGridCompCH(target, name, attpack, value, defa
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -22183,23 +22534,35 @@ subroutine ESMF_AttributeGetAttPackGridCompCH(target, name, attpack, value, defa
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackGridCompCH
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjGridCompCH()"
-subroutine ESMF_AttributeGetObjGridCompCH(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjGridCompCH(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_GridComp), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), intent(out) :: value
   character(len=*), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -22209,6 +22572,8 @@ subroutine ESMF_AttributeGetObjGridCompCH(target, name, value, defaultvalue, con
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -22232,8 +22597,22 @@ subroutine ESMF_AttributeGetObjGridCompCH(target, name, value, defaultvalue, con
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -22255,8 +22634,9 @@ subroutine ESMF_AttributeGetAttPackGridCompLG(target, name, attpack, value, defa
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -22282,23 +22662,35 @@ subroutine ESMF_AttributeGetAttPackGridCompLG(target, name, attpack, value, defa
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackGridCompLG
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjGridCompLG()"
-subroutine ESMF_AttributeGetObjGridCompLG(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjGridCompLG(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_GridComp), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, intent(out) :: value
   logical, intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -22308,6 +22700,8 @@ subroutine ESMF_AttributeGetObjGridCompLG(target, name, value, defaultvalue, con
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -22331,8 +22725,22 @@ subroutine ESMF_AttributeGetObjGridCompLG(target, name, value, defaultvalue, con
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -22354,8 +22762,9 @@ subroutine ESMF_AttributeGetAttPackSciCompR4(target, name, attpack, value, defau
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -22381,23 +22790,35 @@ subroutine ESMF_AttributeGetAttPackSciCompR4(target, name, attpack, value, defau
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackSciCompR4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjSciCompR4()"
-subroutine ESMF_AttributeGetObjSciCompR4(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjSciCompR4(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_SciComp), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), intent(out) :: value
   real(ESMF_KIND_R4), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -22407,6 +22828,8 @@ subroutine ESMF_AttributeGetObjSciCompR4(target, name, value, defaultvalue, conv
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -22430,8 +22853,22 @@ subroutine ESMF_AttributeGetObjSciCompR4(target, name, value, defaultvalue, conv
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -22453,8 +22890,9 @@ subroutine ESMF_AttributeGetAttPackSciCompR8(target, name, attpack, value, defau
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -22480,23 +22918,35 @@ subroutine ESMF_AttributeGetAttPackSciCompR8(target, name, attpack, value, defau
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackSciCompR8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjSciCompR8()"
-subroutine ESMF_AttributeGetObjSciCompR8(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjSciCompR8(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_SciComp), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), intent(out) :: value
   real(ESMF_KIND_R8), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -22506,6 +22956,8 @@ subroutine ESMF_AttributeGetObjSciCompR8(target, name, value, defaultvalue, conv
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -22529,8 +22981,22 @@ subroutine ESMF_AttributeGetObjSciCompR8(target, name, value, defaultvalue, conv
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -22552,8 +23018,9 @@ subroutine ESMF_AttributeGetAttPackSciCompI4(target, name, attpack, value, defau
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -22579,23 +23046,35 @@ subroutine ESMF_AttributeGetAttPackSciCompI4(target, name, attpack, value, defau
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackSciCompI4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjSciCompI4()"
-subroutine ESMF_AttributeGetObjSciCompI4(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjSciCompI4(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_SciComp), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), intent(out) :: value
   integer(ESMF_KIND_I4), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -22605,6 +23084,8 @@ subroutine ESMF_AttributeGetObjSciCompI4(target, name, value, defaultvalue, conv
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -22628,8 +23109,22 @@ subroutine ESMF_AttributeGetObjSciCompI4(target, name, value, defaultvalue, conv
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -22651,8 +23146,9 @@ subroutine ESMF_AttributeGetAttPackSciCompI8(target, name, attpack, value, defau
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -22678,23 +23174,35 @@ subroutine ESMF_AttributeGetAttPackSciCompI8(target, name, attpack, value, defau
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackSciCompI8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjSciCompI8()"
-subroutine ESMF_AttributeGetObjSciCompI8(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjSciCompI8(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_SciComp), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), intent(out) :: value
   integer(ESMF_KIND_I8), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -22704,6 +23212,8 @@ subroutine ESMF_AttributeGetObjSciCompI8(target, name, value, defaultvalue, conv
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -22727,8 +23237,22 @@ subroutine ESMF_AttributeGetObjSciCompI8(target, name, value, defaultvalue, conv
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -22750,8 +23274,9 @@ subroutine ESMF_AttributeGetAttPackSciCompCH(target, name, attpack, value, defau
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -22777,23 +23302,35 @@ subroutine ESMF_AttributeGetAttPackSciCompCH(target, name, attpack, value, defau
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackSciCompCH
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjSciCompCH()"
-subroutine ESMF_AttributeGetObjSciCompCH(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjSciCompCH(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_SciComp), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), intent(out) :: value
   character(len=*), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -22803,6 +23340,8 @@ subroutine ESMF_AttributeGetObjSciCompCH(target, name, value, defaultvalue, conv
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -22826,8 +23365,22 @@ subroutine ESMF_AttributeGetObjSciCompCH(target, name, value, defaultvalue, conv
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -22849,8 +23402,9 @@ subroutine ESMF_AttributeGetAttPackSciCompLG(target, name, attpack, value, defau
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -22876,23 +23430,35 @@ subroutine ESMF_AttributeGetAttPackSciCompLG(target, name, attpack, value, defau
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackSciCompLG
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjSciCompLG()"
-subroutine ESMF_AttributeGetObjSciCompLG(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjSciCompLG(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_SciComp), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, intent(out) :: value
   logical, intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -22902,6 +23468,8 @@ subroutine ESMF_AttributeGetObjSciCompLG(target, name, value, defaultvalue, conv
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -22925,8 +23493,22 @@ subroutine ESMF_AttributeGetObjSciCompLG(target, name, value, defaultvalue, conv
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -22948,8 +23530,9 @@ subroutine ESMF_AttributeGetAttPackDistGridR4(target, name, attpack, value, defa
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -22975,23 +23558,35 @@ subroutine ESMF_AttributeGetAttPackDistGridR4(target, name, attpack, value, defa
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackDistGridR4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjDistGridR4()"
-subroutine ESMF_AttributeGetObjDistGridR4(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjDistGridR4(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_DistGrid), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), intent(out) :: value
   real(ESMF_KIND_R4), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -23001,6 +23596,8 @@ subroutine ESMF_AttributeGetObjDistGridR4(target, name, value, defaultvalue, con
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -23024,8 +23621,22 @@ subroutine ESMF_AttributeGetObjDistGridR4(target, name, value, defaultvalue, con
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -23047,8 +23658,9 @@ subroutine ESMF_AttributeGetAttPackDistGridR8(target, name, attpack, value, defa
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -23074,23 +23686,35 @@ subroutine ESMF_AttributeGetAttPackDistGridR8(target, name, attpack, value, defa
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackDistGridR8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjDistGridR8()"
-subroutine ESMF_AttributeGetObjDistGridR8(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjDistGridR8(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_DistGrid), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), intent(out) :: value
   real(ESMF_KIND_R8), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -23100,6 +23724,8 @@ subroutine ESMF_AttributeGetObjDistGridR8(target, name, value, defaultvalue, con
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -23123,8 +23749,22 @@ subroutine ESMF_AttributeGetObjDistGridR8(target, name, value, defaultvalue, con
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -23146,8 +23786,9 @@ subroutine ESMF_AttributeGetAttPackDistGridI4(target, name, attpack, value, defa
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -23173,23 +23814,35 @@ subroutine ESMF_AttributeGetAttPackDistGridI4(target, name, attpack, value, defa
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackDistGridI4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjDistGridI4()"
-subroutine ESMF_AttributeGetObjDistGridI4(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjDistGridI4(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_DistGrid), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), intent(out) :: value
   integer(ESMF_KIND_I4), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -23199,6 +23852,8 @@ subroutine ESMF_AttributeGetObjDistGridI4(target, name, value, defaultvalue, con
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -23222,8 +23877,22 @@ subroutine ESMF_AttributeGetObjDistGridI4(target, name, value, defaultvalue, con
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -23245,8 +23914,9 @@ subroutine ESMF_AttributeGetAttPackDistGridI8(target, name, attpack, value, defa
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -23272,23 +23942,35 @@ subroutine ESMF_AttributeGetAttPackDistGridI8(target, name, attpack, value, defa
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackDistGridI8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjDistGridI8()"
-subroutine ESMF_AttributeGetObjDistGridI8(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjDistGridI8(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_DistGrid), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), intent(out) :: value
   integer(ESMF_KIND_I8), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -23298,6 +23980,8 @@ subroutine ESMF_AttributeGetObjDistGridI8(target, name, value, defaultvalue, con
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -23321,8 +24005,22 @@ subroutine ESMF_AttributeGetObjDistGridI8(target, name, value, defaultvalue, con
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -23344,8 +24042,9 @@ subroutine ESMF_AttributeGetAttPackDistGridCH(target, name, attpack, value, defa
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -23371,23 +24070,35 @@ subroutine ESMF_AttributeGetAttPackDistGridCH(target, name, attpack, value, defa
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackDistGridCH
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjDistGridCH()"
-subroutine ESMF_AttributeGetObjDistGridCH(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjDistGridCH(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_DistGrid), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), intent(out) :: value
   character(len=*), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -23397,6 +24108,8 @@ subroutine ESMF_AttributeGetObjDistGridCH(target, name, value, defaultvalue, con
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -23420,8 +24133,22 @@ subroutine ESMF_AttributeGetObjDistGridCH(target, name, value, defaultvalue, con
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -23443,8 +24170,9 @@ subroutine ESMF_AttributeGetAttPackDistGridLG(target, name, attpack, value, defa
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -23470,23 +24198,35 @@ subroutine ESMF_AttributeGetAttPackDistGridLG(target, name, attpack, value, defa
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackDistGridLG
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjDistGridLG()"
-subroutine ESMF_AttributeGetObjDistGridLG(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjDistGridLG(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_DistGrid), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, intent(out) :: value
   logical, intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -23496,6 +24236,8 @@ subroutine ESMF_AttributeGetObjDistGridLG(target, name, value, defaultvalue, con
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -23519,8 +24261,22 @@ subroutine ESMF_AttributeGetObjDistGridLG(target, name, value, defaultvalue, con
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -23542,8 +24298,9 @@ subroutine ESMF_AttributeGetAttPackFieldR4(target, name, attpack, value, default
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -23569,23 +24326,35 @@ subroutine ESMF_AttributeGetAttPackFieldR4(target, name, attpack, value, default
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackFieldR4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjFieldR4()"
-subroutine ESMF_AttributeGetObjFieldR4(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjFieldR4(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_Field), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), intent(out) :: value
   real(ESMF_KIND_R4), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -23595,6 +24364,8 @@ subroutine ESMF_AttributeGetObjFieldR4(target, name, value, defaultvalue, conven
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -23618,8 +24389,22 @@ subroutine ESMF_AttributeGetObjFieldR4(target, name, value, defaultvalue, conven
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -23641,8 +24426,9 @@ subroutine ESMF_AttributeGetAttPackFieldR8(target, name, attpack, value, default
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -23668,23 +24454,35 @@ subroutine ESMF_AttributeGetAttPackFieldR8(target, name, attpack, value, default
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackFieldR8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjFieldR8()"
-subroutine ESMF_AttributeGetObjFieldR8(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjFieldR8(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_Field), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), intent(out) :: value
   real(ESMF_KIND_R8), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -23694,6 +24492,8 @@ subroutine ESMF_AttributeGetObjFieldR8(target, name, value, defaultvalue, conven
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -23717,8 +24517,22 @@ subroutine ESMF_AttributeGetObjFieldR8(target, name, value, defaultvalue, conven
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -23740,8 +24554,9 @@ subroutine ESMF_AttributeGetAttPackFieldI4(target, name, attpack, value, default
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -23767,23 +24582,35 @@ subroutine ESMF_AttributeGetAttPackFieldI4(target, name, attpack, value, default
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackFieldI4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjFieldI4()"
-subroutine ESMF_AttributeGetObjFieldI4(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjFieldI4(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_Field), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), intent(out) :: value
   integer(ESMF_KIND_I4), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -23793,6 +24620,8 @@ subroutine ESMF_AttributeGetObjFieldI4(target, name, value, defaultvalue, conven
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -23816,8 +24645,22 @@ subroutine ESMF_AttributeGetObjFieldI4(target, name, value, defaultvalue, conven
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -23839,8 +24682,9 @@ subroutine ESMF_AttributeGetAttPackFieldI8(target, name, attpack, value, default
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -23866,23 +24710,35 @@ subroutine ESMF_AttributeGetAttPackFieldI8(target, name, attpack, value, default
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackFieldI8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjFieldI8()"
-subroutine ESMF_AttributeGetObjFieldI8(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjFieldI8(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_Field), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), intent(out) :: value
   integer(ESMF_KIND_I8), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -23892,6 +24748,8 @@ subroutine ESMF_AttributeGetObjFieldI8(target, name, value, defaultvalue, conven
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -23915,8 +24773,22 @@ subroutine ESMF_AttributeGetObjFieldI8(target, name, value, defaultvalue, conven
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -23938,8 +24810,9 @@ subroutine ESMF_AttributeGetAttPackFieldCH(target, name, attpack, value, default
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -23965,23 +24838,35 @@ subroutine ESMF_AttributeGetAttPackFieldCH(target, name, attpack, value, default
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackFieldCH
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjFieldCH()"
-subroutine ESMF_AttributeGetObjFieldCH(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjFieldCH(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_Field), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), intent(out) :: value
   character(len=*), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -23991,6 +24876,8 @@ subroutine ESMF_AttributeGetObjFieldCH(target, name, value, defaultvalue, conven
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -24014,8 +24901,22 @@ subroutine ESMF_AttributeGetObjFieldCH(target, name, value, defaultvalue, conven
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -24037,8 +24938,9 @@ subroutine ESMF_AttributeGetAttPackFieldLG(target, name, attpack, value, default
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -24064,23 +24966,35 @@ subroutine ESMF_AttributeGetAttPackFieldLG(target, name, attpack, value, default
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackFieldLG
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjFieldLG()"
-subroutine ESMF_AttributeGetObjFieldLG(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjFieldLG(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_Field), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, intent(out) :: value
   logical, intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -24090,6 +25004,8 @@ subroutine ESMF_AttributeGetObjFieldLG(target, name, value, defaultvalue, conven
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -24113,8 +25029,22 @@ subroutine ESMF_AttributeGetObjFieldLG(target, name, value, defaultvalue, conven
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -24136,8 +25066,9 @@ subroutine ESMF_AttributeGetAttPackFieldBundleR4(target, name, attpack, value, d
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -24163,23 +25094,35 @@ subroutine ESMF_AttributeGetAttPackFieldBundleR4(target, name, attpack, value, d
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackFieldBundleR4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjFieldBundleR4()"
-subroutine ESMF_AttributeGetObjFieldBundleR4(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjFieldBundleR4(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_FieldBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), intent(out) :: value
   real(ESMF_KIND_R4), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -24189,6 +25132,8 @@ subroutine ESMF_AttributeGetObjFieldBundleR4(target, name, value, defaultvalue, 
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -24212,8 +25157,22 @@ subroutine ESMF_AttributeGetObjFieldBundleR4(target, name, value, defaultvalue, 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -24235,8 +25194,9 @@ subroutine ESMF_AttributeGetAttPackFieldBundleR8(target, name, attpack, value, d
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -24262,23 +25222,35 @@ subroutine ESMF_AttributeGetAttPackFieldBundleR8(target, name, attpack, value, d
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackFieldBundleR8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjFieldBundleR8()"
-subroutine ESMF_AttributeGetObjFieldBundleR8(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjFieldBundleR8(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_FieldBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), intent(out) :: value
   real(ESMF_KIND_R8), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -24288,6 +25260,8 @@ subroutine ESMF_AttributeGetObjFieldBundleR8(target, name, value, defaultvalue, 
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -24311,8 +25285,22 @@ subroutine ESMF_AttributeGetObjFieldBundleR8(target, name, value, defaultvalue, 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -24334,8 +25322,9 @@ subroutine ESMF_AttributeGetAttPackFieldBundleI4(target, name, attpack, value, d
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -24361,23 +25350,35 @@ subroutine ESMF_AttributeGetAttPackFieldBundleI4(target, name, attpack, value, d
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackFieldBundleI4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjFieldBundleI4()"
-subroutine ESMF_AttributeGetObjFieldBundleI4(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjFieldBundleI4(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_FieldBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), intent(out) :: value
   integer(ESMF_KIND_I4), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -24387,6 +25388,8 @@ subroutine ESMF_AttributeGetObjFieldBundleI4(target, name, value, defaultvalue, 
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -24410,8 +25413,22 @@ subroutine ESMF_AttributeGetObjFieldBundleI4(target, name, value, defaultvalue, 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -24433,8 +25450,9 @@ subroutine ESMF_AttributeGetAttPackFieldBundleI8(target, name, attpack, value, d
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -24460,23 +25478,35 @@ subroutine ESMF_AttributeGetAttPackFieldBundleI8(target, name, attpack, value, d
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackFieldBundleI8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjFieldBundleI8()"
-subroutine ESMF_AttributeGetObjFieldBundleI8(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjFieldBundleI8(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_FieldBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), intent(out) :: value
   integer(ESMF_KIND_I8), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -24486,6 +25516,8 @@ subroutine ESMF_AttributeGetObjFieldBundleI8(target, name, value, defaultvalue, 
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -24509,8 +25541,22 @@ subroutine ESMF_AttributeGetObjFieldBundleI8(target, name, value, defaultvalue, 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -24532,8 +25578,9 @@ subroutine ESMF_AttributeGetAttPackFieldBundleCH(target, name, attpack, value, d
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -24559,23 +25606,35 @@ subroutine ESMF_AttributeGetAttPackFieldBundleCH(target, name, attpack, value, d
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackFieldBundleCH
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjFieldBundleCH()"
-subroutine ESMF_AttributeGetObjFieldBundleCH(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjFieldBundleCH(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_FieldBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), intent(out) :: value
   character(len=*), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -24585,6 +25644,8 @@ subroutine ESMF_AttributeGetObjFieldBundleCH(target, name, value, defaultvalue, 
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -24608,8 +25669,22 @@ subroutine ESMF_AttributeGetObjFieldBundleCH(target, name, value, defaultvalue, 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -24631,8 +25706,9 @@ subroutine ESMF_AttributeGetAttPackFieldBundleLG(target, name, attpack, value, d
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -24658,23 +25734,35 @@ subroutine ESMF_AttributeGetAttPackFieldBundleLG(target, name, attpack, value, d
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackFieldBundleLG
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjFieldBundleLG()"
-subroutine ESMF_AttributeGetObjFieldBundleLG(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjFieldBundleLG(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_FieldBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, intent(out) :: value
   logical, intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -24684,6 +25772,8 @@ subroutine ESMF_AttributeGetObjFieldBundleLG(target, name, value, defaultvalue, 
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -24707,8 +25797,22 @@ subroutine ESMF_AttributeGetObjFieldBundleLG(target, name, value, defaultvalue, 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -24730,8 +25834,9 @@ subroutine ESMF_AttributeGetAttPackGridR4(target, name, attpack, value, defaultv
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -24757,23 +25862,35 @@ subroutine ESMF_AttributeGetAttPackGridR4(target, name, attpack, value, defaultv
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackGridR4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjGridR4()"
-subroutine ESMF_AttributeGetObjGridR4(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjGridR4(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_Grid), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), intent(out) :: value
   real(ESMF_KIND_R4), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -24783,6 +25900,8 @@ subroutine ESMF_AttributeGetObjGridR4(target, name, value, defaultvalue, convent
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -24806,8 +25925,22 @@ subroutine ESMF_AttributeGetObjGridR4(target, name, value, defaultvalue, convent
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -24829,8 +25962,9 @@ subroutine ESMF_AttributeGetAttPackGridR8(target, name, attpack, value, defaultv
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -24856,23 +25990,35 @@ subroutine ESMF_AttributeGetAttPackGridR8(target, name, attpack, value, defaultv
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackGridR8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjGridR8()"
-subroutine ESMF_AttributeGetObjGridR8(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjGridR8(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_Grid), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), intent(out) :: value
   real(ESMF_KIND_R8), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -24882,6 +26028,8 @@ subroutine ESMF_AttributeGetObjGridR8(target, name, value, defaultvalue, convent
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -24905,8 +26053,22 @@ subroutine ESMF_AttributeGetObjGridR8(target, name, value, defaultvalue, convent
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -24928,8 +26090,9 @@ subroutine ESMF_AttributeGetAttPackGridI4(target, name, attpack, value, defaultv
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -24955,23 +26118,35 @@ subroutine ESMF_AttributeGetAttPackGridI4(target, name, attpack, value, defaultv
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackGridI4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjGridI4()"
-subroutine ESMF_AttributeGetObjGridI4(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjGridI4(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_Grid), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), intent(out) :: value
   integer(ESMF_KIND_I4), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -24981,6 +26156,8 @@ subroutine ESMF_AttributeGetObjGridI4(target, name, value, defaultvalue, convent
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -25004,8 +26181,22 @@ subroutine ESMF_AttributeGetObjGridI4(target, name, value, defaultvalue, convent
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -25027,8 +26218,9 @@ subroutine ESMF_AttributeGetAttPackGridI8(target, name, attpack, value, defaultv
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -25054,23 +26246,35 @@ subroutine ESMF_AttributeGetAttPackGridI8(target, name, attpack, value, defaultv
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackGridI8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjGridI8()"
-subroutine ESMF_AttributeGetObjGridI8(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjGridI8(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_Grid), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), intent(out) :: value
   integer(ESMF_KIND_I8), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -25080,6 +26284,8 @@ subroutine ESMF_AttributeGetObjGridI8(target, name, value, defaultvalue, convent
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -25103,8 +26309,22 @@ subroutine ESMF_AttributeGetObjGridI8(target, name, value, defaultvalue, convent
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -25126,8 +26346,9 @@ subroutine ESMF_AttributeGetAttPackGridCH(target, name, attpack, value, defaultv
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -25153,23 +26374,35 @@ subroutine ESMF_AttributeGetAttPackGridCH(target, name, attpack, value, defaultv
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackGridCH
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjGridCH()"
-subroutine ESMF_AttributeGetObjGridCH(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjGridCH(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_Grid), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), intent(out) :: value
   character(len=*), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -25179,6 +26412,8 @@ subroutine ESMF_AttributeGetObjGridCH(target, name, value, defaultvalue, convent
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -25202,8 +26437,22 @@ subroutine ESMF_AttributeGetObjGridCH(target, name, value, defaultvalue, convent
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -25225,8 +26474,9 @@ subroutine ESMF_AttributeGetAttPackGridLG(target, name, attpack, value, defaultv
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -25252,23 +26502,35 @@ subroutine ESMF_AttributeGetAttPackGridLG(target, name, attpack, value, defaultv
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackGridLG
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjGridLG()"
-subroutine ESMF_AttributeGetObjGridLG(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjGridLG(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_Grid), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, intent(out) :: value
   logical, intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -25278,6 +26540,8 @@ subroutine ESMF_AttributeGetObjGridLG(target, name, value, defaultvalue, convent
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -25301,8 +26565,22 @@ subroutine ESMF_AttributeGetObjGridLG(target, name, value, defaultvalue, convent
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -25324,8 +26602,9 @@ subroutine ESMF_AttributeGetAttPackStateR4(target, name, attpack, value, default
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -25351,23 +26630,35 @@ subroutine ESMF_AttributeGetAttPackStateR4(target, name, attpack, value, default
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackStateR4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjStateR4()"
-subroutine ESMF_AttributeGetObjStateR4(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjStateR4(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_State), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), intent(out) :: value
   real(ESMF_KIND_R4), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -25377,6 +26668,8 @@ subroutine ESMF_AttributeGetObjStateR4(target, name, value, defaultvalue, conven
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -25400,8 +26693,22 @@ subroutine ESMF_AttributeGetObjStateR4(target, name, value, defaultvalue, conven
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -25423,8 +26730,9 @@ subroutine ESMF_AttributeGetAttPackStateR8(target, name, attpack, value, default
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -25450,23 +26758,35 @@ subroutine ESMF_AttributeGetAttPackStateR8(target, name, attpack, value, default
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackStateR8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjStateR8()"
-subroutine ESMF_AttributeGetObjStateR8(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjStateR8(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_State), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), intent(out) :: value
   real(ESMF_KIND_R8), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -25476,6 +26796,8 @@ subroutine ESMF_AttributeGetObjStateR8(target, name, value, defaultvalue, conven
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -25499,8 +26821,22 @@ subroutine ESMF_AttributeGetObjStateR8(target, name, value, defaultvalue, conven
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -25522,8 +26858,9 @@ subroutine ESMF_AttributeGetAttPackStateI4(target, name, attpack, value, default
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -25549,23 +26886,35 @@ subroutine ESMF_AttributeGetAttPackStateI4(target, name, attpack, value, default
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackStateI4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjStateI4()"
-subroutine ESMF_AttributeGetObjStateI4(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjStateI4(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_State), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), intent(out) :: value
   integer(ESMF_KIND_I4), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -25575,6 +26924,8 @@ subroutine ESMF_AttributeGetObjStateI4(target, name, value, defaultvalue, conven
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -25598,8 +26949,22 @@ subroutine ESMF_AttributeGetObjStateI4(target, name, value, defaultvalue, conven
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -25621,8 +26986,9 @@ subroutine ESMF_AttributeGetAttPackStateI8(target, name, attpack, value, default
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -25648,23 +27014,35 @@ subroutine ESMF_AttributeGetAttPackStateI8(target, name, attpack, value, default
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackStateI8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjStateI8()"
-subroutine ESMF_AttributeGetObjStateI8(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjStateI8(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_State), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), intent(out) :: value
   integer(ESMF_KIND_I8), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -25674,6 +27052,8 @@ subroutine ESMF_AttributeGetObjStateI8(target, name, value, defaultvalue, conven
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -25697,8 +27077,22 @@ subroutine ESMF_AttributeGetObjStateI8(target, name, value, defaultvalue, conven
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -25720,8 +27114,9 @@ subroutine ESMF_AttributeGetAttPackStateCH(target, name, attpack, value, default
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -25747,23 +27142,35 @@ subroutine ESMF_AttributeGetAttPackStateCH(target, name, attpack, value, default
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackStateCH
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjStateCH()"
-subroutine ESMF_AttributeGetObjStateCH(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjStateCH(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_State), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), intent(out) :: value
   character(len=*), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -25773,6 +27180,8 @@ subroutine ESMF_AttributeGetObjStateCH(target, name, value, defaultvalue, conven
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -25796,8 +27205,22 @@ subroutine ESMF_AttributeGetObjStateCH(target, name, value, defaultvalue, conven
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -25819,8 +27242,9 @@ subroutine ESMF_AttributeGetAttPackStateLG(target, name, attpack, value, default
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -25846,23 +27270,35 @@ subroutine ESMF_AttributeGetAttPackStateLG(target, name, attpack, value, default
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackStateLG
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjStateLG()"
-subroutine ESMF_AttributeGetObjStateLG(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjStateLG(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_State), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, intent(out) :: value
   logical, intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -25872,6 +27308,8 @@ subroutine ESMF_AttributeGetObjStateLG(target, name, value, defaultvalue, conven
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -25895,8 +27333,22 @@ subroutine ESMF_AttributeGetObjStateLG(target, name, value, defaultvalue, conven
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -25918,8 +27370,9 @@ subroutine ESMF_AttributeGetAttPackLocStreamR4(target, name, attpack, value, def
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -25945,23 +27398,35 @@ subroutine ESMF_AttributeGetAttPackLocStreamR4(target, name, attpack, value, def
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackLocStreamR4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjLocStreamR4()"
-subroutine ESMF_AttributeGetObjLocStreamR4(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjLocStreamR4(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_LocStream), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), intent(out) :: value
   real(ESMF_KIND_R4), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -25971,6 +27436,8 @@ subroutine ESMF_AttributeGetObjLocStreamR4(target, name, value, defaultvalue, co
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -25994,8 +27461,22 @@ subroutine ESMF_AttributeGetObjLocStreamR4(target, name, value, defaultvalue, co
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -26017,8 +27498,9 @@ subroutine ESMF_AttributeGetAttPackLocStreamR8(target, name, attpack, value, def
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -26044,23 +27526,35 @@ subroutine ESMF_AttributeGetAttPackLocStreamR8(target, name, attpack, value, def
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackLocStreamR8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjLocStreamR8()"
-subroutine ESMF_AttributeGetObjLocStreamR8(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjLocStreamR8(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_LocStream), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), intent(out) :: value
   real(ESMF_KIND_R8), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -26070,6 +27564,8 @@ subroutine ESMF_AttributeGetObjLocStreamR8(target, name, value, defaultvalue, co
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -26093,8 +27589,22 @@ subroutine ESMF_AttributeGetObjLocStreamR8(target, name, value, defaultvalue, co
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -26116,8 +27626,9 @@ subroutine ESMF_AttributeGetAttPackLocStreamI4(target, name, attpack, value, def
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -26143,23 +27654,35 @@ subroutine ESMF_AttributeGetAttPackLocStreamI4(target, name, attpack, value, def
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackLocStreamI4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjLocStreamI4()"
-subroutine ESMF_AttributeGetObjLocStreamI4(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjLocStreamI4(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_LocStream), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), intent(out) :: value
   integer(ESMF_KIND_I4), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -26169,6 +27692,8 @@ subroutine ESMF_AttributeGetObjLocStreamI4(target, name, value, defaultvalue, co
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -26192,8 +27717,22 @@ subroutine ESMF_AttributeGetObjLocStreamI4(target, name, value, defaultvalue, co
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -26215,8 +27754,9 @@ subroutine ESMF_AttributeGetAttPackLocStreamI8(target, name, attpack, value, def
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -26242,23 +27782,35 @@ subroutine ESMF_AttributeGetAttPackLocStreamI8(target, name, attpack, value, def
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackLocStreamI8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjLocStreamI8()"
-subroutine ESMF_AttributeGetObjLocStreamI8(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjLocStreamI8(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_LocStream), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), intent(out) :: value
   integer(ESMF_KIND_I8), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -26268,6 +27820,8 @@ subroutine ESMF_AttributeGetObjLocStreamI8(target, name, value, defaultvalue, co
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -26291,8 +27845,22 @@ subroutine ESMF_AttributeGetObjLocStreamI8(target, name, value, defaultvalue, co
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -26314,8 +27882,9 @@ subroutine ESMF_AttributeGetAttPackLocStreamCH(target, name, attpack, value, def
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -26341,23 +27910,35 @@ subroutine ESMF_AttributeGetAttPackLocStreamCH(target, name, attpack, value, def
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackLocStreamCH
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjLocStreamCH()"
-subroutine ESMF_AttributeGetObjLocStreamCH(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjLocStreamCH(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_LocStream), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), intent(out) :: value
   character(len=*), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -26367,6 +27948,8 @@ subroutine ESMF_AttributeGetObjLocStreamCH(target, name, value, defaultvalue, co
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -26390,8 +27973,22 @@ subroutine ESMF_AttributeGetObjLocStreamCH(target, name, value, defaultvalue, co
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -26413,8 +28010,9 @@ subroutine ESMF_AttributeGetAttPackLocStreamLG(target, name, attpack, value, def
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -26440,23 +28038,35 @@ subroutine ESMF_AttributeGetAttPackLocStreamLG(target, name, attpack, value, def
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackLocStreamLG
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjLocStreamLG()"
-subroutine ESMF_AttributeGetObjLocStreamLG(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjLocStreamLG(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_LocStream), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, intent(out) :: value
   logical, intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -26466,6 +28076,8 @@ subroutine ESMF_AttributeGetObjLocStreamLG(target, name, value, defaultvalue, co
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -26489,8 +28101,22 @@ subroutine ESMF_AttributeGetObjLocStreamLG(target, name, value, defaultvalue, co
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -26512,8 +28138,9 @@ subroutine ESMF_AttributeGetAttPackMeshR4(target, name, attpack, value, defaultv
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -26539,23 +28166,35 @@ subroutine ESMF_AttributeGetAttPackMeshR4(target, name, attpack, value, defaultv
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackMeshR4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjMeshR4()"
-subroutine ESMF_AttributeGetObjMeshR4(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjMeshR4(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_Mesh), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), intent(out) :: value
   real(ESMF_KIND_R4), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -26565,6 +28204,8 @@ subroutine ESMF_AttributeGetObjMeshR4(target, name, value, defaultvalue, convent
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -26588,8 +28229,22 @@ subroutine ESMF_AttributeGetObjMeshR4(target, name, value, defaultvalue, convent
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -26611,8 +28266,9 @@ subroutine ESMF_AttributeGetAttPackMeshR8(target, name, attpack, value, defaultv
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -26638,23 +28294,35 @@ subroutine ESMF_AttributeGetAttPackMeshR8(target, name, attpack, value, defaultv
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackMeshR8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjMeshR8()"
-subroutine ESMF_AttributeGetObjMeshR8(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjMeshR8(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_Mesh), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), intent(out) :: value
   real(ESMF_KIND_R8), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -26664,6 +28332,8 @@ subroutine ESMF_AttributeGetObjMeshR8(target, name, value, defaultvalue, convent
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -26687,8 +28357,22 @@ subroutine ESMF_AttributeGetObjMeshR8(target, name, value, defaultvalue, convent
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -26710,8 +28394,9 @@ subroutine ESMF_AttributeGetAttPackMeshI4(target, name, attpack, value, defaultv
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -26737,23 +28422,35 @@ subroutine ESMF_AttributeGetAttPackMeshI4(target, name, attpack, value, defaultv
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackMeshI4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjMeshI4()"
-subroutine ESMF_AttributeGetObjMeshI4(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjMeshI4(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_Mesh), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), intent(out) :: value
   integer(ESMF_KIND_I4), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -26763,6 +28460,8 @@ subroutine ESMF_AttributeGetObjMeshI4(target, name, value, defaultvalue, convent
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -26786,8 +28485,22 @@ subroutine ESMF_AttributeGetObjMeshI4(target, name, value, defaultvalue, convent
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -26809,8 +28522,9 @@ subroutine ESMF_AttributeGetAttPackMeshI8(target, name, attpack, value, defaultv
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -26836,23 +28550,35 @@ subroutine ESMF_AttributeGetAttPackMeshI8(target, name, attpack, value, defaultv
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackMeshI8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjMeshI8()"
-subroutine ESMF_AttributeGetObjMeshI8(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjMeshI8(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_Mesh), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), intent(out) :: value
   integer(ESMF_KIND_I8), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -26862,6 +28588,8 @@ subroutine ESMF_AttributeGetObjMeshI8(target, name, value, defaultvalue, convent
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -26885,8 +28613,22 @@ subroutine ESMF_AttributeGetObjMeshI8(target, name, value, defaultvalue, convent
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -26908,8 +28650,9 @@ subroutine ESMF_AttributeGetAttPackMeshCH(target, name, attpack, value, defaultv
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -26935,23 +28678,35 @@ subroutine ESMF_AttributeGetAttPackMeshCH(target, name, attpack, value, defaultv
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackMeshCH
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjMeshCH()"
-subroutine ESMF_AttributeGetObjMeshCH(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjMeshCH(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_Mesh), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), intent(out) :: value
   character(len=*), intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -26961,6 +28716,8 @@ subroutine ESMF_AttributeGetObjMeshCH(target, name, value, defaultvalue, convent
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -26984,8 +28741,22 @@ subroutine ESMF_AttributeGetObjMeshCH(target, name, value, defaultvalue, convent
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -27007,8 +28778,9 @@ subroutine ESMF_AttributeGetAttPackMeshLG(target, name, attpack, value, defaultv
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -27034,23 +28806,35 @@ subroutine ESMF_AttributeGetAttPackMeshLG(target, name, attpack, value, defaultv
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetAttPackMeshLG
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjMeshLG()"
-subroutine ESMF_AttributeGetObjMeshLG(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)
-  ! 39.11.11 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjMeshLG(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)
   type(ESMF_Mesh), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, intent(out) :: value
   logical, intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -27060,6 +28844,8 @@ subroutine ESMF_AttributeGetObjMeshLG(target, name, value, defaultvalue, convent
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -27083,8 +28869,22 @@ subroutine ESMF_AttributeGetObjMeshLG(target, name, value, defaultvalue, convent
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -27160,15 +28960,13 @@ end subroutine ESMF_AttributeGetAttPackArrayR4List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjArrayR4List()"
-subroutine ESMF_AttributeGetObjArrayR4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjArrayR4List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_Array), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
   real(ESMF_KIND_R4), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -27298,15 +29096,13 @@ end subroutine ESMF_AttributeGetAttPackArrayR8List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjArrayR8List()"
-subroutine ESMF_AttributeGetObjArrayR8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjArrayR8List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_Array), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
   real(ESMF_KIND_R8), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -27436,15 +29232,13 @@ end subroutine ESMF_AttributeGetAttPackArrayI4List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjArrayI4List()"
-subroutine ESMF_AttributeGetObjArrayI4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjArrayI4List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_Array), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
   integer(ESMF_KIND_I4), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -27574,15 +29368,13 @@ end subroutine ESMF_AttributeGetAttPackArrayI8List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjArrayI8List()"
-subroutine ESMF_AttributeGetObjArrayI8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjArrayI8List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_Array), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
   integer(ESMF_KIND_I8), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -27712,15 +29504,13 @@ end subroutine ESMF_AttributeGetAttPackArrayCHList
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjArrayCHList()"
-subroutine ESMF_AttributeGetObjArrayCHList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjArrayCHList(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_Array), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), dimension(:), intent(out) :: valueList
   character(len=*), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -27850,15 +29640,13 @@ end subroutine ESMF_AttributeGetAttPackArrayLGList
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjArrayLGList()"
-subroutine ESMF_AttributeGetObjArrayLGList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjArrayLGList(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_Array), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, dimension(:), intent(out) :: valueList
   logical, dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -27988,15 +29776,13 @@ end subroutine ESMF_AttributeGetAttPackArrayBundleR4List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjArrayBundleR4List()"
-subroutine ESMF_AttributeGetObjArrayBundleR4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjArrayBundleR4List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_ArrayBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
   real(ESMF_KIND_R4), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -28126,15 +29912,13 @@ end subroutine ESMF_AttributeGetAttPackArrayBundleR8List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjArrayBundleR8List()"
-subroutine ESMF_AttributeGetObjArrayBundleR8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjArrayBundleR8List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_ArrayBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
   real(ESMF_KIND_R8), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -28264,15 +30048,13 @@ end subroutine ESMF_AttributeGetAttPackArrayBundleI4List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjArrayBundleI4List()"
-subroutine ESMF_AttributeGetObjArrayBundleI4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjArrayBundleI4List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_ArrayBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
   integer(ESMF_KIND_I4), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -28402,15 +30184,13 @@ end subroutine ESMF_AttributeGetAttPackArrayBundleI8List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjArrayBundleI8List()"
-subroutine ESMF_AttributeGetObjArrayBundleI8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjArrayBundleI8List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_ArrayBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
   integer(ESMF_KIND_I8), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -28540,15 +30320,13 @@ end subroutine ESMF_AttributeGetAttPackArrayBundleCHList
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjArrayBundleCHList()"
-subroutine ESMF_AttributeGetObjArrayBundleCHList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjArrayBundleCHList(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_ArrayBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), dimension(:), intent(out) :: valueList
   character(len=*), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -28678,15 +30456,13 @@ end subroutine ESMF_AttributeGetAttPackArrayBundleLGList
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjArrayBundleLGList()"
-subroutine ESMF_AttributeGetObjArrayBundleLGList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjArrayBundleLGList(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_ArrayBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, dimension(:), intent(out) :: valueList
   logical, dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -28816,15 +30592,13 @@ end subroutine ESMF_AttributeGetAttPackCplCompR4List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjCplCompR4List()"
-subroutine ESMF_AttributeGetObjCplCompR4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjCplCompR4List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_CplComp), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
   real(ESMF_KIND_R4), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -28954,15 +30728,13 @@ end subroutine ESMF_AttributeGetAttPackCplCompR8List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjCplCompR8List()"
-subroutine ESMF_AttributeGetObjCplCompR8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjCplCompR8List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_CplComp), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
   real(ESMF_KIND_R8), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -29092,15 +30864,13 @@ end subroutine ESMF_AttributeGetAttPackCplCompI4List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjCplCompI4List()"
-subroutine ESMF_AttributeGetObjCplCompI4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjCplCompI4List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_CplComp), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
   integer(ESMF_KIND_I4), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -29230,15 +31000,13 @@ end subroutine ESMF_AttributeGetAttPackCplCompI8List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjCplCompI8List()"
-subroutine ESMF_AttributeGetObjCplCompI8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjCplCompI8List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_CplComp), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
   integer(ESMF_KIND_I8), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -29368,15 +31136,13 @@ end subroutine ESMF_AttributeGetAttPackCplCompCHList
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjCplCompCHList()"
-subroutine ESMF_AttributeGetObjCplCompCHList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjCplCompCHList(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_CplComp), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), dimension(:), intent(out) :: valueList
   character(len=*), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -29506,15 +31272,13 @@ end subroutine ESMF_AttributeGetAttPackCplCompLGList
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjCplCompLGList()"
-subroutine ESMF_AttributeGetObjCplCompLGList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjCplCompLGList(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_CplComp), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, dimension(:), intent(out) :: valueList
   logical, dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -29644,15 +31408,13 @@ end subroutine ESMF_AttributeGetAttPackGridCompR4List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjGridCompR4List()"
-subroutine ESMF_AttributeGetObjGridCompR4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjGridCompR4List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_GridComp), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
   real(ESMF_KIND_R4), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -29782,15 +31544,13 @@ end subroutine ESMF_AttributeGetAttPackGridCompR8List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjGridCompR8List()"
-subroutine ESMF_AttributeGetObjGridCompR8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjGridCompR8List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_GridComp), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
   real(ESMF_KIND_R8), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -29920,15 +31680,13 @@ end subroutine ESMF_AttributeGetAttPackGridCompI4List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjGridCompI4List()"
-subroutine ESMF_AttributeGetObjGridCompI4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjGridCompI4List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_GridComp), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
   integer(ESMF_KIND_I4), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -30058,15 +31816,13 @@ end subroutine ESMF_AttributeGetAttPackGridCompI8List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjGridCompI8List()"
-subroutine ESMF_AttributeGetObjGridCompI8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjGridCompI8List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_GridComp), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
   integer(ESMF_KIND_I8), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -30196,15 +31952,13 @@ end subroutine ESMF_AttributeGetAttPackGridCompCHList
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjGridCompCHList()"
-subroutine ESMF_AttributeGetObjGridCompCHList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjGridCompCHList(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_GridComp), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), dimension(:), intent(out) :: valueList
   character(len=*), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -30334,15 +32088,13 @@ end subroutine ESMF_AttributeGetAttPackGridCompLGList
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjGridCompLGList()"
-subroutine ESMF_AttributeGetObjGridCompLGList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjGridCompLGList(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_GridComp), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, dimension(:), intent(out) :: valueList
   logical, dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -30472,15 +32224,13 @@ end subroutine ESMF_AttributeGetAttPackSciCompR4List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjSciCompR4List()"
-subroutine ESMF_AttributeGetObjSciCompR4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjSciCompR4List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_SciComp), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
   real(ESMF_KIND_R4), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -30610,15 +32360,13 @@ end subroutine ESMF_AttributeGetAttPackSciCompR8List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjSciCompR8List()"
-subroutine ESMF_AttributeGetObjSciCompR8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjSciCompR8List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_SciComp), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
   real(ESMF_KIND_R8), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -30748,15 +32496,13 @@ end subroutine ESMF_AttributeGetAttPackSciCompI4List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjSciCompI4List()"
-subroutine ESMF_AttributeGetObjSciCompI4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjSciCompI4List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_SciComp), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
   integer(ESMF_KIND_I4), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -30886,15 +32632,13 @@ end subroutine ESMF_AttributeGetAttPackSciCompI8List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjSciCompI8List()"
-subroutine ESMF_AttributeGetObjSciCompI8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjSciCompI8List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_SciComp), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
   integer(ESMF_KIND_I8), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -31024,15 +32768,13 @@ end subroutine ESMF_AttributeGetAttPackSciCompCHList
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjSciCompCHList()"
-subroutine ESMF_AttributeGetObjSciCompCHList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjSciCompCHList(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_SciComp), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), dimension(:), intent(out) :: valueList
   character(len=*), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -31162,15 +32904,13 @@ end subroutine ESMF_AttributeGetAttPackSciCompLGList
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjSciCompLGList()"
-subroutine ESMF_AttributeGetObjSciCompLGList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjSciCompLGList(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_SciComp), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, dimension(:), intent(out) :: valueList
   logical, dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -31300,15 +33040,13 @@ end subroutine ESMF_AttributeGetAttPackDistGridR4List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjDistGridR4List()"
-subroutine ESMF_AttributeGetObjDistGridR4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjDistGridR4List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_DistGrid), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
   real(ESMF_KIND_R4), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -31438,15 +33176,13 @@ end subroutine ESMF_AttributeGetAttPackDistGridR8List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjDistGridR8List()"
-subroutine ESMF_AttributeGetObjDistGridR8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjDistGridR8List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_DistGrid), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
   real(ESMF_KIND_R8), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -31576,15 +33312,13 @@ end subroutine ESMF_AttributeGetAttPackDistGridI4List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjDistGridI4List()"
-subroutine ESMF_AttributeGetObjDistGridI4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjDistGridI4List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_DistGrid), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
   integer(ESMF_KIND_I4), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -31714,15 +33448,13 @@ end subroutine ESMF_AttributeGetAttPackDistGridI8List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjDistGridI8List()"
-subroutine ESMF_AttributeGetObjDistGridI8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjDistGridI8List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_DistGrid), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
   integer(ESMF_KIND_I8), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -31852,15 +33584,13 @@ end subroutine ESMF_AttributeGetAttPackDistGridCHList
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjDistGridCHList()"
-subroutine ESMF_AttributeGetObjDistGridCHList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjDistGridCHList(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_DistGrid), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), dimension(:), intent(out) :: valueList
   character(len=*), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -31990,15 +33720,13 @@ end subroutine ESMF_AttributeGetAttPackDistGridLGList
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjDistGridLGList()"
-subroutine ESMF_AttributeGetObjDistGridLGList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjDistGridLGList(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_DistGrid), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, dimension(:), intent(out) :: valueList
   logical, dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -32128,15 +33856,13 @@ end subroutine ESMF_AttributeGetAttPackFieldR4List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjFieldR4List()"
-subroutine ESMF_AttributeGetObjFieldR4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjFieldR4List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_Field), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
   real(ESMF_KIND_R4), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -32266,15 +33992,13 @@ end subroutine ESMF_AttributeGetAttPackFieldR8List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjFieldR8List()"
-subroutine ESMF_AttributeGetObjFieldR8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjFieldR8List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_Field), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
   real(ESMF_KIND_R8), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -32404,15 +34128,13 @@ end subroutine ESMF_AttributeGetAttPackFieldI4List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjFieldI4List()"
-subroutine ESMF_AttributeGetObjFieldI4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjFieldI4List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_Field), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
   integer(ESMF_KIND_I4), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -32542,15 +34264,13 @@ end subroutine ESMF_AttributeGetAttPackFieldI8List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjFieldI8List()"
-subroutine ESMF_AttributeGetObjFieldI8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjFieldI8List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_Field), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
   integer(ESMF_KIND_I8), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -32680,15 +34400,13 @@ end subroutine ESMF_AttributeGetAttPackFieldCHList
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjFieldCHList()"
-subroutine ESMF_AttributeGetObjFieldCHList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjFieldCHList(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_Field), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), dimension(:), intent(out) :: valueList
   character(len=*), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -32818,15 +34536,13 @@ end subroutine ESMF_AttributeGetAttPackFieldLGList
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjFieldLGList()"
-subroutine ESMF_AttributeGetObjFieldLGList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjFieldLGList(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_Field), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, dimension(:), intent(out) :: valueList
   logical, dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -32956,15 +34672,13 @@ end subroutine ESMF_AttributeGetAttPackFieldBundleR4List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjFieldBundleR4List()"
-subroutine ESMF_AttributeGetObjFieldBundleR4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjFieldBundleR4List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_FieldBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
   real(ESMF_KIND_R4), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -33094,15 +34808,13 @@ end subroutine ESMF_AttributeGetAttPackFieldBundleR8List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjFieldBundleR8List()"
-subroutine ESMF_AttributeGetObjFieldBundleR8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjFieldBundleR8List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_FieldBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
   real(ESMF_KIND_R8), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -33232,15 +34944,13 @@ end subroutine ESMF_AttributeGetAttPackFieldBundleI4List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjFieldBundleI4List()"
-subroutine ESMF_AttributeGetObjFieldBundleI4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjFieldBundleI4List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_FieldBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
   integer(ESMF_KIND_I4), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -33370,15 +35080,13 @@ end subroutine ESMF_AttributeGetAttPackFieldBundleI8List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjFieldBundleI8List()"
-subroutine ESMF_AttributeGetObjFieldBundleI8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjFieldBundleI8List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_FieldBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
   integer(ESMF_KIND_I8), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -33508,15 +35216,13 @@ end subroutine ESMF_AttributeGetAttPackFieldBundleCHList
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjFieldBundleCHList()"
-subroutine ESMF_AttributeGetObjFieldBundleCHList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjFieldBundleCHList(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_FieldBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), dimension(:), intent(out) :: valueList
   character(len=*), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -33646,15 +35352,13 @@ end subroutine ESMF_AttributeGetAttPackFieldBundleLGList
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjFieldBundleLGList()"
-subroutine ESMF_AttributeGetObjFieldBundleLGList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjFieldBundleLGList(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_FieldBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, dimension(:), intent(out) :: valueList
   logical, dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -33784,15 +35488,13 @@ end subroutine ESMF_AttributeGetAttPackGridR4List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjGridR4List()"
-subroutine ESMF_AttributeGetObjGridR4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjGridR4List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_Grid), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
   real(ESMF_KIND_R4), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -33922,15 +35624,13 @@ end subroutine ESMF_AttributeGetAttPackGridR8List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjGridR8List()"
-subroutine ESMF_AttributeGetObjGridR8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjGridR8List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_Grid), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
   real(ESMF_KIND_R8), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -34060,15 +35760,13 @@ end subroutine ESMF_AttributeGetAttPackGridI4List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjGridI4List()"
-subroutine ESMF_AttributeGetObjGridI4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjGridI4List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_Grid), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
   integer(ESMF_KIND_I4), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -34198,15 +35896,13 @@ end subroutine ESMF_AttributeGetAttPackGridI8List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjGridI8List()"
-subroutine ESMF_AttributeGetObjGridI8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjGridI8List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_Grid), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
   integer(ESMF_KIND_I8), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -34336,15 +36032,13 @@ end subroutine ESMF_AttributeGetAttPackGridCHList
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjGridCHList()"
-subroutine ESMF_AttributeGetObjGridCHList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjGridCHList(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_Grid), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), dimension(:), intent(out) :: valueList
   character(len=*), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -34474,15 +36168,13 @@ end subroutine ESMF_AttributeGetAttPackGridLGList
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjGridLGList()"
-subroutine ESMF_AttributeGetObjGridLGList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjGridLGList(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_Grid), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, dimension(:), intent(out) :: valueList
   logical, dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -34612,15 +36304,13 @@ end subroutine ESMF_AttributeGetAttPackStateR4List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjStateR4List()"
-subroutine ESMF_AttributeGetObjStateR4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjStateR4List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_State), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
   real(ESMF_KIND_R4), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -34750,15 +36440,13 @@ end subroutine ESMF_AttributeGetAttPackStateR8List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjStateR8List()"
-subroutine ESMF_AttributeGetObjStateR8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjStateR8List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_State), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
   real(ESMF_KIND_R8), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -34888,15 +36576,13 @@ end subroutine ESMF_AttributeGetAttPackStateI4List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjStateI4List()"
-subroutine ESMF_AttributeGetObjStateI4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjStateI4List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_State), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
   integer(ESMF_KIND_I4), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -35026,15 +36712,13 @@ end subroutine ESMF_AttributeGetAttPackStateI8List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjStateI8List()"
-subroutine ESMF_AttributeGetObjStateI8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjStateI8List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_State), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
   integer(ESMF_KIND_I8), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -35164,15 +36848,13 @@ end subroutine ESMF_AttributeGetAttPackStateCHList
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjStateCHList()"
-subroutine ESMF_AttributeGetObjStateCHList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjStateCHList(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_State), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), dimension(:), intent(out) :: valueList
   character(len=*), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -35302,15 +36984,13 @@ end subroutine ESMF_AttributeGetAttPackStateLGList
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjStateLGList()"
-subroutine ESMF_AttributeGetObjStateLGList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjStateLGList(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_State), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, dimension(:), intent(out) :: valueList
   logical, dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -35440,15 +37120,13 @@ end subroutine ESMF_AttributeGetAttPackLocStreamR4List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjLocStreamR4List()"
-subroutine ESMF_AttributeGetObjLocStreamR4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjLocStreamR4List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_LocStream), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
   real(ESMF_KIND_R4), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -35578,15 +37256,13 @@ end subroutine ESMF_AttributeGetAttPackLocStreamR8List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjLocStreamR8List()"
-subroutine ESMF_AttributeGetObjLocStreamR8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjLocStreamR8List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_LocStream), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
   real(ESMF_KIND_R8), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -35716,15 +37392,13 @@ end subroutine ESMF_AttributeGetAttPackLocStreamI4List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjLocStreamI4List()"
-subroutine ESMF_AttributeGetObjLocStreamI4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjLocStreamI4List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_LocStream), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
   integer(ESMF_KIND_I4), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -35854,15 +37528,13 @@ end subroutine ESMF_AttributeGetAttPackLocStreamI8List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjLocStreamI8List()"
-subroutine ESMF_AttributeGetObjLocStreamI8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjLocStreamI8List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_LocStream), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
   integer(ESMF_KIND_I8), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -35992,15 +37664,13 @@ end subroutine ESMF_AttributeGetAttPackLocStreamCHList
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjLocStreamCHList()"
-subroutine ESMF_AttributeGetObjLocStreamCHList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjLocStreamCHList(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_LocStream), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), dimension(:), intent(out) :: valueList
   character(len=*), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -36130,15 +37800,13 @@ end subroutine ESMF_AttributeGetAttPackLocStreamLGList
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjLocStreamLGList()"
-subroutine ESMF_AttributeGetObjLocStreamLGList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjLocStreamLGList(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_LocStream), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, dimension(:), intent(out) :: valueList
   logical, dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -36268,15 +37936,13 @@ end subroutine ESMF_AttributeGetAttPackMeshR4List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjMeshR4List()"
-subroutine ESMF_AttributeGetObjMeshR4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjMeshR4List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_Mesh), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
   real(ESMF_KIND_R4), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -36406,15 +38072,13 @@ end subroutine ESMF_AttributeGetAttPackMeshR8List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjMeshR8List()"
-subroutine ESMF_AttributeGetObjMeshR8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjMeshR8List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_Mesh), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
   real(ESMF_KIND_R8), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -36544,15 +38208,13 @@ end subroutine ESMF_AttributeGetAttPackMeshI4List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjMeshI4List()"
-subroutine ESMF_AttributeGetObjMeshI4List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjMeshI4List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_Mesh), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
   integer(ESMF_KIND_I4), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -36682,15 +38344,13 @@ end subroutine ESMF_AttributeGetAttPackMeshI8List
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjMeshI8List()"
-subroutine ESMF_AttributeGetObjMeshI8List(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjMeshI8List(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_Mesh), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
   integer(ESMF_KIND_I8), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -36820,15 +38480,13 @@ end subroutine ESMF_AttributeGetAttPackMeshCHList
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjMeshCHList()"
-subroutine ESMF_AttributeGetObjMeshCHList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjMeshCHList(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_Mesh), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), dimension(:), intent(out) :: valueList
   character(len=*), dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -36958,15 +38616,13 @@ end subroutine ESMF_AttributeGetAttPackMeshLGList
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetObjMeshLGList()"
-subroutine ESMF_AttributeGetObjMeshLGList(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)
-  ! 39.11.13 - attPackInstanceName is NOOP
+subroutine ESMF_AttributeGetObjMeshLGList(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)
   type(ESMF_Mesh), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, dimension(:), intent(out) :: valueList
   logical, dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -37226,14 +38882,13 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
 end subroutine ESMF_AttributeGetInfoByNamAPArray
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetInfoByNamArray()"
-subroutine ESMF_AttributeGetInfoByNamArray(target, name, keywordEnforcer, convention, purpose, attPackInstanceName, attnestflag, typekind, itemCount, isPresent, rc)
+subroutine ESMF_AttributeGetInfoByNamArray(target, name, keywordEnforcer, convention, purpose, attnestflag, typekind, itemCount, isPresent, rc)
   ! 39.11.17
   type(ESMF_Array), intent(in) :: target
   character(len=*), intent(in) :: name
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
@@ -37299,7 +38954,6 @@ end subroutine ESMF_AttributeGetInfoByNamArray
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetInfoByNumArray()"
 subroutine ESMF_AttributeGetInfoByNumArray(target, attributeIndex, name, convention, purpose, attnestflag, typekind, itemCount, isPresent, rc)
-  ! 39.11.18: removed attPackInstanceName
   type(ESMF_Array), intent(in) :: target
   integer, intent(in) :: attributeIndex
   character(len=*), intent(out) :: name
@@ -37628,14 +39282,13 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
 end subroutine ESMF_AttributeGetInfoByNamAPArrayBundle
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetInfoByNamArrayBundle()"
-subroutine ESMF_AttributeGetInfoByNamArrayBundle(target, name, keywordEnforcer, convention, purpose, attPackInstanceName, attnestflag, typekind, itemCount, isPresent, rc)
+subroutine ESMF_AttributeGetInfoByNamArrayBundle(target, name, keywordEnforcer, convention, purpose, attnestflag, typekind, itemCount, isPresent, rc)
   ! 39.11.17
   type(ESMF_ArrayBundle), intent(in) :: target
   character(len=*), intent(in) :: name
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
@@ -37701,7 +39354,6 @@ end subroutine ESMF_AttributeGetInfoByNamArrayBundle
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetInfoByNumArrayBundle()"
 subroutine ESMF_AttributeGetInfoByNumArrayBundle(target, attributeIndex, name, convention, purpose, attnestflag, typekind, itemCount, isPresent, rc)
-  ! 39.11.18: removed attPackInstanceName
   type(ESMF_ArrayBundle), intent(in) :: target
   integer, intent(in) :: attributeIndex
   character(len=*), intent(out) :: name
@@ -38030,14 +39682,13 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
 end subroutine ESMF_AttributeGetInfoByNamAPCplComp
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetInfoByNamCplComp()"
-subroutine ESMF_AttributeGetInfoByNamCplComp(target, name, keywordEnforcer, convention, purpose, attPackInstanceName, attnestflag, typekind, itemCount, isPresent, rc)
+subroutine ESMF_AttributeGetInfoByNamCplComp(target, name, keywordEnforcer, convention, purpose, attnestflag, typekind, itemCount, isPresent, rc)
   ! 39.11.17
   type(ESMF_CplComp), intent(in) :: target
   character(len=*), intent(in) :: name
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
@@ -38103,7 +39754,6 @@ end subroutine ESMF_AttributeGetInfoByNamCplComp
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetInfoByNumCplComp()"
 subroutine ESMF_AttributeGetInfoByNumCplComp(target, attributeIndex, name, convention, purpose, attnestflag, typekind, itemCount, isPresent, rc)
-  ! 39.11.18: removed attPackInstanceName
   type(ESMF_CplComp), intent(in) :: target
   integer, intent(in) :: attributeIndex
   character(len=*), intent(out) :: name
@@ -38432,14 +40082,13 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
 end subroutine ESMF_AttributeGetInfoByNamAPGridComp
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetInfoByNamGridComp()"
-subroutine ESMF_AttributeGetInfoByNamGridComp(target, name, keywordEnforcer, convention, purpose, attPackInstanceName, attnestflag, typekind, itemCount, isPresent, rc)
+subroutine ESMF_AttributeGetInfoByNamGridComp(target, name, keywordEnforcer, convention, purpose, attnestflag, typekind, itemCount, isPresent, rc)
   ! 39.11.17
   type(ESMF_GridComp), intent(in) :: target
   character(len=*), intent(in) :: name
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
@@ -38505,7 +40154,6 @@ end subroutine ESMF_AttributeGetInfoByNamGridComp
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetInfoByNumGridComp()"
 subroutine ESMF_AttributeGetInfoByNumGridComp(target, attributeIndex, name, convention, purpose, attnestflag, typekind, itemCount, isPresent, rc)
-  ! 39.11.18: removed attPackInstanceName
   type(ESMF_GridComp), intent(in) :: target
   integer, intent(in) :: attributeIndex
   character(len=*), intent(out) :: name
@@ -38834,14 +40482,13 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
 end subroutine ESMF_AttributeGetInfoByNamAPSciComp
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetInfoByNamSciComp()"
-subroutine ESMF_AttributeGetInfoByNamSciComp(target, name, keywordEnforcer, convention, purpose, attPackInstanceName, attnestflag, typekind, itemCount, isPresent, rc)
+subroutine ESMF_AttributeGetInfoByNamSciComp(target, name, keywordEnforcer, convention, purpose, attnestflag, typekind, itemCount, isPresent, rc)
   ! 39.11.17
   type(ESMF_SciComp), intent(in) :: target
   character(len=*), intent(in) :: name
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
@@ -38907,7 +40554,6 @@ end subroutine ESMF_AttributeGetInfoByNamSciComp
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetInfoByNumSciComp()"
 subroutine ESMF_AttributeGetInfoByNumSciComp(target, attributeIndex, name, convention, purpose, attnestflag, typekind, itemCount, isPresent, rc)
-  ! 39.11.18: removed attPackInstanceName
   type(ESMF_SciComp), intent(in) :: target
   integer, intent(in) :: attributeIndex
   character(len=*), intent(out) :: name
@@ -39236,14 +40882,13 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
 end subroutine ESMF_AttributeGetInfoByNamAPDistGrid
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetInfoByNamDistGrid()"
-subroutine ESMF_AttributeGetInfoByNamDistGrid(target, name, keywordEnforcer, convention, purpose, attPackInstanceName, attnestflag, typekind, itemCount, isPresent, rc)
+subroutine ESMF_AttributeGetInfoByNamDistGrid(target, name, keywordEnforcer, convention, purpose, attnestflag, typekind, itemCount, isPresent, rc)
   ! 39.11.17
   type(ESMF_DistGrid), intent(in) :: target
   character(len=*), intent(in) :: name
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
@@ -39309,7 +40954,6 @@ end subroutine ESMF_AttributeGetInfoByNamDistGrid
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetInfoByNumDistGrid()"
 subroutine ESMF_AttributeGetInfoByNumDistGrid(target, attributeIndex, name, convention, purpose, attnestflag, typekind, itemCount, isPresent, rc)
-  ! 39.11.18: removed attPackInstanceName
   type(ESMF_DistGrid), intent(in) :: target
   integer, intent(in) :: attributeIndex
   character(len=*), intent(out) :: name
@@ -39638,14 +41282,13 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
 end subroutine ESMF_AttributeGetInfoByNamAPField
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetInfoByNamField()"
-subroutine ESMF_AttributeGetInfoByNamField(target, name, keywordEnforcer, convention, purpose, attPackInstanceName, attnestflag, typekind, itemCount, isPresent, rc)
+subroutine ESMF_AttributeGetInfoByNamField(target, name, keywordEnforcer, convention, purpose, attnestflag, typekind, itemCount, isPresent, rc)
   ! 39.11.17
   type(ESMF_Field), intent(in) :: target
   character(len=*), intent(in) :: name
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
@@ -39711,7 +41354,6 @@ end subroutine ESMF_AttributeGetInfoByNamField
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetInfoByNumField()"
 subroutine ESMF_AttributeGetInfoByNumField(target, attributeIndex, name, convention, purpose, attnestflag, typekind, itemCount, isPresent, rc)
-  ! 39.11.18: removed attPackInstanceName
   type(ESMF_Field), intent(in) :: target
   integer, intent(in) :: attributeIndex
   character(len=*), intent(out) :: name
@@ -40040,14 +41682,13 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
 end subroutine ESMF_AttributeGetInfoByNamAPFieldBundle
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetInfoByNamFieldBundle()"
-subroutine ESMF_AttributeGetInfoByNamFieldBundle(target, name, keywordEnforcer, convention, purpose, attPackInstanceName, attnestflag, typekind, itemCount, isPresent, rc)
+subroutine ESMF_AttributeGetInfoByNamFieldBundle(target, name, keywordEnforcer, convention, purpose, attnestflag, typekind, itemCount, isPresent, rc)
   ! 39.11.17
   type(ESMF_FieldBundle), intent(in) :: target
   character(len=*), intent(in) :: name
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
@@ -40113,7 +41754,6 @@ end subroutine ESMF_AttributeGetInfoByNamFieldBundle
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetInfoByNumFieldBundle()"
 subroutine ESMF_AttributeGetInfoByNumFieldBundle(target, attributeIndex, name, convention, purpose, attnestflag, typekind, itemCount, isPresent, rc)
-  ! 39.11.18: removed attPackInstanceName
   type(ESMF_FieldBundle), intent(in) :: target
   integer, intent(in) :: attributeIndex
   character(len=*), intent(out) :: name
@@ -40442,14 +42082,13 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
 end subroutine ESMF_AttributeGetInfoByNamAPGrid
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetInfoByNamGrid()"
-subroutine ESMF_AttributeGetInfoByNamGrid(target, name, keywordEnforcer, convention, purpose, attPackInstanceName, attnestflag, typekind, itemCount, isPresent, rc)
+subroutine ESMF_AttributeGetInfoByNamGrid(target, name, keywordEnforcer, convention, purpose, attnestflag, typekind, itemCount, isPresent, rc)
   ! 39.11.17
   type(ESMF_Grid), intent(in) :: target
   character(len=*), intent(in) :: name
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
@@ -40515,7 +42154,6 @@ end subroutine ESMF_AttributeGetInfoByNamGrid
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetInfoByNumGrid()"
 subroutine ESMF_AttributeGetInfoByNumGrid(target, attributeIndex, name, convention, purpose, attnestflag, typekind, itemCount, isPresent, rc)
-  ! 39.11.18: removed attPackInstanceName
   type(ESMF_Grid), intent(in) :: target
   integer, intent(in) :: attributeIndex
   character(len=*), intent(out) :: name
@@ -40844,14 +42482,13 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
 end subroutine ESMF_AttributeGetInfoByNamAPState
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetInfoByNamState()"
-subroutine ESMF_AttributeGetInfoByNamState(target, name, keywordEnforcer, convention, purpose, attPackInstanceName, attnestflag, typekind, itemCount, isPresent, rc)
+subroutine ESMF_AttributeGetInfoByNamState(target, name, keywordEnforcer, convention, purpose, attnestflag, typekind, itemCount, isPresent, rc)
   ! 39.11.17
   type(ESMF_State), intent(in) :: target
   character(len=*), intent(in) :: name
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
@@ -40917,7 +42554,6 @@ end subroutine ESMF_AttributeGetInfoByNamState
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetInfoByNumState()"
 subroutine ESMF_AttributeGetInfoByNumState(target, attributeIndex, name, convention, purpose, attnestflag, typekind, itemCount, isPresent, rc)
-  ! 39.11.18: removed attPackInstanceName
   type(ESMF_State), intent(in) :: target
   integer, intent(in) :: attributeIndex
   character(len=*), intent(out) :: name
@@ -41246,14 +42882,13 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
 end subroutine ESMF_AttributeGetInfoByNamAPLocStream
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetInfoByNamLocStream()"
-subroutine ESMF_AttributeGetInfoByNamLocStream(target, name, keywordEnforcer, convention, purpose, attPackInstanceName, attnestflag, typekind, itemCount, isPresent, rc)
+subroutine ESMF_AttributeGetInfoByNamLocStream(target, name, keywordEnforcer, convention, purpose, attnestflag, typekind, itemCount, isPresent, rc)
   ! 39.11.17
   type(ESMF_LocStream), intent(in) :: target
   character(len=*), intent(in) :: name
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
@@ -41319,7 +42954,6 @@ end subroutine ESMF_AttributeGetInfoByNamLocStream
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetInfoByNumLocStream()"
 subroutine ESMF_AttributeGetInfoByNumLocStream(target, attributeIndex, name, convention, purpose, attnestflag, typekind, itemCount, isPresent, rc)
-  ! 39.11.18: removed attPackInstanceName
   type(ESMF_LocStream), intent(in) :: target
   integer, intent(in) :: attributeIndex
   character(len=*), intent(out) :: name
@@ -41648,14 +43282,13 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
 end subroutine ESMF_AttributeGetInfoByNamAPMesh
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetInfoByNamMesh()"
-subroutine ESMF_AttributeGetInfoByNamMesh(target, name, keywordEnforcer, convention, purpose, attPackInstanceName, attnestflag, typekind, itemCount, isPresent, rc)
+subroutine ESMF_AttributeGetInfoByNamMesh(target, name, keywordEnforcer, convention, purpose, attnestflag, typekind, itemCount, isPresent, rc)
   ! 39.11.17
   type(ESMF_Mesh), intent(in) :: target
   character(len=*), intent(in) :: name
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
@@ -41721,7 +43354,6 @@ end subroutine ESMF_AttributeGetInfoByNamMesh
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetInfoByNumMesh()"
 subroutine ESMF_AttributeGetInfoByNumMesh(target, attributeIndex, name, convention, purpose, attnestflag, typekind, itemCount, isPresent, rc)
-  ! 39.11.18: removed attPackInstanceName
   type(ESMF_Mesh), intent(in) :: target
   integer, intent(in) :: attributeIndex
   character(len=*), intent(out) :: name
@@ -41863,7 +43495,6 @@ end subroutine ESMF_AttributeGetAttPackMesh
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeRemoveAttPackArray()"
 subroutine ESMF_AttributeRemoveAttPackArray(target, name, attpack, convention, purpose, attnestflag, rc)
-  ! 39.11.33- removed attpackinstancename
   type(ESMF_Array), intent(inout) :: target
   character(len=*), intent(in), optional :: name
   type(ESMF_AttPack), intent(inout), optional :: attpack
@@ -41969,7 +43600,6 @@ end subroutine ESMF_AttributeRemoveAttPackArray
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeRemoveAttPackArrayBundle()"
 subroutine ESMF_AttributeRemoveAttPackArrayBundle(target, name, attpack, convention, purpose, attnestflag, rc)
-  ! 39.11.33- removed attpackinstancename
   type(ESMF_ArrayBundle), intent(inout) :: target
   character(len=*), intent(in), optional :: name
   type(ESMF_AttPack), intent(inout), optional :: attpack
@@ -42075,7 +43705,6 @@ end subroutine ESMF_AttributeRemoveAttPackArrayBundle
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeRemoveAttPackCplComp()"
 subroutine ESMF_AttributeRemoveAttPackCplComp(target, name, attpack, convention, purpose, attnestflag, rc)
-  ! 39.11.33- removed attpackinstancename
   type(ESMF_CplComp), intent(inout) :: target
   character(len=*), intent(in), optional :: name
   type(ESMF_AttPack), intent(inout), optional :: attpack
@@ -42181,7 +43810,6 @@ end subroutine ESMF_AttributeRemoveAttPackCplComp
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeRemoveAttPackGridComp()"
 subroutine ESMF_AttributeRemoveAttPackGridComp(target, name, attpack, convention, purpose, attnestflag, rc)
-  ! 39.11.33- removed attpackinstancename
   type(ESMF_GridComp), intent(inout) :: target
   character(len=*), intent(in), optional :: name
   type(ESMF_AttPack), intent(inout), optional :: attpack
@@ -42287,7 +43915,6 @@ end subroutine ESMF_AttributeRemoveAttPackGridComp
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeRemoveAttPackSciComp()"
 subroutine ESMF_AttributeRemoveAttPackSciComp(target, name, attpack, convention, purpose, attnestflag, rc)
-  ! 39.11.33- removed attpackinstancename
   type(ESMF_SciComp), intent(inout) :: target
   character(len=*), intent(in), optional :: name
   type(ESMF_AttPack), intent(inout), optional :: attpack
@@ -42393,7 +44020,6 @@ end subroutine ESMF_AttributeRemoveAttPackSciComp
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeRemoveAttPackDistGrid()"
 subroutine ESMF_AttributeRemoveAttPackDistGrid(target, name, attpack, convention, purpose, attnestflag, rc)
-  ! 39.11.33- removed attpackinstancename
   type(ESMF_DistGrid), intent(inout) :: target
   character(len=*), intent(in), optional :: name
   type(ESMF_AttPack), intent(inout), optional :: attpack
@@ -42499,7 +44125,6 @@ end subroutine ESMF_AttributeRemoveAttPackDistGrid
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeRemoveAttPackField()"
 subroutine ESMF_AttributeRemoveAttPackField(target, name, attpack, convention, purpose, attnestflag, rc)
-  ! 39.11.33- removed attpackinstancename
   type(ESMF_Field), intent(inout) :: target
   character(len=*), intent(in), optional :: name
   type(ESMF_AttPack), intent(inout), optional :: attpack
@@ -42605,7 +44230,6 @@ end subroutine ESMF_AttributeRemoveAttPackField
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeRemoveAttPackFieldBundle()"
 subroutine ESMF_AttributeRemoveAttPackFieldBundle(target, name, attpack, convention, purpose, attnestflag, rc)
-  ! 39.11.33- removed attpackinstancename
   type(ESMF_FieldBundle), intent(inout) :: target
   character(len=*), intent(in), optional :: name
   type(ESMF_AttPack), intent(inout), optional :: attpack
@@ -42711,7 +44335,6 @@ end subroutine ESMF_AttributeRemoveAttPackFieldBundle
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeRemoveAttPackGrid()"
 subroutine ESMF_AttributeRemoveAttPackGrid(target, name, attpack, convention, purpose, attnestflag, rc)
-  ! 39.11.33- removed attpackinstancename
   type(ESMF_Grid), intent(inout) :: target
   character(len=*), intent(in), optional :: name
   type(ESMF_AttPack), intent(inout), optional :: attpack
@@ -42817,7 +44440,6 @@ end subroutine ESMF_AttributeRemoveAttPackGrid
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeRemoveAttPackState()"
 subroutine ESMF_AttributeRemoveAttPackState(target, name, attpack, convention, purpose, attnestflag, rc)
-  ! 39.11.33- removed attpackinstancename
   type(ESMF_State), intent(inout) :: target
   character(len=*), intent(in), optional :: name
   type(ESMF_AttPack), intent(inout), optional :: attpack
@@ -42923,7 +44545,6 @@ end subroutine ESMF_AttributeRemoveAttPackState
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeRemoveAttPackLocStream()"
 subroutine ESMF_AttributeRemoveAttPackLocStream(target, name, attpack, convention, purpose, attnestflag, rc)
-  ! 39.11.33- removed attpackinstancename
   type(ESMF_LocStream), intent(inout) :: target
   character(len=*), intent(in), optional :: name
   type(ESMF_AttPack), intent(inout), optional :: attpack
@@ -43029,7 +44650,6 @@ end subroutine ESMF_AttributeRemoveAttPackLocStream
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeRemoveAttPackMesh()"
 subroutine ESMF_AttributeRemoveAttPackMesh(target, name, attpack, convention, purpose, attnestflag, rc)
-  ! 39.11.33- removed attpackinstancename
   type(ESMF_Mesh), intent(inout) :: target
   character(len=*), intent(in), optional :: name
   type(ESMF_AttPack), intent(inout), optional :: attpack

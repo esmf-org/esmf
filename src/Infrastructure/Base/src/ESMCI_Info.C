@@ -342,13 +342,26 @@ void handleJSONTypeCheck(
   const json &dst   // the destination target used to check against
                          ) {
   if (!src.is_null() && src.type() != dst.type()) {
-    // Allowed unsigned to integer conversion and vice-versa.
-    if (!((src.type() == json::value_t::number_integer ||
-         src.type() == json::value_t::number_unsigned) &&
-        (dst.type() == json::value_t::number_integer ||
-         dst.type() == json::value_t::number_unsigned))) {
-      std::string errmsg = "Types not equivalent. The key is: " + key;
-      ESMC_CHECK_RC("ESMC_RC_ARG_BAD", ESMC_RC_ARG_BAD, errmsg)
+    if ((src.is_array() && src.size() == 1) || (dst.is_array() && dst.size() == 1)) {
+      if (src.is_array() && dst.is_array()) {
+        handleJSONTypeCheck(key, src[0], dst[0]);
+      } else if (src.is_array()) {
+        handleJSONTypeCheck(key, src[0], dst);
+      } else if (dst.is_array()) {
+        handleJSONTypeCheck(key, src, dst[0]);
+      } else {
+        std::string errmsg = "Types not equivalent. The key is: " + key;
+        ESMC_CHECK_RC("ESMC_RC_ARG_BAD", ESMC_RC_ARG_BAD, errmsg)
+      }
+    } else {
+      // Allow unsigned to integer conversion and vice-versa.
+      if (!((src.type() == json::value_t::number_integer ||
+             src.type() == json::value_t::number_unsigned) &&
+            (dst.type() == json::value_t::number_integer ||
+             dst.type() == json::value_t::number_unsigned))) {
+        std::string errmsg = "Types not equivalent. The key is: " + key;
+        ESMC_CHECK_RC("ESMC_RC_ARG_BAD", ESMC_RC_ARG_BAD, errmsg)
+      }
     }
   }
 }
@@ -403,17 +416,32 @@ ESMC_TypeKind_Flag json_type_to_esmf_typekind(const json &j, const bool allow_ar
     esmf_type = ESMF_NOKIND;
   } else if (j.type() == json::value_t::boolean) {
     esmf_type = ESMC_TYPEKIND_LOGICAL;
-  } else if (j.type() == json::value_t::number_integer) {
-    esmf_type = ESMC_TYPEKIND_I8;
-  } else if (j.type() == json::value_t::number_unsigned) {
-    esmf_type = ESMC_TYPEKIND_I8;
+  } else if (j.type() == json::value_t::number_integer || j.type() == json::value_t::number_unsigned) {
+    if (j <= std::numeric_limits<int>::max() && j >= std::numeric_limits<int>::min()) {
+      esmf_type = ESMC_TYPEKIND_I4;
+    } else {
+      esmf_type = ESMC_TYPEKIND_I8;
+    }
   } else if (j.type() == json::value_t::number_float) {
-    esmf_type = ESMC_TYPEKIND_R8;
+    float as_float = std::abs((float)j);
+    double as_double = std::abs((double)j);
+    double diff = std::abs(as_double - (double)as_float);
+    if (diff < std::numeric_limits<float>::epsilon()) {
+      esmf_type = ESMC_TYPEKIND_R4;
+    } else {
+      esmf_type = ESMC_TYPEKIND_R8;
+    }
   } else if (j.type() == json::value_t::object) {
     esmf_type = ESMF_NOKIND;
   } else if (j.type() == json::value_t::array) {
     if (allow_array && j.size() > 0) {
-      esmf_type = json_type_to_esmf_typekind(j.at(0), allow_array);
+      esmf_type = ESMC_TYPEKIND_I4;
+      for (std::size_t ii = 0; ii < j.size(); ++ii) {
+        ESMC_TypeKind_Flag curr_esmf_type = json_type_to_esmf_typekind(j.at(ii), false);
+        if (curr_esmf_type > esmf_type) {
+          esmf_type = curr_esmf_type;
+        }
+      }
     } else {
       esmf_type = ESMF_NOKIND;
     }
@@ -619,7 +647,7 @@ void check_overflow(T dst, T2 tocheck) {
   // Exceptions:  ESMCI:esmc_error
   T2 max = std::numeric_limits<T>::max();
   if (tocheck > max) {
-    const std::string errmsg = "Overflow error when converting from 64-bit to 32-bit.";
+    const std::string errmsg = "Overflow error during type conversion.";
     ESMC_CHECK_RC("ESMC_RC_ARG_BAD", ESMC_RC_ARG_BAD, errmsg)
   }
 };

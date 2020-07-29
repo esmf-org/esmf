@@ -34,7 +34,7 @@ class TestMesh(TestBase):
         assert (np.all(xcoords == xcoords3))
         assert (np.all(ycoords == ycoords3))
 
-        if elemCoord is not None:
+        if not isinstance(elemCoord, type(None)):
             xelems = mesh.get_coords(0, 1)
             yelems = mesh.get_coords(1, 1)
 
@@ -50,12 +50,14 @@ class TestMesh(TestBase):
         # mesh.free_memory()
 
     def test_mesh_5(self):
-        parallel = False
         elemCoord = None
-        if constants._ESMF_MPIRUN_NP != 4:
-            raise SkipTest('This test must be run with 4 processors.')
-        else:
+        parallel = False
+        if pet_count() > 1:
             parallel = True
+
+        if parallel:
+            if constants._ESMF_MPIRUN_NP != 4:
+                raise SkipTest('This test must be run with 4 processors.')
 
         if parallel:
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
@@ -67,12 +69,14 @@ class TestMesh(TestBase):
         self.check_mesh(mesh, nodeCoord, nodeOwner, elemCoord=elemCoord)
 
     def test_mesh_10(self):
-        parallel = False
         elemCoord = None
-        if constants._ESMF_MPIRUN_NP != 4:
-            raise SkipTest('This test must be run with 4 processors.')
-        else:
+        parallel = False
+        if pet_count() > 1:
             parallel = True
+
+        if parallel:
+            if constants._ESMF_MPIRUN_NP != 4:
+                raise SkipTest('This test must be run with 4 processors.')
 
         if parallel:
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
@@ -84,12 +88,14 @@ class TestMesh(TestBase):
         self.check_mesh(mesh, nodeCoord, nodeOwner, elemCoord=elemCoord)
 
     def test_mesh_50(self):
-        parallel = False
         elemCoord = None
-        if constants._ESMF_MPIRUN_NP != 4:
-            raise SkipTest('This test must be run with 4 processors.')
-        else:
+        parallel = False
+        if pet_count() > 1:
             parallel = True
+
+        if parallel:
+            if constants._ESMF_MPIRUN_NP != 4:
+                raise SkipTest('This test must be run with 4 processors.')
 
         if parallel:
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
@@ -102,10 +108,12 @@ class TestMesh(TestBase):
 
     def test_mesh_50_ngons(self):
         parallel = False
-        if constants._ESMF_MPIRUN_NP != 4:
-            raise SkipTest('This test must be run with 4 processors.')
-        else:
+        if pet_count() > 1:
             parallel = True
+
+        if parallel:
+            if constants._ESMF_MPIRUN_NP != 4:
+                raise SkipTest('This test must be run with 4 processors.')
 
         if parallel:
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
@@ -117,12 +125,14 @@ class TestMesh(TestBase):
         self.check_mesh(mesh, nodeCoord, nodeOwner)
 
     def test_mesh_50_mask_area(self):
-        parallel = False
         elemCoord = None
-        if constants._ESMF_MPIRUN_NP != 4:
-            raise SkipTest('This test must be run with 4 processors.')
-        else:
+        parallel = False
+        if pet_count() > 1:
             parallel = True
+
+        if parallel:
+            if constants._ESMF_MPIRUN_NP != 4:
+                raise SkipTest('This test must be run with 4 processors.')
 
         if parallel:
             mesh, nodeCoord, nodeOwner, elemType, elemConn, elemMask, elemArea = \
@@ -157,10 +167,12 @@ class TestMesh(TestBase):
 
     def test_mesh_copy(self):
         parallel = False
-        if constants._ESMF_MPIRUN_NP != 4:
-            raise SkipTest('This test must be run with 4 processors.')
-        else:
+        if pet_count() > 1:
             parallel = True
+
+        if parallel:
+            if constants._ESMF_MPIRUN_NP != 4:
+                raise SkipTest('This test must be run with 4 processors.')
 
         if parallel:
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
@@ -174,13 +186,16 @@ class TestMesh(TestBase):
         mesh2 = mesh.copy()
         self.check_mesh(mesh2, nodeCoord, nodeOwner)
 
+    # slicing is disabled in parallel
     @attr('serial')
     def test_mesh_slicing(self):
         parallel = False
-        if constants._ESMF_MPIRUN_NP != 4:
-            raise SkipTest('This test must be run with 4 processors.')
-        else:
+        if pet_count() > 1:
             parallel = True
+
+        if parallel:
+            if constants._ESMF_MPIRUN_NP != 4:
+                raise SkipTest('This test must be run with 4 processors.')
 
         if parallel:
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
