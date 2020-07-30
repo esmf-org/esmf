@@ -168,47 +168,19 @@ contains
     ! Attributes must be reconciled to de-deduplicate Field geometries
     lattreconflag = ESMF_ATTRECONCILE_ON
 
-#if 0
-    ! Log a JSON State representation -----------------------------------------
-
-    call idesc%Initialize(createInfo=.true., addObjectInfo=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-    call idesc%Update(state, "", rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_LogWrite("InfoDescribe BEFORE state reconcile driver=", rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_LogWrite("state_json_before="//ESMF_InfoDump(idesc%info), rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-    call idesc%Destroy(rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-#endif
-
     call ESMF_StateReconcile_driver (state, vm=localvm, &
         attreconflag=lattreconflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
 
-     call ESMF_InfoCacheReassembleFields(state, localrc)
-     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    ! Traverse the State hierarchy and fix Field references to a shared geometry
+    call ESMF_InfoCacheReassembleFields(state, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-     call ESMF_InfoCacheReassembleFieldsFinalize(state, localrc)
-     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-#if 0
-    ! Log a JSON State representation -----------------------------------------
-
-    call idesc2%Initialize(createInfo=.true., addObjectInfo=.true., rc=localrc)
+    ! Traverse the state hierarchy and remove reconcile-specific attributes
+    call ESMF_InfoCacheReassembleFieldsFinalize(state, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-    call idesc2%Update(state, "", rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_LogWrite("InfoDescribe AFTER state reconcile driver=", rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_LogWrite("state_json_after="//ESMF_InfoDump(idesc2%info), rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-    call idesc2%Destroy(rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-#endif
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -315,13 +287,12 @@ contains
         rcToReturn=rc)) return
     if (meminfo) call ESMF_VMLogMemInfo ('after Step 0 - initialization')
 
-
     ! 1.) Each PET constructs its send arrays containing local Id
     ! and VMId info for each object contained in the State.
     ! Note that element zero is reserved for the State itself.
     if (trace) then
       call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
-          ': *** Step 1 - Build send arrays')
+          ': *** Step 1.0 - Build send arrays')
     end if
     itemtypes_send => null ()
     ids_send   => null ()
@@ -337,6 +308,11 @@ contains
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
     if (meminfo) call ESMF_VMLogMemInfo ('after Step 1 - constructed send Id/VMId info')
+
+    if (trace) then
+      call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
+          ': *** Step 1.1 - Translate VM identifiers to integers')
+    end if
 
     ! Translate VmId objects to an integer representation to minimize memory
     ! usage. This is also beneficial for performance.
@@ -371,7 +347,15 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 #endif
 
-    ! Update Field metadata for unique geometries
+    if (trace) then
+      call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
+          ': *** Step 1.2 - Update Field metadata for unique geometries')
+    end if
+
+    ! Update Field metadata for unique geometries. This will traverse the state
+    ! hierarchy adding reconcile-specific attributes that will find unique
+    ! geometry objects and maintain sufficient information to re-establish
+    ! references once the objects have been communicated and deserialized.
     ! -------------------------------------------------------------------------
     call info_cache%Initialize(localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
