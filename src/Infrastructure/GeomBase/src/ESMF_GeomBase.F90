@@ -1578,7 +1578,7 @@ end subroutine ESMF_GeomBaseGet
 !     \item[{[attreconflag]}]
 !           Flag to tell if Attribute deserialization is to be done
 !     \item[{[skipGeomObj]}]
-!           Default is false. If true, do not serialize the underlying geometry
+!           Default is false. If true, do not deserialize the underlying geometry
 !           object associated with this base.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1588,23 +1588,9 @@ end subroutine ESMF_GeomBaseGet
     type(ESMF_GeomBaseClass),pointer :: gbcp
     integer :: localrc
     type(ESMF_AttReconcileFlag) :: lattreconflag
-
-    type(ESMF_Base) :: base_temp
-    integer :: offset_temp
-
-    integer :: id_temp
-    type(ESMF_VMId) :: vmid_temp
-    type(ESMF_Grid) :: grid_temp
-    character(ESMF_MAXSTR) :: objname_temp
-    type(ESMF_Logical) :: object_found
-
     integer :: geomobj_len
-
-    logical, parameter :: ENABLE_SHARED_GRID_SUPPORT = .true.
-
     logical, parameter :: trace = .false.
     character(ESMF_MAXSTR) :: grid_name
-
     logical :: local_skipGeomObj
 
     ! ----------
@@ -1654,63 +1640,13 @@ end subroutine ESMF_GeomBaseGet
       ! Get info depending on type
       select case(gbcp%type%type)
 
-         case (ESMF_GEOMTYPE_GRID%type) ! Grid
-
-            ! Peek into the serialized Base to see if this Grid ID/VMId already exists
-
-            if (trace) call ESMF_LogWrite (msg='creating a VMId for peek', ESMF_CONTEXT)
-            call ESMF_VMIdCreate (vmid_temp, localrc)
+         case (ESMF_GEOMTYPE_GRID%type)
+            gbcp%grid=ESMF_GridDeserialize(buffer=buffer, &
+                offset=offset, attreconflag=lattreconflag,  &
+                rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                                    ESMF_ERR_PASSTHRU, &
                                    ESMF_CONTEXT, rcToReturn=rc)) return
-
-            if (trace)  &
-                call ESMF_LogWrite (msg='deserialize the VMId for peek.  Offset =' // &
-                    ESMF_UtilStringInt2String (offset), ESMF_CONTEXT)
-            offset_temp = offset
-            call ESMF_BaseDeserializeIDVMId (buffer, offset_temp,  &
-                                   id_temp, vmid_temp, objname_temp, localrc)
-            if (ESMF_LogFoundError(localrc, &
-                                   ESMF_ERR_PASSTHRU, &
-                                   ESMF_CONTEXT, rcToReturn=rc)) return
-            if (trace)  &
-                call ESMF_LogWrite (msg='searching for object: ' // objname_temp, ESMF_CONTEXT)
-            call c_esmc_vmgetobject (grid_temp%this,  &
-                id_temp, vmid_temp,  objname_temp, ESMF_PROXYYES,  &
-                object_found, localrc)
-            if (ESMF_LogFoundError(localrc, &
-                                   ESMF_ERR_PASSTHRU, &
-                                   ESMF_CONTEXT, rcToReturn=rc)) return
-
-            if (trace) call ESMF_LogWrite (msg='Destroy temp VMId')
-            call ESMF_VMIdDestroy (vmid_temp, localrc)
-            if (ESMF_LogFoundError(localrc, &
-                                   ESMF_ERR_PASSTHRU, &
-                                   ESMF_CONTEXT, rcToReturn=rc)) return
-
-            if (trace) call ESMF_LogWrite (msg='shared object_found flag = ' //  &
-                merge (".true. ", ".false.", object_found == ESMF_TRUE))
-            !tdk:todo: how is ENABLE_SHARED_GRID_SUPPORT used? should we remove it?
-            if (ENABLE_SHARED_GRID_SUPPORT .and. object_found == ESMF_TRUE) then
-              gbcp%grid = grid_temp
-              gbcp%grid%isInit = ESMF_INIT_CREATED
-              if (trace) then
-                call ESMF_GridGet (gbcp%grid, name=grid_name, rc=localrc)
-                if (ESMF_LogFoundError(localrc, &
-                                   ESMF_ERR_PASSTHRU, &
-                                   ESMF_CONTEXT, rcToReturn=rc)) return
-                call ESMF_LogWrite (msg='Grid linked for sharing: ' // grid_name, ESMF_CONTEXT)
-              end if
-! TODO: (increment Base and/or VM refCount?, etc.  Gerhard says not yet.)
-              offset = offset + geomobj_len
-            else
-              gbcp%grid=ESMF_GridDeserialize(buffer=buffer, &
-                  offset=offset, attreconflag=lattreconflag,  &
-                  rc=localrc)
-              if (ESMF_LogFoundError(localrc, &
-                                     ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
-            end if
 
          case  (ESMF_GEOMTYPE_MESH%type)
             gbcp%mesh=ESMF_MeshDeserialize(buffer=buffer, &

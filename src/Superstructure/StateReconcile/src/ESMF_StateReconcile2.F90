@@ -2424,10 +2424,11 @@ contains
     ! a communication step to see if any removals have taken place.
     ! Conditionally zap the proxies depending on whether it is actually
     ! needed.
-!    call ESMF_ReconcileZapProxies (state, localrc)
-!    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-!        ESMF_CONTEXT,  &
-!        rcToReturn=rc)) return
+    !tdk:rm
+    call ESMF_ReconcileZapProxies (state, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
 
     ! Obtain local PET item list
     siwrap => null ()
