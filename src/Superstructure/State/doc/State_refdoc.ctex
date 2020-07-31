@@ -65,12 +65,12 @@
 #ifdef STANDALONE
 \input{State_usage}
 \input{ESMF_StateEx_fapi}
-\input{ESMF_StateReconcileEx_fapi}
+\input{../../Superstructure/StateReconcile/doc/ESMF_StateReconcileEx_fapi}
 \input{ESMF_StateReadWriteEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Superstructure/State/doc/State_usage}
 \input{../Superstructure/State/doc/ESMF_StateEx_fapi}
-\input{../Superstructure/State/doc/ESMF_StateReconcileEx_fapi}
+\input{../Superstructure/StateReconcile/doc/ESMF_StateReconcileEx_fapi}
 \input{../Superstructure/State/doc/ESMF_StateReadWriteEx_fapi}
 #endif
 
@@ -99,14 +99,12 @@
 \subsection{Class API}
 #ifdef STANDALONE
 \input{ESMF_StateAPI_fapi}
-\input{ESMF_StateReconcile2_fapi}
 \input{ESMF_StateRemRep_fapi}
 \input{ESMF_StateSet_fapi}
 \input{ESMF_StateVa_fapi}
 \input{ESMF_StateWr_fapi}
 #elif defined(CONSTITUENT)
 \input{../Superstructure/State/doc/ESMF_StateAPI_fapi}
-\input{../Superstructure/State/doc/ESMF_StateReconcile2_fapi}
 \input{../Superstructure/State/doc/ESMF_StateRemRep_fapi}
 \input{../Superstructure/State/doc/ESMF_StateSet_fapi}
 \input{../Superstructure/State/doc/ESMF_StateVa_fapi}
