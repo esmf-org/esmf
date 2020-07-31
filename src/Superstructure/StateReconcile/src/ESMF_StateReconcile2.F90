@@ -1536,11 +1536,8 @@ contains
 !     contained within it.  It does not return the IDs of nested State
 !     items.
 !   \item[vmid]
-!     tdk:doc: edit to account for integers. consider renaming to vm_intid
-!     The object VMIds of this PETs State itself (in element 0) and the items
-!     contained within it.  It does not return the IDs of nested State
-!     items.  Note that since VMId is a deep object class, the vmid array
-!     has aliases to existing VMId objects, rather than copies of them.
+!     The object integer VMIds of this PET's State itself (in element 0) and the
+!     items contained within it.  It does not return the IDs of nested State items.
 !   \item[id_info]
 !     Array of arrays of global VMId info.  Array has a size of numPets, and each
 !     element points to Id/VMId arrays.  Also returns which objects are not
