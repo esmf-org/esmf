@@ -4702,12 +4702,15 @@ module NUOPC_Base
     ! local variables
     character(len=80)       :: petListBuffer
     integer                 :: i, lineCount, extra, localrc
+    integer                 :: petListT(10)
+    integer, allocatable    :: petListTe(:)
 
     lineCount = size(petList)/10
     extra = size(petList) - (size(petList)/10)*10
     
     do i=1, lineCount
-      write (petListBuffer, "(10I7)") petList((i-1)*10+1:i*10)
+      petListT(:) = petList((i-1)*10+1:i*10)
+      write (petListBuffer, "(10I7)") petListT
       call ESMF_LogWrite(petListBuffer, ESMF_LOGMSG_INFO, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU,&
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -4715,11 +4718,14 @@ module NUOPC_Base
     enddo
     
     if (extra>0) then
-      write (petListBuffer, "(10I7)") petList((i-1)*10+1:(i-1)*10+extra)
+      allocate(petListTe(extra))
+      petListTe(:) = petList((i-1)*10+1:(i-1)*10+extra)
+      write (petListBuffer, "(10I7)") petListTe
       call ESMF_LogWrite(petListBuffer, ESMF_LOGMSG_INFO, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU,&
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
+      deallocate(petListTe)
     endif
     
     ! return successfully
