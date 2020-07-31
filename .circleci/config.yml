@@ -255,11 +255,12 @@ workflows:
 
   docs-commit:
     jobs:
-      - should-build-docs:
-          type: approval
-      - build-docs:
+#      - should-build-docs:
+#          type: approval
+      - build-docs
+      - publish-docs:
           requires:
-            - should-build-docs
+            - build-docs
 #      - esmpy-docs:
 #          name: placeholder-esmpy-docs
 #          requires:
