@@ -261,6 +261,10 @@ workflows:
       - publish-docs:
           requires:
             - build-docs
+          filters:
+            branches:
+              only:
+                - develop
 #      - esmpy-docs:
 #          name: placeholder-esmpy-docs
 #          requires:
