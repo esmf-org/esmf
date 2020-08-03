@@ -327,7 +327,7 @@ subroutine ESMF_InfoCacheReassembleField(target, state, rc)
 !     \item [target]
 !       Input Field.
 !     \item [state]
-!       Inpute State.
+!       Input State.
 !     \item [rc]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
