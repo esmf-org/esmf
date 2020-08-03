@@ -9,10 +9,10 @@
 ! Licensed under the University of Illinois-NCSA License.
 !==============================================================================
 !
-#define ESMF_FILENAME "ESMF_StateReconcile2.F90"
+#define ESMF_FILENAME "ESMF_StateReconcile.F90"
 !
 ! ESMF StateReconcile module
-module ESMF_StateReconcile2Mod
+module ESMF_StateReconcileMod
 !
 !==============================================================================
 !
@@ -127,13 +127,43 @@ contains
 !==============================================================================
 
 !------------------------------------------------------------------------------
-! NOTE: Documentation stub located in src/Superstructure/State/src/ESMF_StateAPI.cppF90
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StateReconcile2"
-  subroutine ESMF_StateReconcile (state, vm, rc)
+#define ESMF_METHOD "ESMF_StateReconcile"
+!BOP
+! !IROUTINE: ESMF_StateReconcile -- Reconcile State data across all PETs in a VM
+!
+! !INTERFACE:
+  subroutine ESMF_StateReconcile(state, vm, rc)
+!
+! !ARGUMENTS:
     type(ESMF_State),            intent(inout)         :: state
     type(ESMF_VM),               intent(in),  optional :: vm
     integer,                     intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Must be called for any {\tt ESMF\_State} which contains ESMF objects
+!     that have not been created on all the {\tt PET}s of the currently
+!     running {\tt ESMF\_Component}.
+!     For example, if a coupler is operating on data
+!     which was created by another component that ran on only a subset
+!     of the couplers {\tt PET}s, the coupler must make this call first
+!     before operating on any data inside that {\tt ESMF\_State}.
+!     After calling {\tt ESMF\_StateReconcile} all {\tt PET}s will have
+!     a common view of all objects contained in this {\tt ESMF\_State}.
+!
+!     This call is collective across the specified VM.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[state]
+!       {\tt ESMF\_State} to reconcile.
+!     \item[{[vm]}]
+!       {\tt ESMF\_VM} for this {\tt ESMF\_Component}.  By default, it is set to the current vm.
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
 
     integer :: localrc
     type(ESMF_VM) :: localvm
@@ -3173,4 +3203,4 @@ contains
 
   end function iTos
 
-end module ESMF_StateReconcile2Mod
+end module ESMF_StateReconcileMod
