@@ -3,7 +3,7 @@
 ALL: build_here 
 
 SOURCEC	  =
-SOURCEF	  = ESMF_StateReconcile2.F90
+SOURCEF	  = ESMF_StateReconcile.F90
 SOURCEH	  = 
 STOREH    =
 TEXFILES  = $(addsuffix _fapi.tex, $(basename $(AUTOGEN)))
