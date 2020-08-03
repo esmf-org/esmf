@@ -625,11 +625,10 @@ contains
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
 
-    !tdk:rm
-    !call ESMF_ReconcileZappedProxies (state, localrc)
-    !if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    !    ESMF_CONTEXT,  &
-    !    rcToReturn=rc)) return
+    call ESMF_ReconcileZappedProxies (state, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
 
     ! 8.) Attributes on the State itself
 
@@ -2451,11 +2450,10 @@ contains
     ! a communication step to see if any removals have taken place.
     ! Conditionally zap the proxies depending on whether it is actually
     ! needed.
-    !tdk:rm
-!    call ESMF_ReconcileZapProxies (state, localrc)
-!    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-!        ESMF_CONTEXT,  &
-!        rcToReturn=rc)) return
+    call ESMF_ReconcileZapProxies (state, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
 
     ! Obtain local PET item list
     siwrap => null ()
