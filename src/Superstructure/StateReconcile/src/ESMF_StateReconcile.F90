@@ -204,8 +204,23 @@ contains
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
 
+#if 0
+    ! Log a JSON State representation -----------------------------------------
+
+    call idesc%Initialize(createInfo=.true., addObjectInfo=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    call idesc%Update(state, "", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_LogWrite("InfoDescribe before InfoCacheReassembleFields=", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_LogWrite("state_json_before_reassemble="//ESMF_InfoDump(idesc%info), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    call idesc%Destroy(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+#endif
+
     ! Traverse the State hierarchy and fix Field references to a shared geometry
-    call ESMF_InfoCacheReassembleFields(state, localrc)
+    call ESMF_InfoCacheReassembleFields(state, state, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Traverse the state hierarchy and remove reconcile-specific attributes
@@ -354,8 +369,8 @@ contains
 
     ! VM integer ids should always start with 1
     do i=lbound(vmintids_send,1),ubound(vmintids_send,1)
-      if (vmintids_send(i) == 0) then
-        if (ESMF_LogFoundError(ESMF_FAILURE, msg="A zero VM integer id was encountered", &
+      if (vmintids_send(i) <= 0) then
+        if (ESMF_LogFoundError(ESMF_FAILURE, msg="A <= zero VM integer id was encountered", &
           ESMF_CONTEXT, rcToReturn=rc)) return
       end if
     enddo

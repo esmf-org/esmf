@@ -141,7 +141,7 @@ void update_field_metadata_by_geom(const json &infoDescStorage, esmc_basecache_t
         ESMC_Base *ibase = findBase(*base, geomCache, index);
         if (!ibase) {
           // The current iteration target is a geometry and we did not find the
-          // geometry base. This geometry needs to be serialized/deserialzed.
+          // geometry base. This geometry needs to be serialized/deserialized.
           should_serialize_geom = true;
           // Add the geometry's base to the cache.
           geomCache.push_back(base);
@@ -157,7 +157,7 @@ void update_field_metadata_by_geom(const json &infoDescStorage, esmc_basecache_t
         }
       }
       // The parent Base pointer is not null when it is a Field. Field metadata
-      // is update in this code block.
+      // is updated in this code block.
       if (parentBase) {
         assert(intVmIdCache);
         ESMCI::Info *parent_info = parentBase->ESMC_BaseGetInfo();

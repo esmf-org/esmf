@@ -209,6 +209,7 @@ recursive function ESMF_InfoCacheFindField(target, foundField, intVmId, baseID, 
   character(len=ESMF_MAXSTR), dimension(:), allocatable :: field_name_list
   type(ESMF_Info) :: infoh
   logical :: is_present
+  character(len=ESMF_MAXSTR) :: logmsg
 
   found = .false.
   rc = ESMF_SUCCESS
@@ -375,10 +376,15 @@ subroutine ESMF_InfoCacheReassembleField(target, state, rc)
       if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (.not. found) then
-        !write(errmsg, *) "integer_vmid=", integer_vmid
-        !call ESMF_LogWrite(trim(errmsg))
-        !write(errmsg, *) "base_id=", base_id
-        !call ESMF_LogWrite(trim(errmsg))
+#if 0
+        call ESMF_LogWrite("esmf infodump=")
+        call ESMF_LogWrite(ESMF_InfoDump(infoh))
+        write(errmsg, *) "integer_vmid=", integer_vmid
+        call ESMF_LogWrite(trim(errmsg))
+        write(errmsg, *) "base_id=", base_id
+        call ESMF_LogWrite(trim(errmsg))
+#endif
+
         if (ESMF_LogFoundError(ESMF_FAILURE, msg="Archetype Field not found", &
           ESMF_CONTEXT, rcToReturn=rc)) return
       end if
@@ -523,9 +529,10 @@ end subroutine
 ! !IROUTINE: ESMF_InfoCacheReassembleFields - Reassemble all Fields in a State
 !
 ! !INTERFACE:
-recursive subroutine ESMF_InfoCacheReassembleFields(target, rc)
+recursive subroutine ESMF_InfoCacheReassembleFields(target, stateToSearch, rc)
 ! !ARGUMENTS:
   type(ESMF_State), intent(inout) :: target
+  type(ESMF_State), intent(inout) :: stateToSearch
   integer, intent(out) :: rc
 !
 ! !DESCRIPTION:
@@ -536,6 +543,9 @@ recursive subroutine ESMF_InfoCacheReassembleFields(target, rc)
 !     \begin{description}
 !     \item [target]
 !       Input State.
+!     \item [stateToSearch]
+!       The State to search. Used recursively to control the hierarchical search
+!       level. Typically, searches should always be performed on the global State.
 !     \item [rc]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -567,13 +577,13 @@ recursive subroutine ESMF_InfoCacheReassembleFields(target, rc)
         call ESMF_StateGet(target, trim(stateNames(ii)), state, rc=rc)
         if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_InfoCacheReassembleFields(state, rc)
+        call ESMF_InfoCacheReassembleFields(state, stateToSearch, rc)
         if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
       case(ESMF_STATEITEM_FIELD%ot)
         call ESMF_StateGet(target, trim(stateNames(ii)), field, rc=rc)
         if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_InfoCacheReassembleField(field, target, rc)
+        call ESMF_InfoCacheReassembleField(field, stateToSearch, rc)
         if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
       case(ESMF_STATEITEM_FIELDBUNDLE%ot)
         call ESMF_StateGet(target, trim(stateNames(ii)), fb, rc=rc)
@@ -593,7 +603,7 @@ recursive subroutine ESMF_InfoCacheReassembleFields(target, rc)
             call ESMF_FieldBundleGet(fb, trim(field_name_list(jj)), field=field, rc=rc)
             if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-            call ESMF_InfoCacheReassembleField(field, target, rc)
+            call ESMF_InfoCacheReassembleField(field, stateToSearch, rc)
             if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
           end do
         end if
