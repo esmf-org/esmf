@@ -153,11 +153,15 @@ jobs:
           command: exit 0
 
   esmpy-docs:
-    machine: true
+    docker:
+      - image: cimg/base:2020.01
     steps:
-      - run:
-          name: passthru-esmpy-docs
-          command: exit 0
+      - setup_remote_docker:
+          docker_layer_caching: true
+#      - run: echo "build esmpy-doc-base"
+#      - run: echo "build esmpy-doc"
+#      - run: echo "extract esmpy doc artifacts"
+#      - run: echo "push esmpy doc artifacts"
 
   osx-esmf:
     macos:

@@ -42,3 +42,13 @@ git pull
 git add .
 git commit -m "NUOPC doc build by CircleCI on `date`"
 git push origin master
+
+# Developer's Guide -----------------------------------------------------------
+
+# TODO: This needs to be enabled
+#cp -rf ~/esmf/src/doc/dev_guide ~/esmf-org.github.io/dev_docs/
+#cd ~/esmf-org.github.io/
+#git pull
+#git add .
+#git commit -m " pushing dev_guide build by CircleCI on `date` "
+#git push origin master
