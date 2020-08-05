@@ -225,7 +225,7 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - develop
     jobs:
 #      - osx-esmf
 #      - build-esmf
