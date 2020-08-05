@@ -646,6 +646,8 @@ int Clock::count=0;
       // check each alarm to see if it's time to ring
       ringing = alarmList[i]->Alarm::checkRingTime(&rc);
 
+      if (userChangedDirection) userChangedDirection = false;
+
       // report ringing alarms if requested
       if (ringing) {
         // report number of ringing alarms
@@ -675,8 +677,6 @@ int Clock::count=0;
         }
       }
     }
-
-    if (userChangedDirection) userChangedDirection = false;
 
     return(rc);
 
