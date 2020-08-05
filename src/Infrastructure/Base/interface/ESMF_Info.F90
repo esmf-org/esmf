@@ -1530,64 +1530,12 @@ end subroutine ESMF_InfoSetArrayLG
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoSetNULL()"
-!BOP
-! !IROUTINE: ESMF_InfoSetNULL - Set a value to null
-!
-! !INTERFACE:
-subroutine ESMF_InfoSetNULL(info, key, keywordEnforcer, force, rc)
-! !ARGUMENTS:
-  type(ESMF_Info), intent(inout) :: info
-  character(len=*), intent(in) :: key
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  logical, intent(in), optional :: force
-  integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Set a value to null \cite{json_for_modern_cpp_null}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-!       Target \texttt{ESMF\_Info} object.
-!     \item [key]
-!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
-!       for an overview of the key format.
-!     \item [{[force]}]
-!       Default is true. When true, insert the key even if it already exists in
-!       storage. If false, \textit{rc} will not return {\tt ESMF\_SUCCESS} if the
-!       key already exists.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOP
-
-  integer :: localrc
-  logical(C_BOOL) :: local_force
-
-  localrc = ESMF_FAILURE
-  if (present(rc)) rc = ESMF_FAILURE
-
-  if (present(force)) then
-    local_force = force
-  else
-    local_force = .true.
-  end if
-
-  call c_info_set_NULL(info%ptr, trim(key)//C_NULL_CHAR, local_force, localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (present(rc)) rc = ESMF_SUCCESS
-end subroutine ESMF_InfoSetNULL
-
-! -----------------------------------------------------------------------------
-
-#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoSetINFO()"
 !BOP
-! !IROUTINE: ESMF_InfoSetINFO - Set a key to the contents of an Info object
+! !IROUTINE: ESMF_InfoSet - Set a key to the contents of an Info object
 !
 ! !INTERFACE:
+  ! Private name; call using ESMF_InfoSet()
 subroutine ESMF_InfoSetINFO(info, key, value, keywordEnforcer, force, rc)
 ! !ARGUMENTS:
   type(ESMF_Info), intent(inout) :: info
@@ -1643,6 +1591,59 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 end subroutine ESMF_InfoSetINFO
 
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoSetNULL()"
+!BOP
+! !IROUTINE: ESMF_InfoSetNULL - Set a value to null
+!
+! !INTERFACE:
+subroutine ESMF_InfoSetNULL(info, key, keywordEnforcer, force, rc)
+! !ARGUMENTS:
+  type(ESMF_Info), intent(inout) :: info
+  character(len=*), intent(in) :: key
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  logical, intent(in), optional :: force
+  integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Set a value to null \cite{json_for_modern_cpp_null}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [info]
+!       Target \texttt{ESMF\_Info} object.
+!     \item [key]
+!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
+!       for an overview of the key format.
+!     \item [{[force]}]
+!       Default is true. When true, insert the key even if it already exists in
+!       storage. If false, \textit{rc} will not return {\tt ESMF\_SUCCESS} if the
+!       key already exists.
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOP
+
+  integer :: localrc
+  logical(C_BOOL) :: local_force
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_FAILURE
+
+  if (present(force)) then
+    local_force = force
+  else
+    local_force = .true.
+  end if
+
+  call c_info_set_NULL(info%ptr, trim(key)//C_NULL_CHAR, local_force, localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_InfoSetNULL
+
+! -----------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoSetDirty()"
@@ -3700,7 +3701,7 @@ end subroutine ESMF_InfoGetArrayLGAlloc
 !       An integer index to use. This will index into an object type providing
 !       the primary mechanism for iteration.
 !     \item [{[typekind]}]
-!       Get the ESMF typekind for the target.
+!       Get the ESMF typekind for the target. The minimum typekind required to hold the value is returned.
 !     \item [{[ikey]}]
 !       If present, this will be set to the key's name for the current inquire.
 !       Useful when iterating using an index. This does \textit{not} return the full key

@@ -489,18 +489,16 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
 
 {% set proc_suffix = "Obj" %}
 {% if d %}
-    {% set arglist = "(target, name, valueList, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)" %}
+    {% set arglist = "(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)" %}
 {% else %}
-    {% set arglist = "(target, name, value, convention, purpose, attPackInstanceName, itemcount, attnestflag, rc)" %}
+    {% set arglist = "(target, name, value, convention, purpose, itemcount, attnestflag, rc)" %}
 {% endif %}
 {% include "ESMF_Attribute-ProcHeader.jinja2" %}{{ "" }}
-  ! 39.11.38/40 - attPackInstanceName is NOOP
   type(ESMF_{{ et }}), intent(inout) :: target
   character(len=*), intent(in) :: name
   {{ t.full_ftype }}, {% if d %}dimension(:), {% endif %}intent(in) :: value{% if d %}List{% endif %}{{ "" }}
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(inout), optional :: rc
@@ -574,8 +572,9 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   integer :: localrc
   character(:), allocatable :: key
   type(ESMF_AttNest_Flag) :: local_attnestflag
-
-  logical, parameter :: debug = .false.
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array
 
 {% include "ESMF_Attribute-ProcInit.jinja2" %}{{ "" }}
 
@@ -594,22 +593,34 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    attnestflag=local_attnestflag, rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
 {% include "ESMF_Attribute-ProcFinalize.jinja2" %}{{ "" }}
 
 {% set proc_suffix = "Obj" %}
-{% set arglist = "(target, name, value, defaultvalue, convention, purpose, attPackInstanceName, attnestflag, isPresent, rc)" %}
+{% set arglist = "(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)" %}
 {% include "ESMF_Attribute-ProcHeader.jinja2" %}{{ "" }}
-  ! 39.11.11 - attPackInstanceName is NOOP
   type(ESMF_{{ et }}), intent(in) :: target
   character(len=*), intent(in) :: name
   {{ t.full_ftype }}, intent(out) :: value
   {{ t.full_ftype }}, intent(in), optional :: defaultvalue
   character(len=*), optional, intent(in) :: convention
   character(len=*), optional, intent(in) :: purpose
-  character(len=*), optional, intent(in) :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
   integer, intent(inout), optional :: rc
@@ -619,6 +630,8 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   type(ESMF_InfoDescribe) :: eidesc
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array
 
 {% include "ESMF_Attribute-ProcInit.jinja2" %}{{ "" }}
 
@@ -635,8 +648,22 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
-  call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, rc=localrc)
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
+    rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
 
   deallocate(key)
 
@@ -706,16 +733,14 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
 
 !------------------------------------------------------------------------------
 {% set proc_suffix = "Obj" %}
-{% set arglist = "(target, name, valueList, defaultvalueList, convention, purpose, attPackInstanceName, attnestflag, itemcount, isPresent, rc)" %}
+{% set arglist = "(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)" %}
 {% include "ESMF_Attribute-ProcHeader.jinja2" %}{{ "" }}
-  ! 39.11.13 - attPackInstanceName is NOOP
   type(ESMF_{{ et }}), intent(in) :: target
   character(len=*), intent(in) :: name
   {{ t.full_ftype }}, dimension(:), intent(out) :: valueList
   {{ t.full_ftype }}, dimension(:), intent(in), optional :: defaultvalueList
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
@@ -951,7 +976,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
 {% include "ESMF_Attribute-ProcFinalize.jinja2" %}{{ "" }}
 {% set set_or_get = "Get" %}
 {% set proc_suffix = "InfoByNam" %}
-{% set arglist = "(target, name, keywordEnforcer, convention, purpose, attPackInstanceName, attnestflag, typekind, itemCount, isPresent, rc)" %}
+{% set arglist = "(target, name, keywordEnforcer, convention, purpose, attnestflag, typekind, itemCount, isPresent, rc)" %}
 {% include "ESMF_Attribute-ProcHeader.jinja2" %}{{ "" }}
   ! 39.11.17
   type(ESMF_{{ et }}), intent(in) :: target
@@ -959,7 +984,6 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
-  character(len=*), intent(in), optional :: attPackInstanceName
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
@@ -1018,7 +1042,6 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
 {% set proc_suffix = "InfoByNum" %}
 {% set arglist = "(target, attributeIndex, name, convention, purpose, attnestflag, typekind, itemCount, isPresent, rc)" %}
 {% include "ESMF_Attribute-ProcHeader.jinja2" %}{{ "" }}
-  ! 39.11.18: removed attPackInstanceName
   type(ESMF_{{ et }}), intent(in) :: target
   integer, intent(in) :: attributeIndex
   character(len=*), intent(out) :: name
@@ -1149,7 +1172,6 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
 {% set proc_suffix = "AttPack" %}
 {% set arglist = "(target, name, attpack, convention, purpose, attnestflag, rc)" %}
 {% include "ESMF_Attribute-ProcHeader.jinja2" %}{{ "" }}
-  ! 39.11.33- removed attpackinstancename
   type(ESMF_{{ et }}), intent(inout) :: target
   character(len=*), intent(in), optional :: name
   type(ESMF_AttPack), intent(inout), optional :: attpack
@@ -1245,14 +1267,12 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
 {% include "ESMF_Attribute-ProcFinalize.jinja2" %}{{ "" }}
 
 {#{% set proc_suffix = "Obj" %}#}
-{#{% set arglist = "(target, name, convention, purpose, attPackInstanceName, attnestflag, rc)" %}#}
+{#{% set arglist = "(target, name, convention, purpose, attnestflag, rc)" %}#}
 {#{% include "ESMF_Attribute-ProcHeader.jinja2" %}#}
-{#  ! 39.11.34 - attPackInstanceName is NOOP#}
 {#  type(ESMF_{{ et }}), intent(inout) :: target#}
 {#  character(len=*), intent(in), optional :: name#}
 {#  character(len=*), intent(in), optional :: convention#}
 {#  character(len=*), intent(in), optional :: purpose#}
-{#  character(len=*), intent(in), optional :: attPackInstanceName#}
 {#  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag#}
 {#  integer, intent(inout), optional :: rc#}
 {##}
