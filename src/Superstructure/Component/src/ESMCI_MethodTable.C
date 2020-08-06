@@ -497,9 +497,12 @@ namespace ESMCI {
           else
             prev->nextElement = element->nextElement;
           delete element;
+          element = table;
+          prev = table;
+        }else{
+          prev = element;
+          element = element->nextElement;
         }
-        prev = element;
-        element = element->nextElement;
       }
       prev->nextElement = new MethodElement(labelArg, pointer);
     }else{
@@ -528,9 +531,12 @@ namespace ESMCI {
           else
             prev->nextElement = element->nextElement;
           delete element;
+          element = table;
+          prev = table;
+        }else{
+          prev = element;
+          element = element->nextElement;
         }
-        prev = element;
-        element = element->nextElement;
       }
       prev->nextElement = new MethodElement(labelArg, name, sharedObj);
       element = prev->nextElement;
@@ -606,8 +612,9 @@ namespace ESMCI {
         *existflag = false;
         if (userRc) *userRc = ESMF_SUCCESS;
       }else{
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
-          "method not found in method table", ESMC_CONTEXT, &rc);
+        std::stringstream msg;
+        msg << "method not found in method table: " << labelArg;
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, msg, ESMC_CONTEXT, &rc);
         return rc;
       }
     }else{
