@@ -2186,6 +2186,7 @@ void VM::logMemInfo(
     sprintf(msg, "%s - MemInfo: Total allocated space (bytes): \t%d",prefix.c_str(),mem_info.virtual_size);
     log->Write(msg, ESMC_LOGMSG_INFO);
 
+    // Other memory info that might be useful at some point
 #if 0
     sprintf(msg, "%s - MemInfo: v_size:                       \t%d",prefix.c_str(),mem_info.virtual_size);
     log->Write(msg, ESMC_LOGMSG_INFO);
