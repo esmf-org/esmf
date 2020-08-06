@@ -3429,13 +3429,13 @@ module NUOPC_Comp
         return  ! bail out
       endif
       ! add the method under the specific phase index
-      call ESMF_MethodAdd(comp, label=specLabel, index=phaseIndex, &
+      call ESMF_MethodAddReplace(comp, label=specLabel, index=phaseIndex, &
         userRoutine=specRoutine, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
     else
       ! add the method under under no specific phase index
-      call ESMF_MethodAdd(comp, label=specLabel, &
+      call ESMF_MethodAddReplace(comp, label=specLabel, &
         userRoutine=specRoutine, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
@@ -3513,13 +3513,13 @@ module NUOPC_Comp
         return  ! bail out
       endif
       ! add the method under the specific phase index
-      call ESMF_MethodAdd(comp, label=specLabel, index=phaseIndex, &
+      call ESMF_MethodAddReplace(comp, label=specLabel, index=phaseIndex, &
         userRoutine=specRoutine, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
     else
       ! add the method under under no specific phase index
-      call ESMF_MethodAdd(comp, label=specLabel, &
+      call ESMF_MethodAddReplace(comp, label=specLabel, &
         userRoutine=specRoutine, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
