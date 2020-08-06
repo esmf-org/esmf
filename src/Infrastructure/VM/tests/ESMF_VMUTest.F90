@@ -37,8 +37,8 @@
       integer:: init_sec, end_sec, delay_time
       integer, allocatable:: array1(:), array3(:),array3_soln(:)
       integer, allocatable:: array4(:), array5(:)
-      integer, allocatable:: ssiList(:)
-      character(800)  :: ssiListString
+      integer, allocatable:: ssiMap(:)
+      character(800)  :: ssiMapString
       integer, dimension (:, :), allocatable:: array2
       integer::  func_results, myresults
       integer:: nsize, i, j
@@ -77,20 +77,18 @@
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Test_VM Get Test"
       call ESMF_VMGet(test_vm, localPet=test_localPet, petCount=test_npets, &
-        ssiList=ssiList, rc=rc)
+        ssiMap=ssiMap, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
-      write(ssiListString,*) "ssiList=", ssiList
-      call ESMF_LogWrite(ssiListString, ESMF_LOGMSG_INFO, rc=rc)
+      write(ssiMapString,*) "ssiMap=", ssiMap
+      call ESMF_LogWrite(ssiMapString, ESMF_LOGMSG_INFO, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
       !------------------------------------------------------------------------
       !EX_UTest
       write(failMsg, *) "Did not return correct bounds"
-      write(name, *) "Test bounds of ssiList"
-      call ESMF_VMGet(test_vm, localPet=test_localPet, petCount=test_npets, &
-        ssiList=ssiList, rc=rc)
-      call ESMF_Test(((lbound(ssiList,1)==0).and.(ubound(ssiList,1)==test_npets-1)),&
+      write(name, *) "Test bounds of ssiMap"
+      call ESMF_Test(((lbound(ssiMap,1)==0).and.(ubound(ssiMap,1)==test_npets-1)),&
         name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------

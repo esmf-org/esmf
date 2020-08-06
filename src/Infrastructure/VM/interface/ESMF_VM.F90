@@ -5129,7 +5129,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMGet()
   recursive subroutine ESMF_VMGetDefault(vm, keywordEnforcer, localPet, &
-    localPe, petCount, peCount, ssiCount, ssiList, ssiMinPetCount, ssiMaxPetCount, &
+    localPe, petCount, peCount, ssiCount, ssiMap, ssiMinPetCount, ssiMaxPetCount, &
     ssiLocalPetCount, mpiCommunicator, pthreadsEnabledFlag, openMPEnabledFlag, &
     ssiSharedMemoryEnabledFlag, rc)
 !
@@ -5141,7 +5141,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out), optional :: petCount
     integer,              intent(out), optional :: peCount
     integer,              intent(out), optional :: ssiCount
-    integer, allocatable, intent(out), optional :: ssiList(:)
+    integer, allocatable, intent(out), optional :: ssiMap(:)
     integer,              intent(out), optional :: ssiMinPetCount
     integer,              intent(out), optional :: ssiMaxPetCount
     integer,              intent(out), optional :: ssiLocalPetCount
@@ -5166,7 +5166,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   access between PETs on the same SSI.
 ! \item[8.1.0] Added argument {\tt localPe} for easy access to the local PE
 !   mapping.\newline
-!   Added argument {\tt ssiList} for a convenient way to obtain a view
+!   Added argument {\tt ssiMap} for a convenient way to obtain a view
 !   of the mapping of PETs to single system images across the entire VM.
 ! \end{description}
 ! \end{itemize}
@@ -5194,9 +5194,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[ssiCount]}]
 !        Upon return this holds the number of single system images referenced 
 !        by {\tt vm}.
-!   \item[{[ssiList]}]
+!   \item[{[ssiMap]}]
 !        Upon return this array is allocated and holds the single system image
-!        id for each PET across the {\tt vm}. The size of {\tt ssiList} is
+!        id for each PET across the {\tt vm}. The size of {\tt ssiMap} is
 !        equal to {\tt petCount}, with lower bound 0 and upper bound petCount-1.
 !   \item[{[ssiMinPetCount]}]
 !        Upon return this holds the smallest number of PETs running in the same
@@ -5274,10 +5274,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ssiSharedMemoryEnabledFlag = ssiSharedMemoryEnabledFlagArg
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-      if (present(ssiList)) then
-        allocate(ssiList(0:petCountArg-1))
+      if (present(ssiMap)) then
+        allocate(ssiMap(0:petCountArg-1))
         do i=0, petCount-1
-          call ESMF_VMGet(vm, pet=i, ssiId=ssiList(i), rc=localrc)
+          call ESMF_VMGet(vm, pet=i, ssiId=ssiMap(i), rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         enddo
@@ -5285,7 +5285,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     else
       ! Only very specific cases are supported for a NULL this pointer
       if (present(petCount) .or. present(peCount) .or. present(ssiCount) .or. &
-        present(ssiList) .or. present(ssiMinPetCount) .or. &
+        present(ssiMap) .or. present(ssiMinPetCount) .or. &
         present(ssiMaxPetCount) .or. present(ssiLocalPetCount) .or. &
         present(pthreadsEnabledFlag) .or. present(openMPEnabledFlag) .or. &
         present(ssiSharedMemoryEnabledFlag)) then
