@@ -236,9 +236,9 @@ RUN_ESMF_VMBarrierUTestUNI:
 # VM Component
 #
 RUN_ESMF_VMComponentUTest:
-	env MPI_COMM_MAX=5000 MPI_GROUP_MAX=5000 $(MAKE) TNAME=VMComponent NP=4 ftest
+	$(MAKE) TNAME=VMComponent NP=4 ftest
 
 RUN_ESMF_VMComponentUTestUNI:
-	env MPI_COMM_MAX=5000 MPI_GROUP_MAX=5000 $(MAKE) TNAME=VMComponent NP=1 ftest
+	$(MAKE) TNAME=VMComponent NP=1 ftest
 
 
