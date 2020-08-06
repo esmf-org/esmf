@@ -37,6 +37,8 @@
       integer:: init_sec, end_sec, delay_time
       integer, allocatable:: array1(:), array3(:),array3_soln(:)
       integer, allocatable:: array4(:), array5(:)
+      integer, allocatable:: ssiList(:)
+      character(800)  :: ssiListString
       integer, dimension (:, :), allocatable:: array2
       integer::  func_results, myresults
       integer:: nsize, i, j
@@ -75,8 +77,21 @@
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Test_VM Get Test"
       call ESMF_VMGet(test_vm, localPet=test_localPet, petCount=test_npets, &
-        rc=rc)
+        ssiList=ssiList, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      write(ssiListString,*) "ssiList=", ssiList
+      call ESMF_LogWrite(ssiListString, ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Did not return correct bounds"
+      write(name, *) "Test bounds of ssiList"
+      call ESMF_VMGet(test_vm, localPet=test_localPet, petCount=test_npets, &
+        ssiList=ssiList, rc=rc)
+      call ESMF_Test(((lbound(ssiList,1)==0).and.(ubound(ssiList,1)==test_npets-1)),&
+        name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -154,7 +169,6 @@
       if (delay_time.lt.0) delay_time=delay_time + 60
       print *, "delay_time =", delay_time
       call ESMF_Test((delay_time.eq.5.or.delay_time.eq.6), name, failMsg, result, ESMF_SRCLINE)
-
       
       !------------------------------------------------------------------------
       !EX_UTest
@@ -1203,7 +1217,7 @@
       allocate(f4array2(nsize,npets))
       do j=1, npets 
         do i=1, nsize
-           array2(i,j) = (j-1) * 100 + i
+          array2(i,j) = (j-1) * 100 + i
           farray2(i,j)  = real( array2(i,j) , ESMF_KIND_R8)
           f4array2(i,j) = real(farray2(i,j))
         enddo
