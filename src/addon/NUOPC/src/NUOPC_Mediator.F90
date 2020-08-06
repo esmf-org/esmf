@@ -117,8 +117,8 @@ module NUOPC_Mediator
       return  ! bail out
 
     ! Specialize Run -> timestamp export Fields
-    call ESMF_MethodAdd(gcomp, label=label_TimestampExport, &
-      userRoutine=TimestampExport, rc=rc)
+    call NUOPC_CompSpecialize(gcomp, specLabel=label_TimestampExport, &
+      specRoutine=TimestampExport, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out

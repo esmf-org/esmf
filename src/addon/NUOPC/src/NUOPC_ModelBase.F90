@@ -202,14 +202,14 @@ module NUOPC_ModelBase
       return  ! bail out
     
     ! Specialize default Run -> setting the run Clock
-    call ESMF_MethodAdd(gcomp, label=label_SetRunClock, &
-      userRoutine=SetRunClock, rc=rc)
+    call NUOPC_CompSpecialize(gcomp, specLabel=label_SetRunClock, &
+      specRoutine=SetRunClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
     ! Specialize default Run -> checking import Fields
-    call ESMF_MethodAdd(gcomp, label=label_CheckImport, &
-      userRoutine=CheckImport, rc=rc)
+    call NUOPC_CompSpecialize(gcomp, specLabel=label_CheckImport, &
+      specRoutine=CheckImport, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out

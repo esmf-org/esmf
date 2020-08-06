@@ -250,15 +250,15 @@ module NUOPC_Driver
       return  ! bail out
 
     ! Run specialization
-    call ESMF_MethodAdd(driver, label=label_SetRunClock, &
-      userRoutine=SetRunClock, rc=rc)
+    call NUOPC_CompSpecialize(driver, specLabel=label_SetRunClock, &
+      specRoutine=SetRunClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
       
     ! Run specialization
-    call ESMF_MethodAdd(driver, label=label_ExecuteRunSequence, &
-      userRoutine=ExecuteRunSequence, rc=rc)
+    call NUOPC_CompSpecialize(driver, specLabel=label_ExecuteRunSequence, &
+      specRoutine=ExecuteRunSequence, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
