@@ -121,6 +121,12 @@ module NUOPC_Model
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
 
+    ! Set IPDvX attribute
+    call NUOPC_CompAttributeSet(gcomp, name="IPDvX", value="true", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+
   end subroutine
 
   !-----------------------------------------------------------------------------
