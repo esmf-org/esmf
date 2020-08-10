@@ -324,9 +324,11 @@ module NUOPC_Connector
     call NUOPC_CompAttributeGet(connector, name="IPDvX", value=ipdvxAttr, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#if 1
     call ESMF_LogWrite("ipdvxAttr: "//ipdvxAttr, ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
 
     ! filter all other entries but those of type IPDv05
     call NUOPC_CompFilterPhaseMap(connector, ESMF_METHOD_INITIALIZE, &

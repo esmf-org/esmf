@@ -306,7 +306,9 @@ module NUOPC_ModelBase
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
     character(ESMF_MAXSTR)    :: ipdvxAttr
-    logical                   :: isPresent
+    logical                   :: isPresentAdvertise
+    logical                   :: isPresentRealize
+    logical                   :: isPresentDataInitialize
 
     rc = ESMF_SUCCESS
 
@@ -393,9 +395,11 @@ module NUOPC_ModelBase
     call NUOPC_CompAttributeGet(gcomp, name="IPDvX", value=ipdvxAttr, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#if 1
     call ESMF_LogWrite("ipdvxAttr: "//ipdvxAttr, ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
 
     if (trim(ipdvxAttr)=="true") then
       ! switch to IPDvX
@@ -403,12 +407,29 @@ module NUOPC_ModelBase
         acceptStringList=(/"IPDvXp"/), rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      ! Advertise: conditionally activate the generic code
+      ! Determine the active specializations
       call ESMF_MethodGet(gcomp, label=label_Advertise, &
-        isPresent=isPresent, rc=rc)
+        isPresent=isPresentAdvertise, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      if (isPresent) then
+      call ESMF_MethodGet(gcomp, label=label_Realize, &
+        isPresent=isPresentRealize, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      call ESMF_MethodGet(gcomp, label=label_DataInitialize, &
+        isPresent=isPresentDataInitialize, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      ! Detect inconsistent specialization combinations
+      if (isPresentAdvertise.neqv.isPresentRealize) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="NUOPC INCOMPATIBILITY DETECTED: "// &
+          "Advertise and Realize must both be present or absent.", &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+        return  ! bail out
+      endif
+      ! Advertise: conditionally activate the generic code
+      if (isPresentAdvertise) then
         call NUOPC_CompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
           phaseLabelList=(/"IPDvXp01"/), userRoutine=InitializeIPDvXp01, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -416,29 +437,21 @@ module NUOPC_ModelBase
           return  ! bail out
       endif
       ! Realize: conditionally activate the generic code
-      call ESMF_MethodGet(gcomp, label=label_Realize, &
-        isPresent=isPresent, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      if (isPresent) then
+      if (isPresentRealize) then
         call NUOPC_CompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
           phaseLabelList=(/"IPDvXp04"/), userRoutine=InitializeIPDvXp04, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) &
           return  ! bail out
       endif
-      ! ConnectedCheck: always have generic code active
+      ! ConnectedCheck: always activate the generic code
       call NUOPC_CompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
         phaseLabelList=(/"IPDvXp07"/), userRoutine=InitializeIPDvXp07, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
         return  ! bail out
-      ! DataInitialize: choose different generic code depending on specialization
-      call ESMF_MethodGet(gcomp, label=label_DataInitialize, &
-        isPresent=isPresent, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      if (isPresent) then
+      ! DataInitialize: choose different generic code depending on spec details
+      if (isPresentDataInitialize) then
         call NUOPC_CompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
           phaseLabelList=(/"IPDv05p8"/), userRoutine=InitializeIPDvXp08, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
