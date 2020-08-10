@@ -330,6 +330,7 @@ module NUOPC_Driver
     character(*), parameter   :: rName="InitializeP0"
     character(ESMF_MAXSTR)    :: name
     integer                   :: verbosity
+    character(ESMF_MAXSTR)    :: ipdvxAttr
 
     rc = ESMF_SUCCESS
 
@@ -340,6 +341,14 @@ module NUOPC_Driver
     
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! determine whether the component is compatible with IPDvX
+    call NUOPC_CompAttributeGet(driver, name="IPDvX", value=ipdvxAttr, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    call ESMF_LogWrite("ipdvxAttr: "//ipdvxAttr, ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1082,8 +1091,8 @@ module NUOPC_Driver
       enddo
     enddo
 
-    ! -> Now encode the NUOPC IPDv00, IPDv01, IPDv02, IPDv03, IPDv04, IPDv05
-      
+    ! -> Encode the NUOPC IPDv00, IPDv01, IPDv02, IPDv03, IPDv04, IPDv05, IPDvX
+
     ! modelComps
     call loopModelCompsS(driver, phaseString="IPDv00p1", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1109,14 +1118,26 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
+    call loopModelCompsS(driver, phaseString="IPDvXp01", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
     ! connectorComps
     call loopConnectorCompsS(driver, phaseString="IPDv05p1", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call loopConnectorCompsS(driver, phaseString="IPDvXp01", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
 
     ! modelComps (new for IPDv05)
     call loopModelCompsS(driver, phaseString="IPDv05p2", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call loopModelCompsS(driver, phaseString="IPDvXp02", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
@@ -1155,6 +1176,14 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
+    call loopConnectorCompsS(driver, phaseString="IPDvXp02a", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call loopConnectorCompsS(driver, phaseString="IPDvXp02b", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
 
     ! modelComps
     ! moved down one level
@@ -1182,6 +1211,10 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
+    call loopModelCompsS(driver, phaseString="IPDvXp03", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
     ! connectorComps
     call loopConnectorCompsS(driver, phaseString="IPDv00p2a", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1204,6 +1237,10 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
     call loopConnectorCompsS(driver, phaseString="IPDv05p3", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call loopConnectorCompsS(driver, phaseString="IPDvXp03", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
@@ -1598,6 +1635,10 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
+    call loopModelCompsS(driver, phaseString="IPDvXp04", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
     ! connectorComps
     call loopConnectorCompsS(driver, phaseString="IPDv03p3", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1608,6 +1649,10 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
     call loopConnectorCompsS(driver, phaseString="IPDv05p4", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call loopConnectorCompsS(driver, phaseString="IPDvXp04", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
@@ -1625,6 +1670,10 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
+    call loopModelCompsS(driver, phaseString="IPDvXp05", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
     ! connectorComps
     call loopConnectorCompsS(driver, phaseString="IPDv03p4", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1635,6 +1684,10 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
     call loopConnectorCompsS(driver, phaseString="IPDv05p5", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call loopConnectorCompsS(driver, phaseString="IPDvXp05", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
@@ -1649,6 +1702,10 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
     call loopModelCompsS(driver, phaseString="IPDv05p6", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call loopModelCompsS(driver, phaseString="IPDvXp06", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
@@ -1693,6 +1750,14 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
+    call loopConnectorCompsS(driver, phaseString="IPDvXp06a", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call loopConnectorCompsS(driver, phaseString="IPDvXp06b", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
 
     ! modelComps
     call loopModelCompsS(driver, phaseString="IPDv00p3", rc=rc)
@@ -1716,6 +1781,10 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
     call loopModelCompsS(driver, phaseString="IPDv05p7", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call loopModelCompsS(driver, phaseString="IPDvXp07", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
@@ -2085,6 +2154,12 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
     execFlagCollect = execFlagCollect.or.execFlag
+    call loopModelCompsS(driver, phaseString="IPDvXp08", execFlag=execFlag, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    execFlagCollect = execFlagCollect.or.execFlag
 
     ! deal with the fact that the executing component may not be across all PETs
     execFlagInt = 0
@@ -2101,7 +2176,7 @@ module NUOPC_Driver
     ! now all PETs have the same execFlag setting for a consistent decision
     if (execFlag) then
       ! there were model components with IPDv02p5, IPDv03p7, IPDv04p7, 
-      ! or IPDv05p8 -->> resolve data dependencies by entering loop
+      ! IPDv05p8, or IPDvXp08 -->> resolve data dependencies by entering loop
       if (btest(verbosity,11)) then
         call ESMF_LogWrite(trim(name)//&
           ": components present that trigger loopDataDependentInitialize().", &
@@ -2462,7 +2537,8 @@ module NUOPC_Driver
             if ((trim(is%wrap%modelPhaseMap(i)%phaseKey(k))==trim("IPDv02p5")).or. &
               (trim(is%wrap%modelPhaseMap(i)%phaseKey(k)) == trim("IPDv03p7")).or. &
               (trim(is%wrap%modelPhaseMap(i)%phaseKey(k)) == trim("IPDv04p7")).or. &
-              (trim(is%wrap%modelPhaseMap(i)%phaseKey(k)) == trim("IPDv05p8"))) then
+              (trim(is%wrap%modelPhaseMap(i)%phaseKey(k)) == trim("IPDv05p8")).or. &
+              (trim(is%wrap%modelPhaseMap(i)%phaseKey(k)) == trim("IPDvXp08"))) then
               phase = is%wrap%modelPhaseMap(i)%phaseValue(k)
             endif
           enddo
