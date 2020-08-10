@@ -228,6 +228,35 @@ extern "C" {
   }
   
 #undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_methodtableget"
+  void FTN_X(c_esmc_methodtableget)(ESMCI::MethodTable **ptr,
+    char const *labelArg, int *index, ESMC_Logical *isPresent, int *rc,
+    ESMCI_FortranStrLenArg labelLen){
+    int localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
+    if (labelLen>=0){
+      std::string label(labelArg, labelLen);
+      label.resize(label.find_last_not_of(" ")+1);
+      if (index){
+        std::stringstream indexString;
+        indexString << "::ESMF::index::" << *index;
+        label += indexString.str();
+      }
+      if ((*ptr)->isPresent(label))
+        *isPresent = ESMF_TRUE;
+      else
+        *isPresent = ESMF_FALSE;
+    }else{
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
+        "corrupt label string", ESMC_CONTEXT, rc);
+      return;
+    }
+
+    // return successfully
+    if (rc) *rc = ESMF_SUCCESS;
+  }
+
+#undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_methodtableremove"
   void FTN_X(c_esmc_methodtableremove)(ESMCI::MethodTable **ptr,
     char const *labelArg, int *index, int *rc, ESMCI_FortranStrLenArg labelLen){
@@ -585,6 +614,29 @@ namespace ESMCI {
     // return successfully
     rc = ESMF_SUCCESS;
     return rc;
+  }
+
+  
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::MethodTable::isPresent()"
+  bool MethodTable::isPresent(std::string labelArg){
+    int rc = ESMC_RC_NOT_IMPL;
+    if (table){
+      MethodElement *element = table; // initialize
+      MethodElement *prev = table;  // initialize
+      while (element){
+        if (element->label == labelArg)
+          return true;
+        prev = element;
+        element = element->nextElement;
+      }
+      return false;
+    }else{
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
+        "empty method table", ESMC_CONTEXT, &rc);
+      return false;
+    }
+    return false;
   }
 
   

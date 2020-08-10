@@ -108,6 +108,7 @@ class MethodTable{
     int addreplace(std::string labelArg, void *pointer);
     int addreplace(std::string labelArg, std::string name, std::string sharedObj);
     int remove(std::string labelArg);
+    bool isPresent(std::string labelArg);
     int execute(std::string labelArg, void *object, int *userRc,
       bool* existflag=NULL);
 };

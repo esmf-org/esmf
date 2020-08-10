@@ -54,7 +54,7 @@ module ESMF_AttachMethodsMod
 ! !PUBLIC MEMBER FUNCTIONS:
       
   public ESMF_MethodAdd, ESMF_MethodAddReplace, ESMF_MethodExecute, &
-    ESMF_MethodRemove
+    ESMF_MethodGet, ESMF_MethodRemove
 
 !EOPI
 
@@ -91,6 +91,12 @@ module ESMF_AttachMethodsMod
     module procedure ESMF_MethodCplCompExecute
     module procedure ESMF_MethodGridCompExecute
     module procedure ESMF_MethodStateExecute
+  end interface
+
+  interface ESMF_MethodGet
+    module procedure ESMF_MethodCplCompGet
+    module procedure ESMF_MethodGridCompGet
+    module procedure ESMF_MethodStateGet
   end interface
 
   interface ESMF_MethodRemove
@@ -1368,6 +1374,195 @@ module ESMF_AttachMethodsMod
     ! pass back userRc
     if (present(userRc)) userRc = localUserRc
 
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MethodCplCompGet"
+!BOP
+! !IROUTINE: ESMF_MethodGet - Get info about user method attached to CplComp
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_MethodGet()
+  subroutine ESMF_MethodCplCompGet(cplcomp, label, index, isPresent, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_CplComp)                      :: cplcomp
+    character(len=*), intent(in)            :: label
+    integer,          intent(in),  optional :: index
+    logical,          intent(out), optional :: isPresent
+    integer,          intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+! Remove attached method.
+!
+! The arguments are:
+! \begin{description}
+! \item[cplcomp]
+!   The {\tt ESMF\_CplComp} to attach to.
+! \item[label]
+!   Label of method.
+! \item[{[index]}]
+!   Integer modifier to distinguish multiple entries with the same {\tt label}.
+! \item[{[isPresent]}]
+!   {\tt .true.} if a method was attached for {\tt label}/{\tt index}.
+!   {\tt .false.} otherwise.
+! \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer :: localrc                       ! local error status
+    integer :: indexArg
+    type(ESMF_Logical)  :: isPresentArg
+
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
+    
+    indexArg = -987654  ! unique default index
+    if (present(index)) indexArg = index
+    
+    call c_ESMC_MethodTableGet(cplcomp%compp%methodTable, label, indexArg, &
+      isPresentArg, localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present(isPresent)) isPresent = isPresentArg
+ 
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MethodGridCompGet"
+!BOP
+! !IROUTINE: ESMF_MethodGet - Get info about user method attached to GridComp
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_MethodGet()
+  subroutine ESMF_MethodGridCompGet(gcomp, label, index, isPresent, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_GridComp)                     :: gcomp
+    character(len=*), intent(in)            :: label
+    integer,          intent(in),  optional :: index
+    logical,          intent(out), optional :: isPresent
+    integer,          intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+! Remove attached method.
+!
+! The arguments are:
+! \begin{description}
+! \item[gcomp]
+!   The {\tt ESMF\_GridComp} to attach to.
+! \item[label]
+!   Label of method.
+! \item[{[index]}]
+!   Integer modifier to distinguish multiple entries with the same {\tt label}.
+! \item[{[isPresent]}]
+!   {\tt .true.} if a method was attached for {\tt label}/{\tt index}.
+!   {\tt .false.} otherwise.
+! \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer :: localrc                       ! local error status
+    integer :: indexArg
+    type(ESMF_Logical)  :: isPresentArg
+
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gcomp, rc)
+    
+    indexArg = -987654  ! unique default index
+    if (present(index)) indexArg = index
+    
+    call c_ESMC_MethodTableGet(gcomp%compp%methodTable, label, indexArg, &
+      isPresentArg, localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present(isPresent)) isPresent = isPresentArg
+ 
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MethodStateGet"
+!BOP
+! !IROUTINE: ESMF_MethodGet - Get info about user method attached to State
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_MethodGet()
+  subroutine ESMF_MethodStateGet(state, label, index, isPresent, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_State)                        :: state
+    character(len=*), intent(in)            :: label
+    integer,          intent(in),  optional :: index
+    logical,          intent(out), optional :: isPresent
+    integer,          intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+! Remove attached method.
+!
+! The arguments are:
+! \begin{description}
+! \item[state]
+!   The {\tt ESMF\_State} to attach to.
+! \item[label]
+!   Label of method.
+! \item[{[index]}]
+!   Integer modifier to distinguish multiple entries with the same {\tt label}.
+! \item[{[isPresent]}]
+!   {\tt .true.} if a method was attached for {\tt label}/{\tt index}.
+!   {\tt .false.} otherwise.
+! \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer :: localrc                       ! local error status
+    integer :: indexArg
+    type(ESMF_Logical)  :: isPresentArg
+
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit, state, rc)
+    
+    indexArg = -987654  ! unique default index
+    if (present(index)) indexArg = index
+    
+    call c_ESMC_MethodTableGet(state%statep%methodTable, label, indexArg, &
+      isPresentArg, localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present(isPresent)) isPresent = isPresentArg
+ 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine
