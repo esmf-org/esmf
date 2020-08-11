@@ -150,6 +150,12 @@ endif
 
 ifndef ESMF_BOPT
 export ESMF_BOPT = default
+else
+ifneq ($(ESMF_BOPT),g)
+ifneq ($(ESMF_BOPT),O)
+$(error Not a valid ESMF_BOPT setting.)
+endif
+endif
 endif
 
 ifndef ESMF_OPTLEVEL

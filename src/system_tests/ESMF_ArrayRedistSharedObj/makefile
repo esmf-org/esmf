@@ -42,4 +42,4 @@ CLOBBERDIRS =
 
 RUN_ArrayRedistSharedObj:
 	cp -f *.$(ESMF_SL_SUFFIX) $(ESMF_TESTDIR)
-	env MPI_REQUEST_MAX=8192 MPI_MSG_RETRIES=8192 MPI_MSGS_PER_PROC=8192 $(MAKE) TNAME=ArrayRedistSharedObj NP=6 stest
+	$(MAKE) TNAME=ArrayRedistSharedObj NP=6 stest

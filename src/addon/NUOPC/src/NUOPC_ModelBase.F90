@@ -129,8 +129,8 @@ module NUOPC_ModelBase
     endif
     
     ! looking for hints in the component's Attributes
-    call ESMF_AttributeGet(gcomp, name="maxPeCountPerPet", value=value, &
-      defaultvalue=1, isPresent=isPresent, rc=rc)
+    call NUOPC_CompAttributeGet(gcomp, name="maxPeCountPerPet", value=value, &
+      isPresent=isPresent, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (isPresent) then
