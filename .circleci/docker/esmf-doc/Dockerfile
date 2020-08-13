@@ -18,7 +18,7 @@ WORKDIR ${ESMF_DIR}
 RUN make doc 2>&1 | tee ${ESMF_ARTIFACTS}/esmf-make-doc.out
 
 WORKDIR ${ESMF_DIR}/src/doc/dev_guide
-RUN make localdoc 2>&1 | tee ${ESMF_ARTIFACTS}/dev_guide-make-doc.out
+RUN make 2>&1 | tee ${ESMF_ARTIFACTS}/dev_guide-make-doc.out
 
 RUN cp -rv doc ${ESMF_ARTIFACTS}/doc-esmf
 RUN mkdir ${ESMF_ARTIFACTS}/doc-nuopc
