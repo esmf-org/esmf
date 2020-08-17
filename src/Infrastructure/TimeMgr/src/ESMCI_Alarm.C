@@ -27,6 +27,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <iostream>
+#include <limits.h>
 
 #include "ESMCI_LogErr.h"
 #include "ESMCI_Clock.h"
@@ -1169,8 +1171,10 @@ int Alarm::count=0;
         }
         // if either clock timeStep sign changed or clock direction mode
         //  changed, pull back ringTime into ringable range
-        if (userChangedTimeStepSign || clock->userChangedDirection) {
+        TimeInterval zeroTimeInterval1(0,0,1,0,0,0);
+        if ( (userChangedTimeStepSign || clock->userChangedDirection) && (ringInterval != zeroTimeInterval1)) {
           if (!userChangedRingTime) {
+            // std::cout << "stopTime: " << (stopTime.Time::validate("initialized")) << (stopTime.Time::validate("initialized") == ESMF_SUCCESS) << std::endl;
             bool stopTimeEnabled = 
                         stopTime.Time::validate("initialized") == ESMF_SUCCESS;
             while (positive ? clock->prevTime >= ringTime :
@@ -1181,8 +1185,18 @@ int Alarm::count=0;
                                ringTime <= (stopTime - ringInterval) ) break;
               }
               // otherwise increment it
+              //std::cout << "ringInterval: " << std::endl; 
+              //ringInterval.print();
+              //std::cout << "ringTime before: " << std::endl; 
+              //ringTime.print();
+
               prevRingTime = ringTime;
               ringTime += ringInterval;
+
+              //std::cout << "ringTime after: " << std::endl; 
+              //ringTime.print();
+              //std::cout << "clock->prevTime: " << std::endl; 
+              //clock->prevTime.print();
             }
           }
         }
