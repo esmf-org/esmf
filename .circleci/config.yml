@@ -102,31 +102,30 @@ jobs:
       - run:
           name: Extract Artifacts
           command: bash esmf/.circleci/sh/extract-artifacts.sh
+      - save_cache:
+          key: esmf-docs-{{ .Revision }}
+          paths:
+            - /tmp/artifacts
       - store_artifacts:
-          path: /tmp/doc-artifacts.zip
+          path: /tmp/artifacts/doc-artifacts.zip
           destination: doc-artifacts.zip
       - run:
           name: Docker Push
           command: bash esmf/.circleci/sh/docker-push-docs.sh
 
   publish-docs:
-    environment:
-      - ESMF_ARTIFACTS: "/artifacts"
-      - DOCKER_IMG: "bekozi/esmf-doc"
     machine: true
+    resource_class: small
     steps:
 #      - run:
 #          name: publish-docs
 #          command: exit 0
-      - run:
-          name: Checkout Code
-          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git esmf
-      - run:
-          name: Extract Artifacts
-          command: bash esmf/.circleci/sh/extract-artifacts.sh
+      - restore_cache:
+          keys:
+            - esmf-docs-{{ .Revision }}
       - run:
           name: Prep Artifacts
-          command: cd /tmp && unzip doc-artifacts.zip
+          command: cd /tmp/artifacts && unzip doc-artifacts.zip
       - run:
           name: Push to github.io
           command: bash esmf/.circleci/sh/doc-push.sh
