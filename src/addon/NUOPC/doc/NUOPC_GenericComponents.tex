@@ -1,6 +1,6 @@
 % $Id$
 
-The NUOPC generic components are implemented as a {\em collection} of Fortran modules. Each module implements a single, well specified set of standard {\tt ESMF\_GridComp} or {\tt ESMF\_CplComp} methods. The nomenclature of the generic component modules starts with the {\tt NUOPC\_} prefix and continues with the kind: {\tt Driver}, {\tt Model}, {\tt Mediator}, or {\tt Connector}. This is optionally followed by a string of additional descriptive terms. The four kinds of generic components implemented by the NUOPC Layer are:
+The NUOPC generic components are implemented as a {\em collection} of Fortran modules. Each module implements a single, well specified set of standard {\tt ESMF\_GridComp} or {\tt ESMF\_CplComp} methods. The nomenclature of the generic component modules starts with the {\tt NUOPC\_} prefix and continues with the kind: {\tt Driver}, {\tt Model}, {\tt Mediator}, or {\tt Connector}. The four kinds of generic components implemented by the NUOPC Layer are:
 
 \begin{itemize}
 
@@ -14,45 +14,97 @@ The NUOPC generic components are implemented as a {\em collection} of Fortran mo
 
 \end{itemize}
 
-The user code accesses the desired generic component(s) by including a {\tt use} line for each one. Each generic component defines a small set of public names that are made available to the user code through the {\tt use} statement. At a minimum the {\tt SetServices} method is made public. Some of the generic components define additional public routines and labels as part of their user interface. It is recommended to rename the entries of an imported generic component module in the local scope as part of the {\tt use} association. This prevents name clashes.
+The user code accesses the desired generic component(s) by including a {\tt use} line for each one. Each generic component defines a small set of public names that are made available to the user code through the {\tt use} statement. At a minimum the {\tt SetServices} method is made public. Some of the generic components define additional public routines and labels as part of their user interface. It is recommended to rename entries of an imported generic component module, such as {\tt SetServices}, in the local scope as part of the {\tt use} association to prevent potential name clashes.
 
 \begin{verbatim}
-  use NUOPC_<GenericComp>, only: &
-    <GenericComp>_SS      => SetServices, &
-    <GenericComp>_labelA  => labelA
+  use NUOPC_<GenericComp>, &
+    <GenericComp>SS      => SetServices
 \end{verbatim}
 
-A generic component is used by user code to implement a specialized version of the generic component. The user component derives from the generic component code by implementing its own public {\tt SetServices} routine that calls into the generic {\tt SetServices} routine before doing anything else. It is through this mechanism that the deriving component {\em inherits} functionality that is implemented in the generic component. The example shows how a specific model component is implemented to derive from the generic {\tt NUOPC\_Model}:
+A generic component is used by user code to implement a specialized version of the generic component. The user component derives from the generic component code by implementing its own public {\tt SetServices} routine that calls into the generic {\tt SetServices} routine via the {\tt NUOPC\_CompDerive()} method.
+Typically this should be the first call made before doing anything else. It is through this mechanism that the deriving component {\em inherits} functionality that is implemented in the generic component. The example below shows how a specific {\em model} component is implemented, deriving from the generic {\tt NUOPC\_Model}:
 
 \begin{verbatim}
-  use NUOPC_Model, only: &
-    model_SS => SetServices
+  use NUOPC_Model, &
+    modelSS => SetServices
 
   subroutine SetServices(model, rc)
     type(ESMF_GridComp)  :: model
     integer, intent(out) :: rc
 
-    ! derive this specific "model" component from generic NUOPC_Model
+    ! derive from NUOPC_Model
     call NUOPC_CompDerive(model, model_SS, rc=rc)
 
-    ! specializing code for "model" to follow
+    ! specialize model
+    !... calls to NUOPC_CompSpecialize() here
     
   end subroutine
 \end{verbatim}
 
-There are three mechanisms through which user code specializes generic components. The first two methods specialize through call-back mechanisms into user implemented routines. The third method specializes by setting the values of parameters implemented by the generic component.
+\subsubsection{Component Specialization}
 
-\begin{enumerate}
+After the call to {\tt NUOPC\_CompDerive()} in a component's {\tt SetServices()} method, the component is connected to all of the generic code provided by NUOPC for the respective component kind. In order to function properly, e.g. as an atmosphere model, ocean model, driver, etc., the component must be {\em specialized}.
 
-\item The specializing user code sets entry points for standard component methods not implemented by the generic component by calling {\tt NUOPC\_CompSetEntryPoint()}. Methods (and phases) that need to be implemented are clearly documented in the generic component description. The user code may further overwrite standard methods already implemented by the generic component code. However, this should rarely be necessary, and may indicate that there is a better fitting generic component available. Finally, some generic components come with generic routines that are suitable candidates for the standard component methods, yet require that the specializing code registers them as appropriate. Setting entry points for standard component methods should be done in the {\tt SetServices()} routine right after {\tt NUOPC\_CompDerive()} is called.
+The {\tt NUOPC\_CompSpecialize()} method is used to link specific user provided implementations to pre-defined NUOPC specialization points. The labels of the pre-defined specialization points are use associated named constants made available by the respective generic component module. The naming of all pre-defined specialization labels starts with the {\tt label\_} prefix, and is followed by a short intent of the specialization. E.g. {\tt label\_Advertise} refers to the specialization point responsible for advertising Fields in the import- and exportStates of the component.
 
-\item Some generic components require that specific methods are attached to the component by calling {\tt NUOPC\_CompSpecialize()}. If a generic component uses specialization through attachable methods, the specific method labels (i.e. the names by which these methods are registered) and the purpose of the method are clearly documented. In some cases attachable methods are optional. This is clearly documented. Further, some generic components attach a default method to a label, which then is used for all phases. This default can be overwritten with a phase specific attachable method. Attaching methods to the component should be done in the {\tt SetServices} routine right after setting entry points for the standard component methods.
+Lists of all the pre-defined specialization labels for each of the generic NUOPC component kinds are provided at the beginning of the respective API sections.
 
-\item Some generic components offer methods that allow parameter specialization. The options of this specialization type are documented as part of the {\tt Set()} methods.
+The following code snippet show a full specialization of {\tt NUOPC\_Model}, using three specialization labels:
 
-\end{enumerate}
+\begin{verbatim}
+  use NUOPC_Model, &
+    modelSS => SetServices
 
-Components that inherit from a generic component may choose to only specialize certain aspects, leaving other aspects unspecified. This allows a hierarchy of generic components to be implemented with a high degree of code re-use. The variable level of specialization supports the very differing user needs. Figure \ref{fig:NUOPCGenericComp} depicts the inheritance structure of the standard generic components implemented by the NUOPC Layer. There are two trees, one is rooted in {\tt ESMF\_GridComp}, while the other is rooted in {\tt ESMF\_CplComp}.
+  subroutine SetServices(model, rc)
+    type(ESMF_GridComp)  :: model
+    integer, intent(out) :: rc
+
+    rc = ESMF_SUCCESS
+
+    ! derive from NUOPC_Model
+    call NUOPC_CompDerive(model, modelSS, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! specialize model
+    call NUOPC_CompSpecialize(model, specLabel=label_Advertise, &
+      specRoutine=Advertise, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    call NUOPC_CompSpecialize(model, specLabel=label_RealizeProvided, &
+      specRoutine=Realize, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    call NUOPC_CompSpecialize(model, specLabel=label_Advance, &
+      specRoutine=Advance, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+  end subroutine
+\end{verbatim}
+
+The user implemented specialization routines must follow the NUOPC defined interface of:
+
+\begin{verbatim}
+  subroutine SpecRoutine(comp, rc)
+    type(ESMF_*Comp)      :: comp
+    integer, intent(out)  :: rc
+  end subroutine
+\end{verbatim}
+
+Here {\tt type(ESMF\_*Comp)} either corresponds to {\tt type(ESMF\_GridComp)} for Models, Mediators, and Drivers, or {\tt type(ESMF\_CplComp)} for Connectors.
+
+\subsubsection{Partial Specialization}
+
+Components that are derived from a generic component may choose to only specialize certain aspects, leaving other aspects unspecified. This allows a hierarchy of generic components to be implemented with a high degree of code re-use. The variable level of specialization supports the very differing user needs. Figure \ref{fig:NUOPCGenericComp} depicts the inheritance structure of the standard generic components implemented by the NUOPC Layer. There are two trees, one is rooted in {\tt ESMF\_GridComp}, while the other is rooted in {\tt ESMF\_CplComp}.
 
 \begin{figure}[h]
 \begin{center}
