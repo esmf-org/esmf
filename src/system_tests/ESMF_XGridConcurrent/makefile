@@ -32,5 +32,5 @@ CLOBBERDIRS =
 
 
 RUN_XGridConcurrent:
-	env MPI_REQUEST_MAX=8192 MPI_MSG_RETRIES=8192 MPI_MSGS_PER_PROC=8192 $(MAKE) TNAME=XGridConcurrent NP=8 stest
+	$(MAKE) TNAME=XGridConcurrent NP=8 stest
 

@@ -29,5 +29,5 @@ CLOBBERDIRS =
 
 
 RUN_SequentialEnsemble:
-	env MPI_REQUEST_MAX=8192 MPI_MSG_RETRIES=8192 MPI_MSGS_PER_PROC=8192 $(MAKE) TNAME=SequentialEnsemble NP=4 stest 
+	$(MAKE) TNAME=SequentialEnsemble NP=4 stest 
 

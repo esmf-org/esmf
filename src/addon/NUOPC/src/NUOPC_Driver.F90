@@ -3611,7 +3611,7 @@ module NUOPC_Driver
     end interface
     optional                                   :: compSetVMRoutine
     integer,             intent(in),  optional :: petList(:)
-    type(ESMF_Info),    intent(in),  optional :: info
+    type(ESMF_Info),     intent(in),  optional :: info
     type(ESMF_GridComp), intent(out), optional :: comp
     integer,             intent(out), optional :: rc 
 !
@@ -3622,7 +3622,7 @@ module NUOPC_Driver
 !
 ! The specified {\tt compSetServicesRoutine()} is called back immediately after
 ! the new child component has been created internally. Very little around the
-! component is set up at that time (e.g. component attributes are not 
+! component is set up at that time (e.g. NUOPC component attributes will not be
 ! available). The routine should therefore be very light weight, with the sole
 ! purpose of setting the entry points of the component -- typically by deriving 
 ! from a generic component followed by the appropriate specilizations.
@@ -3630,6 +3630,13 @@ module NUOPC_Driver
 ! If provided, the {\tt compSetVMRoutine()} is called back before the 
 ! {\tt compSetServicesRoutine()}. This allows the child component to set
 ! aspects of its own VM, such as threading or the PE distribution among PETs.
+!
+! The {\tt info} argument can be used to pass custom attributes to the child
+! component. These attributes are available on the component when
+! {\tt compSetVMRoutine()} and {\tt compSetServicesRoutine()} are called.
+! The attributes provided in {\tt info} are {\em copied} onto the child
+! component. This allows the same {\tt info} object to be used for multiple
+! child components without conflict.
 !
 ! The {\tt compLabel} must uniquely identify the child component within the
 ! context of the Driver component.
@@ -3647,7 +3654,7 @@ module NUOPC_Driver
     integer                         :: stat, i
     character(ESMF_MAXSTR)          :: msgString, lString
     integer                         :: verbosity
-    type(ESMF_Info)                :: infoh
+    type(ESMF_Info)                 :: infoh
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -3739,17 +3746,6 @@ module NUOPC_Driver
         return  ! bail out
     endif
       
-#if 0
-!gjt: This seems redundant with the NUOPC_CompAttributeInit() call from inside
-!gjt: the NUOPC_ModelBase.F90 SetServices().
-    ! add standard NUOPC GridComp Attribute Package to the modelComp
-    call NUOPC_CompAttributeInit(cmEntry%wrap%component, kind="Model", &
-      rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-      return  ! bail out
-#endif
-
     ! Call the SetServices on the added component
     call ESMF_GridCompSetServices(cmEntry%wrap%component, &
       compSetServicesRoutine, userRc=userrc, rc=localrc)
@@ -3780,12 +3776,13 @@ module NUOPC_Driver
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverAddComp()
   recursive subroutine NUOPC_DriverAddGridCompSO(driver, compLabel, &
-    sharedObj, petList, comp, rc)
+    sharedObj, petList, info, comp, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
     character(len=*),    intent(in)            :: compLabel
     character(len=*),    intent(in),  optional :: sharedObj
     integer,             intent(in),  optional :: petList(:)
+    type(ESMF_Info),     intent(in),  optional :: info
     type(ESMF_GridComp), intent(out), optional :: comp
     integer,             intent(out), optional :: rc
 !
@@ -3797,10 +3794,17 @@ module NUOPC_Driver
 ! The {\tt SetServices()} routine in the {\tt sharedObj} is called back
 ! immediately after the
 ! new child component has been created internally. Very little around the
-! component is set up at that time (e.g. component attributes are not 
+! component is set up at that time (e.g. NUOPC component attributes will not be
 ! available). The routine should therefore be very light weight, with the sole
 ! purpose of setting the entry points of the component -- typically by deriving 
 ! from a generic component followed by the appropriate specilizations.
+!
+! The {\tt info} argument can be used to pass custom attributes to the child
+! component. These attributes are available on the component when
+! {\tt compSetVMRoutine()} and {\tt compSetServicesRoutine()} are called.
+! The attributes provided in {\tt info} are {\em copied} onto the child
+! component. This allows the same {\tt info} object to be used for multiple
+! child components without conflict.
 !
 ! The {\tt compLabel} must uniquely identify the child component within the
 ! context of the Driver component.
@@ -3818,6 +3822,7 @@ module NUOPC_Driver
     integer                         :: stat, i
     character(ESMF_MAXSTR)          :: msgString, lString
     integer                         :: verbosity
+    type(ESMF_Info)                 :: infoh
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -3885,16 +3890,17 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
 
-#if 0
-!gjt: This seems redundant with the NUOPC_CompAttributeInit() call from inside
-!gjt: the NUOPC_ModelBase.F90 SetServices().
-    ! add standard NUOPC GridComp Attribute Package to the modelComp
-    call NUOPC_CompAttributeInit(cmEntry%wrap%component, kind="Model", &
-      rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-      return  ! bail out
-#endif
+    ! optionally copy Attributes from info object to the newly created component
+    if (present(info)) then
+      call ESMF_InfoGetFromHost(cmEntry%wrap%component, infoh, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_InfoSet(infoh, "", info, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
 
     ! Call the SetServices on the added component
     call NUOPC_CompSetServices(cmEntry%wrap%component, &
@@ -3950,7 +3956,7 @@ module NUOPC_Driver
     end interface
     optional                                   :: compSetVMRoutine
     integer, target,     intent(in),  optional :: petList(:)
-    type(ESMF_Info),    intent(in),  optional :: info
+    type(ESMF_Info),     intent(in),  optional :: info
     type(ESMF_CplComp),  intent(out), optional :: comp
     integer,             intent(out), optional :: rc 
 !
@@ -3962,10 +3968,17 @@ module NUOPC_Driver
 !
 ! The specified {\tt SetServices()} routine is called back immediately after the
 ! new child component has been created internally. Very little around the
-! component is set up at that time (e.g. component attributes are not 
+! component is set up at that time (e.g. NUOPC component attributes will not be
 ! available). The routine should therefore be very light weight, with the sole
 ! purpose of setting the entry points of the component -- typically by deriving 
 ! from a generic component followed by the appropriate specilizations.
+!
+! The {\tt info} argument can be used to pass custom attributes to the child
+! component. These attributes are available on the component when
+! {\tt compSetVMRoutine()} and {\tt compSetServicesRoutine()} are called.
+! The attributes provided in {\tt info} are {\em copied} onto the child
+! component. This allows the same {\tt info} object to be used for multiple
+! child components without conflict.
 !
 ! The {\tt compLabel} must uniquely identify the child component within the 
 ! context of the Driver component.
@@ -3991,7 +4004,7 @@ module NUOPC_Driver
     type(ESMF_VM)                   :: vm
     logical                         :: isPresent
     integer                         :: verbosity
-    type(ESMF_Info)                :: infoh
+    type(ESMF_Info)                 :: infoh
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -4193,16 +4206,6 @@ module NUOPC_Driver
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
-
-#if 0
-!gjt: This seems redundant with the NUOPC_CompAttributeInit() call from inside
-!gjt: the NUOPC_Connector.F90 SetServices().
-    ! add standard NUOPC CplComp Attribute Package to the connectorComp
-    call NUOPC_CompAttributeInit(cmEntry%wrap%connector, rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-      return  ! bail out
-#endif
 
     ! Call the SetServices on the added connector
     call ESMF_CplCompSetServices(cmEntry%wrap%connector, &

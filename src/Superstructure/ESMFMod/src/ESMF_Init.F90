@@ -147,9 +147,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \ref{vm_inside_user_mpi}. It is not necessary that all MPI ranks are
 !     handed to ESMF. Section \ref{vm_nesting_esmf} shows how an MPI
 !     communicator can be used to execute ESMF on a subset of MPI ranks.
-!     Finally {\tt ESMF\_Initialize()} supports running multiple concurrent
+!     {\tt ESMF\_Initialize()} supports running multiple concurrent
 !     instances of ESMF under the same user MPI program. This feature is
 !     discussed under \ref{vm_multi_instance_esmf}.
+!
+!     In order to use any of the advanced resource management functions that
+!     ESMF provides via the {\tt ESMF\_*CompSetVM*()} methods, the MPI
+!     environment must be thread-safe. {\tt ESMF\_Initialize()} handles this
+!     automatically if it is in charge of initializing MPI. However, if the
+!     user code initializes MPI before calling into {\tt ESMF\_Initialize()},
+!     it must do so via {\tt MPI\_Init\_thread()}, specifying
+!     {\tt MPI\_THREAD\_SERIALIZED} or above for the required level of thread
+!     support.
+!
+!     In cases where {\tt ESMF\_*CompSetVM*()} methods are used to move
+!     processing elements (PEs), i.e. CPU cores, between persistent execution
+!     threads (PETs), ESMF uses POSIX signals between PETs. In order to do so
+!     safely, the proper signal handlers must be installed before MPI is
+!     initialized. For this reason, code that wants to use different threading
+!     levels via OpenMP on components that run on the same set of hardware
+!     resources (PEs), must {\em not} initialize MPI before calling
+!     into {\tt ESMF\_Initialize()}. Instead {\tt ESMF\_Initialize()} must
+!     have the opportunity to install signal handlers before initializing MPI.
 !
 !     By default, {\tt ESMF\_Initialize()} will open multiple error log files,
 !     one per processor.  This is very useful for debugging purpose.  However,
@@ -165,7 +184,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     for more information on how ESMF uses Fortran unit numbers.
 !
 !     Before exiting the application the user must call {\tt ESMF\_Finalize()}
-!     to release resources and clean up ESMF gracefully.
+!     to release resources and clean up ESMF gracefully. See the
+!     {\tt ESMF\_Finalize()} documentation about details relating to the MPI
+!     environment.
 !
 !     The arguments are:
 !     \begin{description}

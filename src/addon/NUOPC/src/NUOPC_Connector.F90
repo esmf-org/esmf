@@ -5591,7 +5591,6 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     integer                   :: localrc
     logical                   :: existflag
     logical                   :: routeHandleIsCreated
-    integer                   :: rootPet, rootVas, vas, petCount
     character(ESMF_MAXSTR)    :: compName, pLabel
     character(len=160)        :: msgString
     integer                   :: phase
