@@ -26,12 +26,15 @@ module NUOPC_Mediator
     routine_Run, &
     routine_Nop, &
     label_Advertise, &
-    label_Realize, &
+    label_ModifyAdvertised, &
+    label_RealizeProvided, &
+    label_AcceptTransfer, &
+    label_RealizeAccepted, &
+    label_SetClock, &
+    label_DataInitialize, &
     label_Advance, &
     label_AdvanceClock, &
     label_CheckImport, &
-    label_DataInitialize, &
-    label_SetClock, &
     label_SetRunClock, &
     label_TimestampExport, &
     label_Finalize, &
@@ -49,12 +52,15 @@ module NUOPC_Mediator
     
   public &
     label_Advertise, &
-    label_Realize, &
+    label_ModifyAdvertised, &
+    label_RealizeProvided, &
+    label_AcceptTransfer, &
+    label_RealizeAccepted, &
+    label_SetClock, &
+    label_DataInitialize, &
     label_Advance, &
     label_AdvanceClock, &
     label_CheckImport, &
-    label_DataInitialize, &
-    label_SetClock, &
     label_SetRunClock, &
     label_TimestampExport, &
     label_Finalize

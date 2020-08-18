@@ -2929,11 +2929,13 @@ module NUOPC_Comp
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
     
-    ! Set IPDvX attribute to false, indicating use of SetEntryPoint()
-    call NUOPC_CompAttributeSet(comp, name="IPDvX", value="false", rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
-
+    if (methodflag == ESMF_METHOD_INITIALIZE) then
+      ! Set IPDvX attribute to false, indicating use of SetEntryPoint()
+      call NUOPC_CompAttributeSet(comp, name="IPDvX", value="false", rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+    endif
+    
     ! clean-up
     deallocate(phases, stat=stat)
     if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
@@ -3072,10 +3074,12 @@ module NUOPC_Comp
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
 
-    ! Set IPDvX attribute to false, indicating use of SetEntryPoint()
-    call NUOPC_CompAttributeSet(comp, name="IPDvX", value="false", rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+    if (methodflag == ESMF_METHOD_INITIALIZE) then
+      ! Set IPDvX attribute to false, indicating use of SetEntryPoint()
+      call NUOPC_CompAttributeSet(comp, name="IPDvX", value="false", rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+    endif
 
     ! clean-up
     deallocate(phases, stat=stat)
