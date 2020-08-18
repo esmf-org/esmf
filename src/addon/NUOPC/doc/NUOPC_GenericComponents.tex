@@ -33,7 +33,7 @@ Typically this should be the first call made before doing anything else. It is t
     integer, intent(out) :: rc
 
     ! derive from NUOPC_Model
-    call NUOPC_CompDerive(model, model_SS, rc=rc)
+    call NUOPC_CompDerive(model, modelSS, rc=rc)
 
     ! specialize model
     !... calls to NUOPC_CompSpecialize() here
