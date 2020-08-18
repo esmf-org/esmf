@@ -157,10 +157,20 @@ jobs:
     steps:
       - setup_remote_docker:
           docker_layer_caching: true
-#      - run: echo "build esmpy-doc-base"
-#      - run: echo "build esmpy-doc"
-#      - run: echo "extract esmpy doc artifacts"
-#      - run: echo "push esmpy doc artifacts"
+      - run:
+          name: Checkout Code
+          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git esmf
+      - run:
+          name: Docker Build esmpy-doc-base
+          command: docker build -t "bekozi/esmpy-doc-base" --file "esmf/.circleci/docker/esmf-doc-base/Dockerfile" .
+      - run:
+          name: Docker Push esmpy-doc-base
+          command: bash esmf/.circleci/sh/docker-push-generic.sh "bekozi/esmpy-doc-base"
+      - run:
+          name: Docker Build esmpy-doc
+          command: docker build -t "bekozi/esmpy-doc" --file "esmf/.circleci/docker/esmf-doc/Dockerfile" .
+      - run:
+          name: Extract Doc Artifacts
 
   osx-esmf:
     macos:
