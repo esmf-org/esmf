@@ -51,7 +51,7 @@ extern "C" {
     if (rc) *rc = ESMC_RC_NOT_IMPL;
     (*ptr) = new ESMCI::MethodTable;
     if (*ptr == NULL){
-      ESMC_LogDefault.MsgAllocError("- MethodTable allocation", ESMC_CONTEXT, 
+      ESMC_LogDefault.MsgAllocError("MethodTable allocation", ESMC_CONTEXT, 
         rc);  
       return;
     }
@@ -65,7 +65,7 @@ extern "C" {
   void FTN_X(c_esmc_methodtabledestroy)(ESMCI::MethodTable **ptr, int *rc){
     if (rc) *rc = ESMC_RC_NOT_IMPL;
     if (*ptr == NULL){
-      ESMC_LogDefault.MsgAllocError("- MethodTable deallocation", ESMC_CONTEXT,
+      ESMC_LogDefault.MsgAllocError("MethodTable deallocation", ESMC_CONTEXT,
         rc);  
       return;
     }
@@ -95,7 +95,7 @@ extern "C" {
         ESMC_CONTEXT, rc)) return;
     }else{
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
-        "- corrupt label string", ESMC_CONTEXT, rc);
+        "corrupt label string", ESMC_CONTEXT, rc);
       return;
     }
 
@@ -136,7 +136,7 @@ extern "C" {
         ESMC_CONTEXT, rc)) return;
     }else{
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
-        "- corrupt label string", ESMC_CONTEXT, rc);
+        "corrupt label string", ESMC_CONTEXT, rc);
       return;
     }
 
@@ -151,6 +151,111 @@ extern "C" {
     if (rc) *rc = ESMF_SUCCESS;
   }
   
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_methodtableaddrep"
+  void FTN_X(c_esmc_methodtableaddrep)(ESMCI::MethodTable **ptr,
+    char const *labelArg, int *index, void *pointer, int *rc,
+    ESMCI_FortranStrLenArg labelLen){
+    int localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
+    if (labelLen>=0){
+      std::string label(labelArg, labelLen);
+      label.resize(label.find_last_not_of(" ")+1);
+      if (index){
+        std::stringstream indexString;
+        indexString << "::ESMF::index::" << *index;
+        label += indexString.str();
+      }
+      localrc = (*ptr)->addreplace(label, pointer);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return;
+    }else{
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
+        "corrupt label string", ESMC_CONTEXT, rc);
+      return;
+    }
+
+    // debugging---------
+//    localrc = (*ptr)->print();
+//    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+//    rc)) 
+//      return;
+    // debugging---------
+    
+    // return successfully
+    if (rc) *rc = ESMF_SUCCESS;
+  }
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_methodtableaddrepshobj"
+  void FTN_X(c_esmc_methodtableaddrepshobj)(ESMCI::MethodTable **ptr,
+    char const *labelArg, int *index, char const *nameArg,
+    char const *sharedObjArg,
+    int *rc, ESMCI_FortranStrLenArg labelLen, ESMCI_FortranStrLenArg nameLen,
+    ESMCI_FortranStrLenArg sharedObjLen){
+    int localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
+    if (labelLen>=0){
+      std::string label(labelArg, labelLen);
+      label.resize(label.find_last_not_of(" ")+1);
+      if (index){
+        std::stringstream indexString;
+        indexString << "::ESMF::index::" << *index;
+        label += indexString.str();
+      }
+      std::string name(nameArg, nameLen);
+      name.resize(name.find_last_not_of(" ")+1);
+      std::string sharedObj(sharedObjArg, sharedObjLen);
+      sharedObj.resize(sharedObj.find_last_not_of(" ")+1);
+      localrc = (*ptr)->addreplace(label, name, sharedObj);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return;
+    }else{
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
+        "corrupt label string", ESMC_CONTEXT, rc);
+      return;
+    }
+
+    // debugging---------
+//    localrc = (*ptr)->print();
+//    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+//    rc)) 
+//      return;
+    // debugging---------
+    
+    // return successfully
+    if (rc) *rc = ESMF_SUCCESS;
+  }
+  
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_methodtableget"
+  void FTN_X(c_esmc_methodtableget)(ESMCI::MethodTable **ptr,
+    char const *labelArg, int *index, ESMC_Logical *isPresent, int *rc,
+    ESMCI_FortranStrLenArg labelLen){
+    int localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
+    if (labelLen>=0){
+      std::string label(labelArg, labelLen);
+      label.resize(label.find_last_not_of(" ")+1);
+      if (index){
+        std::stringstream indexString;
+        indexString << "::ESMF::index::" << *index;
+        label += indexString.str();
+      }
+      if ((*ptr)->isPresent(label))
+        *isPresent = ESMF_TRUE;
+      else
+        *isPresent = ESMF_FALSE;
+    }else{
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
+        "corrupt label string", ESMC_CONTEXT, rc);
+      return;
+    }
+
+    // return successfully
+    if (rc) *rc = ESMF_SUCCESS;
+  }
+
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_methodtableremove"
   void FTN_X(c_esmc_methodtableremove)(ESMCI::MethodTable **ptr,
@@ -170,7 +275,7 @@ extern "C" {
         ESMC_CONTEXT, rc)) return;
     }else{
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
-        "- corrupt label string", ESMC_CONTEXT, rc);
+        "corrupt label string", ESMC_CONTEXT, rc);
       return;
     }
 
@@ -205,7 +310,7 @@ extern "C" {
         ESMC_CONTEXT, rc)) return;
     }else{
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
-        "- corrupt label string", ESMC_CONTEXT, rc);
+        "corrupt label string", ESMC_CONTEXT, rc);
       return;
     }
 
@@ -246,7 +351,7 @@ extern "C" {
         ESMC_CONTEXT, rc)) return;
     }else{
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
-        "- corrupt label string", ESMC_CONTEXT, rc);
+        "corrupt label string", ESMC_CONTEXT, rc);
       return;
     }
 
@@ -287,7 +392,7 @@ namespace ESMCI {
       (*vf)(object, userRc);
     }else{
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        " - invalid function pointer", ESMC_CONTEXT, &rc);
+        "invalid function pointer", ESMC_CONTEXT, &rc);
       return rc;
       
     }
@@ -302,7 +407,7 @@ namespace ESMCI {
     int rc = ESMC_RC_NOT_IMPL;
 #ifdef ESMF_NO_DLFCN
     ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB, 
-      "- System does not support dynamic loading.", ESMC_CONTEXT, &rc);
+      "System does not support dynamic loading.", ESMC_CONTEXT, &rc);
     return rc;
 #else
     void *lib;
@@ -318,7 +423,7 @@ namespace ESMCI {
     pointer = (void *)dlsym(lib, name.c_str());
     if (pointer == NULL){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
-        "- named routine not found", ESMC_CONTEXT, &rc);
+        "named routine not found", ESMC_CONTEXT, &rc);
       return rc;
     }
     // return successfully
@@ -357,7 +462,7 @@ namespace ESMCI {
       while (element){
         if (element->label == labelArg){
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
-            "- method with identical label already exists", ESMC_CONTEXT, &rc);
+            "method with identical label already exists", ESMC_CONTEXT, &rc);
           return rc;
         }
         prev = element;
@@ -385,11 +490,82 @@ namespace ESMCI {
       while (element){
         if (element->label == labelArg){
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
-            "- method with identical label already exists", ESMC_CONTEXT, &rc);
+            "method with identical label already exists", ESMC_CONTEXT, &rc);
           return rc;
         }
         prev = element;
         element = element->nextElement;
+      }
+      prev->nextElement = new MethodElement(labelArg, name, sharedObj);
+      element = prev->nextElement;
+    }else{
+      table = new MethodElement(labelArg, name, sharedObj);
+      element = table;
+    }
+    localrc = element->resolve();
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc; // bail out
+    // return successfully
+    rc = ESMF_SUCCESS;
+    return rc;
+  }
+
+  
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::MethodTable::addreplace()"
+  int MethodTable::addreplace(std::string labelArg, void *pointer){
+    int rc = ESMC_RC_NOT_IMPL;
+    if (table){
+      MethodElement *element = table; // initialize
+      MethodElement *prev;
+      while (element){
+        if (element->label == labelArg){
+          // first delete existing element
+          if (element == table)
+            table = element->nextElement;
+          else
+            prev->nextElement = element->nextElement;
+          delete element;
+          element = table;
+          prev = table;
+        }else{
+          prev = element;
+          element = element->nextElement;
+        }
+      }
+      prev->nextElement = new MethodElement(labelArg, pointer);
+    }else{
+      table = new MethodElement(labelArg, pointer);
+    }
+    // return successfully
+    rc = ESMF_SUCCESS;
+    return rc;
+  }
+
+  
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::MethodTable::addreplace()"
+  int MethodTable::addreplace(std::string labelArg, std::string name,
+    std::string sharedObj){
+    int localrc = ESMC_RC_NOT_IMPL;
+    int rc = ESMC_RC_NOT_IMPL;
+    MethodElement *element = table; // initialize
+    if (table){
+      MethodElement *prev;
+      while (element){
+        if (element->label == labelArg){
+          // first delete existing element
+          if (element == table)
+            table = element->nextElement;
+          else
+            prev->nextElement = element->nextElement;
+          delete element;
+          element = table;
+          prev = table;
+        }else{
+          prev = element;
+          element = element->nextElement;
+        }
       }
       prev->nextElement = new MethodElement(labelArg, name, sharedObj);
       element = prev->nextElement;
@@ -428,16 +604,39 @@ namespace ESMCI {
         element = element->nextElement;
       }
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
-        "- method not found in method table", ESMC_CONTEXT, &rc);
+        "method not found in method table", ESMC_CONTEXT, &rc);
       return rc;
     }else{
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
-        "- empty method table", ESMC_CONTEXT, &rc);
+        "empty method table", ESMC_CONTEXT, &rc);
       return rc;
     }
     // return successfully
     rc = ESMF_SUCCESS;
     return rc;
+  }
+
+  
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::MethodTable::isPresent()"
+  bool MethodTable::isPresent(std::string labelArg){
+    int rc = ESMC_RC_NOT_IMPL;
+    if (table){
+      MethodElement *element = table; // initialize
+      MethodElement *prev = table;  // initialize
+      while (element){
+        if (element->label == labelArg)
+          return true;
+        prev = element;
+        element = element->nextElement;
+      }
+      return false;
+    }else{
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
+        "empty method table", ESMC_CONTEXT, &rc);
+      return false;
+    }
+    return false;
   }
 
   
@@ -465,8 +664,9 @@ namespace ESMCI {
         *existflag = false;
         if (userRc) *userRc = ESMF_SUCCESS;
       }else{
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
-          "- method not found in method table", ESMC_CONTEXT, &rc);
+        std::stringstream msg;
+        msg << "method not found in method table: " << labelArg;
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, msg, ESMC_CONTEXT, &rc);
         return rc;
       }
     }else{
@@ -475,7 +675,7 @@ namespace ESMCI {
         if (userRc) *userRc = ESMF_SUCCESS;
       }else{
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
-          "- empty method table", ESMC_CONTEXT, &rc);
+          "empty method table", ESMC_CONTEXT, &rc);
         return rc;
       }
     }

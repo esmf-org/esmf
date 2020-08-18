@@ -1221,7 +1221,7 @@ module NUOPC_Comp
     if (trim(kind)=="Driver" .or. &
       trim(kind)=="Model" .or. trim(kind)=="Mediator") then
       ! The NUOPC/Component attributes
-      allocate(attrList(8))
+      allocate(attrList(9))
       attrList(1) = "Kind"
       attrList(2) = "Verbosity"
       attrList(3) = "Profiling"
@@ -1230,6 +1230,7 @@ module NUOPC_Comp
       attrList(6) = "InitializePhaseMap"
       attrList(7) = "RunPhaseMap"
       attrList(8) = "FinalizePhaseMap"
+      attrList(9) = "IPDvX"
       call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="Instance", &
         attrList=attrList, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1341,7 +1342,7 @@ module NUOPC_Comp
     if (present(rc)) rc = ESMF_SUCCESS
     
     ! The NUOPC/Component attributes
-    allocate(attrList(8))
+    allocate(attrList(9))
     attrList(1) = "Kind"
     attrList(2) = "Verbosity"
     attrList(3) = "Profiling"
@@ -1350,6 +1351,7 @@ module NUOPC_Comp
     attrList(6) = "InitializePhaseMap"
     attrList(7) = "RunPhaseMap"
     attrList(8) = "FinalizePhaseMap"
+    attrList(9) = "IPDvX"
     call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="Instance",   &
       attrList=attrList, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2863,9 +2865,6 @@ module NUOPC_Comp
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
     
-!print *, "NUOPC_GridCompSetEntryPoint: phaseLabelList:", &
-!phaseLabelList, "     phase:", phase
-
     ! determine which phaseMap to deal with
     attributeName = "UnknownPhaseMap" ! initialize to something obvious
     if (methodflag == ESMF_METHOD_INITIALIZE) then
@@ -2929,6 +2928,13 @@ module NUOPC_Comp
       valueList=phases(1:itemCount+iii), rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+    
+    if (methodflag == ESMF_METHOD_INITIALIZE) then
+      ! Set IPDvX attribute to false, indicating use of SetEntryPoint()
+      call NUOPC_CompAttributeSet(comp, name="IPDvX", value="false", rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+    endif
     
     ! clean-up
     deallocate(phases, stat=stat)
@@ -3004,9 +3010,6 @@ module NUOPC_Comp
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
     
-!print *, "NUOPC_CplCompSetEntryPoint: phaseLabelList:", &
-!phaseLabelList, "     phase:", phase
-
     ! determine which phaseMap to deal with
     attributeName = "UnknownPhaseMap" ! initialize to something obvious
     if (methodflag == ESMF_METHOD_INITIALIZE) then
@@ -3064,13 +3067,20 @@ module NUOPC_Comp
           trim(adjustl(phaseString))
       endif
     enddo
-    
+
     ! set the new phaseMap in the Attribute
     call NUOPC_CompAttributeSet(comp, name=trim(attributeName), &
       valueList=phases(1:itemCount+iii), rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
-    
+
+    if (methodflag == ESMF_METHOD_INITIALIZE) then
+      ! Set IPDvX attribute to false, indicating use of SetEntryPoint()
+      call NUOPC_CompAttributeSet(comp, name="IPDvX", value="false", rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+    endif
+
     ! clean-up
     deallocate(phases, stat=stat)
     if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
@@ -3429,13 +3439,13 @@ module NUOPC_Comp
         return  ! bail out
       endif
       ! add the method under the specific phase index
-      call ESMF_MethodAdd(comp, label=specLabel, index=phaseIndex, &
+      call ESMF_MethodAddReplace(comp, label=specLabel, index=phaseIndex, &
         userRoutine=specRoutine, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
     else
       ! add the method under under no specific phase index
-      call ESMF_MethodAdd(comp, label=specLabel, &
+      call ESMF_MethodAddReplace(comp, label=specLabel, &
         userRoutine=specRoutine, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
@@ -3513,13 +3523,13 @@ module NUOPC_Comp
         return  ! bail out
       endif
       ! add the method under the specific phase index
-      call ESMF_MethodAdd(comp, label=specLabel, index=phaseIndex, &
+      call ESMF_MethodAddReplace(comp, label=specLabel, index=phaseIndex, &
         userRoutine=specRoutine, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
     else
       ! add the method under under no specific phase index
-      call ESMF_MethodAdd(comp, label=specLabel, &
+      call ESMF_MethodAddReplace(comp, label=specLabel, &
         userRoutine=specRoutine, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
