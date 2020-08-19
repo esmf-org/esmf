@@ -42,7 +42,14 @@ module NUOPC_Comp
   public NUOPC_CompSetInternalEntryPoint
   public NUOPC_CompSetServices
   public NUOPC_CompSpecialize
-  
+
+  ! public labels
+  public &
+    label_ExternalAdvertise, &
+    label_ExternalRealize, &
+    label_ExternalDataInit, &
+    label_ExternalReset
+
   ! interface blocks
   interface NUOPC_CompAreServicesSet
     module procedure NUOPC_GridCompAreServicesSet
@@ -142,6 +149,15 @@ module NUOPC_Comp
     module procedure NUOPC_GridCompSpecialize
     module procedure NUOPC_CplCompSpecialize
   end interface
+
+  character(*), parameter :: &
+    label_ExternalAdvertise = "ExternalAdvertise"
+  character(*), parameter :: &
+    label_ExternalRealize = "ExternalRealize"
+  character(*), parameter :: &
+    label_ExternalDataInit = "ExternalDataInitialize"
+  character(*), parameter :: &
+    label_ExternalReset = "ExternalFinalizeReset"
 
   !-----------------------------------------------------------------------------
   contains
