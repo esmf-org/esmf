@@ -63,6 +63,7 @@ program ESMF_AttributeUtilUTest
   integer, dimension(2) :: atos
   real(ESMF_KIND_R4), dimension(4) :: arr
   real(ESMF_KIND_R8), dimension(3) :: arr2
+  integer :: not_there
 
 !------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -237,6 +238,20 @@ program ESMF_AttributeUtilUTest
   if (rc==ESMF_RC_ATTR_WRONGTYPE) rc = ESMF_SUCCESS
 
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  ! Must abort to prevent possible hanging due to communications.
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !----------------------------------------------------------------------------
+
+  !----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Default value when getting an attribute that does not exist"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  call ESMF_AttributeGet(field3, name="not_there", value=not_there, defaultvalue=55, &
+    rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_Test((not_there==55), name, failMsg, result, ESMF_SRCLINE)
   ! Must abort to prevent possible hanging due to communications.
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   !----------------------------------------------------------------------------
