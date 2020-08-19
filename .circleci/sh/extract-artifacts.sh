@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 set -Eeuxo pipefail
 
-: "${ESMF_ARTIFACTS?Need to set}"
+: "${1?Need to set host destination directory}"
+: "${2?Need to set file path to extract}"
+: "${3?Need to set Docker image name}"
 
-mkdir -p /tmp/artifacts
-docker run -dit --name runner -v /tmp/artifacts:/dexc "${DOCKER_IMG}:${CIRCLE_BRANCH}"
-docker exec -t runner bash -c "cp ${ESMF_ARTIFACTS}/doc-artifacts.zip /dexc"
+mkdir -p "${1}"
+docker run -dit --name runner -v "${1}:/dexc" "${3}"
+docker exec -t runner bash -c "cp ${2} /dexc"
 docker stop runner
 docker rm runner

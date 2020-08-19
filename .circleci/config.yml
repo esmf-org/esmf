@@ -86,7 +86,6 @@ jobs:
 
   build-docs:
     environment:
-      - ESMF_ARTIFACTS: "/artifacts"
       - DOCKER_IMG: "bekozi/esmf-doc"
     machine: true
     steps:
@@ -101,7 +100,7 @@ jobs:
           command: docker build -t "${DOCKER_IMG}:${CIRCLE_BRANCH}" --file "esmf/.circleci/docker/esmf-doc/Dockerfile" --build-arg ESMF_BRANCH="${CIRCLE_BRANCH}" .
       - run:
           name: Extract Artifacts
-          command: bash esmf/.circleci/sh/extract-artifacts.sh
+          command: bash esmf/.circleci/sh/extract-artifacts.sh "/tmp/artifacts" "/artifacts/doc-artifacts.zip" "${DOCKER_IMG}:${CIRCLE_BRANCH}"
       - save_cache:
           key: esmf-docs-{{ .Revision }}
           paths:
@@ -151,7 +150,7 @@ jobs:
           name: passthru-esmpy-test
           command: exit 0
 
-  esmpy-docs:
+  esmpy-docs-build:
     docker:
       - image: cimg/base:2020.01
     steps:
@@ -171,6 +170,25 @@ jobs:
           command: docker build -t "bekozi/esmpy-doc" --file "esmf/.circleci/docker/esmf-doc/Dockerfile" .
       - run:
           name: Extract Doc Artifacts
+          command: bash esmf/.circleci/sh/extract-artifacts.sh "/tmp/artifacts" "/artifacts/doc-esmpy.zip" "bekozi/esmpy-doc"
+      - save_cache:
+          key: esmpy-docs-{{ .Revision }}
+          paths:
+            - /tmp/artifacts
+
+  esmpy-publish-docs:
+    machine: true
+    resource_class: small
+    steps:
+      - restore_cache:
+          keys:
+            - esmpy-docs-{{ .Revision }}
+      - run:
+          name: Prep Artifacts
+          command: cd /tmp/artifacts && unzip doc-esmpy.zip
+      - run:
+          name: Push to github.io
+          command: bash esmf/.circleci/sh/doc-push-esmpy.sh
 
   osx-esmf:
     macos:
@@ -241,7 +259,7 @@ workflows:
                 - develop
     jobs:
 #      - osx-esmf
-#      - build-esmf
+      - build-esmf
 #      - build-run-tests:
 #          name: build-run-<< matrix.target >>
 #          matrix:
@@ -249,10 +267,6 @@ workflows:
 #              target: ["unit_tests", "system_tests", "examples"]
 #          requires:
 #            - build-esmf
-      - build-docs
-      - publish-docs:
-          requires:
-            - build-docs
 #      - external_demos:
 #          name: placeholder-external_demos
 #          requires:
@@ -278,10 +292,14 @@ workflows:
             branches:
               only:
                 - develop
-#      - esmpy-docs:
-#          name: placeholder-esmpy-docs
-#          requires:
-#            - should-build-docs
+      - esmpy-docs-build
+      - esmpy-docs-publish:
+          requires:
+            - esmpy-docs-build
+          filters:
+            branches:
+              only:
+                - develop
 
   osx-commit:
     jobs:
