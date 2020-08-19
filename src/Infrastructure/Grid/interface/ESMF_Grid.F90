@@ -5217,6 +5217,9 @@ subroutine convert_corner_arrays_to_1D(isSphere,dim1,dim2,cornerX2D,cornerY2D,co
  integer :: count,inPos,outPos
  integer :: ip1,im1
 
+ !RASF Corner checking  is incorrect for tripolar grids with corner at the tripole
+ integer :: rf_off=0
+
  ! make sure no dimensions are 0
  if ((dim1 < 1) .or. (dim2 <1)) then
      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG,msg="- Currently can't handle a grid of width <1 in a dim.", &
@@ -5261,14 +5264,27 @@ subroutine convert_corner_arrays_to_1D(isSphere,dim1,dim2,cornerX2D,cornerY2D,co
 
  ! Figure out which corner indice is the top row of corners
  ! It won't match any of the neighbors corners
+
+ if (isSphere) then
+    rf_off=0
+ else
+    rf_off=1
+
+    if (dim1 == 2) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+    msg="- Currently can't handle a tripolar grid thats width 2 in only 1st dim", &
+             ESMF_CONTEXT, rcToReturn=rc)
+        return
+    endif
+ endif
  TopCorner=-1
  do i=1,4
 
     ! See if it matches nbr to the right
     matches=.false.
     do j=1,4
-       if ((abs(cornerX2D(i,1)-cornerX2D(j,2))<tol) .and. &
-           (abs(cornerY2D(i,1)-cornerY2D(j,2))<tol)) then
+       if ((abs(cornerX2D(i,1+rf_off)-cornerX2D(j,2+rf_off))<tol) .and. &
+           (abs(cornerY2D(i,1+rf_off)-cornerY2D(j,2+rf_off))<tol)) then
           matches=.true.
           exit
        endif
@@ -5278,8 +5294,8 @@ subroutine convert_corner_arrays_to_1D(isSphere,dim1,dim2,cornerX2D,cornerY2D,co
     ! See if it matches nbr to the below
     matches=.false.
     do j=1,4
-       if ((abs(cornerX2D(i,1)-cornerX2D(j,dim1+1))<tol) .and. &
-           (abs(cornerY2D(i,1)-cornerY2D(j,dim1+1))<tol)) then
+       if ((abs(cornerX2D(i,1+rf_off)-cornerX2D(j,dim1+1+rf_off))<tol) .and. &
+           (abs(cornerY2D(i,1+rf_off)-cornerY2D(j,dim1+1+rf_off))<tol)) then
           matches=.true.
           exit
        endif
@@ -5289,8 +5305,8 @@ subroutine convert_corner_arrays_to_1D(isSphere,dim1,dim2,cornerX2D,cornerY2D,co
    ! See if it matches nbr to the below and to the right
     matches=.false.
     do j=1,4
-       if ((abs(cornerX2D(i,1)-cornerX2D(j,dim1+2))<tol) .and. &
-           (abs(cornerY2D(i,1)-cornerY2D(j,dim1+2))<tol)) then
+       if ((abs(cornerX2D(i,1+rf_off)-cornerX2D(j,dim1+2+rf_off))<tol) .and. &
+           (abs(cornerY2D(i,1+rf_off)-cornerY2D(j,dim1+2+rf_off))<tol)) then
           matches=.true.
           exit
        endif
@@ -5321,8 +5337,8 @@ subroutine convert_corner_arrays_to_1D(isSphere,dim1,dim2,cornerX2D,cornerY2D,co
     ! See if it matches nbr to the right
     matches=.false.
     do j=1,4
-       if ((abs(cornerX2D(i,1)-cornerX2D(j,2))<tol) .and. &
-           (abs(cornerY2D(i,1)-cornerY2D(j,2))<tol)) then
+       if ((abs(cornerX2D(i,1+rf_off)-cornerX2D(j,2+rf_off))<tol) .and. &
+           (abs(cornerY2D(i,1+rf_off)-cornerY2D(j,2+rf_off))<tol)) then
           matches=.true.
           exit
        endif
@@ -5332,8 +5348,8 @@ subroutine convert_corner_arrays_to_1D(isSphere,dim1,dim2,cornerX2D,cornerY2D,co
     ! See if it matches nbr to the below right
     matches=.false.
     do j=1,4
-       if ((abs(cornerX2D(i,1)-cornerX2D(j,dim1+2))<tol) .and. &
-           (abs(cornerY2D(i,1)-cornerY2D(j,dim1+2))<tol)) then
+       if ((abs(cornerX2D(i,1+rf_off)-cornerX2D(j,dim1+2+rf_off))<tol) .and. &
+           (abs(cornerY2D(i,1+rf_off)-cornerY2D(j,dim1+2+rf_off))<tol)) then
           matches=.true.
           exit
        endif
@@ -5361,8 +5377,8 @@ subroutine convert_corner_arrays_to_1D(isSphere,dim1,dim2,cornerX2D,cornerY2D,co
     ! See if it matches nbr to the right
     matches=.false.
     do j=1,4
-       if ((abs(cornerX2D(i,1)-cornerX2D(j,2))<tol) .and. &
-           (abs(cornerY2D(i,1)-cornerY2D(j,2))<tol)) then
+       if ((abs(cornerX2D(i,1+rf_off)-cornerX2D(j,2+rf_off))<tol) .and. &
+           (abs(cornerY2D(i,1+rf_off)-cornerY2D(j,2+rf_off))<tol)) then
           matches=.true.
           exit
        endif
@@ -5372,8 +5388,8 @@ subroutine convert_corner_arrays_to_1D(isSphere,dim1,dim2,cornerX2D,cornerY2D,co
     ! See if it matches nbr to the below
     matches=.false.
     do j=1,4
-       if ((abs(cornerX2D(i,1)-cornerX2D(j,dim1+1))<tol) .and. &
-           (abs(cornerY2D(i,1)-cornerY2D(j,dim1+1))<tol)) then
+       if ((abs(cornerX2D(i,1+rf_off)-cornerX2D(j,dim1+1+rf_off))<tol) .and. &
+           (abs(cornerY2D(i,1+rf_off)-cornerY2D(j,dim1+1+rf_off))<tol)) then
           matches=.true.
           exit
        endif
