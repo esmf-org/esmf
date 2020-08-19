@@ -45,11 +45,11 @@ Typically this should be the first call made before doing anything else. It is t
 
 After the call to {\tt NUOPC\_CompDerive()} in a component's {\tt SetServices()} method, the component is connected to all of the generic code provided by NUOPC for the respective component kind. In order to function properly, e.g. as an atmosphere model, ocean model, driver, etc., the component must be {\em specialized}.
 
-The {\tt NUOPC\_CompSpecialize()} method is used to link specific user provided implementations to pre-defined NUOPC specialization points. The labels of the pre-defined specialization points are use associated named constants made available by the respective generic component module. The naming of all pre-defined specialization labels starts with the {\tt label\_} prefix, and is followed by a short intent of the specialization. E.g. {\tt label\_Advertise} refers to the specialization point responsible for advertising Fields in the import- and exportStates of the component.
+The {\tt NUOPC\_CompSpecialize()} method is used to link specific user provided routines to pre-defined NUOPC specialization points. The labels of the pre-defined specialization points are use associated named constants made available by the respective generic component module. The naming of all pre-defined specialization labels starts with the {\tt label\_} prefix, and is followed by a short intent of the specialization. E.g. {\tt label\_Advertise} refers to the specialization point responsible for advertising Fields in the import- and exportStates of the component.
 
 Lists of all the pre-defined specialization labels for each of the generic NUOPC component kinds are provided at the beginning of the respective API sections.
 
-The following code snippet show a full specialization of {\tt NUOPC\_Model}, using three specialization labels:
+The following code snippet shows a full specialization of {\tt NUOPC\_Model}, using three specialization labels:
 
 \begin{verbatim}
   use NUOPC_Model, &
@@ -91,7 +91,7 @@ The following code snippet show a full specialization of {\tt NUOPC\_Model}, usi
   end subroutine
 \end{verbatim}
 
-The user implemented specialization routines must follow the NUOPC defined interface of:
+The user implemented specialization routines must follow the NUOPC interface definition.
 
 \begin{verbatim}
   subroutine SpecRoutine(comp, rc)
