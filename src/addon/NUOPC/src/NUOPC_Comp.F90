@@ -2820,7 +2820,7 @@ module NUOPC_Comp
   
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_CompSetEntryPoint - Set entry point for a GridComp
+! !IROUTINE: NUOPC_CompSetEntryPoint - Set entry point for a GridComp (DEPRECATED!)
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_CompSetEntryPoint()
@@ -2848,6 +2848,10 @@ module NUOPC_Comp
 ! !DESCRIPTION:
 ! Set an entry point for a GridComp (i.e. Model, Mediator, or Driver). Publish
 ! the new entry point in the correct {\tt PhaseMap} component attribute.
+!
+! Starting with version 8.1.0, the use of this method is deprecated. Components
+! should instead specialize exclusively using the {\tt NUOPC\_CompSpecialize()}
+! method.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -2965,7 +2969,7 @@ module NUOPC_Comp
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_CompSetEntryPoint - Set entry point for a CplComp
+! !IROUTINE: NUOPC_CompSetEntryPoint - Set entry point for a CplComp (DEPRECATED!)
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_CompSetEntryPoint()
@@ -2993,6 +2997,10 @@ module NUOPC_Comp
 ! !DESCRIPTION:
 ! Set an entry point for a CplComp (i.e. Connector). Publish
 ! the new entry point in the correct {\tt PhaseMap} component attribute.
+!
+! Starting with version 8.1.0, the use of this method is deprecated. Components
+! should instead specialize exclusively using the {\tt NUOPC\_CompSpecialize()}
+! method.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
