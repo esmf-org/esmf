@@ -5129,26 +5129,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMGet()
   recursive subroutine ESMF_VMGetDefault(vm, keywordEnforcer, localPet, &
-    localPe, petCount, peCount, ssiCount, ssiMinPetCount, ssiMaxPetCount, &
+    localPe, petCount, peCount, ssiCount, ssiMap, ssiMinPetCount, ssiMaxPetCount, &
     ssiLocalPetCount, mpiCommunicator, pthreadsEnabledFlag, openMPEnabledFlag, &
     ssiSharedMemoryEnabledFlag, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),      intent(in)            :: vm
+    type(ESMF_VM),        intent(in)            :: vm
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(out), optional :: localPet
-    integer,            intent(out), optional :: localPe
-    integer,            intent(out), optional :: petCount
-    integer,            intent(out), optional :: peCount
-    integer,            intent(out), optional :: ssiCount
-    integer,            intent(out), optional :: ssiMinPetCount
-    integer,            intent(out), optional :: ssiMaxPetCount
-    integer,            intent(out), optional :: ssiLocalPetCount
-    integer,            intent(out), optional :: mpiCommunicator
-    logical,            intent(out), optional :: pthreadsEnabledFlag
-    logical,            intent(out), optional :: openMPEnabledFlag
-    logical,            intent(out), optional :: ssiSharedMemoryEnabledFlag
-    integer,            intent(out), optional :: rc
+    integer,              intent(out), optional :: localPet
+    integer,              intent(out), optional :: localPe
+    integer,              intent(out), optional :: petCount
+    integer,              intent(out), optional :: peCount
+    integer,              intent(out), optional :: ssiCount
+    integer, allocatable, intent(out), optional :: ssiMap(:)
+    integer,              intent(out), optional :: ssiMinPetCount
+    integer,              intent(out), optional :: ssiMaxPetCount
+    integer,              intent(out), optional :: ssiLocalPetCount
+    integer,              intent(out), optional :: mpiCommunicator
+    logical,              intent(out), optional :: pthreadsEnabledFlag
+    logical,              intent(out), optional :: openMPEnabledFlag
+    logical,              intent(out), optional :: ssiSharedMemoryEnabledFlag
+    integer,              intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -5163,7 +5164,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Added argument {\tt ssiSharedMemoryEnabledFlag} that allows the user to 
 !   query whether ESMF was compiled with support for shared memory 
 !   access between PETs on the same SSI.
-! \item[8.1.0] Added argument {\tt localPe} for easy access to the PE.
+! \item[8.1.0] Added argument {\tt localPe} for easy access to the local PE
+!   mapping.\newline
+!   Added argument {\tt ssiMap} for a convenient way to obtain a view
+!   of the mapping of PETs to single system images across the entire VM.
 ! \end{description}
 ! \end{itemize}
 !
@@ -5190,6 +5194,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[ssiCount]}]
 !        Upon return this holds the number of single system images referenced 
 !        by {\tt vm}.
+!   \item[{[ssiMap]}]
+!        Upon return this array is allocated and holds the single system image
+!        id for each PET across the {\tt vm}. The size of {\tt ssiMap} is
+!        equal to {\tt petCount}, with lower bound 0 and upper bound petCount-1.
 !   \item[{[ssiMinPetCount]}]
 !        Upon return this holds the smallest number of PETs running in the same
 !        single system images under {\tt vm}.
@@ -5210,9 +5218,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[pthreadsEnabledFlag]}]
 !        \begin{description}
 !        \item[{\tt .TRUE.}]
-!             ESMF has been compiled with Pthreads.
+!             ESMF has been compiled with Pthreads, and the MPI environment
+!             supports threading.
 !        \item[{\tt .FALSE.}]
-!             ESMF has {\em not} been compiled with Pthreads.
+!             ESMF has {\em not} been compiled with Pthreads, or the MPI
+!             environment does {\em not} support threading.
 !        \end{description}
 !   \item[{[openMPEnabledFlag]}]
 !        \begin{description}
@@ -5239,6 +5249,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Logical)      :: pthreadsEnabledFlagArg         ! helper variable
     type(ESMF_Logical)      :: openMPEnabledFlagArg           ! helper variable
     type(ESMF_Logical)      :: ssiSharedMemoryEnabledFlagArg  ! helper variable
+    integer                 :: petCountArg, i;                ! helper variable
     integer                 :: localrc  ! local return code
 
     ! initialize return code; assume routine not implemented
@@ -5250,10 +5261,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (vm%this /= ESMF_NULL_POINTER) then
       ! Call into the C++ interface.
-      call c_ESMC_VMGet(vm, localPet, localPe, petCount, peCount, ssiCount, &
+      call c_ESMC_VMGet(vm, localPet, localPe, petCountArg, peCount, ssiCount, &
         ssiMinPetCount, ssiMaxPetCount, ssiLocalPetCount, mpiCommunicator, &
         pthreadsEnabledFlagArg, openMPEnabledFlagArg, &
         ssiSharedMemoryEnabledFlagArg, localrc)
+      if (present(petCount)) petCount = petCountArg
       if (present (pthreadsEnabledFlag))  &
         pthreadsEnabledFlag = pthreadsEnabledFlagArg
       if (present (openMPEnabledFlag))  &
@@ -5262,10 +5274,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ssiSharedMemoryEnabledFlag = ssiSharedMemoryEnabledFlagArg
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
+      if (present(ssiMap)) then
+        allocate(ssiMap(0:petCountArg-1))
+        do i=0, petCount-1
+          call ESMF_VMGet(vm, pet=i, ssiId=ssiMap(i), rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        enddo
+      endif
     else
       ! Only very specific cases are supported for a NULL this pointer
-      if (present(petCount) .or. present(peCount) .or. &
-        present(ssiCount) .or. present(ssiMinPetCount) .or. &
+      if (present(petCount) .or. present(peCount) .or. present(ssiCount) .or. &
+        present(ssiMap) .or. present(ssiMinPetCount) .or. &
         present(ssiMaxPetCount) .or. present(ssiLocalPetCount) .or. &
         present(pthreadsEnabledFlag) .or. present(openMPEnabledFlag) .or. &
         present(ssiSharedMemoryEnabledFlag)) then

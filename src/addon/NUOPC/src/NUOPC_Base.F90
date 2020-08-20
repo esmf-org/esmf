@@ -3950,10 +3950,37 @@ module NUOPC_Base
   !-----------------------------------------------------------------------------
     ! local variables
     integer                 :: localrc
-
+    type(ESMF_VM)           :: vm
+    integer                 :: rootPet, rootVas, petCount, vas
+    
     if (present(rc)) rc = ESMF_SUCCESS
 
-    call ESMF_StateReconcile(state, attreconflag=ESMF_ATTRECONCILE_ON, rc=localrc)
+    ! The behavior of ESMF_ATTRECONCILE_ON has changed. Now must use
+    ! ESMF_ATTRECONCILE_OFF, and follow up by an ESMF_InfoSync()
+    call ESMF_StateReconcile(state, attreconflag=ESMF_ATTRECONCILE_OFF, &
+      rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+    ! Determine the rootPet for the ESMF_InfoSync()
+    call ESMF_VMGetCurrent(vm, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    call ESMF_AttributeGet(state, name="rootVas", value=rootVas, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    call ESMF_VMGet(vm, petCount=petCount, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    do rootPet=0, petCount-1
+      call ESMF_VMGet(vm, rootPet, vas=vas, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      if (vas==rootVas) exit
+    enddo
+
+    ! Finally the attributes can be synchronized
+    call ESMF_InfoSync(state, rootPet=rootPet, vm=vm, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
