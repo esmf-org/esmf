@@ -171,6 +171,9 @@ jobs:
       - run:
           name: Extract Doc Artifacts
           command: bash esmf/.circleci/sh/extract-artifacts.sh /tmp/artifacts /artifacts/doc-esmpy.zip bekozi/esmpy-doc
+      - run:
+          name: debug
+          command: exit 1
       - save_cache:
           key: esmpy-docs-{{ .Revision }}
           paths:
