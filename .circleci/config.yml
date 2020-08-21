@@ -154,8 +154,6 @@ jobs:
     machine:
       docker_layer_caching: true
     steps:
-      - setup_remote_docker:
-          docker_layer_caching: true
       - run:
           name: Checkout Code
           command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git esmf
