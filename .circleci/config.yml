@@ -297,10 +297,10 @@ workflows:
       - esmpy-docs-publish:
           requires:
             - esmpy-docs-build
-          filters:
-            branches:
-              only:
-                - develop
+#          filters: tdk:re-enable
+#            branches:
+#              only:
+#                - develop
 
   osx-commit:
     jobs:
