@@ -285,14 +285,14 @@ workflows:
     jobs:
 #      - should-build-docs:
 #          type: approval
-      - build-docs
-      - publish-docs:
-          requires:
-            - build-docs
-          filters:
-            branches:
-              only:
-                - develop
+#      - build-docs tdk:re-enable
+#      - publish-docs:
+#          requires:
+#            - build-docs
+#          filters:
+#            branches:
+#              only:
+#                - develop
       - esmpy-docs-build
       - esmpy-docs-publish:
           requires:
