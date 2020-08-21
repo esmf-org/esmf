@@ -161,13 +161,13 @@ jobs:
           command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git esmf
       - run:
           name: Docker Build esmpy-doc-base
-          command: docker build -t "bekozi/esmpy-doc-base" --file "esmf/.circleci/docker/esmpy-doc-base/Dockerfile" .
+          command: docker build -t "bekozi/esmpy-doc-base" --file "esmf/.circleci/docker/esmpy-doc-base/Dockerfile" --build-arg ESMF_BRANCH="${CIRCLE_BRANCH}" .
       - run:
           name: Docker Push esmpy-doc-base
           command: bash esmf/.circleci/sh/docker-push-generic.sh "bekozi/esmpy-doc-base"
       - run:
           name: Docker Build esmpy-doc
-          command: docker build -t "bekozi/esmpy-doc" --file "esmf/.circleci/docker/esmf-doc/Dockerfile" .
+          command: docker build -t "bekozi/esmpy-doc" --file "esmf/.circleci/docker/esmpy-doc/Dockerfile" .
       - run:
           name: Extract Doc Artifacts
           command: bash esmf/.circleci/sh/extract-artifacts.sh "/tmp/artifacts" "/artifacts/doc-esmpy.zip" "bekozi/esmpy-doc"
