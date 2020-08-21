@@ -175,6 +175,9 @@ jobs:
           key: esmpy-docs-{{ .Revision }}
           paths:
             - /tmp/artifacts
+      - store_artifacts:
+          path: /tmp/artifacts/doc-esmpy.zip
+          destination: doc-esmpy.zip
 
   esmpy-docs-publish:
     machine: true
