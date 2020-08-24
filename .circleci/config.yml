@@ -148,9 +148,14 @@ jobs:
       #tdk: revert to $CIRCLE_BRANCH
       - image: bekozi/esmf:latest
     steps:
-      - run: cd ${ESMF_DIR}/src/addon/ESMPy && python setup.py test
+      - run:
+          name: python setup.py test
+          command: cd ${ESMF_DIR}/src/addon/ESMPy && python setup.py test
+      - run:
+          name: Prep Test Results
+          command: mkdir -p /tmp/test-results && mv nosetests.xml /tmp/test-results/junit.xml
       - store_test_results:
-          path: nosetests.xml
+          path: /tmp/test-results
 
   esmpy-docs-build:
     machine:
