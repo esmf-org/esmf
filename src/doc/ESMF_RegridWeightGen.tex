@@ -507,10 +507,9 @@ where:
                         For all other cases, only the center location is supported.
                         The value can be one of the following:
 
-                        center - Regrid using the center location of each grid cell. 
-                                 This is the default option. 
+                        center - Regrid using the center location of each grid cell.
 
-                        corner - Regrid using the corner location of each grid cell. 
+                        corner - Regrid using the corner location of each grid cell.
 
     --dst_loc         - an optional argument indicating which part of a destination
                         grid cell to use for regridding. Currently, this flag is 
@@ -519,19 +518,10 @@ where:
                         For all other cases, only the center location is supported.
                         The value can be one of the following:
 
-                        center - Regrid using the center location of each grid cell. 
-                                 This is the default option. 
+                        center - Regrid using the center location of each grid cell.
 
-                        corner - Regrid using the corner location of each grid cell. 
+                        corner - Regrid using the corner location of each grid cell.
 
-
-    --dst_loc         - an optional argument that specifies whether to use the 
-                        center coordinates or corner coordinates to do the regridding.
-                        Currently, this flag is only required for non-conservative
-                        regridding when the destination grid is an unstructured grid in 
-                        ESMF or UGRID format.  For all other cases, only the center
-                        coordinates is supported and that is also the default value if
-                        this argument is not specified.
 
     --user_areas      - an optional argument specifying that the conservation
                         is adjusted to hold for the user areas provided in
