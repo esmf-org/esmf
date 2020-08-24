@@ -45,7 +45,6 @@ git push origin master
 
 # Developer's Guide -----------------------------------------------------------
 
-# TODO: This needs to be enabled
 cd ${DOC_ARTIFACTS}/doc-dev_guide
 #cp -rf ~/esmf/src/doc/dev_guide ~/esmf-org.github.io/dev_docs/
 cp -rf ./* ~/esmf-org.github.io/dev_docs/

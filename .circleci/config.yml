@@ -105,6 +105,7 @@ jobs:
           key: esmf-docs-{{ .Revision }}
           paths:
             - /tmp/artifacts
+            - esmf
       - store_artifacts:
           path: /tmp/artifacts/doc-artifacts.zip
           destination: doc-artifacts.zip
