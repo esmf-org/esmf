@@ -31,5 +31,5 @@ CLOBBERDIRS =
 
 
 RUN_ArraySparseMatMul:
-	env MPI_REQUEST_MAX=8192 MPI_MSG_RETRIES=8192 MPI_MSGS_PER_PROC=8192 $(MAKE) TNAME=ArraySparseMatMul NP=6 stest
+	$(MAKE) TNAME=ArraySparseMatMul NP=6 stest
 

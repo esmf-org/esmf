@@ -214,6 +214,13 @@
 \input{../addon/NUOPC/doc/NUOPC_ComponentHierarchies}
 #endif
 
+\subsection{External NUOPC Interface}
+#ifdef STANDALONE
+\input{NUOPC_ExternalInterface}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_ExternalInterface}
+#endif
+
 \newpage
 
 \section{API}
