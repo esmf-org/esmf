@@ -246,11 +246,11 @@ workflows:
 
   build-and-test-commit:
     jobs:
-#      - should-run-linux: tdk:enable
-#          type: approval
-#      - build-esmf:
-#          requires:
-#            - should-run-linux
+      - should-run-linux: #tdk:enable
+          type: approval
+      - build-esmf:
+          requires:
+            - should-run-linux
 #      - build-run-tests: tdk:enable
 #          name: build-run-commit-<< matrix.target >>
 #          matrix:
@@ -263,8 +263,8 @@ workflows:
           matrix:
             parameters:
               target: ["", "_parallel", "_examples", "_examples_parallel", "_regrid_from_file", "_regrid_from_file_parallel"]
-#          requires: tdk:enable
-#            - build-esmf
+          requires: #tdk:enable
+            - build-esmf
 
 
   build-and-test:
