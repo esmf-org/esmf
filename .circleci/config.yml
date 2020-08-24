@@ -147,8 +147,16 @@ jobs:
     machine: true
     steps:
       - run:
-          name: passthru-esmpy-test
-          command: exit 0
+          name: Checkout Code
+          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git esmf
+      - run:
+          name: Docker Build
+          command: docker build -t "bekozi/esmpy-test" --file "esmf/.circleci/docker/esmpy-test/Dockerfile" --build-arg ESMF_BRANCH="${CIRCLE_BRANCH}" --no-cache .
+      - run:
+          name: Extract Test Artifacts
+          command: bash esmf/.circleci/sh/extract-artifacts.sh . /artifacts/nosetests.xml bekozi/esmpy-test
+      - store_test_results:
+          path: nosetests.xml
 
   esmpy-docs-build:
     machine:
@@ -249,6 +257,9 @@ workflows:
               target: ["unit_tests", "system_tests", "examples"]
           requires:
             - build-esmf
+      - esmpy-test:
+          name: ESMPy Testing
+
 
   build-and-test:
     triggers:
@@ -281,31 +292,32 @@ workflows:
 #          requires:
 #            - placeholder-esmpy-build
 
-  docs-commit:
-    jobs:
-#      - should-build-docs:
+#tdk:re-enable docs
+#  docs-commit:
+#    jobs:
+##      - should-build-docs:
+##          type: approval
+#      - build-docs
+#      - publish-docs:
+#          requires:
+#            - build-docs
+#          filters:
+#            branches:
+#              only:
+#                - develop
+#      - esmpy-docs-build
+#      - esmpy-docs-publish:
+#          requires:
+#            - esmpy-docs-build
+#          filters:
+#            branches:
+#              only:
+#                - develop
+#
+#  osx-commit:
+#    jobs:
+#      - should-run-osx:
 #          type: approval
-      - build-docs
-      - publish-docs:
-          requires:
-            - build-docs
-          filters:
-            branches:
-              only:
-                - develop
-      - esmpy-docs-build
-      - esmpy-docs-publish:
-          requires:
-            - esmpy-docs-build
-          filters:
-            branches:
-              only:
-                - develop
-
-  osx-commit:
-    jobs:
-      - should-run-osx:
-          type: approval
-      - osx-esmf:
-          requires:
-            - should-run-osx
+#      - osx-esmf:
+#          requires:
+#            - should-run-osx
