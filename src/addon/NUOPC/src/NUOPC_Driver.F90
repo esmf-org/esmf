@@ -224,19 +224,19 @@ module NUOPC_Driver
     
     ! - upward implement External IPD:
     call NUOPC_CompSetEntryPoint(driver, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"ExternalAdvertise"/), &
+      phaseLabelList=(/label_ExternalAdvertise/), &
       userRoutine=InitializeExternalAdvertise, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     call NUOPC_CompSetEntryPoint(driver, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"ExternalRealize"/), &
+      phaseLabelList=(/label_ExternalRealize/), &
       userRoutine=InitializeIPDv02p3, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     call NUOPC_CompSetEntryPoint(driver, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"ExternalDataInitialize"/), &
+      phaseLabelList=(/label_ExternalDataInit/), &
       userRoutine=InitializeIPDv02p5, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -270,7 +270,7 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     call NUOPC_CompSetEntryPoint(driver, ESMF_METHOD_FINALIZE, &
-      phaseLabelList=(/"ExternalFinalizeReset"/), userRoutine=FinalizeReset, &
+      phaseLabelList=(/label_ExternalReset/), userRoutine=FinalizeReset, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
