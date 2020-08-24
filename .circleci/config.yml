@@ -151,7 +151,8 @@ jobs:
           command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git esmf
       - run:
           name: Docker Build
-          command: docker build -t "bekozi/esmpy-test" --file "esmf/.circleci/docker/esmpy-test/Dockerfile" --build-arg ESMF_BRANCH="${CIRCLE_BRANCH}" --no-cache .
+#          tdk: revert to ${CIRCLE_BRANCH}
+          command: docker build -t "bekozi/esmpy-test" --file "esmf/.circleci/docker/esmpy-test/Dockerfile" --build-arg ESMF_BRANCH="develop" --no-cache .
       - run:
           name: Extract Test Artifacts
           command: bash esmf/.circleci/sh/extract-artifacts.sh . /artifacts/nosetests.xml bekozi/esmpy-test
@@ -173,8 +174,7 @@ jobs:
           command: bash esmf/.circleci/sh/docker-push-generic.sh "bekozi/esmpy-doc-base"
       - run:
           name: Docker Build esmpy-doc
-#          tdk: revert to ${CIRCLE_BRANCH}
-          command: docker build -t "bekozi/esmpy-doc" --file "esmf/.circleci/docker/esmpy-doc/Dockerfile" --build-arg ESMF_BRANCH="develop" --no-cache .
+          command: docker build -t "bekozi/esmpy-doc" --file "esmf/.circleci/docker/esmpy-doc/Dockerfile" --build-arg ESMF_BRANCH="${CIRCLE_BRANCH}" --no-cache .
       - run:
           name: Extract Doc Artifacts
           command: bash esmf/.circleci/sh/extract-artifacts.sh /tmp/artifacts /artifacts/doc-esmpy.zip bekozi/esmpy-doc
@@ -259,7 +259,7 @@ workflows:
           requires:
             - build-esmf
       - esmpy-test:
-          name: ESMPy Testing
+          name: esmpy-test
 #          requires: tdk:enable
 #            - build-esmf
 
