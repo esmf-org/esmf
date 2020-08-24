@@ -152,7 +152,7 @@ jobs:
       - run:
           name: Docker Build
 #          tdk: revert to ${CIRCLE_BRANCH}
-          command: docker build -t "bekozi/esmpy-test" --file "esmf/.circleci/docker/esmpy-test/Dockerfile" --build-arg ESMF_BRANCH="develop" --no-cache .
+          command: docker build -t "bekozi/esmpy-test" --file "esmf/.circleci/docker/esmpy-test/Dockerfile" --build-arg ESMF_BRANCH="latest" --no-cache .
       - run:
           name: Extract Test Artifacts
           command: bash esmf/.circleci/sh/extract-artifacts.sh . /artifacts/nosetests.xml bekozi/esmpy-test
