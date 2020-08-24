@@ -145,15 +145,14 @@ jobs:
 
   esmpy-test:
     docker:
-      #tdk: revert to $CIRCLE_BRANCH
-      - image: bekozi/esmf:latest
+      - image: bekozi/esmf:$CIRCLE_BRANCH
     steps:
       - run:
           name: python setup.py test
           command: cd ${ESMF_DIR}/src/addon/ESMPy && python setup.py test
       - run:
           name: Prep Test Results
-          command: mkdir -p /tmp/test-results && mv nosetests.xml /tmp/test-results/junit.xml
+          command: mkdir -p /tmp/test-results && mv ${ESMF_DIR}/src/addon/ESMPy/nosetests.xml /tmp/test-results/
       - store_test_results:
           path: /tmp/test-results
 
@@ -244,22 +243,22 @@ workflows:
 
   build-and-test-commit:
     jobs:
-      - should-run-linux:
-          type: approval
+#      - should-run-linux: tdk:enable
+#          type: approval
       - build-esmf:
           requires:
             - should-run-linux
-      - build-run-tests:
-          name: build-run-commit-<< matrix.target >>
-          matrix:
-            parameters:
-              target: ["unit_tests", "system_tests", "examples"]
-          requires:
-            - build-esmf
+#      - build-run-tests: tdk:enable
+#          name: build-run-commit-<< matrix.target >>
+#          matrix:
+#            parameters:
+#              target: ["unit_tests", "system_tests", "examples"]
+#          requires:
+#            - build-esmf
       - esmpy-test:
           name: esmpy-test
-#          requires: tdk:enable
-#            - build-esmf
+          requires:
+            - build-esmf
 
 
   build-and-test:
