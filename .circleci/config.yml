@@ -246,24 +246,24 @@ workflows:
 
   build-and-test-commit:
     jobs:
-      - should-run-linux: #tdk:enable
+      - should-run-linux:
           type: approval
       - build-esmf:
           requires:
             - should-run-linux
-#      - build-run-tests: tdk:enable
-#          name: build-run-commit-<< matrix.target >>
-#          matrix:
-#            parameters:
-#              target: ["unit_tests", "system_tests", "examples"]
-#          requires:
-#            - build-esmf
+      - build-run-tests:
+          name: build-run-commit-<< matrix.target >>
+          matrix:
+            parameters:
+              target: ["unit_tests", "system_tests", "examples"]
+          requires:
+            - build-esmf
       - esmpy-test:
           name: esmpy-test<< matrix.target >>
           matrix:
             parameters:
-              target: ["", "_parallel", "_examples", "_examples_parallel", "_regrid_from_file", "_regrid_from_file_parallel"]
-          requires: #tdk:enable
+              target: ["", "_parallel", "_examples", "_examples_parallel"]
+          requires:
             - build-esmf
 
 
@@ -293,37 +293,39 @@ workflows:
 #          name: placeholder-bit-for-bit
 #          requires:
 #            - build-run-tests
-#      - esmpy-test:
-#          name: placeholder-esmpy-test
-#          requires:
-#            - placeholder-esmpy-build
+      - esmpy-test:
+          name: esmpy-test<< matrix.target >>
+          matrix:
+            parameters:
+              target: ["", "_parallel", "_examples", "_examples_parallel"]
+          requires:
+            - build-esmf
 
-#tdk:re-enable docs
-#  docs-commit:
-#    jobs:
-##      - should-build-docs:
-##          type: approval
-#      - build-docs
-#      - publish-docs:
-#          requires:
-#            - build-docs
-#          filters:
-#            branches:
-#              only:
-#                - develop
-#      - esmpy-docs-build
-#      - esmpy-docs-publish:
-#          requires:
-#            - esmpy-docs-build
-#          filters:
-#            branches:
-#              only:
-#                - develop
-#
-#  osx-commit:
-#    jobs:
-#      - should-run-osx:
+  docs-commit:
+    jobs:
+#      - should-build-docs:
 #          type: approval
-#      - osx-esmf:
-#          requires:
-#            - should-run-osx
+      - build-docs
+      - publish-docs:
+          requires:
+            - build-docs
+          filters:
+            branches:
+              only:
+                - develop
+      - esmpy-docs-build
+      - esmpy-docs-publish:
+          requires:
+            - esmpy-docs-build
+          filters:
+            branches:
+              only:
+                - develop
+
+  osx-commit:
+    jobs:
+      - should-run-osx:
+          type: approval
+      - osx-esmf:
+          requires:
+            - should-run-osx
