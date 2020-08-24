@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuxo pipefail
 
-DOC_ARTIFACTS="/tmp/artifacts"
+DOC_ARTIFACTS="/tmp/artifacts/artifacts"
 
 git config --global user.email "himanshu@ucar.edu"
 git config --global user.name "esmf-orgbot"
@@ -19,7 +19,7 @@ cp -rf ./* ~/esmf-org.github.io/dev_docs/
 cd ~/esmf-org.github.io/
 git pull
 git add .
-git commit -m "ESMF doc build by CircleCI on `date`"
+git commit -m "ESMF doc build by CircleCI"
 git push origin master
 
 # NUOPC Docs ------------------------------------------------------------------
@@ -40,16 +40,15 @@ for i in  NUOPC_refdoc.pdf NUOPC_howtodoc.pdf
 cd ~/esmf-org.github.io/dev_docs
 git pull
 git add .
-git commit -m "NUOPC doc build by CircleCI on `date`"
+git commit -m "NUOPC doc build by CircleCI"
 git push origin master
 
 # Developer's Guide -----------------------------------------------------------
 
 cd ${DOC_ARTIFACTS}/doc-dev_guide
-#cp -rf ~/esmf/src/doc/dev_guide ~/esmf-org.github.io/dev_docs/
 cp -rf ./* ~/esmf-org.github.io/dev_docs/
 cd ~/esmf-org.github.io/
 git pull
 git add .
-git commit -m " pushing dev_guide build by CircleCI on `date` "
+git commit -m " ESMF dev_guide build by CircleCI"
 git push origin master
