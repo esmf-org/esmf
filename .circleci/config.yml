@@ -245,9 +245,9 @@ workflows:
     jobs:
 #      - should-run-linux: tdk:enable
 #          type: approval
-      - build-esmf:
-          requires:
-            - should-run-linux
+      - build-esmf
+#          requires: tdk:enable
+#            - should-run-linux
 #      - build-run-tests: tdk:enable
 #          name: build-run-commit-<< matrix.target >>
 #          matrix:
