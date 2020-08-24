@@ -262,7 +262,7 @@ workflows:
           name: esmpy-test<< matrix.target >>
           matrix:
             parameters:
-              target: ["", "_parallel"]
+              target: ["", "_parallel", "_examples", "_examples_parallel"]
 #          requires: tdk:enable
 #            - build-esmf
 
