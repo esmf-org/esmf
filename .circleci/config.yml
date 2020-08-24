@@ -29,7 +29,7 @@ jobs:
           name: ESMPy Build + Install
           command: bash $ESMF_DIR/.circleci/sh/esmpy-build-install.sh
       - run:
-          name: Test Environment Finalize
+          name: Docker Push
           command: bash $ESMF_DIR/.circleci/sh/docker-push.sh
 
   should-run-linux:
@@ -144,12 +144,15 @@ jobs:
           command: exit 0
 
   esmpy-test:
+    parameters:
+      target:
+        type: string
     docker:
       - image: bekozi/esmf:$CIRCLE_BRANCH
     steps:
       - run:
-          name: python setup.py test
-          command: cd ${ESMF_DIR}/src/addon/ESMPy && python setup.py test
+          name: python setup.py test<< parameters.target>>
+          command: cd ${ESMF_DIR}/src/addon/ESMPy && python setup.py test<< parameters.target>>
       - run:
           name: Prep Test Results
           command: mkdir -p /tmp/test-results && mv ${ESMF_DIR}/src/addon/ESMPy/nosetests.xml /tmp/test-results/
@@ -245,8 +248,8 @@ workflows:
     jobs:
 #      - should-run-linux: tdk:enable
 #          type: approval
-      - build-esmf
-#          requires: tdk:enable
+#      - build-esmf:
+#          requires:
 #            - should-run-linux
 #      - build-run-tests: tdk:enable
 #          name: build-run-commit-<< matrix.target >>
@@ -256,9 +259,12 @@ workflows:
 #          requires:
 #            - build-esmf
       - esmpy-test:
-          name: esmpy-test
-          requires:
-            - build-esmf
+          name: esmpy-test<< matrix.target >>
+          matrix:
+            parameters:
+              target: ["", "_parallel"]
+#          requires: tdk:enable
+#            - build-esmf
 
 
   build-and-test:
