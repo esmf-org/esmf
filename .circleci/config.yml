@@ -2,35 +2,48 @@ version: 2.1
 
 jobs:
 
+  build-base-container:
+    machine:
+      docker_layer_caching: true
+    steps:
+      - run:
+          name: Checkout Code
+          command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
+      - run:
+          name: Docker Build
+          command: docker build -t "bekozi/centos8" --file "ESCOMP-Containers/base/centos8/Dockerfile" .
+      - run:
+          name: Docker Push
+          command: bash esmf/.circleci/sh/docker-push-generic.sh "bekozi/centos8"
+
   build-esmf:
     machine: true
     resource_class: xlarge
     environment:
-      - ESMF_DIR: $CIRCLE_WORKING_DIRECTORY/sandbox/esmf/src-git
       - DOCKER_IMG: bekozi/esmf
       - TEST_RUNNER: esmf-test-runner
     steps:
-#      - run:
-#          name: passthru-build-esmf
-#          command: exit 0
       - run:
           name: Checkout Code
-          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git $ESMF_DIR
+          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git
+      - run:
+          name: Docker Build
+          command: docker build -q -t "${DOCKER_IMG}:${CIRCLE_BRANCH}" --file "esmf/.circleci/docker/esmf/Dockerfile" --build-arg ESMF_BRANCH="${CIRCLE_BRANCH}" .
       - run:
           name: make info
-          command: bash $ESMF_DIR/.circleci/sh/make-info.sh
+          command: bash esmf/.circleci/sh/make-info.sh
       - run:
           name: make
-          command: bash $ESMF_DIR/.circleci/sh/make.sh
+          command: bash esmf/.circleci/sh/make.sh
       - run:
           name: make install
-          command: bash $ESMF_DIR/.circleci/sh/make-install.sh
+          command: bash esmf/.circleci/sh/make-install.sh
       - run:
           name: ESMPy Build + Install
-          command: bash $ESMF_DIR/.circleci/sh/esmpy-build-install.sh
+          command: bash esmf/.circleci/sh/esmpy-build-install.sh
       - run:
           name: Docker Push
-          command: bash $ESMF_DIR/.circleci/sh/docker-push.sh
+          command: bash esmf/.circleci/sh/docker-push-generic.sh "bekozi/esmf:${CIRCLE_BRANCH}"
 
   should-run-linux:
     docker:
@@ -152,7 +165,7 @@ jobs:
     steps:
       - run:
           name: python setup.py test<< parameters.target>>
-          command: cd ${ESMF_DIR}/src/addon/ESMPy && python setup.py test<< parameters.target>>
+          command: cd ${ESMPy_DIR} && python setup.py test<< parameters.target>>
       - run:
           name: Prep Test Results
           command: mkdir -p /tmp/test-results && mv ${ESMF_DIR}/src/addon/ESMPy/nosetests.xml /tmp/test-results/
@@ -246,6 +259,7 @@ workflows:
 
   build-and-test-commit:
     jobs:
+      - build-base-container
       - should-run-linux:
           type: approval
       - build-esmf:
@@ -276,7 +290,7 @@ workflows:
               only:
                 - develop
     jobs:
-#      - osx-esmf
+      - build-base-container
       - build-esmf
       - build-run-tests:
           name: build-run-<< matrix.target >>
@@ -300,6 +314,7 @@ workflows:
               target: ["", "_parallel", "_examples", "_examples_parallel"]
           requires:
             - build-esmf
+#      - osx-esmf
 
   docs-commit:
     jobs:
@@ -322,10 +337,10 @@ workflows:
               only:
                 - develop
 
-  osx-commit:
-    jobs:
-      - should-run-osx:
-          type: approval
-      - osx-esmf:
-          requires:
-            - should-run-osx
+#  osx-commit:
+#    jobs:
+#      - should-run-osx:
+#          type: approval
+#      - osx-esmf:
+#          requires:
+#            - should-run-osx

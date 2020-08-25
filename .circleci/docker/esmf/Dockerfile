@@ -1,18 +1,13 @@
-FROM bekozi/esmf-netcdf
+FROM bekozi/centos8
 
 ARG ESMF_BRANCH=""
 RUN echo "ESMF_BRANCH=${ESMF_BRANCH}"
 
-RUN apt-get --yes update && \
-    apt-get --yes install zip
-
-ENV PATH=${PATH}:${BB_MPICH_PREFIX}/bin
-
-WORKDIR ${HOME}/sandbox/esmf
-RUN git clone --branch ${ESMF_BRANCH} --depth 1 https://github.com/esmf-org/esmf.git src-git
+RUN git clone --branch ${ESMF_BRANCH} --depth 1 https://github.com/esmf-org/esmf.git
 WORKDIR esmf
 
-ENV ESMF_DIR=${HOME}/sandbox/esmf/src-git
+ENV ESMF_DIR=${HOME}/esmf
+
 ENV ESMF_COMM=mpich3
 ENV ESMF_BOPT="g"
 
