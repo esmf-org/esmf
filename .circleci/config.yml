@@ -118,7 +118,7 @@ jobs:
           command: bash esmf/.circleci/sh/docker-push-generic.sh "bekozi/esmf-doc-base"
       - run:
           name: Docker Build esmf-doc
-          command: docker build -t "bekozi/esmf-doc:${CIRCLE_BRANCH}" --file "ESCOMP-Containers/ESMF/esmf-doc/Dockerfile" --build-arg ESMF_BRANCH="${CIRCLE_BRANCH}" --build-arg DOCKER_NAMESPACE="bekozi" --no-cache .
+          command: docker build -t "bekozi/esmf-doc:${CIRCLE_BRANCH}" --file "ESCOMP-Containers/ESMF/doc/esmf-doc/Dockerfile" --build-arg ESMF_BRANCH="${CIRCLE_BRANCH}" --build-arg DOCKER_NAMESPACE="bekozi" --no-cache .
       - run:
           name: Extract Artifacts
           command: bash esmf/.circleci/sh/extract-artifacts.sh "/tmp/artifacts" "/artifacts/doc-artifacts.zip" "${DOCKER_IMG}:${CIRCLE_BRANCH}"
