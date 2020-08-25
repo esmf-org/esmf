@@ -5,7 +5,6 @@ jobs:
   build-escomp-centos8:
     docker:
       - image: cimg/base:2020.01
-    resource_class: xlarge
     steps:
       - setup_remote_docker:
           docker_layer_caching: true
@@ -27,8 +26,6 @@ jobs:
       - image: cimg/base:2020.01
     resource_class: xlarge
     steps:
-      - setup_remote_docker:
-          docker_layer_caching: true
       - run:
           name: Checkout Code (ESCOMP-Containers)
           command: git clone --branch bekozi-sync-doc-containers --depth 1 https://github.com/esmf-org/ESCOMP-Containers.git
@@ -121,7 +118,7 @@ jobs:
           command: bash esmf/.circleci/sh/docker-push-generic.sh "bekozi/esmf-doc-base"
       - run:
           name: Docker Build esmf-doc
-          command: docker build -t "bekozi/esmf-doc:${CIRCLE_BRANCH}" --file "ESCOMP/ESMF/esmf-doc/Dockerfile" --build-arg ESMF_BRANCH="${CIRCLE_BRANCH}" --build-arg DOCKER_NAMESPACE="bekozi" --no-cache .
+          command: docker build -t "bekozi/esmf-doc:${CIRCLE_BRANCH}" --file "ESCOMP-Containers/ESMF/esmf-doc/Dockerfile" --build-arg ESMF_BRANCH="${CIRCLE_BRANCH}" --build-arg DOCKER_NAMESPACE="bekozi" --no-cache .
       - run:
           name: Extract Artifacts
           command: bash esmf/.circleci/sh/extract-artifacts.sh "/tmp/artifacts" "/artifacts/doc-artifacts.zip" "${DOCKER_IMG}:${CIRCLE_BRANCH}"
