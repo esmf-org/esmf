@@ -278,13 +278,13 @@ workflows:
     jobs:
 #      - osx-esmf
       - build-esmf
-#      - build-run-tests:
-#          name: build-run-<< matrix.target >>
-#          matrix:
-#            parameters:
-#              target: ["unit_tests", "system_tests", "examples"]
-#          requires:
-#            - build-esmf
+      - build-run-tests:
+          name: build-run-<< matrix.target >>
+          matrix:
+            parameters:
+              target: ["unit_tests", "system_tests", "examples"]
+          requires:
+            - build-esmf
 #      - external_demos:
 #          name: placeholder-external_demos
 #          requires:
