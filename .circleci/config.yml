@@ -21,6 +21,7 @@ jobs:
 
   build-escomp-esmf:
     machine: true
+    resource_class: xlarge
     steps:
       - run:
           name: Checkout Code (ESCOMP-Containers)
