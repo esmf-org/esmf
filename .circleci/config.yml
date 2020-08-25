@@ -274,7 +274,10 @@ workflows:
 
   build-and-test-commit:
     jobs:
-      - build-escomp-container
+      - build-escomp-centos8
+      - build-escomp-esmf:
+          requires:
+            - build-escomp-centos8
       - should-run-linux:
           type: approval
       - build-escomp-esmf:
