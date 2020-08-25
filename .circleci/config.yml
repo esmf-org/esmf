@@ -29,7 +29,7 @@ jobs:
           name: ESMPy Build + Install
           command: bash $ESMF_DIR/.circleci/sh/esmpy-build-install.sh
       - run:
-          name: Test Environment Finalize
+          name: Docker Push
           command: bash $ESMF_DIR/.circleci/sh/docker-push.sh
 
   should-run-linux:
@@ -144,11 +144,20 @@ jobs:
           command: exit 0
 
   esmpy-test:
-    machine: true
+    parameters:
+      target:
+        type: string
+    docker:
+      - image: bekozi/esmf:$CIRCLE_BRANCH
     steps:
       - run:
-          name: passthru-esmpy-test
-          command: exit 0
+          name: python setup.py test<< parameters.target>>
+          command: cd ${ESMF_DIR}/src/addon/ESMPy && python setup.py test<< parameters.target>>
+      - run:
+          name: Prep Test Results
+          command: mkdir -p /tmp/test-results && mv ${ESMF_DIR}/src/addon/ESMPy/nosetests.xml /tmp/test-results/
+      - store_test_results:
+          path: /tmp/test-results
 
   esmpy-docs-build:
     machine:
@@ -249,6 +258,14 @@ workflows:
               target: ["unit_tests", "system_tests", "examples"]
           requires:
             - build-esmf
+      - esmpy-test:
+          name: esmpy-test<< matrix.target >>
+          matrix:
+            parameters:
+              target: ["", "_parallel", "_examples", "_examples_parallel"]
+          requires:
+            - build-esmf
+
 
   build-and-test:
     triggers:
@@ -261,13 +278,13 @@ workflows:
     jobs:
 #      - osx-esmf
       - build-esmf
-#      - build-run-tests:
-#          name: build-run-<< matrix.target >>
-#          matrix:
-#            parameters:
-#              target: ["unit_tests", "system_tests", "examples"]
-#          requires:
-#            - build-esmf
+      - build-run-tests:
+          name: build-run-<< matrix.target >>
+          matrix:
+            parameters:
+              target: ["unit_tests", "system_tests", "examples"]
+          requires:
+            - build-esmf
 #      - external_demos:
 #          name: placeholder-external_demos
 #          requires:
@@ -276,10 +293,13 @@ workflows:
 #          name: placeholder-bit-for-bit
 #          requires:
 #            - build-run-tests
-#      - esmpy-test:
-#          name: placeholder-esmpy-test
-#          requires:
-#            - placeholder-esmpy-build
+      - esmpy-test:
+          name: esmpy-test<< matrix.target >>
+          matrix:
+            parameters:
+              target: ["", "_parallel", "_examples", "_examples_parallel"]
+          requires:
+            - build-esmf
 
   docs-commit:
     jobs:
