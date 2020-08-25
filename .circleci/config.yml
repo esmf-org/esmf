@@ -134,7 +134,7 @@ jobs:
           path: /tmp/artifacts/doc-artifacts.zip
           destination: doc-artifacts.zip
 
-  publish-esmfdocs:
+  publish-esmf-docs:
     machine: true
     steps:
 #      - run:
