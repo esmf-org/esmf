@@ -29,12 +29,12 @@ jobs:
       - run:
           name: Checkout Code (ESMF)
           command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git
-#      - run:
-#          name: Docker Build
-#          command: docker build -q -t "bekozi/esmf:${CIRCLE_BRANCH}" --file "ESCOMP-Containers/ESMF/dev/Dockerfile" --build-arg ESMF_BRANCH="${CIRCLE_BRANCH}" .
-#      - run:
-#          name: Docker Push
-#          command: bash esmf/.circleci/sh/docker-push-generic.sh "bekozi/esmf:${CIRCLE_BRANCH}"
+      - run:
+          name: Docker Build
+          command: docker build -t "bekozi/esmf:${CIRCLE_BRANCH}" --file "ESCOMP-Containers/ESMF/dev/Dockerfile" --build-arg ESMF_BRANCH="${CIRCLE_BRANCH}" .
+      - run:
+          name: Docker Push
+          command: bash esmf/.circleci/sh/docker-push-generic.sh "bekozi/esmf:${CIRCLE_BRANCH}"
 
 #tdk:remove
 #  build-escomp-esmf:
