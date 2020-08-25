@@ -133,7 +133,7 @@ jobs:
           path: /tmp/artifacts/doc-artifacts.zip
           destination: doc-artifacts.zip
 
-  publish-esmf-docs:
+  publish-esmfdocs:
     machine: true
     steps:
 #      - run:
@@ -274,15 +274,13 @@ workflows:
 
   build-and-test-commit:
     jobs:
-      - build-escomp-centos8
+      - should-run-linux:
+          type: approval
+      - build-escomp-centos8:
+          requires: should-run-linux
       - build-escomp-esmf:
           requires:
             - build-escomp-centos8
-      - should-run-linux:
-          type: approval
-      - build-escomp-esmf:
-          requires:
-            - should-run-linux
       - build-run-tests:
           name: build-run-commit-<< matrix.target >>
           matrix:
