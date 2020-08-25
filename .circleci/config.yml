@@ -316,8 +316,8 @@ workflows:
     jobs:
       - build-escomp-container
       - build-esmf:
-          - requires:
-              - build-escomp-container
+          requires:
+            - build-escomp-container
       - build-run-tests:
           name: build-run-<< matrix.target >>
           matrix:
