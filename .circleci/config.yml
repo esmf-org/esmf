@@ -2,70 +2,46 @@ version: 2.1
 
 jobs:
 
-  build-escomp-container:
-    machine:
-      docker_layer_caching: true
+  build-escomp-centos8:
+    docker:
+      - image: cimg/base:2020.01
     steps:
+      - setup_remote_docker:
+          docker_layer_caching: true
       - run:
           name: Checkout Code (ESCOMP-Containers)
           command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
       - run:
-          name: Docker Build
-          command: docker build -t "bekozi/centos8" --file "ESCOMP-Containers/base/centos8/Dockerfile" .
-      - run:
           name: Checkout Code (ESMF)
           command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git
+      - run:
+          name: Docker Build
+          command: docker build -t "bekozi/centos8" --file "ESCOMP-Containers/base/centos8/Dockerfile" .
       - run:
           name: Docker Push
           command: bash esmf/.circleci/sh/docker-push-generic.sh "bekozi/centos8"
 
   build-escomp-esmf:
-    machine: true
+    docker:
+      - image: cimg/base:2020.01
     resource_class: xlarge
     steps:
+      - setup_remote_docker:
+          docker_layer_caching: true
       - run:
           name: Checkout Code (ESCOMP-Containers)
-          #tdk: do not need to use branch / remove checkout from esmf-org
-          command: git clone --branch bekozi-esmf-ci-integration --depth 1 https://github.com/esmf-org/ESCOMP-Containers.git
+          command: git clone --branch bekozi-sync-doc-containers --depth 1 https://github.com/esmf-org/ESCOMP-Containers.git
+          #tdk: switch back to escomp
+      #          command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
       - run:
           name: Checkout Code (ESMF)
           command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git
       - run:
           name: Docker Build
-          command: docker build -t "bekozi/esmf:${CIRCLE_BRANCH}" --file "ESCOMP-Containers/ESMF/dev/Dockerfile" --build-arg ESMF_BRANCH="${CIRCLE_BRANCH}" .
+          command: docker build -t "bekozi/esmf:${CIRCLE_BRANCH}" --file "ESCOMP-Containers/ESMF/dev/Dockerfile" --build-arg ESMF_BRANCH="${CIRCLE_BRANCH}" --build-arg DOCKER_NAMESPACE="bekozi" .
       - run:
           name: Docker Push
           command: bash esmf/.circleci/sh/docker-push-generic.sh "bekozi/esmf:${CIRCLE_BRANCH}"
-
-#tdk:remove
-#  build-escomp-esmf:
-#    machine: true
-#    resource_class: xlarge
-#    environment:
-#      - DOCKER_IMG: bekozi/esmf
-#      - TEST_RUNNER: esmf-test-runner
-#    steps:
-#      - run:
-#          name: Checkout Code
-#          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git
-#      - run:
-#          name: Docker Build
-#          command: docker build -q -t "${DOCKER_IMG}:${CIRCLE_BRANCH}" --file "esmf/.circleci/docker/esmf/Dockerfile" --build-arg ESMF_BRANCH="${CIRCLE_BRANCH}" .
-#      - run:
-#          name: make info
-#          command: bash esmf/.circleci/sh/make-info.sh
-#      - run:
-#          name: make
-#          command: bash esmf/.circleci/sh/make.sh
-#      - run:
-#          name: make install
-#          command: bash esmf/.circleci/sh/make-install.sh
-#      - run:
-#          name: ESMPy Build + Install
-#          command: bash esmf/.circleci/sh/esmpy-build-install.sh
-#      - run:
-#          name: Docker Push
-#          command: bash esmf/.circleci/sh/docker-push-generic.sh "bekozi/esmf:${CIRCLE_BRANCH}"
 
   should-run-linux:
     docker:
@@ -119,20 +95,66 @@ jobs:
           path: /artifacts/test-artifacts.zip
           destination: << parameters.target >>-artifacts.zip
 
-  build-docs:
-    environment:
-      - DOCKER_IMG: "bekozi/esmf-doc"
-    machine: true
+  build-esmf-docs-base:
+    docker:
+      - image: cimg/base:2020.01
+    steps:
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          name: Checkout Code (ESCOMP-Containers)
+          command: git clone --branch bekozi-sync-doc-containers --depth 1 https://github.com/esmf-org/ESCOMP-Containers.git
+          #tdk: switch back to escomp
+#          command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
+      - run:
+          name: Checkout Code (ESMF)
+          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git
+      - run:
+          name: Docker Build
+          command: docker build -t "bekozi/esmf-doc-base" --file "ESCOMP-Containers/ESMF/doc/esmf-doc-base/Dockerfile" --build-arg DOCKER_NAMESPACE="bekozi" .
+      - run:
+          name: Docker Push
+          command: bash esmf/.circleci/sh/docker-push-generic.sh "bekozi/esmf-doc-base"
+
+  build-esmpy-docs-base:
+    docker:
+      - image: cimg/base:2020.01
+    steps:
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          name: Checkout Code (ESCOMP-Containers)
+          command: git clone --branch bekozi-sync-doc-containers --depth 1 https://github.com/esmf-org/ESCOMP-Containers.git
+          #tdk: switch back to escomp
+#          command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
+      - run:
+          name: Checkout Code (ESMF)
+          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git
+      - run:
+          name: Docker Build
+          command: docker build -t "bekozi/esmpy-doc-base" --file "ESCOMP-Containers/ESMF/doc/esmpy-doc-base/Dockerfile" --build-arg DOCKER_NAMESPACE="bekozi" .
+      - run:
+          name: Docker Push
+          command: bash esmf/.circleci/sh/docker-push-generic.sh "bekozi/esmpy-doc-base"
+
+  build-esmf-docs:
+    docker:
+      - image: cimg/base:2020.01
     steps:
 #      - run:
 #          name: passthru-build-docs
 #          command: exit 0
       - run:
-          name: Checkout Code
-          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git esmf
+          name: Checkout Code (ESCOMP-Containers)
+          command: git clone --branch bekozi-sync-doc-containers --depth 1 https://github.com/esmf-org/ESCOMP-Containers.git
+          #tdk: switch back to escomp
+      #          command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
+      - run:
+          name: Checkout Code (ESMF)
+          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git
       - run:
           name: Docker Build
-          command: docker build -t "${DOCKER_IMG}:${CIRCLE_BRANCH}" --file "esmf/.circleci/docker/esmf-doc/Dockerfile" --build-arg ESMF_BRANCH="${CIRCLE_BRANCH}" .
+          command: docker build -t "bekozi/esmf-doc:${CIRCLE_BRANCH}" --file "ESCOMP/ESMF/esmf-doc/Dockerfile" --build-arg ESMF_BRANCH="${CIRCLE_BRANCH}" .
       - run:
           name: Extract Artifacts
           command: bash esmf/.circleci/sh/extract-artifacts.sh "/tmp/artifacts" "/artifacts/doc-artifacts.zip" "${DOCKER_IMG}:${CIRCLE_BRANCH}"
@@ -144,9 +166,6 @@ jobs:
       - store_artifacts:
           path: /tmp/artifacts/doc-artifacts.zip
           destination: doc-artifacts.zip
-      - run:
-          name: Docker Push
-          command: bash esmf/.circleci/sh/docker-push-docs.sh
 
   publish-docs:
     machine: true
@@ -312,10 +331,10 @@ workflows:
               only:
                 - develop
     jobs:
-      - build-escomp-container
+      - build-escomp-centos8
       - build-escomp-esmf:
           requires:
-            - build-escomp-container
+            - build-escomp-centos8
       - build-run-tests:
           name: build-run-<< matrix.target >>
           matrix:
@@ -323,7 +342,11 @@ workflows:
               target: ["unit_tests", "system_tests", "examples"]
           requires:
             - build-escomp-esmf
-#      - external_demos:
+#      - nuopc-protos:
+#          name: placeholder-external_demos
+#          requires:
+#            - build-run-tests
+#      - extended-tests:
 #          name: placeholder-external_demos
 #          requires:
 #            - build-run-tests
@@ -342,17 +365,22 @@ workflows:
 
   docs-commit:
     jobs:
+      - build-esmf-docs-base
 #      - should-build-docs:
 #          type: approval
-      - build-docs
-      - publish-docs:
+      - build-esmf-docs
           requires:
-            - build-docs
+            - build-esmf-docs-base
+      - publish-esmf-docs:
+          requires:
+            - build-esmf-docs
           filters:
             branches:
               only:
                 - develop
-      - esmpy-docs-build
+      - build-esmpy-docs-base
+      - esmpy-docs-build:
+          requires: build-esmpy-docs-base
       - esmpy-docs-publish:
           requires:
             - esmpy-docs-build
