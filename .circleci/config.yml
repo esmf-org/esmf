@@ -2,16 +2,19 @@ version: 2.1
 
 jobs:
 
-  build-base-container:
+  build-escomp-container:
     machine:
       docker_layer_caching: true
     steps:
       - run:
-          name: Checkout Code
+          name: Checkout Code (ESCOMP-Containers)
           command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
       - run:
           name: Docker Build
           command: docker build -t "bekozi/centos8" --file "ESCOMP-Containers/base/centos8/Dockerfile" .
+      - run:
+          name: Checkout Code (ESMF)
+          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git
       - run:
           name: Docker Push
           command: bash esmf/.circleci/sh/docker-push-generic.sh "bekozi/centos8"
@@ -259,7 +262,7 @@ workflows:
 
   build-and-test-commit:
     jobs:
-      - build-base-container
+      - build-escomp-container
       - should-run-linux:
           type: approval
       - build-esmf:
@@ -279,7 +282,7 @@ workflows:
               target: ["", "_parallel", "_examples", "_examples_parallel"]
           requires:
             - build-esmf
-
+#      - osx-esmf
 
   build-and-test:
     triggers:
@@ -290,7 +293,7 @@ workflows:
               only:
                 - develop
     jobs:
-      - build-base-container
+      - build-escomp-container
       - build-esmf
       - build-run-tests:
           name: build-run-<< matrix.target >>
