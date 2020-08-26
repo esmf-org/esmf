@@ -17,10 +17,8 @@ cd ${DOC_ARTIFACTS}/doc-esmf
 cp -rf ./* ~/esmf-org.github.io/dev_docs/
 
 cd ~/esmf-org.github.io/
-git pull
 git add .
 git commit -m "ESMF doc build by CircleCI"
-git push origin master
 
 # NUOPC Docs ------------------------------------------------------------------
 
@@ -38,17 +36,17 @@ for i in  NUOPC_refdoc.pdf NUOPC_howtodoc.pdf
     done
 
 cd ~/esmf-org.github.io/dev_docs
-git pull
 git add .
 git commit -m "NUOPC doc build by CircleCI"
-git push origin master
 
 # Developer's Guide -----------------------------------------------------------
 
 cd ${DOC_ARTIFACTS}/doc-dev_guide
 cp -rf ./* ~/esmf-org.github.io/dev_docs/
 cd ~/esmf-org.github.io/
-git pull
 git add .
 git commit -m " ESMF dev_guide build by CircleCI"
+
+# Push the changes ------------------------------------------------------------
+
 git push origin master
