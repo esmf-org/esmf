@@ -7,6 +7,6 @@ set -Eeuxo pipefail
 
 mkdir -p "${1}"
 docker run -dit --name runner -v "${1}:/dexc" "${3}"
-docker exec -t runner bash -c "cp ${2} /dexc"
+docker exec -t runner bash -c "cp -rv ${2} /dexc"
 docker stop runner
 docker rm runner
