@@ -461,8 +461,9 @@ end subroutine {{ method_name }}
 !  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Set a value in an \texttt{ESMF\_Info} object using a key. List values are
-!     initialized to null.
+!     Set a value in an \texttt{ESMF\_Info} object using a key. If \textit{value}
+!     is of type \texttt{ESMF\_Info}, then a copy of its contents are made when
+!     setting.
 !
 {% if not do_charalloc %}
 !     Overloaded \textit{value} for the following types:
@@ -473,6 +474,7 @@ end subroutine {{ method_name }}
 !       \item \texttt{real(kind=ESMF\_KIND\_R8)}
 !       \item \texttt{logical}
 !       \item \texttt{character(:)}
+!       \item \texttt{type(ESMF\_Info)}
 !     \end{itemize}
 {% endif %}
 !
@@ -587,7 +589,8 @@ end subroutine ESMF_InfoSet{{ t.esmf_suffix }}
 !  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Set a value list in an \texttt{ESMF\_Info} object using a key.
+!     Set a value list in an \texttt{ESMF\_Info} object using a key. List values
+!     are initialized to null.
 !
 {% if not do_charalloc %}
 !     Overloaded \textit{values} for the following types:
@@ -760,7 +763,7 @@ end subroutine {{ method_name }}
 {% set method_name = "ESMF_InfoSetINFO" %}
 #undef  ESMF_METHOD
 #define ESMF_METHOD "{{ method_name }}()"
-!BOP
+!BOPI
 ! !IROUTINE: {{ method_name }} - Set a key to the contents of an Info object
 !
 ! !INTERFACE:
@@ -789,7 +792,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 {{ doc_force }}
 {{ doc_rc }}
 !     \end{description}
-!EOP
+!EOPI
 
   integer :: localrc
   logical(C_BOOL) :: local_force

@@ -477,8 +477,9 @@ end subroutine ESMF_InfoDestroy
 !  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Set a value in an \texttt{ESMF\_Info} object using a key. List values are
-!     initialized to null.
+!     Set a value in an \texttt{ESMF\_Info} object using a key. If \textit{value}
+!     is of type \texttt{ESMF\_Info}, then a copy of its contents are made when
+!     setting.
 !
 !     Overloaded \textit{value} for the following types:
 !     \begin{itemize}
@@ -488,6 +489,7 @@ end subroutine ESMF_InfoDestroy
 !       \item \texttt{real(kind=ESMF\_KIND\_R8)}
 !       \item \texttt{logical}
 !       \item \texttt{character(:)}
+!       \item \texttt{type(ESMF\_Info)}
 !     \end{itemize}
 !
 !     The arguments are:
@@ -838,7 +840,8 @@ end subroutine ESMF_InfoSetLG
 !  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Set a value list in an \texttt{ESMF\_Info} object using a key.
+!     Set a value list in an \texttt{ESMF\_Info} object using a key. List values
+!     are initialized to null.
 !
 !     Overloaded \textit{values} for the following types:
 !     \begin{itemize}
@@ -1190,7 +1193,7 @@ end subroutine ESMF_InfoSetNULL
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoSetINFO()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_InfoSetINFO - Set a key to the contents of an Info object
 !
 ! !INTERFACE:
@@ -1223,7 +1226,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
-!EOP
+!EOPI
 
   integer :: localrc
   logical(C_BOOL) :: local_force
