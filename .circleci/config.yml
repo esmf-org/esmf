@@ -1,24 +1,3 @@
-default-checkout: &default-checkout
-  steps:
-    - run:
-        name: Checkout Code (ESCOMP-Containers)
-        command: git clone --branch bekozi-sync-doc-containers --depth 1 https://github.com/esmf-org/ESCOMP-Containers.git
-        #tdk: switch back to escomp
-    #          command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
-    - run:
-        name: Checkout Code (ESMF)
-        command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git
-
-
-default-approval: &default-approval
-  docker:
-    - image: cimg/base:2020.01
-  resource_class: small
-  steps:
-    - run: exit 0
-
-# =============================================================================
-
 version: 2.1
 
 jobs:
@@ -26,7 +5,15 @@ jobs:
   build-escomp-centos8:
     docker:
       - image: cimg/base:2020.01
-    <<: *default-checkout
+    steps:
+      - run:
+          name: Checkout Code (ESCOMP-Containers)
+          command: git clone --branch bekozi-sync-doc-containers --depth 1 https://github.com/esmf-org/ESCOMP-Containers.git
+          #tdk: switch back to escomp
+      #          command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
+      - run:
+          name: Checkout Code (ESMF)
+          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git
       - setup_remote_docker:
           docker_layer_caching: true
       - run:
@@ -40,7 +27,15 @@ jobs:
     docker:
       - image: cimg/base:2020.01
     resource_class: xlarge
-    <<: *default-checkout
+    steps:
+      - run:
+          name: Checkout Code (ESCOMP-Containers)
+          command: git clone --branch bekozi-sync-doc-containers --depth 1 https://github.com/esmf-org/ESCOMP-Containers.git
+          #tdk: switch back to escomp
+      #          command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
+      - run:
+          name: Checkout Code (ESMF)
+          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git
       - setup_remote_docker
       - run:
           name: Docker Build
@@ -55,13 +50,25 @@ jobs:
           path: /tmp/artifacts
 
   should-run-linux:
-    <<: *default-approval
+    docker:
+      - image: cimg/base:2020.01
+    resource_class: small
+    steps:
+      - run: exit 0
 
   should-build-docs:
-    <<: *default-approval
+    docker:
+      - image: cimg/base:2020.01
+    resource_class: small
+    steps:
+      - run: exit 0
 
   should-run-osx:
-    <<: *default-approval
+    docker:
+      - image: cimg/base:2020.01
+    resource_class: small
+    steps:
+      - run: exit 0
 
   build-run-tests:
     parameters:
@@ -73,7 +80,15 @@ jobs:
     environment:
       - ESMF_ARTIFACTS: /artifacts
       - ESMF_OUTDIR: /artifacts/test-artifacts
-    <<: *default-checkout
+    steps:
+      - run:
+          name: Checkout Code (ESCOMP-Containers)
+          command: git clone --branch bekozi-sync-doc-containers --depth 1 https://github.com/esmf-org/ESCOMP-Containers.git
+          #tdk: switch back to escomp
+      #          command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
+      - run:
+          name: Checkout Code (ESMF)
+          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git
 #      - run:
 #          name: passthru-build-tests
 #          command: exit 0
@@ -99,7 +114,15 @@ jobs:
   build-esmf-docs:
     docker:
       - image: cimg/base:2020.01
-    <<: *default-checkout
+    steps:
+      - run:
+          name: Checkout Code (ESCOMP-Containers)
+          command: git clone --branch bekozi-sync-doc-containers --depth 1 https://github.com/esmf-org/ESCOMP-Containers.git
+          #tdk: switch back to escomp
+      #          command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
+      - run:
+          name: Checkout Code (ESMF)
+          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git
 #      - run:
 #          name: passthru-build-docs
 #          command: exit 0
@@ -175,7 +198,15 @@ jobs:
   build-esmpy-docs:
     docker:
       - image: cimg/base:2020.01
-    <<: *default-checkout
+    steps:
+      - run:
+          name: Checkout Code (ESCOMP-Containers)
+          command: git clone --branch bekozi-sync-doc-containers --depth 1 https://github.com/esmf-org/ESCOMP-Containers.git
+          #tdk: switch back to escomp
+      #          command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
+      - run:
+          name: Checkout Code (ESMF)
+          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git
       - setup_remote_docker:
           docker_layer_caching: true
       - run:
