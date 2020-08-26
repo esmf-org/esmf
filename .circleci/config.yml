@@ -24,7 +24,7 @@ jobs:
   build-escomp-esmf:
     docker:
       - image: cimg/base:2020.01
-    resource_class: xlarge
+#    resource_class: xlarge
     steps:
       - run:
           name: Checkout Code (ESCOMP-Containers)
