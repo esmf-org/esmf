@@ -24,8 +24,9 @@ jobs:
   build-escomp-esmf:
     docker:
       - image: cimg/base:2020.01
-#    resource_class: xlarge
+    resource_class: xlarge
     steps:
+      - setup_remote_docker
       - run:
           name: Checkout Code (ESCOMP-Containers)
           command: git clone --branch bekozi-sync-doc-containers --depth 1 https://github.com/esmf-org/ESCOMP-Containers.git
