@@ -826,7 +826,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (present(extrapNumLevels)) then
            localExtrapNumLevels=extrapNumLevels
         else     
-           if (localExtrapMethod==ESMF_EXTRAPMETHOD_CREEP) then 
+           if ((localExtrapMethod==ESMF_EXTRAPMETHOD_CREEP) .or. &
+                (localExtrapMethod==ESMF_EXTRAPMETHOD_CREEP_NRST_D)) then 
               call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
                    msg=" If extrapMethod is ESMF_EXTRAPMETHOD_CREEP, then extrapNumLevels must be specified.", & 
                    ESMF_CONTEXT, rcToReturn=rc) 
@@ -1275,11 +1276,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           endif
 
           ! If we're doing creep fill, then also need Mesh
-          if (localExtrapMethod .eq. ESMF_EXTRAPMETHOD_CREEP) then
-               dstMesh = ESMF_GridToMesh(dstGrid, dstStaggerLocG2M, dstIsSphere, dstIsLatLonDeg, &
-                    maskValues=dstMaskValues, regridConserve=regridConserveG2M, rc=localrc)
-               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc)) return
+          if ((localExtrapMethod==ESMF_EXTRAPMETHOD_CREEP) .or. &
+               (localExtrapMethod==ESMF_EXTRAPMETHOD_CREEP_NRST_D)) then 
+             dstMesh = ESMF_GridToMesh(dstGrid, dstStaggerLocG2M, dstIsSphere, dstIsLatLonDeg, &
+                  maskValues=dstMaskValues, regridConserve=regridConserveG2M, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
           endif
 
         else if (dstgeomtype .eq. ESMF_GEOMTYPE_MESH) then
@@ -1325,7 +1327,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
              ! Generate Mesh for creep fill extrapolation 
-             if (localExtrapMethod .eq. ESMF_EXTRAPMETHOD_CREEP) then
+             if ((localExtrapMethod==ESMF_EXTRAPMETHOD_CREEP) .or. &
+                  (localExtrapMethod==ESMF_EXTRAPMETHOD_CREEP_NRST_D)) then 
                 if (dstMeshloc .ne. ESMF_MESHLOC_NODE) then
                    if (dstMeshloc .eq. ESMF_MESHLOC_ELEMENT) then
                       ! Create a dual of the Mesh
@@ -1379,7 +1382,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           dst_pl_used=.true.
 
           ! Can't do creep fill on locstream
-          if (localExtrapMethod .eq. ESMF_EXTRAPMETHOD_CREEP) then
+          if ((localExtrapMethod==ESMF_EXTRAPMETHOD_CREEP) .or. &
+               (localExtrapMethod==ESMF_EXTRAPMETHOD_CREEP_NRST_D)) then 
              call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
                   msg=" - Creep fill extrapolation is not allowed when destination is a location stream", & 
                   ESMF_CONTEXT, rcToReturn=rc) 
@@ -1617,7 +1621,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                ESMF_CONTEXT, rcToReturn=rc)) return
            else 
               ! If we're doing creep fill, then also made mesh
-              if (localExtrapMethod .eq. ESMF_EXTRAPMETHOD_CREEP) then
+              if ((localExtrapMethod==ESMF_EXTRAPMETHOD_CREEP) .or. &
+                   (localExtrapMethod==ESMF_EXTRAPMETHOD_CREEP_NRST_D)) then 
                  call ESMF_MeshDestroy(dstMesh,rc=localrc)
                  if (ESMF_LogFoundError(localrc, &
                       ESMF_ERR_PASSTHRU, &
@@ -1642,9 +1647,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               endif
            else
               ! If we're doing creep fill and made a dual, then also destroy
-              if ((localExtrapMethod .eq. ESMF_EXTRAPMETHOD_CREEP) .and. &
-                   dstDual) then
-                 
+              if (dstDual .and. &
+                   ((localExtrapMethod==ESMF_EXTRAPMETHOD_CREEP) .or. &
+                   (localExtrapMethod==ESMF_EXTRAPMETHOD_CREEP_NRST_D))) then 
                  call ESMF_MeshDestroy(dstMesh,rc=localrc)
                  if (ESMF_LogFoundError(localrc, &
                       ESMF_ERR_PASSTHRU, &
