@@ -1,3 +1,6 @@
+#TODO: Test applications (i.e. RegridWeightGen)
+#TODO: Build tags in ESCOMP
+
 version: 2.1
 
 jobs:
@@ -108,8 +111,6 @@ jobs:
       - store_artifacts:
           path: /artifacts/test-artifacts.zip
           destination: << parameters.target >>-artifacts.zip
-
-#TODO: Test applications (i.e. RegridWeightGen)
 
   build-esmf-docs:
     docker:
