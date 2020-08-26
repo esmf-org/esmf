@@ -4018,10 +4018,9 @@ module NUOPC_Base
     
     if (present(rc)) rc = ESMF_SUCCESS
 
-    ! The behavior of ESMF_ATTRECONCILE_ON has changed. Now must use
-    ! ESMF_ATTRECONCILE_OFF, and follow up by an ESMF_InfoSync()
-    call ESMF_StateReconcile(state, attreconflag=ESMF_ATTRECONCILE_OFF, &
-      rc=localrc)
+    !TODO: Now that ESMF_StateReconcile() internally always reconciles the
+    !TODO: Attributes, there is a problem for the threaded case!!!
+    call ESMF_StateReconcile(state, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
