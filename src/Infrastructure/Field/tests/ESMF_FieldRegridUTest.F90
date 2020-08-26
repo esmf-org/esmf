@@ -42572,6 +42572,14 @@ end subroutine test_regridSMMArbGrid
 
   enddo    ! lDE
 
+
+!  write(*,*) "maxRelErr=",maxRelErr
+!  write(*,*) "avgRelErr=",avgRelErr/REAL(numPnts)
+
+
+#if 0
+  !! DEBUG VTK FILE OUTPUT !! 
+
   ! Copy dstStatusArray from I4 to R8
   do lDE=0,dstlocalDECount-1
 
@@ -42598,11 +42606,6 @@ end subroutine test_regridSMMArbGrid
 
   enddo    ! lDE
 
-
-!  write(*,*) "maxRelErr=",maxRelErr
-!  write(*,*) "avgRelErr=",avgRelErr/REAL(numPnts)
-
-#if 1
   call ESMF_GridWriteVTK(srcGrid,staggerloc=ESMF_STAGGERLOC_CENTER, &
        filename="srcGrid", array1=srcArray, &
        rc=localrc)

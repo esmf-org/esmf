@@ -743,6 +743,25 @@ static void _create_pointlist_of_points_not_in_wmat(PointList *pointlist, WMat &
        
        // Create the weight matrix
        interp(0, nrst_extrap_wts, set_dst_status, nrst_extrap_dst_status);
+
+#if 0
+       // DEBUG
+       {
+         WMat::WeightMap::iterator wi = nrst_extrap_wts.weights.begin(), we = nrst_extrap_wts.weights.end();
+         for (; wi != we; ++wi) {
+           const WMat::Entry &row = wi->first;
+           std::vector<WMat::Entry> &col = wi->second;
+
+           printf("nrst_wts row id=%d :: col ids= ",row.id);
+           for (UInt i = 0; i < col.size(); i++) {
+             printf(" %d ",col[i].id);
+           }
+           printf("\n");
+
+         }
+       }
+#endif
+
        
        // Merge nearest weights into regrid weights
        _merge_dst_to_dst_wts_into_src_to_dst_wts(*dstmesh, nrst_extrap_wts, wts);
