@@ -319,7 +319,7 @@ end function {{ method_name }}
 #undef  ESMF_METHOD
 #define ESMF_METHOD "{{ method_name }}()"
 !BOP
-! !IROUTINE: {{ method_name }} - Create an Info object from another Info object
+! !IROUTINE: ESMF_InfoCreate - Create an Info object from another Info object
 !
 ! !INTERFACE:
   ! Private name; call using {{ doc_generic_method }}()
@@ -461,9 +461,7 @@ end subroutine {{ method_name }}
 !  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Set a value in an \texttt{ESMF\_Info} object using a key. If \textit{value}
-!     is of type \texttt{ESMF\_Info}, then a copy of its contents are made when
-!     setting.
+!     Set a \textit{value} in an \texttt{ESMF\_Info} object using a key.
 !
 {% if not do_charalloc %}
 !     Overloaded \textit{value} for the following types:
@@ -474,7 +472,6 @@ end subroutine {{ method_name }}
 !       \item \texttt{real(kind=ESMF\_KIND\_R8)}
 !       \item \texttt{logical}
 !       \item \texttt{character(:)}
-!       \item \texttt{type(ESMF\_Info)}
 !     \end{itemize}
 {% endif %}
 !
@@ -568,6 +565,66 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoSet{{ t.esmf_suffix }}
 {% endfor %}
+
+! -----------------------------------------------------------------------------
+
+{% set method_name = "ESMF_InfoSetINFO" %}
+#undef  ESMF_METHOD
+#define ESMF_METHOD "{{ method_name }}()"
+!BOP
+! !IROUTINE: ESMF_InfoSet - Set a key to the contents of an Info object
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_InfoSet
+subroutine {{ method_name }}(info, key, value, keywordEnforcer, force, rc)
+! !ARGUMENTS:
+  type(ESMF_Info), intent(inout) :: info
+  character(len=*), intent(in) :: key
+  type(ESMF_Info), intent(in) :: value
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  logical, intent(in), optional :: force
+  integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Set a value to the contents of an \texttt{ESMF\_Info} object. A copy of
+!     the source contents is made.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [info]
+{{ doc_info }}
+!     \item [key]
+{{ doc_key }}
+!     \item [value]
+!       The \texttt{ESMF\_Info} object to use as source data.
+!     \item [{[force]}]
+{{ doc_force }}
+{{ doc_rc }}
+!     \end{description}
+!EOP
+
+  integer :: localrc
+  logical(C_BOOL) :: local_force
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_FAILURE
+
+  if (present(force)) then
+    local_force = force
+  else
+    local_force = .true.
+  end if
+
+  call c_info_set_INFO(&
+    info%ptr, &
+    trim(key)//C_NULL_CHAR, &
+    value%ptr, &
+    local_force, &
+    localrc)
+  {{ esmf_lfe }}
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine {{ method_name }}
 
 !------------------------------------------------------------------------------
 ! SetArray --------------------------------------------------------------------
@@ -708,6 +765,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 end subroutine ESMF_InfoSetArray{{ t.esmf_suffix }}
 
 {% endfor %}
+
 !------------------------------------------------------------------------------
 
 {% set method_name = "ESMF_InfoSetNULL" %}
@@ -753,65 +811,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   end if
 
   call c_info_set_NULL(info%ptr, trim(key)//C_NULL_CHAR, local_force, localrc)
-  {{ esmf_lfe }}
-
-  if (present(rc)) rc = ESMF_SUCCESS
-end subroutine {{ method_name }}
-
-! -----------------------------------------------------------------------------
-
-{% set method_name = "ESMF_InfoSetINFO" %}
-#undef  ESMF_METHOD
-#define ESMF_METHOD "{{ method_name }}()"
-!BOPI
-! !IROUTINE: {{ method_name }} - Set a key to the contents of an Info object
-!
-! !INTERFACE:
-subroutine {{ method_name }}(info, key, value, keywordEnforcer, force, rc)
-! !ARGUMENTS:
-  type(ESMF_Info), intent(inout) :: info
-  character(len=*), intent(in) :: key
-  type(ESMF_Info), intent(in) :: value
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  logical, intent(in), optional :: force
-  integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Set a value to the contents of an \texttt{ESMF\_Info} object. A copy of
-!     the source contents is made.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-{{ doc_info }}
-!     \item [key]
-{{ doc_key }}
-!     \item [value]
-!       The \texttt{ESMF\_Info} object to use as source data.
-!     \item [{[force]}]
-{{ doc_force }}
-{{ doc_rc }}
-!     \end{description}
-!EOPI
-
-  integer :: localrc
-  logical(C_BOOL) :: local_force
-
-  localrc = ESMF_FAILURE
-  if (present(rc)) rc = ESMF_FAILURE
-
-  if (present(force)) then
-    local_force = force
-  else
-    local_force = .true.
-  end if
-
-  call c_info_set_INFO(&
-    info%ptr, &
-    trim(key)//C_NULL_CHAR, &
-    value%ptr, &
-    local_force, &
-    localrc)
   {{ esmf_lfe }}
 
   if (present(rc)) rc = ESMF_SUCCESS
