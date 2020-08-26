@@ -1,12 +1,13 @@
 default-checkout: &default-checkout
-  - run:
-      name: Checkout Code (ESCOMP-Containers)
-      command: git clone --branch bekozi-sync-doc-containers --depth 1 https://github.com/esmf-org/ESCOMP-Containers.git
-      #tdk: switch back to escomp
-  #          command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
-  - run:
-      name: Checkout Code (ESMF)
-      command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git
+  steps:
+    - run:
+        name: Checkout Code (ESCOMP-Containers)
+        command: git clone --branch bekozi-sync-doc-containers --depth 1 https://github.com/esmf-org/ESCOMP-Containers.git
+        #tdk: switch back to escomp
+    #          command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
+    - run:
+        name: Checkout Code (ESMF)
+        command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git
 
 
 default-approval: &default-approval
@@ -25,10 +26,9 @@ jobs:
   build-escomp-centos8:
     docker:
       - image: cimg/base:2020.01
-    steps:
+    <<: *default-checkout
       - setup_remote_docker:
           docker_layer_caching: true
-      <<: *default-checkout
       - run:
           name: Docker Build
           command: docker build -t "esmf/centos8" --file "ESCOMP-Containers/base/centos8/Dockerfile" .
@@ -40,9 +40,8 @@ jobs:
     docker:
       - image: cimg/base:2020.01
     resource_class: xlarge
-    steps:
+    <<: *default-checkout
       - setup_remote_docker
-      <<: *default-checkout
       - run:
           name: Docker Build
           command: docker build -t "esmf/esmf:${CIRCLE_BRANCH}" --file "ESCOMP-Containers/ESMF/dev/Dockerfile" --build-arg ESMF_BRANCH="${CIRCLE_BRANCH}" --build-arg DOCKER_NAMESPACE="esmf" .
@@ -74,7 +73,7 @@ jobs:
     environment:
       - ESMF_ARTIFACTS: /artifacts
       - ESMF_OUTDIR: /artifacts/test-artifacts
-    steps:
+    <<: *default-checkout
 #      - run:
 #          name: passthru-build-tests
 #          command: exit 0
@@ -100,13 +99,12 @@ jobs:
   build-esmf-docs:
     docker:
       - image: cimg/base:2020.01
-    steps:
+    <<: *default-checkout
 #      - run:
 #          name: passthru-build-docs
 #          command: exit 0
       - setup_remote_docker:
           docker_layer_caching: true
-      <<: *default-checkout
       - run:
           name: Docker Build esmf-doc-base
           command: docker build -t "esmf/esmf-doc-base" --file "ESCOMP-Containers/ESMF/doc/esmf-doc-base/Dockerfile" --build-arg DOCKER_NAMESPACE="esmf" .
@@ -177,10 +175,9 @@ jobs:
   build-esmpy-docs:
     docker:
       - image: cimg/base:2020.01
-    steps:
+    <<: *default-checkout
       - setup_remote_docker:
           docker_layer_caching: true
-      <<: *default-checkout
       - run:
           name: Docker Build esmpy-doc-base
           command: docker build -t "esmf/esmpy-doc-base" --file "ESCOMP-Containers/ESMF/doc/esmpy-doc-base/Dockerfile" --build-arg DOCKER_NAMESPACE="esmf" .
