@@ -132,7 +132,9 @@ namespace ESMCI{
                            const char *dstFile,
                            ESMC_FileFormat_Flag *srcFileType,
                            ESMC_FileFormat_Flag *dstFileType,
-                           Field *srcFracField, Field *dstFracField);
+                           ESMC_Logical *largeFileFlag,
+                           Field *srcFracField, 
+                           Field *dstFracField);
     static int regrid(Field *fieldsrc, Field *fielddst,
                       RouteHandle *routehandle, ESMC_Region_Flag *zeroRegion);
     static int regridrelease(RouteHandle *routehandle);

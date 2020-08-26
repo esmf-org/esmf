@@ -253,6 +253,10 @@ module NUOPC_Connector
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
+    ! Set IPDvX attribute
+    call NUOPC_CompAttributeSet(connector, name="IPDvX", value="true", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
   end subroutine
   
   !-----------------------------------------------------------------------------
@@ -270,6 +274,7 @@ module NUOPC_Connector
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
     type(type_InternalState)  :: is
+    character(ESMF_MAXSTR)    :: ipdvxAttr
 
     rc = ESMF_SUCCESS
 
@@ -315,6 +320,16 @@ module NUOPC_Connector
         return  ! bail out
     endif
     
+    ! determine whether the component is compatible with IPDvX
+    call NUOPC_CompAttributeGet(connector, name="IPDvX", value=ipdvxAttr, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#if 0
+    call ESMF_LogWrite("ipdvxAttr: "//ipdvxAttr, ESMF_LOGMSG_INFO, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
+
     ! filter all other entries but those of type IPDv05
     call NUOPC_CompFilterPhaseMap(connector, ESMF_METHOD_INITIALIZE, &
       acceptStringList=(/"IPDv05p"/), rc=rc)
@@ -5591,7 +5606,6 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     integer                   :: localrc
     logical                   :: existflag
     logical                   :: routeHandleIsCreated
-    integer                   :: rootPet, rootVas, vas, petCount
     character(ESMF_MAXSTR)    :: compName, pLabel
     character(len=160)        :: msgString
     integer                   :: phase

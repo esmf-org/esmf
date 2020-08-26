@@ -128,22 +128,22 @@ class Mesh(object):
         if (not isinstance(parametric_dim, type(None))) or (not isinstance(spatial_dim, type(None))):
             # parametric_dim and spatial_dim are required for in-memory mesh creation
             if (isinstance(parametric_dim, type(None))) or (isinstance(spatial_dim, type(None))):
-                warning.warn("both parametric_dim and spatial_dim must be specified")
+                warnings.warn("both parametric_dim and spatial_dim must be specified")
             # raise warnings for the from-file options
             if not isinstance(filename, type(None)):
-                warning.warn("filename is only used for meshes created from file, this argument will be ignored.")
+                warnings.warn("filename is only used for meshes created from file, this argument will be ignored.")
             if not isinstance(filetype, type(None)):
-                warning.warn("filetype is only used for meshes created from file, this argument will be ignored.")
+                warnings.warn("filetype is only used for meshes created from file, this argument will be ignored.")
             if not isinstance(convert_to_dual, type(None)):
-                warning.warn("convert_to_dual is only used for meshes created from file, this argument will be ignored.")
+                warnings.warn("convert_to_dual is only used for meshes created from file, this argument will be ignored.")
             if not isinstance(add_user_area, type(None)):
-                warning.warn("add_user_area is only used for meshes created from file, this argument will be ignored.")
+                warnings.warn("add_user_area is only used for meshes created from file, this argument will be ignored.")
             if meshname != "":
-                warning.warn("meshname is only used for meshes created from file, this argument will be ignored.")
+                warnings.warn("meshname is only used for meshes created from file, this argument will be ignored.")
             if not isinstance(mask_flag, type(None)):
-                warning.warn("mask_flag is only used for meshes created from file, this argument will be ignored.")
+                warnings.warn("mask_flag is only used for meshes created from file, this argument will be ignored.")
             if varname != "":
-                warning.warn("varname is only used for meshes created from file, this argument will be ignored.")
+                warnings.warn("varname is only used for meshes created from file, this argument will be ignored.")
         # filename and filetype are required for from-file mesh creation
         elif (isinstance(filename, type(None))) or (isinstance(filetype, type(None))):
             raise MeshArgumentError ("must supply either parametric_dim and spatial_dim for an in-memory mesh or filename and filetype for a from-file mesh")
@@ -152,11 +152,11 @@ class Mesh(object):
             fromfile = True
             #raise warnings for all in-memory grid options
             if not isinstance(parametric_dim, type(None)):
-                warning.warn("parametric_dim is only used for meshes created in memory, this argument will be ignored.")
+                warnings.warn("parametric_dim is only used for meshes created in memory, this argument will be ignored.")
             if not isinstance(spatial_dim, type(None)):
-                warning.warn("spatial_dim is only used for meshes created in memory, this argument will be ignored.")
+                warnings.warn("spatial_dim is only used for meshes created in memory, this argument will be ignored.")
             if not isinstance(coord_sys, type(None)):
-                warning.warn("coord_sys is only used for meshes created in memory, this argument will be ignored.")
+                warnings.warn("coord_sys is only used for meshes created in memory, this argument will be ignored.")
 
         # ctypes stuff
         self._struct = None

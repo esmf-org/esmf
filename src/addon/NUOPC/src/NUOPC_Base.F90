@@ -2812,7 +2812,7 @@ module NUOPC_Base
 ! !INTERFACE:
   ! Private name; call using NUOPC_Realize()
   subroutine NUOPC_RealizeCompleteG(state, grid, fieldName, typekind, &
-    staggerloc, selection, dataFillScheme, rc)
+    staggerloc, selection, dataFillScheme, field, rc)
 ! !ARGUMENTS:
     type(ESMF_State)                                :: state
     type(ESMF_Grid),          intent(in)            :: grid
@@ -2821,6 +2821,7 @@ module NUOPC_Base
     type(ESMF_StaggerLoc),    intent(in),  optional :: staggerloc
     character(len=*),         intent(in),  optional :: selection
     character(len=*),         intent(in),  optional :: dataFillScheme    
+    type(ESMF_Field),         intent(out), optional :: field
     integer,                  intent(out), optional :: rc
 ! !DESCRIPTION:
 !   \label{NUOPC_RealizeCompleteG}
@@ -2870,6 +2871,9 @@ module NUOPC_Base
 !     Realized fields will be filled according to the selected fill
 !     scheme. See \ref{NUOPC_FillField} for fill schemes. Default is to leave
 !     the data in realized fields uninitialized.
+!   \item[{[field]}]
+!     Returns the completed field that was realized by this method. This option
+!     is only supported if also argument {\tt fieldName} was specified.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -2880,7 +2884,7 @@ module NUOPC_Base
     character(len=80), allocatable  :: fieldNameList(:)
     integer                         :: localrc
     integer                         :: i, itemCount, k
-    type(ESMF_Field)                :: field, fieldAdv
+    type(ESMF_Field)                :: fieldNew, fieldAdv
     type(ESMF_FieldStatus_Flag)     :: fieldStatus
     character(len=80)               :: selectionOpt
     type(ESMF_TypeKind_Flag)        :: typekindOpt
@@ -2903,6 +2907,14 @@ module NUOPC_Base
       allocate(fieldNameList(itemCount))
       fieldNameList(1)=trim(fieldName)
     else
+      ! check for inconsistent optional arguments
+      if (present(field)) then
+        call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
+          msg="fieldName must be specified to request field.", &
+          line=__LINE__, file=FILENAME, &
+          rcToReturn=rc)
+        return  ! bail out
+      endif
       ! query the entire fieldNameList from state
       call ESMF_StateGet(state, itemCount=itemCount, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2914,7 +2926,7 @@ module NUOPC_Base
         line=__LINE__, file=FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
-    
+
     ! optional selection argument
     if (present(selection)) then
       selectionOpt=trim(selection)
@@ -2958,20 +2970,20 @@ module NUOPC_Base
       
       if (trim(selectionOpt)=="realize_all") then
         ! create a Field
-        field = ESMF_FieldCreate(grid, typekindOpt, &
+        fieldNew = ESMF_FieldCreate(grid, typekindOpt, &
           staggerloc=staggerlocOpt, name=fieldNameList(i), rc=localrc)
         if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) &
           return  ! bail out
         ! realize the connected Field using the just created Field
-        call NUOPC_Realize(state, field=field, rc=localrc)
+        call NUOPC_Realize(state, field=fieldNew, rc=localrc)
         if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) &
           return  ! bail out
         if (present(dataFillScheme)) then
           ! a data fill scheme was provided -> use it to initialize
-          call ESMF_FieldFill(field, dataFillScheme=dataFillScheme, member=k, &
-            step=0, rc=localrc)
+          call ESMF_FieldFill(fieldNew, dataFillScheme=dataFillScheme, &
+            member=k, step=0, rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=FILENAME, rcToReturn=rc)) &
             return  ! bail out
@@ -2985,19 +2997,20 @@ module NUOPC_Base
           return  ! bail out
         if (isConnected) then
           ! create a Field
-          field = ESMF_FieldCreate(grid, typekindOpt, &
+          fieldNew = ESMF_FieldCreate(grid, typekindOpt, &
             staggerloc=staggerlocOpt, name=fieldNameList(i), rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=FILENAME, rcToReturn=rc)) &
             return  ! bail out
           ! realize the connected Field using the just created Field
-          call NUOPC_Realize(state, field=field, rc=localrc)
+          call NUOPC_Realize(state, field=fieldNew, rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=FILENAME, rcToReturn=rc)) &
             return  ! bail out
           if (present(dataFillScheme)) then
             ! a data fill scheme was provided -> use it to initialize
-            call ESMF_FieldFill(field, dataFillScheme=dataFillScheme, member=k, step=0, rc=localrc)
+            call ESMF_FieldFill(fieldNew, dataFillScheme=dataFillScheme, &
+              member=k, step=0, rc=localrc)
             if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=FILENAME, rcToReturn=rc)) &
               return  ! bail out
@@ -3029,45 +3042,46 @@ module NUOPC_Base
               rcToReturn=rc)
             return  ! bail out
           endif
-          call ESMF_StateGet(state, itemName=fieldNameList(i), field=field, &
+          call ESMF_StateGet(state, itemName=fieldNameList(i), field=fieldNew, &
             rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=FILENAME, rcToReturn=rc)) &
             return  ! bail out
 #if 0
-          call NUOPC_GetAttribute(field, name=tempString, &
+          call NUOPC_GetAttribute(fieldNew, name=tempString, &
             value=value, rc=localrc)
           call ESMF_LogWrite(trim(fieldNameList(i))//":*** "//trim(value)// &
             " ***: TransferAction", ESMF_LOGMSG_INFO, rc=localrc)
-          call NUOPC_GetAttribute(field, name="ShareStatusField", &
+          call NUOPC_GetAttribute(fieldNew, name="ShareStatusField", &
             value=value, rc=localrc)
           call ESMF_LogWrite(trim(fieldNameList(i))//":*** "//trim(value)// &
             " ***: ShareStatusField", ESMF_LOGMSG_INFO, rc=localrc)
-          call NUOPC_GetAttribute(field, name="ShareStatusGeomObject", &
+          call NUOPC_GetAttribute(fieldNew, name="ShareStatusGeomObject", &
             value=value, rc=localrc)
           call ESMF_LogWrite(trim(fieldNameList(i))//":*** "//trim(value)// &
             " ***: ShareStatusGeomObject:", ESMF_LOGMSG_INFO, rc=localrc)
 #endif
-          call NUOPC_GetAttribute(field, name=tempString, &
+          call NUOPC_GetAttribute(fieldNew, name=tempString, &
             value=value, rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=FILENAME, rcToReturn=rc)) &
             return  ! bail out
           if (trim(value)=="provide") then
             ! create a Field
-            field = ESMF_FieldCreate(grid, typekindOpt, &
+            fieldNew = ESMF_FieldCreate(grid, typekindOpt, &
               staggerloc=staggerlocOpt, name=fieldNameList(i), rc=localrc)
             if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=FILENAME, rcToReturn=rc)) &
               return  ! bail out
             ! realize the connected Field using the just created Field
-            call NUOPC_Realize(state, field=field, rc=localrc)
+            call NUOPC_Realize(state, field=fieldNew, rc=localrc)
             if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=FILENAME, rcToReturn=rc)) &
               return  ! bail out
             if (present(dataFillScheme)) then
               ! a data fill scheme was provided -> use it to initialize
-              call ESMF_FieldFill(field, dataFillScheme=dataFillScheme, member=k, step=0, rc=localrc)
+              call ESMF_FieldFill(fieldNew, dataFillScheme=dataFillScheme, &
+                member=k, step=0, rc=localrc)
               if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=FILENAME, rcToReturn=rc)) &
                 return  ! bail out
@@ -3089,7 +3103,15 @@ module NUOPC_Base
         return ! bail out
       endif
     enddo
-    
+
+    if (present(field)) then
+      call ESMF_StateGet(state, itemName=fieldNameList(1), field=field, &
+        rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
   end subroutine
   !-----------------------------------------------------------------------------
 
@@ -3099,7 +3121,7 @@ module NUOPC_Base
 ! !INTERFACE:
   ! Private name; call using NUOPC_Realize()
   subroutine NUOPC_RealizeCompleteLS(state, locstream, fieldName, typekind, selection,&
-    dataFillScheme, rc)
+    dataFillScheme, field, rc)
 ! !ARGUMENTS:
     type(ESMF_State)                                :: state
     type(ESMF_LocStream),     intent(in)            :: locstream
@@ -3107,6 +3129,7 @@ module NUOPC_Base
     type(ESMF_TypeKind_Flag), intent(in),  optional :: typekind
     character(len=*),         intent(in),  optional :: selection
     character(len=*),         intent(in),  optional :: dataFillScheme    
+    type(ESMF_Field),         intent(out), optional :: field
     integer,                  intent(out), optional :: rc
 ! !DESCRIPTION:
 !   \label{NUOPC_RealizeCompleteLS}
@@ -3150,6 +3173,9 @@ module NUOPC_Base
 !     Realized fields will be filled according to the selected fill
 !     scheme. See \ref{NUOPC_FillField} for fill schemes. Default is to leave
 !     the data in realized fields uninitialized.
+!   \item[{[field]}]
+!     Returns the completed field that was realized by this method. This option
+!     is only supported if also argument {\tt fieldName} was specified.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -3160,7 +3186,7 @@ module NUOPC_Base
     character(len=80), allocatable  :: fieldNameList(:)
     integer                         :: localrc
     integer                         :: i, itemCount, k
-    type(ESMF_Field)                :: field
+    type(ESMF_Field)                :: fieldNew
     character(len=80)               :: selectionOpt
     type(ESMF_TypeKind_Flag)        :: typekindOpt
     logical                         :: isConnected
@@ -3173,6 +3199,14 @@ module NUOPC_Base
       allocate(fieldNameList(itemCount))
       fieldNameList(1)=trim(fieldName)
     else
+      ! check for inconsistent optional arguments
+      if (present(field)) then
+        call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
+          msg="fieldName must be specified to request field.", &
+          line=__LINE__, file=FILENAME, &
+          rcToReturn=rc)
+        return  ! bail out
+      endif
       ! query the entire fieldNameList from state
       call ESMF_StateGet(state, itemCount=itemCount, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -3203,20 +3237,20 @@ module NUOPC_Base
     do i=1, itemCount
       if (trim(selectionOpt)=="realize_all") then
         ! create a Field
-        field = ESMF_FieldCreate(locstream, typekindOpt, &
+        fieldNew = ESMF_FieldCreate(locstream, typekindOpt, &
           name=fieldNameList(i), rc=localrc)
         if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) &
           return  ! bail out
         ! realize the connected Field using the just created Field
-        call NUOPC_Realize(state, field=field, rc=localrc)
+        call NUOPC_Realize(state, field=fieldNew, rc=localrc)
         if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) &
           return  ! bail out
         if (present(dataFillScheme)) then
           ! a data fill scheme was provided -> use it to initialize
-          call ESMF_FieldFill(field, dataFillScheme=dataFillScheme, member=k, &
-            step=0, rc=localrc)
+          call ESMF_FieldFill(fieldNew, dataFillScheme=dataFillScheme, &
+            member=k, step=0, rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=FILENAME, rcToReturn=rc)) &
             return  ! bail out
@@ -3230,19 +3264,20 @@ module NUOPC_Base
           return  ! bail out
         if (isConnected) then
           ! create a Field
-          field = ESMF_FieldCreate(locstream, typekindOpt, &
+          fieldNew = ESMF_FieldCreate(locstream, typekindOpt, &
             name=fieldNameList(i), rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=FILENAME, rcToReturn=rc)) &
             return  ! bail out
           ! realize the connected Field using the just created Field
-          call NUOPC_Realize(state, field=field, rc=localrc)
+          call NUOPC_Realize(state, field=fieldNew, rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=FILENAME, rcToReturn=rc)) &
             return  ! bail out
           if (present(dataFillScheme)) then
             ! a data fill scheme was provided -> use it to initialize
-            call ESMF_FieldFill(field, dataFillScheme=dataFillScheme, member=k, step=0, rc=localrc)
+            call ESMF_FieldFill(fieldNew, dataFillScheme=dataFillScheme, &
+              member=k, step=0, rc=localrc)
             if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=FILENAME, rcToReturn=rc)) &
               return  ! bail out
@@ -3263,7 +3298,15 @@ module NUOPC_Base
         return ! bail out
       endif
     enddo
-    
+
+    if (present(field)) then
+      call ESMF_StateGet(state, itemName=fieldNameList(1), field=field, &
+        rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
   end subroutine
   !-----------------------------------------------------------------------------
 
@@ -3273,7 +3316,7 @@ module NUOPC_Base
 ! !INTERFACE:
   ! Private name; call using NUOPC_Realize()
   subroutine NUOPC_RealizeCompleteM(state, mesh, fieldName, typekind, &
-    meshloc, selection, dataFillScheme, rc)
+    meshloc, selection, dataFillScheme, field, rc)
 ! !ARGUMENTS:
     type(ESMF_State)                                :: state
     type(ESMF_Mesh),          intent(in)            :: mesh
@@ -3281,7 +3324,8 @@ module NUOPC_Base
     type(ESMF_TypeKind_Flag), intent(in),  optional :: typekind
     type(ESMF_MeshLoc),       intent(in),  optional :: meshloc
     character(len=*),         intent(in),  optional :: selection
-    character(len=*),         intent(in),  optional :: dataFillScheme    
+    character(len=*),         intent(in),  optional :: dataFillScheme
+    type(ESMF_Field),         intent(out), optional :: field
     integer,                  intent(out), optional :: rc
 ! !DESCRIPTION:
 !   \label{NUOPC_RealizeCompleteM}
@@ -3329,6 +3373,9 @@ module NUOPC_Base
 !     Realized fields will be filled according to the selected fill
 !     scheme. See \ref{NUOPC_FillField} for fill schemes. Default is to leave
 !     the data in realized fields uninitialized.
+!   \item[{[field]}]
+!     Returns the completed field that was realized by this method. This option
+!     is only supported if also argument {\tt fieldName} was specified.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -3339,7 +3386,7 @@ module NUOPC_Base
     character(len=80), allocatable  :: fieldNameList(:)
     integer                         :: localrc
     integer                         :: i, itemCount, k
-    type(ESMF_Field)                :: field, fieldAdv
+    type(ESMF_Field)                :: fieldNew, fieldAdv
     type(ESMF_FieldStatus_Flag)     :: fieldStatus
     character(len=80)               :: selectionOpt
     type(ESMF_TypeKind_Flag)        :: typekindOpt
@@ -3354,6 +3401,14 @@ module NUOPC_Base
       allocate(fieldNameList(itemCount))
       fieldNameList(1)=trim(fieldName)
     else
+      ! check for inconsistent optional arguments
+      if (present(field)) then
+        call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
+          msg="fieldName must be specified to request field.", &
+          line=__LINE__, file=FILENAME, &
+          rcToReturn=rc)
+        return  ! bail out
+      endif
       ! query the entire fieldNameList from state
       call ESMF_StateGet(state, itemCount=itemCount, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -3409,20 +3464,20 @@ module NUOPC_Base
 
       if (trim(selectionOpt)=="realize_all") then
         ! create a Field
-        field = ESMF_FieldCreate(mesh, typekindOpt, &
+        fieldNew = ESMF_FieldCreate(mesh, typekindOpt, &
           meshloc=meshlocOpt, name=fieldNameList(i), rc=localrc)
         if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) &
           return  ! bail out
         ! realize the connected Field using the just created Field
-        call NUOPC_Realize(state, field=field, rc=localrc)
+        call NUOPC_Realize(state, field=fieldNew, rc=localrc)
         if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) &
           return  ! bail out
         if (present(dataFillScheme)) then
           ! a data fill scheme was provided -> use it to initialize
-          call ESMF_FieldFill(field, dataFillScheme=dataFillScheme, member=k, &
-            step=0, rc=localrc)
+          call ESMF_FieldFill(fieldNew, dataFillScheme=dataFillScheme, &
+            member=k, step=0, rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=FILENAME, rcToReturn=rc)) &
             return  ! bail out
@@ -3436,19 +3491,20 @@ module NUOPC_Base
             return  ! bail out
         if (isConnected) then
           ! create a Field
-          field = ESMF_FieldCreate(mesh, typekindOpt, &
+          fieldNew = ESMF_FieldCreate(mesh, typekindOpt, &
           meshloc=meshlocOpt, name=fieldNameList(i), rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=FILENAME, rcToReturn=rc)) &
             return  ! bail out
           ! realize the connected Field using the just created Field
-          call NUOPC_Realize(state, field=field, rc=localrc)
+          call NUOPC_Realize(state, field=fieldNew, rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=FILENAME, rcToReturn=rc)) &
             return  ! bail out
           if (present(dataFillScheme)) then
             ! a data fill scheme was provided -> use it to initialize
-            call ESMF_FieldFill(field, dataFillScheme=dataFillScheme, member=k, step=0, rc=localrc)
+            call ESMF_FieldFill(fieldNew, dataFillScheme=dataFillScheme, &
+              member=k, step=0, rc=localrc)
             if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=FILENAME, rcToReturn=rc)) &
               return  ! bail out
@@ -3469,7 +3525,15 @@ module NUOPC_Base
         return ! bail out
       endif
     enddo
-    
+
+    if (present(field)) then
+      call ESMF_StateGet(state, itemName=fieldNameList(1), field=field, &
+        rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
   end subroutine
   !-----------------------------------------------------------------------------
 
@@ -3949,10 +4013,37 @@ module NUOPC_Base
   !-----------------------------------------------------------------------------
     ! local variables
     integer                 :: localrc
-
+    type(ESMF_VM)           :: vm
+    integer                 :: rootPet, rootVas, petCount, vas
+    
     if (present(rc)) rc = ESMF_SUCCESS
 
-    call ESMF_StateReconcile(state, rc=localrc)
+    ! The behavior of ESMF_ATTRECONCILE_ON has changed. Now must use
+    ! ESMF_ATTRECONCILE_OFF, and follow up by an ESMF_InfoSync()
+    call ESMF_StateReconcile(state, attreconflag=ESMF_ATTRECONCILE_OFF, &
+      rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+    ! Determine the rootPet for the ESMF_InfoSync()
+    call ESMF_VMGetCurrent(vm, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    call ESMF_AttributeGet(state, name="rootVas", value=rootVas, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    call ESMF_VMGet(vm, petCount=petCount, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    do rootPet=0, petCount-1
+      call ESMF_VMGet(vm, rootPet, vas=vas, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      if (vas==rootVas) exit
+    enddo
+
+    ! Finally the attributes can be synchronized
+    call ESMF_InfoSync(state, rootPet=rootPet, vm=vm, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
@@ -4701,12 +4792,15 @@ module NUOPC_Base
     ! local variables
     character(len=80)       :: petListBuffer
     integer                 :: i, lineCount, extra, localrc
+    integer                 :: petListT(10)
+    integer, allocatable    :: petListTe(:)
 
     lineCount = size(petList)/10
     extra = size(petList) - (size(petList)/10)*10
     
     do i=1, lineCount
-      write (petListBuffer, "(10I7)") petList((i-1)*10+1:i*10)
+      petListT(:) = petList((i-1)*10+1:i*10)
+      write (petListBuffer, "(10I7)") petListT
       call ESMF_LogWrite(petListBuffer, ESMF_LOGMSG_INFO, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU,&
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -4714,11 +4808,14 @@ module NUOPC_Base
     enddo
     
     if (extra>0) then
-      write (petListBuffer, "(10I7)") petList((i-1)*10+1:(i-1)*10+extra)
+      allocate(petListTe(extra))
+      petListTe(:) = petList((i-1)*10+1:(i-1)*10+extra)
+      write (petListBuffer, "(10I7)") petListTe
       call ESMF_LogWrite(petListBuffer, ESMF_LOGMSG_INFO, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU,&
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
+      deallocate(petListTe)
     endif
     
     ! return successfully

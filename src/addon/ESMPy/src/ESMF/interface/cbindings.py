@@ -2094,6 +2094,7 @@ _ESMF.ESMC_FieldRegridStoreFile.argtypes = [ct.c_void_p, ct.c_void_p,
                                             ct.c_char_p,
                                             OptionalNamedConstant,
                                             OptionalNamedConstant,
+                                            OptionalBool,
                                             OptionalField,
                                             OptionalField]
 @deprecated
@@ -2105,6 +2106,7 @@ def ESMP_FieldRegridStoreFile(srcField, dstField, filename,
                           ignoreDegenerate=None, createRH=None,
                           filemode=None, srcFile=None, dstFile=None,
                           srcFileType=None, dstFileType=None,
+                          largeFileFlag=None,
                           srcFracField=None, dstFracField=None):
     """
     Preconditions: Two ESMP_Fields have been created and initialized
@@ -2158,6 +2160,7 @@ def ESMP_FieldRegridStoreFile(srcField, dstField, filename,
         string (optional)                   :: dstFile\n
         FileFormat (optional)               :: srcFileType\n
         FileFormat (optional)               :: dstFileType\n
+        bool (optional)                     :: largeFileFlag\n
         ESMP_Field (optional)               :: srcFracField\n
         ESMP_Field (optional)               :: dstFracField\n
     """
@@ -2227,6 +2230,7 @@ def ESMP_FieldRegridStoreFile(srcField, dstField, filename,
                                      b_dstfilename,
                                      srcFileType,
                                      dstFileType,
+                                     largeFileFlag,
                                      srcFracField,
                                      dstFracField)
     if rc != constants._ESMP_SUCCESS:

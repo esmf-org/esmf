@@ -1160,8 +1160,9 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                     filemode, &
                                     srcFile, &
                                     dstFile, &
-                                    dstFileType, &
                                     srcFileType, &
+                                    dstFileType, &
+                                    largeFileFlag, &
                                     srcFracField, &
                                     dstFracField, &
                                     rc)
@@ -1198,6 +1199,8 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     character(len=*),           optional    :: dstFile
     type(ESMF_FileFormat_Flag), optional    :: srcFileType
     type(ESMF_FileFormat_Flag), optional    :: dstFileType
+
+    logical, optional                       :: largeFileFlag
 
     type(ESMF_Field)                        :: srcFracField
     type(ESMF_Field)                        :: dstFracField
@@ -1291,6 +1294,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                       srcFile=srcFile, dstFile=dstFile, &
                                       srcFileType=srcFileType, &
                                       dstFileType=dstFileType, &
+                                      largeFileFlag=largeFileFlag, &
                                       rc=localrc)
     else
       call ESMF_LogSetError(rcToCheck=ESMF_RC_VAL_OUTOFRANGE, &

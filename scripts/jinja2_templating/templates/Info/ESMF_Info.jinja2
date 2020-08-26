@@ -443,37 +443,22 @@ end subroutine {{ method_name }}
 !------------------------------------------------------------------------------
 ! Set (Scalar) ----------------------------------------------------------------
 !------------------------------------------------------------------------------
-{% for t in ts %}
-{% if t.esmf_suffix == "I4" %}
-  {% set do_doc = true %}
-{% else %}
-  {% set do_doc = false %}
-{% endif %}
 
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoSet{{ t.esmf_suffix }}()"
-{% if do_doc %}!BOP{% else %}!BOPI{% endif %}{{ "" }}
+!BOP
 ! !IROUTINE: ESMF_InfoSet - Set a value
 !
 ! !INTERFACE:
-  ! Private name; call using ESMF_InfoSet()
-subroutine ESMF_InfoSet{{ t.esmf_suffix }}(info, key, value, keywordEnforcer, force, idx, pkey, rc)
-
+!subroutine ESMF_InfoSet(info, key, value, keywordEnforcer, force, idx, pkey, rc)
+!
 ! !ARGUMENTS:
-  type(ESMF_Info), intent(inout) :: info
-  character(len=*), intent(in) :: key
-{% if t.ctype == "std::string" %}
-  character(len=*), intent(in) :: value
-{% elif t.ctype == "bool" %}
-  {{ t.ftype }}, intent(in) :: value
-{% else %}
-  {{ t.ftype }}({{ t.esmf_type }}), intent(in) :: value
-{% endif %}
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  logical, intent(in), optional :: force
-  integer, intent(in), optional :: idx
-  character(len=*), intent(in), optional :: pkey
-  integer, intent(out), optional :: rc
+!  type(ESMF_Info), intent(inout) :: info
+!  character(len=*), intent(in) :: key
+!  <value>, see below for supported value
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!  logical, intent(in), optional :: force
+!  integer, intent(in), optional :: idx
+!  character(len=*), intent(in), optional :: pkey
+!  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Set a value in an \texttt{ESMF\_Info} object using a key. List values are
@@ -507,7 +492,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       Use this key's location as the origin for the set call.
 {{ doc_rc }}
 !     \end{description}
-{% if do_doc %}!EOP{% else %}!EOPI{% endif %}{{ "" }}
+!EOP
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! NOTE: Documentation stub located above for generic interface compliance.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+{% for t in ts %}
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoSet{{ t.esmf_suffix }}()"
+subroutine ESMF_InfoSet{{ t.esmf_suffix }}(info, key, value, keywordEnforcer, force, idx, pkey, rc)
+  type(ESMF_Info), intent(inout) :: info
+  character(len=*), intent(in) :: key
+{% if t.ctype == "std::string" %}
+  character(len=*), intent(in) :: value
+{% elif t.ctype == "bool" %}
+  {{ t.ftype }}, intent(in) :: value
+{% else %}
+  {{ t.ftype }}({{ t.esmf_type }}), intent(in) :: value
+{% endif %}
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  logical, intent(in), optional :: force
+  integer, intent(in), optional :: idx
+  character(len=*), intent(in), optional :: pkey
+  integer, intent(out), optional :: rc
+
   integer :: localrc
   logical(C_BOOL) :: local_force{% if t.ctype == "bool" %}, local_value{% endif %}{{ "" }}
   integer(C_INT), target :: local_idx
@@ -561,35 +570,21 @@ end subroutine ESMF_InfoSet{{ t.esmf_suffix }}
 !------------------------------------------------------------------------------
 ! SetArray --------------------------------------------------------------------
 !------------------------------------------------------------------------------
-{% for t in ts %}
-{% if t.ctype == "std::string" %}{% set is_str = True %}{% else %}{% set is_str = False %}{% endif %}
-{% if t.esmf_suffix == "I4" %}
-  {% set do_doc = true %}
-{% else %}
-  {% set do_doc = false %}
-{% endif %}
 
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoSetArray{{ t.esmf_suffix }}()"
-{% if do_doc %}!BOP{% else %}!BOPI{% endif %}{{ "" }}
+!BOP
 ! !IROUTINE: ESMF_InfoSet - Set a value list
 !
 ! !INTERFACE:
-  ! Private name; call using ESMF_InfoSet()
-subroutine ESMF_InfoSetArray{{ t.esmf_suffix }}(info, key, values, keywordEnforcer, force, pkey, rc)
-
+!subroutine ESMF_InfoSet(info, key, values, keywordEnforcer, force, pkey, rc)
+!
 ! !ARGUMENTS:
-  type(ESMF_Info), intent(inout) :: info
-  character(len=*), intent(in) :: key
-{% if is_str %}
-  character(len=*), dimension(:), intent(in) :: values
-{% else %}
-  {{ t.ftype }}{% if t.ctype != "bool" %}({{ t.esmf_type }}){% endif %}, dimension(:), intent(in) :: values
-{% endif %}
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  logical, intent(in), optional :: force
-  character(len=*), intent(in), optional :: pkey
-  integer, intent(out), optional :: rc
+!  type(ESMF_Info), intent(inout) :: info
+!  character(len=*), intent(in) :: key
+!  <values>, see below for supported values
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!  logical, intent(in), optional :: force
+!  character(len=*), intent(in), optional :: pkey
+!  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Set a value list in an \texttt{ESMF\_Info} object using a key.
@@ -621,7 +616,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       for recursive requirements related to \texttt{ESMF\_Attribute}.
 {{ doc_rc }}
 !     \end{description}
-{% if do_doc %}!EOP{% else %}!EOPI{% endif %}{{ "" }}
+!EOP
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! NOTE: Documentation stub located above for generic interface compliance.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+{% for t in ts %}
+{% if t.ctype == "std::string" %}{% set is_str = True %}{% else %}{% set is_str = False %}{% endif %}
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoSetArray{{ t.esmf_suffix }}()"
+subroutine ESMF_InfoSetArray{{ t.esmf_suffix }}(info, key, values, keywordEnforcer, force, pkey, rc)
+  type(ESMF_Info), intent(inout) :: info
+  character(len=*), intent(in) :: key
+{% if is_str %}
+  character(len=*), dimension(:), intent(in) :: values
+{% else %}
+  {{ t.ftype }}{% if t.ctype != "bool" %}({{ t.esmf_type }}){% endif %}, dimension(:), intent(in) :: values
+{% endif %}
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  logical, intent(in), optional :: force
+  character(len=*), intent(in), optional :: pkey
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   logical(C_BOOL) :: local_force
@@ -687,8 +703,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 {% endif %}
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoSetArray{{ t.esmf_suffix }}
-{% endfor %}
 
+{% endfor %}
 !------------------------------------------------------------------------------
 
 {% set method_name = "ESMF_InfoSetNULL" %}
@@ -847,13 +863,93 @@ end subroutine {{ method_name }}
 ! Get (Scalar) ----------------------------------------------------------------
 !------------------------------------------------------------------------------
 
+{% for do_charalloc in [False, True] %}
 {% set doc_private = true %}
-{% for t in ts %}{% for do_charalloc in [False, True] %}
-{% if t.esmf_suffix == "I4" or do_charalloc %}
-  {% set do_doc = true %}
+{% if do_charalloc %}
+  {% set suffix = "Char" %}
 {% else %}
-  {% set do_doc = false %}
+  {% set suffix = "" %}
 {% endif %}
+{% set method_name = "ESMF_InfoGet" %}
+{% if do_charalloc %}
+{% set method_name = method_name~"CharAlloc" %}
+{% endif %}
+{% if do_charalloc %}
+  {% set doc_iroutine = method_name %}
+  {% set doc_iroutine_desc = "Get an allocatable character value" %}
+  {% if do_charalloc %}{% set doc_private = false %}{% endif %}
+{% else %}
+  {% set doc_iroutine = "ESMF_InfoGet" %}
+  {% set doc_iroutine_desc = "Get a numeric, logical, or fixed-size character value" %}
+{% endif %}
+!BOP
+! !IROUTINE: {{ doc_iroutine }} - {{ doc_iroutine_desc }}
+!
+! !INTERFACE:
+!subroutine {{ method_name }}(info, key, value, keywordEnforcer, default, idx, attnestflag, rc)
+!
+! !ARGUMENTS:
+!  type(ESMF_Info), intent(in) :: info
+!  character(len=*), intent(in) :: key
+{% if do_charalloc %}
+!  character(:), allocatable, intent(out) :: value
+{% else %}
+!  <value>, see below for supported value
+{% endif %}
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+{% if do_charalloc %}
+!  character(len=*), intent(in), optional :: default
+{% else %}
+!  <default, optional> see below for supported default value
+{% endif %}
+!  integer, intent(in), optional :: idx
+!  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+!  integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Get a value from an \texttt{ESMF\_Info} object using a key. If the key is
+!     not found, \textit{rc} will not equal \texttt{ESMF\_SUCCESS}. The returned
+!     value is always a copy including gets with a \textit{default}.
+!
+{% if not do_charalloc %}
+!     Overloaded \textit{value} for the following types:
+!     \begin{itemize}
+!       \item \texttt{integer(kind=ESMF\_KIND\_I4)}
+!       \item \texttt{integer(kind=ESMF\_KIND\_I8)}
+!       \item \texttt{real(kind=ESMF\_KIND\_R4)}
+!       \item \texttt{real(kind=ESMF\_KIND\_R8)}
+!       \item \texttt{logical}
+!       \item \texttt{character(:)}
+!     \end{itemize}
+!
+{% endif %}
+!     The arguments are:
+!     \begin{description}
+!     \item [info]
+{{ doc_info }}
+!     \item [key]
+{{ doc_key }}
+!     \item [value]
+!       The output value associated with the key.
+!     \item [{[default]}]
+!       A default value to use if the key is not present in the target \texttt{ESMF\_Info}
+!       object. Must be the same typekind and size as \textit{value}.
+!     \item [{[idx]}]
+!       An integer index to get if the target key's value is a list.
+!     \item [{[attnestflag]}]
+!       Setting to \texttt{ESMF\_ATTNEST\_ON} triggers a recursive search. The
+!       first instance of the key (searching by depth) will be found in the hierarchy.
+!       Default is \texttt{ESMF\_ATTNEST\_OFF}.
+{{ doc_rc }}
+!     \end{description}
+!EOP
+
+{% endfor %}
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! NOTE: Documentation stub located above for generic interface compliance.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+{% for t in ts %}{% for do_charalloc in [False, True] %}
 {% if t.ctype != "std::string" and do_charalloc%}
 {#pass#}
 {% else %}
@@ -866,26 +962,9 @@ end subroutine {{ method_name }}
 {% if do_charalloc %}
 {% set method_name = method_name~"Alloc" %}
 {% endif %}
-{% if do_charalloc %}
-  {% set doc_iroutine = method_name %}
-  {% set doc_iroutine_desc = "Get an allocatable character value" %}
-  {% if do_charalloc %}{% set doc_private = false %}{% endif %}
-{% else %}
-  {% set doc_iroutine = "ESMF_InfoGet" %}
-  {% set doc_iroutine_desc = "Get a numeric, logical, or fixed-size character value" %}
-{% endif %}
 #undef  ESMF_METHOD
 #define ESMF_METHOD "{{ method_name }}()"
-{% if do_doc %}!BOP{% else %}!BOPI{% endif %}{{ "" }}
-! !IROUTINE: {{ doc_iroutine }} - {{ doc_iroutine_desc }}
-!
-! !INTERFACE:
-{% if doc_private %}
-  ! Private name; call using ESMF_InfoGet()
-{% endif %}
 subroutine {{ method_name }}(info, key, value, keywordEnforcer, default, idx, attnestflag, rc)
-
-! !ARGUMENTS:
   type(ESMF_Info), intent(in) :: info
   character(len=*), intent(in) :: key
 {% if t.ctype == "bool" %}
@@ -908,44 +987,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: idx
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Get a value from an \texttt{ESMF\_Info} object using a key. If the key is
-!     not found, \textit{rc} will not equal \texttt{ESMF\_SUCCESS}. The returned
-!     value is always a copy including gets with a \textit{default}.
-!
-{% if not do_charalloc %}
-!     Overloaded \textit{value} for the following types:
-!     \begin{itemize}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I4)}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I8)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R4)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R8)}
-!       \item \texttt{logical}
-!       \item \texttt{character(:)}
-!     \end{itemize}
-{% endif %}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-{{ doc_info }}
-!     \item [key]
-{{ doc_key }}
-!     \item [value]
-!       The output value associated with the key.
-!     \item [{[default]}]
-!       A default value to use if the key is not present in the target \texttt{ESMF\_Info}
-!       object. Must be the same typekind and size as \textit{value}.
-!     \item [{[idx]}]
-!       An integer index to get if the target key's value is a list.
-!     \item [{[attnestflag]}]
-!       Setting to \texttt{ESMF\_ATTNEST\_ON} triggers a recursive search. The
-!       first instance of the key (searching by depth) will be found in the hierarchy.
-!       Default is \texttt{ESMF\_ATTNEST\_OFF}.
-{{ doc_rc }}
-!     \end{description}
-{% if do_doc %}!EOP{% else %}!EOPI{% endif %}{{ "" }}
 
   integer :: localrc{%  if t.ctype == "std::string" %}, vlen{% endif %}{{ "" }}
 {% if t.ctype == "std::string" %}
@@ -1032,12 +1073,7 @@ end subroutine {{ method_name }}
 ! GetArray --------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
-{% for t in ts %}{% for alloc in [False, True] %}
-{% if t.esmf_suffix == "I4" %}
-  {% set do_doc = true %}
-{% else %}
-  {% set do_doc = false %}
-{% endif %}
+{% for alloc in [False, True] %}
 {% if alloc %}
   {% set doc_iroutine = "ESMF_InfoGetAlloc" %}
   {% set doc_iroutine_desc = "Get an allocatable list" %}
@@ -1045,26 +1081,20 @@ end subroutine {{ method_name }}
   {% set doc_iroutine = "ESMF_InfoGet" %}
   {% set doc_iroutine_desc = "Get a list" %}
 {% endif %}
-{% set method_name = "ESMF_InfoGetArray"~t.esmf_suffix %}
-{% if alloc %}{% set method_name = method_name~"Alloc" %}{% endif %}
-#undef  ESMF_METHOD
-#define ESMF_METHOD "{{ method_name }}()"
-{% if do_doc %}!BOP{% else %}!BOPI{% endif %}{{ "" }}
+!BOP
 ! !IROUTINE: {{ doc_iroutine }} - {{ doc_iroutine_desc }}
 !
 ! !INTERFACE:
-  ! Private name; call using {{ doc_iroutine }}()
-subroutine ESMF_InfoGetArray{{ t.esmf_suffix }}{% if alloc %}Alloc{% endif %}(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
-
+!subroutine ESMF_InfoGet{% if alloc %}Alloc{% endif %}(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
 ! !ARGUMENTS:
-  type(ESMF_Info), intent(in) :: info
-  character(len=*), intent(in) :: key
-  {{ t.full_ftype }}, dimension(:), {% if alloc %} allocatable, {% endif %}intent(out) :: values
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  integer, intent(out), optional :: itemCount
-  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  logical, intent(in), optional :: scalarToArray
-  integer, intent(out), optional :: rc
+!  type(ESMF_Info), intent(in) :: info
+!  character(len=*), intent(in) :: key
+!  <values>, see below for supported values
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!  integer, intent(out), optional :: itemCount
+!  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+!  logical, intent(in), optional :: scalarToArray
+!  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Get a value list from an \texttt{ESMF\_Info} object using a key. If the key
@@ -1104,7 +1134,34 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       to single-valued lists.
 {{ doc_rc }}
 !     \end{description}
-{% if do_doc %}!EOP{% else %}!EOPI{% endif %}{{ "" }}
+!EOP
+
+{% endfor %}
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! NOTE: Documentation stubs located above for generic interface compliance.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+{% for t in ts %}{% for alloc in [False, True] %}
+{% if alloc %}
+  {% set doc_iroutine = "ESMF_InfoGetAlloc" %}
+  {% set doc_iroutine_desc = "Get an allocatable list" %}
+{% else %}
+  {% set doc_iroutine = "ESMF_InfoGet" %}
+  {% set doc_iroutine_desc = "Get a list" %}
+{% endif %}
+{% set method_name = "ESMF_InfoGetArray"~t.esmf_suffix %}
+{% if alloc %}{% set method_name = method_name~"Alloc" %}{% endif %}
+#undef  ESMF_METHOD
+#define ESMF_METHOD "{{ method_name }}()"
+subroutine ESMF_InfoGetArray{{ t.esmf_suffix }}{% if alloc %}Alloc{% endif %}(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
+  type(ESMF_Info), intent(in) :: info
+  character(len=*), intent(in) :: key
+  {{ t.full_ftype }}, dimension(:), {% if alloc %} allocatable, {% endif %}intent(out) :: values
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  integer, intent(out), optional :: itemCount
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  logical, intent(in), optional :: scalarToArray
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC
@@ -1202,6 +1259,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoGetArray{{ t.esmf_suffix }}{% if alloc %}Alloc{% endif %}
 
+
 {% endfor %}{% endfor %}
 !------------------------------------------------------------------------------
 
@@ -1290,9 +1348,9 @@ end subroutine ESMF_InfoGetArray{{ t.esmf_suffix }}{% if alloc %}Alloc{% endif %
 !       Default is false. If true, treat the JSON scheme as an \textit{ESMF\_Attribute}
 !       schema.
 
-! !!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! NOTE: Documentation stub above to make some parameters private.
-! !!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "{{ method_name }}()"

@@ -353,7 +353,7 @@ int main(void){
                              &routehandle,
                              NULL, NULL, NULL, NULL,
                              NULL, NULL, NULL,
-                             NULL, NULL, NULL,
+                             NULL, NULL, NULL, NULL,
                              NULL, NULL, NULL,NULL, NULL);
 #else
   rc = ESMC_FieldRegridStore(srcfield, dstfield,

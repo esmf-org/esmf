@@ -29,7 +29,7 @@ jobs:
           name: ESMPy Build + Install
           command: bash $ESMF_DIR/.circleci/sh/esmpy-build-install.sh
       - run:
-          name: Test Environment Finalize
+          name: Docker Push
           command: bash $ESMF_DIR/.circleci/sh/docker-push.sh
 
   should-run-linux:
@@ -86,7 +86,6 @@ jobs:
 
   build-docs:
     environment:
-      - ESMF_ARTIFACTS: "/artifacts"
       - DOCKER_IMG: "bekozi/esmf-doc"
     machine: true
     steps:
@@ -101,32 +100,31 @@ jobs:
           command: docker build -t "${DOCKER_IMG}:${CIRCLE_BRANCH}" --file "esmf/.circleci/docker/esmf-doc/Dockerfile" --build-arg ESMF_BRANCH="${CIRCLE_BRANCH}" .
       - run:
           name: Extract Artifacts
-          command: bash esmf/.circleci/sh/extract-artifacts.sh
+          command: bash esmf/.circleci/sh/extract-artifacts.sh "/tmp/artifacts" "/artifacts/doc-artifacts.zip" "${DOCKER_IMG}:${CIRCLE_BRANCH}"
+      - save_cache:
+          key: esmf-docs-{{ .Revision }}
+          paths:
+            - /tmp/artifacts
+            - esmf
       - store_artifacts:
-          path: /tmp/doc-artifacts.zip
+          path: /tmp/artifacts/doc-artifacts.zip
           destination: doc-artifacts.zip
       - run:
           name: Docker Push
           command: bash esmf/.circleci/sh/docker-push-docs.sh
 
   publish-docs:
-    environment:
-      - ESMF_ARTIFACTS: "/artifacts"
-      - DOCKER_IMG: "bekozi/esmf-doc"
     machine: true
     steps:
 #      - run:
 #          name: publish-docs
 #          command: exit 0
-      - run:
-          name: Checkout Code
-          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git esmf
-      - run:
-          name: Extract Artifacts
-          command: bash esmf/.circleci/sh/extract-artifacts.sh
+      - restore_cache:
+          keys:
+            - esmf-docs-{{ .Revision }}
       - run:
           name: Prep Artifacts
-          command: cd /tmp && unzip doc-artifacts.zip
+          command: cd /tmp/artifacts && unzip doc-artifacts.zip
       - run:
           name: Push to github.io
           command: bash esmf/.circleci/sh/doc-push.sh
@@ -146,18 +144,61 @@ jobs:
           command: exit 0
 
   esmpy-test:
-    machine: true
+    parameters:
+      target:
+        type: string
+    docker:
+      - image: bekozi/esmf:$CIRCLE_BRANCH
     steps:
       - run:
-          name: passthru-esmpy-test
-          command: exit 0
+          name: python setup.py test<< parameters.target>>
+          command: cd ${ESMF_DIR}/src/addon/ESMPy && python setup.py test<< parameters.target>>
+      - run:
+          name: Prep Test Results
+          command: mkdir -p /tmp/test-results && mv ${ESMF_DIR}/src/addon/ESMPy/nosetests.xml /tmp/test-results/
+      - store_test_results:
+          path: /tmp/test-results
 
-  esmpy-docs:
-    machine: true
+  esmpy-docs-build:
+    machine:
+      docker_layer_caching: true
     steps:
       - run:
-          name: passthru-esmpy-docs
-          command: exit 0
+          name: Checkout Code
+          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git esmf
+      - run:
+          name: Docker Build esmpy-doc-base
+          command: docker build -t "bekozi/esmpy-doc-base" --file "esmf/.circleci/docker/esmpy-doc-base/Dockerfile" .
+      - run:
+          name: Docker Push esmpy-doc-base
+          command: bash esmf/.circleci/sh/docker-push-generic.sh "bekozi/esmpy-doc-base"
+      - run:
+          name: Docker Build esmpy-doc
+          command: docker build -t "bekozi/esmpy-doc" --file "esmf/.circleci/docker/esmpy-doc/Dockerfile" --build-arg ESMF_BRANCH="${CIRCLE_BRANCH}" --no-cache .
+      - run:
+          name: Extract Doc Artifacts
+          command: bash esmf/.circleci/sh/extract-artifacts.sh /tmp/artifacts /artifacts/doc-esmpy.zip bekozi/esmpy-doc
+      - save_cache:
+          key: esmpy-docs-{{ .Revision }}
+          paths:
+            - /tmp/artifacts
+            - esmf
+      - store_artifacts:
+          path: /tmp/artifacts/doc-esmpy.zip
+          destination: doc-esmpy.zip
+
+  esmpy-docs-publish:
+    machine: true
+    steps:
+      - restore_cache:
+          keys:
+            - esmpy-docs-{{ .Revision }}
+      - run:
+          name: Prep Artifacts
+          command: cd /tmp/artifacts && unzip doc-esmpy.zip
+      - run:
+          name: Push to github.io
+          command: bash esmf/.circleci/sh/doc-push-esmpy.sh
 
   osx-esmf:
     macos:
@@ -217,6 +258,14 @@ workflows:
               target: ["unit_tests", "system_tests", "examples"]
           requires:
             - build-esmf
+      - esmpy-test:
+          name: esmpy-test<< matrix.target >>
+          matrix:
+            parameters:
+              target: ["", "_parallel", "_examples", "_examples_parallel"]
+          requires:
+            - build-esmf
+
 
   build-and-test:
     triggers:
@@ -228,18 +277,14 @@ workflows:
                 - develop
     jobs:
 #      - osx-esmf
-#      - build-esmf
-#      - build-run-tests:
-#          name: build-run-<< matrix.target >>
-#          matrix:
-#            parameters:
-#              target: ["unit_tests", "system_tests", "examples"]
-#          requires:
-#            - build-esmf
-      - build-docs
-      - publish-docs:
+      - build-esmf
+      - build-run-tests:
+          name: build-run-<< matrix.target >>
+          matrix:
+            parameters:
+              target: ["unit_tests", "system_tests", "examples"]
           requires:
-            - build-docs
+            - build-esmf
 #      - external_demos:
 #          name: placeholder-external_demos
 #          requires:
@@ -248,22 +293,34 @@ workflows:
 #          name: placeholder-bit-for-bit
 #          requires:
 #            - build-run-tests
-#      - esmpy-test:
-#          name: placeholder-esmpy-test
-#          requires:
-#            - placeholder-esmpy-build
+      - esmpy-test:
+          name: esmpy-test<< matrix.target >>
+          matrix:
+            parameters:
+              target: ["", "_parallel", "_examples", "_examples_parallel"]
+          requires:
+            - build-esmf
 
   docs-commit:
     jobs:
-      - should-build-docs:
-          type: approval
-      - build-docs:
+#      - should-build-docs:
+#          type: approval
+      - build-docs
+      - publish-docs:
           requires:
-            - should-build-docs
-#      - esmpy-docs:
-#          name: placeholder-esmpy-docs
-#          requires:
-#            - should-build-docs
+            - build-docs
+          filters:
+            branches:
+              only:
+                - develop
+      - esmpy-docs-build
+      - esmpy-docs-publish:
+          requires:
+            - esmpy-docs-build
+          filters:
+            branches:
+              only:
+                - develop
 
   osx-commit:
     jobs:
