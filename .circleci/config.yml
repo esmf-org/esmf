@@ -295,12 +295,9 @@ workflows:
     jobs:
       - should-run-linux:
           type: approval
-      - build-escomp-centos8:
-          requires:
-            - should-run-linux
       - build-escomp-esmf:
           requires:
-            - build-escomp-centos8
+            - should-run-linux
       - build-run-tests:
           name: build-run-commit-<< matrix.target >>
           matrix:
