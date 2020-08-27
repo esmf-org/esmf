@@ -5217,8 +5217,9 @@ subroutine convert_corner_arrays_to_1D(isSphere,dim1,dim2,cornerX2D,cornerY2D,co
  integer :: count,inPos,outPos
  integer :: ip1,im1
 
- !RASF Corner checking  is incorrect for tripolar grids with corner at the tripole
- integer :: rf_off=0
+ !RASF Corner checking  is potentially incorrect for tripolar grids with corner at the tripole. If possible try to
+ !     implement check on next point
+ integer :: offset
 
  ! make sure no dimensions are 0
  if ((dim1 < 1) .or. (dim2 <1)) then
@@ -5265,68 +5266,73 @@ subroutine convert_corner_arrays_to_1D(isSphere,dim1,dim2,cornerX2D,cornerY2D,co
  ! Figure out which corner indice is the top row of corners
  ! It won't match any of the neighbors corners
 
- if (isSphere) then
-    rf_off=0
- else
-    rf_off=1
 
-    if (dim1 == 2) then
+ offset=0
+ do
+
+ ! If default offset=0 fails then try with 1 if dimension allows it.
+    if ((dim1 == 2 ).and. (offset == 1) ) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-    msg="- Currently can't handle a tripolar grid thats width 2 in only 1st dim", &
+        msg="- Currently can't handle a grid thats width 2 in only 1st dim with offset=1", &
              ESMF_CONTEXT, rcToReturn=rc)
         return
     endif
- endif
- TopCorner=-1
- do i=1,4
+
+    TopCorner=-1
+    do i=1,4
 
     ! See if it matches nbr to the right
-    matches=.false.
-    do j=1,4
-       if ((abs(cornerX2D(i,1+rf_off)-cornerX2D(j,2+rf_off))<tol) .and. &
-           (abs(cornerY2D(i,1+rf_off)-cornerY2D(j,2+rf_off))<tol)) then
-          matches=.true.
-          exit
-       endif
+       matches=.false.
+       do j=1,4
+          if ((abs(cornerX2D(i,1+offset)-cornerX2D(j,2+offset))<tol) .and. &
+              (abs(cornerY2D(i,1+offset)-cornerY2D(j,2+offset))<tol)) then
+             matches=.true.
+             exit
+          endif
+       enddo
+       if (matches) cycle
+
+       ! See if it matches nbr to the below
+       matches=.false.
+       do j=1,4
+          if ((abs(cornerX2D(i,1+offset)-cornerX2D(j,dim1+1+offset))<tol) .and. &
+              (abs(cornerY2D(i,1+offset)-cornerY2D(j,dim1+1+offset))<tol)) then
+             matches=.true.
+             exit
+          endif
+       enddo
+       if (matches) cycle
+
+       ! See if it matches nbr to the below and to the right
+       matches=.false.
+       do j=1,4
+          if ((abs(cornerX2D(i,1+offset)-cornerX2D(j,dim1+2+offset))<tol) .and. &
+              (abs(cornerY2D(i,1+offset)-cornerY2D(j,dim1+2+offset))<tol)) then
+             matches=.true.
+             exit
+          endif
+       enddo
+       if (matches) cycle
+
+       ! Doesn't match anyone
+       TopCorner=i
+
+       ! Exit the loop
+       exit
     enddo
-    if (matches) cycle
 
-    ! See if it matches nbr to the below
-    matches=.false.
-    do j=1,4
-       if ((abs(cornerX2D(i,1+rf_off)-cornerX2D(j,dim1+1+rf_off))<tol) .and. &
-           (abs(cornerY2D(i,1+rf_off)-cornerY2D(j,dim1+1+rf_off))<tol)) then
-          matches=.true.
-          exit
-       endif
-    enddo
-    if (matches) cycle
-
-   ! See if it matches nbr to the below and to the right
-    matches=.false.
-    do j=1,4
-       if ((abs(cornerX2D(i,1+rf_off)-cornerX2D(j,dim1+2+rf_off))<tol) .and. &
-           (abs(cornerY2D(i,1+rf_off)-cornerY2D(j,dim1+2+rf_off))<tol)) then
-          matches=.true.
-          exit
-       endif
-    enddo
-    if (matches) cycle
-
-    ! Doesn't match anyone
-    TopCorner=i
-
-    ! Exit the loop
-    exit
+    ! If TopCorner is found all is good and exit loop. If offset is 1 then we will test failure outside loop
+    if(TopCorner/=-1 .or. offset==1) exit
+    offset=1
  enddo
 
-  ! Make sure we found a corner
-  if (TopCorner == -1) then
-     call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-          msg="- Bad corner array in SCRIP file", &
+ ! Make sure we found a corner
+ if (TopCorner == -1) then
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+          msg="- Bad Top corner array in SCRIP file", &
           ESMF_CONTEXT, rcToReturn=rc)
-     return
-  endif
+    return
+ endif
 
 
  ! Figure out which corner indice is the top right row of corners
@@ -5337,8 +5343,8 @@ subroutine convert_corner_arrays_to_1D(isSphere,dim1,dim2,cornerX2D,cornerY2D,co
     ! See if it matches nbr to the right
     matches=.false.
     do j=1,4
-       if ((abs(cornerX2D(i,1+rf_off)-cornerX2D(j,2+rf_off))<tol) .and. &
-           (abs(cornerY2D(i,1+rf_off)-cornerY2D(j,2+rf_off))<tol)) then
+       if ((abs(cornerX2D(i,1+offset)-cornerX2D(j,2+offset))<tol) .and. &
+           (abs(cornerY2D(i,1+offset)-cornerY2D(j,2+offset))<tol)) then
           matches=.true.
           exit
        endif
@@ -5348,8 +5354,8 @@ subroutine convert_corner_arrays_to_1D(isSphere,dim1,dim2,cornerX2D,cornerY2D,co
     ! See if it matches nbr to the below right
     matches=.false.
     do j=1,4
-       if ((abs(cornerX2D(i,1+rf_off)-cornerX2D(j,dim1+2+rf_off))<tol) .and. &
-           (abs(cornerY2D(i,1+rf_off)-cornerY2D(j,dim1+2+rf_off))<tol)) then
+       if ((abs(cornerX2D(i,1+offset)-cornerX2D(j,dim1+2+offset))<tol) .and. &
+           (abs(cornerY2D(i,1+offset)-cornerY2D(j,dim1+2+offset))<tol)) then
           matches=.true.
           exit
        endif
@@ -5364,7 +5370,7 @@ subroutine convert_corner_arrays_to_1D(isSphere,dim1,dim2,cornerX2D,cornerY2D,co
 
   ! Make sure we found a corner
   if (TopRightCorner == -1) then
-     call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG,msg="- Bad corner array in SCRIP file", &
+     call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG,msg="- Bad TopRight corner array in SCRIP file", &
           ESMF_CONTEXT, rcToReturn=rc)
      return
   endif
@@ -5377,8 +5383,8 @@ subroutine convert_corner_arrays_to_1D(isSphere,dim1,dim2,cornerX2D,cornerY2D,co
     ! See if it matches nbr to the right
     matches=.false.
     do j=1,4
-       if ((abs(cornerX2D(i,1+rf_off)-cornerX2D(j,2+rf_off))<tol) .and. &
-           (abs(cornerY2D(i,1+rf_off)-cornerY2D(j,2+rf_off))<tol)) then
+       if ((abs(cornerX2D(i,1+offset)-cornerX2D(j,2+offset))<tol) .and. &
+           (abs(cornerY2D(i,1+offset)-cornerY2D(j,2+offset))<tol)) then
           matches=.true.
           exit
        endif
@@ -5388,8 +5394,8 @@ subroutine convert_corner_arrays_to_1D(isSphere,dim1,dim2,cornerX2D,cornerY2D,co
     ! See if it matches nbr to the below
     matches=.false.
     do j=1,4
-       if ((abs(cornerX2D(i,1+rf_off)-cornerX2D(j,dim1+1+rf_off))<tol) .and. &
-           (abs(cornerY2D(i,1+rf_off)-cornerY2D(j,dim1+1+rf_off))<tol)) then
+       if ((abs(cornerX2D(i,1+offset)-cornerX2D(j,dim1+1+offset))<tol) .and. &
+           (abs(cornerY2D(i,1+offset)-cornerY2D(j,dim1+1+offset))<tol)) then
           matches=.true.
           exit
        endif
@@ -5405,7 +5411,7 @@ subroutine convert_corner_arrays_to_1D(isSphere,dim1,dim2,cornerX2D,cornerY2D,co
 
   ! Make sure we found a corner
   if (BtmCorner == -1) then
-     call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, msg="- Bad corner array in SCRIP file", &
+     call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, msg="- Bad Btm corner array in SCRIP file", &
           ESMF_CONTEXT, rcToReturn=rc)
      return
   endif
@@ -5426,7 +5432,7 @@ subroutine convert_corner_arrays_to_1D(isSphere,dim1,dim2,cornerX2D,cornerY2D,co
 
   ! Make sure we found a corner
   if (BtmRightCorner == -1) then
-     call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG,msg="- Bad corner array in SCRIP file", &
+     call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG,msg="- Bad BtmRight corner array in SCRIP file", &
           ESMF_CONTEXT, rcToReturn=rc)
      return
   endif
