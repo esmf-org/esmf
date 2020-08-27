@@ -1770,11 +1770,6 @@ int VM::translateVMId(
       bool vmKeyEqual(const Helper1 &cmp)const{
         return VMKeyCompare(vmID->vmKey,cmp.vmID->vmKey);
       }
-      unsigned getRootVas()const{
-        // The position of bits in the vmKey corresponds to VAS index. Left most
-        // bit that is set is defined here as root VAS index.
-        return VMKeyFirstBitFromLeft(vmID->vmKey);
-      }
       void getVasList(vector<unsigned> &vasList)const{
         VMKeyVasList(vmID->vmKey, vasList);
       }
@@ -1878,11 +1873,6 @@ int VM::translateVMId(
     // create mpiComm to handle the respective vmKey PET subspace
     int totalLocalIds = 0; // init
     for (unsigned i=0; i<helper2.size(); i++){
-      unsigned rootVas = helper1[helper2[i].indexH1].getRootVas();
-      helper2[i].rootPet = vasToPetMap[rootVas];
-      if (helper2[i].rootPet == localPet){
-        totalLocalIds += helper2[i].count;
-      }
       vector<unsigned> vasList;
       helper1[helper2[i].indexH1].getVasList(vasList);
 #ifdef TRANSLATE_VMID_LOG_on
@@ -1899,13 +1889,22 @@ int VM::translateVMId(
       for (unsigned k=0; k<vasList.size(); k++){
         if (vasToPetMap.find(vasList[k]) != vasToPetMap.end()){
           // the VAS exists in the current VM
+          if (kk==0){
+            // first active PET that is found handling a VAS becomes rootPet
+            helper2[i].rootPet = vasToPetMap[vasList[k]];
+            if (helper2[i].rootPet == localPet){
+              totalLocalIds += helper2[i].count;
+            }
+          }
+          // add to petList
           petList.push_back(vasToPetMap[vasList[k]]);
           if (petList[kk]==helper2[i].rootPet)
             helper2[i].subRootPet=kk;
 #ifdef TRANSLATE_VMID_LOG_on
           // development log
           std::stringstream msg;
-          msg << "petList["<<kk<<"]=" << petList[kk];
+          msg << "petList["<<kk<<"]=" << petList[kk]
+            << " vasList[k=" << k << "]=" << vasList[k];
           ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
           // end development log
 #endif
