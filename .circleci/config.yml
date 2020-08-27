@@ -11,9 +11,7 @@ jobs:
     steps:
       - run:
           name: Checkout Code (ESCOMP-Containers)
-          command: git clone --branch bekozi-sync-doc-containers --depth 1 https://github.com/esmf-org/ESCOMP-Containers.git
-          #tdk: switch back to escomp
-      #          command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
+          command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
       - run:
           name: Checkout Code (ESMF)
           command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git
@@ -33,9 +31,7 @@ jobs:
     steps:
       - run:
           name: Checkout Code (ESCOMP-Containers)
-          command: git clone --branch bekozi-sync-doc-containers --depth 1 https://github.com/esmf-org/ESCOMP-Containers.git
-          #tdk: switch back to escomp
-      #          command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
+          command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
       - run:
           name: Checkout Code (ESMF)
           command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git
@@ -86,9 +82,7 @@ jobs:
     steps:
       - run:
           name: Checkout Code (ESCOMP-Containers)
-          command: git clone --branch bekozi-sync-doc-containers --depth 1 https://github.com/esmf-org/ESCOMP-Containers.git
-          #tdk: switch back to escomp
-      #          command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
+          command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
       - run:
           name: Checkout Code (ESMF)
           command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git
@@ -118,9 +112,7 @@ jobs:
     steps:
       - run:
           name: Checkout Code (ESCOMP-Containers)
-          command: git clone --branch bekozi-sync-doc-containers --depth 1 https://github.com/esmf-org/ESCOMP-Containers.git
-          #tdk: switch back to escomp
-      #          command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
+          command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
       - run:
           name: Checkout Code (ESMF)
           command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git
@@ -202,9 +194,7 @@ jobs:
     steps:
       - run:
           name: Checkout Code (ESCOMP-Containers)
-          command: git clone --branch bekozi-sync-doc-containers --depth 1 https://github.com/esmf-org/ESCOMP-Containers.git
-          #tdk: switch back to escomp
-      #          command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
+          command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
       - run:
           name: Checkout Code (ESMF)
           command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git
