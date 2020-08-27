@@ -81,7 +81,7 @@ extern "C" void FTN_X(c_esmc_regrid_create)(MeshCap **meshsrcpp,
 
   if (*dst_pl_used==1) {
     // TODO: figure out how to include ESMC_EXTRAPMETHOD_CREEP here without MOAB
-    if (*extrapMethod != 3) {
+    if ((*extrapMethod != 3) && (*extrapMethod != 4)) {
       *meshdstpp=NULL;    
     }
   } else {

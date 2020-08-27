@@ -334,7 +334,7 @@ end function ESMF_InfoCreateByKey
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoCreateFromInfo()"
 !BOP
-! !IROUTINE: ESMF_InfoCreateFromInfo - Create an Info object from another Info object
+! !IROUTINE: ESMF_InfoCreate - Create an Info object from another Info object
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_InfoCreate()
@@ -477,8 +477,7 @@ end subroutine ESMF_InfoDestroy
 !  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Set a value in an \texttt{ESMF\_Info} object using a key. List values are
-!     initialized to null.
+!     Set a \textit{value} in an \texttt{ESMF\_Info} object using a key.
 !
 !     Overloaded \textit{value} for the following types:
 !     \begin{itemize}
@@ -818,6 +817,69 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoSetLG
 
+! -----------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoSetINFO()"
+!BOP
+! !IROUTINE: ESMF_InfoSet - Set a key to the contents of an Info object
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_InfoSet
+subroutine ESMF_InfoSetINFO(info, key, value, keywordEnforcer, force, rc)
+! !ARGUMENTS:
+  type(ESMF_Info), intent(inout) :: info
+  character(len=*), intent(in) :: key
+  type(ESMF_Info), intent(in) :: value
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  logical, intent(in), optional :: force
+  integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Set a value to the contents of an \texttt{ESMF\_Info} object. A copy of
+!     the source contents is made.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [info]
+!       Target \texttt{ESMF\_Info} object.
+!     \item [key]
+!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
+!       for an overview of the key format.
+!     \item [value]
+!       The \texttt{ESMF\_Info} object to use as source data.
+!     \item [{[force]}]
+!       Default is true. When true, insert the key even if it already exists in
+!       storage. If false, \textit{rc} will not return {\tt ESMF\_SUCCESS} if the
+!       key already exists.
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOP
+
+  integer :: localrc
+  logical(C_BOOL) :: local_force
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_FAILURE
+
+  if (present(force)) then
+    local_force = force
+  else
+    local_force = .true.
+  end if
+
+  call c_info_set_INFO(&
+    info%ptr, &
+    trim(key)//C_NULL_CHAR, &
+    value%ptr, &
+    local_force, &
+    localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_InfoSetINFO
+
 !------------------------------------------------------------------------------
 ! SetArray --------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -838,7 +900,8 @@ end subroutine ESMF_InfoSetLG
 !  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Set a value list in an \texttt{ESMF\_Info} object using a key.
+!     Set a value list in an \texttt{ESMF\_Info} object using a key. List values
+!     are initialized to null.
 !
 !     Overloaded \textit{values} for the following types:
 !     \begin{itemize}
@@ -1133,6 +1196,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoSetArrayLG
 
+
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
@@ -1185,68 +1249,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoSetNULL
-
-! -----------------------------------------------------------------------------
-
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoSetINFO()"
-!BOP
-! !IROUTINE: ESMF_InfoSetINFO - Set a key to the contents of an Info object
-!
-! !INTERFACE:
-subroutine ESMF_InfoSetINFO(info, key, value, keywordEnforcer, force, rc)
-! !ARGUMENTS:
-  type(ESMF_Info), intent(inout) :: info
-  character(len=*), intent(in) :: key
-  type(ESMF_Info), intent(in) :: value
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  logical, intent(in), optional :: force
-  integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Set a value to the contents of an \texttt{ESMF\_Info} object. A copy of
-!     the source contents is made.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-!       Target \texttt{ESMF\_Info} object.
-!     \item [key]
-!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
-!       for an overview of the key format.
-!     \item [value]
-!       The \texttt{ESMF\_Info} object to use as source data.
-!     \item [{[force]}]
-!       Default is true. When true, insert the key even if it already exists in
-!       storage. If false, \textit{rc} will not return {\tt ESMF\_SUCCESS} if the
-!       key already exists.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOP
-
-  integer :: localrc
-  logical(C_BOOL) :: local_force
-
-  localrc = ESMF_FAILURE
-  if (present(rc)) rc = ESMF_FAILURE
-
-  if (present(force)) then
-    local_force = force
-  else
-    local_force = .true.
-  end if
-
-  call c_info_set_INFO(&
-    info%ptr, &
-    trim(key)//C_NULL_CHAR, &
-    value%ptr, &
-    local_force, &
-    localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (present(rc)) rc = ESMF_SUCCESS
-end subroutine ESMF_InfoSetINFO
 
 !------------------------------------------------------------------------------
 

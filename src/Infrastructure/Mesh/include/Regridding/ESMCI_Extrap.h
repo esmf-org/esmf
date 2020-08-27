@@ -9,8 +9,8 @@
 
 //
 //-----------------------------------------------------------------------------
-#ifndef ESMCI_MeshRegrid_h
-#define ESMCI_MeshRegrid_h
+#ifndef ESMCI_Extrap_h
+#define ESMCI_Extrap_h
 
 #include <Mesh/include/ESMCI_Mesh.h>
 #include <PointList/include/ESMCI_PointList.h>
@@ -18,30 +18,22 @@
 #include <Mesh/include/Regridding/ESMCI_Integrate.h>
 #include <Mesh/include/Regridding/ESMCI_Interp.h>
 #include <Mesh/include/Legacy/ESMCI_WriteWeightsPar.h>
-
 #include <Mesh/include/ESMCI_RegridConstants.h>
-
-#ifdef REGRIDTIMING
-#include <mpi.h>
-#endif
 
 namespace ESMCI {
 
- int regrid(Mesh *srcmesh, PointList *srcpointlist, Mesh *dstmesh, PointList *dstpointlist,
-            Mesh *midmesh, IWeights &wts,
-            int *regridMethod, int *regridScheme,
-            int *regridPoleType, int *regridPoleNPnts,
-            int *map_type,
-            int *extrapMethod,
-            int *extrapNumSrcPnts,
-            ESMC_R8 *extrapDistExponent,
-            int *extrapNumLevels,
-            int *extrapNumInputLevels, 
-            int *unmappedaction,
-            bool set_dst_status, WMat &dst_status);
+  void extrap(Mesh *srcmesh, PointList *srcpointlist, Mesh *dstmesh, PointList *dstpointlist,
+              IWeights &wts,
+              MAP_TYPE mtype,
+              UInt pole_constraint_id, // Only valid when srcmesh exists
+              int extrapMethod,
+              int extrapNumSrcPnts,
+              ESMC_R8 extrapDistExponent,
+              int extrapNumLevels,
+              int extrapNumInputLevels, 
+              bool set_dst_status, WMat &dst_status);
 
- int get_iwts(Mesh &mesh, MEField<> *iwts, int *regridScheme);
 
 } // namespace
 
-#endif /*ESMC_MESHREGRID_H_*/
+#endif /* ESMCI_Extrap_H_*/
