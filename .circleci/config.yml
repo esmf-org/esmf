@@ -108,8 +108,8 @@ jobs:
           destination: << parameters.target >>-artifacts.zip
 
   build-esmf-docs:
-    docker:
-      - image: cimg/base:2020.01
+    machine:
+      docker_layer_caching: true
     steps:
       - run:
           name: Checkout Code (ESCOMP-Containers)
@@ -120,8 +120,8 @@ jobs:
 #      - run:
 #          name: passthru-build-docs
 #          command: exit 0
-      - setup_remote_docker:
-          docker_layer_caching: true
+#      - setup_remote_docker:
+#          docker_layer_caching: true
       - run:
           name: Docker Build esmf-doc-base
           command: docker build -t "esmf/esmf-doc-base" --file "ESCOMP-Containers/ESMF/doc/esmf-doc-base/Dockerfile" --build-arg DOCKER_NAMESPACE="esmf" .
@@ -190,8 +190,8 @@ jobs:
           path: /tmp/test-results
 
   build-esmpy-docs:
-    docker:
-      - image: cimg/base:2020.01
+    machine:
+      docker_layer_caching: true
     steps:
       - run:
           name: Checkout Code (ESCOMP-Containers)
@@ -200,8 +200,8 @@ jobs:
       - run:
           name: Checkout Code (ESMF)
           command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git
-      - setup_remote_docker:
-          docker_layer_caching: true
+#      - setup_remote_docker:
+#          docker_layer_caching: true
 #      - run: #tdk:enable
 #          name: Docker Build esmpy-doc-base
 #          command: docker build -t "esmf/esmpy-doc-base" --file "ESCOMP-Containers/ESMF/doc/esmpy-doc-base/Dockerfile" --build-arg DOCKER_NAMESPACE="esmf" .
