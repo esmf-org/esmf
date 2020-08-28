@@ -1732,6 +1732,15 @@ int VM::translateVMId(
 // made to be true!
 //    The rootVmIds object is created and filled with indices pointing into the
 // local vmIDs array for those entries for which the local PET is root.
+//    The algorithm makes the following assumptions about the vmIDs passed into
+// the PETs across the current VM:
+//  1. Each VMId object must be present on all the PETs of the current VM that
+//     are associated with the VAS bits set in the VMId key.
+//  2. VMId objects that have VAS bits set outside what is covered by the PETs
+//     of the current VM are supported.
+//  3. VMId objects must NOT be present on any PET associated with a VAS for
+//     which the corresponding VMId key bit is not set. (E.g. proxy objects
+//     would bring in such VMIds.)
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -1916,6 +1925,12 @@ int VM::translateVMId(
       MPI_Group subGroup;
       MPI_Group_incl(mpiGroup, petList.size(), &(petList[0]), &subGroup);
       MPI_Comm_create_group(mpiComm, subGroup, 99, &(helper2[i].subComm));
+      if (helper2[i].subComm == MPI_COMM_NULL){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+          "This VMId's key does not have this PET's VAS bit set. Unsupported!",
+          ESMC_CONTEXT, &rc);
+          return rc;
+      }
       // clean-up
       MPI_Group_free(&subGroup);
     }
