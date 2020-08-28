@@ -6,24 +6,36 @@ version: 2.1
 
 jobs:
 
-  build-escomp-centos8:
+  build-base-images:
     docker:
       - image: cimg/base:2020.01
     steps:
+      - setup_remote_docker:
+          docker_layer_caching: true
       - run:
           name: Checkout Code (ESCOMP-Containers)
           command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
       - run:
           name: Checkout Code (ESMF)
           command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git
-      - setup_remote_docker:
-          docker_layer_caching: true
       - run:
           name: Docker Build
           command: docker build -t "esmf/centos8" --file "ESCOMP-Containers/base/centos8/Dockerfile" .
       - run:
           name: Docker Push
           command: bash esmf/.circleci/sh/docker-push-generic.sh "esmf/centos8"
+      - run:
+          name: Docker Build esmf-doc-base
+          command: docker build -t "esmf/esmf-doc-base" --file "ESCOMP-Containers/ESMF/doc/esmf-doc-base/Dockerfile" --build-arg DOCKER_NAMESPACE="esmf" .
+      - run:
+          name: Docker Push esmf-doc-base
+          command: bash esmf/.circleci/sh/docker-push-generic.sh "esmf/esmf-doc-base"
+      - run:
+          name: Docker Build esmpy-doc-base
+          command: docker build -t "esmf/esmpy-doc-base" --file "ESCOMP-Containers/ESMF/doc/esmpy-doc-base/Dockerfile" --build-arg DOCKER_NAMESPACE="esmf" .
+      - run:
+          name: Docker Push esmpy-doc-base
+          command: bash esmf/.circleci/sh/docker-push-generic.sh "esmf/esmpy-doc-base"
 
   build-escomp-esmf:
     docker:
@@ -123,12 +135,6 @@ jobs:
 #      - setup_remote_docker:
 #          docker_layer_caching: true
       - run:
-          name: Docker Build esmf-doc-base
-          command: docker build -t "esmf/esmf-doc-base" --file "ESCOMP-Containers/ESMF/doc/esmf-doc-base/Dockerfile" --build-arg DOCKER_NAMESPACE="esmf" .
-      - run:
-          name: Docker Push esmf-doc-base
-          command: bash esmf/.circleci/sh/docker-push-generic.sh "esmf/esmf-doc-base"
-      - run:
           name: Docker Build esmf-doc
           command: docker build -t "esmf/esmf-doc:${CIRCLE_BRANCH}" --file "ESCOMP-Containers/ESMF/doc/esmf-doc/Dockerfile" --build-arg ESMF_BRANCH="${CIRCLE_BRANCH}" --build-arg DOCKER_NAMESPACE="esmf" --no-cache .
       - run:
@@ -190,9 +196,12 @@ jobs:
           path: /tmp/test-results
 
   build-esmpy-docs:
-    machine:
-      docker_layer_caching: true
+    docker:
+      - image: cimg/base:2020.01
+#    machine:
+#      docker_layer_caching: true
     steps:
+      - setup_remote_docker
       - run:
           name: Checkout Code (ESCOMP-Containers)
 #          command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
@@ -200,14 +209,6 @@ jobs:
       - run:
           name: Checkout Code (ESMF)
           command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git
-#      - setup_remote_docker:
-#          docker_layer_caching: true
-#      - run: #tdk:enable
-#          name: Docker Build esmpy-doc-base
-#          command: docker build -t "esmf/esmpy-doc-base" --file "ESCOMP-Containers/ESMF/doc/esmpy-doc-base/Dockerfile" --build-arg DOCKER_NAMESPACE="esmf" .
-#      - run:
-#          name: Docker Push esmpy-doc-base
-#          command: bash esmf/.circleci/sh/docker-push-generic.sh "esmf/esmpy-doc-base"
       - run:
           name: Docker Build esmpy-doc
           command: docker build -t "esmf/esmpy-doc" --file "ESCOMP-Containers/ESMF/doc/esmpy-doc/Dockerfile" --build-arg ESMF_BRANCH="${CIRCLE_BRANCH}" --build-arg DOCKER_NAMESPACE="esmf" --no-cache .
@@ -315,10 +316,10 @@ workflows:
               only:
                 - develop
     jobs:
-      - build-escomp-centos8
+      - build-base-images
       - build-escomp-esmf:
           requires:
-            - build-escomp-centos8
+            - build-base-images
       - build-run-tests:
           name: build-run-<< matrix.target >>
           matrix:
