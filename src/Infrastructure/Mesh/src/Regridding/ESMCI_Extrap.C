@@ -510,6 +510,25 @@ static void _create_pointlist_of_points_not_in_wmat(PointList *pointlist, WMat &
        }
      }
 
+     // Sort new col to enable merging entries         
+     std::sort(new_cols.begin(),new_cols.end());
+
+     // Merge entries with the same id
+     int prev=0;
+     for (int i=1; i<new_cols.size(); i++) {
+       // If not the same id, then copy into a new entry
+       if (new_cols[i].id != new_cols[prev].id) {
+         prev++;
+         new_cols[prev].id=new_cols[i].id;
+         new_cols[prev].value=new_cols[i].value;
+       } else { // if the same id, then just sum weights 
+         new_cols[prev].value += new_cols[i].value;
+       }
+     }
+
+     // Resize to just hold the merged entries
+     new_cols.resize(prev+1);
+
      // Add to weight matrix
      stod_wts.InsertRow(dw_row, new_cols);
    }
