@@ -202,7 +202,7 @@ jobs:
           command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git
       - setup_remote_docker:
           docker_layer_caching: true
-#      - run:
+#      - run: #tdk:enable
 #          name: Docker Build esmpy-doc-base
 #          command: docker build -t "esmf/esmpy-doc-base" --file "ESCOMP-Containers/ESMF/doc/esmpy-doc-base/Dockerfile" --build-arg DOCKER_NAMESPACE="esmf" .
 #      - run:
