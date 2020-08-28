@@ -42,13 +42,13 @@ jobs:
       - image: cimg/base:2020.01
     resource_class: xlarge
     steps:
+      - setup_remote_docker
       - run:
           name: Checkout Code (ESCOMP-Containers)
           command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
       - run:
           name: Checkout Code (ESMF)
           command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git
-      - setup_remote_docker
       - run:
           name: Docker Build
           command: docker build -t "esmf/esmf:${CIRCLE_BRANCH}" --file "ESCOMP-Containers/ESMF/dev/Dockerfile" --build-arg ESMF_BRANCH="${CIRCLE_BRANCH}" --build-arg DOCKER_NAMESPACE="esmf" .
@@ -120,20 +120,16 @@ jobs:
           destination: << parameters.target >>-artifacts.zip
 
   build-esmf-docs:
-    machine:
-      docker_layer_caching: true
+    docker:
+      - image: cimg/base:2020.01
     steps:
+      - setup_remote_docker
       - run:
           name: Checkout Code (ESCOMP-Containers)
           command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
       - run:
           name: Checkout Code (ESMF)
           command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git
-#      - run:
-#          name: passthru-build-docs
-#          command: exit 0
-#      - setup_remote_docker:
-#          docker_layer_caching: true
       - run:
           name: Docker Build esmf-doc
           command: docker build -t "esmf/esmf-doc:${CIRCLE_BRANCH}" --file "ESCOMP-Containers/ESMF/doc/esmf-doc/Dockerfile" --build-arg ESMF_BRANCH="${CIRCLE_BRANCH}" --build-arg DOCKER_NAMESPACE="esmf" --no-cache .
@@ -151,10 +147,8 @@ jobs:
 
   publish-esmf-docs:
     machine: true
+    resource_class: small
     steps:
-#      - run:
-#          name: publish-docs
-#          command: exit 0
       - restore_cache:
           keys:
             - esmf-docs-{{ .Revision }}
@@ -198,8 +192,6 @@ jobs:
   build-esmpy-docs:
     docker:
       - image: cimg/base:2020.01
-#    machine:
-#      docker_layer_caching: true
     steps:
       - setup_remote_docker
       - run:
