@@ -11,6 +11,7 @@ set -Eeuxo pipefail
 #docker stop runner
 #docker rm runner
 
+mkdir -p "${1}"
 CID=$(docker run -dit --name runner "${3}")
 docker cp ${CID}:${2} ${1}
 docker stop ${CID}
