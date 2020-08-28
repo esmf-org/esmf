@@ -767,9 +767,11 @@ bool VMIdLessThan(
       "- Invalid vmIDs", ESMC_CONTEXT, NULL);
     return false;    // bail out
   }
-  if (VMKeyLessThan(vmID1->vmKey, vmID2->vmKey)) return true;
-  if (vmID1->localID < vmID2->localID) return true;
-  return false;
+  if (VMKeyCompare(vmID1->vmKey, vmID2->vmKey)){
+    // keys identical, look at localID part
+    return (vmID1->localID < vmID2->localID);
+  }
+  return VMKeyLessThan(vmID1->vmKey, vmID2->vmKey);
 }
 //-----------------------------------------------------------------------------
 
