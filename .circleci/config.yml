@@ -1,5 +1,6 @@
 #TODO: Test applications (i.e. RegridWeightGen)
-#TODO: Build tags in ESCOMP
+#TODO: Build ESMF tags in ESCOMP
+#TODO: Remove old bekozi Docker credentials from CircleCi
 
 version: 2.1
 
