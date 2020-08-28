@@ -1136,9 +1136,11 @@ contains
     if (needs_count /= ubound (vm_intids, 1)) then
       write (errstring, '(a,i0,a,i0)') 'size mismatch: needs_count = ', needs_count, ', vm_intids =', ubound (vm_intids, 1)
       call ESMF_LogWrite (msg=errstring, logmsgFlag=ESMF_LOGMSG_ERROR, ESMF_CONTEXT)
+#if 0
       if (ESMF_LogFoundError(ESMF_RC_INTNRL_INCONS, msg='needs_count /= ubound (vm_intids, 1)', &
           ESMF_CONTEXT,  &
           rcToReturn=rc)) return
+#endif
     end if
 
     ! -------------------------------------------------------------------------
@@ -2939,6 +2941,8 @@ contains
       type(ESMF_StateClass),    pointer :: stypep
       type(ESMF_StateItemWrap), pointer :: itemList(:)
       character(len=ESMF_MAXSTR) :: thisname
+      type(ESMF_FieldType),       pointer :: fieldp
+      character(len=80)                   :: msgString
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2955,6 +2959,32 @@ contains
 
       if (associated(itemList)) then
         do i=1, size(itemList)
+          if (itemList(i)%si%otype==ESMF_STATEITEM_FIELD) then
+            fieldp => itemList(i)%si%datap%fp%ftypep
+#if 1
+            call ESMF_StateItemGet(itemList(i)%si, name=thisname, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+write(msgString,*) "ESMF_ReconcileZapProxies: "//trim(thisname), &
+  itemList(i)%si%proxyFlag
+call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=localrc)
+#endif
+
+#if 1
+            ! determine proxyFlag from Base level
+            itemList(i)%si%proxyFlag = ESMF_IsProxy(fieldp%base, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT,  &
+              rcToReturn=rc)) return
+#endif
+
+#if 1
+write(msgString,*) "ESMF_ReconcileZapProxies: "//trim(thisname), &
+  itemList(i)%si%proxyFlag
+call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=localrc)
+#endif
+          endif
           if (itemList(i)%si%proxyFlag) then
             call ESMF_StateItemGet(itemList(i)%si, name=thisname, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
