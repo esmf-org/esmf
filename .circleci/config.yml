@@ -194,7 +194,8 @@ jobs:
     steps:
       - run:
           name: Checkout Code (ESCOMP-Containers)
-          command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
+#          command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
+          command: git clone --depth 1 --branch esmpy-doc-base-to-ubuntu https://github.com/esmf-org/ESCOMP-Containers.git #tdk:revert
       - run:
           name: Checkout Code (ESMF)
           command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git
