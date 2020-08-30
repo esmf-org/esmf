@@ -49,4 +49,7 @@ git commit -m " ESMF dev_guide build by CircleCI"
 
 # Push the changes ------------------------------------------------------------
 
+# Attempt to help with the push by updating remote refs.
+# https://stackoverflow.com/questions/6656619/git-and-nasty-error-cannot-lock-existing-info-refs-fatal
+git remote prune origin
 git push origin master
