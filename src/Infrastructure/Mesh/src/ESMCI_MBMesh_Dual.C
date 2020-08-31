@@ -808,12 +808,22 @@ namespace ESMCI {
       }
 #endif
 
-    // Allocate some temporary variables for splitting
-    double *polyCoords=new double[3*max_num_conn];
-    double *polyDblBuf=new double[3*max_num_conn];
-    int    *polyIntBuf=new int[max_num_conn];
-    int    *triInd=new int[3*(max_num_conn-2)];
-    double *triFrac=new double[max_num_conn-2];
+      double *polyCoords = NULL;
+      double *polyDblBuf = NULL;
+      int    *polyIntBuf = NULL;
+      int    *triInd = NULL;
+      double *triFrac = NULL;
+
+      //There is nothing to do if there are no local elements, 
+      //plus the max_num_conn will be zero in this case
+      //which will try to allocate negative memory below
+      if (num_elems > 0) {
+        polyCoords = new double[3*max_num_conn];
+        polyDblBuf = new double[3*max_num_conn];
+        polyIntBuf = new int[max_num_conn];
+        triInd = new int[3*(max_num_conn-2)];
+        triFrac = new double[max_num_conn-2];
+      }
 
     // new id counter
     int curr_extra_id=beg_extra_ids;

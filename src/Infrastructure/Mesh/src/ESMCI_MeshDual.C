@@ -660,11 +660,11 @@ namespace ESMCI {
       //plus the max_num_conn will be zero in this case
       //which will try to allocate negative memory below
       if (num_elems > 0) {
-	polyCoords = new double[3*max_num_conn];
-	polyDblBuf = new double[3*max_num_conn];
-	polyIntBuf = new int[max_num_conn];
-	triInd = new int[3*(max_num_conn-2)];
-	triFrac = new double[max_num_conn-2];
+        polyCoords = new double[3*max_num_conn];
+        polyDblBuf = new double[3*max_num_conn];
+        polyIntBuf = new int[max_num_conn];
+        triInd = new int[3*(max_num_conn-2)];
+        triFrac = new double[max_num_conn-2];
       }
 
       // new id counter
