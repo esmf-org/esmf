@@ -93,4 +93,12 @@ if __name__ == '__main__':
         test_func = make_test_function(name, pass_fail)
         setattr(TestsContainer, 'test_{0}'.format(name), test_func)
 
+    #tdk:remove: need to handle multiple entries
+    count = 0
+    for k, v in TestsContainer.__dict__.items():
+        if k.startswith('test_'):
+            print(k)
+            count += 1
+    print('count', count)
+
     unittest.main(testRunner=xmlrunner.XMLTestRunner(output=xmlout))
