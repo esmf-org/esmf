@@ -741,6 +741,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     usingCreepExtrap=.false.
     if (present(extrapMethod)) then
        if (extrapMethod == ESMF_EXTRAPMETHOD_CREEP) usingCreepExtrap=.true.
+       if (extrapMethod == ESMF_EXTRAPMETHOD_CREEP_NRST_D) usingCreepExtrap=.true.
     endif
 
     ! Use LocStream if the dest file format is SCRIP and the regridmethod is non-conservative
@@ -1049,8 +1050,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                print *, "  Extrap. Dist. Exponent: ",2.0
             endif
          else if (extrapMethod%extrapmethod .eq. &
+              ESMF_EXTRAPMETHOD_NEAREST_D%extrapmethod) then
+            print *, "  Extrap. Method: nearestd"
+         else if (extrapMethod%extrapmethod .eq. &
               ESMF_EXTRAPMETHOD_CREEP%extrapmethod) then
             print *, "  Extrap. Method: creep"
+            if (present(extrapNumLevels)) then
+               print '(a,i0)', "   Extrap. Number of Levels: ",extrapNumLevels
+            else
+               print *,"   Extrap. Number of Levels: NOT PRESENT?"
+            endif
+         else if (extrapMethod%extrapmethod .eq. &
+           ESMF_EXTRAPMETHOD_CREEP_NRST_D%extrapmethod) then
+            print *, "  Extrap. Method: creepnrstd"
             if (present(extrapNumLevels)) then
                print '(a,i0)', "   Extrap. Number of Levels: ",extrapNumLevels
             else

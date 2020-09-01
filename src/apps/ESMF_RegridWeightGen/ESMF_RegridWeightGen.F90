@@ -263,7 +263,9 @@ program ESMF_RegridWeightGenApp
       call ESMF_UtilGetArg(ind+1, argvalue=extrapMethodStr)
       if ((trim(extrapMethodStr) .ne. 'none') .and. &
            (trim(extrapMethodStr) .ne. 'nearestidavg') .and. &
+           (trim(extrapMethodStr) .ne. 'nearestd') .and. &
            (trim(extrapMethodStr) .ne. 'creep') .and. &
+           (trim(extrapMethodStr) .ne. 'creepnrstd') .and. &
            (trim(extrapMethodStr) .ne. 'neareststod')) then
         write(*,*)
         print *, 'ERROR: The extrap. method "', trim(extrapMethodStr), '" is not supported'
@@ -293,7 +295,8 @@ program ESMF_RegridWeightGenApp
 
    ! If creep is the extrap method, get the number of levels
     extrapNumLevels=-1  ! Init just in case
-    if (trim(extrapMethodStr) .eq. 'creep') then
+    if ((trim(extrapMethodStr) .eq. 'creep') .or. &
+         (trim(extrapMethodStr) .eq. 'creepnrstd')) then
        ! Get number of levels index
        call ESMF_UtilGetArgIndex('--extrap_num_levels', argindex=ind, rc=rc)
 
@@ -788,7 +791,9 @@ program ESMF_RegridWeightGenApp
       if (extrapMethodStr .eq. 'none') commandbuf2(22)=1
       if (extrapMethodStr .eq. 'neareststod') commandbuf2(22)=2
       if (extrapMethodStr .eq. 'nearestidavg') commandbuf2(22)=3
-      if (extrapMethodStr .eq. 'creep') commandbuf2(22)=4
+      if (extrapMethodStr .eq. 'nearestd') commandbuf2(22)=4
+      if (extrapMethodStr .eq. 'creep') commandbuf2(22)=5
+      if (extrapMethodStr .eq. 'creepnrstd') commandbuf2(22)=6
       commandbuf2(23)=extrap_num_src_pnts
       commandbuf2(24)=extrapNumLevels
     endif 
@@ -946,7 +951,11 @@ program ESMF_RegridWeightGenApp
     else if (commandbuf2(22)==3) then
       extrapMethodStr = 'nearestidavg'
     else if (commandbuf2(22)==4) then
+      extrapMethodStr = 'nearestd'
+    else if (commandbuf2(22)==5) then
       extrapMethodStr = 'creep'
+    else if (commandbuf2(22)==6) then
+      extrapMethodStr = 'creepnrstd'
     else
       method = 'none'
     endif
@@ -1025,8 +1034,12 @@ program ESMF_RegridWeightGenApp
      extrapMethodFlag=ESMF_EXTRAPMETHOD_NEAREST_STOD
   else if (trim(extrapMethodStr) .eq. 'nearestidavg') then
      extrapMethodFlag=ESMF_EXTRAPMETHOD_NEAREST_IDAVG
+  else if (trim(extrapMethodStr) .eq. 'nearestd') then
+     extrapMethodFlag=ESMF_EXTRAPMETHOD_NEAREST_D
   else if (trim(extrapMethodStr) .eq. 'creep') then
      extrapMethodFlag=ESMF_EXTRAPMETHOD_CREEP
+  else if (trim(extrapMethodStr) .eq. 'creepnrstd') then
+     extrapMethodFlag=ESMF_EXTRAPMETHOD_CREEP_NRST_D
   else 
      extrapMethodFlag=ESMF_EXTRAPMETHOD_NONE
   endif
@@ -1256,7 +1269,7 @@ contains
     print *, "                      [--pole|-p all|none|teeth|<N>]"
     print *, "                      [--line_type|-l cartesian|greatcircle]"
     print *, "                      [--norm_type dstarea|fracarea]"
-    print *, "                      [--extrap_method none|neareststod|nearestidavg|creep]"
+    print *, "                      [--extrap_method none|neareststod|nearestidavg|nearestd|creep|creepnrstd]"
     print *, "                      [--extrap_num_src_pnts <N>]"
     print *, "                      [--extrap_dist_exponent <P>]"
     print *, "                      [--extrap_num_levels <L>]"
