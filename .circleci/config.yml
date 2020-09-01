@@ -276,6 +276,7 @@ jobs:
   nuopc-app-prototypes:
     docker:
       - image: cimg/base:2020.01
+    resource_class: xlarge
     steps:
       - setup_remote_docker
       - run:
