@@ -287,7 +287,7 @@ jobs:
           command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git
       - run:
           name: Docker Build
-          command: docker build -t "esmf/nuopc-app-prototypes" --build-arg ESMF_BRANCH="${CIRCLE_BRANCH}" --build-arg DOCKER_NAMESPACE="esmf" --no-cache .
+          command: cd ESCOMP-Containers/ESMF/nuopc-app-prototypes && docker build -t "esmf/nuopc-app-prototypes" --build-arg ESMF_BRANCH="${CIRCLE_BRANCH}" --build-arg DOCKER_NAMESPACE="esmf" --no-cache .
       - run:
           name: Extract Artifacts
           command: bash esmf/.circleci/sh/extract-artifacts.sh /tmp /opt/artifacts/artifacts.zip esmf/nuopc-app-prototypes && cd /tmp && unzip /tmp/artifacts.zip
@@ -367,26 +367,26 @@ workflows:
           requires:
             - build-escomp-esmf
 
-  docs-commit:
-    jobs:
-#      - should-build-docs:
-#          type: approval
-      - build-esmf-docs
-      - publish-esmf-docs:
-          requires:
-            - build-esmf-docs
-          filters:
-            branches:
-              only:
-                - develop
-      - build-esmpy-docs
-      - publish-esmpy-docs:
-          requires:
-            - build-esmpy-docs
-          filters:
-            branches:
-              only:
-                - develop
+#  docs-commit: tdk: re-enable
+#    jobs:
+##      - should-build-docs:
+##          type: approval
+#      - build-esmf-docs
+#      - publish-esmf-docs:
+#          requires:
+#            - build-esmf-docs
+#          filters:
+#            branches:
+#              only:
+#                - develop
+#      - build-esmpy-docs
+#      - publish-esmpy-docs:
+#          requires:
+#            - build-esmpy-docs
+#          filters:
+#            branches:
+#              only:
+#                - develop
 
 #  osx-commit:
 #    jobs:
