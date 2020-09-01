@@ -61,6 +61,7 @@ enum ESMC_Decomp_Flag {ESMC_DECOMP_INVALID=0,
 enum ESMC_ExtrapMethod_Flag {ESMC_EXTRAPMETHOD_NONE=0,
                              ESMC_EXTRAPMETHOD_NEAREST_STOD,
                              ESMC_EXTRAPMETHOD_NEAREST_IDAVG,
+                             ESMC_EXTRAPMETHOD_NEAREST_D,
                              ESMC_EXTRAPMETHOD_CREEP,
                              ESMC_EXTRAPMETHOD_CREEP_NRST_D};
 

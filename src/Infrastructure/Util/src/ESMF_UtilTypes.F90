@@ -775,8 +775,10 @@
            ESMF_EXTRAPMETHOD_NONE    = ESMF_ExtrapMethod_Flag(0), &
            ESMF_EXTRAPMETHOD_NEAREST_STOD = ESMF_ExtrapMethod_Flag(1), &
            ESMF_EXTRAPMETHOD_NEAREST_IDAVG = ESMF_ExtrapMethod_Flag(2), &
-           ESMF_EXTRAPMETHOD_CREEP = ESMF_ExtrapMethod_Flag(3), &
-           ESMF_EXTRAPMETHOD_CREEP_NRST_D = ESMF_ExtrapMethod_Flag(4)
+           ESMF_EXTRAPMETHOD_NEAREST_D = ESMF_ExtrapMethod_Flag(3), &
+           ESMF_EXTRAPMETHOD_CREEP = ESMF_ExtrapMethod_Flag(4), &
+           ESMF_EXTRAPMETHOD_CREEP_NRST_D = ESMF_ExtrapMethod_Flag(5)
+
 
 !------------------------------------------------------------------------------
       type ESMF_LineType_Flag
@@ -1146,6 +1148,7 @@
              ESMF_EXTRAPMETHOD_NONE, & 
              ESMF_EXTRAPMETHOD_NEAREST_STOD, &
              ESMF_EXTRAPMETHOD_NEAREST_IDAVG, &
+             ESMF_EXTRAPMETHOD_NEAREST_D, &
              ESMF_EXTRAPMETHOD_CREEP, &
              ESMF_EXTRAPMETHOD_CREEP_NRST_D
 
