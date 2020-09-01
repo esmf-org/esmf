@@ -1,10 +1,7 @@
 import os
 import re
-import subprocess
-import tempfile
 import unittest
 from collections import OrderedDict
-from pprint import PrettyPrinter
 
 import xmlrunner
 
@@ -74,7 +71,11 @@ def make_testsmap_nuopc_protos(outfile):
                 parse = True
             elif parse:
                 result = re.search('(?P<pass_fail>.*): (?P<name>.*)$', line)
-                testsmap[result['name']] = result['pass_fail']
+                if result['name'] in testsmap:
+                    result_name =  result['name'] + '_' + str(ran)
+                else:
+                    result_name = result['name']
+                testsmap[result_name] = result['pass_fail']
                 ran += 1
     testsmap['ran'] = ran
     return testsmap
@@ -92,13 +93,5 @@ if __name__ == '__main__':
     for name, pass_fail in testsmap.items():
         test_func = make_test_function(name, pass_fail)
         setattr(TestsContainer, 'test_{0}'.format(name), test_func)
-
-    #tdk:remove: need to handle multiple entries
-    count = 0
-    for k, v in TestsContainer.__dict__.items():
-        if k.startswith('test_'):
-            print(k)
-            count += 1
-    print('count', count)
 
     unittest.main(testRunner=xmlrunner.XMLTestRunner(output=xmlout))
