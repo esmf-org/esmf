@@ -277,7 +277,7 @@ jobs:
     docker:
       - image: cimg/base:2020.01
     steps:
-      - setup_remove_docker
+      - setup_remote_docker
       - run:
           name: Checkout Code (ESCOMP-Containers)
 #          command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
