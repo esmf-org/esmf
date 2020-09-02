@@ -298,6 +298,31 @@ jobs:
       - store_test_results:
           path: /tmp/artifacts/meta_test
 
+  nuopc-app-prototypes:
+    docker:
+      - image: cimg/base:2020.01
+    resource_class: xlarge
+    steps:
+      - setup_remote_docker
+      - run:
+          name: Checkout Code (ESCOMP-Containers)
+          #          command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
+          command: git clone --depth 1 --branch esmpy-doc-base-to-ubuntu https://github.com/esmf-org/ESCOMP-Containers.git #tdk:revert
+      - run:
+          name: Checkout Code (ESMF)
+          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git
+      - run:
+          name: Docker Build
+          command: cd ESCOMP-Containers/ESMF/nuopc-app-prototypes && docker build -t "esmf/nuopc-app-prototypes" --build-arg ESMF_BRANCH="${CIRCLE_BRANCH}" --build-arg DOCKER_NAMESPACE="esmf" --no-cache .
+      - run:
+          name: Extract Artifacts
+          command: bash esmf/.circleci/sh/extract-artifacts.sh /tmp /opt/artifacts.zip esmf/nuopc-app-prototypes && cd /tmp && unzip /tmp/artifacts.zip
+      - store_artifacts:
+          path: /tmp/artifacts.zip
+          destination: artifacts.zip
+      - store_test_results:
+          path: /tmp/artifacts/meta_test
+
 # =============================================================================
 
 workflows:
