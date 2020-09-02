@@ -63,7 +63,6 @@ module ESMF_StateReconcileMod
   use ESMF_RHandleMod
 
   use ESMF_InfoMod, only : ESMF_Info, ESMF_InfoGetFromBase, ESMF_InfoUpdate
-  use ESMF_InfoSyncMod, only : ESMF_InfoGetFromHost
   use ESMF_InfoCacheMod
 
   implicit none
@@ -377,8 +376,7 @@ contains
     enddo
     vmIdMap_ptr => vmIdMap
 
-!tdk:debug
-#if 1
+#if 0
     ! Log a JSON State representation -----------------------------------------
 
     call idesc%Initialize(createInfo=.true., addObjectInfo=.true., vmIdMap=vmIdMap_ptr, &
@@ -557,12 +555,10 @@ contains
           print *, '    items_recv(', lbound (items_recv(i)%cptr),  &
               ':', ubound (items_recv(i)%cptr), ')'
             end if
-        call ESMF_ReconcileDeserialize (state, vm,  &
-            obj_buffer=items_recv(i)%cptr,  &
-            vm_intids=id_info(i)%vmid,  &
-            vm_ids=vmids_send, &
-            vmIdMap=vmIdMap, &
-            attreconflag=attreconflag, rc=localrc)
+        call ESMF_ReconcileDeserialize (state, vm, &
+            obj_buffer=items_recv(i)%cptr, &
+            attreconflag=attreconflag, &
+            rc=localrc)
       else
         localrc = ESMF_SUCCESS
       end if
@@ -1058,16 +1054,12 @@ contains
 ! !IROUTINE: ESMF_ReconcileDeserialize
 !
 ! !INTERFACE:
-  subroutine ESMF_ReconcileDeserialize (state, vm, obj_buffer, vm_intids,  &
-      vm_ids, vmIdMap, attreconflag, rc)
+  subroutine ESMF_ReconcileDeserialize (state, vm, obj_buffer, attreconflag, rc)
 !
 ! !ARGUMENTS:
     type (ESMF_State), intent(inout):: state
     type (ESMF_VM),    intent(in)   :: vm
     character,         pointer      :: obj_buffer(:)    ! intent(in)
-    integer,           pointer      :: vm_intids(:)     ! intent(in)
-    type(ESMF_VMId),   pointer      :: vm_ids(:)        ! intent(in)
-    type(ESMF_VMId)                 :: vmIdMap(:)       ! intent(in)
     type(ESMF_AttReconcileFlag),intent(in)   :: attreconflag
     integer,           intent(out)  :: rc
 !
@@ -1082,19 +1074,12 @@ contains
 !     {\tt ESMF\_VM} to use.
 !   \item[obj_buffer]
 !     Buffer of serialized State objects (intent(in))
-!   \item[vm_intids]
-!     Integer VM identifiers to use for reconcile communication operations.
-!   \item[vm_ids]
-!     VMIds to be associated with proxy objects.
-!   \item[vmIdMap]
-!     VMIds associated with the integer identifiers in \textit{vm_intids}.
 !   \item[attreconflag]
 !     Flag to indicate attribute reconciliation.
 !   \item[rc]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !EOPI
-!tdk:todo: remove vm_ids. it is not used in this subroutine
 
     integer :: localrc
     integer :: memstat
@@ -1119,9 +1104,6 @@ contains
     logical, parameter :: debug = .false.
     logical, parameter :: trace = .false.
 
-    integer :: vmidint_attr
-    type(ESMF_Info) :: infoh
-
     ! Sanity checks
     call ESMF_VMGet (vm, localPet=mypet, rc=localrc)
     if (ESMF_LogFoundError (localrc, ESMF_ERR_PASSTHRU, &
@@ -1139,21 +1121,6 @@ contains
     if (debug) then
       print *, ESMF_METHOD, ': PET', mypet, ', needs_count =', needs_count
     end if
-
-    ! if (needs_count /= ubound (vm_intids, 1)) then
-    !   write (errstring, '(a,i0,a,i0)') 'size mismatch: needs_count = ', needs_count, ', vm_intids =', ubound (vm_intids, 1)
-    !   call ESMF_LogWrite (msg=errstring, logmsgFlag=ESMF_LOGMSG_ERROR, ESMF_CONTEXT)
-    !   write (errstring, *) 'ubound(vm_ids, 1)=', ubound(vm_ids, 1)
-    !   call ESMF_LogWrite (msg=trim(errstring), logmsgFlag=ESMF_LOGMSG_ERROR, ESMF_CONTEXT)
-    !   write (errstring, *) 'ubound(vmIdMap, 1)=', ubound(vmIdMap, 1)
-    !   call ESMF_LogWrite (msg=trim(errstring), logmsgFlag=ESMF_LOGMSG_ERROR, ESMF_CONTEXT)
-!tdk:debug
-#if 0
-      if (ESMF_LogFoundError(ESMF_RC_INTNRL_INCONS, msg='needs_count /= ubound (vm_intids, 1)', &
-          ESMF_CONTEXT,  &
-          rcToReturn=rc)) return
-#endif
-    ! end if
 
     ! -------------------------------------------------------------------------
 
@@ -1235,21 +1202,6 @@ contains
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT,  &
               rcToReturn=rc)) return
-
-!          call ESMF_InfoGetFromHost(field, infoh, rc=localrc)
-!          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-!              ESMF_CONTEXT,  &
-!              rcToReturn=rc)) return
-
-!tdk:debug
-#if 1
-!          call ESMF_LogWrite("info dump with vmidint_attr="//ESMF_InfoDump(infoh))
-#endif
-
-!          call ESMF_InfoGet(infoh, "_vmidint", vmidint_attr, rc=localrc)
-!          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-!              ESMF_CONTEXT,  &
-!              rcToReturn=rc)) return
 
           if (debug) then
             print *, "created field, ready to add to local state"
@@ -1638,8 +1590,7 @@ contains
           rcToReturn=rc)) return
     end if
 
-!tdk:debug
-#if 1
+#if 0
     ! Log some information about the number of items in the state.
     write(logmsg, *) nitems_buf
     call ESMF_LogWrite("nitems_buf="//trim(logmsg))
@@ -2574,8 +2525,8 @@ contains
     integer :: i
     integer :: mypet, npets, pet
 
-    logical, parameter :: debug=.true. !tdk:debug
-    logical, parameter :: trace=.true. !tdk:debug
+    logical, parameter :: debug=.false.
+    logical, parameter :: trace=.false.
     character(len=ESMF_MAXSTR) :: logmsg
     integer :: needs_count_debug
     type(ESMF_Info) :: infoh
@@ -2636,12 +2587,6 @@ contains
   ! Make two passes through each needed item.  The first time to calculate
   ! the size of the buffer, and the second time to perform the actual
   ! serialization.
-
-!tdk:debug
-#if 1
-      write(logmsg, *) "pet_needs%needed=", pet_needs%needed
-      call ESMF_LogWrite(trim(logmsg))
-#endif
 
       if (.not. pet_needs(item)%needed) cycle item_loop
 
@@ -2712,16 +2657,6 @@ contains
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT,  &
                 rcToReturn=rc)) return
-
-!            call ESMF_InfoGetFromHost(stateitem%datap%fp, infoh, rc=localrc)
-!            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-!                ESMF_CONTEXT,  &
-!                rcToReturn=rc)) return
-
-!            call ESMF_InfoSet(infoh, "_vmidint", id_info(mypet)%vmid(item), rc=localrc)
-!            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-!                ESMF_CONTEXT,  &
-!                rcToReturn=rc)) return
 
           case (ESMF_STATEITEM_ARRAY%ot)
             if (debug) then
