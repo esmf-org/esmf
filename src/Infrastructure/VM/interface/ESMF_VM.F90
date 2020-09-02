@@ -432,7 +432,9 @@ module ESMF_VMMod
   public ESMF_VMGetCurrentGarbageInfo
   public ESMF_VMGetMemInfo
   public ESMF_VMIsCreated
+  public ESMF_VMLogBacktrace
   public ESMF_VMLogCurrentGarbageInfo
+  public ESMF_VMLogGarbageInfo
   public ESMF_VMLogMemInfo
   public ESMF_VMGetVMId
   public ESMF_VMPrint
@@ -5727,6 +5729,50 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMLogBacktrace()"
+!BOPI
+! !IROUTINE: ESMF_VMLogBacktrace - Log backtrace
+
+! !INTERFACE:
+  subroutine ESMF_VMLogBacktrace(prefix, rc)
+!
+! !ARGUMENTS:
+    character (len=*),    intent(in),   optional  :: prefix
+    integer, intent(out),               optional  :: rc           
+!
+! !DESCRIPTION:
+!   Log backtrace of the current call stack.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item [{[prefix]}]
+!     String to prefix the backtrace message. Default is no prefix.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Call into the C++ interface.
+    call c_esmc_vmlogbacktrace(prefix, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMLogBacktrace
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMLogCurrentGarbageInfo()"
 !BOPI
 ! !IROUTINE: ESMF_VMLogCurrentGarbageInfo - Log garbage collection info
@@ -5739,12 +5785,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out),               optional  :: rc           
 !
 ! !DESCRIPTION:
-!   Log memory info from the system for this PET.
+!   Log gargbage collection info of the current VM on this PET.
 !
 !   The arguments are:
 !   \begin{description}
 !   \item [{[prefix]}]
-!     String to prefix the memory info message. Default is no prefix.
+!     String to prefix the garbage info message. Default is no prefix.
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -5766,6 +5812,50 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMLogCurrentGarbageInfo
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMLogGarbageInfo()"
+!BOPI
+! !IROUTINE: ESMF_VMLogGarbageInfo - Log garbage collection info
+
+! !INTERFACE:
+  subroutine ESMF_VMLogGarbageInfo(prefix, rc)
+!
+! !ARGUMENTS:
+    character (len=*),    intent(in),   optional  :: prefix
+    integer, intent(out),               optional  :: rc           
+!
+! !DESCRIPTION:
+!   Log gargbage collection info for all VMs on this PET.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item [{[prefix]}]
+!     String to prefix the garbage info message. Default is no prefix.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Call into the C++ interface.
+    call c_esmc_vmloggarbageinfo(prefix, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMLogGarbageInfo
 !------------------------------------------------------------------------------
 
 

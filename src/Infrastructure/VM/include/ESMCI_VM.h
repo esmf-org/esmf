@@ -133,10 +133,11 @@ class VM : public VMK {   // inherits from ESMCI::VMK class
     static VM *getCurrent(int *rc=NULL);      // current VM
     static VMId *getCurrentID(int *rc=NULL);  // VMId of current VM
     static void getCurrentGarbageInfo(int *, int *); // garbage info current VM
-    static void logCurrentGarbageInfo(std::string prefix); // garbage info
+    static void logGarbageInfo(std::string prefix, bool current=false); // garb
     static void getMemInfo(int *virtMemPet, int *physMemPet);   // memory info
     static void logMemInfo(std::string prefix,
-      ESMCI::LogErr *log=&ESMC_LogDefault);   // memory info
+      ESMCI::LogErr *log=&ESMC_LogDefault);   // memory log
+    static void logBacktrace(std::string prefix); // backtrace log
     static int getBaseIDAndInc(VMId *vmID);
     static void addObject(ESMC_Base *, VMId *vmID);
     static void rmObject(ESMC_Base *);
@@ -145,6 +146,7 @@ class VM : public VMK {   // inherits from ESMCI::VMK class
       int objectID, VMId *vmID, const std::string &name, ESMC_ProxyFlag proxyflag,
       bool *obj_found, int *rc);
     static void rmFObject(void **fobject);
+    static bool validObject(ESMC_Base *);
     static void printMatchTable(void);
     static char const *getenv(char const *name);
     // misc.

@@ -46,6 +46,7 @@
 #include <cstdlib>
 #if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
 #include <malloc.h>
+#include <execinfo.h>
 #endif
 #include "ESMF_Pthread.h"
 #include "ESMCI_IO_Handler.h"
@@ -2330,16 +2331,17 @@ void VM::getCurrentGarbageInfo(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::VM::logCurrentGarbageInfo()"
+#define ESMC_METHOD "ESMCI::VM::logGarbageInfo()"
 //BOPI
-// !IROUTINE:  ESMCI::VM::logCurrentGarbageInfo - Log garbage info of current VM
+// !IROUTINE:  ESMCI::VM::logGarbageInfo - Log garbage info of current VM
 //
 // !INTERFACE:
-void VM::logCurrentGarbageInfo(
+void VM::logGarbageInfo(
 //
 // !ARGUMENTS:
 //
-  std::string prefix
+  std::string prefix,
+  bool current
   ){
 //
 // !DESCRIPTION:
@@ -2366,32 +2368,91 @@ void VM::logCurrentGarbageInfo(
       throw rc;
     }
   }
-  // found a match
+  // found the current VM
+  
+  int ic=i;
+  int lb=0;
+  int ub=matchTableBound;
+  if (current){
+    lb = ic;
+    ub = ic+1;
+  }
 
   char msg[512];
-  sprintf(msg, "%s - CurrGarbInfo: Fortran objs=%lu", prefix.c_str(),
-    matchTable_FObjects[i].size());
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-  for (unsigned j=0; j<matchTable_FObjects[i].size(); j++){
-    sprintf(msg, "%s - CurrGarbInfo: fortran objs[%d]: %d", prefix.c_str(), j,
-      matchTable_FObjects[i][j].objectID);
+  for (int i=lb; i<ub; i++){
+    if (i==ic)
+      sprintf(msg, "%s - GarbInfo: VM matchTableIndex=%i"
+        " ***current VM context****", prefix.c_str(), i);
+    else
+      sprintf(msg, "%s - GarbInfo: VM matchTableIndex=%i", prefix.c_str(), i);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-  }
-  sprintf(msg, "%s - CurrGarbInfo: Base objs=%lu", prefix.c_str(),
-    matchTable_Objects[i].size());
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-  for (unsigned j=0; j<matchTable_Objects[i].size(); j++){
-    const char *proxyString;
-    proxyString="actual object";
-    if (matchTable_Objects[i][j]->ESMC_BaseGetProxyFlag()==ESMF_PROXYYES)
-      proxyString="proxy object";
-    sprintf(msg, "%s - CurrGarbInfo: base objs[%d]: %p : %s : %s : %d ; %s",
-      prefix.c_str(), j, matchTable_Objects[i][j],
-      matchTable_Objects[i][j]->ESMC_BaseGetClassName(),
-      matchTable_Objects[i][j]->ESMC_BaseGetName(),
-      matchTable_Objects[i][j]->ESMC_BaseGetID(), proxyString);
+    sprintf(msg, "%s - GarbInfo: Fortran objs=%lu", prefix.c_str(),
+      matchTable_FObjects[i].size());
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    for (unsigned j=0; j<matchTable_FObjects[i].size(); j++){
+      void *basePtr = NULL;
+      if (matchTable_FObjects[i][j].objectID != ESMC_ID_GEOMBASE.objectID)
+        basePtr = **(void ***)(&matchTable_FObjects[i][j].fobject);
+      sprintf(msg, "%s - GarbInfo: fortran objs[%d]: %s %p", prefix.c_str(), j,
+        ESMC_ObjectID_Name(matchTable_FObjects[i][j].objectID), basePtr);
+      ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    }
+    sprintf(msg, "%s - GarbInfo: Base objs=%lu", prefix.c_str(),
+      matchTable_Objects[i].size());
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    for (unsigned j=0; j<matchTable_Objects[i].size(); j++){
+      const char *proxyString;
+      proxyString="actual object";
+      if (matchTable_Objects[i][j]->ESMC_BaseGetProxyFlag()==ESMF_PROXYYES)
+        proxyString="proxy object";
+      sprintf(msg, "%s - GarbInfo: base objs[%d]: %s : %p : %s : %d ; %s",
+        prefix.c_str(), j, matchTable_Objects[i][j]->ESMC_BaseGetClassName(),
+        matchTable_Objects[i][j],
+        matchTable_Objects[i][j]->ESMC_BaseGetName(),
+        matchTable_Objects[i][j]->ESMC_BaseGetID(), proxyString);
+      ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    }
   }
+
+  // return successfully
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VM::logBacktrace()"
+//BOPI
+// !IROUTINE:  ESMCI::VM::logBacktrace - Log backtrace
+//
+// !INTERFACE:
+void VM::logBacktrace(
+//
+// !ARGUMENTS:
+//
+  std::string prefix
+  ){
+//
+// !DESCRIPTION:
+//   Log the backtrace of the current call stack.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;   // final return code
+
+#if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
+  const int size=1000;
+  void *buffer[size];
+  int count = backtrace(buffer, size);
+  char **symbols = backtrace_symbols(buffer, count);
+  for (int i=0; i<count; i++){
+    std::stringstream info;
+    info << prefix << " - Backtrace: " << symbols[i];
+    ESMC_LogDefault.Write(info, ESMC_LOGMSG_INFO);
+  }
+  free(symbols);
+#endif
 
   // return successfully
 }
@@ -2648,6 +2709,14 @@ void VM::addObject(
   VM *vm = getCurrent();
   vm->lock();
   matchTable_Objects[i].push_back(object);
+
+#ifdef GARBAGE_COLLECTION_LOG_on
+  std::stringstream msg;
+  msg << "VM::addObject() object added: " << object;
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  //logBacktrace("VM::addObject()");  // enable to pin down specific caller
+#endif
+
   vm->unlock();
 }
 //-----------------------------------------------------------------------------
@@ -2701,6 +2770,7 @@ void VM::rmObject(
   // must lock/unlock for thread-safe access to std::vector
   VM *vm = getCurrent();
   vm->lock();
+  for (i=0; i<matchTableBound; i++){
   for (vector<ESMC_Base *>::iterator
     it = matchTable_Objects[i].begin();
     it != matchTable_Objects[i].end(); ++it){
@@ -2709,6 +2779,15 @@ void VM::rmObject(
       break;
     }
   }
+  }
+
+#ifdef GARBAGE_COLLECTION_LOG_on
+  std::stringstream msg;
+  msg << "VM::rmObject() object removed: " << object;
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  //logBacktrace("VM::rmObject()");  // enable to pin down specific caller
+#endif
+
   vm->unlock();
 }
 //-----------------------------------------------------------------------------
@@ -2763,6 +2842,14 @@ void VM::addFObject(
   FTN_X(f_esmf_fortranudtpointercopy)(fobjectElement, (void *)fobject);
 
   matchTable_FObjects[i][size].objectID = objectID;
+  
+#ifdef GARBAGE_COLLECTION_LOG_on
+  std::stringstream msg;
+  msg << "VM::addFObject() object added: " << string(ESMC_ObjectID_Name(objectID));
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  //logBacktrace("VM::addFObject()");  // enable to pin down specific caller
+#endif
+
   vm->unlock();
 }
 //-----------------------------------------------------------------------------
@@ -2982,6 +3069,7 @@ void VM::rmFObject(
   // must lock/unlock for thread-safe access to std::vector
   VM *vm = getCurrent();
   vm->lock();
+  for (i=0; i<matchTableBound; i++){
   for (vector<FortranObject>::iterator
     it = matchTable_FObjects[i].begin();
     it != matchTable_FObjects[i].end(); ++it){
@@ -2996,10 +3084,62 @@ void VM::rmFObject(
       break;
     }
   }
+  }
+
+#ifdef GARBAGE_COLLECTION_LOG_on
+  std::stringstream msg;
+  msg << "VM::rmFObject() object removed: " << **(void ***)fobject;
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  //logBacktrace("VM::rmFObject()");  // enable to pin down specific caller
+#endif
+
   vm->unlock();
 }
 //-----------------------------------------------------------------------------
 
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VM::validObject()"
+//BOPI
+// !IROUTINE:  ESMCI::VM::validObject - Check if an object is valid in garbage collection
+//
+// !INTERFACE:
+bool VM::validObject(
+//
+// !RETURN VALUE:
+//    true/false
+//
+// !ARGUMENTS:
+//
+  ESMC_Base *object){   // object to be checked
+//
+// !DESCRIPTION:
+//    Check if an object is valid in garbage collection
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  // must lock/unlock for thread-safe access to std::vector
+  bool valid = false;
+  VM *vm = getCurrent();
+  vm->lock();
+  for (int i=0; i<matchTableBound; i++){
+  for (vector<ESMC_Base *>::iterator
+    it = matchTable_Objects[i].begin();
+    it != matchTable_Objects[i].end(); ++it){
+    if (*it == object){
+      valid = true;
+      break;
+    }
+  }
+  }
+  vm->unlock();
+  return valid;
+}
+//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
