@@ -187,6 +187,7 @@ jobs:
       - run:
           name: Prep Test Results
           command: mkdir -p /tmp/test-results && mv ${ESMF_DIR}/src/addon/ESMPy/nosetests.xml /tmp/test-results/
+          when: always
       - store_test_results:
           path: /tmp/test-results
 
