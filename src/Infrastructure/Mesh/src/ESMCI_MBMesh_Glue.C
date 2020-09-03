@@ -2752,6 +2752,237 @@ void MBMesh_getlocalcoords(void **mbmpp, double *ncoords, int *_orig_sdim, int *
 
 }
 
+
+// Set data based on typekind
+// Mesh data is always double for now, so need to convert
+void set_Array_data(LocalArray *localArray, int index, ESMC_TypeKind_Flag typekind, double data) {
+
+  if (typekind == ESMC_TYPEKIND_I4) {
+    ESMC_I4 data_i4=static_cast<ESMC_I4>(data);
+    localArray->setData(&index, data_i4);
+  } else if (typekind == ESMC_TYPEKIND_R4) {
+    ESMC_R4 data_r4=static_cast<ESMC_R4>(data);
+    localArray->setData(&index, data_r4);
+  } else if (typekind == ESMC_TYPEKIND_R8) {
+    ESMC_R8 data_r8=static_cast<ESMC_R8>(data);
+    localArray->setData(&index, data_r8);
+  } else {
+    int localrc;
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+                                  " unsupported typekind in Array.",
+                                  ESMC_CONTEXT, &localrc);
+    throw localrc;
+  }
+}
+
+
+void MBMesh_geteleminfointoarray(void **mbmpp,
+                                 ESMCI::DistGrid *elemDistgrid, 
+                                 int numElemArrays,
+                                 int *infoTypeElemArrays, 
+                                 ESMCI::Array **elemArrays, 
+                                 int *rc)
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_geteleminfointoarray()"
+
+{
+  // Must match with ESMF_MeshGet()
+#define INFO_TYPE_ELEM_ARRAYS_MASK 1
+#define INFO_TYPE_ELEM_ARRAYS_AREA 2
+#define INFO_TYPE_ELEM_ARRAYS_MAX  2
+
+    int localrc;
+    try {
+
+        // Initialize the parallel environment for mesh (if not already done)
+        ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+        if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+            throw localrc;
+
+        // Make sure that incoming Array distgrids match element distgrid
+        for (int i=0; i<numElemArrays; i++) {
+
+          // Get match
+          DistGridMatch_Flag matchflag=DistGrid::match(elemArrays[i]->getDistGrid(),elemDistgrid,&localrc);
+          if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+
+          // Complain if it doesn't match sufficiently
+          if ((matchflag != DISTGRIDMATCH_EXACT) && (matchflag != DISTGRIDMATCH_ALIAS)) {
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+                                          " DistGrid in element information Array doesn't match Mesh element DistGrid.",
+                                          ESMC_CONTEXT, &localrc);
+            throw localrc;
+          }
+        }
+
+        // Get Moab Mesh wrapper
+        MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
+
+        //Get MOAB Mesh
+        Interface *moab_mesh=mbmp->mesh;
+
+        /// STOPPED HERE ///
+
+
+        // Get the fields, Arrays for the various types of info
+        MEField<> *elem_mask_field=NULL; 
+        ESMCI::Array *elem_mask_Array=NULL;
+        MEField<> *elem_area_field=NULL; 
+        ESMCI::Array *elem_area_Array=NULL;
+
+        for (int i=0; i<numElemArrays; i++) {
+          if (infoTypeElemArrays[i] == INFO_TYPE_ELEM_ARRAYS_MASK) { 
+            elem_mask_field = mesh->GetField("elem_mask_val");
+            if (!elem_mask_field) {
+              ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+                                            " mesh doesn't contain element mask information.",
+                                            ESMC_CONTEXT, &localrc);
+              throw localrc;
+            }
+
+            // Get array pointer
+            elem_mask_Array=elemArrays[i];
+
+            // Complain if the array has more than rank 1                                 
+            if (elem_mask_Array->getRank() != 1) Throw() << "this call currently can't handle Array rank != 1";
+          }
+
+          if (infoTypeElemArrays[i] == INFO_TYPE_ELEM_ARRAYS_AREA) { 
+            elem_area_field = mesh->GetField("elem_area");
+            if (!elem_area_field) {
+              ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+                                            " mesh doesn't contain element area information.",
+                                            ESMC_CONTEXT, &localrc);
+              throw localrc;
+            }
+
+            // Get array pointer
+            elem_area_Array=elemArrays[i];
+
+            // Complain if the array has more than rank 1                                 
+            if (elem_area_Array->getRank() != 1) Throw() << "this call currently can't handle Array rank != 1";
+
+            // Complain if the Mesh is split 
+            if (mesh->is_split) Throw() << "this call currently can't handle a mesh containing elems with > 4 corners";
+          }
+
+        }
+
+
+        // Get LocalDeCount
+        int localDECount=elemDistgrid->getDELayout()->getLocalDeCount();
+
+        // Loop filling local DEs
+        for (int lDE=0; lDE<localDECount; lDE++) {
+
+          // Get sequence indices
+          std::vector<int> seqIndexList;
+          elemDistgrid->fillSeqIndexList(seqIndexList, lDE, 1);
+
+
+          // Get mask if needed
+          if (elem_mask_Array) {
+            // Get the array info
+            LocalArray *localArray=(elem_mask_Array->getLocalarrayList())[lDE];
+
+            // Get localDE lower bound                                                    
+            int lbound=(elem_mask_Array->getComputationalLBound())[lDE]; // (assumes array rank is 1)                                                                          
+            // Typekind
+            ESMC_TypeKind_Flag typekind=elem_mask_Array->getTypekind();
+
+            // Loop seqIndices
+            for (int i=0; i<seqIndexList.size(); i++) {
+              int si=seqIndexList[i];
+
+              //  Find the corresponding Mesh element
+              Mesh::MeshObjIDMap::iterator mi =  mesh->map_find(MeshObj::ELEMENT, si);
+              if (mi == mesh->map_end(MeshObj::ELEMENT)) {
+                Throw() << "element with that id not found in mesh";
+              }
+              
+              // Get the element
+              const MeshObj &elem = *mi;
+
+              // Get the data from mesh
+              double *mask_val=elem_mask_field->data(elem);
+         
+              // Location in array
+              int index=i+lbound;
+              
+              // Set data
+              set_Array_data(localArray, index, typekind, *mask_val);
+            }
+          }
+
+          // Get area if needed
+          if (elem_area_Array) {
+            // Get the array info
+            LocalArray *localArray=(elem_area_Array->getLocalarrayList())[lDE];
+
+            // Get localDE lower bound                                                    
+            int lbound=(elem_area_Array->getComputationalLBound())[lDE]; // (assumes array rank is 1)                                                                          
+            // Typekind
+            ESMC_TypeKind_Flag typekind=elem_area_Array->getTypekind();
+
+            // Loop seqIndices
+            for (int i=0; i<seqIndexList.size(); i++) {
+              int si=seqIndexList[i];
+
+              //  Find the corresponding Mesh element
+              Mesh::MeshObjIDMap::iterator mi =  mesh->map_find(MeshObj::ELEMENT, si);
+              if (mi == mesh->map_end(MeshObj::ELEMENT)) {
+                Throw() << "element with that id not found in mesh";
+              }
+              
+              // Get the element
+              const MeshObj &elem = *mi;
+
+              // Get the data from mesh
+              double *area_val=elem_area_field->data(elem);
+         
+              // Location in array
+              int index=i+lbound;
+              
+              // Set data
+              set_Array_data(localArray, index, typekind, *area_val);
+            }
+          }
+        }
+
+    } catch(std::exception &x) {
+        // catch Mesh exception return code
+        if (x.what()) {
+            localrc = ESMC_RC_INTNRL_BAD;
+            ESMC_LogDefault.MsgFoundError(localrc, x.what(), ESMC_CONTEXT, rc);
+    } else {
+        localrc = ESMC_RC_INTNRL_BAD;
+        ESMC_LogDefault.MsgFoundError(localrc, "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+    if (rc!=NULL) *rc = localrc;
+    return;
+    } catch(int localrc) {
+        // catch standard ESMF return code
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+        if (rc!=NULL) *rc = localrc;
+        return;
+    } catch(...) {
+        localrc = ESMC_RC_INTNRL_BAD;
+        ESMC_LogDefault.MsgFoundError(localrc,
+            "- Caught unknown exception", ESMC_CONTEXT, rc);
+        if (rc!=NULL) *rc = localrc;
+        return;
+    }
+
+    // Set return code
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+#undef INFO_TYPE_ELEM_ARRAYS_MASK 
+#undef INFO_TYPE_ELEM_ARRAYS_AREA 
+#undef INFO_TYPE_ELEM_ARRAYS_MAX  
+}
+
+
+
 void MBMesh_serialize(void **mbmpp, char *buffer, int *length, 
                       int *offset, ESMC_InquireFlag *inquireflag, int *rc,
                       ESMCI_FortranStrLenArg buffer_l) {
