@@ -2752,6 +2752,8 @@ void MBMesh_getlocalcoords(void **mbmpp, double *ncoords, int *_orig_sdim, int *
 
 }
 
+////////// WORK IN PROGRESS //////
+#if 0
 
 // Set data based on typekind
 // Mesh data is always double for now, so need to convert
@@ -2981,6 +2983,7 @@ void MBMesh_geteleminfointoarray(void **mbmpp,
 #undef INFO_TYPE_ELEM_ARRAYS_MAX  
 }
 
+#endif
 
 
 void MBMesh_serialize(void **mbmpp, char *buffer, int *length, 
