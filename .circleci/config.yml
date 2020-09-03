@@ -318,8 +318,16 @@ jobs:
           name: Run NUOPC Prototypes
           command: bash esmf/.circleci/sh/run-nuopc-protos.sh
       - run:
+          name: Run NUOPC Prototypes Meta Tests
+          command: docker exec -t runner /opt/docker-entrypoint.sh meta_test
+      - run:
+          name: Prep Artifacts
+          command: docker exec -t runner /opt/docker-entrypoint.sh prep_artifacts && docker commit runner esmf/nuopc-app-prototypes && docker stop runner && docker rm runner
+          when: always
+      - run:
           name: Extract Artifacts
           command: bash esmf/.circleci/sh/extract-artifacts.sh /tmp /opt/artifacts.zip esmf/nuopc-app-prototypes && cd /tmp && unzip /tmp/artifacts.zip
+          when: always
       - store_artifacts:
           path: /tmp/artifacts.zip
           destination: artifacts.zip
