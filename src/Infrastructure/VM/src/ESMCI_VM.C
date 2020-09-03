@@ -45,6 +45,9 @@
 #if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
 #include <malloc.h>
 #endif
+#if (defined ESMF_OS_Darwin)
+#include <mach/mach.h>
+#endif
 #include "ESMF_Pthread.h"
 #include "ESMCI_IO_Handler.h"
 
@@ -2035,6 +2038,8 @@ void VM::getMemInfo(
   vm->unlock();
 #endif
 
+
+
   // return successfully
 }
 //-----------------------------------------------------------------------------
@@ -2155,6 +2160,68 @@ void VM::logMemInfo(
   info << "Wall-clock time since execution start (s): \t" << wt;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
   log->Write(msg, ESMC_LOGMSG_INFO);
+  // unlock again
+  vm->unlock();
+#endif
+#if (defined ESMF_OS_Darwin)
+  // must lock/unlock for thread-safety
+  VM *vm = getCurrent();
+  vm->lock();
+
+  // string storage
+  char msg[256];
+
+  // Get memory
+  task_vm_info_data_t mem_info;
+  mach_msg_type_number_t size = TASK_VM_INFO_COUNT;
+  kern_return_t kerr = task_info(mach_task_self(),
+                                 TASK_VM_INFO,
+                                 (task_info_t)&mem_info,
+                                 &size);
+  if( kerr == KERN_SUCCESS ) {
+    sprintf(msg, "%s - MemInfo: VmRSS:                       \t%d (bytes)",prefix.c_str(),mem_info.resident_size);
+    log->Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "%s - MemInfo: VmHWM:                       \t%d (bytes)",prefix.c_str(),mem_info.resident_size_peak);
+    log->Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "%s - MemInfo: Total allocated space (bytes): \t%d",prefix.c_str(),mem_info.virtual_size);
+    log->Write(msg, ESMC_LOGMSG_INFO);
+
+    // Other memory info that might be useful at some point
+#if 0
+    sprintf(msg, "%s - MemInfo: v_size:                       \t%d",prefix.c_str(),mem_info.virtual_size);
+    log->Write(msg, ESMC_LOGMSG_INFO);
+
+    sprintf(msg, "%s - MemInfo: r_size:                       \t%d",prefix.c_str(),mem_info.resident_size);
+    log->Write(msg, ESMC_LOGMSG_INFO);
+
+    sprintf(msg, "%s - MemInfo: internal:                       \t%d",prefix.c_str(),mem_info.internal);
+    log->Write(msg, ESMC_LOGMSG_INFO);
+
+    sprintf(msg, "%s - MemInfo: external:                       \t%d",prefix.c_str(),mem_info.external);
+    log->Write(msg, ESMC_LOGMSG_INFO);
+
+    sprintf(msg, "%s - MemInfo: resusable:                       \t%d",prefix.c_str(),mem_info.reusable);
+    log->Write(msg, ESMC_LOGMSG_INFO);
+
+    sprintf(msg, "%s - MemInfo: compressed:                       \t%d",prefix.c_str(),mem_info.compressed);
+    log->Write(msg, ESMC_LOGMSG_INFO);
+
+    sprintf(msg, "%s - MemInfo: phys_footprint:                       \t%d",prefix.c_str(),mem_info.phys_footprint);
+    log->Write(msg, ESMC_LOGMSG_INFO);
+#endif
+
+  }
+
+
+  // output the wtime since execution start
+  std::stringstream info;
+  double wt;
+  ESMCI::VMK::wtime(&wt);
+  info.str(""); // clear info
+  info << "Wall-clock time since execution start (s): \t" << wt;
+  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
+  log->Write(msg, ESMC_LOGMSG_INFO);
+
   // unlock again
   vm->unlock();
 #endif

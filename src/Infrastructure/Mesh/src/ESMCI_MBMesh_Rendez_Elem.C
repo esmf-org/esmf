@@ -166,6 +166,8 @@ static void assign_elems_to_procs(MBMesh *mesh, std::vector<EntityHandle> *elems
   std::vector<EntityHandle>::iterator si = elems->begin(), se = elems->end();
   for (; si != se; ++si) {
     EntityHandle &elem = *si;
+    int elem_id;
+    MBMesh_get_gid(mesh, elem, &elem_id);
 
     // Get bounding box for elem
     MBMesh_BBox ebox(mesh, elem, geom_tol);
@@ -182,7 +184,7 @@ static void assign_elems_to_procs(MBMesh *mesh, std::vector<EntityHandle> *elems
 
     // Add to pattern
     for (int i = 0; i < numprocs; i++) {
-      EH_Comm_Pair ecp(elem, procs[i]);
+      EH_Comm_Pair ecp(elem, elem_id, procs[i]);
 
       std::vector<EH_Comm_Pair>::iterator lb =
         std::lower_bound(elem_to_proc_list->begin(), elem_to_proc_list->end(), ecp);

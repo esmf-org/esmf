@@ -1027,18 +1027,6 @@ namespace ESMCI {
     // Set number of local elems
     dual_mesh->num_elems=num_elems;
 
-    //// Setup parallel sharing ///
-
-    // setup parallel comm, destroyed in MBMesh destructor
-    ParallelComm *pcomm= new ParallelComm(dual_mesh->mesh, mpi_comm);
-  
-    Range elems_dual;
-    merr=dual_mesh->mesh->get_entities_by_dimension(0, dual_mesh->pdim, elems_dual);
-    MBMESH_CHECK_ERR(merr, localrc);
-    
-    // Resolve object sharing like in Mesh->Commit()
-    merr = pcomm->resolve_shared_ents(0, elems_dual, dual_mesh->pdim, dual_mesh->pdim-1);
-    MBMESH_CHECK_ERR(merr, localrc);
 
     // Output 
     *_dual_mesh=dual_mesh;

@@ -23,9 +23,7 @@
 #include "ESMC_Util.h"
 #include "ESMCI_Array.h"
 
-
-
- namespace ESMCI {
+namespace ESMCI {
 
   class MeshCap : public ESMC_Base {
 
