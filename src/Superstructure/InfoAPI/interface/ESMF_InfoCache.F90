@@ -70,7 +70,7 @@ end function c_infocache_updatefields
 end interface ! ===============================================================
 
 type, public :: ESMF_InfoCache
-  type(C_PTR) :: ptr = C_NULL_PTR
+  type(C_PTR) :: ptr
 contains
   procedure, private, pass :: ESMF_InfoCacheInitialize, ESMF_InfoCacheDestroy, &
    ESMF_InfoCacheUpdateFields
@@ -91,6 +91,7 @@ subroutine ESMF_InfoCacheInitialize(self, rc)
   class(ESMF_InfoCache), intent(inout) :: self
   integer, intent(out) :: rc
 
+  self%ptr = C_NULL_PTR
   self%ptr = c_infocache_initialize()
 
   rc = ESMF_SUCCESS
