@@ -3101,6 +3101,41 @@ call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): found: "//trim(name), &
                     return
 
                 end if
+              else if (zapList(k)%si%otype==ESMF_STATEITEM_FIELDBUNDLE) then
+                call ESMF_FieldBundleGet(zapList(k)%si%datap%fbp, name=name, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                    ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc)) &
+                    return
+#ifdef RECONCILE_LOG_on
+call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): checking: "//trim(name), &
+  ESMF_LOGMSG_INFO, rc=localrc)
+#endif
+                if (name == thisname) then
+                  zapFlag(k) = .false.
+#ifdef RECONCILE_LOG_on
+call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): found: "//trim(name), &
+  ESMF_LOGMSG_INFO, rc=localrc)
+#endif
+                ! Bend pointers and copy contents to result in the desired
+                ! behavior for re-reconcile. From a user perspective of
+                ! Reconcile() proxies should persist when a State is
+                ! re-reconciled, and the same proxies are needed. Basically
+                ! a user should be able to hang on to a proxy.
+                  tempFB%this => itemList(i)%si%datap%fbp%this
+                  tempFBAlloc%this = zapList(k)%si%datap%fbp%this
+                  zapList(k)%si%datap%fbp%this = itemList(i)%si%datap%fbp%this
+                  itemList(i)%si%datap%fbp%this => zapList(k)%si%datap%fbp%this
+                  tempFB%this = tempFBAlloc%this
+
+                  ESMF_INIT_SET_CREATED(tempFB)
+                  call ESMF_FieldBundleDestroy(tempFB, noGarbage=.true., rc=localrc)
+                  if (ESMF_LogFoundError(localrc, &
+                    ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc)) &
+                    return
+
+                end if
               end if  !TODO: handle all of the other object types state can hold
             end if
           end do ! k
