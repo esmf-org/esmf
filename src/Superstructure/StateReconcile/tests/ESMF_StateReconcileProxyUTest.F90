@@ -52,10 +52,11 @@ module subcomp_mod
     integer, intent(out):: rc
     
     ! local variables
-    type(ESMF_DistGrid) :: dg
-    type(ESMF_Array)    :: array
-    type(ESMF_Grid)     :: grid
-    type(ESMF_Field)    :: field
+    type(ESMF_DistGrid)     :: dg
+    type(ESMF_Array)        :: array
+    type(ESMF_Grid)         :: grid
+    type(ESMF_Field)        :: field
+    type(ESMF_FieldBundle)  :: fb
     
     ! Initialize
     rc = ESMF_SUCCESS
@@ -90,6 +91,12 @@ module subcomp_mod
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     call ESMF_StateAdd(estate, (/field/), rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    
+    fb = ESMF_FieldBundleCreate(name="fb", rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    
+    call ESMF_StateAdd(estate, (/fb/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
   end subroutine !--------------------------------------------------------------
@@ -178,8 +185,9 @@ program ESMF_StateReconcileProxyUTest
   type(ESMF_State)      :: exportState
   type(ESMF_Array)      :: array
   type(ESMF_DistGrid)   :: dg1, dg2
-  type(ESMF_Field)      :: field
+  type(ESMF_Field)      :: field, fieldRe
   type(ESMF_Grid)       :: g1, g2
+  type(ESMF_FieldBundle):: fb, fbRe
   
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -196,9 +204,11 @@ program ESMF_StateReconcileProxyUTest
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
   ! Construct reduced petList for sub component
-  allocate(petList(petCount-1))
-  do i=1, petCount-1
-    petList(i) = i-1 ! PETs are base 0
+  allocate(petList(petCount/2))
+  j = 0
+  do i=1, petCount/2
+    petList(i) = j
+    j = j + 2
   enddo
   
   ! Create sub component on reduced petList
@@ -214,8 +224,11 @@ program ESMF_StateReconcileProxyUTest
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
   ! Reconcile the State
+  !NEX_UTest_Multi_Proc_Only
   call ESMF_StateReconcile(exportState, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  write(name, *) "Reconciling a State"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   ! Extract the DistGrid from the two Array objects in the State
   call ESMF_StateGet(exportState, "array1", array=array, rc=rc)
@@ -249,9 +262,37 @@ program ESMF_StateReconcileProxyUTest
   
   ! Test whether g1 and g2 are aliases to the same Grid in memory
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Ensure g1 and g2 are aliases to the same Grid Test"
-  write(failMsg, *) "Found non-aliased Grid objects!"
+  write(name, *) "Ensure g1 and g2 are aliases to the same Grid (proxy) Test"
+  write(failMsg, *) "Found non-aliased Grid (proxy) objects!"
   call ESMF_Test((g1==g2), name, failMsg, result, ESMF_SRCLINE)
+
+  call ESMF_StateGet(exportState, "fb", fieldbundle=fb, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  ! Re-Reconcile the State
+  !NEX_UTest_Multi_Proc_Only
+  call ESMF_StateReconcile(exportState, rc=rc)
+  write(name, *) "Re-Reconciling a State"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  call ESMF_StateGet(exportState, "field2", field=fieldRe, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  ! Test whether field and fieldRe are aliases
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Ensure Re-Reconcile Field (proxy) persistence Test"
+  write(failMsg, *) "Found non-persistent Field (proxy) objects!"
+  call ESMF_Test((field==fieldRe), name, failMsg, result, ESMF_SRCLINE)
+
+  call ESMF_StateGet(exportState, "fb", fieldbundle=fbRe, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  ! Test whether fb and fbRe are aliases
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Ensure Re-Reconcile FieldBundle (proxy) persistence Test"
+  write(failMsg, *) "Found non-persistent FieldBundle (proxy) objects!"
+  call ESMF_Test((fb==fbRe), name, failMsg, result, ESMF_SRCLINE)
 
   ! Sub component Finalize
   call ESMF_GridCompFinalize(subcomp, exportState=exportState, rc=rc)
