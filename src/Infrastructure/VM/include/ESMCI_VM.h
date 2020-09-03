@@ -80,13 +80,9 @@ class VMId {
 namespace ESMCI {
 
 // ESMCI::VMId methods:
-// VMId VMIdCreate(int *rc);      // allocates memory for vmKey member
-// void VMIdDestroy(VMId *vmID, int *rc); // frees memory for vmKey memb
 bool VMIdCompare(const VMId *vmID1, const VMId *vmID2);
 bool VMIdLessThan(const VMId *vmID1, const VMId *vmID2);
 int VMIdCopy(VMId *vmIDdst, VMId *vmIDsrc);
-// void VMIdGet(VMId *vmID, int *localID, char *key, int key_len, int *rc);
-// void VMIdSet(VMId *vmID, int  localID, char *key, int key_len, int *rc);
 } // namespace ESMCI
 
 
@@ -142,9 +138,6 @@ class VM : public VMK {   // inherits from ESMCI::VMK class
     static void addObject(ESMC_Base *, VMId *vmID);
     static void rmObject(ESMC_Base *);
     static void addFObject(void **fobject, int objectID, VMId *vmID);
-    static void getObject(void **fobject,
-      int objectID, VMId *vmID, const std::string &name, ESMC_ProxyFlag proxyflag,
-      bool *obj_found, int *rc);
     static void rmFObject(void **fobject);
     static bool validObject(ESMC_Base *);
     static void printMatchTable(void);
