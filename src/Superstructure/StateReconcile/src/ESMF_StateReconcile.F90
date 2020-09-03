@@ -11,6 +11,8 @@
 !
 #define ESMF_FILENAME "ESMF_StateReconcile.F90"
 !
+#define RECONCILE_LOG_off
+!
 ! ESMF StateReconcile module
 module ESMF_StateReconcileMod
 !
@@ -59,6 +61,7 @@ module ESMF_StateReconcileMod
   use ESMF_ArrayBundleMod
   use ESMF_FieldMod
   use ESMF_FieldGetMod
+  use ESMF_FieldCreateMod
   use ESMF_FieldBundleMod
   use ESMF_RHandleMod
 
@@ -2529,7 +2532,6 @@ contains
     logical, parameter :: trace=.false.
     character(len=ESMF_MAXSTR) :: logmsg
     integer :: needs_count_debug
-    type(ESMF_Info) :: infoh
 
     localrc = ESMF_RC_NOT_IMPL
 
@@ -2907,6 +2909,10 @@ contains
 
       stypep => state%statep
 
+#ifdef RECONCILE_LOG_on
+      call ESMF_VMLogGarbageInfo(prefix="ZapProxies bef: ", rc=localrc)
+#endif
+
       itemList => null ()
       call ESMF_ContainerGet(container=stypep%stateContainer, itemList=itemList, &
           rc=localrc)
@@ -2914,35 +2920,45 @@ contains
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
+      stypep%zapFlag => null()
+          
       if (associated(itemList)) then
+        allocate(stypep%zapFlag(size(itemList)))
+        stypep%zapFlag = .false.
         do i=1, size(itemList)
           if (itemList(i)%si%otype==ESMF_STATEITEM_FIELD) then
+            ! Handle proxies that were created actually in a different State
+            ! and then copied over into this state. This can happen under NUOPC
+            ! when Fields from a smaller VM are shared with a larger VM. The
+            ! extra PETs in the larger VM end up with proxy field objects that
+            ! were created in a temporary state and copied into the component
+            ! import/exportState.
+            ! TODO: handle all the other object types that States can hold!!!!
             fieldp => itemList(i)%si%datap%fp%ftypep
-#if 1
             call ESMF_StateItemGet(itemList(i)%si, name=thisname, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
+#ifdef RECONCILE_LOG_on
 write(msgString,*) "ESMF_ReconcileZapProxies: "//trim(thisname), &
   itemList(i)%si%proxyFlag
 call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=localrc)
 #endif
 
-#if 1
             ! determine proxyFlag from Base level
             itemList(i)%si%proxyFlag = ESMF_IsProxy(fieldp%base, rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT,  &
               rcToReturn=rc)) return
-#endif
 
-#if 1
+#ifdef RECONCILE_LOG_on
 write(msgString,*) "ESMF_ReconcileZapProxies: "//trim(thisname), &
   itemList(i)%si%proxyFlag
 call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=localrc)
 #endif
           endif
           if (itemList(i)%si%proxyFlag) then
+            stypep%zapFlag(i) = .true.
             call ESMF_StateItemGet(itemList(i)%si, name=thisname, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -2952,12 +2968,15 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
-            itemList(i)%si => null ()
           end if
         end do
       endif
 
       stypep%zapList => itemList ! hang on for ESMF_ReconcileZappedProxies()
+
+#ifdef RECONCILE_LOG_on
+      call ESMF_VMLogGarbageInfo(prefix="ZapProxies aft: ", rc=localrc)
+#endif
 
       if (present(rc)) rc = ESMF_SUCCESS
     end subroutine ESMF_ReconcileZapProxies
@@ -2991,9 +3010,12 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=localrc)
     type(ESMF_StateClass),    pointer :: stypep
     type(ESMF_StateItemWrap), pointer :: itemList(:)
     type(ESMF_StateItemWrap), pointer :: zapList(:)
+    logical,                  pointer :: zapFlag(:)
     character(len=ESMF_MAXSTR)  :: thisname
     character(len=ESMF_MAXSTR)  :: name
-    type(ESMF_Field)            :: tempField
+    type(ESMF_Field)            :: tempField, tempFieldAlloc
+    type(ESMF_FieldBundle)      :: tempFB, tempFBAlloc
+    character(len=80)                   :: msgString
 
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -3001,6 +3023,7 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=localrc)
 
     stypep => state%statep
     zapList => stypep%zapList
+    zapFlag => stypep%zapFlag
 
     itemList => null ()
     call ESMF_ContainerGet(container=stypep%stateContainer, itemList=itemList, &
@@ -3009,44 +3032,109 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=localrc)
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-!print *, "ESMF_ReconcileZappedProxies() looking"
+    allocate(tempFieldAlloc%ftypep)
+    allocate(tempFBAlloc%this)
+
+#ifdef RECONCILE_LOG_on
+    call ESMF_VMLogGarbageInfo(prefix="ZappedProxies bef: ", rc=localrc)
+#endif
 
     if (associated(itemList).and.associated(zapList)) then
+#ifdef RECONCILE_LOG_on
+      call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): have lists", &
+        ESMF_LOGMSG_INFO, rc=localrc)
+#endif
       do i=1, size(itemList)
         if (itemList(i)%si%proxyFlag .and. &
-            itemList(i)%si%otype==ESMF_STATEITEM_FIELD) then
+          (itemList(i)%si%otype==ESMF_STATEITEM_FIELD .or. &
+           itemList(i)%si%otype==ESMF_STATEITEM_FIELDBUNDLE )) then
           call ESMF_StateItemGet(itemList(i)%si, name=thisname, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-
+#ifdef RECONCILE_LOG_on
+call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): found a proxy field: "//&
+  trim(thisname), ESMF_LOGMSG_INFO, rc=localrc)
+#endif
           do k=1, size(zapList)
+#ifdef RECONCILE_LOG_on
+call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): scanning zapList", &
+  ESMF_LOGMSG_INFO, rc=localrc)
+#endif
             if (associated (zapList(k)%si)) then
+#ifdef RECONCILE_LOG_on
+call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): found associated zapList object", &
+  ESMF_LOGMSG_INFO, rc=localrc)
+#endif
               if (zapList(k)%si%otype==ESMF_STATEITEM_FIELD) then
                 call ESMF_FieldGet(zapList(k)%si%datap%fp, name=name, rc=localrc)
                 if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc)) &
                     return
-!print *, "ESMF_ReconcileZappedProxies() checking: ", trim(name)
+#ifdef RECONCILE_LOG_on
+call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): checking: "//trim(name), &
+  ESMF_LOGMSG_INFO, rc=localrc)
+#endif
                 if (name == thisname) then
-!print *, "ESMF_ReconcileZappedProxies() found: ", trim(name)
+                  zapFlag(k) = .false.
+#ifdef RECONCILE_LOG_on
+call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): found: "//trim(name), &
+  ESMF_LOGMSG_INFO, rc=localrc)
+#endif
                 ! Bend pointers and copy contents to result in the desired
                 ! behavior for re-reconcile. From a user perspective of
                 ! Reconcile() proxies should persist when a State is
                 ! re-reconciled, and the same proxies are needed. Basically
                 ! a user should be able to hang on to a proxy.
                   tempField%ftypep => itemList(i)%si%datap%fp%ftypep
+                  tempFieldAlloc%ftypep = zapList(k)%si%datap%fp%ftypep
                   zapList(k)%si%datap%fp%ftypep = itemList(i)%si%datap%fp%ftypep
                   itemList(i)%si%datap%fp%ftypep => zapList(k)%si%datap%fp%ftypep
-                  zapList(k)%si%datap%fp%ftypep => tempField%ftypep
+                  tempField%ftypep = tempFieldAlloc%ftypep
+
+                  ESMF_INIT_SET_CREATED(tempField)
+                  call ESMF_FieldDestroy(tempField, noGarbage=.true., rc=localrc)
+                  if (ESMF_LogFoundError(localrc, &
+                    ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc)) &
+                    return
+
                 end if
-              end if
+              end if  !TODO: handle all of the other object types state can hold
             end if
           end do ! k
         end if
       end do ! i
     endif
+
+    ! destroy any zapped proxies that did not get restored
+    if (associated(zapFlag)) then
+      do k=1, size(zapFlag)
+        if (zapFlag(k)) then
+          if (zapList(k)%si%otype==ESMF_STATEITEM_FIELD) then
+            call ESMF_FieldDestroy(zapList(k)%si%datap%fp, noGarbage=.true., rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) &
+              return
+          else if (zapList(k)%si%otype==ESMF_STATEITEM_FIELDBUNDLE) then
+            call ESMF_FieldBundleDestroy(zapList(k)%si%datap%fbp, noGarbage=.true., rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) &
+              return
+          endif
+        endif
+      end do ! k
+    endif
+
+#ifdef RECONCILE_LOG_on
+call ESMF_VMLogGarbageInfo(prefix="ZappedProxies aft: ", rc=localrc)
+#endif
+
+    deallocate(tempFieldAlloc%ftypep)
+    deallocate(tempFBAlloc%this)
 
     if (associated (itemList)) then
       deallocate(itemList, stat=memstat)
@@ -3055,11 +3143,19 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=localrc)
           ESMF_CONTEXT, rcToReturn=rc)) return
     end if
 
-    if (associated (zaplist)) then
-      deallocate(zaplist, stat=memstat)
+    if (associated (zapList)) then
+      deallocate(zapList, stat=memstat)
       if (ESMF_LogFoundDeallocError(memstat, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
+    end if
+
+    if (associated (zapFlag)) then
+      deallocate(zapFlag, stat=memstat)
+      if (ESMF_LogFoundDeallocError(memstat, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      stypep%zapFlag => null()
     end if
 
     if (present(rc)) rc = ESMF_SUCCESS

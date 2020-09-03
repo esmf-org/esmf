@@ -326,11 +326,6 @@ contains
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
-      deallocate (dataitem, stat=memstat)
-      if (ESMF_LogFoundDeallocError(memstat, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-
     end do
 
     if (present(rc)) rc = localrc
