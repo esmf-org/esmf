@@ -3307,12 +3307,13 @@ end subroutine ESMF_InfoPrint
 ! !IROUTINE: ESMF_InfoUpdate - Update the contents of an Info object
 !
 ! !INTERFACE:
-subroutine ESMF_InfoUpdate(lhs, rhs, keywordEnforcer, recursive, rc)
+subroutine ESMF_InfoUpdate(lhs, rhs, keywordEnforcer, recursive, overwrite, rc)
 ! !ARGUMENTS:
   type(ESMF_Info), intent(inout) :: lhs
   type(ESMF_Info), intent(in) :: rhs
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   logical, intent(in), optional :: recursive
+  logical, intent(in), optional :: overwrite
   integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -3334,13 +3335,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[recursive]}]
 !       Default is \texttt{.false.}. If \texttt{.true.}, descend into nested objects
 !       and recursively update the contents.
+!     \item [{[overwrite]}]
+!       Default is \texttt{.false.}. If \texttt{.true.}, key-values that exist
+!       in \textit{lhs} will be overwritten by key-values in \textit{rhs}. Flag
+!       is only applicable when \textit{recursive} is \texttt{.true.}.
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !EOP
 
   integer :: localrc
-  integer :: recursive_int
+  integer :: recursive_int, overwrite_int
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_FAILURE
@@ -3350,8 +3355,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       recursive_int = 1  ! .true.
     end if
   end if
+  overwrite_int = 0  ! .false.
+  if (present(overwrite)) then
+    if (overwrite) then
+      overwrite_int = 1  ! .true.
+    end if
+  end if
 
-  call c_info_update(lhs%ptr, rhs%ptr, recursive_int, localrc)
+  call c_info_update(lhs%ptr, rhs%ptr, recursive_int, overwrite_int, localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   if (present(rc)) rc = ESMF_SUCCESS
