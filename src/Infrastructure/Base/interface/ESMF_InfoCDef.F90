@@ -163,12 +163,13 @@ interface
 
   !=============================================================================
 
-  subroutine c_info_update(lhs, rhs, attr_compliance_int, rc) bind(C, name="ESMC_InfoUpdate")
+  subroutine c_info_update(lhs, rhs, recursive_int, overwrite_int, rc) bind(C, name="ESMC_InfoUpdate")
     use iso_c_binding
     implicit none
     type(C_PTR), value :: lhs
     type(C_PTR), value :: rhs
-    integer(C_INT), intent(in) :: attr_compliance_int
+    integer(C_INT), intent(in) :: recursive_int
+    integer(C_INT), intent(in) :: overwrite_int
     integer(C_INT), intent(out) :: rc
   end subroutine c_info_update
 
