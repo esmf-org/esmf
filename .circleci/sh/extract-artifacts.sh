@@ -6,7 +6,7 @@ set -Eeuxo pipefail
 : "${3?Need to set Docker image name}"
 
 mkdir -p "${1}"
-docker run -dit --name runner -v "${1}:/dexc" "${3}"
-docker exec -t runner bash -c "cp ${2} /dexc"
-docker stop runner
-docker rm runner
+CID=$(docker run -dit --name runner "${3}")
+docker cp ${CID}:${2} ${1}
+docker stop ${CID}
+docker rm ${CID}
