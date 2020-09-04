@@ -139,6 +139,18 @@ class ExtrapMethod(IntEnum):
     source point may go to multiple destination points, but no destination 
     point will receive input from more than one source point.
     """
+    CREEP_FILL = 3
+    """
+    creep fill extrapolation
+    Here unmapped destination points are filled by repeatedly moving data from
+    mapped locations to neighboring unmapped locations for a user specified
+    number of levels. More precisely, for each creeped point, its value is the
+    average of the values of the point's immediate neighbors in the previous
+    level. For the first level, the values are the average of the point's
+    immediate neighbors in the destination points mapped by the regridding
+    method. The number of creep levels is specified by the user via the
+    extrapNumLevels argument.
+    """
 
 # FileFormat
 class FileFormat(IntEnum):
