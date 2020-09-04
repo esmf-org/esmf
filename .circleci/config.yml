@@ -69,6 +69,13 @@ jobs:
     steps:
       - run: exit 0
 
+  should-run-nuopc-protos:
+    docker:
+      - image: cimg/base:2020.01
+    resource_class: small
+    steps:
+      - run: exit 0
+
   should-build-docs:
     docker:
       - image: cimg/base:2020.01
@@ -318,15 +325,19 @@ workflows:
               target: ["", "_parallel", "_examples", "_examples_parallel"]
           requires:
             - build-escomp-esmf
-      - nuopc-app-prototypes:
+      - should-run-nuopc-protos:
+          type: approval
           requires:
             - build-escomp-esmf
+      - nuopc-app-prototypes:
+          requires:
+            - should-run-nuopc-protos
 #      - osx-esmf
 
   build-and-test-nightly:
     triggers:
       - schedule:
-          cron: "0 6 * * *"
+          cron: "0 3 * * *"
           filters:
             branches:
               only:
