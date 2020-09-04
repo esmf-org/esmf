@@ -42,7 +42,14 @@ module NUOPC_Comp
   public NUOPC_CompSetInternalEntryPoint
   public NUOPC_CompSetServices
   public NUOPC_CompSpecialize
-  
+
+  ! public labels
+  public &
+    label_ExternalAdvertise, &
+    label_ExternalRealize, &
+    label_ExternalDataInit, &
+    label_ExternalReset
+
   ! interface blocks
   interface NUOPC_CompAreServicesSet
     module procedure NUOPC_GridCompAreServicesSet
@@ -142,6 +149,15 @@ module NUOPC_Comp
     module procedure NUOPC_GridCompSpecialize
     module procedure NUOPC_CplCompSpecialize
   end interface
+
+  character(*), parameter :: &
+    label_ExternalAdvertise = "ExternalAdvertise"
+  character(*), parameter :: &
+    label_ExternalRealize = "ExternalRealize"
+  character(*), parameter :: &
+    label_ExternalDataInit = "ExternalDataInitialize"
+  character(*), parameter :: &
+    label_ExternalReset = "ExternalFinalizeReset"
 
   !-----------------------------------------------------------------------------
   contains
@@ -1221,7 +1237,7 @@ module NUOPC_Comp
     if (trim(kind)=="Driver" .or. &
       trim(kind)=="Model" .or. trim(kind)=="Mediator") then
       ! The NUOPC/Component attributes
-      allocate(attrList(8))
+      allocate(attrList(9))
       attrList(1) = "Kind"
       attrList(2) = "Verbosity"
       attrList(3) = "Profiling"
@@ -1230,6 +1246,7 @@ module NUOPC_Comp
       attrList(6) = "InitializePhaseMap"
       attrList(7) = "RunPhaseMap"
       attrList(8) = "FinalizePhaseMap"
+      attrList(9) = "IPDvX"
       call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="Instance", &
         attrList=attrList, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1341,7 +1358,7 @@ module NUOPC_Comp
     if (present(rc)) rc = ESMF_SUCCESS
     
     ! The NUOPC/Component attributes
-    allocate(attrList(8))
+    allocate(attrList(9))
     attrList(1) = "Kind"
     attrList(2) = "Verbosity"
     attrList(3) = "Profiling"
@@ -1350,6 +1367,7 @@ module NUOPC_Comp
     attrList(6) = "InitializePhaseMap"
     attrList(7) = "RunPhaseMap"
     attrList(8) = "FinalizePhaseMap"
+    attrList(9) = "IPDvX"
     call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="Instance",   &
       attrList=attrList, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2802,7 +2820,7 @@ module NUOPC_Comp
   
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_CompSetEntryPoint - Set entry point for a GridComp
+! !IROUTINE: NUOPC_CompSetEntryPoint - Set entry point for a GridComp (DEPRECATED!)
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_CompSetEntryPoint()
@@ -2830,6 +2848,10 @@ module NUOPC_Comp
 ! !DESCRIPTION:
 ! Set an entry point for a GridComp (i.e. Model, Mediator, or Driver). Publish
 ! the new entry point in the correct {\tt PhaseMap} component attribute.
+!
+! Starting with version 8.1.0, the use of this method is deprecated. Components
+! should instead specialize exclusively using the {\tt NUOPC\_CompSpecialize()}
+! method.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -2863,9 +2885,6 @@ module NUOPC_Comp
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
     
-!print *, "NUOPC_GridCompSetEntryPoint: phaseLabelList:", &
-!phaseLabelList, "     phase:", phase
-
     ! determine which phaseMap to deal with
     attributeName = "UnknownPhaseMap" ! initialize to something obvious
     if (methodflag == ESMF_METHOD_INITIALIZE) then
@@ -2930,6 +2949,13 @@ module NUOPC_Comp
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
     
+    if (methodflag == ESMF_METHOD_INITIALIZE) then
+      ! Set IPDvX attribute to false, indicating use of SetEntryPoint()
+      call NUOPC_CompAttributeSet(comp, name="IPDvX", value="false", rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+    endif
+    
     ! clean-up
     deallocate(phases, stat=stat)
     if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
@@ -2943,7 +2969,7 @@ module NUOPC_Comp
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_CompSetEntryPoint - Set entry point for a CplComp
+! !IROUTINE: NUOPC_CompSetEntryPoint - Set entry point for a CplComp (DEPRECATED!)
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_CompSetEntryPoint()
@@ -2971,6 +2997,10 @@ module NUOPC_Comp
 ! !DESCRIPTION:
 ! Set an entry point for a CplComp (i.e. Connector). Publish
 ! the new entry point in the correct {\tt PhaseMap} component attribute.
+!
+! Starting with version 8.1.0, the use of this method is deprecated. Components
+! should instead specialize exclusively using the {\tt NUOPC\_CompSpecialize()}
+! method.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -3004,9 +3034,6 @@ module NUOPC_Comp
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
     
-!print *, "NUOPC_CplCompSetEntryPoint: phaseLabelList:", &
-!phaseLabelList, "     phase:", phase
-
     ! determine which phaseMap to deal with
     attributeName = "UnknownPhaseMap" ! initialize to something obvious
     if (methodflag == ESMF_METHOD_INITIALIZE) then
@@ -3064,13 +3091,20 @@ module NUOPC_Comp
           trim(adjustl(phaseString))
       endif
     enddo
-    
+
     ! set the new phaseMap in the Attribute
     call NUOPC_CompAttributeSet(comp, name=trim(attributeName), &
       valueList=phases(1:itemCount+iii), rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
-    
+
+    if (methodflag == ESMF_METHOD_INITIALIZE) then
+      ! Set IPDvX attribute to false, indicating use of SetEntryPoint()
+      call NUOPC_CompAttributeSet(comp, name="IPDvX", value="false", rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+    endif
+
     ! clean-up
     deallocate(phases, stat=stat)
     if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
@@ -3429,13 +3463,13 @@ module NUOPC_Comp
         return  ! bail out
       endif
       ! add the method under the specific phase index
-      call ESMF_MethodAdd(comp, label=specLabel, index=phaseIndex, &
+      call ESMF_MethodAddReplace(comp, label=specLabel, index=phaseIndex, &
         userRoutine=specRoutine, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
     else
       ! add the method under under no specific phase index
-      call ESMF_MethodAdd(comp, label=specLabel, &
+      call ESMF_MethodAddReplace(comp, label=specLabel, &
         userRoutine=specRoutine, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
@@ -3513,13 +3547,13 @@ module NUOPC_Comp
         return  ! bail out
       endif
       ! add the method under the specific phase index
-      call ESMF_MethodAdd(comp, label=specLabel, index=phaseIndex, &
+      call ESMF_MethodAddReplace(comp, label=specLabel, index=phaseIndex, &
         userRoutine=specRoutine, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
     else
       ! add the method under under no specific phase index
-      call ESMF_MethodAdd(comp, label=specLabel, &
+      call ESMF_MethodAddReplace(comp, label=specLabel, &
         userRoutine=specRoutine, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out

@@ -73,6 +73,11 @@ module NUOPC
   public NUOPC_CompSetInternalEntryPoint  ! method
   public NUOPC_CompSetServices            ! method
   public NUOPC_CompSpecialize             ! method
+  public &
+    label_ExternalAdvertise, &
+    label_ExternalRealize, &
+    label_ExternalDataInit, &
+    label_ExternalReset
 
   ! public Utility API
   public NUOPC_AddNestedState             ! method

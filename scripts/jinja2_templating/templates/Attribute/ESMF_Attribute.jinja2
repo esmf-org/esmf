@@ -574,7 +574,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
 {% include "ESMF_Attribute-ProcInit.jinja2" %}{{ "" }}
 
@@ -588,19 +588,29 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -631,7 +641,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
 {% include "ESMF_Attribute-ProcInit.jinja2" %}{{ "" }}
 
@@ -643,31 +653,42 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
   deallocate(key)
 
 {% include "ESMF_Attribute-ProcFinalize.jinja2" %}{{ "" }}
+
 {% endfor %}{% endfor %}
 !==============================================================================
 ! ESMF_AttributeGet (Lists)

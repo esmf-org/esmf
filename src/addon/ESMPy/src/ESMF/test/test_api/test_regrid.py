@@ -229,7 +229,7 @@ class TestRegrid(TestBase):
         mgr.barrier()
 
         # Execute regridding from file.
-        _ = Regrid(srcfield, dstfield, filename=filename)
+        _ = Regrid(srcfield, dstfield, filename=filename, large_file=True)
         mgr.barrier()
 
         # Test weight file contents are rational.

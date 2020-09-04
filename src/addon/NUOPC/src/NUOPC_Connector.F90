@@ -253,6 +253,10 @@ module NUOPC_Connector
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
+    ! Set IPDvX attribute
+    call NUOPC_CompAttributeSet(connector, name="IPDvX", value="true", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
   end subroutine
   
   !-----------------------------------------------------------------------------
@@ -270,6 +274,7 @@ module NUOPC_Connector
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
     type(type_InternalState)  :: is
+    character(ESMF_MAXSTR)    :: ipdvxAttr
 
     rc = ESMF_SUCCESS
 
@@ -315,6 +320,16 @@ module NUOPC_Connector
         return  ! bail out
     endif
     
+    ! determine whether the component is compatible with IPDvX
+    call NUOPC_CompAttributeGet(connector, name="IPDvX", value=ipdvxAttr, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#if 0
+    call ESMF_LogWrite("ipdvxAttr: "//ipdvxAttr, ESMF_LOGMSG_INFO, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
+
     ! filter all other entries but those of type IPDv05
     call NUOPC_CompFilterPhaseMap(connector, ESMF_METHOD_INITIALIZE, &
       acceptStringList=(/"IPDv05p"/), rc=rc)
@@ -5591,7 +5606,6 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     integer                   :: localrc
     logical                   :: existflag
     logical                   :: routeHandleIsCreated
-    integer                   :: rootPet, rootVas, vas, petCount
     character(ESMF_MAXSTR)    :: compName, pLabel
     character(len=160)        :: msgString
     integer                   :: phase
@@ -6800,6 +6814,8 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
               extrapMethod = ESMF_EXTRAPMETHOD_NEAREST_STOD
             else if (trim(chopSubString(2))=="creep") then
               extrapMethod = ESMF_EXTRAPMETHOD_CREEP
+            else if (trim(chopSubString(2))=="creep_nrst_d") then
+              extrapMethod = ESMF_EXTRAPMETHOD_CREEP_NRST_D
             else
               write (msgString,*) "Specified option '", &
                 trim(chopStringList(j)), &
@@ -6866,6 +6882,12 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
         if ((extrapMethod.eq.ESMF_EXTRAPMETHOD_CREEP) .and. extrapNumLevelsINC) then
           call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
             msg="User must set extrapNumLevels when extrapMethod=ESMF_EXTRAPMETHOD_CREEP!", &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+          return  ! bail out
+        endif
+        if ((extrapMethod.eq.ESMF_EXTRAPMETHOD_CREEP_NRST_D) .and. extrapNumLevelsINC) then
+          call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+            msg="User must set extrapNumLevels when extrapMethod=ESMF_EXTRAPMETHOD_CREEP_NRST_D!", &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
           return  ! bail out
         endif

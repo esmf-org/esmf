@@ -173,6 +173,7 @@ void FTN_X(f_esmf_regridstorefile)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldp
   const char *dstFile,
   ESMC_FileFormat_Flag *srcFileType,
   ESMC_FileFormat_Flag *dstFileType,
+  ESMC_Logical *largeFileFlag,
   ESMCI::Field *srcfracfieldp,
   ESMCI::Field *dstfracfieldp,
   int *rc,
@@ -1508,9 +1509,9 @@ namespace ESMCI {
     const char *dstFile,
     ESMC_FileFormat_Flag *srcFileType,
     ESMC_FileFormat_Flag *dstFileType,
+    ESMC_Logical *largeFileFlag,
     Field *srcFracField,
-    Field *dstFracField
-) {
+    Field *dstFracField) {
 //
 // !DESCRIPTION:
 //
@@ -1587,6 +1588,7 @@ namespace ESMCI {
                               dstFile,
                               srcFileType,
                               dstFileType,
+                              largeFileFlag,
                               srcFracField,
                               dstFracField,
                               &localrc,

@@ -294,6 +294,7 @@ class VMK{
     // and the thread level that the MPI implementation supports.
     static MPI_Comm default_mpi_c;
     static int mpi_thread_level;
+    static int mpi_init_outside_esmf;
     // Static data members that hold command line arguments
     // There are two sets of these variables. The first set of variables is
     // used to obtain the command line arguments in the obtain_args() method

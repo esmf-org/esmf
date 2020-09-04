@@ -50,7 +50,7 @@ class AbstractESMFNoseCommand(AbstractESMFCommand):
 
     @classmethod
     def nosetests_command(cls):
-        ret = ['nosetests', '-vs']
+        ret = ['nosetests', '-vs', '--with-xunit']
         if not isinstance(cls._nose_attrs, type(None)):
             nose_attrs = cls._nose_base_attrs + cls._nose_attrs
             nose_attrs = ','.join(nose_attrs)

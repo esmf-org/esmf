@@ -105,7 +105,9 @@ typedef DWORD pid_t;
 #endif
 
 // Requested MPI thread level
-#ifndef VM_MPI_THREAD_LEVEL
+#ifdef ESMF_NO_PTHREADS
+#define VM_MPI_THREAD_LEVEL MPI_THREAD_SINGLE
+#else
 #define VM_MPI_THREAD_LEVEL MPI_THREAD_MULTIPLE
 #endif
 
@@ -114,6 +116,7 @@ namespace ESMCI {
 // Definition of class static data members
 MPI_Comm VMK::default_mpi_c;
 int VMK::mpi_thread_level;
+int VMK::mpi_init_outside_esmf;
 int VMK::ncores;
 int *VMK::cpuid;
 int *VMK::ssiid;
@@ -347,12 +350,12 @@ void VMK::init(MPI_Comm mpiCommunicator){
   obtain_args();
 #endif
   // next check is whether MPI has been initialized yet
-  // actually we need to indicate an error if MPI has been initialized before
-  // because signal blocking might not reach all of the threads again...
-  int initialized;
-  MPI_Initialized(&initialized);
+  // there is a check in vmk_sigcatcher() to make sure signals between processes
+  // are only used if ESMF initialized MPI to make sure all the threads
+  // were reached with the SIG_BLOCK above.
+  MPI_Initialized(&mpi_init_outside_esmf);
 #ifndef ESMF_MPIUNI
-  if (!initialized){
+  if (!mpi_init_outside_esmf){
 #ifdef ESMF_MPICH
     // MPICH1.2 is not standard compliant and needs valid args
     // make copy of argc and argv for MPICH because it modifies them and
@@ -1088,6 +1091,8 @@ static void *vmk_spawn(void *arg){
 
 
 static void *vmk_sigcatcher(void *arg){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMK::vmk_sigcatcher()"
   // vmkt's first level spawn function, includes the catch/release loop
   // typecast the argument into the type it really is:
   SpawnArg *sarg = (SpawnArg *)arg;
@@ -1118,14 +1123,27 @@ static void *vmk_sigcatcher(void *arg){
   pid_t pid = getpid();
   vmkt->arg = (void *)&pid;
   // more preparation
-#if !defined (ESMF_NO_SIGNALS)
+  VMK vm;  // need a handle to a VM object to access the static members
+  if (vm.mpi_init_outside_esmf){
+    int localrc;
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Cannot safely use signals inside VMKernel when MPI was initialized "
+      "outside of ESMF.", ESMC_CONTEXT, &localrc);
+    throw localrc;  // bail out with exception
+  }
+#ifdef ESMF_NO_SIGNALS
+  int localrc;
+  ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+    "Need signals to support advanced threading options inside VMKernel",
+    ESMC_CONTEXT, &localrc);
+  throw localrc;  // bail out with exception
+#else
   sigset_t sigs_to_catch;
   sigemptyset(&sigs_to_catch);
   sigaddset(&sigs_to_catch, VM_SIG1);
 #endif
   int caught;
   MPI_Status mpi_s;
-  VMK vm;  // need a handle to access the MPI_Comm of default VMK
   // now use vmkt features to prepare for catch/release loop (back-sync)
   // - part 2
 #ifndef ESMF_NO_PTHREADS
@@ -1163,11 +1181,7 @@ static void *vmk_sigcatcher(void *arg){
     getpid());
 #endif
 
-#ifdef ESMF_NO_SIGNALS
-#ifndef ESMF_NO_PTHREADS
-#error Need signals for Pthreads in VMKernel
-#endif
-#else
+#ifndef ESMF_NO_SIGNALS
   sigwait(&sigs_to_catch, &caught);
 #endif
   
@@ -3177,7 +3191,11 @@ void VMK::sendBuffer::clear(){
   ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
 #endif
   if (mpireq != MPI_REQUEST_NULL){
-    ESMC_LogDefault.Write("actually posting MPI_Wait()", ESMC_LOGMSG_INFO);
+#ifdef VM_EPOCHLOG_on
+    std::stringstream msg;
+    msg << "epochBuffer:" << __LINE__ << " actually posting MPI_Wait()";
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+#endif
     MPI_Wait(&mpireq, MPI_STATUS_IGNORE);
   }
 #ifdef USE_STRSTREAM

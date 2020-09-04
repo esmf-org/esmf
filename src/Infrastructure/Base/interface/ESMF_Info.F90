@@ -334,7 +334,7 @@ end function ESMF_InfoCreateByKey
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoCreateFromInfo()"
 !BOP
-! !IROUTINE: ESMF_InfoCreateFromInfo - Create an Info object from another Info object
+! !IROUTINE: ESMF_InfoCreate - Create an Info object from another Info object
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_InfoCreate()
@@ -460,28 +460,24 @@ end subroutine ESMF_InfoDestroy
 ! Set (Scalar) ----------------------------------------------------------------
 !------------------------------------------------------------------------------
 
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoSetR4()"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_InfoSet - Set a value
 !
 ! !INTERFACE:
-  ! Private name; call using ESMF_InfoSet()
-subroutine ESMF_InfoSetR4(info, key, value, keywordEnforcer, force, idx, pkey, rc)
-
+!subroutine ESMF_InfoSet(info, key, value, keywordEnforcer, force, idx, pkey, rc)
+!
 ! !ARGUMENTS:
-  type(ESMF_Info), intent(inout) :: info
-  character(len=*), intent(in) :: key
-  real(ESMF_KIND_R4), intent(in) :: value
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  logical, intent(in), optional :: force
-  integer, intent(in), optional :: idx
-  character(len=*), intent(in), optional :: pkey
-  integer, intent(out), optional :: rc
+!  type(ESMF_Info), intent(inout) :: info
+!  character(len=*), intent(in) :: key
+!  <value>, see below for supported value
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!  logical, intent(in), optional :: force
+!  integer, intent(in), optional :: idx
+!  character(len=*), intent(in), optional :: pkey
+!  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Set a value in an \texttt{ESMF\_Info} object using a key. List values are
-!     initialized to null.
+!     Set a \textit{value} in an \texttt{ESMF\_Info} object using a key.
 !
 !     Overloaded \textit{value} for the following types:
 !     \begin{itemize}
@@ -513,7 +509,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
-!EOPI
+!EOP
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! NOTE: Documentation stub located above for generic interface compliance.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoSetR4()"
+subroutine ESMF_InfoSetR4(info, key, value, keywordEnforcer, force, idx, pkey, rc)
+  type(ESMF_Info), intent(inout) :: info
+  character(len=*), intent(in) :: key
+  real(ESMF_KIND_R4), intent(in) :: value
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  logical, intent(in), optional :: force
+  integer, intent(in), optional :: idx
+  character(len=*), intent(in), optional :: pkey
+  integer, intent(out), optional :: rc
+
   integer :: localrc
   logical(C_BOOL) :: local_force
   integer(C_INT), target :: local_idx
@@ -552,17 +565,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoSetR4
-
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoSetR8()"
-!BOPI
-! !IROUTINE: ESMF_InfoSet - Set a value
-!
-! !INTERFACE:
-  ! Private name; call using ESMF_InfoSet()
 subroutine ESMF_InfoSetR8(info, key, value, keywordEnforcer, force, idx, pkey, rc)
-
-! !ARGUMENTS:
   type(ESMF_Info), intent(inout) :: info
   character(len=*), intent(in) :: key
   real(ESMF_KIND_R8), intent(in) :: value
@@ -571,42 +576,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: idx
   character(len=*), intent(in), optional :: pkey
   integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Set a value in an \texttt{ESMF\_Info} object using a key. List values are
-!     initialized to null.
-!
-!     Overloaded \textit{value} for the following types:
-!     \begin{itemize}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I4)}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I8)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R4)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R8)}
-!       \item \texttt{logical}
-!       \item \texttt{character(:)}
-!     \end{itemize}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-!       Target \texttt{ESMF\_Info} object.
-!     \item [key]
-!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
-!       for an overview of the key format.
-!     \item [value]
-!       The input value associated with the key.
-!     \item [{[force]}]
-!       Default is true. When true, insert the key even if it already exists in
-!       storage. If false, \textit{rc} will not return {\tt ESMF\_SUCCESS} if the
-!       key already exists.
-!     \item [{[idx]}]
-!       An integer index to set if the target key's value is a list.
-!     \item [{[pkey]}]
-!       Use this key's location as the origin for the set call.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOPI
+
   integer :: localrc
   logical(C_BOOL) :: local_force
   integer(C_INT), target :: local_idx
@@ -645,17 +615,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoSetR8
-
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoSetI4()"
-!BOP
-! !IROUTINE: ESMF_InfoSet - Set a value
-!
-! !INTERFACE:
-  ! Private name; call using ESMF_InfoSet()
 subroutine ESMF_InfoSetI4(info, key, value, keywordEnforcer, force, idx, pkey, rc)
-
-! !ARGUMENTS:
   type(ESMF_Info), intent(inout) :: info
   character(len=*), intent(in) :: key
   integer(ESMF_KIND_I4), intent(in) :: value
@@ -664,42 +626,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: idx
   character(len=*), intent(in), optional :: pkey
   integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Set a value in an \texttt{ESMF\_Info} object using a key. List values are
-!     initialized to null.
-!
-!     Overloaded \textit{value} for the following types:
-!     \begin{itemize}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I4)}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I8)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R4)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R8)}
-!       \item \texttt{logical}
-!       \item \texttt{character(:)}
-!     \end{itemize}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-!       Target \texttt{ESMF\_Info} object.
-!     \item [key]
-!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
-!       for an overview of the key format.
-!     \item [value]
-!       The input value associated with the key.
-!     \item [{[force]}]
-!       Default is true. When true, insert the key even if it already exists in
-!       storage. If false, \textit{rc} will not return {\tt ESMF\_SUCCESS} if the
-!       key already exists.
-!     \item [{[idx]}]
-!       An integer index to set if the target key's value is a list.
-!     \item [{[pkey]}]
-!       Use this key's location as the origin for the set call.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOP
+
   integer :: localrc
   logical(C_BOOL) :: local_force
   integer(C_INT), target :: local_idx
@@ -738,17 +665,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoSetI4
-
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoSetI8()"
-!BOPI
-! !IROUTINE: ESMF_InfoSet - Set a value
-!
-! !INTERFACE:
-  ! Private name; call using ESMF_InfoSet()
 subroutine ESMF_InfoSetI8(info, key, value, keywordEnforcer, force, idx, pkey, rc)
-
-! !ARGUMENTS:
   type(ESMF_Info), intent(inout) :: info
   character(len=*), intent(in) :: key
   integer(ESMF_KIND_I8), intent(in) :: value
@@ -757,42 +676,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: idx
   character(len=*), intent(in), optional :: pkey
   integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Set a value in an \texttt{ESMF\_Info} object using a key. List values are
-!     initialized to null.
-!
-!     Overloaded \textit{value} for the following types:
-!     \begin{itemize}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I4)}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I8)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R4)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R8)}
-!       \item \texttt{logical}
-!       \item \texttt{character(:)}
-!     \end{itemize}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-!       Target \texttt{ESMF\_Info} object.
-!     \item [key]
-!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
-!       for an overview of the key format.
-!     \item [value]
-!       The input value associated with the key.
-!     \item [{[force]}]
-!       Default is true. When true, insert the key even if it already exists in
-!       storage. If false, \textit{rc} will not return {\tt ESMF\_SUCCESS} if the
-!       key already exists.
-!     \item [{[idx]}]
-!       An integer index to set if the target key's value is a list.
-!     \item [{[pkey]}]
-!       Use this key's location as the origin for the set call.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOPI
+
   integer :: localrc
   logical(C_BOOL) :: local_force
   integer(C_INT), target :: local_idx
@@ -831,17 +715,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoSetI8
-
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoSetCH()"
-!BOPI
-! !IROUTINE: ESMF_InfoSet - Set a value
-!
-! !INTERFACE:
-  ! Private name; call using ESMF_InfoSet()
 subroutine ESMF_InfoSetCH(info, key, value, keywordEnforcer, force, idx, pkey, rc)
-
-! !ARGUMENTS:
   type(ESMF_Info), intent(inout) :: info
   character(len=*), intent(in) :: key
   character(len=*), intent(in) :: value
@@ -850,42 +726,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: idx
   character(len=*), intent(in), optional :: pkey
   integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Set a value in an \texttt{ESMF\_Info} object using a key. List values are
-!     initialized to null.
-!
-!     Overloaded \textit{value} for the following types:
-!     \begin{itemize}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I4)}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I8)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R4)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R8)}
-!       \item \texttt{logical}
-!       \item \texttt{character(:)}
-!     \end{itemize}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-!       Target \texttt{ESMF\_Info} object.
-!     \item [key]
-!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
-!       for an overview of the key format.
-!     \item [value]
-!       The input value associated with the key.
-!     \item [{[force]}]
-!       Default is true. When true, insert the key even if it already exists in
-!       storage. If false, \textit{rc} will not return {\tt ESMF\_SUCCESS} if the
-!       key already exists.
-!     \item [{[idx]}]
-!       An integer index to set if the target key's value is a list.
-!     \item [{[pkey]}]
-!       Use this key's location as the origin for the set call.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOPI
+
   integer :: localrc
   logical(C_BOOL) :: local_force
   integer(C_INT), target :: local_idx
@@ -924,17 +765,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoSetCH
-
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoSetLG()"
-!BOPI
-! !IROUTINE: ESMF_InfoSet - Set a value
-!
-! !INTERFACE:
-  ! Private name; call using ESMF_InfoSet()
 subroutine ESMF_InfoSetLG(info, key, value, keywordEnforcer, force, idx, pkey, rc)
-
-! !ARGUMENTS:
   type(ESMF_Info), intent(inout) :: info
   character(len=*), intent(in) :: key
   logical, intent(in) :: value
@@ -943,42 +776,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: idx
   character(len=*), intent(in), optional :: pkey
   integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Set a value in an \texttt{ESMF\_Info} object using a key. List values are
-!     initialized to null.
-!
-!     Overloaded \textit{value} for the following types:
-!     \begin{itemize}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I4)}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I8)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R4)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R8)}
-!       \item \texttt{logical}
-!       \item \texttt{character(:)}
-!     \end{itemize}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-!       Target \texttt{ESMF\_Info} object.
-!     \item [key]
-!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
-!       for an overview of the key format.
-!     \item [value]
-!       The input value associated with the key.
-!     \item [{[force]}]
-!       Default is true. When true, insert the key even if it already exists in
-!       storage. If false, \textit{rc} will not return {\tt ESMF\_SUCCESS} if the
-!       key already exists.
-!     \item [{[idx]}]
-!       An integer index to set if the target key's value is a list.
-!     \item [{[pkey]}]
-!       Use this key's location as the origin for the set call.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOPI
+
   integer :: localrc
   logical(C_BOOL) :: local_force, local_value
   integer(C_INT), target :: local_idx
@@ -1019,515 +817,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoSetLG
 
-!------------------------------------------------------------------------------
-! SetArray --------------------------------------------------------------------
-!------------------------------------------------------------------------------
-
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoSetArrayR4()"
-!BOPI
-! !IROUTINE: ESMF_InfoSet - Set a value list
-!
-! !INTERFACE:
-  ! Private name; call using ESMF_InfoSet()
-subroutine ESMF_InfoSetArrayR4(info, key, values, keywordEnforcer, force, pkey, rc)
-
-! !ARGUMENTS:
-  type(ESMF_Info), intent(inout) :: info
-  character(len=*), intent(in) :: key
-  real(ESMF_KIND_R4), dimension(:), intent(in) :: values
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  logical, intent(in), optional :: force
-  character(len=*), intent(in), optional :: pkey
-  integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Set a value list in an \texttt{ESMF\_Info} object using a key.
-!
-!     Overloaded \textit{values} for the following types:
-!     \begin{itemize}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I4), dimension(:)}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I8), dimension(:)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R4), dimension(:)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R8), dimension(:)}
-!       \item \texttt{logical, dimension(:)}
-!       \item \texttt{character(:), dimension(:)}
-!     \end{itemize}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-!       Target \texttt{ESMF\_Info} object.
-!     \item [key]
-!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
-!       for an overview of the key format.
-!     \item [values]
-!       The input value list associated with the key.
-!     \item [{[force]}]
-!       Default is true. When true, insert the key even if it already exists in
-!       storage. If false, \textit{rc} will not return {\tt ESMF\_SUCCESS} if the
-!       key already exists.
-!     \item [{[pkey]}]
-!       Use this key's location as the origin for the set call. Used primarily
-!       for recursive requirements related to \texttt{ESMF\_Attribute}.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOPI
-
-  integer :: localrc
-  logical(C_BOOL) :: local_force
-  character(:), allocatable :: local_pkey
-  localrc = ESMF_FAILURE
-  if (present(rc)) rc = ESMF_FAILURE
-
-  if (present(force)) then
-    local_force = force
-  else
-    local_force = .true.
-  end if
-  if (present(pkey)) then
-    local_pkey = TRIM(pkey)//C_NULL_CHAR
-  else
-    local_pkey = ""//C_NULL_CHAR
-  end if
-
-  call c_info_set_array_R4(&
-    info%ptr, &
-    trim(key)//C_NULL_CHAR, &
-    values, &
-    SIZE(values), &
-    local_force, &
-    localrc, &
-    local_pkey)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (present(rc)) rc = ESMF_SUCCESS
-end subroutine ESMF_InfoSetArrayR4
-
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoSetArrayR8()"
-!BOPI
-! !IROUTINE: ESMF_InfoSet - Set a value list
-!
-! !INTERFACE:
-  ! Private name; call using ESMF_InfoSet()
-subroutine ESMF_InfoSetArrayR8(info, key, values, keywordEnforcer, force, pkey, rc)
-
-! !ARGUMENTS:
-  type(ESMF_Info), intent(inout) :: info
-  character(len=*), intent(in) :: key
-  real(ESMF_KIND_R8), dimension(:), intent(in) :: values
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  logical, intent(in), optional :: force
-  character(len=*), intent(in), optional :: pkey
-  integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Set a value list in an \texttt{ESMF\_Info} object using a key.
-!
-!     Overloaded \textit{values} for the following types:
-!     \begin{itemize}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I4), dimension(:)}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I8), dimension(:)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R4), dimension(:)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R8), dimension(:)}
-!       \item \texttt{logical, dimension(:)}
-!       \item \texttt{character(:), dimension(:)}
-!     \end{itemize}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-!       Target \texttt{ESMF\_Info} object.
-!     \item [key]
-!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
-!       for an overview of the key format.
-!     \item [values]
-!       The input value list associated with the key.
-!     \item [{[force]}]
-!       Default is true. When true, insert the key even if it already exists in
-!       storage. If false, \textit{rc} will not return {\tt ESMF\_SUCCESS} if the
-!       key already exists.
-!     \item [{[pkey]}]
-!       Use this key's location as the origin for the set call. Used primarily
-!       for recursive requirements related to \texttt{ESMF\_Attribute}.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOPI
-
-  integer :: localrc
-  logical(C_BOOL) :: local_force
-  character(:), allocatable :: local_pkey
-  localrc = ESMF_FAILURE
-  if (present(rc)) rc = ESMF_FAILURE
-
-  if (present(force)) then
-    local_force = force
-  else
-    local_force = .true.
-  end if
-  if (present(pkey)) then
-    local_pkey = TRIM(pkey)//C_NULL_CHAR
-  else
-    local_pkey = ""//C_NULL_CHAR
-  end if
-
-  call c_info_set_array_R8(&
-    info%ptr, &
-    trim(key)//C_NULL_CHAR, &
-    values, &
-    SIZE(values), &
-    local_force, &
-    localrc, &
-    local_pkey)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (present(rc)) rc = ESMF_SUCCESS
-end subroutine ESMF_InfoSetArrayR8
-
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoSetArrayI4()"
-!BOP
-! !IROUTINE: ESMF_InfoSet - Set a value list
-!
-! !INTERFACE:
-  ! Private name; call using ESMF_InfoSet()
-subroutine ESMF_InfoSetArrayI4(info, key, values, keywordEnforcer, force, pkey, rc)
-
-! !ARGUMENTS:
-  type(ESMF_Info), intent(inout) :: info
-  character(len=*), intent(in) :: key
-  integer(ESMF_KIND_I4), dimension(:), intent(in) :: values
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  logical, intent(in), optional :: force
-  character(len=*), intent(in), optional :: pkey
-  integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Set a value list in an \texttt{ESMF\_Info} object using a key.
-!
-!     Overloaded \textit{values} for the following types:
-!     \begin{itemize}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I4), dimension(:)}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I8), dimension(:)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R4), dimension(:)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R8), dimension(:)}
-!       \item \texttt{logical, dimension(:)}
-!       \item \texttt{character(:), dimension(:)}
-!     \end{itemize}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-!       Target \texttt{ESMF\_Info} object.
-!     \item [key]
-!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
-!       for an overview of the key format.
-!     \item [values]
-!       The input value list associated with the key.
-!     \item [{[force]}]
-!       Default is true. When true, insert the key even if it already exists in
-!       storage. If false, \textit{rc} will not return {\tt ESMF\_SUCCESS} if the
-!       key already exists.
-!     \item [{[pkey]}]
-!       Use this key's location as the origin for the set call. Used primarily
-!       for recursive requirements related to \texttt{ESMF\_Attribute}.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOP
-
-  integer :: localrc
-  logical(C_BOOL) :: local_force
-  character(:), allocatable :: local_pkey
-  localrc = ESMF_FAILURE
-  if (present(rc)) rc = ESMF_FAILURE
-
-  if (present(force)) then
-    local_force = force
-  else
-    local_force = .true.
-  end if
-  if (present(pkey)) then
-    local_pkey = TRIM(pkey)//C_NULL_CHAR
-  else
-    local_pkey = ""//C_NULL_CHAR
-  end if
-
-  call c_info_set_array_I4(&
-    info%ptr, &
-    trim(key)//C_NULL_CHAR, &
-    values, &
-    SIZE(values), &
-    local_force, &
-    localrc, &
-    local_pkey)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (present(rc)) rc = ESMF_SUCCESS
-end subroutine ESMF_InfoSetArrayI4
-
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoSetArrayI8()"
-!BOPI
-! !IROUTINE: ESMF_InfoSet - Set a value list
-!
-! !INTERFACE:
-  ! Private name; call using ESMF_InfoSet()
-subroutine ESMF_InfoSetArrayI8(info, key, values, keywordEnforcer, force, pkey, rc)
-
-! !ARGUMENTS:
-  type(ESMF_Info), intent(inout) :: info
-  character(len=*), intent(in) :: key
-  integer(ESMF_KIND_I8), dimension(:), intent(in) :: values
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  logical, intent(in), optional :: force
-  character(len=*), intent(in), optional :: pkey
-  integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Set a value list in an \texttt{ESMF\_Info} object using a key.
-!
-!     Overloaded \textit{values} for the following types:
-!     \begin{itemize}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I4), dimension(:)}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I8), dimension(:)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R4), dimension(:)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R8), dimension(:)}
-!       \item \texttt{logical, dimension(:)}
-!       \item \texttt{character(:), dimension(:)}
-!     \end{itemize}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-!       Target \texttt{ESMF\_Info} object.
-!     \item [key]
-!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
-!       for an overview of the key format.
-!     \item [values]
-!       The input value list associated with the key.
-!     \item [{[force]}]
-!       Default is true. When true, insert the key even if it already exists in
-!       storage. If false, \textit{rc} will not return {\tt ESMF\_SUCCESS} if the
-!       key already exists.
-!     \item [{[pkey]}]
-!       Use this key's location as the origin for the set call. Used primarily
-!       for recursive requirements related to \texttt{ESMF\_Attribute}.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOPI
-
-  integer :: localrc
-  logical(C_BOOL) :: local_force
-  character(:), allocatable :: local_pkey
-  localrc = ESMF_FAILURE
-  if (present(rc)) rc = ESMF_FAILURE
-
-  if (present(force)) then
-    local_force = force
-  else
-    local_force = .true.
-  end if
-  if (present(pkey)) then
-    local_pkey = TRIM(pkey)//C_NULL_CHAR
-  else
-    local_pkey = ""//C_NULL_CHAR
-  end if
-
-  call c_info_set_array_I8(&
-    info%ptr, &
-    trim(key)//C_NULL_CHAR, &
-    values, &
-    SIZE(values), &
-    local_force, &
-    localrc, &
-    local_pkey)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (present(rc)) rc = ESMF_SUCCESS
-end subroutine ESMF_InfoSetArrayI8
-
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoSetArrayCH()"
-!BOPI
-! !IROUTINE: ESMF_InfoSet - Set a value list
-!
-! !INTERFACE:
-  ! Private name; call using ESMF_InfoSet()
-subroutine ESMF_InfoSetArrayCH(info, key, values, keywordEnforcer, force, pkey, rc)
-
-! !ARGUMENTS:
-  type(ESMF_Info), intent(inout) :: info
-  character(len=*), intent(in) :: key
-  character(len=*), dimension(:), intent(in) :: values
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  logical, intent(in), optional :: force
-  character(len=*), intent(in), optional :: pkey
-  integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Set a value list in an \texttt{ESMF\_Info} object using a key.
-!
-!     Overloaded \textit{values} for the following types:
-!     \begin{itemize}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I4), dimension(:)}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I8), dimension(:)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R4), dimension(:)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R8), dimension(:)}
-!       \item \texttt{logical, dimension(:)}
-!       \item \texttt{character(:), dimension(:)}
-!     \end{itemize}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-!       Target \texttt{ESMF\_Info} object.
-!     \item [key]
-!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
-!       for an overview of the key format.
-!     \item [values]
-!       The input value list associated with the key.
-!     \item [{[force]}]
-!       Default is true. When true, insert the key even if it already exists in
-!       storage. If false, \textit{rc} will not return {\tt ESMF\_SUCCESS} if the
-!       key already exists.
-!     \item [{[pkey]}]
-!       Use this key's location as the origin for the set call. Used primarily
-!       for recursive requirements related to \texttt{ESMF\_Attribute}.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOPI
-
-  integer :: localrc
-  logical(C_BOOL) :: local_force
-  integer :: ii
-  integer(C_INT) :: idx
-  character(:), allocatable :: local_pkey
-  localrc = ESMF_FAILURE
-  if (present(rc)) rc = ESMF_FAILURE
-
-  if (present(force)) then
-    local_force = force
-  else
-    local_force = .true.
-  end if
-  if (present(pkey)) then
-    local_pkey = TRIM(pkey)//C_NULL_CHAR
-  else
-    local_pkey = ""//C_NULL_CHAR
-  end if
-
-  ! Allocate storage in C
-  call c_info_set_array_CH(info%ptr, trim(key)//C_NULL_CHAR, &
-    SIZE(values), local_force, localrc, local_pkey)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  ! Set each character element in the underlying store
-  do ii=1,SIZE(values)
-    call ESMF_InfoSetCH(info, key, values(ii), idx=ii, pkey=local_pkey, rc=localrc)
-  enddo
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (present(rc)) rc = ESMF_SUCCESS
-end subroutine ESMF_InfoSetArrayCH
-
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoSetArrayLG()"
-!BOPI
-! !IROUTINE: ESMF_InfoSet - Set a value list
-!
-! !INTERFACE:
-  ! Private name; call using ESMF_InfoSet()
-subroutine ESMF_InfoSetArrayLG(info, key, values, keywordEnforcer, force, pkey, rc)
-
-! !ARGUMENTS:
-  type(ESMF_Info), intent(inout) :: info
-  character(len=*), intent(in) :: key
-  logical, dimension(:), intent(in) :: values
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  logical, intent(in), optional :: force
-  character(len=*), intent(in), optional :: pkey
-  integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Set a value list in an \texttt{ESMF\_Info} object using a key.
-!
-!     Overloaded \textit{values} for the following types:
-!     \begin{itemize}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I4), dimension(:)}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I8), dimension(:)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R4), dimension(:)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R8), dimension(:)}
-!       \item \texttt{logical, dimension(:)}
-!       \item \texttt{character(:), dimension(:)}
-!     \end{itemize}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-!       Target \texttt{ESMF\_Info} object.
-!     \item [key]
-!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
-!       for an overview of the key format.
-!     \item [values]
-!       The input value list associated with the key.
-!     \item [{[force]}]
-!       Default is true. When true, insert the key even if it already exists in
-!       storage. If false, \textit{rc} will not return {\tt ESMF\_SUCCESS} if the
-!       key already exists.
-!     \item [{[pkey]}]
-!       Use this key's location as the origin for the set call. Used primarily
-!       for recursive requirements related to \texttt{ESMF\_Attribute}.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOPI
-
-  integer :: localrc
-  logical(C_BOOL) :: local_force
-  integer :: ii
-  logical(C_BOOL), dimension(:), allocatable :: local_values
-  character(:), allocatable :: local_pkey
-  localrc = ESMF_FAILURE
-  if (present(rc)) rc = ESMF_FAILURE
-
-  if (present(force)) then
-    local_force = force
-  else
-    local_force = .true.
-  end if
-  if (present(pkey)) then
-    local_pkey = TRIM(pkey)//C_NULL_CHAR
-  else
-    local_pkey = ""//C_NULL_CHAR
-  end if
-
-  allocate(local_values(SIZE(values)))
-  do ii=1,SIZE(values)
-    local_values(ii) = values(ii)
-  enddo
-
-  call c_info_set_array_LG(&
-    info%ptr, &
-    trim(key)//C_NULL_CHAR, &
-    local_values, &
-    SIZE(values), &
-    local_force, &
-    localrc, &
-    local_pkey)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  deallocate(local_values)
-
-  if (present(rc)) rc = ESMF_SUCCESS
-end subroutine ESMF_InfoSetArrayLG
-
-!------------------------------------------------------------------------------
+! -----------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoSetINFO()"
@@ -1535,7 +825,7 @@ end subroutine ESMF_InfoSetArrayLG
 ! !IROUTINE: ESMF_InfoSet - Set a key to the contents of an Info object
 !
 ! !INTERFACE:
-  ! Private name; call using ESMF_InfoSet()
+  ! Private name; call using ESMF_InfoSet
 subroutine ESMF_InfoSetINFO(info, key, value, keywordEnforcer, force, rc)
 ! !ARGUMENTS:
   type(ESMF_Info), intent(inout) :: info
@@ -1591,6 +881,323 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 end subroutine ESMF_InfoSetINFO
 
 !------------------------------------------------------------------------------
+! SetArray --------------------------------------------------------------------
+!------------------------------------------------------------------------------
+
+!BOP
+! !IROUTINE: ESMF_InfoSet - Set a value list
+!
+! !INTERFACE:
+!subroutine ESMF_InfoSet(info, key, values, keywordEnforcer, force, pkey, rc)
+!
+! !ARGUMENTS:
+!  type(ESMF_Info), intent(inout) :: info
+!  character(len=*), intent(in) :: key
+!  <values>, see below for supported values
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!  logical, intent(in), optional :: force
+!  character(len=*), intent(in), optional :: pkey
+!  integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Set a value list in an \texttt{ESMF\_Info} object using a key. List values
+!     are initialized to null.
+!
+!     Overloaded \textit{values} for the following types:
+!     \begin{itemize}
+!       \item \texttt{integer(kind=ESMF\_KIND\_I4), dimension(:)}
+!       \item \texttt{integer(kind=ESMF\_KIND\_I8), dimension(:)}
+!       \item \texttt{real(kind=ESMF\_KIND\_R4), dimension(:)}
+!       \item \texttt{real(kind=ESMF\_KIND\_R8), dimension(:)}
+!       \item \texttt{logical, dimension(:)}
+!       \item \texttt{character(:), dimension(:)}
+!     \end{itemize}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [info]
+!       Target \texttt{ESMF\_Info} object.
+!     \item [key]
+!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
+!       for an overview of the key format.
+!     \item [values]
+!       The input value list associated with the key.
+!     \item [{[force]}]
+!       Default is true. When true, insert the key even if it already exists in
+!       storage. If false, \textit{rc} will not return {\tt ESMF\_SUCCESS} if the
+!       key already exists.
+!     \item [{[pkey]}]
+!       Use this key's location as the origin for the set call. Used primarily
+!       for recursive requirements related to \texttt{ESMF\_Attribute}.
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOP
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! NOTE: Documentation stub located above for generic interface compliance.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoSetArrayR4()"
+subroutine ESMF_InfoSetArrayR4(info, key, values, keywordEnforcer, force, pkey, rc)
+  type(ESMF_Info), intent(inout) :: info
+  character(len=*), intent(in) :: key
+  real(ESMF_KIND_R4), dimension(:), intent(in) :: values
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  logical, intent(in), optional :: force
+  character(len=*), intent(in), optional :: pkey
+  integer, intent(out), optional :: rc
+
+  integer :: localrc
+  logical(C_BOOL) :: local_force
+  character(:), allocatable :: local_pkey
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_FAILURE
+
+  if (present(force)) then
+    local_force = force
+  else
+    local_force = .true.
+  end if
+  if (present(pkey)) then
+    local_pkey = TRIM(pkey)//C_NULL_CHAR
+  else
+    local_pkey = ""//C_NULL_CHAR
+  end if
+
+  call c_info_set_array_R4(&
+    info%ptr, &
+    trim(key)//C_NULL_CHAR, &
+    values, &
+    SIZE(values), &
+    local_force, &
+    localrc, &
+    local_pkey)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_InfoSetArrayR4
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoSetArrayR8()"
+subroutine ESMF_InfoSetArrayR8(info, key, values, keywordEnforcer, force, pkey, rc)
+  type(ESMF_Info), intent(inout) :: info
+  character(len=*), intent(in) :: key
+  real(ESMF_KIND_R8), dimension(:), intent(in) :: values
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  logical, intent(in), optional :: force
+  character(len=*), intent(in), optional :: pkey
+  integer, intent(out), optional :: rc
+
+  integer :: localrc
+  logical(C_BOOL) :: local_force
+  character(:), allocatable :: local_pkey
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_FAILURE
+
+  if (present(force)) then
+    local_force = force
+  else
+    local_force = .true.
+  end if
+  if (present(pkey)) then
+    local_pkey = TRIM(pkey)//C_NULL_CHAR
+  else
+    local_pkey = ""//C_NULL_CHAR
+  end if
+
+  call c_info_set_array_R8(&
+    info%ptr, &
+    trim(key)//C_NULL_CHAR, &
+    values, &
+    SIZE(values), &
+    local_force, &
+    localrc, &
+    local_pkey)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_InfoSetArrayR8
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoSetArrayI4()"
+subroutine ESMF_InfoSetArrayI4(info, key, values, keywordEnforcer, force, pkey, rc)
+  type(ESMF_Info), intent(inout) :: info
+  character(len=*), intent(in) :: key
+  integer(ESMF_KIND_I4), dimension(:), intent(in) :: values
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  logical, intent(in), optional :: force
+  character(len=*), intent(in), optional :: pkey
+  integer, intent(out), optional :: rc
+
+  integer :: localrc
+  logical(C_BOOL) :: local_force
+  character(:), allocatable :: local_pkey
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_FAILURE
+
+  if (present(force)) then
+    local_force = force
+  else
+    local_force = .true.
+  end if
+  if (present(pkey)) then
+    local_pkey = TRIM(pkey)//C_NULL_CHAR
+  else
+    local_pkey = ""//C_NULL_CHAR
+  end if
+
+  call c_info_set_array_I4(&
+    info%ptr, &
+    trim(key)//C_NULL_CHAR, &
+    values, &
+    SIZE(values), &
+    local_force, &
+    localrc, &
+    local_pkey)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_InfoSetArrayI4
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoSetArrayI8()"
+subroutine ESMF_InfoSetArrayI8(info, key, values, keywordEnforcer, force, pkey, rc)
+  type(ESMF_Info), intent(inout) :: info
+  character(len=*), intent(in) :: key
+  integer(ESMF_KIND_I8), dimension(:), intent(in) :: values
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  logical, intent(in), optional :: force
+  character(len=*), intent(in), optional :: pkey
+  integer, intent(out), optional :: rc
+
+  integer :: localrc
+  logical(C_BOOL) :: local_force
+  character(:), allocatable :: local_pkey
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_FAILURE
+
+  if (present(force)) then
+    local_force = force
+  else
+    local_force = .true.
+  end if
+  if (present(pkey)) then
+    local_pkey = TRIM(pkey)//C_NULL_CHAR
+  else
+    local_pkey = ""//C_NULL_CHAR
+  end if
+
+  call c_info_set_array_I8(&
+    info%ptr, &
+    trim(key)//C_NULL_CHAR, &
+    values, &
+    SIZE(values), &
+    local_force, &
+    localrc, &
+    local_pkey)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_InfoSetArrayI8
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoSetArrayCH()"
+subroutine ESMF_InfoSetArrayCH(info, key, values, keywordEnforcer, force, pkey, rc)
+  type(ESMF_Info), intent(inout) :: info
+  character(len=*), intent(in) :: key
+  character(len=*), dimension(:), intent(in) :: values
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  logical, intent(in), optional :: force
+  character(len=*), intent(in), optional :: pkey
+  integer, intent(out), optional :: rc
+
+  integer :: localrc
+  logical(C_BOOL) :: local_force
+  integer :: ii
+  integer(C_INT) :: idx
+  character(:), allocatable :: local_pkey
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_FAILURE
+
+  if (present(force)) then
+    local_force = force
+  else
+    local_force = .true.
+  end if
+  if (present(pkey)) then
+    local_pkey = TRIM(pkey)//C_NULL_CHAR
+  else
+    local_pkey = ""//C_NULL_CHAR
+  end if
+
+  ! Allocate storage in C
+  call c_info_set_array_CH(info%ptr, trim(key)//C_NULL_CHAR, &
+    SIZE(values), local_force, localrc, local_pkey)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! Set each character element in the underlying store
+  do ii=1,SIZE(values)
+    call ESMF_InfoSetCH(info, key, values(ii), idx=ii, pkey=local_pkey, rc=localrc)
+  enddo
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_InfoSetArrayCH
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoSetArrayLG()"
+subroutine ESMF_InfoSetArrayLG(info, key, values, keywordEnforcer, force, pkey, rc)
+  type(ESMF_Info), intent(inout) :: info
+  character(len=*), intent(in) :: key
+  logical, dimension(:), intent(in) :: values
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  logical, intent(in), optional :: force
+  character(len=*), intent(in), optional :: pkey
+  integer, intent(out), optional :: rc
+
+  integer :: localrc
+  logical(C_BOOL) :: local_force
+  integer :: ii
+  logical(C_BOOL), dimension(:), allocatable :: local_values
+  character(:), allocatable :: local_pkey
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_FAILURE
+
+  if (present(force)) then
+    local_force = force
+  else
+    local_force = .true.
+  end if
+  if (present(pkey)) then
+    local_pkey = TRIM(pkey)//C_NULL_CHAR
+  else
+    local_pkey = ""//C_NULL_CHAR
+  end if
+
+  allocate(local_values(SIZE(values)))
+  do ii=1,SIZE(values)
+    local_values(ii) = values(ii)
+  enddo
+
+  call c_info_set_array_LG(&
+    info%ptr, &
+    trim(key)//C_NULL_CHAR, &
+    local_values, &
+    SIZE(values), &
+    local_force, &
+    localrc, &
+    local_pkey)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  deallocate(local_values)
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_InfoSetArrayLG
+
+
+!------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoSetNULL()"
@@ -1643,7 +1250,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoSetNULL
 
-! -----------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoSetDirty()"
@@ -1692,24 +1299,21 @@ end subroutine ESMF_InfoSetDirty
 ! Get (Scalar) ----------------------------------------------------------------
 !------------------------------------------------------------------------------
 
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoGetR4()"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_InfoGet - Get a numeric, logical, or fixed-size character value
 !
 ! !INTERFACE:
-  ! Private name; call using ESMF_InfoGet()
-subroutine ESMF_InfoGetR4(info, key, value, keywordEnforcer, default, idx, attnestflag, rc)
-
+!subroutine ESMF_InfoGet(info, key, value, keywordEnforcer, default, idx, attnestflag, rc)
+!
 ! !ARGUMENTS:
-  type(ESMF_Info), intent(in) :: info
-  character(len=*), intent(in) :: key
-  real(ESMF_KIND_R4), intent(out) :: value
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  real(ESMF_KIND_R4), intent(in), optional :: default
-  integer, intent(in), optional :: idx
-  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(out), optional :: rc
+!  type(ESMF_Info), intent(in) :: info
+!  character(len=*), intent(in) :: key
+!  <value>, see below for supported value
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!  <default, optional> see below for supported default value
+!  integer, intent(in), optional :: idx
+!  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+!  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Get a value from an \texttt{ESMF\_Info} object using a key. If the key is
@@ -1747,7 +1351,67 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
-!EOPI
+!EOP
+
+!BOP
+! !IROUTINE: ESMF_InfoGetCharAlloc - Get an allocatable character value
+!
+! !INTERFACE:
+!subroutine ESMF_InfoGetCharAlloc(info, key, value, keywordEnforcer, default, idx, attnestflag, rc)
+!
+! !ARGUMENTS:
+!  type(ESMF_Info), intent(in) :: info
+!  character(len=*), intent(in) :: key
+!  character(:), allocatable, intent(out) :: value
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!  character(len=*), intent(in), optional :: default
+!  integer, intent(in), optional :: idx
+!  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+!  integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Get a value from an \texttt{ESMF\_Info} object using a key. If the key is
+!     not found, \textit{rc} will not equal \texttt{ESMF\_SUCCESS}. The returned
+!     value is always a copy including gets with a \textit{default}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [info]
+!       Target \texttt{ESMF\_Info} object.
+!     \item [key]
+!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
+!       for an overview of the key format.
+!     \item [value]
+!       The output value associated with the key.
+!     \item [{[default]}]
+!       A default value to use if the key is not present in the target \texttt{ESMF\_Info}
+!       object. Must be the same typekind and size as \textit{value}.
+!     \item [{[idx]}]
+!       An integer index to get if the target key's value is a list.
+!     \item [{[attnestflag]}]
+!       Setting to \texttt{ESMF\_ATTNEST\_ON} triggers a recursive search. The
+!       first instance of the key (searching by depth) will be found in the hierarchy.
+!       Default is \texttt{ESMF\_ATTNEST\_OFF}.
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOP
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! NOTE: Documentation stub located above for generic interface compliance.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoGetR4()"
+subroutine ESMF_InfoGetR4(info, key, value, keywordEnforcer, default, idx, attnestflag, rc)
+  type(ESMF_Info), intent(in) :: info
+  character(len=*), intent(in) :: key
+  real(ESMF_KIND_R4), intent(out) :: value
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  real(ESMF_KIND_R4), intent(in), optional :: default
+  integer, intent(in), optional :: idx
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   real(C_FLOAT), target :: local_default
@@ -1796,14 +1460,7 @@ end subroutine ESMF_InfoGetR4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoGetR8()"
-!BOPI
-! !IROUTINE: ESMF_InfoGet - Get a numeric, logical, or fixed-size character value
-!
-! !INTERFACE:
-  ! Private name; call using ESMF_InfoGet()
 subroutine ESMF_InfoGetR8(info, key, value, keywordEnforcer, default, idx, attnestflag, rc)
-
-! !ARGUMENTS:
   type(ESMF_Info), intent(in) :: info
   character(len=*), intent(in) :: key
   real(ESMF_KIND_R8), intent(out) :: value
@@ -1812,44 +1469,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: idx
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Get a value from an \texttt{ESMF\_Info} object using a key. If the key is
-!     not found, \textit{rc} will not equal \texttt{ESMF\_SUCCESS}. The returned
-!     value is always a copy including gets with a \textit{default}.
-!
-!     Overloaded \textit{value} for the following types:
-!     \begin{itemize}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I4)}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I8)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R4)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R8)}
-!       \item \texttt{logical}
-!       \item \texttt{character(:)}
-!     \end{itemize}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-!       Target \texttt{ESMF\_Info} object.
-!     \item [key]
-!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
-!       for an overview of the key format.
-!     \item [value]
-!       The output value associated with the key.
-!     \item [{[default]}]
-!       A default value to use if the key is not present in the target \texttt{ESMF\_Info}
-!       object. Must be the same typekind and size as \textit{value}.
-!     \item [{[idx]}]
-!       An integer index to get if the target key's value is a list.
-!     \item [{[attnestflag]}]
-!       Setting to \texttt{ESMF\_ATTNEST\_ON} triggers a recursive search. The
-!       first instance of the key (searching by depth) will be found in the hierarchy.
-!       Default is \texttt{ESMF\_ATTNEST\_OFF}.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOPI
 
   integer :: localrc
   real(C_DOUBLE), target :: local_default
@@ -1898,14 +1517,7 @@ end subroutine ESMF_InfoGetR8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoGetI4()"
-!BOP
-! !IROUTINE: ESMF_InfoGet - Get a numeric, logical, or fixed-size character value
-!
-! !INTERFACE:
-  ! Private name; call using ESMF_InfoGet()
 subroutine ESMF_InfoGetI4(info, key, value, keywordEnforcer, default, idx, attnestflag, rc)
-
-! !ARGUMENTS:
   type(ESMF_Info), intent(in) :: info
   character(len=*), intent(in) :: key
   integer(ESMF_KIND_I4), intent(out) :: value
@@ -1914,44 +1526,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: idx
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Get a value from an \texttt{ESMF\_Info} object using a key. If the key is
-!     not found, \textit{rc} will not equal \texttt{ESMF\_SUCCESS}. The returned
-!     value is always a copy including gets with a \textit{default}.
-!
-!     Overloaded \textit{value} for the following types:
-!     \begin{itemize}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I4)}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I8)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R4)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R8)}
-!       \item \texttt{logical}
-!       \item \texttt{character(:)}
-!     \end{itemize}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-!       Target \texttt{ESMF\_Info} object.
-!     \item [key]
-!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
-!       for an overview of the key format.
-!     \item [value]
-!       The output value associated with the key.
-!     \item [{[default]}]
-!       A default value to use if the key is not present in the target \texttt{ESMF\_Info}
-!       object. Must be the same typekind and size as \textit{value}.
-!     \item [{[idx]}]
-!       An integer index to get if the target key's value is a list.
-!     \item [{[attnestflag]}]
-!       Setting to \texttt{ESMF\_ATTNEST\_ON} triggers a recursive search. The
-!       first instance of the key (searching by depth) will be found in the hierarchy.
-!       Default is \texttt{ESMF\_ATTNEST\_OFF}.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOP
 
   integer :: localrc
   integer(C_INT), target :: local_default
@@ -2000,14 +1574,7 @@ end subroutine ESMF_InfoGetI4
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoGetI8()"
-!BOPI
-! !IROUTINE: ESMF_InfoGet - Get a numeric, logical, or fixed-size character value
-!
-! !INTERFACE:
-  ! Private name; call using ESMF_InfoGet()
 subroutine ESMF_InfoGetI8(info, key, value, keywordEnforcer, default, idx, attnestflag, rc)
-
-! !ARGUMENTS:
   type(ESMF_Info), intent(in) :: info
   character(len=*), intent(in) :: key
   integer(ESMF_KIND_I8), intent(out) :: value
@@ -2016,44 +1583,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: idx
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Get a value from an \texttt{ESMF\_Info} object using a key. If the key is
-!     not found, \textit{rc} will not equal \texttt{ESMF\_SUCCESS}. The returned
-!     value is always a copy including gets with a \textit{default}.
-!
-!     Overloaded \textit{value} for the following types:
-!     \begin{itemize}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I4)}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I8)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R4)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R8)}
-!       \item \texttt{logical}
-!       \item \texttt{character(:)}
-!     \end{itemize}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-!       Target \texttt{ESMF\_Info} object.
-!     \item [key]
-!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
-!       for an overview of the key format.
-!     \item [value]
-!       The output value associated with the key.
-!     \item [{[default]}]
-!       A default value to use if the key is not present in the target \texttt{ESMF\_Info}
-!       object. Must be the same typekind and size as \textit{value}.
-!     \item [{[idx]}]
-!       An integer index to get if the target key's value is a list.
-!     \item [{[attnestflag]}]
-!       Setting to \texttt{ESMF\_ATTNEST\_ON} triggers a recursive search. The
-!       first instance of the key (searching by depth) will be found in the hierarchy.
-!       Default is \texttt{ESMF\_ATTNEST\_OFF}.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOPI
 
   integer :: localrc
   integer(C_LONG), target :: local_default
@@ -2102,14 +1631,7 @@ end subroutine ESMF_InfoGetI8
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoGetCH()"
-!BOPI
-! !IROUTINE: ESMF_InfoGet - Get a numeric, logical, or fixed-size character value
-!
-! !INTERFACE:
-  ! Private name; call using ESMF_InfoGet()
 subroutine ESMF_InfoGetCH(info, key, value, keywordEnforcer, default, idx, attnestflag, rc)
-
-! !ARGUMENTS:
   type(ESMF_Info), intent(in) :: info
   character(len=*), intent(in) :: key
   character(len=*), intent(out) :: value
@@ -2118,44 +1640,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: idx
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Get a value from an \texttt{ESMF\_Info} object using a key. If the key is
-!     not found, \textit{rc} will not equal \texttt{ESMF\_SUCCESS}. The returned
-!     value is always a copy including gets with a \textit{default}.
-!
-!     Overloaded \textit{value} for the following types:
-!     \begin{itemize}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I4)}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I8)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R4)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R8)}
-!       \item \texttt{logical}
-!       \item \texttt{character(:)}
-!     \end{itemize}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-!       Target \texttt{ESMF\_Info} object.
-!     \item [key]
-!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
-!       for an overview of the key format.
-!     \item [value]
-!       The output value associated with the key.
-!     \item [{[default]}]
-!       A default value to use if the key is not present in the target \texttt{ESMF\_Info}
-!       object. Must be the same typekind and size as \textit{value}.
-!     \item [{[idx]}]
-!       An integer index to get if the target key's value is a list.
-!     \item [{[attnestflag]}]
-!       Setting to \texttt{ESMF\_ATTNEST\_ON} triggers a recursive search. The
-!       first instance of the key (searching by depth) will be found in the hierarchy.
-!       Default is \texttt{ESMF\_ATTNEST\_OFF}.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOPI
 
   integer :: localrc, vlen
   character(:), allocatable, target :: local_default
@@ -2199,13 +1683,7 @@ end subroutine ESMF_InfoGetCH
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoGetCharAlloc()"
-!BOP
-! !IROUTINE: ESMF_InfoGetCharAlloc - Get an allocatable character value
-!
-! !INTERFACE:
 subroutine ESMF_InfoGetCharAlloc(info, key, value, keywordEnforcer, default, idx, attnestflag, rc)
-
-! !ARGUMENTS:
   type(ESMF_Info), intent(in) :: info
   character(len=*), intent(in) :: key
   character(:), allocatable, intent(out) :: value
@@ -2214,35 +1692,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: idx
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Get a value from an \texttt{ESMF\_Info} object using a key. If the key is
-!     not found, \textit{rc} will not equal \texttt{ESMF\_SUCCESS}. The returned
-!     value is always a copy including gets with a \textit{default}.
-!
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-!       Target \texttt{ESMF\_Info} object.
-!     \item [key]
-!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
-!       for an overview of the key format.
-!     \item [value]
-!       The output value associated with the key.
-!     \item [{[default]}]
-!       A default value to use if the key is not present in the target \texttt{ESMF\_Info}
-!       object. Must be the same typekind and size as \textit{value}.
-!     \item [{[idx]}]
-!       An integer index to get if the target key's value is a list.
-!     \item [{[attnestflag]}]
-!       Setting to \texttt{ESMF\_ATTNEST\_ON} triggers a recursive search. The
-!       first instance of the key (searching by depth) will be found in the hierarchy.
-!       Default is \texttt{ESMF\_ATTNEST\_OFF}.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOP
 
   integer :: localrc, vlen
   character(:), allocatable, target :: local_default
@@ -2291,14 +1740,7 @@ end subroutine ESMF_InfoGetCharAlloc
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoGetLG()"
-!BOPI
-! !IROUTINE: ESMF_InfoGet - Get a numeric, logical, or fixed-size character value
-!
-! !INTERFACE:
-  ! Private name; call using ESMF_InfoGet()
 subroutine ESMF_InfoGetLG(info, key, value, keywordEnforcer, default, idx, attnestflag, rc)
-
-! !ARGUMENTS:
   type(ESMF_Info), intent(in) :: info
   character(len=*), intent(in) :: key
   logical, intent(inout) :: value
@@ -2307,44 +1749,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: idx
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Get a value from an \texttt{ESMF\_Info} object using a key. If the key is
-!     not found, \textit{rc} will not equal \texttt{ESMF\_SUCCESS}. The returned
-!     value is always a copy including gets with a \textit{default}.
-!
-!     Overloaded \textit{value} for the following types:
-!     \begin{itemize}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I4)}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I8)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R4)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R8)}
-!       \item \texttt{logical}
-!       \item \texttt{character(:)}
-!     \end{itemize}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-!       Target \texttt{ESMF\_Info} object.
-!     \item [key]
-!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
-!       for an overview of the key format.
-!     \item [value]
-!       The output value associated with the key.
-!     \item [{[default]}]
-!       A default value to use if the key is not present in the target \texttt{ESMF\_Info}
-!       object. Must be the same typekind and size as \textit{value}.
-!     \item [{[idx]}]
-!       An integer index to get if the target key's value is a list.
-!     \item [{[attnestflag]}]
-!       Setting to \texttt{ESMF\_ATTNEST\_ON} triggers a recursive search. The
-!       first instance of the key (searching by depth) will be found in the hierarchy.
-!       Default is \texttt{ESMF\_ATTNEST\_OFF}.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOPI
 
   integer :: localrc
   logical(C_BOOL), target :: local_default
@@ -2398,24 +1802,20 @@ end subroutine ESMF_InfoGetLG
 ! GetArray --------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoGetArrayR4()"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_InfoGet - Get a list
 !
 ! !INTERFACE:
-  ! Private name; call using ESMF_InfoGet()
-subroutine ESMF_InfoGetArrayR4(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
-
+!subroutine ESMF_InfoGet(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
 ! !ARGUMENTS:
-  type(ESMF_Info), intent(in) :: info
-  character(len=*), intent(in) :: key
-  real(ESMF_KIND_R4), dimension(:), intent(out) :: values
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  integer, intent(out), optional :: itemCount
-  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  logical, intent(in), optional :: scalarToArray
-  integer, intent(out), optional :: rc
+!  type(ESMF_Info), intent(in) :: info
+!  character(len=*), intent(in) :: key
+!  <values>, see below for supported values
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!  integer, intent(out), optional :: itemCount
+!  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+!  logical, intent(in), optional :: scalarToArray
+!  integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Get a value list from an \texttt{ESMF\_Info} object using a key. If the key
@@ -2455,7 +1855,76 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
-!EOPI
+!EOP
+
+!BOP
+! !IROUTINE: ESMF_InfoGetAlloc - Get an allocatable list
+!
+! !INTERFACE:
+!subroutine ESMF_InfoGetAlloc(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
+! !ARGUMENTS:
+!  type(ESMF_Info), intent(in) :: info
+!  character(len=*), intent(in) :: key
+!  <values>, see below for supported values
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!  integer, intent(out), optional :: itemCount
+!  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+!  logical, intent(in), optional :: scalarToArray
+!  integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Get a value list from an \texttt{ESMF\_Info} object using a key. If the key
+!     is not found, \textit{rc} will not equal \texttt{ESMF\_SUCCESS}. The returned
+!     value is always a copy.
+!
+!     Overloaded \textit{values} for the following types:
+!     \begin{itemize}
+!       \item \texttt{integer(kind=ESMF\_KIND\_I4), dimension(:), allocatable}
+!       \item \texttt{integer(kind=ESMF\_KIND\_I8), dimension(:), allocatable}
+!       \item \texttt{real(kind=ESMF\_KIND\_R4), dimension(:), allocatable}
+!       \item \texttt{real(kind=ESMF\_KIND\_R8), dimension(:), allocatable}
+!       \item \texttt{logical, dimension(:), allocatable}
+!       \item \texttt{character(:), dimension(:), allocatable}
+!     \end{itemize}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [info]
+!       Target \texttt{ESMF\_Info} object.
+!     \item [key]
+!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
+!       for an overview of the key format.
+!     \item [values]
+!       The output value list associated with the key.
+!     \item [{[itemCount]}]
+!       The number of items in \textit{values}.
+!     \item [{[attnestflag]}]
+!       Default is \texttt{ESMF\_ATTNEST\_OFF}. Setting to \texttt{ESMF\_ATTNEST\_ON}
+!       triggers a recursive search. The first instance of the key will be found
+!       in the hierarchy.
+!     \item [{[scalarToArray]}]
+!       Default is false. If true, allow conversion of scalar values in storage
+!       to single-valued lists.
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOP
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! NOTE: Documentation stubs located above for generic interface compliance.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoGetArrayR4()"
+subroutine ESMF_InfoGetArrayR4(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
+  type(ESMF_Info), intent(in) :: info
+  character(len=*), intent(in) :: key
+  real(ESMF_KIND_R4), dimension(:), intent(out) :: values
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  integer, intent(out), optional :: itemCount
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  logical, intent(in), optional :: scalarToArray
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC
@@ -2502,16 +1971,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   if (present(itemCount)) itemCount = local_itemCount
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoGetArrayR4
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoGetArrayR4Alloc()"
-!BOPI
-! !IROUTINE: ESMF_InfoGetAlloc - Get an allocatable list
-!
-! !INTERFACE:
-  ! Private name; call using ESMF_InfoGetAlloc()
 subroutine ESMF_InfoGetArrayR4Alloc(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
-
-! !ARGUMENTS:
   type(ESMF_Info), intent(in) :: info
   character(len=*), intent(in) :: key
   real(ESMF_KIND_R4), dimension(:),  allocatable, intent(out) :: values
@@ -2520,44 +1983,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(in), optional :: scalarToArray
   integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Get a value list from an \texttt{ESMF\_Info} object using a key. If the key
-!     is not found, \textit{rc} will not equal \texttt{ESMF\_SUCCESS}. The returned
-!     value is always a copy.
-!
-!     Overloaded \textit{values} for the following types:
-!     \begin{itemize}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I4), dimension(:), allocatable}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I8), dimension(:), allocatable}
-!       \item \texttt{real(kind=ESMF\_KIND\_R4), dimension(:), allocatable}
-!       \item \texttt{real(kind=ESMF\_KIND\_R8), dimension(:), allocatable}
-!       \item \texttt{logical, dimension(:), allocatable}
-!       \item \texttt{character(:), dimension(:), allocatable}
-!     \end{itemize}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-!       Target \texttt{ESMF\_Info} object.
-!     \item [key]
-!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
-!       for an overview of the key format.
-!     \item [values]
-!       The output value list associated with the key.
-!     \item [{[itemCount]}]
-!       The number of items in \textit{values}.
-!     \item [{[attnestflag]}]
-!       Default is \texttt{ESMF\_ATTNEST\_OFF}. Setting to \texttt{ESMF\_ATTNEST\_ON}
-!       triggers a recursive search. The first instance of the key will be found
-!       in the hierarchy.
-!     \item [{[scalarToArray]}]
-!       Default is false. If true, allow conversion of scalar values in storage
-!       to single-valued lists.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOPI
 
   integer :: localrc
   integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC
@@ -2601,16 +2026,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   if (present(itemCount)) itemCount = local_itemCount
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoGetArrayR4Alloc
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoGetArrayR8()"
-!BOPI
-! !IROUTINE: ESMF_InfoGet - Get a list
-!
-! !INTERFACE:
-  ! Private name; call using ESMF_InfoGet()
 subroutine ESMF_InfoGetArrayR8(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
-
-! !ARGUMENTS:
   type(ESMF_Info), intent(in) :: info
   character(len=*), intent(in) :: key
   real(ESMF_KIND_R8), dimension(:), intent(out) :: values
@@ -2619,46 +2038,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(in), optional :: scalarToArray
   integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Get a value list from an \texttt{ESMF\_Info} object using a key. If the key
-!     is not found, \textit{rc} will not equal \texttt{ESMF\_SUCCESS}. The returned
-!     value is always a copy.
-!
-!     The length of \textit{values} must match its length in storage.
-!
-!     Overloaded \textit{values} for the following types:
-!     \begin{itemize}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I4), dimension(:)}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I8), dimension(:)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R4), dimension(:)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R8), dimension(:)}
-!       \item \texttt{logical, dimension(:)}
-!       \item \texttt{character(:), dimension(:)}
-!     \end{itemize}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-!       Target \texttt{ESMF\_Info} object.
-!     \item [key]
-!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
-!       for an overview of the key format.
-!     \item [values]
-!       The output value list associated with the key.
-!     \item [{[itemCount]}]
-!       The number of items in \textit{values}.
-!     \item [{[attnestflag]}]
-!       Default is \texttt{ESMF\_ATTNEST\_OFF}. Setting to \texttt{ESMF\_ATTNEST\_ON}
-!       triggers a recursive search. The first instance of the key will be found
-!       in the hierarchy.
-!     \item [{[scalarToArray]}]
-!       Default is false. If true, allow conversion of scalar values in storage
-!       to single-valued lists.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOPI
 
   integer :: localrc
   integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC
@@ -2705,16 +2084,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   if (present(itemCount)) itemCount = local_itemCount
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoGetArrayR8
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoGetArrayR8Alloc()"
-!BOPI
-! !IROUTINE: ESMF_InfoGetAlloc - Get an allocatable list
-!
-! !INTERFACE:
-  ! Private name; call using ESMF_InfoGetAlloc()
 subroutine ESMF_InfoGetArrayR8Alloc(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
-
-! !ARGUMENTS:
   type(ESMF_Info), intent(in) :: info
   character(len=*), intent(in) :: key
   real(ESMF_KIND_R8), dimension(:),  allocatable, intent(out) :: values
@@ -2723,44 +2096,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(in), optional :: scalarToArray
   integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Get a value list from an \texttt{ESMF\_Info} object using a key. If the key
-!     is not found, \textit{rc} will not equal \texttt{ESMF\_SUCCESS}. The returned
-!     value is always a copy.
-!
-!     Overloaded \textit{values} for the following types:
-!     \begin{itemize}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I4), dimension(:), allocatable}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I8), dimension(:), allocatable}
-!       \item \texttt{real(kind=ESMF\_KIND\_R4), dimension(:), allocatable}
-!       \item \texttt{real(kind=ESMF\_KIND\_R8), dimension(:), allocatable}
-!       \item \texttt{logical, dimension(:), allocatable}
-!       \item \texttt{character(:), dimension(:), allocatable}
-!     \end{itemize}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-!       Target \texttt{ESMF\_Info} object.
-!     \item [key]
-!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
-!       for an overview of the key format.
-!     \item [values]
-!       The output value list associated with the key.
-!     \item [{[itemCount]}]
-!       The number of items in \textit{values}.
-!     \item [{[attnestflag]}]
-!       Default is \texttt{ESMF\_ATTNEST\_OFF}. Setting to \texttt{ESMF\_ATTNEST\_ON}
-!       triggers a recursive search. The first instance of the key will be found
-!       in the hierarchy.
-!     \item [{[scalarToArray]}]
-!       Default is false. If true, allow conversion of scalar values in storage
-!       to single-valued lists.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOPI
 
   integer :: localrc
   integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC
@@ -2804,16 +2139,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   if (present(itemCount)) itemCount = local_itemCount
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoGetArrayR8Alloc
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoGetArrayI4()"
-!BOP
-! !IROUTINE: ESMF_InfoGet - Get a list
-!
-! !INTERFACE:
-  ! Private name; call using ESMF_InfoGet()
 subroutine ESMF_InfoGetArrayI4(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
-
-! !ARGUMENTS:
   type(ESMF_Info), intent(in) :: info
   character(len=*), intent(in) :: key
   integer(ESMF_KIND_I4), dimension(:), intent(out) :: values
@@ -2822,46 +2151,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(in), optional :: scalarToArray
   integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Get a value list from an \texttt{ESMF\_Info} object using a key. If the key
-!     is not found, \textit{rc} will not equal \texttt{ESMF\_SUCCESS}. The returned
-!     value is always a copy.
-!
-!     The length of \textit{values} must match its length in storage.
-!
-!     Overloaded \textit{values} for the following types:
-!     \begin{itemize}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I4), dimension(:)}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I8), dimension(:)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R4), dimension(:)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R8), dimension(:)}
-!       \item \texttt{logical, dimension(:)}
-!       \item \texttt{character(:), dimension(:)}
-!     \end{itemize}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-!       Target \texttt{ESMF\_Info} object.
-!     \item [key]
-!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
-!       for an overview of the key format.
-!     \item [values]
-!       The output value list associated with the key.
-!     \item [{[itemCount]}]
-!       The number of items in \textit{values}.
-!     \item [{[attnestflag]}]
-!       Default is \texttt{ESMF\_ATTNEST\_OFF}. Setting to \texttt{ESMF\_ATTNEST\_ON}
-!       triggers a recursive search. The first instance of the key will be found
-!       in the hierarchy.
-!     \item [{[scalarToArray]}]
-!       Default is false. If true, allow conversion of scalar values in storage
-!       to single-valued lists.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOP
 
   integer :: localrc
   integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC
@@ -2908,16 +2197,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   if (present(itemCount)) itemCount = local_itemCount
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoGetArrayI4
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoGetArrayI4Alloc()"
-!BOP
-! !IROUTINE: ESMF_InfoGetAlloc - Get an allocatable list
-!
-! !INTERFACE:
-  ! Private name; call using ESMF_InfoGetAlloc()
 subroutine ESMF_InfoGetArrayI4Alloc(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
-
-! !ARGUMENTS:
   type(ESMF_Info), intent(in) :: info
   character(len=*), intent(in) :: key
   integer(ESMF_KIND_I4), dimension(:),  allocatable, intent(out) :: values
@@ -2926,44 +2209,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(in), optional :: scalarToArray
   integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Get a value list from an \texttt{ESMF\_Info} object using a key. If the key
-!     is not found, \textit{rc} will not equal \texttt{ESMF\_SUCCESS}. The returned
-!     value is always a copy.
-!
-!     Overloaded \textit{values} for the following types:
-!     \begin{itemize}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I4), dimension(:), allocatable}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I8), dimension(:), allocatable}
-!       \item \texttt{real(kind=ESMF\_KIND\_R4), dimension(:), allocatable}
-!       \item \texttt{real(kind=ESMF\_KIND\_R8), dimension(:), allocatable}
-!       \item \texttt{logical, dimension(:), allocatable}
-!       \item \texttt{character(:), dimension(:), allocatable}
-!     \end{itemize}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-!       Target \texttt{ESMF\_Info} object.
-!     \item [key]
-!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
-!       for an overview of the key format.
-!     \item [values]
-!       The output value list associated with the key.
-!     \item [{[itemCount]}]
-!       The number of items in \textit{values}.
-!     \item [{[attnestflag]}]
-!       Default is \texttt{ESMF\_ATTNEST\_OFF}. Setting to \texttt{ESMF\_ATTNEST\_ON}
-!       triggers a recursive search. The first instance of the key will be found
-!       in the hierarchy.
-!     \item [{[scalarToArray]}]
-!       Default is false. If true, allow conversion of scalar values in storage
-!       to single-valued lists.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOP
 
   integer :: localrc
   integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC
@@ -3007,16 +2252,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   if (present(itemCount)) itemCount = local_itemCount
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoGetArrayI4Alloc
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoGetArrayI8()"
-!BOPI
-! !IROUTINE: ESMF_InfoGet - Get a list
-!
-! !INTERFACE:
-  ! Private name; call using ESMF_InfoGet()
 subroutine ESMF_InfoGetArrayI8(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
-
-! !ARGUMENTS:
   type(ESMF_Info), intent(in) :: info
   character(len=*), intent(in) :: key
   integer(ESMF_KIND_I8), dimension(:), intent(out) :: values
@@ -3025,46 +2264,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(in), optional :: scalarToArray
   integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Get a value list from an \texttt{ESMF\_Info} object using a key. If the key
-!     is not found, \textit{rc} will not equal \texttt{ESMF\_SUCCESS}. The returned
-!     value is always a copy.
-!
-!     The length of \textit{values} must match its length in storage.
-!
-!     Overloaded \textit{values} for the following types:
-!     \begin{itemize}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I4), dimension(:)}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I8), dimension(:)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R4), dimension(:)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R8), dimension(:)}
-!       \item \texttt{logical, dimension(:)}
-!       \item \texttt{character(:), dimension(:)}
-!     \end{itemize}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-!       Target \texttt{ESMF\_Info} object.
-!     \item [key]
-!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
-!       for an overview of the key format.
-!     \item [values]
-!       The output value list associated with the key.
-!     \item [{[itemCount]}]
-!       The number of items in \textit{values}.
-!     \item [{[attnestflag]}]
-!       Default is \texttt{ESMF\_ATTNEST\_OFF}. Setting to \texttt{ESMF\_ATTNEST\_ON}
-!       triggers a recursive search. The first instance of the key will be found
-!       in the hierarchy.
-!     \item [{[scalarToArray]}]
-!       Default is false. If true, allow conversion of scalar values in storage
-!       to single-valued lists.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOPI
 
   integer :: localrc
   integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC
@@ -3111,16 +2310,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   if (present(itemCount)) itemCount = local_itemCount
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoGetArrayI8
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoGetArrayI8Alloc()"
-!BOPI
-! !IROUTINE: ESMF_InfoGetAlloc - Get an allocatable list
-!
-! !INTERFACE:
-  ! Private name; call using ESMF_InfoGetAlloc()
 subroutine ESMF_InfoGetArrayI8Alloc(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
-
-! !ARGUMENTS:
   type(ESMF_Info), intent(in) :: info
   character(len=*), intent(in) :: key
   integer(ESMF_KIND_I8), dimension(:),  allocatable, intent(out) :: values
@@ -3129,44 +2322,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(in), optional :: scalarToArray
   integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Get a value list from an \texttt{ESMF\_Info} object using a key. If the key
-!     is not found, \textit{rc} will not equal \texttt{ESMF\_SUCCESS}. The returned
-!     value is always a copy.
-!
-!     Overloaded \textit{values} for the following types:
-!     \begin{itemize}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I4), dimension(:), allocatable}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I8), dimension(:), allocatable}
-!       \item \texttt{real(kind=ESMF\_KIND\_R4), dimension(:), allocatable}
-!       \item \texttt{real(kind=ESMF\_KIND\_R8), dimension(:), allocatable}
-!       \item \texttt{logical, dimension(:), allocatable}
-!       \item \texttt{character(:), dimension(:), allocatable}
-!     \end{itemize}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-!       Target \texttt{ESMF\_Info} object.
-!     \item [key]
-!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
-!       for an overview of the key format.
-!     \item [values]
-!       The output value list associated with the key.
-!     \item [{[itemCount]}]
-!       The number of items in \textit{values}.
-!     \item [{[attnestflag]}]
-!       Default is \texttt{ESMF\_ATTNEST\_OFF}. Setting to \texttt{ESMF\_ATTNEST\_ON}
-!       triggers a recursive search. The first instance of the key will be found
-!       in the hierarchy.
-!     \item [{[scalarToArray]}]
-!       Default is false. If true, allow conversion of scalar values in storage
-!       to single-valued lists.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOPI
 
   integer :: localrc
   integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC
@@ -3210,16 +2365,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   if (present(itemCount)) itemCount = local_itemCount
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoGetArrayI8Alloc
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoGetArrayCH()"
-!BOPI
-! !IROUTINE: ESMF_InfoGet - Get a list
-!
-! !INTERFACE:
-  ! Private name; call using ESMF_InfoGet()
 subroutine ESMF_InfoGetArrayCH(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
-
-! !ARGUMENTS:
   type(ESMF_Info), intent(in) :: info
   character(len=*), intent(in) :: key
   character(len=*), dimension(:), intent(out) :: values
@@ -3228,46 +2377,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(in), optional :: scalarToArray
   integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Get a value list from an \texttt{ESMF\_Info} object using a key. If the key
-!     is not found, \textit{rc} will not equal \texttt{ESMF\_SUCCESS}. The returned
-!     value is always a copy.
-!
-!     The length of \textit{values} must match its length in storage.
-!
-!     Overloaded \textit{values} for the following types:
-!     \begin{itemize}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I4), dimension(:)}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I8), dimension(:)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R4), dimension(:)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R8), dimension(:)}
-!       \item \texttt{logical, dimension(:)}
-!       \item \texttt{character(:), dimension(:)}
-!     \end{itemize}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-!       Target \texttt{ESMF\_Info} object.
-!     \item [key]
-!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
-!       for an overview of the key format.
-!     \item [values]
-!       The output value list associated with the key.
-!     \item [{[itemCount]}]
-!       The number of items in \textit{values}.
-!     \item [{[attnestflag]}]
-!       Default is \texttt{ESMF\_ATTNEST\_OFF}. Setting to \texttt{ESMF\_ATTNEST\_ON}
-!       triggers a recursive search. The first instance of the key will be found
-!       in the hierarchy.
-!     \item [{[scalarToArray]}]
-!       Default is false. If true, allow conversion of scalar values in storage
-!       to single-valued lists.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOPI
 
   integer :: localrc
   integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC
@@ -3322,16 +2431,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   if (present(itemCount)) itemCount = local_itemCount
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoGetArrayCH
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoGetArrayCHAlloc()"
-!BOPI
-! !IROUTINE: ESMF_InfoGetAlloc - Get an allocatable list
-!
-! !INTERFACE:
-  ! Private name; call using ESMF_InfoGetAlloc()
 subroutine ESMF_InfoGetArrayCHAlloc(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
-
-! !ARGUMENTS:
   type(ESMF_Info), intent(in) :: info
   character(len=*), intent(in) :: key
   character(len=*), dimension(:),  allocatable, intent(out) :: values
@@ -3340,44 +2443,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(in), optional :: scalarToArray
   integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Get a value list from an \texttt{ESMF\_Info} object using a key. If the key
-!     is not found, \textit{rc} will not equal \texttt{ESMF\_SUCCESS}. The returned
-!     value is always a copy.
-!
-!     Overloaded \textit{values} for the following types:
-!     \begin{itemize}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I4), dimension(:), allocatable}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I8), dimension(:), allocatable}
-!       \item \texttt{real(kind=ESMF\_KIND\_R4), dimension(:), allocatable}
-!       \item \texttt{real(kind=ESMF\_KIND\_R8), dimension(:), allocatable}
-!       \item \texttt{logical, dimension(:), allocatable}
-!       \item \texttt{character(:), dimension(:), allocatable}
-!     \end{itemize}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-!       Target \texttt{ESMF\_Info} object.
-!     \item [key]
-!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
-!       for an overview of the key format.
-!     \item [values]
-!       The output value list associated with the key.
-!     \item [{[itemCount]}]
-!       The number of items in \textit{values}.
-!     \item [{[attnestflag]}]
-!       Default is \texttt{ESMF\_ATTNEST\_OFF}. Setting to \texttt{ESMF\_ATTNEST\_ON}
-!       triggers a recursive search. The first instance of the key will be found
-!       in the hierarchy.
-!     \item [{[scalarToArray]}]
-!       Default is false. If true, allow conversion of scalar values in storage
-!       to single-valued lists.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOPI
 
   integer :: localrc
   integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC
@@ -3429,16 +2494,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   if (present(itemCount)) itemCount = local_itemCount
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoGetArrayCHAlloc
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoGetArrayLG()"
-!BOPI
-! !IROUTINE: ESMF_InfoGet - Get a list
-!
-! !INTERFACE:
-  ! Private name; call using ESMF_InfoGet()
 subroutine ESMF_InfoGetArrayLG(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
-
-! !ARGUMENTS:
   type(ESMF_Info), intent(in) :: info
   character(len=*), intent(in) :: key
   logical, dimension(:), intent(out) :: values
@@ -3447,46 +2506,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(in), optional :: scalarToArray
   integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Get a value list from an \texttt{ESMF\_Info} object using a key. If the key
-!     is not found, \textit{rc} will not equal \texttt{ESMF\_SUCCESS}. The returned
-!     value is always a copy.
-!
-!     The length of \textit{values} must match its length in storage.
-!
-!     Overloaded \textit{values} for the following types:
-!     \begin{itemize}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I4), dimension(:)}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I8), dimension(:)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R4), dimension(:)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R8), dimension(:)}
-!       \item \texttt{logical, dimension(:)}
-!       \item \texttt{character(:), dimension(:)}
-!     \end{itemize}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-!       Target \texttt{ESMF\_Info} object.
-!     \item [key]
-!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
-!       for an overview of the key format.
-!     \item [values]
-!       The output value list associated with the key.
-!     \item [{[itemCount]}]
-!       The number of items in \textit{values}.
-!     \item [{[attnestflag]}]
-!       Default is \texttt{ESMF\_ATTNEST\_OFF}. Setting to \texttt{ESMF\_ATTNEST\_ON}
-!       triggers a recursive search. The first instance of the key will be found
-!       in the hierarchy.
-!     \item [{[scalarToArray]}]
-!       Default is false. If true, allow conversion of scalar values in storage
-!       to single-valued lists.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOPI
 
   integer :: localrc
   integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC
@@ -3541,16 +2560,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   if (present(itemCount)) itemCount = local_itemCount
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoGetArrayLG
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoGetArrayLGAlloc()"
-!BOPI
-! !IROUTINE: ESMF_InfoGetAlloc - Get an allocatable list
-!
-! !INTERFACE:
-  ! Private name; call using ESMF_InfoGetAlloc()
 subroutine ESMF_InfoGetArrayLGAlloc(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
-
-! !ARGUMENTS:
   type(ESMF_Info), intent(in) :: info
   character(len=*), intent(in) :: key
   logical, dimension(:),  allocatable, intent(out) :: values
@@ -3559,44 +2572,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(in), optional :: scalarToArray
   integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Get a value list from an \texttt{ESMF\_Info} object using a key. If the key
-!     is not found, \textit{rc} will not equal \texttt{ESMF\_SUCCESS}. The returned
-!     value is always a copy.
-!
-!     Overloaded \textit{values} for the following types:
-!     \begin{itemize}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I4), dimension(:), allocatable}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I8), dimension(:), allocatable}
-!       \item \texttt{real(kind=ESMF\_KIND\_R4), dimension(:), allocatable}
-!       \item \texttt{real(kind=ESMF\_KIND\_R8), dimension(:), allocatable}
-!       \item \texttt{logical, dimension(:), allocatable}
-!       \item \texttt{character(:), dimension(:), allocatable}
-!     \end{itemize}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-!       Target \texttt{ESMF\_Info} object.
-!     \item [key]
-!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
-!       for an overview of the key format.
-!     \item [values]
-!       The output value list associated with the key.
-!     \item [{[itemCount]}]
-!       The number of items in \textit{values}.
-!     \item [{[attnestflag]}]
-!       Default is \texttt{ESMF\_ATTNEST\_OFF}. Setting to \texttt{ESMF\_ATTNEST\_ON}
-!       triggers a recursive search. The first instance of the key will be found
-!       in the hierarchy.
-!     \item [{[scalarToArray]}]
-!       Default is false. If true, allow conversion of scalar values in storage
-!       to single-valued lists.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOPI
 
   integer :: localrc
   integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC
@@ -3648,6 +2623,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   if (present(itemCount)) itemCount = local_itemCount
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoGetArrayLGAlloc
+
 !------------------------------------------------------------------------------
 
 !BOP
@@ -3735,9 +2711,9 @@ end subroutine ESMF_InfoGetArrayLGAlloc
 !       Default is false. If true, treat the JSON scheme as an \textit{ESMF\_Attribute}
 !       schema.
 
-! !!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! NOTE: Documentation stub above to make some parameters private.
-! !!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoInquire()"

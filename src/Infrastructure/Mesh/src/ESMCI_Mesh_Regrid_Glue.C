@@ -125,9 +125,6 @@ void ESMCI_regrid_create(
   int has_statusArray=*_has_statusArray;
   ESMCI::Array *statusArray=*_statusArray;
 
-  // Old Regrid conserve turned off for now
-  int regridConserve=ESMC_REGRID_CONSERVE_OFF;
-
 #define PROGRESSLOG_off
 #define MEMLOG_off
 
@@ -210,31 +207,35 @@ void ESMCI_regrid_create(
     // to do NEARESTDTOS just do NEARESTSTOD and invert results
     if (*regridMethod != ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) {
 
-      if(!online_regrid(srcmesh, srcpointlist, dstmesh, dstpointlist, *wts, &regridConserve,
-                        regridMethod, regridPoleType, regridPoleNPnts,
-                        regridScheme, map_type,
-                        extrapMethod,
-                        extrapNumSrcPnts,
-                        extrapDistExponent,
-                        extrapNumLevels,
-                        extrapNumInputLevels, 
-                        &temp_unmappedaction,
-                        set_dst_status, dst_status)) {
+      if(!regrid(srcmesh, srcpointlist, dstmesh, dstpointlist, 
+                 NULL, *wts, 
+                 regridMethod, regridScheme, 
+                 regridPoleType, regridPoleNPnts,
+                 map_type,
+                 extrapMethod,
+                 extrapNumSrcPnts,
+                 extrapDistExponent,
+                 extrapNumLevels,
+                 extrapNumInputLevels, 
+                 &temp_unmappedaction,
+                 set_dst_status, dst_status)) {
         Throw() << "Online regridding error" << std::endl;
       }
     } else {
       int tempRegridMethod=ESMC_REGRID_METHOD_NEAREST_SRC_TO_DST;
 
-      if(!online_regrid(dstmesh, dstpointlist, srcmesh, srcpointlist, *wts, &regridConserve,
-                        &tempRegridMethod, regridPoleType, regridPoleNPnts,
-                        regridScheme, map_type,
-                        extrapMethod,
-                        extrapNumSrcPnts,
-                        extrapDistExponent,
-                        extrapNumLevels,
-                        extrapNumInputLevels, 
-                        &temp_unmappedaction,
-                        set_dst_status, dst_status)) {
+      if(!regrid(dstmesh, dstpointlist, srcmesh, srcpointlist, 
+                 NULL, *wts,
+                 &tempRegridMethod, regridScheme, 
+                 regridPoleType, regridPoleNPnts,
+                  map_type,
+                 extrapMethod,
+                 extrapNumSrcPnts,
+                 extrapDistExponent,
+                 extrapNumLevels,
+                 extrapNumInputLevels, 
+                 &temp_unmappedaction,
+                 set_dst_status, dst_status)) {
         Throw() << "Online regridding error" << std::endl;
       }
     }
@@ -544,6 +545,7 @@ void ESMCI_regrid_create(
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 }
 
+
 void ESMCI_regrid_getiwts(Grid **gridpp,
                    Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
                    int *regridScheme, int*rc) {
@@ -593,7 +595,6 @@ void ESMCI_regrid_getiwts(Grid **gridpp,
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
 }
-
 
 void ESMCI_regrid_getarea(Grid **gridpp,
                    Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
