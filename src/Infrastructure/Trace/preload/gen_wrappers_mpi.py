@@ -285,6 +285,12 @@ cfunc_list = [
     },
 
     {
+        'ret':'int', 'name':'MPI_Probe',
+        'params':'int source, int tag, MPI_Comm comm, MPI_Status *status',
+        'args':'source, tag, comm, status'
+    },
+        
+    {
         'ret':'int', 'name':'MPI_Recv',
         'params':'void *buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Status *status',
         'args':'buf, count, datatype, source, tag, comm, status'
@@ -408,6 +414,12 @@ ffunc_list = [
         'args':'sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs, recvtype, root, comm, ierr'
     },
 
+    {
+        'name':'mpi_probe',
+        'params':'MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr',
+        'args':'source, tag, comm, status, ierr'
+    },
+    
     {
         'name':'mpi_recv',
         'params':'MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr',

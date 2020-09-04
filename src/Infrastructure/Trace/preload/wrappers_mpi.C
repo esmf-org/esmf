@@ -200,6 +200,23 @@ extern "C" {
       }
     }
   
+    extern int __real_MPI_Probe(int source, int tag, MPI_Comm comm, MPI_Status *status);    
+
+    int __wrap_MPI_Probe(int source, int tag, MPI_Comm comm, MPI_Status *status) {
+      if (c_esmftrace_isinitialized() == 1 && insideMPIRegion == 0) {
+        //printf("__wrap_MPI_Probe (C)\n");
+        insideMPIRegion = 1;
+        ESMCI::TraceEventRegionEnter("MPI_Probe", &ignorerc);
+        int ret = __real_MPI_Probe(source, tag, comm, status);
+        ESMCI::TraceEventRegionExit("MPI_Probe", &ignorerc);
+        insideMPIRegion = 0;
+        return ret;
+      }
+      else {
+        return __real_MPI_Probe(source, tag, comm, status);
+      }
+    }
+  
     extern int __real_MPI_Recv(void *buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Status *status);    
 
     int __wrap_MPI_Recv(void *buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Status *status) {
@@ -535,6 +552,22 @@ extern "C" {
       }
     }
   
+    extern void FTN_X(__real_mpi_probe)(MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr);    
+
+    void FTN_X(__wrap_mpi_probe)(MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr) {
+      if (c_esmftrace_isinitialized() == 1 && insideMPIRegion == 0) {
+        //printf("__wrap_mpi_probe_ (Fortran)\n");
+        insideMPIRegion = 1;
+        ESMCI::TraceEventRegionEnter("mpi_probe", &ignorerc);
+        FTN_X(__real_mpi_probe)(source, tag, comm, status, ierr);
+        ESMCI::TraceEventRegionExit("mpi_probe", &ignorerc);
+        insideMPIRegion = 0;
+      }
+      else {
+        FTN_X(__real_mpi_probe)(source, tag, comm, status, ierr);
+      }
+    }
+  
     extern void FTN_X(__real_mpi_recv)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr);    
 
     void FTN_X(__wrap_mpi_recv)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr) {
@@ -698,4 +731,3 @@ extern "C" {
 
 }
 #endif
-

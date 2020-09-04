@@ -181,6 +181,20 @@ extern "C" {
     }
 
   
+    static int (*__real_ptr_MPI_Probe)(int source, int tag, MPI_Comm comm, MPI_Status *status) = NULL;
+
+    int __real_MPI_Probe(int source, int tag, MPI_Comm comm, MPI_Status *status) {
+      if (__real_ptr_MPI_Probe == NULL) {
+        __real_ptr_MPI_Probe = (int (*)(int source, int tag, MPI_Comm comm, MPI_Status *status)) dlsym(RTLD_NEXT, "MPI_Probe");
+      }
+      return __real_ptr_MPI_Probe(source, tag, comm, status);
+    }
+
+    int MPI_Probe(int source, int tag, MPI_Comm comm, MPI_Status *status) {
+      return __wrap_MPI_Probe(source, tag, comm, status);
+    }
+
+  
     static int (*__real_ptr_MPI_Recv)(void *buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Status *status) = NULL;
 
     int __real_MPI_Recv(void *buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Status *status) {
@@ -464,6 +478,20 @@ extern "C" {
 
     void FTN_X(mpi_gatherv)(MPI_Fint *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, MPI_Fint *recvbuf, MPI_Fint *recvcounts, MPI_Fint *displs, MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierr) {
       FTN_X(__wrap_mpi_gatherv)(sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs, recvtype, root, comm, ierr);
+    }
+
+  
+    static void (*FTN_X(__real_ptr_mpi_probe))(MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr) = NULL;
+
+    void FTN_X(__real_mpi_probe)(MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr) {
+      if (FTN_X(__real_ptr_mpi_probe) == NULL) {
+        FTN_X(__real_ptr_mpi_probe) = (void (*)(MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr)) dlsym(RTLD_NEXT, xstr(FTN_X(mpi_probe)));
+      }
+      FTN_X(__real_ptr_mpi_probe)(source, tag, comm, status, ierr);
+    }
+
+    void FTN_X(mpi_probe)(MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr) {
+      FTN_X(__wrap_mpi_probe)(source, tag, comm, status, ierr);
     }
 
   
