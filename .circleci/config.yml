@@ -46,7 +46,8 @@ jobs:
       - setup_remote_docker
       - run:
           name: Checkout Code (ESCOMP-Containers)
-          command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
+#          command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
+          command: git clone --depth 1 --branch esmpy-doc-base-to-ubuntu https://github.com/esmf-org/ESCOMP-Containers.git #tdk:revert
       - run:
           name: Checkout Code (ESMF)
           command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git
@@ -58,7 +59,7 @@ jobs:
           command: bash esmf/.circleci/sh/docker-push-generic.sh "esmf/esmf:${CIRCLE_BRANCH}"
       - run:
           name: Extract Artifacts
-          command: bash esmf/.circleci/sh/extract-artifacts.sh "/tmp/artifacts" "/tmp/artifacts/*" "esmf/esmf:${CIRCLE_BRANCH}"
+          command: bash esmf/.circleci/sh/extract-artifacts.sh "/tmp" "/tmp/artifacts.zip" "esmf/esmf:${CIRCLE_BRANCH}"
       - store_artifacts:
           path: /tmp/artifacts
 
