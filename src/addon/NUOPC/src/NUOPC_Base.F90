@@ -4013,39 +4013,16 @@ module NUOPC_Base
   !-----------------------------------------------------------------------------
     ! local variables
     integer                 :: localrc
-    type(ESMF_VM)           :: vm
-    integer                 :: rootPet, rootVas, petCount, vas
     
     if (present(rc)) rc = ESMF_SUCCESS
 
-    !TODO: Now that ESMF_StateReconcile() internally always reconciles the
-    !TODO: Attributes, there is a problem for the threaded case!!!
+    ! Reconcile the state
     call ESMF_StateReconcile(state, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
-    ! Determine the rootPet for the ESMF_InfoSync()
-    call ESMF_VMGetCurrent(vm, rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-    call ESMF_AttributeGet(state, name="rootVas", value=rootVas, rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-    call ESMF_VMGet(vm, petCount=petCount, rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-    do rootPet=0, petCount-1
-      call ESMF_VMGet(vm, rootPet, vas=vas, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-      if (vas==rootVas) exit
-    enddo
-
-    ! Finally the attributes can be synchronized
-    call ESMF_InfoSync(state, rootPet=rootPet, vm=vm, rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-
+    ! As it stands, all attribute handling is correctly handled on the ESMF
+    ! side now.
   end subroutine
   !-----------------------------------------------------------------------------
 
