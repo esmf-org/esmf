@@ -38,6 +38,7 @@ module ESMF_FieldCreateMod
   use ESMF_StaggerLocMod
   use ESMF_GridMod
   use ESMF_XGridMod
+  use ESMF_XGridCreateMod
   use ESMF_XGridGetMod
   use ESMF_XGridGeomBaseMod
   use ESMF_DistGridMod
@@ -4988,6 +4989,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     integer                 :: localrc        ! local return code
     type(ESMF_Status)       :: basestatus
+    type(ESMF_GeomType_Flag):: geomtype
+    type(ESMF_Grid)         :: grid
+    type(ESMF_Mesh)         :: mesh
+    type(ESMF_LocStream)    :: locstream
+    type(ESMF_Xgrid)        :: xgrid
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -5006,7 +5012,63 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        if(ftype%is_proxy .or. ftype%geomb_internal) then
+        
+        if (ftype%is_proxy .or. ftype%geomb_internal) then
+        
+          if (ftype%is_proxy) then
+            ! proxies destroy their actual geometry object
+
+            call ESMF_GeomBaseGet(ftype%geombase, geomtype=geomtype, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+
+            ! call into the GEOMTYPE specific Destroy() method
+            if (geomtype .eq. ESMF_GEOMTYPE_GRID) then
+              call ESMF_GeomBaseGet(ftype%geombase, grid=grid, rc=localrc)
+              if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+              ! destroy the Grid proxy
+              call ESMF_GridDestroy(grid, noGarbage=.true., rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+            else if (geomtype .eq. ESMF_GEOMTYPE_MESH) then
+              call ESMF_GeomBaseGet(ftype%geombase, mesh=mesh, rc=localrc)
+              if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+              ! destroy the Mesh proxy
+              call ESMF_MeshDestroy(mesh, noGarbage=.true., rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+            else if (geomtype .eq. ESMF_GEOMTYPE_LOCSTREAM) then
+              call ESMF_GeomBaseGet(ftype%geombase, locstream=locstream, rc=localrc)
+              if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+              ! destroy the LocStream proxy
+              call ESMF_LocStreamDestroy(locstream, noGarbage=.true., rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+            else if (geomtype .eq. ESMF_GEOMTYPE_XGRID) then
+              call ESMF_GeomBaseGet(ftype%geombase, xgrid=xgrid, rc=localrc)
+              if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+              ! destroy the XGrid proxy
+              call ESMF_XGridDestroy(xgrid, noGarbage=.true., rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+            endif
+            
+          endif
+
+          ! proxy or not, the GeomBase needs to be destroyed
           call ESMF_GeomBaseDestroy(ftype%geombase, noGarbage=noGarbage, &
             rc=localrc)
           if (ESMF_LogFoundError(localrc, &

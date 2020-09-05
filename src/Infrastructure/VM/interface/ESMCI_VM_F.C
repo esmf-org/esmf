@@ -1773,6 +1773,18 @@ extern "C" {
     ESMCI::VM::rmObject(*base);
   }
     
+  void FTN_X(c_esmc_vmvalidobject)(ESMC_Base **base, ESMC_Logical *validFlag,
+    int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmvalidobject()"
+    if (ESMCI::VM::validObject(*base))
+      *validFlag = ESMF_TRUE;
+    else
+      *validFlag = ESMF_FALSE;
+    // return successfully
+    *rc = ESMF_SUCCESS;
+  }
+
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   // Fortran entry point to info about automatic garbage collection
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

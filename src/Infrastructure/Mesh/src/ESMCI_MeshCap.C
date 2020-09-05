@@ -1796,6 +1796,9 @@ int MeshCap::destroy(MeshCap **mcpp, bool noGarbage) {
     // Dereference meshcap
   MeshCap *mcp=*mcpp;
 
+  if (!VM::validObject(mcp))
+    return ESMF_SUCCESS;  // nothing to do -> early successful return
+
   // Get mesh type
   bool is_esmf_mesh=mcp->is_esmf_mesh;
 
