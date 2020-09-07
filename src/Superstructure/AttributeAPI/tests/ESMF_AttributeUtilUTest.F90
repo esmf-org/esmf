@@ -277,6 +277,11 @@ program ESMF_AttributeUtilUTest
   write(name, *) "Set array and retrieve a type R4"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
+  arr(1) = HUGE(arr)
+  arr(2) = HUGE(arr)
+  arr(3) = HUGE(arr)
+  arr(4) = HUGE(arr)
+
   call ESMF_AttributeSet(field3,name="arr",valueList=arr,rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
