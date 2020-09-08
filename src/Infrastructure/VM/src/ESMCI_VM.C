@@ -2694,17 +2694,16 @@ void VM::rmObject(
     it != matchTable_Objects[i].end(); ++it){
     if (*it == object){
       matchTable_Objects[i].erase(it);  // erase the object entry
+#ifdef GARBAGE_COLLECTION_LOG_on
+    std::stringstream msg;
+    msg << "VM::rmObject() object removed: " << object;
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    logBacktrace("VM::rmObject()");  // enable to pin down specific caller
+#endif
       break;
     }
   }
   }
-
-#ifdef GARBAGE_COLLECTION_LOG_on
-  std::stringstream msg;
-  msg << "VM::rmObject() object removed: " << object;
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-  //logBacktrace("VM::rmObject()");  // enable to pin down specific caller
-#endif
 
   vm->unlock();
 }
@@ -2835,18 +2834,17 @@ void VM::rmFObject(
 
     if (flag){
       matchTable_FObjects[i].erase(it);  // erase the object entry
+#ifdef GARBAGE_COLLECTION_LOG_on
+      std::stringstream msg;
+      msg << "VM::rmFObject() object removed: " << *(void **)fobject << "-" <<
+        **(void ***)fobject;
+      ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+      //logBacktrace("VM::rmFObject()");  // enable to pin down specific caller
+#endif
       break;
     }
   }
   }
-
-#ifdef GARBAGE_COLLECTION_LOG_on
-  std::stringstream msg;
-  msg << "VM::rmFObject() object removed: " << *(void **)fobject << "-" <<
-    **(void ***)fobject;
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-  //logBacktrace("VM::rmFObject()");  // enable to pin down specific caller
-#endif
 
   vm->unlock();
 }
