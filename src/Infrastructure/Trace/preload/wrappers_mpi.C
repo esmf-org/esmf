@@ -200,6 +200,91 @@ extern "C" {
       }
     }
   
+    extern int __real_MPI_Iprobe(int source, int tag, MPI_Comm comm, int *flag, MPI_Status *status);    
+
+    int __wrap_MPI_Iprobe(int source, int tag, MPI_Comm comm, int *flag, MPI_Status *status) {
+      if (c_esmftrace_isinitialized() == 1 && insideMPIRegion == 0) {
+        //printf("__wrap_MPI_Iprobe (C)\n");
+        insideMPIRegion = 1;
+        ESMCI::TraceEventRegionEnter("MPI_Iprobe", &ignorerc);
+        int ret = __real_MPI_Iprobe(source, tag, comm, flag, status);
+        ESMCI::TraceEventRegionExit("MPI_Iprobe", &ignorerc);
+        insideMPIRegion = 0;
+        return ret;
+      }
+      else {
+        return __real_MPI_Iprobe(source, tag, comm, flag, status);
+      }
+    }
+  
+    extern int __real_MPI_Irecv(void *buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Request *request);    
+
+    int __wrap_MPI_Irecv(void *buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Request *request) {
+      if (c_esmftrace_isinitialized() == 1 && insideMPIRegion == 0) {
+        //printf("__wrap_MPI_Irecv (C)\n");
+        insideMPIRegion = 1;
+        ESMCI::TraceEventRegionEnter("MPI_Irecv", &ignorerc);
+        int ret = __real_MPI_Irecv(buf, count, datatype, source, tag, comm, request);
+        ESMCI::TraceEventRegionExit("MPI_Irecv", &ignorerc);
+        insideMPIRegion = 0;
+        return ret;
+      }
+      else {
+        return __real_MPI_Irecv(buf, count, datatype, source, tag, comm, request);
+      }
+    }
+  
+    extern int __real_MPI_Irsend(ESMF_MPI_CONST void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Request *request);    
+
+    int __wrap_MPI_Irsend(ESMF_MPI_CONST void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Request *request) {
+      if (c_esmftrace_isinitialized() == 1 && insideMPIRegion == 0) {
+        //printf("__wrap_MPI_Irsend (C)\n");
+        insideMPIRegion = 1;
+        ESMCI::TraceEventRegionEnter("MPI_Irsend", &ignorerc);
+        int ret = __real_MPI_Irsend(buf, count, datatype, dest, tag, comm, request);
+        ESMCI::TraceEventRegionExit("MPI_Irsend", &ignorerc);
+        insideMPIRegion = 0;
+        return ret;
+      }
+      else {
+        return __real_MPI_Irsend(buf, count, datatype, dest, tag, comm, request);
+      }
+    }
+  
+    extern int __real_MPI_Isend(ESMF_MPI_CONST void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Request *request);    
+
+    int __wrap_MPI_Isend(ESMF_MPI_CONST void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Request *request) {
+      if (c_esmftrace_isinitialized() == 1 && insideMPIRegion == 0) {
+        //printf("__wrap_MPI_Isend (C)\n");
+        insideMPIRegion = 1;
+        ESMCI::TraceEventRegionEnter("MPI_Isend", &ignorerc);
+        int ret = __real_MPI_Isend(buf, count, datatype, dest, tag, comm, request);
+        ESMCI::TraceEventRegionExit("MPI_Isend", &ignorerc);
+        insideMPIRegion = 0;
+        return ret;
+      }
+      else {
+        return __real_MPI_Isend(buf, count, datatype, dest, tag, comm, request);
+      }
+    }
+  
+    extern int __real_MPI_Issend(ESMF_MPI_CONST void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Request *request);    
+
+    int __wrap_MPI_Issend(ESMF_MPI_CONST void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Request *request) {
+      if (c_esmftrace_isinitialized() == 1 && insideMPIRegion == 0) {
+        //printf("__wrap_MPI_Issend (C)\n");
+        insideMPIRegion = 1;
+        ESMCI::TraceEventRegionEnter("MPI_Issend", &ignorerc);
+        int ret = __real_MPI_Issend(buf, count, datatype, dest, tag, comm, request);
+        ESMCI::TraceEventRegionExit("MPI_Issend", &ignorerc);
+        insideMPIRegion = 0;
+        return ret;
+      }
+      else {
+        return __real_MPI_Issend(buf, count, datatype, dest, tag, comm, request);
+      }
+    }
+  
     extern int __real_MPI_Probe(int source, int tag, MPI_Comm comm, MPI_Status *status);    
 
     int __wrap_MPI_Probe(int source, int tag, MPI_Comm comm, MPI_Status *status) {
@@ -549,6 +634,86 @@ extern "C" {
       }
       else {
         FTN_X(__real_mpi_gatherv)(sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs, recvtype, root, comm, ierr);
+      }
+    }
+  
+    extern void FTN_X(__real_mpi_iprobe)(MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *flag, MPI_Fint *status, MPI_Fint *ierr);    
+
+    void FTN_X(__wrap_mpi_iprobe)(MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *flag, MPI_Fint *status, MPI_Fint *ierr) {
+      if (c_esmftrace_isinitialized() == 1 && insideMPIRegion == 0) {
+        //printf("__wrap_mpi_iprobe_ (Fortran)\n");
+        insideMPIRegion = 1;
+        ESMCI::TraceEventRegionEnter("mpi_iprobe", &ignorerc);
+        FTN_X(__real_mpi_iprobe)(source, tag, comm, flag, status, ierr);
+        ESMCI::TraceEventRegionExit("mpi_iprobe", &ignorerc);
+        insideMPIRegion = 0;
+      }
+      else {
+        FTN_X(__real_mpi_iprobe)(source, tag, comm, flag, status, ierr);
+      }
+    }
+  
+    extern void FTN_X(__real_mpi_irecv)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr);    
+
+    void FTN_X(__wrap_mpi_irecv)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr) {
+      if (c_esmftrace_isinitialized() == 1 && insideMPIRegion == 0) {
+        //printf("__wrap_mpi_irecv_ (Fortran)\n");
+        insideMPIRegion = 1;
+        ESMCI::TraceEventRegionEnter("mpi_irecv", &ignorerc);
+        FTN_X(__real_mpi_irecv)(buf, count, datatype, source, tag, comm, request, ierr);
+        ESMCI::TraceEventRegionExit("mpi_irecv", &ignorerc);
+        insideMPIRegion = 0;
+      }
+      else {
+        FTN_X(__real_mpi_irecv)(buf, count, datatype, source, tag, comm, request, ierr);
+      }
+    }
+  
+    extern void FTN_X(__real_mpi_irsend)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr);    
+
+    void FTN_X(__wrap_mpi_irsend)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr) {
+      if (c_esmftrace_isinitialized() == 1 && insideMPIRegion == 0) {
+        //printf("__wrap_mpi_irsend_ (Fortran)\n");
+        insideMPIRegion = 1;
+        ESMCI::TraceEventRegionEnter("mpi_irsend", &ignorerc);
+        FTN_X(__real_mpi_irsend)(buf, count, datatype, dest, tag, comm, request, ierr);
+        ESMCI::TraceEventRegionExit("mpi_irsend", &ignorerc);
+        insideMPIRegion = 0;
+      }
+      else {
+        FTN_X(__real_mpi_irsend)(buf, count, datatype, dest, tag, comm, request, ierr);
+      }
+    }
+  
+    extern void FTN_X(__real_mpi_isend)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr);    
+
+    void FTN_X(__wrap_mpi_isend)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr) {
+      if (c_esmftrace_isinitialized() == 1 && insideMPIRegion == 0) {
+        //printf("__wrap_mpi_isend_ (Fortran)\n");
+        insideMPIRegion = 1;
+        ESMCI::TraceEventRegionEnter("mpi_isend", &ignorerc);
+        FTN_X(__real_mpi_isend)(buf, count, datatype, dest, tag, comm, request, ierr);
+        ESMCI::TraceEventRegionExit("mpi_isend", &ignorerc);
+        insideMPIRegion = 0;
+      }
+      else {
+        FTN_X(__real_mpi_isend)(buf, count, datatype, dest, tag, comm, request, ierr);
+      }
+    }
+  
+    extern void FTN_X(__real_mpi_issend)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr);    
+
+    void FTN_X(__wrap_mpi_issend)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr) {
+      if (c_esmftrace_isinitialized() == 1 && insideMPIRegion == 0) {
+        //printf("__wrap_mpi_issend_ (Fortran)\n");
+        insideMPIRegion = 1;
+        ESMCI::TraceEventRegionEnter("mpi_issend", &ignorerc);
+        FTN_X(__real_mpi_issend)(buf, count, datatype, dest, tag, comm, request, ierr);
+        ESMCI::TraceEventRegionExit("mpi_issend", &ignorerc);
+        insideMPIRegion = 0;
+      }
+      else {
+        FTN_X(__real_mpi_issend)(buf, count, datatype, dest, tag, comm, request, ierr);
       }
     }
   

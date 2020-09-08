@@ -181,6 +181,76 @@ extern "C" {
     }
 
   
+    static int (*__real_ptr_MPI_Iprobe)(int source, int tag, MPI_Comm comm, int *flag, MPI_Status *status) = NULL;
+
+    int __real_MPI_Iprobe(int source, int tag, MPI_Comm comm, int *flag, MPI_Status *status) {
+      if (__real_ptr_MPI_Iprobe == NULL) {
+        __real_ptr_MPI_Iprobe = (int (*)(int source, int tag, MPI_Comm comm, int *flag, MPI_Status *status)) dlsym(RTLD_NEXT, "MPI_Iprobe");
+      }
+      return __real_ptr_MPI_Iprobe(source, tag, comm, flag, status);
+    }
+
+    int MPI_Iprobe(int source, int tag, MPI_Comm comm, int *flag, MPI_Status *status) {
+      return __wrap_MPI_Iprobe(source, tag, comm, flag, status);
+    }
+
+  
+    static int (*__real_ptr_MPI_Irecv)(void *buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Request *request) = NULL;
+
+    int __real_MPI_Irecv(void *buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Request *request) {
+      if (__real_ptr_MPI_Irecv == NULL) {
+        __real_ptr_MPI_Irecv = (int (*)(void *buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Request *request)) dlsym(RTLD_NEXT, "MPI_Irecv");
+      }
+      return __real_ptr_MPI_Irecv(buf, count, datatype, source, tag, comm, request);
+    }
+
+    int MPI_Irecv(void *buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Request *request) {
+      return __wrap_MPI_Irecv(buf, count, datatype, source, tag, comm, request);
+    }
+
+  
+    static int (*__real_ptr_MPI_Irsend)(ESMF_MPI_CONST void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Request *request) = NULL;
+
+    int __real_MPI_Irsend(ESMF_MPI_CONST void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Request *request) {
+      if (__real_ptr_MPI_Irsend == NULL) {
+        __real_ptr_MPI_Irsend = (int (*)(ESMF_MPI_CONST void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Request *request)) dlsym(RTLD_NEXT, "MPI_Irsend");
+      }
+      return __real_ptr_MPI_Irsend(buf, count, datatype, dest, tag, comm, request);
+    }
+
+    int MPI_Irsend(ESMF_MPI_CONST void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Request *request) {
+      return __wrap_MPI_Irsend(buf, count, datatype, dest, tag, comm, request);
+    }
+
+  
+    static int (*__real_ptr_MPI_Isend)(ESMF_MPI_CONST void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Request *request) = NULL;
+
+    int __real_MPI_Isend(ESMF_MPI_CONST void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Request *request) {
+      if (__real_ptr_MPI_Isend == NULL) {
+        __real_ptr_MPI_Isend = (int (*)(ESMF_MPI_CONST void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Request *request)) dlsym(RTLD_NEXT, "MPI_Isend");
+      }
+      return __real_ptr_MPI_Isend(buf, count, datatype, dest, tag, comm, request);
+    }
+
+    int MPI_Isend(ESMF_MPI_CONST void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Request *request) {
+      return __wrap_MPI_Isend(buf, count, datatype, dest, tag, comm, request);
+    }
+
+  
+    static int (*__real_ptr_MPI_Issend)(ESMF_MPI_CONST void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Request *request) = NULL;
+
+    int __real_MPI_Issend(ESMF_MPI_CONST void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Request *request) {
+      if (__real_ptr_MPI_Issend == NULL) {
+        __real_ptr_MPI_Issend = (int (*)(ESMF_MPI_CONST void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Request *request)) dlsym(RTLD_NEXT, "MPI_Issend");
+      }
+      return __real_ptr_MPI_Issend(buf, count, datatype, dest, tag, comm, request);
+    }
+
+    int MPI_Issend(ESMF_MPI_CONST void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Request *request) {
+      return __wrap_MPI_Issend(buf, count, datatype, dest, tag, comm, request);
+    }
+
+  
     static int (*__real_ptr_MPI_Probe)(int source, int tag, MPI_Comm comm, MPI_Status *status) = NULL;
 
     int __real_MPI_Probe(int source, int tag, MPI_Comm comm, MPI_Status *status) {
@@ -478,6 +548,76 @@ extern "C" {
 
     void FTN_X(mpi_gatherv)(MPI_Fint *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, MPI_Fint *recvbuf, MPI_Fint *recvcounts, MPI_Fint *displs, MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierr) {
       FTN_X(__wrap_mpi_gatherv)(sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs, recvtype, root, comm, ierr);
+    }
+
+  
+    static void (*FTN_X(__real_ptr_mpi_iprobe))(MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *flag, MPI_Fint *status, MPI_Fint *ierr) = NULL;
+
+    void FTN_X(__real_mpi_iprobe)(MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *flag, MPI_Fint *status, MPI_Fint *ierr) {
+      if (FTN_X(__real_ptr_mpi_iprobe) == NULL) {
+        FTN_X(__real_ptr_mpi_iprobe) = (void (*)(MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *flag, MPI_Fint *status, MPI_Fint *ierr)) dlsym(RTLD_NEXT, xstr(FTN_X(mpi_iprobe)));
+      }
+      FTN_X(__real_ptr_mpi_iprobe)(source, tag, comm, flag, status, ierr);
+    }
+
+    void FTN_X(mpi_iprobe)(MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *flag, MPI_Fint *status, MPI_Fint *ierr) {
+      FTN_X(__wrap_mpi_iprobe)(source, tag, comm, flag, status, ierr);
+    }
+
+  
+    static void (*FTN_X(__real_ptr_mpi_irecv))(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr) = NULL;
+
+    void FTN_X(__real_mpi_irecv)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr) {
+      if (FTN_X(__real_ptr_mpi_irecv) == NULL) {
+        FTN_X(__real_ptr_mpi_irecv) = (void (*)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr)) dlsym(RTLD_NEXT, xstr(FTN_X(mpi_irecv)));
+      }
+      FTN_X(__real_ptr_mpi_irecv)(buf, count, datatype, source, tag, comm, request, ierr);
+    }
+
+    void FTN_X(mpi_irecv)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr) {
+      FTN_X(__wrap_mpi_irecv)(buf, count, datatype, source, tag, comm, request, ierr);
+    }
+
+  
+    static void (*FTN_X(__real_ptr_mpi_irsend))(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr) = NULL;
+
+    void FTN_X(__real_mpi_irsend)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr) {
+      if (FTN_X(__real_ptr_mpi_irsend) == NULL) {
+        FTN_X(__real_ptr_mpi_irsend) = (void (*)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr)) dlsym(RTLD_NEXT, xstr(FTN_X(mpi_irsend)));
+      }
+      FTN_X(__real_ptr_mpi_irsend)(buf, count, datatype, dest, tag, comm, request, ierr);
+    }
+
+    void FTN_X(mpi_irsend)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr) {
+      FTN_X(__wrap_mpi_irsend)(buf, count, datatype, dest, tag, comm, request, ierr);
+    }
+
+  
+    static void (*FTN_X(__real_ptr_mpi_isend))(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr) = NULL;
+
+    void FTN_X(__real_mpi_isend)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr) {
+      if (FTN_X(__real_ptr_mpi_isend) == NULL) {
+        FTN_X(__real_ptr_mpi_isend) = (void (*)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr)) dlsym(RTLD_NEXT, xstr(FTN_X(mpi_isend)));
+      }
+      FTN_X(__real_ptr_mpi_isend)(buf, count, datatype, dest, tag, comm, request, ierr);
+    }
+
+    void FTN_X(mpi_isend)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr) {
+      FTN_X(__wrap_mpi_isend)(buf, count, datatype, dest, tag, comm, request, ierr);
+    }
+
+  
+    static void (*FTN_X(__real_ptr_mpi_issend))(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr) = NULL;
+
+    void FTN_X(__real_mpi_issend)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr) {
+      if (FTN_X(__real_ptr_mpi_issend) == NULL) {
+        FTN_X(__real_ptr_mpi_issend) = (void (*)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr)) dlsym(RTLD_NEXT, xstr(FTN_X(mpi_issend)));
+      }
+      FTN_X(__real_ptr_mpi_issend)(buf, count, datatype, dest, tag, comm, request, ierr);
+    }
+
+    void FTN_X(mpi_issend)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr) {
+      FTN_X(__wrap_mpi_issend)(buf, count, datatype, dest, tag, comm, request, ierr);
     }
 
   
