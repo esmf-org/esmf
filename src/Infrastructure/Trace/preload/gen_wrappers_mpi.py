@@ -346,7 +346,7 @@ cfunc_list = [
     
     {
         'ret':'int', 'name':'MPI_Scan',
-        'params':'ESMF_MPI_CONST void *sendbuf, ESMF_MPI_CONST void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm',
+        'params':'ESMF_MPI_CONST void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm',
         'args':'sendbuf, recvbuf, count, datatype, op, comm'
     },
     
@@ -359,7 +359,7 @@ cfunc_list = [
     {
         'ret':'int', 'name':'MPI_Scatterv',
         'params':'ESMF_MPI_CONST void *sendbuf, ESMF_MPI_CONST int sendcounts[], ESMF_MPI_CONST int displs[], MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPI_Comm comm',
-        'args':'sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm'
+        'args':'sendbuf, sendcounts, displs, sendtype, recvbuf, recvcount, recvtype, root, comm'
     },
     
     {

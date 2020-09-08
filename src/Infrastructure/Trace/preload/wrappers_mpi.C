@@ -370,9 +370,9 @@ extern "C" {
       }
     }
   
-    extern int __real_MPI_Scan(ESMF_MPI_CONST void *sendbuf, ESMF_MPI_CONST void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm);    
+    extern int __real_MPI_Scan(ESMF_MPI_CONST void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm);    
 
-    int __wrap_MPI_Scan(ESMF_MPI_CONST void *sendbuf, ESMF_MPI_CONST void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm) {
+    int __wrap_MPI_Scan(ESMF_MPI_CONST void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm) {
       if (c_esmftrace_isinitialized() == 1 && insideMPIRegion == 0) {
         //printf("__wrap_MPI_Scan (C)\n");
         insideMPIRegion = 1;
@@ -411,13 +411,13 @@ extern "C" {
         //printf("__wrap_MPI_Scatterv (C)\n");
         insideMPIRegion = 1;
         ESMCI::TraceEventRegionEnter("MPI_Scatterv", &ignorerc);
-        int ret = __real_MPI_Scatterv(sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm);
+        int ret = __real_MPI_Scatterv(sendbuf, sendcounts, displs, sendtype, recvbuf, recvcount, recvtype, root, comm);
         ESMCI::TraceEventRegionExit("MPI_Scatterv", &ignorerc);
         insideMPIRegion = 0;
         return ret;
       }
       else {
-        return __real_MPI_Scatterv(sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm);
+        return __real_MPI_Scatterv(sendbuf, sendcounts, displs, sendtype, recvbuf, recvcount, recvtype, root, comm);
       }
     }
   

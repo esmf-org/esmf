@@ -71,7 +71,7 @@ extern "C" {
   
   int __wrap_MPI_Rsend(ESMF_MPI_CONST void *sendbuf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm);
   
-  int __wrap_MPI_Scan(ESMF_MPI_CONST void *sendbuf, ESMF_MPI_CONST void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm);
+  int __wrap_MPI_Scan(ESMF_MPI_CONST void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm);
   
   int __wrap_MPI_Scatter(ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPI_Comm comm);
   

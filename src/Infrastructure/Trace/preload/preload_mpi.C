@@ -321,16 +321,16 @@ extern "C" {
     }
 
   
-    static int (*__real_ptr_MPI_Scan)(ESMF_MPI_CONST void *sendbuf, ESMF_MPI_CONST void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm) = NULL;
+    static int (*__real_ptr_MPI_Scan)(ESMF_MPI_CONST void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm) = NULL;
 
-    int __real_MPI_Scan(ESMF_MPI_CONST void *sendbuf, ESMF_MPI_CONST void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm) {
+    int __real_MPI_Scan(ESMF_MPI_CONST void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm) {
       if (__real_ptr_MPI_Scan == NULL) {
-        __real_ptr_MPI_Scan = (int (*)(ESMF_MPI_CONST void *sendbuf, ESMF_MPI_CONST void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm)) dlsym(RTLD_NEXT, "MPI_Scan");
+        __real_ptr_MPI_Scan = (int (*)(ESMF_MPI_CONST void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm)) dlsym(RTLD_NEXT, "MPI_Scan");
       }
       return __real_ptr_MPI_Scan(sendbuf, recvbuf, count, datatype, op, comm);
     }
 
-    int MPI_Scan(ESMF_MPI_CONST void *sendbuf, ESMF_MPI_CONST void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm) {
+    int MPI_Scan(ESMF_MPI_CONST void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm) {
       return __wrap_MPI_Scan(sendbuf, recvbuf, count, datatype, op, comm);
     }
 
@@ -355,11 +355,11 @@ extern "C" {
       if (__real_ptr_MPI_Scatterv == NULL) {
         __real_ptr_MPI_Scatterv = (int (*)(ESMF_MPI_CONST void *sendbuf, ESMF_MPI_CONST int sendcounts[], ESMF_MPI_CONST int displs[], MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPI_Comm comm)) dlsym(RTLD_NEXT, "MPI_Scatterv");
       }
-      return __real_ptr_MPI_Scatterv(sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm);
+      return __real_ptr_MPI_Scatterv(sendbuf, sendcounts, displs, sendtype, recvbuf, recvcount, recvtype, root, comm);
     }
 
     int MPI_Scatterv(ESMF_MPI_CONST void *sendbuf, ESMF_MPI_CONST int sendcounts[], ESMF_MPI_CONST int displs[], MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPI_Comm comm) {
-      return __wrap_MPI_Scatterv(sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm);
+      return __wrap_MPI_Scatterv(sendbuf, sendcounts, displs, sendtype, recvbuf, recvcount, recvtype, root, comm);
     }
 
   
