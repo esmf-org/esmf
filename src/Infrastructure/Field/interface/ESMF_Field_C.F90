@@ -740,15 +740,14 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     rc = ESMF_RC_NOT_IMPL
   
     !print *, "collecting Field garbage"
-    
-    ! destruct internal data allocations
-    call ESMF_FieldDestruct(field%ftypep, rc=localrc)
-    if (ESMF_LogFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! deallocate actual FieldType allocation      
     if (associated(field%ftypep)) then
+      ! destruct internal data allocations
+      call ESMF_FieldDestruct(field%ftypep, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! deallocate actual FieldType allocation      
       !print *, "deallocate(field%ftypep)"
       deallocate(field%ftypep, stat=localrc)
       if (ESMF_LogFoundAllocError(localrc, msg="Deallocating Field", &
