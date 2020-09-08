@@ -282,7 +282,7 @@ ESMF_RegridWeightGen
         [--pole|-p none|all|teeth|1|2|..]
         [--line_type|-l cartesian|greatcircle]
         [--norm_type dstarea|fracarea]
-        [--extrap_method none|neareststod|nearestidavg|creep]
+        [--extrap_method none|neareststod|nearestidavg|nearestd|creep|creepnrstd]
         [--extrap_num_src_pnts <N>]
         [--extrap_dist_exponent <P>]
         [--extrap_num_levels <L>]
@@ -404,6 +404,13 @@ where:
                                        supported with conservative regrid methods
                                        (e.g. conserve).
 
+                        nearestd     - nearest mapped destination to 
+                                       unmapped destination. Each
+                                       unmapped destination location is mapped 
+                                       to the closest mapped destination location. This 
+                                       extrapolation method is not supported with 
+                                       conservative regrid methods (e.g. conserve).
+
                         creep        - creep fill. 
                                        Here unmapped destination points are filled by 
                                        moving values from mapped locations to neighboring 
@@ -414,6 +421,15 @@ where:
                                        --extrap_num_levels flag. This extrapolation
                                        method is not supported with conservative 
                                        regrid methods (e.g. conserve).
+
+                        creepnrstd   - creep fill with nearest destination.  
+                                       Here unmapped destination points are filled by 
+                                       first doing a creep fill, and then filling the 
+                                       remaining unmapped points by using 
+                                       the nearest destination method (both of these
+                                       methods are described in the entries above). 
+                                       This extrapolation method is not supported 
+                                       with conservative regrid methods (e.g. conserve).
                                        
 
     --extrap_num_src_pnts - an optional argument specifying how many source points
