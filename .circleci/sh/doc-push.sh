@@ -9,7 +9,7 @@ git config --global user.name "esmf-orgbot"
 cd
 
 # Clone the docs repository
-git clone git@github.com:esmf-org/esmf-org.github.io.git
+git clone --depth 1 git@github.com:esmf-org/esmf-org.github.io.git
 
 # ESMF Docs -------------------------------------------------------------------
 

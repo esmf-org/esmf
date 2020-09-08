@@ -61,6 +61,12 @@ namespace ESMCI {
     Tag node_mask_tag;
     Tag node_mask_val_tag;
 
+    bool has_elem_coords;
+    Tag  elem_coords_tag;
+
+    bool has_elem_orig_coords;
+    Tag  elem_orig_coords_tag;
+
     bool has_elem_frac; // TODO: Get rid of this
     Tag  elem_frac_tag;
 
@@ -70,12 +76,6 @@ namespace ESMCI {
 
     bool has_elem_area;
     Tag  elem_area_tag;
-
-    bool has_elem_coords;
-    Tag  elem_coords_tag;
-
-    bool has_elem_orig_coords;
-    Tag  elem_orig_coords_tag;
 
     // Split stuff
     bool is_split;

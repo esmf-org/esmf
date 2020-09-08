@@ -12,8 +12,6 @@
 #define ESMC_FILENAME "ESMCI_MeshCap.C"
 //==============================================================================
 
-#define REGRID_STORE_MEMLOG_off
-
 //==============================================================================
 //
 // This file contains the Fortran interface code to link F90 and C++.
@@ -31,7 +29,8 @@
 #include "ESMCI_Mesh.h"
 #include "ESMCI_VM.h"
 #include "ESMCI_CoordSys.h"
-#include "ESMCI_TraceRegion.h"
+
+#include "ESMCI_TraceMacros.h"  // for profiling
 
 #include "Mesh/include/ESMCI_Mesh_Glue.h"
 #include "Mesh/include/ESMCI_Mesh_GToM_Glue.h"
@@ -566,13 +565,10 @@ void MeshCap::regrid_create(
      }
   }
 
-#ifdef REGRID_STORE_MEMLOG_on
-  VM::logMemInfo(std::string(ESMC_METHOD": 1.0"));
-#endif
-
   // Call into func. depending on mesh type
   if (is_esmf_mesh) {
     int localrc;
+    ESMCI_REGRID_TRACE_ENTER("NativeMesh regrid");
     ESMCI_regrid_create((Mesh **)&mesh_src_p, arraysrcpp, plsrcpp,
                         (Mesh **)&mesh_dst_p, arraydstpp, pldstpp,
                         regridMethod,
@@ -592,11 +588,13 @@ void MeshCap::regrid_create(
                         has_udl, _num_udl, _tudl,
                         has_statusArray, statusArray,
                         &localrc);
+    ESMCI_REGRID_TRACE_EXIT("NativeMesh regrid");
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return;
   } else {
 #if defined ESMF_MOAB
     int localrc;
+    ESMCI_REGRID_TRACE_ENTER("MBMesh regrid");
     MBMesh_regrid_create(&mesh_src_p, arraysrcpp, plsrcpp,
                          &mesh_dst_p, arraydstpp, pldstpp,
                          regridMethod,
@@ -616,6 +614,7 @@ void MeshCap::regrid_create(
                          has_udl, _num_udl, _tudl,
                          has_statusArray, statusArray,
                          &localrc);
+    ESMCI_REGRID_TRACE_EXIT("MBMesh regrid");
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return;
 #else
@@ -635,23 +634,26 @@ MeshCap *MeshCap::meshcreate(int *pdim, int *sdim,
 
   int localrc;
 
-
   // Create mesh depending on the type
   Mesh *mesh;
   void *mbmesh;
   if (_is_esmf_mesh) {
+    ESMCI_MESHCREATE_TRACE_ENTER("NativeMesh create");
     ESMCI_meshcreate(&mesh,
                      pdim, sdim,
                      coordSys, &localrc);
+    ESMCI_MESHCREATE_TRACE_EXIT("NativeMesh create");
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                        ESMC_CONTEXT, rc)) return NULL;
   } else {
 #if defined ESMF_MOAB
+    ESMCI_MESHCREATE_TRACE_ENTER("MBMesh create");
     MBMesh_create(&mbmesh,
                   pdim, sdim,
                   coordSys, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return NULL;
+    ESMCI_MESHCREATE_TRACE_EXIT("MBMesh create");
 #else
     if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
       "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return NULL;
@@ -683,16 +685,20 @@ void MeshCap::meshaddnodes(int *num_nodes, int *nodeId,
 
   // Call into func. depending on mesh type
   if (is_esmf_mesh) {
+    ESMCI_MESHCREATE_TRACE_ENTER("NativeMesh addnodes");
     ESMCI_meshaddnodes(&mesh, num_nodes, nodeId,
                        nodeCoord, nodeOwner, nodeMaskII,
                        _coordSys, _orig_sdim,
                        rc);
+    ESMCI_MESHCREATE_TRACE_EXIT("NativeMesh addnodes");
   } else {
 #if defined ESMF_MOAB
+    ESMCI_MESHCREATE_TRACE_ENTER("MBMesh addnodes");
     MBMesh_addnodes(&mbmesh, num_nodes, nodeId,
                      nodeCoord, nodeOwner, nodeMaskII,
                      _coordSys, _orig_sdim,
                      rc);
+    ESMCI_MESHCREATE_TRACE_EXIT("MBMesh addnodes");
 #else
    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
       "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
@@ -756,6 +762,7 @@ void MeshCap::meshaddelements(int *_num_elems, int *elemId, int *elemType, Inter
 
   // Call into func. depending on mesh type
   if (is_esmf_mesh) {
+    ESMCI_MESHCREATE_TRACE_ENTER("NativeMesh addelements");
     ESMCI_meshaddelements(&mesh,
                           _num_elems, elemId, elemType, _elemMaskII ,
                           _areaPresent, elemArea,
@@ -763,8 +770,10 @@ void MeshCap::meshaddelements(int *_num_elems, int *elemId, int *elemType, Inter
                           _num_elemConn, elemConn, regridConserve,
                           _coordSys, _orig_sdim,
                           rc);
+    ESMCI_MESHCREATE_TRACE_EXIT("NativeMesh addelements");
   } else {
  #if defined ESMF_MOAB
+    ESMCI_MESHCREATE_TRACE_ENTER("MBMesh addelements");
     MBMesh_addelements(&mbmesh,
                        _num_elems, elemId, elemType, _elemMaskII,
                        _areaPresent, elemArea,
@@ -772,6 +781,7 @@ void MeshCap::meshaddelements(int *_num_elems, int *elemId, int *elemType, Inter
                        _num_elemConn, elemConn, regridConserve,
                        _coordSys, _orig_sdim,
                        rc);
+    ESMCI_MESHCREATE_TRACE_EXIT("MBMesh addelements");
 #else
    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
       "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
@@ -1523,23 +1533,35 @@ MeshCap *MeshCap::meshcreateredistelems(MeshCap **src_meshpp, int *num_elem_gids
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::meshcreateredistelems()"
 
+  int localrc;
+
   // Get mesh type
   bool is_esmf_mesh=(*src_meshpp)->is_esmf_mesh;
 
   // Call into func. depending on mesh type
-  Mesh *mesh;
-  if (is_esmf_mesh) {
-    int localrc;
+  Mesh *mesh = NULL;
+  void *mbmesh = NULL;
 
+  if (is_esmf_mesh) {
+    ESMCI_MESHREDIST_TRACE_ENTER("MBMesh redist (elements)");
     ESMCI_meshcreateredistelems(&((*src_meshpp)->mesh), num_elem_gids, elem_gids,
                                 &mesh, &localrc);
+    ESMCI_MESHREDIST_TRACE_EXIT("MBMesh redist (elements)");
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return NULL;
   } else {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-       "- this functionality is not currently supported using MOAB",
-                                  ESMC_CONTEXT, rc);
-    return NULL;
+#if defined ESMF_MOAB
+    ESMCI_MESHREDIST_TRACE_ENTER("NativeMesh redist (elements)");
+    MBMesh_createredistelems(&((*src_meshpp)->mbmesh), num_elem_gids, elem_gids,
+                                &mbmesh, &localrc);
+    ESMCI_MESHREDIST_TRACE_EXIT("NativeMesh redist (elements)");
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return NULL;
+#else
+   if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+      "This functionality requires ESMF to be built with the MOAB library enabled" ,
+      ESMC_CONTEXT, &rc)) return rc;
+#endif
   }
 
   // Create MeshCap
@@ -1548,6 +1570,7 @@ MeshCap *MeshCap::meshcreateredistelems(MeshCap **src_meshpp, int *num_elem_gids
   // Set member variables
   mc->is_esmf_mesh=is_esmf_mesh;
   mc->mesh=mesh;
+  mc->mbmesh=mbmesh;
 
   // Output new MeshCap
   return mc;
@@ -1559,26 +1582,36 @@ MeshCap *MeshCap::meshcreateredistnodes(MeshCap **src_meshpp,int *num_node_gids,
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::meshcreateredistnodes()"
 
+  int localrc;
+
   // Get mesh type
   bool is_esmf_mesh=(*src_meshpp)->is_esmf_mesh;
 
   // Call into func. depending on mesh type
-  Mesh *mesh;
-  if (is_esmf_mesh) {
-    int localrc;
+  Mesh *mesh = NULL;
+  void *mbmesh = NULL;
 
-     ESMCI_meshcreateredistnodes(&((*src_meshpp)->mesh), num_node_gids, node_gids,
+  if (is_esmf_mesh) {
+    ESMCI_MESHREDIST_TRACE_ENTER("NativeMesh redist (nodes)");
+    ESMCI_meshcreateredistnodes(&((*src_meshpp)->mesh), num_node_gids, node_gids,
                                 &mesh, &localrc);
+    ESMCI_MESHREDIST_TRACE_EXIT("NativeMesh redist (nodes)");
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return NULL;
-
  } else {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-       "- this functionality is not currently supported using MOAB",
-                                  ESMC_CONTEXT, rc);
-    return NULL;
+#if defined ESMF_MOAB
+    ESMCI_MESHREDIST_TRACE_ENTER("MBMesh redist (nodes)");
+    MBMesh_createredistnodes(&((*src_meshpp)->mbmesh), num_node_gids, node_gids,
+                                &mbmesh, &localrc);
+    ESMCI_MESHREDIST_TRACE_EXIT("MBMesh redist (nodes)");
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return NULL;
+#else
+   if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+      "This functionality requires ESMF to be built with the MOAB library enabled" ,
+      ESMC_CONTEXT, &rc)) return rc;
+#endif
   }
-
 
   // Create MeshCap
   MeshCap *mc=new MeshCap();
@@ -1586,6 +1619,7 @@ MeshCap *MeshCap::meshcreateredistnodes(MeshCap **src_meshpp,int *num_node_gids,
   // Set member variables
   mc->is_esmf_mesh=is_esmf_mesh;
   mc->mesh=mesh;
+  mc->mbmesh=mbmesh;
 
   // Output new MeshCap
   return mc;
@@ -1597,25 +1631,36 @@ MeshCap *MeshCap::meshcreateredist(MeshCap **src_meshpp, int *num_node_gids, int
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::meshcreateredist()"
 
- // Get mesh type
+  int localrc;
+
+  // Get mesh type
   bool is_esmf_mesh=(*src_meshpp)->is_esmf_mesh;
 
   // Call into func. depending on mesh type
-  Mesh *mesh;
-  if (is_esmf_mesh) {
-    int localrc;
+  Mesh *mesh = NULL;
+  void *mbmesh = NULL;
 
+  if (is_esmf_mesh) {
+    ESMCI_MESHREDIST_TRACE_ENTER("NativeMesh redist");
     ESMCI_meshcreateredist(&((*src_meshpp)->mesh), num_node_gids, node_gids,
                            num_elem_gids, elem_gids, &mesh, &localrc);
+    ESMCI_MESHREDIST_TRACE_EXIT("NativeMesh redist");
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return NULL;
   } else {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-       "- this functionality is not currently supported using MOAB",
-                                  ESMC_CONTEXT, rc);
-    return NULL;
+#if defined ESMF_MOAB
+    ESMCI_MESHREDIST_TRACE_ENTER("MBMesh redist");
+    MBMesh_createredist(&((*src_meshpp)->mbmesh), num_node_gids, node_gids,
+                        num_elem_gids, elem_gids, &mbmesh, &localrc);
+    ESMCI_MESHREDIST_TRACE_EXIT("MBMesh redist");
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return NULL;
+#else
+   if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+      "This functionality requires ESMF to be built with the MOAB library enabled" ,
+      ESMC_CONTEXT, &rc)) return rc;
+#endif
   }
-
 
   // Create MeshCap
   MeshCap *mc=new MeshCap();
@@ -1623,6 +1668,7 @@ MeshCap *MeshCap::meshcreateredist(MeshCap **src_meshpp, int *num_node_gids, int
   // Set member variables
   mc->is_esmf_mesh=is_esmf_mesh;
   mc->mesh=mesh;
+  mc->mbmesh=mbmesh;
 
   // Output new MeshCap
   return mc;
@@ -1640,15 +1686,23 @@ void MeshCap::meshchecknodelist(int *_num_node_gids, int *node_gids,
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::meshchecknodelist()"
 
+  int localrc;
 
   // Call into func. depending on mesh type
   if (is_esmf_mesh) {
-    ESMCI_meshchecknodelist(&mesh, _num_node_gids, node_gids, rc);
+    ESMCI_meshchecknodelist(&mesh, _num_node_gids, node_gids, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return;
   } else {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-       "- this functionality is not currently supported using MOAB",
-                                  ESMC_CONTEXT, rc);
-    return;
+#if defined ESMF_MOAB
+    MBMesh_checknodelist(&mbmesh, _num_node_gids, node_gids, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return;
+#else
+   if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+      "This functionality requires ESMF to be built with the MOAB library enabled" ,
+      ESMC_CONTEXT, &rc) return;
+#endif
   }
 
 }
@@ -1663,14 +1717,23 @@ void MeshCap::meshcheckelemlist(int *_num_elem_gids, int *elem_gids,
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::meshcheckelemlist()"
 
+  int localrc;
+
   // Call into func. depending on mesh type
   if (is_esmf_mesh) {
-    ESMCI_meshcheckelemlist(&mesh, _num_elem_gids, elem_gids, rc);
+    ESMCI_meshcheckelemlist(&mesh, _num_elem_gids, elem_gids, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return;
   } else {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-       "- this functionality is not currently supported using MOAB",
-                                  ESMC_CONTEXT, rc);
-    return;
+#if defined ESMF_MOAB
+    MBMesh_checkelemlist(&mbmesh, _num_elem_gids, elem_gids, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return;
+#else
+   if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+      "This functionality requires ESMF to be built with the MOAB library enabled" ,
+      ESMC_CONTEXT, &rc) return;
+#endif
   }
 }
 
@@ -1725,37 +1788,19 @@ MeshCap *MeshCap::meshcreatedual(MeshCap **src_meshpp, int *rc) {
   MBMesh *mbmesh;
   // Call into func. depending on mesh type
   if (is_esmf_mesh) {
-#ifdef ESMF_PROFILE_MESH_DUAL_NATIVE
-    ESMCI_REGION_ENTER("Native Dual Mesh Generation", localrc);
-    VM::logMemInfo(std::string("before Native Dual Mesh Generation"));
-#endif
-
+    ESMCI_DUALMESH_TRACE_ENTER("NativeMesh Dual Mesh Generation");
     ESMCI_meshcreatedual(&((*src_meshpp)->mesh), &mesh, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return NULL;
-
-#ifdef ESMF_PROFILE_MESH_DUAL_NATIVE
-    VM::logMemInfo(std::string("after Native Dual Mesh Generation"));
-    ESMCI_REGION_EXIT("Native Dual Mesh Generation", localrc)
-#endif
+    ESMCI_DUALMESH_TRACE_EXIT("NativeMesh Dual Mesh Generation")
   } else {
 #if defined ESMF_MOAB
     MBMesh *meshin = (MBMesh *)((*src_meshpp)->mbmesh);
-
-#ifdef ESMF_PROFILE_MESH_DUAL_MBMESH
-    ESMCI_REGION_ENTER("MOAB Dual Mesh Generation", localrc);
-    VM::logMemInfo(std::string("before MOAB Dual Mesh Generation"));
-#endif
-
+    ESMCI_DUALMESH_TRACE_ENTER("MBMesh Dual Mesh Generation");
     MBMeshDual(meshin, &mbmesh, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return NULL;
-
-#ifdef ESMF_PROFILE_MESH_DUAL_MBMESH
-    VM::logMemInfo(std::string("after MOAB Dual Mesh Generation"));
-    ESMCI_REGION_EXIT("MOAB Dual Mesh Generation", localrc)
-#endif
-
+    ESMCI_DUALMESH_TRACE_EXIT("MBMesh Dual Mesh Generation")
 #else
    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
       "This functionality requires ESMF to be built with the MOAB library enabled" ,
@@ -1811,7 +1856,7 @@ int MeshCap::destroy(MeshCap **mcpp, bool noGarbage) {
   } else {
 #if defined ESMF_MOAB
     // Only do if mesh is present
-    if (mcp->mesh != NULL) {
+    if (mcp->mbmesh != NULL) {
       int localrc;
       MBMesh_destroy(&(mcp->mbmesh), &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,

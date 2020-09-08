@@ -51,7 +51,7 @@ program ESMF_RegridWeightGenApp
   type(ESMF_ExtrapMethod_Flag) :: extrapMethodFlag
   character(len=ESMF_MAXPATHLEN) :: commandbuf1(5)
   character(len=MAXNAMELEN)  :: commandbuf3(9)
-  integer            :: commandbuf2(24)
+  integer            :: commandbuf2(25)
   integer            :: ind, pos
   logical            :: largeFileFlag
   logical            :: netcdf4FileFlag
@@ -754,9 +754,6 @@ program ESMF_RegridWeightGenApp
     call ESMF_UtilGetArgIndex('--moab', argindex=ind, rc=rc)
     if (ind /= -1) moabFlag = .true.
 
-    if (moabFlag) call ESMF_MeshSetMOAB(.true., rc=rc)
-    if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
-
 1110 continue
     commandbuf2(:)=0
     if (terminateProg) then
@@ -796,6 +793,7 @@ program ESMF_RegridWeightGenApp
       if (extrapMethodStr .eq. 'creepnrstd') commandbuf2(22)=6
       commandbuf2(23)=extrap_num_src_pnts
       commandbuf2(24)=extrapNumLevels
+      if (moabFlag) commandbuf2(25)=1
     endif 
 
 
@@ -963,6 +961,10 @@ program ESMF_RegridWeightGenApp
     extrap_num_src_pnts=commandbuf2(23)
     extrapNumLevels=commandbuf2(24)
 
+    ! Set moab flag
+    moabFlag=.false.
+    if (commandbuf2(25)==1) moabFlag=.true.
+ 
     call ESMF_VMBroadcast(vm, commandbuf1, len(commandbuf1)*size(commandbuf1), 0, rc=rc)
     if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
     call ESMF_VMBroadcast(vm, commandbuf3, len(commandbuf3)*size(commandbuf3), 0, rc=rc)
@@ -1053,6 +1055,11 @@ program ESMF_RegridWeightGenApp
   write(*,*) "extrap_dist_exponent=",extrap_dist_exponent
   write(*,*) "extrapNumLevels=",extrapNumLevels
 #endif
+
+  ! Turn on MOAB flag based on moabFlag which has been broadcast across PETs
+  if (moabFlag) call ESMF_MeshSetMOAB(.true., rc=rc)
+  if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
+
 
 if (writewgtfile) then
   if (writerhfile) then

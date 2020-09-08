@@ -14,7 +14,9 @@
 // Take out if MOAB isn't being used
 #if defined ESMF_MOAB
 
-#include <Mesh/include/ESMCI_MBMesh.h>
+#include "Mesh/include/ESMCI_MBMesh.h"
+
+#include "Mesh/include/Legacy/ESMCI_DDir.h"
 
 #include "ESMCI_PointList.h"
 
@@ -25,21 +27,53 @@ namespace ESMCI {
 struct point;
 
 // Eventually move this to wherever you have the code to redist a mesh
+struct Proc_Elem_Pair {
+  int proc;
+  std::vector<int> elem_gids;
+
+  Proc_Elem_Pair(int _proc, int *_num_elem_gids, int *_elem_gids) {
+    proc = _proc;
+    elem_gids.reserve(*_num_elem_gids);
+    for(int i=0; i<*_num_elem_gids; ++i) elem_gids.push_back(_elem_gids[i]);
+  }
+
+  // // Sort as obj <, proc
+  // bool operator< (const EH_Comm_Pair &other) const {
+  //   return eh != other.eh ?
+  //      eh < other.eh 
+  //    : proc < other.proc;
+  // }
+  // 
+  // bool operator==(const EH_Comm_Pair &other) const {
+  //   if (eh != other.eh) return false;
+  //   if (proc != other.proc) return false;
+  //   return true;
+  // }
+  // 
+  // bool operator!=(const EH_Comm_Pair &rhs) const {
+  //   return !(*this == rhs);
+  // }
+};
+
 struct EH_Comm_Pair {
   EntityHandle eh;
+  int id;
   int proc;
 
-  EH_Comm_Pair(EntityHandle _eh, int _proc) : eh(_eh), proc(_proc) {}
+  EH_Comm_Pair(EntityHandle _eh, int _id, int _proc) : eh(_eh), id(_id), proc(_proc) {}
 
   // Sort as obj <, proc
   bool operator< (const EH_Comm_Pair &other) const {
-    return eh != other.eh ?
-       eh < other.eh 
-     : proc < other.proc;
+    // replace with c++11
+    return std::tie(eh, id, proc) < std::tie(other.eh, other.id, other.proc);
+    // return eh != other.eh ?
+    //    eh < other.eh 
+    //  : proc < other.proc;
   }
 
   bool operator==(const EH_Comm_Pair &other) const {
     if (eh != other.eh) return false;
+    if (id != other.id) return false;
     if (proc != other.proc) return false;
     return true;
   }
@@ -47,6 +81,8 @@ struct EH_Comm_Pair {
   bool operator!=(const EH_Comm_Pair &rhs) const {
     return !(*this == rhs);
   }
+
+  inline int getID() const {return id;}
 };
 
 struct PL_Comm_Pair {
@@ -73,6 +109,11 @@ struct PL_Comm_Pair {
   }
 };
 
+// individual entry points from the glue layer to the mesh cap
+void mbmesh_redist_elem(MBMesh *src_mesh, int *num_elem_gids, int *elem_gids, MBMesh **out_mesh);
+void mbmesh_redist_node(MBMesh *src_mesh, int *num_node_gids, int *node_gids, MBMesh **out_mesh);
+void mbmesh_redist(MBMesh *src_mesh, int *num_node_gids, int *node_gids, int *num_elem_gids, int *elem_gids, MBMesh **out_mesh);
+
 // This creates src and dst rendezvous meshes where the overlap is based on elements
 void create_mbmesh_redist_elem(MBMesh *src_mesh, 
                                std::vector<EH_Comm_Pair> *elem_to_proc_list, 
@@ -82,6 +123,10 @@ void create_pointlist_redist_point(PointList *src_pl,
                                    std::vector<PL_Comm_Pair> *point_to_proc_list,
                                    PointList **_out_pl);
 
+// split element handling that needs to be called from the glue layer
+void mbmesh_expand_split_elem_ids(MBMesh *mesh, int num_elem_gids, int *elem_gids, int *_num_elem_gids_ws, int **_elem_gids_ws, std::map<int,int> &split_to_orig_id);
+void mbmesh_set_split_orig_id_map(MBMesh *src_mesh, MBMesh *output_mesh);
+void mbmesh_calc_split_id_to_frac(MBMesh *mesh);
 
 } //namespace
 

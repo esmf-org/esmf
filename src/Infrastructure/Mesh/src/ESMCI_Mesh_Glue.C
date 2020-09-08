@@ -29,6 +29,8 @@
 #include "ESMCI_CoordSys.h"
 #include "ESMCI_Array.h"
 
+#include "ESMCI_TraceMacros.h"  // for profiling
+
 #include "Mesh/include/ESMCI_Mesh.h"
 #include "Mesh/include/Legacy/ESMCI_MeshRead.h"
 #include "Mesh/include/Regridding/ESMCI_MeshRegrid.h" //only for the conservative flag in add_elements
@@ -55,13 +57,17 @@ using namespace ESMCI;
 
 // #define DEBUG_OWNED
 
+
+extern "C" void FTN_X(f_esmf_getmeshdistgrid)(int*, int*, int*, int*);
+
+
+
 void ESMCI_meshcreate(Mesh **meshpp,
                       int *pdim, int *sdim,
                       ESMC_CoordSys_Flag *coordSys, int *rc)
 {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_meshcreate()"
-
 
    try {
 
@@ -1775,8 +1781,6 @@ void ESMCI_meshfreememory(Mesh **meshpp, int *rc) {
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
 }
-
-extern "C" void FTN_X(f_esmf_getmeshdistgrid)(int*, int*, int*, int*);
 
 
 /**
@@ -5574,7 +5578,7 @@ void ESMCI_meshcreateredistelems(Mesh **src_meshpp, int *num_elem_gids, int *ele
 void ESMCI_meshcreateredistnodes(Mesh **src_meshpp, int *num_node_gids, int *node_gids,
                                                     Mesh **output_meshpp, int *rc) {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_meshcreateredistelems()"
+#define ESMC_METHOD "ESMCI_meshcreateredistnodes()"
 
   try {
 
@@ -5602,6 +5606,7 @@ void ESMCI_meshcreateredistnodes(Mesh **src_meshpp, int *num_node_gids, int *nod
       // dereference output mesh
       Mesh *output_mesh=*output_meshpp;
 
+      ESMCI_MESHREDIST_TRACE_ENTER("NativeMesh split id postprocessing 2");
       // if split mesh add info
       // output_mesh->is_split=src_mesh->is_split; // SET INSIDE MeshRedistNode()
       output_mesh->max_non_split_id=src_mesh->max_non_split_id;
@@ -5609,6 +5614,7 @@ void ESMCI_meshcreateredistnodes(Mesh **src_meshpp, int *num_node_gids, int *nod
 
       // calculate split_id_to_frac map from other info
       calc_split_id_to_frac(output_mesh);
+      ESMCI_MESHREDIST_TRACE_EXIT("NativeMesh split id postprocessing 2");
 
 #if 0
       // DEBUG OUTPUT

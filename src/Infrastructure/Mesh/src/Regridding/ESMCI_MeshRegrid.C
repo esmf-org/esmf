@@ -16,6 +16,8 @@
 #include <Mesh/include/Regridding/ESMCI_CreepFill.h>
 #include <Mesh/include/Regridding/ESMCI_Extrap.h>
 
+#include "ESMCI_TraceMacros.h"  // for profiling
+
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
@@ -186,15 +188,19 @@ namespace ESMCI {
       Mesh *tmp_dstmesh=NULL;
       if (dstpointlist == NULL) tmp_dstmesh=dstmesh;
 
+      ESMCI_REGRID_TRACE_ENTER("NativeMesh regrid interp 1");
       // Build the rendezvous grids
       Interp interp(srcmesh, srcpointlist, tmp_dstmesh, dstpointlist,
                     midmesh, false, *regridMethod,
                     set_dst_status, dst_status,
                     mtype, *unmappedaction);
+      ESMCI_REGRID_TRACE_EXIT("NativeMesh regrid interp 1");
 
 
+      ESMCI_REGRID_TRACE_ENTER("NativeMesh regrid interp 2");
       // Create the weight matrix
       interp(0, wts, set_dst_status, dst_status);
+      ESMCI_REGRID_TRACE_EXIT("NativeMesh regrid interp 2");
 
       // Release the Zoltan struct if we used it for the mid mesh
       if(midmesh) interp.release_zz();
@@ -222,8 +228,7 @@ namespace ESMCI {
      }
 
     return 1;
-  }
-
+ }
 
 
   // to generate the iwts again, and return to Fortran
