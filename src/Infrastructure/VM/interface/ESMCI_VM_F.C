@@ -1747,6 +1747,17 @@ extern "C" {
     fflush (stdout);
   }
   
+  void FTN_X(c_esmc_vmlogpointer)(void *ptr, char *prefix,
+    ESMCI_FortranStrLenArg prefix_l ){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmlogpointer()"
+    std::string prefixStr(prefix, prefix_l);
+    std::stringstream msg;
+    msg << prefixStr << ptr;
+    if (ptr) msg << " => " << *(void **)ptr;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
+  
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   // Fortran entry point to automatic garbage collection on Component scope
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

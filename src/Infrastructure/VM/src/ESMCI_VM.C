@@ -1017,6 +1017,12 @@ void VM::shutdown(
         try{
           // The following loop deallocates deep Fortran ESMF objects
           for (int k=matchTable_FObjects[i].size()-1; k>=0; k--){
+#ifdef GARBAGE_COLLECTION_LOG_on
+            std::stringstream debugmsg;
+            debugmsg << "ESMF Automatic Garbage Collection: FObject delete: "
+              << *(void **)&(matchTable_FObjects[i][k].fobject);
+            ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+#endif
             if (matchTable_FObjects[i][k].objectID == ESMC_ID_FIELD.objectID){
               FTN_X(f_esmf_fieldcollectgarbage)
                 (&(matchTable_FObjects[i][k].fobject),&localrc);
@@ -2757,7 +2763,9 @@ void VM::addFObject(
   
 #ifdef GARBAGE_COLLECTION_LOG_on
   std::stringstream msg;
-  msg << "VM::addFObject() object added: " << string(ESMC_ObjectID_Name(objectID));
+  msg << "VM::addFObject() object added: " <<
+    string(ESMC_ObjectID_Name(objectID)) << " " << *(void **)fobject << " - " <<
+    **(void ***)fobject;
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
   //logBacktrace("VM::addFObject()");  // enable to pin down specific caller
 #endif
@@ -2834,7 +2842,8 @@ void VM::rmFObject(
 
 #ifdef GARBAGE_COLLECTION_LOG_on
   std::stringstream msg;
-  msg << "VM::rmFObject() object removed: " << **(void ***)fobject;
+  msg << "VM::rmFObject() object removed: " << *(void **)fobject << "-" <<
+    **(void ***)fobject;
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
   //logBacktrace("VM::rmFObject()");  // enable to pin down specific caller
 #endif
