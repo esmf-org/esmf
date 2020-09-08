@@ -2605,12 +2605,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rcToReturn=rc)) return
 
-      ! mark object invalid
-      call ESMF_BaseSetStatus(locstream%lstypep%base, ESMF_STATUS_INVALID, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rcToReturn=rc)) return
-                                
       if (present(noGarbage)) then
         if (noGarbage) then
           ! destroy Base object (which also removes it from garbage collection)
@@ -2713,6 +2707,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         
       endif
 
+      ! mark object invalid
+      call ESMF_BaseSetStatus(lstypep%base, ESMF_STATUS_INVALID, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rcToReturn=rc)) return
+                                
       ! return successfully
       if (present(rc)) rc = ESMF_SUCCESS
 
