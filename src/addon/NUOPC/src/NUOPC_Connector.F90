@@ -2723,6 +2723,11 @@ module NUOPC_Connector
               staggerloc=staggerloc, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return
+call ESMF_PointerLog(grid%this, prefix="acceptorField set persistent shared Grid: ", rc=rc)
+            ! must make Grid persistent to be safe when sharing with other VM
+            call c_ESMC_SetPersist(grid, ESMF_TRUE, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return
           else
             ! not shared GeomObject -> must transfer
             call ESMF_GridGet(grid, distgrid=providerDG, name=geomobjname, &
@@ -2977,8 +2982,13 @@ call ESMF_PointerLog(gridListE%keyGrid%this, &
               rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+call ESMF_PointerLog(mesh%this, prefix="acceptorField set persistent shared Mesh: ", rc=rc)
+            ! must make Mesh persistent to be safe when sharing with other VM
+            call c_ESMC_SetPersist(mesh, ESMF_TRUE, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return
           else
-            ! not sharedGeom -> must transfer
+            ! not shared GeomObject -> must transfer
             call ESMF_MeshGet(mesh, nodalDistgrid=providerDG_nodal, &
               name=geomobjname, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -3671,7 +3681,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
           ! not a situation that needs handling here
           if (btest(verbosity,12)) then
             write (msgString, '(A)') trim(name)//": "//&
-              "- nothing shared or transferred"
+              "- nothing shared or transferred, or may already be handled"
             call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &

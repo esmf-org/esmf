@@ -1840,10 +1840,14 @@ int Grid::destroy(
     return rc;
   }
 
+  // check if this Grid object has the persist flag set
+  if ((*gridArg)->ESMC_BaseGetPersist())
+    return ESMF_SUCCESS;  // nothing to be done here, return successfully
+
   try{
-    // check that Grid object still has a valid entry in the garbage collection
+    // check if this Grid object still has a valid entry in the garbage collection
     if (!VM::validObject(*gridArg))
-      return ESMF_SUCCESS;  // nothing to do -> early successful return
+      return ESMF_SUCCESS;  // nothing to be done here, return successfully
     // destruct Grid object
     (*gridArg)->destruct(true, noGarbage);
     // mark as invalid object

@@ -1796,8 +1796,13 @@ int MeshCap::destroy(MeshCap **mcpp, bool noGarbage) {
     // Dereference meshcap
   MeshCap *mcp=*mcpp;
 
+  // check if this Mesh object has the persist flag set
+  if (mcp->ESMC_BaseGetPersist())
+    return ESMF_SUCCESS;  // nothing to be done here, return successfully
+
+  // check if this Mesh object still has a valid entry in the garbage collection
   if (!VM::validObject(mcp))
-    return ESMF_SUCCESS;  // nothing to do -> early successful return
+    return ESMF_SUCCESS;  // nothing to be done here, return successfully
 
   // Get mesh type
   bool is_esmf_mesh=mcp->is_esmf_mesh;
