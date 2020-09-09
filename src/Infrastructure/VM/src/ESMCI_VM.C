@@ -1036,6 +1036,16 @@ void VM::shutdown(
               if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                 ESMC_CONTEXT, rc))
                 return;
+#if 0
+//gjt: Disable cleaning up GeomBase from the garbage collection level because
+//gjt: each Field actually owns its own instance of the GeomBase. The way
+//gjt: FieldDestruct() currently works, it looks at the GeomBase, and if that
+//gjt: were already destroyed, it causes issues. In the long run this might
+//gjt: be better implemented via a protection against accessing GeomBase from
+//gjt: FieldDestruct() in that case. But then it is important that all of the
+//gjt: Geom types correctly implement their destructor. Right now the Mesh
+//gjt: destructur is not doing all that is needed, and so the Mesh cleanup
+//ght: actually does depend on the Field garbage collection.
             }else if (matchTable_FObjects[i][k].objectID ==
               ESMC_ID_GEOMBASE.objectID){
               FTN_X(f_esmf_geombasecollectgarbage)(
@@ -1043,6 +1053,7 @@ void VM::shutdown(
               if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                 ESMC_CONTEXT, rc))
                 return;
+#endif
             }else if (matchTable_FObjects[i][k].objectID ==
               ESMC_ID_XGRIDGEOMBASE.objectID){
               FTN_X(f_esmf_xgridgeombasecolgarbage)(
@@ -2704,7 +2715,7 @@ void VM::rmObject(
     std::stringstream msg;
     msg << "VM::rmObject() object removed: " << object;
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    logBacktrace("VM::rmObject()");  // enable to pin down specific caller
+    //logBacktrace("VM::rmObject()");  // enable to pin down specific caller
 #endif
       break;
     }
@@ -3218,6 +3229,16 @@ void VM::finalize(
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc))
           return;
+#if 0
+//gjt: Disable cleaning up GeomBase from the garbage collection level because
+//gjt: each Field actually owns its own instance of the GeomBase. The way
+//gjt: FieldDestruct() currently works, it looks at the GeomBase, and if that
+//gjt: were already destroyed, it causes issues. In the long run this might
+//gjt: be better implemented via a protection against accessing GeomBase from
+//gjt: FieldDestruct() in that case. But then it is important that all of the
+//gjt: Geom types correctly implement their destructor. Right now the Mesh
+//gjt: destructur is not doing all that is needed, and so the Mesh cleanup
+//ght: actually does depend on the Field garbage collection.
       }else if (matchTable_FObjects[0][k].objectID ==
         ESMC_ID_GEOMBASE.objectID){
         FTN_X(f_esmf_geombasecollectgarbage)(
@@ -3225,6 +3246,7 @@ void VM::finalize(
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc))
           return;
+#endif
       }else if (matchTable_FObjects[0][k].objectID ==
         ESMC_ID_XGRIDGEOMBASE.objectID){
         FTN_X(f_esmf_xgridgeombasecolgarbage)(
