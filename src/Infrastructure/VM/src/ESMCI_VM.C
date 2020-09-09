@@ -2311,8 +2311,10 @@ void VM::logGarbageInfo(
       void *basePtr = NULL;
       if (matchTable_FObjects[i][j].objectID != ESMC_ID_GEOMBASE.objectID)
         basePtr = **(void ***)(&matchTable_FObjects[i][j].fobject);
-      sprintf(msg, "%s - GarbInfo: fortran objs[%d]: %s %p", prefix.c_str(), j,
-        ESMC_ObjectID_Name(matchTable_FObjects[i][j].objectID), basePtr);
+      sprintf(msg, "%s - GarbInfo: fortran objs[%d]: %s %p - %p",
+        prefix.c_str(), j,
+        ESMC_ObjectID_Name(matchTable_FObjects[i][j].objectID),
+        *(void **)(&matchTable_FObjects[i][j].fobject), basePtr);
       ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
     }
     sprintf(msg, "%s - GarbInfo: Base objs=%lu", prefix.c_str(),
@@ -2664,6 +2666,10 @@ void VM::rmObject(
   // initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;   // final return code
 
+  //gjt: Disabled the following block of code because we allow object sharing
+  //gjt: across VMs. Therefore garbage collection functionality like removing
+  //gjt: an object must loop through _all_ of the VMs.
+#if 0
   // find current VM index
   esmf_pthread_t mytid;
 #ifndef ESMF_NO_PTHREADS
@@ -2681,14 +2687,14 @@ void VM::rmObject(
       throw rc;
     }
   }
-
   // found a match
   // proceed to remove object from this VM's garbage collection table
+#endif
 
   // must lock/unlock for thread-safe access to std::vector
   VM *vm = getCurrent();
   vm->lock();
-  for (i=0; i<matchTableBound; i++){
+  for (int i=0; i<matchTableBound; i++){  //gjt: loop through all of the VMs
   for (vector<ESMC_Base *>::iterator
     it = matchTable_Objects[i].begin();
     it != matchTable_Objects[i].end(); ++it){
@@ -2798,6 +2804,10 @@ void VM::rmFObject(
   // initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;   // final return code
 
+  //gjt: Disabled the following block of code because we allow object sharing
+  //gjt: across VMs. Therefore garbage collection functionality like removing
+  //gjt: an object must loop through _all_ of the VMs.
+#if 0
   // find current VM index
   esmf_pthread_t mytid;
 #ifndef ESMF_NO_PTHREADS
@@ -2815,14 +2825,14 @@ void VM::rmFObject(
       throw rc;
     }
   }
-
   // found a match
   // proceed to remove object from this VM's garbage collection table
+#endif
 
   // must lock/unlock for thread-safe access to std::vector
   VM *vm = getCurrent();
   vm->lock();
-  for (i=0; i<matchTableBound; i++){
+  for (int i=0; i<matchTableBound; i++){  //gjt: loop through all of the VMs
   for (vector<FortranObject>::iterator
     it = matchTable_FObjects[i].begin();
     it != matchTable_FObjects[i].end(); ++it){
@@ -2836,7 +2846,7 @@ void VM::rmFObject(
       matchTable_FObjects[i].erase(it);  // erase the object entry
 #ifdef GARBAGE_COLLECTION_LOG_on
       std::stringstream msg;
-      msg << "VM::rmFObject() object removed: " << *(void **)fobject << "-" <<
+      msg << "VM::rmFObject() object removed: " << *(void **)fobject << " - " <<
         **(void ***)fobject;
       ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
       //logBacktrace("VM::rmFObject()");  // enable to pin down specific caller
