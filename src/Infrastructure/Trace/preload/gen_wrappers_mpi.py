@@ -271,6 +271,12 @@ cfunc_list = [
         'params':'void *buffer, int count, MPI_Datatype datatype, int root, MPI_Comm comm',
         'args':'buffer, count, datatype, root, comm'
     },
+
+    {
+        'ret':'int', 'name':'MPI_Bsend',
+        'params':'ESMF_MPI_CONST void *buffer, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm',
+        'args':'buffer, count, datatype, dest, tag, comm'
+    },
     
     {
         'ret':'int', 'name':'MPI_Gather',
@@ -285,6 +291,42 @@ cfunc_list = [
     },
 
     {
+        'ret':'int', 'name':'MPI_Iprobe',
+        'params':'int source, int tag, MPI_Comm comm, int *flag, MPI_Status *status',
+        'args':'source, tag, comm, flag, status'
+    },
+    
+    {
+        'ret':'int', 'name':'MPI_Irecv',
+        'params':'void *buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Request *request',
+        'args':'buf, count, datatype, source, tag, comm, request'
+    },
+
+    {
+        'ret':'int', 'name':'MPI_Irsend',
+        'params':'ESMF_MPI_CONST void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Request *request',
+        'args':'buf, count, datatype, dest, tag, comm, request'
+    },
+
+    {
+        'ret':'int', 'name':'MPI_Isend',
+        'params':'ESMF_MPI_CONST void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Request *request',
+        'args':'buf, count, datatype, dest, tag, comm, request'
+    },
+
+    {
+        'ret':'int', 'name':'MPI_Issend',
+        'params':'ESMF_MPI_CONST void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Request *request',
+        'args':'buf, count, datatype, dest, tag, comm, request'
+    },
+    
+    {
+        'ret':'int', 'name':'MPI_Probe',
+        'params':'int source, int tag, MPI_Comm comm, MPI_Status *status',
+        'args':'source, tag, comm, status'
+    },
+        
+    {
         'ret':'int', 'name':'MPI_Recv',
         'params':'void *buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Status *status',
         'args':'buf, count, datatype, source, tag, comm, status'
@@ -297,9 +339,27 @@ cfunc_list = [
     },
 
     {
+        'ret':'int', 'name':'MPI_Rsend',
+        'params':'ESMF_MPI_CONST void *sendbuf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm',
+        'args':'sendbuf, count, datatype, dest, tag, comm'
+    },    
+    
+    {
+        'ret':'int', 'name':'MPI_Scan',
+        'params':'ESMF_MPI_CONST void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm',
+        'args':'sendbuf, recvbuf, count, datatype, op, comm'
+    },
+    
+    {
         'ret':'int', 'name':'MPI_Scatter',
         'params':'ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPI_Comm comm',
         'args':'sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm'
+    },
+
+    {
+        'ret':'int', 'name':'MPI_Scatterv',
+        'params':'ESMF_MPI_CONST void *sendbuf, ESMF_MPI_CONST int sendcounts[], ESMF_MPI_CONST int displs[], MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPI_Comm comm',
+        'args':'sendbuf, sendcounts, displs, sendtype, recvbuf, recvcount, recvtype, root, comm'
     },
     
     {
@@ -312,6 +372,30 @@ cfunc_list = [
         'ret':'int', 'name':'MPI_Sendrecv',
         'params':'ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, int dest, int sendtag, void *recvbuf, int recvcount, MPI_Datatype recvtype, int source, int recvtag, MPI_Comm comm, MPI_Status *status',
         'args':'sendbuf, sendcount, sendtype, dest, sendtag, recvbuf, recvcount, recvtype, source, recvtag, comm, status'
+    },
+
+    {
+        'ret':'int', 'name':'MPI_Test',
+        'params':'MPI_Request *request, int *flag, MPI_Status *status',
+        'args':'request, flag, status'
+    },
+
+    {
+        'ret':'int', 'name':'MPI_Testall',
+        'params':'int count, MPI_Request requests[], int *flag, MPI_Status statuses[]',
+        'args':'count, requests, flag, statuses'
+    },
+
+    {
+        'ret':'int', 'name':'MPI_Testany',
+        'params':'int count, MPI_Request requests[], int *index, int *flag, MPI_Status statuses[]',
+        'args':'count, requests, index, flag, statuses'
+    },
+
+    {
+        'ret':'int', 'name':'MPI_Testsome',
+        'params':'int incount, MPI_Request requests[], int *outcount, int indices[], MPI_Status statuses[]',
+        'args':'incount, requests, outcount, indices, statuses'
     },
     
     {
@@ -391,6 +475,12 @@ ffunc_list = [
     },
 
     {
+        'name':'mpi_bsend',
+        'params':'MPI_Fint *buffer, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierr',
+        'args':'buffer, count, datatype, dest, tag, comm, ierr'
+    },
+        
+    {
         'name':'mpi_exscan',
         'params':'MPI_Fint *sendbuf, MPI_Fint *recvbuf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierr',
         'args':'sendbuf, recvbuf, count, datatype, op, comm, ierr'      
@@ -409,6 +499,42 @@ ffunc_list = [
     },
 
     {
+        'name':'mpi_iprobe',
+        'params':'MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *flag, MPI_Fint *status, MPI_Fint *ierr',
+        'args':'source, tag, comm, flag, status, ierr'
+    },
+    
+    {
+        'name':'mpi_irecv',
+        'params':'MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr',
+        'args':'buf, count, datatype, source, tag, comm, request, ierr'
+    },
+
+    {
+        'name':'mpi_irsend',
+        'params':'MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr',
+        'args':'buf, count, datatype, dest, tag, comm, request, ierr'
+    },
+    
+    {
+        'name':'mpi_isend',
+        'params':'MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr',
+        'args':'buf, count, datatype, dest, tag, comm, request, ierr'
+    },
+
+    {
+        'name':'mpi_issend',
+        'params':'MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr',
+        'args':'buf, count, datatype, dest, tag, comm, request, ierr'
+    },
+    
+    {
+        'name':'mpi_probe',
+        'params':'MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr',
+        'args':'source, tag, comm, status, ierr'
+    },
+    
+    {
         'name':'mpi_recv',
         'params':'MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr',
         'args':'buf, count, datatype, source, tag, comm, status, ierr'
@@ -425,6 +551,12 @@ ffunc_list = [
         'params':'MPI_Fint *sendbuf, MPI_Fint *recvbuf, MPI_Fint *recvcounts, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierr',
         'args':'sendbuf, recvbuf, recvcounts, datatype, op, comm, ierr'
         
+    },
+
+    {
+        'name':'mpi_rsend',
+        'params':'MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierr',
+        'args':'buf, count, datatype, dest, tag, comm, ierr'
     },
     
     {
@@ -449,6 +581,36 @@ ffunc_list = [
         'name':'mpi_send',
         'params':'MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierr',
         'args':'buf, count, datatype, dest, tag, comm, ierr'
+    },
+
+    {
+        'name':'mpi_sendrecv',
+        'params':'MPI_Fint *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, MPI_Fint *dest, MPI_Fint *sendtag, MPI_Fint *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *source, MPI_Fint *recvtag, MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr',
+        'args':'sendbuf, sendcount, sendtype, dest, sendtag, recvbuf, recvcount, recvtype, source, recvtag, comm, status, ierr'
+    },
+
+    {
+        'name':'mpi_test',
+        'params':'MPI_Fint *request, MPI_Fint *flag, MPI_Fint *status, MPI_Fint *ierr',
+        'args':'request, flag, status, ierr'
+    },
+
+    {
+        'name':'mpi_testall',
+        'params':'MPI_Fint *count, MPI_Fint *requests, MPI_Fint *flag, MPI_Fint *statuses, MPI_Fint *ierr',
+        'args':'count, requests, flag, statuses, ierr'
+    },
+
+    {
+        'name':'mpi_testany',
+        'params':'MPI_Fint *count, MPI_Fint *requests, MPI_Fint *index, MPI_Fint *flag, MPI_Fint *status, MPI_Fint *ierr',
+        'args':'count, requests, index, flag, status, ierr'
+    },
+
+    {
+        'name':'mpi_testsome',
+        'params':'MPI_Fint *incount, MPI_Fint *requests, MPI_Fint *outcount, MPI_Fint *indices, MPI_Fint *statuses, MPI_Fint *ierr',
+        'args':'incount, requests, outcount, indices, statuses, ierr'
     },
     
     {
