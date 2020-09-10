@@ -2899,12 +2899,13 @@ contains
 !     \end{description}
 !
 !EOPI
-      integer                           :: localrc, i
-      type(ESMF_StateClass),    pointer :: stypep
-      type(ESMF_StateItemWrap), pointer :: itemList(:)
-      character(len=ESMF_MAXSTR)        :: thisname
-      type(ESMF_FieldType),     pointer :: fieldp
-      character(len=80)                 :: msgString
+      integer                             :: localrc, i
+      type(ESMF_StateClass),      pointer :: stypep
+      type(ESMF_StateItemWrap),   pointer :: itemList(:)
+      character(len=ESMF_MAXSTR)          :: thisname
+      type(ESMF_FieldType),       pointer :: fieldp
+      type(ESMF_FieldBundleType), pointer :: fbpthis
+      character(len=80)                   :: msgString
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2935,10 +2936,12 @@ contains
           ! if it was created as a proxy or not. However, the local State
           ! might not correctly track this if the proxy object was created
           ! under a different State and then copied over into this State.
-          ! This can happen e.g. under NUOPC when Fields from a smaller VM
-          ! are shared with a larger VM. Then on the extra PETs the sharing
-          ! protocol creates proxies using a temporary State which then are
-          ! copied into the actual import/exportState seen in a later Reconcile.
+          ! This can happen e.g. under NUOPC when Fields or FieldBuindles
+          ! from a smaller VM are shared with a larger VM. Then on the extra
+          ! PETs the sharing protocol creates proxies using a temporary State
+          ! which then are copied into the actual import/exportState seen in
+          ! a later Reconcile.
+          ! The only use cases are Field and FieldBundle objects under State.
           if (itemList(i)%si%otype==ESMF_STATEITEM_FIELD) then
             fieldp => itemList(i)%si%datap%fp%ftypep
             call ESMF_StateItemGet(itemList(i)%si, name=thisname, rc=localrc)
@@ -2947,7 +2950,7 @@ contains
               ESMF_CONTEXT, rcToReturn=rc)) return
 
 #ifdef RECONCILE_ZAP_LOG_on
-write(msgString,*) "ESMF_ReconcileZapProxies: "//trim(thisname), &
+write(msgString,*) "ESMF_ReconcileZapProxies Field: "//trim(thisname), &
   itemList(i)%si%proxyFlag
 call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=localrc)
 #endif
@@ -2959,12 +2962,36 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=localrc)
               rcToReturn=rc)) return
 
 #ifdef RECONCILE_ZAP_LOG_on
-write(msgString,*) "ESMF_ReconcileZapProxies: "//trim(thisname), &
+write(msgString,*) "ESMF_ReconcileZapProxies Field: "//trim(thisname), &
   itemList(i)%si%proxyFlag
 call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=localrc)
 #endif
 
-          else ! TODO: handle also FieldBundle
+          else if (itemList(i)%si%otype==ESMF_STATEITEM_FIELDBUNDLE) then
+            fbpthis => itemList(i)%si%datap%fbp%this
+            call ESMF_StateItemGet(itemList(i)%si, name=thisname, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+
+#ifdef RECONCILE_ZAP_LOG_on
+write(msgString,*) "ESMF_ReconcileZapProxies Field: "//trim(thisname), &
+  itemList(i)%si%proxyFlag
+call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=localrc)
+#endif
+
+            ! determine proxyFlag from Base level
+            itemList(i)%si%proxyFlag = ESMF_IsProxy(fbpthis%base, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT,  &
+              rcToReturn=rc)) return
+
+#ifdef RECONCILE_ZAP_LOG_on
+write(msgString,*) "ESMF_ReconcileZapProxies Field: "//trim(thisname), &
+  itemList(i)%si%proxyFlag
+call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=localrc)
+#endif
+
           endif
           ! Now the local State proxyFlag is consistent and can be used to
           ! determine whether the current object needs to be zapped or not.
@@ -3089,6 +3116,16 @@ call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): scanning zapList", &
 call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): found associated zapList object", &
   ESMF_LOGMSG_INFO, rc=localrc)
 #endif
+              ! Note that only Fields and FieldBundles receive the restoration
+              ! treatment, and therefore persist during repeated Reconcile()
+              ! calls. The method only works for these two types carried by
+              ! State, because they are deep Fortran classes, and there is an
+              ! extra layer of indirection that is used by the implemented
+              ! approach. For deep C++ implemented classes this extra layer of
+              ! indirection is missing, and the method would not work.
+              ! For practical cases under NUOPC only Field and FieldBundle
+              ! objects are relevant direct objects handled under State, and
+              ! therefore the implemented method suffices.
               if (zapList(k)%si%otype==ESMF_STATEITEM_FIELD) then
                 call ESMF_FieldGet(zapList(k)%si%datap%fp, name=name, rc=localrc)
                 if (ESMF_LogFoundError(localrc, &
@@ -3165,7 +3202,8 @@ call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): found FieldBundle: "//trim(na
       end do ! i
     endif
 
-    ! Completely destroy any zapped proxies that did not get restored
+    ! Completely destroy any zapped proxies that did not get restored.
+    ! This applies to all zapped proxy objects, regardless of type.
     if (associated(zapFlag)) then
       do k=1, size(zapFlag)
         if (zapFlag(k)) then
