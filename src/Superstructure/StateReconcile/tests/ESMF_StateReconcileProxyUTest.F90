@@ -55,6 +55,8 @@ module subcomp_mod
     type(ESMF_DistGrid)     :: dg
     type(ESMF_Array)        :: array
     type(ESMF_Grid)         :: grid
+    type(ESMF_Mesh)         :: mesh
+    type(ESMF_LocStream)    :: locStream
     type(ESMF_Field)        :: field
     type(ESMF_FieldBundle)  :: fb
     
@@ -76,18 +78,21 @@ module subcomp_mod
     call ESMF_StateAdd(estate, (/array/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
-    grid = ESMF_GridCreate(dg, rc=rc)
+    grid = ESMF_GridCreate1PeriDimUfrm(maxIndex=(/10, 15/), &
+      minCornerCoord=(/2.5_ESMF_KIND_R8, -59._ESMF_KIND_R8/), &
+      maxCornerCoord=(/362.5_ESMF_KIND_R8, 81._ESMF_KIND_R8/), &
+      staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     field = ESMF_FieldCreate(grid=grid, typekind=ESMF_TYPEKIND_R8, &
-      name="field1", rc=rc)
+      name="field1G", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     call ESMF_StateAdd(estate, (/field/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     field = ESMF_FieldCreate(grid=grid, typekind=ESMF_TYPEKIND_R8, &
-      name="field2", rc=rc)
+      name="field2G", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     call ESMF_StateAdd(estate, (/field/), rc=rc)
@@ -97,6 +102,40 @@ module subcomp_mod
     if (rc/=ESMF_SUCCESS) return ! bail out
     
     call ESMF_StateAdd(estate, (/fb/), rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    mesh = ESMF_MeshCreate(grid, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    field = ESMF_FieldCreate(mesh=mesh, typekind=ESMF_TYPEKIND_R8, &
+      name="field1M", rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    call ESMF_StateAdd(estate, (/field/), rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    field = ESMF_FieldCreate(mesh=mesh, typekind=ESMF_TYPEKIND_R8, &
+      name="field2M", rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    call ESMF_StateAdd(estate, (/field/), rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    locStream=ESMF_LocStreamCreate(name="Temperature Measurements", &
+      localCount=20, coordSys=ESMF_COORDSYS_SPH_DEG, rc=rc)
+
+    field = ESMF_FieldCreate(locStream=locStream, typekind=ESMF_TYPEKIND_R8, &
+      name="field1L", rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    call ESMF_StateAdd(estate, (/field/), rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    field = ESMF_FieldCreate(locStream=locStream, typekind=ESMF_TYPEKIND_R8, &
+      name="field2L", rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    call ESMF_StateAdd(estate, (/field/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
   end subroutine !--------------------------------------------------------------
@@ -187,6 +226,8 @@ program ESMF_StateReconcileProxyUTest
   type(ESMF_DistGrid)   :: dg1, dg2
   type(ESMF_Field)      :: field, fieldRe
   type(ESMF_Grid)       :: g1, g2
+  type(ESMF_Mesh)       :: m1, m2
+  type(ESMF_LocStream)  :: l1, l2
   type(ESMF_FieldBundle):: fb, fbRe
   
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
@@ -249,13 +290,13 @@ program ESMF_StateReconcileProxyUTest
 !  write(failMsg, *) "Found non-aliased DistGrid objects!"
 !  call ESMF_Test((dg1==dg2), name, failMsg, result, ESMF_SRCLINE)
 
-  ! Extract the Grid from the two Field objects in the State
-  call ESMF_StateGet(exportState, "field1", field=field, rc=rc)
+  ! Extract the Grid from two Field objects in the State built on same Grid
+  call ESMF_StateGet(exportState, "field1G", field=field, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_FieldGet(field, grid=g1, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   !-
-  call ESMF_StateGet(exportState, "field2", field=field, rc=rc)
+  call ESMF_StateGet(exportState, "field2G", field=field, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_FieldGet(field, grid=g2, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -265,6 +306,40 @@ program ESMF_StateReconcileProxyUTest
   write(name, *) "Ensure g1 and g2 are aliases to the same Grid (proxy) Test"
   write(failMsg, *) "Found non-aliased Grid (proxy) objects!"
   call ESMF_Test((g1==g2), name, failMsg, result, ESMF_SRCLINE)
+
+  ! Extract the Mesh from two Field objects in the State built on same Mesh
+  call ESMF_StateGet(exportState, "field1M", field=field, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_FieldGet(field, mesh=m1, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !-
+  call ESMF_StateGet(exportState, "field2M", field=field, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_FieldGet(field, mesh=m2, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  
+  ! Test whether m1 and m2 are aliases to the same Mesh in memory
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Ensure m1 and m2 are aliases to the same Mesh (proxy) Test"
+  write(failMsg, *) "Found non-aliased Mesh (proxy) objects!"
+  call ESMF_Test((m1==m2), name, failMsg, result, ESMF_SRCLINE)
+
+  ! Extract the LocStream from two Field objects in the State built on same LocStream
+  call ESMF_StateGet(exportState, "field1L", field=field, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_FieldGet(field, locStream=l1, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !-
+  call ESMF_StateGet(exportState, "field2L", field=field, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_FieldGet(field, locStream=l2, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  
+  ! Test whether l1 and l2 are aliases to the same LocStream in memory
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Ensure l1 and l2 are aliases to the same LocStream (proxy) Test"
+  write(failMsg, *) "Found non-aliased LocStream (proxy) objects!"
+  call ESMF_Test((l1==l2), name, failMsg, result, ESMF_SRCLINE)
 
   call ESMF_StateGet(exportState, "fb", fieldbundle=fb, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -276,7 +351,7 @@ program ESMF_StateReconcileProxyUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-  call ESMF_StateGet(exportState, "field2", field=fieldRe, rc=rc)
+  call ESMF_StateGet(exportState, "field2L", field=fieldRe, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   ! Test whether field and fieldRe are aliases
