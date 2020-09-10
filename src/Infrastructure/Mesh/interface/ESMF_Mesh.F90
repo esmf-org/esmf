@@ -8217,11 +8217,19 @@ offset = 0
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Release the route handle
-    call ESMF_ArrayHaloRelease(haloHandle, rc=localrc)
-    call ESMF_ArrayRedistRelease(redistHdl, rc=localrc)
-    call ESMF_ArrayDestroy(regCoordArray)
-    call ESMF_DistGridDestroy(regDistGrid)
+    ! Release RouteHandle, Array, and DistGrid
+    call ESMF_ArrayHaloRelease(haloHandle, noGarbage=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_ArrayRedistRelease(redistHdl, noGarbage=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_ArrayDestroy(regCoordArray, noGarbage=.true., rc=localrc))
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_DistGridDestroy(regDistGrid, noGarbage=.true., rc=localrc))
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Now, get the node coordinates fortran pointer, this fptr includes both the
     ! exclusive region and the halo region
