@@ -544,7 +544,7 @@ static void _create_pointlist_of_points_in_wmat(PointList *pointlist, WMat &wts,
  // a set of weights which map source to destination ids (e.g. regrid weights). This means converting
  // the dest. to dest. weights to source to dest. using those weights and then adding them in. 
   template<class Type>
-  static void _merge_dst_to_dst_wts_into_src_to_dst_wts(Type &dst, WMat &dtod_wts, 
+  void _merge_dst_to_dst_wts_into_src_to_dst_wts(Type &dst, WMat &dtod_wts, 
                                                         WMat &stod_wts) {
 
    // If parallel, migrate stod_wts to make sure the correct entries are on this
@@ -649,10 +649,10 @@ static void _create_pointlist_of_points_in_wmat(PointList *pointlist, WMat &wts,
    }
  }
 
-template static void _merge_dst_to_dst_wts_into_src_to_dst_wts(Mesh &dst, WMat &dtod_wts, 
+template void _merge_dst_to_dst_wts_into_src_to_dst_wts(Mesh &dst, WMat &dtod_wts, 
                                                                WMat &stod_wts);
 
-template static void _merge_dst_to_dst_wts_into_src_to_dst_wts(PointList &dst, WMat &dtod_wts, 
+template void _merge_dst_to_dst_wts_into_src_to_dst_wts(PointList &dst, WMat &dtod_wts, 
                                                                WMat &stod_wts);
 
 
