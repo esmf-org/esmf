@@ -4245,7 +4245,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return
     
     ! done with the helper state
-    call ESMF_StateDestroy(state, rc=rc)
+    call ESMF_StateDestroy(state, noGarbage=.true., rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return
 
@@ -4388,7 +4388,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return
     
     ! done with the helper state
-    call ESMF_StateDestroy(state, rc=rc)
+    call ESMF_StateDestroy(state, noGarbage=.true., rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return
       
@@ -6067,7 +6067,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     call ESMF_FieldBundleDestroy(is%wrap%dstFields, noGarbage=.true., rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call ESMF_StateDestroy(is%wrap%state, rc=rc)
+    call ESMF_StateDestroy(is%wrap%state, noGarbage=.true., rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (associated(is%wrap%zeroRegions)) then
