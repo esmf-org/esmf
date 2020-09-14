@@ -950,6 +950,48 @@ void testInquire(int& rc, char failMsg[]) {
 }
 
 #undef  ESMC_METHOD
+#define ESMC_METHOD "testInquire32Bit()"
+void testInquire32Bit(int& rc, char failMsg[]) {
+  rc = ESMF_FAILURE;
+
+  ESMCI::Info info;
+
+  // Test an I4
+  try {
+    info.set<int>("/ESMF/General/foo", 45, false);
+    info.set_32bit_type_storage("/ESMF/General/foo", true, nullptr);
+    json inquire = info.inquire("/ESMF/General/foo");
+    if (inquire["ESMC_TypeKind_Flag"] != ESMC_TYPEKIND_I4) {
+      return finalizeFailure(rc, failMsg, "Wrong storage type");
+    }
+  }
+  ESMC_CATCH_ERRPASSTHRU
+
+  // Test an R4
+  try {
+    info.set<float>("/ESMF/General/foo2", 33.3, false);
+    info.set_32bit_type_storage("/ESMF/General/foo2", true, nullptr);
+    json inquire = info.inquire("/ESMF/General/foo2");
+    if (inquire["ESMC_TypeKind_Flag"] != ESMC_TYPEKIND_R4) {
+      return finalizeFailure(rc, failMsg, "Wrong storage type");
+    }
+  }
+  ESMC_CATCH_ERRPASSTHRU
+
+  // Test empty 32-bit mapping
+  try {
+    info.set<int>("/ESMF/General/foo3", 3, false);
+    json inquire = info.inquire("/ESMF/General/foo3");
+    if (inquire["ESMC_TypeKind_Flag"] != ESMC_TYPEKIND_I8) {
+      return finalizeFailure(rc, failMsg, "Wrong storage type");
+    }
+  }
+  ESMC_CATCH_ERRPASSTHRU
+
+  rc = ESMF_SUCCESS;
+}
+
+#undef  ESMC_METHOD
 #define ESMC_METHOD "testUpdate()"
 void testUpdate(int& rc, char failMsg[]) {
   rc = ESMF_FAILURE;
@@ -1225,7 +1267,7 @@ void test_set_32bit_type_storage(int& rc, char failMsg[]) {
     std::string pkey = "/NUOPC/Instance";
     info.set_32bit_type_storage("is_r4", false, &pkey);
 
-    json &type_storage = info.getTypeStorage();
+    json &type_storage = info.getTypeStorageWritable();
 //    std::cout << type_storage.dump(2) << std::endl;
 
     if (!(type_storage["ESMF"]["General"]["is_i4"])) {
@@ -1363,6 +1405,13 @@ int main(void) {
   //NEX_UTest
   strcpy(name, "testInquire");
   testInquire(rc, failMsg);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //---------------------------------------------------------------------------
+
+  //---------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "testInquire32Bit");
+  testInquire32Bit(rc, failMsg);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //---------------------------------------------------------------------------
 

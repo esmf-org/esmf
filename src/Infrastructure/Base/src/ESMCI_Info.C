@@ -435,22 +435,24 @@ bool isIn(key_t& target, const json& j) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "json_type_to_esmf_typekind()"
 ESMC_TypeKind_Flag json_type_to_esmf_typekind(const json &j, bool allow_array, bool is_32bit) {
+  //tdk:clean
   ESMC_TypeKind_Flag esmf_type;
   if (j.type() == json::value_t::null) {
     esmf_type = ESMF_NOKIND;
   } else if (j.type() == json::value_t::boolean) {
     esmf_type = ESMC_TYPEKIND_LOGICAL;
   } else if (j.type() == json::value_t::number_integer || j.type() == json::value_t::number_unsigned) {
-    if (j <= std::numeric_limits<int>::max() && j >= std::numeric_limits<int>::min()) {
+//    if (j <= std::numeric_limits<int>::max() && j >= std::numeric_limits<int>::min()) {
+     if (is_32bit) {
       esmf_type = ESMC_TYPEKIND_I4;
     } else {
       esmf_type = ESMC_TYPEKIND_I8;
     }
   } else if (j.type() == json::value_t::number_float) {
-    float as_float = std::abs((float)j);
-    double as_double = std::abs((double)j);
-    double diff = std::abs(as_double - (double)as_float);
-    if (diff < std::numeric_limits<float>::epsilon()) {
+//    float as_float = std::abs((float)j);
+//    double as_double = std::abs((double)j);
+//    double diff = std::abs(as_double - (double)as_float);
+    if (is_32bit) {
       esmf_type = ESMC_TYPEKIND_R4;
     } else {
       esmf_type = ESMC_TYPEKIND_R8;
@@ -520,6 +522,7 @@ Info::Info(const json& storage) {
   try {
     check_init_from_json(storage);
     this->storage = storage;
+    this->type_storage = json::object();
   }
   ESMF_CATCH_INFO
 };
@@ -530,6 +533,7 @@ Info::Info(json&& storage) {
   try {
     check_init_from_json(storage);
     this->storage = std::move(storage);
+    this->type_storage = json::object();
   }
   ESMF_CATCH_INFO
 };
@@ -540,6 +544,7 @@ Info::Info(key_t& input) {
   // Exceptions: ESMCI::esmc_error
   try {
     this->storage = json::parse(input);
+    this->type_storage = json::object();
   }
   ESMF_CATCH_INFO
 };
@@ -940,6 +945,7 @@ json Info::inquire(key_t &key, bool recursive, const int *idx, bool attr_complia
     ESMC_LogWrite(this->dump().c_str(), ESMC_LOGMSG_INFO);
 #endif
 
+  bool is_32bit = false;
   json j = json::object();
   try {
     j["isDirty"] = this->isDirty();
@@ -948,6 +954,20 @@ json Info::inquire(key_t &key, bool recursive, const int *idx, bool attr_complia
     try {
       json::json_pointer jp = this->formatKey(key);
       update_json_pointer(this->getStorageRef(), &sp, jp, recursive);
+
+      // This is for the 32bit flag
+      // Only attempt to get 32-bit information if the type storage is iniatialized
+      // and has at least a single entry.
+      if (!this->getTypeStorage().is_null() && this->getTypeStorage().size() > 0) {
+        const json *ts = nullptr;
+        try {
+          update_json_pointer(this->getTypeStorage(), &ts, jp, recursive);
+          is_32bit = *ts;
+        } catch (json::out_of_range &e) {
+          // This is okay, and we default to the standard JSON type definitions with
+          // no checking for 32-bit types
+        }
+      }
     }
     ESMC_CATCH_ERRPASSTHRU
     if (idx) {
@@ -985,7 +1005,7 @@ json Info::inquire(key_t &key, bool recursive, const int *idx, bool attr_complia
 
     // Type inquire -----------------------------------------------------------
 
-    j["ESMC_TypeKind_Flag"] = json_type_to_esmf_typekind(sk, true, false); //tdk:need to get this 32bit parameter
+    j["ESMC_TypeKind_Flag"] = json_type_to_esmf_typekind(sk, true, is_32bit);
     std::string json_typename;
     bool is_array = false;
     if (sk.is_array()) {

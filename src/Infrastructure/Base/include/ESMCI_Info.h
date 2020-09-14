@@ -134,7 +134,8 @@ public:
 
   virtual const json& getStorageRef(void) const { return this->storage; }
   virtual json& getStorageRefWritable(void) { return this->storage; }
-  json& getTypeStorage() { return this->type_storage; }
+  json& getTypeStorageWritable(void) { return this->type_storage; }
+  const json& getTypeStorage(void) const { return this->type_storage; }
 
   json const * getPointer(key_t &key, bool recursive = false) const;
 
