@@ -12,7 +12,7 @@
 #define ESMC_FILENAME "ESMCI_VM.C"
 //==============================================================================
 #define GARBAGE_COLLECTION_LOG_off
-#define TRANSLATE_VMID_LOG_off
+#define TRANSLATE_VMID_LOG_on
 //==============================================================================
 //
 // VM class implementation (body) file
