@@ -2594,6 +2594,138 @@ endif
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
+  write(name, *) "Test MOAB get of element mask and area info"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! initialize check variables
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  ! Don't test if MOAB isn't available
+#if defined ESMF_MOAB
+
+  ! Turn on MOAB mesh creation
+  call ESMF_MeshSetMOAB(.true., rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  ! Create Test mesh
+  call createTestMeshSphDeg(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Now that Mesh is created turn back off MOAB
+  call ESMF_MeshSetMOAB(.false., rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  ! Create Mask Field
+  maskField = ESMF_FieldCreate(mesh, ESMF_TYPEKIND_I4, &
+       meshloc=ESMF_MESHLOC_ELEMENT, name="mask", &
+       rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Get mask Array
+  call ESMF_FieldGet(maskField, array=maskArray, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! Create Area Field
+  areaField = ESMF_FieldCreate(mesh, ESMF_TYPEKIND_R8, &
+       meshloc=ESMF_MESHLOC_ELEMENT, name="area", &
+       rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Get Array
+  call ESMF_FieldGet(areaField, array=areaArray, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! Get mask info
+  call ESMF_MeshGet(mesh, &
+       elemMaskArray=maskArray, &
+       elemAreaArray=areaArray, &
+       rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+!  call ESMF_MeshWriteVTK(mesh, "elemArrayTst", &
+!         elemArray1=maskArray, elemArray2=areaArray, &
+!         rc=localrc)
+!  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! get pointer to mask
+  call ESMF_FieldGet(maskField, 0, maskPtr,       &
+       rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Check mask output
+  if (petCount .eq. 1) then
+     if (maskPtr(1) .ne. 0) correct=.false.
+     if (maskPtr(2) .ne. 1) correct=.false.
+     if (maskPtr(3) .ne. 1) correct=.false.
+     if (maskPtr(4) .ne. 2) correct=.false.
+  else if (petCount .eq. 4) then
+     if (localPet .eq. 0) then
+        if (maskPtr(1) .ne. 0) correct=.false.
+     else if (localPet .eq. 1) then
+        if (maskPtr(1) .ne. 1) correct=.false.
+     else if (localPet .eq. 2) then
+        if (maskPtr(1) .ne. 1) correct=.false.
+     else if (localPet .eq. 3) then
+        if (maskPtr(1) .ne. 2) correct=.false.
+     endif
+  endif
+
+  ! get pointer to area
+  call ESMF_FieldGet(areaField, 0, areaPtr,       &
+       rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Check area output
+  if (petCount .eq. 1) then
+     if (areaPtr(1) .ne. 7.0) correct=.false.
+     if (areaPtr(2) .ne. 8.0) correct=.false.
+     if (areaPtr(3) .ne. 9.0) correct=.false.
+     if (areaPtr(4) .ne. 10.0) correct=.false.
+  else if (petCount .eq. 4) then
+     if (localPet .eq. 0) then
+        if (areaPtr(1) .ne. 7.0) correct=.false.
+     else if (localPet .eq. 1) then
+        if (areaPtr(1) .ne. 8.0) correct=.false.
+     else if (localPet .eq. 2) then
+        if (areaPtr(1) .ne. 9.0) correct=.false.
+     else if (localPet .eq. 3) then
+        if (areaPtr(1) .ne. 10.0) correct=.false.
+     endif
+  endif
+
+  ! Destroy the mask Field
+  call ESMF_FieldDestroy(maskField, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Destroy the area Field
+  call ESMF_FieldDestroy(areaField, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Get rid of Mesh
+  call ESMF_MeshDestroy(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+ ! end of if defined MOAB
+#endif
+
+  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
   write(name, *) "Test Mesh Create from Grid with 1 width DE"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
