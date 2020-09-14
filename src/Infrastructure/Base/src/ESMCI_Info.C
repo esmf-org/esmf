@@ -434,7 +434,7 @@ bool isIn(key_t& target, const json& j) {
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "json_type_to_esmf_typekind()"
-ESMC_TypeKind_Flag json_type_to_esmf_typekind(const json &j, const bool allow_array) noexcept {
+ESMC_TypeKind_Flag json_type_to_esmf_typekind(const json &j, bool allow_array, bool is_32bit) {
   ESMC_TypeKind_Flag esmf_type;
   if (j.type() == json::value_t::null) {
     esmf_type = ESMF_NOKIND;
@@ -461,7 +461,7 @@ ESMC_TypeKind_Flag json_type_to_esmf_typekind(const json &j, const bool allow_ar
     if (allow_array && j.size() > 0) {
       esmf_type = ESMC_TYPEKIND_I4;
       for (std::size_t ii = 0; ii < j.size(); ++ii) {
-        ESMC_TypeKind_Flag curr_esmf_type = json_type_to_esmf_typekind(j.at(ii), false);
+        ESMC_TypeKind_Flag curr_esmf_type = json_type_to_esmf_typekind(j.at(ii), false, is_32bit);
         if (curr_esmf_type > esmf_type) {
           esmf_type = curr_esmf_type;
         }
@@ -985,7 +985,7 @@ json Info::inquire(key_t &key, bool recursive, const int *idx, bool attr_complia
 
     // Type inquire -----------------------------------------------------------
 
-    j["ESMC_TypeKind_Flag"] = json_type_to_esmf_typekind(sk, true);
+    j["ESMC_TypeKind_Flag"] = json_type_to_esmf_typekind(sk, true, false); //tdk:need to get this 32bit parameter
     std::string json_typename;
     bool is_array = false;
     if (sk.is_array()) {
@@ -1232,6 +1232,13 @@ void Info::set(key_t &key, json &&j, bool force, const int *index, const key_t *
       }
     }
     ESMC_CATCH_ERRPASSTHRU
+
+    // Set the 32-bit storage tracker
+    try {
+      this->set_32bit_type_storage(key, false, pkey); //tdk: bool flag needs to be a parameter
+    }
+    ESMC_CATCH_ERRPASSTHRU
+
   }
   ESMF_CATCH_INFO
   this->dirty = true;

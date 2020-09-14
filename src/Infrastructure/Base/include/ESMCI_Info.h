@@ -82,7 +82,7 @@ void update_json_attribute_count_map(count_map_t &counts, const json &j, bool fi
 bool isIn(key_t& target, const std::vector<std::string>& container);
 bool isIn(const std::vector<std::string>& target, const std::vector<std::string>& container);
 bool isIn(key_t& target, const json& j);
-ESMC_TypeKind_Flag json_type_to_esmf_typekind(const json &j, const bool allow_array) noexcept;
+ESMC_TypeKind_Flag json_type_to_esmf_typekind(const json &j, bool allow_array, bool is_32bit);
 void handleJSONTypeCheck(key_t &key, const json &src, const json &dst);
 template<typename T, typename T2>
 void check_overflow(T dst, T2 tocheck);

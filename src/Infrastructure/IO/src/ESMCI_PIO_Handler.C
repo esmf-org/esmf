@@ -1559,7 +1559,7 @@ void PIO_Handler::attPackPut (
         return;
     }
     int size = (int)(jcurr.size());
-    ESMC_TypeKind_Flag att_type = ESMCI::json_type_to_esmf_typekind(jcurr, true);
+    ESMC_TypeKind_Flag att_type = ESMCI::json_type_to_esmf_typekind(jcurr, true, false); //tdk: figure out what to do here with the 32bit flag
     switch (att_type) {
       case ESMC_TYPEKIND_CHARACTER: {
         if (size > 1) {
