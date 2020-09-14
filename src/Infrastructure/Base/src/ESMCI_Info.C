@@ -1079,6 +1079,48 @@ void Info::serialize(char *buffer, int *length, int *offset, ESMC_InquireFlag in
 }
 
 #undef  ESMC_METHOD
+#define ESMC_METHOD "Info::set_32bit_type_storage()"
+void Info::set_32bit_type_storage(key_t &key, bool flag, const key_t * const pkey) {
+  //tdk:order
+
+  // Test: test_set_32bit_type_storage
+
+  try {
+    json *jobject = nullptr;
+    if (pkey) {
+      // Set the target JSON container to the parent key location. The parent key
+      // location must be an object to proceed.
+      try {
+        const json::json_pointer jpkey_parent = this->formatKey(*pkey);
+        bool has_pkey = has_key_json(this->type_storage, jpkey_parent, true);
+        if (!has_pkey) {
+          this->type_storage[jpkey_parent] = json::object();
+        }
+        try {
+          update_json_pointer(this->type_storage, &jobject, jpkey_parent, true);
+          ESMC_CHECK_NULLPTR(jobject)
+          check_is_object(*jobject);
+        }
+        ESMF_INFO_CATCH_JSON
+      }
+      ESMC_CATCH_ERRPASSTHRU
+    } else {
+      jobject = &(this->type_storage);
+    }
+    try {
+      const json::json_pointer jpkey = this->formatKey(key);
+      try {
+        (*jobject)[jpkey] = flag;
+      }
+      ESMF_INFO_CATCH_JSON
+    }
+    ESMC_CATCH_ERRPASSTHRU
+  }
+  ESMF_CATCH_INFO
+
+}
+
+#undef  ESMC_METHOD
 #define ESMC_METHOD "Info::set(<json>)"
 void Info::set(key_t &key, json &&j, bool force, const int *index, const key_t * const pkey) {
   // Test:

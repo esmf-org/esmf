@@ -1213,6 +1213,34 @@ void test_update_for_attribute(int& rc, char failMsg[]) {
   rc = ESMF_SUCCESS;
 };
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "test_set_32bit_type_storage()"
+void test_set_32bit_type_storage(int& rc, char failMsg[]) {
+  rc = ESMF_FAILURE;
+
+  try {
+    ESMCI::Info info;
+
+    info.set_32bit_type_storage("/ESMF/General/is_i4", true, nullptr);
+    std::string pkey = "/NUOPC/Instance";
+    info.set_32bit_type_storage("is_r4", false, &pkey);
+
+    json &type_storage = info.getTypeStorage();
+//    std::cout << type_storage.dump(2) << std::endl;
+
+    if (!(type_storage["ESMF"]["General"]["is_i4"])) {
+      return finalizeFailure(rc, failMsg, "wrong flag, should be true");
+    }
+    if (type_storage["NUOPC"]["Instance"]["is_r4"]) {
+      return finalizeFailure(rc, failMsg, "wrong flag, should be false");
+    }
+
+  }
+  ESMC_CATCH_ERRPASSTHRU
+
+  rc = ESMF_SUCCESS;
+};
+
 int main(void) {
 
   char name[80];
@@ -1391,6 +1419,13 @@ int main(void) {
   //NEX_UTest
   strcpy(name, "test_update_for_attribute");
   test_update_for_attribute(rc, failMsg);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //---------------------------------------------------------------------------
+
+  //---------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "test_set_32bit_type_storage");
+  test_set_32bit_type_storage(rc, failMsg);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //---------------------------------------------------------------------------
 

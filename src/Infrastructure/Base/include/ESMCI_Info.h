@@ -94,9 +94,10 @@ class Info {
 private:
   bool dirty = false;
   json storage;  // JSON object store for keys/values managed by this instance
+  json type_storage;  // JSON object for Fortran typing
 
 protected:
-  virtual void init(void) {this->storage = json::object();}
+  void init(void) {this->storage = json::object(); this->type_storage = json::object();}
 
 public:
   Info(void) {this->init();}
@@ -133,6 +134,7 @@ public:
 
   virtual const json& getStorageRef(void) const { return this->storage; }
   virtual json& getStorageRefWritable(void) { return this->storage; }
+  json& getTypeStorage() { return this->type_storage; }
 
   json const * getPointer(key_t &key, bool recursive = false) const;
 
@@ -172,6 +174,8 @@ public:
   void update_for_attribute(const Info &info);
 
   int ESMC_Print(bool tofile, const char *filename, bool append) const;
+
+  void set_32bit_type_storage(key_t &key, bool flag, const key_t * const pkey);
 };
 
 //-----------------------------------------------------------------------------
