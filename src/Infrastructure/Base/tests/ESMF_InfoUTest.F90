@@ -941,7 +941,7 @@ program ESMF_InfoUTest
 !
 !  call ESMF_InfoDestroy(info_parse, rc=rc)
 !  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!
+
   !----------------------------------------------------------------------------
   call ESMF_TestEnd(ESMF_SRCLINE) ! calls ESMF_Finalize() internally
   !----------------------------------------------------------------------------
