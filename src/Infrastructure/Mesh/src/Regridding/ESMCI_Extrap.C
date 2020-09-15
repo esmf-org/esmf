@@ -291,8 +291,8 @@ static void _create_pointlist_of_mesh_nodes_in_wmat(Mesh *mesh, WMat &wts, Point
  }
 
 
-// Get the list of ids in the mesh, but not in the wts
-// (i.e. if mesh is the dest. mesh, the unmapped points)
+// Get the list of ids in the pointlist, but not in the wts
+// Assumes input pointlist is sorted
 static void _create_pointlist_of_points_not_in_wmat(PointList *pointlist, WMat &wts, PointList **_missing_points) {
 
   // Get weight iterators
@@ -348,6 +348,64 @@ static void _create_pointlist_of_points_not_in_wmat(PointList *pointlist, WMat &
   *_missing_points=missing_points;
 }
 
+// Get the list of ids in the pointlist and in the wts
+// Assumes input pointlist is sorted
+static void _create_pointlist_of_points_in_wmat(PointList *pointlist, WMat &wts, PointList **_mapped_points) {
+
+  // Get weight iterators
+  WMat::WeightMap::iterator wi =wts.begin_row(),we = wts.end_row();
+
+  // Count number of missing points
+  int num_mapped=0;
+  int curr_num_pts = pointlist->get_curr_num_pts();
+  for (int i=0; i<curr_num_pts; i++) {
+
+    // get node id
+    int id = pointlist->get_id(i);
+
+    // get weight id
+    int wt_id=wi->first.id;
+
+    // Advance weights until not less than node id
+    while ((wi != we) && (wi->first.id < id)) {
+      wi++;
+    }
+
+    // If the current weight is equal to the id, then we found it, so count it
+    if (wi->first.id == id) {
+      num_mapped++;
+    }
+  }
+
+  // Create Pointlist
+  PointList *mapped_points = new ESMCI::PointList(num_mapped, pointlist->get_coord_dim());
+
+  // Add mapped points to PointList
+  wi =wts.begin_row();
+  for (int i=0; i<curr_num_pts; i++) {
+
+    // get node id
+    int id = pointlist->get_id(i);
+
+    // get weight id
+    int wt_id=wi->first.id;
+
+    // Advance weights until not less than node id
+    while ((wi != we) && (wi->first.id < id)) {
+      wi++;
+    }
+
+    // If the current weight is equal to the node id, then we found it, so add it to the list
+    if (wi->first.id == id) {
+      mapped_points->add(id, pointlist->get_coord_ptr(i));
+    }
+  }
+
+  // Output
+  *_mapped_points=mapped_points;
+}
+
+
  void _replace_mapped_with_mapped_extrap(WMat &status) {
 
    WMat::WeightMap::iterator wi = status.begin_row(), we = status.end_row();
@@ -400,7 +458,14 @@ static void _create_pointlist_of_points_not_in_wmat(PointList *pointlist, WMat &
 
  // Prune out any weights in stod_wts that don't have a  local
  // destination in dst_mesh. This is the typical condition for regrid_wts and it's dst_mesh
- static void _prune_wts_after_dtod_stod_merge(Mesh &dst_mesh, WMat &stod_wts) {
+  template<class Type>
+  void _prune_wts_after_dtod_stod_merge(Type &dst_mesh, WMat &stod_wts) {
+    Throw()<<" Unknown type for weight prune.";
+  }
+
+  // Prune weights using a mesh
+  template<>
+  void _prune_wts_after_dtod_stod_merge(Mesh &dst_mesh, WMat &stod_wts) {
 
    // Loop through weights, pruning out ones that aren't in dst_mesh
    WMat::WeightMap::iterator wi = stod_wts.weights.begin(), we = stod_wts.weights.end();
@@ -432,11 +497,55 @@ static void _create_pointlist_of_points_not_in_wmat(PointList *pointlist, WMat &
    }
  }
 
+  // Prune weights using a PointList
+  template<>
+  void _prune_wts_after_dtod_stod_merge(PointList &pointlist, WMat &stod_wts) {
+
+    // Get weight iterators
+    WMat::WeightMap::iterator wi =stod_wts.begin_row(),we = stod_wts.end_row();
+
+    // Loop through points
+    int curr_num_pts = pointlist.get_curr_num_pts();
+    for (int i=0; i<curr_num_pts; i++) {
+
+      // get id
+      int id = pointlist.get_id(i);
+
+      // Erase any weights that aren't in point list
+      while ((wi != we) && (wi->first.id < id)) {
+
+        // Save temporary iterator to erase
+        WMat::WeightMap::iterator tmp_wi = wi;
+        
+        // Advance to next position before wi is invalidated by erase
+        wi++;
+
+        // Erase
+        stod_wts.weights.erase(tmp_wi);
+      }
+
+      // If at end of weights leave
+      if (wi == we) break;
+      
+      // If the current weight is equal to the id, then advance to the next (i.e. don't erase)
+      if (wi->first.id == id) {
+        wi++;
+      }
+    }
+
+    // If not at end of weights, erase everything else
+    if (wi != we) {
+      stod_wts.weights.erase(wi,we);
+    }
+  }
+
+
  // This method merges a set of weights that map from destination ids to destination ids into
  // a set of weights which map source to destination ids (e.g. regrid weights). This means converting
  // the dest. to dest. weights to source to dest. using those weights and then adding them in. 
- static void _merge_dst_to_dst_wts_into_src_to_dst_wts(Mesh &mesh, WMat &dtod_wts, 
-                                                       WMat &stod_wts) {
+  template<class Type>
+  void _merge_dst_to_dst_wts_into_src_to_dst_wts(Type &dst, WMat &dtod_wts, 
+                                                        WMat &stod_wts) {
 
    // If parallel, migrate stod_wts to make sure the correct entries are on this
    // processor to allow the merge
@@ -536,9 +645,16 @@ static void _create_pointlist_of_points_not_in_wmat(PointList *pointlist, WMat &
    // If parallel, now prune the weights again to make sure just 
    // the correct weights for the mesh are present
    if (Par::Size() > 1) {
-     _prune_wts_after_dtod_stod_merge(mesh,stod_wts);
+     _prune_wts_after_dtod_stod_merge(dst, stod_wts);
    }
  }
+
+template void _merge_dst_to_dst_wts_into_src_to_dst_wts(Mesh &dst, WMat &dtod_wts, 
+                                                               WMat &stod_wts);
+
+template void _merge_dst_to_dst_wts_into_src_to_dst_wts(PointList &dst, WMat &dtod_wts, 
+                                                               WMat &stod_wts);
+
 
   // Implementation of ESMC_EXTRAPMETHOD_NEAREST_STOD
   void _extrapmethod_nearest_stod(Mesh *srcmesh, PointList *srcpointlist, 
@@ -675,6 +791,93 @@ static void _create_pointlist_of_points_not_in_wmat(PointList *pointlist, WMat &
    if (missing_points != NULL) delete missing_points;
   }
 
+  // Implementation of ESMC_EXTRAPMETHOD_NEAREST_D
+  void _extrapmethod_nearest_d(Mesh *dstmesh, PointList *dstpointlist,
+                               IWeights &wts,
+                               MAP_TYPE mtype,
+                               bool set_dst_status, WMat &dst_status) {
+    
+    
+    // Calculate a source pointlist from dst pointlist and wmat
+    PointList *dst_mapped_points=NULL;
+    if (dstpointlist != NULL) {
+      _create_pointlist_of_points_in_wmat(dstpointlist, wts, &dst_mapped_points);
+    } else if (dstmesh != NULL) {
+      _create_pointlist_of_mesh_nodes_in_wmat(dstmesh, wts, &dst_mapped_points);
+    } else {
+      Throw() << "Missing destination geometry object.";
+    }
+    
+    // Construct a new point list which just contains destination points not in the weight matrix
+    PointList *dst_missing_points=NULL;
+    if (dstpointlist != NULL) {
+      _create_pointlist_of_points_not_in_wmat(dstpointlist, wts, &dst_missing_points);
+    } else if (dstmesh != NULL) {
+      _create_pointlist_of_mesh_nodes_not_in_wmat(dstmesh, wts, &dst_missing_points);
+    } else {
+      Throw() << "Missing destination geometry object.";
+    }
+    
+    // Translate extrap method to regrid method
+    int regridMethod=ESMC_REGRID_METHOD_NEAREST_SRC_TO_DST;
+    
+    // Nearest weights and status
+    IWeights nrst_extrap_wts;
+    WMat nrst_extrap_dst_status;
+    
+    // Build the rendezvous grids
+    Interp interp((Mesh *)NULL, dst_mapped_points, 
+                  (Mesh *)NULL, dst_missing_points,
+                  (Mesh *)NULL, false, regridMethod,
+                  set_dst_status, nrst_extrap_dst_status,
+                  mtype, ESMCI_UNMAPPEDACTION_IGNORE, 
+                  0, 0.0);
+    
+    // Create the weight matrix
+    interp(0, nrst_extrap_wts, set_dst_status, nrst_extrap_dst_status);
+    
+#if 0
+    // DEBUG
+    {
+      WMat::WeightMap::iterator wi = nrst_extrap_wts.weights.begin(), we = nrst_extrap_wts.weights.end();
+      for (; wi != we; ++wi) {
+        const WMat::Entry &row = wi->first;
+        std::vector<WMat::Entry> &col = wi->second;
+        
+        printf("nrst_wts row id=%d :: col ids= ",row.id);
+        for (UInt i = 0; i < col.size(); i++) {
+          printf(" %d ",col[i].id);
+        }
+        printf("\n");
+        
+      }
+    }
+#endif
+    
+    // Merge nearest weights into regrid weights
+    if (dstpointlist != NULL) {
+      _merge_dst_to_dst_wts_into_src_to_dst_wts(*dstpointlist, nrst_extrap_wts, wts);
+    } else if (dstmesh != NULL) {
+      _merge_dst_to_dst_wts_into_src_to_dst_wts(*dstmesh, nrst_extrap_wts, wts);
+    } else {
+      Throw() << "Missing destination geometry object.";
+    }
+
+
+    // If status was requested merge that too
+    if (set_dst_status) {
+      // Change from ...MAPPED to ...MAPPED_NRST_EXTRAP
+      _replace_mapped_with_mapped_extrap(nrst_extrap_dst_status);
+      
+      // Replace old status with extrap ones
+      dst_status.MergeReplace(nrst_extrap_dst_status);
+    }
+    
+    // Clean up
+    if (dst_missing_points != NULL) delete dst_missing_points;
+    if (dst_mapped_points != NULL) delete dst_mapped_points;
+  }
+  
   // Implementation of ESMC_EXTRAPMETHOD_CREEP
   void _extrapmethod_creep(Mesh *dstmesh, 
                            IWeights &wts,
@@ -841,6 +1044,14 @@ static void _create_pointlist_of_points_not_in_wmat(PointList *pointlist, WMat &
                                   extrapNumSrcPnts,
                                   extrapDistExponent,
                                   set_dst_status, dst_status);
+
+    } else if (extrapMethod == ESMC_EXTRAPMETHOD_NEAREST_D) {
+
+      // Call into method to do nearest d
+      _extrapmethod_nearest_d(dstmesh, dstpointlist,
+                              wts,
+                              mtype,
+                              set_dst_status, dst_status);
 
     } else if (extrapMethod == ESMC_EXTRAPMETHOD_CREEP) {
 

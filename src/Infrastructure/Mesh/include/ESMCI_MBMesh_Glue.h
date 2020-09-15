@@ -90,6 +90,12 @@ void MBMesh_checknodelist(void **meshpp, int *_num_node_gids, int *node_gids,
 
 void MBMesh_getarea(void **mbmpp, int *num_elem, double *elem_areas, int *rc);
 
+void MBMesh_geteleminfointoarray(void *vmbmp,
+                                 ESMCI::DistGrid *elemDistgrid, 
+                                 int numElemArrays,
+                                 int *infoTypeElemArrays, 
+                                 ESMCI::Array **elemArrays, 
+                                 int *rc);
 
 void MBMesh_getlocalcoords(void **meshpp, double *ncoords,
                                int *_orig_sdim, int *rc);
