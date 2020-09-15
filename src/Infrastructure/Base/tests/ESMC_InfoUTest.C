@@ -67,6 +67,8 @@ void testbroadcastInfo(int& rc, char failMsg[]) {
   if (localPet == rootPet) {
     try {
         info.set("foo", desired, false);
+        info.set("maintain_i4", 44, false);
+        info.set_32bit_type_storage("maintain_i4", true, nullptr);
     }
     ESMC_CATCH_ERRPASSTHRU
   }
@@ -80,6 +82,15 @@ void testbroadcastInfo(int& rc, char failMsg[]) {
     int actual = info.get<int>("foo");
     if (actual != desired) {
       return finalizeFailure(rc, failMsg, "Value not broadcast");
+    }
+    if (info.getTypeStorage().size() == 0) {
+      return finalizeFailure(rc, failMsg, "Type storage not broadcast");
+    }
+    if (!info.getTypeStorage()["maintain_i4"]) {
+      return finalizeFailure(rc, failMsg, "Type storage value missing");
+    }
+    if (info.hasKey("_esmf_info_type_storage")) {
+      return finalizeFailure(rc, failMsg, "Type storage should be erased");
     }
   }
   ESMC_CATCH_ERRPASSTHRU

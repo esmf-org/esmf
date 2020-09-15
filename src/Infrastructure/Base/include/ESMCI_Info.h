@@ -114,6 +114,7 @@ public:
 
   std::string dump(void) const;
   std::string dump(int indent) const;
+  std::string dump_with_type_storage(void);
 
   void erase(key_t& key, key_t& keyChild, bool recursive = false);
 

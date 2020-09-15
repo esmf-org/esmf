@@ -564,6 +564,21 @@ std::string Info::dump(void) const {
 };
 
 #undef  ESMC_METHOD
+#define ESMC_METHOD "Info::dump_with_type_storage"
+std::string Info::dump_with_type_storage(void) {
+  std::string ret;
+  try {
+    if (this->getTypeStorage().size() > 0) {
+      this->getStorageRefWritable()["_esmf_info_type_storage"] = this->getTypeStorage();
+    }
+    std::string ret = this->dump(0);
+    this->erase("", "_esmf_info_type_storage");
+  }
+  ESMC_CATCH_ERRPASSTHRU
+  return ret;
+}
+
+#undef  ESMC_METHOD
 #define ESMC_METHOD "Info::deserialize()"
 void Info::deserialize(char *buffer, int *offset) {
   // Test: testSerializeDeserialize, testSerializeDeserialize2
@@ -1526,9 +1541,13 @@ void broadcastInfo(ESMCI::Info* info, int rootPet, const ESMCI::VM &vm) {
   int localPet = vm.getLocalPet();
   std::size_t target_size = 0;  // Size of serialized info storage
   std::string target;  // Serialize storage buffer
+
   if (localPet == rootPet) {
     // If this is the root, serialize the info storage to std::string
     try {
+      if (info->getTypeStorage().size() > 0) {
+        info->getStorageRefWritable()["_esmf_info_type_storage"] = info->getTypeStorage();
+      }
       target = info->dump();
     }
     catch (ESMCI::esmc_error &exc_esmf) {
@@ -1556,6 +1575,10 @@ void broadcastInfo(ESMCI::Info* info, int rootPet, const ESMCI::VM &vm) {
     catch (ESMCI::esmc_error &exc_esmf) {
       ESMC_ERRPASSTHRU(exc_esmf);
     }
+  }
+  if (info->hasKey("_esmf_info_type_storage")) {
+    info->getTypeStorageWritable() = info->get<json>("_esmf_info_type_storage");
+    info->erase("", "_esmf_info_type_storage");
   }
   return;
 }
