@@ -594,6 +594,10 @@ void Info::deserialize(char *buffer, int *offset) {
   std::string infobuffer(&(buffer[*offset]), length);
   try {
     this->parse(infobuffer);
+    if (this->hasKey("_esmf_info_type_storage")) {
+      this->getTypeStorageWritable() = this->get<json>("_esmf_info_type_storage");
+      this->erase("", "_esmf_info_type_storage");
+    }
   }
   catch (esmc_error &e) {
     ESMC_ERRPASSTHRU(e);
@@ -1114,7 +1118,13 @@ void Info::serialize(char *buffer, int *length, int *offset, ESMC_InquireFlag in
   // Exceptions:  ESMCI:esmc_error
   std::string infobuffer;
   try {
+    bool should_erase = false;
+    if (this->getTypeStorage().size() > 0) {
+      this->getStorageRefWritable()["_esmf_info_type_storage"] = this->getTypeStorage();
+      should_erase = true;
+    }
     infobuffer = this->dump();
+    if (should_erase) { this->erase("", "_esmf_info_type_storage"); }
   }
   ESMC_CATCH_ERRPASSTHRU
   alignOffset(*offset);

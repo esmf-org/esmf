@@ -846,6 +846,7 @@ void testSerializeDeserialize2(int& rc, char failMsg[]) {
     char *null_buffer = nullptr;
     for (auto element : infops) {
       try {
+        element->set_32bit_type_storage("foo", true, nullptr);
         element->serialize(null_buffer, &inquire_length, &offset, ESMF_INQUIREONLY);
       }
       ESMC_CATCH_ERRPASSTHRU
@@ -877,6 +878,12 @@ void testSerializeDeserialize2(int& rc, char failMsg[]) {
       Info *desired = infops[ii];
       if (actual->getStorageRef() != desired->getStorageRef()) {
         return finalizeFailure(rc, failMsg, "Deserialized incorrect");
+      }
+      if (actual->getTypeStorage().size() == 0) {
+        return finalizeFailure(rc, failMsg, "Type storage not present");
+      }
+      if (actual->inquire("foo")["ESMF_TYPEKIND"] == ESMC_TYPEKIND_I4) {
+        return finalizeFailure(rc, failMsg, "Type storage incorrect");
       }
     }
   }
