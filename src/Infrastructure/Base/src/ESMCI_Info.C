@@ -926,9 +926,33 @@ bool Info::hasKey(const json::json_pointer &jp, bool recursive) const {
 }
 
 #undef  ESMC_METHOD
+#define ESMC_METHOD "retrieve_32bit_flag"
+bool retrieve_32bit_flag(const json &j, const json::json_pointer &jp, bool recursive) {
+  //tdk:order
+
+  bool ret = false;
+  // Only attempt to get 32-bit information if the type storage is initialized
+  // and has at least a single entry.
+  if (!j.is_null() && j.size() > 0) {
+    const json *ts = nullptr;
+    try {
+      update_json_pointer(j, &ts, jp, recursive);
+      try {
+        if (ts->is_boolean()) { ret = *ts; }
+      }
+      ESMF_INFO_CATCH_JSON
+    } catch (json::out_of_range &e) {
+      // This is okay, and we default to the standard JSON type definitions with
+      // no checking for 32-bit types
+    }
+  }
+  return ret;
+}
+
+#undef  ESMC_METHOD
 #define ESMC_METHOD "Info::inquire()"
 json Info::inquire(key_t &key, bool recursive, const int *idx, bool attr_compliance) const {
-  // Test: testInquire
+  // Test: testInquire, testInquire32Bit
   // Notes:
 
 #if 0
@@ -943,6 +967,9 @@ json Info::inquire(key_t &key, bool recursive, const int *idx, bool attr_complia
     msg = prefix + "this->dump()=...";
     ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO);
     ESMC_LogWrite(this->dump().c_str(), ESMC_LOGMSG_INFO);
+    msg = prefix + "this->type_storage.dump()=...";
+    ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO);
+    ESMC_LogWrite(this->type_storage.dump().c_str(), ESMC_LOGMSG_INFO);
 #endif
 
   bool is_32bit = false;
@@ -955,21 +982,13 @@ json Info::inquire(key_t &key, bool recursive, const int *idx, bool attr_complia
       json::json_pointer jp = this->formatKey(key);
       update_json_pointer(this->getStorageRef(), &sp, jp, recursive);
 
-      // This is for the 32bit flag
-      // Only attempt to get 32-bit information if the type storage is iniatialized
-      // and has at least a single entry.
-      if (!this->getTypeStorage().is_null() && this->getTypeStorage().size() > 0) {
-        const json *ts = nullptr;
-        try {
-          update_json_pointer(this->getTypeStorage(), &ts, jp, recursive);
-          is_32bit = *ts;
-        } catch (json::out_of_range &e) {
-          // This is okay, and we default to the standard JSON type definitions with
-          // no checking for 32-bit types
-        }
-      }
+      // Find out if the output data is 32-bit
+      is_32bit = retrieve_32bit_flag(this->getTypeStorage(), jp, recursive);
     }
     ESMC_CATCH_ERRPASSTHRU
+
+    // Handle finding by index for arrays and objects -------------------------
+
     if (idx) {
       if (sp->is_array()) {
         try {
@@ -982,6 +1001,14 @@ json Info::inquire(key_t &key, bool recursive, const int *idx, bool attr_complia
         json::iterator it = find_by_index(const_cast<json&>(*sp), (std::size_t)(*idx), recursive, attr_compliance);
         j["key"] = it.key();
         sp = &(it.value());
+
+        // Find out if the output data is 32-bit
+        try {
+          json::json_pointer jp = this->formatKey(j["key"]);
+          is_32bit = retrieve_32bit_flag(this->getTypeStorage(), jp, recursive);
+        }
+        ESMC_CATCH_ERRPASSTHRU
+
       } else {
         std::string msg = "'idx' only supported for JSON arrays or objects";
         ESMC_CHECK_RC("ESMC_RC_ARG_BAD", ESMC_RC_ARG_BAD, msg);
@@ -1105,6 +1132,9 @@ void Info::set_32bit_type_storage(key_t &key, bool flag, const key_t * const pke
 
   // Test: test_set_32bit_type_storage
 
+  if (this->type_storage.is_null()) {
+    this->type_storage = json::object();
+  }
   try {
     json *jobject = nullptr;
     if (pkey) {
@@ -1253,11 +1283,12 @@ void Info::set(key_t &key, json &&j, bool force, const int *index, const key_t *
     }
     ESMC_CATCH_ERRPASSTHRU
 
-    // Set the 32-bit storage tracker
-    try {
-      this->set_32bit_type_storage(key, false, pkey); //tdk: bool flag needs to be a parameter
-    }
-    ESMC_CATCH_ERRPASSTHRU
+    //tdk:remove
+//    // Set the 32-bit storage tracker
+//    try {
+//      this->set_32bit_type_storage(key, false, pkey);
+//    }
+//    ESMC_CATCH_ERRPASSTHRU
 
   }
   ESMF_CATCH_INFO

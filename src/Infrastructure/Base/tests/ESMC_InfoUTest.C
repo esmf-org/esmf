@@ -988,6 +988,16 @@ void testInquire32Bit(int& rc, char failMsg[]) {
   }
   ESMC_CATCH_ERRPASSTHRU
 
+  // Test using an index
+  try {
+    const int idx = 1;
+    json inquire = info.inquire("", true, &idx, true);
+    if (inquire["ESMC_TypeKind_Flag"] != ESMC_TYPEKIND_R4) {
+      return finalizeFailure(rc, failMsg, "Wrong storage type");
+    }
+  }
+  ESMC_CATCH_ERRPASSTHRU
+
   rc = ESMF_SUCCESS;
 }
 
