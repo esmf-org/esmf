@@ -81,7 +81,6 @@ program ESMF_InfoUTest
   logical :: is_present, failed, is_set, is_present_copy_test, actual_logical, &
              desired_logical, isArray, isDirty
   logical, dimension(2) :: fails_obj
-  type(ESMF_TypeKind_Flag) :: tk1, tk2
 
   !----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)  ! calls ESMF_Initialize() internally
@@ -899,47 +898,6 @@ program ESMF_InfoUTest
   call ESMF_InfoDestroy(info_implicit, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   !----------------------------------------------------------------------------
-
-  !----------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "I4/R4 Metadata Scalar"
-  write(failMsg, *) "Did not track I4/R4 typekind"
-  rc = ESMF_FAILURE
-  failed = .false.
-
-  to_parse = '{"an_i4": 4, "an_r4": 4.4, "an_i4_array": [4], "an_r4_array": [5.5]}'
-
-  info_parse = ESMF_InfoCreate(to_parse, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  call ESMF_InfoGet(info_parse, key="an_i4", typekind=tk1, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  call ESMF_InfoGet(info_parse, key="an_r4", typekind=tk2, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  call ESMF_Test((tk1==ESMF_TYPEKIND_I4 .and. tk2==ESMF_TYPEKIND_R4), name, &
-    failMsg, result, ESMF_SRCLINE)
-  !----------------------------------------------------------------------------
-
-  !----------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "I4/R4 Metadata Array"
-  write(failMsg, *) "Did not track I4 typekind"
-  rc = ESMF_FAILURE
-  failed = .false.
-
-  call ESMF_InfoGet(info_parse, key="an_i4_array", typekind=tk1, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  call ESMF_InfoGet(info_parse, key="an_r4_array", typekind=tk2, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  call ESMF_Test((tk1==ESMF_TYPEKIND_I4 .and. tk2==ESMF_TYPEKIND_R4), name, &
-    failMsg, result, ESMF_SRCLINE)
-
-  call ESMF_InfoDestroy(info_parse, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   !----------------------------------------------------------------------------
   call ESMF_TestEnd(ESMF_SRCLINE) ! calls ESMF_Finalize() internally
