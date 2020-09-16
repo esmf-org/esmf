@@ -1527,9 +1527,9 @@ void PIO_Handler::attPackPut (
 //
 // !ARGUMENTS:
 //
-  pio_var_desc_t vardesc,                 // (in) - variable to write attributes into, NULL for global
-  const ESMCI::Info *attPack,               // (in) - AttPack containing name/value(s) pairs
-  int *rc                                 // (out) - Error return code
+  pio_var_desc_t vardesc,      // (in) - variable to write attributes into, NULL for global
+  const ESMCI::Info *attPack,  // (in) - AttPack containing name/value(s) pairs
+  int *rc                      // (out) - Error return code
   ) {
 //
 // !DESCRIPTION:
@@ -1559,7 +1559,16 @@ void PIO_Handler::attPackPut (
         return;
     }
     int size = (int)(jcurr.size());
-    ESMC_TypeKind_Flag att_type = ESMCI::json_type_to_esmf_typekind(jcurr, true, false); //tdk: figure out what to do here with the 32bit flag
+
+    // Determine if the target key is 32-bit
+    bool is_32bit = false;
+    try {
+      json::json_pointer jp = attPack->formatKey(it.key());
+      is_32bit = ESMCI::retrieve_32bit_flag(attPack->getTypeStorage(), jp, true);
+    }
+    ESMC_CATCH_ERRPASSTHRU
+
+    ESMC_TypeKind_Flag att_type = ESMCI::json_type_to_esmf_typekind(jcurr, true, is_32bit);
     switch (att_type) {
       case ESMC_TYPEKIND_CHARACTER: {
         if (size > 1) {

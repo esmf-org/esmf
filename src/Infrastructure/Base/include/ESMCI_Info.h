@@ -86,6 +86,7 @@ ESMC_TypeKind_Flag json_type_to_esmf_typekind(const json &j, bool allow_array, b
 void handleJSONTypeCheck(key_t &key, const json &src, const json &dst);
 template<typename T, typename T2>
 void check_overflow(T dst, T2 tocheck);
+bool retrieve_32bit_flag(const json &j, const json::json_pointer &jp, bool recursive);
 
 //-----------------------------------------------------------------------------
 

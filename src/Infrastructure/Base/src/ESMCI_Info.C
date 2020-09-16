@@ -435,23 +435,18 @@ bool isIn(key_t& target, const json& j) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "json_type_to_esmf_typekind()"
 ESMC_TypeKind_Flag json_type_to_esmf_typekind(const json &j, bool allow_array, bool is_32bit) {
-  //tdk:clean
   ESMC_TypeKind_Flag esmf_type;
   if (j.type() == json::value_t::null) {
     esmf_type = ESMF_NOKIND;
   } else if (j.type() == json::value_t::boolean) {
     esmf_type = ESMC_TYPEKIND_LOGICAL;
   } else if (j.type() == json::value_t::number_integer || j.type() == json::value_t::number_unsigned) {
-//    if (j <= std::numeric_limits<int>::max() && j >= std::numeric_limits<int>::min()) {
      if (is_32bit) {
       esmf_type = ESMC_TYPEKIND_I4;
     } else {
       esmf_type = ESMC_TYPEKIND_I8;
     }
   } else if (j.type() == json::value_t::number_float) {
-//    float as_float = std::abs((float)j);
-//    double as_double = std::abs((double)j);
-//    double diff = std::abs(as_double - (double)as_float);
     if (is_32bit) {
       esmf_type = ESMC_TYPEKIND_R4;
     } else {
@@ -509,6 +504,28 @@ bool has_key_json(const json &target, const json::json_pointer &jp, bool recursi
     }
   }
   ESMC_CATCH_ERRPASSTHRU
+  return ret;
+}
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "retrieve_32bit_flag"
+bool retrieve_32bit_flag(const json &j, const json::json_pointer &jp, bool recursive) {
+  bool ret = false;
+  // Only attempt to get 32-bit information if the type storage is initialized
+  // and has at least a single entry.
+  if (!j.is_null() && j.size() > 0) {
+    const json *ts = nullptr;
+    try {
+      update_json_pointer(j, &ts, jp, recursive);
+      try {
+        if (ts->is_boolean()) { ret = *ts; }
+      }
+      ESMF_INFO_CATCH_JSON
+    } catch (json::out_of_range &e) {
+      // This is okay, and we default to the standard JSON type definitions with
+      // no checking for 32-bit types
+    }
+  }
   return ret;
 }
 
@@ -945,30 +962,6 @@ bool Info::hasKey(const json::json_pointer &jp, bool recursive) const {
 }
 
 #undef  ESMC_METHOD
-#define ESMC_METHOD "retrieve_32bit_flag"
-bool retrieve_32bit_flag(const json &j, const json::json_pointer &jp, bool recursive) {
-  //tdk:order
-
-  bool ret = false;
-  // Only attempt to get 32-bit information if the type storage is initialized
-  // and has at least a single entry.
-  if (!j.is_null() && j.size() > 0) {
-    const json *ts = nullptr;
-    try {
-      update_json_pointer(j, &ts, jp, recursive);
-      try {
-        if (ts->is_boolean()) { ret = *ts; }
-      }
-      ESMF_INFO_CATCH_JSON
-    } catch (json::out_of_range &e) {
-      // This is okay, and we default to the standard JSON type definitions with
-      // no checking for 32-bit types
-    }
-  }
-  return ret;
-}
-
-#undef  ESMC_METHOD
 #define ESMC_METHOD "Info::inquire()"
 json Info::inquire(key_t &key, bool recursive, const int *idx, bool attr_compliance) const {
   // Test: testInquire, testInquire32Bit
@@ -1153,8 +1146,6 @@ void Info::serialize(char *buffer, int *length, int *offset, ESMC_InquireFlag in
 #undef  ESMC_METHOD
 #define ESMC_METHOD "Info::set_32bit_type_storage()"
 void Info::set_32bit_type_storage(key_t &key, bool flag, const key_t * const pkey) {
-  //tdk:order
-
   // Test: test_set_32bit_type_storage
 
   if (this->type_storage.is_null()) {
@@ -1307,13 +1298,6 @@ void Info::set(key_t &key, json &&j, bool force, const int *index, const key_t *
       }
     }
     ESMC_CATCH_ERRPASSTHRU
-
-    //tdk:remove
-//    // Set the 32-bit storage tracker
-//    try {
-//      this->set_32bit_type_storage(key, false, pkey);
-//    }
-//    ESMC_CATCH_ERRPASSTHRU
 
   }
   ESMF_CATCH_INFO
