@@ -462,7 +462,8 @@ void VMId::log(
   char digits[64];
   char msg[256];
   std::stringstream info;
-  info << "  vmKeyWidth = " << vmKeyWidth << " vmKeyOff = " << vmKeyOff;
+  info << "  vmKeyWidth (bytes) = " << vmKeyWidth
+    <<" vmKeyOff (invalid bits end of last byte) = " << vmKeyOff;
   sprintf(msg, "%s - VMId: %s", prefix.c_str(), info.str().c_str());
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
   info.str(""); // clear info
@@ -473,7 +474,7 @@ void VMId::log(
     bitmap |= vmKey[i];
     bitmap = bitmap << 8;
     ++k;
-    if (k==4){
+    if (k==3){
       sprintf(digits, "%08X", bitmap);
       info << digits;
       bitmap=0;
@@ -527,7 +528,7 @@ int VMId::print() const{
     bitmap |= vmKey[i];
     bitmap = bitmap << 8;
     ++k;
-    if (k==4){
+    if (k==3){
       printf("%08X", bitmap);
       bitmap=0;
       k=0;
