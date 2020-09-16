@@ -131,7 +131,7 @@ program ESMF_MeshUTest
   write(name, *) "Testing Mesh IsCreated for uncreated object"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   isCreated = ESMF_MeshIsCreated(mesh, rc=rc)
-   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
@@ -2606,10 +2606,7 @@ endif
 
   ! Turn on MOAB mesh creation
   call ESMF_MeshSetMOAB(.true., rc=localrc)
-  if (localrc /=ESMF_SUCCESS) then
-    rc=ESMF_FAILURE
-    return
-  endif
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Create Test mesh
   call createTestMeshSphDeg(mesh, rc=localrc)
@@ -2617,11 +2614,7 @@ endif
 
   ! Now that Mesh is created turn back off MOAB
   call ESMF_MeshSetMOAB(.false., rc=localrc)
-  if (localrc /=ESMF_SUCCESS) then
-    rc=ESMF_FAILURE
-    return
-  endif
-
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Create Mask Field
   maskField = ESMF_FieldCreate(mesh, ESMF_TYPEKIND_I4, &
