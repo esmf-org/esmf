@@ -57,7 +57,7 @@ program ESMF_InfoUTest
   type(ESMF_VM)         :: vm
   type(ESMF_GridComp)   :: gcomp
   ! cumulative result: count failures; no failures equals "all pass"
-  integer               :: result = 0, count
+  integer               :: result = 0, count, localPet
 
   integer(ESMF_KIND_I4) :: value, actual, actual2, actual3, arr_i4_get_count, &
                            actual4, ir4=0, implicit_i4
@@ -87,10 +87,10 @@ program ESMF_InfoUTest
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   !----------------------------------------------------------------------------
 
-  call ESMF_VMGetGlobal(vm, rc=rc)
+  call ESMF_VMGetCurrent(vm, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_VMGet(vm, petCount=petCount, rc=rc)
+  call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   !----------------------------------------------------------------------------
@@ -557,7 +557,12 @@ program ESMF_InfoUTest
   call ESMF_InfoSet(info_w, "a-key", desired_rw_val, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_InfoWriteJSON(info_w, "test-esmf-info-write.json", rc=rc)
+  if (localPet == 0) then
+    call ESMF_InfoWriteJSON(info_w, "test-esmf-info-write.json", rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  end if
+
+  call ESMF_VMBarrier(vm, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   info_r = ESMF_InfoReadJSON("test-esmf-info-write.json", rc=rc)
