@@ -17,7 +17,7 @@ By adopting JSON compliance for \texttt{ESMF\_Info}, ESMF made its core metadata
 
 \textbf{\textit{There are some aspects of the \texttt{ESMF\_Info} implementation related to JSON and \textit{JSON for Modern C++} that should be noted:}}
 \begin{enumerate}
-    \item JSON supports 64-bit data types for integers and reals (\cite{json_for_modern_cpp_64bit_int}, \cite{json_for_modern_cpp_64bit_float}). I4/R4 is converted to I8/R8 and vice versa. An error will occur if truncation is triggered during a conversion.
+    \item JSON supports 64-bit data types for integers and reals (\cite{json_for_modern_cpp_64bit_int}, \cite{json_for_modern_cpp_64bit_float}). I4/R4 is converted to I8/R8 and vice versa. \texttt{ESMF\_Info} internally tracks 32-bit sets to ensure the data type may be appropriately queried.
     \item The memory overhead per JSON object (e.g. a key-value pair) requires an additional allocator pointer for type generalization \cite{json_for_modern_cpp_memory_overhead}. Hence, the JSON map is not suited for big data storage, offering flexibility in exchange.
     \item Keys are stored in an unordered map sorted in lexicographical order.
 \end{enumerate}

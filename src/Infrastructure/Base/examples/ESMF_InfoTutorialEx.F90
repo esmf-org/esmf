@@ -100,9 +100,7 @@
 !------------------------------------------------------------------------------
 
 !BOE
-! Add an integer value. JSON types only support 64-bit integers \cite{json_for_modern_cpp_64bit_int}
-! and 64-bit reals \cite{json_for_modern_cpp_64bit_float}. 32-bit data types
-! are converted to 64-bit.
+! Add an integer value.
 !EOE
 !BOC
     call ESMF_InfoSet(info, "myIntegerKey", 54, rc=rc)

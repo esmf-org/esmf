@@ -2752,12 +2752,9 @@ void MBMesh_getlocalcoords(void **mbmpp, double *ncoords, int *_orig_sdim, int *
 
 }
 
-////////// WORK IN PROGRESS //////
-#if 0
-
-// Set data based on typekind
-// Mesh data is always double for now, so need to convert
-void set_Array_data(LocalArray *localArray, int index, ESMC_TypeKind_Flag typekind, double data) {
+// Set data in Array based on typekind
+template <class TYPE>
+void MBMesh_set_Array_data(LocalArray *localArray, int index, ESMC_TypeKind_Flag typekind, TYPE data) {
 
   if (typekind == ESMC_TYPEKIND_I4) {
     ESMC_I4 data_i4=static_cast<ESMC_I4>(data);
@@ -2777,15 +2774,20 @@ void set_Array_data(LocalArray *localArray, int index, ESMC_TypeKind_Flag typeki
   }
 }
 
+template void MBMesh_set_Array_data(LocalArray *localArray, int index, ESMC_TypeKind_Flag typekind, double data);
 
-void MBMesh_geteleminfointoarray(void **mbmpp,
+template void MBMesh_set_Array_data(LocalArray *localArray, int index, ESMC_TypeKind_Flag typekind, int data);
+
+
+
+void MBMesh_geteleminfointoarray(void *vmbmp,
                                  ESMCI::DistGrid *elemDistgrid, 
                                  int numElemArrays,
                                  int *infoTypeElemArrays, 
                                  ESMCI::Array **elemArrays, 
                                  int *rc)
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_geteleminfointoarray()"
+#define ESMC_METHOD "MBMesh_geteleminfointoarray()"
 
 {
   // Must match with ESMF_MeshGet()
@@ -2818,24 +2820,16 @@ void MBMesh_geteleminfointoarray(void **mbmpp,
         }
 
         // Get Moab Mesh wrapper
-        MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
-
-        //Get MOAB Mesh
-        Interface *moab_mesh=mbmp->mesh;
-
-        /// STOPPED HERE ///
+        MBMesh *mbmp=reinterpret_cast<MBMesh*>(vmbmp);
 
 
         // Get the fields, Arrays for the various types of info
-        MEField<> *elem_mask_field=NULL; 
         ESMCI::Array *elem_mask_Array=NULL;
-        MEField<> *elem_area_field=NULL; 
         ESMCI::Array *elem_area_Array=NULL;
 
         for (int i=0; i<numElemArrays; i++) {
           if (infoTypeElemArrays[i] == INFO_TYPE_ELEM_ARRAYS_MASK) { 
-            elem_mask_field = mesh->GetField("elem_mask_val");
-            if (!elem_mask_field) {
+            if (!mbmp->has_elem_mask) {
               ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
                                             " mesh doesn't contain element mask information.",
                                             ESMC_CONTEXT, &localrc);
@@ -2850,8 +2844,7 @@ void MBMesh_geteleminfointoarray(void **mbmpp,
           }
 
           if (infoTypeElemArrays[i] == INFO_TYPE_ELEM_ARRAYS_AREA) { 
-            elem_area_field = mesh->GetField("elem_area");
-            if (!elem_area_field) {
+            if (!mbmp->has_elem_area) {
               ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
                                             " mesh doesn't contain element area information.",
                                             ESMC_CONTEXT, &localrc);
@@ -2865,9 +2858,29 @@ void MBMesh_geteleminfointoarray(void **mbmpp,
             if (elem_area_Array->getRank() != 1) Throw() << "this call currently can't handle Array rank != 1";
 
             // Complain if the Mesh is split 
-            if (mesh->is_split) Throw() << "this call currently can't handle a mesh containing elems with > 4 corners";
+            if (mbmp->is_split) Throw() << "this call currently can't handle a mesh containing elems with > 4 corners";
           }
+        }
 
+
+        // Get elems
+        Range elems;
+        mbmp->get_all_elems(elems);
+
+        // TODO: MAYBE HAVE THE LIST OF LOCAL elemhandles in order in the mbmesh, that way you could
+        //     probably just read/write them quickly in a chunk using one of the MOAB subroutines. 
+        //     However, until then, this is a good way to do it. 
+
+        // Loop and set up gid_to_elem_map
+        std::map<int,EntityHandle> gid_to_elem_map;
+        for (Range::iterator it=elems.begin(); it !=elems.end(); it++) {
+          EntityHandle elem=*it;
+          
+          // Get node global id
+          int gid=mbmp->get_gid(elem);
+          
+          // Add to map
+          gid_to_elem_map[gid]=elem;
         }
 
 
@@ -2889,6 +2902,7 @@ void MBMesh_geteleminfointoarray(void **mbmpp,
 
             // Get localDE lower bound                                                    
             int lbound=(elem_mask_Array->getComputationalLBound())[lDE]; // (assumes array rank is 1)                                                                          
+
             // Typekind
             ESMC_TypeKind_Flag typekind=elem_mask_Array->getTypekind();
 
@@ -2896,27 +2910,29 @@ void MBMesh_geteleminfointoarray(void **mbmpp,
             for (int i=0; i<seqIndexList.size(); i++) {
               int si=seqIndexList[i];
 
-              //  Find the corresponding Mesh element
-              Mesh::MeshObjIDMap::iterator mi =  mesh->map_find(MeshObj::ELEMENT, si);
-              if (mi == mesh->map_end(MeshObj::ELEMENT)) {
+              // Get elem with si as gid
+              std::map<int,EntityHandle>::iterator mi =  gid_to_elem_map.find(si);
+              
+              // If it doesn't exist, then go to next
+              if (mi == gid_to_elem_map.end()) {
                 Throw() << "element with that id not found in mesh";
               }
               
-              // Get the element
-              const MeshObj &elem = *mi;
+              // Get elem 
+              EntityHandle elem=mi->second;
 
-              // Get the data from mesh
-              double *mask_val=elem_mask_field->data(elem);
+              // Get elem mask value
+              int mask_val=mbmp->get_elem_mask_val(elem);
          
               // Location in array
               int index=i+lbound;
               
-              // Set data
-              set_Array_data(localArray, index, typekind, *mask_val);
+              // Convert and set data
+              MBMesh_set_Array_data(localArray, index, typekind, mask_val);
             }
           }
 
-          // Get area if needed
+          // Get mask if needed
           if (elem_area_Array) {
             // Get the array info
             LocalArray *localArray=(elem_area_Array->getLocalarrayList())[lDE];
@@ -2930,23 +2946,25 @@ void MBMesh_geteleminfointoarray(void **mbmpp,
             for (int i=0; i<seqIndexList.size(); i++) {
               int si=seqIndexList[i];
 
-              //  Find the corresponding Mesh element
-              Mesh::MeshObjIDMap::iterator mi =  mesh->map_find(MeshObj::ELEMENT, si);
-              if (mi == mesh->map_end(MeshObj::ELEMENT)) {
+              // Get elem with si as gid
+              std::map<int,EntityHandle>::iterator mi =  gid_to_elem_map.find(si);
+              
+              // If it doesn't exist, then go to next
+              if (mi == gid_to_elem_map.end()) {
                 Throw() << "element with that id not found in mesh";
               }
               
-              // Get the element
-              const MeshObj &elem = *mi;
+              // Get elem 
+              EntityHandle elem=mi->second;
 
-              // Get the data from mesh
-              double *area_val=elem_area_field->data(elem);
+              // Get elem area
+              double area= mbmp->get_elem_area(elem);
          
               // Location in array
               int index=i+lbound;
               
-              // Set data
-              set_Array_data(localArray, index, typekind, *area_val);
+              // Convert and set data
+              MBMesh_set_Array_data(localArray, index, typekind, area);
             }
           }
         }
@@ -2982,8 +3000,6 @@ void MBMesh_geteleminfointoarray(void **mbmpp,
 #undef INFO_TYPE_ELEM_ARRAYS_AREA 
 #undef INFO_TYPE_ELEM_ARRAYS_MAX  
 }
-
-#endif
 
 
 void MBMesh_serialize(void **mbmpp, char *buffer, int *length, 

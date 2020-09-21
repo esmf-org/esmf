@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-//\ Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -434,23 +434,20 @@ bool isIn(key_t& target, const json& j) {
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "json_type_to_esmf_typekind()"
-ESMC_TypeKind_Flag json_type_to_esmf_typekind(const json &j, const bool allow_array) noexcept {
+ESMC_TypeKind_Flag json_type_to_esmf_typekind(const json &j, bool allow_array, bool is_32bit) {
   ESMC_TypeKind_Flag esmf_type;
   if (j.type() == json::value_t::null) {
     esmf_type = ESMF_NOKIND;
   } else if (j.type() == json::value_t::boolean) {
     esmf_type = ESMC_TYPEKIND_LOGICAL;
   } else if (j.type() == json::value_t::number_integer || j.type() == json::value_t::number_unsigned) {
-    if (j <= std::numeric_limits<int>::max() && j >= std::numeric_limits<int>::min()) {
+     if (is_32bit) {
       esmf_type = ESMC_TYPEKIND_I4;
     } else {
       esmf_type = ESMC_TYPEKIND_I8;
     }
   } else if (j.type() == json::value_t::number_float) {
-    float as_float = std::abs((float)j);
-    double as_double = std::abs((double)j);
-    double diff = std::abs(as_double - (double)as_float);
-    if (diff < std::numeric_limits<float>::epsilon()) {
+    if (is_32bit) {
       esmf_type = ESMC_TYPEKIND_R4;
     } else {
       esmf_type = ESMC_TYPEKIND_R8;
@@ -461,7 +458,7 @@ ESMC_TypeKind_Flag json_type_to_esmf_typekind(const json &j, const bool allow_ar
     if (allow_array && j.size() > 0) {
       esmf_type = ESMC_TYPEKIND_I4;
       for (std::size_t ii = 0; ii < j.size(); ++ii) {
-        ESMC_TypeKind_Flag curr_esmf_type = json_type_to_esmf_typekind(j.at(ii), false);
+        ESMC_TypeKind_Flag curr_esmf_type = json_type_to_esmf_typekind(j.at(ii), false, is_32bit);
         if (curr_esmf_type > esmf_type) {
           esmf_type = curr_esmf_type;
         }
@@ -510,6 +507,28 @@ bool has_key_json(const json &target, const json::json_pointer &jp, bool recursi
   return ret;
 }
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "retrieve_32bit_flag"
+bool retrieve_32bit_flag(const json &j, const json::json_pointer &jp, bool recursive) {
+  bool ret = false;
+  // Only attempt to get 32-bit information if the type storage is initialized
+  // and has at least a single entry.
+  if (!j.is_null() && j.size() > 0) {
+    const json *ts = nullptr;
+    try {
+      update_json_pointer(j, &ts, jp, recursive);
+      try {
+        if (ts->is_boolean()) { ret = *ts; }
+      }
+      ESMF_INFO_CATCH_JSON
+    } catch (json::out_of_range &e) {
+      // This is okay, and we default to the standard JSON type definitions with
+      // no checking for 32-bit types
+    }
+  }
+  return ret;
+}
+
 //-----------------------------------------------------------------------------
 // Info Implementations -------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -520,6 +539,7 @@ Info::Info(const json& storage) {
   try {
     check_init_from_json(storage);
     this->storage = storage;
+    this->type_storage = json::object();
   }
   ESMF_CATCH_INFO
 };
@@ -530,6 +550,7 @@ Info::Info(json&& storage) {
   try {
     check_init_from_json(storage);
     this->storage = std::move(storage);
+    this->type_storage = json::object();
   }
   ESMF_CATCH_INFO
 };
@@ -540,6 +561,7 @@ Info::Info(key_t& input) {
   // Exceptions: ESMCI::esmc_error
   try {
     this->storage = json::parse(input);
+    this->type_storage = json::object();
   }
   ESMF_CATCH_INFO
 };
@@ -559,6 +581,21 @@ std::string Info::dump(void) const {
 };
 
 #undef  ESMC_METHOD
+#define ESMC_METHOD "Info::dump_with_type_storage"
+std::string Info::dump_with_type_storage(void) {
+  std::string ret;
+  try {
+    if (this->getTypeStorage().size() > 0) {
+      this->getStorageRefWritable()["_esmf_info_type_storage"] = this->getTypeStorage();
+    }
+    std::string ret = this->dump(0);
+    this->erase("", "_esmf_info_type_storage");
+  }
+  ESMC_CATCH_ERRPASSTHRU
+  return ret;
+}
+
+#undef  ESMC_METHOD
 #define ESMC_METHOD "Info::deserialize()"
 void Info::deserialize(char *buffer, int *offset) {
   // Test: testSerializeDeserialize, testSerializeDeserialize2
@@ -574,6 +611,10 @@ void Info::deserialize(char *buffer, int *offset) {
   std::string infobuffer(&(buffer[*offset]), length);
   try {
     this->parse(infobuffer);
+    if (this->hasKey("_esmf_info_type_storage")) {
+      this->getTypeStorageWritable() = this->get<json>("_esmf_info_type_storage");
+      this->erase("", "_esmf_info_type_storage");
+    }
   }
   catch (esmc_error &e) {
     ESMC_ERRPASSTHRU(e);
@@ -923,7 +964,7 @@ bool Info::hasKey(const json::json_pointer &jp, bool recursive) const {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "Info::inquire()"
 json Info::inquire(key_t &key, bool recursive, const int *idx, bool attr_compliance) const {
-  // Test: testInquire
+  // Test: testInquire, testInquire32Bit
   // Notes:
 
 #if 0
@@ -938,8 +979,12 @@ json Info::inquire(key_t &key, bool recursive, const int *idx, bool attr_complia
     msg = prefix + "this->dump()=...";
     ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO);
     ESMC_LogWrite(this->dump().c_str(), ESMC_LOGMSG_INFO);
+    msg = prefix + "this->type_storage.dump()=...";
+    ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO);
+    ESMC_LogWrite(this->type_storage.dump().c_str(), ESMC_LOGMSG_INFO);
 #endif
 
+  bool is_32bit = false;
   json j = json::object();
   try {
     j["isDirty"] = this->isDirty();
@@ -948,8 +993,14 @@ json Info::inquire(key_t &key, bool recursive, const int *idx, bool attr_complia
     try {
       json::json_pointer jp = this->formatKey(key);
       update_json_pointer(this->getStorageRef(), &sp, jp, recursive);
+
+      // Find out if the output data is 32-bit
+      is_32bit = retrieve_32bit_flag(this->getTypeStorage(), jp, recursive);
     }
     ESMC_CATCH_ERRPASSTHRU
+
+    // Handle finding by index for arrays and objects -------------------------
+
     if (idx) {
       if (sp->is_array()) {
         try {
@@ -962,6 +1013,14 @@ json Info::inquire(key_t &key, bool recursive, const int *idx, bool attr_complia
         json::iterator it = find_by_index(const_cast<json&>(*sp), (std::size_t)(*idx), recursive, attr_compliance);
         j["key"] = it.key();
         sp = &(it.value());
+
+        // Find out if the output data is 32-bit
+        try {
+          json::json_pointer jp = this->formatKey(j["key"]);
+          is_32bit = retrieve_32bit_flag(this->getTypeStorage(), jp, recursive);
+        }
+        ESMC_CATCH_ERRPASSTHRU
+
       } else {
         std::string msg = "'idx' only supported for JSON arrays or objects";
         ESMC_CHECK_RC("ESMC_RC_ARG_BAD", ESMC_RC_ARG_BAD, msg);
@@ -985,7 +1044,7 @@ json Info::inquire(key_t &key, bool recursive, const int *idx, bool attr_complia
 
     // Type inquire -----------------------------------------------------------
 
-    j["ESMC_TypeKind_Flag"] = json_type_to_esmf_typekind(sk, true);
+    j["ESMC_TypeKind_Flag"] = json_type_to_esmf_typekind(sk, true, is_32bit);
     std::string json_typename;
     bool is_array = false;
     if (sk.is_array()) {
@@ -1052,7 +1111,13 @@ void Info::serialize(char *buffer, int *length, int *offset, ESMC_InquireFlag in
   // Exceptions:  ESMCI:esmc_error
   std::string infobuffer;
   try {
+    bool should_erase = false;
+    if (this->getTypeStorage().size() > 0) {
+      this->getStorageRefWritable()["_esmf_info_type_storage"] = this->getTypeStorage();
+      should_erase = true;
+    }
     infobuffer = this->dump();
+    if (should_erase) { this->erase("", "_esmf_info_type_storage"); }
   }
   ESMC_CATCH_ERRPASSTHRU
   alignOffset(*offset);
@@ -1076,6 +1141,49 @@ void Info::serialize(char *buffer, int *length, int *offset, ESMC_InquireFlag in
   }
   alignOffset(*offset);
   return;
+}
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "Info::set_32bit_type_storage()"
+void Info::set_32bit_type_storage(key_t &key, bool flag, const key_t * const pkey) {
+  // Test: test_set_32bit_type_storage
+
+  if (this->type_storage.is_null()) {
+    this->type_storage = json::object();
+  }
+  try {
+    json *jobject = nullptr;
+    if (pkey) {
+      // Set the target JSON container to the parent key location. The parent key
+      // location must be an object to proceed.
+      try {
+        const json::json_pointer jpkey_parent = this->formatKey(*pkey);
+        bool has_pkey = has_key_json(this->type_storage, jpkey_parent, true);
+        if (!has_pkey) {
+          this->type_storage[jpkey_parent] = json::object();
+        }
+        try {
+          update_json_pointer(this->type_storage, &jobject, jpkey_parent, true);
+          ESMC_CHECK_NULLPTR(jobject)
+          check_is_object(*jobject);
+        }
+        ESMF_INFO_CATCH_JSON
+      }
+      ESMC_CATCH_ERRPASSTHRU
+    } else {
+      jobject = &(this->type_storage);
+    }
+    try {
+      const json::json_pointer jpkey = this->formatKey(key);
+      try {
+        (*jobject)[jpkey] = flag;
+      }
+      ESMF_INFO_CATCH_JSON
+    }
+    ESMC_CATCH_ERRPASSTHRU
+  }
+  ESMF_CATCH_INFO
+
 }
 
 #undef  ESMC_METHOD
@@ -1190,6 +1298,7 @@ void Info::set(key_t &key, json &&j, bool force, const int *index, const key_t *
       }
     }
     ESMC_CATCH_ERRPASSTHRU
+
   }
   ESMF_CATCH_INFO
   this->dirty = true;
@@ -1426,9 +1535,13 @@ void broadcastInfo(ESMCI::Info* info, int rootPet, const ESMCI::VM &vm) {
   int localPet = vm.getLocalPet();
   std::size_t target_size = 0;  // Size of serialized info storage
   std::string target;  // Serialize storage buffer
+
   if (localPet == rootPet) {
     // If this is the root, serialize the info storage to std::string
     try {
+      if (info->getTypeStorage().size() > 0) {
+        info->getStorageRefWritable()["_esmf_info_type_storage"] = info->getTypeStorage();
+      }
       target = info->dump();
     }
     catch (ESMCI::esmc_error &exc_esmf) {
@@ -1456,6 +1569,10 @@ void broadcastInfo(ESMCI::Info* info, int rootPet, const ESMCI::VM &vm) {
     catch (ESMCI::esmc_error &exc_esmf) {
       ESMC_ERRPASSTHRU(exc_esmf);
     }
+  }
+  if (info->hasKey("_esmf_info_type_storage")) {
+    info->getTypeStorageWritable() = info->get<json>("_esmf_info_type_storage");
+    info->erase("", "_esmf_info_type_storage");
   }
   return;
 }

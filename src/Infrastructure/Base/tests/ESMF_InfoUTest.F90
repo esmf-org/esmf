@@ -57,7 +57,7 @@ program ESMF_InfoUTest
   type(ESMF_VM)         :: vm
   type(ESMF_GridComp)   :: gcomp
   ! cumulative result: count failures; no failures equals "all pass"
-  integer               :: result = 0, count
+  integer               :: result = 0, count, localPet
 
   integer(ESMF_KIND_I4) :: value, actual, actual2, actual3, arr_i4_get_count, &
                            actual4, ir4=0, implicit_i4
@@ -81,17 +81,16 @@ program ESMF_InfoUTest
   logical :: is_present, failed, is_set, is_present_copy_test, actual_logical, &
              desired_logical, isArray, isDirty
   logical, dimension(2) :: fails_obj
-  type(ESMF_TypeKind_Flag) :: tk1, tk2
 
   !----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)  ! calls ESMF_Initialize() internally
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   !----------------------------------------------------------------------------
 
-  call ESMF_VMGetGlobal(vm, rc=rc)
+  call ESMF_VMGetCurrent(vm, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_VMGet(vm, petCount=petCount, rc=rc)
+  call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   !----------------------------------------------------------------------------
@@ -558,7 +557,12 @@ program ESMF_InfoUTest
   call ESMF_InfoSet(info_w, "a-key", desired_rw_val, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_InfoWriteJSON(info_w, "test-esmf-info-write.json", rc=rc)
+  if (localPet == 0) then
+    call ESMF_InfoWriteJSON(info_w, "test-esmf-info-write.json", rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  end if
+
+  call ESMF_VMBarrier(vm, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   info_r = ESMF_InfoReadJSON("test-esmf-info-write.json", rc=rc)
@@ -899,47 +903,6 @@ program ESMF_InfoUTest
   call ESMF_InfoDestroy(info_implicit, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   !----------------------------------------------------------------------------
-
-  !----------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "I4/R4 Metadata Scalar"
-  write(failMsg, *) "Did not track I4/R4 typekind"
-  rc = ESMF_FAILURE
-  failed = .false.
-
-  to_parse = '{"an_i4": 4, "an_r4": 4.4, "an_i4_array": [4], "an_r4_array": [5.5]}'
-
-  info_parse = ESMF_InfoCreate(to_parse, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  call ESMF_InfoGet(info_parse, key="an_i4", typekind=tk1, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  call ESMF_InfoGet(info_parse, key="an_r4", typekind=tk2, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  call ESMF_Test((tk1==ESMF_TYPEKIND_I4 .and. tk2==ESMF_TYPEKIND_R4), name, &
-    failMsg, result, ESMF_SRCLINE)
-  !----------------------------------------------------------------------------
-
-  !----------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "I4/R4 Metadata Array"
-  write(failMsg, *) "Did not track I4 typekind"
-  rc = ESMF_FAILURE
-  failed = .false.
-
-  call ESMF_InfoGet(info_parse, key="an_i4_array", typekind=tk1, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  call ESMF_InfoGet(info_parse, key="an_r4_array", typekind=tk2, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  call ESMF_Test((tk1==ESMF_TYPEKIND_I4 .and. tk2==ESMF_TYPEKIND_R4), name, &
-    failMsg, result, ESMF_SRCLINE)
-
-  call ESMF_InfoDestroy(info_parse, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   !----------------------------------------------------------------------------
   call ESMF_TestEnd(ESMF_SRCLINE) ! calls ESMF_Finalize() internally
