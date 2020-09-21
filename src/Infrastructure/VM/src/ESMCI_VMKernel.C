@@ -3191,7 +3191,11 @@ void VMK::sendBuffer::clear(){
   ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
 #endif
   if (mpireq != MPI_REQUEST_NULL){
-    ESMC_LogDefault.Write("actually posting MPI_Wait()", ESMC_LOGMSG_INFO);
+#ifdef VM_EPOCHLOG_on
+    std::stringstream msg;
+    msg << "epochBuffer:" << __LINE__ << " actually posting MPI_Wait()";
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+#endif
     MPI_Wait(&mpireq, MPI_STATUS_IGNORE);
   }
 #ifdef USE_STRSTREAM

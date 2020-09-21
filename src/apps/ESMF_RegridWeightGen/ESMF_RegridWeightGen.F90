@@ -51,7 +51,7 @@ program ESMF_RegridWeightGenApp
   type(ESMF_ExtrapMethod_Flag) :: extrapMethodFlag
   character(len=ESMF_MAXPATHLEN) :: commandbuf1(5)
   character(len=MAXNAMELEN)  :: commandbuf3(9)
-  integer            :: commandbuf2(24)
+  integer            :: commandbuf2(25)
   integer            :: ind, pos
   logical            :: largeFileFlag
   logical            :: netcdf4FileFlag
@@ -263,7 +263,9 @@ program ESMF_RegridWeightGenApp
       call ESMF_UtilGetArg(ind+1, argvalue=extrapMethodStr)
       if ((trim(extrapMethodStr) .ne. 'none') .and. &
            (trim(extrapMethodStr) .ne. 'nearestidavg') .and. &
+           (trim(extrapMethodStr) .ne. 'nearestd') .and. &
            (trim(extrapMethodStr) .ne. 'creep') .and. &
+           (trim(extrapMethodStr) .ne. 'creepnrstd') .and. &
            (trim(extrapMethodStr) .ne. 'neareststod')) then
         write(*,*)
         print *, 'ERROR: The extrap. method "', trim(extrapMethodStr), '" is not supported'
@@ -293,7 +295,8 @@ program ESMF_RegridWeightGenApp
 
    ! If creep is the extrap method, get the number of levels
     extrapNumLevels=-1  ! Init just in case
-    if (trim(extrapMethodStr) .eq. 'creep') then
+    if ((trim(extrapMethodStr) .eq. 'creep') .or. &
+         (trim(extrapMethodStr) .eq. 'creepnrstd')) then
        ! Get number of levels index
        call ESMF_UtilGetArgIndex('--extrap_num_levels', argindex=ind, rc=rc)
 
@@ -751,9 +754,6 @@ program ESMF_RegridWeightGenApp
     call ESMF_UtilGetArgIndex('--moab', argindex=ind, rc=rc)
     if (ind /= -1) moabFlag = .true.
 
-    if (moabFlag) call ESMF_MeshSetMOAB(.true., rc=rc)
-    if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
-
 1110 continue
     commandbuf2(:)=0
     if (terminateProg) then
@@ -788,9 +788,12 @@ program ESMF_RegridWeightGenApp
       if (extrapMethodStr .eq. 'none') commandbuf2(22)=1
       if (extrapMethodStr .eq. 'neareststod') commandbuf2(22)=2
       if (extrapMethodStr .eq. 'nearestidavg') commandbuf2(22)=3
-      if (extrapMethodStr .eq. 'creep') commandbuf2(22)=4
+      if (extrapMethodStr .eq. 'nearestd') commandbuf2(22)=4
+      if (extrapMethodStr .eq. 'creep') commandbuf2(22)=5
+      if (extrapMethodStr .eq. 'creepnrstd') commandbuf2(22)=6
       commandbuf2(23)=extrap_num_src_pnts
       commandbuf2(24)=extrapNumLevels
+      if (moabFlag) commandbuf2(25)=1
     endif 
 
 
@@ -946,7 +949,11 @@ program ESMF_RegridWeightGenApp
     else if (commandbuf2(22)==3) then
       extrapMethodStr = 'nearestidavg'
     else if (commandbuf2(22)==4) then
+      extrapMethodStr = 'nearestd'
+    else if (commandbuf2(22)==5) then
       extrapMethodStr = 'creep'
+    else if (commandbuf2(22)==6) then
+      extrapMethodStr = 'creepnrstd'
     else
       method = 'none'
     endif
@@ -954,6 +961,10 @@ program ESMF_RegridWeightGenApp
     extrap_num_src_pnts=commandbuf2(23)
     extrapNumLevels=commandbuf2(24)
 
+    ! Set moab flag
+    moabFlag=.false.
+    if (commandbuf2(25)==1) moabFlag=.true.
+ 
     call ESMF_VMBroadcast(vm, commandbuf1, len(commandbuf1)*size(commandbuf1), 0, rc=rc)
     if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
     call ESMF_VMBroadcast(vm, commandbuf3, len(commandbuf3)*size(commandbuf3), 0, rc=rc)
@@ -1025,8 +1036,12 @@ program ESMF_RegridWeightGenApp
      extrapMethodFlag=ESMF_EXTRAPMETHOD_NEAREST_STOD
   else if (trim(extrapMethodStr) .eq. 'nearestidavg') then
      extrapMethodFlag=ESMF_EXTRAPMETHOD_NEAREST_IDAVG
+  else if (trim(extrapMethodStr) .eq. 'nearestd') then
+     extrapMethodFlag=ESMF_EXTRAPMETHOD_NEAREST_D
   else if (trim(extrapMethodStr) .eq. 'creep') then
      extrapMethodFlag=ESMF_EXTRAPMETHOD_CREEP
+  else if (trim(extrapMethodStr) .eq. 'creepnrstd') then
+     extrapMethodFlag=ESMF_EXTRAPMETHOD_CREEP_NRST_D
   else 
      extrapMethodFlag=ESMF_EXTRAPMETHOD_NONE
   endif
@@ -1040,6 +1055,11 @@ program ESMF_RegridWeightGenApp
   write(*,*) "extrap_dist_exponent=",extrap_dist_exponent
   write(*,*) "extrapNumLevels=",extrapNumLevels
 #endif
+
+  ! Turn on MOAB flag based on moabFlag which has been broadcast across PETs
+  if (moabFlag) call ESMF_MeshSetMOAB(.true., rc=rc)
+  if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
+
 
 if (writewgtfile) then
   if (writerhfile) then
@@ -1256,7 +1276,7 @@ contains
     print *, "                      [--pole|-p all|none|teeth|<N>]"
     print *, "                      [--line_type|-l cartesian|greatcircle]"
     print *, "                      [--norm_type dstarea|fracarea]"
-    print *, "                      [--extrap_method none|neareststod|nearestidavg|creep]"
+    print *, "                      [--extrap_method none|neareststod|nearestidavg|nearestd|creep|creepnrstd]"
     print *, "                      [--extrap_num_src_pnts <N>]"
     print *, "                      [--extrap_dist_exponent <P>]"
     print *, "                      [--extrap_num_levels <L>]"

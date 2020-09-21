@@ -343,6 +343,7 @@ void ESMC_InfoSetR4(ESMCI::Info *info, char *key, float &value, bool &force, int
     std::string *local_pkeyp = nullptr;
     if (local_pkey.size() != 0) {local_pkeyp = &local_pkey;}
     info->set<float>(local_key, value, force, index, local_pkeyp);
+    info->set_32bit_type_storage(local_key, true, local_pkeyp);
     esmc_rc = ESMF_SUCCESS;
   }
   ESMC_CATCH_ISOC
@@ -375,6 +376,7 @@ void ESMC_InfoSetI4(ESMCI::Info *info, char *key, int &value, bool &force, int &
     std::string *local_pkeyp = nullptr;
     if (local_pkey.size() != 0) {local_pkeyp = &local_pkey;}
     info->set<int>(local_key, value, force, index, local_pkeyp);
+    info->set_32bit_type_storage(local_key, true, local_pkeyp);
     esmc_rc = ESMF_SUCCESS;
   }
   ESMC_CATCH_ISOC
@@ -423,6 +425,7 @@ void ESMC_InfoSetArrayR4(ESMCI::Info *info, char *key, float *value, int &count,
     std::string *local_pkeyp = nullptr;
     if (local_pkey.size() != 0) {local_pkeyp = &local_pkey;}
     info->set<float>(local_key, value, count, force, local_pkeyp);
+    info->set_32bit_type_storage(local_key, true, local_pkeyp);
     esmc_rc = ESMF_SUCCESS;
   }
   ESMC_CATCH_ISOC
@@ -455,6 +458,7 @@ void ESMC_InfoSetArrayI4(ESMCI::Info *info, char *key, int *value, int &count, b
     std::string *local_pkeyp = nullptr;
     if (local_pkey.size() != 0) {local_pkeyp = &local_pkey;}
     info->set<int>(local_key, value, count, force, local_pkeyp);
+    info->set_32bit_type_storage(local_key, true, local_pkeyp);
     esmc_rc = ESMF_SUCCESS;
   }
   ESMC_CATCH_ISOC

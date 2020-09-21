@@ -82,10 +82,11 @@ void update_json_attribute_count_map(count_map_t &counts, const json &j, bool fi
 bool isIn(key_t& target, const std::vector<std::string>& container);
 bool isIn(const std::vector<std::string>& target, const std::vector<std::string>& container);
 bool isIn(key_t& target, const json& j);
-ESMC_TypeKind_Flag json_type_to_esmf_typekind(const json &j, const bool allow_array) noexcept;
+ESMC_TypeKind_Flag json_type_to_esmf_typekind(const json &j, bool allow_array, bool is_32bit);
 void handleJSONTypeCheck(key_t &key, const json &src, const json &dst);
 template<typename T, typename T2>
 void check_overflow(T dst, T2 tocheck);
+bool retrieve_32bit_flag(const json &j, const json::json_pointer &jp, bool recursive);
 
 //-----------------------------------------------------------------------------
 
@@ -94,9 +95,10 @@ class Info {
 private:
   bool dirty = false;
   json storage;  // JSON object store for keys/values managed by this instance
+  json type_storage;  // JSON object for Fortran typing
 
 protected:
-  virtual void init(void) {this->storage = json::object();}
+  void init(void) {this->storage = json::object(); this->type_storage = json::object();}
 
 public:
   Info(void) {this->init();}
@@ -113,6 +115,7 @@ public:
 
   std::string dump(void) const;
   std::string dump(int indent) const;
+  std::string dump_with_type_storage(void);
 
   void erase(key_t& key, key_t& keyChild, bool recursive = false);
 
@@ -133,6 +136,8 @@ public:
 
   virtual const json& getStorageRef(void) const { return this->storage; }
   virtual json& getStorageRefWritable(void) { return this->storage; }
+  json& getTypeStorageWritable(void) { return this->type_storage; }
+  const json& getTypeStorage(void) const { return this->type_storage; }
 
   json const * getPointer(key_t &key, bool recursive = false) const;
 
@@ -172,6 +177,8 @@ public:
   void update_for_attribute(const Info &info, bool overwrite);
 
   int ESMC_Print(bool tofile, const char *filename, bool append) const;
+
+  void set_32bit_type_storage(key_t &key, bool flag, const key_t * const pkey);
 };
 
 //-----------------------------------------------------------------------------

@@ -237,6 +237,29 @@ EntityHandle MBMesh::add_node(double *orig_coords, int gid, int orig_pos, int ow
 }
 
 
+// Get a Range of all nodes on this processor
+void MBMesh::get_all_nodes(Range &all_nodes) {
+
+  int merr=mesh->get_entities_by_dimension(0, 0, all_nodes);
+  if (merr != MB_SUCCESS) {
+    int localrc;
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+  }
+}
+
+// Get a Range of all elems on this processor
+void MBMesh::get_all_elems(Range &all_elems) {
+
+  int merr=mesh->get_entities_by_dimension(0, pdim, all_elems);
+  if (merr != MB_SUCCESS) {
+    int localrc;
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+  }
+}
+
+
 void MBMesh::set_owner(EntityHandle eh, int owner) {
 
   // Error return codes
@@ -473,6 +496,28 @@ void MBMesh::set_elem_mask_val(EntityHandle eh, int mask_val) {
   }  
 }
 
+int MBMesh::get_elem_mask_val(EntityHandle eh) {
+
+  // Error return codes
+  int localrc;
+  int merr;
+  
+  // If no masking, then error
+  if (!has_elem_mask) Throw() << "Element mask value not present in mesh.";
+
+  // Get mask vale
+  int mask_val;
+  merr=mesh->tag_get_data(elem_mask_val_tag, &eh, 1, &mask_val);
+  if (merr != MB_SUCCESS) {
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+  }  
+
+  // Output information
+  return mask_val;
+}
+
+
 void MBMesh::setup_elem_area() {
 
   int merr,localrc;
@@ -506,6 +551,28 @@ void MBMesh::set_elem_area(EntityHandle eh, double area) {
                                      moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
   }  
 }
+
+double MBMesh::get_elem_area(EntityHandle eh) {
+
+  // Error return codes
+  int localrc;
+  int merr;
+  
+  // If no area, then error
+  if (!has_elem_area) Throw() << "Element area not present in mesh.";
+
+  // Get Owner
+  double area;
+  merr=mesh->tag_get_data(elem_area_tag, &eh, 1, &area);
+  if (merr != MB_SUCCESS) {
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+  }  
+
+  // Output area
+  return area;
+}
+
 
 void MBMesh::setup_elem_coords() {
 
@@ -605,6 +672,15 @@ void MBMesh::update_parallel() {
   // Get the indexed pcomm object from the interface                                                                
   // index 0 should return the one created inside MBMesh_addelements                                                
   ParallelComm *pcomm = ParallelComm::get_pcomm(this->mesh, 0);
+
+  pcomm->set_debug_verbosity(0);
+
+  // strange errors with edges (in moab edges are processor boundaries) showed up with redistribution
+  // the best solution we found with the moab team was to remove edges after redist and prior to resolve_shared_ents
+  Range edges;
+  merr=mesh->get_entities_by_dimension(0, 1, edges);
+  MBMESH_CHECK_ERR(merr, localrc);
+  pcomm->delete_entities(edges);
 
   // Get current list of elements
   Range elems;
@@ -869,11 +945,6 @@ void MBMesh::halo_comm_elems_all_tags() {
 
 
 MBMesh::~MBMesh() {
-
-  // Get the indexed pcomm object from the interface                                                                
-  // index 0 should return the one created inside MBMesh_addelements                                                
-  ParallelComm *pcomm = ParallelComm::get_pcomm(this->mesh, 0);
-  delete pcomm;
   
   // Get rid of MOAB mesh
   if (mesh != NULL) delete mesh;
@@ -905,7 +976,7 @@ void MBMesh::debug_output_nodes() {
   }
 
   // Loop over nodes outputting information
-  for (Range::iterator it=nodes.begin(); it != nodes.end(); it++) {
+  for (Range::const_iterator it=nodes.begin(); it != nodes.end(); it++) {
     EntityHandle node=*it;
 
     // Output info
@@ -961,7 +1032,7 @@ void MBMesh::debug_output_elems() {
   }
 
   // Loop over nodes outputting information
-  for (Range::iterator it=elems.begin(); it != elems.end(); it++) {
+  for (Range::const_iterator it=elems.begin(); it != elems.end(); it++) {
     EntityHandle elem=*it;
 
     // Output info
@@ -1017,7 +1088,7 @@ void MBMesh::setup_verts_array() {
 
   // Loop over nodes filling array
   int i=0;
-  for (Range::iterator it=nodes.begin(); it != nodes.end(); it++) {
+  for (Range::const_iterator it=nodes.begin(); it != nodes.end(); it++) {
     EntityHandle node=*it;
 
     verts[i]=node;
@@ -1050,13 +1121,18 @@ void MBMesh::CreateGhost() {
   if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
     throw localrc;  // bail out with exception
 
-  // get the indexed pcomm object from the interface
-  // pass index 0, it will the one created inside MBMesh_addelements
-  ParallelComm *pcomm = ParallelComm::get_pcomm(this->mesh, 0);
-  
-  // this is already called in MBMesh_addelements
-  // merr = pcomm->resolve_shared_ents(0, elems, this->pdim, this->pdim-1);
-  // MBMESH_CHECK_ERR(merr, localrc);
+  // set up the MOAB parallel environment
+  ParallelComm *pcomm= new ParallelComm(mesh, mpi_comm);
+
+  // Get list of elements
+  Range elems;
+  merr=mesh->get_entities_by_dimension(0, pdim, elems);
+  MBMESH_CHECK_ERR(merr, localrc);
+    
+  // Resolve object sharing 
+  merr = pcomm->resolve_shared_ents(0, elems, pdim, pdim-1);
+  MBMESH_CHECK_ERR(merr, localrc);
+
 
 #ifdef DEBUG_MOAB_GHOST_EXCHANGE
   int nprocs = pcomm->size();
@@ -1128,10 +1204,6 @@ void MBMesh::CreateGhost() {
   merr = pcomm->exchange_tags(node_tags, node_tags, nodes);
   MBMESH_CHECK_ERR(merr, localrc);
 
-  Range elems;
-  merr=this->mesh->get_entities_by_dimension(0, this->pdim, elems);
-  MBMESH_CHECK_ERR(merr, localrc);
-
   merr = pcomm->exchange_tags(elem_tags, elem_tags, elems);
   MBMESH_CHECK_ERR(merr, localrc);
 
@@ -1167,8 +1239,10 @@ void MBMesh::CreateGhost() {
           rbuf[4*i + 1] << " edges, " << rbuf[4*i + 2] << " faces, " << rbuf[4*i + 3] << " elements" << endl;
     }
   }
-  
 #endif
+
+  // Get the indexed pcomm object from the interface
+  delete pcomm;
 
 }
 

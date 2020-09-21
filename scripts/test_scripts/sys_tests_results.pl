@@ -113,7 +113,7 @@ use File::Find
 			push @all_files, "$File::Find::name\n" ;
         }
         # Get all system tests files
-        @st_files=grep (/STest.F90/, @all_files);
+        @st_files=grep (/STest.F90$|STest.C$/, @all_files);
 	# Check for special case of MPMD test
 	$count=grep (/STestA.F90/, @all_files);
 	if ($count != 0) {

@@ -105,12 +105,7 @@ use File::Find
                         push @all_files, "$File::Find::name\n" ;
         }
         # Get all source mapl tests files
-        @c_files=grep (/UTest.C/, @all_files);
-        @F90_files=grep (/UTest.F90/, @all_files);
-        foreach $file ( @c_files) {
-                push (@F90_files, $file);               
-        }
-	@st_ut_files = @F90_files;
+	@st_ut_files=grep (/UTest.F90$|UTest.C$/, @all_files);
         @ut_files = @st_ut_files;
         foreach ( @st_ut_files) {
                 s/\.\///; # Delete all the "./"

@@ -105,13 +105,9 @@ use File::Find
                         push @all_files, "$File::Find::name\n" ;
         }
         # Get all source unit tests files
-        @c_files=grep (/UTest.C/, @all_files);
-        @F90_files=grep (/UTest.F90/, @all_files);
-        foreach $file ( @c_files) {
-                push (@F90_files, $file);               
-        }
+        @utt_files=grep (/UTest.F90$|UTest.C$/, @all_files);
 	# Remove ESM*_MAPL_* unit tests from list
-	foreach $file (@F90_files) {
+	foreach $file (@utt_files) {
 		if ((grep(/ESMF_MAPL_/, $file)) ||
 		    (grep(/ESMC_MAPL_/, $file)) ||
 		    (grep(/ESMCI_MAPL_/, $file))) {

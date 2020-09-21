@@ -24,7 +24,8 @@
 #include "ESMCI_GridToMesh.h"
 #include "ESMC_Util.h"
 #include "ESMCI_Array.h"
-#include "ESMCI_TraceRegion.h"
+
+#include "ESMCI_TraceMacros.h"  // for profiling
 
 #include "Mesh/include/ESMCI_Mesh.h"
 #include "Mesh/include/Legacy/ESMCI_MeshRead.h"
@@ -124,9 +125,6 @@ void ESMCI_regrid_create(
   int has_statusArray=*_has_statusArray;
   ESMCI::Array *statusArray=*_statusArray;
 
-  // Old Regrid conserve turned off for now
-  int regridConserve=ESMC_REGRID_CONSERVE_OFF;
-
 #define PROGRESSLOG_off
 #define MEMLOG_off
 
@@ -204,48 +202,45 @@ void ESMCI_regrid_create(
     }
     WMat dst_status;
 
-#ifdef ESMF_PROFILE_MESH_WEIGHTGEN_NATIVE
-    int localrc;
-    ESMCI_REGION_ENTER("Native Mesh Weight Generation", localrc)
-    VM::logMemInfo(std::string("before Native Mesh Weight Generation"));
-#endif
+    ESMCI_REGRID_TRACE_ENTER("NativeMesh Weight Generation");
 
     // to do NEARESTDTOS just do NEARESTSTOD and invert results
     if (*regridMethod != ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) {
 
-      if(!online_regrid(srcmesh, srcpointlist, dstmesh, dstpointlist, *wts, &regridConserve,
-                        regridMethod, regridPoleType, regridPoleNPnts,
-                        regridScheme, map_type,
-                        extrapMethod,
-                        extrapNumSrcPnts,
-                        extrapDistExponent,
-                        extrapNumLevels,
-                        extrapNumInputLevels, 
-                        &temp_unmappedaction,
-                        set_dst_status, dst_status)) {
+      if(!regrid(srcmesh, srcpointlist, dstmesh, dstpointlist, 
+                 NULL, *wts, 
+                 regridMethod, regridScheme, 
+                 regridPoleType, regridPoleNPnts,
+                 map_type,
+                 extrapMethod,
+                 extrapNumSrcPnts,
+                 extrapDistExponent,
+                 extrapNumLevels,
+                 extrapNumInputLevels, 
+                 &temp_unmappedaction,
+                 set_dst_status, dst_status)) {
         Throw() << "Online regridding error" << std::endl;
       }
     } else {
       int tempRegridMethod=ESMC_REGRID_METHOD_NEAREST_SRC_TO_DST;
 
-      if(!online_regrid(dstmesh, dstpointlist, srcmesh, srcpointlist, *wts, &regridConserve,
-                        &tempRegridMethod, regridPoleType, regridPoleNPnts,
-                        regridScheme, map_type,
-                        extrapMethod,
-                        extrapNumSrcPnts,
-                        extrapDistExponent,
-                        extrapNumLevels,
-                        extrapNumInputLevels, 
-                        &temp_unmappedaction,
-                        set_dst_status, dst_status)) {
+      if(!regrid(dstmesh, dstpointlist, srcmesh, srcpointlist, 
+                 NULL, *wts,
+                 &tempRegridMethod, regridScheme, 
+                 regridPoleType, regridPoleNPnts,
+                  map_type,
+                 extrapMethod,
+                 extrapNumSrcPnts,
+                 extrapDistExponent,
+                 extrapNumLevels,
+                 extrapNumInputLevels, 
+                 &temp_unmappedaction,
+                 set_dst_status, dst_status)) {
         Throw() << "Online regridding error" << std::endl;
       }
     }
 
-#ifdef ESMF_PROFILE_MESH_WEIGHTGEN_NATIVE
-    VM::logMemInfo(std::string("after Native Mesh Weight Generation"));
-    ESMCI_REGION_EXIT("Native Mesh Weight Generation", localrc)
-#endif
+    ESMCI_REGRID_TRACE_EXIT("NativeMesh Weight Generation");
 
 #ifdef PROGRESSLOG_on
     ESMC_LogDefault.Write("c_esmc_regrid_create(): Done with weight generation... check unmapped dest,", ESMC_LOGMSG_INFO);
@@ -451,10 +446,7 @@ void ESMCI_regrid_create(
     VM::logMemInfo(std::string("RegridCreate5.2"));
 #endif
 
-#ifdef ESMF_PROFILE_MESH_SMMSTORE_NATIVE
-    ESMCI_REGION_ENTER("Native Mesh ArraySMMStore", localrc)
-    VM::logMemInfo(std::string("before Native Mesh ArraySMMStore"));
-#endif
+    ESMCI_REGRID_TRACE_ENTER("NativeMesh ArraySMMStore");
 
     // Build the ArraySMM
     if (*has_rh != 0) {
@@ -468,10 +460,7 @@ void ESMCI_regrid_create(
         ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
     }
 
-#ifdef ESMF_PROFILE_MESH_SMMSTORE_NATIVE
-    VM::logMemInfo(std::string("after Native Mesh ArraySMMStore"));
-    ESMCI_REGION_EXIT("Native Mesh ArraySMMStore", localrc)
-#endif
+    ESMCI_REGRID_TRACE_EXIT("NativeMesh ArraySMMStore");
 
 #ifdef PROGRESSLOG_on
     ESMC_LogDefault.Write("c_esmc_regrid_create(): Returned from ArraySMMStore().", ESMC_LOGMSG_INFO);
@@ -556,6 +545,7 @@ void ESMCI_regrid_create(
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 }
 
+
 void ESMCI_regrid_getiwts(Grid **gridpp,
                    Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
                    int *regridScheme, int*rc) {
@@ -605,7 +595,6 @@ void ESMCI_regrid_getiwts(Grid **gridpp,
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
 }
-
 
 void ESMCI_regrid_getarea(Grid **gridpp,
                    Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,

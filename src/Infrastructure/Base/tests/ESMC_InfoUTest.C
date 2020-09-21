@@ -67,6 +67,8 @@ void testbroadcastInfo(int& rc, char failMsg[]) {
   if (localPet == rootPet) {
     try {
         info.set("foo", desired, false);
+        info.set("maintain_i4", 44, false);
+        info.set_32bit_type_storage("maintain_i4", true, nullptr);
     }
     ESMC_CATCH_ERRPASSTHRU
   }
@@ -80,6 +82,15 @@ void testbroadcastInfo(int& rc, char failMsg[]) {
     int actual = info.get<int>("foo");
     if (actual != desired) {
       return finalizeFailure(rc, failMsg, "Value not broadcast");
+    }
+    if (info.getTypeStorage().size() == 0) {
+      return finalizeFailure(rc, failMsg, "Type storage not broadcast");
+    }
+    if (!info.getTypeStorage()["maintain_i4"]) {
+      return finalizeFailure(rc, failMsg, "Type storage value missing");
+    }
+    if (info.hasKey("_esmf_info_type_storage")) {
+      return finalizeFailure(rc, failMsg, "Type storage should be erased");
     }
   }
   ESMC_CATCH_ERRPASSTHRU
@@ -835,6 +846,7 @@ void testSerializeDeserialize2(int& rc, char failMsg[]) {
     char *null_buffer = nullptr;
     for (auto element : infops) {
       try {
+        element->set_32bit_type_storage("foo", true, nullptr);
         element->serialize(null_buffer, &inquire_length, &offset, ESMF_INQUIREONLY);
       }
       ESMC_CATCH_ERRPASSTHRU
@@ -866,6 +878,12 @@ void testSerializeDeserialize2(int& rc, char failMsg[]) {
       Info *desired = infops[ii];
       if (actual->getStorageRef() != desired->getStorageRef()) {
         return finalizeFailure(rc, failMsg, "Deserialized incorrect");
+      }
+      if (actual->getTypeStorage().size() == 0) {
+        return finalizeFailure(rc, failMsg, "Type storage not present");
+      }
+      if (actual->inquire("foo")["ESMF_TYPEKIND"] == ESMC_TYPEKIND_I4) {
+        return finalizeFailure(rc, failMsg, "Type storage incorrect");
       }
     }
   }
@@ -947,6 +965,58 @@ void testInquire(int& rc, char failMsg[]) {
 
   rc = ESMF_SUCCESS;
   return;
+}
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "testInquire32Bit()"
+void testInquire32Bit(int& rc, char failMsg[]) {
+  rc = ESMF_FAILURE;
+
+  ESMCI::Info info;
+
+  // Test an I4
+  try {
+    info.set<int>("/ESMF/General/foo", 45, false);
+    info.set_32bit_type_storage("/ESMF/General/foo", true, nullptr);
+    json inquire = info.inquire("/ESMF/General/foo");
+    if (inquire["ESMC_TypeKind_Flag"] != ESMC_TYPEKIND_I4) {
+      return finalizeFailure(rc, failMsg, "Wrong storage type");
+    }
+  }
+  ESMC_CATCH_ERRPASSTHRU
+
+  // Test an R4
+  try {
+    info.set<float>("/ESMF/General/foo2", 33.3, false);
+    info.set_32bit_type_storage("/ESMF/General/foo2", true, nullptr);
+    json inquire = info.inquire("/ESMF/General/foo2");
+    if (inquire["ESMC_TypeKind_Flag"] != ESMC_TYPEKIND_R4) {
+      return finalizeFailure(rc, failMsg, "Wrong storage type");
+    }
+  }
+  ESMC_CATCH_ERRPASSTHRU
+
+  // Test empty 32-bit mapping
+  try {
+    info.set<int>("/ESMF/General/foo3", 3, false);
+    json inquire = info.inquire("/ESMF/General/foo3");
+    if (inquire["ESMC_TypeKind_Flag"] != ESMC_TYPEKIND_I8) {
+      return finalizeFailure(rc, failMsg, "Wrong storage type");
+    }
+  }
+  ESMC_CATCH_ERRPASSTHRU
+
+  // Test using an index
+  try {
+    const int idx = 1;
+    json inquire = info.inquire("", true, &idx, true);
+    if (inquire["ESMC_TypeKind_Flag"] != ESMC_TYPEKIND_R4) {
+      return finalizeFailure(rc, failMsg, "Wrong storage type");
+    }
+  }
+  ESMC_CATCH_ERRPASSTHRU
+
+  rc = ESMF_SUCCESS;
 }
 
 #undef  ESMC_METHOD
@@ -1240,6 +1310,34 @@ void test_update_for_attribute(int& rc, char failMsg[]) {
   rc = ESMF_SUCCESS;
 };
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "test_set_32bit_type_storage()"
+void test_set_32bit_type_storage(int& rc, char failMsg[]) {
+  rc = ESMF_FAILURE;
+
+  try {
+    ESMCI::Info info;
+
+    info.set_32bit_type_storage("/ESMF/General/is_i4", true, nullptr);
+    std::string pkey = "/NUOPC/Instance";
+    info.set_32bit_type_storage("is_r4", false, &pkey);
+
+    json &type_storage = info.getTypeStorageWritable();
+//    std::cout << type_storage.dump(2) << std::endl;
+
+    if (!(type_storage["ESMF"]["General"]["is_i4"])) {
+      return finalizeFailure(rc, failMsg, "wrong flag, should be true");
+    }
+    if (type_storage["NUOPC"]["Instance"]["is_r4"]) {
+      return finalizeFailure(rc, failMsg, "wrong flag, should be false");
+    }
+
+  }
+  ESMC_CATCH_ERRPASSTHRU
+
+  rc = ESMF_SUCCESS;
+};
+
 int main(void) {
 
   char name[80];
@@ -1367,6 +1465,13 @@ int main(void) {
 
   //---------------------------------------------------------------------------
   //NEX_UTest
+  strcpy(name, "testInquire32Bit");
+  testInquire32Bit(rc, failMsg);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //---------------------------------------------------------------------------
+
+  //---------------------------------------------------------------------------
+  //NEX_UTest
   strcpy(name, "test_update_json_pointer");
   test_update_json_pointer(rc, failMsg);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -1418,6 +1523,13 @@ int main(void) {
   //NEX_UTest
   strcpy(name, "test_update_for_attribute");
   test_update_for_attribute(rc, failMsg);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //---------------------------------------------------------------------------
+
+  //---------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "test_set_32bit_type_storage");
+  test_set_32bit_type_storage(rc, failMsg);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //---------------------------------------------------------------------------
 

@@ -265,6 +265,8 @@ void ESMC_InfoIsEqual(ESMCI::Info *lhs, ESMCI::Info *rhs, int &res, int &esmc_rc
     // TODO: This is not efficient but required for a peculiar situation with
     //  Intel and Intel MPI. I think it has something to do with unsigned integer
     //  and integer comparison following deserialization.
+    //TODO (bekozi): This fix is temporary. It is inefficient to string serialize
+    //  for the purposes of comparison.
     bool local_res = lhs->getStorageRef().dump() == rhs->getStorageRef().dump();
 #else
     bool local_res = lhs->getStorageRef() == rhs->getStorageRef();
@@ -347,7 +349,9 @@ void ESMC_InfoUpdate(ESMCI::Info *to_update, ESMCI::Info *new_contents,
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoBaseSyncDo"
-void ESMC_InfoBaseSyncDo(const std::vector<long long int> &base_addresses, const int &rootPet, const long long int &vmAddress, int &markClean, int &esmc_rc) {
+void ESMC_InfoBaseSyncDo(const std::vector<long long int> &base_addresses,
+                         const int &rootPet, const long long int &vmAddress,
+                         int &markClean, int &esmc_rc) {
   esmc_rc = ESMF_FAILURE;
   try {
     void *v = (void *)vmAddress;

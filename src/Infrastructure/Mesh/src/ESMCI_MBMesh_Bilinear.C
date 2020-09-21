@@ -36,6 +36,8 @@
 #include <ESMCI_VM.h>
 #include <ESMCI_LogErr.h>
 
+#include "ESMCI_TraceMacros.h"  // for profiling
+
 using std::vector;
 using std::iterator;
 
@@ -261,7 +263,9 @@ void calc_bilinear_regrid_wgts(MBMesh *srcmb, PointList *dstpl, IWeights &wts,
   if (petCount > 1) {
 
     // Create rendez meshes
+    ESMCI_REGRID_TRACE_ENTER("MBMesh regrid bilinear rendezvous");
     create_rendez_mbmesh_etop(srcmb, dstpl, &srcmesh_rend, &dstpl_rend, map_type);
+    ESMCI_REGRID_TRACE_EXIT("MBMesh regrid bilinear rendezvous");
 
     // Use rendezvous meshes instead
     srcmesh_regrid=srcmesh_rend;
@@ -269,20 +273,26 @@ void calc_bilinear_regrid_wgts(MBMesh *srcmb, PointList *dstpl, IWeights &wts,
   }
 
   // Do search
+  ESMCI_REGRID_TRACE_ENTER("MBMesh regrid bilinear search");
   MBMesh_Search_EToP_Result_List result;
   MBMesh_Search_EToP(srcmesh_regrid, 
                       dstpl_regrid, ESMCI_UNMAPPEDACTION_IGNORE,
                       map_type, 1.0E-8, result, 
                       set_dst_status, dst_status, NULL, NULL);
+  ESMCI_REGRID_TRACE_EXIT("MBMesh regrid bilinear search");
 
   // Calculate the bilinear weight matrix
+  ESMCI_REGRID_TRACE_ENTER("MBMesh regrid bilinear calculate weights");
   calc_bilinear_mat(srcmesh_regrid, dstpl_regrid, result, wts);
+  ESMCI_REGRID_TRACE_EXIT("MBMesh regrid bilinear calculate weights");
 
   // If parallel then migrate weights back to decompostion of original mesh
+  ESMCI_REGRID_TRACE_ENTER("MBMesh regrid bilinear migrate weights");
   if (petCount > 1) {
     wts.Migrate(*dstpl);
     if (set_dst_status) dst_status.Migrate(*dstpl);
   }
+  ESMCI_REGRID_TRACE_EXIT("MBMesh regrid bilinear migrate weights");
 
   // If parallel then get rid of rendezvous meshes.
   if (petCount > 1) {

@@ -61,6 +61,12 @@ namespace ESMCI {
     Tag node_mask_tag;
     Tag node_mask_val_tag;
 
+    bool has_elem_coords;
+    Tag  elem_coords_tag;
+
+    bool has_elem_orig_coords;
+    Tag  elem_orig_coords_tag;
+
     bool has_elem_frac; // TODO: Get rid of this
     Tag  elem_frac_tag;
 
@@ -71,12 +77,6 @@ namespace ESMCI {
     bool has_elem_area;
     Tag  elem_area_tag;
 
-    bool has_elem_coords;
-    Tag  elem_coords_tag;
-
-    bool has_elem_orig_coords;
-    Tag  elem_orig_coords_tag;
-
     // Split stuff
     bool is_split;
     int max_non_split_id;
@@ -84,6 +84,7 @@ namespace ESMCI {
     std::map<int,double> split_id_to_frac;
 
     void CreateGhost();
+
 
 
     // Mesh from inputs
@@ -95,6 +96,7 @@ namespace ESMCI {
     // Add one elem
     EntityHandle add_elem(EntityType elem_type, int num_nodes, EntityHandle *nodes, 
                           int gid, int orig_pos, int owner);
+
 
 
     // Change owner
@@ -109,11 +111,30 @@ namespace ESMCI {
     // Get gid
     int get_gid(EntityHandle eh);
 
+
+    // TODO:
+    //      + We should eventually have a get set of each type of field (mask, etc.) for individual entityhandles, as well as an array of entity handles. 
+    //        For the individual gets, I'm not sure what to do about coordinates. It's useful to have the gids, etc come out of the return value of the method, so I hate
+    //        to force all of the gets to return through the arg list. However, I'm not sure if there's a good way to do that for the coords. May have to just have the couple of get coord
+    //        interfaces be different. 
+    //      + Make versions of get_all_elems() and get_all_nodes() to just return local things? 
+
+
+    // TODO: Should these come out via return??
+
+    // Get a Range of all nodes on this processor
+    void get_all_nodes(Range &all_nodes);
+
+    // Get range of all elems on this processor
+    void get_all_elems(Range &all_elems);
+
+
     // Turn on node masking for this mesh
     void setup_node_mask();
 
     // Set node mask value
     void set_node_mask_val(EntityHandle eh, int mask_val);
+
 
     // Set node coords
     void set_node_coords(EntityHandle eh, double *orig_coords);
@@ -121,14 +142,22 @@ namespace ESMCI {
     // Turn on elem masking
     void setup_elem_mask();
 
-    // Set a mask value 
+    // Set an element mask value 
     void set_elem_mask_val(EntityHandle eh, int mask_val);
+
+    // Get an element mask value 
+    int get_elem_mask_val(EntityHandle eh);
+
 
     // Setup elem areas
     void setup_elem_area();
 
     // Set an elem area value
     void set_elem_area(EntityHandle eh, double area);
+
+    // Get an elem area value
+    double get_elem_area(EntityHandle eh);
+
 
     // Setup elem coords
     void setup_elem_coords();

@@ -44,6 +44,7 @@
 #include <ESMCI_VM.h>
 #include <ESMCI_LogErr.h>
 
+#include "ESMCI_TraceMacros.h"  // for profiling
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
@@ -1410,7 +1411,9 @@ void calc_cnsrv_regrid_wgts(MBMesh *srcmesh, MBMesh *dstmesh, IWeights &wts) {
   if (petCount > 1) {
 
     // Create rendez meshes
+    ESMCI_REGRID_TRACE_ENTER("MBMesh regrid csrv rendezvous");
     create_rendez_mbmesh_elem(srcmesh, dstmesh, &srcmesh_rend, &dstmesh_rend);
+    ESMCI_REGRID_TRACE_EXIT("MBMesh regrid csrv rendezvous");
 
     // Use rendezvous meshes instead
     srcmesh_regrid=srcmesh_rend;
@@ -1419,18 +1422,23 @@ void calc_cnsrv_regrid_wgts(MBMesh *srcmesh, MBMesh *dstmesh, IWeights &wts) {
 
 
   // Do search
+  ESMCI_REGRID_TRACE_ENTER("MBMesh regrid csrv search");
   MBMesh_Search_EToE_Result_List result;
   MBMesh_Search_EToE(srcmesh_regrid, ESMCI_UNMAPPEDACTION_IGNORE, dstmesh_regrid, ESMCI_UNMAPPEDACTION_IGNORE,
                  1.0E-8, result);
+  ESMCI_REGRID_TRACE_EXIT("MBMesh regrid csrv search");
 
 
   IWeights src_frac;
   IWeights dst_frac;
+  ESMCI_REGRID_TRACE_ENTER("MBMesh regrid csrv calculate weights");
   calc_conserve_mat(srcmesh_regrid, dstmesh_regrid, result, wts, src_frac, dst_frac);
+  ESMCI_REGRID_TRACE_EXIT("MBMesh regrid csrv calculate weights");
 
 
   // If parallel then migrate weights and fracs
   // back to decompostion of original destination mesh
+  ESMCI_REGRID_TRACE_ENTER("MBMesh regrid csrv migrate weights");
   if (petCount > 1) {
      wts.MigrateToElem(*dstmesh);
      dst_frac.MigrateToElem(*dstmesh);
@@ -1438,6 +1446,7 @@ void calc_cnsrv_regrid_wgts(MBMesh *srcmesh, MBMesh *dstmesh, IWeights &wts) {
      // Migrate and set fracs
      src_frac.MigrateToElem(*srcmesh);
   }
+  ESMCI_REGRID_TRACE_EXIT("MBMesh regrid csrv migrate weights");
 
   // Copy dst fractions to mesh
   // TODO: If users areas are used, then use dst_frac instead

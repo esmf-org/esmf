@@ -6824,6 +6824,8 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
               extrapMethod = ESMF_EXTRAPMETHOD_NEAREST_STOD
             else if (trim(chopSubString(2))=="creep") then
               extrapMethod = ESMF_EXTRAPMETHOD_CREEP
+            else if (trim(chopSubString(2))=="creep_nrst_d") then
+              extrapMethod = ESMF_EXTRAPMETHOD_CREEP_NRST_D
             else
               write (msgString,*) "Specified option '", &
                 trim(chopStringList(j)), &
@@ -6890,6 +6892,12 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
         if ((extrapMethod.eq.ESMF_EXTRAPMETHOD_CREEP) .and. extrapNumLevelsINC) then
           call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
             msg="User must set extrapNumLevels when extrapMethod=ESMF_EXTRAPMETHOD_CREEP!", &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+          return  ! bail out
+        endif
+        if ((extrapMethod.eq.ESMF_EXTRAPMETHOD_CREEP_NRST_D) .and. extrapNumLevelsINC) then
+          call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+            msg="User must set extrapNumLevels when extrapMethod=ESMF_EXTRAPMETHOD_CREEP_NRST_D!", &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
           return  ! bail out
         endif

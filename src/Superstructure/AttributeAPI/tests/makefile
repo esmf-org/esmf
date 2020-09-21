@@ -32,7 +32,7 @@ AUTOGEN = ESMF_AttPackABundleUTest.F90 \
 LOCDIR = src/Superstructure/AttributeAPI/tests
 
 .NOTPARALLEL:
-#TESTS_BUILD = $(ESMF_TESTDIR)/ESMF_AttPackFieldUTest
+#TESTS_BUILD = $(ESMF_TESTDIR)/ESMF_AttributeArrayUTest
 TESTS_BUILD = \
           $(ESMF_TESTDIR)/ESMF_AttPackABundleUTest \
           $(ESMF_TESTDIR)/ESMF_AttPackArrayUTest \
@@ -64,6 +64,7 @@ TESTS_BUILD = \
           $(ESMF_TESTDIR)/ESMF_AttributeUpdateReconcileUTest \
           $(ESMF_TESTDIR)/ESMF_AttributeUtilUTest
 
+#TESTS_RUN = RUN_ESMF_AttributeArrayUTest
 TESTS_RUN = \
           RUN_ESMF_AttPackABundleUTest \
           RUN_ESMF_AttPackArrayUTest \

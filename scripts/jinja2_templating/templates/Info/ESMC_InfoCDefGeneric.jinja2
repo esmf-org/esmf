@@ -118,6 +118,9 @@ void {{ method_name }}(ESMCI::Info *info, char *key, {{ t.ctype }} {% if is_scal
     std::string *local_pkeyp = nullptr;
     if (local_pkey.size() != 0) {local_pkeyp = &local_pkey;}
     info->set<{{ t.ctype }}>(local_key, value, {% if not is_scalar %}count, {% endif %}force, {% if is_scalar %}index, {% endif %}local_pkeyp);
+{% if t.esmf_suffix in ["I4", "R4"] %}
+    info->set_32bit_type_storage(local_key, true, local_pkeyp);
+{% endif %}
     esmc_rc = ESMF_SUCCESS;
   }
   ESMC_CATCH_ISOC

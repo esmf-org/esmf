@@ -84,7 +84,7 @@ use File::Find
 			push @all_files, "$File::Find::name\n" ;
         }
         # Get all system tests files
-        @st_files=grep (/STest/, @all_files);
+        @st_files=grep (/STest.F90$|STest.C$/, @all_files);
         # Find the system test files with the "ESMF_SYSTEM_TEST" string
         # grep for system tests to report on
         $count=0;
