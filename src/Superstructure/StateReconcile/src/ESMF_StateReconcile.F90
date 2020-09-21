@@ -288,7 +288,7 @@ contains
 
     logical, parameter :: debug = .false.
     logical, parameter :: meminfo = .false.
-    logical, parameter :: trace = .true. !tdk:debug
+    logical, parameter :: trace = .false.
 
     character(160)  :: prefixStr
     type(ESMF_VMId), allocatable, target :: vmIdMap(:)
