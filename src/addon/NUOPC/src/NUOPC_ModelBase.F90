@@ -311,7 +311,7 @@ module NUOPC_ModelBase
     type(ESMF_Clock)          :: internalClock
     logical                   :: clockIsPresent
     type(type_InternalState)  :: is
-    integer                   :: verbosity, diagnostic
+    integer                   :: verbosity, diagnostic, profiling
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
     character(ESMF_MAXSTR)    :: ipdvxAttr
@@ -326,10 +326,18 @@ module NUOPC_ModelBase
 
     ! query the component for info
     call NUOPC_CompGet(gcomp, name=name, verbosity=verbosity, &
-      diagnostic=diagnostic, rc=rc)
+      diagnostic=diagnostic, profiling=profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
+    ! handle profiling
+    if (btest(profiling,0)) then
+      call ESMF_TraceRegionEnter(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -583,6 +591,14 @@ module NUOPC_ModelBase
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+    ! handle profiling
+    if (btest(profiling,0)) then
+      call ESMF_TraceRegionExit(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
   end subroutine
   
   !-----------------------------------------------------------------------------
@@ -602,7 +618,7 @@ module NUOPC_ModelBase
     type(ESMF_Clock)          :: internalClock
     logical                   :: clockIsPresent
     logical                   :: existflag
-    integer                   :: verbosity, diagnostic
+    integer                   :: verbosity, diagnostic, profiling
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
 
@@ -610,9 +626,17 @@ module NUOPC_ModelBase
 
     ! query the component for info
     call NUOPC_CompGet(gcomp, name=name, verbosity=verbosity, &
-      diagnostic=diagnostic, rc=rc)
+      diagnostic=diagnostic, profiling=profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! handle profiling
+    if (btest(profiling,0)) then
+      call ESMF_TraceRegionEnter(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
 
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
@@ -748,6 +772,14 @@ module NUOPC_ModelBase
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+    ! handle profiling
+    if (btest(profiling,0)) then
+      call ESMF_TraceRegionExit(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
   end subroutine
   
   !-----------------------------------------------------------------------------
@@ -767,7 +799,7 @@ module NUOPC_ModelBase
     type(ESMF_Clock)          :: internalClock
     logical                   :: clockIsPresent
     logical                   :: existflag
-    integer                   :: verbosity, diagnostic
+    integer                   :: verbosity, diagnostic, profiling
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
 
@@ -775,9 +807,17 @@ module NUOPC_ModelBase
 
     ! query the component for info
     call NUOPC_CompGet(gcomp, name=name, verbosity=verbosity, &
-      diagnostic=diagnostic, rc=rc)
+      diagnostic=diagnostic, profiling=profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! handle profiling
+    if (btest(profiling,0)) then
+      call ESMF_TraceRegionEnter(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
 
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
@@ -913,6 +953,14 @@ module NUOPC_ModelBase
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+    ! handle profiling
+    if (btest(profiling,0)) then
+      call ESMF_TraceRegionExit(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
   end subroutine
   
   !-----------------------------------------------------------------------------
@@ -932,7 +980,7 @@ module NUOPC_ModelBase
     type(ESMF_Clock)          :: internalClock
     logical                   :: clockIsPresent
     logical                   :: existflag
-    integer                   :: verbosity, diagnostic
+    integer                   :: verbosity, diagnostic, profiling
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
 
@@ -940,9 +988,17 @@ module NUOPC_ModelBase
 
     ! query the component for info
     call NUOPC_CompGet(gcomp, name=name, verbosity=verbosity, &
-      diagnostic=diagnostic, rc=rc)
+      diagnostic=diagnostic, profiling=profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! handle profiling
+    if (btest(profiling,0)) then
+      call ESMF_TraceRegionEnter(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
 
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
@@ -1078,6 +1134,14 @@ module NUOPC_ModelBase
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+    ! handle profiling
+    if (btest(profiling,0)) then
+      call ESMF_TraceRegionExit(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
   end subroutine
   
   !-----------------------------------------------------------------------------
@@ -1097,7 +1161,7 @@ module NUOPC_ModelBase
     type(ESMF_Clock)          :: internalClock
     logical                   :: clockIsPresent
     logical                   :: existflag
-    integer                   :: verbosity, diagnostic
+    integer                   :: verbosity, diagnostic, profiling
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
 
@@ -1105,9 +1169,17 @@ module NUOPC_ModelBase
 
     ! query the component for info
     call NUOPC_CompGet(gcomp, name=name, verbosity=verbosity, &
-      diagnostic=diagnostic, rc=rc)
+      diagnostic=diagnostic, profiling=profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! handle profiling
+    if (btest(profiling,0)) then
+      call ESMF_TraceRegionEnter(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
 
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
@@ -1243,6 +1315,14 @@ module NUOPC_ModelBase
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+    ! handle profiling
+    if (btest(profiling,0)) then
+      call ESMF_TraceRegionExit(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
   end subroutine
   
   !-----------------------------------------------------------------------------
@@ -1262,7 +1342,7 @@ module NUOPC_ModelBase
     type(ESMF_Clock)          :: internalClock
     logical                   :: clockIsPresent
     logical                   :: existflag
-    integer                   :: verbosity, diagnostic
+    integer                   :: verbosity, diagnostic, profiling
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
 
@@ -1270,9 +1350,17 @@ module NUOPC_ModelBase
 
     ! query the component for info
     call NUOPC_CompGet(gcomp, name=name, verbosity=verbosity, &
-      diagnostic=diagnostic, rc=rc)
+      diagnostic=diagnostic, profiling=profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! handle profiling
+    if (btest(profiling,0)) then
+      call ESMF_TraceRegionEnter(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
 
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
@@ -1408,6 +1496,14 @@ module NUOPC_ModelBase
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+    ! handle profiling
+    if (btest(profiling,0)) then
+      call ESMF_TraceRegionExit(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
   end subroutine
   
   !-----------------------------------------------------------------------------
@@ -1433,7 +1529,7 @@ module NUOPC_ModelBase
     character(ESMF_MAXSTR), pointer :: impStdNameList(:)
     character(ESMF_MAXSTR), pointer :: impItemNameList(:)
     character(ESMF_MAXSTR), pointer :: impConnectedList(:)
-    integer                   :: verbosity, diagnostic
+    integer                   :: verbosity, diagnostic, profiling
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
     
@@ -1445,10 +1541,18 @@ module NUOPC_ModelBase
     
     ! query the component for info
     call NUOPC_CompGet(gcomp, name=name, verbosity=verbosity, &
-      diagnostic=diagnostic, rc=rc)
+      diagnostic=diagnostic, profiling=profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
+    ! handle profiling
+    if (btest(profiling,0)) then
+      call ESMF_TraceRegionEnter(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1631,6 +1735,14 @@ module NUOPC_ModelBase
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+    ! handle profiling
+    if (btest(profiling,0)) then
+      call ESMF_TraceRegionExit(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
   end subroutine
   
   !-----------------------------------------------------------------------------
@@ -1653,7 +1765,7 @@ module NUOPC_ModelBase
     integer                   :: oldUpdatedCount, newUpdatedCount
     logical                   :: allUpdated
     character(ESMF_MAXSTR)    :: name, valueString1, valueString2
-    integer                   :: verbosity, diagnostic
+    integer                   :: verbosity, diagnostic, profiling
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
 
@@ -1661,10 +1773,18 @@ module NUOPC_ModelBase
 
     ! query the component for info
     call NUOPC_CompGet(gcomp, name=name, verbosity=verbosity, &
-      diagnostic=diagnostic, rc=rc)
+      diagnostic=diagnostic, profiling=profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
+    ! handle profiling
+    if (btest(profiling,0)) then
+      call ESMF_TraceRegionEnter(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1898,6 +2018,14 @@ module NUOPC_ModelBase
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+    ! handle profiling
+    if (btest(profiling,0)) then
+      call ESMF_TraceRegionExit(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
   end subroutine
   
   !-----------------------------------------------------------------------------
@@ -1918,7 +2046,7 @@ module NUOPC_ModelBase
     type(ESMF_Clock)          :: internalClock
     logical                   :: clockIsPresent
     logical                   :: clockIsCreated
-    integer                   :: verbosity, diagnostic
+    integer                   :: verbosity, diagnostic, profiling
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
 
@@ -1926,10 +2054,18 @@ module NUOPC_ModelBase
 
     ! query the component for info
     call NUOPC_CompGet(gcomp, name=name, verbosity=verbosity, &
-      diagnostic=diagnostic, rc=rc)
+      diagnostic=diagnostic, profiling=profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
+    ! handle profiling
+    if (btest(profiling,0)) then
+      call ESMF_TraceRegionEnter(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2104,6 +2240,14 @@ module NUOPC_ModelBase
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+    ! handle profiling
+    if (btest(profiling,0)) then
+      call ESMF_TraceRegionExit(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
   end subroutine
 
   !-----------------------------------------------------------------------------
@@ -2123,25 +2267,28 @@ module NUOPC_ModelBase
     logical                   :: existflag
     character(ESMF_MAXSTR)    :: msgString, pLabel
     integer                   :: phase
-    integer                   :: verbosity, diagnostic
+    integer                   :: verbosity, diagnostic, profiling
     character(ESMF_MAXSTR)    :: name
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
     logical                   :: exportIsCreated
 
-#define NUOPC_MODELBASE_TRACE__OFF
-#ifdef NUOPC_MODELBASE_TRACE
-    call ESMF_TraceRegionEnter("NUOPC_ModelBase:Run")
-#endif
-    
     rc = ESMF_SUCCESS
 
     ! query the component for info
     call NUOPC_CompGet(gcomp, name=name, verbosity=verbosity, &
-      diagnostic=diagnostic, rc=rc)
+      diagnostic=diagnostic, profiling=profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
+    ! handle profiling
+    if (btest(profiling,3)) then
+      call ESMF_TraceRegionEnter(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2464,10 +2611,14 @@ module NUOPC_ModelBase
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-#ifdef NUOPC_MODELBASE_TRACE
-    call ESMF_TraceRegionExit("NUOPC_ModelBase:Run")
-#endif
-    
+    ! handle profiling
+    if (btest(profiling,3)) then
+      call ESMF_TraceRegionExit(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
   end subroutine
   
   !-----------------------------------------------------------------------------
@@ -2596,7 +2747,7 @@ module NUOPC_ModelBase
     character(ESMF_MAXSTR)    :: msgString, pLabel
     integer                   :: phase
     type(ESMF_Clock)          :: internalClock
-    integer                   :: verbosity, diagnostic
+    integer                   :: verbosity, diagnostic, profiling
     type(type_InternalState)  :: is
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
@@ -2605,10 +2756,18 @@ module NUOPC_ModelBase
 
     ! query the component for info
     call NUOPC_CompGet(gcomp, name=name, verbosity=verbosity, &
-      diagnostic=diagnostic, rc=rc)
+      diagnostic=diagnostic, profiling=profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
+    ! handle profiling
+    if (btest(profiling,6)) then
+      call ESMF_TraceRegionEnter(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2733,6 +2892,14 @@ module NUOPC_ModelBase
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! handle profiling
+    if (btest(profiling,6)) then
+      call ESMF_TraceRegionExit(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
 
   end subroutine
   !-----------------------------------------------------------------------------
