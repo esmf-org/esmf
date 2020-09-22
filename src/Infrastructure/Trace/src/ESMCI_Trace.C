@@ -1375,9 +1375,9 @@ namespace ESMCI {
     if (traceLocalPet || profileLocalPet) {
       int localrc;
 
-      if (*method == ESMCI::METHOD_SETSERVICES) {
+      if (*method == ESMCI::METHOD_SETSERVICES || (ESMCI::METHOD_INITIALIZE && *phase==0)) {
 
-        //after SetServices, look to see if there are any
+        //after SetServices or Init phase 0, look to see if there are any
         //phase map attributes available, and if so record
         //these labels for displaying in the output
 
