@@ -325,7 +325,7 @@ module NUOPC_Connector
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 #if 0
-    call ESMF_LogWrite("ipdvxAttr: "//ipdvxAttr, ESMF_LOGMSG_INFO, rc=rc)
+    call ESMF_LogWrite("ipdvxAttr: "//ipdvxAttr, ESMF_LOGMSG_DEBUG, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 #endif
@@ -7121,7 +7121,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
 #if 0
 write (msgString,*) trim(name)//": srcGrid Match for i=", i, " is: ", &
   rhListMatch
-call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO)
+call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_DEBUG)
 #endif
           if (.not.rhListMatch) goto 123
           ! test dst grid match
@@ -7133,7 +7133,7 @@ call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO)
 #if 0
 write (msgString,*) trim(name)//": dstGrid Match for i=", i, " is: ", &
   rhListMatch
-call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO)
+call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_DEBUG)
 #endif
           if (.not.rhListMatch) goto 123
           ! test src arrayspec match
@@ -7254,7 +7254,7 @@ call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO)
 #if 0
 call ESMF_LogWrite(trim(name)//&
   ": no rhListMatch -> pre-compute new remapping: "// &
-  trim(cplList(i)), ESMF_LOGMSG_INFO)
+  trim(cplList(i)), ESMF_LOGMSG_DEBUG)
 #endif
         if (gridPair) then
           ! add a new rhList element
@@ -7329,7 +7329,7 @@ call ESMF_LogWrite(trim(name)//&
 #if 0
 call ESMF_LogWrite(trim(name)//&
   ": found rhListMatch -> reuse routehandle: "// &
-  trim(cplList(i)), ESMF_LOGMSG_INFO)
+  trim(cplList(i)), ESMF_LOGMSG_DEBUG)
 #endif
         ! pull out the routehandle from the matching rhList element
         rhh = rhListE%rh
@@ -7422,7 +7422,7 @@ call ESMF_LogWrite(trim(name)//&
     if (count > 0) then
 #if 0
 write(msgString,*) "Redist FBs have elements: ", count
-call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=rc)
 #endif
       ! call into ESMF for an optimized Redist pre-compute between FieldBundles
       call ESMF_FieldBundleRedistStore(srcFBRedist, dstFBRedist, &
