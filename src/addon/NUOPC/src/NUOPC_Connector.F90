@@ -4987,6 +4987,9 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     enddo
 
     ! SPECIALIZE by calling into attached method to precompute routehandle
+    if (btest(profiling,1)) then
+      call ESMF_TraceRegionEnter("label_ComputeRouteHandle")
+    endif
     call ESMF_MethodExecute(connector, label=label_ComputeRouteHandle, &
       existflag=existflag, userRc=localrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4994,6 +4997,9 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
+    if (btest(profiling,1)) then
+      call ESMF_TraceRegionExit("label_ComputeRouteHandle")
+    endif
 
     if (.not.existflag) then
       ! if not specialized -> use default method to:
@@ -5851,6 +5857,9 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     !TODO: with the Fields held in the FieldBundle inside the internal State?
       
     ! SPECIALIZE by calling into attached method to execute routehandle
+    if (btest(profiling,4)) then
+      call ESMF_TraceRegionEnter("label_ExecuteRouteHandle")
+    endif
     call ESMF_MethodExecute(connector, label=label_ExecuteRouteHandle, &
       existflag=existflag, userRc=localrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -5858,8 +5867,14 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
+    if (btest(profiling,4)) then
+      call ESMF_TraceRegionExit("label_ExecuteRouteHandle")
+    endif
 
     if (.not.existflag) then
+      if (btest(profiling,4)) then
+        call ESMF_TraceRegionEnter("default_RouteHandle_execution")
+      endif
       ! if not specialized -> use default method to execute the exchange
       ! Conditionally enter VMEpoch
       if (.not. is%wrap%srcDstOverlap) then
@@ -5910,10 +5925,13 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
       endif
       if (btest(verbosity,14)) then
         call ESMF_LogWrite(trim(name)//&
-          ": called default label_ExecuteRouteHandle", &
+          ": called default RouteHandle execution", &
           ESMF_LOGMSG_INFO, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      endif
+      if (btest(profiling,4)) then
+        call ESMF_TraceRegionExit("default_RouteHandle_execution")
       endif
     else
       ! Next update the TimeStamp metadata on the export Fields....
@@ -6055,6 +6073,9 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     endif
     
     ! SPECIALIZE by calling into attached method to release routehandle
+    if (btest(profiling,7)) then
+      call ESMF_TraceRegionEnter("label_ReleaseRouteHandle")
+    endif
     call ESMF_MethodExecute(connector, label=label_ReleaseRouteHandle, &
       existflag=existflag, userRc=localrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -6062,6 +6083,9 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
+    if (btest(profiling,7)) then
+      call ESMF_TraceRegionExit("label_ReleaseRouteHandle")
+    endif
 
     if (.not.existflag) then
       ! if not specialized -> use default method to:
@@ -6106,6 +6130,9 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     endif
 
     ! SPECIALIZE by calling into optional attached method
+    if (btest(profiling,7)) then
+      call ESMF_TraceRegionEnter("label_Finalize")
+    endif
     call ESMF_MethodExecute(connector, label=label_Finalize, &
       existflag=existflag, userRc=localrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -6114,6 +6141,9 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
+    if (btest(profiling,7)) then
+      call ESMF_TraceRegionExit("label_Finalize")
+    endif
 
     ! destroy Timestamp update packets
     !TODO: consider whether CplSet needs extra treatment here or not

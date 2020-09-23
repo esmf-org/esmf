@@ -712,12 +712,18 @@ module NUOPC_ModelBase
     endif
 
     ! SPECIALIZE by calling into attached method
+    if (btest(profiling,1)) then
+      call ESMF_TraceRegionEnter("label_Advertise")
+    endif
     call ESMF_MethodExecute(gcomp, label=label_Advertise, &
       existflag=existflag, userRc=localrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+    if (btest(profiling,1)) then
+      call ESMF_TraceRegionExit("label_Advertise")
+    endif
 
     ! handle diagnostic
     if (btest(diagnostic,2)) then
@@ -893,12 +899,18 @@ module NUOPC_ModelBase
     endif
 
     ! SPECIALIZE by calling into attached method
+    if (btest(profiling,1)) then
+      call ESMF_TraceRegionEnter("label_ModifyAdvertised")
+    endif
     call ESMF_MethodExecute(gcomp, label=label_ModifyAdvertised, &
       existflag=existflag, userRc=localrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+    if (btest(profiling,1)) then
+      call ESMF_TraceRegionExit("label_ModifyAdvertised")
+    endif
 
     ! handle diagnostic
     if (btest(diagnostic,2)) then
@@ -1074,12 +1086,18 @@ module NUOPC_ModelBase
     endif
 
     ! SPECIALIZE by calling into attached method
+    if (btest(profiling,1)) then
+      call ESMF_TraceRegionEnter("label_RealizeProvided")
+    endif
     call ESMF_MethodExecute(gcomp, label=label_RealizeProvided, &
       existflag=existflag, userRc=localrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+    if (btest(profiling,1)) then
+      call ESMF_TraceRegionExit("label_RealizeProvided")
+    endif
 
     ! handle diagnostic
     if (btest(diagnostic,2)) then
@@ -1255,12 +1273,18 @@ module NUOPC_ModelBase
     endif
 
     ! SPECIALIZE by calling into attached method
+    if (btest(profiling,1)) then
+      call ESMF_TraceRegionEnter("label_AcceptTransfer")
+    endif
     call ESMF_MethodExecute(gcomp, label=label_AcceptTransfer, &
       existflag=existflag, userRc=localrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+    if (btest(profiling,1)) then
+      call ESMF_TraceRegionExit("label_AcceptTransfer")
+    endif
 
     ! handle diagnostic
     if (btest(diagnostic,2)) then
@@ -1436,12 +1460,18 @@ module NUOPC_ModelBase
     endif
 
     ! SPECIALIZE by calling into attached method
+    if (btest(profiling,1)) then
+      call ESMF_TraceRegionEnter("label_RealizeAccepted")
+    endif
     call ESMF_MethodExecute(gcomp, label=label_RealizeAccepted, &
       existflag=existflag, userRc=localrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+    if (btest(profiling,1)) then
+      call ESMF_TraceRegionExit("label_RealizeAccepted")
+    endif
 
     ! handle diagnostic
     if (btest(diagnostic,2)) then
@@ -1642,12 +1672,18 @@ module NUOPC_ModelBase
     endif
 
     ! SPECIALIZE by calling into optional attached method to set internal clock
+    if (btest(profiling,1)) then
+      call ESMF_TraceRegionEnter("label_SetClock")
+    endif
     call ESMF_MethodExecute(gcomp, label=label_SetClock, &
       existflag=existflag, userRc=localrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+    if (btest(profiling,1)) then
+      call ESMF_TraceRegionExit("label_SetClock")
+    endif
 
     ! query if all import Fields are connected
     call NUOPC_GetStateMemberLists(importState, StandardNameList=impStdNameList, &
@@ -1875,6 +1911,9 @@ module NUOPC_ModelBase
     ! only connected Fields reside in exportState at this time.
     ! Expect the component to set "InitializeDataComplete" attribute when done.
     ! SPECIALIZE by calling into attached method to fill initial data
+    if (btest(profiling,1)) then
+      call ESMF_TraceRegionEnter("label_DataInitialize")
+    endif
     call ESMF_MethodExecute(gcomp, label=label_DataInitialize, &
       existflag=existflag, userRc=localrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1884,6 +1923,9 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME, &
       rcToReturn=rc)) &
       return  ! bail out
+    if (btest(profiling,1)) then
+      call ESMF_TraceRegionExit("label_DataInitialize")
+    endif
     
     ! re-set the "InitializeDataProgress" attribute to "false"
     call NUOPC_CompAttributeSet(gcomp, &
@@ -2160,6 +2202,9 @@ module NUOPC_ModelBase
     ! fill all export Fields with valid initial data for current time
     ! note that only connected Fields reside in exportState at this time
     ! SPECIALIZE by calling into attached method to fill initial data
+    if (btest(profiling,1)) then
+      call ESMF_TraceRegionEnter("label_DataInitialize")
+    endif
     call ESMF_MethodExecute(gcomp, label=label_DataInitialize, &
       existflag=existflag, userRc=localrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2169,6 +2214,9 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME, &
       rcToReturn=rc)) &
       return  ! bail out
+    if (btest(profiling,1)) then
+      call ESMF_TraceRegionExit("label_DataInitialize")
+    endif
     
     ! update timestamp on all the export Fields
     call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
@@ -2341,10 +2389,10 @@ module NUOPC_ModelBase
     ! store the incoming clock as driverClock in internal state
     is%wrap%driverClock = clock
 
-#ifdef NUOPC_MODELBASE_TRACE
-    call ESMF_TraceRegionEnter("NUOPC_ModelBase:SetRunClock")
-#endif
     ! SPECIALIZE required: label_SetRunClock
+    if (btest(profiling,4)) then
+      call ESMF_TraceRegionEnter("label_SetRunClock")
+    endif
     ! -> first check for the label with phase index
     call ESMF_MethodExecute(gcomp, label=label_SetRunClock, index=phase, &
       existflag=existflag, userRc=localrc, rc=rc)
@@ -2367,9 +2415,9 @@ module NUOPC_ModelBase
         rcToReturn=rc)) &
         return  ! bail out
     endif
-#ifdef NUOPC_MODELBASE_TRACE
-    call ESMF_TraceRegionExit("NUOPC_ModelBase:SetRunClock")
-#endif
+    if (btest(profiling,4)) then
+      call ESMF_TraceRegionExit("label_SetRunClock")
+    endif
     
     ! get the internal clock for the time stepping loop
     call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
@@ -2402,10 +2450,10 @@ module NUOPC_ModelBase
         return  ! bail out
     endif
 
-#ifdef NUOPC_MODELBASE_TRACE
-    call ESMF_TraceRegionEnter("NUOPC_ModelBase:CheckImport")
-#endif
     ! SPECIALIZE optionally: label_CheckImport
+    if (btest(profiling,4)) then
+      call ESMF_TraceRegionEnter("label_CheckImport")
+    endif
     ! -> first check for the label with phase index
     call ESMF_MethodExecute(gcomp, label=label_CheckImport, index=phase, &
       existflag=existflag, userRc=localrc, rc=rc)
@@ -2427,10 +2475,10 @@ module NUOPC_ModelBase
         line=__LINE__, file=trim(name)//":"//FILENAME, &
         rcToReturn=rc)) &
         return  ! bail out
-   endif
-#ifdef NUOPC_MODELBASE_TRACE
-   call ESMF_TraceRegionExit("NUOPC_ModelBase:CheckImport")
-#endif
+    endif
+    if (btest(profiling,4)) then
+      call ESMF_TraceRegionExit("label_CheckImport")
+    endif
 
     ! model time stepping loop
     do while (.not. ESMF_ClockIsStopTime(internalClock, rc=rc))
@@ -2450,11 +2498,11 @@ module NUOPC_ModelBase
           return  ! bail out
       endif
 
-#ifdef NUOPC_MODELBASE_TRACE
-      call ESMF_TraceRegionEnter("NUOPC_ModelBase:Advance")
-#endif
       ! advance the model t->t+dt
       ! SPECIALIZE required: label_Advance
+      if (btest(profiling,4)) then
+        call ESMF_TraceRegionEnter("label_Advance")
+      endif
       ! -> first check for the label with phase index
       call ESMF_MethodExecute(gcomp, label=label_Advance, index=phase, &
         existflag=existflag, userRc=localrc, rc=rc)
@@ -2477,13 +2525,13 @@ module NUOPC_ModelBase
           rcToReturn=rc)) &
           return  ! bail out
       endif
-#ifdef NUOPC_MODELBASE_TRACE
-      call ESMF_TraceRegionExit("NUOPC_ModelBase:Advance")
-#endif
+      if (btest(profiling,4)) then
+        call ESMF_TraceRegionExit("label_Advance")
+      endif
 
-#ifdef NUOPC_MODELBASE_TRACE
-      call ESMF_TraceRegionEnter("NUOPC_ModelBase:AdvanceClock")
-#endif
+      if (btest(profiling,4)) then
+        call ESMF_TraceRegionEnter("label_AdvanceClock")
+      endif
       ! advance the internalClock to the new current time (optionally specialz)
       call ESMF_MethodExecute(gcomp, label=label_AdvanceClock, index=phase, &
         existflag=existflag, userRc=localrc, rc=rc)
@@ -2512,10 +2560,10 @@ module NUOPC_ModelBase
             line=__LINE__, file=trim(name)//":"//FILENAME)) &
             return  ! bail out
         endif
-     endif
-#ifdef NUOPC_MODELBASE_TRACE
-     call ESMF_TraceRegionExit("NUOPC_ModelBase:AdvanceClock")
-#endif
+      endif
+      if (btest(profiling,4)) then
+        call ESMF_TraceRegionExit("label_AdvanceClock")
+      endif
     
       ! handle verbosity
       if (btest(verbosity,12)) then
@@ -2541,10 +2589,10 @@ module NUOPC_ModelBase
       return  ! bail out
 
     if (exportIsCreated) then
-#ifdef NUOPC_MODELBASE_TRACE
-      call ESMF_TraceRegionEnter("NUOPC_ModelBase:TimestampExport")
-#endif
       ! SPECIALIZE optionally: label_TimestampExport
+      if (btest(profiling,4)) then
+        call ESMF_TraceRegionEnter("label_TimestampExport")
+      endif
       ! -> first check for the label with phase index
       call ESMF_MethodExecute(gcomp, label=label_TimestampExport, index=phase, &
         existflag=existflag, userRc=localrc, rc=rc)
@@ -2567,9 +2615,9 @@ module NUOPC_ModelBase
           rcToReturn=rc)) &
           return  ! bail out
       endif
-#ifdef NUOPC_MODELBASE_TRACE
-      call ESMF_TraceRegionExit("NUOPC_ModelBase:TimestampExport")
-#endif
+      if (btest(profiling,4)) then
+        call ESMF_TraceRegionExit("label_TimestampExport")
+      endif
     endif
 
     ! handle diagnostic
@@ -2831,6 +2879,9 @@ module NUOPC_ModelBase
     endif
     
     ! SPECIALIZE by calling into optional attached method
+    if (btest(profiling,7)) then
+      call ESMF_TraceRegionEnter("label_Finalize")
+    endif
     call ESMF_MethodExecute(gcomp, label=label_Finalize, existflag=existflag, &
       userRc=localrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2839,6 +2890,9 @@ module NUOPC_ModelBase
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
+    if (btest(profiling,7)) then
+      call ESMF_TraceRegionExit("label_Finalize")
+    endif
 
     ! query Component for the internal State
     nullify(is%wrap)

@@ -698,6 +698,9 @@ module NUOPC_Driver
     is%wrap%legacyReady = .false.
         
     ! SPECIALIZE by calling into attached method to SetServices for modelComps
+    if (btest(profiling,1)) then
+      call ESMF_TraceRegionEnter("label_SetModelServices")
+    endif
     call ESMF_MethodExecute(driver, label=label_SetModelServices, &
       userRc=userrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -705,6 +708,9 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=userrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
+    if (btest(profiling,1)) then
+      call ESMF_TraceRegionExit("label_SetModelServices")
+    endif
       
     ! --> adding and moving code here that supports legacy data structures
     ! --> for now, but after the SetModelServices has been called, and
@@ -1103,6 +1109,9 @@ module NUOPC_Driver
     is%wrap%legacyReady = .true.
 
     ! SPECIALIZE by calling into optional attached method that sets RunSequence
+    if (btest(profiling,1)) then
+      call ESMF_TraceRegionEnter("label_SetRunSequence")
+    endif
     call ESMF_MethodExecute(driver, label=label_SetRunSequence, &
       existflag=existflag, userRc=userrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1111,9 +1120,15 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=userrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
+    if (btest(profiling,1)) then
+      call ESMF_TraceRegionExit("label_SetRunSequence")
+    endif
 
     ! SPECIALIZE by calling into optional attached method allowing modification
     ! of the "InitializePhaseMap" metadata.
+    if (btest(profiling,1)) then
+      call ESMF_TraceRegionEnter("label_ModifyInitializePhaseMap")
+    endif
     call ESMF_MethodExecute(driver, label=label_ModifyInitializePhaseMap, &
       existflag=existflag, userRc=userrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1122,6 +1137,9 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=userrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
+    if (btest(profiling,1)) then
+      call ESMF_TraceRegionExit("label_ModifyInitializePhaseMap")
+    endif
     
     ! Ingest the InitializePhaseMap
     do i=0, is%wrap%modelCount
@@ -2055,10 +2073,16 @@ module NUOPC_Driver
     ! calling into the DataInitialize could be implemented via MethodExecute,
     ! as for NUOPC_Model, but currently there seems to be no reason for this.
     ! -> call directly into the subroutine
+    if (btest(profiling,1)) then
+      call ESMF_TraceRegionEnter("InitializeIPDv02p5Data")
+    endif
     call InitializeIPDv02p5Data(driver, importState, exportState, clock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
+    if (btest(profiling,1)) then
+      call ESMF_TraceRegionExit("InitializeIPDv02p5Data")
+    endif
 
     ! see if this driver was called with a valid exportState
     stateIsCreated = ESMF_StateIsCreated(exportState, rc=rc)
@@ -2987,6 +3011,9 @@ module NUOPC_Driver
     is%wrap%parentClock = clock
     
     ! SPECIALIZE required: label_SetRunClock
+    if (btest(profiling,4)) then
+      call ESMF_TraceRegionEnter("label_SetRunClock")
+    endif
     ! -> first check for the label with phase index
     call ESMF_MethodExecute(driver, label=label_SetRunClock, index=runPhase, &
       existflag=existflag, userRc=userrc, rc=rc)
@@ -3004,6 +3031,9 @@ module NUOPC_Driver
       if (ESMF_LogFoundError(rcToCheck=userrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
+    endif
+    if (btest(profiling,4)) then
+      call ESMF_TraceRegionExit("label_SetRunClock")
     endif
     
     if (btest(verbosity,12)) then
@@ -3034,6 +3064,9 @@ module NUOPC_Driver
     enddo
 
     ! SPECIALIZE required: label_ExecuteRunClock
+    if (btest(profiling,4)) then
+      call ESMF_TraceRegionEnter("label_ExecuteRunSequence")
+    endif
     ! -> first check for the label with phase index
     call ESMF_MethodExecute(driver, label=label_ExecuteRunSequence, &
       index=phase, existflag=existflag, userRc=userrc, rc=rc)
@@ -3051,6 +3084,9 @@ module NUOPC_Driver
       if (ESMF_LogFoundError(rcToCheck=userrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
+    endif
+    if (btest(profiling,4)) then
+      call ESMF_TraceRegionExit("label_ExecuteRunSequence")
     endif
 
     ! execute all connectors to driver (parent) from its children
@@ -3252,7 +3288,7 @@ module NUOPC_Driver
     type(NUOPC_RunElement), pointer :: runElement
     type(ESMF_Clock)                :: internalClock, activeClock
     integer                         :: i, j, phase, runPhase, runSeqIndex
-    integer                         :: verbosity
+    integer                         :: verbosity, profiling
     integer                         :: indentCount
     integer                         :: loopLevel, loopLevelPrev
     integer                         :: levelMember, levelMemberPrev
@@ -3261,10 +3297,19 @@ module NUOPC_Driver
     rc = ESMF_SUCCESS
 
     ! query Component for its clock and currentPhase
-    call NUOPC_CompGet(driver, name=name, verbosity=verbosity, rc=rc)
+    call NUOPC_CompGet(driver, name=name, verbosity=verbosity, &
+      profiling=profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
+
+    ! handle profiling
+    if (btest(profiling,5)) then
+      call ESMF_TraceRegionEnter("ExecuteRunSequence", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
 
     ! query Component for its clock and currentPhase
     call ESMF_GridCompGet(driver, clock=internalClock, currentPhase=runPhase, &
@@ -3356,17 +3401,41 @@ module NUOPC_Driver
       phase = runElement%phase
       if (runElement%j >= 0) then
         ! connector component: i -> j
+        if (btest(profiling,5)) then
+          call ESMF_TraceRegionEnter("routine_executeCplComp", rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+        endif
         j = runElement%j
         call routine_executeCplComp(is, i, j, phase, activeClock, name, &
           userrc=userrc, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        if (btest(profiling,5)) then
+          call ESMF_TraceRegionExit("routine_executeCplComp", rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+        endif
       else
         ! model, mediator, or driver component
+        if (btest(profiling,5)) then
+          call ESMF_TraceRegionEnter("routine_executeGridComp", rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+        endif
         call routine_executeGridComp(is, i, phase, activeClock, name, &
           userrc=userrc, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        if (btest(profiling,5)) then
+          call ESMF_TraceRegionExit("routine_executeGridComp", rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+        endif
       endif
 
     enddo
@@ -3385,6 +3454,14 @@ module NUOPC_Driver
       write(msgString,"(A)") &
         trim(name)//": end <--------- RunSequence"
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
+    ! handle profiling
+    if (btest(profiling,5)) then
+      call ESMF_TraceRegionExit("ExecuteRunSequence", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -3505,6 +3582,9 @@ module NUOPC_Driver
     enddo
     
     ! SPECIALIZE by calling into optional attached method
+    if (btest(profiling,7)) then
+      call ESMF_TraceRegionEnter("label_Finalize")
+    endif
     call ESMF_MethodExecute(driver, label=label_Finalize, existflag=existflag, &
       userRc=urc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -3513,6 +3593,9 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=urc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
+    if (btest(profiling,7)) then
+      call ESMF_TraceRegionExit("label_Finalize")
+    endif
 
     ! destroy components in the compList and their import and export States,
     ! and also petLists that were set by the user (and ownership transferred)
@@ -3787,6 +3870,9 @@ module NUOPC_Driver
     enddo
     
     ! SPECIALIZE by calling into optional attached method
+    if (btest(profiling,7)) then
+      call ESMF_TraceRegionEnter("label_Finalize")
+    endif
     call ESMF_MethodExecute(driver, label=label_Finalize, existflag=existflag, &
       userRc=urc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -3795,6 +3881,9 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=urc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
+    if (btest(profiling,7)) then
+      call ESMF_TraceRegionExit("label_Finalize")
+    endif
 #endif
 
     ! reset flags in the internal state
@@ -6571,6 +6660,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! SPECIALIZE by calling into optional attached method allowing modification
     ! of the "CplList" metadata on child Connectors.
+    if (btest(profiling,1)) then
+      call ESMF_TraceRegionEnter("label_ModifyCplLists")
+    endif
     call ESMF_MethodExecute(driver, label=label_ModifyCplLists, &
       existflag=existflag, userRc=userrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -6579,6 +6671,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(rcToCheck=userrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
+    if (btest(profiling,1)) then
+      call ESMF_TraceRegionExit("label_ModifyCplLists")
+    endif
       
     ! extro
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
