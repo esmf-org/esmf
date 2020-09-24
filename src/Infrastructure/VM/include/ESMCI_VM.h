@@ -41,6 +41,7 @@
 #include "ESMCI_VMKernel.h"    // inherit from ESMCI::VMK class
 #include "ESMCI_Util.h"
 #include "ESMCI_LogErr.h"
+#include "ESMCI_F90Interface.h"
 
 #include <string>
 #include <map>
@@ -79,12 +80,9 @@ class VMId {
 namespace ESMCI {
 
 // ESMCI::VMId methods:
-// VMId VMIdCreate(int *rc);      // allocates memory for vmKey member
-// void VMIdDestroy(VMId *vmID, int *rc); // frees memory for vmKey memb
-bool VMIdCompare(VMId *vmID1, VMId *vmID2);
+bool VMIdCompare(const VMId *vmID1, const VMId *vmID2);
+bool VMIdLessThan(const VMId *vmID1, const VMId *vmID2);
 int VMIdCopy(VMId *vmIDdst, VMId *vmIDsrc);
-// void VMIdGet(VMId *vmID, int *localID, char *key, int key_len, int *rc);
-// void VMIdSet(VMId *vmID, int  localID, char *key, int key_len, int *rc);
 } // namespace ESMCI
 
 
@@ -131,18 +129,17 @@ class VM : public VMK {   // inherits from ESMCI::VMK class
     static VM *getCurrent(int *rc=NULL);      // current VM
     static VMId *getCurrentID(int *rc=NULL);  // VMId of current VM
     static void getCurrentGarbageInfo(int *, int *); // garbage info current VM
-    static void logCurrentGarbageInfo(std::string prefix); // garbage info
+    static void logGarbageInfo(std::string prefix, bool current=false); // garb
     static void getMemInfo(int *virtMemPet, int *physMemPet);   // memory info
     static void logMemInfo(std::string prefix,
-      ESMCI::LogErr *log=&ESMC_LogDefault);   // memory info
+      ESMCI::LogErr *log=&ESMC_LogDefault);   // memory log
+    static void logBacktrace(std::string prefix); // backtrace log
     static int getBaseIDAndInc(VMId *vmID);
     static void addObject(ESMC_Base *, VMId *vmID);
     static void rmObject(ESMC_Base *);
     static void addFObject(void **fobject, int objectID, VMId *vmID);
-    static void getObject(void **fobject,
-      int objectID, VMId *vmID, const std::string &name, ESMC_ProxyFlag proxyflag,
-      bool *obj_found, int *rc);
     static void rmFObject(void **fobject);
+    static bool validObject(ESMC_Base *);
     static void printMatchTable(void);
     static char const *getenv(char const *name);
     // misc.
@@ -151,6 +148,8 @@ class VM : public VMK {   // inherits from ESMCI::VMK class
     int sendVMId(VMId *vmid, int dest);
     int recvVMId(VMId *vmid, int source);
     int bcastVMId(VMId **vmid, int count, int root);
+    int translateVMId(VMId **vmids, ESMCI::InterArray<int> *ids,
+      ESMCI::InterArray<int> *rootVmIds, int *rootVmIdCount);
     int allgathervVMId(VMId **sendvmid, int  sendcount,
       VMId **recvvmid, int *recvcounts, int *recvoffsets);
     int alltoallvVMId(VMId **sendvmid, int *sendcounts, int *sendoffsets,

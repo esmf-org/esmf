@@ -175,7 +175,7 @@ subroutine ESMF_OutputWeightFile (weightFile, factorList, factorIndexList, rc)
     integer(ESMF_KIND_I4), allocatable, dimension(:,:,:) :: deBlockList
     type(ESMF_Info) :: idg
     type(ESMF_Pointer) :: ptr
-    
+
     ! ==============================================================================
 
     if (present(rc)) then

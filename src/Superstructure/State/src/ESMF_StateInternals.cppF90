@@ -476,6 +476,12 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandles(i),rc)
 
         ! Set as deleted
         ESMF_INIT_SET_DELETED(stypep)
+        
+        ! mark object invalid
+        call ESMF_BaseSetStatus(stypep%base, ESMF_STATUS_INVALID, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! Set return code if user specified it
         if (present(rc)) rc = ESMF_SUCCESS

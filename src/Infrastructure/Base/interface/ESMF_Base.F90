@@ -128,10 +128,11 @@ module ESMF_BaseMod
       public ESMF_GetName
       public ESMF_GetVM
       public ESMF_IsProxy
+      public ESMF_SetPersist
 
 #ifndef ESMF_NO_F2018ASSUMEDTYPE
       public c_ESMC_GetName, c_ESMC_GetId
-      public c_ESMC_GetVMId, c_ESMC_SetVMId
+      public c_ESMC_GetVMId, c_ESMC_SetVMId, c_ESMC_SetPersist
       public c_ESMC_AttributeLinkRemove, c_ESMC_AttributeLink
 #endif
 
@@ -178,6 +179,13 @@ module ESMF_BaseMod
       import                :: ESMF_VMId
       type(*)               :: base
       type(ESMF_VMId)       :: vmid
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_SetPersist(base, persist, rc)
+      import                :: ESMF_Logical
+      type(*)               :: base
+      type(ESMF_Logical)    :: persist
       integer               :: rc
     end subroutine
 
@@ -1257,6 +1265,57 @@ module ESMF_BaseMod
     rc = ESMF_SUCCESS
 
   end function ESMF_IsProxy
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_SetPersist"
+!BOPI
+! !IROUTINE: ESMF_SetPersist - Internal access routine to set persist flag
+!
+! !INTERFACE:
+  subroutine ESMF_SetPersist(base, persist, rc) 
+!
+! !RETURN VALUE:
+!    none
+!
+! !ARGUMENTS:
+    type(ESMF_Base), intent(in)  :: base
+    logical,         intent(in)  :: persist 
+    integer,         intent(out) , optional :: rc
+!
+! !DESCRIPTION:
+!      Set persist flag
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [{[base]}]
+!           Base object.
+!     \item [{[persist]}]
+!           Value of to set the persist flag.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+    integer             :: localrc
+    type(ESMF_Logical)  :: persistFlag
+
+    ! Initialize
+    localrc = ESMF_RC_NOT_IMPL
+    rc = ESMF_RC_NOT_IMPL
+
+    persistFlag = persist ! convert logical -> ESMF_Logical
+
+    call c_ESMC_SetPersist(base, persistFlag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Return successfully
+    rc = ESMF_SUCCESS
+
+  end subroutine ESMF_SetPersist
 !------------------------------------------------------------------------------
 
 

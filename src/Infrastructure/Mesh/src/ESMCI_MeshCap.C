@@ -1854,33 +1854,47 @@ int MeshCap::destroy(MeshCap **mcpp, bool noGarbage) {
     // Dereference meshcap
   MeshCap *mcp=*mcpp;
 
-  // Get mesh type
-  bool is_esmf_mesh=mcp->is_esmf_mesh;
+  // check if this Mesh object has the persist flag set
+  if (mcp->ESMC_BaseGetPersist())
+    return ESMF_SUCCESS;  // nothing to be done here, return successfully
 
-  // Call into func. depending on mesh type
-  if (is_esmf_mesh) {
-    // Only do if mesh is present
-    if (mcp->mesh != NULL) {
-      int localrc;
-      ESMCI_meshdestroy(&(mcp->mesh), &localrc);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+  // check if this Mesh object still has a valid entry in the garbage collection
+  if (!VM::validObject(mcp))
+    return ESMF_SUCCESS;  // nothing to be done here, return successfully
+
+  if (mcp->ESMC_BaseGetStatus()==ESMF_STATUS_READY){
+
+    // Get mesh type
+    bool is_esmf_mesh=mcp->is_esmf_mesh;
+
+    // Call into func. depending on mesh type
+    if (is_esmf_mesh) {
+      // Only do if mesh is present
+      if (mcp->mesh != NULL) {
+        int localrc;
+        ESMCI_meshdestroy(&(mcp->mesh), &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                         ESMC_CONTEXT, &rc)) return rc;
-    }
-  } else {
+      }
+    } else {
 #if defined ESMF_MOAB
-    // Only do if mesh is present
-    if (mcp->mbmesh != NULL) {
-      int localrc;
-      MBMesh_destroy(&(mcp->mbmesh), &localrc);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      // Only do if mbmesh is present
+      if (mcp->mbmesh != NULL) {
+        int localrc;
+        MBMesh_destroy(&(mcp->mbmesh), &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                         ESMC_CONTEXT, &rc)) return rc;
-    }
+      }
 #else
-   if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
-      "This functionality requires ESMF to be built with the MOAB library enabled" ,
-      ESMC_CONTEXT, &rc)) return rc;
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+        "This functionality requires ESMF to be built with the MOAB library enabled" ,
+        ESMC_CONTEXT, &rc)) return rc;
 #endif
+    }
   }
+
+  // mark as invalid object
+  mcp->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);
 
   // optionally delete the complete object and remove from garbage collection
   if (noGarbage){

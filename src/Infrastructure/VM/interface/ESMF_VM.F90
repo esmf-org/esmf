@@ -38,6 +38,7 @@ module ESMF_VMMod
   use ESMF_UtilTypesMod     ! ESMF utility types
   use ESMF_InitMacrosMod    ! ESMF initializer macros
   use ESMF_LogErrMod        ! ESMF error handling
+  use ESMF_F90InterfaceMod  ! ESMF F90-C++ interface helper
   use ESMF_IOUtilMod        ! ESMF I/O utility layer
       
   implicit none
@@ -431,7 +432,9 @@ module ESMF_VMMod
   public ESMF_VMGetCurrentGarbageInfo
   public ESMF_VMGetMemInfo
   public ESMF_VMIsCreated
+  public ESMF_VMLogBacktrace
   public ESMF_VMLogCurrentGarbageInfo
+  public ESMF_VMLogGarbageInfo
   public ESMF_VMLogMemInfo
   public ESMF_VMGetVMId
   public ESMF_VMPrint
@@ -475,7 +478,8 @@ module ESMF_VMMod
   public ESMF_VMSendVMId
   public ESMF_VMRecvVMId
   public ESMF_VMBcastVMId
-
+  public ESMF_VMTranslateVMId
+  
   public ESMF_CommHandleGetInit
 
 !EOPI
@@ -5725,6 +5729,50 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMLogBacktrace()"
+!BOPI
+! !IROUTINE: ESMF_VMLogBacktrace - Log backtrace
+
+! !INTERFACE:
+  subroutine ESMF_VMLogBacktrace(prefix, rc)
+!
+! !ARGUMENTS:
+    character (len=*),    intent(in),   optional  :: prefix
+    integer, intent(out),               optional  :: rc           
+!
+! !DESCRIPTION:
+!   Log backtrace of the current call stack.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item [{[prefix]}]
+!     String to prefix the backtrace message. Default is no prefix.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Call into the C++ interface.
+    call c_esmc_vmlogbacktrace(prefix, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMLogBacktrace
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMLogCurrentGarbageInfo()"
 !BOPI
 ! !IROUTINE: ESMF_VMLogCurrentGarbageInfo - Log garbage collection info
@@ -5737,12 +5785,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out),               optional  :: rc           
 !
 ! !DESCRIPTION:
-!   Log memory info from the system for this PET.
+!   Log gargbage collection info of the current VM on this PET.
 !
 !   The arguments are:
 !   \begin{description}
 !   \item [{[prefix]}]
-!     String to prefix the memory info message. Default is no prefix.
+!     String to prefix the garbage info message. Default is no prefix.
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -5764,6 +5812,50 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMLogCurrentGarbageInfo
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMLogGarbageInfo()"
+!BOPI
+! !IROUTINE: ESMF_VMLogGarbageInfo - Log garbage collection info
+
+! !INTERFACE:
+  subroutine ESMF_VMLogGarbageInfo(prefix, rc)
+!
+! !ARGUMENTS:
+    character (len=*),    intent(in),   optional  :: prefix
+    integer, intent(out),               optional  :: rc           
+!
+! !DESCRIPTION:
+!   Log gargbage collection info for all VMs on this PET.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item [{[prefix]}]
+!     String to prefix the garbage info message. Default is no prefix.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Call into the C++ interface.
+    call c_esmc_vmloggarbageinfo(prefix, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMLogGarbageInfo
 !------------------------------------------------------------------------------
 
 
@@ -10336,7 +10428,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                  intent(out),  optional  :: rc           
 !
 ! !DESCRIPTION:
-!   Receive {\tt ESMF\_VMId}.
+!   Send {\tt ESMF\_VMId}.
 !
 !   The arguments are:
 !   \begin{description}
@@ -10367,6 +10459,171 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMSendVMId
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMTranslateVMId()"
+!BOPI
+! !IROUTINE: ESMF_VMTranslateVMId - Translate ESMF_VMId array to integer ids
+
+! !INTERFACE:
+  subroutine ESMF_VMTranslateVMId(vm, vmIds, ids, vmIdMap, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),                intent(in)            :: vm
+    type(ESMF_VMId), pointer,     intent(in)            :: vmIds(:)
+    integer,         allocatable, intent(out)           :: ids(:)
+    type(ESMF_VMId), allocatable, intent(out), optional :: vmIdMap(:)
+    integer,                      intent(out), optional :: rc
+!         
+! !DESCRIPTION:
+!   Translate list of {\tt ESMF\_VMId} into integer {\tt ids}. The returned
+!   {\tt ids} are globally unique across {\tt vm}. The {\tt ids} start at 1
+!   and can directly be used to index into the {\tt vmIdMap} which is provided
+!   identically on every PET.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm]
+!        {\tt ESMF\_VM} object.
+!   \item[vmIds]
+!        Local list of {\tt ESMF\_VMId} objects to be translated.
+!   \item[ids]
+!        Local list of generated globally unique integers within {\tt vm},
+!        corresponding to the {\tt vmIds}. The size of the returned argument
+!        will be identical to the locally provided {\tt vmIds} argument.
+!        The integer {\tt ids} start at 1.
+!   \item[{[vmIdMap}]]
+!        Global list of unique {\tt ESMF\_VMId} objects provided in {\tt vmIds}
+!        across all PETs within {\tt vm}. The order of objects corresponds to
+!        the numbering of the integer {\tt ids}. This list can therefore be
+!        used to map every integer id to the corresponding {\tt ESMF\_VMId}
+!        object. The size of the returned argument will be identical to the
+!        total number of unique {\tt ESMF\_VMId} objects provided across the
+!        {\tt vm}, and the lower bound is 1.
+!   \item[{[rc]}]
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc        ! local return code
+    type(ESMF_InterArray)   :: idsAux         ! interface variable
+    integer, allocatable    :: rootVMIdI(:)   ! local index of ids PET is root
+    type(ESMF_InterArray)   :: rootVmIds      ! interface variable
+    integer                 :: rootVmIdCount  ! local number of ids PET is root
+    type(ESMF_VMId), allocatable  :: localVmIds(:)  ! local list of vmIDs root
+    integer                 :: i, petCount, totalRootCount
+    integer, allocatable    :: rootCounts(:), recvOffsets(:)  ! gatherV vars
+    
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Confirm the lower bound is 0 for the vmIds array. It is zero-bounded in
+    ! StateReconcile which is the primary client for this subroutine.
+    if (lbound(vmIds,1)/=0) then
+      if (ESMF_LogFoundError(ESMF_FAILURE, msg="lbound must be 0 for vmIds", &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    end if
+
+    ! Allocate ids(:) array, ensuring matching bounds with vmIDs(:) array
+    allocate(ids(lbound(vmIds,1):ubound(vmIds,1)))
+    
+    ! Deal with integer array argument
+    idsAux = ESMF_InterArrayCreate(ids, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Prepare rootVMId helper arrays
+    allocate(rootVMIdI(size(vmIds)))  ! large enough
+    rootVmIds = ESMF_InterArrayCreate(rootVMIdI, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Call into the C++ interface.
+    call c_ESMC_VMTranslateVMId(vm, vmIds, idsAux, rootVmIds, rootVmIdCount, &
+      localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! Shift integer ids from base 0 to base 1 for more standard Fortran use
+    do i=lbound(ids,1),ubound(ids,1)
+      ids(i) = ids(i) + 1
+    enddo
+    
+    if (present(vmIdMap)) then
+      ! Must construct vmIdMap
+
+      ! Set up localVmIds array for which local PET is root
+      allocate(localVmIds(rootVmIdCount))
+      call ESMF_VMIdCreate(localVmIds, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      do i=1, rootVmIdCount
+        call ESMF_VMIdCopy(source=(/vmIds(rootVMIdI(i))/), &
+          dest=localVmIds(i:i), rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      enddo
+
+      ! AllGather rootCounts from all PETs
+      call ESMF_VMGet(vm, petCount=petCount, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      allocate(rootCounts(petCount), recvOffsets(petCount))
+      call ESMF_VMAllGather(vm, sendData=(/rootVmIdCount/), recvData=rootCounts, &
+        count=1, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      
+      ! Determine totalRootCount across all PETs, and offsets for AllGatherV
+      totalRootCount = 0
+      do i=1, petCount
+        recvOffsets(i) = totalRootCount
+        totalRootCount = totalRootCount + rootCounts(i)
+      enddo
+      
+      ! Prepare final vmIdMap to hold totalRootCount many vmIDs
+      allocate(vmIdMap(totalRootCount))
+      call ESMF_VMIdCreate(vmIdMap, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      
+      ! Finally AllGatherV the vmIDs
+      call ESMF_VMAllGatherV(vm, &
+        sendData=localVmIds, sendCount=size(localVmIds), &
+        recvData=vmIdMap, recvCounts=rootCounts, recvOffsets=recvOffsets, &
+        rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      
+      ! Local clean-up
+      call ESMF_VMIdDestroy(localVmIds, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      deallocate(localVmIds, rootCounts)
+    endif
+    
+    ! Garbage collection
+    call ESMF_InterArrayDestroy(idsAux, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterArrayDestroy(rootVmIds, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    deallocate(rootVMIdI)
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMTranslateVMId
 !------------------------------------------------------------------------------
 
 

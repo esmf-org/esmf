@@ -174,7 +174,7 @@ public:
            const key_t * const pkey = nullptr);
 
   void update(const Info &info);
-  void update_for_attribute(const Info &info);
+  void update_for_attribute(const Info &info, bool overwrite);
 
   int ESMC_Print(bool tofile, const char *filename, bool append) const;
 

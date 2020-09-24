@@ -1840,7 +1840,14 @@ int Grid::destroy(
     return rc;
   }
 
+  // check if this Grid object has the persist flag set
+  if ((*gridArg)->ESMC_BaseGetPersist())
+    return ESMF_SUCCESS;  // nothing to be done here, return successfully
+
   try{
+    // check if this Grid object still has a valid entry in the garbage collection
+    if (!VM::validObject(*gridArg))
+      return ESMF_SUCCESS;  // nothing to be done here, return successfully
     // destruct Grid object
     (*gridArg)->destruct(true, noGarbage);
     // mark as invalid object
@@ -1862,7 +1869,7 @@ int Grid::destroy(
     delete (*gridArg);      // completely delete the object, free heap
   }
 
-    // return successfully
+  // return successfully
   return ESMF_SUCCESS;
 }
 
@@ -5897,9 +5904,8 @@ int Grid::deserialize(
     DESERIALIZE_VAR( buffer,loffset,indexflag,ESMC_IndexFlag);
     
     // Don't deserialize, but set 
-    destroyDistgrid=false; // proxy distgrid (like all proxies) do not belong to any 
-                           // other object -> garbage collection will take care of them.
-    destroyDELayout=false; // delayot belongs to DistGrid
+    destroyDistgrid=true;   // proxy DistGrid belongs to this proxy Grid object
+    destroyDELayout=false;  // DELayout belongs to DistGrid
     
     DESERIALIZE_VAR( buffer,loffset,distDimCount,int);    
     

@@ -99,6 +99,97 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_ObjectID_Name"
+//BOPI
+// !IROUTINE:  ESMC_ObjectID_Name - Return name of object
+//
+// !INTERFACE:
+    const char *ESMC_ObjectID_Name(
+//
+// !RETURN VALUE:
+//  int number of bytes (negative for error)
+//
+// !ARGUMENTS:
+    int objectId){       // in - integer objectId
+//EOPI
+
+    if (objectId == ESMC_ID_BASE.objectID)
+      return ESMC_ID_BASE.objectName;
+    else if (objectId == ESMC_ID_LOGERR.objectID)
+      return ESMC_ID_LOGERR.objectName;
+    else if (objectId == ESMC_ID_TIME.objectID)
+      return ESMC_ID_TIME.objectName;
+    else if (objectId == ESMC_ID_CALENDAR.objectID)
+      return ESMC_ID_CALENDAR.objectName;
+    else if (objectId == ESMC_ID_TIMEINTERVAL.objectID)
+      return ESMC_ID_TIMEINTERVAL.objectName;
+    else if (objectId == ESMC_ID_ALARM.objectID)
+      return ESMC_ID_ALARM.objectName;
+    else if (objectId == ESMC_ID_CLOCK.objectID)
+      return ESMC_ID_CLOCK.objectName;
+    else if (objectId == ESMC_ID_ARRAYSPEC.objectID)
+      return ESMC_ID_ARRAYSPEC.objectName;
+    else if (objectId == ESMC_ID_VM.objectID)
+      return ESMC_ID_VM.objectName;
+    else if (objectId == ESMC_ID_DELAYOUT.objectID)
+      return ESMC_ID_DELAYOUT.objectName;
+    else if (objectId == ESMC_ID_CONFIG.objectID)
+      return ESMC_ID_CONFIG.objectName;
+    else if (objectId == ESMC_ID_ARRAY.objectID)
+      return ESMC_ID_ARRAY.objectName;
+    else if (objectId == ESMC_ID_PHYSGRID.objectID)
+      return ESMC_ID_PHYSGRID.objectName;
+    else if (objectId == ESMC_ID_IGRID.objectID)
+      return ESMC_ID_IGRID.objectName;
+    else if (objectId == ESMC_ID_EXCHANGEPACKET.objectID)
+      return ESMC_ID_EXCHANGEPACKET.objectName;
+    else if (objectId == ESMC_ID_COMMTABLE.objectID)
+      return ESMC_ID_COMMTABLE.objectName;
+    else if (objectId == ESMC_ID_ROUTETABLE.objectID)
+      return ESMC_ID_ROUTETABLE.objectName;
+    else if (objectId == ESMC_ID_ROUTE.objectID)
+      return ESMC_ID_ROUTE.objectName;
+    else if (objectId == ESMC_ID_ROUTEHANDLE.objectID)
+      return ESMC_ID_ROUTEHANDLE.objectName;
+    else if (objectId == ESMC_ID_FIELDDATAMAP.objectID)
+      return ESMC_ID_FIELDDATAMAP.objectName;
+    else if (objectId == ESMC_ID_FIELD.objectID)
+      return ESMC_ID_FIELD.objectName;
+    else if (objectId == ESMC_ID_BUNDLEDATAMAP.objectID)
+      return ESMC_ID_BUNDLEDATAMAP.objectName;
+    else if (objectId == ESMC_ID_FIELDBUNDLE.objectID)
+      return ESMC_ID_FIELDBUNDLE.objectName;
+    else if (objectId == ESMC_ID_GEOMBASE.objectID)
+      return ESMC_ID_GEOMBASE.objectName;
+    else if (objectId == ESMC_ID_REGRID.objectID)
+      return ESMC_ID_REGRID.objectName;
+    else if (objectId == ESMC_ID_LOCSTREAM.objectID)
+      return ESMC_ID_LOCSTREAM.objectName;
+    else if (objectId == ESMC_ID_STATE.objectID)
+      return ESMC_ID_STATE.objectName;
+    else if (objectId == ESMC_ID_GRIDCOMPONENT.objectID)
+      return ESMC_ID_GRIDCOMPONENT.objectName;
+    else if (objectId == ESMC_ID_CPLCOMPONENT.objectID)
+      return ESMC_ID_CPLCOMPONENT.objectName;
+    else if (objectId == ESMC_ID_COMPONENT.objectID)
+      return ESMC_ID_COMPONENT.objectName;
+    else if (objectId == ESMC_ID_XGRID.objectID)
+      return ESMC_ID_XGRID.objectName;
+    else if (objectId == ESMC_ID_XGRIDGEOMBASE.objectID)
+      return ESMC_ID_XGRIDGEOMBASE.objectName;
+    else if (objectId == ESMC_ID_NONE.objectID)
+      return ESMC_ID_NONE.objectName;
+    else{
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+        "Unknown objectID", ESMC_CONTEXT, NULL);
+      return NULL;
+    }
+
+    /* not reached */
+}
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_TypeKind_FlagSize"
 //BOPI
 // !IROUTINE:  ESMC_TypeKind_FlagSize - Return number of bytes in a TypeKind

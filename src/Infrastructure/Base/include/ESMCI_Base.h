@@ -114,6 +114,7 @@ class ESMC_Base
     ESMC_Status     baseStatus;   // status of the Base part of the object
     ESMC_Status     status;       // overall status of the derived class object
     ESMC_ProxyFlag  proxyflag;    // whether object is a proxy or not
+    bool            persist;      // protect this object from destroys
     char            baseName[ESMF_MAXSTR];    // object name, unique over class 
     char            baseNameF90[ESMF_MAXSTR]; // same name, non-null terminated
     char            className[ESMF_MAXSTR];   // object class
@@ -164,6 +165,10 @@ class ESMC_Base
     // accessors to proxyFlag
     void ESMC_BaseSetProxyFlag(ESMC_ProxyFlag pf){ proxyflag = pf;}
     ESMC_ProxyFlag ESMC_BaseGetProxyFlag()const{ return proxyflag;}
+    
+    // accessors to persist
+    void ESMC_BaseSetPersist(bool _persist){ persist = _persist;}
+    bool ESMC_BaseGetPersist()const{ return persist;}
     
     // accessors to base name
     int   ESMC_BaseSetName(const char *name, const char *classname);

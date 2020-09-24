@@ -17,7 +17,7 @@
 !   that is added to its importState.
 !
 !   The Coupler Component runs on all 6 PETs and transfers the Grid from
-!   Component 1 with Component 2.
+!   Component 1 to Component 2.
 !
 !   Redist and Regrid operations are performed between the two Gridded
 !   Components to test correct behavior of the transferred Grid.

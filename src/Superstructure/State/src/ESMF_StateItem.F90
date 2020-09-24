@@ -245,6 +245,7 @@
         type(ESMF_MethodTable) :: methodTable
         type(ESMF_StateIntent_Flag) :: st
         type(ESMF_StateItemWrap), pointer :: zapList(:)
+        logical, pointer                  :: zapFlag(:)
 #if 0
         type(ESMF_NeededFlag) :: needed_default
         type(ESMF_ReadyFlag) :: ready_default

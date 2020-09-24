@@ -149,7 +149,7 @@
       !------------------------------------------------------------------------
       !EX_UTest 
       ! Test reconciling Arrays across all PETs in a VM
-      call ESMF_StateReconcile(state, vm=vm, attreconflag=ESMF_ATTRECONCILE_ON, rc=rc)
+      call ESMF_StateReconcile(state, vm=vm, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Reconciling Arrays across all PETs in a VM"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &

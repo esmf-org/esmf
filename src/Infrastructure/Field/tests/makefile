@@ -134,9 +134,11 @@ RUN_ESMC_FieldUTestUNI:
 	$(MAKE) TNAME=Field NP=1 ctest
 
 RUN_ESMC_FieldRegridUTest:
+	rm -f $(ESMF_TESTDIR)/meshmeshweights.nc
 	$(MAKE) TNAME=FieldRegrid NP=1 ctest
 
 RUN_ESMC_FieldRegridUTestUNI:
+	rm -f $(ESMF_TESTDIR)/meshmeshweights.nc
 	$(MAKE) TNAME=FieldRegrid NP=1 ctest
 
 RUN_ESMC_FieldRegridCsrvUTest:
@@ -226,6 +228,7 @@ RUN_ESMF_FieldArbGridUTest:
 	$(MAKE) TNAME=FieldArbGrid NP=4 ftest
 
 RUN_ESMF_FieldIOUTest:
+	rm -f $(ESMF_TESTDIR)/field2.nc
 	$(MAKE) TNAME=FieldIO NP=4 ftest
 
 RUN_ESMF_FieldArbGridUTestUNI:
@@ -291,15 +294,18 @@ RUN_ESMF_TestHarnessFieldUNI_1:
 
 RUN_ESMC_FieldSMMFromFileUTest:
 	mkdir -p $(ESMF_TESTDIR)/data
+	rm -f $(ESMF_TESTDIR)/data/weights_esmc_smmsff.nc
 	$(MAKE) TNAME=FieldSMMFromFile NP=4 ctest
 
 RUN_ESMC_FieldSMMFromFileUTestUNI:
 	mkdir -p $(ESMF_TESTDIR)/data
+	rm -f $(ESMF_TESTDIR)/data/weights_esmc_smmsff.nc
 	$(MAKE) TNAME=FieldSMMFromFile NP=1 ctest
 
 RUN_ESMF_FieldSMMFromFileUTest:
 	mkdir -p $(ESMF_TESTDIR)/data
 	rm -f $(ESMF_TESTDIR)/data/test_smm_from_file_weights.nc
+	rm -f $(ESMF_TESTDIR)/weights_esmf_smmsff.nc
 	cp -f ../../IO/tests/T42_grid.nc $(ESMF_TESTDIR)/data
 	chmod u+rw $(ESMF_TESTDIR)/data/*
 	$(MAKE) TNAME=FieldSMMFromFile NP=4 ftest
@@ -307,6 +313,7 @@ RUN_ESMF_FieldSMMFromFileUTest:
 RUN_ESMF_FieldSMMFromFileUTestUNI:
 	mkdir -p $(ESMF_TESTDIR)/data
 	rm -f $(ESMF_TESTDIR)/data/test_smm_from_file_weights.nc
+	rm -f $(ESMF_TESTDIR)/weights_esmf_smmsff.nc
 	cp -f ../../IO/tests/T42_grid.nc $(ESMF_TESTDIR)/data
 	chmod u+rw $(ESMF_TESTDIR)/data/*
 	$(MAKE) TNAME=FieldSMMFromFile NP=1 ftest

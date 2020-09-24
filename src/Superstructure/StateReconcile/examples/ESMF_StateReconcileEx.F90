@@ -267,8 +267,7 @@ end module ESMF_StateReconcileEx_Mod
 !BOC
 
 
-    call ESMF_StateReconcile(state1, vm=vm,  &
-                             attreconflag=ESMF_ATTRECONCILE_OFF, rc=rc)
+    call ESMF_StateReconcile(state1, vm=vm, rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC

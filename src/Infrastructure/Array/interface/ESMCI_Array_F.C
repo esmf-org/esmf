@@ -750,7 +750,7 @@ extern "C" {
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
-  
+
   void FTN_X(c_esmc_arraywrite)(ESMCI::Array **array,
                                 char *file,
                                 char *variableName, char *convention, char *purpose,
