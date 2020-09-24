@@ -468,12 +468,24 @@ module NUOPC_Connector
     endif
     
     ! reconcile the States including Attributes
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionEnter("Reconcile", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     call NUOPC_Reconcile(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_Reconcile(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionExit("Reconcile", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
 
     ! get transfer policy for both states
     call NUOPC_GetAttribute(importState, name="FieldTransferPolicy", &
@@ -1019,12 +1031,24 @@ module NUOPC_Connector
     endif
 
     ! reconcile the States including Attributes
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionEnter("Reconcile", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     call NUOPC_Reconcile(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_Reconcile(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionExit("Reconcile", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
 
     nullify(importStandardNameList)
     nullify(importFieldList)
@@ -1284,12 +1308,24 @@ module NUOPC_Connector
     endif
 
     ! reconcile the States including Attributes
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionEnter("Reconcile", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     call NUOPC_Reconcile(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_Reconcile(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionExit("Reconcile", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
 
     ! set Attributes
     call NUOPC_CompAttributeSet(connector, &
@@ -1778,12 +1814,24 @@ module NUOPC_Connector
 
     ! re-reconcile the States because they may have changed
     ! (previous proxy objects are dropped before fresh reconcile)
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionEnter("Reconcile", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     call NUOPC_Reconcile(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_Reconcile(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionExit("Reconcile", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     
     ! get the cplList Attribute
     call NUOPC_CompAttributeGet(connector, name="CplList", &
@@ -2515,12 +2563,24 @@ module NUOPC_Connector
 
     ! re-reconcile the States because they may have changed
     ! (previous proxy objects are dropped before fresh reconcile)
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionEnter("Reconcile", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     call NUOPC_Reconcile(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_Reconcile(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionExit("Reconcile", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     
     ! get the cplList Attribute
     call NUOPC_CompAttributeGet(connector, name="CplList", &
@@ -3581,12 +3641,24 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
 
     ! re-reconcile the States because they may have changed
     ! (previous proxy objects are dropped before fresh reconcile)
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionEnter("Reconcile", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     call NUOPC_Reconcile(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_Reconcile(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionExit("Reconcile", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     
     ! get the cplList Attribute
     call NUOPC_CompAttributeGet(connector, name="CplList", &
@@ -4561,12 +4633,24 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
 
     ! re-reconcile the States because they may have changed
     ! (previous proxy objects are dropped before fresh reconcile)
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionEnter("Reconcile", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     call NUOPC_Reconcile(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_Reconcile(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionExit("Reconcile", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
 
     ! handle diagnostic
     if (btest(diagnostic,2)) then
