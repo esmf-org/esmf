@@ -71,6 +71,10 @@ class Regrid(object):
         calculating weights for the :attr:`~ESMF.api.constants.ExtrapMethod.NEAREST_IDAVG`
         extrapolation method. A higher value reduces the influence of more distant
         points. If not specified, defaults to ``2.0``.
+    :param int extrap_num_levels: The number of levels to output for the extrapolation 
+        methods that fill levels (e.g. :attr:`~ESMF.api.constants.ExtrapMethod.CREEP`). 
+        When a method is used that requires this, then an error will be returned if it 
+        is not specified.
     :param UnmappedAction unmapped_action: specifies which action to take if a
         destination point is found which does not map to any source point. If
         ``None``, defaults to :attr:`~ESMF.api.constants.UnmappedAction.ERROR`.
@@ -107,9 +111,9 @@ class Regrid(object):
                  src_mask_values=None,
                  dst_mask_values=None, regrid_method=None, pole_method=None,
                  regrid_pole_npoints=None, line_type=None, norm_type=None, extrap_method=None,
-                 extrap_num_src_pnts=None, extrap_dist_exponent=None, unmapped_action=None,
-                 ignore_degenerate=None, create_rh=None, filemode=None, src_file=None, dst_file=None,
-                 src_file_type=None, dst_file_type=None, 
+                 extrap_num_src_pnts=None, extrap_dist_exponent=None, extrap_num_levels=None,
+                 unmapped_action=None, ignore_degenerate=None, create_rh=None, filemode=None, 
+                 src_file=None, dst_file=None, src_file_type=None, dst_file_type=None, 
                  factors=False, large_file=None,
                  src_frac_field=None, dst_frac_field=None):
 
@@ -189,6 +193,7 @@ class Regrid(object):
                 extrapMethod=extrap_method,
                 extrapNumSrcPnts=extrap_num_src_pnts,
                 extrapDistExponent=extrap_dist_exponent,
+                extrapNumLevels=extrap_num_levels,
                 unmappedaction=unmapped_action,
                 ignoreDegenerate=ignore_degenerate,
                 factorList=fl,

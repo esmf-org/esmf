@@ -753,6 +753,7 @@ int ESMC_FieldRegridStore(
     enum ESMC_ExtrapMethod_Flag *extrapMethod,     // in
     int *extrapNumSrcPnts,                         // in
     float *extrapDistExponent,                     // in
+    int *extrapNumLevels,                          // in
     enum ESMC_UnmappedAction_Flag *unmappedaction, // in
     enum ESMC_Logical *ignoreDegenerate,           // in
     double **factorList,                           // inout
@@ -821,6 +822,10 @@ int ESMC_FieldRegridStore(
 //    The exponent to raise the distance to when calculating weights for 
 //    the {\tt ESMC\_EXTRAPMETHOD\_NEAREST\_IDAVG} extrapolation method. A higher value reduces the influence 
 //    of more distant points. If not specified, defaults to 2.0.
+//  \item [{[extrapNumLevels]}] 
+//    The number of levels to output for the extrapolation methods that fill levels 
+//    (e.g. ESMC\_EXTRAPMETHOD\_CREEP). When a method is used that requires this, then 
+//    an error will be returned if it is not specified.
 //  \item[unmappedaction]
 //    Specifies what should happen if there are destination points that can't 
 //    be mapped to a source cell. Options are {\tt ESMF\_UNMAPPEDACTION\_ERROR} or

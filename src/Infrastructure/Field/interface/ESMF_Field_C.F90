@@ -1004,6 +1004,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                 extrapMethod, &
                                 extrapNumSrcPnts, &
                                 extrapDistExponent, &
+                                extrapNumLevels, &
                                 unmappedaction, &
                                 ignoreDegenerate, &
                                 factorList, &
@@ -1027,7 +1028,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     type(ESMF_Field)                        :: dstField
     integer                                 :: len1, len2
     integer,optional                        :: srcMaskValues(len1), &
-                                                 dstMaskValues(len2)
+                                               dstMaskValues(len2)
     type(ESMF_RouteHandle),optional         :: routehandle
     type(ESMF_RegridMethod_Flag),optional   :: regridmethod
     type(ESMF_PoleMethod_Flag),optional     :: polemethod
@@ -1038,6 +1039,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     type(ESMF_ExtrapMethod_Flag), optional  :: extrapMethod
     integer, optional                       :: extrapNumSrcPnts
     real(ESMF_KIND_R4), optional            :: extrapDistExponent
+    integer, optional                       :: extrapNumLevels
     type(ESMF_UnmappedAction_Flag),optional :: unmappedaction
     logical,optional                        :: ignoreDegenerate
 
@@ -1083,6 +1085,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                 extrapMethod=extrapMethod, &
                                 extrapNumSrcPnts=extrapNumSrcPnts, &
                                 extrapDistExponent=extrapDistExponent, &
+                                extrapNumLevels=extrapNumLevels, &
                                 unmappedaction=unmappedaction, &
                                 ignoreDegenerate=ignoreDegenerate, &
                                 factorList=factorListFPtr, &
@@ -1114,6 +1117,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                 extrapMethod=extrapMethod, &
                                 extrapNumSrcPnts=extrapNumSrcPnts, &
                                 extrapDistExponent=extrapDistExponent, &
+                                extrapNumLevels=extrapNumLevels, &
                                 unmappedaction=unmappedaction, &
                                 ignoreDegenerate=ignoreDegenerate, &
                                 srcFracField=srcFracField, &

@@ -108,6 +108,7 @@ namespace ESMCI{
                            ESMC_ExtrapMethod_Flag *extrapMethod,
                            int *extrapNumSrcPnts,
                            float *extrapDistExponent,
+                           int *extrapNumLevels,
                            ESMC_UnmappedAction_Flag *unmappedAction,
                            ESMC_Logical *ignoreDegenerate,
                            double **factorList,

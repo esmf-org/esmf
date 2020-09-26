@@ -1975,6 +1975,7 @@ _ESMF.ESMC_FieldRegridStore.argtypes = [ct.c_void_p,              # srcField
                                         OptionalNamedConstant,    # extrapMethod
                                         OptionalInt,              # extrapNumSrcPnts
                                         OptionalFloat,            # extrapDistExponent
+                                        OptionalInt,              # extrapNumLevels
                                         OptionalNamedConstant,    # unmappedaction
                                         OptionalBool,             # ignoreDegenerate
                                         ct.POINTER(ct.POINTER(ct.c_double)),  # factorList
@@ -1997,6 +1998,7 @@ def ESMP_FieldRegridStore(srcField,
                           extrapMethod=None, 
                           extrapNumSrcPnts=None,
                           extrapDistExponent=None,
+                          extrapNumLevels=None,
                           unmappedaction=None,
                           ignoreDegenerate=None,
                           factorList=None,
@@ -2057,6 +2059,7 @@ def ESMP_FieldRegridStore(srcField,
                                      extrapMethod, 
                                      extrapNumSrcPnts,
                                      extrapDistExponent,
+                                     extrapNumLevels,
                                      unmappedaction,
                                      ignoreDegenerate,
                                      arg_factorList,
