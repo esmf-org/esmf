@@ -270,7 +270,7 @@ module NUOPC_Connector
     ! local variables
     character(*), parameter   :: rName="InitializeP0"
     character(ESMF_MAXSTR)    :: name
-    integer                   :: verbosity, diagnostic
+    integer                   :: verbosity, diagnostic, profiling
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
     type(type_InternalState)  :: is
@@ -280,9 +280,17 @@ module NUOPC_Connector
 
     ! query the component for info
     call NUOPC_CompGet(connector, name=name, verbosity=verbosity, &
-      diagnostic=diagnostic, rc=rc)
+      diagnostic=diagnostic, profiling=profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! handle profiling
+    if (btest(profiling,0)) then
+      call ESMF_TraceRegionEnter(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
 
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
@@ -325,7 +333,7 @@ module NUOPC_Connector
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 #if 0
-    call ESMF_LogWrite("ipdvxAttr: "//ipdvxAttr, ESMF_LOGMSG_INFO, rc=rc)
+    call ESMF_LogWrite("ipdvxAttr: "//ipdvxAttr, ESMF_LOGMSG_DEBUG, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 #endif
@@ -370,6 +378,14 @@ module NUOPC_Connector
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+    ! handle profiling
+    if (btest(profiling,0)) then
+      call ESMF_TraceRegionExit(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
   end subroutine
   
    !-----------------------------------------------------------------------------
@@ -385,7 +401,7 @@ module NUOPC_Connector
     character(ESMF_MAXSTR)    :: name
     character(ESMF_MAXSTR)    :: importXferPolicy, exportXferPolicy
     type(ESMF_VM)             :: vm
-    integer                   :: verbosity, profiling, diagnostic
+    integer                   :: verbosity, diagnostic, profiling
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
     integer                   :: importItemCount, exportItemCount
@@ -403,9 +419,17 @@ module NUOPC_Connector
 
     ! query the component for info
     call NUOPC_CompGet(connector, name=name, verbosity=verbosity, &
-      profiling=profiling, diagnostic=diagnostic, rc=rc)
+      diagnostic=diagnostic, profiling=profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! handle profiling
+    if (btest(profiling,0)) then
+      call ESMF_TraceRegionEnter(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
 
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
@@ -444,8 +468,11 @@ module NUOPC_Connector
     endif
     
     ! reconcile the States including Attributes
-    if (btest(profiling,1)) then    ! PROFILE
-      call ESMF_VMLogMemInfo("befP1 Reconcile")
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionEnter("Reconcile", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
     endif
     call NUOPC_Reconcile(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -453,8 +480,11 @@ module NUOPC_Connector
     call NUOPC_Reconcile(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    if (btest(profiling,1)) then    ! PROFILE
-      call ESMF_VMLogMemInfo("aftP1 Reconcile")
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionExit("Reconcile", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
     endif
 
     ! get transfer policy for both states
@@ -668,6 +698,14 @@ module NUOPC_Connector
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! handle profiling
+    if (btest(profiling,0)) then
+      call ESMF_TraceRegionExit(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
 
    contains
 
@@ -936,7 +974,7 @@ module NUOPC_Connector
     character(ESMF_MAXSTR), pointer       :: exportCplSetList(:)
     character(len=240)                    :: msgString
     logical                               :: match
-    integer                   :: verbosity, profiling, diagnostic
+    integer                   :: verbosity, diagnostic, profiling
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
 
@@ -944,9 +982,17 @@ module NUOPC_Connector
 
     ! query the component for info
     call NUOPC_CompGet(connector, name=name, verbosity=verbosity, &
-      profiling=profiling, diagnostic=diagnostic, rc=rc)
+      diagnostic=diagnostic, profiling=profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! handle profiling
+    if (btest(profiling,0)) then
+      call ESMF_TraceRegionEnter(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
 
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
@@ -985,8 +1031,11 @@ module NUOPC_Connector
     endif
 
     ! reconcile the States including Attributes
-    if (btest(profiling,1)) then    ! PROFILE
-      call ESMF_VMLogMemInfo("befP1a Reconcile")
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionEnter("Reconcile", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
     endif
     call NUOPC_Reconcile(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -994,8 +1043,11 @@ module NUOPC_Connector
     call NUOPC_Reconcile(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    if (btest(profiling,1)) then    ! PROFILE
-      call ESMF_VMLogMemInfo("aftP1a Reconcile")
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionExit("Reconcile", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
     endif
 
     nullify(importStandardNameList)
@@ -1160,6 +1212,14 @@ module NUOPC_Connector
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+    ! handle profiling
+    if (btest(profiling,0)) then
+      call ESMF_TraceRegionExit(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
   end subroutine
   
   !-----------------------------------------------------------------------------
@@ -1191,7 +1251,7 @@ module NUOPC_Connector
     logical                               :: match
     type(ESMF_StateIntent_Flag)           :: importStateIntent
     character(ESMF_MAXSTR)                :: fieldName
-    integer                   :: verbosity, profiling, diagnostic
+    integer                   :: verbosity, diagnostic, profiling
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
     
@@ -1199,7 +1259,20 @@ module NUOPC_Connector
 
     ! query the component for info
     call NUOPC_CompGet(connector, name=name, verbosity=verbosity, &
-      profiling=profiling, diagnostic=diagnostic, rc=rc)
+      diagnostic=diagnostic, profiling=profiling, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      
+    ! handle profiling
+    if (btest(profiling,0)) then
+      call ESMF_TraceRegionEnter(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
+    ! intro
+    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
@@ -1234,14 +1307,12 @@ module NUOPC_Connector
         return  ! bail out
     endif
 
-    ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      
     ! reconcile the States including Attributes
-    if (btest(profiling,1)) then    ! PROFILE
-      call ESMF_VMLogMemInfo("befP1b Reconcile")
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionEnter("Reconcile", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
     endif
     call NUOPC_Reconcile(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1249,8 +1320,11 @@ module NUOPC_Connector
     call NUOPC_Reconcile(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    if (btest(profiling,1)) then    ! PROFILE
-      call ESMF_VMLogMemInfo("aftP1b Reconcile")
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionExit("Reconcile", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
     endif
 
     ! set Attributes
@@ -1486,6 +1560,14 @@ module NUOPC_Connector
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+    ! handle profiling
+    if (btest(profiling,0)) then
+      call ESMF_TraceRegionExit(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
   end subroutine
   
   !-----------------------------------------------------------------------------
@@ -1500,7 +1582,7 @@ module NUOPC_Connector
     character(*), parameter   :: rName="InitializeIPDv03p1"
     type(ESMF_Clock)          :: internalClock
     character(ESMF_MAXSTR)    :: name
-    integer                   :: verbosity, diagnostic
+    integer                   :: verbosity, diagnostic, profiling
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
 
@@ -1508,9 +1590,17 @@ module NUOPC_Connector
 
     ! query the component for info
     call NUOPC_CompGet(connector, name=name, verbosity=verbosity, &
-      diagnostic=diagnostic, rc=rc)
+      diagnostic=diagnostic, profiling=profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! handle profiling
+    if (btest(profiling,0)) then
+      call ESMF_TraceRegionEnter(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
 
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
@@ -1595,6 +1685,14 @@ module NUOPC_Connector
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+    ! handle profiling
+    if (btest(profiling,0)) then
+      call ESMF_TraceRegionExit(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
   end subroutine
   
   !-----------------------------------------------------------------------------
@@ -1636,7 +1734,7 @@ module NUOPC_Connector
     type(ESMF_VM)                   :: acceptorVM, providerVM, currentVM
     logical                         :: sharable
     integer                         :: helperIn, helperOut
-    integer                   :: verbosity, profiling, diagnostic
+    integer                   :: verbosity, diagnostic, profiling
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
 
@@ -1644,10 +1742,18 @@ module NUOPC_Connector
 
     ! query the component for info
     call NUOPC_CompGet(connector, name=name, verbosity=verbosity, &
-      profiling=profiling, diagnostic=diagnostic, rc=rc)
+      diagnostic=diagnostic, profiling=profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
+    ! handle profiling
+    if (btest(profiling,0)) then
+      call ESMF_TraceRegionEnter(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1708,8 +1814,11 @@ module NUOPC_Connector
 
     ! re-reconcile the States because they may have changed
     ! (previous proxy objects are dropped before fresh reconcile)
-    if (btest(profiling,1)) then    ! PROFILE
-      call ESMF_VMLogMemInfo("befP2 Reconcile")
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionEnter("Reconcile", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
     endif
     call NUOPC_Reconcile(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1717,8 +1826,11 @@ module NUOPC_Connector
     call NUOPC_Reconcile(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    if (btest(profiling,1)) then    ! PROFILE
-      call ESMF_VMLogMemInfo("aftP2 Reconcile")
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionExit("Reconcile", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
     endif
     
     ! get the cplList Attribute
@@ -2296,6 +2408,14 @@ module NUOPC_Connector
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+    ! handle profiling
+    if (btest(profiling,0)) then
+      call ESMF_TraceRegionExit(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
   end subroutine
   
   !-----------------------------------------------------------------------------
@@ -2355,7 +2475,7 @@ module NUOPC_Connector
     integer, allocatable            :: minIndex(:), maxIndex(:)
     logical                         :: sharedField, sharedGeom
     type(ESMF_Array)                :: array
-    integer                         :: verbosity, profiling, diagnostic
+    integer                         :: verbosity, diagnostic, profiling
     type(ESMF_Time)                 :: currTime
     character(len=40)               :: currTimeString
     character(len=40)               :: transferDirection
@@ -2373,10 +2493,18 @@ module NUOPC_Connector
 
     ! query the component for info
     call NUOPC_CompGet(connector, name=name, verbosity=verbosity, &
-      profiling=profiling, diagnostic=diagnostic, rc=rc)
+      diagnostic=diagnostic, profiling=profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
+    ! handle profiling
+    if (btest(profiling,0)) then
+      call ESMF_TraceRegionEnter(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2435,8 +2563,11 @@ module NUOPC_Connector
 
     ! re-reconcile the States because they may have changed
     ! (previous proxy objects are dropped before fresh reconcile)
-    if (btest(profiling,1)) then    ! PROFILE
-      call ESMF_VMLogMemInfo("befP3 Reconcile")
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionEnter("Reconcile", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
     endif
     call NUOPC_Reconcile(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2444,8 +2575,11 @@ module NUOPC_Connector
     call NUOPC_Reconcile(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    if (btest(profiling,1)) then    ! PROFILE
-      call ESMF_VMLogMemInfo("aftP3 Reconcile")
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionExit("Reconcile", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
     endif
     
     ! get the cplList Attribute
@@ -2723,6 +2857,11 @@ module NUOPC_Connector
               staggerloc=staggerloc, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return
+call ESMF_PointerLog(grid%this, prefix="acceptorField set persistent shared Grid: ", rc=rc)
+            ! must make Grid persistent to be safe when sharing with other VM
+            call c_ESMC_SetPersist(grid, ESMF_TRUE, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return
           else
             ! not shared GeomObject -> must transfer
             call ESMF_GridGet(grid, distgrid=providerDG, name=geomobjname, &
@@ -2977,8 +3116,13 @@ call ESMF_PointerLog(gridListE%keyGrid%this, &
               rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+call ESMF_PointerLog(mesh%this, prefix="acceptorField set persistent shared Mesh: ", rc=rc)
+            ! must make Mesh persistent to be safe when sharing with other VM
+            call c_ESMC_SetPersist(mesh, ESMF_TRUE, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return
           else
-            ! not sharedGeom -> must transfer
+            ! not shared GeomObject -> must transfer
             call ESMF_MeshGet(mesh, nodalDistgrid=providerDG_nodal, &
               name=geomobjname, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -3360,6 +3504,14 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+    ! handle profiling
+    if (btest(profiling,0)) then
+      call ESMF_TraceRegionExit(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
   end subroutine
 
   !-----------------------------------------------------------------------------
@@ -3412,7 +3564,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     character(ESMF_MAXSTR)          :: iShareStatusG, eShareStatusG
     logical                         :: matchE, matchI
     logical                         :: sharedField, sharedGeom
-    integer                         :: verbosity, profiling, diagnostic
+    integer                         :: verbosity, diagnostic, profiling
     type(ESMF_Time)                 :: currTime
     character(len=40)               :: currTimeString
     character(len=40)               :: transferDirection
@@ -3429,10 +3581,18 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
 
     ! query the component for info
     call NUOPC_CompGet(connector, name=name, verbosity=verbosity, &
-      profiling=profiling, diagnostic=diagnostic, rc=rc)
+      diagnostic=diagnostic, profiling=profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
+    ! handle profiling
+    if (btest(profiling,0)) then
+      call ESMF_TraceRegionEnter(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -3491,8 +3651,11 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
 
     ! re-reconcile the States because they may have changed
     ! (previous proxy objects are dropped before fresh reconcile)
-    if (btest(profiling,1)) then    ! PROFILE
-      call ESMF_VMLogMemInfo("befP4 Reconcile")
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionEnter("Reconcile", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
     endif
     call NUOPC_Reconcile(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -3500,8 +3663,11 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     call NUOPC_Reconcile(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    if (btest(profiling,1)) then    ! PROFILE
-      call ESMF_VMLogMemInfo("aftP4 Reconcile")
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionExit("Reconcile", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
     endif
     
     ! get the cplList Attribute
@@ -3671,7 +3837,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
           ! not a situation that needs handling here
           if (btest(verbosity,12)) then
             write (msgString, '(A)') trim(name)//": "//&
-              "- nothing shared or transferred"
+              "- nothing shared or transferred, or may already be handled"
             call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -4112,6 +4278,14 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+    ! handle profiling
+    if (btest(profiling,0)) then
+      call ESMF_TraceRegionExit(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
   end subroutine
 
   !-----------------------------------------------------------------------------
@@ -4235,7 +4409,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return
     
     ! done with the helper state
-    call ESMF_StateDestroy(state, rc=rc)
+    call ESMF_StateDestroy(state, noGarbage=.true., rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return
 
@@ -4378,7 +4552,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return
     
     ! done with the helper state
-    call ESMF_StateDestroy(state, rc=rc)
+    call ESMF_StateDestroy(state, noGarbage=.true., rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return
       
@@ -4411,7 +4585,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     ! local variables
     character(*), parameter   :: rName="InitializeIPDv05p6a"
     character(ESMF_MAXSTR)    :: name
-    integer                   :: verbosity, profiling, diagnostic
+    integer                   :: verbosity, diagnostic, profiling
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
 
@@ -4419,10 +4593,18 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
 
     ! query the component for info
     call NUOPC_CompGet(connector, name=name, verbosity=verbosity, &
-      profiling=profiling, diagnostic=diagnostic, rc=rc)
+      diagnostic=diagnostic, profiling=profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
+    ! handle profiling
+    if (btest(profiling,0)) then
+      call ESMF_TraceRegionEnter(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4461,8 +4643,11 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
 
     ! re-reconcile the States because they may have changed
     ! (previous proxy objects are dropped before fresh reconcile)
-    if (btest(profiling,1)) then    ! PROFILE
-      call ESMF_VMLogMemInfo("befP5a Reconcile")
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionEnter("Reconcile", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
     endif
     call NUOPC_Reconcile(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4470,8 +4655,11 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     call NUOPC_Reconcile(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    if (btest(profiling,1)) then    ! PROFILE
-      call ESMF_VMLogMemInfo("aftP5a Reconcile")
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionExit("Reconcile", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
     endif
 
     ! handle diagnostic
@@ -4498,6 +4686,14 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! handle profiling
+    if (btest(profiling,0)) then
+      call ESMF_TraceRegionExit(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
 
   end subroutine
 
@@ -4547,7 +4743,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     integer                         :: sIndex
     character(ESMF_MAXSTR)          :: iShareStatus, eShareStatus
     logical                         :: sharedFlag
-    integer                   :: verbosity, diagnostic
+    integer                   :: verbosity, diagnostic, profiling
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
 
@@ -4555,10 +4751,18 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
 
     ! query the component for info
     call NUOPC_CompGet(connector, name=name, verbosity=verbosity, &
-      diagnostic=diagnostic, rc=rc)
+      diagnostic=diagnostic, profiling=profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
+    ! handle profiling
+    if (btest(profiling,0)) then
+      call ESMF_TraceRegionEnter(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4877,6 +5081,9 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     enddo
 
     ! SPECIALIZE by calling into attached method to precompute routehandle
+    if (btest(profiling,1)) then
+      call ESMF_TraceRegionEnter("label_ComputeRouteHandle")
+    endif
     call ESMF_MethodExecute(connector, label=label_ComputeRouteHandle, &
       existflag=existflag, userRc=localrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4884,6 +5091,9 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
+    if (btest(profiling,1)) then
+      call ESMF_TraceRegionExit("label_ComputeRouteHandle")
+    endif
 
     if (.not.existflag) then
       ! if not specialized -> use default method to:
@@ -5010,6 +5220,14 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! handle profiling
+    if (btest(profiling,0)) then
+      call ESMF_TraceRegionExit(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
 
   end subroutine
     
@@ -5524,14 +5742,23 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     character(*), parameter               :: rName="InitializeIPDv00p2a"
     type(ESMF_Clock)                      :: internalClock
     character(ESMF_MAXSTR)                :: name
-    integer                               :: verbosity
+    integer                               :: verbosity, profiling
 
     rc = ESMF_SUCCESS
 
     ! query the component for info
-    call NUOPC_CompGet(connector, name=name, verbosity=verbosity, rc=rc)
+    call NUOPC_CompGet(connector, name=name, verbosity=verbosity, &
+      profiling=profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! handle profiling
+    if (btest(profiling,0)) then
+      call ESMF_TraceRegionEnter(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
 
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
@@ -5551,6 +5778,14 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+    ! handle profiling
+    if (btest(profiling,0)) then
+      call ESMF_TraceRegionExit(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
   end subroutine
   
   !-----------------------------------------------------------------------------
@@ -5565,14 +5800,23 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     character(*), parameter               :: rName="InitializeIPDv00p2b"
     type(ESMF_Clock)                      :: internalClock
     character(ESMF_MAXSTR)                :: name
-    integer                               :: verbosity
+    integer                               :: verbosity, profiling
 
     rc = ESMF_SUCCESS
 
     ! query the component for info
-    call NUOPC_CompGet(connector, name=name, verbosity=verbosity, rc=rc)
+    call NUOPC_CompGet(connector, name=name, verbosity=verbosity, &
+      profiling=profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! handle profiling
+    if (btest(profiling,0)) then
+      call ESMF_TraceRegionEnter(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
 
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
@@ -5588,6 +5832,14 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! handle profiling
+    if (btest(profiling,0)) then
+      call ESMF_TraceRegionExit(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
 
   end subroutine
   
@@ -5609,26 +5861,28 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     character(ESMF_MAXSTR)    :: compName, pLabel
     character(len=160)        :: msgString
     integer                   :: phase
-    integer                   :: verbosity, profiling, diagnostic
+    integer                   :: verbosity, diagnostic, profiling
     character(ESMF_MAXSTR)    :: name
     integer                   :: i
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
 
-    real(ESMF_KIND_R8)        :: timeBase, time0, time
-
     rc = ESMF_SUCCESS
-
-    ! PROFILE base time
-    call ESMF_VMWtime(timeBase)
-    time0=timeBase
 
     ! query the component for info
     call NUOPC_CompGet(connector, name=name, verbosity=verbosity, &
-      profiling=profiling, diagnostic=diagnostic, rc=rc)
+      diagnostic=diagnostic, profiling=profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         
+    ! handle profiling
+    if (btest(profiling,3)) then
+      call ESMF_TraceRegionEnter(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -5684,15 +5938,6 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
         return  ! bail out
     endif
     
-    ! handle profiling
-    if (btest(profiling,0)) then
-      call ESMF_VMWtime(time)
-      write (msgString, *) trim(name)//": Profile 01 time=   ", &
-        time-time0, time-timeBase
-        time0=time
-      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
-    endif
-
     ! query Component for its internal State
     nullify(is%wrap)
     call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc)
@@ -5702,26 +5947,13 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     ! store the incoming clock as driverClock in internal state
     is%wrap%driverClock = clock
 
-    if (btest(profiling,0)) then
-      call ESMF_VMWtime(time)
-      write (msgString, *) trim(name)//": Profile 02 time=   ", &
-        time-time0, time-timeBase
-        time0=time
-      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
-    endif
-
     !TODO: here may be the place to ensure incoming States are consistent
     !TODO: with the Fields held in the FieldBundle inside the internal State?
       
-    if (btest(profiling,0)) then
-      call ESMF_VMWtime(time)
-      write (msgString, *) trim(name)//": Profile 03 time=   ", &
-        time-time0, time-timeBase
-        time0=time
-      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
-    endif
-
     ! SPECIALIZE by calling into attached method to execute routehandle
+    if (btest(profiling,4)) then
+      call ESMF_TraceRegionEnter("label_ExecuteRouteHandle")
+    endif
     call ESMF_MethodExecute(connector, label=label_ExecuteRouteHandle, &
       existflag=existflag, userRc=localrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -5729,17 +5961,14 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-
-    ! handle profiling
-    if (btest(profiling,0)) then
-      call ESMF_VMWtime(time)
-      write (msgString, *) trim(name)//": Profile 04 time=   ", &
-        time-time0, time-timeBase
-        time0=time
-      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+    if (btest(profiling,4)) then
+      call ESMF_TraceRegionExit("label_ExecuteRouteHandle")
     endif
 
     if (.not.existflag) then
+      if (btest(profiling,4)) then
+        call ESMF_TraceRegionEnter("default_RouteHandle_execution")
+      endif
       ! if not specialized -> use default method to execute the exchange
       ! Conditionally enter VMEpoch
       if (.not. is%wrap%srcDstOverlap) then
@@ -5790,10 +6019,13 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
       endif
       if (btest(verbosity,14)) then
         call ESMF_LogWrite(trim(name)//&
-          ": called default label_ExecuteRouteHandle", &
+          ": called default RouteHandle execution", &
           ESMF_LOGMSG_INFO, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      endif
+      if (btest(profiling,4)) then
+        call ESMF_TraceRegionExit("default_RouteHandle_execution")
       endif
     else
       ! Next update the TimeStamp metadata on the export Fields....
@@ -5810,15 +6042,6 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
       endif    
     endif
     
-    ! handle profiling
-    if (btest(profiling,0)) then
-      call ESMF_VMWtime(time)
-      write (msgString, *) trim(name)//": Profile 05 time=   ", &
-        time-time0, time-timeBase
-        time0=time
-      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
-    endif
-
     ! handle diagnostic
     if (btest(diagnostic,6)) then
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
@@ -5854,6 +6077,14 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+    ! handle profiling
+    if (btest(profiling,3)) then
+      call ESMF_TraceRegionExit(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
   end subroutine
   
   !-----------------------------------------------------------------------------
@@ -5872,7 +6103,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     logical                   :: existflag
     logical                   :: routeHandleIsCreated
     character(ESMF_MAXSTR)    :: name
-    integer                   :: verbosity, diagnostic
+    integer                   :: verbosity, diagnostic, profiling
     integer                   :: i
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
@@ -5881,10 +6112,18 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
 
     ! query the component for info
     call NUOPC_CompGet(connector, name=name, verbosity=verbosity, &
-      diagnostic=diagnostic, rc=rc)
+      diagnostic=diagnostic, profiling=profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
+    ! handle profiling
+    if (btest(profiling,6)) then
+      call ESMF_TraceRegionEnter(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -5928,6 +6167,9 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     endif
     
     ! SPECIALIZE by calling into attached method to release routehandle
+    if (btest(profiling,7)) then
+      call ESMF_TraceRegionEnter("label_ReleaseRouteHandle")
+    endif
     call ESMF_MethodExecute(connector, label=label_ReleaseRouteHandle, &
       existflag=existflag, userRc=localrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -5935,6 +6177,9 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
+    if (btest(profiling,7)) then
+      call ESMF_TraceRegionExit("label_ReleaseRouteHandle")
+    endif
 
     if (.not.existflag) then
       ! if not specialized -> use default method to:
@@ -5979,6 +6224,9 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     endif
 
     ! SPECIALIZE by calling into optional attached method
+    if (btest(profiling,7)) then
+      call ESMF_TraceRegionEnter("label_Finalize")
+    endif
     call ESMF_MethodExecute(connector, label=label_Finalize, &
       existflag=existflag, userRc=localrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -5987,6 +6235,9 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
+    if (btest(profiling,7)) then
+      call ESMF_TraceRegionExit("label_Finalize")
+    endif
 
     ! destroy Timestamp update packets
     !TODO: consider whether CplSet needs extra treatment here or not
@@ -6057,7 +6308,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     call ESMF_FieldBundleDestroy(is%wrap%dstFields, noGarbage=.true., rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call ESMF_StateDestroy(is%wrap%state, rc=rc)
+    call ESMF_StateDestroy(is%wrap%state, noGarbage=.true., rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (associated(is%wrap%zeroRegions)) then
@@ -6106,6 +6357,14 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! handle profiling
+    if (btest(profiling,6)) then
+      call ESMF_TraceRegionExit(rName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
 
   end subroutine
   
@@ -7121,7 +7380,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
 #if 0
 write (msgString,*) trim(name)//": srcGrid Match for i=", i, " is: ", &
   rhListMatch
-call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO)
+call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_DEBUG)
 #endif
           if (.not.rhListMatch) goto 123
           ! test dst grid match
@@ -7133,7 +7392,7 @@ call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO)
 #if 0
 write (msgString,*) trim(name)//": dstGrid Match for i=", i, " is: ", &
   rhListMatch
-call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO)
+call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_DEBUG)
 #endif
           if (.not.rhListMatch) goto 123
           ! test src arrayspec match
@@ -7254,7 +7513,7 @@ call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO)
 #if 0
 call ESMF_LogWrite(trim(name)//&
   ": no rhListMatch -> pre-compute new remapping: "// &
-  trim(cplList(i)), ESMF_LOGMSG_INFO)
+  trim(cplList(i)), ESMF_LOGMSG_DEBUG)
 #endif
         if (gridPair) then
           ! add a new rhList element
@@ -7329,7 +7588,7 @@ call ESMF_LogWrite(trim(name)//&
 #if 0
 call ESMF_LogWrite(trim(name)//&
   ": found rhListMatch -> reuse routehandle: "// &
-  trim(cplList(i)), ESMF_LOGMSG_INFO)
+  trim(cplList(i)), ESMF_LOGMSG_DEBUG)
 #endif
         ! pull out the routehandle from the matching rhList element
         rhh = rhListE%rh
@@ -7422,7 +7681,7 @@ call ESMF_LogWrite(trim(name)//&
     if (count > 0) then
 #if 0
 write(msgString,*) "Redist FBs have elements: ", count
-call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=rc)
 #endif
       ! call into ESMF for an optimized Redist pre-compute between FieldBundles
       call ESMF_FieldBundleRedistStore(srcFBRedist, dstFBRedist, &

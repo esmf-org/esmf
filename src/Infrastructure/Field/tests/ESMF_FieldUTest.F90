@@ -258,7 +258,7 @@
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       call ESMF_FieldDestroy(fieldAlias, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
 
 #ifdef ESMF_TESTEXHAUSTIVE
 

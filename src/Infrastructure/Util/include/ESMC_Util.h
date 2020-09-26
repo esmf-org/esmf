@@ -122,7 +122,8 @@ enum ESMC_LogMsgType_Flag{
                 ESMC_LOGMSG_WARN =2,
                 ESMC_LOGMSG_ERROR=3,
                 ESMC_LOGMSG_TRACE=4,
-                ESMC_LOGMSG_JSON =5 };
+                ESMC_LOGMSG_DEBUG=5,
+                ESMC_LOGMSG_JSON =6 };
 
 enum ESMC_MeshLoc_Flag {ESMC_MESHLOC_NODE=0,
                         ESMC_MESHLOC_ELEMENT};

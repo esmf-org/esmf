@@ -9,10 +9,12 @@
 ! Licensed under the University of Illinois-NCSA License.
 !==============================================================================
 !
-#define ESMF_FILENAME "ESMF_StateReconcile2.F90"
+#define ESMF_FILENAME "ESMF_StateReconcile.F90"
+!
+#define RECONCILE_ZAP_LOG_off
 !
 ! ESMF StateReconcile module
-module ESMF_StateReconcile2Mod
+module ESMF_StateReconcileMod
 !
 !==============================================================================
 !
@@ -59,10 +61,12 @@ module ESMF_StateReconcile2Mod
   use ESMF_ArrayBundleMod
   use ESMF_FieldMod
   use ESMF_FieldGetMod
+  use ESMF_FieldCreateMod
   use ESMF_FieldBundleMod
   use ESMF_RHandleMod
 
   use ESMF_InfoMod, only : ESMF_Info, ESMF_InfoGetFromBase, ESMF_InfoUpdate
+  use ESMF_InfoCacheMod
 
   implicit none
   private
@@ -100,7 +104,7 @@ module ESMF_StateReconcile2Mod
 
   type ESMF_ReconcileIDInfo
     integer,         pointer :: id(:) => null ()
-    type(ESMF_VMId), pointer :: vmid(:) => null ()
+    integer,         pointer :: vmid(:) => null ()
     logical,         pointer :: needed(:) => null ()
     character,       pointer :: item_buffer(:) => null ()
   end type
@@ -125,22 +129,19 @@ contains
 
 !==============================================================================
 
-
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StateReconcile2"
+#define ESMF_METHOD "ESMF_StateReconcile"
 !BOP
 ! !IROUTINE: ESMF_StateReconcile -- Reconcile State data across all PETs in a VM
 !
 ! !INTERFACE:
-  subroutine ESMF_StateReconcile (state, vm, attreconflag, rc)
+  subroutine ESMF_StateReconcile(state, vm, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_State),            intent(inout)         :: state
     type(ESMF_VM),               intent(in),  optional :: vm
-    type(ESMF_AttReconcileFlag), intent(in),  optional :: attreconflag
     integer,                     intent(out), optional :: rc
-!
 !
 ! !DESCRIPTION:
 !     Must be called for any {\tt ESMF\_State} which contains ESMF objects
@@ -152,10 +153,6 @@ contains
 !     before operating on any data inside that {\tt ESMF\_State}.
 !     After calling {\tt ESMF\_StateReconcile} all {\tt PET}s will have
 !     a common view of all objects contained in this {\tt ESMF\_State}.
-!     The option to reconcile the metadata associated with the objects
-!     contained in this {\tt ESMF\_State} also exists.  The default behavior
-!     for this capability is to {\it not} reconcile metadata unless told
-!     otherwise.
 !
 !     This call is collective across the specified VM.
 !
@@ -165,18 +162,17 @@ contains
 !       {\tt ESMF\_State} to reconcile.
 !     \item[{[vm]}]
 !       {\tt ESMF\_VM} for this {\tt ESMF\_Component}.  By default, it is set to the current vm.
-!     \item[{[attreconflag]}]
-!       Flag to tell if Attribute reconciliation is to be done as well as data reconciliation.
-!       This flag is documented in section \ref{const:attreconcile}.  Default is
-!       {\tt ESMF\_ATTRECONCILE\_OFF}.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
+
     integer :: localrc
     type(ESMF_VM) :: localvm
     type(ESMF_AttReconcileFlag) :: lattreconflag
+
+    type(ESMF_InfoDescribe) :: idesc, idesc2
 
     ! check input variables
     ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -202,17 +198,37 @@ contains
     ! (or short list of numbers) instead of having to build and send the
     ! list each time.
 
-    ! Set the optional ESMF_AttReconcileFlag
-    lattreconflag = ESMF_ATTRECONCILE_OFF
-    if(present(attreconflag)) then
-      lattreconflag = attreconflag
-    endif
+    ! Attributes must be reconciled to de-deduplicate Field geometries
+    lattreconflag = ESMF_ATTRECONCILE_ON
 
     call ESMF_StateReconcile_driver (state, vm=localvm, &
         attreconflag=lattreconflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
+
+#if 0
+    ! Log a JSON State representation -----------------------------------------
+
+    call idesc%Initialize(createInfo=.true., addObjectInfo=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    call idesc%Update(state, "", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_LogWrite("InfoDescribe before InfoCacheReassembleFields=", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_LogWrite("state_json_before_reassemble="//ESMF_InfoDump(idesc%info), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    call idesc%Destroy(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+#endif
+
+    ! Traverse the State hierarchy and fix Field references to a shared geometry
+    call ESMF_InfoCacheReassembleFields(state, state, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Traverse the state hierarchy and remove reconcile-specific attributes
+    call ESMF_InfoCacheReassembleFieldsFinalize(state, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -259,6 +275,7 @@ contains
 
     integer,         pointer :: ids_send(:), itemtypes_send(:)
     type(ESMF_VMId), pointer :: vmids_send(:)
+    integer, allocatable, target :: vmintids_send(:)
 
     type(ESMF_ReconcileIDInfo), allocatable :: id_info(:)
 
@@ -273,7 +290,19 @@ contains
     logical, parameter :: meminfo = .false.
     logical, parameter :: trace = .false.
 
+    character(160)  :: prefixStr
+    type(ESMF_VMId), allocatable, target :: vmIdMap(:)
+    type(ESMF_VMId), pointer :: vmIdMap_ptr(:)
+
+    character(len=ESMF_MAXSTR) :: logmsg
+
+    type(ESMF_InfoCache) :: info_cache
+    type(ESMF_InfoDescribe) :: idesc
+
+    ! -------------------------------------------------------------------------
+
     localrc = ESMF_RC_NOT_IMPL
+    nullify(vmIdMap_ptr)
 
     call ESMF_VMGet(vm, localPet=mypet, petCount=npets, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -306,13 +335,12 @@ contains
         rcToReturn=rc)) return
     if (meminfo) call ESMF_VMLogMemInfo ('after Step 0 - initialization')
 
-
     ! 1.) Each PET constructs its send arrays containing local Id
     ! and VMId info for each object contained in the State.
     ! Note that element zero is reserved for the State itself.
     if (trace) then
       call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
-          ': *** Step 1 - Build send arrays')
+          ': *** Step 1.0 - Build send arrays')
     end if
     itemtypes_send => null ()
     ids_send   => null ()
@@ -329,6 +357,63 @@ contains
         rcToReturn=rc)) return
     if (meminfo) call ESMF_VMLogMemInfo ('after Step 1 - constructed send Id/VMId info')
 
+    if (trace) then
+      call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
+          ': *** Step 1.1 - Translate VM identifiers to integers')
+    end if
+
+    ! Translate VmId objects to an integer representation to minimize memory
+    ! usage. This is also beneficial for performance.
+    call ESMF_VMTranslateVMId(vm, vmIds=vmids_send, ids=vmintids_send, &
+      vmIdMap=vmIdMap, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT,  &
+      rcToReturn=rc)) return
+
+    ! VM integer ids should always start with 1
+    do i=lbound(vmintids_send,1),ubound(vmintids_send,1)
+      if (vmintids_send(i) <= 0) then
+        if (ESMF_LogFoundError(ESMF_FAILURE, msg="A <= zero VM integer id was encountered", &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      end if
+    enddo
+    vmIdMap_ptr => vmIdMap
+
+#if 0
+    ! Log a JSON State representation -----------------------------------------
+
+    call idesc%Initialize(createInfo=.true., addObjectInfo=.true., vmIdMap=vmIdMap_ptr, &
+      vmIdMapGeomExc=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    call idesc%Update(state, "", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_LogWrite("InfoDescribe AFTER VMId collection=", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_LogWrite("state_json_after_vmid="//ESMF_InfoDump(idesc%info), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    call idesc%Destroy(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+#endif
+
+    if (trace) then
+      call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
+          ': *** Step 1.2 - Update Field metadata for unique geometries')
+    end if
+
+    ! Update Field metadata for unique geometries. This will traverse the state
+    ! hierarchy adding reconcile-specific attributes that will find unique
+    ! geometry objects and maintain sufficient information to re-establish
+    ! references once the objects have been communicated and deserialized.
+    ! -------------------------------------------------------------------------
+    call info_cache%Initialize(localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call info_cache%UpdateFields(state, vmIdMap_ptr, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call info_cache%Destroy(localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    ! -------------------------------------------------------------------------
 
     ! 2.) All PETs send their items Ids and VMIds to all the other PETs,
     ! then create local directories of which PETs have which ids/VMIds.
@@ -344,7 +429,7 @@ contains
     call ESMF_ReconcileExchgIDInfo (vm,  &
         nitems_buf=nitems_buf,  &
         id=ids_send,  &
-        vmid=vmids_send,  &
+        vmid=vmintids_send,  &
         id_info=id_info, &
         rc=localrc)
     if (debug)  &
@@ -370,7 +455,7 @@ contains
 
     call ESMF_ReconcileCompareNeeds (vm,  &
           id=  ids_send,  &
-        vmid=vmids_send,  &
+        vmid=vmintids_send,  &
         id_info=id_info,  &
         rc=localrc)
     if (debug)  &
@@ -472,11 +557,11 @@ contains
         if (debug) then
           print *, '    items_recv(', lbound (items_recv(i)%cptr),  &
               ':', ubound (items_recv(i)%cptr), ')'
-        end if
-        call ESMF_ReconcileDeserialize (state, vm,  &
-            obj_buffer=items_recv(i)%cptr,  &
-            vm_ids=id_info(i)%vmid,  &
-            attreconflag=attreconflag, rc=localrc)
+            end if
+        call ESMF_ReconcileDeserialize (state, vm, &
+            obj_buffer=items_recv(i)%cptr, &
+            attreconflag=attreconflag, &
+            rc=localrc)
       else
         localrc = ESMF_SUCCESS
       end if
@@ -515,12 +600,6 @@ contains
     end if
 
     do, i=0, ubound (id_info, 1)
-      if (associated (id_info(i)%vmid)) then
-        call ESMF_VMIdDestroy (id_info(i)%vmid, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT,  &
-            rcToReturn=rc)) return
-      end if
       if (associated (id_info(i)%id)) then
         deallocate (id_info(i)%id, id_info(i)%vmid, id_info(i)%needed,  &
             stat=memstat)
@@ -536,6 +615,14 @@ contains
             rcToReturn=rc)) return
       end if
     end do
+
+    call ESMF_VMIdDestroy(vmIdMap, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    deallocate (vmIdMap, stat=memstat)
+    if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
 
     deallocate (id_info, stat=memstat)
     if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
@@ -597,7 +684,7 @@ contains
 ! !ARGUMENTS:
     type(ESMF_VM),     intent(in)   :: vm
     integer,           intent(in)   :: id(0:)
-    type(ESMF_VMId),   intent(in)   :: vmid(0:)
+    integer,           intent(in)   :: vmid(0:)
     type(ESMF_ReconcileIDInfo), intent(inout) :: id_info(0:)
     integer,           intent(out)  :: rc
 !
@@ -616,10 +703,9 @@ contains
 !     contained within it.  It does not return the IDs of nested State
 !     items.
 !   \item[vmid]
-!     The object VMIds of this PETs State itself (in element 0) and the items
+!     The integer VMIds of this PETs State itself (in element 0) and the items
 !     contained within it.  It does not return the IDs of nested State
-!     items.  Note that since VMId is a deep object class, the vmid array
-!     has aliases to existing VMId objects, rather than copies of them.
+!     items.
 !   \item[id_info]
 !     Array of arrays of global VMId info.  Upon input, the array has a size
 !     of numPets, and each element points to Id/VMId arrays.  Returns 'needed'
@@ -638,7 +724,7 @@ contains
 
     type NeedsList_t
       integer          :: id
-      type(ESMF_VMId)  :: vmid
+      integer          :: vmid
       logical, pointer :: offerers(:) => null ()
       integer, pointer :: position(:) => null ()
       type(NeedsList_t), pointer :: next => null ()
@@ -689,7 +775,7 @@ contains
 ! print *, '  PET', mypet, ': setting needed to .true.', j, k
         do, k = 1, ubound (id, 1)
           if (id(k) == id_info(i)%id(j)) then
-            if (ESMF_VMIdCompare (vmid(k), id_info(i)%vmid(j))) then
+            if (vmid(k) == id_info(i)%vmid(j)) then
 ! print *, '  PET', mypet, ': setting needed to .false.', j, k
               needed = .false.
               exit
@@ -788,7 +874,7 @@ contains
       type(NeedsList_t),  pointer :: needs_list_1  ! intent(inout)
       integer,         intent(in) :: pet_1
       integer,         intent(in) :: id_1
-      type(ESMF_VMId), intent(in) :: vmid_1
+      integer,         intent(in) :: vmid_1
       integer,         intent(in) :: position
       integer,         intent(out):: rc_1
 
@@ -829,7 +915,7 @@ contains
       needslist_p => needs_list_1
       do
         if (id_1 == needslist_p%id .and.  &
-            ESMF_VMIdCompare (vmid_1, needslist_p%vmid)) then
+            vmid_1 == needslist_p%vmid) then
 ! print *, 'pet', mypet, ': needs_list_insert: marking match and returing'
           needslist_p%offerers(pet_1) = .true.
           needslist_p%position(pet_1) = position
@@ -971,14 +1057,12 @@ contains
 ! !IROUTINE: ESMF_ReconcileDeserialize
 !
 ! !INTERFACE:
-  subroutine ESMF_ReconcileDeserialize (state, vm, obj_buffer, vm_ids,  &
-      attreconflag, rc)
+  subroutine ESMF_ReconcileDeserialize (state, vm, obj_buffer, attreconflag, rc)
 !
 ! !ARGUMENTS:
     type (ESMF_State), intent(inout):: state
     type (ESMF_VM),    intent(in)   :: vm
-    character,         pointer      :: obj_buffer(:) ! intent(in)
-    type(ESMF_VMId),   pointer      :: vm_ids(:)     ! intent(in)
+    character,         pointer      :: obj_buffer(:)    ! intent(in)
     type(ESMF_AttReconcileFlag),intent(in)   :: attreconflag
     integer,           intent(out)  :: rc
 !
@@ -989,10 +1073,10 @@ contains
 !   \begin{description}
 !   \item[state]
 !     {\tt ESMF\_State} to add proxy objects to.
+!   \item[vm]
+!     {\tt ESMF\_VM} to use.
 !   \item[obj_buffer]
 !     Buffer of serialized State objects (intent(in))
-!   \item[vm_ids]
-!     VMIds to be associated with proxy objects (intent(in))
 !   \item[attreconflag]
 !     Flag to indicate attribute reconciliation.
 !   \item[rc]
@@ -1016,6 +1100,7 @@ contains
     integer :: i, idx
     integer :: stateitem_type
     character(ESMF_MAXSTR) :: errstring
+    logical :: found
 
     integer :: mypet
 
@@ -1040,13 +1125,7 @@ contains
       print *, ESMF_METHOD, ': PET', mypet, ', needs_count =', needs_count
     end if
 
-    if (needs_count /= ubound (vm_ids, 1)) then
-      write (errstring, '(a,i0,a,i0)') 'size mismatch: needs_count = ', needs_count, ', vm_ids =', ubound (vm_ids, 1)
-      call ESMF_LogWrite (msg=errstring, logmsgFlag=ESMF_LOGMSG_ERROR, ESMF_CONTEXT)
-      if (ESMF_LogFoundError(ESMF_RC_INTNRL_INCONS, msg='needs_count /= ubound (vm_ids, 1)', &
-          ESMF_CONTEXT,  &
-          rcToReturn=rc)) return
-    end if
+    ! -------------------------------------------------------------------------
 
     ! Deserialize offset and type tables
     if (debug) then
@@ -1110,11 +1189,6 @@ contains
               ESMF_CONTEXT,  &
               rcToReturn=rc)) return
 
-          call c_ESMC_SetVMId(fieldbundle%this, vm_ids(i), localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT,  &
-              rcToReturn=rc)) return
-
           call ESMF_StateAdd(state, fieldbundle, &
               addflag=.true., proxyflag=.true.,  &
               rc=localrc)
@@ -1133,13 +1207,8 @@ contains
               rcToReturn=rc)) return
 
           if (debug) then
-            print *, "created field, ready to set id and add to local state"
+            print *, "created field, ready to add to local state"
           end if
-!!DEBUG "created field, ready to set id and add to local state"
-          call c_ESMC_SetVMId(field%ftypep, vm_ids(i), localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT,  &
-              rcToReturn=rc)) return
 
           call ESMF_StateAdd(state, field,      &
               addflag=.true., proxyflag=.true., &
@@ -1161,11 +1230,6 @@ contains
 
           ! Set init code
           call ESMF_ArraySetInitCreated(array, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT,  &
-              rcToReturn=rc)) return
-
-          call c_ESMC_SetVMId(array, vm_ids(i), localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT,  &
               rcToReturn=rc)) return
@@ -1193,11 +1257,6 @@ contains
               ESMF_CONTEXT,  &
               rcToReturn=rc)) return
 
-          call c_ESMC_SetVMId(arraybundle, vm_ids(i), localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT,  &
-              rcToReturn=rc)) return
-
           call ESMF_StateAdd(state, arraybundle, &
               addflag=.true., proxyflag=.true.,  &
               rc=localrc)
@@ -1211,11 +1270,6 @@ contains
           end if
           substate = ESMF_StateDeserialize(vm, obj_buffer, buffer_offset, &
               attreconflag=attreconflag, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT,  &
-              rcToReturn=rc)) return
-
-          call c_ESMC_SetVMId(substate%statep, vm_ids(i), localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT,  &
               rcToReturn=rc)) return
@@ -1466,7 +1520,7 @@ contains
     type(ESMF_VM),          intent(in)  :: vm
     integer,                intent(in)  :: nitems_buf(0:)
     integer,                intent(in)  :: id(0:)
-    type(ESMF_VMId),        intent(in)  :: vmid(0:)
+    integer,                intent(in)  :: vmid(0:)
     type(ESMF_ReconcileIDInfo), intent(inout) :: id_info(0:)
     integer,                intent(out) :: rc
 !
@@ -1485,10 +1539,8 @@ contains
 !     contained within it.  It does not return the IDs of nested State
 !     items.
 !   \item[vmid]
-!     The object VMIds of this PETs State itself (in element 0) and the items
-!     contained within it.  It does not return the IDs of nested State
-!     items.  Note that since VMId is a deep object class, the vmid array
-!     has aliases to existing VMId objects, rather than copies of them.
+!     The object integer VMIds of this PET's State itself (in element 0) and the
+!     items contained within it.  It does not return the IDs of nested State items.
 !   \item[id_info]
 !     Array of arrays of global VMId info.  Array has a size of numPets, and each
 !     element points to Id/VMId arrays.  Also returns which objects are not
@@ -1506,11 +1558,15 @@ contains
     integer :: i, ipos
     integer :: memstat
 
-    integer,         allocatable ::   id_recv(:)
+    integer, allocatable :: id_recv(:), vm_intids_recv(:)
 
     logical, parameter :: debug = .false.
+    logical, parameter :: meminfo = .false.
+    character(len=ESMF_MAXSTR) :: logmsg
 
     localrc = ESMF_RC_NOT_IMPL
+
+    if (meminfo) call ESMF_VMLogMemInfo ('entering ESMF_ReconcileExchgIDInfo')
 
     call ESMF_VMGet(vm, localPet=mypet, petCount=npets, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1537,9 +1593,20 @@ contains
           rcToReturn=rc)) return
     end if
 
+#if 0
+    ! Log some information about the number of items in the state.
+    write(logmsg, *) nitems_buf
+    call ESMF_LogWrite("nitems_buf="//trim(logmsg))
+    ! Log the current integer VM identifiers
+    write(logmsg, *) "vmid=", vmid
+    call ESMF_LogWrite(trim(logmsg))
+    ! Log the current integer Base identifiers
+    write(logmsg, *) "id=", id
+    call ESMF_LogWrite(trim(logmsg))
+#endif
+
     ! Broadcast each Id to all the other PETs.  Since the number of items per
     ! PET can vary, use AllToAllV.
-
     do, i=0, npets-1
       allocate (  &
           id_info(i)%  id  (0:nitems_buf(i)), &
@@ -1549,12 +1616,10 @@ contains
       if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT,  &
           rcToReturn=rc)) return
-      call ESMF_VMIdCreate (id_info(i)%vmid, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT,  &
-          rcToReturn=rc)) return
       id_info(i)%needed = .false.
     end do
+
+    if (meminfo) call ESMF_VMLogMemInfo ('tp ESMF_ReconcileExchgIDInfo - after id_info allocate and VMIDCreate')
 
     ! First, compute counts and displacements for AllToAllV calls.  Note that
     ! sending displacements are always zero, since each PET is broadcasting
@@ -1589,10 +1654,14 @@ contains
       end do
     end if
 
-    ! Exchange Ids
+    ! Exchange Base Ids -------------------------------------------------------
 
-    allocate (id_recv(0:sum (counts_buf_recv+1)-1),  &
-        stat=memstat)
+    ! NOTE: The base id exchange could be combined with the integer VM Id
+    ! exchange below. Historically, they were separate because the VM Ids were
+    ! character strings. Now that the VM Ids used in reconcile are integers, they
+    ! could be both be exhchanged in the same AllToAll call.
+
+    allocate(id_recv(0:sum (counts_buf_recv+1)-1), stat=memstat)
     if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
@@ -1609,9 +1678,33 @@ contains
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
 
+    if (meminfo) call ESMF_VMLogMemInfo ('tp ESMF_ReconcileExchgIDInfo - after VMAllGatherV for Base Ids')
+
     ipos = 0
     do, i=0, npets-1
       id_info(i)%id = id_recv(ipos:ipos+counts_buf_recv(i)-1)
+      ipos = ipos + counts_buf_recv(i)
+    end do
+
+    ! Exchange VMIds ----------------------------------------------------------
+
+    allocate(vm_intids_recv(0:sum (counts_buf_recv+1)-1), stat=memstat)
+    if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    call ESMF_VMAllGatherV (vm,  &
+        sendData=vmid, sendCount=size(vmid),  &
+        recvData=vm_intids_recv, recvCounts=counts_buf_recv, recvOffsets=displs_buf_recv,  &
+        rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+
+    if (meminfo) call ESMF_VMLogMemInfo ('tp ESMF_ReconcileExchgIDInfo - after VMAllGatherV for Base Ids')
+
+    ipos = 0
+    do, i=0, npets-1
+      id_info(i)%vmid = vm_intids_recv(ipos:ipos+counts_buf_recv(i)-1)
       ipos = ipos + counts_buf_recv(i)
     end do
 
@@ -1627,8 +1720,9 @@ contains
 !      end do
 !    end if
 
-    ! Exchange VMIds
-
+! NOTE: This code is a non-collective approach to the base and VM id exchanges.
+! It will probably not be used, but AllToAll calls are notoriously problematic
+! with some MPI implementations.
 #if 0
     if (trace) then
       call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
@@ -1664,7 +1758,7 @@ contains
           rcToReturn=rc)) return
       ipos = ipos + counts_buf_recv(i)
     end do
-#else
+!else
 ! VMBcastVMId version
     if (trace) then
       call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
@@ -1699,6 +1793,8 @@ contains
 #endif
 
     rc = localrc
+
+    if (meminfo) call ESMF_VMLogMemInfo ('exiting ESMF_ReconcileExchgIDInfo')
 
   end subroutine ESMF_ReconcileExchgIDInfo
 
@@ -1750,6 +1846,13 @@ contains
     character, pointer :: cptr_tmp(:)
 
     logical, parameter :: debug = .false.
+
+    character(len=ESMF_MAXSTR) :: logmsg
+    logical, parameter :: meminfo = .false.
+
+    ! -------------------------------------------------------------------------
+
+    if (meminfo) call ESMF_VMLogMemInfo("entering ESMF_ReconcileExchgItems")
 
     localrc = ESMF_RC_NOT_IMPL
 
@@ -1849,6 +1952,15 @@ contains
       offset_pos = offset_pos + itemcount
     end do
 
+#if 0
+    write(logmsg, *) SIZE(buffer_send)
+    call ESMF_LogWrite("SIZE(buffer_send)="//TRIM(logmsg), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    write(logmsg, *) SIZE(recv_buffer)
+    call ESMF_LogWrite("SIZE(recv_buffer)="//TRIM(logmsg), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+#endif
+
     ! AlltoAllV
 
     call ESMF_VMAllToAllV (vm,  &
@@ -1858,6 +1970,8 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
+
+    if (meminfo) call ESMF_VMLogMemInfo("tp ESMF_ReconcileExchgItems: after ESMF_VMAllToAllV")
 
     deallocate (buffer_send, counts_send, offsets_send,  &
         stat=memstat)
@@ -1871,7 +1985,7 @@ contains
       itemcount = counts_recv(i)
       if (itemcount > 0) then
         offset_pos = offsets_recv(i)
-#if 0
+#if 1
       ! Fortran 2003 version
         recv_items(i)%cptr(0:) => recv_buffer(offset_pos:offset_pos+itemcount-1)
 #else
@@ -1887,6 +2001,8 @@ contains
     end do
 
     rc = localrc
+
+    if (meminfo) call ESMF_VMLogMemInfo("exiting ESMF_ReconcileExchgItems")
 
   contains
 
@@ -2414,6 +2530,8 @@ contains
 
     logical, parameter :: debug=.false.
     logical, parameter :: trace=.false.
+    character(len=ESMF_MAXSTR) :: logmsg
+    integer :: needs_count_debug
 
     localrc = ESMF_RC_NOT_IMPL
 
@@ -2678,9 +2796,23 @@ contains
           rcToReturn=rc)) return
       obj_buffer => id_info(pet)%item_buffer
 
+      if (debug) then
+        write(logmsg, *) "ESMF_SIZEOF_DEFINT=", ESMF_SIZEOF_DEFINT
+        call ESMF_LogWrite(trim(logmsg))
+        write(logmsg, *) "needs_count=", needs_count
+        call ESMF_LogWrite(trim(logmsg))
+      end if
+
       obj_buffer(0:ESMF_SIZEOF_DEFINT-1) = transfer (  &
           source=needs_count,  &
           mold  =obj_buffer(0:ESMF_SIZEOF_DEFINT-1))
+
+      if (debug) then
+        needs_count_debug = transfer(source=obj_buffer(0:ESMF_SIZEOF_DEFINT-1), &
+          mold=needs_count_debug)
+        write(logmsg, *) "needs_count_debug=", needs_count_debug
+        call ESMF_LogWrite(trim(logmsg))
+      end if
 
       ! space for needs_count, padding, and size/type table
       buffer_offset = ESMF_SIZEOF_DEFINT * (2 + needs_count*2)
@@ -2754,20 +2886,26 @@ contains
       integer,          intent(out), optional :: rc
 !
 ! !DESCRIPTION:
+!     Proxy objects are identified and removed from the State. Information about
+!   the zapped proxies is kept in the State for later handling during the
+!   companion method ESMF_ReconcileZappedProxies().
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[state]
-!       {\tt ESMF\_State} to clear proxies out of.
+!       The State from which to zap proxies.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOPI
-      integer :: localrc, i
-      type(ESMF_StateClass),    pointer :: stypep
-      type(ESMF_StateItemWrap), pointer :: itemList(:)
-      character(len=ESMF_MAXSTR) :: thisname
+      integer                             :: localrc, i
+      type(ESMF_StateClass),      pointer :: stypep
+      type(ESMF_StateItemWrap),   pointer :: itemList(:)
+      character(len=ESMF_MAXSTR)          :: thisname
+      type(ESMF_FieldType),       pointer :: fieldp
+      type(ESMF_FieldBundleType), pointer :: fbpthis
+      character(len=80)                   :: msgString
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2775,31 +2913,109 @@ contains
 
       stypep => state%statep
 
+#ifdef RECONCILE_ZAP_LOG_on
+      call ESMF_VMLogGarbageInfo(prefix="ZapProxies bef: ", rc=localrc)
+#endif
+
       itemList => null ()
       call ESMF_ContainerGet(container=stypep%stateContainer, itemList=itemList, &
-          rc=localrc)
+        rc=localrc)
       if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
+      stypep%zapFlag => null()
+          
       if (associated(itemList)) then
+        allocate(stypep%zapFlag(size(itemList)))
+        stypep%zapFlag = .false.
+        ! Zap all proxies
         do i=1, size(itemList)
-          if (itemList(i)%si%proxyFlag) then
+          ! First ensure the proxyFlag for the current object in the local
+          ! State is set correctly. Each object internally (in Base) knows
+          ! if it was created as a proxy or not. However, the local State
+          ! might not correctly track this if the proxy object was created
+          ! under a different State and then copied over into this State.
+          ! This can happen e.g. under NUOPC when Fields or FieldBuindles
+          ! from a smaller VM are shared with a larger VM. Then on the extra
+          ! PETs the sharing protocol creates proxies using a temporary State
+          ! which then are copied into the actual import/exportState seen in
+          ! a later Reconcile.
+          ! The only use cases are Field and FieldBundle objects under State.
+          if (itemList(i)%si%otype==ESMF_STATEITEM_FIELD) then
+            fieldp => itemList(i)%si%datap%fp%ftypep
             call ESMF_StateItemGet(itemList(i)%si, name=thisname, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
-                ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
+#ifdef RECONCILE_ZAP_LOG_on
+write(msgString,*) "ESMF_ReconcileZapProxies Field: "//trim(thisname), &
+  itemList(i)%si%proxyFlag
+call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=localrc)
+#endif
+
+            ! determine proxyFlag from Base level
+            itemList(i)%si%proxyFlag = ESMF_IsProxy(fieldp%base, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT,  &
+              rcToReturn=rc)) return
+
+#ifdef RECONCILE_ZAP_LOG_on
+write(msgString,*) "ESMF_ReconcileZapProxies Field: "//trim(thisname), &
+  itemList(i)%si%proxyFlag
+call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=localrc)
+#endif
+
+          else if (itemList(i)%si%otype==ESMF_STATEITEM_FIELDBUNDLE) then
+            fbpthis => itemList(i)%si%datap%fbp%this
+            call ESMF_StateItemGet(itemList(i)%si, name=thisname, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+
+#ifdef RECONCILE_ZAP_LOG_on
+write(msgString,*) "ESMF_ReconcileZapProxies Field: "//trim(thisname), &
+  itemList(i)%si%proxyFlag
+call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=localrc)
+#endif
+
+            ! determine proxyFlag from Base level
+            itemList(i)%si%proxyFlag = ESMF_IsProxy(fbpthis%base, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT,  &
+              rcToReturn=rc)) return
+
+#ifdef RECONCILE_ZAP_LOG_on
+write(msgString,*) "ESMF_ReconcileZapProxies Field: "//trim(thisname), &
+  itemList(i)%si%proxyFlag
+call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=localrc)
+#endif
+
+          endif
+          ! Now the local State proxyFlag is consistent and can be used to
+          ! determine whether the current object needs to be zapped or not.
+          if (itemList(i)%si%proxyFlag) then
+            stypep%zapFlag(i) = .true.  ! keep record about zapping
+            call ESMF_StateItemGet(itemList(i)%si, name=thisname, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+            ! Remove proxy object from state using its name. This is safe b/c
+            ! a state only allows items with unique names.
             call ESMF_StateRemove (state, itemNameList=(/thisname/), rc=localrc)
             if (ESMF_LogFoundError(localrc, &
-                ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
-            itemList(i)%si => null ()
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           end if
         end do
       endif
 
       stypep%zapList => itemList ! hang on for ESMF_ReconcileZappedProxies()
+
+#ifdef RECONCILE_ZAP_LOG_on
+      call ESMF_VMLogGarbageInfo(prefix="ZapProxies aft: ", rc=localrc)
+#endif
 
       if (present(rc)) rc = ESMF_SUCCESS
     end subroutine ESMF_ReconcileZapProxies
@@ -2818,24 +3034,38 @@ contains
       integer,          intent(out), optional :: rc
 !
 ! !DESCRIPTION:
+!     Proxy objects that have been zapped from the State during a previous
+!   call to the companion method ESMF_ReconcileZapProxies() must now be handled
+!   after the reconcile work is done. Potentially new proxies have been
+!   created, and the internal information of those new proxies must be copied
+!   under the old proxy wrappers, then old wrappers must replace the new ones
+!   inside the State. Finally the old inside members must be cleaned up.
+!   There is also a chance that zapped proxy are not associated with new proxy
+!   counter parts (e.g. if the actual objects have been removed from the State).
+!   In that case the old proxy object must be cleaned up for good by removing
+!   it from the garbage collection.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[state]
-!       {\tt ESMF\_State}
+!       The State from which proxies have been zapped and must either be
+!       restored or completely removed from the garbage collection.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOPI
-    integer :: localrc, i, k
-    integer :: memstat
+    integer                           :: localrc, i, k
+    integer                           :: memstat
     type(ESMF_StateClass),    pointer :: stypep
     type(ESMF_StateItemWrap), pointer :: itemList(:)
     type(ESMF_StateItemWrap), pointer :: zapList(:)
-    character(len=ESMF_MAXSTR)  :: thisname
-    character(len=ESMF_MAXSTR)  :: name
-    type(ESMF_Field)            :: tempField
+    logical,                  pointer :: zapFlag(:)
+    character(len=ESMF_MAXSTR)        :: thisname
+    character(len=ESMF_MAXSTR)        :: name
+    type(ESMF_Field)                  :: tempField, tempFieldAlloc
+    type(ESMF_FieldBundle)            :: tempFB, tempFBAlloc
+    character(len=80)                 :: msgString
 
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2843,6 +3073,7 @@ contains
 
     stypep => state%statep
     zapList => stypep%zapList
+    zapFlag => stypep%zapFlag
 
     itemList => null ()
     call ESMF_ContainerGet(container=stypep%stateContainer, itemList=itemList, &
@@ -2851,37 +3082,118 @@ contains
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-!print *, "ESMF_ReconcileZappedProxies() looking"
+    allocate(tempFieldAlloc%ftypep)
+    allocate(tempFBAlloc%this)
+
+#ifdef RECONCILE_ZAP_LOG_on
+    call ESMF_VMLogGarbageInfo(prefix="ZappedProxies bef: ", rc=localrc)
+#endif
 
     if (associated(itemList).and.associated(zapList)) then
+#ifdef RECONCILE_ZAP_LOG_on
+      call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): have lists", &
+        ESMF_LOGMSG_INFO, rc=localrc)
+#endif
       do i=1, size(itemList)
         if (itemList(i)%si%proxyFlag .and. &
-            itemList(i)%si%otype==ESMF_STATEITEM_FIELD) then
+          (itemList(i)%si%otype==ESMF_STATEITEM_FIELD .or. &
+           itemList(i)%si%otype==ESMF_STATEITEM_FIELDBUNDLE )) then
           call ESMF_StateItemGet(itemList(i)%si, name=thisname, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+#ifdef RECONCILE_ZAP_LOG_on
+call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): found a proxy field: "//&
+  trim(thisname), ESMF_LOGMSG_INFO, rc=localrc)
+#endif
           do k=1, size(zapList)
+#ifdef RECONCILE_ZAP_LOG_on
+call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): scanning zapList", &
+  ESMF_LOGMSG_INFO, rc=localrc)
+#endif
             if (associated (zapList(k)%si)) then
+#ifdef RECONCILE_ZAP_LOG_on
+call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): found associated zapList object", &
+  ESMF_LOGMSG_INFO, rc=localrc)
+#endif
+              ! Note that only Fields and FieldBundles receive the restoration
+              ! treatment, and therefore persist during repeated Reconcile()
+              ! calls. The method only works for these two types carried by
+              ! State, because they are deep Fortran classes, and there is an
+              ! extra layer of indirection that is used by the implemented
+              ! approach. For deep C++ implemented classes this extra layer of
+              ! indirection is missing, and the method would not work.
+              ! For practical cases under NUOPC only Field and FieldBundle
+              ! objects are relevant direct objects handled under State, and
+              ! therefore the implemented method suffices.
               if (zapList(k)%si%otype==ESMF_STATEITEM_FIELD) then
                 call ESMF_FieldGet(zapList(k)%si%datap%fp, name=name, rc=localrc)
                 if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) &
+                  return
+#ifdef RECONCILE_ZAP_LOG_on
+call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): checking Field: "//trim(name), &
+  ESMF_LOGMSG_INFO, rc=localrc)
+#endif
+                if (name == thisname) then
+                  zapFlag(k) = .false.  ! indicate that proxy has been restored
+#ifdef RECONCILE_ZAP_LOG_on
+call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): found Field: "//trim(name), &
+  ESMF_LOGMSG_INFO, rc=localrc)
+#endif
+                  ! Bend pointers and copy contents to result in the desired
+                  ! behavior for re-reconcile. From a user perspective of
+                  ! Reconcile() proxies should persist when a State is
+                  ! re-reconciled, and the same proxies are needed. Basically
+                  ! a user should be able to hang on to a proxy.
+                  tempField%ftypep => itemList(i)%si%datap%fp%ftypep
+                  tempFieldAlloc%ftypep = zapList(k)%si%datap%fp%ftypep
+                  zapList(k)%si%datap%fp%ftypep = itemList(i)%si%datap%fp%ftypep
+                  itemList(i)%si%datap%fp%ftypep => zapList(k)%si%datap%fp%ftypep
+                  tempField%ftypep = tempFieldAlloc%ftypep
+                  ! Finally destroy the old Field internals
+                  ESMF_INIT_SET_CREATED(tempField)
+                  call ESMF_FieldDestroy(tempField, noGarbage=.true., rc=localrc)
+                  if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc)) &
                     return
-!print *, "ESMF_ReconcileZappedProxies() checking: ", trim(name)
+                end if
+              else if (zapList(k)%si%otype==ESMF_STATEITEM_FIELDBUNDLE) then
+                call ESMF_FieldBundleGet(zapList(k)%si%datap%fbp, name=name, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) &
+                  return
+#ifdef RECONCILE_ZAP_LOG_on
+call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): checking FieldBundle: "//trim(name), &
+  ESMF_LOGMSG_INFO, rc=localrc)
+#endif
                 if (name == thisname) then
-!print *, "ESMF_ReconcileZappedProxies() found: ", trim(name)
-                ! Bend pointers and copy contents to result in the desired
-                ! behavior for re-reconcile. From a user perspective of
-                ! Reconcile() proxies should persist when a State is
-                ! re-reconciled, and the same proxies are needed. Basically
-                ! a user should be able to hang on to a proxy.
-                  tempField%ftypep => itemList(i)%si%datap%fp%ftypep
-                  zapList(k)%si%datap%fp%ftypep = itemList(i)%si%datap%fp%ftypep
-                  itemList(i)%si%datap%fp%ftypep => zapList(k)%si%datap%fp%ftypep
-                  zapList(k)%si%datap%fp%ftypep => tempField%ftypep
+                  zapFlag(k) = .false.  ! indicate that proxy has been restored
+#ifdef RECONCILE_ZAP_LOG_on
+call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): found FieldBundle: "//trim(name), &
+  ESMF_LOGMSG_INFO, rc=localrc)
+#endif
+                  ! Bend pointers and copy contents to result in the desired
+                  ! behavior for re-reconcile. From a user perspective of
+                  ! Reconcile() proxies should persist when a State is
+                  ! re-reconciled, and the same proxies are needed. Basically
+                  ! a user should be able to hang on to a proxy.
+                  tempFB%this => itemList(i)%si%datap%fbp%this
+                  tempFBAlloc%this = zapList(k)%si%datap%fbp%this
+                  zapList(k)%si%datap%fbp%this = itemList(i)%si%datap%fbp%this
+                  itemList(i)%si%datap%fbp%this => zapList(k)%si%datap%fbp%this
+                  tempFB%this = tempFBAlloc%this
+                  ! Finally destroy the old FieldBundle internals
+                  ESMF_INIT_SET_CREATED(tempFB)
+                  call ESMF_FieldBundleDestroy(tempFB, noGarbage=.true., &
+                    rc=localrc)
+                  if (ESMF_LogFoundError(localrc, &
+                    ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc)) &
+                    return
                 end if
               end if
             end if
@@ -2890,18 +3202,57 @@ contains
       end do ! i
     endif
 
+    ! Completely destroy any zapped proxies that did not get restored.
+    ! This applies to all zapped proxy objects, regardless of type.
+    if (associated(zapFlag)) then
+      do k=1, size(zapFlag)
+        if (zapFlag(k)) then
+          if (zapList(k)%si%otype==ESMF_STATEITEM_FIELD) then
+            call ESMF_FieldDestroy(zapList(k)%si%datap%fp, &
+              noGarbage=.true., rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) &
+              return
+          else if (zapList(k)%si%otype==ESMF_STATEITEM_FIELDBUNDLE) then
+            call ESMF_FieldBundleDestroy(zapList(k)%si%datap%fbp, &
+              noGarbage=.true., rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) &
+              return
+          endif
+        endif
+      end do ! k
+    endif
+
+#ifdef RECONCILE_ZAP_LOG_on
+call ESMF_VMLogGarbageInfo(prefix="ZappedProxies aft: ", rc=localrc)
+#endif
+
+    deallocate(tempFieldAlloc%ftypep)
+    deallocate(tempFBAlloc%this)
+
     if (associated (itemList)) then
       deallocate(itemList, stat=memstat)
       if (ESMF_LogFoundDeallocError(memstat, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
     end if
 
-    if (associated (zaplist)) then
-      deallocate(zaplist, stat=memstat)
+    if (associated (zapList)) then
+      deallocate(zapList, stat=memstat)
       if (ESMF_LogFoundDeallocError(memstat, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    end if
+
+    if (associated (zapFlag)) then
+      deallocate(zapFlag, stat=memstat)
+      if (ESMF_LogFoundDeallocError(memstat, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      stypep%zapFlag => null()
     end if
 
     if (present(rc)) rc = ESMF_SUCCESS
@@ -3045,4 +3396,4 @@ contains
 
   end function iTos
 
-end module ESMF_StateReconcile2Mod
+end module ESMF_StateReconcileMod

@@ -13,17 +13,20 @@ LOCDIR = src/Superstructure/InfoAPI/tests
 TESTS_BUILD = \
           $(ESMF_TESTDIR)/ESMF_InfoGetInterfaceArrayUTest \
           $(ESMF_TESTDIR)/ESMF_InfoSyncUTest \
-          $(ESMF_TESTDIR)/ESMF_InfoDescribeUTest
+          $(ESMF_TESTDIR)/ESMF_InfoDescribeUTest \
+          $(ESMF_TESTDIR)/ESMF_InfoCacheUTest
 
 TESTS_RUN = \
           RUN_ESMF_InfoGetInterfaceArrayUTest \
           RUN_ESMF_InfoSyncUTest \
-          RUN_ESMF_InfoDescribeUTest
+          RUN_ESMF_InfoDescribeUTest \
+          RUN_ESMF_InfoCacheUTest
 
 TESTS_RUN_UNI = \
           RUN_ESMF_InfoGetInterfaceArrayUTestUNI \
           RUN_ESMF_InfoSyncUTestUNI \
-          RUN_ESMF_InfoDescribeUTestUNI
+          RUN_ESMF_InfoDescribeUTestUNI \
+          RUN_ESMF_InfoCacheUTestUNI
 
 include ${ESMF_DIR}/makefile
 
@@ -60,3 +63,11 @@ RUN_ESMF_InfoDescribeUTest:
 
 RUN_ESMF_InfoDescribeUTestUNI:
 	$(MAKE) TNAME=InfoDescribe NP=1 ftest
+
+# --- InfoCache Testing
+
+RUN_ESMF_InfoCacheUTest:
+	$(MAKE) TNAME=InfoCache NP=4 ftest
+
+RUN_ESMF_InfoCacheUTestUNI:
+	$(MAKE) TNAME=InfoCache NP=1 ftest

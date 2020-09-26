@@ -87,15 +87,14 @@
 
     !print *, "collecting FieldBundle garbage"
   
-    ! destruct internal data allocations
-    call ESMF_FieldBundleDestruct(fb%this, localrc)
-    if (ESMF_LogFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, &
-      rcToReturn=rc)) return
-
-    ! deallocate actual FieldBundleType allocation      
     if (associated(fb%this)) then
+      ! destruct internal data allocations
+      call ESMF_FieldBundleDestruct(fb%this, localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, &
+        rcToReturn=rc)) return
+      ! deallocate actual FieldBundleType allocation      
       deallocate(fb%this, stat=localrc)
       if (ESMF_LogFoundAllocError(localrc, msg="Deallocating FieldBundle", &
         ESMF_CONTEXT, &

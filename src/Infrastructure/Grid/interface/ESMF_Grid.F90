@@ -3163,7 +3163,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             zeroregion=ESMF_REGION_TOTAL, rc=localrc)
          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
-         call ESMF_ArrayRedistRelease(routehandle=routehandle, rc=localrc)
+         call ESMF_ArrayRedistRelease(routehandle=routehandle, noGarbage=.true., rc=localrc)
          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
        enddo
@@ -3225,7 +3225,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
        ! Destroy ArrayBundles and release Routehandle
-!       call ESMF_ArrayBundleRedistRelease(routehandle=routehandle, rc=localrc)
+!       call ESMF_ArrayBundleRedistRelease(routehandle=routehandle, noGarbage=.true., rc=localrc)
 !       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
 !            ESMF_CONTEXT, rcToReturn=rc)) return
        call ESMF_ArrayBundleDestroy(srcAB, rc=localrc)
@@ -3310,7 +3310,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                zeroregion=ESMF_REGION_TOTAL, rc=localrc)
              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rcToReturn=rc)) return
-             call ESMF_ArrayRedistRelease(routehandle=routehandle, rc=localrc)
+             call ESMF_ArrayRedistRelease(routehandle=routehandle, noGarbage=.true., rc=localrc)
              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rcToReturn=rc)) return
           enddo
@@ -3325,7 +3325,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
        ! Destroy ArrayBundles and release Routehandle
-          !       call ESMF_ArrayBundleRedistRelease(routehandle=routehandle, rc=localrc)
+          !       call ESMF_ArrayBundleRedistRelease(routehandle=routehandle, noGarbage=.true., rc=localrc)
           !       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           !            ESMF_CONTEXT, rcToReturn=rc)) return
           !call ESMF_ArrayBundleDestroy(srcAB, rc=localrc)
@@ -30923,8 +30923,6 @@ subroutine ESMF_OutputScripGridFile(filename, grid, rc)
     type(ESMF_DistGrid) :: distgrid
     type(ESMF_Array) :: array
     type(ESMF_Array) :: lonarray, latarray
-    type(ESMF_ArraySpec) :: arrayspec
-    type(ESMF_RouteHandle) :: routehandle
     type(ESMF_CoordSys_Flag) :: coordsys
     real(ESMF_KIND_R8), pointer::lonArray1d(:), latArray1d(:)
     real(ESMF_KIND_R8), pointer::lonArray2d(:,:), latArray2d(:,:)

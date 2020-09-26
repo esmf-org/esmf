@@ -599,6 +599,10 @@ extern double ESMC_MPI_Wtime(void);
      (*(newcomm) =  (comm),\
      MPIUNI_TMP = (void*)(long) (group),\
      MPI_SUCCESS)
+#define MPI_Comm_create_group(comm,group,tag,newcomm)  \
+     (*(newcomm) =  (comm),\
+     MPIUNI_TMP = (void*)(long) (group),\
+     MPI_SUCCESS)
 #define MPI_Comm_split(comm,color,key,newcomm) MPI_SUCCESS
 #define MPI_Comm_test_inter(comm,flag) (*(flag)=1,MPI_SUCCESS)
 #define MPI_Comm_remote_size(comm,size) (*(size)=1,MPI_SUCCESS)

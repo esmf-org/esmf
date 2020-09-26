@@ -676,7 +676,7 @@ void ESMC_Base::constructInfo(ESMC_Base& base) {
     pfp = (ESMC_ProxyFlag *)sp;
     proxyflag = *pfp++;
     proxyflag = ESMF_PROXYYES;  // deserialize means this is a proxy object
-
+    
     vmIDp = (ESMCI::VMId *)pfp;
     vmIDp++;
 
@@ -1135,6 +1135,7 @@ void ESMC_Base::constructInfo(ESMC_Base& base) {
   baseStatus  = ESMF_STATUS_READY;
   status      = ESMF_STATUS_READY;
   proxyflag   = ESMF_PROXYNO;
+  persist     = false;
 
  } // end ESMC_Base
 
@@ -1202,6 +1203,7 @@ void ESMC_Base::constructInfo(ESMC_Base& base) {
   baseStatus  = ESMF_STATUS_READY;
   status      = ESMF_STATUS_READY;
   proxyflag   = ESMF_PROXYNO;
+  persist     = false;
 
  } // end ESMC_Base
 
@@ -1274,6 +1276,7 @@ void ESMC_Base::constructInfo(ESMC_Base& base) {
   baseStatus  = ESMF_STATUS_READY;
   status      = ESMF_STATUS_READY;
   proxyflag   = ESMF_PROXYNO;
+  persist     = false;
 
  } // end ESMC_Base
 

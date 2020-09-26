@@ -11893,7 +11893,7 @@ int Array::sparseMatMul(
       // -> this leaves SingleSum ops enabled
 #ifdef ASMM_EXEC_INFO_on
       ESMC_LogDefault.Write("SMM exec: COMM_BLOCKING, TERMORDER_SRCSEQ",
-        ESMC_LOGMSG_INFO);
+        ESMC_LOGMSG_DEBUG);
 #endif
     }else if (termorderflag == ESMC_TERMORDER_SRCPET){
       // order of terms by src PET, allow partial sums of terms from same PET
@@ -11903,7 +11903,7 @@ int Array::sparseMatMul(
       // -> this leaves NbWaitFinish ops enabled
 #ifdef ASMM_EXEC_INFO_on
       ESMC_LogDefault.Write("SMM exec: COMM_BLOCKING, TERMORDER_SRCPET",
-        ESMC_LOGMSG_INFO);
+        ESMC_LOGMSG_DEBUG);
 #endif
     }else if (termorderflag == ESMC_TERMORDER_FREE){
       // completely free order of terms, allow any partial sums
@@ -11932,7 +11932,7 @@ int Array::sparseMatMul(
       filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // no SingleSum ops
 #ifdef ASMM_EXEC_INFO_on
       ESMC_LogDefault.Write("SMM exec: COMM_BLOCKING, TERMORDER_FREE",
-        ESMC_LOGMSG_INFO);
+        ESMC_LOGMSG_DEBUG);
 #endif
     }else{
       ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
@@ -11948,7 +11948,7 @@ int Array::sparseMatMul(
     filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
 #ifdef ASMM_EXEC_INFO_on
     ESMC_LogDefault.Write("SMM exec: COMM_NBSTART",
-      ESMC_LOGMSG_INFO);
+      ESMC_LOGMSG_DEBUG);
 #endif
   }else if(commflag==ESMF_COMM_NBTESTFINISH){
     // non-blocking test and finish
@@ -11960,7 +11960,7 @@ int Array::sparseMatMul(
       filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
 #ifdef ASMM_EXEC_INFO_on
       ESMC_LogDefault.Write("SMM exec: COMM_NBTESTFINISH, TERMORDER_FREE",
-        ESMC_LOGMSG_INFO);
+        ESMC_LOGMSG_DEBUG);
 #endif
     }else{
       ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
@@ -11978,7 +11978,7 @@ int Array::sparseMatMul(
       filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
 #ifdef ASMM_EXEC_INFO_on
       ESMC_LogDefault.Write("SMM exec: COMM_NBWAITFINISH TERMORDER_FREE",
-        ESMC_LOGMSG_INFO);
+        ESMC_LOGMSG_DEBUG);
 #endif
     }else{
       ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
@@ -11994,7 +11994,7 @@ int Array::sparseMatMul(
     filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
 #ifdef ASMM_EXEC_INFO_on
     ESMC_LogDefault.Write("SMM exec: COMM_CANCEL",
-      ESMC_LOGMSG_INFO);
+      ESMC_LOGMSG_DEBUG);
 #endif
   }
 
@@ -12131,7 +12131,7 @@ int Array::sparseMatMul(
   {
     std::stringstream msg;
     msg << "SMM exec: finishedflag=" << *finishedflag;
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
 
@@ -12164,7 +12164,7 @@ int Array::sparseMatMul(
   {
     std::stringstream msg;
     msg << "SMM exec: finishLoopCount=" << finishLoopCount;
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
 

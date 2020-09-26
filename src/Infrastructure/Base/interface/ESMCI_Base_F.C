@@ -877,6 +877,39 @@ extern "C" {
 
 }  // end c_ESMC_IsProxy
 
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_SetPersist - set the persist flag
+//
+// !INTERFACE:
+      void FTN_X(c_esmc_setpersist)(
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_setpersist()"
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,         // in - base object
+      ESMC_Logical *persistArg, // in - true or false
+      int *rc) {                // out - return code
+// 
+// !DESCRIPTION:
+//     
+//
+//EOP
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+  
+  bool persist = (*persistArg == ESMF_TRUE);
+  (*base)->ESMC_BaseSetPersist(persist);
+  
+  // return successfully
+  *rc = ESMF_SUCCESS;
+  return;
+
+}  // end c_ESMC_IsProxy
 
 
 } // extern "C"

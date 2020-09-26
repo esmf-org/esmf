@@ -33,6 +33,8 @@ program ESMF_InfoSyncUTest
   use ESMF_UtilTypesMod     ! ESMF utility types
   use ESMF
 
+  use ESMF_InfoCacheMod
+
   implicit none
 
   !----------------------------------------------------------------------------
@@ -52,17 +54,19 @@ program ESMF_InfoSyncUTest
   type(ESMF_ArrayBundle) :: ab
   type(ESMF_Pointer) :: eptr
   type(ESMF_Info) :: infoh, desired_info
-  type(ESMF_Field) :: field, field2, field3, field4
+  type(ESMF_Field) :: field, field2, field3, field4, foundField
   type(ESMF_FieldBundle) :: fb
   type(ESMF_DistGrid) :: distgrid, distgrid1d, distgrid2
   type(ESMF_Grid) :: grid
   type(ESMF_LocStream) :: locstream
   type(ESMF_RouteHandle) :: rh
   type(ESMF_State) :: state, nested_state, nested_state2
-  type(ESMF_InfoDescribe) :: eidesc, desired_eidesc, ainq
-  integer :: rootPet=0
+  type(ESMF_InfoDescribe) :: eidesc, desired_eidesc, ainq, search_idesc
+  integer :: rootPet=0, find_base_id
   integer(ESMF_KIND_I8), dimension(:), allocatable :: bases
-  logical :: isDirty
+  type(ESMF_Info) :: search_criteria
+  logical :: isDirty, found
+  character(len=ESMF_MAXSTR) :: found_field_name
 
   !----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)  ! calls ESMF_Initialize() internally
@@ -111,7 +115,7 @@ program ESMF_InfoSyncUTest
 
   field = ESMF_FieldCreate(grid, ESMF_TYPEKIND_I8, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  field2 = ESMF_FieldCreate(grid, ESMF_TYPEKIND_I8, rc=rc)
+  field2 = ESMF_FieldCreate(grid, ESMF_TYPEKIND_I8, name="search_target", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   field3 = ESMF_FieldCreate(locstream, ESMF_TYPEKIND_I4, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -168,6 +172,11 @@ program ESMF_InfoSyncUTest
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     call ESMF_InfoSet(infoh, "fvarname", "field2", rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+    ! Add some Field finding metadata for testing. This is StateReconcile
+    ! specific.
+    call ESMF_InfoSet(infoh, "/_esmf_state_reconcile/integer_vmid", 567, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     call ESMF_InfoGetFromHost(field3, infoh, rc=rc)
@@ -258,7 +267,24 @@ program ESMF_InfoSyncUTest
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_Test(isDirty .neqv. .true., name, failMsg, result, ESMF_SRCLINE)
+  ! ---------------------------------------------------------------------------
 
+  ! ---------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Find a Field"
+  write(failMsg, *) "Did not succeed"
+  rc = ESMF_FAILURE
+
+  call ESMF_BaseGetID(field2%ftypep%base, find_base_id, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  found = ESMF_InfoCacheFindField(state, foundField, 567, find_base_id, rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_FieldGet(foundField, name=found_field_name, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_Test((found .and. (trim(found_field_name)=="search_target")), name, failMsg, result, ESMF_SRCLINE)
   ! ---------------------------------------------------------------------------
 
   call eidesc%Destroy(rc=rc)

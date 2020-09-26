@@ -1257,6 +1257,8 @@ void test_isNull(int& rc, char failMsg[]) {
 void test_update_for_attribute(int& rc, char failMsg[]) {
   rc = ESMF_FAILURE;
 
+  // Test with overwrite true -------------------------------------------------
+
   ESMCI::Info to_update;
   ESMCI::Info new_contents;
 
@@ -1267,7 +1269,7 @@ void test_update_for_attribute(int& rc, char failMsg[]) {
     new_contents.set("/NUOPC/Instance/Two", json(55), false);
     new_contents.set("/ESMF/General/Three", json(987), false);
 
-    to_update.update_for_attribute(new_contents);
+    to_update.update_for_attribute(new_contents, true);
     if (!(to_update.get<int>("/NUOPC/Instance/One")==66)) {
       return finalizeFailure(rc, failMsg, "wrong value 66");
     }
@@ -1275,6 +1277,31 @@ void test_update_for_attribute(int& rc, char failMsg[]) {
       return finalizeFailure(rc, failMsg, "wrong value 55");
     }
     if (!(to_update.get<int>("/ESMF/General/Three")==987)) {
+      return finalizeFailure(rc, failMsg, "wrong value 987");
+    }
+  }
+  ESMC_CATCH_ERRPASSTHRU
+
+  // Test with overwrite false ------------------------------------------------
+
+  ESMCI::Info to_update2;
+  ESMCI::Info new_contents2;
+
+  try {
+    to_update2.set("/NUOPC/Instance/One", json(44), false);
+
+    new_contents2.set("/NUOPC/Instance/One", json(66), false);
+    new_contents2.set("/NUOPC/Instance/Two", json(55), false);
+    new_contents2.set("/ESMF/General/Three", json(987), false);
+
+    to_update2.update_for_attribute(new_contents2, false);
+    if (!(to_update2.get<int>("/NUOPC/Instance/One")==44)) {
+      return finalizeFailure(rc, failMsg, "wrong value 44");
+    }
+    if (!(to_update2.get<int>("/NUOPC/Instance/Two")==55)) {
+      return finalizeFailure(rc, failMsg, "wrong value 55");
+    }
+    if (!(to_update2.get<int>("/ESMF/General/Three")==987)) {
       return finalizeFailure(rc, failMsg, "wrong value 987");
     }
   }

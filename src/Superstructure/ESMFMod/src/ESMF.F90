@@ -94,10 +94,7 @@ module ESMF
     use ESMF_StateTypesMod
     use ESMF_StateVaMod
     use ESMF_StateMod
-!    use ESMF_StateSetMod
-!    use ESMF_StateGetMod
-!    use ESMF_StateReconcileMod,  only: ESMF_StateReconcile_old => ESMF_StateReconcile
-    use ESMF_StateReconcile2Mod
+    use ESMF_StateReconcileMod
     use ESMF_CompMod
     use ESMF_GridCompMod
     use ESMF_CplCompMod

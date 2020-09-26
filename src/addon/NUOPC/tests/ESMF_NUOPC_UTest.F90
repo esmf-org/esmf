@@ -290,7 +290,7 @@ program ESMF_NUOPC_UTest
   call ESMF_GridCompInitialize(gridComp, userRc=urc, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   if (urc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "NUOPC_CompGet() Test"

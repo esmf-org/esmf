@@ -184,6 +184,8 @@ void  FTN_X(esmf_ctof90string)(const char *src, char *dst, int *rc,
                              /* hidden */ ESMCI_FortranStrLenArg slen, ESMCI_FortranStrLenArg dlen);
 }
 
+// return the objectName given the objectId
+const char *ESMC_ObjectID_Name(int objectId);
 // return byte counts for TypeKinds
 int ESMC_TypeKind_FlagSize(ESMC_TypeKind_Flag dk);
 // return a static string name for various enums

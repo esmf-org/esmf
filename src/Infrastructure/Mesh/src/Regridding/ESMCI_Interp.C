@@ -2887,9 +2887,9 @@ interp_method(imethod)
     // Form the parallel rendezvous meshes/specs
    //  if (Par::Rank() == 0)
        //std::cout << "Building rendezvous..." << std::endl;
-
-
-    grend.Build(srcF.size(), &srcF[0], dstF.size(), &dstF[0], &zz, midmesh==0? true:false);
+    grend.Build(srcF.size(), (srcF.size()>0)?(&srcF[0]):NULL, 
+                dstF.size(), (dstF.size()>0)?(&dstF[0]):NULL,
+                &zz, midmesh==0? true:false);
 
     // Check grend status, if it's not complete
     if (grend.status != GEOMREND_STATUS_COMPLETE) {

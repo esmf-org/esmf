@@ -219,7 +219,7 @@ void update_json_pointer(const json &j, json const **jdp, const json::json_point
 }
 
 #undef  ESMC_METHOD
-#define ESMC_METHOD "update_json_pointer(<non-const>)"
+#define ESMC_METHOD "update_json_pointer(<const>)"
 void update_json_pointer(json &j, json **jdp, const json::json_pointer &key,
   bool recursive) {
   // Test: test_update_json_pointer (for const overload)
@@ -242,7 +242,7 @@ void update_json_pointer(json &j, json **jdp, const json::json_pointer &key,
 }
 
 #undef  ESMC_METHOD
-#define ESMC_METHOD "update_json_pointer(<non-const> + container)"
+#define ESMC_METHOD "update_json_pointer(<const> + container)"
 void update_json_pointer(json &j, json **jdp, const json::json_pointer &key,
                          bool recursive, json **container) {
   // Test: test_update_json_pointer
@@ -314,30 +314,6 @@ json::iterator find_by_index(json &j, const std::size_t index_target, bool recur
   }
   ESMF_CATCH_INFO
   return ret;
-}
-
-#undef  ESMC_METHOD
-#define ESMC_METHOD "update_json_pointer(<non-const> + container)"
-void update_json_pointer(json &j, json **jdp, int index, bool recursive,
-  json **container) {
-  // Test: test_update_json_pointer (for const overload)
-  // Notes:
-  // Throws: json::out_of_range when key not found
-  try {
-//    *jdp = &(j.at(key));
-//    *container = &j;
-  } catch (json::out_of_range &e) {
-    if (recursive) {
-      for (json::iterator it=j.begin(); it!=j.end(); it++) {
-        if (it.value().is_object()) {
-//          update_json_pointer(it.value(), jdp, index, true, container);
-        }
-      }
-    }
-    if (!*jdp) {
-      throw(e);
-    }
-  }
 }
 
 #undef  ESMC_METHOD
@@ -1398,7 +1374,7 @@ void Info::update(const Info &info) {
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "Info::update_for_attribute()"
-void do_update_for_attribute(json &to_update, const json &new_contents) {
+void do_update_for_attribute(json &to_update, const json &new_contents, bool overwrite) {
   check_is_object(to_update);
   check_is_object(new_contents);
   // Loop over the key/values in the root object
@@ -1408,13 +1384,13 @@ void do_update_for_attribute(json &to_update, const json &new_contents) {
     // Check if the new content key is in the object to update
     bool is_in = isIn(nc.key(), to_update);
     if (is_in) {
-      // If the new content value is and object, we descend into it for the
+      // If the new content value is an object, we descend into it for the
       // recursive update.
       if (nc.value().is_object()) {
-        do_update_for_attribute(to_update.at(nc.key()), nc.value());
+        do_update_for_attribute(to_update.at(nc.key()), nc.value(), overwrite);
       } else {
-        // Otherwise we replace the value if it exists.
-        to_update[nc.key()] = nc.value();
+        // Otherwise we replace the value if it exists provided we are overwriting.
+        if (overwrite) { to_update[nc.key()] = nc.value(); }
       }
     } else {
       // Insert the new key into the map.
@@ -1425,13 +1401,13 @@ void do_update_for_attribute(json &to_update, const json &new_contents) {
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "Info::update_for_attribute()"
-void Info::update_for_attribute(const Info &info) {
+void Info::update_for_attribute(const Info &info, bool overwrite) {
   // Test: test_update_for_attribute
   // Throws: esmc_error
   try {
     const json &new_contents = info.getStorageRef();
     json &to_update = this->getStorageRefWritable();
-    do_update_for_attribute(to_update, new_contents);
+    do_update_for_attribute(to_update, new_contents, overwrite);
   }
   ESMF_INFO_CATCH_JSON;
   // Data is considered not dirty after the update since this is primarily used

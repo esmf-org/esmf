@@ -75,23 +75,26 @@ type(ESMF_LogMsg_Flag), parameter           :: &
     ESMF_LOGMSG_WARNING = ESMF_LogMsg_Flag(2), &
     ESMF_LOGMSG_ERROR =   ESMF_LogMsg_Flag(3), &
     ESMF_LOGMSG_TRACE =   ESMF_LogMsg_Flag(4), &
-    ESMF_LOGMSG_JSON  =   ESMF_LogMsg_Flag(5)
+    ESMF_LOGMSG_DEBUG =   ESMF_LogMsg_Flag(5), &
+    ESMF_LOGMSG_JSON  =   ESMF_LogMsg_Flag(6)
 
 character(8), parameter ::  &
-    ESMF_LogMsgString(5) = (/ &
+    ESMF_LogMsgString(6) = (/ &
       'INFO    ', &
       'WARNING ', &
       'ERROR   ', &
       'TRACE   ', &
+      'DEBUG   ', &
       'JSON    '  &
     /)
 
 type(ESMF_LogMsg_Flag), parameter :: &
-    ESMF_LOGMSG_ALL(5) = (/ &
+    ESMF_LOGMSG_ALL(6) = (/ &
       ESMF_LOGMSG_INFO,     &
       ESMF_LOGMSG_WARNING,  &
       ESMF_LOGMSG_ERROR,    &
       ESMF_LOGMSG_TRACE,    &
+      ESMF_LOGMSG_DEBUG,    &
       ESMF_LOGMSG_JSON      &
     /)
 
@@ -105,10 +108,11 @@ type(ESMF_LogMsg_Flag) :: &
 #endif
 
 type(ESMF_LogMsg_Flag), parameter :: &
-   ESMF_LOGMSG_NOTRACE(4) = (/ &
+   ESMF_LOGMSG_NOTRACE(5) = (/ &
       ESMF_LOGMSG_INFO,     &
       ESMF_LOGMSG_WARNING,  &
       ESMF_LOGMSG_ERROR,    &
+      ESMF_LOGMSG_DEBUG,    &
       ESMF_LOGMSG_JSON      &
     /)
 
@@ -216,6 +220,7 @@ end type ESMF_LogPrivate
     public ESMF_LOGMSG_WARNING
     public ESMF_LOGMSG_ERROR
     public ESMF_LOGMSG_TRACE
+    public ESMF_LOGMSG_DEBUG
     public ESMF_LOGMSG_JSON
     public ESMF_LOGMSG_ALL
     public ESMF_LOGMSG_NONE
