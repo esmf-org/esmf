@@ -93,10 +93,19 @@ namespace ESMCI {
     // Add one node
     EntityHandle add_node(double *orig_coords, int gid, int orig_pos, int owner);
 
+    // Add a set of nodes
+    void add_nodes(int num_nodes,       // Number of nodes
+                   double *orig_coords, // For each node it's orig_coords
+                   int *gids,           // For each node it's gid
+                   int *orig_pos,       // For each node it's orig_pos, if NULL just order
+                   int *owners,         // For each node it's owner
+                   Range &added_nodes);
+
+
+
     // Add one elem
     EntityHandle add_elem(EntityType elem_type, int num_nodes, EntityHandle *nodes, 
                           int gid, int orig_pos, int owner);
-
 
 
     // Change owner
@@ -135,6 +144,8 @@ namespace ESMCI {
     // Set node mask value
     void set_node_mask_val(EntityHandle eh, int mask_val);
 
+    // Set node mask value on a Range of nodes
+    void set_node_mask_val(Range nodes, int *mask_vals);
 
     // Set node coords
     void set_node_coords(EntityHandle eh, double *orig_coords);

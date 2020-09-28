@@ -237,6 +237,113 @@ EntityHandle MBMesh::add_node(double *orig_coords, int gid, int orig_pos, int ow
 }
 
 
+// Create a bunch of new nodes at once 
+// (This seems more memory efficient in MOAB)
+void MBMesh::add_nodes(int num_nodes,       // Number of nodes
+                       double *orig_coords, // For each node it's orig_coords
+                       int *gids,           // For each node it's gid
+                       int *orig_pos,       // For each node it's orig_pos, if NULL just order
+                       int *owners,         // For each node it's owner
+                       Range &added_nodes) {        
+
+  // Error return codes
+  int localrc;
+  int merr;
+
+  // Allocate coordinate space
+  double *cart_coords3D=NULL;
+  cart_coords3D=new double[3*num_nodes];
+
+  // Convert coords to 3D cartesian
+  double *node_orig_coords=orig_coords;
+  double *node_cart_coords=cart_coords3D;
+  for (int n=0; n<num_nodes; n++) {
+
+    // Set 3rd dim to 0 in case this is 2D cart
+    // and that dimension isn't being set
+    node_cart_coords[2]=0.0;
+
+    // Convert to cartesian
+    ESMCI_CoordSys_ConvertToCart(coordsys, orig_sdim,
+                                 node_orig_coords,
+                                 node_cart_coords);
+
+    // Advance to next spot in arrays
+    node_orig_coords+=orig_sdim;
+    node_cart_coords+=3;
+  }
+
+
+  // Add vertices
+  merr=mesh->create_vertices(cart_coords3D, num_nodes, added_nodes);
+  if (merr != MB_SUCCESS) {
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+  }
+
+  // Get rid of coordinate memory
+  if (cart_coords3D != NULL) delete [] cart_coords3D;
+
+
+  // Set original coords (if necessary) 
+  if (has_node_orig_coords) {
+    // Set original coords
+    merr=mesh->tag_set_data(node_orig_coords_tag, added_nodes, orig_coords);
+    if (merr != MB_SUCCESS) {
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                       moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+    }
+  }
+
+
+  // Set Ids
+  merr=mesh->tag_set_data(gid_tag, added_nodes, gids);
+  if (merr != MB_SUCCESS) {
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+  }
+
+
+  // Set original positions
+  // IF NULL, just order from 1, otherwise use input
+  if (orig_pos == NULL) {
+
+    // Set in order starting from 0
+    int pos=0;
+    for(Range::const_iterator it=added_nodes.begin(); it !=added_nodes.end(); it++) {
+      const EntityHandle *node=&(*it);
+    
+      merr=mesh->tag_set_data(orig_pos_tag, node, 1, &pos);
+      if (merr != MB_SUCCESS) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                    moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+      }
+
+      // Next pos
+      pos++;
+    }
+
+  } else { // Use input
+    merr=mesh->tag_set_data(orig_pos_tag, added_nodes, orig_pos);
+    if (merr != MB_SUCCESS) {
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                       moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+    }
+  }
+  
+  // Set Owners
+  merr=mesh->tag_set_data(owner_tag, added_nodes, owners);
+  if (merr != MB_SUCCESS) {
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+  }
+  
+  // Increment number of verts
+  num_verts += num_nodes;
+}
+
+
+
 // Get a Range of all nodes on this processor
 void MBMesh::get_all_nodes(Range &all_nodes) {
 
@@ -420,6 +527,25 @@ void MBMesh::set_node_mask_val(EntityHandle eh, int mask_val) {
                                      moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
   }  
 }
+
+void MBMesh::set_node_mask_val(Range nodes, int *mask_vals) {
+
+  // Error return codes
+  int localrc;
+  int merr;
+  
+  // If no masking, then leave
+  // TODO: should this be an error instead?
+  if (!has_node_mask) return;
+
+  // Get Owner
+  merr=mesh->tag_set_data(node_mask_val_tag, nodes, mask_vals);
+  if (merr != MB_SUCCESS) {
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+  }  
+}
+
 
 
 void MBMesh::set_node_coords(EntityHandle eh, double *orig_coords) {

@@ -73,115 +73,41 @@ void MBMesh_create(void **mbmpp,
 
   // Init output
   *mbmpp=NULL;
+  
+  
+  // Some error checking of input
+  if (*pdim > *sdim) {
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                                     "- Parametric dimension can't be greater than spatial dimension",
+                                     ESMC_CONTEXT, rc)) return;
+  }
+  
+  if ((*pdim < 2) || (*pdim >3)) {
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                                     "- Parametric dimension can't be greater than 3D or less than 2D",
+                                     ESMC_CONTEXT, rc)) return;
+  }
+  
+  if ((*sdim < 2) || (*sdim >3)) {
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                                     "- Spatial dimension can't be greater than 3D or less than 2D",
+                                     ESMC_CONTEXT, rc)) return;
+  }
+  
+  
+  // Create new Mesh
+  MBMesh *mbmp = new MBMesh(*pdim, *sdim, *coordSys);
 
-
-  // Initialize the parallel environment for mesh (if not already done)
-#if 0
-     {
-       int localrc;
-       int rc;
-       ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-       if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-          throw localrc;  // bail out with exception
-      }
-#endif
-
-
-      // Some error checking of input
-     if (*pdim > *sdim) {
-       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-         "- Parametric dimension can't be greater than spatial dimension",
-                                        ESMC_CONTEXT, rc)) return;
-     }
-
-     if ((*pdim < 2) || (*pdim >3)) {
-       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-         "- Parametric dimension can't be greater than 3D or less than 2D",
-                                        ESMC_CONTEXT, rc)) return;
-     }
-
-    if ((*sdim < 2) || (*sdim >3)) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-        "- Spatial dimension can't be greater than 3D or less than 2D",
-                                       ESMC_CONTEXT, rc)) return;
-    }
-
-
-    // Moab error
-    int merr;
-
-    // New Mesh
-    MBMesh *mbmp = new MBMesh();
-
-    // Get cartesian dimension
-    int cart_sdim;
-    int localrc;
-    localrc=ESMCI_CoordSys_CalcCartDim(*coordSys, *sdim, &cart_sdim);
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,rc))
-      return;
-
-    // Create MOAB Mesh
-    Interface *moab_mesh=new Core();
-
-    // Default value
-    int int_def_val = 0;
-    double dbl_def_val[3] = {0.0, 0.0, 0.0};
-
-     // Setup global id tag
-    int_def_val=0;
-    merr=moab_mesh->tag_get_handle(GLOBAL_ID_TAG_NAME, 1, MB_TYPE_INTEGER, mbmp->gid_tag, MB_TAG_DENSE, &int_def_val);
-    if (merr != MB_SUCCESS) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                       moab::ErrorCodeStr[merr], ESMC_CONTEXT, rc)) return;
-    }
-
-    // Setup orig_pos tag
-    int_def_val=-1;
-    merr=moab_mesh->tag_get_handle("orig_pos", 1, MB_TYPE_INTEGER, mbmp->orig_pos_tag, MB_TAG_EXCL|MB_TAG_DENSE, &int_def_val);
-    if (merr != MB_SUCCESS) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                       moab::ErrorCodeStr[merr], ESMC_CONTEXT, rc)) return;
-    }
-
-    // Setup owner tag
-    int_def_val=-1;
-    merr=moab_mesh->tag_get_handle("owner", 1, MB_TYPE_INTEGER, mbmp->owner_tag, MB_TAG_EXCL|MB_TAG_DENSE, &int_def_val);
-    if (merr != MB_SUCCESS) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                       moab::ErrorCodeStr[merr], ESMC_CONTEXT, rc)) return;
-    }
-
-    // Setup node_orig_coord tag
-    mbmp->has_node_orig_coords=false;
-    if (*coordSys != ESMC_COORDSYS_CART) {
-      dbl_def_val[0]=dbl_def_val[1]=dbl_def_val[2]=-1.0;
-      merr=moab_mesh->tag_get_handle("node_orig_coords", *sdim, MB_TYPE_DOUBLE, mbmp->node_orig_coords_tag, MB_TAG_EXCL|MB_TAG_DENSE, dbl_def_val);
-      if (merr != MB_SUCCESS) {
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                         moab::ErrorCodeStr[merr], ESMC_CONTEXT, rc)) return;
-      }
-      mbmp->has_node_orig_coords=true;
-    }
-
-    // Set Moab Mesh
-    mbmp->mesh=moab_mesh;
-
-    // Set dimensions
-    mbmp->pdim=*pdim;
-    mbmp->sdim=cart_sdim;
-    mbmp->orig_sdim=*sdim;
-    mbmp->coordsys=*coordSys;
-
-    // Output mesh
-    *mbmpp=(void *)mbmp;
-
-    // Set return code
-    if (rc!=NULL) *rc = ESMF_SUCCESS;
-
+  // Output new mesh
+  *mbmpp=(void *)mbmp;
+  
+  // Set return code
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  
 } // meshcreate
 
 
-void MBMesh_addnodes(void **mbmpp, int *num_nodes, int *nodeId,
+void MBMesh_addnodes(void **mbmpp, int *_num_nodes, int *nodeId,
                      double *nodeCoord, int *nodeOwner, InterArray<int> *nodeMaskII,
                      ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                        int *rc)
@@ -189,157 +115,67 @@ void MBMesh_addnodes(void **mbmpp, int *num_nodes, int *nodeId,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_addnodes()"
 
-  // Should we do exception handling in here, since MOAB doesn't???
-   try {
+  try {
 
-     // Get Moab Mesh wrapper
-      MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
+    // Get Moab Mesh wrapper
+    MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
 
-     //Get MOAB Mesh
-     Interface *moab_mesh=mbmp->mesh;
+    // Get number of nodes
+    int num_nodes=*_num_nodes;
 
-     // Get some handy variables
-     ESMC_CoordSys_Flag coordSys=*_coordSys;
-     int sdim = mbmp->sdim; // spatial dim of mesh (after conversion to Cartesian)
-     int orig_sdim = *_orig_sdim;   // original sdim (before conversion to Cartesian)
-
-     // Moab error
-     int merr;
-
-#if 0
-     // Initialize the parallel environment for mesh (if not already done)
-     {
-       int localrc;
-       int rc;
-       ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-       if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-         throw localrc;  // bail out with exception
-     }
-#endif
-
-     // Get petCount for error checking
-     int localrc;
-     int petCount = VM::getCurrent(&localrc)->getPetCount();
+    // Get petCount for error checking
+    int localrc;
+    int petCount = VM::getCurrent(&localrc)->getPetCount();
     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
       throw localrc;  // bail out with exception
-
+    
     // Check node owners
-    for (int n = 0; n < *num_nodes; ++n) {
+    for (int n = 0; n < num_nodes; ++n) {
       if ((nodeOwner[n]<0) || (nodeOwner[n]>petCount-1)) {
-         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-           "- Bad nodeOwner value ", ESMC_CONTEXT,&localrc)) throw localrc;
-      }
-     }
-
-    // Number of verts
-    int num_verts=*num_nodes;
-    mbmp->num_verts=num_verts;
-
-    // Allocate temp storage for verts
-    EntityHandle *verts=new EntityHandle[num_verts];
-    mbmp->verts=verts; // Put temporarily in structure for use in element creation
-
-     // Create new nodes
-    for (int n = 0; n < num_verts; ++n) {
-      double cart_coords[3];
-
-      // Init to 0.0 incase less than 3D
-      cart_coords[0]=0.0; cart_coords[1]=0.0; cart_coords[2]=0.0;
-
-      // Convert to cartesian
-      ESMCI_CoordSys_ConvertToCart(coordSys, orig_sdim,
-                                   nodeCoord+orig_sdim*n, cart_coords);
-#ifdef DEBUG_NODE_COORDS
-      printf("%d# node %d [%f, %f] - [%f,%f,%f]\n", localPet, nodeId[n], nodeCoord[orig_sdim*n+0], nodeCoord[orig_sdim*n+1], cart_coords[0],cart_coords[1],cart_coords[2]);
-#endif
-      // Add vertex
-      merr=moab_mesh->create_vertex(cart_coords,verts[n]);
-      if (merr != MB_SUCCESS) {
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-          moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                                         "- Bad nodeOwner value ", ESMC_CONTEXT,&localrc)) throw localrc;
       }
     }
 
-    // Set Ids
-    merr=moab_mesh->tag_set_data(mbmp->gid_tag, verts, num_verts, nodeId);
-    if (merr != MB_SUCCESS) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-         moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-    }
+    // Create a new set of nodes with basic info
+    Range added_nodes;
+    mbmp->add_nodes(num_nodes,     
+                    nodeCoord,
+                    nodeId,          
+                    NULL,  // Tell to just use orig_pos starting from 0      
+                    nodeOwner,        
+                    added_nodes);
 
-    // Set Owners
-    merr=moab_mesh->tag_set_data(mbmp->owner_tag, verts, num_verts, nodeOwner);
-    if (merr != MB_SUCCESS) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-         moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-    }
-
-
-    // Set orig_pos
-    for (int n = 0; n < num_verts; ++n) {
-      merr=moab_mesh->tag_set_data(mbmp->orig_pos_tag, verts+n, 1, &n);
-      if (merr != MB_SUCCESS) {
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                    moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-      }
-    }
-
-    // Set original coords
-    if (mbmp->has_node_orig_coords) {
-      // Set orinal coords
-      merr=moab_mesh->tag_set_data(mbmp->node_orig_coords_tag, verts, num_verts, nodeCoord);
-      if (merr != MB_SUCCESS) {
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                       moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-      }
-    }
+    // DEPRECATED
+    // Will go away soon!
+    mbmp->setup_verts_array();
 
     // Set mask information
-    mbmp->has_node_mask=false;
     if (present(nodeMaskII)) { // if masks exist
       // Error checking
       if ((nodeMaskII)->dimCount !=1) {
         int localrc;
-         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
                                          "- nodeMask array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
       }
-
-      if ((nodeMaskII)->extent[0] != *num_nodes) {
+      
+      if ((nodeMaskII)->extent[0] != num_nodes) {
         int localrc;
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
                                          "- nodeMask array must be the same size as the nodeIds array ", ESMC_CONTEXT, &localrc)) throw localrc;
       }
-
-      // Setup node mask tag
-      int int_def_val=0; // So things are by default not masked
-      merr=moab_mesh->tag_get_handle("node_mask", 1, MB_TYPE_INTEGER, mbmp->node_mask_tag, MB_TAG_EXCL|MB_TAG_DENSE, &int_def_val);
-      if (merr != MB_SUCCESS) {
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                         moab::ErrorCodeStr[merr], ESMC_CONTEXT, rc)) return;
-      }
-
-      // Setup node mask value tag
-      int_def_val=0; // So things are by default not masked
-      merr=moab_mesh->tag_get_handle("node_mask_val", 1, MB_TYPE_INTEGER, mbmp->node_mask_val_tag, MB_TAG_EXCL|MB_TAG_DENSE, &int_def_val);
-      if (merr != MB_SUCCESS) {
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                         moab::ErrorCodeStr[merr], ESMC_CONTEXT, rc)) return;
-      }
+      
+      // Turn on node masks
+      mbmp->setup_node_mask();
+      
       // Set values in node mask value
-      merr=moab_mesh->tag_set_data(mbmp->node_mask_val_tag, verts, num_verts, nodeMaskII->array);
-      if (merr != MB_SUCCESS) {
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                         moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-      }
-
-      // Record the fact that it has masks
-      mbmp->has_node_mask=true;
-
+      mbmp->set_node_mask_val(added_nodes, nodeMaskII->array);
+      
 #ifdef DEBUG_MASK
       {
         int localrc = 0;
         int merr = 0;
-
+        
         int node_mask[num_verts];
         if (mbmp->has_node_mask) { 
           Range nodes;
@@ -348,9 +184,9 @@ void MBMesh_addnodes(void **mbmpp, int *num_nodes, int *nodeId,
           merr=mbmp->mesh->tag_get_data(mbmp->node_mask_val_tag, nodes, &node_mask);
           if (merr != MB_SUCCESS)
             if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-              moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+                                             moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
         }
-
+        
         printf("%d# has_node_mask = %s [", Par::Rank(), mbmp->has_node_mask ? "true" : "false");
         for (int i = 0; i < num_verts; ++i)
           printf("%d, ", node_mask[i]);
@@ -359,6 +195,7 @@ void MBMesh_addnodes(void **mbmpp, int *num_nodes, int *nodeId,
 #endif
 
     }
+
 
 #ifdef DEBUG_NODE_COORDS
   {
@@ -412,6 +249,9 @@ void MBMesh_addnodes(void **mbmpp, int *num_nodes, int *nodeId,
    if (rc!=NULL) *rc = ESMF_SUCCESS;
 
 }
+
+
+
 
 
 //Get the entity type from parametric dimension and ESMF etype
@@ -748,18 +588,6 @@ void MBMesh_addelements(void **mbmpp,
     double  dbl_def_val[3]= {0.0, 0.0, 0.0};
     double  dbl_def_val_one= 0.0;
 
-    //// Register the frac field
-    mbmp->has_elem_frac=false;
-    if (*regridConserve == ESMC_REGRID_CONSERVE_ON) {
-
-      merr=moab_mesh->tag_get_handle("elem_frac", 1, MB_TYPE_DOUBLE, mbmp->elem_frac_tag, MB_TAG_EXCL|MB_TAG_DENSE, &dbl_def_val_one);
-      if (merr != MB_SUCCESS) {
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                         moab::ErrorCodeStr[merr], ESMC_CONTEXT, rc)) return;
-      }
-
-      mbmp->has_elem_frac=true;
-    }
 
     // Handle element masking
     mbmp->has_elem_mask=false;
