@@ -335,37 +335,37 @@ workflows:
             - should-run-nuopc-protos
 #      - osx-esmf
 
-  build-and-test-nightly:
-    triggers:
-      - schedule:
-          cron: "0 3 * * *"
-          filters:
-            branches:
-              only:
-                - develop
-    jobs:
-      - build-base-images
-      - build-escomp-esmf:
-          requires:
-            - build-base-images
-      - build-run-tests:
-          name: build-run-<< matrix.target >>
-          matrix:
-            parameters:
-              target: ["unit_tests", "system_tests", "examples"]
-          requires:
-            - build-escomp-esmf
-      - esmpy-test:
-          name: esmpy-test<< matrix.target >>
-          matrix:
-            parameters:
-              target: ["", "_parallel", "_examples", "_examples_parallel"]
-          requires:
-            - build-escomp-esmf
-      - nuopc-app-prototypes:
-          requires:
-            - build-escomp-esmf
-#      - osx-esmf
+#  build-and-test-nightly:
+#    triggers:
+#      - schedule:
+#          cron: "0 3 * * *"
+#          filters:
+#            branches:
+#              only:
+#                - develop
+#    jobs:
+#      - build-base-images
+#      - build-escomp-esmf:
+#          requires:
+#            - build-base-images
+#      - build-run-tests:
+#          name: build-run-<< matrix.target >>
+#          matrix:
+#            parameters:
+#              target: ["unit_tests", "system_tests", "examples"]
+#          requires:
+#            - build-escomp-esmf
+#      - esmpy-test:
+#          name: esmpy-test<< matrix.target >>
+#          matrix:
+#            parameters:
+#              target: ["", "_parallel", "_examples", "_examples_parallel"]
+#          requires:
+#            - build-escomp-esmf
+#      - nuopc-app-prototypes:
+#          requires:
+#            - build-escomp-esmf
+##      - osx-esmf
 
   docs-commit:
     jobs:
