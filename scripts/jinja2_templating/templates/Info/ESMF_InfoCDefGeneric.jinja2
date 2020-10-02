@@ -13,7 +13,7 @@ interface
 !===============================================================================
 
 {% for is_scalar in is_scalar_opts %}{% for t in ts %}{% if t.ctype != "std::string" %}
-  subroutine c_info_get_{% if not is_scalar %}array_{% endif %}{{ t.esmf_suffix }}(info, key, value, {% if not is_scalar %}itemcount, {% endif %}rc{% if is_scalar %}, default, idx{% endif %}, recursive{% if not is_scalar %}, local_scalarToArray_forC{% endif %}) bind(C, name="ESMC_InfoGet{% if not is_scalar %}Array{% endif %}{{ t.esmf_suffix }}")
+  subroutine c_info_get_{% if not is_scalar %}array_{% endif %}{{ t.esmf_suffix }}(info, key, value, {% if not is_scalar %}itemcount, {% endif %}rc{% if is_scalar %}, default, idx{% endif %}, recursive{% if not is_scalar %}, local_scalarToArray_forC, expected_size{% endif %}) bind(C, name="ESMC_InfoGet{% if not is_scalar %}Array{% endif %}{{ t.esmf_suffix }}")
     use iso_c_binding
     implicit none
     type(C_PTR), value :: info
@@ -29,6 +29,7 @@ interface
     integer(C_INT), intent(in) :: recursive
 {% if not is_scalar %}
     integer(C_INT), intent(in) :: local_scalarToArray_forC
+    integer(C_INT), intent(in) :: expected_size
 {% endif %}
   end subroutine c_info_get_{% if not is_scalar %}array_{% endif %}{{ t.esmf_suffix }}
 

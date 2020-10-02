@@ -152,6 +152,31 @@ interface
 
   !=============================================================================
 
+  subroutine c_info_get_tk(info, key, typekind, rc, recursive) bind(C, name="ESMC_InfoGetTK")
+    use iso_c_binding
+    implicit none
+    type(C_PTR), value :: info
+    character(C_CHAR), intent(in) :: key(*)
+    integer(C_INT), intent(out) :: typekind
+    integer(C_INT), intent(out) :: rc
+    integer(C_INT), intent(in) :: recursive
+  end subroutine c_info_get_tk
+
+  !=============================================================================
+
+  subroutine c_info_get_array_meta(info, key, is_array, size, recursive, rc) bind(C, name="ESMC_InfoGetArrayMeta")
+    use iso_c_binding
+    implicit none
+    type(C_PTR), value :: info
+    character(C_CHAR), intent(in) :: key(*)
+    integer(C_INT), intent(out) :: is_array
+    integer(C_INT), intent(out) :: size
+    integer(C_INT), intent(in) :: recursive
+    integer(C_INT), intent(out) :: rc
+  end subroutine c_info_get_array_meta
+
+  !=============================================================================
+
   subroutine c_info_is_set(info, key, is_set_c, rc) bind(C, name="ESMC_InfoIsSet")
     use iso_c_binding
     implicit none

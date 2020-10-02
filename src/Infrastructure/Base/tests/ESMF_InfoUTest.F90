@@ -67,7 +67,7 @@ program ESMF_InfoUTest
   real(ESMF_KIND_R4) :: desired_r4, value_r4
   real(ESMF_KIND_R8) :: desired_r8, value_r8
   real(ESMF_KIND_R8), dimension(3) :: values_r8
-  integer(ESMF_KIND_I4), dimension(3) :: arr_i4
+  integer(ESMF_KIND_I4), dimension(3) :: arr_i4, tk_value
   integer(ESMF_KIND_I4), dimension(:), allocatable :: arr_i4_get
   type(ESMF_Info) :: info, info2, info3, info4, info5, info6, &
                      info7, info8, info9, info10, info_copy_src, &
@@ -76,11 +76,12 @@ program ESMF_InfoUTest
                      info_obj_new, info_parse, info_update_lhs, &
                      info_update_rhs, info_inq, info_eq_lhs, &
                      info_eq_rhs, irecurse, ipkey, info_charalloc, &
-                     info_uninit, info_dirty, info_implicit
+                     info_uninit, info_dirty, info_implicit, info_tk
 
   logical :: is_present, failed, is_set, is_present_copy_test, actual_logical, &
              desired_logical, isArray, isDirty
   logical, dimension(2) :: fails_obj
+  type(ESMF_TypeKind_Flag) :: actual_tk
 
   !----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)  ! calls ESMF_Initialize() internally
@@ -469,19 +470,6 @@ program ESMF_InfoUTest
   deallocate(arr_i4_get)
 
   call ESMF_Test((.not. failed), name, failMsg, result, ESMF_SRCLINE)
-  !----------------------------------------------------------------------------
-
-  !----------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "Implicit Conversion w/ Array"
-  write(failMsg, *) "Did not throw proper error"
-  failed = .false.
-
-  call ESMF_InfoGet(info9, "the-key", values_r8, rc=rc)
-  call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-  call ESMF_InfoDestroy(info9, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   !----------------------------------------------------------------------------
 
   !----------------------------------------------------------------------------
@@ -901,6 +889,51 @@ program ESMF_InfoUTest
   call ESMF_Test(rc/=ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
   call ESMF_InfoDestroy(info_implicit, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !----------------------------------------------------------------------------
+
+  !----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "InfoGetTK for I4"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  rc = ESMF_FAILURE
+  failed = .false.
+
+  info_tk = ESMF_InfoCreate(rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  tk_value = 11
+  call ESMF_InfoSet(info_tk, "/NUOPC/Instance/Verbosity", tk_value, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  actual_tk = ESMF_InfoGetTK(info_tk, "/NUOPC/Instance/Verbosity", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_Test(actual_tk == ESMF_TYPEKIND_I4, name, failMsg, result, ESMF_SRCLINE)
+
+  call ESMF_InfoDestroy(info_tk, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !----------------------------------------------------------------------------
+
+  !----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "InfoGetTK for Character"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  rc = ESMF_FAILURE
+  failed = .false.
+
+  info_tk = ESMF_InfoCreate(rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_InfoSet(info_tk, "/NUOPC/Instance/Verbosity", "max", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  actual_tk = ESMF_InfoGetTK(info_tk, "/NUOPC/Instance/Verbosity", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_Test(actual_tk == ESMF_TYPEKIND_CHARACTER, name, failMsg, result, ESMF_SRCLINE)
+
+  call ESMF_InfoDestroy(info_tk, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   !----------------------------------------------------------------------------
 

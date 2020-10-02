@@ -6,8 +6,8 @@ run_uni:  run_unit_tests_uni
 
 LOCDIR	  = src/Infrastructure/Base/tests
 
-#TESTS_BUILD = $(ESMF_TESTDIR)/ESMF_InfoArrayUTest
 .NOTPARALLEL:
+#TESTS_BUILD = $(ESMF_TESTDIR)/ESMF_InfoProfileUTest
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_BaseUTest \
                 $(ESMF_TESTDIR)/ESMC_BaseUTest \
                 $(ESMF_TESTDIR)/ESMC_NlohmannJSONUTest \
@@ -15,6 +15,7 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_BaseUTest \
                 $(ESMF_TESTDIR)/ESMF_InfoUTest \
                 $(ESMF_TESTDIR)/ESMF_InfoArrayUTest
 
+#TESTS_RUN     = RUN_ESMF_InfoProfileUTest
 TESTS_RUN     = RUN_ESMF_BaseUTest \
                 RUN_ESMC_BaseUTest \
                 RUN_ESMC_NlohmannJSONUTest \
@@ -76,11 +77,11 @@ RUN_ESMF_InfoUTest:
 RUN_ESMF_InfoUTestUNI:
 	$(MAKE) TNAME=Info NP=1 ftest
 
-# RUN_ESMF_InfoProfileUTest:
-# 	env ESMF_RUNTIME_PROFILE=ON $(MAKE) TNAME=InfoProfile NP=4 ftest
+RUN_ESMF_InfoProfileUTest:
+	env ESMF_RUNTIME_PROFILE=ON $(MAKE) TNAME=InfoProfile NP=4 ftest
 
-# RUN_ESMF_InfoProfileUTestUNI:
-# 	env ESMF_RUNTIME_PROFILE=ON $(MAKE) TNAME=InfoProfile NP=1 ftest
+RUN_ESMF_InfoProfileUTestUNI:
+	env ESMF_RUNTIME_PROFILE=ON $(MAKE) TNAME=InfoProfile NP=1 ftest
 
 RUN_ESMF_InfoArrayUTest:
 	$(MAKE) TNAME=InfoArray NP=4 ftest

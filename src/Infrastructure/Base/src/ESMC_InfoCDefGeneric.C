@@ -130,7 +130,7 @@ void ESMC_InfoGetLG(ESMCI::Info *info, char *key, bool &value, int &esmc_rc, boo
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoGetArrayR4()"
-void ESMC_InfoGetArrayR4(ESMCI::Info *info, char *key, float *value, int &count, int &esmc_rc, int &fortran_bool_recursive, bool &fortran_bool_scalarToArray) {
+void ESMC_InfoGetArrayR4(ESMCI::Info *info, char *key, float *value, int &count, int &esmc_rc, int &fortran_bool_recursive, bool &fortran_bool_scalarToArray, int &expected_size) {
   ESMC_CHECK_INIT(info, esmc_rc)
   esmc_rc = ESMF_FAILURE;
   try {
@@ -138,27 +138,28 @@ void ESMC_InfoGetArrayR4(ESMCI::Info *info, char *key, float *value, int &count,
     bool recursive = fortran_bool_recursive == 1;
     bool scalar_to_array = fortran_bool_scalarToArray == 1;
     const json *j = info->getPointer(local_key, recursive);
-    if (!j->is_array() && !scalar_to_array) {
+    bool is_array = j->is_array();
+    if (!is_array && !scalar_to_array) {
       std::string msg = "Array requested but type in JSON storage is not an array. Key is: " + local_key;
       ESMC_CHECK_RC("ESMF_RC_ATTR_WRONGTYPE", ESMF_RC_ATTR_WRONGTYPE, msg)
     }
-    if (j->is_array()) {
+    if (is_array) {
       const json::array_t *ap = j->get_ptr<const json::array_t *>();
       count = (int)ap->size();
-      for (int ii=0; ii<count; ii++) {
+      // If the expected size is a negative one, the data request is for an allocatable
+      // and the expected size is irrelevant since the outgoing array will be allocated
+      // in Fortran.
+      if (expected_size != -1 && count != expected_size) {
+        ESMC_CHECK_RC("ESMF_RC_ATTR_ITEMSOFF", ESMF_RC_ATTR_ITEMSOFF, "values allocation size does not match size in Info storage")
+      }
+      for (int ii=0; ii<count; ++ii) {
         try {
-          const json &ap_at = ap->at(ii);  // Target JSON in in the output array
-          if (ap_at.is_number()) {
-            try { ESMCI::check_overflow(value[ii], ap_at); }  // Check bit overflow
-            ESMC_CATCH_ERRPASSTHRU
-          }
-          value[ii] = ap_at;
-          try { ESMCI::handleJSONTypeCheck(local_key, value[ii], ap_at); }
-          ESMC_CATCH_ERRPASSTHRU
+          value[ii] = ap->at(ii);
         }
         catch (std::out_of_range &exc) {
           ESMC_CHECK_RC("ESMF_RC_ARG_OUTOFRANGE", ESMF_RC_ARG_OUTOFRANGE, std::string(exc.what()))
         }
+        ESMC_CATCH_ERRPASSTHRU
       }
     } else {
       value[0] = info->get<float>(local_key, nullptr, nullptr, recursive, nullptr, false);
@@ -170,7 +171,7 @@ void ESMC_InfoGetArrayR4(ESMCI::Info *info, char *key, float *value, int &count,
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoGetArrayR8()"
-void ESMC_InfoGetArrayR8(ESMCI::Info *info, char *key, double *value, int &count, int &esmc_rc, int &fortran_bool_recursive, bool &fortran_bool_scalarToArray) {
+void ESMC_InfoGetArrayR8(ESMCI::Info *info, char *key, double *value, int &count, int &esmc_rc, int &fortran_bool_recursive, bool &fortran_bool_scalarToArray, int &expected_size) {
   ESMC_CHECK_INIT(info, esmc_rc)
   esmc_rc = ESMF_FAILURE;
   try {
@@ -178,27 +179,28 @@ void ESMC_InfoGetArrayR8(ESMCI::Info *info, char *key, double *value, int &count
     bool recursive = fortran_bool_recursive == 1;
     bool scalar_to_array = fortran_bool_scalarToArray == 1;
     const json *j = info->getPointer(local_key, recursive);
-    if (!j->is_array() && !scalar_to_array) {
+    bool is_array = j->is_array();
+    if (!is_array && !scalar_to_array) {
       std::string msg = "Array requested but type in JSON storage is not an array. Key is: " + local_key;
       ESMC_CHECK_RC("ESMF_RC_ATTR_WRONGTYPE", ESMF_RC_ATTR_WRONGTYPE, msg)
     }
-    if (j->is_array()) {
+    if (is_array) {
       const json::array_t *ap = j->get_ptr<const json::array_t *>();
       count = (int)ap->size();
-      for (int ii=0; ii<count; ii++) {
+      // If the expected size is a negative one, the data request is for an allocatable
+      // and the expected size is irrelevant since the outgoing array will be allocated
+      // in Fortran.
+      if (expected_size != -1 && count != expected_size) {
+        ESMC_CHECK_RC("ESMF_RC_ATTR_ITEMSOFF", ESMF_RC_ATTR_ITEMSOFF, "values allocation size does not match size in Info storage")
+      }
+      for (int ii=0; ii<count; ++ii) {
         try {
-          const json &ap_at = ap->at(ii);  // Target JSON in in the output array
-          if (ap_at.is_number()) {
-            try { ESMCI::check_overflow(value[ii], ap_at); }  // Check bit overflow
-            ESMC_CATCH_ERRPASSTHRU
-          }
-          value[ii] = ap_at;
-          try { ESMCI::handleJSONTypeCheck(local_key, value[ii], ap_at); }
-          ESMC_CATCH_ERRPASSTHRU
+          value[ii] = ap->at(ii);
         }
         catch (std::out_of_range &exc) {
           ESMC_CHECK_RC("ESMF_RC_ARG_OUTOFRANGE", ESMF_RC_ARG_OUTOFRANGE, std::string(exc.what()))
         }
+        ESMC_CATCH_ERRPASSTHRU
       }
     } else {
       value[0] = info->get<double>(local_key, nullptr, nullptr, recursive, nullptr, false);
@@ -210,7 +212,7 @@ void ESMC_InfoGetArrayR8(ESMCI::Info *info, char *key, double *value, int &count
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoGetArrayI4()"
-void ESMC_InfoGetArrayI4(ESMCI::Info *info, char *key, int *value, int &count, int &esmc_rc, int &fortran_bool_recursive, bool &fortran_bool_scalarToArray) {
+void ESMC_InfoGetArrayI4(ESMCI::Info *info, char *key, int *value, int &count, int &esmc_rc, int &fortran_bool_recursive, bool &fortran_bool_scalarToArray, int &expected_size) {
   ESMC_CHECK_INIT(info, esmc_rc)
   esmc_rc = ESMF_FAILURE;
   try {
@@ -218,27 +220,28 @@ void ESMC_InfoGetArrayI4(ESMCI::Info *info, char *key, int *value, int &count, i
     bool recursive = fortran_bool_recursive == 1;
     bool scalar_to_array = fortran_bool_scalarToArray == 1;
     const json *j = info->getPointer(local_key, recursive);
-    if (!j->is_array() && !scalar_to_array) {
+    bool is_array = j->is_array();
+    if (!is_array && !scalar_to_array) {
       std::string msg = "Array requested but type in JSON storage is not an array. Key is: " + local_key;
       ESMC_CHECK_RC("ESMF_RC_ATTR_WRONGTYPE", ESMF_RC_ATTR_WRONGTYPE, msg)
     }
-    if (j->is_array()) {
+    if (is_array) {
       const json::array_t *ap = j->get_ptr<const json::array_t *>();
       count = (int)ap->size();
-      for (int ii=0; ii<count; ii++) {
+      // If the expected size is a negative one, the data request is for an allocatable
+      // and the expected size is irrelevant since the outgoing array will be allocated
+      // in Fortran.
+      if (expected_size != -1 && count != expected_size) {
+        ESMC_CHECK_RC("ESMF_RC_ATTR_ITEMSOFF", ESMF_RC_ATTR_ITEMSOFF, "values allocation size does not match size in Info storage")
+      }
+      for (int ii=0; ii<count; ++ii) {
         try {
-          const json &ap_at = ap->at(ii);  // Target JSON in in the output array
-          if (ap_at.is_number()) {
-            try { ESMCI::check_overflow(value[ii], ap_at); }  // Check bit overflow
-            ESMC_CATCH_ERRPASSTHRU
-          }
-          value[ii] = ap_at;
-          try { ESMCI::handleJSONTypeCheck(local_key, value[ii], ap_at); }
-          ESMC_CATCH_ERRPASSTHRU
+          value[ii] = ap->at(ii);
         }
         catch (std::out_of_range &exc) {
           ESMC_CHECK_RC("ESMF_RC_ARG_OUTOFRANGE", ESMF_RC_ARG_OUTOFRANGE, std::string(exc.what()))
         }
+        ESMC_CATCH_ERRPASSTHRU
       }
     } else {
       value[0] = info->get<int>(local_key, nullptr, nullptr, recursive, nullptr, false);
@@ -250,7 +253,7 @@ void ESMC_InfoGetArrayI4(ESMCI::Info *info, char *key, int *value, int &count, i
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoGetArrayI8()"
-void ESMC_InfoGetArrayI8(ESMCI::Info *info, char *key, long int *value, int &count, int &esmc_rc, int &fortran_bool_recursive, bool &fortran_bool_scalarToArray) {
+void ESMC_InfoGetArrayI8(ESMCI::Info *info, char *key, long int *value, int &count, int &esmc_rc, int &fortran_bool_recursive, bool &fortran_bool_scalarToArray, int &expected_size) {
   ESMC_CHECK_INIT(info, esmc_rc)
   esmc_rc = ESMF_FAILURE;
   try {
@@ -258,27 +261,28 @@ void ESMC_InfoGetArrayI8(ESMCI::Info *info, char *key, long int *value, int &cou
     bool recursive = fortran_bool_recursive == 1;
     bool scalar_to_array = fortran_bool_scalarToArray == 1;
     const json *j = info->getPointer(local_key, recursive);
-    if (!j->is_array() && !scalar_to_array) {
+    bool is_array = j->is_array();
+    if (!is_array && !scalar_to_array) {
       std::string msg = "Array requested but type in JSON storage is not an array. Key is: " + local_key;
       ESMC_CHECK_RC("ESMF_RC_ATTR_WRONGTYPE", ESMF_RC_ATTR_WRONGTYPE, msg)
     }
-    if (j->is_array()) {
+    if (is_array) {
       const json::array_t *ap = j->get_ptr<const json::array_t *>();
       count = (int)ap->size();
-      for (int ii=0; ii<count; ii++) {
+      // If the expected size is a negative one, the data request is for an allocatable
+      // and the expected size is irrelevant since the outgoing array will be allocated
+      // in Fortran.
+      if (expected_size != -1 && count != expected_size) {
+        ESMC_CHECK_RC("ESMF_RC_ATTR_ITEMSOFF", ESMF_RC_ATTR_ITEMSOFF, "values allocation size does not match size in Info storage")
+      }
+      for (int ii=0; ii<count; ++ii) {
         try {
-          const json &ap_at = ap->at(ii);  // Target JSON in in the output array
-          if (ap_at.is_number()) {
-            try { ESMCI::check_overflow(value[ii], ap_at); }  // Check bit overflow
-            ESMC_CATCH_ERRPASSTHRU
-          }
-          value[ii] = ap_at;
-          try { ESMCI::handleJSONTypeCheck(local_key, value[ii], ap_at); }
-          ESMC_CATCH_ERRPASSTHRU
+          value[ii] = ap->at(ii);
         }
         catch (std::out_of_range &exc) {
           ESMC_CHECK_RC("ESMF_RC_ARG_OUTOFRANGE", ESMF_RC_ARG_OUTOFRANGE, std::string(exc.what()))
         }
+        ESMC_CATCH_ERRPASSTHRU
       }
     } else {
       value[0] = info->get<long int>(local_key, nullptr, nullptr, recursive, nullptr, false);
@@ -290,7 +294,7 @@ void ESMC_InfoGetArrayI8(ESMCI::Info *info, char *key, long int *value, int &cou
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoGetArrayLG()"
-void ESMC_InfoGetArrayLG(ESMCI::Info *info, char *key, bool *value, int &count, int &esmc_rc, int &fortran_bool_recursive, bool &fortran_bool_scalarToArray) {
+void ESMC_InfoGetArrayLG(ESMCI::Info *info, char *key, bool *value, int &count, int &esmc_rc, int &fortran_bool_recursive, bool &fortran_bool_scalarToArray, int &expected_size) {
   ESMC_CHECK_INIT(info, esmc_rc)
   esmc_rc = ESMF_FAILURE;
   try {
@@ -298,27 +302,28 @@ void ESMC_InfoGetArrayLG(ESMCI::Info *info, char *key, bool *value, int &count, 
     bool recursive = fortran_bool_recursive == 1;
     bool scalar_to_array = fortran_bool_scalarToArray == 1;
     const json *j = info->getPointer(local_key, recursive);
-    if (!j->is_array() && !scalar_to_array) {
+    bool is_array = j->is_array();
+    if (!is_array && !scalar_to_array) {
       std::string msg = "Array requested but type in JSON storage is not an array. Key is: " + local_key;
       ESMC_CHECK_RC("ESMF_RC_ATTR_WRONGTYPE", ESMF_RC_ATTR_WRONGTYPE, msg)
     }
-    if (j->is_array()) {
+    if (is_array) {
       const json::array_t *ap = j->get_ptr<const json::array_t *>();
       count = (int)ap->size();
-      for (int ii=0; ii<count; ii++) {
+      // If the expected size is a negative one, the data request is for an allocatable
+      // and the expected size is irrelevant since the outgoing array will be allocated
+      // in Fortran.
+      if (expected_size != -1 && count != expected_size) {
+        ESMC_CHECK_RC("ESMF_RC_ATTR_ITEMSOFF", ESMF_RC_ATTR_ITEMSOFF, "values allocation size does not match size in Info storage")
+      }
+      for (int ii=0; ii<count; ++ii) {
         try {
-          const json &ap_at = ap->at(ii);  // Target JSON in in the output array
-          if (ap_at.is_number()) {
-            try { ESMCI::check_overflow(value[ii], ap_at); }  // Check bit overflow
-            ESMC_CATCH_ERRPASSTHRU
-          }
-          value[ii] = ap_at;
-          try { ESMCI::handleJSONTypeCheck(local_key, value[ii], ap_at); }
-          ESMC_CATCH_ERRPASSTHRU
+          value[ii] = ap->at(ii);
         }
         catch (std::out_of_range &exc) {
           ESMC_CHECK_RC("ESMF_RC_ARG_OUTOFRANGE", ESMF_RC_ARG_OUTOFRANGE, std::string(exc.what()))
         }
+        ESMC_CATCH_ERRPASSTHRU
       }
     } else {
       value[0] = info->get<bool>(local_key, nullptr, nullptr, recursive, nullptr, false);

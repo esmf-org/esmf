@@ -32,7 +32,6 @@ AUTOGEN = ESMF_AttPackABundleUTest.F90 \
 LOCDIR = src/Superstructure/AttributeAPI/tests
 
 .NOTPARALLEL:
-#TESTS_BUILD = $(ESMF_TESTDIR)/ESMF_AttributeArrayUTest
 TESTS_BUILD = \
           $(ESMF_TESTDIR)/ESMF_AttPackABundleUTest \
           $(ESMF_TESTDIR)/ESMF_AttPackArrayUTest \
@@ -64,7 +63,6 @@ TESTS_BUILD = \
           $(ESMF_TESTDIR)/ESMF_AttributeUpdateReconcileUTest \
           $(ESMF_TESTDIR)/ESMF_AttributeUtilUTest
 
-#TESTS_RUN = RUN_ESMF_AttributeArrayUTest
 TESTS_RUN = \
           RUN_ESMF_AttPackABundleUTest \
           RUN_ESMF_AttPackArrayUTest \
@@ -381,3 +379,11 @@ RUN_ESMF_AttributeUtilUTest:
 
 RUN_ESMF_AttributeUtilUTestUNI:
 	$(MAKE) TNAME=AttributeUtil NP=1 ftest
+
+# --- Attribute Profiling
+
+RUN_ESMF_AttributeProfileUTest:
+	env ESMF_RUNTIME_PROFILE=ON $(MAKE) TNAME=AttributeProfile NP=4 ftest
+
+RUN_ESMF_AttributeProfileUTestUNI:
+	env ESMF_RUNTIME_PROFILE=ON $(MAKE) TNAME=AttributeProfile NP=1 ftest

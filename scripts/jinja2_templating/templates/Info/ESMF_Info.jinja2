@@ -165,7 +165,7 @@ public operator(/=)
 {% set suffixes = ["","Create","Destroy","Get","GetCharAlloc", "GetAlloc","Set",
                    "Remove","GetFromBase","GetFromPointer","SetNULL","SetDirty",
                    "IsSet","IsPresent","Print","Dump","Update","ReadJSON","WriteJSON",
-                   "Broadcast"] %}
+                   "Broadcast","GetTK","GetArrayMeta"] %}
 {% for suffix in suffixes %}
 public ESMF_Info{{ suffix }}
 {% endfor %}
@@ -1166,11 +1166,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(out), optional :: rc
 
   integer :: localrc
-  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC
+  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC, expected_size
 {% if t.ctype == "bool" or t.ctype == "std::string"%}
   integer :: ii
 {% endif %}
-{% if t.ctype == "std::string" %}
+{% if alloc or t.ctype == "std::string" %}
   logical :: is_array
 {% endif %}
 {% if t.ctype == "bool" %}
@@ -1189,18 +1189,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   if (present(attnestflag)) then
     if (attnestflag%value==ESMF_ATTNEST_ON%value) recursive = 1 !true
   end if
+{% if t.ctype != "std::string" %}
 
   if (local_scalarToArray) then
     local_scalarToArray_forC = 1 !true
   else
     local_scalarToArray_forC = 0 !false
   end if
+{% endif %}
+
+{% if alloc or t.ctype == "std::string" %}
+  ! Set the value to a negative one to indicate we are doing an allocatable call
+  ! into the storage layer, and the size should not be checked.
+  expected_size = -1
 
   ! Get the array size from the info store
-  call ESMF_InfoGet(info, key=key, size=local_itemCount, attnestflag=attnestflag, &
-{% if t.ctype == "std::string" %}
-    isArray=is_array, &
-{% endif %}
+  call ESMF_InfoGetArrayMeta(info, key, is_array, local_itemcount, attnestflag=attnestflag, &
     rc=localrc)
   {{ esmf_lfe }}
 {% if t.ctype == "std::string" %}
@@ -1211,16 +1215,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 {% endif %}
-{% if not alloc %}
 
+{% if alloc %}
+  ! Allocate the outgoing storage array and call into C to fill the array
+  allocate(values(local_itemCount))
+{% else %}
   if (local_itemCount /= SIZE(values)) then
     if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="values allocation size does not match size in Info storage", ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 {% endif %}
-
-  ! Allocate the outgoing storage array and call into C to fill the array
-{% if alloc %}
-  allocate(values(local_itemCount))
+{% else %}
+  ! This is used to validate the size of the outgoing array given the size in
+  ! storage.
+  expected_size = size(values)
 {% endif %}
 {% if t.ctype == "bool" %}
   allocate(local_values(local_itemCount))
@@ -1238,7 +1245,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     local_itemCount, &
     localrc, &
     recursive, &
-    local_scalarToArray_forC)
+    local_scalarToArray_forC, &
+    expected_size)
 {% else %}
   do ii=1,local_itemCount
     if (.not. is_array .and. local_scalarToArray) then
@@ -1815,6 +1823,129 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   if (present(rc)) rc = ESMF_SUCCESS
 end function {{ method_name }}
+
+!------------------------------------------------------------------------------
+
+{% set method_name = "ESMF_InfoGetTK" %}
+#undef  ESMF_METHOD
+#define ESMF_METHOD "{{ method_name }}()"
+!BOP
+! !IROUTINE: {{ method_name }} - Retrieve the ESMF TypeKind for a key
+!
+! !INTERFACE:
+function {{ method_name }}(info, key, keywordEnforcer, attnestflag, rc) result(typekind)
+! !ARGUMENTS:
+  type(ESMF_Info), intent(in) :: info
+  character(len=*), intent(in) :: key
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(out), optional :: rc
+! !RETURN VALUE:
+  type(ESMF_TypeKind_Flag) :: typekind
+!
+! !DESCRIPTION:
+!     Return a value's ESMF TypeKind using a \textit{key}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [info]
+{{ doc_info }}
+!     \item [key]
+{{ doc_key }}
+!     \item [{[attnestflag]}]
+!       Setting to \texttt{ESMF\_ATTNEST\_ON} triggers a recursive search for
+!       \textit{keyParent}. The first instance of the key will be found in the
+!       hierarchy. Default is \texttt{ESMF\_ATTNEST\_OFF}.
+{{ doc_rc }}
+!     \end{description}
+!EOP
+
+  integer :: localrc
+  integer(C_INT) :: local_typekind
+  integer(C_INT) :: recursive
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_FAILURE
+  recursive = 0 !false
+  local_typekind = 0
+
+  if (present(attnestflag)) then
+    if (attnestflag%value==ESMF_ATTNEST_ON%value) recursive = 1 !true
+  end if
+
+  call c_info_get_tk(info%ptr, trim(key)//C_NULL_CHAR, local_typekind, &
+    localrc, recursive)
+  {{ esmf_lfe }}
+
+  typekind = ESMF_TypeKind_Flag(local_typekind)
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end function {{ method_name }}
+
+!------------------------------------------------------------------------------
+
+{% set method_name = "ESMF_InfoGetArrayMeta" %}
+#undef  ESMF_METHOD
+#define ESMF_METHOD "{{ method_name }}()"
+!BOP
+! !IROUTINE: {{ method_name }} - Retrieve array metadata information
+!
+! !INTERFACE:
+subroutine {{ method_name }}(info, key, isArray, size, keywordEnforcer, attnestflag, rc)
+! !ARGUMENTS:
+  type(ESMF_Info), intent(in) :: info
+  character(len=*), intent(in) :: key
+  logical, intent(out) :: isArray
+  integer(C_INT), intent(out) :: size
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Return a value's array status and size using a \textit{key}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [info]
+{{ doc_info }}
+!     \item [key]
+{{ doc_key }}
+!     \item [isArray]
+!       Set to \texttt{true} if the target is an array in storage.
+!     \item [size]
+!       Set to the size of the target object in storage (i.e. length of the array).
+!     \item [{[attnestflag]}]
+!       Setting to \texttt{ESMF\_ATTNEST\_ON} triggers a recursive search for
+!       \textit{keyParent}. The first instance of the key will be found in the
+!       hierarchy. Default is \texttt{ESMF\_ATTNEST\_OFF}.
+{{ doc_rc }}
+!     \end{description}
+!EOP
+
+  integer :: localrc
+  integer(C_INT) :: local_is_array
+  integer(C_INT) :: recursive
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_FAILURE
+
+  recursive = 0 !false
+  if (present(attnestflag)) then
+    if (attnestflag%value==ESMF_ATTNEST_ON%value) recursive = 1 !true
+  end if
+
+  call c_info_get_array_meta(info%ptr, trim(key)//C_NULL_CHAR, local_is_array, size, recursive, &
+    localrc)
+  {{ esmf_lfe }}
+
+  if (local_is_array == 1) then
+    isArray = .true.
+  else
+    isArray = .false.
+  end if
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine {{ method_name }}
 
 !------------------------------------------------------------------------------
 
