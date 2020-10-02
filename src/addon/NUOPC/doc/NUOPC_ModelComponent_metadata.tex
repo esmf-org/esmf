@@ -47,7 +47,10 @@ is {\em not} part of the Attribute name!
                        {\bf bit 7}: Specialization point profiling of {\em Finalize} phases.\newline
                        {\bf bit 8}: Additional profiling of internals of {\em Finalize} phases.\newline
                      & 0, 1, 2, ... \newline
-                       "max" = set all lower 16 bits\\ \hline
+                       "off" = 0 (default), \newline
+                       "low": Top level profiling. \newline
+                       "high": Top level and specialization point profiling. \newline
+                       "max": All lower 16 bits set.\\ \hline
      {\tt Diagnostic} & String value, converted into an integer, and interpreted as a bit field. The lower 16 bits are reserved to control diagnostic of the generic component implementation. Higher bits are available for user level diagnostic control. \newline
                        {\bf bit 0}: Dump fields of the importState on entering {\em Initialize} phases.\newline
                        {\bf bit 1}: Dump fields of the exportState on entering {\em Initialize} phases.\newline
@@ -62,7 +65,8 @@ is {\em not} part of the Attribute name!
                        {\bf bit 10}: Dump fields of the importState on exiting {\em Finalize} phases.\newline
                        {\bf bit 11}: Dump fields of the exportState on exiting {\em Finalize} phases.
                      & 0, 1, 2, ... \newline
-                       "max" = set all lower 16 bits\\ \hline
+                       "off" = 0 (default), \newline
+                       "max": All lower 16 bits set.\\ \hline
      {\tt CompLabel} & String value holding the label under which the component was added to its parent driver.& {\em no restriction}\\ \hline
      {\tt InitializePhaseMap} & List of string values, mapping the logical NUOPC initialize phases, of a specific Initialize Phase Definition (IPD) version, to the actual ESMF initialize phase number under which the entry point is registered.& IPDvXXpY=Z, where XX = two-digit revision number, e.g. 01, Y = logical NUOPC phase number, Z = actual ESMF phase number, with Y, Z > 0 and Y, Z < 10 \\ \hline
      {\tt RunPhaseMap} & List of string values, mapping the logical NUOPC run phases to the actual ESMF run phase number under which the entry point is registered.& {\em label-string}=Z, where {\em label-string} can be chosen freely, and Z = actual ESMF phase number. \\ \hline
