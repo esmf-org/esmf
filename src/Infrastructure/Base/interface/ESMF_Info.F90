@@ -196,6 +196,8 @@ public ESMF_InfoUpdate
 public ESMF_InfoReadJSON
 public ESMF_InfoWriteJSON
 public ESMF_InfoBroadcast
+public ESMF_InfoGetTK
+public ESMF_InfoGetArrayMeta
 
 public c_info_base_sync
 public c_info_copyforattribute
@@ -1927,7 +1929,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(out), optional :: rc
 
   integer :: localrc
-  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC
+  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC, expected_size
   logical :: local_scalarToArray
 
   local_scalarToArray = .false.
@@ -1948,16 +1950,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     local_scalarToArray_forC = 0 !false
   end if
 
-  ! Get the array size from the info store
-  call ESMF_InfoGet(info, key=key, size=local_itemCount, attnestflag=attnestflag, &
-    rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (local_itemCount /= SIZE(values)) then
-    if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="values allocation size does not match size in Info storage", ESMF_CONTEXT, rcToReturn=rc)) return
-  end if
-
-  ! Allocate the outgoing storage array and call into C to fill the array
+  ! This is used to validate the size of the outgoing array given the size in
+  ! storage.
+  expected_size = size(values)
   call c_info_get_array_R4(&
     info%ptr, &
     trim(key)//C_NULL_CHAR, &
@@ -1965,7 +1960,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     local_itemCount, &
     localrc, &
     recursive, &
-    local_scalarToArray_forC)
+    local_scalarToArray_forC, &
+    expected_size)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   if (present(itemCount)) itemCount = local_itemCount
@@ -1985,402 +1981,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(out), optional :: rc
 
   integer :: localrc
-  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC
-  logical :: local_scalarToArray
-
-  local_scalarToArray = .false.
-  localrc = ESMF_FAILURE
-  if (present(rc)) rc = ESMF_FAILURE
-  recursive = 0 !false
-  if (present(scalarToArray)) then
-    local_scalarToArray = scalarToArray
-  end if
-
-  if (present(attnestflag)) then
-    if (attnestflag%value==ESMF_ATTNEST_ON%value) recursive = 1 !true
-  end if
-
-  if (local_scalarToArray) then
-    local_scalarToArray_forC = 1 !true
-  else
-    local_scalarToArray_forC = 0 !false
-  end if
-
-  ! Get the array size from the info store
-  call ESMF_InfoGet(info, key=key, size=local_itemCount, attnestflag=attnestflag, &
-    rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  ! Allocate the outgoing storage array and call into C to fill the array
-  allocate(values(local_itemCount))
-  call c_info_get_array_R4(&
-    info%ptr, &
-    trim(key)//C_NULL_CHAR, &
-    values, &
-    local_itemCount, &
-    localrc, &
-    recursive, &
-    local_scalarToArray_forC)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (present(itemCount)) itemCount = local_itemCount
-  if (present(rc)) rc = ESMF_SUCCESS
-end subroutine ESMF_InfoGetArrayR4Alloc
-
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoGetArrayR8()"
-subroutine ESMF_InfoGetArrayR8(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
-  type(ESMF_Info), intent(in) :: info
-  character(len=*), intent(in) :: key
-  real(ESMF_KIND_R8), dimension(:), intent(out) :: values
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  integer, intent(out), optional :: itemCount
-  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  logical, intent(in), optional :: scalarToArray
-  integer, intent(out), optional :: rc
-
-  integer :: localrc
-  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC
-  logical :: local_scalarToArray
-
-  local_scalarToArray = .false.
-  localrc = ESMF_FAILURE
-  if (present(rc)) rc = ESMF_FAILURE
-  recursive = 0 !false
-  if (present(scalarToArray)) then
-    local_scalarToArray = scalarToArray
-  end if
-
-  if (present(attnestflag)) then
-    if (attnestflag%value==ESMF_ATTNEST_ON%value) recursive = 1 !true
-  end if
-
-  if (local_scalarToArray) then
-    local_scalarToArray_forC = 1 !true
-  else
-    local_scalarToArray_forC = 0 !false
-  end if
-
-  ! Get the array size from the info store
-  call ESMF_InfoGet(info, key=key, size=local_itemCount, attnestflag=attnestflag, &
-    rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (local_itemCount /= SIZE(values)) then
-    if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="values allocation size does not match size in Info storage", ESMF_CONTEXT, rcToReturn=rc)) return
-  end if
-
-  ! Allocate the outgoing storage array and call into C to fill the array
-  call c_info_get_array_R8(&
-    info%ptr, &
-    trim(key)//C_NULL_CHAR, &
-    values, &
-    local_itemCount, &
-    localrc, &
-    recursive, &
-    local_scalarToArray_forC)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (present(itemCount)) itemCount = local_itemCount
-  if (present(rc)) rc = ESMF_SUCCESS
-end subroutine ESMF_InfoGetArrayR8
-
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoGetArrayR8Alloc()"
-subroutine ESMF_InfoGetArrayR8Alloc(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
-  type(ESMF_Info), intent(in) :: info
-  character(len=*), intent(in) :: key
-  real(ESMF_KIND_R8), dimension(:),  allocatable, intent(out) :: values
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  integer, intent(out), optional :: itemCount
-  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  logical, intent(in), optional :: scalarToArray
-  integer, intent(out), optional :: rc
-
-  integer :: localrc
-  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC
-  logical :: local_scalarToArray
-
-  local_scalarToArray = .false.
-  localrc = ESMF_FAILURE
-  if (present(rc)) rc = ESMF_FAILURE
-  recursive = 0 !false
-  if (present(scalarToArray)) then
-    local_scalarToArray = scalarToArray
-  end if
-
-  if (present(attnestflag)) then
-    if (attnestflag%value==ESMF_ATTNEST_ON%value) recursive = 1 !true
-  end if
-
-  if (local_scalarToArray) then
-    local_scalarToArray_forC = 1 !true
-  else
-    local_scalarToArray_forC = 0 !false
-  end if
-
-  ! Get the array size from the info store
-  call ESMF_InfoGet(info, key=key, size=local_itemCount, attnestflag=attnestflag, &
-    rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  ! Allocate the outgoing storage array and call into C to fill the array
-  allocate(values(local_itemCount))
-  call c_info_get_array_R8(&
-    info%ptr, &
-    trim(key)//C_NULL_CHAR, &
-    values, &
-    local_itemCount, &
-    localrc, &
-    recursive, &
-    local_scalarToArray_forC)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (present(itemCount)) itemCount = local_itemCount
-  if (present(rc)) rc = ESMF_SUCCESS
-end subroutine ESMF_InfoGetArrayR8Alloc
-
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoGetArrayI4()"
-subroutine ESMF_InfoGetArrayI4(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
-  type(ESMF_Info), intent(in) :: info
-  character(len=*), intent(in) :: key
-  integer(ESMF_KIND_I4), dimension(:), intent(out) :: values
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  integer, intent(out), optional :: itemCount
-  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  logical, intent(in), optional :: scalarToArray
-  integer, intent(out), optional :: rc
-
-  integer :: localrc
-  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC
-  logical :: local_scalarToArray
-
-  local_scalarToArray = .false.
-  localrc = ESMF_FAILURE
-  if (present(rc)) rc = ESMF_FAILURE
-  recursive = 0 !false
-  if (present(scalarToArray)) then
-    local_scalarToArray = scalarToArray
-  end if
-
-  if (present(attnestflag)) then
-    if (attnestflag%value==ESMF_ATTNEST_ON%value) recursive = 1 !true
-  end if
-
-  if (local_scalarToArray) then
-    local_scalarToArray_forC = 1 !true
-  else
-    local_scalarToArray_forC = 0 !false
-  end if
-
-  ! Get the array size from the info store
-  call ESMF_InfoGet(info, key=key, size=local_itemCount, attnestflag=attnestflag, &
-    rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (local_itemCount /= SIZE(values)) then
-    if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="values allocation size does not match size in Info storage", ESMF_CONTEXT, rcToReturn=rc)) return
-  end if
-
-  ! Allocate the outgoing storage array and call into C to fill the array
-  call c_info_get_array_I4(&
-    info%ptr, &
-    trim(key)//C_NULL_CHAR, &
-    values, &
-    local_itemCount, &
-    localrc, &
-    recursive, &
-    local_scalarToArray_forC)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (present(itemCount)) itemCount = local_itemCount
-  if (present(rc)) rc = ESMF_SUCCESS
-end subroutine ESMF_InfoGetArrayI4
-
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoGetArrayI4Alloc()"
-subroutine ESMF_InfoGetArrayI4Alloc(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
-  type(ESMF_Info), intent(in) :: info
-  character(len=*), intent(in) :: key
-  integer(ESMF_KIND_I4), dimension(:),  allocatable, intent(out) :: values
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  integer, intent(out), optional :: itemCount
-  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  logical, intent(in), optional :: scalarToArray
-  integer, intent(out), optional :: rc
-
-  integer :: localrc
-  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC
-  logical :: local_scalarToArray
-
-  local_scalarToArray = .false.
-  localrc = ESMF_FAILURE
-  if (present(rc)) rc = ESMF_FAILURE
-  recursive = 0 !false
-  if (present(scalarToArray)) then
-    local_scalarToArray = scalarToArray
-  end if
-
-  if (present(attnestflag)) then
-    if (attnestflag%value==ESMF_ATTNEST_ON%value) recursive = 1 !true
-  end if
-
-  if (local_scalarToArray) then
-    local_scalarToArray_forC = 1 !true
-  else
-    local_scalarToArray_forC = 0 !false
-  end if
-
-  ! Get the array size from the info store
-  call ESMF_InfoGet(info, key=key, size=local_itemCount, attnestflag=attnestflag, &
-    rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  ! Allocate the outgoing storage array and call into C to fill the array
-  allocate(values(local_itemCount))
-  call c_info_get_array_I4(&
-    info%ptr, &
-    trim(key)//C_NULL_CHAR, &
-    values, &
-    local_itemCount, &
-    localrc, &
-    recursive, &
-    local_scalarToArray_forC)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (present(itemCount)) itemCount = local_itemCount
-  if (present(rc)) rc = ESMF_SUCCESS
-end subroutine ESMF_InfoGetArrayI4Alloc
-
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoGetArrayI8()"
-subroutine ESMF_InfoGetArrayI8(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
-  type(ESMF_Info), intent(in) :: info
-  character(len=*), intent(in) :: key
-  integer(ESMF_KIND_I8), dimension(:), intent(out) :: values
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  integer, intent(out), optional :: itemCount
-  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  logical, intent(in), optional :: scalarToArray
-  integer, intent(out), optional :: rc
-
-  integer :: localrc
-  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC
-  logical :: local_scalarToArray
-
-  local_scalarToArray = .false.
-  localrc = ESMF_FAILURE
-  if (present(rc)) rc = ESMF_FAILURE
-  recursive = 0 !false
-  if (present(scalarToArray)) then
-    local_scalarToArray = scalarToArray
-  end if
-
-  if (present(attnestflag)) then
-    if (attnestflag%value==ESMF_ATTNEST_ON%value) recursive = 1 !true
-  end if
-
-  if (local_scalarToArray) then
-    local_scalarToArray_forC = 1 !true
-  else
-    local_scalarToArray_forC = 0 !false
-  end if
-
-  ! Get the array size from the info store
-  call ESMF_InfoGet(info, key=key, size=local_itemCount, attnestflag=attnestflag, &
-    rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (local_itemCount /= SIZE(values)) then
-    if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="values allocation size does not match size in Info storage", ESMF_CONTEXT, rcToReturn=rc)) return
-  end if
-
-  ! Allocate the outgoing storage array and call into C to fill the array
-  call c_info_get_array_I8(&
-    info%ptr, &
-    trim(key)//C_NULL_CHAR, &
-    values, &
-    local_itemCount, &
-    localrc, &
-    recursive, &
-    local_scalarToArray_forC)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (present(itemCount)) itemCount = local_itemCount
-  if (present(rc)) rc = ESMF_SUCCESS
-end subroutine ESMF_InfoGetArrayI8
-
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoGetArrayI8Alloc()"
-subroutine ESMF_InfoGetArrayI8Alloc(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
-  type(ESMF_Info), intent(in) :: info
-  character(len=*), intent(in) :: key
-  integer(ESMF_KIND_I8), dimension(:),  allocatable, intent(out) :: values
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  integer, intent(out), optional :: itemCount
-  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  logical, intent(in), optional :: scalarToArray
-  integer, intent(out), optional :: rc
-
-  integer :: localrc
-  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC
-  logical :: local_scalarToArray
-
-  local_scalarToArray = .false.
-  localrc = ESMF_FAILURE
-  if (present(rc)) rc = ESMF_FAILURE
-  recursive = 0 !false
-  if (present(scalarToArray)) then
-    local_scalarToArray = scalarToArray
-  end if
-
-  if (present(attnestflag)) then
-    if (attnestflag%value==ESMF_ATTNEST_ON%value) recursive = 1 !true
-  end if
-
-  if (local_scalarToArray) then
-    local_scalarToArray_forC = 1 !true
-  else
-    local_scalarToArray_forC = 0 !false
-  end if
-
-  ! Get the array size from the info store
-  call ESMF_InfoGet(info, key=key, size=local_itemCount, attnestflag=attnestflag, &
-    rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  ! Allocate the outgoing storage array and call into C to fill the array
-  allocate(values(local_itemCount))
-  call c_info_get_array_I8(&
-    info%ptr, &
-    trim(key)//C_NULL_CHAR, &
-    values, &
-    local_itemCount, &
-    localrc, &
-    recursive, &
-    local_scalarToArray_forC)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (present(itemCount)) itemCount = local_itemCount
-  if (present(rc)) rc = ESMF_SUCCESS
-end subroutine ESMF_InfoGetArrayI8Alloc
-
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoGetArrayCH()"
-subroutine ESMF_InfoGetArrayCH(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
-  type(ESMF_Info), intent(in) :: info
-  character(len=*), intent(in) :: key
-  character(len=*), dimension(:), intent(out) :: values
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  integer, intent(out), optional :: itemCount
-  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  logical, intent(in), optional :: scalarToArray
-  integer, intent(out), optional :: rc
-
-  integer :: localrc
-  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC
-  integer :: ii
+  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC, expected_size
   logical :: is_array
   logical :: local_scalarToArray
 
@@ -2402,9 +2003,407 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     local_scalarToArray_forC = 0 !false
   end if
 
+  ! Set the value to a negative one to indicate we are doing an allocatable call
+  ! into the storage layer, and the size should not be checked.
+  expected_size = -1
+
   ! Get the array size from the info store
-  call ESMF_InfoGet(info, key=key, size=local_itemCount, attnestflag=attnestflag, &
-    isArray=is_array, &
+  call ESMF_InfoGetArrayMeta(info, key, is_array, local_itemcount, attnestflag=attnestflag, &
+    rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! Allocate the outgoing storage array and call into C to fill the array
+  allocate(values(local_itemCount))
+  call c_info_get_array_R4(&
+    info%ptr, &
+    trim(key)//C_NULL_CHAR, &
+    values, &
+    local_itemCount, &
+    localrc, &
+    recursive, &
+    local_scalarToArray_forC, &
+    expected_size)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(itemCount)) itemCount = local_itemCount
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_InfoGetArrayR4Alloc
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoGetArrayR8()"
+subroutine ESMF_InfoGetArrayR8(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
+  type(ESMF_Info), intent(in) :: info
+  character(len=*), intent(in) :: key
+  real(ESMF_KIND_R8), dimension(:), intent(out) :: values
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  integer, intent(out), optional :: itemCount
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  logical, intent(in), optional :: scalarToArray
+  integer, intent(out), optional :: rc
+
+  integer :: localrc
+  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC, expected_size
+  logical :: local_scalarToArray
+
+  local_scalarToArray = .false.
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_FAILURE
+  recursive = 0 !false
+  if (present(scalarToArray)) then
+    local_scalarToArray = scalarToArray
+  end if
+
+  if (present(attnestflag)) then
+    if (attnestflag%value==ESMF_ATTNEST_ON%value) recursive = 1 !true
+  end if
+
+  if (local_scalarToArray) then
+    local_scalarToArray_forC = 1 !true
+  else
+    local_scalarToArray_forC = 0 !false
+  end if
+
+  ! This is used to validate the size of the outgoing array given the size in
+  ! storage.
+  expected_size = size(values)
+  call c_info_get_array_R8(&
+    info%ptr, &
+    trim(key)//C_NULL_CHAR, &
+    values, &
+    local_itemCount, &
+    localrc, &
+    recursive, &
+    local_scalarToArray_forC, &
+    expected_size)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(itemCount)) itemCount = local_itemCount
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_InfoGetArrayR8
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoGetArrayR8Alloc()"
+subroutine ESMF_InfoGetArrayR8Alloc(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
+  type(ESMF_Info), intent(in) :: info
+  character(len=*), intent(in) :: key
+  real(ESMF_KIND_R8), dimension(:),  allocatable, intent(out) :: values
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  integer, intent(out), optional :: itemCount
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  logical, intent(in), optional :: scalarToArray
+  integer, intent(out), optional :: rc
+
+  integer :: localrc
+  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC, expected_size
+  logical :: is_array
+  logical :: local_scalarToArray
+
+  local_scalarToArray = .false.
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_FAILURE
+  recursive = 0 !false
+  if (present(scalarToArray)) then
+    local_scalarToArray = scalarToArray
+  end if
+
+  if (present(attnestflag)) then
+    if (attnestflag%value==ESMF_ATTNEST_ON%value) recursive = 1 !true
+  end if
+
+  if (local_scalarToArray) then
+    local_scalarToArray_forC = 1 !true
+  else
+    local_scalarToArray_forC = 0 !false
+  end if
+
+  ! Set the value to a negative one to indicate we are doing an allocatable call
+  ! into the storage layer, and the size should not be checked.
+  expected_size = -1
+
+  ! Get the array size from the info store
+  call ESMF_InfoGetArrayMeta(info, key, is_array, local_itemcount, attnestflag=attnestflag, &
+    rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! Allocate the outgoing storage array and call into C to fill the array
+  allocate(values(local_itemCount))
+  call c_info_get_array_R8(&
+    info%ptr, &
+    trim(key)//C_NULL_CHAR, &
+    values, &
+    local_itemCount, &
+    localrc, &
+    recursive, &
+    local_scalarToArray_forC, &
+    expected_size)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(itemCount)) itemCount = local_itemCount
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_InfoGetArrayR8Alloc
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoGetArrayI4()"
+subroutine ESMF_InfoGetArrayI4(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
+  type(ESMF_Info), intent(in) :: info
+  character(len=*), intent(in) :: key
+  integer(ESMF_KIND_I4), dimension(:), intent(out) :: values
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  integer, intent(out), optional :: itemCount
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  logical, intent(in), optional :: scalarToArray
+  integer, intent(out), optional :: rc
+
+  integer :: localrc
+  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC, expected_size
+  logical :: local_scalarToArray
+
+  local_scalarToArray = .false.
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_FAILURE
+  recursive = 0 !false
+  if (present(scalarToArray)) then
+    local_scalarToArray = scalarToArray
+  end if
+
+  if (present(attnestflag)) then
+    if (attnestflag%value==ESMF_ATTNEST_ON%value) recursive = 1 !true
+  end if
+
+  if (local_scalarToArray) then
+    local_scalarToArray_forC = 1 !true
+  else
+    local_scalarToArray_forC = 0 !false
+  end if
+
+  ! This is used to validate the size of the outgoing array given the size in
+  ! storage.
+  expected_size = size(values)
+  call c_info_get_array_I4(&
+    info%ptr, &
+    trim(key)//C_NULL_CHAR, &
+    values, &
+    local_itemCount, &
+    localrc, &
+    recursive, &
+    local_scalarToArray_forC, &
+    expected_size)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(itemCount)) itemCount = local_itemCount
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_InfoGetArrayI4
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoGetArrayI4Alloc()"
+subroutine ESMF_InfoGetArrayI4Alloc(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
+  type(ESMF_Info), intent(in) :: info
+  character(len=*), intent(in) :: key
+  integer(ESMF_KIND_I4), dimension(:),  allocatable, intent(out) :: values
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  integer, intent(out), optional :: itemCount
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  logical, intent(in), optional :: scalarToArray
+  integer, intent(out), optional :: rc
+
+  integer :: localrc
+  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC, expected_size
+  logical :: is_array
+  logical :: local_scalarToArray
+
+  local_scalarToArray = .false.
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_FAILURE
+  recursive = 0 !false
+  if (present(scalarToArray)) then
+    local_scalarToArray = scalarToArray
+  end if
+
+  if (present(attnestflag)) then
+    if (attnestflag%value==ESMF_ATTNEST_ON%value) recursive = 1 !true
+  end if
+
+  if (local_scalarToArray) then
+    local_scalarToArray_forC = 1 !true
+  else
+    local_scalarToArray_forC = 0 !false
+  end if
+
+  ! Set the value to a negative one to indicate we are doing an allocatable call
+  ! into the storage layer, and the size should not be checked.
+  expected_size = -1
+
+  ! Get the array size from the info store
+  call ESMF_InfoGetArrayMeta(info, key, is_array, local_itemcount, attnestflag=attnestflag, &
+    rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! Allocate the outgoing storage array and call into C to fill the array
+  allocate(values(local_itemCount))
+  call c_info_get_array_I4(&
+    info%ptr, &
+    trim(key)//C_NULL_CHAR, &
+    values, &
+    local_itemCount, &
+    localrc, &
+    recursive, &
+    local_scalarToArray_forC, &
+    expected_size)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(itemCount)) itemCount = local_itemCount
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_InfoGetArrayI4Alloc
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoGetArrayI8()"
+subroutine ESMF_InfoGetArrayI8(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
+  type(ESMF_Info), intent(in) :: info
+  character(len=*), intent(in) :: key
+  integer(ESMF_KIND_I8), dimension(:), intent(out) :: values
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  integer, intent(out), optional :: itemCount
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  logical, intent(in), optional :: scalarToArray
+  integer, intent(out), optional :: rc
+
+  integer :: localrc
+  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC, expected_size
+  logical :: local_scalarToArray
+
+  local_scalarToArray = .false.
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_FAILURE
+  recursive = 0 !false
+  if (present(scalarToArray)) then
+    local_scalarToArray = scalarToArray
+  end if
+
+  if (present(attnestflag)) then
+    if (attnestflag%value==ESMF_ATTNEST_ON%value) recursive = 1 !true
+  end if
+
+  if (local_scalarToArray) then
+    local_scalarToArray_forC = 1 !true
+  else
+    local_scalarToArray_forC = 0 !false
+  end if
+
+  ! This is used to validate the size of the outgoing array given the size in
+  ! storage.
+  expected_size = size(values)
+  call c_info_get_array_I8(&
+    info%ptr, &
+    trim(key)//C_NULL_CHAR, &
+    values, &
+    local_itemCount, &
+    localrc, &
+    recursive, &
+    local_scalarToArray_forC, &
+    expected_size)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(itemCount)) itemCount = local_itemCount
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_InfoGetArrayI8
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoGetArrayI8Alloc()"
+subroutine ESMF_InfoGetArrayI8Alloc(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
+  type(ESMF_Info), intent(in) :: info
+  character(len=*), intent(in) :: key
+  integer(ESMF_KIND_I8), dimension(:),  allocatable, intent(out) :: values
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  integer, intent(out), optional :: itemCount
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  logical, intent(in), optional :: scalarToArray
+  integer, intent(out), optional :: rc
+
+  integer :: localrc
+  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC, expected_size
+  logical :: is_array
+  logical :: local_scalarToArray
+
+  local_scalarToArray = .false.
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_FAILURE
+  recursive = 0 !false
+  if (present(scalarToArray)) then
+    local_scalarToArray = scalarToArray
+  end if
+
+  if (present(attnestflag)) then
+    if (attnestflag%value==ESMF_ATTNEST_ON%value) recursive = 1 !true
+  end if
+
+  if (local_scalarToArray) then
+    local_scalarToArray_forC = 1 !true
+  else
+    local_scalarToArray_forC = 0 !false
+  end if
+
+  ! Set the value to a negative one to indicate we are doing an allocatable call
+  ! into the storage layer, and the size should not be checked.
+  expected_size = -1
+
+  ! Get the array size from the info store
+  call ESMF_InfoGetArrayMeta(info, key, is_array, local_itemcount, attnestflag=attnestflag, &
+    rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! Allocate the outgoing storage array and call into C to fill the array
+  allocate(values(local_itemCount))
+  call c_info_get_array_I8(&
+    info%ptr, &
+    trim(key)//C_NULL_CHAR, &
+    values, &
+    local_itemCount, &
+    localrc, &
+    recursive, &
+    local_scalarToArray_forC, &
+    expected_size)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(itemCount)) itemCount = local_itemCount
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_InfoGetArrayI8Alloc
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoGetArrayCH()"
+subroutine ESMF_InfoGetArrayCH(info, key, values, keywordEnforcer, itemCount, attnestflag, scalarToArray, rc)
+  type(ESMF_Info), intent(in) :: info
+  character(len=*), intent(in) :: key
+  character(len=*), dimension(:), intent(out) :: values
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  integer, intent(out), optional :: itemCount
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  logical, intent(in), optional :: scalarToArray
+  integer, intent(out), optional :: rc
+
+  integer :: localrc
+  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC, expected_size
+  integer :: ii
+  logical :: is_array
+  logical :: local_scalarToArray
+
+  local_scalarToArray = .false.
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_FAILURE
+  recursive = 0 !false
+  if (present(scalarToArray)) then
+    local_scalarToArray = scalarToArray
+  end if
+
+  if (present(attnestflag)) then
+    if (attnestflag%value==ESMF_ATTNEST_ON%value) recursive = 1 !true
+  end if
+
+  ! Set the value to a negative one to indicate we are doing an allocatable call
+  ! into the storage layer, and the size should not be checked.
+  expected_size = -1
+
+  ! Get the array size from the info store
+  call ESMF_InfoGetArrayMeta(info, key, is_array, local_itemcount, attnestflag=attnestflag, &
     rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2417,8 +2416,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   if (local_itemCount /= SIZE(values)) then
     if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="values allocation size does not match size in Info storage", ESMF_CONTEXT, rcToReturn=rc)) return
   end if
-
-  ! Allocate the outgoing storage array and call into C to fill the array
   do ii=1,local_itemCount
     if (.not. is_array .and. local_scalarToArray) then
       call ESMF_InfoGetCH(info, key, values(ii), attnestflag=attnestflag, rc=localrc)
@@ -2445,7 +2442,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(out), optional :: rc
 
   integer :: localrc
-  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC
+  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC, expected_size
   integer :: ii
   logical :: is_array
   logical :: local_scalarToArray
@@ -2462,15 +2459,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (attnestflag%value==ESMF_ATTNEST_ON%value) recursive = 1 !true
   end if
 
-  if (local_scalarToArray) then
-    local_scalarToArray_forC = 1 !true
-  else
-    local_scalarToArray_forC = 0 !false
-  end if
+  ! Set the value to a negative one to indicate we are doing an allocatable call
+  ! into the storage layer, and the size should not be checked.
+  expected_size = -1
 
   ! Get the array size from the info store
-  call ESMF_InfoGet(info, key=key, size=local_itemCount, attnestflag=attnestflag, &
-    isArray=is_array, &
+  call ESMF_InfoGetArrayMeta(info, key, is_array, local_itemcount, attnestflag=attnestflag, &
     rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2508,7 +2502,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(out), optional :: rc
 
   integer :: localrc
-  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC
+  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC, expected_size
   integer :: ii
   logical(C_BOOL), dimension(:), allocatable :: local_values
   logical :: local_scalarToArray
@@ -2531,16 +2525,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     local_scalarToArray_forC = 0 !false
   end if
 
-  ! Get the array size from the info store
-  call ESMF_InfoGet(info, key=key, size=local_itemCount, attnestflag=attnestflag, &
-    rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (local_itemCount /= SIZE(values)) then
-    if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="values allocation size does not match size in Info storage", ESMF_CONTEXT, rcToReturn=rc)) return
-  end if
-
-  ! Allocate the outgoing storage array and call into C to fill the array
+  ! This is used to validate the size of the outgoing array given the size in
+  ! storage.
+  expected_size = size(values)
   allocate(local_values(local_itemCount))
   call c_info_get_array_LG(&
     info%ptr, &
@@ -2549,7 +2536,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     local_itemCount, &
     localrc, &
     recursive, &
-    local_scalarToArray_forC)
+    local_scalarToArray_forC, &
+    expected_size)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   do ii=1,SIZE(values)
@@ -2574,8 +2562,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(out), optional :: rc
 
   integer :: localrc
-  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC
+  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC, expected_size
   integer :: ii
+  logical :: is_array
   logical(C_BOOL), dimension(:), allocatable :: local_values
   logical :: local_scalarToArray
 
@@ -2597,8 +2586,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     local_scalarToArray_forC = 0 !false
   end if
 
+  ! Set the value to a negative one to indicate we are doing an allocatable call
+  ! into the storage layer, and the size should not be checked.
+  expected_size = -1
+
   ! Get the array size from the info store
-  call ESMF_InfoGet(info, key=key, size=local_itemCount, attnestflag=attnestflag, &
+  call ESMF_InfoGetArrayMeta(info, key, is_array, local_itemcount, attnestflag=attnestflag, &
     rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2612,7 +2605,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     local_itemCount, &
     localrc, &
     recursive, &
-    local_scalarToArray_forC)
+    local_scalarToArray_forC, &
+    expected_size)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   do ii=1,SIZE(values)
@@ -3187,6 +3181,131 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   if (present(rc)) rc = ESMF_SUCCESS
 end function ESMF_InfoIsPresent
+
+!------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoGetTK()"
+!BOP
+! !IROUTINE: ESMF_InfoGetTK - Retrieve the ESMF TypeKind for a key
+!
+! !INTERFACE:
+function ESMF_InfoGetTK(info, key, keywordEnforcer, attnestflag, rc) result(typekind)
+! !ARGUMENTS:
+  type(ESMF_Info), intent(in) :: info
+  character(len=*), intent(in) :: key
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(out), optional :: rc
+! !RETURN VALUE:
+  type(ESMF_TypeKind_Flag) :: typekind
+!
+! !DESCRIPTION:
+!     Return a value's ESMF TypeKind using a \textit{key}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [info]
+!       Target \texttt{ESMF\_Info} object.
+!     \item [key]
+!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
+!       for an overview of the key format.
+!     \item [{[attnestflag]}]
+!       Setting to \texttt{ESMF\_ATTNEST\_ON} triggers a recursive search for
+!       \textit{keyParent}. The first instance of the key will be found in the
+!       hierarchy. Default is \texttt{ESMF\_ATTNEST\_OFF}.
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOP
+
+  integer :: localrc
+  integer(C_INT) :: local_typekind
+  integer(C_INT) :: recursive
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_FAILURE
+  recursive = 0 !false
+  local_typekind = 0
+
+  if (present(attnestflag)) then
+    if (attnestflag%value==ESMF_ATTNEST_ON%value) recursive = 1 !true
+  end if
+
+  call c_info_get_tk(info%ptr, trim(key)//C_NULL_CHAR, local_typekind, &
+    localrc, recursive)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  typekind = ESMF_TypeKind_Flag(local_typekind)
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end function ESMF_InfoGetTK
+
+!------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoGetArrayMeta()"
+!BOP
+! !IROUTINE: ESMF_InfoGetArrayMeta - Retrieve array metadata information
+!
+! !INTERFACE:
+subroutine ESMF_InfoGetArrayMeta(info, key, isArray, size, keywordEnforcer, attnestflag, rc)
+! !ARGUMENTS:
+  type(ESMF_Info), intent(in) :: info
+  character(len=*), intent(in) :: key
+  logical, intent(out) :: isArray
+  integer(C_INT), intent(out) :: size
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Return a value's array status and size using a \textit{key}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [info]
+!       Target \texttt{ESMF\_Info} object.
+!     \item [key]
+!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
+!       for an overview of the key format.
+!     \item [isArray]
+!       Set to \texttt{true} if the target is an array in storage.
+!     \item [size]
+!       Set to the size of the target object in storage (i.e. length of the array).
+!     \item [{[attnestflag]}]
+!       Setting to \texttt{ESMF\_ATTNEST\_ON} triggers a recursive search for
+!       \textit{keyParent}. The first instance of the key will be found in the
+!       hierarchy. Default is \texttt{ESMF\_ATTNEST\_OFF}.
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOP
+
+  integer :: localrc
+  integer(C_INT) :: local_is_array
+  integer(C_INT) :: recursive
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_FAILURE
+
+  recursive = 0 !false
+  if (present(attnestflag)) then
+    if (attnestflag%value==ESMF_ATTNEST_ON%value) recursive = 1 !true
+  end if
+
+  call c_info_get_array_meta(info%ptr, trim(key)//C_NULL_CHAR, local_is_array, size, recursive, &
+    localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (local_is_array == 1) then
+    isArray = .true.
+  else
+    isArray = .false.
+  end if
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_InfoGetArrayMeta
 
 !------------------------------------------------------------------------------
 

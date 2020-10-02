@@ -316,6 +316,43 @@ void ESMC_InfoIsPresent(ESMCI::Info *info, char *key, int &fortran_bool_res,
 }
 
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_InfoGetTK()"
+void ESMC_InfoGetTK(ESMCI::Info *info, char *key, int &typekind, int &esmc_rc,
+                    int &fortran_bool_recursive) {
+  ESMC_CHECK_INIT(info, esmc_rc)
+  bool recursive = fortran_bool_recursive == 1;
+  try {
+    std::string local_key(key);
+    const json *sp = &(info->getStorageRef());
+    try {
+      json::json_pointer jp = info->formatKey(local_key);
+      ESMCI::update_json_pointer(info->getStorageRef(), &sp, jp, recursive);
+      bool is_32bit = ESMCI::retrieve_32bit_flag(info->getTypeStorage(), jp, recursive);
+      typekind = ESMCI::json_type_to_esmf_typekind(*sp, true, is_32bit);
+    }
+    ESMC_CATCH_ERRPASSTHRU
+    esmc_rc = ESMF_SUCCESS;
+  }
+  ESMC_CATCH_ISOC
+}
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_InfoGetArrayMeta()"
+void ESMC_InfoGetArrayMeta(ESMCI::Info *info, char *key, int &fortran_bool_is_array,
+                           int &size, int &fortran_bool_recursive, int &esmc_rc) {
+  ESMC_CHECK_INIT(info, esmc_rc)
+  try {
+    bool recursive = fortran_bool_recursive == 1;
+    std::string local_key(key);
+    json const *j = info->getPointer(local_key, recursive);
+    fortran_bool_is_array = j->is_array() ? 1:0;
+    size = static_cast<int>(j->size());
+    esmc_rc = ESMF_SUCCESS;
+  }
+  ESMC_CATCH_ISOC
+}
+
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoIsSet()"
 void ESMC_InfoIsSet(ESMCI::Info *info, char *key, int &isSet, int &esmc_rc) {
   ESMC_CHECK_INIT(info, esmc_rc)

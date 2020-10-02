@@ -2482,12 +2482,11 @@ module NUOPC_Connector
     type(ESMF_TypeKind_Flag)        :: tkf
     integer                         :: tk, gl
     character(ESMF_MAXSTR)          :: acceptorTransferActionAttr
-    
     type(GridL), pointer            :: gridList, gridListE
     logical                         :: gridListMatch
-    
     type(MeshL), pointer            :: meshList, meshListE
     logical                         :: meshListMatch
+    type(ESMF_Info)                 :: info
 
     rc = ESMF_SUCCESS
 
@@ -2998,58 +2997,45 @@ call ESMF_PointerLog(gridListE%keyGrid%this, &
           endif
           if (.not.sharedField) then
             ! transfer additional provider info in form of attributes
+            call ESMF_InfoGetFromHost(acceptorField, info=info, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             tk = tkf  ! convert TypeKind_Flag to integer
-            call ESMF_AttributeSet(acceptorField, &
-              name="TypeKind", value=tk, &
-              convention="NUOPC", purpose="Instance", &
-              attnestflag=ESMF_ATTNEST_ON, rc=rc)
+            call ESMF_InfoSet(info, key="/NUOPC/Instance/TypeKind", &
+              value=tk, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             gl = staggerloc  ! convert StaggerLoc to integer
-            call ESMF_AttributeSet(acceptorField, &
-              name="GeomLoc", value=gl, &
-              convention="NUOPC", purpose="Instance", &
-              attnestflag=ESMF_ATTNEST_ON, rc=rc)
+            call ESMF_InfoSet(info, key="/NUOPC/Instance/GeomLoc", &
+              value=gl, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            call ESMF_AttributeSet(acceptorField, &
-              name="MinIndex", valueList=minIndex, &
-              convention="NUOPC", purpose="Instance", &
-              attnestflag=ESMF_ATTNEST_ON, rc=rc)
+            call ESMF_InfoSet(info, key="/NUOPC/Instance/MinIndex", &
+              values=minIndex, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            call ESMF_AttributeSet(acceptorField, &
-              name="MaxIndex", valueList=maxIndex, &
-              convention="NUOPC", purpose="Instance", &
-              attnestflag=ESMF_ATTNEST_ON, rc=rc)
+            call ESMF_InfoSet(info, key="/NUOPC/Instance/MaxIndex", &
+              values=maxIndex, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             ! bring over arbDimCount as attribute
-            call ESMF_AttributeSet(acceptorField, &
-              name="ArbDimCount", value=arbDimCount, &
-              convention="NUOPC", purpose="Instance", &
-              attnestflag=ESMF_ATTNEST_ON, rc=rc)
+            call ESMF_InfoSet(info, key="/NUOPC/Instance/ArbDimCount", &
+              value=arbDimCount, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             ! bring over gridToFieldMap as attributes
-            call ESMF_AttributeSet(acceptorField, &
-              name="GridToFieldMap", valueList=gridToFieldMap, &
-              convention="NUOPC", purpose="Instance", &
-              attnestflag=ESMF_ATTNEST_ON, rc=rc)
+            call ESMF_InfoSet(info, key="/NUOPC/Instance/GridToFieldMap", &
+              values=gridToFieldMap, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             if (fieldDimCount - gridDimCount > 0) then
               ! bring over ungridded dim bounds as attributes
-              call ESMF_AttributeSet(acceptorField, &
-                name="UngriddedLBound", valueList=ungriddedLBound, &
-                convention="NUOPC", purpose="Instance", &
-                attnestflag=ESMF_ATTNEST_ON, rc=rc)
+              call ESMF_InfoSet(info, key="/NUOPC/Instance/UngriddedLBound", &
+                values=ungriddedLBound, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-              call ESMF_AttributeSet(acceptorField, &
-                name="UngriddedUBound", valueList=ungriddedUBound, &
-                convention="NUOPC", purpose="Instance", &
-                attnestflag=ESMF_ATTNEST_ON, rc=rc)
+              call ESMF_InfoSet(info, key="/NUOPC/Instance/UngriddedUBound", &
+                values=ungriddedUBound, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             endif
@@ -3242,39 +3228,32 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
           endif
           if (.not.sharedField) then
             ! transfer additional provider info in form of attributes
+            call ESMF_InfoGetFromHost(acceptorField, info=info, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             tk = tkf  ! convert TypeKind_Flag to integer
-            call ESMF_AttributeSet(acceptorField, &
-              name="TypeKind", value=tk, &
-              convention="NUOPC", purpose="Instance", &
-              attnestflag=ESMF_ATTNEST_ON, rc=rc)
+            call ESMF_InfoSet(info, key="/NUOPC/Instance/TypeKind", &
+              value=tk, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             gl = meshloc  ! convert StaggerLoc to integer
-            call ESMF_AttributeSet(acceptorField, &
-              name="GeomLoc", value=gl, &
-              convention="NUOPC", purpose="Instance", &
-              attnestflag=ESMF_ATTNEST_ON, rc=rc)
+            call ESMF_InfoSet(info, key="/NUOPC/Instance/GeomLoc", &
+              value=gl, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             ! bring over gridToFieldMap as attributes
-            call ESMF_AttributeSet(acceptorField, &
-              name="GridToFieldMap", valueList=gridToFieldMap, &
-              convention="NUOPC", purpose="Instance", &
-              attnestflag=ESMF_ATTNEST_ON, rc=rc)
+            call ESMF_InfoSet(info, key="/NUOPC/Instance/GridToFieldMap", &
+              values=gridToFieldMap, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             if (fieldDimCount - gridDimCount > 0) then
               ! bring over ungridded dim bounds as attributes
-              call ESMF_AttributeSet(acceptorField, &
-                name="UngriddedLBound", valueList=ungriddedLBound, &
-                convention="NUOPC", purpose="Instance", &
-                attnestflag=ESMF_ATTNEST_ON, rc=rc)
+              call ESMF_InfoSet(info, key="/NUOPC/Instance/UngriddedLBound", &
+                values=ungriddedLBound, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-              call ESMF_AttributeSet(acceptorField, &
-                name="UngriddedUBound", valueList=ungriddedUBound, &
-                convention="NUOPC", purpose="Instance", &
-                attnestflag=ESMF_ATTNEST_ON, rc=rc)
+              call ESMF_InfoSet(info, key="/NUOPC/Instance/UngriddedUBound", &
+                values=ungriddedUBound, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             endif
@@ -3395,32 +3374,27 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           endif
           ! transfer additional provider info in form of attributes
+          call ESMF_InfoGetFromHost(acceptorField, info=info, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           tk = tkf  ! convert TypeKind_Flag to integer
-          call ESMF_AttributeSet(acceptorField, &
-            name="TypeKind", value=tk, &
-            convention="NUOPC", purpose="Instance", &
-            attnestflag=ESMF_ATTNEST_ON, rc=rc)
+          call ESMF_InfoSet(info, key="/NUOPC/Instance/TypeKind", &
+            value=tk, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           ! bring over gridToFieldMap as attributes
-          call ESMF_AttributeSet(acceptorField, &
-            name="GridToFieldMap", valueList=gridToFieldMap, &
-            convention="NUOPC", purpose="Instance", &
-            attnestflag=ESMF_ATTNEST_ON, rc=rc)
+          call ESMF_InfoSet(info, key="/NUOPC/Instance/GridToFieldMap", &
+            values=gridToFieldMap, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           if (fieldDimCount - gridDimCount > 0) then
             ! bring over ungridded dim bounds as attributes
-            call ESMF_AttributeSet(acceptorField, &
-              name="UngriddedLBound", valueList=ungriddedLBound, &
-              convention="NUOPC", purpose="Instance", &
-              attnestflag=ESMF_ATTNEST_ON, rc=rc)
+            call ESMF_InfoSet(info, key="/NUOPC/Instance/UngriddedLBound", &
+              values=ungriddedLBound, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            call ESMF_AttributeSet(acceptorField, &
-              name="UngriddedUBound", valueList=ungriddedUBound, &
-              convention="NUOPC", purpose="Instance", &
-              attnestflag=ESMF_ATTNEST_ON, rc=rc)
+            call ESMF_InfoSet(info, key="/NUOPC/Instance/ungriddedUBound", &
+              values=ungriddedUBound, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           endif
@@ -5619,6 +5593,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     type(type_UpdatePacket), pointer  :: upE
     integer                           :: i, j, jj
     integer, pointer                  :: bufferPtr(:)
+    type(ESMF_Info)                   :: info
     
     rc = ESMF_SUCCESS
     
@@ -5648,10 +5623,11 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
         ! there are messages to be sent -> fill the sendBuffer
         do j=1, upE%fieldCount
           jj = upE%fieldIndex(j)
-          call ESMF_AttributeGet(srcFieldList(jj), &
-            name="TimeStamp", valueList=upE%sendBuffer(:,j), &
-            convention="NUOPC", purpose="Instance", &
-            attnestflag=ESMF_ATTNEST_ON, rc=rc)
+          call ESMF_InfoGetFromHost(srcFieldList(jj), info=info, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+          call ESMF_InfoGet(info, key="/NUOPC/Instance/TimeStamp", &
+            values=upE%sendBuffer(:,j), rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
         enddo
@@ -5680,10 +5656,11 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
         ! fill in the reiceived timestamps
         do j=1, upE%fieldCount
           jj = upE%fieldIndex(j)
-          call ESMF_AttributeSet(dstFieldList(jj), &
-            name="TimeStamp", valueList=upE%recvBuffer(:,j), &
-            convention="NUOPC", purpose="Instance", &
-            attnestflag=ESMF_ATTNEST_ON, rc=rc)
+          call ESMF_InfoGetFromHost(dstFieldList(jj), info=info, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+          call ESMF_InfoSet(info, key="/NUOPC/Instance/TimeStamp", &
+            values=upE%recvBuffer(:,j), rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
         enddo

@@ -19725,7 +19725,7 @@ subroutine ESMF_AttributeGetAttPackArrayR4(target, name, attpack, value, default
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -19874,7 +19874,7 @@ subroutine ESMF_AttributeGetAttPackArrayR8(target, name, attpack, value, default
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -20023,7 +20023,7 @@ subroutine ESMF_AttributeGetAttPackArrayI4(target, name, attpack, value, default
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -20172,7 +20172,7 @@ subroutine ESMF_AttributeGetAttPackArrayI8(target, name, attpack, value, default
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -20321,7 +20321,7 @@ subroutine ESMF_AttributeGetAttPackArrayCH(target, name, attpack, value, default
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -20470,7 +20470,7 @@ subroutine ESMF_AttributeGetAttPackArrayLG(target, name, attpack, value, default
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -20619,7 +20619,7 @@ subroutine ESMF_AttributeGetAttPackArrayBundleR4(target, name, attpack, value, d
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -20768,7 +20768,7 @@ subroutine ESMF_AttributeGetAttPackArrayBundleR8(target, name, attpack, value, d
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -20917,7 +20917,7 @@ subroutine ESMF_AttributeGetAttPackArrayBundleI4(target, name, attpack, value, d
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -21066,7 +21066,7 @@ subroutine ESMF_AttributeGetAttPackArrayBundleI8(target, name, attpack, value, d
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -21215,7 +21215,7 @@ subroutine ESMF_AttributeGetAttPackArrayBundleCH(target, name, attpack, value, d
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -21364,7 +21364,7 @@ subroutine ESMF_AttributeGetAttPackArrayBundleLG(target, name, attpack, value, d
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -21513,7 +21513,7 @@ subroutine ESMF_AttributeGetAttPackCplCompR4(target, name, attpack, value, defau
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -21662,7 +21662,7 @@ subroutine ESMF_AttributeGetAttPackCplCompR8(target, name, attpack, value, defau
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -21811,7 +21811,7 @@ subroutine ESMF_AttributeGetAttPackCplCompI4(target, name, attpack, value, defau
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -21960,7 +21960,7 @@ subroutine ESMF_AttributeGetAttPackCplCompI8(target, name, attpack, value, defau
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -22109,7 +22109,7 @@ subroutine ESMF_AttributeGetAttPackCplCompCH(target, name, attpack, value, defau
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -22258,7 +22258,7 @@ subroutine ESMF_AttributeGetAttPackCplCompLG(target, name, attpack, value, defau
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -22407,7 +22407,7 @@ subroutine ESMF_AttributeGetAttPackGridCompR4(target, name, attpack, value, defa
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -22556,7 +22556,7 @@ subroutine ESMF_AttributeGetAttPackGridCompR8(target, name, attpack, value, defa
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -22705,7 +22705,7 @@ subroutine ESMF_AttributeGetAttPackGridCompI4(target, name, attpack, value, defa
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -22854,7 +22854,7 @@ subroutine ESMF_AttributeGetAttPackGridCompI8(target, name, attpack, value, defa
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -23003,7 +23003,7 @@ subroutine ESMF_AttributeGetAttPackGridCompCH(target, name, attpack, value, defa
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -23152,7 +23152,7 @@ subroutine ESMF_AttributeGetAttPackGridCompLG(target, name, attpack, value, defa
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -23301,7 +23301,7 @@ subroutine ESMF_AttributeGetAttPackSciCompR4(target, name, attpack, value, defau
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -23450,7 +23450,7 @@ subroutine ESMF_AttributeGetAttPackSciCompR8(target, name, attpack, value, defau
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -23599,7 +23599,7 @@ subroutine ESMF_AttributeGetAttPackSciCompI4(target, name, attpack, value, defau
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -23748,7 +23748,7 @@ subroutine ESMF_AttributeGetAttPackSciCompI8(target, name, attpack, value, defau
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -23897,7 +23897,7 @@ subroutine ESMF_AttributeGetAttPackSciCompCH(target, name, attpack, value, defau
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -24046,7 +24046,7 @@ subroutine ESMF_AttributeGetAttPackSciCompLG(target, name, attpack, value, defau
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -24195,7 +24195,7 @@ subroutine ESMF_AttributeGetAttPackDistGridR4(target, name, attpack, value, defa
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -24344,7 +24344,7 @@ subroutine ESMF_AttributeGetAttPackDistGridR8(target, name, attpack, value, defa
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -24493,7 +24493,7 @@ subroutine ESMF_AttributeGetAttPackDistGridI4(target, name, attpack, value, defa
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -24642,7 +24642,7 @@ subroutine ESMF_AttributeGetAttPackDistGridI8(target, name, attpack, value, defa
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -24791,7 +24791,7 @@ subroutine ESMF_AttributeGetAttPackDistGridCH(target, name, attpack, value, defa
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -24940,7 +24940,7 @@ subroutine ESMF_AttributeGetAttPackDistGridLG(target, name, attpack, value, defa
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -25089,7 +25089,7 @@ subroutine ESMF_AttributeGetAttPackFieldR4(target, name, attpack, value, default
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -25238,7 +25238,7 @@ subroutine ESMF_AttributeGetAttPackFieldR8(target, name, attpack, value, default
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -25387,7 +25387,7 @@ subroutine ESMF_AttributeGetAttPackFieldI4(target, name, attpack, value, default
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -25536,7 +25536,7 @@ subroutine ESMF_AttributeGetAttPackFieldI8(target, name, attpack, value, default
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -25685,7 +25685,7 @@ subroutine ESMF_AttributeGetAttPackFieldCH(target, name, attpack, value, default
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -25834,7 +25834,7 @@ subroutine ESMF_AttributeGetAttPackFieldLG(target, name, attpack, value, default
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -25983,7 +25983,7 @@ subroutine ESMF_AttributeGetAttPackFieldBundleR4(target, name, attpack, value, d
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -26132,7 +26132,7 @@ subroutine ESMF_AttributeGetAttPackFieldBundleR8(target, name, attpack, value, d
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -26281,7 +26281,7 @@ subroutine ESMF_AttributeGetAttPackFieldBundleI4(target, name, attpack, value, d
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -26430,7 +26430,7 @@ subroutine ESMF_AttributeGetAttPackFieldBundleI8(target, name, attpack, value, d
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -26579,7 +26579,7 @@ subroutine ESMF_AttributeGetAttPackFieldBundleCH(target, name, attpack, value, d
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -26728,7 +26728,7 @@ subroutine ESMF_AttributeGetAttPackFieldBundleLG(target, name, attpack, value, d
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -26877,7 +26877,7 @@ subroutine ESMF_AttributeGetAttPackGridR4(target, name, attpack, value, defaultv
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -27026,7 +27026,7 @@ subroutine ESMF_AttributeGetAttPackGridR8(target, name, attpack, value, defaultv
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -27175,7 +27175,7 @@ subroutine ESMF_AttributeGetAttPackGridI4(target, name, attpack, value, defaultv
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -27324,7 +27324,7 @@ subroutine ESMF_AttributeGetAttPackGridI8(target, name, attpack, value, defaultv
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -27473,7 +27473,7 @@ subroutine ESMF_AttributeGetAttPackGridCH(target, name, attpack, value, defaultv
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -27622,7 +27622,7 @@ subroutine ESMF_AttributeGetAttPackGridLG(target, name, attpack, value, defaultv
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -27771,7 +27771,7 @@ subroutine ESMF_AttributeGetAttPackStateR4(target, name, attpack, value, default
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -27920,7 +27920,7 @@ subroutine ESMF_AttributeGetAttPackStateR8(target, name, attpack, value, default
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -28069,7 +28069,7 @@ subroutine ESMF_AttributeGetAttPackStateI4(target, name, attpack, value, default
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -28218,7 +28218,7 @@ subroutine ESMF_AttributeGetAttPackStateI8(target, name, attpack, value, default
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -28367,7 +28367,7 @@ subroutine ESMF_AttributeGetAttPackStateCH(target, name, attpack, value, default
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -28516,7 +28516,7 @@ subroutine ESMF_AttributeGetAttPackStateLG(target, name, attpack, value, default
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -28665,7 +28665,7 @@ subroutine ESMF_AttributeGetAttPackLocStreamR4(target, name, attpack, value, def
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -28814,7 +28814,7 @@ subroutine ESMF_AttributeGetAttPackLocStreamR8(target, name, attpack, value, def
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -28963,7 +28963,7 @@ subroutine ESMF_AttributeGetAttPackLocStreamI4(target, name, attpack, value, def
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -29112,7 +29112,7 @@ subroutine ESMF_AttributeGetAttPackLocStreamI8(target, name, attpack, value, def
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -29261,7 +29261,7 @@ subroutine ESMF_AttributeGetAttPackLocStreamCH(target, name, attpack, value, def
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -29410,7 +29410,7 @@ subroutine ESMF_AttributeGetAttPackLocStreamLG(target, name, attpack, value, def
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -29559,7 +29559,7 @@ subroutine ESMF_AttributeGetAttPackMeshR4(target, name, attpack, value, defaultv
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -29708,7 +29708,7 @@ subroutine ESMF_AttributeGetAttPackMeshR8(target, name, attpack, value, defaultv
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -29857,7 +29857,7 @@ subroutine ESMF_AttributeGetAttPackMeshI4(target, name, attpack, value, defaultv
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -30006,7 +30006,7 @@ subroutine ESMF_AttributeGetAttPackMeshI8(target, name, attpack, value, defaultv
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -30155,7 +30155,7 @@ subroutine ESMF_AttributeGetAttPackMeshCH(target, name, attpack, value, defaultv
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
@@ -30304,7 +30304,7 @@ subroutine ESMF_AttributeGetAttPackMeshLG(target, name, attpack, value, defaultv
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else

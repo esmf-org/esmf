@@ -600,7 +600,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
   if (local_isPresent) then
-    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
