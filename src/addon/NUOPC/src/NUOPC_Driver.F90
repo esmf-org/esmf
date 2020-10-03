@@ -985,6 +985,34 @@ module NUOPC_Driver
                 value=vString, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail
+              ! automatically created connectors inherit Profiling from parent
+              call NUOPC_CompAttributeGet(driver, name="Profiling", &
+                value=valueString, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail
+              if (trim(valueString)=="max" .or. trim(valueString)=="high" .or. &
+                trim(valueString)=="low" .or. trim(valueString)=="off") then
+                ! directly inherit presets
+                vString = trim(valueString)
+              else
+                ! not a preset level: lower 16-bit of parent's profiling setting
+                vInherit = ibits(profiling,0,16)
+                write(vString,"(I10)") vInherit
+              endif
+              if (btest(verbosity,13)) then
+                write (msgString,"(A)") trim(name)//&
+                  " - Setting Profiling on created component to: "// &
+                  trim(vString)
+                call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, &
+                  file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                  return  ! bail out
+              endif
+              call NUOPC_CompAttributeSet(connector, name="Profiling", &
+                value=vString, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail
             endif
           endif
         endif
@@ -5628,6 +5656,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical                                         :: optAutoAddConnectors
     type(ESMF_CplComp)                              :: conn
     integer                                         :: verbosity, vInherit
+    integer                                         :: profiling
     character(len=10)                               :: vString
     logical                                         :: needDriverTopLoop
     type(NUOPC_FreeFormat), target                  :: freeFormatTemp
@@ -5644,7 +5673,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(autoAddConnectors)) optAutoAddConnectors = autoAddConnectors
 
     ! query the component for info
-    call NUOPC_CompGet(driver, name=name, verbosity=verbosity, rc=localrc)
+    call NUOPC_CompGet(driver, name=name, verbosity=verbosity, &
+      profiling=profiling, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -5742,7 +5772,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               ! directly inherit presets
               vString = trim(valueString)
             else
-              ! not a preset level: lower 8-bit of parent's verbosity setting
+              ! not a preset level: lower 8-bit of parent's Verbosity setting
               vInherit = ibits(verbosity,0,8)
               write(vString,"(I10)") vInherit
             endif
@@ -5757,6 +5787,34 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 return  ! bail out
             endif
             call NUOPC_CompAttributeSet(conn, name="Verbosity", value=vString, &
+              rc=localrc)
+            if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU,&
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail
+            ! automatically created connectors inherit Profiling from parent
+            call NUOPC_CompAttributeGet(driver, name="Profiling", &
+              value=valueString, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail
+            if (trim(valueString)=="max" .or. trim(valueString)=="high" .or. &
+              trim(valueString)=="low" .or. trim(valueString)=="off") then
+              ! directly inherit presets
+              vString = trim(valueString)
+            else
+              ! not a preset level: lower 16-bit of parent's Profiling setting
+              vInherit = ibits(profiling,0,16)
+              write(vString,"(I10)") vInherit
+            endif
+            if (btest(verbosity,13)) then
+              write (msgString,"(A)") trim(name)//&
+                " - Setting Profiling on created component to: "// &
+                trim(vString)
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, &
+                file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+            endif
+            call NUOPC_CompAttributeSet(conn, name="Profiling", value=vString, &
               rc=localrc)
             if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU,&
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail
