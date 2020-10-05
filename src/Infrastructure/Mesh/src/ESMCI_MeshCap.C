@@ -1573,7 +1573,7 @@ MeshCap *MeshCap::meshcreateredistelems(MeshCap **src_meshpp, int *num_elem_gids
 #else
    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
       "This functionality requires ESMF to be built with the MOAB library enabled" ,
-      ESMC_CONTEXT, &rc)) return rc;
+      ESMC_CONTEXT, rc)) return NULL;
 #endif
   }
 
@@ -1622,7 +1622,7 @@ MeshCap *MeshCap::meshcreateredistnodes(MeshCap **src_meshpp,int *num_node_gids,
 #else
    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
       "This functionality requires ESMF to be built with the MOAB library enabled" ,
-      ESMC_CONTEXT, &rc)) return rc;
+      ESMC_CONTEXT, rc)) return NULL;
 #endif
   }
 
@@ -1671,7 +1671,7 @@ MeshCap *MeshCap::meshcreateredist(MeshCap **src_meshpp, int *num_node_gids, int
 #else
    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
       "This functionality requires ESMF to be built with the MOAB library enabled" ,
-      ESMC_CONTEXT, &rc)) return rc;
+      ESMC_CONTEXT, rc)) return NULL;
 #endif
   }
 
@@ -1714,7 +1714,7 @@ void MeshCap::meshchecknodelist(int *_num_node_gids, int *node_gids,
 #else
    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
       "This functionality requires ESMF to be built with the MOAB library enabled" ,
-      ESMC_CONTEXT, &rc) return;
+      ESMC_CONTEXT, rc)) return;
 #endif
   }
 
@@ -1745,7 +1745,7 @@ void MeshCap::meshcheckelemlist(int *_num_elem_gids, int *elem_gids,
 #else
    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
       "This functionality requires ESMF to be built with the MOAB library enabled" ,
-      ESMC_CONTEXT, &rc) return;
+      ESMC_CONTEXT, rc)) return;
 #endif
   }
 }
