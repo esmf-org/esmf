@@ -15,6 +15,7 @@
 
 #define VM_MEMLOG_off
 #define VM_EPOCHLOG_off
+#define VM_SSISHMLOG_off
 
 // On SunOS systems there are a couple of macros that need to be set
 // in order to get POSIX compliant functions IPC, pthreads, gethostid
@@ -191,7 +192,7 @@ int vmkt_create(vmkt_t *vmkt, void *(*vmkt_spawn)(void *), void *arg,
     msg << "service: " << service
       << "  PTHREAD_STACK_MIN: " << PTHREAD_STACK_MIN << " bytes"
       << "  stack_size: " << stack_size << " bytes";
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
     pthreadAttrsPtr = &pthreadAttrs;
   }
@@ -5570,8 +5571,6 @@ void VMK::wtimedelay(double delay){
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#undef DEBUGLOG
-
 int VMK::ssishmAllocate(vector<unsigned long>&bytes, memhandle *memh, 
   bool contigFlag){
 #ifndef ESMF_NO_MPI3
@@ -5590,13 +5589,13 @@ int VMK::ssishmAllocate(vector<unsigned long>&bytes, memhandle *memh,
   memh->counts[0] = count;
   int maxCount = count;
 #endif
-#ifdef DEBUGLOG
+#ifdef VM_SSISHMLOG_on
   {
     std::stringstream msg;
     msg << "ssishmAllocate#" << __LINE__
       << " localPetCount=" << memh->localPetCount
       << " bytes request maxCount=" << maxCount;
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
   void *dummyPtr;
@@ -5635,7 +5634,7 @@ int VMK::ssishmAllocate(vector<unsigned long>&bytes, memhandle *memh,
 
 int VMK::ssishmFree(memhandle *memh){
 #ifndef ESMF_NO_MPI3
-#ifdef DEBUGLOG
+#ifdef VM_SSISHMLOG_on
   {
     std::stringstream msg;
     msg << "ssishmFree#" << __LINE__ << " number of shared memory windows=" 
@@ -5644,7 +5643,7 @@ int VMK::ssishmFree(memhandle *memh){
 #else
       << memh->mems.size();
 #endif
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
   ssishmSync(*memh);
@@ -5660,11 +5659,11 @@ int VMK::ssishmFree(memhandle *memh){
 #endif
   memh->counts.resize(0);
   memh->localPetCount=-1; // invalidate
-#ifdef DEBUGLOG
+#ifdef VM_SSISHMLOG_on
   {
     std::stringstream msg;
     msg << "ssishmFree#" << __LINE__ << " done.";
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
   return ESMF_SUCCESS;
@@ -5702,12 +5701,12 @@ int VMK::ssishmGetMems(memhandle memh, int pet, vector<void *>*mems,
 #endif
     if (mems) (*mems)[i]=baseptr;
     if (bytes) (*bytes)[i]=size;
-#ifdef DEBUGLOG
+#ifdef VM_SSISHMLOG_on
     {
       std::stringstream msg;
       msg << "ssishmGetMems#" << __LINE__
         << " pet=" << pet << " baseptr=" << baseptr << " size=" << size;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
   }
@@ -5722,6 +5721,13 @@ int VMK::ssishmGetMems(memhandle memh, int pet, vector<void *>*mems,
 
 int VMK::ssishmSync(memhandle memh){
 #ifndef ESMF_NO_MPI3
+#ifdef VM_SSISHMLOG_on
+  {
+    std::stringstream msg;
+    msg << "ssishmSync#" << __LINE__ << " entering.";
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+  }
+#endif
 #ifndef ESMF_MPIUNI
   // call barrier for the ssi-local communicator
   MPI_Barrier(mpi_c_ssi);
@@ -5737,8 +5743,6 @@ int VMK::ssishmSync(memhandle memh){
   return ESMC_RC_INTNRL_BAD; // bail with error
 #endif
 }
-
-#undef DEBUGLOG
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
