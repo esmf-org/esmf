@@ -183,6 +183,7 @@ program ESMF_ArraySharedDeSSISTest
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
   
+  ! Comp1 Run -> initialize the data array
   call ESMF_GridCompRun(comp1, exportState=state, userRc=userrc, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
@@ -192,7 +193,13 @@ program ESMF_ArraySharedDeSSISTest
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
     
   ! Because DEs are shared across PETs on the same SSI, must call ArraySync()
-  ! before comp2 gets to access the Array.
+  ! before comp2 gets to access the Array. In order to do this here, the
+  ! state must be reconciled in case comp1 was only active on a subset of
+  ! PETs.
+  call ESMF_StateReconcile(state, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   call ESMF_StateGet(state, "MyArray", array, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
@@ -202,6 +209,7 @@ program ESMF_ArraySharedDeSSISTest
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
+  ! Comp2 Run -> validate the data array
   call ESMF_GridCompRun(comp2, importState=state, userRc=userrc, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &

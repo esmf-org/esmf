@@ -144,14 +144,16 @@ module user_model1
 
     ! Local variables
     real(ESMF_KIND_R8)    :: pi
+    type(ESMF_VM)         :: vm
     type(ESMF_Array)      :: array
     real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)   ! matching F90 array pointer
-    integer               :: i, j
+    integer               :: i, j, k, localPe
+    character(len=320)    :: msg
     
     ! Initialize return code
     rc = ESMF_SUCCESS
 
-    call ESMF_LogWrite("Executing 'user1_run'", ESMF_LOGMSG_INFO, rc=rc)
+    call ESMF_LogWrite("Entering 'user1_run'", ESMF_LOGMSG_INFO, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     pi = 3.14159d0
@@ -164,6 +166,20 @@ module user_model1
     call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
+    ! Get VM
+    call ESMF_GridCompGet(comp, vm=vm, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+do k=1, 5 ! repeatedly go through the work loops to monitor PE affinity.
+
+    call ESMF_VMGet(vm, localPe=localPe, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    write(msg,*) "user1_run: on PE: ", localPe, &
+      " Filling data lbound:", lbound(farrayPtr), " ubound:", ubound(farrayPtr)
+    call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
     ! Fill source Array with data
     do j = lbound(farrayPtr, 2), ubound(farrayPtr, 2)
       do i = lbound(farrayPtr, 1), ubound(farrayPtr, 1)
@@ -172,7 +188,12 @@ module user_model1
           + 2.0d0 * sin(real(j,ESMF_KIND_R8)/150.d0*pi)
       enddo
     enddo
+    
+enddo
  
+    call ESMF_LogWrite("Exiting 'user1_run'", ESMF_LOGMSG_INFO, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
   end subroutine user1_run
 
 
