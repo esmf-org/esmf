@@ -382,10 +382,8 @@ void Array::destruct(bool followCreator, bool noGarbage){
     // free shared memory handle if it is present
     if (mh != NULL){
       int localrc;
-      VM *cvm = VM::getCurrent(&localrc);      
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-        ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
-      localrc = cvm->ssishmFree(mh);
+      VM *vm = delayout->getVM();      
+      localrc = vm->ssishmFree(mh);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
       delete mh;
@@ -4079,10 +4077,8 @@ int Array::sync(){
   // see if the array holds a valid memhandle, optionally call sync
   if (mh != NULL){
     int localrc;
-    VM *cvm = VM::getCurrent(&localrc);      
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      &rc)) return rc;
-    localrc = cvm->ssishmSync(*mh);
+    VM *vm = delayout->getVM();      
+    localrc = vm->ssishmSync(*mh);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
   }
