@@ -1166,7 +1166,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(out), optional :: rc
 
   integer :: localrc
-  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC, expected_size
+  integer(C_INT) :: recursive, local_itemCount, expected_size, local_scalarToArray
 {% if t.ctype == "bool" or t.ctype == "std::string"%}
   integer :: ii
 {% endif %}
@@ -1176,27 +1176,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 {% if t.ctype == "bool" %}
   {{ t.ftype }}({{ t.iso_ctype }}), dimension(:), allocatable :: local_values
 {% endif %}
-  logical :: local_scalarToArray
 
-  local_scalarToArray = .false.
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_FAILURE
   recursive = 0 !false
-  if (present(scalarToArray)) then
-    local_scalarToArray = scalarToArray
-  end if
 
   if (present(attnestflag)) then
     if (attnestflag%value==ESMF_ATTNEST_ON%value) recursive = 1 !true
   end if
-{% if t.ctype != "std::string" %}
 
-  if (local_scalarToArray) then
-    local_scalarToArray_forC = 1 !true
-  else
-    local_scalarToArray_forC = 0 !false
+  local_scalarToArray = 0 !false
+  if (present(scalarToArray)) then
+    if (scalarToArray) local_scalarToArray = 1 !true
   end if
-{% endif %}
 
 {% if alloc or t.ctype == "std::string" %}
   ! Set the value to a negative one to indicate we are doing an allocatable call
@@ -1209,7 +1201,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   {{ esmf_lfe }}
 {% if t.ctype == "std::string" %}
 
-  if (.not. is_array .and. .not. local_scalarToArray) then
+  if (.not. is_array .and. local_scalarToArray == 0) then
     if (ESMF_LogFoundError(ESMF_RC_ATTR_WRONGTYPE, &
       msg="Array requested but type in JSON storage is not an array. Key is: "//TRIM(key), &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1230,9 +1222,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   expected_size = size(values)
 {% endif %}
 {% if t.ctype == "bool" %}
-  allocate(local_values(local_itemCount))
+
+  ! Store boolean integers for transfer from C
+  allocate(local_values(SIZE(values)))
 {% endif %}
 {% if t.ctype != "std::string" %}
+
   call c_info_get_array_{{ t.esmf_suffix }}(&
     info%ptr, &
     trim(key)//C_NULL_CHAR, &
@@ -1245,11 +1240,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     local_itemCount, &
     localrc, &
     recursive, &
-    local_scalarToArray_forC, &
+    local_scalarToArray, &
     expected_size)
 {% else %}
   do ii=1,local_itemCount
-    if (.not. is_array .and. local_scalarToArray) then
+    if (.not. is_array .and. local_scalarToArray == 1) then
       call ESMF_InfoGetCH(info, key, values(ii), attnestflag=attnestflag, rc=localrc)
     else
       call ESMF_InfoGetCH(info, key, values(ii), idx=ii, attnestflag=attnestflag, rc=localrc)
@@ -1257,14 +1252,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   enddo
 {% endif %}
   {{ esmf_lfe }}
-
 {% if t.ctype == "bool" %}
+
+  ! Transfer to logical storage from boolean integers
   do ii=1,SIZE(values)
     values(ii) = local_values(ii)
   enddo
   deallocate(local_values)
-
 {% endif %}
+
   if (present(itemCount)) itemCount = local_itemCount
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoGetArray{{ t.esmf_suffix }}{% if alloc %}Alloc{% endif %}

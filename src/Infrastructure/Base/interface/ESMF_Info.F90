@@ -1929,30 +1929,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(out), optional :: rc
 
   integer :: localrc
-  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC, expected_size
-  logical :: local_scalarToArray
+  integer(C_INT) :: recursive, local_itemCount, expected_size, local_scalarToArray
 
-  local_scalarToArray = .false.
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_FAILURE
   recursive = 0 !false
-  if (present(scalarToArray)) then
-    local_scalarToArray = scalarToArray
-  end if
 
   if (present(attnestflag)) then
     if (attnestflag%value==ESMF_ATTNEST_ON%value) recursive = 1 !true
   end if
 
-  if (local_scalarToArray) then
-    local_scalarToArray_forC = 1 !true
-  else
-    local_scalarToArray_forC = 0 !false
+  local_scalarToArray = 0 !false
+  if (present(scalarToArray)) then
+    if (scalarToArray) local_scalarToArray = 1 !true
   end if
 
   ! This is used to validate the size of the outgoing array given the size in
   ! storage.
   expected_size = size(values)
+
   call c_info_get_array_R4(&
     info%ptr, &
     trim(key)//C_NULL_CHAR, &
@@ -1960,7 +1955,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     local_itemCount, &
     localrc, &
     recursive, &
-    local_scalarToArray_forC, &
+    local_scalarToArray, &
     expected_size)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1981,26 +1976,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(out), optional :: rc
 
   integer :: localrc
-  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC, expected_size
+  integer(C_INT) :: recursive, local_itemCount, expected_size, local_scalarToArray
   logical :: is_array
-  logical :: local_scalarToArray
 
-  local_scalarToArray = .false.
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_FAILURE
   recursive = 0 !false
-  if (present(scalarToArray)) then
-    local_scalarToArray = scalarToArray
-  end if
 
   if (present(attnestflag)) then
     if (attnestflag%value==ESMF_ATTNEST_ON%value) recursive = 1 !true
   end if
 
-  if (local_scalarToArray) then
-    local_scalarToArray_forC = 1 !true
-  else
-    local_scalarToArray_forC = 0 !false
+  local_scalarToArray = 0 !false
+  if (present(scalarToArray)) then
+    if (scalarToArray) local_scalarToArray = 1 !true
   end if
 
   ! Set the value to a negative one to indicate we are doing an allocatable call
@@ -2014,6 +2003,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   ! Allocate the outgoing storage array and call into C to fill the array
   allocate(values(local_itemCount))
+
   call c_info_get_array_R4(&
     info%ptr, &
     trim(key)//C_NULL_CHAR, &
@@ -2021,7 +2011,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     local_itemCount, &
     localrc, &
     recursive, &
-    local_scalarToArray_forC, &
+    local_scalarToArray, &
     expected_size)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2042,30 +2032,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(out), optional :: rc
 
   integer :: localrc
-  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC, expected_size
-  logical :: local_scalarToArray
+  integer(C_INT) :: recursive, local_itemCount, expected_size, local_scalarToArray
 
-  local_scalarToArray = .false.
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_FAILURE
   recursive = 0 !false
-  if (present(scalarToArray)) then
-    local_scalarToArray = scalarToArray
-  end if
 
   if (present(attnestflag)) then
     if (attnestflag%value==ESMF_ATTNEST_ON%value) recursive = 1 !true
   end if
 
-  if (local_scalarToArray) then
-    local_scalarToArray_forC = 1 !true
-  else
-    local_scalarToArray_forC = 0 !false
+  local_scalarToArray = 0 !false
+  if (present(scalarToArray)) then
+    if (scalarToArray) local_scalarToArray = 1 !true
   end if
 
   ! This is used to validate the size of the outgoing array given the size in
   ! storage.
   expected_size = size(values)
+
   call c_info_get_array_R8(&
     info%ptr, &
     trim(key)//C_NULL_CHAR, &
@@ -2073,7 +2058,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     local_itemCount, &
     localrc, &
     recursive, &
-    local_scalarToArray_forC, &
+    local_scalarToArray, &
     expected_size)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2094,26 +2079,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(out), optional :: rc
 
   integer :: localrc
-  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC, expected_size
+  integer(C_INT) :: recursive, local_itemCount, expected_size, local_scalarToArray
   logical :: is_array
-  logical :: local_scalarToArray
 
-  local_scalarToArray = .false.
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_FAILURE
   recursive = 0 !false
-  if (present(scalarToArray)) then
-    local_scalarToArray = scalarToArray
-  end if
 
   if (present(attnestflag)) then
     if (attnestflag%value==ESMF_ATTNEST_ON%value) recursive = 1 !true
   end if
 
-  if (local_scalarToArray) then
-    local_scalarToArray_forC = 1 !true
-  else
-    local_scalarToArray_forC = 0 !false
+  local_scalarToArray = 0 !false
+  if (present(scalarToArray)) then
+    if (scalarToArray) local_scalarToArray = 1 !true
   end if
 
   ! Set the value to a negative one to indicate we are doing an allocatable call
@@ -2127,6 +2106,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   ! Allocate the outgoing storage array and call into C to fill the array
   allocate(values(local_itemCount))
+
   call c_info_get_array_R8(&
     info%ptr, &
     trim(key)//C_NULL_CHAR, &
@@ -2134,7 +2114,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     local_itemCount, &
     localrc, &
     recursive, &
-    local_scalarToArray_forC, &
+    local_scalarToArray, &
     expected_size)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2155,30 +2135,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(out), optional :: rc
 
   integer :: localrc
-  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC, expected_size
-  logical :: local_scalarToArray
+  integer(C_INT) :: recursive, local_itemCount, expected_size, local_scalarToArray
 
-  local_scalarToArray = .false.
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_FAILURE
   recursive = 0 !false
-  if (present(scalarToArray)) then
-    local_scalarToArray = scalarToArray
-  end if
 
   if (present(attnestflag)) then
     if (attnestflag%value==ESMF_ATTNEST_ON%value) recursive = 1 !true
   end if
 
-  if (local_scalarToArray) then
-    local_scalarToArray_forC = 1 !true
-  else
-    local_scalarToArray_forC = 0 !false
+  local_scalarToArray = 0 !false
+  if (present(scalarToArray)) then
+    if (scalarToArray) local_scalarToArray = 1 !true
   end if
 
   ! This is used to validate the size of the outgoing array given the size in
   ! storage.
   expected_size = size(values)
+
   call c_info_get_array_I4(&
     info%ptr, &
     trim(key)//C_NULL_CHAR, &
@@ -2186,7 +2161,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     local_itemCount, &
     localrc, &
     recursive, &
-    local_scalarToArray_forC, &
+    local_scalarToArray, &
     expected_size)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2207,26 +2182,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(out), optional :: rc
 
   integer :: localrc
-  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC, expected_size
+  integer(C_INT) :: recursive, local_itemCount, expected_size, local_scalarToArray
   logical :: is_array
-  logical :: local_scalarToArray
 
-  local_scalarToArray = .false.
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_FAILURE
   recursive = 0 !false
-  if (present(scalarToArray)) then
-    local_scalarToArray = scalarToArray
-  end if
 
   if (present(attnestflag)) then
     if (attnestflag%value==ESMF_ATTNEST_ON%value) recursive = 1 !true
   end if
 
-  if (local_scalarToArray) then
-    local_scalarToArray_forC = 1 !true
-  else
-    local_scalarToArray_forC = 0 !false
+  local_scalarToArray = 0 !false
+  if (present(scalarToArray)) then
+    if (scalarToArray) local_scalarToArray = 1 !true
   end if
 
   ! Set the value to a negative one to indicate we are doing an allocatable call
@@ -2240,6 +2209,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   ! Allocate the outgoing storage array and call into C to fill the array
   allocate(values(local_itemCount))
+
   call c_info_get_array_I4(&
     info%ptr, &
     trim(key)//C_NULL_CHAR, &
@@ -2247,7 +2217,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     local_itemCount, &
     localrc, &
     recursive, &
-    local_scalarToArray_forC, &
+    local_scalarToArray, &
     expected_size)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2268,30 +2238,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(out), optional :: rc
 
   integer :: localrc
-  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC, expected_size
-  logical :: local_scalarToArray
+  integer(C_INT) :: recursive, local_itemCount, expected_size, local_scalarToArray
 
-  local_scalarToArray = .false.
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_FAILURE
   recursive = 0 !false
-  if (present(scalarToArray)) then
-    local_scalarToArray = scalarToArray
-  end if
 
   if (present(attnestflag)) then
     if (attnestflag%value==ESMF_ATTNEST_ON%value) recursive = 1 !true
   end if
 
-  if (local_scalarToArray) then
-    local_scalarToArray_forC = 1 !true
-  else
-    local_scalarToArray_forC = 0 !false
+  local_scalarToArray = 0 !false
+  if (present(scalarToArray)) then
+    if (scalarToArray) local_scalarToArray = 1 !true
   end if
 
   ! This is used to validate the size of the outgoing array given the size in
   ! storage.
   expected_size = size(values)
+
   call c_info_get_array_I8(&
     info%ptr, &
     trim(key)//C_NULL_CHAR, &
@@ -2299,7 +2264,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     local_itemCount, &
     localrc, &
     recursive, &
-    local_scalarToArray_forC, &
+    local_scalarToArray, &
     expected_size)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2320,26 +2285,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(out), optional :: rc
 
   integer :: localrc
-  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC, expected_size
+  integer(C_INT) :: recursive, local_itemCount, expected_size, local_scalarToArray
   logical :: is_array
-  logical :: local_scalarToArray
 
-  local_scalarToArray = .false.
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_FAILURE
   recursive = 0 !false
-  if (present(scalarToArray)) then
-    local_scalarToArray = scalarToArray
-  end if
 
   if (present(attnestflag)) then
     if (attnestflag%value==ESMF_ATTNEST_ON%value) recursive = 1 !true
   end if
 
-  if (local_scalarToArray) then
-    local_scalarToArray_forC = 1 !true
-  else
-    local_scalarToArray_forC = 0 !false
+  local_scalarToArray = 0 !false
+  if (present(scalarToArray)) then
+    if (scalarToArray) local_scalarToArray = 1 !true
   end if
 
   ! Set the value to a negative one to indicate we are doing an allocatable call
@@ -2353,6 +2312,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   ! Allocate the outgoing storage array and call into C to fill the array
   allocate(values(local_itemCount))
+
   call c_info_get_array_I8(&
     info%ptr, &
     trim(key)//C_NULL_CHAR, &
@@ -2360,7 +2320,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     local_itemCount, &
     localrc, &
     recursive, &
-    local_scalarToArray_forC, &
+    local_scalarToArray, &
     expected_size)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2381,21 +2341,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(out), optional :: rc
 
   integer :: localrc
-  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC, expected_size
+  integer(C_INT) :: recursive, local_itemCount, expected_size, local_scalarToArray
   integer :: ii
   logical :: is_array
-  logical :: local_scalarToArray
 
-  local_scalarToArray = .false.
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_FAILURE
   recursive = 0 !false
-  if (present(scalarToArray)) then
-    local_scalarToArray = scalarToArray
-  end if
 
   if (present(attnestflag)) then
     if (attnestflag%value==ESMF_ATTNEST_ON%value) recursive = 1 !true
+  end if
+
+  local_scalarToArray = 0 !false
+  if (present(scalarToArray)) then
+    if (scalarToArray) local_scalarToArray = 1 !true
   end if
 
   ! Set the value to a negative one to indicate we are doing an allocatable call
@@ -2407,7 +2367,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  if (.not. is_array .and. .not. local_scalarToArray) then
+  if (.not. is_array .and. local_scalarToArray == 0) then
     if (ESMF_LogFoundError(ESMF_RC_ATTR_WRONGTYPE, &
       msg="Array requested but type in JSON storage is not an array. Key is: "//TRIM(key), &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2417,7 +2377,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="values allocation size does not match size in Info storage", ESMF_CONTEXT, rcToReturn=rc)) return
   end if
   do ii=1,local_itemCount
-    if (.not. is_array .and. local_scalarToArray) then
+    if (.not. is_array .and. local_scalarToArray == 1) then
       call ESMF_InfoGetCH(info, key, values(ii), attnestflag=attnestflag, rc=localrc)
     else
       call ESMF_InfoGetCH(info, key, values(ii), idx=ii, attnestflag=attnestflag, rc=localrc)
@@ -2442,21 +2402,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(out), optional :: rc
 
   integer :: localrc
-  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC, expected_size
+  integer(C_INT) :: recursive, local_itemCount, expected_size, local_scalarToArray
   integer :: ii
   logical :: is_array
-  logical :: local_scalarToArray
 
-  local_scalarToArray = .false.
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_FAILURE
   recursive = 0 !false
-  if (present(scalarToArray)) then
-    local_scalarToArray = scalarToArray
-  end if
 
   if (present(attnestflag)) then
     if (attnestflag%value==ESMF_ATTNEST_ON%value) recursive = 1 !true
+  end if
+
+  local_scalarToArray = 0 !false
+  if (present(scalarToArray)) then
+    if (scalarToArray) local_scalarToArray = 1 !true
   end if
 
   ! Set the value to a negative one to indicate we are doing an allocatable call
@@ -2468,7 +2428,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-  if (.not. is_array .and. .not. local_scalarToArray) then
+  if (.not. is_array .and. local_scalarToArray == 0) then
     if (ESMF_LogFoundError(ESMF_RC_ATTR_WRONGTYPE, &
       msg="Array requested but type in JSON storage is not an array. Key is: "//TRIM(key), &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2477,7 +2437,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Allocate the outgoing storage array and call into C to fill the array
   allocate(values(local_itemCount))
   do ii=1,local_itemCount
-    if (.not. is_array .and. local_scalarToArray) then
+    if (.not. is_array .and. local_scalarToArray == 1) then
       call ESMF_InfoGetCH(info, key, values(ii), attnestflag=attnestflag, rc=localrc)
     else
       call ESMF_InfoGetCH(info, key, values(ii), idx=ii, attnestflag=attnestflag, rc=localrc)
@@ -2502,33 +2462,30 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(out), optional :: rc
 
   integer :: localrc
-  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC, expected_size
+  integer(C_INT) :: recursive, local_itemCount, expected_size, local_scalarToArray
   integer :: ii
   logical(C_BOOL), dimension(:), allocatable :: local_values
-  logical :: local_scalarToArray
 
-  local_scalarToArray = .false.
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_FAILURE
   recursive = 0 !false
-  if (present(scalarToArray)) then
-    local_scalarToArray = scalarToArray
-  end if
 
   if (present(attnestflag)) then
     if (attnestflag%value==ESMF_ATTNEST_ON%value) recursive = 1 !true
   end if
 
-  if (local_scalarToArray) then
-    local_scalarToArray_forC = 1 !true
-  else
-    local_scalarToArray_forC = 0 !false
+  local_scalarToArray = 0 !false
+  if (present(scalarToArray)) then
+    if (scalarToArray) local_scalarToArray = 1 !true
   end if
 
   ! This is used to validate the size of the outgoing array given the size in
   ! storage.
   expected_size = size(values)
-  allocate(local_values(local_itemCount))
+
+  ! Store boolean integers for transfer from C
+  allocate(local_values(SIZE(values)))
+
   call c_info_get_array_LG(&
     info%ptr, &
     trim(key)//C_NULL_CHAR, &
@@ -2536,10 +2493,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     local_itemCount, &
     localrc, &
     recursive, &
-    local_scalarToArray_forC, &
+    local_scalarToArray, &
     expected_size)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  ! Transfer to logical storage from boolean integers
   do ii=1,SIZE(values)
     values(ii) = local_values(ii)
   enddo
@@ -2562,28 +2520,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(out), optional :: rc
 
   integer :: localrc
-  integer(C_INT) :: recursive, local_itemCount, local_scalarToArray_forC, expected_size
+  integer(C_INT) :: recursive, local_itemCount, expected_size, local_scalarToArray
   integer :: ii
   logical :: is_array
   logical(C_BOOL), dimension(:), allocatable :: local_values
-  logical :: local_scalarToArray
 
-  local_scalarToArray = .false.
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_FAILURE
   recursive = 0 !false
-  if (present(scalarToArray)) then
-    local_scalarToArray = scalarToArray
-  end if
 
   if (present(attnestflag)) then
     if (attnestflag%value==ESMF_ATTNEST_ON%value) recursive = 1 !true
   end if
 
-  if (local_scalarToArray) then
-    local_scalarToArray_forC = 1 !true
-  else
-    local_scalarToArray_forC = 0 !false
+  local_scalarToArray = 0 !false
+  if (present(scalarToArray)) then
+    if (scalarToArray) local_scalarToArray = 1 !true
   end if
 
   ! Set the value to a negative one to indicate we are doing an allocatable call
@@ -2597,7 +2549,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   ! Allocate the outgoing storage array and call into C to fill the array
   allocate(values(local_itemCount))
-  allocate(local_values(local_itemCount))
+
+  ! Store boolean integers for transfer from C
+  allocate(local_values(SIZE(values)))
+
   call c_info_get_array_LG(&
     info%ptr, &
     trim(key)//C_NULL_CHAR, &
@@ -2605,10 +2560,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     local_itemCount, &
     localrc, &
     recursive, &
-    local_scalarToArray_forC, &
+    local_scalarToArray, &
     expected_size)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  ! Transfer to logical storage from boolean integers
   do ii=1,SIZE(values)
     values(ii) = local_values(ii)
   enddo
