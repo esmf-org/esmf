@@ -769,6 +769,15 @@ void VMK::construct(void *ssarg){
 #if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
   mpi_c_ssi = sarg->mpi_c_ssi;
 #endif  
+#ifndef ESMF_NO_PTHREADS
+  // set thread affinity
+  cpu_set_t cpuset;
+  CPU_ZERO(&cpuset);
+  for (int i=0; i<ncpet[mypet]; i++)
+    CPU_SET(cid[mypet][i], &cpuset);
+  pthread_setaffinity_np(mypthid, sizeof(cpu_set_t), &cpuset);
+#endif
+  // pthread mutex control
   pth_mutex2 = sarg->pth_mutex2;
   pth_mutex = sarg->pth_mutex;
   pth_finish_count = sarg->pth_finish_count;
