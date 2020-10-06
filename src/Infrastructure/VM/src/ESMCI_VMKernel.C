@@ -67,6 +67,10 @@
 #endif
 #include <limits.h>
 
+#ifndef ESMF_NO_OPENMP
+#include <omp.h>
+#endif
+
 using namespace std;
 
 // Memory mapped files may not be available on all systems
@@ -789,6 +793,17 @@ void VMK::construct(void *ssarg){
   for (int i=0; i<ncpet[mypet]; i++)
     CPU_SET(ssipe[cid[mypet][i]], &cpuset);
   pthread_setaffinity_np(mypthid, sizeof(cpu_set_t), &cpuset);
+#ifndef ESMF_NO_OPENMP
+  // Set the number of OpenMP threads and pin each thread to a specific PE
+  omp_set_num_threads(ncpet[mypet]);
+#pragma omp parallel shared(cid, mypet)
+  {
+    cpu_set_t cpuset;
+    CPU_ZERO(&cpuset);
+    CPU_SET(ssipe[cid[mypet][omp_get_thread_num()]], &cpuset);
+    pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
+  }
+#endif
 #endif
   // pthread mutex control
   pth_mutex2 = sarg->pth_mutex2;
