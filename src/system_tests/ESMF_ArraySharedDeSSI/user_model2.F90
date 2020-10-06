@@ -100,7 +100,7 @@ module user_model2
     type(ESMF_VM)         :: vm
     type(ESMF_Array)      :: array
     real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)   ! matching F90 array pointer
-    integer               :: i, j, k, tid, localPet, peCount, currentSsiPe
+    integer               :: i, j, k, tid, currentSsiPe
     integer               :: ssiLocalDeCount, lde
     integer, allocatable  :: localDeToDeMap(:)
     type(ESMF_LocalArray), allocatable :: localArrayList(:)
@@ -138,11 +138,6 @@ module user_model2
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_VMLog(vm, prefix="model2: ", logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_VMGet(vm, localPet=localPet, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_VMGet(vm, pet=localPet, peCount=peCount, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-!$  call omp_set_num_threads(peCount)
 
     dataOkay = .true.
 
