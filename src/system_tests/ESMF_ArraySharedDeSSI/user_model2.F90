@@ -100,7 +100,7 @@ module user_model2
     type(ESMF_VM)         :: vm
     type(ESMF_Array)      :: array
     real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)   ! matching F90 array pointer
-    integer               :: i, j, k, tid, localPet, peCount, localPe
+    integer               :: i, j, k, tid, localPet, peCount, currentSsiPe
     integer               :: ssiLocalDeCount, lde
     integer, allocatable  :: localDeToDeMap(:)
     type(ESMF_LocalArray), allocatable :: localArrayList(:)
@@ -136,6 +136,8 @@ module user_model2
     ! -> Set the number of OpenMP threads accordingly
     call ESMF_GridCompGet(comp, vm=vm, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_VMLog(vm, prefix="model2: ", logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_VMGet(vm, localPet=localPet, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_VMGet(vm, pet=localPet, peCount=peCount, rc=rc)
@@ -149,7 +151,7 @@ do k=1, 5 ! repeatedly go through the work loops to monitor PE affinity.
 !$omp parallel do reduction (.and.:dataOkay) &
 !$omp& default (none)  &
 !$omp& shared  (vm, pi, localArrayList, ssiLocalDeCount)  &
-!$omp& private (lde, i, j, tid, localPe, farrayPtr, msg, rc)
+!$omp& private (lde, i, j, tid, currentSsiPe, farrayPtr, msg, rc)
     ! Loop over all the locally accessible DEs and check for data correctness
 
     do lde=1, ssiLocalDeCount
@@ -158,7 +160,7 @@ do k=1, 5 ! repeatedly go through the work loops to monitor PE affinity.
       call ESMF_LocalArrayGet(localArrayList(lde), farrayPtr=farrayPtr, rc=rc)
       ! No RC checking inside OpenMP region
       
-      call ESMF_VMGet(vm, localPe=localPe, rc=rc)
+      call ESMF_VMGet(vm, currentSsiPe=currentSsiPe, rc=rc)
       ! No RC checking inside OpenMP region
       
       !! Doing logging inside the OpenMP loop is just done to produce output
@@ -166,7 +168,7 @@ do k=1, 5 ! repeatedly go through the work loops to monitor PE affinity.
       !! for real applications!
 !$omp critical
       write(msg,*) "user2_run: OpenMP thread:", tid, &
-        " on PE: ", localPe, " Testing data for localDe =", lde-1, &
+        " on SSIPE: ", currentSsiPe, " Testing data for localDe =", lde-1, &
         " lbound:", lbound(farrayPtr), " ubound:", ubound(farrayPtr)
       call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
       ! No RC checking inside OpenMP region

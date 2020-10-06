@@ -96,6 +96,16 @@ program ESMF_ArraySharedDeSSISTest
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
+  call ESMF_VMLogSystem(logMsgFlag=ESMF_LOGMSG_DEBUG, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+
+  call ESMF_VMLog(vm, prefix="main: ", logMsgFlag=ESMF_LOGMSG_DEBUG, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+
   ! Get number of PETs we are running with
   call ESMF_VMGet(vm, localPet=localPet, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &

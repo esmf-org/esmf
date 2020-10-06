@@ -109,6 +109,10 @@ module user_model1
 
     call ESMF_GridCompGet(comp, vm=vm, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
+
+    call ESMF_VMLog(vm, prefix="model1: ", logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
     call ESMF_VMGet(vm, ssiSharedMemoryEnabledFlag=ssiSharedMemoryEnabled, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
@@ -147,7 +151,7 @@ module user_model1
     type(ESMF_VM)         :: vm
     type(ESMF_Array)      :: array
     real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)   ! matching F90 array pointer
-    integer               :: i, j, k, localPe
+    integer               :: i, j, k, currentSsiPe
     character(len=320)    :: msg
     
     ! Initialize return code
@@ -172,10 +176,10 @@ module user_model1
 
 do k=1, 5 ! repeatedly go through the work loops to monitor PE affinity.
 
-    call ESMF_VMGet(vm, localPe=localPe, rc=rc)
+    call ESMF_VMGet(vm, currentSsiPe=currentSsiPe, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    write(msg,*) "user1_run: on PE: ", localPe, &
+    write(msg,*) "user1_run: on SSIPE: ", currentSsiPe, &
       " Filling data lbound:", lbound(farrayPtr), " ubound:", ubound(farrayPtr)
     call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
