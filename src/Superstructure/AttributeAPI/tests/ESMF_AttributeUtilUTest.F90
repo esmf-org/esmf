@@ -51,19 +51,19 @@ program ESMF_AttributeUtilUTest
 
   character(:), allocatable :: key, name_key, convention, purpose
 
-  type(ESMF_FieldBundle) :: src_fb, dst_fb
+  type(ESMF_FieldBundle) :: src_fb, dst_fb, src_fb2, dst_fb2
   type(ESMF_Info) :: infoh, infoh2
   character(:), allocatable :: actual
   type(ESMF_Grid) :: grid
   type(ESMF_Field) :: field,field2,field3,field4
   integer :: i,j,count,ii,n
   character(len=ESMF_MAXSTR) :: attname
-  type(ESMF_TYPEKIND_FLAG) :: tk
+  type(ESMF_TYPEKIND_FLAG) :: tk, actual_tk
   integer, pointer :: iptr(:)
   integer, dimension(2) :: atos
   real(ESMF_KIND_R4), dimension(4) :: arr
   real(ESMF_KIND_R8), dimension(3) :: arr2
-  integer :: not_there
+  integer :: not_there, actual_value
 
 !------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -332,10 +332,41 @@ program ESMF_AttributeUtilUTest
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   !----------------------------------------------------------------------------
 
+  !----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Attribute copy preserves 32-bit"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  src_fb2 = ESMF_FieldBundleCreate(name="src_fb2", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  dst_fb2 = ESMF_FieldBundleCreate(name="dst_fb2", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_AttributeSet(src_fb2, "is_32bit", not_there, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_AttributeCopy(src_fb2, dst_fb2, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_AttributeGet(dst_fb2, "is_32bit", typekind=actual_tk, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_Test((actual_tk == ESMF_TYPEKIND_I4), name, failMsg, result, ESMF_SRCLINE)
+  ! Must abort to prevent possible hanging due to communications.
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !----------------------------------------------------------------------------
+
   call ESMF_FieldBundleDestroy(src_fb, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldBundleDestroy(dst_fb, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_FieldBundleDestroy(src_fb2, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_FieldBundleDestroy(dst_fb2, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldDestroy(field, rc=rc)

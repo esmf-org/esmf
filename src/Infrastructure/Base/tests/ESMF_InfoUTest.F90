@@ -76,8 +76,8 @@ program ESMF_InfoUTest
                      info_obj_new, info_parse, info_update_lhs, &
                      info_update_rhs, info_inq, info_eq_lhs, &
                      info_eq_rhs, irecurse, ipkey, info_charalloc, &
-                     info_uninit, info_dirty, info_implicit, info_tk
-
+                     info_uninit, info_dirty, info_implicit, info_copy, &
+                     info_cbk, info_cbk_base, info_tk
   logical :: is_present, failed, is_set, is_present_copy_test, actual_logical, &
              desired_logical, isArray, isDirty
   logical, dimension(2) :: fails_obj
@@ -889,6 +889,57 @@ program ESMF_InfoUTest
   call ESMF_Test(rc/=ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
   call ESMF_InfoDestroy(info_implicit, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !----------------------------------------------------------------------------
+
+  !----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Copy while preserving 32-bit"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  rc = ESMF_FAILURE
+  failed = .false.
+
+  info_copy = ESMF_InfoCreate(rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_InfoSet(info_copy, "is_32bit", 33, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_InfoGet(info_copy, key="is_32bit", typekind=actual_tk, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_Test(actual_tk == ESMF_TYPEKIND_I4, name, failMsg, result, ESMF_SRCLINE)
+
+  call ESMF_InfoDestroy(info_copy, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !----------------------------------------------------------------------------
+
+  !----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Create by key while preserving 32-bit"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  rc = ESMF_FAILURE
+  failed = .false.
+
+  info_cbk_base = ESMF_InfoCreate(rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_InfoSet(info_cbk_base, "/ESMF/General/is_32bit", 33, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  info_cbk = ESMF_InfoCreate(info_cbk_base, "ESMF", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_InfoGet(info_cbk, key="is_32bit", typekind=actual_tk, &
+    attnestflag=ESMF_ATTNEST_ON, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_Test(actual_tk == ESMF_TYPEKIND_I4, name, failMsg, result, ESMF_SRCLINE)
+
+  call ESMF_InfoDestroy(info_cbk_base, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_InfoDestroy(info_cbk, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   !----------------------------------------------------------------------------
 
