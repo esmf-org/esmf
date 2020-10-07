@@ -796,7 +796,7 @@ void VMK::construct(void *ssarg){
 #ifndef ESMF_NO_OPENMP
   // Set the number of OpenMP threads and pin each thread to a specific PE
   omp_set_num_threads(ncpet[mypet]);
-#pragma omp parallel shared(cid, mypet)
+#pragma omp parallel
   {
     cpu_set_t cpuset;
     CPU_ZERO(&cpuset);
