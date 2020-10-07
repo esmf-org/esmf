@@ -124,8 +124,8 @@ module user_model2
     if (rc/=ESMF_SUCCESS) return ! bail out
     
     ! Allocate map and list variables
-    allocate(localDeToDeMap(ssiLocalDeCount))
-    allocate(localArrayList(ssiLocalDeCount))
+    allocate(localDeToDeMap(0:ssiLocalDeCount-1))
+    allocate(localArrayList(0:ssiLocalDeCount-1))
     
     ! Request map and list variables from the Array
     call ESMF_ArrayGet(array, localDeToDeMap=localDeToDeMap, &
@@ -145,11 +145,11 @@ do k=1, 5 ! repeatedly go through the work loops to monitor PE affinity.
 
 !$omp parallel do reduction (.and.:dataOkay) &
 !$omp& default (none)  &
-!$omp& shared  (vm, pi, localArrayList, ssiLocalDeCount)  &
+!$omp& shared  (vm, pi, localArrayList, localDeToDeMap, ssiLocalDeCount)  &
 !$omp& private (lde, i, j, tid, currentSsiPe, farrayPtr, msg, rc)
     ! Loop over all the locally accessible DEs and check for data correctness
 
-    do lde=1, ssiLocalDeCount
+    do lde=0, ssiLocalDeCount-1
 !$    tid = omp_get_thread_num()
       ! Access the data pointer for this DE
       call ESMF_LocalArrayGet(localArrayList(lde), farrayPtr=farrayPtr, rc=rc)
@@ -163,7 +163,8 @@ do k=1, 5 ! repeatedly go through the work loops to monitor PE affinity.
       !! for real applications!
 !$omp critical
       write(msg,*) "user2_run: OpenMP thread:", tid, &
-        " on SSIPE: ", currentSsiPe, " Testing data for localDe =", lde-1, &
+        " on SSIPE: ", currentSsiPe, " Testing data for localDe =", lde, &
+        " DE=", localDeToDeMap(lde), &
         " lbound:", lbound(farrayPtr), " ubound:", ubound(farrayPtr)
       call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
       ! No RC checking inside OpenMP region
