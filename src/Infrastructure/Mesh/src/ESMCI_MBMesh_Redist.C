@@ -880,6 +880,25 @@ void mbmesh_redist_elem(MBMesh *mesh, int *num_elem_gids, int *elem_gids, MBMesh
     std::vector<UInt> src_elem_gids_proc;
     DDir<> edir;
 
+#undef debug_printelems
+#ifdef debug_printelems
+    int localrc;
+    VM *vm = VM::getCurrent(&localrc);
+    int petCount = vm->getPetCount();
+    int localPet = vm->getLocalPet();
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;
+
+    // print the vectors
+    printf("%d# mbmesh_redist_elem num_elem_gids = %d\n",Par::Rank(),*num_elem_gids);
+
+    // printf("%d# elem_gids [%d] = [", localPet, *num_elem_gids);
+    // for (int i=0; i<*num_elem_gids; ++i) {
+    //   printf("%d, ", elem_gids[i]);
+    // }
+    // printf("]\n");
+#endif
+
     // for split element handling
     std::multimap<int, EntityHandle> orig_id_to_split_elem;
     mbmesh_invert_split_to_orig_id_map(mesh, orig_id_to_split_elem);
@@ -2108,15 +2127,7 @@ void mbmesh_initialize_edir(MBMesh *mesh, int *num_elem_gids, int *elem_gids, st
   
   mbmesh_initialize_ddir(mesh, elems, num_elem_gids, elem_gids, src_elem_gids_proc, edir);
 
-#undef debug_printedir
 #ifdef debug_printedir
-    int localrc;
-    VM *vm = VM::getCurrent(&localrc);
-    int petCount = vm->getPetCount();
-    int localPet = vm->getLocalPet();
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-      throw localrc;
-
   // print the vectors
   printf("%d# src_elem_gids_proc [%d] = [", localPet, src_elem_gids_proc.size());
   for (int i=0; i<src_elem_gids_proc.size(); ++i) {
@@ -2179,9 +2190,24 @@ void mbmesh_initialize_ddir(MBMesh *mesh, const Range &ents, int *num_gids, int 
     std::vector<UInt> e_lids(*num_gids, 0);
     std::vector<UInt> e_gids(*num_gids, 0);
     
+    // load the distributed directory
+    for (int i=0; i<*num_gids; i++) {
+      e_lids[i]=i;
+      if (gids[i]>=0) {
+        e_gids[i]=gids[i];
+      } else {
+        e_gids[i]=0;
+      }
+    }
+
+    if (*num_gids) {
+      ddir.Create(*num_gids, &e_gids[0], &e_lids[0]);
+    } else {
+      ddir.Create(0, (UInt*) NULL, (UInt *)NULL);
+    }
+
     // list of the Mesh elem gids
     std::vector<UInt> src_gids;
-  
     src_gids.reserve(ents.size());
 
     // Loop through objects getting ids
@@ -2193,27 +2219,11 @@ void mbmesh_initialize_ddir(MBMesh *mesh, const Range &ents, int *num_gids, int 
       src_gids.push_back(gid);
     }
 
-
     // vectors of element destinations
     UInt num_src_gids=src_gids.size();
     std::vector<UInt> src_gids_lids(num_src_gids, 0);
     src_gids_proc.assign(num_src_gids, 0);
 
-    // load the distributed directory
-    for (int i=0; i<*num_gids; i++) {
-      e_lids[i]=i;
-      if (gids[i]>=0) {
-        e_gids[i]=gids[i];
-      } else {
-        e_gids[i]=0;
-      }
-    }
-  
-    if (*num_gids) {
-      ddir.Create(*num_gids, &e_gids[0], &e_lids[0]);
-    } else {
-      ddir.Create(0, (UInt*) NULL, (UInt *)NULL);
-    }
 
     // Get element destinations
     if (num_src_gids) {

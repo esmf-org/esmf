@@ -85,8 +85,6 @@ namespace ESMCI {
 
     void CreateGhost();
 
-
-
     // Mesh from inputs
     MBMesh(int _pdim, int _orig_sdim, ESMC_CoordSys_Flag _coordSys);
 
@@ -182,6 +180,10 @@ namespace ESMCI {
 
     // Output mesh elems for debugging
     void debug_output_elems();
+
+    // change proc numbers to those of new VM
+    void map_proc_numbers(int num_procs, int *proc_map);
+
 
 // DEPRECATED 
 // TODO: Get rid of verts array

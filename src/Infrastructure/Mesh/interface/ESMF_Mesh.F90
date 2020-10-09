@@ -3276,8 +3276,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DELayout) :: delayout
     integer             :: localDeCount
 
+    type(ESMF_VM) :: lvm
+    integer :: localPet
+
     ! Init localrc
     localrc = ESMF_SUCCESS
+
+    call ESMF_VMGetCurrent(lvm, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! set up local pet info
+    call ESMF_VMGet(lvm, localPet=localPet, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Check input classes
     ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)

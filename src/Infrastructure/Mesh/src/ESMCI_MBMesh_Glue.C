@@ -3033,7 +3033,7 @@ void MBMesh_serialize(void **mbmpp, char *buffer, int *length,
 // printf("%d# MBMesh_serialize - 0\n", Par::Rank());
 
     // Calc Size
-    int size = 4*sizeof(int);
+    int size = 0;
 
     // TODO: verify length > vars.
     if (*inquireflag != ESMF_INQUIREONLY) {
@@ -3050,15 +3050,22 @@ void MBMesh_serialize(void **mbmpp, char *buffer, int *length,
     ip= (int *)(buffer + *offset);
     if (*inquireflag != ESMF_INQUIREONLY) {
       *ip++ = mbmp->sdim;
+      size++;
       *ip++ = mbmp->pdim;
+      size++;
       *ip++ = mbmp->orig_sdim;
+      size++;
       *ip++ = mbmp->coordsys;
+      size++;
+      *ip++ = mbmp->is_split;
+      size++;
     }
     
+
 // printf("%d# MBMesh_serialize - 2\n", Par::Rank());
 
     // Adjust offset
-    *offset += size;
+    *offset += size * sizeof(int);
 
 // printf("%d# MBMesh_serialize - 3\n", Par::Rank());
 
@@ -3126,6 +3133,8 @@ void MBMesh_deserialize(void **mbmpp, char *buffer, int *offset, int *rc,
     localsize++;
     ESMC_CoordSys_Flag coordsys=static_cast<ESMC_CoordSys_Flag> (*ip++);
     localsize++;
+    bool is_split=static_cast<bool> (*ip++);
+    localsize++;
 
     // Adjust offset
     *offset += localsize*sizeof(int);
@@ -3133,6 +3142,9 @@ void MBMesh_deserialize(void **mbmpp, char *buffer, int *offset, int *rc,
     MBMesh_create(mbmpp, &pdim, &sdim, &coordsys, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
       return;
+
+    MBMesh *mesh=reinterpret_cast<MBMesh*> (*mbmpp);
+    mesh->is_split = is_split;
 
 // printf("%d# MBMesh_deserialize - 1\n", Par::Rank());
 
@@ -3173,11 +3185,17 @@ void MBMesh_createredistelems(void **src_meshpp, int *num_elem_gids, int *elem_g
   try {
     int localrc;
 
+    // set up Par
+    ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception
+
     // Dereference
     MBMesh *mesh=reinterpret_cast<MBMesh*> (*src_meshpp);
     MBMesh *out_mesh=reinterpret_cast<MBMesh*> (*output_meshpp);
 
 #if 1
+
     if (mesh->is_split) {
       // If split mesh expand ids
       int num_elem_gids_ws;
@@ -3247,8 +3265,14 @@ void MBMesh_createredistnodes(void **src_meshpp, int *num_node_gids, int *node_g
                               void **output_meshpp, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_createredistnodes()"
-
   try {
+    int localrc;
+
+    // set up Par
+    ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception
+
     // Dereference
     MBMesh *mesh=reinterpret_cast<MBMesh*> (*src_meshpp);
     MBMesh *out_mesh=reinterpret_cast<MBMesh*> (*output_meshpp);
@@ -3302,6 +3326,12 @@ void MBMesh_createredist(void **src_meshpp, int *num_node_gids, int *node_gids,
 
   try {
     int localrc;
+
+    // set up Par
+    ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception
+
 
     // Dereference
     MBMesh *mesh=reinterpret_cast<MBMesh*> (*src_meshpp);
@@ -3716,62 +3746,52 @@ void MBMesh_checkelemlist(void **meshpp, int *_num_elem_gids, int *elem_gids,
   if (rc!=NULL) *rc=ESMF_SUCCESS;
 }
 
-#if 0
-void MBMesh_FitOnVM(Mesh **meshpp,
-                       VM **new_vm,
-                       int *rc)
+void MBMesh_FitOnVM(void **meshpp, VM **new_vm, int *rc)
 {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_MeshFitOnVM()"
-  int localrc;
+  int localrc, merr;
 
    try {
 
-     // Initialize the parallel environment for mesh (if not already done)
-     {
-       ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-       if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-         throw localrc;  // bail out with exception
-     }
+    VM *curr_vm = VM::getCurrent(&localrc);
+    int petCount = curr_vm->getPetCount();
+    int localPet = curr_vm->getLocalPet();
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;
 
-     // Get Pointer to Mesh
-     ThrowRequire(meshpp);
-     Mesh *mesh = *meshpp;
+    // Dereference
+    MBMesh *mbmesh=reinterpret_cast<MBMesh*> (*meshpp);
 
-     // Get current VM
-     VM *curr_vm=VM::getCurrent(&localrc);
-     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-       throw localrc;  // bail out with exception
+    // Get current VM size
+    int curr_vm_size=curr_vm->getPetCount();
 
-     // Get current VM size
-     int curr_vm_size=curr_vm->getPetCount();
+    // Get current VM rank
+    int curr_vm_rank=curr_vm->getLocalPet();
 
-     // Get current VM rank
-     int curr_vm_rank=curr_vm->getLocalPet();
+    // Describe mapping of current PET
+    int new_vm_rank=-1; // if there is no pet, set to -1
+    if ((ESMC_NOT_PRESENT_FILTER(new_vm) != ESMC_NULL_POINTER) && *new_vm) {
+      new_vm_rank=(*new_vm)->getLocalPet();
+    }
 
-     // Describe mapping of current PET
-     int new_vm_rank=-1; // if there is no pet, set to -1
-     if ((ESMC_NOT_PRESENT_FILTER(new_vm) != ESMC_NULL_POINTER) && *new_vm) {
-       new_vm_rank=(*new_vm)->getLocalPet();
-     }
+    // Allocate array
+    int *rank_map=new int[curr_vm_size];
 
-     // Allocate array
-     int *rank_map=new int[curr_vm_size];
-
-     // Create array mapping from current vm to input vm
-     localrc=curr_vm->allgather(&new_vm_rank,rank_map,sizeof(int));
-     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-       throw localrc;  // bail out with exception
+    // Create array mapping from current vm to input vm
+    localrc=curr_vm->allgather(&new_vm_rank,rank_map,sizeof(int));
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception
 
 #if 0
-     // debug output
-     for (int p=0; p<curr_vm_size; p++) {
-       printf("%d# %d to %d\n",curr_vm_rank,p,rank_map[p]);
-     }
+    // debug output
+    for (int p=0; p<curr_vm_size; p++) {
+      printf("%d# %d to %d\n",curr_vm_rank,p,rank_map[p]);
+    }
 #endif
 
-     // Change proc numbers in mesh
-     mesh->map_proc_numbers(curr_vm_size, rank_map);
+    // Change proc numbers in mesh
+    mbmesh->map_proc_numbers(curr_vm_size, rank_map);
 
     // Free map
     delete [] rank_map;
@@ -3792,70 +3812,5 @@ void MBMesh_FitOnVM(Mesh **meshpp,
 
 
 } // ESMCI_MeshFitOnVM
-
- // Change the proc numbers in a mesh to correspond to a different set. This isn't to 
- // merge procs into one another, but to map them to different number. E.g. if they 
- // are being switched to a different VM or MPI_COMM.
- void Mesh::map_proc_numbers(int num_procs, int *proc_map) {
-
-     // Loop through nodes changing owners to owners in new VM
-     MeshDB::iterator ni = this->node_begin_all(), ne = this->node_end_all();
-     for (; ni != ne; ++ni) {
-       MeshObj &node=*ni;
-
-       // Get original owner
-       UInt orig_owner=node.get_owner();
-
-       // Error check owner
-       if ((orig_owner < 0) || (orig_owner > num_procs-1)) {
-         Throw()<<" mesh node owner rank outside current vm";
-       }
-
-       // map to new owner rank in new vm
-       int new_owner=proc_map[orig_owner];
-
-       // Make sure that the new one is ok
-       if (new_owner < 0) {
-         Throw()<<" mesh node owner outside of new vm";
-       }
-
-       // Set new owner
-       node.set_owner((UInt)new_owner);
-     }
-
-
-     // Loop through elems changing owners to owners in new VM
-     MeshDB::iterator ei = this->elem_begin_all(), ee = this->elem_end_all();
-     for (; ei != ee; ++ei) {
-       MeshObj &elem=*ei;
-
-       // Get original owner
-       UInt orig_owner=elem.get_owner();
-
-       // Error check owner
-       if ((orig_owner < 0) || (orig_owner > num_procs-1)) {
-         Throw()<<" mesh element owner rank outside current vm";
-       }
-
-       // map to new owner rank in new vm
-       int new_owner=proc_map[orig_owner];
-
-       // Make sure that the new one is ok
-       if (new_owner < 0) {
-         Throw()<<" mesh element owner outside of new vm";
-       }
-
-       // Set new owner
-       elem.set_owner((UInt)new_owner);
-     }
-
-     // Change CommReg
-     CommReg::map_proc_numbers(num_procs, proc_map);
-
-     // Remove ghosting, because it would be wrong now that procs have changed.
-     RemoveGhost();
- }
-
-#endif
 
 #endif // ESMF_MOAB
