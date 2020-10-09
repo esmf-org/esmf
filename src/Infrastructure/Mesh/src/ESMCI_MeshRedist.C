@@ -597,12 +597,6 @@ namespace ESMCI {
   Trace __trace("MeshRedistElem()");
 
 
-#if 0
-  for (int i=0; i<num_elem_gids; i++) {
-    printf("%d# %d :: e_gids=%d \n",Par::Rank(),i,elem_gids[i]);
-  }
-#endif
-
   // Create Mesh
   Mesh *output_mesh=new Mesh();
 

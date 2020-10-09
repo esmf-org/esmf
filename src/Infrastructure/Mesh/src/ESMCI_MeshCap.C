@@ -68,13 +68,17 @@ void MeshCap::fit_on_vm(VM **vm, int *rc) {
 #define ESMC_METHOD "MeshCap::fit_on_vm()"
 
   // Call into func. depending on mesh type
+  int localrc;
   if (is_esmf_mesh) {
     ESMCI_MeshFitOnVM(&mesh, vm, rc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return;
+#if defined ESMF_MOAB
   } else {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-        "- this functionality is not currently supported using MOAB",
-                                  ESMC_CONTEXT, rc);
-    return;
+    MBMesh_FitOnVM(&mbmesh, vm, rc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return;
+#endif
   }
 }
 

@@ -640,6 +640,9 @@ void MBMesh::set_elem_coords(EntityHandle eh, double *orig_coords) {
 
 // Setup MBMesh to operate in parallel by resolving shared ents, etc. 
 void MBMesh::setup_parallel() {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MBMesh::setup_parallel()"
+
   int merr,localrc;
 
   // Get MPI Communicator of current VM
@@ -667,6 +670,9 @@ void MBMesh::setup_parallel() {
 // (This hasn't been tested, but it should be what has to happen.
 //  TODO: Test!)
 void MBMesh::update_parallel() {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MBMesh::update_parallel()"
+
   int merr,localrc;
 
   // Get the indexed pcomm object from the interface                                                                
@@ -1245,6 +1251,77 @@ void MBMesh::CreateGhost() {
   delete pcomm;
 
 }
+
+// Change the proc numbers in a mesh to correspond to a different set. This isn't to 
+// merge procs into one another, but to map them to different number. E.g. if they 
+// are being switched to a different VM or MPI_COMM.
+void MBMesh::map_proc_numbers(int num_procs, int *proc_map) {
+  int merr,localrc;
+
+  // Get range of nodes
+  Range nodes;
+  merr=mesh->get_entities_by_dimension(0, 0, nodes);
+  if (merr != MB_SUCCESS) {
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                     moab::ErrorCodeStr[merr], 
+                                     ESMC_CONTEXT,&localrc)) throw localrc;
+  }
+
+  // Loop through nodes changing owners to owners in new VM
+  for (Range::const_iterator it=nodes.begin(); it != nodes.end(); it++) {
+    EntityHandle node=*it;
+
+    int orig_owner=this->get_owner(node);
+    if ((orig_owner < 0) || (orig_owner > num_procs-1)) {
+      Throw()<<" mesh node owner rank outside current vm";
+    }
+
+    // map to new owner rank in new vm
+    int new_owner=proc_map[orig_owner];
+    // Make sure that the new one is ok
+    if (new_owner < 0) {
+      Throw()<<" mesh node owner outside of new vm";
+    }
+
+    // Set new owner
+    this->set_owner(node, new_owner);
+  }
+
+  // Get range of elems
+  Range elems;
+  merr=mesh->get_entities_by_dimension(0, pdim, elems);
+  if (merr != MB_SUCCESS) {
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+  }
+
+  // Loop through elems changing owners to owners in new VM
+  for (Range::const_iterator it=elems.begin(); it != elems.end(); it++) {
+    EntityHandle elem=*it;
+
+    int orig_owner=this->get_owner(elem);
+    // Error check owner
+    if ((orig_owner < 0) || (orig_owner > num_procs-1)) {
+      Throw()<<" mesh element owner rank outside current vm";
+    }
+
+    // map to new owner rank in new vm
+    int new_owner=proc_map[orig_owner];
+    // Make sure that the new one is ok
+    if (new_owner < 0) {
+       Throw()<<" mesh element owner outside of new vm";
+    }
+    // Set new owner
+    this->set_owner(elem, new_owner);
+  }
+
+  // NOTE: not sure it this needs to be done for the mbmesh
+  // // Change CommReg
+  // CommReg::map_proc_numbers(num_procs, proc_map);
+  // // Remove ghosting, because it would be wrong now that procs have changed.
+  // RemoveGhost();
+}
+
 
 #endif // ESMF_MOAB
 
