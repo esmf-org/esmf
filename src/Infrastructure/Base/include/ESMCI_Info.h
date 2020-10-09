@@ -109,8 +109,12 @@ public:
   Info&operator=(const Info&) = delete; // Copy assignment
   Info&operator=(Info&&) = delete; // Move assignment
 
-  explicit Info(const json& storage); // Copy constructor from JSON
+  explicit Info(const json& storage); // Constructor from JSON
+  // Constructor from JSON with type storage
+  explicit Info(const json& storage, const json& type_storage);
   explicit Info(json&& storage); // Move constructor from JSON
+  // Move constructor from JSON with type storage
+  explicit Info(json&& storage, json&& type_storage);
   explicit Info(key_t& input); // Constructor from string
 
   std::string dump(void) const;

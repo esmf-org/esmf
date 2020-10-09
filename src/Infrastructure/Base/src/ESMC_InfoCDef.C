@@ -100,7 +100,7 @@ ESMCI::Info* ESMC_InfoCopy(ESMCI::Info *info, int &esmc_rc) {
     return nullptr;
   }
   esmc_rc = ESMF_SUCCESS;
-  return new ESMCI::Info(info->getStorageRef());
+  return new ESMCI::Info(info->getStorageRef(), info->getTypeStorage());
 }
 
 #undef  ESMC_METHOD
@@ -111,6 +111,7 @@ void ESMC_InfoCopyForAttribute(const ESMCI::Info* src, ESMCI::Info* dst, int &es
   esmc_rc = ESMF_FAILURE;
   try {
     dst->getStorageRefWritable() = src->getStorageRef();
+    dst->getTypeStorageWritable() = src->getTypeStorage();
     esmc_rc = ESMF_SUCCESS;
   }
   ESMC_CATCH_ISOC
@@ -150,8 +151,16 @@ ESMCI::Info* ESMC_InfoCreateByKey(ESMCI::Info *srcInfo, char* key, int &esmc_rc)
   ESMCI::Info *info;
   try {
     std::string local_key(key);
+    // Get the Base info storage
     json new_storage = srcInfo->get<json>(local_key);
-    info = new ESMCI::Info(std::move(new_storage));
+    // Get the type storage
+    ESMCI::Info type_storage_info(srcInfo->getTypeStorage());
+    json type_storage = json::object();
+    if (type_storage_info.hasKey(local_key)) {
+      type_storage = type_storage_info.get<json>(local_key);
+    }
+
+    info = new ESMCI::Info(std::move(new_storage), std::move(type_storage));
     esmc_rc = ESMF_SUCCESS;
   }
   ESMC_CATCH_ISOC

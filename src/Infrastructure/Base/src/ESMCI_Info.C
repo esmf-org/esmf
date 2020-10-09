@@ -521,12 +521,36 @@ Info::Info(const json& storage) {
 };
 
 #undef  ESMC_METHOD
+#define ESMC_METHOD "Info(json&)"
+Info::Info(const json& storage, const json& type_storage) {
+  try {
+    check_init_from_json(storage);
+    check_init_from_json(type_storage);
+    this->storage = storage;
+    this->type_storage = type_storage;
+  }
+  ESMF_CATCH_INFO
+};
+
+#undef  ESMC_METHOD
 #define ESMC_METHOD "Info(json&&)"
 Info::Info(json&& storage) {
   try {
     check_init_from_json(storage);
     this->storage = std::move(storage);
     this->type_storage = json::object();
+  }
+  ESMF_CATCH_INFO
+};
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "Info(json&&, json&&)"
+Info::Info(json&& storage, json&& type_storage) {
+  try {
+    check_init_from_json(storage);
+    check_init_from_json(type_storage);
+    this->storage = std::move(storage);
+    this->type_storage = std::move(type_storage);
   }
   ESMF_CATCH_INFO
 };
@@ -647,6 +671,19 @@ void Info::erase(key_t &keyParent, key_t &keyChild, bool recursive) {
       }
       json &found = jp->at(keyChild); // Check that the key exists
       jp->erase(keyChild);
+
+      // Erase from the type storage if the key combination is present
+      if (this->getTypeStorage().size() > 0) {
+        try {
+          ESMCI::Info type_storage(this->getTypeStorage());
+          json::json_pointer type_target(key.to_string() + "/" + keyChild);
+          if (type_storage.hasKey(type_target, recursive)) {
+            type_storage.erase(keyParent, keyChild, recursive);
+            this->getTypeStorageWritable() = std::move(type_storage.getTypeStorageWritable());
+          }
+        }
+        ESMC_CATCH_ERRPASSTHRU
+      }
     }
     ESMF_INFO_CATCH_JSON
   }
@@ -1297,6 +1334,10 @@ void Info::set(key_t &key, const ESMCI::Info &info, bool force, const key_t * co
     json j = info.getStorageRef();
     // Move the contents of the copied "info" storage into this object.
     this->set(key, std::move(j), force, nullptr, pkey);
+    // Need to move over the type storage as well.
+    ESMCI::Info type_storage;
+    type_storage.set(key, info.getTypeStorage(), force, nullptr, pkey);
+    this->getTypeStorageWritable() = std::move(type_storage.getStorageRefWritable());
   }
   ESMF_CATCH_INFO
 }
@@ -1367,6 +1408,7 @@ template void Info::set<std::vector<std::string>>(key_t&, std::vector<std::strin
 void Info::update(const Info &info) {
   try {
     this->getStorageRefWritable().update(info.getStorageRef());
+    this->getTypeStorageWritable().update(info.getTypeStorage());
   }
   ESMF_INFO_CATCH_JSON;
   this->dirty = true;
@@ -1408,6 +1450,11 @@ void Info::update_for_attribute(const Info &info, bool overwrite) {
     const json &new_contents = info.getStorageRef();
     json &to_update = this->getStorageRefWritable();
     do_update_for_attribute(to_update, new_contents, overwrite);
+
+    // Update the type storage
+    const json &new_type_contents = info.getTypeStorage();
+    json &to_update_types = this->getTypeStorageWritable();
+    do_update_for_attribute(to_update_types, new_type_contents, overwrite);
   }
   ESMF_INFO_CATCH_JSON;
   // Data is considered not dirty after the update since this is primarily used

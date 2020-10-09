@@ -404,6 +404,21 @@ void testErase(int& rc, char failMsg[]) {
     return finalizeFailure(rc, failMsg, "Error not handled for missing child");
   }
 
+  //---------------------------------------------------------------------------
+  // Test an erase with a 32-bit flag
+
+  try {
+    Info info2;
+    info2.set<int>("/ESMF/General/foo", 33, false);
+    info2.getTypeStorageWritable()[json::json_pointer("/ESMF/General/foo")] = true;
+    info2.erase("/ESMF/General", "foo");
+    Info info2_type_storage(info2.getTypeStorage());
+    if (info2_type_storage.hasKey("/ESMF/General/foo")) {
+      return finalizeFailure(rc, failMsg, "key still present in type storage after erase");
+    }
+  }
+  ESMC_CATCH_ERRPASSTHRU
+
   rc = ESMF_SUCCESS;
   return;
 };
