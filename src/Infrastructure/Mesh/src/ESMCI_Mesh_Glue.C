@@ -6206,7 +6206,6 @@ void ESMCI_MeshFitOnVM(Mesh **meshpp,
     // Free map
     delete [] rank_map;
 
-    return;
   }catch(int localrc){
     // catch standard ESMF return code
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,rc);
