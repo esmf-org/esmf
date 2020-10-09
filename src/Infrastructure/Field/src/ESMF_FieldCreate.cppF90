@@ -5016,7 +5016,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ftype%is_proxy .or. ftype%geomb_internal) then
         
           if (ftype%is_proxy) then
-            ! proxies destroy their actual geometry object
+            ! proxies destroy their actual geometry object, but must leave
+            ! in garbage collection because multiple fields might be referencing
+            ! the same actual geometry object, and try to destroy
 
             call ESMF_GeomBaseGet(ftype%geombase, geomtype=geomtype, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
@@ -5030,7 +5032,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
               ! destroy the Grid proxy
-              call ESMF_GridDestroy(grid, noGarbage=noGarbage, rc=localrc)
+              call ESMF_GridDestroy(grid, noGarbage=.false., rc=localrc)
                 if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -5040,7 +5042,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
               ! destroy the Mesh proxy
-              call ESMF_MeshDestroy(mesh, noGarbage=noGarbage, rc=localrc)
+              call ESMF_MeshDestroy(mesh, noGarbage=.false., rc=localrc)
                 if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -5051,7 +5053,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
               ! destroy the LocStream proxy
-              call ESMF_LocStreamDestroy(locstream, noGarbage=noGarbage, &
+              call ESMF_LocStreamDestroy(locstream, noGarbage=.false., &
                 rc=localrc)
                 if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -5062,7 +5064,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
               ! destroy the XGrid proxy
-              call ESMF_XGridDestroy(xgrid, noGarbage=noGarbage, rc=localrc)
+              call ESMF_XGridDestroy(xgrid, noGarbage=.false., rc=localrc)
                 if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
