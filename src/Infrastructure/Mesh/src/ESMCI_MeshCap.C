@@ -70,12 +70,12 @@ void MeshCap::fit_on_vm(VM **vm, int *rc) {
   // Call into func. depending on mesh type
   int localrc;
   if (is_esmf_mesh) {
-    ESMCI_MeshFitOnVM(&mesh, vm, rc);
+    ESMCI_MeshFitOnVM(&mesh, vm, localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return;
 #if defined ESMF_MOAB
   } else {
-    MBMesh_FitOnVM(&mbmesh, vm, rc);
+    MBMesh_FitOnVM(&mbmesh, vm, localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return;
 #endif
