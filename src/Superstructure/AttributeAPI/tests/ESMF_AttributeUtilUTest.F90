@@ -51,7 +51,7 @@ program ESMF_AttributeUtilUTest
 
   character(:), allocatable :: key, name_key, convention, purpose
 
-  type(ESMF_FieldBundle) :: src_fb, dst_fb, src_fb2, dst_fb2
+  type(ESMF_FieldBundle) :: src_fb, dst_fb, src_fb2, dst_fb2, src_fb3, dst_fb3
   type(ESMF_Info) :: infoh, infoh2
   character(:), allocatable :: actual
   type(ESMF_Grid) :: grid
@@ -357,6 +357,32 @@ program ESMF_AttributeUtilUTest
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   !----------------------------------------------------------------------------
 
+  !----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Attribute copy by reference preserves 32-bit"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  src_fb3 = ESMF_FieldBundleCreate(name="src_fb3", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  dst_fb3 = ESMF_FieldBundleCreate(name="dst_fb3", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_AttributeSet(src_fb3, "is_32bit", actual_value, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_AttributeCopy(src_fb3, dst_fb3, attcopy=ESMF_ATTCOPY_REFERENCE, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  actual_tk = ESMF_TYPEKIND_I8
+  call ESMF_AttributeGet(dst_fb3, "is_32bit", typekind=actual_tk, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_Test((actual_tk == ESMF_TYPEKIND_I4), name, failMsg, result, ESMF_SRCLINE)
+  ! Must abort to prevent possible hanging due to communications.
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !----------------------------------------------------------------------------
+
   call ESMF_FieldBundleDestroy(src_fb, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
@@ -367,6 +393,12 @@ program ESMF_AttributeUtilUTest
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldBundleDestroy(dst_fb2, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_FieldBundleDestroy(src_fb3, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_FieldBundleDestroy(dst_fb3, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldDestroy(field, rc=rc)
