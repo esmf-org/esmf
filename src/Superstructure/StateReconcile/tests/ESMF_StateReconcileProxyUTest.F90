@@ -150,6 +150,8 @@ module subcomp_mod
     ! local variables
     type(ESMF_DistGrid) :: dg
     type(ESMF_Array)    :: array
+    type(ESMF_Field)    :: field
+    type(ESMF_Mesh)     :: mesh
     
     ! Initialize
     rc = ESMF_SUCCESS
@@ -170,6 +172,15 @@ module subcomp_mod
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     call ESMF_DistGridDestroy(dg, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    call ESMF_StateGet(estate, "field1M", field=field, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    
+    call ESMF_FieldGet(field, mesh=mesh, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    
+    call ESMF_MeshDestroy(mesh, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
   end subroutine !--------------------------------------------------------------
