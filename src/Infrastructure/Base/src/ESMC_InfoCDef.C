@@ -416,7 +416,8 @@ void ESMC_InfoBaseSyncDo(const std::vector<long long int> &base_addresses,
         bool is_dirty = info->isDirty();
         if (is_dirty) {
           try {
-            j[std::to_string(ii)] = info->getStorageRef().dump();
+            // Serialize the JSON storage to string and include the type storage.
+            j[std::to_string(ii)] = info->dump_with_type_storage();
             // This data will be broadcast and we can consider the object
             // clean.
             if (markClean_bool) {
@@ -444,12 +445,13 @@ void ESMC_InfoBaseSyncDo(const std::vector<long long int> &base_addresses,
       // map.
       ESMCI::Info rhs;
       try {
-        rhs.parse(it.value());
+        rhs.parse_with_type_storage(it.value());
       }
       ESMF_CATCH_INFO
       try {
         if (localPet != rootPet) {
           info_to_update->getStorageRefWritable() = rhs.getStorageRef();
+          info_to_update->getTypeStorageWritable() = rhs.getTypeStorage();
 
           // Since these data were broadcast, they should be marked as dirty in
           // case the root PET is switched to this PET. This may happen with

@@ -157,6 +157,7 @@ public:
   bool isNull(key_t &key) const;
 
   void parse(key_t &input);
+  void parse_with_type_storage(key_t &input);
 
   void deserialize(char *buffer, int *offset);
 

@@ -62,11 +62,12 @@ program ESMF_InfoSyncUTest
   type(ESMF_RouteHandle) :: rh
   type(ESMF_State) :: state, nested_state, nested_state2
   type(ESMF_InfoDescribe) :: eidesc, desired_eidesc, ainq, search_idesc
-  integer :: rootPet=0, find_base_id
+  integer :: rootPet=0, find_base_id, tk_check
   integer(ESMF_KIND_I8), dimension(:), allocatable :: bases
   type(ESMF_Info) :: search_criteria
   logical :: isDirty, found
   character(len=ESMF_MAXSTR) :: found_field_name
+  type(ESMF_TypeKind_Flag) :: tk
 
   !----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)  ! calls ESMF_Initialize() internally
@@ -156,6 +157,9 @@ program ESMF_InfoSyncUTest
     call ESMF_InfoSet(infoh, "fvarname", "state", rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+    call ESMF_AttributeSet(state, "is_32bit", tk_check, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
     call ESMF_InfoGetFromHost(nested_state2, infoh, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
@@ -235,6 +239,19 @@ program ESMF_InfoSyncUTest
 #endif
 
   call ESMF_Test((eidesc%info == desired_info), name, failMsg, result, ESMF_SRCLINE)
+
+  ! ---------------------------------------------------------------------------
+
+  ! ---------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Check 32-bit preserved"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  rc = ESMF_FAILURE
+
+  call ESMF_AttributeGet(state, "is_32bit", typekind=tk, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_Test(tk==ESMF_TYPEKIND_I4, name, failMsg, result, ESMF_SRCLINE)
 
   ! ---------------------------------------------------------------------------
 

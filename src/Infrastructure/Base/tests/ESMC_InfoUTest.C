@@ -1353,6 +1353,58 @@ void test_set_32bit_type_storage(int& rc, char failMsg[]) {
   rc = ESMF_SUCCESS;
 };
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "test_dump_and_parse_with_type_storage()"
+void test_dump_and_parse_with_type_storage(int& rc, char failMsg[]) {
+  rc = ESMF_FAILURE;
+
+  try {
+    ESMCI::Info info;
+
+    info.set<int>("/ESMF/General/is_i4", 33, false);
+    info.set_32bit_type_storage("/ESMF/General/is_i4", true, nullptr);
+
+    std::string actual = info.dump_with_type_storage();
+
+    if (actual != "{\"ESMF\":{\"General\":{\"is_i4\":33}},\"_esmf_info_type_storage\":{\"ESMF\":{\"General\":{\"is_i4\":true}}}}") {
+      return finalizeFailure(rc, failMsg, "did not dump type storage");
+    }
+    if (info.hasKey("_esmf_info_type_storage", true)) {
+      return finalizeFailure(rc, failMsg, "type storage not removed");
+    }
+
+    // Test dumping with no type storage --------------------------------------
+
+    ESMCI::Info info_no_types;
+    std::string mostly_empty = info_no_types.dump_with_type_storage();
+
+    // ------------------------------------------------------------------------
+    // Test parsing the dumped string and make sure the type storage is set
+    // as expected.
+
+    ESMCI::Info info_parse;
+    info_parse.parse_with_type_storage(actual);
+    if (info_parse.hasKey("_esmf_info_type_storage", true)) {
+      return finalizeFailure(rc, failMsg, "type storage not erased");
+    }
+    if (!info_parse.getTypeStorage()["ESMF"]["General"]["is_i4"]) {
+      return finalizeFailure(rc, failMsg, "type storage not assigned");
+    }
+
+    // Test parsing with no type storage in the string. -----------------------
+
+    std::string to_parse = "{\"ESMF\":{\"General\":{\"is_i4\":33}}}";
+    ESMCI::Info info2;
+    info2.parse_with_type_storage(to_parse);
+    if (info2.getTypeStorage().size() != 0) {
+      return finalizeFailure(rc, failMsg, "type storage assigned");
+    }
+  }
+  ESMC_CATCH_ERRPASSTHRU
+
+  rc = ESMF_SUCCESS;
+};
+
 int main(void) {
 
   char name[80];
@@ -1545,6 +1597,13 @@ int main(void) {
   //NEX_UTest
   strcpy(name, "test_set_32bit_type_storage");
   test_set_32bit_type_storage(rc, failMsg);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //---------------------------------------------------------------------------
+
+  //---------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "test_dump_and_parse_with_type_storage");
+  test_dump_and_parse_with_type_storage(rc, failMsg);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //---------------------------------------------------------------------------
 

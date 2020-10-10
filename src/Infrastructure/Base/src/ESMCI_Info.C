@@ -583,13 +583,15 @@ std::string Info::dump(void) const {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "Info::dump_with_type_storage"
 std::string Info::dump_with_type_storage(void) {
+  // Test: test_dump_and_parse_with_type_storage
   std::string ret;
   try {
-    if (this->getTypeStorage().size() > 0) {
+    bool has_type_storage = this->getTypeStorage().size() > 0;
+    if (has_type_storage) {
       this->getStorageRefWritable()["_esmf_info_type_storage"] = this->getTypeStorage();
     }
-    std::string ret = this->dump(0);
-    this->erase("", "_esmf_info_type_storage");
+    ret = this->dump(0);
+    if (has_type_storage) this->erase("", "_esmf_info_type_storage");
   }
   ESMC_CATCH_ERRPASSTHRU
   return ret;
@@ -610,11 +612,7 @@ void Info::deserialize(char *buffer, int *offset) {
   (*offset) += sizeof(int);
   std::string infobuffer(&(buffer[*offset]), length);
   try {
-    this->parse(infobuffer);
-    if (this->hasKey("_esmf_info_type_storage")) {
-      this->getTypeStorageWritable() = this->get<json>("_esmf_info_type_storage");
-      this->erase("", "_esmf_info_type_storage");
-    }
+    this->parse_with_type_storage(infobuffer);
   }
   catch (esmc_error &e) {
     ESMC_ERRPASSTHRU(e);
@@ -1103,6 +1101,23 @@ void Info::parse(key_t& input) {
 }
 
 #undef  ESMC_METHOD
+#define ESMC_METHOD "Info::parse_with_type_storage()"
+void Info::parse_with_type_storage(key_t& input) {
+  // Exceptions:  ESMCI:esmc_error
+  // Test: test_dump_and_parse_with_type_storage
+
+  try {
+    this->parse(input);
+    if (this->hasKey("_esmf_info_type_storage", false)) {
+      this->getTypeStorageWritable() = this->getStorageRef()["_esmf_info_type_storage"];
+      this->erase("", "_esmf_info_type_storage");
+    }
+  }
+  ESMF_CATCH_INFO
+  return;
+}
+
+#undef  ESMC_METHOD
 #define ESMC_METHOD "Info::isNull()"
 bool Info::isNull(key_t &key) const {
   bool ret;
@@ -1124,13 +1139,7 @@ void Info::serialize(char *buffer, int *length, int *offset, ESMC_InquireFlag in
   // Exceptions:  ESMCI:esmc_error
   std::string infobuffer;
   try {
-    bool should_erase = false;
-    if (this->getTypeStorage().size() > 0) {
-      this->getStorageRefWritable()["_esmf_info_type_storage"] = this->getTypeStorage();
-      should_erase = true;
-    }
-    infobuffer = this->dump();
-    if (should_erase) { this->erase("", "_esmf_info_type_storage"); }
+    infobuffer = this->dump_with_type_storage();
   }
   ESMC_CATCH_ERRPASSTHRU
   alignOffset(*offset);
@@ -1562,14 +1571,9 @@ void broadcastInfo(ESMCI::Info* info, int rootPet, const ESMCI::VM &vm) {
   if (localPet == rootPet) {
     // If this is the root, serialize the info storage to std::string
     try {
-      if (info->getTypeStorage().size() > 0) {
-        info->getStorageRefWritable()["_esmf_info_type_storage"] = info->getTypeStorage();
-      }
-      target = info->dump();
+      target = info->dump_with_type_storage();
     }
-    catch (ESMCI::esmc_error &exc_esmf) {
-      ESMC_ERRPASSTHRU(exc_esmf);
-    }
+    ESMC_CATCH_ERRPASSTHRU
     target_size = target.size();
   }
   // Broadcast size of the string buffer holding the serialized info.
@@ -1579,7 +1583,7 @@ void broadcastInfo(ESMCI::Info* info, int rootPet, const ESMCI::VM &vm) {
   std::string target_received(target_size, '\0');  // Allocate receive buffer
   if (localPet == rootPet) {
     // If this is root, just move the data to the receive buffer with no copy.
-    target_received = move(target);
+    target_received = std::move(target);
   }
   // Broadcast the string buffer
   esmc_rc = const_cast<ESMCI::VM&>(vm).broadcast(&target_received[0], target_size, rootPet);
@@ -1587,15 +1591,9 @@ void broadcastInfo(ESMCI::Info* info, int rootPet, const ESMCI::VM &vm) {
   if (localPet != rootPet) {
     // If not root, then parse the incoming string buffer into attribute storage.
     try {
-      info->parse(target_received);
+      info->parse_with_type_storage(target_received);
     }
-    catch (ESMCI::esmc_error &exc_esmf) {
-      ESMC_ERRPASSTHRU(exc_esmf);
-    }
-  }
-  if (info->hasKey("_esmf_info_type_storage")) {
-    info->getTypeStorageWritable() = info->get<json>("_esmf_info_type_storage");
-    info->erase("", "_esmf_info_type_storage");
+    ESMC_CATCH_ERRPASSTHRU
   }
   return;
 }
