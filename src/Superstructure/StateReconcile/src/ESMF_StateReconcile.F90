@@ -3159,6 +3159,8 @@ call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): found Field: "//trim(name), &
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc)) &
                     return
+                  ! deallocate the associated StateItem
+                  deallocate(zapList(k)%si)
                 end if
               else if (zapList(k)%si%otype==ESMF_STATEITEM_FIELDBUNDLE) then
                 call ESMF_FieldBundleGet(zapList(k)%si%datap%fbp, name=name, rc=localrc)
@@ -3194,6 +3196,8 @@ call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): found FieldBundle: "//trim(na
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc)) &
                     return
+                  ! deallocate the associated StateItem
+                  deallocate(zapList(k)%si)
                 end if
               end if
             end if
@@ -3222,6 +3226,8 @@ call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): found FieldBundle: "//trim(na
               ESMF_CONTEXT, rcToReturn=rc)) &
               return
           endif
+          ! deallocate the associated StateItem
+          if (associated(zapList(k)%si)) deallocate(zapList(k)%si)
         endif
       end do ! k
     endif

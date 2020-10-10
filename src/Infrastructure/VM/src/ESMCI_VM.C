@@ -1065,6 +1065,11 @@ void VM::shutdown(
               if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                 ESMC_CONTEXT, rc))
                 return;
+#if 0
+//gjt: Disable cleaning up LocStream from the garbage collection level because
+//gjt: it leads to issues when a field tries to destroy it later.
+//gjt: This is going to be tricky to resolve with Fortran implemented classes.
+//gjt: For now rather have small memory leaks than invalid memory access.
             }else if (matchTable_FObjects[i][k].objectID ==
               ESMC_ID_LOCSTREAM.objectID){
               FTN_X(f_esmf_locstreamcollectgarbage)(
@@ -1072,6 +1077,7 @@ void VM::shutdown(
               if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                 ESMC_CONTEXT, rc))
                 return;
+#endif
             }else if (matchTable_FObjects[i][k].objectID ==
               ESMC_ID_STATE.objectID){
               FTN_X(f_esmf_statecollectgarbage)(
@@ -3322,6 +3328,11 @@ void VM::finalize(
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc))
           return;
+#if 0
+//gjt: Disable cleaning up LocStream from the garbage collection level because
+//gjt: it leads to issues when a field tries to destroy it later.
+//gjt: This is going to be tricky to resolve with Fortran implemented classes.
+//gjt: For now rather have small memory leaks than invalid memory access.
       }else if (matchTable_FObjects[0][k].objectID ==
         ESMC_ID_LOCSTREAM.objectID){
         FTN_X(f_esmf_locstreamcollectgarbage)(
@@ -3329,6 +3340,7 @@ void VM::finalize(
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc))
           return;
+#endif
       }else if (matchTable_FObjects[0][k].objectID ==
         ESMC_ID_STATE.objectID){
         FTN_X(f_esmf_statecollectgarbage)(
