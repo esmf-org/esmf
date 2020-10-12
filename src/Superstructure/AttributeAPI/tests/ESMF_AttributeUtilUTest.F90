@@ -51,7 +51,8 @@ program ESMF_AttributeUtilUTest
 
   character(:), allocatable :: key, name_key, convention, purpose
 
-  type(ESMF_FieldBundle) :: src_fb, dst_fb, src_fb2, dst_fb2, src_fb3, dst_fb3
+  type(ESMF_FieldBundle) :: src_fb, dst_fb, src_fb2, dst_fb2, src_fb3, dst_fb3, &
+                            fb_idx
   type(ESMF_Info) :: infoh, infoh2
   character(:), allocatable :: actual
   type(ESMF_Grid) :: grid
@@ -63,7 +64,7 @@ program ESMF_AttributeUtilUTest
   integer, dimension(2) :: atos
   real(ESMF_KIND_R4), dimension(4) :: arr
   real(ESMF_KIND_R8), dimension(3) :: arr2
-  integer :: not_there, actual_value
+  integer :: not_there, actual_value, itemCount
 
 !------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -376,6 +377,30 @@ program ESMF_AttributeUtilUTest
 
   actual_tk = ESMF_TYPEKIND_I8
   call ESMF_AttributeGet(dst_fb3, "is_32bit", typekind=actual_tk, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_Test((actual_tk == ESMF_TYPEKIND_I4), name, failMsg, result, ESMF_SRCLINE)
+  ! Must abort to prevent possible hanging due to communications.
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !----------------------------------------------------------------------------
+
+  !----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Attribute get by index preserves 32-bit"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  fb_idx = ESMF_FieldBundleCreate(name="fb_idx", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_AttributeSet(fb_idx, "is_32bit", actual_value, convention="NetCDF", &
+                         purpose="FV3", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  actual_tk = ESMF_TYPEKIND_I4
+  call ESMF_AttributeGet(fb_idx, convention="NetCDF", purpose="FV3", &
+                         attnestflag=ESMF_ATTNEST_OFF, attributeIndex=1, &
+                         name=attname, typekind=actual_tk, itemCount=itemCount, &
+                         rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_Test((actual_tk == ESMF_TYPEKIND_I4), name, failMsg, result, ESMF_SRCLINE)

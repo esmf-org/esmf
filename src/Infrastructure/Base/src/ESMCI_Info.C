@@ -1028,7 +1028,7 @@ json Info::inquire(key_t &key, bool recursive, const int *idx, bool attr_complia
         // Find out if the output data is 32-bit
         try {
           json::json_pointer jp = this->formatKey(j["key"]);
-          is_32bit = retrieve_32bit_flag(this->getTypeStorage(), jp, recursive);
+          is_32bit = retrieve_32bit_flag(this->getTypeStorage(), jp, true);
         }
         ESMC_CATCH_ERRPASSTHRU
 
