@@ -160,6 +160,9 @@ program ESMF_InfoSyncUTest
     call ESMF_AttributeSet(state, "is_32bit", tk_check, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+    call ESMF_AttributeSet(fb, "is_32bit2", tk_check, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
     call ESMF_InfoGetFromHost(nested_state2, infoh, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
@@ -244,11 +247,26 @@ program ESMF_InfoSyncUTest
 
   ! ---------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Check 32-bit preserved"
+  write(name, *) "Check 32-bit preserved on top-level state"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   rc = ESMF_FAILURE
 
+  tk = ESMF_TYPEKIND_I8
   call ESMF_AttributeGet(state, "is_32bit", typekind=tk, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_Test(tk==ESMF_TYPEKIND_I4, name, failMsg, result, ESMF_SRCLINE)
+
+  ! ---------------------------------------------------------------------------
+
+  ! ---------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Check 32-bit preserved on field bundle"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  rc = ESMF_FAILURE
+
+  tk = ESMF_TYPEKIND_I8
+  call ESMF_AttributeGet(fb, "is_32bit2", typekind=tk, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_Test(tk==ESMF_TYPEKIND_I4, name, failMsg, result, ESMF_SRCLINE)
