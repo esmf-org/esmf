@@ -880,25 +880,6 @@ void mbmesh_redist_elem(MBMesh *mesh, int *num_elem_gids, int *elem_gids, MBMesh
     std::vector<UInt> src_elem_gids_proc;
     DDir<> edir;
 
-#undef debug_printelems
-#ifdef debug_printelems
-    int localrc;
-    VM *vm = VM::getCurrent(&localrc);
-    int petCount = vm->getPetCount();
-    int localPet = vm->getLocalPet();
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-      throw localrc;
-
-    // print the vectors
-    printf("%d# mbmesh_redist_elem num_elem_gids = %d\n",Par::Rank(),*num_elem_gids);
-
-    // printf("%d# elem_gids [%d] = [", localPet, *num_elem_gids);
-    // for (int i=0; i<*num_elem_gids; ++i) {
-    //   printf("%d, ", elem_gids[i]);
-    // }
-    // printf("]\n");
-#endif
-
     // for split element handling
     std::multimap<int, EntityHandle> orig_id_to_split_elem;
     mbmesh_invert_split_to_orig_id_map(mesh, orig_id_to_split_elem);

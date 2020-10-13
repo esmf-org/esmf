@@ -3057,7 +3057,23 @@ void MBMesh_serialize(void **mbmpp, char *buffer, int *length,
       size++;
       *ip++ = mbmp->coordsys;
       size++;
+      *ip++ = mbmp->has_node_orig_coords;
+      size++;
+      *ip++ = mbmp->has_node_mask;
+      size++;
+      *ip++ = mbmp->has_elem_frac;
+      size++;
+      *ip++ = mbmp->has_elem_mask;
+      size++;
+      *ip++ = mbmp->has_elem_area;
+      size++;
+      *ip++ = mbmp->has_elem_coords;
+      size++;
+      *ip++ = mbmp->has_elem_orig_coords;
+      size++;
       *ip++ = mbmp->is_split;
+      size++;
+      *ip++ = mbmp->max_non_split_id;
       size++;
     }
     
@@ -3133,7 +3149,23 @@ void MBMesh_deserialize(void **mbmpp, char *buffer, int *offset, int *rc,
     localsize++;
     ESMC_CoordSys_Flag coordsys=static_cast<ESMC_CoordSys_Flag> (*ip++);
     localsize++;
-    bool is_split=static_cast<bool> (*ip++);
+    bool has_node_orig_coords=static_cast<bool>(*ip++);
+    localsize++;
+    bool has_node_mask=static_cast<bool>(*ip++);
+    localsize++;
+    bool has_elem_frac=static_cast<bool>(*ip++);
+    localsize++;
+    bool has_elem_mask=static_cast<bool>(*ip++);
+    localsize++;
+    bool has_elem_area=static_cast<bool>(*ip++);
+    localsize++;
+    bool has_elem_coords=static_cast<bool>(*ip++);
+    localsize++;
+    bool has_elem_orig_coords=static_cast<bool>(*ip++);
+    localsize++;
+    bool is_split=static_cast<bool>(*ip++);
+    localsize++;
+    bool max_non_split_id=static_cast<bool>(*ip++);
     localsize++;
 
     // Adjust offset
@@ -3144,7 +3176,16 @@ void MBMesh_deserialize(void **mbmpp, char *buffer, int *offset, int *rc,
       return;
 
     MBMesh *mesh=reinterpret_cast<MBMesh*> (*mbmpp);
+    mesh->has_node_orig_coords = has_node_orig_coords;
+    mesh->has_node_mask = has_node_mask;
+    mesh->has_elem_frac = has_elem_frac;
+    mesh->has_elem_mask = has_elem_mask;
+    mesh->has_elem_area = has_elem_area;
+    mesh->has_elem_coords = has_elem_coords;
+    mesh->has_elem_orig_coords = has_elem_orig_coords;
     mesh->is_split = is_split;
+    mesh->max_non_split_id = max_non_split_id;
+
 
 // printf("%d# MBMesh_deserialize - 1\n", Par::Rank());
 
@@ -3752,16 +3793,19 @@ void MBMesh_FitOnVM(void **meshpp, VM **new_vm, int *rc)
 #define ESMC_METHOD "ESMCI_MeshFitOnVM()"
   int localrc, merr;
 
-   try {
+  try {
 
-    VM *curr_vm = VM::getCurrent(&localrc);
-    int petCount = curr_vm->getPetCount();
-    int localPet = curr_vm->getLocalPet();
+    // set up Par
+    ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-      throw localrc;
+      throw localrc;  // bail out with exception
 
     // Dereference
     MBMesh *mbmesh=reinterpret_cast<MBMesh*> (*meshpp);
+
+    VM *curr_vm = VM::getCurrent(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;
 
     // Get current VM size
     int curr_vm_size=curr_vm->getPetCount();
@@ -3793,10 +3837,15 @@ void MBMesh_FitOnVM(void **meshpp, VM **new_vm, int *rc)
     // Change proc numbers in mesh
     mbmesh->map_proc_numbers(curr_vm_size, rank_map);
 
+    // reset Par
+    // Par::SetComm((*new_vm)->getMpi_c());
+
+    // create ParallelComm
+    // mbmesh->setup_parallel();
+
     // Free map
     delete [] rank_map;
 
-    return;
   }catch(int localrc){
     // catch standard ESMF return code
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,rc);
