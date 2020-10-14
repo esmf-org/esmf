@@ -273,7 +273,7 @@ contains
     integer, pointer :: nitems_buf(:)
     type (ESMF_StateItemWrap), pointer :: siwrap(:)
 
-    integer,         pointer :: ids_send(:), itemtypes_send(:)
+    integer,         pointer :: ids_send(:)
     type(ESMF_VMId), pointer :: vmids_send(:)
     integer, allocatable, target :: vmintids_send(:)
 
@@ -342,11 +342,9 @@ contains
       call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
           ': *** Step 1.0 - Build send arrays')
     end if
-    itemtypes_send => null ()
     ids_send   => null ()
     vmids_send => null ()
     call ESMF_ReconcileGetStateIDInfo (state, siwrap,  &
-        itemtype=itemtypes_send,  &
           id=  ids_send,  &
         vmid=vmids_send,  &
         rc=localrc)
@@ -593,7 +591,7 @@ contains
     end if
 
     if (associated (ids_send)) then
-      deallocate (ids_send, itemtypes_send, vmids_send, stat=memstat)
+      deallocate (ids_send, vmids_send, stat=memstat)
       if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT,  &
           rcToReturn=rc)) return
@@ -2180,13 +2178,11 @@ contains
 ! !IROUTINE: ESMF_ReconcileGetStateIDInfo
 !
 ! !INTERFACE:
-  subroutine ESMF_ReconcileGetStateIDInfo (state, siwrap,  &
-      itemtype, id, vmid, rc)
+  subroutine ESMF_ReconcileGetStateIDInfo (state, siwrap, id, vmid, rc)
 !
 ! !ARGUMENTS:
     type (ESMF_State), intent(in)  :: state
     type(ESMF_StateItemWrap), pointer :: siwrap(:)! intent(in)
-    integer,           pointer     :: itemtype(:) ! intent(out)
     integer,           pointer     :: id(:)       ! intent(out)
     type(ESMF_VMId),   pointer     :: vmid(:)     ! intent(out)
     integer,           intent(out) :: rc
@@ -2199,10 +2195,6 @@ contains
 !     {\tt ESMF\_State} to collect information from.
 !   \item[siwrap]
 !     Pointers to the items in the State
-!   \item[itemtype]
-!     The object ids of the State itself (in element 0) and the items
-!     contained within it.  It does not return the IDs of nested State
-!     items.
 !   \item[id]
 !     The object ids of the State itself (in element 0) and the items
 !     contained within it.  It does not return the IDs of nested State
@@ -2231,7 +2223,7 @@ contains
 
     localrc = ESMF_RC_NOT_IMPL
 
-    if (associated (itemtype) .or. associated (id) .or. associated (vmid)) then
+    if (associated (id) .or. associated (vmid)) then
       if (ESMF_LogFoundError(ESMF_RC_ARG_BAD,  &
           ESMF_ERR_PASSTHRU,  &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2244,7 +2236,6 @@ contains
     end if
 
     allocate (  &
-        itemtype(0:nitems),  &
               id(0:nitems),  &
             vmid(0:nitems),  &
         stat=memstat)
@@ -2254,7 +2245,6 @@ contains
 
 ! Element 0s are for the State itself
 
-    itemtype(0) = ESMF_STATEITEM_STATE%ot
     statep => state%statep
 
     call ESMF_BaseGetID(statep%base, id(0), rc=localrc)
@@ -2271,9 +2261,8 @@ contains
 
     do, i=1, nitems
 
-      itemtype(i) = siwrap(i)%si%otype%ot
+      select case (siwrap(i)%si%otype%ot)
 
-      select case (itemtype(i))
       case (ESMF_STATEITEM_ARRAY%ot)
         arrayp => siwrap(i)%si%datap%ap
 
@@ -2286,7 +2275,6 @@ contains
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT,  &
             rcToReturn=rc)) return
-
 
       case (ESMF_STATEITEM_ARRAYBUNDLE%ot)
         abundlep => siwrap(i)%si%datap%abp
@@ -2301,7 +2289,6 @@ contains
             ESMF_CONTEXT,  &
             rcToReturn=rc)) return
 
-
       case (ESMF_STATEITEM_FIELD%ot)
         fieldp => siwrap(i)%si%datap%fp%ftypep
 
@@ -2314,7 +2301,6 @@ contains
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT,  &
             rcToReturn=rc)) return
-
 
       case (ESMF_STATEITEM_FIELDBUNDLE%ot)
         fbundlep => siwrap(i)%si%datap%fbp%this
@@ -2329,7 +2315,6 @@ contains
             ESMF_CONTEXT,  &
             rcToReturn=rc)) return
 
-
       case (ESMF_STATEITEM_ROUTEHANDLE%ot)
         rhandlep => siwrap(i)%si%datap%rp
 
@@ -2343,7 +2328,6 @@ contains
             ESMF_CONTEXT,  &
             rcToReturn=rc)) return
 
-
       case (ESMF_STATEITEM_STATE%ot)
         statep => siwrap(i)%si%datap%spp
 
@@ -2356,7 +2340,6 @@ contains
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT,  &
             rcToReturn=rc)) return
-
 
       case default
         if (ESMF_LogFoundError(ESMF_RC_INTNRL_INCONS, &

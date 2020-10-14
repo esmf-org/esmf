@@ -221,12 +221,13 @@ module NUOPC_Base
 ! !IROUTINE: NUOPC_AddNestedState - Add a nested state to a state with NUOPC attributes
 ! !INTERFACE:
   subroutine NUOPC_AddNestedState(state, Namespace, CplSet, nestedStateName, &
-    nestedState, rc)
+    vm, nestedState, rc)
 ! !ARGUMENTS:
     type(ESMF_State), intent(inout)         :: state
     character(len=*), intent(in),  optional :: Namespace
     character(len=*), intent(in),  optional :: CplSet
     character(len=*), intent(in),  optional :: nestedStateName
+    type(ESMF_VM),    intent(in),  optional :: vm
     type(ESMF_State), intent(out), optional :: nestedState
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
@@ -249,6 +250,10 @@ module NUOPC_Base
 !   \item[{[nestedStateName]}]
 !     Name of the nested state. Defaults to {\tt Namespace}\_{\tt CplSet},
 !     {\tt Namespace}, or {\tt CplSet} if arguments are provided.
+!   \item[{[vm]}]
+!     If present, the nested state object is created on the specified
+!     {\tt ESMF\_VM} object. The default is to create the nested state object
+!     on the VM of the current component context.
 !   \item[{[nestedState]}]
 !     Optional return of the newly created nested state.
 !   \item[{[rc]}]
@@ -270,28 +275,28 @@ module NUOPC_Base
 
     if (present(nestedStateName)) then
       nestedS = ESMF_StateCreate(name=trim(nestedStateName), &
-        stateIntent=stateIntent, rc=localrc)
+        stateIntent=stateIntent, vm=vm, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     elseif (present(Namespace)) then
       if (present(CplSet)) then
         nestedS = ESMF_StateCreate(name=trim(Namespace)//"_"//trim(CplSet), &
-          stateIntent=stateIntent, rc=localrc)
+          stateIntent=stateIntent, vm=vm, rc=localrc)
         if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       else
         nestedS = ESMF_StateCreate(name=trim(Namespace), &
-          stateIntent=stateIntent, rc=localrc)
+          stateIntent=stateIntent, vm=vm, rc=localrc)
         if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       endif
     elseif (present(CplSet)) then
       nestedS = ESMF_StateCreate(name=trim(CplSet), &
-        stateIntent=stateIntent, rc=localrc)
+        stateIntent=stateIntent, vm=vm, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     else
-      nestedS = ESMF_StateCreate(stateIntent=stateIntent, rc=localrc)
+      nestedS = ESMF_StateCreate(stateIntent=stateIntent, vm=vm, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     endif

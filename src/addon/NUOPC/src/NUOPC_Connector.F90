@@ -574,6 +574,13 @@ module NUOPC_Connector
             name="FieldTransferPolicy", value=exportXferPolicy, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (btest(verbosity,8)) then
+            call ESMF_LogWrite(trim(name)//": nested exportState '"// &
+              trim(exportItemNameList(i))//"' FieldTransferPolicy = "// &
+              trim(exportXferPolicy), ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
           if (trim(exportXferPolicy)=="transferAll") then
             ! found a nested state in the exportState that requests mirroring
             ! -> query the CplSet attribute
@@ -597,6 +604,15 @@ module NUOPC_Connector
                 ! finally see if the CplSet match
                 if (trim(importCplSet)==trim(exportCplSet)) then
                   ! found a matching CplSet -> initiate mirroring
+                  if (btest(verbosity,8)) then
+                    call ESMF_LogWrite(trim(name)//&
+                      ": nested importState with matching CplSet="// &
+                      trim(importCplSet), ESMF_LOGMSG_INFO, rc=rc)
+                    if (ESMF_LogFoundError(rcToCheck=rc, &
+                      msg=ESMF_LOGERR_PASSTHRU, &
+                      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+                      return  ! bail out
+                  endif
                   call doMirror(importNestedState, exportNestedState, &
                     acceptorVM=vm, rc=rc)
                   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -633,6 +649,13 @@ module NUOPC_Connector
             name="FieldTransferPolicy", value=importXferPolicy, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (btest(verbosity,8)) then
+            call ESMF_LogWrite(trim(name)//": nested importState '"// &
+              trim(importItemNameList(i))//"' FieldTransferPolicy = "// &
+              trim(importXferPolicy), ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
           if (trim(importXferPolicy)=="transferAll") then
             ! found a nested state in the importState that requests mirroring
             ! -> query the CplSet attribute
@@ -656,6 +679,15 @@ module NUOPC_Connector
                 ! finally see if the CplSet match
                 if (trim(exportCplSet)==trim(importCplSet)) then
                   ! found a matching CplSet -> initiate mirroring
+                  if (btest(verbosity,8)) then
+                    call ESMF_LogWrite(trim(name)//&
+                      ": nested exportState with matching CplSet="// &
+                      trim(exportCplSet), ESMF_LOGMSG_INFO, rc=rc)
+                    if (ESMF_LogFoundError(rcToCheck=rc, &
+                      msg=ESMF_LOGERR_PASSTHRU, &
+                      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+                      return  ! bail out
+                  endif
                   call doMirror(exportNestedState, importNestedState, &
                     acceptorVM=vm, rc=rc)
                   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -796,7 +828,7 @@ module NUOPC_Connector
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             call NUOPC_AddNestedState(acceptorState, Namespace=namespace, &
               CplSet=cplSet, nestedStateName=nestedStateName, &
-              nestedState=acceptorNestedState, rc=rc)
+              vm=acceptorVM, nestedState=acceptorNestedState, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             call doMirror(providerState=providerNestedState, &
