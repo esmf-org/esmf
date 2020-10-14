@@ -844,7 +844,7 @@ StateAddRepListMacro(ESMF_State,State,nestedStateList,state,nestedStateList(i)%s
                    arrayList, arraybundleList,  &
                    fieldList, fieldbundleList,  &
                    nestedStateList,             &
-                   routehandleList, name, rc)
+                   routehandleList, name, vm, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_State) :: ESMF_StateCreate
@@ -859,11 +859,17 @@ StateAddRepListMacro(ESMF_State,State,nestedStateList,state,nestedStateList(i)%s
       type(ESMF_State),       intent(in),  optional :: nestedStateList(:)
       type(ESMF_RouteHandle), intent(in),  optional :: routehandleList(:)
       character(len=*),       intent(in),  optional :: name
+      type(ESMF_VM),          intent(in),  optional :: vm
       integer,                intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.1.0] Added argument {\tt vm} to support object creation on a
+!              different VM than that of the current context.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -893,20 +899,38 @@ StateAddRepListMacro(ESMF_State,State,nestedStateList,state,nestedStateList(i)%s
 !   \item[{[name]}]
 !    Name of this {\tt ESMF\_State} object.   A default name will be generated
 !    if none is specified.
+!   \item[{[vm]}]
+!    If present, the State object is created on the specified
+!    {\tt ESMF\_VM} object. The default is to create on the VM of the
+!    current component context.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOP
 
-        ! local vars
-        type (ESMF_StateClass), pointer :: stypep
-        integer :: localrc      ! local error status
-        integer :: memstat      ! Stat from allocate/deallocate
-        integer :: i
+      ! local vars
+      type (ESMF_StateClass), pointer :: stypep
+      integer :: localrc      ! local error status
+      integer :: memstat      ! Stat from allocate/deallocate
+      integer :: i
+      type(ESMF_Pointer)  :: vmThis
+      logical             :: actualFlag
 
-        ! Initialize return code; assume failure until success is certain
-        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! Must make sure the local PET is associated with an actual member
+      actualFlag = .true.
+      if (present(vm)) then
+        ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+        call ESMF_VMGetThis(vm, vmThis)
+        if (vmThis == ESMF_NULL_POINTER) then
+          actualFlag = .false.  ! local PET is not for an actual member
+        endif
+      endif
+
+      if (actualFlag) then
 
         ! check input variables
         if (present(arrayList)) then
@@ -954,7 +978,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
                  arrays=arrayList, arraybundles=arraybundleList, &
                  fields=fieldList, fieldbundles=fieldbundleList, &
                  states=nestedStateList,  &
-                 routehandles=routehandleList, rc=localrc)
+                 routehandles=routehandleList, vm=vm, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) then
@@ -962,18 +986,20 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
             return
         endif
 
-        ! Set return values
-        ESMF_StateCreate%statep => stypep
+      endif ! - actualFlag
 
+      ! Set return values
+      ESMF_StateCreate%statep => stypep
+      ESMF_INIT_SET_CREATED(ESMF_StateCreate)
+
+      if (actualFlag) then
         ! Add reference to this object into ESMF garbage collection table
         call c_ESMC_VMAddFObject(ESMF_StateCreate, ESMF_ID_STATE%objectID)
+      endif ! - actualFlag
 
-        ! validate created state
-        ESMF_INIT_SET_CREATED(ESMF_StateCreate)
+      if (present(rc)) rc = ESMF_SUCCESS
 
-        if (present(rc)) rc = ESMF_SUCCESS
-
-        end function ESMF_StateCreate
+    end function ESMF_StateCreate
 
 
 !------------------------------------------------------------------------------

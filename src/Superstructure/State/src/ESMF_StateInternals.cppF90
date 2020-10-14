@@ -126,7 +126,7 @@ contains
                          arrays, arraybundles, &
                          fields, fieldbundles, &
                          routehandles, states, &
-                         itemCount, rc)
+                         itemCount, vm, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_StateClass), pointer :: stypep
@@ -139,6 +139,7 @@ contains
       type(ESMF_RouteHandle), intent(in),  optional :: routehandles(:)
       type(ESMF_State),       intent(in),  optional :: states(:)
       integer,                intent(in),  optional :: itemCount
+      type(ESMF_VM),          intent(in),  optional :: vm
       integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -172,6 +173,10 @@ contains
 !    sum of sizes of the arrays, arraybundles, fields, fieldbundles, names,
 !    routehandles, and states arrays.  If it is set too small, the initial
 !    size will be set to the sum of sizes of the arrays.
+!   \item[{[vm]}]
+!    If present, the State object is constructed on the specified
+!    {\tt ESMF\_VM} object. The default is to construct on the VM of the
+!    current component context.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -238,7 +243,8 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandles(i),rc)
         end if
 
         ! Set initial values
-        call ESMF_StateConstructEmpty(stypep, statename, stateintent, rc=localrc)
+        call ESMF_StateConstructEmpty(stypep, statename, stateintent, &
+          vm=vm, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -319,13 +325,14 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandles(i),rc)
 ! !IROUTINE: ESMF_StateConstructEmpty -- Create a new State specifying no data
 
 ! !INTERFACE:
-      subroutine ESMF_StateConstructEmpty(stypep, statename, stateintent, rc)
+      subroutine ESMF_StateConstructEmpty(stypep, statename, stateintent, vm, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_StateClass), pointer             :: stypep
       character(len=*),     intent(in),  optional :: statename
       type(ESMF_StateIntent_Flag), intent(in),  optional :: stateintent
-      integer,              intent(out), optional :: rc
+      type(ESMF_VM),        intent(in),   optional  :: vm
+      integer,              intent(out), optional   :: rc
 !
 ! !DESCRIPTION:
 !      Construct a new empty {\tt State}.  The return value is a new {\tt State}.
@@ -341,6 +348,10 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandles(i),rc)
 !       \item[{[statename]}]
 !        Name of this {\tt ESMF\_State} object.  Optional.  If a name is not
 !        specified one will be generated.
+!       \item[{[vm]}]
+!        If present, the State object is constructed on the specified
+!        {\tt ESMF\_VM} object. The default is to construct on the VM of the
+!        current component context.
 !       \item[{[rc]}]
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !       \end{description}
@@ -354,7 +365,8 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandles(i),rc)
         if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! Initialize the base object, set the name, etc.
-        call ESMF_BaseCreate(stypep%base, "State", statename, nattr=0, rc=localrc)
+        call ESMF_BaseCreate(stypep%base, "State", statename, nattr=0, vm=vm, &
+          rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
