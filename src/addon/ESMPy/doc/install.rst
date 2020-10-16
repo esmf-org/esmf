@@ -48,6 +48,12 @@ Specific versions of the conda package can be installed like this:
 
     conda create -n esmpy -c conda-forge esmpy=8.0.1
 
+Development versions can be found in the ``esmpy_dev`` channel:
+
+.. code::
+
+    conda create -n esmpy -c conda-forge -c esmpy_dev esmpy
+
 ----------------------------
 Installing ESMPy from Source
 ----------------------------
