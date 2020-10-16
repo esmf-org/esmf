@@ -26,11 +26,11 @@ The primary prerequisite software is the NUOPC library, which is
 included with the ESMF distribution, and your model, including
 any of its dependencies.
 
-Acquire ESMF version 7 from SourceForge:
+Acquire the latest ESMF release from GitHub:
 
 \begin{verbatim}
-$ git archive --remote=git://git.code.sf.net/p/esmf/esmf \ 
-    --format=tar --prefix=esmf/ ESMF\_7\_0\_0 | tar xf - 
+$ git clone https://github.com/esmf-org/esmf.git \
+  --branch ESMF_8_0_1 --depth 1
 \end{verbatim}
 
 \textbf{Compile and install ESMF.}  Full installation details can be found in the \htmladdnormallink{ESMF User Guide}{http://www.earthsystemmodeling.org/esmf\_releases/public/last/ESMF\_usrdoc/node6.html\#SECTION00064000000000000000}.  An example of the basic procedure
@@ -138,7 +138,7 @@ To acquire a cap template you can:
 \begin{itemize}
 \item use the cap template below,
 
-\item copy code from one of the \htmladdnormallink{NUOPC Prototype Applications}{https://sourceforge.net/p/esmfcontrib/svn/HEAD/tree/NUOPC/tags/ESMF\_7\_0\_0} or
+\item copy code from one of the \htmladdnormallink{NUOPC Prototype Applications}{https://github.com/esmf-org/nuopc-app-prototypes} or
 
 \item use the \htmladdnormallink{Cupid plugin for Eclipse}{https://www.earthsystemcog.org/projects/cupid/}
 to generate code.  Cupid automatically generates NUOPC compliant
@@ -188,7 +188,7 @@ Object files that need to be considered as compile dependencies. Must be specifi
 Object files that need to be considered as link dependencies. Must be specified with absolute path.
 
 \item[{\textbf{ESMF\_DEP\_SHRD\_PATH}}] \leavevmode
-The path to find shared libraries during link-time (and during run-time unless overridden by LD\_LIBRARY\_PATH). Must be specified as absolute path.
+The path or list of paths to find shared libraries during link-time (and during run-time unless overridden by LD\_LIBRARY\_PATH). Must be specified as absolute paths.
 
 \item[{\textbf{ESMF\_DEP\_SHRD\_LIBS}}] \leavevmode
 Shared libraries that need to be specified during link-time, and must be available during run-time. Must be specified with absolute path.
@@ -201,12 +201,12 @@ An example makefile fragment useful for statically linking against your model lo
 \begin{verbatim}
    #file: abc.mk
  
-   ESMF\_DEP\_FRONT      = ABC
-   ESMF\_DEP\_INCPATH    = <absolute path to associated ABC module file>
-   ESMF\_DEP\_CMPL\_OBJS  = <absolute path>/abc.o
-   ESMF\_DEP\_LINK\_OBJS  = <absolute path>/abc.o <absolute path>/xyz.o
-   ESMF\_DEP\_SHRD\_PATH  = 
-   ESMF\_DEP\_SHRD\_LIBS  =
+   ESMF_DEP_FRONT      = ABC
+   ESMF_DEP_INCPATH    = <absolute path to associated ABC module file>
+   ESMF_DEP_CMPL_OBJS  = <absolute path>/abc.o
+   ESMF_DEP_LINK_OBJS  = <absolute path>/abc.o <absolute path>/xyz.o
+   ESMF_DEP_SHRD_PATH  = 
+   ESMF_DEP_SHRD_LIBS  =
 \end{verbatim}
 
 The variables in the makefile fragment expose a set of dependencies that the
@@ -220,12 +220,12 @@ Makefile to include a new target:
    %.mk: %.o
       @echo "# ESMF self-describing build dependency makefile fragment" > $@
       @echo >> $@
-      @echo "ESMF\_DEP\_FRONT      = ABC"                          >> $@
-      @echo "ESMF\_DEP\_INCPATH    = `pwd`"                        >> $@
-      @echo "ESMF\_DEP\_CMPL\_OBJS = `pwd`/"$<                     >> $@
-      @echo "ESMF\_DEP\_LINK\_OBJS = "$(addprefix `pwd`/, $(OBJS)) >> $@
-      @echo "ESMF\_DEP\_SHRD\_PATH = "                             >> $@
-      @echo "ESMF\_DEP\_SHRD\_LIBS = "                             >> $@
+      @echo "ESMF_DEP_FRONT     = ABC"                          >> $@
+      @echo "ESMF_DEP_INCPATH   = `pwd`"                        >> $@
+      @echo "ESMF_DEP_CMPL_OBJS = `pwd`/"$<                     >> $@
+      @echo "ESMF_DEP_LINK_OBJS = "$(addprefix `pwd`/, $(OBJS)) >> $@
+      @echo "ESMF_DEP_SHRD_PATH = "                             >> $@
+      @echo "ESMF_DEP_SHRD_LIBS = "                             >> $@
 
    abc.mk: $(OBJS)
 \end{verbatim}

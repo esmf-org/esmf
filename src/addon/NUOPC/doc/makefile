@@ -33,7 +33,7 @@ REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE) NUOPC_desc.tex NUOPC_implnotes.tex NUOPC_
 
 REFDOC_DEP_FILES += NUOPC_Driver_manual_fapi.tex NUOPC_ModelBase_manual_fapi.tex NUOPC_Model_manual_fapi.tex NUOPC_Mediator_manual_fapi.tex NUOPC_Connector_manual_fapi.tex
 
-HOWTO_DEP_FILES = $(REFDOC_DEP_FILES) NUOPC_howto_overview.tex NUOPC_howto_bigidea.tex NUOPC_howto_approach.tex NUOPC_howto_example.tex ESMF_NUOPCBasicModelEx_fapi.tex ESMF_NUOPCAtmModelEx_fapi.tex
+HOWTODOC_DEP_FILES = $(REFDOC_DEP_FILES) NUOPC_howto_overview.tex NUOPC_howto_bigidea.tex NUOPC_howto_approach.tex ESMF_NUOPCBasicModelEx_fapi.tex ESMF_NUOPCAtmModelEx_fapi.tex
 
 include $(ESMF_DIR)/makefile
 
