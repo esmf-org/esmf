@@ -128,7 +128,7 @@ int main(int argc, char *argv[]) {
   void *meshp = static_cast<void *> (mesh);
   void *meshp2;
 
-  int len = 4*sizeof(int);
+  int len = 100*sizeof(int);
   char *buffer = new char[len];
   int length = len; 
   int offset = 0;
