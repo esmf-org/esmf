@@ -432,10 +432,12 @@ module ESMF_VMMod
   public ESMF_VMGetCurrentGarbageInfo
   public ESMF_VMGetMemInfo
   public ESMF_VMIsCreated
+  public ESMF_VMLog
   public ESMF_VMLogBacktrace
   public ESMF_VMLogCurrentGarbageInfo
   public ESMF_VMLogGarbageInfo
   public ESMF_VMLogMemInfo
+  public ESMF_VMLogSystem
   public ESMF_VMGetVMId
   public ESMF_VMPrint
   public ESMF_VMRecv
@@ -5133,7 +5135,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMGet()
   recursive subroutine ESMF_VMGetDefault(vm, keywordEnforcer, localPet, &
-    localPe, petCount, peCount, ssiCount, ssiMap, ssiMinPetCount, ssiMaxPetCount, &
+    currentSsiPe, petCount, peCount, ssiCount, ssiMap, ssiMinPetCount, ssiMaxPetCount, &
     ssiLocalPetCount, mpiCommunicator, pthreadsEnabledFlag, openMPEnabledFlag, &
     ssiSharedMemoryEnabledFlag, rc)
 !
@@ -5141,7 +5143,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_VM),        intent(in)            :: vm
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out), optional :: localPet
-    integer,              intent(out), optional :: localPe
+    integer,              intent(out), optional :: currentSsiPe
     integer,              intent(out), optional :: petCount
     integer,              intent(out), optional :: peCount
     integer,              intent(out), optional :: ssiCount
@@ -5168,8 +5170,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Added argument {\tt ssiSharedMemoryEnabledFlag} that allows the user to 
 !   query whether ESMF was compiled with support for shared memory 
 !   access between PETs on the same SSI.
-! \item[8.1.0] Added argument {\tt localPe} for easy access to the local PE
-!   mapping.\newline
+! \item[8.1.0] Added argument {\tt currentSsiPe} for easy query of the
+!   current PE within the local SSI that is executing the request.\newline
 !   Added argument {\tt ssiMap} for a convenient way to obtain a view
 !   of the mapping of PETs to single system images across the entire VM.
 ! \end{description}
@@ -5186,11 +5188,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        Upon return this holds the id of the local PET that issued this call.
 !        The valid range of {\tt localPet} is $[0..petCount-1]$. A value of $-1$
 !        is returned on PETs that are not active under the specified {\tt vm}.
-!   \item[{[localPe]}]
-!        Upon return this holds the id of the PE on which the local PET is
-!        executing. The range of the returned value is platform specific and
-!        refers to the core or cpu id by which the PE is known to the operating
-!        system.
+!   \item[{[currentSsiPe]}]
+!        Upon return this holds the id of the PE within the local SSI on which
+!        the calling PET (i.e. localPet) is currently executing. If the PET is
+!        associated with a set of PEs, or PETs are not pinned, the returned
+!        value might change each time the call is made.
 !   \item[{[petCount]}]
 !        Upon return this holds the number of PETs running under {\tt vm}.
 !   \item[{[peCount]}]
@@ -5265,9 +5267,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (vm%this /= ESMF_NULL_POINTER) then
       ! Call into the C++ interface.
-      call c_ESMC_VMGet(vm, localPet, localPe, petCountArg, peCount, ssiCount, &
-        ssiMinPetCount, ssiMaxPetCount, ssiLocalPetCount, mpiCommunicator, &
-        pthreadsEnabledFlagArg, openMPEnabledFlagArg, &
+      call c_ESMC_VMGet(vm, localPet, currentSsiPe, petCountArg, peCount, &
+        ssiCount, ssiMinPetCount, ssiMaxPetCount, ssiLocalPetCount, &
+        mpiCommunicator, pthreadsEnabledFlagArg, openMPEnabledFlagArg, &
         ssiSharedMemoryEnabledFlagArg, localrc)
       if (present(petCount)) petCount = petCountArg
       if (present (pthreadsEnabledFlag))  &
@@ -5727,6 +5729,62 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 
 
+! -------------------------- ESMF-public method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMLog()"
+!BOP
+! !IROUTINE: ESMF_VMLog - Log
+
+! !INTERFACE:
+  subroutine ESMF_VMLog(vm, prefix, logMsgFlag, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),          intent(in)              :: vm
+    character(len=*),       intent(in),   optional  :: prefix
+    type(ESMF_LogMsg_Flag), intent(in),   optional  :: logMsgFlag
+    integer, intent(out),                 optional  :: rc           
+!
+! !DESCRIPTION:
+!   Log the VM.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm]
+!     {\tt ESMF\_VM} object logged.
+!   \item [{[prefix]}]
+!     String to prefix the log message. Default is no prefix.
+!   \item [{[logMsgFlag]}]
+!     Type of log message generated. See section \ref{const:logmsgflag} for
+!     a list of valid message types. Default is {\tt ESMF\_LOGMSG\_INFO}.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_LogMsg_Flag)  :: logMsg
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! deal with optionl logMsgFlag
+    logMsg = ESMF_LOGMSG_INFO ! default
+    if (present(logMsgFlag)) logMsg = logMsgFlag
+
+    ! Call into the C++ interface.
+    call c_esmc_vmlog(vm, prefix, logMsg, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMLog
+!------------------------------------------------------------------------------
+
+
 ! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMLogBacktrace()"
@@ -5904,6 +5962,59 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMLogMemInfo
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMLogSystem()"
+!BOP
+! !IROUTINE: ESMF_VMLogSystem - LogSystem
+
+! !INTERFACE:
+  subroutine ESMF_VMLogSystem(prefix, logMsgFlag, rc)
+!
+! !ARGUMENTS:
+    character(len=*),       intent(in),   optional  :: prefix
+    type(ESMF_LogMsg_Flag), intent(in),   optional  :: logMsgFlag
+    integer, intent(out),                 optional  :: rc           
+!
+! !DESCRIPTION:
+!   Log the VM.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item [{[prefix]}]
+!     String to prefix the log message. Default is no prefix.
+!   \item [{[logMsgFlag]}]
+!     Type of log message generated. See section \ref{const:logmsgflag} for
+!     a list of valid message types. Default is {\tt ESMF\_LOGMSG\_INFO}.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_LogMsg_Flag)  :: logMsg
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! deal with optionl logMsgFlag
+    logMsg = ESMF_LOGMSG_INFO ! default
+    if (present(logMsgFlag)) logMsg = logMsgFlag
+
+    ! Call into the C++ interface.
+    call c_esmc_vmlogsystem(prefix, logMsg, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMLogSystem
 !------------------------------------------------------------------------------
 
 

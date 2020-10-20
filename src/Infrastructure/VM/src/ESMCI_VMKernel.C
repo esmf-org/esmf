@@ -15,6 +15,7 @@
 
 #define VM_MEMLOG_off
 #define VM_EPOCHLOG_off
+#define VM_SSISHMLOG_off
 
 // On SunOS systems there are a couple of macros that need to be set
 // in order to get POSIX compliant functions IPC, pthreads, gethostid
@@ -65,6 +66,10 @@
 #include <csignal>
 #endif
 #include <limits.h>
+
+#ifndef ESMF_NO_OPENMP
+#include <omp.h>
+#endif
 
 using namespace std;
 
@@ -117,9 +122,11 @@ namespace ESMCI {
 MPI_Comm VMK::default_mpi_c;
 int VMK::mpi_thread_level;
 int VMK::mpi_init_outside_esmf;
+int VMK::nssiid;
 int VMK::ncores;
 int *VMK::cpuid;
 int *VMK::ssiid;
+int *VMK::ssipe;
 double VMK::wtime0;
 // Static data members to support command line arguments
 int VMK::argc;
@@ -191,7 +198,7 @@ int vmkt_create(vmkt_t *vmkt, void *(*vmkt_spawn)(void *), void *arg,
     msg << "service: " << service
       << "  PTHREAD_STACK_MIN: " << PTHREAD_STACK_MIN << " bytes"
       << "  stack_size: " << stack_size << " bytes";
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
     pthreadAttrsPtr = &pthreadAttrs;
   }
@@ -315,7 +322,7 @@ void VMK::obtain_args(){
 }
 
 
-bool VMK::isSsiSharedMemoryEnabled() const{
+bool VMK::isSsiSharedMemoryEnabled(){
   //TODO: For now had to implement this method in the source file, because
   //TODO: of the way the ESMF_NO_MPI3 macro is being determined.
   //TODO: Move it into the VMKernel header once includes are fixed.
@@ -489,11 +496,13 @@ void VMK::init(MPI_Comm mpiCommunicator){
   for (int i=0; i<ncores; i++){
     cpuid[i]=i;                 // hardcoded assumption of single-core CPUs
   }
-  // determine SSI ids
+  // determine SSI ids and ssipe
   ssiid = new int[ncores];
+  ssipe = new int[ncores];
 #ifdef ESMF_NO_GETHOSTID
   for (int i=0; i<ncores; i++){
     ssiid[i]=i;                 // hardcoded assumption of single-CPU SSIs
+    ssipe[i]=0;
   }
   ssiCount = ncores;
   ssiMinPetCount=1;
@@ -517,10 +526,12 @@ void VMK::init(MPI_Comm mpiCommunicator){
       // found new ssiid
       ssiid[i]=ssiCount;
       ++ssiCount;
+      ssipe[i]=0;
       temp_ssiPetCount[ssiid[i]] = 1;
     }else{
       // found previous ssiid
       ssiid[i]=ssiid[j];
+      ssipe[i]=temp_ssiPetCount[ssiid[i]];
       temp_ssiPetCount[ssiid[i]]++;
     }
   }
@@ -544,8 +555,8 @@ void VMK::init(MPI_Comm mpiCommunicator){
 }
 #endif
   delete [] temp_ssiPetCount;
+  nssiid = ssiCount;
   ssiLocalPetList = new int[ssiLocalPetCount];
-#if 1
   int j=0;
   for (int i=0; i<ncores; i++){
     if (ssiid[i]==localSsi){
@@ -553,6 +564,14 @@ void VMK::init(MPI_Comm mpiCommunicator){
       ++j;
     }
   }
+#ifndef ESMF_NO_PTHREADS
+#ifndef PARCH_darwin
+  // set thread affinity
+  cpu_set_t cpuset;
+  CPU_ZERO(&cpuset);
+  CPU_SET(ssipe[mypet], &cpuset);
+  pthread_setaffinity_np(mypthid, sizeof(cpu_set_t), &cpuset);
+#endif
 #endif
 #endif
   // ESMCI::VMK pet -> core mapping
@@ -617,6 +636,7 @@ void VMK::finalize(int finalizeMpi){
   delete ipSetupMutex;
   delete [] cpuid;
   delete [] ssiid;
+  delete [] ssipe;
   delete [] lpid;
   delete [] pid;
   delete [] tid;
@@ -768,6 +788,28 @@ void VMK::construct(void *ssarg){
 #if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
   mpi_c_ssi = sarg->mpi_c_ssi;
 #endif  
+#ifndef ESMF_NO_PTHREADS
+#ifndef PARCH_darwin
+  // set thread affinity
+  cpu_set_t cpuset;
+  CPU_ZERO(&cpuset);
+  for (int i=0; i<ncpet[mypet]; i++)
+    CPU_SET(ssipe[cid[mypet][i]], &cpuset);
+  pthread_setaffinity_np(mypthid, sizeof(cpu_set_t), &cpuset);
+#ifndef ESMF_NO_OPENMP
+  // Set the number of OpenMP threads and pin each thread to a specific PE
+  omp_set_num_threads(ncpet[mypet]);
+#pragma omp parallel
+  {
+    cpu_set_t cpuset;
+    CPU_ZERO(&cpuset);
+    CPU_SET(ssipe[cid[mypet][omp_get_thread_num()]], &cpuset);
+    pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
+  }
+#endif
+#endif
+#endif
+  // pthread mutex control
   pth_mutex2 = sarg->pth_mutex2;
   pth_mutex = sarg->pth_mutex;
   pth_finish_count = sarg->pth_finish_count;
@@ -2135,7 +2177,75 @@ void VMK::print()const{
 }
 
 
-int VMK::getLocalPe()const{
+void VMK::log(std::string prefix, ESMC_LogMsgType_Flag msgType)const{
+  std::stringstream msg;
+  msg << prefix << "--- VMK::log() start -------------------------------------";
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+  msg << prefix << "vm located at: " << this;
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+  msg << prefix << "petCount=" << getPetCount() << " localPet=" << getLocalPet()
+    << " currentSsiPe=" << getCurrentSsiPe();
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+  msg << prefix << "ssiCount=" << getSsiCount()
+    << " localSsi=" << ssiid[cid[mypet][0]];
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+  msg << prefix << "mpionly=" << mpionly << " nothreadsflag=" << nothreadsflag;
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  for (int i=0; i<npets; i++){
+    msg.str("");  // clear
+    msg << prefix << "PET=" << i << " lpid=" << lpid[i] << " tid=" << tid[i]
+      << " pid=" << pid[i] << " peCount=" << ncpet[i]
+      << " accCount=" << nadevs[i];
+    ESMC_LogDefault.Write(msg.str(), msgType);
+    for (int j=0; j<ncpet[i]; j++){
+      msg.str("");  // clear
+      msg << prefix << " PE=" << cid[i][j] << " SSI=" << ssiid[cid[i][j]]
+        << " SSIPE=" << ssipe[cid[i][j]];
+      ESMC_LogDefault.Write(msg.str(), msgType);
+    }
+  }
+  msg.str("");  // clear
+  msg << prefix << "--- VMK::log() end ---------------------------------------";
+  ESMC_LogDefault.Write(msg.str(), msgType);
+}
+
+
+void VMK::logSystem(std::string prefix, ESMC_LogMsgType_Flag msgType){
+  std::stringstream msg;
+  msg << prefix << "--- VMK::logSystem() start -------------------------------";
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+  msg << prefix << "isPthreadsEnabled=" << isPthreadsEnabled();
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+  msg << prefix << "isOpenMPEnabled=" << isOpenMPEnabled();
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+  msg << prefix << "isOpenACCEnabled=" << isOpenACCEnabled();
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+  msg << prefix << "isSsiSharedMemoryEnabled=" << isSsiSharedMemoryEnabled();
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+  msg << prefix << "ssiCount=" << nssiid << " peCount=" << ncores;
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  for (int i=0; i<ncores; i++){
+    msg.str("");  // clear
+    msg << prefix << "PE=" << i << " SSI=" << ssiid[i]
+      << " SSIPE=" << ssipe[i];
+    ESMC_LogDefault.Write(msg.str(), msgType);
+  }
+  msg.str("");  // clear
+  msg << prefix << "--- VMK::logSystem() end ---------------------------------";
+  ESMC_LogDefault.Write(msg.str(), msgType);
+}
+
+
+int VMK::getCurrentSsiPe()const{
 #if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
   return sched_getcpu();
 #else
@@ -5570,8 +5680,6 @@ void VMK::wtimedelay(double delay){
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#undef DEBUGLOG
-
 int VMK::ssishmAllocate(vector<unsigned long>&bytes, memhandle *memh, 
   bool contigFlag){
 #ifndef ESMF_NO_MPI3
@@ -5590,13 +5698,13 @@ int VMK::ssishmAllocate(vector<unsigned long>&bytes, memhandle *memh,
   memh->counts[0] = count;
   int maxCount = count;
 #endif
-#ifdef DEBUGLOG
+#ifdef VM_SSISHMLOG_on
   {
     std::stringstream msg;
     msg << "ssishmAllocate#" << __LINE__
       << " localPetCount=" << memh->localPetCount
       << " bytes request maxCount=" << maxCount;
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
   void *dummyPtr;
@@ -5635,7 +5743,7 @@ int VMK::ssishmAllocate(vector<unsigned long>&bytes, memhandle *memh,
 
 int VMK::ssishmFree(memhandle *memh){
 #ifndef ESMF_NO_MPI3
-#ifdef DEBUGLOG
+#ifdef VM_SSISHMLOG_on
   {
     std::stringstream msg;
     msg << "ssishmFree#" << __LINE__ << " number of shared memory windows=" 
@@ -5644,7 +5752,7 @@ int VMK::ssishmFree(memhandle *memh){
 #else
       << memh->mems.size();
 #endif
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
   ssishmSync(*memh);
@@ -5660,11 +5768,11 @@ int VMK::ssishmFree(memhandle *memh){
 #endif
   memh->counts.resize(0);
   memh->localPetCount=-1; // invalidate
-#ifdef DEBUGLOG
+#ifdef VM_SSISHMLOG_on
   {
     std::stringstream msg;
     msg << "ssishmFree#" << __LINE__ << " done.";
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
   return ESMF_SUCCESS;
@@ -5702,12 +5810,12 @@ int VMK::ssishmGetMems(memhandle memh, int pet, vector<void *>*mems,
 #endif
     if (mems) (*mems)[i]=baseptr;
     if (bytes) (*bytes)[i]=size;
-#ifdef DEBUGLOG
+#ifdef VM_SSISHMLOG_on
     {
       std::stringstream msg;
       msg << "ssishmGetMems#" << __LINE__
         << " pet=" << pet << " baseptr=" << baseptr << " size=" << size;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
   }
@@ -5722,6 +5830,13 @@ int VMK::ssishmGetMems(memhandle memh, int pet, vector<void *>*mems,
 
 int VMK::ssishmSync(memhandle memh){
 #ifndef ESMF_NO_MPI3
+#ifdef VM_SSISHMLOG_on
+  {
+    std::stringstream msg;
+    msg << "ssishmSync#" << __LINE__ << " entering.";
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+  }
+#endif
 #ifndef ESMF_MPIUNI
   // call barrier for the ssi-local communicator
   MPI_Barrier(mpi_c_ssi);
@@ -5737,8 +5852,6 @@ int VMK::ssishmSync(memhandle memh){
   return ESMC_RC_INTNRL_BAD; // bail with error
 #endif
 }
-
-#undef DEBUGLOG
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

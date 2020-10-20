@@ -40,6 +40,8 @@ typedef pthread_t       esmf_pthread_t;
 // define NULL
 #include <cstddef> 
 
+#include "ESMCI_LogErr.h"
+
 // reduction operations
 enum vmOp   { vmSUM=1, vmMIN, vmMAX};
 // typekind indicators
@@ -283,9 +285,11 @@ class VMK{
     std::map<int, sendBuffer> sendMap;
     std::map<int, recvBuffer> recvMap;
     // static info of physical machine
+    static int nssiid;  // total number of single system image ids
     static int ncores;  // total number of cores in the physical machine
     static int *cpuid;  // cpuid associated with certain core (multi-core cpus)
-    static int *ssiid;    // single system image id to which this core belongs
+    static int *ssiid;  // single system image id to which this core belongs
+    static int *ssipe;  // PE id on the SSI on which this PE resides
     static double wtime0; // the MPI WTime at the very beginning of execution
   public:
     // Declaration of static data members - Definitions are in the header of
@@ -343,6 +347,10 @@ class VMK{
       // exit a vm derived from current vm according to the VMKPlan
   
     void print() const;
+    void log(std::string prefix,
+      ESMC_LogMsgType_Flag msgType=ESMC_LOGMSG_INFO)const;
+    static void logSystem(std::string prefix,
+      ESMC_LogMsgType_Flag msgType=ESMC_LOGMSG_INFO);
     
     // get() calls    <-- to be replaced by following new inlined section
     int getNpets();                // return npets
@@ -362,7 +370,7 @@ class VMK{
     
     // get() calls
     int getLocalPet() const {return mypet;}
-    int getLocalPe() const;
+    int getCurrentSsiPe() const;
     int getPetCount() const {return npets;}
     int getSsiCount() const {return ssiCount;}
     int getSsiMinPetCount() const {return ssiMinPetCount;}
@@ -370,7 +378,7 @@ class VMK{
     int getSsiLocalPetCount() const {return ssiLocalPetCount;}
     const int *getSsiLocalPetList() const {return ssiLocalPetList;}
     esmf_pthread_t getLocalPthreadId() const {return mypthid;}
-    bool isPthreadsEnabled() const{
+    static bool isPthreadsEnabled(){
 #ifdef ESMF_NO_PTHREADS
       // did not compile with threads
       return false;
@@ -381,7 +389,7 @@ class VMK{
       return true;
 #endif
     }
-    bool isOpenMPEnabled() const{
+    static bool isOpenMPEnabled(){
 #ifdef ESMF_NO_OPENMP
       return false;
 #else
@@ -392,14 +400,14 @@ class VMK{
 #endif
 #endif
     }
-    bool isOpenACCEnabled() const{
+    static bool isOpenACCEnabled(){
 #ifdef ESMF_NO_OPENACC
       return false;
 #else
       return true;
 #endif
     }
-    bool isSsiSharedMemoryEnabled() const;
+    static bool isSsiSharedMemoryEnabled();
       //TODO: For now had to implement this method in the source file, because
       //TODO: of the way the ESMF_NO_MPI3 macro is being determined.
       //TODO: Move it into the VMKernel header once includes are fixed.

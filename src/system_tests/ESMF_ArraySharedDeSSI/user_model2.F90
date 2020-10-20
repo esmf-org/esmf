@@ -100,17 +100,17 @@ module user_model2
     type(ESMF_VM)         :: vm
     type(ESMF_Array)      :: array
     real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)   ! matching F90 array pointer
-    integer               :: i, j, tid, localPet, peCount
+    integer               :: i, j, k, tid, currentSsiPe
     integer               :: ssiLocalDeCount, lde
     integer, allocatable  :: localDeToDeMap(:)
     type(ESMF_LocalArray), allocatable :: localArrayList(:)
-    character(len=160)    :: msg
+    character(len=320)    :: msg
     logical               :: dataOkay
     
     ! Initialize return code
     rc = ESMF_SUCCESS
 
-    call ESMF_LogWrite("Executing 'user2_run'", ESMF_LOGMSG_INFO, rc=rc)
+    call ESMF_LogWrite("Entering 'user2_run'", ESMF_LOGMSG_INFO, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     pi = 3.14159d0
@@ -124,8 +124,8 @@ module user_model2
     if (rc/=ESMF_SUCCESS) return ! bail out
     
     ! Allocate map and list variables
-    allocate(localDeToDeMap(ssiLocalDeCount))
-    allocate(localArrayList(ssiLocalDeCount))
+    allocate(localDeToDeMap(0:ssiLocalDeCount-1))
+    allocate(localArrayList(0:ssiLocalDeCount-1))
     
     ! Request map and list variables from the Array
     call ESMF_ArrayGet(array, localDeToDeMap=localDeToDeMap, &
@@ -136,24 +136,26 @@ module user_model2
     ! -> Set the number of OpenMP threads accordingly
     call ESMF_GridCompGet(comp, vm=vm, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_VMGet(vm, localPet=localPet, rc=rc)
+    call ESMF_VMLog(vm, prefix="model2: ", logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_VMGet(vm, pet=localPet, peCount=peCount, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-!$  call omp_set_num_threads(peCount)
 
     dataOkay = .true.
 
+do k=1, 5 ! repeatedly go through the work loops to monitor PE affinity.
+
 !$omp parallel do reduction (.and.:dataOkay) &
 !$omp& default (none)  &
-!$omp& shared  (pi, localArrayList, ssiLocalDeCount)  &
-!$omp& private (lde, i, j, tid, farrayPtr, msg, rc)
+!$omp& shared  (vm, pi, localArrayList, localDeToDeMap, ssiLocalDeCount)  &
+!$omp& private (lde, i, j, tid, currentSsiPe, farrayPtr, msg, rc)
     ! Loop over all the locally accessible DEs and check for data correctness
 
-    do lde=1, ssiLocalDeCount
+    do lde=0, ssiLocalDeCount-1
 !$    tid = omp_get_thread_num()
       ! Access the data pointer for this DE
       call ESMF_LocalArrayGet(localArrayList(lde), farrayPtr=farrayPtr, rc=rc)
+      ! No RC checking inside OpenMP region
+      
+      call ESMF_VMGet(vm, currentSsiPe=currentSsiPe, rc=rc)
       ! No RC checking inside OpenMP region
       
       !! Doing logging inside the OpenMP loop is just done to produce output
@@ -161,11 +163,12 @@ module user_model2
       !! for real applications!
 !$omp critical
       write(msg,*) "user2_run: OpenMP thread:", tid, &
-        " Testing data for localDe =", lde-1, &
+        " on SSIPE: ", currentSsiPe, " Testing data for localDe =", lde, &
+        " DE=", localDeToDeMap(lde), &
         " lbound:", lbound(farrayPtr), " ubound:", ubound(farrayPtr)
       call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
       ! No RC checking inside OpenMP region
-      call ESMF_LogFlush(rc=rc)
+      !call ESMF_LogFlush(rc=rc)
       ! No RC checking inside OpenMP region
 !$omp end critical
 
@@ -183,6 +186,8 @@ module user_model2
     enddo
 !$omp end parallel do
 
+enddo
+  
     if (dataOkay) then
       write(msg,*) "user2_run: All data correct."
       call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
@@ -194,6 +199,9 @@ module user_model2
       rc=ESMF_FAILURE ! pass error back to the parent level
     endif
  
+    call ESMF_LogWrite("Exiting 'user2_run'", ESMF_LOGMSG_INFO, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
   end subroutine user2_run
 
 end module user_model2

@@ -445,7 +445,7 @@ struct position_t
 #endif
 #if \
     defined(JSON_HEDLEY_GNUC_VERSION) && \
-    !defined(__clang__) && \
+    !(defined(__clang__) && !defined(__INTEL_COMPILER)) && \
     !defined(JSON_HEDLEY_INTEL_VERSION) && \
     !defined(JSON_HEDLEY_PGI_VERSION) && \
     !defined(JSON_HEDLEY_ARM_VERSION) && \
@@ -686,7 +686,7 @@ struct position_t
 
 #if \
     (defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)) || \
-    defined(__clang__) || \
+    (defined(__clang__) && !defined(__INTEL_COMPILER)) || \
     JSON_HEDLEY_GCC_VERSION_CHECK(3,0,0) || \
     JSON_HEDLEY_INTEL_VERSION_CHECK(13,0,0) || \
     JSON_HEDLEY_IAR_VERSION_CHECK(8,0,0) || \
@@ -710,7 +710,7 @@ struct position_t
 #if defined(JSON_HEDLEY_DIAGNOSTIC_POP)
     #undef JSON_HEDLEY_DIAGNOSTIC_POP
 #endif
-#if defined(__clang__)
+#if (defined(__clang__) && !defined(__INTEL_COMPILER))
     #define JSON_HEDLEY_DIAGNOSTIC_PUSH _Pragma("clang diagnostic push")
     #define JSON_HEDLEY_DIAGNOSTIC_POP _Pragma("clang diagnostic pop")
 #elif JSON_HEDLEY_INTEL_VERSION_CHECK(13,0,0)
@@ -1013,7 +1013,7 @@ JSON_HEDLEY_DIAGNOSTIC_PUSH
     #pragma clang diagnostic ignored "-Wc++98-compat-pedantic"
 #endif
 #if JSON_HEDLEY_GCC_HAS_WARNING("-Wvariadic-macros",4,0,0)
-    #if defined(__clang__)
+    #if (defined(__clang__) && !defined(__INTEL_COMPILER))
         #pragma clang diagnostic ignored "-Wvariadic-macros"
     #elif defined(JSON_HEDLEY_GCC_VERSION)
         #pragma GCC diagnostic ignored "-Wvariadic-macros"
@@ -1206,7 +1206,7 @@ JSON_HEDLEY_DIAGNOSTIC_POP
     JSON_HEDLEY_TI_VERSION_CHECK(8,0,0) || \
     (JSON_HEDLEY_SUNPRO_VERSION_CHECK(5,14,0) && defined(__cplusplus)) || \
     JSON_HEDLEY_IAR_VERSION_CHECK(8,0,0) || \
-    defined(__clang__)
+    (defined(__clang__) && !defined(__INTEL_COMPILER))
     #define JSON_HEDLEY_RESTRICT __restrict
 #elif JSON_HEDLEY_SUNPRO_VERSION_CHECK(5,3,0) && !defined(__cplusplus)
     #define JSON_HEDLEY_RESTRICT _Restrict
@@ -1432,7 +1432,7 @@ JSON_HEDLEY_DIAGNOSTIC_POP
        defined(JSON_HEDLEY_INTEL_VERSION) || \
        defined(JSON_HEDLEY_TINYC_VERSION) || \
        defined(JSON_HEDLEY_TI_VERSION) || \
-       defined(__clang__)
+       (defined(__clang__) && !defined(__INTEL_COMPILER))
 #    define JSON_HEDLEY_IS_CONSTEXPR_(expr) ( \
         sizeof(void) != \
         sizeof(*( \
@@ -1663,7 +1663,7 @@ JSON_HEDLEY_DIAGNOSTIC_POP
 #if defined(JSON_HEDLEY_GCC_NOT_CLANG_VERSION_CHECK)
     #undef JSON_HEDLEY_GCC_NOT_CLANG_VERSION_CHECK
 #endif
-#if defined(__clang__)
+#if (defined(__clang__) && !defined(__INTEL_COMPILER))
     #define JSON_HEDLEY_GCC_NOT_CLANG_VERSION_CHECK(major,minor,patch) (0)
 #else
     #define JSON_HEDLEY_GCC_NOT_CLANG_VERSION_CHECK(major,minor,patch) JSON_HEDLEY_GCC_VERSION_CHECK(major,minor,patch)
@@ -1712,7 +1712,7 @@ JSON_HEDLEY_DIAGNOSTIC_POP
 
 // exclude unsupported compilers
 #if !defined(JSON_SKIP_UNSUPPORTED_COMPILER_CHECK)
-    #if defined(__clang__)
+    #if (defined(__clang__) && !defined(__INTEL_COMPILER))
         #if (__clang_major__ * 10000 + __clang_minor__ * 100 + __clang_patchlevel__) < 30400
             #error "unsupported Clang version - see https://github.com/nlohmann/json#supported-compilers"
         #endif
@@ -1732,13 +1732,13 @@ JSON_HEDLEY_DIAGNOSTIC_POP
 #endif
 
 // disable float-equal warnings on GCC/clang
-#if defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
+#if (defined(__clang__) && !defined(__INTEL_COMPILER)) || defined(__GNUC__) || defined(__GNUG__)
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wfloat-equal"
 #endif
 
 // disable documentation warnings on clang
-#if defined(__clang__)
+#if (defined(__clang__) && !defined(__INTEL_COMPILER))
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wdocumentation"
 #endif
@@ -3430,7 +3430,7 @@ auto get(const nlohmann::detail::iteration_proxy_value<IteratorType>& i) -> decl
 // And see https://github.com/nlohmann/json/pull/1391
 namespace std
 {
-#if defined(__clang__)
+#if (defined(__clang__) && !defined(__INTEL_COMPILER))
     // Fix: https://github.com/nlohmann/json/issues/1401
     #pragma clang diagnostic push
     #pragma clang diagnostic ignored "-Wmismatched-tags"
@@ -3447,7 +3447,7 @@ class tuple_element<N, ::nlohmann::detail::iteration_proxy_value<IteratorType >>
                      get<N>(std::declval <
                             ::nlohmann::detail::iteration_proxy_value<IteratorType >> ()));
 };
-#if defined(__clang__)
+#if (defined(__clang__) && !defined(__INTEL_COMPILER))
     #pragma clang diagnostic pop
 #endif
 } // namespace std
@@ -14892,7 +14892,7 @@ class basic_json
 
 #if defined(__ICC) || defined(__INTEL_COMPILER)
         result["compiler"] = {{"family", "icc"}, {"version", __INTEL_COMPILER}};
-#elif defined(__clang__)
+#elif (defined(__clang__) && !defined(__INTEL_COMPILER))
         result["compiler"] = {{"family", "clang"}, {"version", __clang_version__}};
 #elif defined(__GNUC__) || defined(__GNUG__)
         result["compiler"] = {{"family", "gcc"}, {"version", std::to_string(__GNUC__) + "." + std::to_string(__GNUC_MINOR__) + "." + std::to_string(__GNUC_PATCHLEVEL__)}};
@@ -22723,10 +22723,10 @@ inline nlohmann::json::json_pointer operator "" _json_pointer(const char* s, std
 
 
 // restore GCC/clang diagnostic settings
-#if defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
+#if (defined(__clang__) && !defined(__INTEL_COMPILER)) || defined(__GNUC__) || defined(__GNUG__)
     #pragma GCC diagnostic pop
 #endif
-#if defined(__clang__)
+#if (defined(__clang__) && !defined(__INTEL_COMPILER))
     #pragma GCC diagnostic pop
 #endif
 
