@@ -565,11 +565,13 @@ void VMK::init(MPI_Comm mpiCommunicator){
     }
   }
 #ifndef ESMF_NO_PTHREADS
+#ifndef PARCH_darwin
   // set thread affinity
   cpu_set_t cpuset;
   CPU_ZERO(&cpuset);
   CPU_SET(ssipe[mypet], &cpuset);
   pthread_setaffinity_np(mypthid, sizeof(cpu_set_t), &cpuset);
+#endif
 #endif
 #endif
   // ESMCI::VMK pet -> core mapping
@@ -787,6 +789,7 @@ void VMK::construct(void *ssarg){
   mpi_c_ssi = sarg->mpi_c_ssi;
 #endif  
 #ifndef ESMF_NO_PTHREADS
+#ifndef PARCH_darwin
   // set thread affinity
   cpu_set_t cpuset;
   CPU_ZERO(&cpuset);
@@ -803,6 +806,7 @@ void VMK::construct(void *ssarg){
     CPU_SET(ssipe[cid[mypet][omp_get_thread_num()]], &cpuset);
     pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
   }
+#endif
 #endif
 #endif
   // pthread mutex control
