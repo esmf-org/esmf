@@ -74,19 +74,6 @@ void MBMesh_create(void **mbmpp,
   // Init output
   *mbmpp=NULL;
 
-
-  // Initialize the parallel environment for mesh (if not already done)
-#if 0
-     {
-       int localrc;
-       int rc;
-       ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-       if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-          throw localrc;  // bail out with exception
-      }
-#endif
-
-
       // Some error checking of input
      if (*pdim > *sdim) {
        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -109,13 +96,18 @@ void MBMesh_create(void **mbmpp,
 
     // Moab error
     int merr;
+    int localrc;
+
+  // Initialize the parallel environment for mesh (if not already done)
+  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+    throw localrc;  // bail out with exception
 
     // New Mesh
     MBMesh *mbmp = new MBMesh();
 
     // Get cartesian dimension
     int cart_sdim;
-    int localrc;
     localrc=ESMCI_CoordSys_CalcCartDim(*coordSys, *sdim, &cart_sdim);
     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,rc))
       return;
@@ -205,20 +197,14 @@ void MBMesh_addnodes(void **mbmpp, int *num_nodes, int *nodeId,
 
      // Moab error
      int merr;
+     int localrc;
 
-#if 0
-     // Initialize the parallel environment for mesh (if not already done)
-     {
-       int localrc;
-       int rc;
-       ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-       if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-         throw localrc;  // bail out with exception
-     }
-#endif
+  // Initialize the parallel environment for mesh (if not already done)
+  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+    throw localrc;  // bail out with exception
 
      // Get petCount for error checking
-     int localrc;
      int petCount = VM::getCurrent(&localrc)->getPetCount();
     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
       throw localrc;  // bail out with exception
@@ -637,21 +623,12 @@ void MBMesh_addelements(void **mbmpp,
 #define ESMC_METHOD "MBMesh_addelements()"
 
    try {
-
-#if 0
-
-  // Initialize the parallel environment for mesh (if not already done)
-    {
- int localrc;
- int rc;
-  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
- if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-   throw localrc;  // bail out with exception
-    }
-#endif
-
-    // local rc code
     int localrc;
+
+    // Initialize the parallel environment for mesh (if not already done)
+    ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception
 
     ESMCI_MESHCREATE_TRACE_ENTER("MBMesh addelems setup")
 
@@ -1517,14 +1494,10 @@ void MBMesh_turnonnodemask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg, 
   int merr, localrc;
 
   try {
-
     // Initialize the parallel environment for mesh (if not already done)
-    {
-      int localrc;
-      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-        throw localrc;  // bail out with exception
-    }
+    ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception
 
     // Get Moab Mesh wrapper
     MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
@@ -1622,14 +1595,10 @@ void MBMesh_turnonnodemask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg, 
   int merr, localrc;
 
   try {
-
     // Initialize the parallel environment for mesh (if not already done)
-    {
-      int localrc;
-      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-        throw localrc;  // bail out with exception
-    }
+    ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception
 
     // Get Moab Mesh wrapper
     MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
@@ -1696,12 +1665,10 @@ void MBMesh_turnonelemmask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg, 
   try {
 
     // Initialize the parallel environment for mesh (if not already done)
-    {
-      int localrc;
-      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-        throw localrc;  // bail out with exception
-    }
+    int localrc;
+    ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception
 
     // Get Moab Mesh wrapper
     MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
@@ -1800,14 +1767,10 @@ void MBMesh_turnonelemmask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg, 
   int merr, localrc;
 
   try {
-
     // Initialize the parallel environment for mesh (if not already done)
-    {
-      int localrc;
-      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-        throw localrc;  // bail out with exception
-    }
+    ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception
 
     // Get Moab Mesh wrapper
     MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
@@ -1923,16 +1886,10 @@ void MBMesh_write(void **mbmpp, char *fname, int *rc,
 
   int localrc;
 
- #if 0
   // Initialize the parallel environment for mesh (if not already done)
-    {
- int localrc;
- int rc;
   ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
- if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-   throw localrc;  // bail out with exception
-    }
-#endif
+  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+    throw localrc;  // bail out with exception
 
   // Get localPet
   int localPet = VM::getCurrent(&localrc)->getLocalPet();
@@ -1996,9 +1953,14 @@ void MBMesh_createnodedistgrid(void **mbmpp, int *ngrid, int *num_lnodes, int *r
   std::vector<int> ngids;
 
   try {
+    int localrc;
+
+    // Initialize the parallel environment for mesh (if not already done)
+    ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception
 
     // Get localPet
-    int localrc;
     int localPet = VM::getCurrent(&localrc)->getLocalPet();
     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
       throw localrc;  // bail out with exception
@@ -2173,16 +2135,11 @@ void MBMesh_createelemdistgrid(void **mbmpp, int *egrid, int *num_lelems, int *r
 
   try {
 
-#if 0
-  // Initialize the parallel environment for mesh (if not already done)
-    {
- int localrc;
- int rc;
-  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
- if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-   throw localrc;  // bail out with exception
-    }
-#endif
+    int localrc;
+    // Initialize the parallel environment for mesh (if not already done)
+    ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception
 
     // Get Moab Mesh wrapper
     MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
@@ -2316,7 +2273,11 @@ void MBMesh_getlocalelemcoords(void **mbmpp, double *ecoords,
 #define ESMC_METHOD "MBMesh_getlocalelemcoords()"
 
   int localrc,merr;
-    try {
+  try {
+    // Initialize the parallel environment for mesh (if not already done)
+    ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception
 
       // Get Moab Mesh wrapper
       MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
@@ -2399,18 +2360,12 @@ void MBMesh_getarea(void **mbmpp, int *num_elem, double *elem_areas, int *rc) {
   double poly_coords[MAX_NUM_POLY_COORDS];
   double tmp_coords[MAX_NUM_POLY_COORDS];
 
-
+  int merr, localrc;
   try {
-
-#if 0
     // Initialize the parallel environment for mesh (if not already done)
-    {
-      int localrc;
-      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-        throw localrc;  // bail out with exception
-    }
-#endif
+    ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception
 
     // Declare id vector
     std::vector<EntityHandle> ehs;
@@ -2438,10 +2393,6 @@ void MBMesh_getarea(void **mbmpp, int *num_elem, double *elem_areas, int *rc) {
 
     //Get MOAB Mesh
     Interface *moab_mesh=mbmp->mesh;
-
-    // MOAB error
-    int merr;
-
 
     // Get dimensions
     int sdim=mbmp->sdim;
@@ -2671,16 +2622,18 @@ void MBMesh_getlocalcoords(void **mbmpp, double *ncoords, int *_orig_sdim, int *
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_getlocalcoords()"
 
+  int merr, localrc;
   try {
+    // Initialize the parallel environment for mesh (if not already done)
+    ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception
+
     // Get Moab Mesh wrapper
     MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
 
     //Get MOAB Mesh
     Interface *moab_mesh=mbmp->mesh;
-
-    // MOAB error
-    int merr;
-    int localrc;
 
     // Get dimensions
     int sdim=mbmp->sdim;
@@ -3234,7 +3187,7 @@ void MBMesh_createredistelems(void **src_meshpp, int *num_elem_gids, int *elem_g
   try {
     int localrc;
 
-    // set up Par
+    // Initialize the parallel environment for mesh (if not already done)
     ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
       throw localrc;  // bail out with exception
@@ -3317,7 +3270,7 @@ void MBMesh_createredistnodes(void **src_meshpp, int *num_node_gids, int *node_g
   try {
     int localrc;
 
-    // set up Par
+    // Initialize the parallel environment for mesh (if not already done)
     ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
       throw localrc;  // bail out with exception
@@ -3376,7 +3329,7 @@ void MBMesh_createredist(void **src_meshpp, int *num_node_gids, int *node_gids,
   try {
     int localrc;
 
-    // set up Par
+    // Initialize the parallel environment for mesh (if not already done)
     ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
       throw localrc;  // bail out with exception
@@ -3466,6 +3419,12 @@ void MBMesh_checknodelist(void **meshpp, int *_num_node_gids, int *node_gids,
   try {
 
     int localrc, merr;
+
+    // Initialize the parallel environment for mesh (if not already done)
+    ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception
+
     VM *vm = VM::getCurrent(&localrc);
     int petCount = vm->getPetCount();
     int localPet = vm->getLocalPet();
@@ -3574,6 +3533,12 @@ void MBMesh_checkelemlist(void **meshpp, int *_num_elem_gids, int *elem_gids,
 
     // Initialize the parallel environment for mesh (if not already done)
     int localrc, merr;
+
+    // Initialize the parallel environment for mesh (if not already done)
+    ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception
+
     VM *vm = VM::getCurrent(&localrc);
     int petCount = vm->getPetCount();
     int localPet = vm->getLocalPet();

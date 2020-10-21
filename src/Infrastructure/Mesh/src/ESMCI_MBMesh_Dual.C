@@ -105,6 +105,11 @@ namespace ESMCI {
 
   int merr, localrc;
 
+  // Initialize the parallel environment for mesh (if not already done)
+  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+    throw localrc;  // bail out with exception
+
   // Do this for now instead of initiating mesh parallel stuff
   // TODO: MAYBE EVENTUALLY PUT THIS INTO MBMesh???
   MPI_Comm mpi_comm;
