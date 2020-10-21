@@ -114,6 +114,13 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp,
 #define ESMC_METHOD "MBMesh_regrid_create()"
   Trace __trace("MBMesh_regrid_create()");
 
+  int localrc;
+
+  // set up Par
+  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+    throw localrc;  // bail out with exception
+
   // Get Moab Mesh wrapper
   MBMesh *mbmsrcp=*((MBMesh **)meshsrcpp);
   MBMesh *mbmdstp=*((MBMesh **)meshdstpp);
