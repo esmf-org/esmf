@@ -7,7 +7,7 @@
 !-------------------------------------------------------------------------
 !
 ! !DESCRIPTION:
-! System test FieldBundleSMMPacked.
+! System test FieldBundleRedistPacked.
 !    Two gridded components and one coupler component, one-way coupling.
 !
 !    First gridded component runs on 4 PETs and defines a 2D source packed FieldBundle
@@ -23,19 +23,19 @@
 !
 !    The coupler component runs on all 6 PETs and reconciles import and export
 !    States which contain source and destination packed FieldBundle, respectively. The
-!    coupler component then calls FieldBundleSMM() using the identity matrix.
+!    coupler component then calls FieldBundleRedist() using the identity matrix.
 !    This amounts to a redistribution of the source packed FieldBundle data onto the
 !    destination packed FieldBundle.
 !
 !    Finally the second gridded component compares the data stored in the
 !    destination packed FieldBundle to the exact solution of the above function as a measure
-!    of the accuracy of the FieldBundleSMM() method.
+!    of the accuracy of the FieldBundleRedist() method.
 !
 !-------------------------------------------------------------------------
 !\begin{verbatim}
 
-program ESMF_FieldBundleSMMPackedSTest
-#define ESMF_METHOD "program ESMF_FieldBundleSMMPackedSTest"
+program ESMF_FieldBundleRedistPackedSTest
+#define ESMF_METHOD "program ESMF_FieldBundleRedistPackedSTest"
 
 #include "ESMF.h"
 
@@ -70,7 +70,7 @@ program ESMF_FieldBundleSMMPackedSTest
 !-------------------------------------------------------------------------
 
   write(failMsg, *) "System Test failure"
-  write(testname, *) "System Test ESMF_FieldBundleSMMPacked"
+  write(testname, *) "System Test ESMF_FieldBundleRedistPacked"
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -86,7 +86,7 @@ program ESMF_FieldBundleSMMPackedSTest
 !-------------------------------------------------------------------------
 !
   ! Initialize framework and get back default global VM
-  call ESMF_Initialize(vm=vm, defaultlogfilename="FieldBundleSMMPackedSTest.Log", &
+  call ESMF_Initialize(vm=vm, defaultlogfilename="FieldBundleRedistPackedSTest.Log", &
                         logkindflag=ESMF_LOGKIND_MULTI, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
@@ -377,6 +377,6 @@ program ESMF_FieldBundleSMMPackedSTest
 
   call ESMF_Finalize()
 
-end program ESMF_FieldBundleSMMPackedSTest
+end program ESMF_FieldBundleRedistPackedSTest
 
 !\end{verbatim}

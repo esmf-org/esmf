@@ -2371,10 +2371,10 @@
       write(name, *) "Get fieldNameList from packed FieldBundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       deallocate(fieldNameListAlloc)
+      deallocate(packedPtr)
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
-      deallocate(packedPtr)
       allocate(packedPtr3D(10, 1, 3)) ! fieldIdx, meshdata, timeslice
       fieldIdx = 1
       packedFB = ESMF_FieldBundleCreate(fieldNameList, packedPtr3D, meshTst1, fieldIdx, &
@@ -2383,10 +2383,30 @@
       write(failMsg, *) "Create packed FieldBundle on Mesh"
       write(name, *) "Create packed FieldBundle on Mesh"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      deallocate(packedPtr3D)
+
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only
+      fieldcount = 135
+      allocate(fieldNameListAlloc(fieldcount))
+      do i = 1, fieldcount
+        fieldNameListAlloc(i) = 'ThisReallyIsASuperLongFieldNameThatYouCanUseInESMF'
+      enddo
+      allocate(packedPtr3D(fieldcount, 1, 3)) ! fieldIdx, meshdata, timeslice
+      fieldIdx = 1
+      packedFB = ESMF_FieldBundleCreate(fieldNameListAlloc, packedPtr3D, meshTst1, fieldIdx, &
+        gridToFieldMap=(/2/), meshloc=ESMF_MESHLOC_ELEMENT, rc=rc)
+      call ESMF_FieldBundleDestroy(packedFB, rc=rc)
+      write(failMsg, *) "Create packed FieldBundle with variable many long Field names"
+      write(name, *) "Create packed FieldBundle with variable many long Field names"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       deallocate(packedPtr3D)
+      deallocate(fieldNameListAlloc)
      
       endif ! Petcount = 4
+
+      ! Destroy MeshTst1
       if ((petCount .eq. 1) .or. (petCount .eq. 4)) then
         call ESMF_MeshDestroy(meshTst1, rc=rc)
         if (rc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
