@@ -99,7 +99,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 !     Prints information about the {\tt field} to {\tt stdout}.
 !     This subroutine goes through the internal data members of a field
-!     data type and prints information of each data member. \\
+!     data type and prints information of each data member.
 !
 !     The arguments are:
 !     \begin{description}

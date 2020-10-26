@@ -1154,7 +1154,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                              :: gridDimCount, fieldCount @\
     type(ESMF_Field)                     :: fieldList(1) @\
     integer, allocatable                 :: ig2fmap(:) @\
-    character(ESMF_MAXSTR)               :: encodeName @\
+    character(len=:), allocatable        :: encodeName @\
     integer                              :: i, localrc @\
 @\
     if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
@@ -1163,6 +1163,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Initialize @\
     nullify(this) @\
     nullify(ESMF_FieldBundleCreateGridDataPtr##mrank##D##mtypekind%this) @\
+    allocate(character(1024) :: encodeName) ! Initial allocation @\
 @\
     if (size(fieldNameList) /= size(farrayPtr, fieldDim) ) then @\
       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & @\
@@ -1206,7 +1207,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
     encodeName = fieldNameList(1) @\
     do i = 2, size(fieldNameList) @\
-      write(encodeName, "(3A)") trim(encodeName), trim(":"), trim(fieldNameList(i)) @\
+      call concatName(encodeName, ":", fieldNameList(i)) @\
     enddo @\
 @\
     ! Create an internal g2f map @\
@@ -1355,7 +1356,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer          :: gridDimCount, fieldCount @\
     type(ESMF_Field) :: fieldList(1) @\
     integer, allocatable   :: ig2fmap(:) @\
-    character(ESMF_MAXSTR) :: encodeName @\
+    character(len=:), allocatable  :: encodeName @\
     integer          :: i, localrc @\
 @\
     if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
@@ -1364,6 +1365,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Initialize @\
     nullify(this) @\
     nullify(ESMF_FieldBundleCreateMeshDataPtr##mrank##D##mtypekind%this) @\
+    allocate(character(1024) :: encodeName) ! Initial allocation @\
 @\
     if (size(fieldNameList) /= size(farrayPtr, fieldDim) ) then @\
       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & @\
@@ -1407,7 +1409,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
     encodeName = fieldNameList(1) @\
     do i = 2, size(fieldNameList) @\
-      write(encodeName, "(3A)") trim(encodeName), trim(":"), trim(fieldNameList(i)) @\
+      call concatName(encodeName, ":", fieldNameList(i)) @\
     enddo @\
 @\
     fieldList(1) = ESMF_FieldCreate(mesh, farrayPtr, meshloc=meshloc, & @\
@@ -1713,13 +1715,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                       :: localrc      ! local return code
-    integer                       :: l_fieldCount, i         ! helper variable
-    type(ESMF_Field), pointer     :: l_fieldList(:)
-    type(ESMF_FieldBundleType), pointer     :: this
-    type(ESMF_GeomType_Flag)           :: l_geomtype
-    type(ESMF_ItemOrder_Flag)          :: l_itemorderflag
-    character(len=ESMF_MAXSTR)          :: packedName
+    integer                             :: localrc           ! local return code
+    integer                             :: l_fieldCount, i   ! helper variable
+    type(ESMF_Field), pointer           :: l_fieldList(:)
+    type(ESMF_FieldBundleType), pointer :: this
+    type(ESMF_GeomType_Flag)            :: l_geomtype
+    type(ESMF_ItemOrder_Flag)           :: l_itemorderflag
+    character(len=:), allocatable       :: packedName
     character(len=ESMF_MAXSTR), pointer :: fieldNameListPtr(:)
 
     ! initialize return code; assume routine not implemented
@@ -1733,6 +1735,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     nullify(this)
     nullify(l_fieldList)
+    allocate(character(1024) :: packedName) ! Initial allocation
 
     this => fieldbundle%this
 
@@ -4229,6 +4232,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     type(RHL), pointer              :: rhList, rhListE, rhListG
     logical                         :: rhListMatch
+    type(ESMF_Field), pointer       :: srcFieldsPtr(:), dstFieldsPtr(:)
 
     ! Initialize return code; assume routine not implemented 
     localrc = ESMF_RC_NOT_IMPL 
@@ -4239,12 +4243,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit, dstFieldBundle, rc) 
 
     ! consistency check counts
-    call ESMF_FieldBundleGet(srcFieldBundle, fieldCount=count, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_FieldBundleGet(dstFieldBundle, fieldCount=i, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    if(srcFieldBundle%this%is_packed) then
+      count = 1
+    else
+      call ESMF_FieldBundleGet(srcFieldBundle, fieldCount=count, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    if(dstFieldBundle%this%is_packed) then
+      i = 1
+    else
+      call ESMF_FieldBundleGet(dstFieldBundle, fieldCount=i, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
     if (i /= count) then
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
         msg="Number of Fields in srcFieldBundle/dstFieldBundle must match!", &
@@ -4258,12 +4272,29 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       msg="Allocation of srcFields and dstFields.", &
       ESMF_CONTEXT, rcToReturn=rc)) &
       return  ! bail out
-    call ESMF_FieldBundleGet(srcFieldBundle, fieldList=srcFields, &
-      itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=localrc)
+    if(srcFieldBundle%this%is_packed) then
+      allocate(srcFieldsPtr(1))
+      call ESMF_ContainerGet(srcFieldBundle%this%container, &
+        itemList=srcFieldsPtr, itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=localrc)
+      srcFields = srcFieldsPtr
+      deallocate(srcFieldsPtr)
+    else
+      call ESMF_FieldBundleGet(srcFieldBundle, fieldList=srcFields, &
+        itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=localrc)
+    endif
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_FieldBundleGet(dstFieldBundle, fieldList=dstFields, &
-      itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=localrc)
+
+    if(dstFieldBundle%this%is_packed) then
+      allocate(dstFieldsPtr(1))
+      call ESMF_ContainerGet(dstFieldBundle%this%container, &
+        itemList=dstFieldsPtr, itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=localrc)
+      dstFields = dstFieldsPtr
+      deallocate(dstFieldsPtr)
+    else
+      call ESMF_FieldBundleGet(dstFieldBundle, fieldList=dstFields, &
+        itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=localrc)
+    endif
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -7141,7 +7172,7 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
       ! note any facing space/blank in substrings will be removed
       ! Credit to Mohammad from comp.lang.fortran with slight modification
 
-      character(len=ESMF_MAXSTR), intent(in) :: string
+      character(len=*), intent(in)           :: string
       character,                  intent(in) :: delimiter
       integer,                    intent(out):: decodeCount
       character(len=ESMF_MAXSTR), pointer    :: strarray(:)
@@ -7177,5 +7208,19 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
       !print*,'----------------------'
 
     end subroutine decodeName
+
+    ! Have to work around macro expansion not allowing //
+    ! We will want to inline this for performance
+    !dir$ attributes forceinline :: frob
+    subroutine concatName(str, delim, append)
+
+      character(len=*), intent(inout)          :: str
+      character(len=*), intent(in)             :: delim
+      character(len=*), intent(in)             :: append
+
+      str = trim(str)//trim(delim)//trim(append)
+
+    end subroutine concatName
+
 
 end module ESMF_FieldBundleMod

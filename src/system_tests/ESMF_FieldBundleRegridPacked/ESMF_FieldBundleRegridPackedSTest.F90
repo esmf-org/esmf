@@ -7,7 +7,7 @@
 !-------------------------------------------------------------------------
 !
 ! !DESCRIPTION:
-! System test FieldBundleSMMPacked.
+! System test FieldBundleRegridPacked.
 !    Two gridded components and one coupler component, one-way coupling.
 !
 !    First gridded component runs on 4 PETs and defines a 2D source packed FieldBundle
@@ -16,6 +16,14 @@
 !    with 1 DE per PET. The decomposition of the source packed FieldBundle is defined as
 !    (petCount x 1) = (4 x 1) while the destination packed FieldBundle is decomposed as
 !    (1 x petCount) = (1 x 2).
+! 
+!    The packed Field Bundle in the first component allocates a contiguous
+!    memory block with the dimensions (3, 100, 150) where the first dimension
+!    is the packed Field dimension. I=1..100, J=1..150, K=1..3.
+!
+!    The packed Field Bundle in the second component allocates a contiguous
+!    memory block with the dimensions (100, 3, 150) where the second dimension
+!    is the packed Field dimension.
 !
 !    The first component initializes the source packed FieldBundle to a geometric function:
 !
@@ -23,19 +31,18 @@
 !
 !    The coupler component runs on all 6 PETs and reconciles import and export
 !    States which contain source and destination packed FieldBundle, respectively. The
-!    coupler component then calls FieldBundleSMM() using the identity matrix.
-!    This amounts to a redistribution of the source packed FieldBundle data onto the
-!    destination packed FieldBundle.
+!    coupler component then calls FieldBundleRegrid().
+!    This regrids the source packed FieldBundle data onto the destination packed FieldBundle.
 !
 !    Finally the second gridded component compares the data stored in the
 !    destination packed FieldBundle to the exact solution of the above function as a measure
-!    of the accuracy of the FieldBundleSMM() method.
+!    of the accuracy of the FieldBundleRegrid() method.
 !
 !-------------------------------------------------------------------------
 !\begin{verbatim}
 
-program ESMF_FieldBundleSMMPackedSTest
-#define ESMF_METHOD "program ESMF_FieldBundleSMMPackedSTest"
+program ESMF_FieldBundleRegridPackedSTest
+#define ESMF_METHOD "program ESMF_FieldBundleRegridPackedSTest"
 
 #include "ESMF.h"
 
@@ -70,7 +77,7 @@ program ESMF_FieldBundleSMMPackedSTest
 !-------------------------------------------------------------------------
 
   write(failMsg, *) "System Test failure"
-  write(testname, *) "System Test ESMF_FieldBundleSMMPacked"
+  write(testname, *) "System Test ESMF_FieldBundleRegridPacked"
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -86,7 +93,7 @@ program ESMF_FieldBundleSMMPackedSTest
 !-------------------------------------------------------------------------
 !
   ! Initialize framework and get back default global VM
-  call ESMF_Initialize(vm=vm, defaultlogfilename="FieldBundleSMMPackedSTest.Log", &
+  call ESMF_Initialize(vm=vm, defaultlogfilename="FieldBundleRegridPackedSTest.Log", &
                         logkindflag=ESMF_LOGKIND_MULTI, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
@@ -377,6 +384,6 @@ program ESMF_FieldBundleSMMPackedSTest
 
   call ESMF_Finalize()
 
-end program ESMF_FieldBundleSMMPackedSTest
+end program ESMF_FieldBundleRegridPackedSTest
 
 !\end{verbatim}
