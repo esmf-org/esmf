@@ -750,6 +750,13 @@ The mask generated for a :class:`~ESMF.api.grid.Grid`,
 :class:`~ESMF.api.mesh.Mesh` or :class:`~ESMF.api.locstream.LocStream` created 
 from file will have 0 for the masked values and 1 for the unmasked values.
 
+.. Note:: The :class:`Region.SELECT <ESMF.api.constants.Region.SELECT>` flag to the 
+``zero_region`` parameter of :class:`~ESMF.api.regrid.Regrid` can be used to 
+maintain :class:`Fields <ESMF.api.field.Field>` values on locations that do not 
+participate in the regridding operation. This is useful when setting an 
+uninitialized value to help identify masked locations within the 
+:class:`Fields <ESMF.api.field.Field>` data.
+
 --------------------------
 Numpy Slicing and Indexing
 --------------------------
