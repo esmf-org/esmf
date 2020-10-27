@@ -441,14 +441,15 @@ class RegridMethod(IntEnum):
     CONSERVE = 2
     """
     First-order conservative interpolation. The main purpose of this method is 
-    to preserve the integral of the field between the source and destination. 
-    Will typically give a less accurate approximation to the individual field 
-    values than the bilinear or patch methods. The value of a destination cell 
+    to preserve the integral of the field across the interpolation from source 
+    to destination. In this method the value across each source cell is treated 
+    as a constant, so it will typically have a larger interpolation error than 
+    the bilinear or patch methods.  The value of a destination cell 
     is calculated as the weighted sum of the values of the source cells that it 
     overlaps. The weights are determined by the amount the source cell overlaps 
-    the destination cell. Needs corner coordinate values to be provided in the 
-    :class:`~ESMF.api.grid.Grid`. Currently only works for 
-    :class:`Fields <ESMF.api.field.Field>` created on the 
+    the destination cell. This method requires corner coordinate values to be 
+    provided in the :class:`~ESMF.api.grid.Grid`. It currently only works for 
+    :class:`Fields <ESMF.api.field.Field>`s created on the 
     :class:`~ESMF.api.grid.Grid` center stagger or 
     the :class:`~ESMF.api.mesh.Mesh` element location. 
     """
@@ -468,17 +469,23 @@ class RegridMethod(IntEnum):
     """
     CONSERVE_2ND = 5
     """
-    Second-order conservative interpolation. As with first-order, preserves the 
-    integral of the value between the source and destination. However, typically 
-    produces a smoother more accurate result than first-order. Also like 
-    first-order, the value of a destination cell is calculated as the weighted 
-    sum of the values of the source cells that it overlaps. However, 
-    second-order also includes additional terms to take into account the 
-    gradient of the field across the source cell. Needs corner coordinate 
-    values to be provided in the :class:`~ESMF.api.grid.Grid`. Currently only 
-    works for :class:`Fields <ESMF.api.field.Field>` created 
-    on the :class:`~ESMF.api.grid.Grid` center stagger or the 
-    :class:`~ESMF.api.mesh.Mesh` element location.
+    Second-order conservative interpolation. This method's main purpose is to 
+    preserve the integral of the field across the interpolation from source to 
+    destination. The difference between the first and second-order conservative 
+    methods is that the second-order takes the source gradient into account, so 
+    it yields a smoother destination field that typically better matches the 
+    source field. This difference between the first and second-order methods is 
+    particularly apparent when going from a coarse source grid to a finer 
+    destination grid. Another difference is that the second-order method does 
+    not guarantee that after regridding the range of values in the destination 
+    field is within the range of values in the source field. For example, if the 
+    mininum value in the source field is 0.0, then it's possible that after 
+    regridding with the second-order method, the destination field will contain 
+    values less than 0.0. This method requires corner coordinate values to be 
+    provided in the :class:`~ESMF.api.grid.Grid`. It currently only works for 
+    :class:`Fields <ESMF.api.field.Field>`s created on the 
+    :class:`~ESMF.api.grid.Grid` center stagger or 
+    the :class:`~ESMF.api.mesh.Mesh` element location. 
     """
 
 # StaggerLoc

@@ -686,6 +686,29 @@ See conservative options above.                         Conservation equations  
 :class:`~ESMF.api.constants.CoordSys`                   Spherical grids and pole handling                `Spherical grids and poles <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_8_0_1/ESMF_refdoc/node5.html#SECTION050121600000000000000>`_
 ======================================================  ===============================================  ===============================
 
+~~~~~~~~~~~~~~~~~~
+Great Circle Cells
+~~~~~~~~~~~~~~~~~~
+
+For Grids and Meshes on a sphere some combinations of interpolation options 
+(e.g. first and second-order conservative methods) use cells whose edges are 
+great circles. This section describes some behavior that the user may not expect 
+from these cells and some potential solutions. A great circle edge isn't 
+necessarily the same as a straight line in latitude longitude space. For small 
+edges, this difference will be small, but for long edges it could be 
+significant. This means if the user expects cell edges as straight lines in 
+latitude longitude space, they should avoid using one large cell with long edges 
+to compute an average over a region (e.g. over an ocean basin).
+
+Also, the user should also avoid using cells that contain one edge that runs 
+half way or more around the earth, because the regrid weight calculation assumes 
+the edge follows the shorter great circle path. There isn't a unique great 
+circle edge defined between points on the exact opposite side of the earth from 
+one another (antipodal points). However, the user can work around both of these 
+problem by breaking the long edge into two smaller edges by inserting an extra 
+node, or by breaking the large target grid cells into two or more smaller grid 
+cells. This allows the application to resolve the ambiguity in edge direction.
+
 -------
 Masking
 -------
