@@ -2764,6 +2764,8 @@ endif
   correct=.true.
   rc=ESMF_SUCCESS
 
+  TURN ON MOAB HERE FOR MESHGET TESTING
+
   call test_mesh_get_create_info(correct, rc)
 
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)

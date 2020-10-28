@@ -47,9 +47,7 @@
 
 //#define G2M_DBG
 
-// using namespace ESMCI;
-
-namespace ESMCI {
+using namespace ESMCI;
 
   //================== GTOMCELL ========================
 
@@ -880,5 +878,3 @@ void MBMesh_GridToMeshCell(const Grid &grid_,
 // Set successful return code
  if (rc!=NULL) *rc = ESMF_SUCCESS;
 }
-
-} // namespace

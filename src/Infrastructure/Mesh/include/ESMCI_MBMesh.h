@@ -29,7 +29,7 @@ namespace ESMCI {
 #define MBMESH_CHECK_ERR(merr, localrc) {\
   if (merr != MB_SUCCESS) \
     if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, \
-      moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc; }\
+      moab::ErrorCodeStr[merr], ESMC_CONTEXT, &localrc)) throw localrc; }\
 
   class MBMesh {
 #if defined ESMF_MOAB
@@ -145,7 +145,7 @@ namespace ESMCI {
 
     // Get an element mask value 
     int get_elem_mask_val(EntityHandle eh);
-
+    int *get_elem_mask_array(const Range &elems);
 
     // Setup elem areas
     void setup_elem_area();

@@ -517,6 +517,24 @@ int MBMesh::get_elem_mask_val(EntityHandle eh) {
   return mask_val;
 }
 
+int *MBMesh::get_elem_mask_array(const Range &elems) {
+
+  // Error return codes
+  int localrc;
+  int merr;
+  
+  // If no masking, then error
+  if (!has_elem_mask) Throw() << "Element mask value not present in mesh.";
+
+  // Get mask vale
+  int *elem_mask;
+  merr=mesh->tag_get_data(elem_mask_val_tag, elems, elem_mask);
+  MBMESH_CHECK_ERR(merr, localrc) 
+
+  // Output information
+  return elem_mask;
+}
+
 
 void MBMesh::setup_elem_area() {
 
