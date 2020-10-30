@@ -884,8 +884,10 @@ int ESMC_FieldRegridStoreFile(
     const char *dstFile,                           // in
     enum ESMC_FileFormat_Flag *srcFileType,        // in
     enum ESMC_FileFormat_Flag *dstFileType,        // in
+    enum ESMC_Logical *largeFileFlag,              // in
     ESMC_Field *srcFracField,                      // out
     ESMC_Field *dstFracField);                     // out
+    
 
 // !RETURN VALUE:
 //   Return code; equals ESMF_SUCCESS if there are no errors.

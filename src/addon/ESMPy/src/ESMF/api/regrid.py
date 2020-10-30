@@ -94,6 +94,12 @@ class Regrid(object):
         See the respective documentation on those methods for additional information.
         For more information on how ``ESMF`` treats factor retrieval see the
         documentation for `ESMF_FieldRegridStore <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_8_0_1/ESMF_refdoc/node5.html#SECTION050366000000000000000>`_.
+    :param bool large_file: If ``True``, create the weight file in NetCDF using the 
+        64-bit  offset format to allow variables larger than 2GB. Note the 64-bit offset 
+        format is not supported in the NetCDF version earlier than 3.6.0.  An error message 
+        will be generated if this flag is specified while the application is linked with a 
+        NetCDF library earlier than 3.6.0. Defaults to ``False``.
+
     """
 
     @initialize
@@ -103,7 +109,9 @@ class Regrid(object):
                  regrid_pole_npoints=None, line_type=None, norm_type=None, extrap_method=None,
                  extrap_num_src_pnts=None, extrap_dist_exponent=None, unmapped_action=None,
                  ignore_degenerate=None, create_rh=None, filemode=None, src_file=None, dst_file=None,
-                 src_file_type=None, dst_file_type=None, src_frac_field=None, dst_frac_field=None, factors=False):
+                 src_file_type=None, dst_file_type=None, 
+                 factors=False, large_file=None,
+                 src_frac_field=None, dst_frac_field=None):
 
         # Confirm the ESMF compiler will suport in-memory factor retrieval
         if factors and not constants._ESMF_USE_INMEM_FACTORS:
@@ -154,9 +162,9 @@ class Regrid(object):
                 dstFile=dst_file,
                 srcFileType=src_file_type,
                 dstFileType=dst_file_type,
+                largeFileFlag=large_file,
                 srcFracField=src_frac_field,
-                dstFracField=dst_frac_field
-            )
+                dstFracField=dst_frac_field)
         else:
             # Initialize the factor array pointers if we are returning factors.
             if factors:
@@ -218,6 +226,7 @@ class Regrid(object):
         self._dst_file_type = dst_file_type
         self._src_frac_field = src_frac_field
         self._dst_frac_field = dst_frac_field
+        # factors and large_file are not considered persistent object metadata
 
         # for arbitrary metadata
         self._meta = {}

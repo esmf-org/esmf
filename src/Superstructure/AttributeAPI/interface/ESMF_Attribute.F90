@@ -19692,7 +19692,7 @@ subroutine ESMF_AttributeGetAttPackArrayR4(target, name, attpack, value, default
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -19713,19 +19713,29 @@ subroutine ESMF_AttributeGetAttPackArrayR4(target, name, attpack, value, default
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -19757,7 +19767,7 @@ subroutine ESMF_AttributeGetObjArrayR4(target, name, value, defaultvalue, conven
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -19776,25 +19786,35 @@ subroutine ESMF_AttributeGetObjArrayR4(target, name, value, defaultvalue, conven
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -19802,6 +19822,7 @@ subroutine ESMF_AttributeGetObjArrayR4(target, name, value, defaultvalue, conven
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjArrayR4
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackArrayR8()"
 subroutine ESMF_AttributeGetAttPackArrayR8(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -19820,7 +19841,7 @@ subroutine ESMF_AttributeGetAttPackArrayR8(target, name, attpack, value, default
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -19841,19 +19862,29 @@ subroutine ESMF_AttributeGetAttPackArrayR8(target, name, attpack, value, default
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -19885,7 +19916,7 @@ subroutine ESMF_AttributeGetObjArrayR8(target, name, value, defaultvalue, conven
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -19904,25 +19935,35 @@ subroutine ESMF_AttributeGetObjArrayR8(target, name, value, defaultvalue, conven
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -19930,6 +19971,7 @@ subroutine ESMF_AttributeGetObjArrayR8(target, name, value, defaultvalue, conven
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjArrayR8
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackArrayI4()"
 subroutine ESMF_AttributeGetAttPackArrayI4(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -19948,7 +19990,7 @@ subroutine ESMF_AttributeGetAttPackArrayI4(target, name, attpack, value, default
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -19969,19 +20011,29 @@ subroutine ESMF_AttributeGetAttPackArrayI4(target, name, attpack, value, default
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -20013,7 +20065,7 @@ subroutine ESMF_AttributeGetObjArrayI4(target, name, value, defaultvalue, conven
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -20032,25 +20084,35 @@ subroutine ESMF_AttributeGetObjArrayI4(target, name, value, defaultvalue, conven
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -20058,6 +20120,7 @@ subroutine ESMF_AttributeGetObjArrayI4(target, name, value, defaultvalue, conven
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjArrayI4
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackArrayI8()"
 subroutine ESMF_AttributeGetAttPackArrayI8(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -20076,7 +20139,7 @@ subroutine ESMF_AttributeGetAttPackArrayI8(target, name, attpack, value, default
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -20097,19 +20160,29 @@ subroutine ESMF_AttributeGetAttPackArrayI8(target, name, attpack, value, default
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -20141,7 +20214,7 @@ subroutine ESMF_AttributeGetObjArrayI8(target, name, value, defaultvalue, conven
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -20160,25 +20233,35 @@ subroutine ESMF_AttributeGetObjArrayI8(target, name, value, defaultvalue, conven
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -20186,6 +20269,7 @@ subroutine ESMF_AttributeGetObjArrayI8(target, name, value, defaultvalue, conven
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjArrayI8
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackArrayCH()"
 subroutine ESMF_AttributeGetAttPackArrayCH(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -20204,7 +20288,7 @@ subroutine ESMF_AttributeGetAttPackArrayCH(target, name, attpack, value, default
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -20225,19 +20309,29 @@ subroutine ESMF_AttributeGetAttPackArrayCH(target, name, attpack, value, default
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -20269,7 +20363,7 @@ subroutine ESMF_AttributeGetObjArrayCH(target, name, value, defaultvalue, conven
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -20288,25 +20382,35 @@ subroutine ESMF_AttributeGetObjArrayCH(target, name, value, defaultvalue, conven
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -20314,6 +20418,7 @@ subroutine ESMF_AttributeGetObjArrayCH(target, name, value, defaultvalue, conven
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjArrayCH
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackArrayLG()"
 subroutine ESMF_AttributeGetAttPackArrayLG(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -20332,7 +20437,7 @@ subroutine ESMF_AttributeGetAttPackArrayLG(target, name, attpack, value, default
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -20353,19 +20458,29 @@ subroutine ESMF_AttributeGetAttPackArrayLG(target, name, attpack, value, default
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -20397,7 +20512,7 @@ subroutine ESMF_AttributeGetObjArrayLG(target, name, value, defaultvalue, conven
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -20416,25 +20531,35 @@ subroutine ESMF_AttributeGetObjArrayLG(target, name, value, defaultvalue, conven
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -20442,6 +20567,7 @@ subroutine ESMF_AttributeGetObjArrayLG(target, name, value, defaultvalue, conven
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjArrayLG
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackArrayBundleR4()"
 subroutine ESMF_AttributeGetAttPackArrayBundleR4(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -20460,7 +20586,7 @@ subroutine ESMF_AttributeGetAttPackArrayBundleR4(target, name, attpack, value, d
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -20481,19 +20607,29 @@ subroutine ESMF_AttributeGetAttPackArrayBundleR4(target, name, attpack, value, d
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -20525,7 +20661,7 @@ subroutine ESMF_AttributeGetObjArrayBundleR4(target, name, value, defaultvalue, 
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -20544,25 +20680,35 @@ subroutine ESMF_AttributeGetObjArrayBundleR4(target, name, value, defaultvalue, 
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -20570,6 +20716,7 @@ subroutine ESMF_AttributeGetObjArrayBundleR4(target, name, value, defaultvalue, 
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjArrayBundleR4
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackArrayBundleR8()"
 subroutine ESMF_AttributeGetAttPackArrayBundleR8(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -20588,7 +20735,7 @@ subroutine ESMF_AttributeGetAttPackArrayBundleR8(target, name, attpack, value, d
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -20609,19 +20756,29 @@ subroutine ESMF_AttributeGetAttPackArrayBundleR8(target, name, attpack, value, d
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -20653,7 +20810,7 @@ subroutine ESMF_AttributeGetObjArrayBundleR8(target, name, value, defaultvalue, 
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -20672,25 +20829,35 @@ subroutine ESMF_AttributeGetObjArrayBundleR8(target, name, value, defaultvalue, 
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -20698,6 +20865,7 @@ subroutine ESMF_AttributeGetObjArrayBundleR8(target, name, value, defaultvalue, 
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjArrayBundleR8
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackArrayBundleI4()"
 subroutine ESMF_AttributeGetAttPackArrayBundleI4(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -20716,7 +20884,7 @@ subroutine ESMF_AttributeGetAttPackArrayBundleI4(target, name, attpack, value, d
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -20737,19 +20905,29 @@ subroutine ESMF_AttributeGetAttPackArrayBundleI4(target, name, attpack, value, d
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -20781,7 +20959,7 @@ subroutine ESMF_AttributeGetObjArrayBundleI4(target, name, value, defaultvalue, 
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -20800,25 +20978,35 @@ subroutine ESMF_AttributeGetObjArrayBundleI4(target, name, value, defaultvalue, 
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -20826,6 +21014,7 @@ subroutine ESMF_AttributeGetObjArrayBundleI4(target, name, value, defaultvalue, 
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjArrayBundleI4
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackArrayBundleI8()"
 subroutine ESMF_AttributeGetAttPackArrayBundleI8(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -20844,7 +21033,7 @@ subroutine ESMF_AttributeGetAttPackArrayBundleI8(target, name, attpack, value, d
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -20865,19 +21054,29 @@ subroutine ESMF_AttributeGetAttPackArrayBundleI8(target, name, attpack, value, d
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -20909,7 +21108,7 @@ subroutine ESMF_AttributeGetObjArrayBundleI8(target, name, value, defaultvalue, 
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -20928,25 +21127,35 @@ subroutine ESMF_AttributeGetObjArrayBundleI8(target, name, value, defaultvalue, 
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -20954,6 +21163,7 @@ subroutine ESMF_AttributeGetObjArrayBundleI8(target, name, value, defaultvalue, 
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjArrayBundleI8
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackArrayBundleCH()"
 subroutine ESMF_AttributeGetAttPackArrayBundleCH(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -20972,7 +21182,7 @@ subroutine ESMF_AttributeGetAttPackArrayBundleCH(target, name, attpack, value, d
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -20993,19 +21203,29 @@ subroutine ESMF_AttributeGetAttPackArrayBundleCH(target, name, attpack, value, d
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -21037,7 +21257,7 @@ subroutine ESMF_AttributeGetObjArrayBundleCH(target, name, value, defaultvalue, 
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -21056,25 +21276,35 @@ subroutine ESMF_AttributeGetObjArrayBundleCH(target, name, value, defaultvalue, 
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -21082,6 +21312,7 @@ subroutine ESMF_AttributeGetObjArrayBundleCH(target, name, value, defaultvalue, 
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjArrayBundleCH
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackArrayBundleLG()"
 subroutine ESMF_AttributeGetAttPackArrayBundleLG(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -21100,7 +21331,7 @@ subroutine ESMF_AttributeGetAttPackArrayBundleLG(target, name, attpack, value, d
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -21121,19 +21352,29 @@ subroutine ESMF_AttributeGetAttPackArrayBundleLG(target, name, attpack, value, d
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -21165,7 +21406,7 @@ subroutine ESMF_AttributeGetObjArrayBundleLG(target, name, value, defaultvalue, 
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -21184,25 +21425,35 @@ subroutine ESMF_AttributeGetObjArrayBundleLG(target, name, value, defaultvalue, 
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -21210,6 +21461,7 @@ subroutine ESMF_AttributeGetObjArrayBundleLG(target, name, value, defaultvalue, 
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjArrayBundleLG
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackCplCompR4()"
 subroutine ESMF_AttributeGetAttPackCplCompR4(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -21228,7 +21480,7 @@ subroutine ESMF_AttributeGetAttPackCplCompR4(target, name, attpack, value, defau
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -21249,19 +21501,29 @@ subroutine ESMF_AttributeGetAttPackCplCompR4(target, name, attpack, value, defau
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -21293,7 +21555,7 @@ subroutine ESMF_AttributeGetObjCplCompR4(target, name, value, defaultvalue, conv
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -21312,25 +21574,35 @@ subroutine ESMF_AttributeGetObjCplCompR4(target, name, value, defaultvalue, conv
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -21338,6 +21610,7 @@ subroutine ESMF_AttributeGetObjCplCompR4(target, name, value, defaultvalue, conv
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjCplCompR4
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackCplCompR8()"
 subroutine ESMF_AttributeGetAttPackCplCompR8(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -21356,7 +21629,7 @@ subroutine ESMF_AttributeGetAttPackCplCompR8(target, name, attpack, value, defau
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -21377,19 +21650,29 @@ subroutine ESMF_AttributeGetAttPackCplCompR8(target, name, attpack, value, defau
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -21421,7 +21704,7 @@ subroutine ESMF_AttributeGetObjCplCompR8(target, name, value, defaultvalue, conv
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -21440,25 +21723,35 @@ subroutine ESMF_AttributeGetObjCplCompR8(target, name, value, defaultvalue, conv
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -21466,6 +21759,7 @@ subroutine ESMF_AttributeGetObjCplCompR8(target, name, value, defaultvalue, conv
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjCplCompR8
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackCplCompI4()"
 subroutine ESMF_AttributeGetAttPackCplCompI4(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -21484,7 +21778,7 @@ subroutine ESMF_AttributeGetAttPackCplCompI4(target, name, attpack, value, defau
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -21505,19 +21799,29 @@ subroutine ESMF_AttributeGetAttPackCplCompI4(target, name, attpack, value, defau
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -21549,7 +21853,7 @@ subroutine ESMF_AttributeGetObjCplCompI4(target, name, value, defaultvalue, conv
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -21568,25 +21872,35 @@ subroutine ESMF_AttributeGetObjCplCompI4(target, name, value, defaultvalue, conv
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -21594,6 +21908,7 @@ subroutine ESMF_AttributeGetObjCplCompI4(target, name, value, defaultvalue, conv
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjCplCompI4
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackCplCompI8()"
 subroutine ESMF_AttributeGetAttPackCplCompI8(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -21612,7 +21927,7 @@ subroutine ESMF_AttributeGetAttPackCplCompI8(target, name, attpack, value, defau
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -21633,19 +21948,29 @@ subroutine ESMF_AttributeGetAttPackCplCompI8(target, name, attpack, value, defau
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -21677,7 +22002,7 @@ subroutine ESMF_AttributeGetObjCplCompI8(target, name, value, defaultvalue, conv
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -21696,25 +22021,35 @@ subroutine ESMF_AttributeGetObjCplCompI8(target, name, value, defaultvalue, conv
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -21722,6 +22057,7 @@ subroutine ESMF_AttributeGetObjCplCompI8(target, name, value, defaultvalue, conv
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjCplCompI8
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackCplCompCH()"
 subroutine ESMF_AttributeGetAttPackCplCompCH(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -21740,7 +22076,7 @@ subroutine ESMF_AttributeGetAttPackCplCompCH(target, name, attpack, value, defau
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -21761,19 +22097,29 @@ subroutine ESMF_AttributeGetAttPackCplCompCH(target, name, attpack, value, defau
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -21805,7 +22151,7 @@ subroutine ESMF_AttributeGetObjCplCompCH(target, name, value, defaultvalue, conv
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -21824,25 +22170,35 @@ subroutine ESMF_AttributeGetObjCplCompCH(target, name, value, defaultvalue, conv
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -21850,6 +22206,7 @@ subroutine ESMF_AttributeGetObjCplCompCH(target, name, value, defaultvalue, conv
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjCplCompCH
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackCplCompLG()"
 subroutine ESMF_AttributeGetAttPackCplCompLG(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -21868,7 +22225,7 @@ subroutine ESMF_AttributeGetAttPackCplCompLG(target, name, attpack, value, defau
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -21889,19 +22246,29 @@ subroutine ESMF_AttributeGetAttPackCplCompLG(target, name, attpack, value, defau
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -21933,7 +22300,7 @@ subroutine ESMF_AttributeGetObjCplCompLG(target, name, value, defaultvalue, conv
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -21952,25 +22319,35 @@ subroutine ESMF_AttributeGetObjCplCompLG(target, name, value, defaultvalue, conv
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -21978,6 +22355,7 @@ subroutine ESMF_AttributeGetObjCplCompLG(target, name, value, defaultvalue, conv
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjCplCompLG
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackGridCompR4()"
 subroutine ESMF_AttributeGetAttPackGridCompR4(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -21996,7 +22374,7 @@ subroutine ESMF_AttributeGetAttPackGridCompR4(target, name, attpack, value, defa
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -22017,19 +22395,29 @@ subroutine ESMF_AttributeGetAttPackGridCompR4(target, name, attpack, value, defa
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -22061,7 +22449,7 @@ subroutine ESMF_AttributeGetObjGridCompR4(target, name, value, defaultvalue, con
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -22080,25 +22468,35 @@ subroutine ESMF_AttributeGetObjGridCompR4(target, name, value, defaultvalue, con
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -22106,6 +22504,7 @@ subroutine ESMF_AttributeGetObjGridCompR4(target, name, value, defaultvalue, con
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjGridCompR4
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackGridCompR8()"
 subroutine ESMF_AttributeGetAttPackGridCompR8(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -22124,7 +22523,7 @@ subroutine ESMF_AttributeGetAttPackGridCompR8(target, name, attpack, value, defa
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -22145,19 +22544,29 @@ subroutine ESMF_AttributeGetAttPackGridCompR8(target, name, attpack, value, defa
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -22189,7 +22598,7 @@ subroutine ESMF_AttributeGetObjGridCompR8(target, name, value, defaultvalue, con
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -22208,25 +22617,35 @@ subroutine ESMF_AttributeGetObjGridCompR8(target, name, value, defaultvalue, con
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -22234,6 +22653,7 @@ subroutine ESMF_AttributeGetObjGridCompR8(target, name, value, defaultvalue, con
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjGridCompR8
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackGridCompI4()"
 subroutine ESMF_AttributeGetAttPackGridCompI4(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -22252,7 +22672,7 @@ subroutine ESMF_AttributeGetAttPackGridCompI4(target, name, attpack, value, defa
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -22273,19 +22693,29 @@ subroutine ESMF_AttributeGetAttPackGridCompI4(target, name, attpack, value, defa
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -22317,7 +22747,7 @@ subroutine ESMF_AttributeGetObjGridCompI4(target, name, value, defaultvalue, con
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -22336,25 +22766,35 @@ subroutine ESMF_AttributeGetObjGridCompI4(target, name, value, defaultvalue, con
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -22362,6 +22802,7 @@ subroutine ESMF_AttributeGetObjGridCompI4(target, name, value, defaultvalue, con
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjGridCompI4
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackGridCompI8()"
 subroutine ESMF_AttributeGetAttPackGridCompI8(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -22380,7 +22821,7 @@ subroutine ESMF_AttributeGetAttPackGridCompI8(target, name, attpack, value, defa
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -22401,19 +22842,29 @@ subroutine ESMF_AttributeGetAttPackGridCompI8(target, name, attpack, value, defa
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -22445,7 +22896,7 @@ subroutine ESMF_AttributeGetObjGridCompI8(target, name, value, defaultvalue, con
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -22464,25 +22915,35 @@ subroutine ESMF_AttributeGetObjGridCompI8(target, name, value, defaultvalue, con
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -22490,6 +22951,7 @@ subroutine ESMF_AttributeGetObjGridCompI8(target, name, value, defaultvalue, con
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjGridCompI8
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackGridCompCH()"
 subroutine ESMF_AttributeGetAttPackGridCompCH(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -22508,7 +22970,7 @@ subroutine ESMF_AttributeGetAttPackGridCompCH(target, name, attpack, value, defa
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -22529,19 +22991,29 @@ subroutine ESMF_AttributeGetAttPackGridCompCH(target, name, attpack, value, defa
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -22573,7 +23045,7 @@ subroutine ESMF_AttributeGetObjGridCompCH(target, name, value, defaultvalue, con
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -22592,25 +23064,35 @@ subroutine ESMF_AttributeGetObjGridCompCH(target, name, value, defaultvalue, con
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -22618,6 +23100,7 @@ subroutine ESMF_AttributeGetObjGridCompCH(target, name, value, defaultvalue, con
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjGridCompCH
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackGridCompLG()"
 subroutine ESMF_AttributeGetAttPackGridCompLG(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -22636,7 +23119,7 @@ subroutine ESMF_AttributeGetAttPackGridCompLG(target, name, attpack, value, defa
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -22657,19 +23140,29 @@ subroutine ESMF_AttributeGetAttPackGridCompLG(target, name, attpack, value, defa
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -22701,7 +23194,7 @@ subroutine ESMF_AttributeGetObjGridCompLG(target, name, value, defaultvalue, con
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -22720,25 +23213,35 @@ subroutine ESMF_AttributeGetObjGridCompLG(target, name, value, defaultvalue, con
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -22746,6 +23249,7 @@ subroutine ESMF_AttributeGetObjGridCompLG(target, name, value, defaultvalue, con
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjGridCompLG
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackSciCompR4()"
 subroutine ESMF_AttributeGetAttPackSciCompR4(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -22764,7 +23268,7 @@ subroutine ESMF_AttributeGetAttPackSciCompR4(target, name, attpack, value, defau
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -22785,19 +23289,29 @@ subroutine ESMF_AttributeGetAttPackSciCompR4(target, name, attpack, value, defau
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -22829,7 +23343,7 @@ subroutine ESMF_AttributeGetObjSciCompR4(target, name, value, defaultvalue, conv
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -22848,25 +23362,35 @@ subroutine ESMF_AttributeGetObjSciCompR4(target, name, value, defaultvalue, conv
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -22874,6 +23398,7 @@ subroutine ESMF_AttributeGetObjSciCompR4(target, name, value, defaultvalue, conv
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjSciCompR4
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackSciCompR8()"
 subroutine ESMF_AttributeGetAttPackSciCompR8(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -22892,7 +23417,7 @@ subroutine ESMF_AttributeGetAttPackSciCompR8(target, name, attpack, value, defau
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -22913,19 +23438,29 @@ subroutine ESMF_AttributeGetAttPackSciCompR8(target, name, attpack, value, defau
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -22957,7 +23492,7 @@ subroutine ESMF_AttributeGetObjSciCompR8(target, name, value, defaultvalue, conv
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -22976,25 +23511,35 @@ subroutine ESMF_AttributeGetObjSciCompR8(target, name, value, defaultvalue, conv
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -23002,6 +23547,7 @@ subroutine ESMF_AttributeGetObjSciCompR8(target, name, value, defaultvalue, conv
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjSciCompR8
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackSciCompI4()"
 subroutine ESMF_AttributeGetAttPackSciCompI4(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -23020,7 +23566,7 @@ subroutine ESMF_AttributeGetAttPackSciCompI4(target, name, attpack, value, defau
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -23041,19 +23587,29 @@ subroutine ESMF_AttributeGetAttPackSciCompI4(target, name, attpack, value, defau
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -23085,7 +23641,7 @@ subroutine ESMF_AttributeGetObjSciCompI4(target, name, value, defaultvalue, conv
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -23104,25 +23660,35 @@ subroutine ESMF_AttributeGetObjSciCompI4(target, name, value, defaultvalue, conv
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -23130,6 +23696,7 @@ subroutine ESMF_AttributeGetObjSciCompI4(target, name, value, defaultvalue, conv
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjSciCompI4
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackSciCompI8()"
 subroutine ESMF_AttributeGetAttPackSciCompI8(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -23148,7 +23715,7 @@ subroutine ESMF_AttributeGetAttPackSciCompI8(target, name, attpack, value, defau
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -23169,19 +23736,29 @@ subroutine ESMF_AttributeGetAttPackSciCompI8(target, name, attpack, value, defau
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -23213,7 +23790,7 @@ subroutine ESMF_AttributeGetObjSciCompI8(target, name, value, defaultvalue, conv
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -23232,25 +23809,35 @@ subroutine ESMF_AttributeGetObjSciCompI8(target, name, value, defaultvalue, conv
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -23258,6 +23845,7 @@ subroutine ESMF_AttributeGetObjSciCompI8(target, name, value, defaultvalue, conv
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjSciCompI8
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackSciCompCH()"
 subroutine ESMF_AttributeGetAttPackSciCompCH(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -23276,7 +23864,7 @@ subroutine ESMF_AttributeGetAttPackSciCompCH(target, name, attpack, value, defau
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -23297,19 +23885,29 @@ subroutine ESMF_AttributeGetAttPackSciCompCH(target, name, attpack, value, defau
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -23341,7 +23939,7 @@ subroutine ESMF_AttributeGetObjSciCompCH(target, name, value, defaultvalue, conv
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -23360,25 +23958,35 @@ subroutine ESMF_AttributeGetObjSciCompCH(target, name, value, defaultvalue, conv
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -23386,6 +23994,7 @@ subroutine ESMF_AttributeGetObjSciCompCH(target, name, value, defaultvalue, conv
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjSciCompCH
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackSciCompLG()"
 subroutine ESMF_AttributeGetAttPackSciCompLG(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -23404,7 +24013,7 @@ subroutine ESMF_AttributeGetAttPackSciCompLG(target, name, attpack, value, defau
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -23425,19 +24034,29 @@ subroutine ESMF_AttributeGetAttPackSciCompLG(target, name, attpack, value, defau
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -23469,7 +24088,7 @@ subroutine ESMF_AttributeGetObjSciCompLG(target, name, value, defaultvalue, conv
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -23488,25 +24107,35 @@ subroutine ESMF_AttributeGetObjSciCompLG(target, name, value, defaultvalue, conv
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -23514,6 +24143,7 @@ subroutine ESMF_AttributeGetObjSciCompLG(target, name, value, defaultvalue, conv
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjSciCompLG
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackDistGridR4()"
 subroutine ESMF_AttributeGetAttPackDistGridR4(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -23532,7 +24162,7 @@ subroutine ESMF_AttributeGetAttPackDistGridR4(target, name, attpack, value, defa
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -23553,19 +24183,29 @@ subroutine ESMF_AttributeGetAttPackDistGridR4(target, name, attpack, value, defa
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -23597,7 +24237,7 @@ subroutine ESMF_AttributeGetObjDistGridR4(target, name, value, defaultvalue, con
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -23616,25 +24256,35 @@ subroutine ESMF_AttributeGetObjDistGridR4(target, name, value, defaultvalue, con
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -23642,6 +24292,7 @@ subroutine ESMF_AttributeGetObjDistGridR4(target, name, value, defaultvalue, con
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjDistGridR4
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackDistGridR8()"
 subroutine ESMF_AttributeGetAttPackDistGridR8(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -23660,7 +24311,7 @@ subroutine ESMF_AttributeGetAttPackDistGridR8(target, name, attpack, value, defa
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -23681,19 +24332,29 @@ subroutine ESMF_AttributeGetAttPackDistGridR8(target, name, attpack, value, defa
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -23725,7 +24386,7 @@ subroutine ESMF_AttributeGetObjDistGridR8(target, name, value, defaultvalue, con
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -23744,25 +24405,35 @@ subroutine ESMF_AttributeGetObjDistGridR8(target, name, value, defaultvalue, con
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -23770,6 +24441,7 @@ subroutine ESMF_AttributeGetObjDistGridR8(target, name, value, defaultvalue, con
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjDistGridR8
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackDistGridI4()"
 subroutine ESMF_AttributeGetAttPackDistGridI4(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -23788,7 +24460,7 @@ subroutine ESMF_AttributeGetAttPackDistGridI4(target, name, attpack, value, defa
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -23809,19 +24481,29 @@ subroutine ESMF_AttributeGetAttPackDistGridI4(target, name, attpack, value, defa
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -23853,7 +24535,7 @@ subroutine ESMF_AttributeGetObjDistGridI4(target, name, value, defaultvalue, con
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -23872,25 +24554,35 @@ subroutine ESMF_AttributeGetObjDistGridI4(target, name, value, defaultvalue, con
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -23898,6 +24590,7 @@ subroutine ESMF_AttributeGetObjDistGridI4(target, name, value, defaultvalue, con
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjDistGridI4
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackDistGridI8()"
 subroutine ESMF_AttributeGetAttPackDistGridI8(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -23916,7 +24609,7 @@ subroutine ESMF_AttributeGetAttPackDistGridI8(target, name, attpack, value, defa
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -23937,19 +24630,29 @@ subroutine ESMF_AttributeGetAttPackDistGridI8(target, name, attpack, value, defa
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -23981,7 +24684,7 @@ subroutine ESMF_AttributeGetObjDistGridI8(target, name, value, defaultvalue, con
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -24000,25 +24703,35 @@ subroutine ESMF_AttributeGetObjDistGridI8(target, name, value, defaultvalue, con
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -24026,6 +24739,7 @@ subroutine ESMF_AttributeGetObjDistGridI8(target, name, value, defaultvalue, con
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjDistGridI8
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackDistGridCH()"
 subroutine ESMF_AttributeGetAttPackDistGridCH(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -24044,7 +24758,7 @@ subroutine ESMF_AttributeGetAttPackDistGridCH(target, name, attpack, value, defa
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -24065,19 +24779,29 @@ subroutine ESMF_AttributeGetAttPackDistGridCH(target, name, attpack, value, defa
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -24109,7 +24833,7 @@ subroutine ESMF_AttributeGetObjDistGridCH(target, name, value, defaultvalue, con
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -24128,25 +24852,35 @@ subroutine ESMF_AttributeGetObjDistGridCH(target, name, value, defaultvalue, con
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -24154,6 +24888,7 @@ subroutine ESMF_AttributeGetObjDistGridCH(target, name, value, defaultvalue, con
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjDistGridCH
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackDistGridLG()"
 subroutine ESMF_AttributeGetAttPackDistGridLG(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -24172,7 +24907,7 @@ subroutine ESMF_AttributeGetAttPackDistGridLG(target, name, attpack, value, defa
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -24193,19 +24928,29 @@ subroutine ESMF_AttributeGetAttPackDistGridLG(target, name, attpack, value, defa
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -24237,7 +24982,7 @@ subroutine ESMF_AttributeGetObjDistGridLG(target, name, value, defaultvalue, con
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -24256,25 +25001,35 @@ subroutine ESMF_AttributeGetObjDistGridLG(target, name, value, defaultvalue, con
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -24282,6 +25037,7 @@ subroutine ESMF_AttributeGetObjDistGridLG(target, name, value, defaultvalue, con
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjDistGridLG
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackFieldR4()"
 subroutine ESMF_AttributeGetAttPackFieldR4(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -24300,7 +25056,7 @@ subroutine ESMF_AttributeGetAttPackFieldR4(target, name, attpack, value, default
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -24321,19 +25077,29 @@ subroutine ESMF_AttributeGetAttPackFieldR4(target, name, attpack, value, default
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -24365,7 +25131,7 @@ subroutine ESMF_AttributeGetObjFieldR4(target, name, value, defaultvalue, conven
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -24384,25 +25150,35 @@ subroutine ESMF_AttributeGetObjFieldR4(target, name, value, defaultvalue, conven
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -24410,6 +25186,7 @@ subroutine ESMF_AttributeGetObjFieldR4(target, name, value, defaultvalue, conven
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjFieldR4
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackFieldR8()"
 subroutine ESMF_AttributeGetAttPackFieldR8(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -24428,7 +25205,7 @@ subroutine ESMF_AttributeGetAttPackFieldR8(target, name, attpack, value, default
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -24449,19 +25226,29 @@ subroutine ESMF_AttributeGetAttPackFieldR8(target, name, attpack, value, default
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -24493,7 +25280,7 @@ subroutine ESMF_AttributeGetObjFieldR8(target, name, value, defaultvalue, conven
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -24512,25 +25299,35 @@ subroutine ESMF_AttributeGetObjFieldR8(target, name, value, defaultvalue, conven
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -24538,6 +25335,7 @@ subroutine ESMF_AttributeGetObjFieldR8(target, name, value, defaultvalue, conven
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjFieldR8
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackFieldI4()"
 subroutine ESMF_AttributeGetAttPackFieldI4(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -24556,7 +25354,7 @@ subroutine ESMF_AttributeGetAttPackFieldI4(target, name, attpack, value, default
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -24577,19 +25375,29 @@ subroutine ESMF_AttributeGetAttPackFieldI4(target, name, attpack, value, default
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -24621,7 +25429,7 @@ subroutine ESMF_AttributeGetObjFieldI4(target, name, value, defaultvalue, conven
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -24640,25 +25448,35 @@ subroutine ESMF_AttributeGetObjFieldI4(target, name, value, defaultvalue, conven
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -24666,6 +25484,7 @@ subroutine ESMF_AttributeGetObjFieldI4(target, name, value, defaultvalue, conven
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjFieldI4
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackFieldI8()"
 subroutine ESMF_AttributeGetAttPackFieldI8(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -24684,7 +25503,7 @@ subroutine ESMF_AttributeGetAttPackFieldI8(target, name, attpack, value, default
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -24705,19 +25524,29 @@ subroutine ESMF_AttributeGetAttPackFieldI8(target, name, attpack, value, default
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -24749,7 +25578,7 @@ subroutine ESMF_AttributeGetObjFieldI8(target, name, value, defaultvalue, conven
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -24768,25 +25597,35 @@ subroutine ESMF_AttributeGetObjFieldI8(target, name, value, defaultvalue, conven
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -24794,6 +25633,7 @@ subroutine ESMF_AttributeGetObjFieldI8(target, name, value, defaultvalue, conven
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjFieldI8
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackFieldCH()"
 subroutine ESMF_AttributeGetAttPackFieldCH(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -24812,7 +25652,7 @@ subroutine ESMF_AttributeGetAttPackFieldCH(target, name, attpack, value, default
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -24833,19 +25673,29 @@ subroutine ESMF_AttributeGetAttPackFieldCH(target, name, attpack, value, default
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -24877,7 +25727,7 @@ subroutine ESMF_AttributeGetObjFieldCH(target, name, value, defaultvalue, conven
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -24896,25 +25746,35 @@ subroutine ESMF_AttributeGetObjFieldCH(target, name, value, defaultvalue, conven
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -24922,6 +25782,7 @@ subroutine ESMF_AttributeGetObjFieldCH(target, name, value, defaultvalue, conven
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjFieldCH
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackFieldLG()"
 subroutine ESMF_AttributeGetAttPackFieldLG(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -24940,7 +25801,7 @@ subroutine ESMF_AttributeGetAttPackFieldLG(target, name, attpack, value, default
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -24961,19 +25822,29 @@ subroutine ESMF_AttributeGetAttPackFieldLG(target, name, attpack, value, default
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -25005,7 +25876,7 @@ subroutine ESMF_AttributeGetObjFieldLG(target, name, value, defaultvalue, conven
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -25024,25 +25895,35 @@ subroutine ESMF_AttributeGetObjFieldLG(target, name, value, defaultvalue, conven
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -25050,6 +25931,7 @@ subroutine ESMF_AttributeGetObjFieldLG(target, name, value, defaultvalue, conven
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjFieldLG
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackFieldBundleR4()"
 subroutine ESMF_AttributeGetAttPackFieldBundleR4(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -25068,7 +25950,7 @@ subroutine ESMF_AttributeGetAttPackFieldBundleR4(target, name, attpack, value, d
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -25089,19 +25971,29 @@ subroutine ESMF_AttributeGetAttPackFieldBundleR4(target, name, attpack, value, d
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -25133,7 +26025,7 @@ subroutine ESMF_AttributeGetObjFieldBundleR4(target, name, value, defaultvalue, 
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -25152,25 +26044,35 @@ subroutine ESMF_AttributeGetObjFieldBundleR4(target, name, value, defaultvalue, 
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -25178,6 +26080,7 @@ subroutine ESMF_AttributeGetObjFieldBundleR4(target, name, value, defaultvalue, 
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjFieldBundleR4
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackFieldBundleR8()"
 subroutine ESMF_AttributeGetAttPackFieldBundleR8(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -25196,7 +26099,7 @@ subroutine ESMF_AttributeGetAttPackFieldBundleR8(target, name, attpack, value, d
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -25217,19 +26120,29 @@ subroutine ESMF_AttributeGetAttPackFieldBundleR8(target, name, attpack, value, d
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -25261,7 +26174,7 @@ subroutine ESMF_AttributeGetObjFieldBundleR8(target, name, value, defaultvalue, 
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -25280,25 +26193,35 @@ subroutine ESMF_AttributeGetObjFieldBundleR8(target, name, value, defaultvalue, 
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -25306,6 +26229,7 @@ subroutine ESMF_AttributeGetObjFieldBundleR8(target, name, value, defaultvalue, 
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjFieldBundleR8
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackFieldBundleI4()"
 subroutine ESMF_AttributeGetAttPackFieldBundleI4(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -25324,7 +26248,7 @@ subroutine ESMF_AttributeGetAttPackFieldBundleI4(target, name, attpack, value, d
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -25345,19 +26269,29 @@ subroutine ESMF_AttributeGetAttPackFieldBundleI4(target, name, attpack, value, d
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -25389,7 +26323,7 @@ subroutine ESMF_AttributeGetObjFieldBundleI4(target, name, value, defaultvalue, 
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -25408,25 +26342,35 @@ subroutine ESMF_AttributeGetObjFieldBundleI4(target, name, value, defaultvalue, 
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -25434,6 +26378,7 @@ subroutine ESMF_AttributeGetObjFieldBundleI4(target, name, value, defaultvalue, 
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjFieldBundleI4
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackFieldBundleI8()"
 subroutine ESMF_AttributeGetAttPackFieldBundleI8(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -25452,7 +26397,7 @@ subroutine ESMF_AttributeGetAttPackFieldBundleI8(target, name, attpack, value, d
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -25473,19 +26418,29 @@ subroutine ESMF_AttributeGetAttPackFieldBundleI8(target, name, attpack, value, d
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -25517,7 +26472,7 @@ subroutine ESMF_AttributeGetObjFieldBundleI8(target, name, value, defaultvalue, 
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -25536,25 +26491,35 @@ subroutine ESMF_AttributeGetObjFieldBundleI8(target, name, value, defaultvalue, 
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -25562,6 +26527,7 @@ subroutine ESMF_AttributeGetObjFieldBundleI8(target, name, value, defaultvalue, 
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjFieldBundleI8
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackFieldBundleCH()"
 subroutine ESMF_AttributeGetAttPackFieldBundleCH(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -25580,7 +26546,7 @@ subroutine ESMF_AttributeGetAttPackFieldBundleCH(target, name, attpack, value, d
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -25601,19 +26567,29 @@ subroutine ESMF_AttributeGetAttPackFieldBundleCH(target, name, attpack, value, d
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -25645,7 +26621,7 @@ subroutine ESMF_AttributeGetObjFieldBundleCH(target, name, value, defaultvalue, 
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -25664,25 +26640,35 @@ subroutine ESMF_AttributeGetObjFieldBundleCH(target, name, value, defaultvalue, 
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -25690,6 +26676,7 @@ subroutine ESMF_AttributeGetObjFieldBundleCH(target, name, value, defaultvalue, 
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjFieldBundleCH
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackFieldBundleLG()"
 subroutine ESMF_AttributeGetAttPackFieldBundleLG(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -25708,7 +26695,7 @@ subroutine ESMF_AttributeGetAttPackFieldBundleLG(target, name, attpack, value, d
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -25729,19 +26716,29 @@ subroutine ESMF_AttributeGetAttPackFieldBundleLG(target, name, attpack, value, d
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -25773,7 +26770,7 @@ subroutine ESMF_AttributeGetObjFieldBundleLG(target, name, value, defaultvalue, 
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -25792,25 +26789,35 @@ subroutine ESMF_AttributeGetObjFieldBundleLG(target, name, value, defaultvalue, 
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -25818,6 +26825,7 @@ subroutine ESMF_AttributeGetObjFieldBundleLG(target, name, value, defaultvalue, 
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjFieldBundleLG
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackGridR4()"
 subroutine ESMF_AttributeGetAttPackGridR4(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -25836,7 +26844,7 @@ subroutine ESMF_AttributeGetAttPackGridR4(target, name, attpack, value, defaultv
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -25857,19 +26865,29 @@ subroutine ESMF_AttributeGetAttPackGridR4(target, name, attpack, value, defaultv
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -25901,7 +26919,7 @@ subroutine ESMF_AttributeGetObjGridR4(target, name, value, defaultvalue, convent
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -25920,25 +26938,35 @@ subroutine ESMF_AttributeGetObjGridR4(target, name, value, defaultvalue, convent
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -25946,6 +26974,7 @@ subroutine ESMF_AttributeGetObjGridR4(target, name, value, defaultvalue, convent
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjGridR4
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackGridR8()"
 subroutine ESMF_AttributeGetAttPackGridR8(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -25964,7 +26993,7 @@ subroutine ESMF_AttributeGetAttPackGridR8(target, name, attpack, value, defaultv
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -25985,19 +27014,29 @@ subroutine ESMF_AttributeGetAttPackGridR8(target, name, attpack, value, defaultv
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -26029,7 +27068,7 @@ subroutine ESMF_AttributeGetObjGridR8(target, name, value, defaultvalue, convent
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -26048,25 +27087,35 @@ subroutine ESMF_AttributeGetObjGridR8(target, name, value, defaultvalue, convent
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -26074,6 +27123,7 @@ subroutine ESMF_AttributeGetObjGridR8(target, name, value, defaultvalue, convent
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjGridR8
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackGridI4()"
 subroutine ESMF_AttributeGetAttPackGridI4(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -26092,7 +27142,7 @@ subroutine ESMF_AttributeGetAttPackGridI4(target, name, attpack, value, defaultv
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -26113,19 +27163,29 @@ subroutine ESMF_AttributeGetAttPackGridI4(target, name, attpack, value, defaultv
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -26157,7 +27217,7 @@ subroutine ESMF_AttributeGetObjGridI4(target, name, value, defaultvalue, convent
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -26176,25 +27236,35 @@ subroutine ESMF_AttributeGetObjGridI4(target, name, value, defaultvalue, convent
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -26202,6 +27272,7 @@ subroutine ESMF_AttributeGetObjGridI4(target, name, value, defaultvalue, convent
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjGridI4
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackGridI8()"
 subroutine ESMF_AttributeGetAttPackGridI8(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -26220,7 +27291,7 @@ subroutine ESMF_AttributeGetAttPackGridI8(target, name, attpack, value, defaultv
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -26241,19 +27312,29 @@ subroutine ESMF_AttributeGetAttPackGridI8(target, name, attpack, value, defaultv
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -26285,7 +27366,7 @@ subroutine ESMF_AttributeGetObjGridI8(target, name, value, defaultvalue, convent
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -26304,25 +27385,35 @@ subroutine ESMF_AttributeGetObjGridI8(target, name, value, defaultvalue, convent
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -26330,6 +27421,7 @@ subroutine ESMF_AttributeGetObjGridI8(target, name, value, defaultvalue, convent
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjGridI8
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackGridCH()"
 subroutine ESMF_AttributeGetAttPackGridCH(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -26348,7 +27440,7 @@ subroutine ESMF_AttributeGetAttPackGridCH(target, name, attpack, value, defaultv
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -26369,19 +27461,29 @@ subroutine ESMF_AttributeGetAttPackGridCH(target, name, attpack, value, defaultv
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -26413,7 +27515,7 @@ subroutine ESMF_AttributeGetObjGridCH(target, name, value, defaultvalue, convent
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -26432,25 +27534,35 @@ subroutine ESMF_AttributeGetObjGridCH(target, name, value, defaultvalue, convent
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -26458,6 +27570,7 @@ subroutine ESMF_AttributeGetObjGridCH(target, name, value, defaultvalue, convent
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjGridCH
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackGridLG()"
 subroutine ESMF_AttributeGetAttPackGridLG(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -26476,7 +27589,7 @@ subroutine ESMF_AttributeGetAttPackGridLG(target, name, attpack, value, defaultv
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -26497,19 +27610,29 @@ subroutine ESMF_AttributeGetAttPackGridLG(target, name, attpack, value, defaultv
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -26541,7 +27664,7 @@ subroutine ESMF_AttributeGetObjGridLG(target, name, value, defaultvalue, convent
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -26560,25 +27683,35 @@ subroutine ESMF_AttributeGetObjGridLG(target, name, value, defaultvalue, convent
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -26586,6 +27719,7 @@ subroutine ESMF_AttributeGetObjGridLG(target, name, value, defaultvalue, convent
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjGridLG
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackStateR4()"
 subroutine ESMF_AttributeGetAttPackStateR4(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -26604,7 +27738,7 @@ subroutine ESMF_AttributeGetAttPackStateR4(target, name, attpack, value, default
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -26625,19 +27759,29 @@ subroutine ESMF_AttributeGetAttPackStateR4(target, name, attpack, value, default
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -26669,7 +27813,7 @@ subroutine ESMF_AttributeGetObjStateR4(target, name, value, defaultvalue, conven
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -26688,25 +27832,35 @@ subroutine ESMF_AttributeGetObjStateR4(target, name, value, defaultvalue, conven
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -26714,6 +27868,7 @@ subroutine ESMF_AttributeGetObjStateR4(target, name, value, defaultvalue, conven
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjStateR4
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackStateR8()"
 subroutine ESMF_AttributeGetAttPackStateR8(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -26732,7 +27887,7 @@ subroutine ESMF_AttributeGetAttPackStateR8(target, name, attpack, value, default
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -26753,19 +27908,29 @@ subroutine ESMF_AttributeGetAttPackStateR8(target, name, attpack, value, default
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -26797,7 +27962,7 @@ subroutine ESMF_AttributeGetObjStateR8(target, name, value, defaultvalue, conven
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -26816,25 +27981,35 @@ subroutine ESMF_AttributeGetObjStateR8(target, name, value, defaultvalue, conven
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -26842,6 +28017,7 @@ subroutine ESMF_AttributeGetObjStateR8(target, name, value, defaultvalue, conven
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjStateR8
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackStateI4()"
 subroutine ESMF_AttributeGetAttPackStateI4(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -26860,7 +28036,7 @@ subroutine ESMF_AttributeGetAttPackStateI4(target, name, attpack, value, default
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -26881,19 +28057,29 @@ subroutine ESMF_AttributeGetAttPackStateI4(target, name, attpack, value, default
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -26925,7 +28111,7 @@ subroutine ESMF_AttributeGetObjStateI4(target, name, value, defaultvalue, conven
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -26944,25 +28130,35 @@ subroutine ESMF_AttributeGetObjStateI4(target, name, value, defaultvalue, conven
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -26970,6 +28166,7 @@ subroutine ESMF_AttributeGetObjStateI4(target, name, value, defaultvalue, conven
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjStateI4
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackStateI8()"
 subroutine ESMF_AttributeGetAttPackStateI8(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -26988,7 +28185,7 @@ subroutine ESMF_AttributeGetAttPackStateI8(target, name, attpack, value, default
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -27009,19 +28206,29 @@ subroutine ESMF_AttributeGetAttPackStateI8(target, name, attpack, value, default
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -27053,7 +28260,7 @@ subroutine ESMF_AttributeGetObjStateI8(target, name, value, defaultvalue, conven
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -27072,25 +28279,35 @@ subroutine ESMF_AttributeGetObjStateI8(target, name, value, defaultvalue, conven
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -27098,6 +28315,7 @@ subroutine ESMF_AttributeGetObjStateI8(target, name, value, defaultvalue, conven
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjStateI8
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackStateCH()"
 subroutine ESMF_AttributeGetAttPackStateCH(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -27116,7 +28334,7 @@ subroutine ESMF_AttributeGetAttPackStateCH(target, name, attpack, value, default
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -27137,19 +28355,29 @@ subroutine ESMF_AttributeGetAttPackStateCH(target, name, attpack, value, default
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -27181,7 +28409,7 @@ subroutine ESMF_AttributeGetObjStateCH(target, name, value, defaultvalue, conven
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -27200,25 +28428,35 @@ subroutine ESMF_AttributeGetObjStateCH(target, name, value, defaultvalue, conven
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -27226,6 +28464,7 @@ subroutine ESMF_AttributeGetObjStateCH(target, name, value, defaultvalue, conven
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjStateCH
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackStateLG()"
 subroutine ESMF_AttributeGetAttPackStateLG(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -27244,7 +28483,7 @@ subroutine ESMF_AttributeGetAttPackStateLG(target, name, attpack, value, default
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -27265,19 +28504,29 @@ subroutine ESMF_AttributeGetAttPackStateLG(target, name, attpack, value, default
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -27309,7 +28558,7 @@ subroutine ESMF_AttributeGetObjStateLG(target, name, value, defaultvalue, conven
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -27328,25 +28577,35 @@ subroutine ESMF_AttributeGetObjStateLG(target, name, value, defaultvalue, conven
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -27354,6 +28613,7 @@ subroutine ESMF_AttributeGetObjStateLG(target, name, value, defaultvalue, conven
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjStateLG
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackLocStreamR4()"
 subroutine ESMF_AttributeGetAttPackLocStreamR4(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -27372,7 +28632,7 @@ subroutine ESMF_AttributeGetAttPackLocStreamR4(target, name, attpack, value, def
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -27393,19 +28653,29 @@ subroutine ESMF_AttributeGetAttPackLocStreamR4(target, name, attpack, value, def
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -27437,7 +28707,7 @@ subroutine ESMF_AttributeGetObjLocStreamR4(target, name, value, defaultvalue, co
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -27456,25 +28726,35 @@ subroutine ESMF_AttributeGetObjLocStreamR4(target, name, value, defaultvalue, co
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -27482,6 +28762,7 @@ subroutine ESMF_AttributeGetObjLocStreamR4(target, name, value, defaultvalue, co
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjLocStreamR4
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackLocStreamR8()"
 subroutine ESMF_AttributeGetAttPackLocStreamR8(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -27500,7 +28781,7 @@ subroutine ESMF_AttributeGetAttPackLocStreamR8(target, name, attpack, value, def
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -27521,19 +28802,29 @@ subroutine ESMF_AttributeGetAttPackLocStreamR8(target, name, attpack, value, def
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -27565,7 +28856,7 @@ subroutine ESMF_AttributeGetObjLocStreamR8(target, name, value, defaultvalue, co
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -27584,25 +28875,35 @@ subroutine ESMF_AttributeGetObjLocStreamR8(target, name, value, defaultvalue, co
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -27610,6 +28911,7 @@ subroutine ESMF_AttributeGetObjLocStreamR8(target, name, value, defaultvalue, co
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjLocStreamR8
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackLocStreamI4()"
 subroutine ESMF_AttributeGetAttPackLocStreamI4(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -27628,7 +28930,7 @@ subroutine ESMF_AttributeGetAttPackLocStreamI4(target, name, attpack, value, def
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -27649,19 +28951,29 @@ subroutine ESMF_AttributeGetAttPackLocStreamI4(target, name, attpack, value, def
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -27693,7 +29005,7 @@ subroutine ESMF_AttributeGetObjLocStreamI4(target, name, value, defaultvalue, co
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -27712,25 +29024,35 @@ subroutine ESMF_AttributeGetObjLocStreamI4(target, name, value, defaultvalue, co
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -27738,6 +29060,7 @@ subroutine ESMF_AttributeGetObjLocStreamI4(target, name, value, defaultvalue, co
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjLocStreamI4
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackLocStreamI8()"
 subroutine ESMF_AttributeGetAttPackLocStreamI8(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -27756,7 +29079,7 @@ subroutine ESMF_AttributeGetAttPackLocStreamI8(target, name, attpack, value, def
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -27777,19 +29100,29 @@ subroutine ESMF_AttributeGetAttPackLocStreamI8(target, name, attpack, value, def
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -27821,7 +29154,7 @@ subroutine ESMF_AttributeGetObjLocStreamI8(target, name, value, defaultvalue, co
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -27840,25 +29173,35 @@ subroutine ESMF_AttributeGetObjLocStreamI8(target, name, value, defaultvalue, co
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -27866,6 +29209,7 @@ subroutine ESMF_AttributeGetObjLocStreamI8(target, name, value, defaultvalue, co
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjLocStreamI8
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackLocStreamCH()"
 subroutine ESMF_AttributeGetAttPackLocStreamCH(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -27884,7 +29228,7 @@ subroutine ESMF_AttributeGetAttPackLocStreamCH(target, name, attpack, value, def
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -27905,19 +29249,29 @@ subroutine ESMF_AttributeGetAttPackLocStreamCH(target, name, attpack, value, def
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -27949,7 +29303,7 @@ subroutine ESMF_AttributeGetObjLocStreamCH(target, name, value, defaultvalue, co
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -27968,25 +29322,35 @@ subroutine ESMF_AttributeGetObjLocStreamCH(target, name, value, defaultvalue, co
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -27994,6 +29358,7 @@ subroutine ESMF_AttributeGetObjLocStreamCH(target, name, value, defaultvalue, co
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjLocStreamCH
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackLocStreamLG()"
 subroutine ESMF_AttributeGetAttPackLocStreamLG(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -28012,7 +29377,7 @@ subroutine ESMF_AttributeGetAttPackLocStreamLG(target, name, attpack, value, def
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -28033,19 +29398,29 @@ subroutine ESMF_AttributeGetAttPackLocStreamLG(target, name, attpack, value, def
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -28077,7 +29452,7 @@ subroutine ESMF_AttributeGetObjLocStreamLG(target, name, value, defaultvalue, co
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -28096,25 +29471,35 @@ subroutine ESMF_AttributeGetObjLocStreamLG(target, name, value, defaultvalue, co
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -28122,6 +29507,7 @@ subroutine ESMF_AttributeGetObjLocStreamLG(target, name, value, defaultvalue, co
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjLocStreamLG
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackMeshR4()"
 subroutine ESMF_AttributeGetAttPackMeshR4(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -28140,7 +29526,7 @@ subroutine ESMF_AttributeGetAttPackMeshR4(target, name, attpack, value, defaultv
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -28161,19 +29547,29 @@ subroutine ESMF_AttributeGetAttPackMeshR4(target, name, attpack, value, defaultv
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -28205,7 +29601,7 @@ subroutine ESMF_AttributeGetObjMeshR4(target, name, value, defaultvalue, convent
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -28224,25 +29620,35 @@ subroutine ESMF_AttributeGetObjMeshR4(target, name, value, defaultvalue, convent
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -28250,6 +29656,7 @@ subroutine ESMF_AttributeGetObjMeshR4(target, name, value, defaultvalue, convent
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjMeshR4
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackMeshR8()"
 subroutine ESMF_AttributeGetAttPackMeshR8(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -28268,7 +29675,7 @@ subroutine ESMF_AttributeGetAttPackMeshR8(target, name, attpack, value, defaultv
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -28289,19 +29696,29 @@ subroutine ESMF_AttributeGetAttPackMeshR8(target, name, attpack, value, defaultv
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -28333,7 +29750,7 @@ subroutine ESMF_AttributeGetObjMeshR8(target, name, value, defaultvalue, convent
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -28352,25 +29769,35 @@ subroutine ESMF_AttributeGetObjMeshR8(target, name, value, defaultvalue, convent
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -28378,6 +29805,7 @@ subroutine ESMF_AttributeGetObjMeshR8(target, name, value, defaultvalue, convent
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjMeshR8
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackMeshI4()"
 subroutine ESMF_AttributeGetAttPackMeshI4(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -28396,7 +29824,7 @@ subroutine ESMF_AttributeGetAttPackMeshI4(target, name, attpack, value, defaultv
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -28417,19 +29845,29 @@ subroutine ESMF_AttributeGetAttPackMeshI4(target, name, attpack, value, defaultv
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -28461,7 +29899,7 @@ subroutine ESMF_AttributeGetObjMeshI4(target, name, value, defaultvalue, convent
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -28480,25 +29918,35 @@ subroutine ESMF_AttributeGetObjMeshI4(target, name, value, defaultvalue, convent
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -28506,6 +29954,7 @@ subroutine ESMF_AttributeGetObjMeshI4(target, name, value, defaultvalue, convent
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjMeshI4
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackMeshI8()"
 subroutine ESMF_AttributeGetAttPackMeshI8(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -28524,7 +29973,7 @@ subroutine ESMF_AttributeGetAttPackMeshI8(target, name, attpack, value, defaultv
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -28545,19 +29994,29 @@ subroutine ESMF_AttributeGetAttPackMeshI8(target, name, attpack, value, defaultv
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -28589,7 +30048,7 @@ subroutine ESMF_AttributeGetObjMeshI8(target, name, value, defaultvalue, convent
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -28608,25 +30067,35 @@ subroutine ESMF_AttributeGetObjMeshI8(target, name, value, defaultvalue, convent
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -28634,6 +30103,7 @@ subroutine ESMF_AttributeGetObjMeshI8(target, name, value, defaultvalue, convent
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjMeshI8
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackMeshCH()"
 subroutine ESMF_AttributeGetAttPackMeshCH(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -28652,7 +30122,7 @@ subroutine ESMF_AttributeGetAttPackMeshCH(target, name, attpack, value, defaultv
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -28673,19 +30143,29 @@ subroutine ESMF_AttributeGetAttPackMeshCH(target, name, attpack, value, defaultv
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -28717,7 +30197,7 @@ subroutine ESMF_AttributeGetObjMeshCH(target, name, value, defaultvalue, convent
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -28736,25 +30216,35 @@ subroutine ESMF_AttributeGetObjMeshCH(target, name, value, defaultvalue, convent
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -28762,6 +30252,7 @@ subroutine ESMF_AttributeGetObjMeshCH(target, name, value, defaultvalue, convent
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjMeshCH
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeGetAttPackMeshLG()"
 subroutine ESMF_AttributeGetAttPackMeshLG(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)
@@ -28780,7 +30271,7 @@ subroutine ESMF_AttributeGetAttPackMeshLG(target, name, attpack, value, defaultv
   type(ESMF_AttNest_Flag) :: local_attnestflag
   logical :: debug = .false.
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -28801,19 +30292,29 @@ subroutine ESMF_AttributeGetAttPackMeshLG(target, name, attpack, value, defaultv
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
-    attnestflag=local_attnestflag, rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
 
-  if (is_array .and. size==1) then
+  if (local_isPresent .and. is_array .and. size==1) then
     call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
       attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -28845,7 +30346,7 @@ subroutine ESMF_AttributeGetObjMeshLG(target, name, value, defaultvalue, convent
   type(ESMF_Info) :: info
   type(ESMF_AttNest_Flag) :: local_attnestflag
   integer :: size
-  logical :: is_array
+  logical :: is_array, local_isPresent
 
   localrc = ESMF_FAILURE
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -28864,25 +30365,35 @@ subroutine ESMF_AttributeGetObjMeshLG(target, name, value, defaultvalue, convent
   info = eidesc%GetInfo(target, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
   if (present(isPresent)) then
-    isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    isPresent = local_isPresent
   endif
 
   ! For Attribute, we support scalar to array stuff for single element arrays.
   ! Check if the target is an array with size 1. Operate on it as if it were a
   ! scalar.
-  call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, attnestflag=local_attnestflag, &
-    rc=rc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (is_array .and. size==1) then
-    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   else
-    call ESMF_InfoGet(info, key, value, default=defaultvalue, attnestflag=local_attnestflag, &
-      rc=localrc)
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
   end if
 
@@ -28890,6 +30401,7 @@ subroutine ESMF_AttributeGetObjMeshLG(target, name, value, defaultvalue, convent
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_AttributeGetObjMeshLG
+
 !==============================================================================
 ! ESMF_AttributeGet (Lists)
 !==============================================================================
