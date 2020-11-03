@@ -14,7 +14,7 @@ git clone --depth 1 git@github.com:esmf-org/esmf-org.github.io.git
 # ESMF Docs -------------------------------------------------------------------
 
 cd ${DOC_ARTIFACTS}/doc-esmf
-cp -rf ./* ~/esmf-org.github.io/dev_docs/
+cp -rf ./* ~/esmf-org.github.io/docs/nightly/develop/
 
 cd ~/esmf-org.github.io/
 git add .
@@ -26,23 +26,23 @@ cd ${DOC_ARTIFACTS}/doc-nuopc
 
 for i in  NUOPC_refdoc NUOPC_howtodoc
     do
-        cp -rf $i ~/esmf-org.github.io/dev_docs/
+        cp -rf $i ~/esmf-org.github.io/docs/nightly/develop/
 
     done
 
 for i in  NUOPC_refdoc.pdf NUOPC_howtodoc.pdf
     do
-        cp -rf $i ~/esmf-org.github.io/dev_docs/
+        cp -rf $i ~/esmf-org.github.io/docs/nightly/develop/
     done
 
-cd ~/esmf-org.github.io/dev_docs
+cd ~/esmf-org.github.io/docs/nightly/develop
 git add .
 git commit -m "NUOPC doc build by CircleCI"
 
 # Developer's Guide -----------------------------------------------------------
 
 cd ${DOC_ARTIFACTS}/doc-dev_guide
-cp -rf ./* ~/esmf-org.github.io/dev_docs/
+cp -rf ./* ~/esmf-org.github.io/docs/nightly/develop/
 cd ~/esmf-org.github.io/
 git add .
 git commit -m " ESMF dev_guide build by CircleCI"
