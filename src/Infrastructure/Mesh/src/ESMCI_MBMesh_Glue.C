@@ -169,7 +169,6 @@ void MBMesh_addnodes(void **mbmpp, int *_num_nodes, int *nodeId,
     int num_nodes=*_num_nodes;
 
     // Get petCount 
-    int localrc;
     int petCount = VM::getCurrent(&localrc)->getPetCount();
     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
       throw localrc;  // bail out with exception
@@ -671,10 +670,10 @@ void _generate_info_for_split_elems(
     double *subelem_tri_area=new double[max_num_conn-2];
     
     // Check that nodeCoords is not NULL, because it's used below if num_elems>0
-    if ((num_elems > 0)  {
-        ThrowRequire(nodeCoords != NULL);
+    if (num_elems > 0)  {
+      ThrowRequire(nodeCoords != NULL);
     }
-
+    
     // new id counter
     int curr_extra_id=beg_extra_ids;
     
