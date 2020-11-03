@@ -26,10 +26,19 @@ using namespace moab;
 
 namespace ESMCI {
 
+
+#define MBMESH_CHECK_RC(merr) \
+    if (merr != MB_SUCCESS) {  \
+       int localrc; \
+       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, \
+                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc; } \
+
+  // DEPRECATED! Switch everything to the above
 #define MBMESH_CHECK_ERR(merr, localrc) {\
   if (merr != MB_SUCCESS) \
     if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, \
       moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc; }\
+
 
   class MBMesh {
 #if defined ESMF_MOAB
@@ -42,6 +51,7 @@ namespace ESMCI {
 
     Interface *mesh; // Moab mesh  MAYBE I SHOULD NAME ThIS SOMETHING ELSE????
 
+    // TODO: change this to num_nodes 
     int num_verts; // number of verts this processor
 
     // eventualy get rid of this
@@ -91,10 +101,54 @@ namespace ESMCI {
     // Add one node
     EntityHandle add_node(double *orig_coords, int gid, int orig_pos, int owner);
 
+    // Add a set of nodes
+    // Returns the range of added nodes
+    void add_nodes(int num_nodes,       // Number of nodes
+                   double *orig_coords, // For each node it's orig_coords
+                   int *gids,           // For each node it's gid
+                   int *orig_pos,       // For each node it's orig_pos, if NULL just order
+                   int *owners,         // For each node it's owner
+                   Range &added_nodes);
+
+
+    // Get a Range of all nodes on this processor
+    // TODO: Should these come out via return??
+    void get_all_nodes(Range &all_nodes);
+
+    // Turn on node masking for this mesh
+    void setup_node_mask();
+
+    // Set node mask value
+    void set_node_mask_val(EntityHandle eh, int mask_val);
+
+    // Set node mask value on a Range of nodes
+    void set_node_mask_val(Range nodes, int *mask_vals);
+
+    // Get node mask value
+    int get_node_mask_val(EntityHandle node);
+
+    // Set node coords
+    void set_node_coords(EntityHandle eh, double *orig_coords);
+
+    // Get original node coords
+    void get_node_orig_coords(EntityHandle node, double *coords);
+
+    // Get internal Cartesian node coords
+    void get_node_cart_coords(EntityHandle node, double *coords);
+
     // Add one elem
     EntityHandle add_elem(EntityType elem_type, int num_nodes, EntityHandle *nodes, 
                           int gid, int orig_pos, int owner);
 
+    // Add a set of elems
+    // Returns the range of added elems
+    void add_elems(int num_elems,  // The number of elems to add
+                   EntityType elem_type, int nodes_per_elem, // The type and number of nodes in each elem
+                   EntityHandle *nodes, // List of nodes that make up each elem (of size num_elems*nodes_per_elem)
+                   int *gid,      // global ids for each elem (of size num_elems)
+                   int *orig_pos,  // original position for each elem (of size num_elems)
+                   int *owner,     // owner for each elem (of size num_elems)
+                   Range &added_elems);
 
 
     // Change owner
@@ -118,24 +172,10 @@ namespace ESMCI {
     //      + Make versions of get_all_elems() and get_all_nodes() to just return local things? 
 
 
-    // TODO: Should these come out via return??
-
-    // Get a Range of all nodes on this processor
-    void get_all_nodes(Range &all_nodes);
 
     // Get range of all elems on this processor
+    // TODO: Should this come out via return??
     void get_all_elems(Range &all_elems);
-
-
-    // Turn on node masking for this mesh
-    void setup_node_mask();
-
-    // Set node mask value
-    void set_node_mask_val(EntityHandle eh, int mask_val);
-
-
-    // Set node coords
-    void set_node_coords(EntityHandle eh, double *orig_coords);
 
     // Turn on elem masking
     void setup_elem_mask();
@@ -143,15 +183,21 @@ namespace ESMCI {
     // Set an element mask value 
     void set_elem_mask_val(EntityHandle eh, int mask_val);
 
+    // Set a range of element mask values 
+    void set_elem_mask_val(Range elems, int *mask_vals);
+
+
     // Get an element mask value 
     int get_elem_mask_val(EntityHandle eh);
-
 
     // Setup elem areas
     void setup_elem_area();
 
     // Set an elem area value
     void set_elem_area(EntityHandle eh, double area);
+
+    // Set a range of element area values 
+    void set_elem_area(Range elems, double *area);
 
     // Get an elem area value
     double get_elem_area(EntityHandle eh);
@@ -163,11 +209,20 @@ namespace ESMCI {
     // Set coords in an elem
     void set_elem_coords(EntityHandle eh, double *orig_coords);
 
+    void set_elem_coords(Range elems, double *orig_coords);
+
+    // Get Cartesian coords from elem
+    void get_elem_cart_coords(EntityHandle elem, double *coords);
+
+    // Get orig coords from elem
+    void get_elem_orig_coords(EntityHandle elem, double *orig_coords);
+
     // Do halo communication on all node tags
     void halo_comm_nodes_all_tags(bool do_internal_coords=false);
 
     // Do halo communication on all elem tags
     void halo_comm_elems_all_tags();
+
 
     // Setup MBMesh to operate in parallel by resolving shared ents, etc. 
     void setup_parallel();

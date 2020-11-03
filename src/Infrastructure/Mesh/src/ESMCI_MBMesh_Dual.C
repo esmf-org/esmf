@@ -973,9 +973,7 @@ namespace ESMCI {
     for (int e = 0; e < num_elems; ++e) {
 
       // Get number of nodes in element
-      int num_elem_verts=ElemType2NumNodes(dual_mesh->pdim,
-                                           dual_mesh->sdim,
-                                           elemType[e]);
+      int num_elem_verts=ElemType2NumNodes(dual_mesh->pdim, elemType[e]);
 
       // Define the maximum number of verts
 #define MAX_ELEM_VERTS 20
