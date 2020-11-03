@@ -118,7 +118,7 @@ void MBMesh_turnoffnodemask(void **meshpp, int *rc);
 
 EntityType get_entity_type(int pdim, int etype);
 
-int ElemType2NumNodes(int pdim, int sdim, int etype);
+int ElemType2NumNodes(int pdim, int etype);
 
 #endif // ESMF_MOAB
 

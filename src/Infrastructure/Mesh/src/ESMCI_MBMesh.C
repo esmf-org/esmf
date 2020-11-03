@@ -1,3 +1,4 @@
+
 // $Id$
 //
 // Earth System Modeling Framework
@@ -39,6 +40,7 @@
 #include "MBTagConventions.hpp"
 #include "moab/ParallelComm.hpp"
 #include "MBParallelConventions.h"
+#include "moab/ReadUtilIface.hpp"
 
 #include "VM/include/ESMC_VM.h"
 
@@ -191,43 +193,30 @@ EntityHandle MBMesh::add_node(double *orig_coords, int gid, int orig_pos, int ow
   // Add vertex
   EntityHandle new_vert;
   merr=mesh->create_vertex(cart_coords,new_vert);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                       moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-  }
+  MBMESH_CHECK_RC(merr);
+
 
   // Set original coords (if necessary) 
   if (has_node_orig_coords) {
     // Set original coords
     merr=mesh->tag_set_data(node_orig_coords_tag, &new_vert, 1, orig_coords);
-    if (merr != MB_SUCCESS) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                       moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-    }
+    MBMESH_CHECK_RC(merr);
   }
 
 
   // Set Id
   merr=mesh->tag_set_data(gid_tag, &new_vert, 1, &gid);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-  }
+  MBMESH_CHECK_RC(merr);
+
 
   // Set original position
   merr=mesh->tag_set_data(orig_pos_tag, &new_vert, 1, &orig_pos);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-  }
+  MBMESH_CHECK_RC(merr);
 
   
   // Set Owner
   merr=mesh->tag_set_data(owner_tag, &new_vert, 1, &owner);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-  }
+  MBMESH_CHECK_RC(merr);
   
   // Increment number of verts
   num_verts++;
@@ -239,25 +228,35 @@ EntityHandle MBMesh::add_node(double *orig_coords, int gid, int orig_pos, int ow
 
 // Create a bunch of new nodes at once 
 // (This seems more memory efficient in MOAB)
-void MBMesh::add_nodes(int num_nodes,       // Number of nodes
+// TODO: have the added_nodes range come out the return??
+void MBMesh::add_nodes(int num_new_nodes,       // Number of nodes
                        double *orig_coords, // For each node it's orig_coords
                        int *gids,           // For each node it's gid
-                       int *orig_pos,       // For each node it's orig_pos, if NULL just order
+                       int *orig_pos,       // For each node it's orig_pos, if NULL just do in order
                        int *owners,         // For each node it's owner
                        Range &added_nodes) {        
-
+  
   // Error return codes
   int localrc;
   int merr;
 
+  // If there are no nodes, just leave because there's nothing to do
+  if (num_new_nodes <= 0) return;
+
+  // Check input
+  ThrowRequire(orig_coords != NULL); 
+  ThrowRequire(gids != NULL); 
+  // orig_pos can be NULL
+  ThrowRequire(owners != NULL); 
+
   // Allocate coordinate space
   double *cart_coords3D=NULL;
-  cart_coords3D=new double[3*num_nodes];
+  cart_coords3D=new double[3*num_new_nodes];
 
   // Convert coords to 3D cartesian
   double *node_orig_coords=orig_coords;
   double *node_cart_coords=cart_coords3D;
-  for (int n=0; n<num_nodes; n++) {
+  for (int n=0; n<num_new_nodes; n++) {
 
     // Set 3rd dim to 0 in case this is 2D cart
     // and that dimension isn't being set
@@ -275,11 +274,9 @@ void MBMesh::add_nodes(int num_nodes,       // Number of nodes
 
 
   // Add vertices
-  merr=mesh->create_vertices(cart_coords3D, num_nodes, added_nodes);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-  }
+  merr=mesh->create_vertices(cart_coords3D, num_new_nodes, added_nodes);
+  MBMESH_CHECK_RC(merr);
+
 
   // Get rid of coordinate memory
   if (cart_coords3D != NULL) delete [] cart_coords3D;
@@ -289,19 +286,13 @@ void MBMesh::add_nodes(int num_nodes,       // Number of nodes
   if (has_node_orig_coords) {
     // Set original coords
     merr=mesh->tag_set_data(node_orig_coords_tag, added_nodes, orig_coords);
-    if (merr != MB_SUCCESS) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                       moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-    }
+    MBMESH_CHECK_RC(merr);
   }
 
 
   // Set Ids
   merr=mesh->tag_set_data(gid_tag, added_nodes, gids);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-  }
+  MBMESH_CHECK_RC(merr);
 
 
   // Set original positions
@@ -314,10 +305,7 @@ void MBMesh::add_nodes(int num_nodes,       // Number of nodes
       const EntityHandle *node=&(*it);
     
       merr=mesh->tag_set_data(orig_pos_tag, node, 1, &pos);
-      if (merr != MB_SUCCESS) {
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                    moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-      }
+      MBMESH_CHECK_RC(merr);
 
       // Next pos
       pos++;
@@ -325,21 +313,15 @@ void MBMesh::add_nodes(int num_nodes,       // Number of nodes
 
   } else { // Use input
     merr=mesh->tag_set_data(orig_pos_tag, added_nodes, orig_pos);
-    if (merr != MB_SUCCESS) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                       moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-    }
+    MBMESH_CHECK_RC(merr);
   }
   
   // Set Owners
   merr=mesh->tag_set_data(owner_tag, added_nodes, owners);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-  }
+  MBMESH_CHECK_RC(merr);
   
   // Increment number of verts
-  num_verts += num_nodes;
+  num_verts += num_new_nodes;
 }
 
 
@@ -348,141 +330,10 @@ void MBMesh::add_nodes(int num_nodes,       // Number of nodes
 void MBMesh::get_all_nodes(Range &all_nodes) {
 
   int merr=mesh->get_entities_by_dimension(0, 0, all_nodes);
-  if (merr != MB_SUCCESS) {
-    int localrc;
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-  }
+  MBMESH_CHECK_RC(merr);
+
 }
 
-// Get a Range of all elems on this processor
-void MBMesh::get_all_elems(Range &all_elems) {
-
-  int merr=mesh->get_entities_by_dimension(0, pdim, all_elems);
-  if (merr != MB_SUCCESS) {
-    int localrc;
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-  }
-}
-
-
-void MBMesh::set_owner(EntityHandle eh, int owner) {
-
-  // Error return codes
-  int localrc;
-  int merr;
-  
-  // Get Owner
-  merr=mesh->tag_set_data(owner_tag, &eh, 1, &owner);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-  }  
-}
-
-
-int MBMesh::get_owner(EntityHandle eh) {
-
-  // Error return codes
-  int localrc;
-  int merr;
-  
-  // Get Owner
-  int owner;
-  merr=mesh->tag_get_data(owner_tag, &eh, 1, &owner);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-  }
-
-  // return owner
-  return owner;
-}
-
-int MBMesh::get_orig_pos(EntityHandle eh) {
-
-  // Error return codes
-  int localrc;
-  int merr;
-  
-  // Get Owner
-  int orig_pos;
-  merr=mesh->tag_get_data(orig_pos_tag, &eh, 1, &orig_pos);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-  }
-
-  // return owner
-  return orig_pos;
-}
-
-
-int MBMesh::get_gid(EntityHandle eh) {
-
-  // Error return codes
-  int localrc;
-  int merr;
-  
-  // Get gid
-  int gid;
-  merr=mesh->tag_get_data(gid_tag, &eh, 1, &gid);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-  }
-
-  // return owner
-  return gid;
-}
-
-
-
-// The coords variable here is in the original representation, not converted to cart. 
-EntityHandle MBMesh::add_elem(EntityType elem_type, int num_nodes, EntityHandle *nodes, 
-                              int gid, int orig_pos, int owner) {
-
-  // Error return codes
-  int localrc;
-  int merr;
-
-  // Add element
-  EntityHandle new_elem;
-  merr=mesh->create_element(elem_type, nodes, num_nodes, new_elem);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-  }
-
-  // Set Id
-  merr=mesh->tag_set_data(gid_tag, &new_elem, 1, &gid);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-  }
-
-  // Set original position
-  merr=mesh->tag_set_data(orig_pos_tag, &new_elem, 1, &orig_pos);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-  }
-
-  
-  // Set Owner
-  merr=mesh->tag_set_data(owner_tag, &new_elem, 1, &owner);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-  }
-  
-  // Increment number of verts
-  num_elems++;
-
-  // Output new vertex/node
-  return new_elem;
-}
 
 
 void MBMesh::setup_node_mask() {
@@ -492,18 +343,13 @@ void MBMesh::setup_node_mask() {
   // Setup node mask tag
   int int_def_val=0; // So things are by default not masked
   merr=mesh->tag_get_handle("node_mask", 1, MB_TYPE_INTEGER, node_mask_tag, MB_TAG_EXCL|MB_TAG_DENSE, &int_def_val);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT, &localrc)) throw localrc;
-  }
+  MBMESH_CHECK_RC(merr);
+
   
   // Setup node mask value tag
   int_def_val=0; // So things are by default not masked
   merr=mesh->tag_get_handle("node_mask_val", 1, MB_TYPE_INTEGER, node_mask_val_tag, MB_TAG_EXCL|MB_TAG_DENSE, &int_def_val);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT, &localrc)) throw localrc;
-  }
+  MBMESH_CHECK_RC(merr);
 
   // Turn on masking
   has_node_mask=true;
@@ -515,17 +361,13 @@ void MBMesh::set_node_mask_val(EntityHandle eh, int mask_val) {
   // Error return codes
   int localrc;
   int merr;
-  
-  // If no masking, then leave
-  // TODO: should this be an error instead?
-  if (!has_node_mask) return;
 
-  // Get Owner
+  // If no masking, complain
+  if (!has_node_mask) Throw() << "node mask value not present in mesh.";
+  
+  // Set data
   merr=mesh->tag_set_data(node_mask_val_tag, &eh, 1, &mask_val);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-  }  
+  MBMESH_CHECK_RC(merr);
 }
 
 void MBMesh::set_node_mask_val(Range nodes, int *mask_vals) {
@@ -534,16 +376,31 @@ void MBMesh::set_node_mask_val(Range nodes, int *mask_vals) {
   int localrc;
   int merr;
   
-  // If no masking, then leave
-  // TODO: should this be an error instead?
-  if (!has_node_mask) return;
+  // If no masking, complain
+  if (!has_node_mask) Throw() << "node mask value not present in mesh.";
 
-  // Get Owner
+  // Set data in MOAB
   merr=mesh->tag_set_data(node_mask_val_tag, nodes, mask_vals);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-  }  
+  MBMESH_CHECK_RC(merr);
+
+}
+
+int MBMesh::get_node_mask_val(EntityHandle node) {
+
+  // Error return codes
+  int localrc;
+  int merr;
+  
+  // If no masking, then error
+  if (!has_node_mask) Throw() << "node mask value not present in mesh.";
+
+  // Get mask val
+  int mask_val;
+  merr=mesh->tag_get_data(node_mask_val_tag, &node, 1, &mask_val);
+  MBMESH_CHECK_RC(merr);
+
+  // Output information
+  return mask_val;
 }
 
 
@@ -557,10 +414,7 @@ void MBMesh::set_node_coords(EntityHandle eh, double *orig_coords) {
   // Set original coords if present
   if (has_node_orig_coords) {
     merr=mesh->tag_set_data(node_orig_coords_tag, &eh, 1, orig_coords);
-    if (merr != MB_SUCCESS) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                       moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-    }  
+    MBMESH_CHECK_RC(merr);
   }
 
   // Convert and set vertex coords
@@ -572,11 +426,216 @@ void MBMesh::set_node_coords(EntityHandle eh, double *orig_coords) {
 
   // Set Vertex
   merr=mesh->set_coords(&eh,1,cart_coords);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+  MBMESH_CHECK_RC(merr);
+}
+
+// Get the internal Cartesian coords for the node
+// coords needs to be of size sdim 
+void MBMesh::get_node_cart_coords(EntityHandle node, double *coords) {
+
+  // Error return codes
+  int merr;
+
+  // Get the coords
+  double tmp_coords[3]={0.0,0.0,0.0};
+  merr=mesh->get_coords(&node,1,tmp_coords);
+  MBMESH_CHECK_RC(merr);
+
+  // Copy
+  coords[0]=tmp_coords[0];
+  coords[1]=tmp_coords[1];
+  if (sdim > 2) coords[2]=tmp_coords[2];
+}
+
+
+// Get the original coords for the node, if there are no orig coords then 
+// just uses coords (because those would be the original ones). 
+// orig_coords needs to be of size orig_sdim
+void MBMesh::get_node_orig_coords(EntityHandle node, double *orig_coords) {
+
+  // Error return codes
+  int merr;
+
+  // If has orig coords then get those
+  if (has_node_orig_coords) {
+    merr=mesh->tag_get_data(node_orig_coords_tag, &node, 1, orig_coords);
+    MBMESH_CHECK_RC(merr);
+  } else {
+    // Get coords from MOAB
+    double coords[3]={0.0,0.0,0.0};
+    merr=mesh->get_coords(&node,1,coords);
+    MBMESH_CHECK_RC(merr);
+
+    // Copy into buffer of size orig_sdim
+    orig_coords[0]=coords[0];
+    orig_coords[1]=coords[1];
+    if (orig_sdim > 2) orig_coords[2]=coords[2];
+  }
+}
+
+
+// The coords variable here is in the original representation, not converted to cart. 
+EntityHandle MBMesh::add_elem(EntityType elem_type, int num_nodes, EntityHandle *nodes, 
+                              int gid, int orig_pos, int owner) {
+
+  // Error return codes
+  int localrc;
+  int merr;
+
+  // Add element
+  EntityHandle new_elem;
+  merr=mesh->create_element(elem_type, nodes, num_nodes, new_elem);
+  MBMESH_CHECK_RC(merr);
+
+
+  // Set Id
+  merr=mesh->tag_set_data(gid_tag, &new_elem, 1, &gid);
+  MBMESH_CHECK_RC(merr);
+
+  // Set original position
+  merr=mesh->tag_set_data(orig_pos_tag, &new_elem, 1, &orig_pos);
+  MBMESH_CHECK_RC(merr);
+
+  // Set Owner
+  merr=mesh->tag_set_data(owner_tag, &new_elem, 1, &owner);
+  MBMESH_CHECK_RC(merr);
+  
+  // Increment number of verts
+  num_elems++;
+
+  // Output new vertex/node
+  return new_elem;
+}
+
+// Add a set of elements of the same type
+// returns range of newly added elems
+void MBMesh::add_elems(int num_new_elems,  // The number of elems to add
+                       EntityType elem_type, int nodes_per_elem, // The type and number of nodes in each elem
+                       EntityHandle *nodes, // List of nodes that make up each elem (of size num_new_elems*nodes_per_elem)
+                       int *gids,      // global ids for each elem (of size num_new_elems)
+                       int *orig_pos,  // original position for each elem (of size num_new_elems), if NULL just do in order
+                       int *owners,     // owner for each elem (of size num_new_elems)
+                       Range &added_elems) {
+  
+  // Error return codes
+  int localrc;
+  int merr;
+
+  // If there are no new elems, just leave because there's nothing to do
+  if (num_new_elems <= 0) return;
+
+  // Check input
+  ThrowRequire(nodes != NULL); 
+  ThrowRequire(gids != NULL); 
+  // orig_pos can be NULL
+  ThrowRequire(owners != NULL); 
+
+
+  // Get reader interface
+  ReadUtilIface* iface;
+  merr = mesh->query_interface(iface);
+  MBMESH_CHECK_RC(merr);
+
+
+  // Add elements
+  EntityHandle start_new_elems_eh;
+  EntityHandle* conn;
+  merr=iface->get_element_connect(num_new_elems,
+                             nodes_per_elem,
+                             elem_type,
+                             0,
+                             start_new_elems_eh,
+                             conn);
+
+  // Fill connections with the appropriate nodes
+  int num_new_nodes=num_new_elems*nodes_per_elem;
+  for (int n=0; n<num_new_nodes; n++) {
+    conn[n]=nodes[n];
   }
 
+  // Do update conn
+  merr = iface->update_adjacencies(start_new_elems_eh, num_new_elems, nodes_per_elem, conn);
+  MBMESH_CHECK_RC(merr);
+
+
+  // Create range of newly added elems
+  added_elems.clear();
+  added_elems.insert(start_new_elems_eh,start_new_elems_eh+num_new_elems-1);
+
+  // Set Ids
+  merr=mesh->tag_set_data(gid_tag, added_elems, gids);
+  MBMESH_CHECK_RC(merr);
+
+  // Set original positions
+  // IF NULL, just order from 1, otherwise use input
+  if (orig_pos == NULL) {
+
+    // Set in order starting from 0
+    int pos=0;
+    for(Range::const_iterator it=added_elems.begin(); it !=added_elems.end(); it++) {
+      const EntityHandle elem=(*it);
+    
+      merr=mesh->tag_set_data(orig_pos_tag, &elem, 1, &pos);
+      MBMESH_CHECK_RC(merr);
+
+      // Next pos
+      pos++;
+    }
+
+  } else { // Use input
+    merr=mesh->tag_set_data(orig_pos_tag, added_elems, orig_pos);
+    MBMESH_CHECK_RC(merr);
+  }
+  
+  // Set Owners
+  merr=mesh->tag_set_data(owner_tag, added_elems, owners);
+  MBMESH_CHECK_RC(merr);
+  
+  // Increment number of elems
+  num_elems += num_new_elems;
+}
+
+
+// Get a Range of all elems on this processor
+void MBMesh::get_all_elems(Range &all_elems) {
+
+  int merr=mesh->get_entities_by_dimension(0, pdim, all_elems);
+  MBMESH_CHECK_RC(merr);
+}
+
+
+// Get the internal Cartesian coords for the elem
+// coords needs to be of size sdim 
+void MBMesh::get_elem_cart_coords(EntityHandle elem, double *coords) {
+
+  // If no coords, complain
+  if (!has_elem_coords) Throw() << "element coords not present in mesh.";
+
+  // Error return codes
+  int merr=mesh->tag_get_data(elem_coords_tag, &elem, 1, coords);
+  MBMESH_CHECK_RC(merr);
+}
+
+
+// Get the original coords for the elem, if there are no orig coords then 
+// just uses coords (because those would be the original ones). 
+// orig_coords needs to be of size orig_sdim
+void MBMesh::get_elem_orig_coords(EntityHandle elem, double *orig_coords) {
+
+  // Error return codes
+  int merr;
+
+  // If no coords, complain
+  if (!has_elem_coords) Throw() << "element coords not present in mesh.";
+
+  // If has orig coords then get those
+  if (has_elem_orig_coords) {
+    merr=mesh->tag_get_data(elem_orig_coords_tag, &elem, 1, orig_coords);
+    MBMESH_CHECK_RC(merr);
+  } else {
+    merr=mesh->tag_get_data(elem_coords_tag, &elem, 1, orig_coords);
+    MBMESH_CHECK_RC(merr);
+  } 
 }
 
 
@@ -587,18 +646,14 @@ void MBMesh::setup_elem_mask() {
   // Setup elem mask tag
   int int_def_val=0; // So things are by default not masked
   merr=mesh->tag_get_handle("elem_mask", 1, MB_TYPE_INTEGER, elem_mask_tag, MB_TAG_EXCL|MB_TAG_DENSE, &int_def_val);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT, &localrc)) throw localrc;
-  }
+  MBMESH_CHECK_RC(merr);
+
   
   // Setup elem mask value tag
   int_def_val=0; // So things are by default not masked
   merr=mesh->tag_get_handle("elem_mask_val", 1, MB_TYPE_INTEGER, elem_mask_val_tag, MB_TAG_EXCL|MB_TAG_DENSE, &int_def_val);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT, &localrc)) throw localrc;
-  }
+  MBMESH_CHECK_RC(merr);
+
 
   // Turn on masking
   has_elem_mask=true;
@@ -610,17 +665,33 @@ void MBMesh::set_elem_mask_val(EntityHandle eh, int mask_val) {
   int localrc;
   int merr;
   
-  // If no masking, then leave
-  // TODO: should this be an error instead?
-  if (!has_elem_mask) return;
+  // If no masking, complain
+  if (!has_elem_mask) Throw() << "element mask value not present in mesh.";
 
-  // Get Owner
+  // Set data in MOAB
   merr=mesh->tag_set_data(elem_mask_val_tag, &eh, 1, &mask_val);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-  }  
+  MBMESH_CHECK_RC(merr);
 }
+
+
+
+void MBMesh::set_elem_mask_val(Range elems, int *mask_vals) {
+
+  // Error return codes
+  int localrc;
+  int merr;
+  
+  // If no masking, complain
+  if (!has_elem_mask) Throw() << "element mask value not present in mesh.";
+
+  // Set data in MOAB
+  merr=mesh->tag_set_data(elem_mask_val_tag, elems, mask_vals);
+  MBMESH_CHECK_RC(merr);
+
+}
+
+
+
 
 int MBMesh::get_elem_mask_val(EntityHandle eh) {
 
@@ -629,15 +700,12 @@ int MBMesh::get_elem_mask_val(EntityHandle eh) {
   int merr;
   
   // If no masking, then error
-  if (!has_elem_mask) Throw() << "Element mask value not present in mesh.";
+  if (!has_elem_mask) Throw() << "element mask value not present in mesh.";
 
   // Get mask vale
   int mask_val;
   merr=mesh->tag_get_data(elem_mask_val_tag, &eh, 1, &mask_val);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-  }  
+  MBMESH_CHECK_RC(merr);
 
   // Output information
   return mask_val;
@@ -651,10 +719,7 @@ void MBMesh::setup_elem_area() {
   // Setup elem area tag
   double dbl_def_val=0.0; 
   merr=mesh->tag_get_handle("elem_area", 1, MB_TYPE_DOUBLE, elem_area_tag, MB_TAG_EXCL|MB_TAG_DENSE, &dbl_def_val);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT, &localrc)) throw localrc;
-  }
+  MBMESH_CHECK_RC(merr);
   
   // Turn on elem areas
   has_elem_area=true;
@@ -666,16 +731,27 @@ void MBMesh::set_elem_area(EntityHandle eh, double area) {
   int localrc;
   int merr;
   
-  // If no masking, then leave
-  // TODO: should this be an error instead?
-  if (!has_elem_area) return;
+  // If no area, complain
+  if (!has_elem_area) Throw() << "element area not present in mesh.";
 
   // Get Owner
   merr=mesh->tag_set_data(elem_area_tag, &eh, 1, &area);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-  }  
+  MBMESH_CHECK_RC(merr);
+
+}
+
+void MBMesh::set_elem_area(Range elems, double *area) {
+
+  // Error return codes
+  int localrc;
+  int merr;
+  
+  // If no area, complain
+  if (!has_elem_area) Throw() << "element area not present in mesh.";
+
+  // Get Owner
+  merr=mesh->tag_set_data(elem_area_tag, elems, area);
+  MBMESH_CHECK_RC(merr);
 }
 
 double MBMesh::get_elem_area(EntityHandle eh) {
@@ -685,15 +761,13 @@ double MBMesh::get_elem_area(EntityHandle eh) {
   int merr;
   
   // If no area, then error
-  if (!has_elem_area) Throw() << "Element area not present in mesh.";
+  if (!has_elem_area) Throw() << "element area not present in mesh.";
 
   // Get Owner
   double area;
   merr=mesh->tag_get_data(elem_area_tag, &eh, 1, &area);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-  }  
+  MBMESH_CHECK_RC(merr);
+
 
   // Output area
   return area;
@@ -707,19 +781,13 @@ void MBMesh::setup_elem_coords() {
   // Add element coords field
   double  dbl_def_val[3]= {0.0, 0.0, 0.0};
   merr=mesh->tag_get_handle("elem_coords", sdim, MB_TYPE_DOUBLE, elem_coords_tag, MB_TAG_EXCL|MB_TAG_DENSE, dbl_def_val);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT, &localrc)) throw localrc;
-  }
+  MBMESH_CHECK_RC(merr);
 
   // If not cartesian then add original coordinates field
   if (coordsys != ESMC_COORDSYS_CART) {
     merr=mesh->tag_get_handle("elem_orig_coords", orig_sdim, MB_TYPE_DOUBLE, elem_orig_coords_tag, MB_TAG_EXCL|MB_TAG_DENSE, dbl_def_val);
-    if (merr != MB_SUCCESS) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                       moab::ErrorCodeStr[merr], ESMC_CONTEXT, &localrc)) throw localrc;
-    }
-    
+    MBMESH_CHECK_RC(merr);
+
     // Record the fact that it has original elem coords
     has_elem_orig_coords=true;
   }
@@ -735,16 +803,14 @@ void MBMesh::set_elem_coords(EntityHandle eh, double *orig_coords) {
   int localrc;
   int merr;
   
-  // Leave if no elem coords
-  if (!has_elem_coords) return;
+  // If no coords, complain
+  if (!has_elem_coords) Throw() << "Element coords not present in mesh.";
+
 
   // Set original coords if present
   if (has_elem_orig_coords) {
     merr=mesh->tag_set_data(elem_orig_coords_tag, &eh, 1, orig_coords);
-    if (merr != MB_SUCCESS) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                       moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-    }  
+    MBMESH_CHECK_RC(merr);
   }
 
   // Convert and set vertex coords
@@ -757,12 +823,111 @@ void MBMesh::set_elem_coords(EntityHandle eh, double *orig_coords) {
   // Set cart coords
   // Set original coords if present
   merr=mesh->tag_set_data(elem_coords_tag, &eh, 1, cart_coords);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-  }  
+  MBMESH_CHECK_RC(merr);
  
 }
+
+
+void MBMesh::set_elem_coords(Range elems, double *orig_coords) {
+
+  // Error return codes
+  int localrc;
+  int merr;
+  
+  // If no coords, complain
+  if (!has_elem_coords) Throw() << "element coords not present in mesh.";
+
+  // Set original coords if present
+  if (has_elem_orig_coords) {
+    merr=mesh->tag_set_data(elem_orig_coords_tag, elems, orig_coords);
+    MBMESH_CHECK_RC(merr);
+  }
+  
+  // Loop converting and setting each cart coord. individually 
+  // (This is more memory efficient, but maybe a bit less time efficient.)
+  double *elem_orig_coords=orig_coords;
+  for(Range::const_iterator it=elems.begin(); it !=elems.end(); it++) {
+    const EntityHandle elem=*it;
+    
+    // Convert and set coords
+    double cart_coords[3]={0.0,0.0,0.0};
+    
+    // Convert original coords to cartesian
+    ESMCI_CoordSys_ConvertToCart(coordsys, orig_sdim,
+                                 elem_orig_coords, cart_coords);
+    
+    // Set cart coords
+    merr=mesh->tag_set_data(elem_coords_tag, &elem, 1, cart_coords);
+    MBMESH_CHECK_RC(merr);
+    
+    // Move to next set of coordinates
+    elem_orig_coords += orig_sdim;
+  }
+
+
+}
+
+
+
+void MBMesh::set_owner(EntityHandle eh, int owner) {
+
+  // Error return codes
+  int localrc;
+  int merr;
+  
+  // Get Owner
+  merr=mesh->tag_set_data(owner_tag, &eh, 1, &owner);
+  MBMESH_CHECK_RC(merr);
+}
+
+
+int MBMesh::get_owner(EntityHandle eh) {
+
+  // Error return codes
+  int localrc;
+  int merr;
+  
+  // Get Owner
+  int owner;
+  merr=mesh->tag_get_data(owner_tag, &eh, 1, &owner);
+  MBMESH_CHECK_RC(merr);
+
+  // return owner
+  return owner;
+}
+
+int MBMesh::get_orig_pos(EntityHandle eh) {
+
+  // Error return codes
+  int localrc;
+  int merr;
+  
+  // Get Owner
+  int orig_pos;
+  merr=mesh->tag_get_data(orig_pos_tag, &eh, 1, &orig_pos);
+  MBMESH_CHECK_RC(merr);
+
+  // return owner
+  return orig_pos;
+}
+
+
+int MBMesh::get_gid(EntityHandle eh) {
+
+  // Error return codes
+  int localrc;
+  int merr;
+  
+  // Get gid
+  int gid;
+  merr=mesh->tag_get_data(gid_tag, &eh, 1, &gid);
+  MBMESH_CHECK_RC(merr);
+
+  // return owner
+  return gid;
+}
+
+
 
 // Setup MBMesh to operate in parallel by resolving shared ents, etc. 
 void MBMesh::setup_parallel() {
@@ -779,11 +944,11 @@ void MBMesh::setup_parallel() {
   // Get list of elements
   Range elems;
   merr=mesh->get_entities_by_dimension(0, pdim, elems);
-  MBMESH_CHECK_ERR(merr, localrc);
+  MBMESH_CHECK_RC(merr);
     
   // Resolve object sharing 
   merr = pcomm->resolve_shared_ents(0, elems, pdim, pdim-1);
-  MBMESH_CHECK_ERR(merr, localrc);
+  MBMESH_CHECK_RC(merr);
 
 }
 
@@ -811,11 +976,11 @@ void MBMesh::update_parallel() {
   // Get current list of elements
   Range elems;
   merr=mesh->get_entities_by_dimension(0, pdim, elems);
-  MBMESH_CHECK_ERR(merr, localrc);
+  MBMESH_CHECK_RC(merr);
     
   // Resolve object sharing 
   merr = pcomm->resolve_shared_ents(0, elems, pdim, pdim-1);
-  MBMESH_CHECK_ERR(merr, localrc);
+  MBMESH_CHECK_RC(merr);
 
 }
 
@@ -852,7 +1017,7 @@ void MBMesh::halo_comm_nodes_all_tags(bool do_internal_coords) {
   // Get shared nodes
   Range shared_nodes;
   merr=pcomm->get_shared_entities(-1, shared_nodes,0);
-  MBMESH_CHECK_ERR(merr, localrc);
+  MBMESH_CHECK_RC(merr);
 
   // Loop setting unowned data to max
   for (Range::iterator it=shared_nodes.begin(); it != shared_nodes.end(); it++) {
@@ -872,17 +1037,17 @@ void MBMesh::halo_comm_nodes_all_tags(bool do_internal_coords) {
                                std::numeric_limits<double>::max(),
                                std::numeric_limits<double>::max()};
         merr=mesh->tag_set_data(node_orig_coords_tag, &node, 1, max_orig_coords);
-        MBMESH_CHECK_ERR(merr, localrc);
+        MBMESH_CHECK_RC(merr);
       }
 
       // Set mask
       if (this->has_node_mask) {
         int max_mask=std::numeric_limits<int>::max();
         merr=mesh->tag_set_data(node_mask_tag, &node, 1, &max_mask);
-        MBMESH_CHECK_ERR(merr, localrc);
+        MBMESH_CHECK_RC(merr);
 
         merr=mesh->tag_set_data(node_mask_val_tag, &node, 1, &max_mask);
-        MBMESH_CHECK_ERR(merr, localrc);
+        MBMESH_CHECK_RC(merr);
       }
     }
   }
@@ -894,10 +1059,7 @@ void MBMesh::halo_comm_nodes_all_tags(bool do_internal_coords) {
     // Add tmp coords tag
     double dbl_def_val[3]={-1.0, -1.0, -1.0};
     merr=mesh->tag_get_handle("tmp_node_coords", sdim, MB_TYPE_DOUBLE, tmp_node_coords_tag, MB_TAG_EXCL|MB_TAG_DENSE, dbl_def_val);
-    if (merr != MB_SUCCESS) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                       moab::ErrorCodeStr[merr], ESMC_CONTEXT, &localrc)) throw localrc;
-    }
+    MBMESH_CHECK_RC(merr);
    
     // Add tag to list
     node_tags.push_back(tmp_node_coords_tag);
@@ -916,21 +1078,21 @@ void MBMesh::halo_comm_nodes_all_tags(bool do_internal_coords) {
 
         // set vertex coords in tmp tag
         merr=mesh->tag_set_data(tmp_node_coords_tag, &node, 1, coords);
-        MBMESH_CHECK_ERR(merr, localrc);
+        MBMESH_CHECK_RC(merr);
 
       } else { // Not local set as max
         double max_coords[3]={std::numeric_limits<double>::max(),
                               std::numeric_limits<double>::max(),
                               std::numeric_limits<double>::max()};
         merr=mesh->tag_set_data(tmp_node_coords_tag, &node, 1, max_coords);
-        MBMESH_CHECK_ERR(merr, localrc);
+        MBMESH_CHECK_RC(merr);
       }
     }
   }
 
   // Now do a halo by doing a reduce
   merr = pcomm->reduce_tags(node_tags, node_tags, MPI_MIN, shared_nodes);
-  MBMESH_CHECK_ERR(merr, localrc);
+  MBMESH_CHECK_RC(merr);
 
   // Copy tmp coords back to vertex
   if (do_internal_coords) {
@@ -945,11 +1107,11 @@ void MBMesh::halo_comm_nodes_all_tags(bool do_internal_coords) {
         // get vertex coords from tmp tag
         double coords[3]={0.0,0.0,0.0};
         merr=mesh->tag_get_data(tmp_node_coords_tag, &node, 1, coords);
-        MBMESH_CHECK_ERR(merr, localrc);
+        MBMESH_CHECK_RC(merr);
 
         // Put into vertex
         merr=mesh->set_coords(&node,1,coords);
-        MBMESH_CHECK_ERR(merr, localrc);
+        MBMESH_CHECK_RC(merr);
       }
     }
 
@@ -993,7 +1155,7 @@ void MBMesh::halo_comm_elems_all_tags() {
   // Get shared elems
   Range shared_elems;
   merr=pcomm->get_shared_entities(-1, shared_elems,pdim);
-  MBMESH_CHECK_ERR(merr, localrc);
+  MBMESH_CHECK_RC(merr);
 
   // Loop setting unowned data to max
   for (Range::iterator it=shared_elems.begin(); it != shared_elems.end(); it++) {
@@ -1011,14 +1173,14 @@ void MBMesh::halo_comm_elems_all_tags() {
       if (this->has_elem_frac) {
         double max_elem_frac=std::numeric_limits<double>::max();
         merr=mesh->tag_set_data(elem_frac_tag, &elem, 1, &max_elem_frac);
-        MBMESH_CHECK_ERR(merr, localrc);
+        MBMESH_CHECK_RC(merr);
       }
 
       // Set elem_area
       if (this->has_elem_area) {
         double max_elem_area=std::numeric_limits<double>::max();
         merr=mesh->tag_set_data(elem_area_tag, &elem, 1, &max_elem_area);
-        MBMESH_CHECK_ERR(merr, localrc);
+        MBMESH_CHECK_RC(merr);
       }
 
       
@@ -1028,7 +1190,7 @@ void MBMesh::halo_comm_elems_all_tags() {
                                std::numeric_limits<double>::max(),
                                std::numeric_limits<double>::max()};
         merr=mesh->tag_set_data(elem_orig_coords_tag, &elem, 1, max_orig_coords);
-        MBMESH_CHECK_ERR(merr, localrc);
+        MBMESH_CHECK_RC(merr);
       }
 
       // Set elem_coords
@@ -1037,7 +1199,7 @@ void MBMesh::halo_comm_elems_all_tags() {
                               std::numeric_limits<double>::max(),
                               std::numeric_limits<double>::max()};
         merr=mesh->tag_set_data(elem_coords_tag, &elem, 1, max_coords);
-        MBMESH_CHECK_ERR(merr, localrc);
+        MBMESH_CHECK_RC(merr);
       }
 
 
@@ -1045,25 +1207,25 @@ void MBMesh::halo_comm_elems_all_tags() {
       if (this->has_elem_mask) {
         int max_mask=std::numeric_limits<int>::max();
         merr=mesh->tag_set_data(elem_mask_tag, &elem, 1, &max_mask);
-        MBMESH_CHECK_ERR(merr, localrc);
+        MBMESH_CHECK_RC(merr);
 
         merr=mesh->tag_set_data(elem_mask_val_tag, &elem, 1, &max_mask);
-        MBMESH_CHECK_ERR(merr, localrc);
+        MBMESH_CHECK_RC(merr);
       }
     }
   }
 
   // Now do a halo by doing a reduce
   merr = pcomm->reduce_tags(elem_tags, elem_tags, MPI_MIN, shared_elems);
-  MBMESH_CHECK_ERR(merr, localrc);
+  MBMESH_CHECK_RC(merr);
 
 #if 0
   Range elems;
   merr=this->mesh->get_entities_by_dimension(0, this->pdim, elems);
-  MBMESH_CHECK_ERR(merr, localrc);
+  MBMESH_CHECK_RC(merr);
 
   merr = pcomm->exchange_tags(elem_tags, elem_tags, elems);
-  MBMESH_CHECK_ERR(merr, localrc);
+  MBMESH_CHECK_RC(merr);
 #endif
 
 }
@@ -1091,15 +1253,18 @@ void MBMesh::debug_output_nodes() {
     throw localrc;  // bail out with exception
 
   // get the indexed pcomm object from the interface
-  ParallelComm *pcomm = ParallelComm::get_pcomm(this->mesh, 0);
+  // ParallelComm *pcomm = ParallelComm::get_pcomm(this->mesh, 0);
+
+  // Output info
+  cout<<"\n";
+  cout<<localPet<<"# NODE OVERALL INFO: num="<<num_verts;
+  cout<<" has_orig_coords="<<has_node_orig_coords;
+  cout<<" has_node_mask="<<has_node_mask;
+  cout<<"\n";
 
   // Get range of nodes
   Range nodes;
-  merr=mesh->get_entities_by_dimension(0, 0, nodes);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-  }
+  this->get_all_nodes(nodes);
 
   // Loop over nodes outputting information
   for (Range::const_iterator it=nodes.begin(); it != nodes.end(); it++) {
@@ -1128,10 +1293,25 @@ void MBMesh::debug_output_nodes() {
 
     // Output coords
     double coords[3];
-    merr=mesh->get_coords(&node,1,coords);
-    MBMESH_CHECK_ERR(merr, localrc);
-    cout<<" coords=["<<coords[0]<<" "<<coords[1]<<" "<<coords[2]<<"]";
+    this->get_node_cart_coords(node,coords);
+    cout<<" coords=["<<coords[0]<<" "<<coords[1];
+    if (sdim > 2) cout<<" "<<coords[2];
+    cout<<"]";
 
+    // Orig coords
+    if (has_node_orig_coords) {
+      double orig_coords[3];
+      this->get_node_orig_coords(node, orig_coords);
+      cout<<" orig_coords=["<<coords[0]<<" "<<coords[1];
+      if (orig_sdim > 2) cout<<" "<<coords[2];
+      cout<<"]";
+    }
+
+    // Orig coords
+    if (has_node_mask) {
+      int mask_val=this->get_node_mask_val(node);
+      cout<<" mask_val="<<mask_val;
+    }
 
     //end line
     cout<<"\n";
@@ -1147,15 +1327,23 @@ void MBMesh::debug_output_elems() {
     throw localrc;  // bail out with exception
 
   // get the indexed pcomm object from the interface
-  ParallelComm *pcomm = ParallelComm::get_pcomm(this->mesh, 0);
+  //  ParallelComm *pcomm = ParallelComm::get_pcomm(this->mesh, 0);
+
+  // Output info
+  cout<<"\n";
+  cout<<localPet<<"# ELEM OVERALL INFO: num="<<num_elems;
+  cout<<" has_elem_coords="<<has_elem_coords;
+  cout<<" has_elem_orig_coords="<<has_elem_orig_coords;
+  cout<<" has_elem_mask="<<has_elem_mask;
+  cout<<" has_elem_area="<<has_elem_area;
+  cout<<"\n";
+
 
   // Get range of elems
   Range elems;
   merr=mesh->get_entities_by_dimension(0, pdim, elems);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-  }
+  MBMESH_CHECK_RC(merr);
+
 
   // Loop over nodes outputting information
   for (Range::const_iterator it=elems.begin(); it != elems.end(); it++) {
@@ -1178,13 +1366,45 @@ void MBMesh::debug_output_elems() {
     //pcomm->get_owner(node,moab_owner);
     //cout<<" moab_owner="<<moab_owner;
     
-    // get node orig pos
+    // get elem orig pos
     int orig_pos=this->get_orig_pos(elem);
     cout<<" orig_pos="<<orig_pos;
+
+    // Output coords
+    if (has_elem_coords) {
+      double coords[3];
+      this->get_elem_cart_coords(elem,coords);
+      cout<<" coords=["<<coords[0]<<" "<<coords[1];
+      if (sdim > 2) cout<<" "<<coords[2];
+      cout<<"]";
+    }
+
+    // Orig coords
+    if (has_elem_orig_coords) {
+      double orig_coords[3];
+      this->get_elem_orig_coords(elem, orig_coords);
+      cout<<" orig_coords=["<<orig_coords[0]<<" "<<orig_coords[1];
+      if (orig_sdim > 2) cout<<" "<<orig_coords[2];
+      cout<<"]";
+    }
+
+    // Mask value
+    if (has_elem_mask) {
+      int mask_val=this->get_elem_mask_val(elem);
+      cout<<" mask_val="<<mask_val;
+    }
+
+    // Mask value
+    if (has_elem_area) {
+      int area=this->get_elem_area(elem);
+      cout<<" area="<<area;
+    }
+
 
     //end line
     cout<<"\n";
   }
+  cout<<"\n";
 }
 
 // DEPRECATED 
@@ -1199,10 +1419,7 @@ void MBMesh::setup_verts_array() {
   // Get range of nodes
   Range nodes;
   merr=mesh->get_entities_by_dimension(0, 0, nodes);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-  }
+  MBMESH_CHECK_RC(merr);
 
   // Complain if sizes don't match
   if (num_verts != nodes.size()) {
@@ -1253,11 +1470,11 @@ void MBMesh::CreateGhost() {
   // Get list of elements
   Range elems;
   merr=mesh->get_entities_by_dimension(0, pdim, elems);
-  MBMESH_CHECK_ERR(merr, localrc);
+  MBMESH_CHECK_RC(merr);
     
   // Resolve object sharing 
   merr = pcomm->resolve_shared_ents(0, elems, pdim, pdim-1);
-  MBMESH_CHECK_ERR(merr, localrc);
+  MBMESH_CHECK_RC(merr);
 
 
 #ifdef DEBUG_MOAB_GHOST_EXCHANGE
@@ -1267,12 +1484,12 @@ void MBMesh::CreateGhost() {
   Range shared_ents;
   // Get entities shared with all other processors
   merr = pcomm->get_shared_entities(-1, shared_ents);
-  MBMESH_CHECK_ERR(merr, localrc);
+  MBMESH_CHECK_RC(merr);
   
   // Filter shared entities with not not_owned, which means owned
   Range owned_entities;
   merr = pcomm->filter_pstatus(shared_ents, PSTATUS_NOT_OWNED, PSTATUS_NOT, -1, &owned_entities);
-  MBMESH_CHECK_ERR(merr, localrc);
+  MBMESH_CHECK_RC(merr);
     
   unsigned int nums[4] = {0}; // to store the owned entities per dimension
   for (int i = 0; i < 4; i++)
@@ -1295,7 +1512,7 @@ void MBMesh::CreateGhost() {
                                      1, // int num_layers
                                      0, // int addl_ents
                                      true);// bool store_remote_handles
-  MBMESH_CHECK_ERR(merr, localrc);
+  MBMESH_CHECK_RC(merr);
 
   vector<Tag> node_tags;
   vector<Tag> elem_tags;
@@ -1325,13 +1542,14 @@ void MBMesh::CreateGhost() {
 
   Range nodes;
   merr=this->mesh->get_entities_by_dimension(0, 0, nodes);
-  MBMESH_CHECK_ERR(merr, localrc);
+  MBMESH_CHECK_RC(merr);
 
   merr = pcomm->exchange_tags(node_tags, node_tags, nodes);
-  MBMESH_CHECK_ERR(merr, localrc);
+  MBMESH_CHECK_RC(merr);
 
   merr = pcomm->exchange_tags(elem_tags, elem_tags, elems);
-  MBMESH_CHECK_ERR(merr, localrc);
+  MBMESH_CHECK_RC(merr);
+
 
 #ifdef DEBUG_WRITE_MESH
   {void *mbptr = (void *) this;
@@ -1346,10 +1564,10 @@ void MBMesh::CreateGhost() {
   shared_ents.clear();
   owned_entities.clear();
   merr = pcomm->get_shared_entities(-1, shared_ents);
-  MBMESH_CHECK_ERR(merr, localrc);
+  MBMESH_CHECK_RC(merr);
   
   merr = pcomm->filter_pstatus(shared_ents, PSTATUS_NOT_OWNED, PSTATUS_NOT, -1, &owned_entities);
-  MBMESH_CHECK_ERR(merr, localrc);
+  MBMESH_CHECK_RC(merr);
   
   // Find out how many shared entities of each dimension are owned on this processor
   for (int i = 0; i < 4; i++)
