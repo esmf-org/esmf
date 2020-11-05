@@ -172,7 +172,6 @@ MBMesh::MBMesh(int _pdim, int _orig_sdim, ESMC_CoordSys_Flag _coordsys):
 
 } 
 
-
 // The coords variable here is in the original representation, not converted to cart. 
 EntityHandle MBMesh::add_node(double *orig_coords, int gid, int orig_pos, int owner) {
 
@@ -259,6 +258,352 @@ void MBMesh::get_all_elems(Range &all_elems) {
   }
 }
 
+// accessor for elems
+int MBMesh::num_elem(){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh::num_elem()"
+  int merr;
+  Range elems;
+  try {
+    merr=mesh->get_entities_by_dimension(0, pdim, elems);
+    ESMC_CHECK_MOAB_RC(merr);
+  }
+  ESMC_CATCH_MOAB;
+
+  return elems.size();
+}
+
+// accessor for nodes
+int MBMesh::num_node(){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh::num_node()"
+  int merr;
+  Range nodes;
+  try {
+    merr=mesh->get_entities_by_dimension(0, 0, nodes);
+    ESMC_CHECK_MOAB_RC(merr);
+  }
+  ESMC_CATCH_MOAB;
+
+  return nodes.size();
+}
+
+int MBMesh::num_elem_conn(){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh::num_elem_conn()"
+  int elemConnCount=0;
+  try {
+    int merr;
+    // Doesn't work with split meshes right now
+    if (this->is_split)
+      ESMC_CHECK_RC("ESMC_RC_ARG_VALUE", ESMC_RC_ARG_VALUE, "Can't get elem connection count from mesh containing >4 elements.");
+
+    // Get range of elems
+    Range elems;
+    merr=mesh->get_entities_by_dimension(0, pdim, elems);
+    ESMC_CHECK_MOAB_RC(merr);
+
+    // Loop summing number of nodes per element
+    for (Range::const_iterator it=elems.begin(); it != elems.end(); it++) {
+      EntityHandle elem=*it;
+
+      // Get topology of element
+      std::vector<EntityHandle> nodes_on_elem;
+      merr=mesh->get_connectivity(&elem, 1, nodes_on_elem);
+      ESMC_CHECK_MOAB_RC(merr);
+
+      // Add number of nodes for this elem to connection count
+      elemConnCount += nodes_on_elem.size();
+    }
+  }
+  ESMC_CATCH_MOAB;
+  
+  return elemConnCount;
+}
+
+void MBMesh::get_elem_areas(double *elem_area) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh::get_elem_area()"
+  try {
+    int merr;
+  
+    if (!has_elem_area) ESMC_CHECK_RC("ESMC_RC_CANNOT_GET", ESMC_RC_CANNOT_GET, "Element areas not present.");
+
+    Range elems;
+    merr=mesh->get_entities_by_dimension(0, pdim, elems);
+    ESMC_CHECK_MOAB_RC(merr);
+  
+    merr=mesh->tag_get_data(elem_area_tag, elems, elem_area);
+    ESMC_CHECK_MOAB_RC(merr);
+
+  }
+  ESMC_CATCH_MOAB;
+}
+
+void MBMesh::get_elem_connectivity(int *elem_conn) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh::get_elem_conn()"
+  try {
+    int localrc, merr;
+
+    // get node ids in a vector, which we will need to search later
+    Range nodes;
+    merr=mesh->get_entities_by_dimension(0, 0, nodes);
+    ESMC_CHECK_MOAB_RC(merr);
+    int *node_ids = new int[nodes.size()];
+    get_node_ids(node_ids);
+    std::vector<int> nodeids(node_ids, node_ids + nodes.size());
+    delete [] node_ids;
+
+    // now iterate through the elements
+    Range elems;
+    merr=mesh->get_entities_by_dimension(0, pdim, elems);
+    ESMC_CHECK_MOAB_RC(merr);
+    
+    int elemConnCountTemp = 0;
+    for (Range::const_iterator it=elems.begin(); it != elems.end(); it++) {
+      EntityHandle elem=*it;
+
+      // Get topology of element (ordered)
+      vector<EntityHandle> nodes_on_elem;
+      merr=mesh->get_connectivity(&elem, 1, nodes_on_elem);
+      ESMC_CHECK_MOAB_RC(merr);
+
+      int nid;
+      // add connectivity to output array
+      for (int i=0; i<nodes_on_elem.size(); ++i) {
+        // get the node id
+        merr=mesh->tag_get_data(gid_tag, &nodes_on_elem.at(i), 1, &nid);
+        ESMC_CHECK_MOAB_RC(merr);
+
+        std::vector<int>::iterator itr = std::find(nodeids.begin(), nodeids.end(), nid);
+        // add 1 for Fortran indexing
+        elem_conn[elemConnCountTemp+i] = std::distance(nodeids.begin(), itr) +1;
+      }
+
+      // Add number of nodes for this elem to connection count
+      elemConnCountTemp += nodes_on_elem.size();
+    }
+
+  }
+  ESMC_CATCH_MOAB;
+}
+
+void MBMesh::get_elem_coords(double *elem_coords) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh::get_elem_coords()"
+  try {
+    int merr;
+  
+    Range elems;
+    merr=mesh->get_entities_by_dimension(0, pdim, elems);
+    ESMC_CHECK_MOAB_RC(merr);
+
+    if (coordsys != ESMC_COORDSYS_CART) {
+      if (!has_elem_orig_coords)
+        ESMC_CHECK_RC("ESMC_RC_CANNOT_GET", ESMC_RC_CANNOT_GET , "Element original coords not present.");
+  
+      merr=mesh->tag_get_data(elem_orig_coords_tag, elems, elem_coords);
+      ESMC_CHECK_MOAB_RC(merr);
+    } else {
+      if (!has_elem_coords)
+        ESMC_CHECK_RC("ESMC_RC_CANNOT_GET", ESMC_RC_CANNOT_GET , "Element coords not present.");
+
+      merr=mesh->tag_get_data(elem_coords_tag, elems, elem_coords);
+      ESMC_CHECK_MOAB_RC(merr);
+    }
+
+  }
+  ESMC_CATCH_MOAB;
+}
+
+void MBMesh::get_elem_ids(int *elem_ids) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh::get_elem_ids()"
+  try {
+    int merr;
+
+    Range elems;
+    merr=mesh->get_entities_by_dimension(0, pdim, elems);
+    ESMC_CHECK_MOAB_RC(merr);
+
+    merr=mesh->tag_get_data(gid_tag, elems, elem_ids);
+    ESMC_CHECK_MOAB_RC(merr);
+
+  }
+  ESMC_CATCH_MOAB;
+}
+
+void MBMesh::get_elem_mask(int *elem_mask) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh::get_elem_mask()"
+  try {
+    int merr;
+
+    if (!has_elem_mask) ESMC_CHECK_RC("ESMC_RC_CANNOT_GET", ESMC_RC_CANNOT_GET, "Element mask not present.");
+
+    Range elems;
+    merr=mesh->get_entities_by_dimension(0, pdim, elems);
+    ESMC_CHECK_MOAB_RC(merr);
+
+    merr=mesh->tag_get_data(elem_mask_val_tag, elems, elem_mask);
+    ESMC_CHECK_MOAB_RC(merr);
+
+  }
+  ESMC_CATCH_MOAB;
+}
+
+void MBMesh::get_elem_types(int *elem_types) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh::get_elem_types()"
+  try {
+    int merr;
+  
+    Range elems;
+    merr=mesh->get_entities_by_dimension(0, pdim, elems);
+    ESMC_CHECK_MOAB_RC(merr);
+  
+    int i = 0;
+    for (Range::const_iterator it=elems.begin(); it != elems.end(); it++) {
+      EntityHandle elem=*it;
+  
+      // Get topology of element
+      Range nodes_on_elem;
+      merr=mesh->get_connectivity(&elem, 1, nodes_on_elem);
+      ESMC_CHECK_MOAB_RC(merr);
+
+      elem_types[i] = 0;
+      if (pdim == 2) {
+        if (nodes_on_elem.size() == 3) elem_types[i] = ESMC_MESHELEMTYPE_TRI;
+        else if (nodes_on_elem.size() == 4) elem_types[i] = ESMC_MESHELEMTYPE_QUAD;
+        else {
+          std::string errmsg = "Element type not recognized.";
+          ESMC_CHECK_RC("ESMC_RC_ARG_VALUE", ESMC_RC_ARG_VALUE, errmsg);
+        }
+      } else if (pdim == 3) {
+        if (nodes_on_elem.size() == 4) elem_types[i] = ESMC_MESHELEMTYPE_TETRA;
+        else if (nodes_on_elem.size() == 8) elem_types[i] = ESMC_MESHELEMTYPE_HEX;       
+        else {
+          std::string errmsg = "Element type not recognized.";
+          ESMC_CHECK_RC("ESMC_RC_ARG_VALUE", ESMC_RC_ARG_VALUE, errmsg);
+        }
+      } else {
+        std::string errmsg = "Parameteric dimension not recognized.";
+        ESMC_CHECK_RC("ESMC_RC_ARG_VALUE", ESMC_RC_ARG_VALUE, errmsg);
+      }
+      i++;
+    }
+
+  }
+  ESMC_CATCH_MOAB;
+}
+
+void MBMesh::get_node_coords(double *node_coords) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh::get_node_coords()"
+  try {
+    int merr;
+    
+    Range nodes;
+    merr=mesh->get_entities_by_dimension(0, 0, nodes);
+    ESMC_CHECK_MOAB_RC(merr);
+
+    if (coordsys != ESMC_COORDSYS_CART) {
+      if (!has_node_orig_coords)
+        ESMC_CHECK_RC("ESMC_RC_CANNOT_GET", ESMC_RC_CANNOT_GET , "Node original coords not present.");
+  
+      merr=mesh->tag_get_data(node_orig_coords_tag, nodes, node_coords);
+      ESMC_CHECK_MOAB_RC(merr);
+    } else {
+      double *node_coords3d = new double[3*nodes.size()];
+      // double *node_coords3d = new double;
+      merr=mesh->get_coords(nodes, node_coords3d);
+      ESMC_CHECK_MOAB_RC(merr);
+      
+      // compact 3d coords to 2d
+      for (int i=0; i<nodes.size(); ++i) {
+        node_coords[i*pdim] = node_coords3d[i*3];
+        node_coords[i*pdim+1] = node_coords3d[i*3+1];
+        if (pdim == 3)
+          node_coords[i*pdim+2] = node_coords3d[i*3+2];
+      }
+      
+      delete [] node_coords3d;
+    }
+
+    // double *x = new double[nodes.size()];
+    // double *y = new double[nodes.size()];
+    // double *z = new double[nodes.size()];
+    // 
+    // merr=mesh->get_coords(nodes, x, y, z);
+    // ESMC_CHECK_MOAB_RC(merr);
+    // 
+    // // compact 3d coords to 2d
+    // for (int i=0; i<nodes.size(); ++i) {
+    //   node_coords[i*orig_sdim] = x[i];
+    //   node_coords[i*orig_sdim+1] = y[i];
+    //   if (orig_sdim == 3)
+    //     node_coords[i*orig_sdim+2] = z[i];
+    // }
+    // 
+    // delete [] x, y, z;
+
+
+  }
+  ESMC_CATCH_MOAB;
+}
+
+void MBMesh::get_node_ids(int *node_ids) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh::get_node_ids()"
+  try {
+    int merr;
+    
+    Range nodes;
+    merr=mesh->get_entities_by_dimension(0, 0, nodes);
+    ESMC_CHECK_MOAB_RC(merr);
+
+    merr=mesh->tag_get_data(gid_tag, nodes, node_ids);
+    ESMC_CHECK_MOAB_RC(merr);
+
+  }
+  ESMC_CATCH_MOAB;
+}
+
+void MBMesh::get_node_mask(int *node_mask) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh::get_node_mask()"
+  try {
+    int merr;
+
+    if (!has_node_mask) ESMC_CHECK_RC("ESMC_RC_CANNOT_GET", ESMC_RC_CANNOT_GET, "Node mask not present.");
+
+    Range nodes;
+    merr=mesh->get_entities_by_dimension(0, 0, nodes);
+    ESMC_CHECK_MOAB_RC(merr);
+
+    merr=mesh->tag_get_data(node_mask_val_tag, nodes, node_mask);
+    ESMC_CHECK_MOAB_RC(merr);
+  }
+  ESMC_CATCH_MOAB;
+}
+
+void MBMesh::get_node_owners(int *node_owners) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh::get_node_owners()"
+  try {
+    int merr;
+
+    Range nodes;
+    merr=mesh->get_entities_by_dimension(0, 0, nodes);
+    ESMC_CHECK_MOAB_RC(merr);
+
+    merr=mesh->tag_get_data(owner_tag, nodes, node_owners);
+    ESMC_CHECK_MOAB_RC(merr);
+
+  }
+  ESMC_CATCH_MOAB;
+}
 
 void MBMesh::set_owner(EntityHandle eh, int owner) {
 
@@ -517,24 +862,6 @@ int MBMesh::get_elem_mask_val(EntityHandle eh) {
   return mask_val;
 }
 
-int *MBMesh::get_elem_mask_array(const Range &elems) {
-
-  // Error return codes
-  int localrc;
-  int merr;
-  
-  // If no masking, then error
-  if (!has_elem_mask) Throw() << "Element mask value not present in mesh.";
-
-  // Get mask vale
-  int *elem_mask;
-  merr=mesh->tag_get_data(elem_mask_val_tag, elems, elem_mask);
-  MBMESH_CHECK_ERR(merr, localrc) 
-
-  // Output information
-  return elem_mask;
-}
-
 
 void MBMesh::setup_elem_area() {
 
@@ -675,7 +1002,7 @@ void MBMesh::setup_parallel() {
   Range elems;
   merr=mesh->get_entities_by_dimension(0, pdim, elems);
   MBMESH_CHECK_ERR(merr, localrc);
-    
+  
   // Resolve object sharing 
   merr = pcomm->resolve_shared_ents(0, elems, pdim, pdim-1);
   MBMESH_CHECK_ERR(merr, localrc);

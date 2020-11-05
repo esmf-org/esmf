@@ -94,6 +94,37 @@ void MBMesh_FitOnVM(void **meshpp, VM **new_vm, int *rc);
 
 void MBMesh_getarea(void **mbmpp, int *num_elem, double *elem_areas, int *rc);
 
+void MBMesh_GetElemCount(void *meshp, int *elemCount, int *rc);
+
+void MBMesh_GetNodeCount(void *meshp, int *nodeCount, int *rc);
+
+void MBMesh_GetElemConnCount(void *meshp, int *elemConnCount, int *rc);
+
+void MBMesh_GetElemInfoPresence(void *meshp, 
+                                int *elemMaskIsPresent,
+                                int *elemAreaIsPresent,
+                                int *elemCoordsIsPresent,
+                                int *rc);
+
+void MBMesh_GetElemCreateInfo(void *mesh,
+                              ESMCI::InterArray<int> *elemIds,
+                              ESMCI::InterArray<int> *elemTypes,
+                              ESMCI::InterArray<int> *elemConn,
+                              ESMCI::InterArray<int> *elemMask,
+                              ESMCI::InterArray<ESMC_R8> *elemArea,
+                              ESMCI::InterArray<ESMC_R8> *elemCoords, int *rc);
+
+void MBMesh_GetNodeInfoPresence(void *meshp, 
+                                int *nodeMaskIsPresent,
+                                int *rc);
+
+void MBMesh_GetNodeCreateInfo(void *meshp,
+                              ESMCI::InterArray<int> *nodeIds,
+                              ESMCI::InterArray<ESMC_R8> *nodeCoords,
+                              ESMCI::InterArray<int> *nodeOwners,
+                              ESMCI::InterArray<int> *nodeMask,
+                              int *rc);
+
 void MBMesh_geteleminfointoarray(void *vmbmp,
                                  ESMCI::DistGrid *elemDistgrid, 
                                  int numElemArrays,
@@ -101,13 +132,6 @@ void MBMesh_geteleminfointoarray(void *vmbmp,
                                  ESMCI::Array **elemArrays, 
                                  int *rc);
 
-void MBMesh_GetElemCreateInfo(MBMesh *mesh,
-                              ESMCI::InterArray<int> *elemIds,
-                              ESMCI::InterArray<int> *elemTypes,
-                              ESMCI::InterArray<int> *elemConn,
-                              ESMCI::InterArray<int> *elemMask,
-                              ESMCI::InterArray<ESMC_R8> *elemArea,
-                              ESMCI::InterArray<ESMC_R8> *elemCoords, int *rc){
 void MBMesh_getlocalcoords(void **meshpp, double *ncoords,
                                int *_orig_sdim, int *rc);
 

@@ -31,6 +31,7 @@
 #include "Mesh/include/ESMCI_MathUtil.h"
 
 #include "Mesh/include/ESMCI_MBMesh.h"
+#include "Mesh/include/ESMCI_MBMesh_GToM_Glue.h"
 #include "Mesh/include/ESMCI_GToM_Util.h"
 
 #include <limits>
@@ -47,7 +48,9 @@
 
 //#define G2M_DBG
 
-using namespace ESMCI;
+// using namespace ESMCI;
+
+namespace ESMCI {
 
   //================== GTOMCELL ========================
 
@@ -878,3 +881,5 @@ void MBMesh_GridToMeshCell(const Grid &grid_,
 // Set successful return code
  if (rc!=NULL) *rc = ESMF_SUCCESS;
 }
+
+} // namespace

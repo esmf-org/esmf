@@ -870,14 +870,21 @@ void MeshCap::getNodeCount(int *nodeCount, int *rc){
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::getNodeCount()"
 
+  int localrc;
   // Call into func. depending on mesh type
   if (is_esmf_mesh) {
-    ESMCI_MeshGetNodeCount(mesh, nodeCount, rc);
+    ESMCI_MeshGetNodeCount(mesh, nodeCount, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return;
   } else {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-       "- this functionality is not currently supported using MOAB",
-                                  ESMC_CONTEXT, rc);
-    return;
+#if defined ESMF_MOAB
+    MBMesh_GetNodeCount(mbmesh, nodeCount, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return;
+#else
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+       "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
+#endif
   }
 }
 
@@ -886,15 +893,21 @@ void MeshCap::getElemCount(int *elemCount, int *rc){
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::getElemCount()"
 
-
+  int localrc;
   // Call into func. depending on mesh type
   if (is_esmf_mesh) {
-    ESMCI_MeshGetElemCount(mesh, elemCount, rc);
+    ESMCI_MeshGetElemCount(mesh, elemCount, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return;
   } else {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-       "- this functionality is not currently supported using MOAB",
-                                  ESMC_CONTEXT, rc);
-    return;
+#if defined ESMF_MOAB
+    MBMesh_GetElemCount(mbmesh, elemCount, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return;
+#else
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+       "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
+#endif
   }
 }
 
@@ -903,14 +916,21 @@ void MeshCap::getElemConnCount(int *elemConnCount, int *rc){
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::getElemConnCount()"
 
+  int localrc;
   // Call into func. depending on mesh type
   if (is_esmf_mesh) {
-    ESMCI_MeshGetElemConnCount(mesh, elemConnCount, rc);
+    ESMCI_MeshGetElemConnCount(mesh, elemConnCount, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return;
   } else {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-       "- this functionality is not currently supported using MOAB",
-                                  ESMC_CONTEXT, rc);
-    return;
+#if defined ESMF_MOAB
+    MBMesh_GetElemConnCount(mbmesh, elemConnCount, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return;
+#else
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+       "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
+#endif
   }
 }
 
@@ -922,18 +942,29 @@ void MeshCap::getElemInfoPresence(int *elemMaskIsPresent,
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::getElemInfoPresence()"
 
+  int localrc;
   // Call into func. depending on mesh type
   if (is_esmf_mesh) {
     ESMCI_MeshGetElemInfoPresence(mesh,
                                   elemMaskIsPresent, 
                                   elemAreaIsPresent, 
                                   elemCoordsIsPresent, 
-                                  rc);
+                                  &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return;
   } else {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-       "- this functionality is not currently supported using MOAB",
-                                  ESMC_CONTEXT, rc);
-    return;
+#if defined ESMF_MOAB
+    MBMesh_GetElemInfoPresence(mbmesh,
+                               elemMaskIsPresent, 
+                               elemAreaIsPresent, 
+                               elemCoordsIsPresent, 
+                               &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return;
+#else
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+       "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
+#endif
   }
 }
 
@@ -959,7 +990,7 @@ void MeshCap::getElemCreateInfo(ESMCI::InterArray<int> *elemIds,
                                       ESMC_CONTEXT, rc)) return;
   } else {
 #if defined ESMF_MOAB
-    MBMesh_GetElemCreateInfo(mesh, elemIds,
+    MBMesh_GetElemCreateInfo(mbmesh, elemIds,
                              elemTypes, elemConn,
                              elemMask, elemArea, 
                              elemCoords, &localrc);
@@ -989,21 +1020,29 @@ void MeshCap::setElemInfo(ESMCI::InterArray<int> *elemMask,
   }
 }
 
-void MeshCap::getNodeInfoPresence(int *nodeMaskIsPresent,
-                                  int *rc){
+void MeshCap::getNodeInfoPresence(int *nodeMaskIsPresent, int *rc){
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::getNodeInfoPresence()"
 
+  int localrc;
   // Call into func. depending on mesh type
   if (is_esmf_mesh) {
     ESMCI_MeshGetNodeInfoPresence(mesh, 
                                   nodeMaskIsPresent, 
-                                  rc);
+                                  &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return;
   } else {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-       "- this functionality is not currently supported using MOAB",
-                                  ESMC_CONTEXT, rc);
-    return;
+#if defined ESMF_MOAB
+    MBMesh_GetNodeInfoPresence(mbmesh, 
+                               nodeMaskIsPresent, 
+                               &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return;
+#else
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+       "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
+#endif
   }
 }
 
@@ -1016,19 +1055,25 @@ void MeshCap::getNodeCreateInfo(ESMCI::InterArray<int> *nodeIds,
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::getNodeCreateInfo()"
 
+  int localrc;
   // Call into func. depending on mesh type
   if (is_esmf_mesh) {
     ESMCI_MeshGetNodeCreateInfo(mesh, nodeIds,
                                 nodeCoords, nodeOwners,
-                                nodeMask, rc);
+                                nodeMask, &localrc);
   } else {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-       "- this functionality is not currently supported using MOAB",
-                                  ESMC_CONTEXT, rc);
-    return;
+#if defined ESMF_MOAB
+    MBMesh_GetNodeCreateInfo(mbmesh,  nodeIds, 
+                             nodeCoords, nodeOwners,
+                             nodeMask,  &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return;
+#else
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+       "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
+#endif
   }
 }
-
 
 
 void MeshCap::meshcreatenodedistgrid(int *ngrid, int *num_lnodes, int *rc) {

@@ -264,7 +264,7 @@ MBMesh* create_mesh_quad_sph(int &rc) {
               2,3,6,5,
               4,5,8,7,
               5,6,9,8};
-  double elemCoord_s [] ={0.5,0.5,0.5,1.5,1.5,0.5,1.5,1.5};
+  double elemCoord_s [] ={pi/20,pi/20,pi/20,3*pi/20,3*pi/20,pi/20,3*pi/20,3*pi/20};
 
   ESMC_CoordSys_Flag local_coordSys=ESMC_COORDSYS_SPH_DEG;
 

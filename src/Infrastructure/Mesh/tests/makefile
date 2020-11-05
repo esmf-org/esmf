@@ -21,6 +21,7 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMCI_IntegrateUTest \
                $(ESMF_TESTDIR)/ESMC_MBMesh_CreateUTest \
                $(ESMF_TESTDIR)/ESMC_MBMesh_CreateParUTest \
                $(ESMF_TESTDIR)/ESMC_MBMesh_ExtrapolateUTest \
+               $(ESMF_TESTDIR)/ESMC_MBMesh_GlueUTest \
                $(ESMF_TESTDIR)/ESMC_MBMesh_RedistUTest \
                $(ESMF_TESTDIR)/ESMC_MBMesh_RendezvousUTest \
                $(ESMF_TESTDIR)/ESMC_MBMesh_RendezvousParUTest \
@@ -32,6 +33,7 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMCI_IntegrateUTest \
                $(ESMF_TESTDIR)/ESMF_MeshOpUTest \
                $(ESMF_TESTDIR)/ESMF_MeshUTest
 
+# TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_MBMesh_GlueUTest
 # TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_MeshUTest
 
 # not quite ready for primetime
@@ -51,6 +53,7 @@ TESTS_RUN     = RUN_ESMCI_IntegrateUTest \
                 RUN_ESMC_MBMesh_CreateParUTest \
                 RUN_ESMC_MBMesh_DualUTest \
                 RUN_ESMC_MBMesh_ExtrapolateUTest \
+                RUN_ESMC_MBMesh_GlueUTest \
                 RUN_ESMC_MBMesh_SearchUTest \
                 RUN_ESMC_MBMesh_SerializeUTest \
                 RUN_ESMC_MBMesh_UtilUTest \
@@ -74,6 +77,7 @@ TESTS_RUN_UNI = RUN_ESMCI_IntegrateUTestUNI \
                 RUN_ESMC_MBMesh_BilinearEdgeCases3DUTestUNI \
                 RUN_ESMC_MBMesh_CreateUTestUNI \
                 RUN_ESMC_MBMesh_DualUTestUNI \
+                RUN_ESMC_MBMesh_GlueUTestUNI \
                 RUN_ESMC_MBMesh_SearchUTestUNI \
                 RUN_ESMC_MBMesh_SerializeUTestUNI \
                 RUN_ESMC_MBMesh_UtilUTestUNI \
@@ -207,6 +211,14 @@ RUN_ESMC_MBMesh_DualParUTest:
 RUN_ESMC_MBMesh_ExtrapolateUTest:
 	$(MAKE) TNAME=MBMesh_Extrapolate NP=4 ctest
 
+RUN_ESMC_MBMesh_GlueUTestUNI:
+	$(MAKE) TNAME=MBMesh_Glue NP=1 ctest
+
+RUN_ESMC_MBMesh_GlueUTest:
+	$(MAKE) TNAME=MBMesh_Glue NP=4 ctest
+
+RUN_ESMC_MBMesh_GlueParUTest:
+	$(MAKE) TNAME=MBMesh_GluePar NP=4 ctest
 
 
 RUN_ESMC_MBMesh_RendezvousUTest:
