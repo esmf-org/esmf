@@ -2890,7 +2890,7 @@ module NUOPC_Connector
               line=__LINE__, file=trim(name)//":"//FILENAME)) return
 call ESMF_PointerLog(grid%this, prefix="acceptorField set persistent shared Grid: ", rc=rc)
             ! must make Grid persistent to be safe when sharing with other VM
-            call c_ESMC_SetPersist(grid, ESMF_TRUE, rc=rc)
+            call c_ESMC_SetPersist(grid, ESMF_TRUE, rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return
           else
@@ -3136,7 +3136,7 @@ call ESMF_PointerLog(gridListE%keyGrid%this, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 call ESMF_PointerLog(mesh%this, prefix="acceptorField set persistent shared Mesh: ", rc=rc)
             ! must make Mesh persistent to be safe when sharing with other VM
-            call c_ESMC_SetPersist(mesh, ESMF_TRUE, rc=rc)
+            call c_ESMC_SetPersist(mesh, ESMF_TRUE, rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return
           else
