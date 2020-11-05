@@ -18,6 +18,7 @@
 using namespace moab;
 #endif
 
+#include "ESMCI_Base.h"
 #include "ESMCI_CoordSys.h"
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
@@ -29,7 +30,67 @@ namespace ESMCI {
 #define MBMESH_CHECK_ERR(merr, localrc) {\
   if (merr != MB_SUCCESS) \
     if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, \
-      moab::ErrorCodeStr[merr], ESMC_CONTEXT, &localrc)) throw localrc; }\
+      moab::ErrorCodeStr[merr], ESMC_CONTEXT, &localrc)) throw localrc; }
+
+#define ESMC_CHECK_MOAB_RC(actual_rc) {\
+  if (actual_rc != MB_SUCCESS) {\
+    ESMCI::esmc_error local_macro_error("", actual_rc, ""); \
+    if (ESMC_LogDefault.MsgFoundError(actual_rc, local_macro_error.what(), ESMC_CONTEXT, nullptr)) \
+      throw(local_macro_error);}}
+
+// should go in base, but it's here for now
+// for use when pointer *rc is expected as a return value
+#define ESMC_CHECK_ERRPASSTHRU(localrc) {\
+  if (localrc != ESMF_SUCCESS) {\
+    ESMCI::esmc_error local_macro_error("", localrc, ""); \
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) \
+      throw(local_macro_error);}}
+
+// for routines with direct access to MOAB, when pointer *rc is NOT returned
+#define ESMC_CATCH_MOAB \
+  catch(int localrc){ \
+    if (localrc != ESMF_SUCCESS) {\
+      ESMCI::esmc_error local_macro_error("", localrc, ""); \
+      if (ESMC_LogDefault.MsgFoundError(localrc, local_macro_error.what(), ESMC_CONTEXT, nullptr)) \
+        throw(local_macro_error);} \
+  } catch(std::string errstr){ \
+    ESMCI::esmc_error local_macro_error("ESMC_RC_MOAB_ERROR", ESMC_RC_MOAB_ERROR, errstr); \
+    if (ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, errstr, ESMC_CONTEXT, nullptr)) \
+      throw(local_macro_error); \
+  } catch (std::exception &exc) {\
+    if (ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, exc.what(), ESMC_CONTEXT, nullptr)) \
+      throw(exc); \
+  } catch(...) {\
+    std::string msg;\
+    msg = "Unhandled throw";\
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, msg, ESMC_CONTEXT, nullptr);}
+
+// for routines with direct access to MOAB, when pointer *rc is returned
+#define ESMC_CATCH_MOAB_RC \
+  catch(int localrc){ \
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc); \
+  } catch(std::string errstr){ \
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, errstr, ESMC_CONTEXT, rc); \
+  } catch (ESMCI::esmc_error &exc) {\
+    ESMC_LogDefault.MsgFoundError(exc.getReturnCode(), ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc); \
+  } catch (std::exception &exc) {\
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, exc.what(), ESMC_CONTEXT, rc); \
+  } catch(...) {\
+    std::string msg;\
+    msg = "Unhandled throw";\
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, msg, ESMC_CONTEXT, rc);}
+
+// for MBMesh routines, when pointer *rc is returned
+#define ESMC_CATCH_MBMESH \
+  catch (ESMCI::esmc_error &exc) {\
+    ESMC_LogDefault.MsgFoundError(exc.getReturnCode(), ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc); \
+  } catch(...) {\
+    std::string msg;\
+    msg = "Unhandled throw";\
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL, msg, ESMC_CONTEXT, rc);}
+
+// may need one more for MBMesh routines which do not return rc pointer (constructor)
+
 
   class MBMesh {
 #if defined ESMF_MOAB
@@ -40,6 +101,7 @@ namespace ESMCI {
     int orig_sdim;  // Original spatial dim before converting
     ESMC_CoordSys_Flag coordsys;
 
+    // RLO: why isn't this private? (and most of the other members as well)
     Interface *mesh; // Moab mesh  MAYBE I SHOULD NAME ThIS SOMETHING ELSE????
 
     int num_verts; // number of verts this processor
@@ -118,13 +180,39 @@ namespace ESMCI {
     //      + Make versions of get_all_elems() and get_all_nodes() to just return local things? 
 
 
-    // TODO: Should these come out via return??
+    // BOB: Should these come out via return??
+    // RLO: that would be nice, but we can't without a Range return from MOAB..
+    //      an option would be to allocated space for a Range, deleted on destruct
 
-    // Get a Range of all nodes on this processor
+    // Get a Range of all nodes and elements on this processor
     void get_all_nodes(Range &all_nodes);
-
-    // Get range of all elems on this processor
     void get_all_elems(Range &all_elems);
+
+    // Basic accessors for number of nodes, elements, and connectivity
+    int num_elem();
+    int num_node();
+    int num_elem_conn();
+
+    // Range based accessors for required element tags
+    void get_elem_connectivity(int *elem_conn);
+    void get_elem_ids(int *elem_ids);
+    void get_elem_types(int *elem_types);
+    // Range-based accessors for optional element tags
+    void get_elem_areas(double *elem_area);
+    void get_elem_coords(double *elem_coords);
+    void get_elem_mask(int *elem_mask);
+
+    // Range based accessors for required node tags
+    void get_node_coords(double *node_coords);
+    void get_node_ids(int *node_ids);
+    void get_node_owners(int *node_owners);
+    // Range based accessors for optional node tags
+    void get_node_mask(int *node_mask);
+
+
+    // Accessors for values from a single EntityHandle (avoid if possible, slow)
+    int get_elem_mask_val(EntityHandle eh);
+    double get_elem_area(EntityHandle eh);
 
 
     // Turn on node masking for this mesh
@@ -143,18 +231,11 @@ namespace ESMCI {
     // Set an element mask value 
     void set_elem_mask_val(EntityHandle eh, int mask_val);
 
-    // Get an element mask value 
-    int get_elem_mask_val(EntityHandle eh);
-    int *get_elem_mask_array(const Range &elems);
-
     // Setup elem areas
     void setup_elem_area();
 
     // Set an elem area value
     void set_elem_area(EntityHandle eh, double area);
-
-    // Get an elem area value
-    double get_elem_area(EntityHandle eh);
 
 
     // Setup elem coords
