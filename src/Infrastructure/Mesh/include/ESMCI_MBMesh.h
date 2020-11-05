@@ -173,10 +173,6 @@ namespace ESMCI {
                    Range &added_nodes);
 
 
-    // Get a Range of all nodes on this processor
-    // TODO: Should these come out via return??
-    void get_all_nodes(Range &all_nodes);
-
     // Turn on node masking for this mesh
     void setup_node_mask();
 
@@ -268,22 +264,12 @@ namespace ESMCI {
     int get_elem_mask_val(EntityHandle eh);
     double get_elem_area(EntityHandle eh);
 
-
-    // Turn on node masking for this mesh
-    void setup_node_mask();
-
-    // Set node mask value
-    void set_node_mask_val(EntityHandle eh, int mask_val);
-
-
-    // Set node coords
-    void set_node_coords(EntityHandle eh, double *orig_coords);
-
     // Turn on elem masking
     void setup_elem_mask();
 
     // Set an element mask value 
     void set_elem_mask_val(EntityHandle eh, int mask_val);
+    void set_elem_mask_val(Range elems, int *mask_vals);
 
     // Setup elem areas
     void setup_elem_area();
@@ -293,10 +279,6 @@ namespace ESMCI {
 
     // Set a range of element area values 
     void set_elem_area(Range elems, double *area);
-
-    // Get an elem area value
-    double get_elem_area(EntityHandle eh);
-
 
     // Setup elem coords
     void setup_elem_coords();
