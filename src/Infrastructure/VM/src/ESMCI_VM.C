@@ -475,9 +475,10 @@ void VMId::log(
   int k=0;
   for (int i=0; i<vmKeyWidth; i++){
     bitmap |= vmKey[i];
-    bitmap = bitmap << 8;
     ++k;
-    if (k==3){
+    if (k<4){
+      bitmap = bitmap << 8;
+    }else{
       sprintf(digits, "%08X", bitmap);
       info << digits;
       bitmap=0;
@@ -529,9 +530,10 @@ int VMId::print() const{
   int k=0;
   for (int i=0; i<vmKeyWidth; i++){
     bitmap |= vmKey[i];
-    bitmap = bitmap << 8;
     ++k;
-    if (k==3){
+    if (k<4){
+      bitmap = bitmap << 8;
+    }else{
       printf("%08X", bitmap);
       bitmap=0;
       k=0;
