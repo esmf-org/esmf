@@ -58,6 +58,7 @@ module ESMF_FieldGetMod
 
   public ESMF_FieldGet
   public ESMF_FieldGetBounds
+  public ESMF_FieldGetTimestamp
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
@@ -1538,6 +1539,48 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_FieldGetBounds
+!------------------------------------------------------------------------------
+
+! -------------------------- ESMF-private method -------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldGetTimestamp"
+!BOPI
+! !IROUTINE: ESMF_FieldGetTimestamp - Get timestamp on Field
+
+! !INTERFACE:
+  subroutine ESMF_FieldGetTimestamp(field, timestamp, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Field),           intent(in)            :: field
+    integer,                    intent(out), optional :: timestamp(10)
+    integer,                    intent(out), optional :: rc
+!
+! !DESCRIPTION:
+! Query an {\tt ESMF\_Field} for its timestamp.
+!
+! The arguments are:
+! \begin{description}
+! \item [field]
+!       {\tt ESMF\_Field} object to query.
+! \item [timestamp]
+!       Timestamp, an array of 10 integer values.
+! \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!EOPI
+!------------------------------------------------------------------------------
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! check variables
+    ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
+    ! Get timestamp
+    timestamp(:) = field%ftypep%timestamp(:)
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_FieldGetTimestamp
 !------------------------------------------------------------------------------
 
 end module ESMF_FieldGetMod
