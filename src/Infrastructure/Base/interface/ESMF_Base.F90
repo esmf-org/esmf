@@ -1308,7 +1308,7 @@ module ESMF_BaseMod
 
     persistFlag = persist ! convert logical -> ESMF_Logical
 
-    call c_ESMC_SetPersist(base, persistFlag, rc=localrc)
+    call c_ESMC_SetPersist(base, persistFlag, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
