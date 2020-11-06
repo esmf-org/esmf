@@ -4012,7 +4012,7 @@ void MBMesh_GetNodeCount(void *meshp, int *nodeCount, int *rc){
 
     *nodeCount = mesh->num_node();
   }
-  ESMC_CATCH_MBMESH;
+  ESMC_CATCH_MBMESH(rc)
   
   if(rc != NULL) *rc = ESMF_SUCCESS;
 }
@@ -4026,7 +4026,7 @@ void MBMesh_GetElemCount(void *meshp, int *elemCount, int *rc){
 
     *elemCount = mesh->num_elem();
   }
-  ESMC_CATCH_MBMESH;
+  ESMC_CATCH_MBMESH(rc)
   
   if(rc != NULL) *rc = ESMF_SUCCESS;
 }
@@ -4041,7 +4041,7 @@ void MBMesh_GetElemConnCount(void *meshp, int *elemConnCount, int *rc){
     // Output
     *elemConnCount = mesh->num_elem_conn();
   }
-  ESMC_CATCH_MBMESH;
+  ESMC_CATCH_MBMESH(rc)
   
   if(rc != NULL) *rc = ESMF_SUCCESS;
 }
@@ -4070,7 +4070,7 @@ void MBMesh_GetElemInfoPresence(void *meshp,
     if (mesh->has_elem_coords) *elemCoordsIsPresent=1;
   
   }
-  ESMC_CATCH_MBMESH;
+  ESMC_CATCH_MBMESH(rc)
   
   if(rc != NULL) *rc = ESMF_SUCCESS;
 }
@@ -4090,86 +4090,83 @@ void MBMesh_GetElemCreateInfo(void *meshp,
 
     // Initialize the parallel environment for mesh (if not already done)
     ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
-    ESMC_CHECK_ERRPASSTHRU(localrc);
+    ESMC_THROW_PASSTHRU(localrc)
 
     VM *vm = VM::getCurrent(&localrc);
     int petCount = vm->getPetCount();
     int localPet = vm->getLocalPet();
-    ESMC_CHECK_ERRPASSTHRU(localrc);
+    ESMC_THROW_PASSTHRU(localrc)
 
     // Dereference
     MBMesh *mesh=reinterpret_cast<MBMesh*> (meshp);
 
     // Doesn't work with split meshes right now
     if (mesh->is_split)
-      ESMC_CHECK_RC("ESMC_RC_ARG_VALUE", ESMC_RC_ARG_VALUE, "Can't get elem connection count from mesh containing >4 elements.");
+      ESMC_THROW_ERROR(ESMC_RC_ARG_VALUE, "Can't get elem connection count from mesh containing >4 elements.")
     
     ////// Get some handy information //////
     int num_elems=mesh->num_elem();
-    
-    // RLO: coordinates should be allocated to pdim*num_elem not sdim
-    // int orig_sdim=mesh->orig_sdim;
-    int pdim=mesh->pdim;
+    int orig_sdim=mesh->orig_sdim;
 
     ////// Error check input arrays //////
 
     if (present(elemIds)) {
       if (elemIds->dimCount !=1)
-        ESMC_CHECK_RC("ESMC_RC_ARG_RANK", ESMC_RC_ARG_RANK, "elemIds array must be 1D");
+        ESMC_THROW_ERROR(ESMC_RC_ARG_RANK, "elemIds array must be 1D")
 
       if (elemIds->extent[0] != num_elems)
-        ESMC_CHECK_RC("ESMC_RC_ARG_SIZE", ESMC_RC_ARG_SIZE, "elemIds array must be of size elemCount");
+        ESMC_THROW_ERROR(ESMC_RC_ARG_SIZE, "elemIds array must be of size elemCount")
     }
 
     if (present(elemTypes)) {
       if (elemTypes->dimCount !=1)
-        ESMC_CHECK_RC("ESMC_RC_ARG_RANK", ESMC_RC_ARG_RANK, "elemTypes array must be 1D");
+        ESMC_THROW_ERROR(ESMC_RC_ARG_RANK, "elemTypes array must be 1D")
 
       if (elemTypes->extent[0] != num_elems)
-        ESMC_CHECK_RC("ESMC_RC_ARG_SIZE", ESMC_RC_ARG_SIZE, "elemTypes array must be of size elemCount");
+        ESMC_THROW_ERROR(ESMC_RC_ARG_SIZE, "elemTypes array must be of size elemCount")
     }
 
     if (present(elemConn)) {
       if (elemConn->dimCount !=1)
-        ESMC_CHECK_RC("ESMC_RC_ARG_RANK", ESMC_RC_ARG_RANK, "elemConn array must be 1D");
+        ESMC_THROW_ERROR(ESMC_RC_ARG_RANK, "elemConn array must be 1D")
 
       int num_elem_conn = mesh->num_elem_conn();
 
       if (elemConn->extent[0] != num_elem_conn)
-        ESMC_CHECK_RC("ESMC_RC_ARG_SIZE", ESMC_RC_ARG_SIZE, "elemConn array must be of size elemConnCount");
+        ESMC_THROW_ERROR(ESMC_RC_ARG_SIZE, "elemConn array must be of size elemConnCount")
     }
 
     if (present(elemMask)) {
       if (!mesh->has_elem_mask)
-        ESMC_CHECK_RC("ESMC_RC_CANNOT_GET", ESMC_RC_CANNOT_GET, "Element mask not present.");
+        ESMC_THROW_ERROR(ESMC_RC_CANNOT_GET, "Element mask not present.")
 
       if (elemMask->dimCount !=1)
-        ESMC_CHECK_RC("ESMC_RC_ARG_RANK", ESMC_RC_ARG_RANK, "elemMask array must be 1D");
+        ESMC_THROW_ERROR(ESMC_RC_ARG_RANK, "elemMask array must be 1D")
 
       if (elemMask->extent[0] != num_elems)
-        ESMC_CHECK_RC("ESMC_RC_ARG_SIZE", ESMC_RC_ARG_SIZE, "elemMask array must be of size elemCount");
+        ESMC_THROW_ERROR(ESMC_RC_ARG_SIZE, "elemMask array must be of size elemCount")
     }
 
     if (present(elemArea)) {
       if (!mesh->has_elem_area)
-        ESMC_CHECK_RC("ESMC_RC_CANNOT_GET", ESMC_RC_CANNOT_GET, "Element areas not present.");
+        ESMC_THROW_ERROR(ESMC_RC_CANNOT_GET, "Element areas not present.")
 
       if (elemArea->dimCount !=1)
-        ESMC_CHECK_RC("ESMC_RC_ARG_RANK", ESMC_RC_ARG_RANK, "elemArea array must be 1D");
+        ESMC_THROW_ERROR(ESMC_RC_ARG_RANK, "elemArea array must be 1D")
 
       if (elemArea->extent[0] != num_elems)
-        ESMC_CHECK_RC("ESMC_RC_ARG_SIZE", ESMC_RC_ARG_SIZE, "elemArea array must be of size elemCount");
+        ESMC_THROW_ERROR(ESMC_RC_ARG_SIZE, "elemArea array must be of size elemCount")
     }
 
     if (present(elemCoords)) {
       if (!mesh->has_elem_coords)
-        ESMC_CHECK_RC("ESMC_RC_CANNOT_GET", ESMC_RC_CANNOT_GET, "Element coords not present.");
+        ESMC_THROW_ERROR(ESMC_RC_CANNOT_GET, "Element coords not present.")
 
       if (elemCoords->dimCount !=1)
-        ESMC_CHECK_RC("ESMC_RC_ARG_RANK", ESMC_RC_ARG_RANK, "elemCoords array must be 1D");
+        ESMC_THROW_ERROR(ESMC_RC_ARG_RANK, "elemCoords array must be 1D")
 
-      if (elemCoords->extent[0] != num_elems*pdim)
-        ESMC_CHECK_RC("ESMC_RC_ARG_SIZE", ESMC_RC_ARG_SIZE, "elemCoords array must be of size pdim*elemCount");
+      if (elemCoords->extent[0] != num_elems*orig_sdim)
+        ESMC_THROW_ERROR(ESMC_RC_ARG_SIZE, "elemCoords array must be of size elemCount*orig_sdim")
     }
 
 
@@ -4212,7 +4209,7 @@ void MBMesh_GetElemCreateInfo(void *meshp,
     }
 
   }
-  ESMC_CATCH_MBMESH;
+  ESMC_CATCH_MBMESH(rc)
   
   if(rc != NULL) *rc = ESMF_SUCCESS;
 }
@@ -4231,7 +4228,7 @@ void MBMesh_GetNodeInfoPresence(void *meshp,
     if (mesh->has_node_mask) *nodeMaskIsPresent=1;
 
   }
-  ESMC_CATCH_MBMESH;
+  ESMC_CATCH_MBMESH(rc)
   
   if(rc != NULL) *rc = ESMF_SUCCESS;
 }
@@ -4249,60 +4246,58 @@ void MBMesh_GetNodeCreateInfo(void *meshp,
 
     // Initialize the parallel environment for mesh (if not already done)
     ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
-    ESMC_CHECK_ERRPASSTHRU(localrc);
+    ESMC_THROW_PASSTHRU(localrc)
 
     VM *vm = VM::getCurrent(&localrc);
     int petCount = vm->getPetCount();
     int localPet = vm->getLocalPet();
-    ESMC_CHECK_ERRPASSTHRU(localrc);
+    ESMC_THROW_PASSTHRU(localrc)
 
     // Dereference
     MBMesh *mesh=reinterpret_cast<MBMesh*> (meshp);
 
     int num_nodes=mesh->num_node();
-    // RLO: coordinates should be allocated to pdim*num_elem not sdim
-    // int orig_sdim=mesh->orig_sdim;
-    int pdim=mesh->pdim;
+    int orig_sdim=mesh->orig_sdim;
 
     // Error check input arrays
 
     // If nodeIds array exists, error check
     if (present(nodeIds)) {
       if (nodeIds->dimCount !=1)
-        ESMC_CHECK_RC("ESMC_RC_ARG_RANK", ESMC_RC_ARG_RANK, "nodeIds array must be 1D");
+        ESMC_THROW_ERROR(ESMC_RC_ARG_RANK, "nodeIds array must be 1D")
 
       if (nodeIds->extent[0] != num_nodes)
-        ESMC_CHECK_RC("ESMC_RC_ARG_SIZE", ESMC_RC_ARG_SIZE, "nodeIds array must be of size nodeCount");
+        ESMC_THROW_ERROR(ESMC_RC_ARG_SIZE, "nodeIds array must be of size nodeCount")
     }
 
     // If nodeIds array exists, error check
     if (present(nodeCoords)) {
       if (nodeCoords->dimCount !=1)
-        ESMC_CHECK_RC("ESMC_RC_ARG_RANK", ESMC_RC_ARG_RANK, "nodeCoords array must be 1D");
+        ESMC_THROW_ERROR(ESMC_RC_ARG_RANK, "nodeCoords array must be 1D")
 
-      if (nodeCoords->extent[0] != pdim*num_nodes)
-        ESMC_CHECK_RC("ESMC_RC_ARG_SIZE", ESMC_RC_ARG_SIZE, "nodeCoords array must be of size pdim*nodeCount");
+      if (nodeCoords->extent[0] != orig_sdim*num_nodes)
+        ESMC_THROW_ERROR(ESMC_RC_ARG_SIZE, "nodeCoords array must be of size nodeCount*orig_sdim")
     }
 
     // If nodeOwners array exists, error check
     if (present(nodeOwners)) {
       if (nodeOwners->dimCount !=1)
-        ESMC_CHECK_RC("ESMC_RC_ARG_RANK", ESMC_RC_ARG_RANK, "nodeOwners array must be 1D");
+        ESMC_THROW_ERROR(ESMC_RC_ARG_RANK, "nodeOwners array must be 1D")
 
       if (nodeOwners->extent[0] != num_nodes)
-        ESMC_CHECK_RC("ESMC_RC_ARG_SIZE", ESMC_RC_ARG_SIZE, "nodeOwners array must be of size nodeCount");
+        ESMC_THROW_ERROR(ESMC_RC_ARG_SIZE, "nodeOwners array must be of size nodeCount")
     }
 
     // If nodeMask array exists, error check
     if (present(nodeMask)) {
       if (!mesh->has_node_mask)
-        ESMC_CHECK_RC("ESMC_RC_CANNOT_GET", ESMC_RC_CANNOT_GET, "Node mask not present.");
+        ESMC_THROW_ERROR(ESMC_RC_CANNOT_GET, "Node mask not present.")
 
       if (nodeMask->dimCount !=1)
-        ESMC_CHECK_RC("ESMC_RC_ARG_RANK", ESMC_RC_ARG_RANK, "nodeMask array must be 1D");
+        ESMC_THROW_ERROR(ESMC_RC_ARG_RANK, "nodeMask array must be 1D")
 
       if (nodeMask->extent[0] != num_nodes)
-        ESMC_CHECK_RC("ESMC_RC_ARG_SIZE", ESMC_RC_ARG_SIZE, "nodeMask array must be of size nodeCount");
+        ESMC_THROW_ERROR(ESMC_RC_ARG_SIZE, "nodeMask array must be of size nodeCount")
     }
 
     // RLO: don't think we need an ordered list of nodes here..
@@ -4334,7 +4329,7 @@ void MBMesh_GetNodeCreateInfo(void *meshp,
     }
 
   }
-  ESMC_CATCH_MBMESH;
+  ESMC_CATCH_MBMESH(rc)
 
   if(rc != NULL) *rc = ESMF_SUCCESS;
 }

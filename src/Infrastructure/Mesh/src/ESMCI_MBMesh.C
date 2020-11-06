@@ -362,9 +362,9 @@ int MBMesh::num_elem(){
   Range elems;
   try {
     merr=mesh->get_entities_by_dimension(0, pdim, elems);
-    ESMC_CHECK_MOAB_RC(merr);
+    ESMC_CHECK_MOAB_RC_THROW(merr)
   }
-  ESMC_CATCH_MOAB;
+  ESMC_CATCH_MOAB
 
   return elems.size();
 }
@@ -377,9 +377,9 @@ int MBMesh::num_node(){
   Range nodes;
   try {
     merr=mesh->get_entities_by_dimension(0, 0, nodes);
-    ESMC_CHECK_MOAB_RC(merr);
+    ESMC_CHECK_MOAB_RC_THROW(merr)
   }
-  ESMC_CATCH_MOAB;
+  ESMC_CATCH_MOAB
 
   return nodes.size();
 }
@@ -392,12 +392,12 @@ int MBMesh::num_elem_conn(){
     int merr;
     // Doesn't work with split meshes right now
     if (this->is_split)
-      ESMC_CHECK_RC("ESMC_RC_ARG_VALUE", ESMC_RC_ARG_VALUE, "Can't get elem connection count from mesh containing >4 elements.");
+      ESMC_THROW_ERROR(ESMC_RC_ARG_VALUE, "Can't get elem connection count from mesh containing >4 elements.")
 
     // Get range of elems
     Range elems;
     merr=mesh->get_entities_by_dimension(0, pdim, elems);
-    ESMC_CHECK_MOAB_RC(merr);
+    ESMC_CHECK_MOAB_RC_THROW(merr)
 
     // Loop summing number of nodes per element
     for (Range::const_iterator it=elems.begin(); it != elems.end(); it++) {
@@ -406,13 +406,13 @@ int MBMesh::num_elem_conn(){
       // Get topology of element
       std::vector<EntityHandle> nodes_on_elem;
       merr=mesh->get_connectivity(&elem, 1, nodes_on_elem);
-      ESMC_CHECK_MOAB_RC(merr);
+      ESMC_CHECK_MOAB_RC_THROW(merr)
 
       // Add number of nodes for this elem to connection count
       elemConnCount += nodes_on_elem.size();
     }
   }
-  ESMC_CATCH_MOAB;
+  ESMC_CATCH_MOAB
   
   return elemConnCount;
 }
@@ -423,17 +423,17 @@ void MBMesh::get_elem_areas(double *elem_area) {
   try {
     int merr;
   
-    if (!has_elem_area) ESMC_CHECK_RC("ESMC_RC_CANNOT_GET", ESMC_RC_CANNOT_GET, "Element areas not present.");
+    if (!has_elem_area) ESMC_THROW_ERROR(ESMC_RC_CANNOT_GET, "Element areas not present.")
 
     Range elems;
     merr=mesh->get_entities_by_dimension(0, pdim, elems);
-    ESMC_CHECK_MOAB_RC(merr);
+    ESMC_CHECK_MOAB_RC_THROW(merr)
   
     merr=mesh->tag_get_data(elem_area_tag, elems, elem_area);
-    ESMC_CHECK_MOAB_RC(merr);
+    ESMC_CHECK_MOAB_RC_THROW(merr)
 
   }
-  ESMC_CATCH_MOAB;
+  ESMC_CATCH_MOAB
 }
 
 void MBMesh::get_elem_connectivity(int *elem_conn) {
@@ -445,7 +445,7 @@ void MBMesh::get_elem_connectivity(int *elem_conn) {
     // get node ids in a vector, which we will need to search later
     Range nodes;
     merr=mesh->get_entities_by_dimension(0, 0, nodes);
-    ESMC_CHECK_MOAB_RC(merr);
+    ESMC_CHECK_MOAB_RC_THROW(merr)
     int *node_ids = new int[nodes.size()];
     get_node_ids(node_ids);
     std::vector<int> nodeids(node_ids, node_ids + nodes.size());
@@ -454,7 +454,7 @@ void MBMesh::get_elem_connectivity(int *elem_conn) {
     // now iterate through the elements
     Range elems;
     merr=mesh->get_entities_by_dimension(0, pdim, elems);
-    ESMC_CHECK_MOAB_RC(merr);
+    ESMC_CHECK_MOAB_RC_THROW(merr)
     
     int elemConnCountTemp = 0;
     for (Range::const_iterator it=elems.begin(); it != elems.end(); it++) {
@@ -463,14 +463,14 @@ void MBMesh::get_elem_connectivity(int *elem_conn) {
       // Get topology of element (ordered)
       vector<EntityHandle> nodes_on_elem;
       merr=mesh->get_connectivity(&elem, 1, nodes_on_elem);
-      ESMC_CHECK_MOAB_RC(merr);
+      ESMC_CHECK_MOAB_RC_THROW(merr)
 
       int nid;
       // add connectivity to output array
       for (int i=0; i<nodes_on_elem.size(); ++i) {
         // get the node id
         merr=mesh->tag_get_data(gid_tag, &nodes_on_elem.at(i), 1, &nid);
-        ESMC_CHECK_MOAB_RC(merr);
+        ESMC_CHECK_MOAB_RC_THROW(merr)
 
         std::vector<int>::iterator itr = std::find(nodeids.begin(), nodeids.end(), nid);
         // add 1 for Fortran indexing
@@ -482,7 +482,7 @@ void MBMesh::get_elem_connectivity(int *elem_conn) {
     }
 
   }
-  ESMC_CATCH_MOAB;
+  ESMC_CATCH_MOAB
 }
 
 void MBMesh::get_elem_coords(double *elem_coords) {
@@ -493,24 +493,24 @@ void MBMesh::get_elem_coords(double *elem_coords) {
   
     Range elems;
     merr=mesh->get_entities_by_dimension(0, pdim, elems);
-    ESMC_CHECK_MOAB_RC(merr);
+    ESMC_CHECK_MOAB_RC_THROW(merr)
 
     if (coordsys != ESMC_COORDSYS_CART) {
       if (!has_elem_orig_coords)
-        ESMC_CHECK_RC("ESMC_RC_CANNOT_GET", ESMC_RC_CANNOT_GET , "Element original coords not present.");
+        ESMC_THROW_ERROR(ESMC_RC_CANNOT_GET , "Element original coords not present.")
   
       merr=mesh->tag_get_data(elem_orig_coords_tag, elems, elem_coords);
-      ESMC_CHECK_MOAB_RC(merr);
+      ESMC_CHECK_MOAB_RC_THROW(merr)
     } else {
       if (!has_elem_coords)
-        ESMC_CHECK_RC("ESMC_RC_CANNOT_GET", ESMC_RC_CANNOT_GET , "Element coords not present.");
+        ESMC_THROW_ERROR(ESMC_RC_CANNOT_GET , "Element coords not present.")
 
       merr=mesh->tag_get_data(elem_coords_tag, elems, elem_coords);
-      ESMC_CHECK_MOAB_RC(merr);
+      ESMC_CHECK_MOAB_RC_THROW(merr)
     }
 
   }
-  ESMC_CATCH_MOAB;
+  ESMC_CATCH_MOAB
 }
 
 void MBMesh::get_elem_ids(int *elem_ids) {
@@ -521,13 +521,13 @@ void MBMesh::get_elem_ids(int *elem_ids) {
 
     Range elems;
     merr=mesh->get_entities_by_dimension(0, pdim, elems);
-    ESMC_CHECK_MOAB_RC(merr);
+    ESMC_CHECK_MOAB_RC_THROW(merr)
 
     merr=mesh->tag_get_data(gid_tag, elems, elem_ids);
-    ESMC_CHECK_MOAB_RC(merr);
+    ESMC_CHECK_MOAB_RC_THROW(merr)
 
   }
-  ESMC_CATCH_MOAB;
+  ESMC_CATCH_MOAB
 }
 
 void MBMesh::get_elem_mask(int *elem_mask) {
@@ -536,17 +536,17 @@ void MBMesh::get_elem_mask(int *elem_mask) {
   try {
     int merr;
 
-    if (!has_elem_mask) ESMC_CHECK_RC("ESMC_RC_CANNOT_GET", ESMC_RC_CANNOT_GET, "Element mask not present.");
+    if (!has_elem_mask) ESMC_THROW_ERROR(ESMC_RC_CANNOT_GET, "Element mask not present.")
 
     Range elems;
     merr=mesh->get_entities_by_dimension(0, pdim, elems);
-    ESMC_CHECK_MOAB_RC(merr);
+    ESMC_CHECK_MOAB_RC_THROW(merr)
 
     merr=mesh->tag_get_data(elem_mask_val_tag, elems, elem_mask);
-    ESMC_CHECK_MOAB_RC(merr);
+    ESMC_CHECK_MOAB_RC_THROW(merr)
 
   }
-  ESMC_CATCH_MOAB;
+  ESMC_CATCH_MOAB
 }
 
 void MBMesh::get_elem_types(int *elem_types) {
@@ -557,7 +557,7 @@ void MBMesh::get_elem_types(int *elem_types) {
   
     Range elems;
     merr=mesh->get_entities_by_dimension(0, pdim, elems);
-    ESMC_CHECK_MOAB_RC(merr);
+    ESMC_CHECK_MOAB_RC_THROW(merr)
   
     int i = 0;
     for (Range::const_iterator it=elems.begin(); it != elems.end(); it++) {
@@ -566,7 +566,7 @@ void MBMesh::get_elem_types(int *elem_types) {
       // Get topology of element
       Range nodes_on_elem;
       merr=mesh->get_connectivity(&elem, 1, nodes_on_elem);
-      ESMC_CHECK_MOAB_RC(merr);
+      ESMC_CHECK_MOAB_RC_THROW(merr)
 
       elem_types[i] = 0;
       if (pdim == 2) {
@@ -574,24 +574,24 @@ void MBMesh::get_elem_types(int *elem_types) {
         else if (nodes_on_elem.size() == 4) elem_types[i] = ESMC_MESHELEMTYPE_QUAD;
         else {
           std::string errmsg = "Element type not recognized.";
-          ESMC_CHECK_RC("ESMC_RC_ARG_VALUE", ESMC_RC_ARG_VALUE, errmsg);
+          ESMC_THROW_ERROR(ESMC_RC_ARG_VALUE, errmsg)
         }
       } else if (pdim == 3) {
         if (nodes_on_elem.size() == 4) elem_types[i] = ESMC_MESHELEMTYPE_TETRA;
         else if (nodes_on_elem.size() == 8) elem_types[i] = ESMC_MESHELEMTYPE_HEX;       
         else {
           std::string errmsg = "Element type not recognized.";
-          ESMC_CHECK_RC("ESMC_RC_ARG_VALUE", ESMC_RC_ARG_VALUE, errmsg);
+          ESMC_THROW_ERROR(ESMC_RC_ARG_VALUE, errmsg)
         }
       } else {
         std::string errmsg = "Parameteric dimension not recognized.";
-        ESMC_CHECK_RC("ESMC_RC_ARG_VALUE", ESMC_RC_ARG_VALUE, errmsg);
+        ESMC_THROW_ERROR(ESMC_RC_ARG_VALUE, errmsg)
       }
       i++;
     }
 
   }
-  ESMC_CATCH_MOAB;
+  ESMC_CATCH_MOAB
 }
 
 void MBMesh::get_node_coords(double *node_coords) {
@@ -602,19 +602,19 @@ void MBMesh::get_node_coords(double *node_coords) {
     
     Range nodes;
     merr=mesh->get_entities_by_dimension(0, 0, nodes);
-    ESMC_CHECK_MOAB_RC(merr);
+    ESMC_CHECK_MOAB_RC_THROW(merr)
 
     if (coordsys != ESMC_COORDSYS_CART) {
       if (!has_node_orig_coords)
-        ESMC_CHECK_RC("ESMC_RC_CANNOT_GET", ESMC_RC_CANNOT_GET , "Node original coords not present.");
+        ESMC_THROW_ERROR(ESMC_RC_CANNOT_GET , "Node original coords not present.")
   
       merr=mesh->tag_get_data(node_orig_coords_tag, nodes, node_coords);
-      ESMC_CHECK_MOAB_RC(merr);
+      ESMC_CHECK_MOAB_RC_THROW(merr)
     } else {
       double *node_coords3d = new double[3*nodes.size()];
       // double *node_coords3d = new double;
       merr=mesh->get_coords(nodes, node_coords3d);
-      ESMC_CHECK_MOAB_RC(merr);
+      ESMC_CHECK_MOAB_RC_THROW(merr)
       
       // compact 3d coords to 2d
       for (int i=0; i<nodes.size(); ++i) {
@@ -632,7 +632,7 @@ void MBMesh::get_node_coords(double *node_coords) {
     // double *z = new double[nodes.size()];
     // 
     // merr=mesh->get_coords(nodes, x, y, z);
-    // ESMC_CHECK_MOAB_RC(merr);
+    // ESMC_CHECK_MOAB_RC_THROW(merr)
     // 
     // // compact 3d coords to 2d
     // for (int i=0; i<nodes.size(); ++i) {
@@ -646,7 +646,7 @@ void MBMesh::get_node_coords(double *node_coords) {
 
 
   }
-  ESMC_CATCH_MOAB;
+  ESMC_CATCH_MOAB
 }
 
 void MBMesh::get_node_ids(int *node_ids) {
@@ -657,13 +657,13 @@ void MBMesh::get_node_ids(int *node_ids) {
     
     Range nodes;
     merr=mesh->get_entities_by_dimension(0, 0, nodes);
-    ESMC_CHECK_MOAB_RC(merr);
+    ESMC_CHECK_MOAB_RC_THROW(merr)
 
     merr=mesh->tag_get_data(gid_tag, nodes, node_ids);
-    ESMC_CHECK_MOAB_RC(merr);
+    ESMC_CHECK_MOAB_RC_THROW(merr)
 
   }
-  ESMC_CATCH_MOAB;
+  ESMC_CATCH_MOAB
 }
 
 void MBMesh::get_node_mask(int *node_mask) {
@@ -672,16 +672,16 @@ void MBMesh::get_node_mask(int *node_mask) {
   try {
     int merr;
 
-    if (!has_node_mask) ESMC_CHECK_RC("ESMC_RC_CANNOT_GET", ESMC_RC_CANNOT_GET, "Node mask not present.");
+    if (!has_node_mask) ESMC_THROW_ERROR(ESMC_RC_CANNOT_GET, "Node mask not present.")
 
     Range nodes;
     merr=mesh->get_entities_by_dimension(0, 0, nodes);
-    ESMC_CHECK_MOAB_RC(merr);
+    ESMC_CHECK_MOAB_RC_THROW(merr)
 
     merr=mesh->tag_get_data(node_mask_val_tag, nodes, node_mask);
-    ESMC_CHECK_MOAB_RC(merr);
+    ESMC_CHECK_MOAB_RC_THROW(merr)
   }
-  ESMC_CATCH_MOAB;
+  ESMC_CATCH_MOAB
 }
 
 void MBMesh::get_node_owners(int *node_owners) {
@@ -692,13 +692,13 @@ void MBMesh::get_node_owners(int *node_owners) {
 
     Range nodes;
     merr=mesh->get_entities_by_dimension(0, 0, nodes);
-    ESMC_CHECK_MOAB_RC(merr);
+    ESMC_CHECK_MOAB_RC_THROW(merr)
 
     merr=mesh->tag_get_data(owner_tag, nodes, node_owners);
-    ESMC_CHECK_MOAB_RC(merr);
+    ESMC_CHECK_MOAB_RC_THROW(merr)
 
   }
-  ESMC_CATCH_MOAB;
+  ESMC_CATCH_MOAB
 }
 
 void MBMesh::set_node_mask_val(EntityHandle eh, int mask_val) {

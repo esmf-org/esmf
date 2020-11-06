@@ -285,7 +285,7 @@ MBMeshTest *mesh_gen_quad_sph(int &rc){
   int num_elem = 4;
   int num_node = 9;
 
-  ESMC_CoordSys_Flag coord_sys=ESMC_COORDSYS_SPH_DEG;
+  ESMC_CoordSys_Flag coord_sys=ESMC_COORDSYS_SPH_RAD;
 
   int nodeId_s [] ={1,2,3,4,5,6,7,8,9};
   double nodeCoord_s [] ={0.0,0.0, pi/10,0.0, pi/5,0.0,
@@ -452,12 +452,13 @@ void test_mbmesh_get_info(const MBMeshTest * const mbt, int *rc){
   // /////////////////// node create info ////////////////////////////
   
   int pdim = mbt->pdim;
+  int orig_sdim = mbt->orig_sdim;
   int num_node = mbt->num_node;
 
   int nodeIds[num_node];
   InterArray<int> *nii = new InterArray<int>(nodeIds,num_node);
   double nodeCoords[num_node*pdim];
-  InterArray<double> *nci = new InterArray<double>(nodeCoords,num_node*pdim);
+  InterArray<double> *nci = new InterArray<double>(nodeCoords,num_node*orig_sdim);
   int nodeMask[num_node];
   InterArray<int> *nmi = new InterArray<int>(nodeMask,num_node);
   int nodeOwners[num_node];
@@ -491,7 +492,7 @@ void test_mbmesh_get_info(const MBMeshTest * const mbt, int *rc){
     return;
   }
 
-  if (nci->extent[0] != num_node*pdim) correct = false;
+  if (nci->extent[0] != num_node*orig_sdim) correct = false;
   else {
     bool print = false;
     for (int i=0; i<nci->extent[0]; ++i) {
@@ -569,7 +570,7 @@ void test_mbmesh_get_info(const MBMeshTest * const mbt, int *rc){
   double elemArea[num_elem];
   InterArray<double> *eai = new InterArray<double>(elemArea,num_elem);
   double elemCoords[num_elem*pdim];
-  InterArray<double> *eci = new InterArray<double>(elemCoords,num_elem*pdim);
+  InterArray<double> *eci = new InterArray<double>(elemCoords,num_elem*orig_sdim);
 
   MBMesh_GetElemCreateInfo(mbt->meshp, eii, NULL, NULL, NULL, NULL, NULL, &localrc);
   if (localrc != ESMF_SUCCESS) {
@@ -668,7 +669,7 @@ void test_mbmesh_get_info(const MBMeshTest * const mbt, int *rc){
       return;
     }
   
-    if (eci->extent[0] != num_elem*pdim) correct = false;
+    if (eci->extent[0] != num_elem*orig_sdim) correct = false;
     else {
       bool print = false;
       for (int i=0; i<eci->extent[0]; ++i) {
@@ -734,7 +735,7 @@ int main(int argc, char *argv[]) {
   char name[80];
   char failMsg[80];
   int result = 0;
-  int rc;
+  int rc, localrc;
   int localPet, petCount;
   ESMC_VM vm;
 
@@ -753,8 +754,8 @@ int main(int argc, char *argv[]) {
   // quad mesh Cartesian
   // --------------------------------------------------------------------------
 #if defined ESMF_MOAB
-  MBMeshTest *mbt_quad = mesh_gen_quad(rc);
-  if (rc == ESMF_SUCCESS) test_mbmesh_get_info(mbt_quad, &rc);
+  MBMeshTest *mbt_quad = mesh_gen_quad(localrc);
+  if (localrc == ESMF_SUCCESS) test_mbmesh_get_info(mbt_quad, &rc);
 #else
   rc = ESMF_SUCCESS;
 #endif
@@ -771,8 +772,8 @@ int main(int argc, char *argv[]) {
   // quad mesh spherical
   // --------------------------------------------------------------------------
 #if defined ESMF_MOAB
-  MBMeshTest *mbt_quad_sph = mesh_gen_quad_sph(rc);
-  if (rc == ESMF_SUCCESS) test_mbmesh_get_info(mbt_quad_sph, &rc);
+  MBMeshTest *mbt_quad_sph = mesh_gen_quad_sph(localrc);
+  if (localrc == ESMF_SUCCESS) test_mbmesh_get_info(mbt_quad_sph, &rc);
 #else
   rc = ESMF_SUCCESS;
 #endif
@@ -789,8 +790,8 @@ int main(int argc, char *argv[]) {
   // hexahedral mesh (3d)
   // --------------------------------------------------------------------------
 #if defined ESMF_MOAB
-  MBMeshTest *mbt_hex = mesh_gen_hex(rc);
-  if (rc == ESMF_SUCCESS) test_mbmesh_get_info(mbt_hex, &rc);
+  MBMeshTest *mbt_hex = mesh_gen_hex(localrc);
+  if (localrc == ESMF_SUCCESS) test_mbmesh_get_info(mbt_hex, &rc);
 #else
   rc = ESMF_SUCCESS;
 #endif
