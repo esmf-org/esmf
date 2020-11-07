@@ -387,6 +387,8 @@ void test_mbmesh_get_info(const MBMeshTest * const mbt, int *rc){
   bool correct = true;
   if (rc) *rc = ESMF_FAILURE;
 
+  int tol = 1e-15;
+
   int elemCount;
   MBMesh_GetElemCount(mbt->meshp, &elemCount, &localrc);
   if (localrc != ESMF_SUCCESS) {
@@ -496,7 +498,7 @@ void test_mbmesh_get_info(const MBMeshTest * const mbt, int *rc){
   else {
     bool print = false;
     for (int i=0; i<nci->extent[0]; ++i) {
-      if (nci->array[i] != mbt->nodeCoord[i]) {
+      if (abs(nci->array[i] - mbt->nodeCoord[i]) > tol) {
         correct = false;
         print = true;
       }
@@ -649,7 +651,7 @@ void test_mbmesh_get_info(const MBMeshTest * const mbt, int *rc){
     else {
       bool print = false;
       for (int i=0; i<eai->extent[0]; ++i) {
-        if (eai->array[i] != mbt->elemArea[i]) {
+        if (abs(eai->array[i] - mbt->elemArea[i]) > tol) {
           correct = false;
           print = true;
         }
@@ -673,7 +675,7 @@ void test_mbmesh_get_info(const MBMeshTest * const mbt, int *rc){
     else {
       bool print = false;
       for (int i=0; i<eci->extent[0]; ++i) {
-        if (eci->array[i] != mbt->elemCoord[i]) {
+        if (abs(eci->array[i] - mbt->elemCoord[i]) > tol) {
           correct = false;
           print = true;
         }
