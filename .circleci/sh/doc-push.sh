@@ -42,7 +42,7 @@ git commit -m "NUOPC doc build by CircleCI"
 # Developer's Guide -----------------------------------------------------------
 
 cd ${DOC_ARTIFACTS}/doc-dev_guide
-cp -rf ./* ~/esmf-org.github.io/docs/nightly/develop/
+cp -rf ./dev_guide/dev_guide/* ~/esmf-org.github.io/docs/nightly/develop/dev_guide/
 cd ~/esmf-org.github.io/
 git add .
 git commit -m " ESMF dev_guide build by CircleCI"
