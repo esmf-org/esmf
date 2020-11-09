@@ -5625,10 +5625,9 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     type(type_UpdatePacket), pointer  :: upE
     integer                           :: i, j, jj
     integer, pointer                  :: bufferPtr(:)
-    type(ESMF_Info)                   :: info
-    
+
     rc = ESMF_SUCCESS
-    
+
     call ESMF_VMGetCurrent(vm=vm, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
@@ -5647,7 +5646,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
       ! step to next element
       upE=>upE%prev
     enddo
-    
+
     ! traverse all packets, fill the sendBuffer and post the sends
     upE=>updatePackets
     do while (associated(upE))
@@ -5655,11 +5654,8 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
         ! there are messages to be sent -> fill the sendBuffer
         do j=1, upE%fieldCount
           jj = upE%fieldIndex(j)
-          call ESMF_InfoGetFromHost(srcFieldList(jj), info=info, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-          call ESMF_InfoGet(info, key="/NUOPC/Instance/TimeStamp", &
-            values=upE%sendBuffer(:,j), rc=rc)
+          call ESMF_FieldGetTimestamp(srcFieldList(jj), &
+            timestamp=upE%sendBuffer(:,j), rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
         enddo
@@ -5688,11 +5684,8 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
         ! fill in the reiceived timestamps
         do j=1, upE%fieldCount
           jj = upE%fieldIndex(j)
-          call ESMF_InfoGetFromHost(dstFieldList(jj), info=info, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-          call ESMF_InfoSet(info, key="/NUOPC/Instance/TimeStamp", &
-            values=upE%recvBuffer(:,j), rc=rc)
+          call ESMF_FieldSetTimestamp(dstFieldList(jj), &
+            timestamp=upE%recvBuffer(:,j), rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
         enddo
@@ -5702,7 +5695,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     enddo
 
   end subroutine
-    
+
   !-----------------------------------------------------------------------------
 
   subroutine DestroyUpdatePackets(updatePackets, rc)

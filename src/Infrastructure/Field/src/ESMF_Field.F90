@@ -108,6 +108,7 @@ module ESMF_FieldMod
     integer                       :: ungriddedUBound(ESMF_MAXDIM)
     integer                       :: totalLWidth(ESMF_MAXDIM)
     integer                       :: totalUWidth(ESMF_MAXDIM)
+    integer                       :: timestamp(10)
     ESMF_INIT_DECLARE
   end type
 

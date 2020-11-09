@@ -63,7 +63,7 @@ module ESMF_FieldSetMod
 ! !PUBLIC MEMBER FUNCTIONS:
 !
 ! - ESMF-public methods:
-   public ESMF_FieldSet
+   public ESMF_FieldSet, ESMF_FieldSetTimestamp
 
 
 !------------------------------------------------------------------------------
@@ -92,7 +92,6 @@ contains
 ! !IROUTINE: ESMF_FieldSet - Set object-wide Field information
 !
 ! !INTERFACE:
-  ! Private name; call using ESMF_FieldSet()
   subroutine ESMF_FieldSet(field, keywordEnforcer, name, rc)
 
 !
@@ -128,9 +127,6 @@ contains
     
     ! Set the name in Base object
     if (present(name)) then
-      !call ESMF_ArraySet(field%ftypep%array, name=name, rc=localrc)
-      !if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      !  ESMF_CONTEXT, rcToReturn=rc)) return
       call ESMF_SetName(field%ftypep%base, name=name, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -140,5 +136,50 @@ contains
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_FieldSet
+
+! -------------------------- ESMF-private method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldSetTimestamp()"
+!BOPI
+! !IROUTINE: ESMF_FieldSetTimestamp - Set timestamp on Field
+!
+! !INTERFACE:
+  subroutine ESMF_FieldSetTimestamp(field, timestamp, rc)
+
+!
+! !ARGUMENTS:
+    type(ESMF_Field),   intent(inout)         :: field
+    integer,            intent(in)            :: timestamp(10)
+    integer,            intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Set timestamp on an {\tt ESMF\_Field} object. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!       {\tt ESMF\_Field} object for which to set properties.
+!     \item [timestamp]
+!       Timestamp, an array of 10 integer values.
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, field, rc)
+
+    ! Set timestamp
+    field%ftypep%timestamp(:) = timestamp(:)
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_FieldSetTimestamp
+!------------------------------------------------------------------------------
 
 end module ESMF_FieldSetMod
