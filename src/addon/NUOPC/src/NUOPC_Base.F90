@@ -4454,7 +4454,6 @@ module NUOPC_Base
       return  ! bail out
     ! convert calendar kind flag into integer
     ckf = calkf
-call ESMF_TraceRegionEnter("loop over fields", rc=rc)
     do i=1, size(fieldList)
       call ESMF_FieldSetTimestamp(fieldList(i), &
         timestamp=(/yy,mm,dd,h,m,s,ms,us,ns,ckf/), rc=localrc)
@@ -4464,7 +4463,6 @@ call ESMF_TraceRegionEnter("loop over fields", rc=rc)
         rcToReturn=rc)) &
         return  ! bail out
     enddo
-call ESMF_TraceRegionExit("loop over fields", rc=rc)
   end subroutine
   !-----------------------------------------------------------------------------
 
@@ -4516,15 +4514,13 @@ call ESMF_TraceRegionExit("loop over fields", rc=rc)
 
     nullify(fieldList)
 
-call ESMF_TraceRegionEnter("calling NUOPC_GetStateMemberLists", rc=rc)
     call NUOPC_GetStateMemberLists(state, fieldList=fieldList, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME, &
       rcToReturn=rc)) &
       return  ! bail out
-call ESMF_TraceRegionExit("calling NUOPC_GetStateMemberLists", rc=rc)
-    
+
     if (associated(fieldList)) then
       allocate(fieldListSet(size(fieldList)))
       j = 0
@@ -4553,18 +4549,8 @@ call ESMF_TraceRegionExit("calling NUOPC_GetStateMemberLists", rc=rc)
         if (selected) then
           j = j+1
           fieldListSet(j) = field
-#if 0
-          call NUOPC_SetTimestamp(field, time=time, rc=localrc)
-          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, &
-            file=FILENAME, &
-            rcToReturn=rc)) &
-            return  ! bail out
-#endif
         endif
       enddo
-#if 1
-call ESMF_TraceRegionEnter("timestamp fieldList", rc=rc)
       if (j>0) then
         call NUOPC_SetTimestamp(fieldListSet(1:j), time=time, rc=localrc)
         if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4573,8 +4559,6 @@ call ESMF_TraceRegionEnter("timestamp fieldList", rc=rc)
           rcToReturn=rc)) &
           return  ! bail out
       endif
-call ESMF_TraceRegionExit("timestamp fieldList", rc=rc)
-#endif
       deallocate(fieldListSet)
     endif
     
