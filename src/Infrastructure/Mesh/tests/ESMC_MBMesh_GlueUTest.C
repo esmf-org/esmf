@@ -387,7 +387,7 @@ void test_mbmesh_get_info(const MBMeshTest * const mbt, int *rc){
   bool correct = true;
   if (rc) *rc = ESMF_FAILURE;
 
-  int tol = 1e-15;
+  int tol = 1e-12;
 
   int elemCount;
   MBMesh_GetElemCount(mbt->meshp, &elemCount, &localrc);
