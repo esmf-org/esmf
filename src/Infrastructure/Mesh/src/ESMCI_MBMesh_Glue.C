@@ -489,7 +489,7 @@ void _generate_info_for_split_elems(
 
                                           int num_elems,                                           
                                           int *elemId, 
-                                          int *elemType, InterArray<int> *elemMaskII,
+                                          int *elemType, int *elemMask,
                                           int areaPresent, double *elemArea,
                                           int elemCoordsPresent, double *elemCoords,
                                           int num_elemConn, 
@@ -504,7 +504,7 @@ void _generate_info_for_split_elems(
                                           int  &num_elems_wsplit,
                                           int *&elemId_wsplit,
                                           int *&elemType_wsplit,
-                                          InterArray<int> *&elemMaskII_wsplit,
+                                          int *&elemMask_wsplit,
                                           double *&elemArea_wsplit,
                                           double *&elemCoords_wsplit,
                                           int *&elemConn_wsplit
@@ -635,25 +635,10 @@ void _generate_info_for_split_elems(
     ThrowRequire(num_elems_wsplit >= 0);
     elemType_wsplit=new int[num_elems_wsplit];
     elemId_wsplit=new int[num_elems_wsplit];
+    if (elemMask != NULL) elemMask_wsplit=new int[num_elems_wsplit];
     if (areaPresent) elemArea_wsplit=new double[num_elems_wsplit];
     if (elemCoordsPresent) elemCoords_wsplit=new double[orig_sdim*num_elems_wsplit];
-    
-    //// Setup for split mask
-    int *elemMaskIIArray=NULL;
-    int *elemMaskIIArray_wsplit=NULL;
-    if (present(elemMaskII)) {
-      
-      // Get mask value array
-      elemMaskIIArray=elemMaskII->array;
-      
-      int extent[1];
-      int *elemMaskIIArray_wsplit=new int[num_elems_wsplit];
-      
-      extent[0]=num_elems_wsplit;
-      elemMaskII_wsplit=new InterArray<int>(elemMaskIIArray_wsplit,1,extent);
-    }
-    
-    
+        
     // Allocate some temporary variables for splitting
     ThrowRequire(max_num_conn >= 0);
     double *subelem_coords=new double[3*max_num_conn];
@@ -745,7 +730,7 @@ void _generate_info_for_split_elems(
             elemType_wsplit[split_elem_pos]=3;
             
             // Set mask (if it exists)
-            if (elemMaskIIArray !=NULL) elemMaskIIArray_wsplit[split_elem_pos]=elemMaskIIArray[e];
+            if (elemMask != NULL) elemMask_wsplit[split_elem_pos]=elemMask[e];
             
             // Set element coords. (if it exists)
             if (elemCoordsPresent) {
@@ -817,7 +802,7 @@ void _generate_info_for_split_elems(
               elem_pnt_wsplit[j]=elem_pnt[j];
             }
           }
-          if (elemMaskIIArray !=NULL) elemMaskIIArray_wsplit[split_elem_pos]=elemMaskIIArray[e];
+          if (elemMask != NULL) elemMask_wsplit[split_elem_pos]=elemMask[e];
           split_elem_pos++;
           for (int i=0; i<elemType[e]; i++) {
             elemConn_wsplit[split_conn_pos]=elemConn[conn_pos];
@@ -1526,7 +1511,7 @@ void MBMesh_addelements(void **mbmpp,
      int *elemId_wsplit=NULL;
      double *elemArea_wsplit=NULL;
      double *elemCoords_wsplit=NULL;
-     InterArray<int> *elemMaskII_wsplit=NULL;
+     int *elemMask_wsplit=NULL;
 
      if (is_split) {
 
@@ -1548,13 +1533,13 @@ void MBMesh_addelements(void **mbmpp,
        // Generate split info 
        _generate_info_for_split_elems(// In
                                       is_split_local,pdim, orig_sdim, sdim, 
-                                      num_elems, elemId, elemType, elemMaskII, 
+                                      num_elems, elemId, elemType, elemMask, 
                                       areaPresent, elemArea, elemCoordsPresent, elemCoords,
                                       num_elemConn, elemConn, nodeCoords, 
                                  
                                       // Out
-                                      mbmp->max_non_split_id, mbmp->split_to_orig_id,  mbmp->split_id_to_frac,                                 
-                                      num_elems_wsplit, elemId_wsplit, elemType_wsplit, elemMaskII_wsplit, 
+                                      mbmp->max_non_split_id, mbmp->split_to_orig_id,  mbmp->split_id_to_frac,
+                                      num_elems_wsplit, elemId_wsplit, elemType_wsplit, elemMask_wsplit, 
                                       elemArea_wsplit, elemCoords_wsplit, elemConn_wsplit);
 
        // If there was a local split elem, then use the split info for creating elems below. 
@@ -1563,13 +1548,9 @@ void MBMesh_addelements(void **mbmpp,
          elemConn=elemConn_wsplit;
          elemType=elemType_wsplit;
          elemId=elemId_wsplit;
+         elemMask=elemMask_wsplit;
          if (areaPresent) elemArea=elemArea_wsplit;
          if (elemCoordsPresent) elemCoords=elemCoords_wsplit;
-         
-         if (present(elemMaskII)) {
-           elemMaskII=elemMaskII_wsplit;
-           elemMask=elemMaskII_wsplit->array;
-         }
        }
 
        // Get rid of nodeCoords
@@ -1588,12 +1569,12 @@ void MBMesh_addelements(void **mbmpp,
     }
     
     // Turn on element areas
-    if (areaPresent == 1) { 
+    if (areaPresent) { 
       mbmp->setup_elem_area();
     }
     
     // Turn on element coordinates
-    if (elemCoordsPresent == 1) { 
+    if (elemCoordsPresent) { 
       mbmp->setup_elem_coords();
     }
 
@@ -1620,12 +1601,9 @@ void MBMesh_addelements(void **mbmpp,
     delete [] elemConn_wsplit;
     delete [] elemType_wsplit;
     delete [] elemId_wsplit;
+    if (present(elemMaskII)) delete [] elemMask_wsplit;
     if (areaPresent) delete [] elemArea_wsplit;
     if (elemCoordsPresent) delete [] elemCoords_wsplit;
-    if (present(elemMaskII)) {
-      delete [] elemMaskII_wsplit->array;
-      delete elemMaskII_wsplit;
-    }
   }
 
   } catch(std::exception &x) {
