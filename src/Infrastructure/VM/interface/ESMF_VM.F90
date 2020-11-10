@@ -484,6 +484,8 @@ module ESMF_VMMod
   
   public ESMF_CommHandleGetInit
 
+  public ESMF_PointerLog
+
 !EOPI
 !------------------------------------------------------------------------------
 
@@ -5792,11 +5794,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_VMLogBacktrace - Log backtrace
 
 ! !INTERFACE:
-  subroutine ESMF_VMLogBacktrace(prefix, rc)
+  subroutine ESMF_VMLogBacktrace(prefix, logMsgFlag, rc)
 !
 ! !ARGUMENTS:
-    character (len=*),    intent(in),   optional  :: prefix
-    integer, intent(out),               optional  :: rc           
+    character (len=*),      intent(in),   optional  :: prefix
+    type(ESMF_LogMsg_Flag), intent(in),   optional  :: logMsgFlag
+    integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
 !   Log backtrace of the current call stack.
@@ -5805,20 +5808,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{description}
 !   \item [{[prefix]}]
 !     String to prefix the backtrace message. Default is no prefix.
-!   \item[{[rc]}] 
+!   \item [{[logMsgFlag]}]
+!     Type of log message generated. See section \ref{const:logmsgflag} for
+!     a list of valid message types. Default is {\tt ESMF\_LOGMSG\_INFO}.
+!   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
+    type(ESMF_LogMsg_Flag)  :: logMsg
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+    ! deal with optionl logMsgFlag
+    logMsg = ESMF_LOGMSG_INFO ! default
+    if (present(logMsgFlag)) logMsg = logMsgFlag
+
     ! Call into the C++ interface.
-    call c_esmc_vmlogbacktrace(prefix, localrc)
+    call c_esmc_vmlogbacktrace(prefix, logMsg, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -5836,11 +5847,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_VMLogCurrentGarbageInfo - Log garbage collection info
 
 ! !INTERFACE:
-  subroutine ESMF_VMLogCurrentGarbageInfo(prefix, rc)
+  subroutine ESMF_VMLogCurrentGarbageInfo(prefix, logMsgFlag, rc)
 !
 ! !ARGUMENTS:
-    character (len=*),    intent(in),   optional  :: prefix
-    integer, intent(out),               optional  :: rc           
+    character (len=*),      intent(in),   optional  :: prefix
+    type(ESMF_LogMsg_Flag), intent(in),   optional  :: logMsgFlag
+    integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
 !   Log gargbage collection info of the current VM on this PET.
@@ -5849,6 +5861,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{description}
 !   \item [{[prefix]}]
 !     String to prefix the garbage info message. Default is no prefix.
+!   \item [{[logMsgFlag]}]
+!     Type of log message generated. See section \ref{const:logmsgflag} for
+!     a list of valid message types. Default is {\tt ESMF\_LOGMSG\_INFO}.
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -5856,13 +5871,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
+    type(ESMF_LogMsg_Flag)  :: logMsg
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+    ! deal with optionl logMsgFlag
+    logMsg = ESMF_LOGMSG_INFO ! default
+    if (present(logMsgFlag)) logMsg = logMsgFlag
+
     ! Call into the C++ interface.
-    call c_esmc_vmlogcurrentgarbageinfo(prefix, localrc)
+    call c_esmc_vmlogcurrentgarbageinfo(prefix, logMsg, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -5880,11 +5900,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_VMLogGarbageInfo - Log garbage collection info
 
 ! !INTERFACE:
-  subroutine ESMF_VMLogGarbageInfo(prefix, rc)
+  subroutine ESMF_VMLogGarbageInfo(prefix, logMsgFlag, rc)
 !
 ! !ARGUMENTS:
-    character (len=*),    intent(in),   optional  :: prefix
-    integer, intent(out),               optional  :: rc           
+    character (len=*),      intent(in),   optional  :: prefix
+    type(ESMF_LogMsg_Flag), intent(in),   optional  :: logMsgFlag
+    integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
 !   Log gargbage collection info for all VMs on this PET.
@@ -5893,6 +5914,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{description}
 !   \item [{[prefix]}]
 !     String to prefix the garbage info message. Default is no prefix.
+!   \item [{[logMsgFlag]}]
+!     Type of log message generated. See section \ref{const:logmsgflag} for
+!     a list of valid message types. Default is {\tt ESMF\_LOGMSG\_INFO}.
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -5900,13 +5924,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
+    type(ESMF_LogMsg_Flag)  :: logMsg
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+    ! deal with optionl logMsgFlag
+    logMsg = ESMF_LOGMSG_INFO ! default
+    if (present(logMsgFlag)) logMsg = logMsgFlag
+
     ! Call into the C++ interface.
-    call c_esmc_vmloggarbageinfo(prefix, localrc)
+    call c_esmc_vmloggarbageinfo(prefix, logMsg, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -5924,12 +5953,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_VMLogMemInfo - Log memory info for this PET
 
 ! !INTERFACE:
-  subroutine ESMF_VMLogMemInfo(prefix, log, rc)
+  subroutine ESMF_VMLogMemInfo(prefix, logMsgFlag, log, rc)
 !
 ! !ARGUMENTS:
-    character (len=*),    intent(in),   optional  :: prefix
-    type(ESMF_Log),       intent(inout),optional  :: log
-    integer, intent(out),               optional  :: rc           
+    character (len=*),      intent(in),    optional  :: prefix
+    type(ESMF_LogMsg_Flag), intent(in),    optional  :: logMsgFlag
+    type(ESMF_Log),         intent(inout), optional  :: log
+    integer,                intent(out),   optional  :: rc
 !
 ! !DESCRIPTION:
 !   Log memory info from the system for this PET.
@@ -5938,6 +5968,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{description}
 !   \item [{[prefix]}]
 !     String to prefix the memory info message. Default is no prefix.
+!   \item [{[logMsgFlag]}]
+!     Type of log message generated. See section \ref{const:logmsgflag} for
+!     a list of valid message types. Default is {\tt ESMF\_LOGMSG\_INFO}.
 !   \item [{[log]}] !TODO: BROKEN!!!
 !     {\tt ESMF\_Log} object that can be used instead of the default Log.
 !     Default is to use the default log.
@@ -5948,13 +5981,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
+    type(ESMF_LogMsg_Flag)  :: logMsg
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+    ! deal with optionl logMsgFlag
+    logMsg = ESMF_LOGMSG_INFO ! default
+    if (present(logMsgFlag)) logMsg = logMsgFlag
+
     ! Call into the C++ interface.
-    call c_esmc_vmlogmeminfo(prefix, log, localrc)
+    call c_esmc_vmlogmeminfo(prefix, logMsg, log, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -10018,12 +10056,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_VMIdLog - Log an ESMF_VMId object
 
 ! !INTERFACE:
-  subroutine ESMF_VMIdLog(vmId, prefix, rc)
+  subroutine ESMF_VMIdLog(vmId, prefix, logMsgFlag, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VMId),      intent(in)              :: vmId
-    character (len=*),    intent(in),   optional  :: prefix
-    integer,              intent(out),  optional  :: rc           
+    type(ESMF_VMId),        intent(in)              :: vmId
+    character (len=*),      intent(in),   optional  :: prefix
+    type(ESMF_LogMsg_Flag), intent(in),   optional  :: logMsgFlag
+    integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
 !   Write an ESMF_VMId object to the default Log.
@@ -10034,20 +10073,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     ESMF_VMId object
 !   \item [{[prefix]}]
 !     String to prefix the memory info message. Default is no prefix.
-!   \item[{[rc]}] 
+!   \item [{[logMsgFlag]}]
+!     Type of log message generated. See section \ref{const:logmsgflag} for
+!     a list of valid message types. Default is {\tt ESMF\_LOGMSG\_INFO}.
+!   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
+    type(ESMF_LogMsg_Flag)  :: logMsg
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+    ! deal with optionl logMsgFlag
+    logMsg = ESMF_LOGMSG_INFO ! default
+    if (present(logMsgFlag)) logMsg = logMsgFlag
+
     ! Call into the C++ interface
-    call c_ESMC_VMIdLog(vmId, prefix, localrc)
+    call c_ESMC_VMIdLog(vmId, prefix, logMsg, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -10829,8 +10876,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end function ESMF_CommHandleGetInit
 !------------------------------------------------------------------------------
 
+!==============================================================================
+! ESMF_PointerLog, which has to be built _after_ ESMF_LogErrMod
+!==============================================================================
 
+subroutine ESMF_PointerLog(ptr, prefix, logMsgFlag, rc)
+  type(ESMF_Pointer),     intent(in)             :: ptr
+  character (len=*),      intent(in),  optional  :: prefix
+  type(ESMF_LogMsg_Flag), intent(in),  optional  :: logMsgFlag
+  integer,                intent(out), optional  :: rc
+  type(ESMF_LogMsg_Flag)  :: logMsg
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! deal with optionl logMsgFlag
+  logMsg = ESMF_LOGMSG_INFO ! default
+  if (present(logMsgFlag)) logMsg = logMsgFlag
+  call c_pointerlog(ptr, prefix, logMsg)
+  ! return successfully
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine
 
+!------------------------------------------------------------------------------
 
 end module ESMF_VMMod
 
