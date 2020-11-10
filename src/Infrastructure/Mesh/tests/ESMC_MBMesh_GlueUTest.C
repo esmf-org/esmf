@@ -43,6 +43,17 @@
 #define M_PI 3.14159265358979323846
 #endif
 
+template<class T>
+typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
+    almost_equal(T x, T y, int ulp=15)
+{
+    // the machine epsilon has to be scaled to the magnitude of the values used
+    // and multiplied by the desired precision in ULPs (units in the last place)
+    return std::fabs(x-y) <= std::numeric_limits<T>::epsilon() * std::fabs(x+y) * ulp
+        // unless the result is subnormal
+        || std::fabs(x-y) < std::numeric_limits<T>::min();
+}
+
 class MBMeshTest {
   public:
     MBMesh *mesh;
@@ -387,7 +398,7 @@ void test_mbmesh_get_info(const MBMeshTest * const mbt, int *rc){
   bool correct = true;
   if (rc) *rc = ESMF_FAILURE;
 
-  int tol = 1e-15;
+  double tol = 1.e-15;
 
   int elemCount;
   MBMesh_GetElemCount(mbt->meshp, &elemCount, &localrc);
@@ -503,14 +514,14 @@ void test_mbmesh_get_info(const MBMeshTest * const mbt, int *rc){
   } else {
     bool print = false;
     for (int i=0; i<nci->extent[0]; ++i) {
-      if (abs(nci->array[i] - mbt->nodeCoord[i]) > tol) {
+      if (!almost_equal(nci->array[i], mbt->nodeCoord[i])) {
         correct = false;
         print = true;
       }
     }
     if (print) {
       for (int i=0; i<nci->extent[0]; ++i)
-        printf("node_coord[%d] = %f (correct = %f)\n", i, nci->array[i], mbt->nodeCoord[i]);
+        printf("node_coord[%d] = %.16f (correct = %.16f)\n", i, nci->array[i], mbt->nodeCoord[i]);
     }
   }
   
@@ -669,14 +680,14 @@ void test_mbmesh_get_info(const MBMeshTest * const mbt, int *rc){
     } else {
       bool print = false;
       for (int i=0; i<eai->extent[0]; ++i) {
-        if (abs(eai->array[i] - mbt->elemArea[i]) > tol) {
+        if (!almost_equal(eai->array[i], mbt->elemArea[i])) {
           correct = false;
           print = true;
         }
       }
       if (print) {
         for (int i=0; i<eai->extent[0]; ++i)
-          printf("elem_area[%d] = %f (correct = %f)\n", i, eai->array[i], mbt->elemArea[i]);
+          printf("elem_area[%d] = %.16f (correct = %.16f)\n", i, eai->array[i], mbt->elemArea[i]);
       }
     }
   }
@@ -695,14 +706,14 @@ void test_mbmesh_get_info(const MBMeshTest * const mbt, int *rc){
     } else {
       bool print = false;
       for (int i=0; i<eci->extent[0]; ++i) {
-        if (abs(eci->array[i] - mbt->elemCoord[i]) > tol) {
+        if (!almost_equal(eci->array[i], mbt->elemCoord[i])) {
           correct = false;
           print = true;
         }
       }
       if (print) {
         for (int i=0; i<eci->extent[0]; ++i)
-          printf("elem_coords[%d] = %f (correct = %f)\n", i, eci->array[i], mbt->elemCoord[i]);
+          printf("elem_coords[%d] = %.16f (correct = %.16f)\n", i, eci->array[i], mbt->elemCoord[i]);
       }
     }
   }
