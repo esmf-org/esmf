@@ -2912,11 +2912,12 @@ call ESMF_PointerLog(gridListE%keyGrid%this, &
   prefix="    to keyGrid: "//trim(msgString)//": ", &
   logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
 !TODO: Actually want to check for alias match.
-!              if (gridListE%providerGrid == grid) then
+              if (gridListE%keyGrid == grid) then
 !TODO: But for now this does not work due to proxy duplication, and as a 
 !TODO: work-around matching is done by name. This is very fragile and should
 !TODO: be fixed as soon as we can rely on correct proxy behavior!
-              if (trim(geomobjname)==trim(msgString)) then
+!              if (trim(geomobjname)==trim(msgString)) then
+call ESMF_LogWrite("Matching Grid found!", ESMF_LOGMSG_DEBUG, rc=rc)
                 gridListMatch=.true.
                 exit
               endif
@@ -3161,11 +3162,12 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
   prefix="    to keyMesh: "//trim(msgString)//": ", &
   logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
 !TODO: Actually want to check for alias match.
-!              if (meshListE%providerMesh == mesh) then
+              if (meshListE%keyMesh == mesh) then
 !TODO: But for now this does not work due to proxy duplication, and as a 
 !TODO: work-around matching is done by name. This is very fragile and should
 !TODO: be fixed as soon as we can rely on correct proxy behavior!
-              if (trim(geomobjname)==trim(msgString)) then
+!              if (trim(geomobjname)==trim(msgString)) then
+call ESMF_LogWrite("Matching Mesh found!", ESMF_LOGMSG_DEBUG, rc=rc)
                 meshListMatch=.true.
                 exit
               endif
@@ -3960,11 +3962,12 @@ call ESMF_PointerLog(gridListE%keyGrid%this, &
   prefix="    to keyGrid: "//trim(msgString)//": ", &
   logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
 !TODO: Actually want to check for alias match.
-!              if (acceptorGrid == gridListE%keyGrid) then
+              if (acceptorGrid == gridListE%keyGrid) then
 !TODO: But for now this does not work due to proxy duplication, and as a 
 !TODO: work-around matching is done by name. This is very fragile and should
 !TODO: be fixed as soon as we can rely on correct proxy behavior!
-              if (trim(geomobjname)==trim(msgString)) then
+!              if (trim(geomobjname)==trim(msgString)) then
+call ESMF_LogWrite("Matching Grid found!", ESMF_LOGMSG_DEBUG, rc=rc)
                 gridListMatch=.true.
                 exit
               endif
@@ -4066,11 +4069,12 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
   prefix="    to keyMesh: "//trim(msgString)//": ", &
   logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
 !TODO: Actually want to check for alias match.
-!              if (acceptorMesh == meshListE%keyMesh) then
+              if (acceptorMesh == meshListE%keyMesh) then
 !TODO: But for now this does not work due to proxy duplication, and as a 
 !TODO: work-around matching is done by name. This is very fragile and should
 !TODO: be fixed as soon as we can rely on correct proxy behavior!
-              if (trim(geomobjname)==trim(msgString)) then
+!              if (trim(geomobjname)==trim(msgString)) then
+call ESMF_LogWrite("Matching Mesh found!", ESMF_LOGMSG_DEBUG, rc=rc)
                 meshListMatch=.true.
                 exit
               endif
