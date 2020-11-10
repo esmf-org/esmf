@@ -579,7 +579,7 @@ namespace ESMCI {
     }
     int getTensorSequenceIndex()const;
     int getArbSequenceIndexOffset()const;
-    void log()const;
+    void log(ESMC_LogMsgType_Flag msgType=ESMC_LOGMSG_INFO)const;
     void next(){
       bool adjusted = MultiDimIndexLoop::next();
       if (!isWithin()) return;  // reached the end of iteration

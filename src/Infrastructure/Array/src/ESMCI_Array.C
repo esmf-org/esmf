@@ -585,7 +585,7 @@ Array *Array::create(
   {
     std::stringstream debugmsg;
     debugmsg << "rank=" << rank << " dimCount=" << dimCount;
-    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
   // check if distgridToArrayMap was provided and matches rest of arguments
@@ -645,7 +645,7 @@ Array *Array::create(
   {
     std::stringstream debugmsg;
     debugmsg << "rank=" << rank << " dimCount=" << dimCount;
-    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
   // generate arrayToDistGridMap
@@ -750,7 +750,7 @@ Array *Array::create(
   {
     std::stringstream debugmsg;
     debugmsg << "indexflag=" << indexflag;
-    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
   // figure exclusive region
@@ -1140,7 +1140,7 @@ Array *Array::create(
             debugmsg << "jj=" << jj << ": " << temp_counts[jj] << " < "
               << totalUBound[i*redDimCount+j] << " - "
               << totalLBound[i*redDimCount+j] << " + 1";
-            ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_WARN);
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
               "LocalArray does not accommodate requested element count",
               ESMC_CONTEXT, rc);
@@ -1334,7 +1334,7 @@ Array *Array::create(
       << delayout->getLocalDeCount() << " localDeToDeMap()=" 
       << delayout->getLocalDeToDeMap() << " : " 
       << *delayout->getLocalDeToDeMap();
-    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
   int dimCount = distgrid->getDimCount();
@@ -1396,7 +1396,7 @@ Array *Array::create(
     std::stringstream debugmsg;
     debugmsg << "rank=" << rank << " dimCount=" << dimCount
       << " redDimCount=" << redDimCount << " tensorCount=" << tensorCount;
-    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
   // generate arrayToDistGridMap
@@ -3440,7 +3440,7 @@ bool Array::isRHCompatible(
     {
       std::stringstream msg;
       msg << ESMC_METHOD": " << __LINE__ << " return:" << result;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
@@ -3455,7 +3455,7 @@ bool Array::isRHCompatible(
     {
       std::stringstream msg;
       msg << ESMC_METHOD": " << __LINE__ << " return:" << result;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -3468,7 +3468,7 @@ bool Array::isRHCompatible(
     {
       std::stringstream msg;
       msg << ESMC_METHOD": " << __LINE__ << " return:" << result;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -3485,7 +3485,7 @@ bool Array::isRHCompatible(
     {
       std::stringstream msg;
       msg << ESMC_METHOD": " << __LINE__ << " return:" << result;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -3506,7 +3506,7 @@ bool Array::isRHCompatible(
       {
         std::stringstream msg;
         msg << ESMC_METHOD": " << __LINE__ << " return:" << result;
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       }
 #endif
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -3526,7 +3526,7 @@ bool Array::isRHCompatible(
           {
             std::stringstream msg;
             msg << ESMC_METHOD": " << __LINE__ << " return:" << result;
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
           if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -3541,7 +3541,7 @@ bool Array::isRHCompatible(
           {
             std::stringstream msg;
             msg << ESMC_METHOD": " << __LINE__ << " return:" << result;
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
           if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -3557,7 +3557,7 @@ bool Array::isRHCompatible(
   {
     std::stringstream msg;
     msg << ESMC_METHOD": " << __LINE__ << " return:" << result;
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
   if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -3611,7 +3611,7 @@ bool Array::matchBool(
     {
       std::stringstream msg;
       msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
@@ -3623,7 +3623,7 @@ bool Array::matchBool(
     {
       std::stringstream msg;
       msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
@@ -3639,7 +3639,7 @@ bool Array::matchBool(
     {
       std::stringstream msg;
       msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -3653,7 +3653,7 @@ bool Array::matchBool(
     {
       std::stringstream msg;
       msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -3665,7 +3665,7 @@ bool Array::matchBool(
     {
       std::stringstream msg;
       msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -3682,7 +3682,7 @@ bool Array::matchBool(
     {
       std::stringstream msg;
       msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -3696,7 +3696,7 @@ bool Array::matchBool(
     {
       std::stringstream msg;
       msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -3708,7 +3708,7 @@ bool Array::matchBool(
     {
       std::stringstream msg;
       msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -3724,7 +3724,7 @@ bool Array::matchBool(
       {
         std::stringstream msg;
         msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       }
 #endif
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -3738,7 +3738,7 @@ bool Array::matchBool(
   {
     std::stringstream msg;
     msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
   if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -6674,7 +6674,7 @@ namespace ArrayHelper{
       std::stringstream msg;
       msg << "ASMM_STORE_LOG:" << __LINE__ << " on localPet=" << localPet <<
         " from Pet=" << srcPet;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
     recvnbIndex = xxe->count;  // store index for the associated wait
@@ -6734,7 +6734,7 @@ namespace ArrayHelper{
       std::stringstream msg;
       msg << "ASMM_STORE_LOG:" << __LINE__ << " XXE::recv on localPet="
         << localPet << " from Pet=" << srcPet;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
     recvnbIndex = xxe->count;  // store index for the associated wait
@@ -7418,7 +7418,7 @@ namespace ArrayHelper{
     std::stringstream msg;
     msg << "ASMM_STORE_LOG:" << __LINE__ << " from localPet=" << localPet <<
       " to Pet=" << dstPet << " count=" << count;
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
       if (false){
@@ -7432,7 +7432,7 @@ namespace ArrayHelper{
     std::stringstream msg;
     msg << "ASMM_STORE_LOG:" << __LINE__ <<
       " single contiguous linIndex run on src side";
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
         sendnbIndex = xxe->count;  // store index for the associated wait
@@ -7456,7 +7456,7 @@ namespace ArrayHelper{
     std::stringstream msg;
     msg << "ASMM_STORE_LOG:" << __LINE__ <<
       " non-contiguous linIndex on src side -> need buffer";
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
         // use intermediate buffer
@@ -7479,7 +7479,7 @@ namespace ArrayHelper{
     std::stringstream msg;
     msg << "ASMM_STORE_LOG:" << __LINE__ << " countList[]=" <<
       xxeMemGatherSrcRRAInfo->countList[kk];
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
         }
@@ -7506,7 +7506,7 @@ namespace ArrayHelper{
       msg << "ASMM_STORE_LOG:" << __LINE__ << " on localPet=" << localPet <<
         " memGatherSrcRRA took dt_tk=" << dt_tk << "s and dt_byte=" <<
         dt_byte << " for count=" << count;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
         // decide for the fastest option
@@ -7730,7 +7730,7 @@ namespace ArrayHelper{
       std::stringstream msg;
       msg << "ASMM_STORE_LOG:" << __LINE__ << " XXE::send from localPet="
         << localPet << " to Pet=" << dstPet;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
       if (false){
@@ -7744,7 +7744,7 @@ namespace ArrayHelper{
       std::stringstream msg;
       msg << "ASMM_STORE_LOG:" << __LINE__ << " single contiguous linIndex "
         "run on src side";
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
         sendnbIndex = xxe->count;  // store index for the associated wait
@@ -7768,7 +7768,7 @@ namespace ArrayHelper{
       std::stringstream msg;
       msg << "ASMM_STORE_LOG:" << __LINE__ << " non-contiguous linIndex on "
         "src side -> need buffer";
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
         // use intermediate buffer
@@ -7810,7 +7810,7 @@ namespace ArrayHelper{
       msg << "ASMM_STORE_LOG:" << __LINE__ << " on localPet=" << localPet <<
           " memGatherSrcRRA took dt_tk=" << dt_tk << "s and dt_byte=" <<
           dt_byte << " for count=" << count;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
         // decide for the fastest option
@@ -8054,7 +8054,7 @@ namespace ArrayHelper{
       std::stringstream msg;
       msg << "ASMM_STORE_LOG:" << __LINE__ << " XXE::sendrecv from localPet="
         << localPet << " to Pet=" << dstPet;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
       if (false){
@@ -8068,7 +8068,7 @@ namespace ArrayHelper{
       std::stringstream msg;
       msg << "ASMM_STORE_LOG:" << __LINE__ << " single contiguous linIndex "
         "run on src side";
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
         sendnbIndex = xxe->count;  // store index for the associated wait
@@ -8095,7 +8095,7 @@ namespace ArrayHelper{
       std::stringstream msg;
       msg << "ASMM_STORE_LOG:" << __LINE__ << " non-contiguous linIndex on "
           "src side -> need buffer";
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
         // use intermediate buffer
@@ -8137,7 +8137,7 @@ namespace ArrayHelper{
       msg << "ASMM_STORE_LOG:" << __LINE__ << " on localPet " << localPet <<
         " memGatherSrcRRA took dt_tk=" << dt_tk << "s and dt_byte=" <<
         dt_byte << "byte for count=" << count;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
         // decide for the fastest option
@@ -8921,7 +8921,7 @@ template<typename SIT, typename DIT>
       << " dstTensorLength=" << dstTensorLength
       << " srcDimCount=" << srcArray->getDistGrid()->getDimCount()
       << " dstDimCount=" << dstArray->getDistGrid()->getDimCount();
-    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
 
@@ -8971,7 +8971,7 @@ template<typename SIT, typename DIT>
     debugmsg << "Array::tSparseMatMulStore(): workWithTempArrays active:"
       << " srcTensorLength=" << srcTensorLength
       << " dstTensorLength=" << dstTensorLength;
-    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
     workWithTempArrays=true;
@@ -9158,7 +9158,7 @@ template<typename SIT, typename DIT>
 #ifdef MALLOC_TRIM_REPORT_on
     std::stringstream msg;
     msg << "malloc_trim(0)#" << __LINE__ << ": " << mtrim;
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
   }
 #endif
@@ -9237,7 +9237,7 @@ template<typename SIT, typename DIT>
 #ifdef MALLOC_TRIM_REPORT_on
     std::stringstream msg;
     msg << "malloc_trim(0)#" << __LINE__ << ": " << mtrim;
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
   }
 #endif
@@ -9286,60 +9286,60 @@ template<typename SIT, typename DIT>
   VMK::wtime(&t15);   //gjt - profile
   {
     char msg[160];
-    ESMC_LogDefault.Write("ASMM_STORE_TIMING: --- start ---", ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write("ASMM_STORE_TIMING: --- start ---", ESMC_LOGMSG_DEBUG);
     sprintf(msg, "ASMM_STORE_TIMING: t1   = %g", t1-t0);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
     sprintf(msg, "ASMM_STORE_TIMING: t2   = %g", t2-t0);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
     sprintf(msg, "ASMM_STORE_TIMING: t3   = %g", t3-t0);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
     sprintf(msg, "ASMM_STORE_TIMING: t4   = %g", t4-t0);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
     sprintf(msg, "ASMM_STORE_TIMING:    t4a1   = %g", t4a1-t3);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
     sprintf(msg, "ASMM_STORE_TIMING:    t4a2   = %g", t4a2-t3);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
     sprintf(msg, "ASMM_STORE_TIMING:    t4a3   = %g", t4a3-t3);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
     sprintf(msg, "ASMM_STORE_TIMING:    t4a    = %g", t4a-t3);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
     sprintf(msg, "ASMM_STORE_TIMING:    t4b1   = %g", t4b1-t3);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
     sprintf(msg, "ASMM_STORE_TIMING:    t4b2   = %g", t4b2-t3);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
     sprintf(msg, "ASMM_STORE_TIMING:    t4b3   = %g", t4b3-t3);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
     sprintf(msg, "ASMM_STORE_TIMING:    t4b    = %g", t4b-t3);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
     sprintf(msg, "ASMM_STORE_TIMING: t5   = %g", t5-t0);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
     sprintf(msg, "ASMM_STORE_TIMING:    t5c    = %g", t5c-t4);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
     sprintf(msg, "ASMM_STORE_TIMING:    t5f    = %g", t5f-t4);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
     sprintf(msg, "ASMM_STORE_TIMING: t6   = %g", t6-t0);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
     sprintf(msg, "ASMM_STORE_TIMING: t7   = %g", t7-t0);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
     sprintf(msg, "ASMM_STORE_TIMING: t8   = %g", t8-t0);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
     sprintf(msg, "ASMM_STORE_TIMING: t9   = %g", t9-t0);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
     sprintf(msg, "ASMM_STORE_TIMING: t10  = %g", t10-t0);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
     sprintf(msg, "ASMM_STORE_TIMING: t11  = %g", t11-t0);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
     sprintf(msg, "ASMM_STORE_TIMING: t12pre  = %g", t12pre-t0);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
     sprintf(msg, "ASMM_STORE_TIMING: t12  = %g", t12-t0);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
     sprintf(msg, "ASMM_STORE_TIMING: t13  = %g", t13-t0);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
     sprintf(msg, "ASMM_STORE_TIMING: t14  = %g", t14-t0);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
     sprintf(msg, "ASMM_STORE_TIMING: t15  = %g", t15-t0);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    ESMC_LogDefault.Write("ASMM_STORE_TIMING: --- stop ----", ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
+    ESMC_LogDefault.Write("ASMM_STORE_TIMING: --- stop ----", ESMC_LOGMSG_DEBUG);
   }
 #endif
 
@@ -9371,7 +9371,7 @@ template<typename SIT, typename DIT>
 
 #if 0
   vm->timerStop("tSparseMatMulStore");
-  vm->timerLog("tSparseMatMulStore");
+  vm->timerLog("tSparseMatMulStore", ESMC_LOGMSG_DEBUG);
 #endif
 
   // return successfully
@@ -9450,23 +9450,23 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
           ".seqIndex = "<< srcLinSeqVect[j][k].seqIndex.decompSeqIndex
           <<"/"<< srcLinSeqVect[j][k].seqIndex.getTensor() <<
           ", .factorList.size() = "<< srcLinSeqVect[j][k].factorList.size();
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
         msg.str("");  // clear
         for (unsigned kk=0; kk<srcLinSeqVect[j][k].factorList.size(); kk++){
           msg << "ASMM_STORE_LOG:" << __LINE__ << " \tfactorList["<< kk <<"]";
-          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           msg.str("");  // clear
           msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.partnerSeqIndex ="
             << srcLinSeqVect[j][k].factorList[kk].partnerSeqIndex.decompSeqIndex
             <<"/"
             << srcLinSeqVect[j][k].factorList[kk].partnerSeqIndex.getTensor();
-          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           msg.str("");  // clear
           msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.partnerDe =";
           for (unsigned jj=0;
             jj<srcLinSeqVect[j][k].factorList[kk].partnerDe.size(); jj++)
             msg << srcLinSeqVect[j][k].factorList[kk].partnerDe[jj] <<", ";
-          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           msg.str("");  // clear
           switch (typekindFactors){
           case ESMC_TYPEKIND_R4:
@@ -9488,7 +9488,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
           default:
             break;
           }
-          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           msg.str("");  // clear
         }
       }
@@ -9502,23 +9502,23 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
           ".seqIndex = "<< dstLinSeqVect[j][k].seqIndex.decompSeqIndex
           <<"/"<< dstLinSeqVect[j][k].seqIndex.getTensor() <<
           ", .factorList.size() = "<< dstLinSeqVect[j][k].factorList.size();
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
         msg.str("");  // clear
         for (unsigned kk=0; kk<dstLinSeqVect[j][k].factorList.size(); kk++){
           msg << "ASMM_STORE_LOG:" << __LINE__ << " \tfactorList["<< kk <<"]";
-          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           msg.str("");  // clear
           msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.partnerSeqIndex ="
             << dstLinSeqVect[j][k].factorList[kk].partnerSeqIndex.decompSeqIndex
             <<"/"
             << dstLinSeqVect[j][k].factorList[kk].partnerSeqIndex.getTensor();
-          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           msg.str("");  // clear
           msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.partnerDe =";
           for (unsigned jj=0;
             jj<dstLinSeqVect[j][k].factorList[kk].partnerDe.size(); jj++)
             msg << dstLinSeqVect[j][k].factorList[kk].partnerDe[jj] <<", ";
-          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           msg.str("");  // clear
           switch (typekindFactors){
           case ESMC_TYPEKIND_R4:
@@ -9540,7 +9540,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
           default:
             break;
           }
-          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           msg.str("");  // clear
         }
       }
@@ -9581,7 +9581,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
       << " srcTensorContigLength=" << srcTensorContigLength
       << " dstTensorContigLength=" << dstTensorContigLength
       << " ==>> vectorFlag=" << vectorFlag;
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
 
@@ -9602,7 +9602,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
       std::stringstream msg;
       msg << "ASMM_STORE_LOG:" << __LINE__ << " j=" << j <<
         " dstLocalDeElementCount[j]=" << dstLocalDeElementCount[j];
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
     vector<int> index2Ref;
@@ -9632,7 +9632,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
       msg << "ASMM_STORE_LOG:" << __LINE__ << " j=" << j <<
         " iCount=" << iCount <<
         " localDeFactorCount=" << localDeFactorCount;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
     int *index2Ref2 = new int[localDeFactorCount];            // large enough
@@ -9680,17 +9680,17 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
       std::stringstream msg;
       msg << "ASMM_STORE_LOG:" << __LINE__ << " recvnbDiffPartnerDeCount="
         << recvnbDiffPartnerDeCount;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       for (int i=0; i<recvnbDiffPartnerDeCount; i++){
         msg.str("");  // clear
         msg << "ASMM_STORE_LOG:" << __LINE__ << " recvnbPartnerDeCount[" << i <<
           "]=" << recvnbPartnerDeCount[i];
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       }
       msg.str("");  // clear
       msg << "ASMM_STORE_LOG:" << __LINE__ << " sizeof(DstInfo)="
         << sizeof(ArrayHelper::DstInfo<SeqIndex<DIT>,SeqIndex<SIT> >);
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
 
@@ -9785,7 +9785,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
 #ifdef MALLOC_TRIM_REPORT_on
     std::stringstream msg;
     msg << "malloc_trim(0)#" << __LINE__ << ": " << mtrim;
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
   }
 #endif
@@ -9829,7 +9829,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
               << dstInfoTable[i][k].partnerSeqIndex.decompSeqIndex << "/"
               << dstInfoTable[i][k].partnerSeqIndex.getTensor()
               << " .factor = " << dstInfoTable[i][k].factor;
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
         }
 #endif
@@ -9859,7 +9859,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
               " dstTensorContigLength: " << dstTensorContigLength << 
               " vectorLength: " << vectorLength << " decompSeqIndex: " <<
               decompSeqIndex;
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
           if ((rangeWrite != dstInfoTable[i].begin())
@@ -9893,7 +9893,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
         msg.str("");  // clear
         msg << "ASMM_STORE_LOG:" << __LINE__ << " dstInfoTable[" << i <<
           "].size()=" << dstInfoTable[i].size();
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       }
     }
 #endif
@@ -9934,7 +9934,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
         std::stringstream msg;
         msg << "ASMM_STORE_LOG:" << __LINE__ <<
           " recv: deflated count: kk=" << kk;
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #if 0
         for (int k=0; k<deflator.size(); k++){
           msg.str("");  // clear
@@ -9942,7 +9942,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
             " recv: deflator[" << k << "]: index=" << deflator[k].index <<
             ", bufferIndex=" << dstInfoTable[i][deflator[k].index].bufferIndex
             << ", seqIndex=" << deflator[k].seqIndex.decompSeqIndex;
-          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
         }
 #endif
       }
@@ -9993,7 +9993,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
         std::stringstream msg;
         msg << "ASMM_STORE_LOG:" << __LINE__ << " recvnbElement srcPet="
           << srcPet << " vectorLength=" << vectorLength;
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       }
 #endif
     } // for i - recvnbDiffPartnerDeCount
@@ -10026,7 +10026,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
 #ifdef MALLOC_TRIM_REPORT_on
     std::stringstream msg;
     msg << "malloc_trim(0)#" << __LINE__ << ": " << mtrim;
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
   }
 #endif
@@ -10043,7 +10043,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
       std::stringstream msg;
       msg << "ASMM_STORE_LOG:" << __LINE__ << " j=" << j <<
         " srcLocalDeElementCount[j]=" << srcLocalDeElementCount[j];
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
     vector<int> index2Ref;
@@ -10068,7 +10068,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
       std::stringstream msg;
       msg << "ASMM_STORE_LOG:" << __LINE__ << " iCount=" << iCount <<
         " localDeFactorCount=" << localDeFactorCount;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
     
@@ -10116,17 +10116,17 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
       std::stringstream msg;
       msg << "ASMM_STORE_LOG:" << __LINE__ << " sendnbDiffPartnerDeCount="
         << sendnbDiffPartnerDeCount;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       for (int i=0; i<sendnbDiffPartnerDeCount; i++){
         msg.str("");  // clear
         msg << "ASMM_STORE_LOG:" << __LINE__ << " sendnbPartnerDeCount[" << i <<
           "]=" << sendnbPartnerDeCount[i];
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       }
       msg.str("");  // clear
       msg << "ASMM_STORE_LOG:" << __LINE__ << " sizeof(SrcInfo)="
         << sizeof(ArrayHelper::SrcInfo<SeqIndex<DIT>,SeqIndex<SIT> >);
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
 #ifdef ASMM_STORE_MEMLOG_on
@@ -10214,7 +10214,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
 #ifdef MALLOC_TRIM_REPORT_on
     std::stringstream msg;
     msg << "malloc_trim(0)#" << __LINE__ << ": " << mtrim;
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
   }
 #endif
@@ -10254,7 +10254,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
               << srcInfoTable[i][k].partnerSeqIndex.decompSeqIndex << "/"
               << srcInfoTable[i][k].partnerSeqIndex.getTensor()
               << " .factor = " << srcInfoTable[i][k].factor;
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
         }
 #endif
@@ -10284,7 +10284,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
               " srcTensorContigLength: " << srcTensorContigLength << 
               " vectorLength: " << vectorLength << " decompSeqIndex: " <<
               decompSeqIndex;
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
           if ((rangeWrite != srcInfoTable[i].begin())
@@ -10318,7 +10318,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
         msg.str("");  // clear
         msg << "ASMM_STORE_LOG:" << __LINE__ << " srcInfoTable[" << i <<
           "].size()=" << srcInfoTable[i].size();
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       }
     }
 #endif
@@ -10345,14 +10345,14 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
         std::stringstream msg;
         msg << "ASMM_STORE_LOG:" << __LINE__ <<
           " send: after erase: deflator.size()=" << deflator.size();
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #if 0
         for (int k=0; k<deflator.size(); k++){
           msg.str("");  // clear
           msg << "ASMM_STORE_LOG:" << __LINE__ <<
             " send: deflator[" << k << "]: index=" << deflator[k].index <<
             ", seqIndex=" << deflator[k].seqIndex.decompSeqIndex;
-          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
         }
 #endif
       }
@@ -10383,7 +10383,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
           std::stringstream msg;
           msg << "ASMM_STORE_LOG:" << __LINE__ << " sendnbDiffDe=" << i <<
             " linIndexContigBlockList.size()=" << linIndexContigBlockList.size();
-          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
         }
 #endif
 
@@ -10396,7 +10396,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
               " linIndexContigBlockList[" << k << "]: linIndex=" << 
               linIndexContigBlockList[k].linIndex << " linIndexCount=" <<
               linIndexContigBlockList[k].linIndexCount;
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
         }
 #endif
@@ -10458,7 +10458,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
         std::stringstream msg;
         msg << "ASMM_STORE_LOG:" << __LINE__ << " sendnbElement dstPet="
           << dstPet << " vectorLength=" << vectorLength;
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
         for (int k=0; k<sendnbVector[ii].linIndexContigBlockList.size(); k++){
           msg.str("");  // clear
           msg << "ASMM_STORE_LOG:" << __LINE__ << " linIndexContigBlockList["
@@ -10466,7 +10466,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
             sendnbVector[ii].linIndexContigBlockList[k].linIndex <<
             ", linIndexCount=" << 
             sendnbVector[ii].linIndexContigBlockList[k].linIndexCount;
-          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
         }
       }
 #endif
@@ -10475,7 +10475,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
         std::stringstream msg;
         msg << "ASMM_STORE_LOG:" << __LINE__ << " sendnbElement dstPet="
           << dstPet << " vectorLength=" << vectorLength;
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       }
 #endif
     } // for i - sendnbDiffPartnerDeCount
@@ -10536,7 +10536,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
     std::stringstream msg;
     msg << "Storing CommMatrix: sendnbVector.size()=" << sendnbVector.size()
         << " recvnbVector.size()=" << recvnbVector.size();
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
   // store the communication matrix in compact (sparse) distributed fashion,
@@ -10803,7 +10803,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
     char msg[160];
     sprintf(msg, "ASMM_STORE_TUNELOG:%d srcTermProcessingArg = %d"
       " was provided -> do not tune", __LINE__, *srcTermProcessingArg);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
 #endif
     srcTermProcessingOpt = *srcTermProcessingArg;
   }else{
@@ -10812,7 +10812,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
     char msg[160];
     sprintf(msg, "ASMM_STORE_TUNELOG:%d srcTermProcessingArg was NOT"
       " provided -> tuning...", __LINE__);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
 #endif
 #ifdef WORKAROUND_NONBLOCKPROGRESSBUG
     int pipelineDepth = 1;// only allow one outstanding connection as workaround
@@ -10842,7 +10842,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
 #ifdef MALLOC_TRIM_REPORT_on
     std::stringstream msg;
     msg << "malloc_trim(0)#" << __LINE__ << ": " << mtrim;
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
   }
 #endif
@@ -10881,7 +10881,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
       msg << "ASMM_STORE_TUNELOG:" << __LINE__
         << " srcTermProcessing=" << srcTermProcessing
         << " dtAverage=" << dtAverage;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
       // determine optimum srcTermProcessing
@@ -10905,7 +10905,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
       msg << "ASMM_STORE_TUNELOG:" << __LINE__
         << " srcTermProcessingOpt=" << srcTermProcessingOpt
         << " dtMin(local)=" << dtMin;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
 
@@ -10938,7 +10938,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
 #ifdef ASMM_STORE_TUNELOG_on
     sprintf(msg, "ASMM_STORE_TUNELOG:%d ... finished tuning, found"
       " srcTermProcessingOpt = %d", __LINE__, srcTermProcessingOpt);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
 #endif
     if (srcTermProcessingArg) *srcTermProcessingArg = srcTermProcessingOpt;
 
@@ -10954,7 +10954,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
       msg << "ASMM_STORE_TUNELOG:" << __LINE__
         << " srcTermProcessingOpt=" << srcTermProcessingOpt
         << " (majority vote)";
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
 
@@ -10988,7 +10988,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
     char msg[160];
     sprintf(msg, "ASMM_STORE_TUNELOG:%d pipelineDepthArg = %d was provided"
       " -> do not tune", __LINE__, *pipelineDepthArg);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
 #endif
     pipelineDepthOpt = *pipelineDepthArg;
   }else{
@@ -10997,7 +10997,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
     char msg[160];
     sprintf(msg, "ASMM_STORE_TUNELOG:%d pipelineDepthArg was NOT provided"
       " -> tuning...", __LINE__);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
 #endif
     for (int pipelineDepth=1; pipelineDepth<=petCount; pipelineDepth*=2){
       // start writing a fresh XXE stream
@@ -11020,7 +11020,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
 #ifdef MALLOC_TRIM_REPORT_on
     std::stringstream msg;
     msg << "malloc_trim(0)#" << __LINE__ << ": " << mtrim;
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
   }
 #endif
@@ -11071,7 +11071,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
       msg << "ASMM_STORE_TUNELOG:" << __LINE__
         << " pipelineDepth=" << pipelineDepth
         << " dtAverage=" << dtAverage;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
 #ifdef ASMM_STORE_MEMLOG_on
@@ -11098,7 +11098,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
       msg << "ASMM_STORE_TUNELOG:" << __LINE__
         << " pipelineDepthOpt=" << pipelineDepthOpt
         << " dtMin(local)=" << dtMin;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
 
@@ -11133,7 +11133,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
 #ifdef ASMM_STORE_TUNELOG_on
     sprintf(msg, "... finished tuning, found pipelineDepthOpt = %d",
       pipelineDepthOpt);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
 #endif
     if (pipelineDepthArg) *pipelineDepthArg = pipelineDepthOpt;
 
@@ -11149,7 +11149,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
       msg << "ASMM_STORE_TUNELOG:" << __LINE__
         << " pipelineDepthOpt=" << pipelineDepthOpt
         << " (majority vote)";
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
 
@@ -11175,7 +11175,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
 #ifdef MALLOC_TRIM_REPORT_on
     std::stringstream msg;
     msg << "malloc_trim(0)#" << __LINE__ << ": " << mtrim;
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
   }
 #endif
@@ -11341,7 +11341,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXEStream(
   {
     std::stringstream msg;
     msg << "ASMM_STORE_LOG:" << __LINE__ << " rraCount=" << rraCount;
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
         localrc = pSend->appendSendnb(xxe, 0x0|XXE::filterBitNbStart,
@@ -11372,7 +11372,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXEStream(
   {
     std::stringstream msg;
     msg << "ASMM_STORE_LOG:" << __LINE__ << " rraCount=" << rraCount;
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
         localrc = pSend->appendSendnb(xxe, 0x0|XXE::filterBitNbStart,
@@ -11457,7 +11457,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXEStream(
   {
     std::stringstream msg;
     msg << "ASMM_STORE_LOG:" << __LINE__ << " rraCount=" << rraCount;
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
         localrc = pSend->appendSendnb(xxe, 0x0|XXE::filterBitNbStart,
@@ -12136,7 +12136,7 @@ int Array::sparseMatMul(
     // must be a blocking call with TERMORDER_FREE -> free-order while
 #ifdef ASMM_EXEC_INFO_LOOP_on
     ESMC_LogDefault.Write("SMM exec: ...within free-order while",
-      ESMC_LOGMSG_INFO);
+      ESMC_LOGMSG_DEBUG);
 #endif
     filterBitField = 0x0; // init. to execute _all_ operations in XXE stream
     // same as non-blocking test and finish
@@ -12286,7 +12286,7 @@ int Array::sparseMatMulRelease(
     {
       std::stringstream debugmsg;
       debugmsg << ESMC_METHOD": delete xxe: " << xxe;
-      ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
 
@@ -12352,7 +12352,7 @@ void Array::superVecParam(
       std::stringstream msg;
       msg << ESMC_METHOD": " << __LINE__ << " superVectorOkay=" <<
         superVectorOkay;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
 
@@ -12379,7 +12379,7 @@ void Array::superVecParam(
     {
       std::stringstream msg;
       msg << ESMC_METHOD": " << __LINE__ << " vectorLength=" << vectorLength;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
   }
@@ -12395,7 +12395,7 @@ void Array::superVecParam(
       std::stringstream msg;
       msg << ESMC_METHOD": " << __LINE__ << " superVecSizeUnd[i="<<i<<"]=" <<
         superVecSizeUnd[i];
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
       for (int j=0; j<localDeCount; j++)
@@ -12408,7 +12408,7 @@ void Array::superVecParam(
       std::stringstream msg;
       msg << ESMC_METHOD": " << __LINE__ << " superVecSizeUnd[i="<<i<<"]=" <<
         superVecSizeUnd[i];
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
   }
@@ -12419,7 +12419,7 @@ void Array::superVecParam(
     std::stringstream msg;
     msg << ESMC_METHOD": " << __LINE__ << " superVecSizeUnd[0]=" <<
       superVecSizeUnd[0];
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
 #undef DEBUGLOG
@@ -12825,7 +12825,7 @@ void ArrayElement::log(
 //
 // !ARGUMENTS:
 //
-  )const{
+  ESMC_LogMsgType_Flag msgType)const{
 //
 // !DESCRIPTION:
 //    Print internal information..
@@ -12834,8 +12834,8 @@ void ArrayElement::log(
 //-----------------------------------------------------------------------------
   std::stringstream msg;
   msg << ESMC_METHOD << ": array=" << array << " localDe: " << localDe;
-  ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
-  MultiDimIndexLoop::log();
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  MultiDimIndexLoop::log(msgType);
 }
 //-----------------------------------------------------------------------------
 

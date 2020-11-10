@@ -236,7 +236,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandles(i),rc)
           if (itemCount < localitemcount) then
             write (errmsg,*)  &
                'itemCount', itemCount, ' too small.  Setting to', localitemcount
-            call ESMF_LogWrite (trim (errmsg), ESMF_LOGMSG_INFO,  &
+            call ESMF_LogWrite (trim (errmsg), ESMF_LOGMSG_WARNING,  &
                 method=ESMF_METHOD, rc=rc)
           end if
           localitemcount = max (localitemcount, itemCount)

@@ -65,7 +65,8 @@ class VMId {
   int serialize(const char *buffer, int *length, int *offset,
                 const ESMC_InquireFlag &inquireflag);
   int deserialize(const char *buffer, int *offset, bool offsetonly);
-  void log(std::string prefix) const;
+  void log(std::string prefix,
+    ESMC_LogMsgType_Flag msgType=ESMC_LOGMSG_INFO) const;
   int print () const;
 };
 
@@ -129,11 +130,14 @@ class VM : public VMK {   // inherits from ESMCI::VMK class
     static VM *getCurrent(int *rc=NULL);      // current VM
     static VMId *getCurrentID(int *rc=NULL);  // VMId of current VM
     static void getCurrentGarbageInfo(int *, int *); // garbage info current VM
-    static void logGarbageInfo(std::string prefix, bool current=false); // garb
+    static void logGarbageInfo(std::string prefix, bool current=false,
+      ESMC_LogMsgType_Flag msgType=ESMC_LOGMSG_INFO); // garbage log current VM
     static void getMemInfo(int *virtMemPet, int *physMemPet);   // memory info
     static void logMemInfo(std::string prefix,
+      ESMC_LogMsgType_Flag msgType=ESMC_LOGMSG_INFO,
       ESMCI::LogErr *log=&ESMC_LogDefault);   // memory log
-    static void logBacktrace(std::string prefix); // backtrace log
+    static void logBacktrace(std::string prefix,
+      ESMC_LogMsgType_Flag msgType=ESMC_LOGMSG_INFO); // backtrace log
     static int getBaseIDAndInc(VMId *vmID);
     static void addObject(ESMC_Base *, VMId *vmID);
     static void rmObject(ESMC_Base *);
@@ -182,7 +186,8 @@ class VM : public VMK {   // inherits from ESMCI::VMK class
       t->second.taccu += t1 - t->second.t0;
       ++(t->second.iters);
     }
-    void timerLog(std::string timer);
+    void timerLog(std::string timer,
+      ESMC_LogMsgType_Flag msgType=ESMC_LOGMSG_INFO);
 };  // class VM
 
 

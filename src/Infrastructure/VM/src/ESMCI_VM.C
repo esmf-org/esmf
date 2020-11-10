@@ -201,7 +201,7 @@ static void VMKeyVasList(unsigned char *vmKey, vector<unsigned> &vasList){
   std::stringstream msg;
   msg << "VMKeyVasList i="<<i<<" index="<<index<<" vmKey[i]="<<(int)vmKey[i]
     <<" testByte="<<(int)testByte<<" (vmKey[i] & testByte)="<< (vmKey[i] & testByte);
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
 }
 #endif    
         if (vmKey[i] & testByte){
@@ -450,7 +450,8 @@ void VMId::log(
 //
 // !ARGUMENTS:
 //
-  std::string prefix
+  std::string prefix,
+  ESMC_LogMsgType_Flag msgType
   )const{
 //
 // !DESCRIPTION:
@@ -468,7 +469,7 @@ void VMId::log(
   info << "  vmKeyWidth (bytes) = " << vmKeyWidth
     <<" vmKeyOff (invalid bits end of last byte) = " << vmKeyOff;
   sprintf(msg, "%s - VMId: %s", prefix.c_str(), info.str().c_str());
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  ESMC_LogDefault.Write(msg, msgType);
   info.str(""); // clear info
   info << "  vmKey=0x";
   int bitmap=0;
@@ -491,11 +492,11 @@ void VMId::log(
     info << digits;
   }
   sprintf(msg, "%s - VMId: %s", prefix.c_str(), info.str().c_str());
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  ESMC_LogDefault.Write(msg, msgType);
   info.str(""); // clear info
   info << "  localID = " << localID;
   sprintf(msg, "%s - VMId: %s", prefix.c_str(), info.str().c_str());
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  ESMC_LogDefault.Write(msg, msgType);
 }
 //-----------------------------------------------------------------------------
 
@@ -1027,7 +1028,7 @@ void VM::shutdown(
             std::stringstream debugmsg;
             debugmsg << "ESMF Automatic Garbage Collection: FObject delete: "
               << *(void **)&(matchTable_FObjects[i][k].fobject);
-            ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
 #endif
             if (matchTable_FObjects[i][k].objectID == ESMC_ID_FIELD.objectID){
               FTN_X(f_esmf_fieldcollectgarbage)
@@ -1126,7 +1127,7 @@ void VM::shutdown(
               << matchTable_Objects[i][k]->ESMC_BaseGetClassName() << " : "
               << matchTable_Objects[i][k]->ESMC_BaseGetName() << " : "
               << matchTable_Objects[i][k];
-            ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
 #endif
             delete matchTable_Objects[i][k];  // delete ESMF object, incl. Base
             matchTable_Objects[i].pop_back();
@@ -1800,7 +1801,7 @@ int VM::translateVMId(
       std::stringstream msg;
       msg << "helper2[" << i << "] - indexH1=" << helper2[i].indexH1
         << " - count=" << helper2[i].count;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
 
@@ -1818,7 +1819,7 @@ int VM::translateVMId(
       std::stringstream msg;
       msg << "vasToPetMap - vas=" << it->first
         << " - pet=" << it->second;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
 
@@ -1833,7 +1834,7 @@ int VM::translateVMId(
       for (unsigned k=0; k<vasList.size(); k++){
         std::stringstream msg;
         msg << "vasList[" << k << "]=" << vasList[k];
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       }
 #endif
       vector<int> petList;
@@ -1858,7 +1859,7 @@ int VM::translateVMId(
           std::stringstream msg;
           msg << "petList["<<kk<<"]=" << petList[kk]
             << " vasList[k=" << k << "]=" << vasList[k];
-          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           // end development log
 #endif
           ++kk;
@@ -1896,12 +1897,12 @@ int VM::translateVMId(
       msg << "helper2[" << i << "] - indexH1=" << helper2[i].indexH1
         << " - count=" << helper2[i].count 
         << " - rootPet=" << helper2[i].rootPet;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
     {
       std::stringstream msg;
       msg << "totalLocalIds=" << totalLocalIds;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
 
@@ -1914,7 +1915,7 @@ int VM::translateVMId(
     for (unsigned i=0; i<totalLocalIdsList.size(); i++){
       std::stringstream msg;
       msg << "totalLocalIdsList[" << i << "]=" << totalLocalIdsList[i];
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
 
@@ -1929,7 +1930,7 @@ int VM::translateVMId(
     {
       std::stringstream msg;
       msg << "localId=" << localId;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
 
@@ -2282,7 +2283,8 @@ void VM::logGarbageInfo(
 // !ARGUMENTS:
 //
   std::string prefix,
-  bool current
+  bool current,
+  ESMC_LogMsgType_Flag msgType
   ){
 //
 // !DESCRIPTION:
@@ -2326,10 +2328,10 @@ void VM::logGarbageInfo(
         " ***current VM context****", prefix.c_str(), i);
     else
       sprintf(msg, "%s - GarbInfo: VM matchTableIndex=%i", prefix.c_str(), i);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg, msgType);
     sprintf(msg, "%s - GarbInfo: Fortran objs=%lu", prefix.c_str(),
       matchTable_FObjects[i].size());
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg, msgType);
     for (unsigned j=0; j<matchTable_FObjects[i].size(); j++){
       void *basePtr = NULL;
       if (matchTable_FObjects[i][j].objectID != ESMC_ID_GEOMBASE.objectID)
@@ -2338,11 +2340,11 @@ void VM::logGarbageInfo(
         prefix.c_str(), j,
         ESMC_ObjectID_Name(matchTable_FObjects[i][j].objectID),
         *(void **)(&matchTable_FObjects[i][j].fobject), basePtr);
-      ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg, msgType);
     }
     sprintf(msg, "%s - GarbInfo: Base objs=%lu", prefix.c_str(),
       matchTable_Objects[i].size());
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg, msgType);
     for (unsigned j=0; j<matchTable_Objects[i].size(); j++){
       const char *proxyString;
       proxyString="actual object";
@@ -2353,7 +2355,7 @@ void VM::logGarbageInfo(
         matchTable_Objects[i][j],
         matchTable_Objects[i][j]->ESMC_BaseGetName(),
         matchTable_Objects[i][j]->ESMC_BaseGetID(), proxyString);
-      ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg, msgType);
     }
   }
 
@@ -2373,7 +2375,8 @@ void VM::logBacktrace(
 //
 // !ARGUMENTS:
 //
-  std::string prefix
+  std::string prefix,
+  ESMC_LogMsgType_Flag msgType
   ){
 //
 // !DESCRIPTION:
@@ -2392,7 +2395,7 @@ void VM::logBacktrace(
   for (int i=0; i<count; i++){
     std::stringstream info;
     info << prefix << " - Backtrace: " << symbols[i];
-    ESMC_LogDefault.Write(info, ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(info, msgType);
   }
   free(symbols);
 #endif
@@ -2466,6 +2469,7 @@ void VM::logMemInfo(
 // !ARGUMENTS:
 //
   std::string prefix,
+  ESMC_LogMsgType_Flag msgType,
   ESMCI::LogErr *log
   ){
 //
@@ -2490,7 +2494,7 @@ void VM::logMemInfo(
       int len = strlen(line);
       line[len-1] = '\0'; // replace the newline with null
       sprintf(msg, "%s - MemInfo: \t%s", prefix.c_str(), line);
-      log->Write(msg, ESMC_LOGMSG_INFO);
+      log->Write(msg, msgType);
     }
   }
   fclose(file);
@@ -2499,31 +2503,31 @@ void VM::logMemInfo(
   struct mallinfo m = mallinfo();
   info << "Non-mmapped space allocated (bytes):       \t" << m.arena;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  log->Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, msgType);
   info.str(""); // clear info
   info << "Space allocated in mmapped regions (bytes):\t" << m.hblkhd;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  log->Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, msgType);
   info.str(""); // clear info
   info << "Maximum total allocated space (bytes):     \t" << m.usmblks;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  log->Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, msgType);
   info.str(""); // clear info
   info << "Space in freed fastbin blocks (bytes):     \t" << m.fsmblks;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  log->Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, msgType);
   info.str(""); // clear info
   info << "Total allocated space (bytes):             \t" << m.uordblks;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  log->Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, msgType);
   info.str(""); // clear info
   info << "Total free space (bytes):                  \t" << m.fordblks;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  log->Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, msgType);
   info.str(""); // clear info
   info << "Top-most, releasable space (bytes):        \t" << m.keepcost;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  log->Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, msgType);
   long total = 0; // init
   if (m.hblkhd>=0 && m.uordblks>=0){
     total = (long)m.hblkhd+(long)m.uordblks;
@@ -2532,7 +2536,7 @@ void VM::logMemInfo(
   info.str(""); // clear info
   info << "Total space in use, mmap + non-mmap (KiB): \t" << total;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  log->Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, msgType);
   // access through malloc_stats()
   FILE *stderrOrig = stderr;
   char *buf;
@@ -2553,7 +2557,7 @@ void VM::logMemInfo(
   info.str(""); // clear info
   info << "Total space held (mmap + non-mmap) (KiB):  \t" << system;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  log->Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, msgType);
   pos = malloc_stats_output.rfind("in use bytes     =");
   pos += 18;
   long in_use = strtol(malloc_stats_output.c_str()+pos, NULL, 10);
@@ -2561,14 +2565,14 @@ void VM::logMemInfo(
   info.str(""); // clear info
   info << "Total space used (mmap + non-mmap) (KiB):  \t" << in_use;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  log->Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, msgType);
   // output the wtime since execution start
   double wt;
   ESMCI::VMK::wtime(&wt);
   info.str(""); // clear info
   info << "Wall-clock time since execution start (s): \t" << wt;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  log->Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, msgType);
   // unlock again
   vm->unlock();
 #endif
@@ -2589,34 +2593,34 @@ void VM::logMemInfo(
                                  &size);
   if( kerr == KERN_SUCCESS ) {
     sprintf(msg, "%s - MemInfo: VmRSS:                       \t%d (bytes)",prefix.c_str(),mem_info.resident_size);
-    log->Write(msg, ESMC_LOGMSG_INFO);
+    log->Write(msg, msgType);
     sprintf(msg, "%s - MemInfo: VmHWM:                       \t%d (bytes)",prefix.c_str(),mem_info.resident_size_peak);
-    log->Write(msg, ESMC_LOGMSG_INFO);
+    log->Write(msg, msgType);
     sprintf(msg, "%s - MemInfo: Total allocated space (bytes): \t%d",prefix.c_str(),mem_info.virtual_size);
-    log->Write(msg, ESMC_LOGMSG_INFO);
+    log->Write(msg, msgType);
 
     // Other memory info that might be useful at some point
 #if 0
     sprintf(msg, "%s - MemInfo: v_size:                       \t%d",prefix.c_str(),mem_info.virtual_size);
-    log->Write(msg, ESMC_LOGMSG_INFO);
+    log->Write(msg, msgType);
 
     sprintf(msg, "%s - MemInfo: r_size:                       \t%d",prefix.c_str(),mem_info.resident_size);
-    log->Write(msg, ESMC_LOGMSG_INFO);
+    log->Write(msg, msgType);
 
     sprintf(msg, "%s - MemInfo: internal:                       \t%d",prefix.c_str(),mem_info.internal);
-    log->Write(msg, ESMC_LOGMSG_INFO);
+    log->Write(msg, msgType);
 
     sprintf(msg, "%s - MemInfo: external:                       \t%d",prefix.c_str(),mem_info.external);
-    log->Write(msg, ESMC_LOGMSG_INFO);
+    log->Write(msg, msgType);
 
     sprintf(msg, "%s - MemInfo: resusable:                       \t%d",prefix.c_str(),mem_info.reusable);
-    log->Write(msg, ESMC_LOGMSG_INFO);
+    log->Write(msg, msgType);
 
     sprintf(msg, "%s - MemInfo: compressed:                       \t%d",prefix.c_str(),mem_info.compressed);
-    log->Write(msg, ESMC_LOGMSG_INFO);
+    log->Write(msg, msgType);
 
     sprintf(msg, "%s - MemInfo: phys_footprint:                       \t%d",prefix.c_str(),mem_info.phys_footprint);
-    log->Write(msg, ESMC_LOGMSG_INFO);
+    log->Write(msg, msgType);
 #endif
 
   }
@@ -2629,7 +2633,7 @@ void VM::logMemInfo(
   info.str(""); // clear info
   info << "Wall-clock time since execution start (s): \t" << wt;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  log->Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, msgType);
 
   // unlock again
   vm->unlock();
@@ -2720,8 +2724,8 @@ void VM::addObject(
 #ifdef GARBAGE_COLLECTION_LOG_on
   std::stringstream msg;
   msg << "VM::addObject() object added: " << object;
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-  //logBacktrace("VM::addObject()");  // enable to pin down specific caller
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
+  //logBacktrace("VM::addObject()", ESMC_LOGMSG_DEBUG);  // enable to pin down specific caller
 #endif
 
   vm->unlock();
@@ -2790,8 +2794,8 @@ void VM::rmObject(
 #ifdef GARBAGE_COLLECTION_LOG_on
     std::stringstream msg;
     msg << "VM::rmObject() object removed: " << object;
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    //logBacktrace("VM::rmObject()");  // enable to pin down specific caller
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
+    //logBacktrace("VM::rmObject()", ESMC_LOGMSG_DEBUG);  // enable to pin down specific caller
 #endif
       break;
     }
@@ -2858,8 +2862,8 @@ void VM::addFObject(
   msg << "VM::addFObject() object added: " <<
     string(ESMC_ObjectID_Name(objectID)) << " " << *(void **)fobject << " - " <<
     **(void ***)fobject;
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-  //logBacktrace("VM::addFObject()");  // enable to pin down specific caller
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
+  //logBacktrace("VM::addFObject()", ESMC_LOGMSG_DEBUG);  // enable to pin down specific caller
 #endif
 
   vm->unlock();
@@ -2935,8 +2939,8 @@ void VM::rmFObject(
       std::stringstream msg;
       msg << "VM::rmFObject() object removed: " << *(void **)fobject << " - " <<
         **(void ***)fobject;
-      ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-      //logBacktrace("VM::rmFObject()");  // enable to pin down specific caller
+      ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
+      //logBacktrace("VM::rmFObject()", ESMC_LOGMSG_DEBUG);  // enable to pin down specific caller
 #endif
       break;
     }
@@ -3389,7 +3393,7 @@ void VM::finalize(
         << matchTable_Objects[0][k]->ESMC_BaseGetClassName() << " : "
         << matchTable_Objects[0][k]->ESMC_BaseGetName() << " : "
         << matchTable_Objects[0][k];
-      ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
 #endif
       delete matchTable_Objects[0][k];  // delete ESMF object, incl. Base
       matchTable_Objects[0].pop_back();
@@ -3542,7 +3546,9 @@ void VM::timerLog(
 //
 // !ARGUMENTS:
 //
-  std::string timer){
+  std::string timer,
+  ESMC_LogMsgType_Flag msgType
+  ){
 //
 // !DESCRIPTION:
 //    Log the timer information to the default log
@@ -3553,7 +3559,7 @@ void VM::timerLog(
   std::map<std::string, VMTimer>::iterator t = timers.find(timer);
   timerMsg << "Timer '" << timer << "' accumulated time: "
     << t->second.taccu << " seconds in " << t->second.iters << " iterations.";
-  ESMC_LogDefault.Write(timerMsg.str(), ESMC_LOGMSG_INFO);
+  ESMC_LogDefault.Write(timerMsg.str(), msgType);
 }
 //-----------------------------------------------------------------------------
 
