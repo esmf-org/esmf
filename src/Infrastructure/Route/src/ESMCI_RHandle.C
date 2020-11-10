@@ -1184,7 +1184,7 @@ int RouteHandle::optimize(
 
   try{
     
-    ESMC_LogDefault.Write("Entering RouteHandle::optimize()", ESMC_LOGMSG_INFO,
+    ESMC_LogDefault.Write("Entering RouteHandle::optimize()", ESMC_LOGMSG_DEBUG,
       ESMC_CONTEXT);
 
     // get the communication matrix from routehandle
@@ -1265,7 +1265,7 @@ bool RouteHandle::isCompatible(
 
   std::stringstream debugmsg;
   debugmsg << "RouteHandle::isCompatible(), srcMatch=" << srcMatch;
-  ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+  ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
   
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;

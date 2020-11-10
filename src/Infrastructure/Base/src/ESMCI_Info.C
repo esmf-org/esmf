@@ -742,12 +742,12 @@ T Info::get(key_t &key, const T *def, const int *index, bool recursive, std::str
     std::string prefix = std::string(ESMC_METHOD) + ": ";
     std::string msg;
     msg = prefix + "key=" + key;
-    ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO);
+    ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_DEBUG);
     msg = prefix + "recursive=" + std::to_string(recursive);
-    ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO);
+    ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_DEBUG);
     msg = prefix + "this->dump()=...";
-    ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO);
-    ESMC_LogWrite(this->dump().c_str(), ESMC_LOGMSG_INFO);
+    ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_DEBUG);
+    ESMC_LogWrite(this->dump().c_str(), ESMC_LOGMSG_DEBUG);
 #endif
 
   T ret;
@@ -852,9 +852,9 @@ void Info::get(ESMCI::Info &info, key_t &key) const {
 
 #if 0
   std::string msg = std::string(ESMC_METHOD) + ": key=" + key;
-  ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO);
+  ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_DEBUG);
   msg = std::string(ESMC_METHOD) + ": this dump=" + this->dump(0);
-  ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO);
+  ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_DEBUG);
 #endif
 
   json j;
@@ -863,7 +863,7 @@ void Info::get(ESMCI::Info &info, key_t &key) const {
 
 #if 0
     std::string msg2 = std::string(ESMC_METHOD) + ": j dump=" + j.dump();
-    ESMC_LogWrite(msg2.c_str(), ESMC_LOGMSG_INFO);
+    ESMC_LogWrite(msg2.c_str(), ESMC_LOGMSG_DEBUG);
 #endif
     
     check_init_from_json(j);
@@ -873,7 +873,7 @@ void Info::get(ESMCI::Info &info, key_t &key) const {
 
 #if 0
   std::string msg3 = std::string(ESMC_METHOD) + ": info dump=" + info.dump(0);
-  ESMC_LogWrite(msg3.c_str(), ESMC_LOGMSG_INFO);
+  ESMC_LogWrite(msg3.c_str(), ESMC_LOGMSG_DEBUG);
 #endif
 
 }
@@ -923,13 +923,13 @@ bool Info::hasKey(key_t& key, bool isptr, bool recursive) const {
   std::string prefix = std::string(ESMC_METHOD) + ": ";
   std::string msg;
   msg = prefix + "key=" + key;
-  ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO);
+  ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_DEBUG);
   msg = prefix + "isptr=" + std::to_string(isptr);
-  ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO);
+  ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_DEBUG);
   msg = prefix + "recursive=" + std::to_string(recursive);
-  ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO);
+  ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_DEBUG);
   msg = prefix + "this->dump()=...";
-  ESMC_LogWrite((this->dump()).c_str(), ESMC_LOGMSG_INFO);
+  ESMC_LogWrite((this->dump()).c_str(), ESMC_LOGMSG_DEBUG);
 #endif
 
   bool ret;
@@ -953,7 +953,7 @@ bool Info::hasKey(key_t& key, bool isptr, bool recursive) const {
   std::string prefix2 = std::string(ESMC_METHOD) + ": ";
   std::string msg2;
   msg2 = prefix2 + "ret=" + std::to_string(ret);
-  ESMC_LogWrite(msg2.c_str(), ESMC_LOGMSG_INFO);
+  ESMC_LogWrite(msg2.c_str(), ESMC_LOGMSG_DEBUG);
 #endif
 
   return ret;
@@ -982,17 +982,17 @@ json Info::inquire(key_t &key, bool recursive, const int *idx, bool attr_complia
     std::string prefix = std::string(ESMC_METHOD) + ": ";
     std::string msg;
     msg = prefix + "key=" + key;
-    ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO);
+    ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_DEBUG);
     msg = prefix + "recursive=" + std::to_string(recursive);
-    ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO);
+    ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_DEBUG);
     msg = prefix + "attr_compliance=" + std::to_string(attr_compliance);
-    ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO);
+    ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_DEBUG);
     msg = prefix + "this->dump()=...";
-    ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO);
-    ESMC_LogWrite(this->dump().c_str(), ESMC_LOGMSG_INFO);
+    ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_DEBUG);
+    ESMC_LogWrite(this->dump().c_str(), ESMC_LOGMSG_DEBUG);
     msg = prefix + "this->type_storage.dump()=...";
-    ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO);
-    ESMC_LogWrite(this->type_storage.dump().c_str(), ESMC_LOGMSG_INFO);
+    ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_DEBUG);
+    ESMC_LogWrite(this->type_storage.dump().c_str(), ESMC_LOGMSG_DEBUG);
 #endif
 
   bool is_32bit = false;
@@ -1080,8 +1080,8 @@ json Info::inquire(key_t &key, bool recursive, const int *idx, bool attr_complia
 
 #if 0
   msg = prefix + "j.dump()=...";
-  ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO);
-  ESMC_LogWrite(j.dump().c_str(), ESMC_LOGMSG_INFO);
+  ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_DEBUG);
+  ESMC_LogWrite(j.dump().c_str(), ESMC_LOGMSG_DEBUG);
 #endif
 
   return j;
@@ -1218,26 +1218,26 @@ void Info::set(key_t &key, json &&j, bool force, const int *index, const key_t *
   std::string prefix = std::string(ESMC_METHOD) + ": ";
   std::string msg;
   msg = prefix + "key=" + key;
-  ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO);
+  ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_DEBUG);
   msg = prefix + "j.dump()=" + j.dump();
-  ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO);
+  ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_DEBUG);
   msg = prefix + "force=" + std::to_string(force);
-  ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO);
+  ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_DEBUG);
   if (index) {
     msg = prefix + "*index=" + std::to_string(*index);
   } else {
     msg = prefix + "index=nullptr";
   }
-  ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO);
+  ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_DEBUG);
   if (pkey) {
     msg = prefix + "*pkey=" + *pkey;
   } else {
     msg = prefix + "pkey=nullptr";
   }
-  ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO);
+  ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_DEBUG);
   msg = prefix + "this->dump()=...";
-  ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO);
-  ESMC_LogWrite(this->dump().c_str(), ESMC_LOGMSG_INFO);
+  ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_DEBUG);
+  ESMC_LogWrite(this->dump().c_str(), ESMC_LOGMSG_DEBUG);
 #endif
 
   try {
@@ -1329,8 +1329,8 @@ void Info::set(key_t &key, json &&j, bool force, const int *index, const key_t *
   std::string msg2;
   std::string prefix2 = std::string(ESMC_METHOD) + ": ";
   msg2 = prefix2 + "this->dump() <exiting>=...";
-  ESMC_LogWrite(msg2.c_str(), ESMC_LOGMSG_INFO);
-  ESMC_LogWrite(this->dump().c_str(), ESMC_LOGMSG_INFO);
+  ESMC_LogWrite(msg2.c_str(), ESMC_LOGMSG_DEBUG);
+  ESMC_LogWrite(this->dump().c_str(), ESMC_LOGMSG_DEBUG);
 #endif
 }
 

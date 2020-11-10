@@ -320,7 +320,7 @@ namespace ESMCI {
     int const *getIndexTuple()const;
     int const *getIndexTupleEnd()const;
     int const *getIndexTupleStart()const;
-    void log()const;
+    void log(ESMC_LogMsgType_Flag msgType=ESMC_LOGMSG_INFO)const;
   };  // class MultiDimIndexLoop
   //============================================================================
 

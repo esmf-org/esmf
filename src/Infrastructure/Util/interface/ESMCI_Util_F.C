@@ -93,7 +93,7 @@ extern "C" {
 
   if (!string) {
     //printf("uninitialized String object\n");
-    ESMC_LogDefault.Write("String object uninitialized", ESMC_LOGMSG_INFO,
+    ESMC_LogDefault.Write("String object uninitialized", ESMC_LOGMSG_WARN,
       ESMC_CONTEXT);
     if (rc) *rc = ESMF_SUCCESS;
     return;

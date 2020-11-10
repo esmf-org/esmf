@@ -108,7 +108,7 @@ void accessLookup(
   // t-specific routine
   int requestFactor = requestSizeFactor(t);
   // localPet acts as server, posts non-blocking recvs for all client requests
-//ESMC_LogDefault.Write("accessLookup: step 1", ESMC_LOGMSG_INFO); 
+//ESMC_LogDefault.Write("accessLookup: step 1", ESMC_LOGMSG_DEBUG); 
   for (int ii=localPet+1; ii<localPet+petCount; ii++){
     // localPet-dependent shifted loop reduces communication contention
     int i = ii%petCount;  // fold back into [0,..,petCount-1] range
@@ -116,7 +116,7 @@ void accessLookup(
     int count = localIntervalPerPetCount[i];
     if (count>0){
 //sprintf(msg, "posting nb-recv for message from PET %d size=%d", i, requestFactor*count);
-//ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO); 
+//ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG); 
       requestStreamServer[i] = new char[requestFactor*count];
       recv3commhList[i] = NULL;
       vm->recv(requestStreamServer[i], requestFactor*count, i,
@@ -124,7 +124,7 @@ void accessLookup(
     }
   }
   // localPet acts as a client, sends its requests to the appropriate servers
-//ESMC_LogDefault.Write("accessLookup: step 2", ESMC_LOGMSG_INFO); 
+//ESMC_LogDefault.Write("accessLookup: step 2", ESMC_LOGMSG_DEBUG); 
   for (int ii=localPet+petCount-1; ii>localPet; ii--){
     // localPet-dependent shifted loop reduces communication contention
     int i = ii%petCount;  // fold back into [0,..,petCount-1] range
@@ -137,7 +137,7 @@ void accessLookup(
       // send information to the serving Pet
       send1commhList[i] = NULL;
 //sprintf(msg, "posting nb-send to PET %d size=%d", i, requestFactor*localElementsPerIntervalCount[i]);
-//ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO); 
+//ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG); 
 #if (defined MUST_USE_BLOCKING_SEND || defined WORKAROUND_NONBLOCKPROGRESSBUG)
       vm->send(requestStreamClient[i],
         requestFactor*localElementsPerIntervalCount[i], i); 
@@ -149,7 +149,7 @@ void accessLookup(
       // post receive to obtain response size from server Pet
       recv1commhList[i] = NULL;
 //sprintf(msg, "posting nb-recv for message from PET %d size=%d", i, sizeof(int));
-//ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO); 
+//ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG); 
 
       vm->recv(&(responseStreamSizeClient[i]), sizeof(int), i,
         &(recv1commhList[i]));
@@ -157,10 +157,10 @@ void accessLookup(
   }
   // localPet locally acts as server and client to fill its own request
   // t-specific client-server routine
-//ESMC_LogDefault.Write("accessLookup: step 3", ESMC_LOGMSG_INFO); 
+//ESMC_LogDefault.Write("accessLookup: step 3", ESMC_LOGMSG_DEBUG); 
   localClientServerExchange(t);
   // localPet acts as server, processing requests from clients, send response sz
-//ESMC_LogDefault.Write("accessLookup: step 4", ESMC_LOGMSG_INFO); 
+//ESMC_LogDefault.Write("accessLookup: step 4", ESMC_LOGMSG_DEBUG); 
   for (int ii=localPet+1; ii<localPet+petCount; ii++){
     // localPet-dependent shifted loop reduces communication contention
     int i = ii%petCount;  // fold back into [0,..,petCount-1] range
@@ -168,7 +168,7 @@ void accessLookup(
     if (count>0){
       // wait for request from Pet "i"
 //sprintf(msg, "waiting on nb-recv for message from PET %d", i);
-//ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO); 
+//ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG); 
       vm->commwait(&(recv3commhList[i]));
       // t-specific server routine
       int responseStreamSize =
@@ -177,7 +177,7 @@ void accessLookup(
       responseStreamSizeServer[i] = responseStreamSize;
       send2commhList[i] = NULL;
 //sprintf(msg, "posting nb-send to PET %d size=%d", i, sizeof(int));
-//ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO); 
+//ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG); 
 
 #if (defined MUST_USE_BLOCKING_SEND || defined WORKAROUND_NONBLOCKPROGRESSBUG)
       vm->send(&(responseStreamSizeServer[i]), sizeof(int), i);
@@ -189,7 +189,7 @@ void accessLookup(
   }
   // localPet acts as a client, waits for response size from server and posts
   // receive for response stream
-//ESMC_LogDefault.Write("accessLookup: step 5", ESMC_LOGMSG_INFO); 
+//ESMC_LogDefault.Write("accessLookup: step 5", ESMC_LOGMSG_DEBUG); 
   for (int ii=localPet+petCount-1; ii>localPet; ii--){
     // localPet-dependent shifted loop reduces communication contention
     int i = ii%petCount;  // fold back into [0,..,petCount-1] range
@@ -202,7 +202,7 @@ void accessLookup(
         responseStreamClient[i] = new char[responseStreamSize];
         recv2commhList[i] = NULL;
 //sprintf(msg, "posting nb-recv for message from PET %d size=%d", i, responseStreamSize);
-//ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO); 
+//ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG); 
 
         vm->recv(responseStreamClient[i], responseStreamSize, i,
           &(recv2commhList[i]));
@@ -210,7 +210,7 @@ void accessLookup(
     }
   }
   // localPet acts as server, send response stream
-//ESMC_LogDefault.Write("accessLookup: step 6", ESMC_LOGMSG_INFO); 
+//ESMC_LogDefault.Write("accessLookup: step 6", ESMC_LOGMSG_DEBUG); 
   for (int ii=localPet+1; ii<localPet+petCount; ii++){
     // localPet-dependent shifted loop reduces communication contention
     int i = ii%petCount;  // fold back into [0,..,petCount-1] range
@@ -225,7 +225,7 @@ void accessLookup(
         // send response stream to client Pet "i"
         send3commhList[i] = NULL;
 //sprintf(msg, "posting nb-send to PET %d size=%d", i, responseStreamSize);
-//ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO); 
+//ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG); 
 
 #if (defined MUST_USE_BLOCKING_SEND || defined WORKAROUND_NONBLOCKPROGRESSBUG)
         vm->send(responseStreamServer[i], responseStreamSize, i);
@@ -239,7 +239,7 @@ void accessLookup(
     }
   }
   // localPet acts as a client, waits for response stream from server, process
-//ESMC_LogDefault.Write("accessLookup: step 7", ESMC_LOGMSG_INFO); 
+//ESMC_LogDefault.Write("accessLookup: step 7", ESMC_LOGMSG_DEBUG); 
   for (int ii=localPet+petCount-1; ii>localPet; ii--){
     // localPet-dependent shifted loop reduces communication contention
     int i = ii%petCount;  // fold back into [0,..,petCount-1] range
@@ -249,7 +249,7 @@ void accessLookup(
       if (responseStreamSize>0){
         // wait to receive response stream from the serving Pet "i"
 //sprintf(msg, "commwait for message from PET %d, of size %d, with localElements: %d", i, responseStreamSize, localElementsPerIntervalCount[i]);
-//ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO); 
+//ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG); 
         vm->commwait(&(recv2commhList[i]));
         // process responseStream and complete t[][] info
         char *responseStream = responseStreamClient[i];
@@ -261,7 +261,7 @@ void accessLookup(
     }
   }
   // localPet acts as a client, wait for sends to complete and collect garbage
-//ESMC_LogDefault.Write("accessLookup: step 8", ESMC_LOGMSG_INFO); 
+//ESMC_LogDefault.Write("accessLookup: step 8", ESMC_LOGMSG_DEBUG); 
   for (int ii=localPet+petCount-1; ii>localPet; ii--){
     // localPet-dependent shifted loop reduces communication contention
     int i = ii%petCount;  // fold back into [0,..,petCount-1] range
@@ -276,7 +276,7 @@ void accessLookup(
     }
   }
   // localPet acts as server, wait for sends to complete and collect garbage
-//ESMC_LogDefault.Write("accessLookup: step 9", ESMC_LOGMSG_INFO); 
+//ESMC_LogDefault.Write("accessLookup: step 9", ESMC_LOGMSG_DEBUG); 
   for (int ii=localPet+1; ii<localPet+petCount; ii++){
     // localPet-dependent shifted loop reduces communication contention
     int i = ii%petCount;  // fold back into [0,..,petCount-1] range
@@ -307,7 +307,7 @@ void accessLookup(
   delete [] recv1commhList;
   delete [] recv2commhList;
   delete [] recv3commhList;
-//ESMC_LogDefault.Write("accessLookup: step 10", ESMC_LOGMSG_INFO); 
+//ESMC_LogDefault.Write("accessLookup: step 10", ESMC_LOGMSG_DEBUG); 
 }
 
 // --------------------------------------------------
@@ -615,7 +615,7 @@ template<typename IT1, typename IT2>
           debugmsg << "clientRequest()#" << __LINE__ 
             << " ,dstPet=" << dstPet
             << "lookupIndex " << requestStreamClientInt[3*jj];
-          ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
         }
 #endif
         ++jj; // increment counter
@@ -977,7 +977,7 @@ template<typename IT1, typename IT2>
       debugmsg << "SetupSeqIndexFactorLookupStage1().messageSize(srcPet=" 
         << srcPet << " ,dstPet=" << dstPet << "): " <<
         sizeof(int) * messageSizeCount(srcPet, dstPet);
-      ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
       return sizeof(int) * messageSizeCount(srcPet, dstPet);
@@ -1058,7 +1058,7 @@ template<typename IT1, typename IT2>
           * messageSizeCount(srcPet, dstPet)
           << " from dataSizeFactors=" << dataSizeFactors
           << " messageSizeCount=" << messageSizeCount(srcPet, dstPet);
-        ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
       }
 #endif
       return (2*sizeof(int)+sizeof(IT)+dataSizeFactors)
@@ -1132,7 +1132,7 @@ template<typename IT1, typename IT2>
             << " ,srcPet=" << srcPet 
             << " ,dstPet=" << dstPet 
             << " lookupIndex " << lookupIndex;
-          ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
         }
 #endif
         *intStream++ = tensorSeqIndex;  // dummy tensorSeqIndex
@@ -1164,7 +1164,7 @@ template<typename IT1, typename IT2>
             << " seqIndexFactorLookup.size()=" 
             << SetupSeqIndexFactorLookup<IT>::seqIndexFactorLookup.size()
             << " lookupIndex=" << lookupIndex;
-          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
         }
         if (lookupIndex<0 ||
           lookupIndex >
@@ -1336,14 +1336,14 @@ cout << "dstSetupFlag=" << dstSetupFlag << " tensorSeqIndex=" <<
       debugmsg << "setupSeqIndexFactorLookup() seqIntervFactorListCountToPet=";
       for (int i=0; i<seqIntervFactorListCountToPet.size(); i++)
         debugmsg << seqIntervFactorListCountToPet[i] << ", ";
-      ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
     }
     {
       std::stringstream debugmsg;
       debugmsg << "setupSeqIndexFactorLookup() seqIntervFactorListCountFromPet=";
       for (int i=0; i<seqIntervFactorListCountFromPet.size(); i++)
         debugmsg << seqIntervFactorListCountFromPet[i] << ", ";
-      ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
 
@@ -1628,13 +1628,13 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
     msg << "ASMM_STORE_LOG: tensorMixFlag=" << tensorMixFlag
     << " srcTensorElementCountEff=" << srcTensorElementCountEff
     << " dstTensorElementCountEff=" << dstTensorElementCountEff;
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
   }
   {
     std::stringstream msg;
     msg << "ASMM_STORE_LOG: srcSeqIndexMinMax[(0/1)] = " <<
       srcSeqIndexMinMax[0] <<"/"<< srcSeqIndexMinMax[1];
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
 
@@ -1708,7 +1708,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
     std::stringstream msg;
     msg << "ASMM_STORE_LOG: dstSeqIndexMinMaxList[" << i << "(0/1)] = " <<
       dstSeqIndexMinMaxList[i*2] <<"/"<< dstSeqIndexMinMaxList[i*2+1];
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
 
@@ -1786,7 +1786,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
     << " srcSeqIndexMinGlobal/MaxGlobal = " << srcSeqIndexMinGlobal <<"/"<<
     srcSeqIndexMaxGlobal << " srcSeqIndexInterval[localPet].min/.max = " <<
     srcSeqIndexInterval[localPet].min <<"/"<< srcSeqIndexInterval[localPet].max;
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
 
@@ -1910,7 +1910,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
     << " dstSeqIndexMinGlobal/MaxGlobal = " << dstSeqIndexMinGlobal <<"/"<<
     dstSeqIndexMaxGlobal << " dstSeqIndexInterval[localPet].min/.max = " <<
     dstSeqIndexInterval[localPet].min <<"/"<< dstSeqIndexInterval[localPet].max;
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
 
@@ -1995,7 +1995,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
     msg << "srcSeqIndexInterval[localPet].count=" <<
       srcSeqIndexInterval[localPet].count <<
       " srcTensorElementCountEff=" << srcTensorElementCountEff;
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
    
@@ -2035,7 +2035,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
     msg << "dstSeqIndexInterval[localPet].count=" <<
       dstSeqIndexInterval[localPet].count <<
       " dstTensorElementCountEff=" << dstTensorElementCountEff;
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
    
@@ -2493,23 +2493,23 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
           ".seqIndex = "<< srcLinSeqVect[j][k].seqIndex.decompSeqIndex
           <<"/"<< srcLinSeqVect[j][k].seqIndex.tensorSeqIndex <<
           ", .factorList.size() = "<< srcLinSeqVect[j][k].factorList.size();
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
         msg.str("");  // clear
         for (unsigned kk=0; kk<srcLinSeqVect[j][k].factorList.size(); kk++){
           msg << "ASMM_STORE_LOG:" << __LINE__ << " \tfactorList["<< kk <<"]";
-          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           msg.str("");  // clear
           msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.partnerSeqIndex ="
             << srcLinSeqVect[j][k].factorList[kk].partnerSeqIndex.decompSeqIndex
             <<"/"
             << srcLinSeqVect[j][k].factorList[kk].partnerSeqIndex.tensorSeqIndex;
-          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           msg.str("");  // clear
           msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.partnerDE =";
           for (unsigned jj=0;
             jj<srcLinSeqVect[j][k].factorList[kk].partnerDE.size(); jj++)
             msg << srcLinSeqVect[j][k].factorList[kk].partnerDE[jj] <<", ";
-          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           msg.str("");  // clear
           switch (typekindFactors){
           case ESMC_TYPEKIND_R4:
@@ -2531,7 +2531,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
           default:
             break;
           }
-          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           msg.str("");  // clear
         }
       }
@@ -2545,23 +2545,23 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
           ".seqIndex = "<< dstLinSeqVect[j][k].seqIndex.decompSeqIndex
           <<"/"<< dstLinSeqVect[j][k].seqIndex.tensorSeqIndex <<
           ", .factorList.size() = "<< dstLinSeqVect[j][k].factorList.size();
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
         msg.str("");  // clear
         for (unsigned kk=0; kk<dstLinSeqVect[j][k].factorList.size(); kk++){
           msg << "ASMM_STORE_LOG:" << __LINE__ << " \tfactorList["<< kk <<"]";
-          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           msg.str("");  // clear
           msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.partnerSeqIndex ="
             << dstLinSeqVect[j][k].factorList[kk].partnerSeqIndex.decompSeqIndex
             <<"/"
             << dstLinSeqVect[j][k].factorList[kk].partnerSeqIndex.tensorSeqIndex;
-          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           msg.str("");  // clear
           msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.partnerDE =";
           for (unsigned jj=0;
             jj<dstLinSeqVect[j][k].factorList[kk].partnerDE.size(); jj++)
             msg << dstLinSeqVect[j][k].factorList[kk].partnerDE[jj] <<", ";
-          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           msg.str("");  // clear
           switch (typekindFactors){
           case ESMC_TYPEKIND_R4:
@@ -2583,7 +2583,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
           default:
             break;
           }
-          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           msg.str("");  // clear
         }
       }

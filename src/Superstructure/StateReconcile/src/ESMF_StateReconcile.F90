@@ -2935,7 +2935,7 @@ contains
 #ifdef RECONCILE_ZAP_LOG_on
 write(msgString,*) "ESMF_ReconcileZapProxies Field: "//trim(thisname), &
   itemList(i)%si%proxyFlag
-call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=localrc)
+call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
 #endif
 
             ! determine proxyFlag from Base level
@@ -2947,7 +2947,7 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=localrc)
 #ifdef RECONCILE_ZAP_LOG_on
 write(msgString,*) "ESMF_ReconcileZapProxies Field: "//trim(thisname), &
   itemList(i)%si%proxyFlag
-call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=localrc)
+call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
 #endif
 
           else if (itemList(i)%si%otype==ESMF_STATEITEM_FIELDBUNDLE) then
@@ -2960,7 +2960,7 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=localrc)
 #ifdef RECONCILE_ZAP_LOG_on
 write(msgString,*) "ESMF_ReconcileZapProxies Field: "//trim(thisname), &
   itemList(i)%si%proxyFlag
-call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=localrc)
+call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
 #endif
 
             ! determine proxyFlag from Base level
@@ -2972,7 +2972,7 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=localrc)
 #ifdef RECONCILE_ZAP_LOG_on
 write(msgString,*) "ESMF_ReconcileZapProxies Field: "//trim(thisname), &
   itemList(i)%si%proxyFlag
-call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=localrc)
+call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
 #endif
 
           endif
@@ -3075,7 +3075,7 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=localrc)
     if (associated(itemList).and.associated(zapList)) then
 #ifdef RECONCILE_ZAP_LOG_on
       call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): have lists", &
-        ESMF_LOGMSG_INFO, rc=localrc)
+        ESMF_LOGMSG_DEBUG, rc=localrc)
 #endif
       do i=1, size(itemList)
         if (itemList(i)%si%proxyFlag .and. &
@@ -3087,17 +3087,17 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=localrc)
             ESMF_CONTEXT, rcToReturn=rc)) return
 #ifdef RECONCILE_ZAP_LOG_on
 call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): found a proxy field: "//&
-  trim(thisname), ESMF_LOGMSG_INFO, rc=localrc)
+  trim(thisname), ESMF_LOGMSG_DEBUG, rc=localrc)
 #endif
           do k=1, size(zapList)
 #ifdef RECONCILE_ZAP_LOG_on
 call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): scanning zapList", &
-  ESMF_LOGMSG_INFO, rc=localrc)
+  ESMF_LOGMSG_DEBUG, rc=localrc)
 #endif
             if (associated (zapList(k)%si)) then
 #ifdef RECONCILE_ZAP_LOG_on
 call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): found associated zapList object", &
-  ESMF_LOGMSG_INFO, rc=localrc)
+  ESMF_LOGMSG_DEBUG, rc=localrc)
 #endif
               ! Note that only Fields and FieldBundles receive the restoration
               ! treatment, and therefore persist during repeated Reconcile()
@@ -3117,13 +3117,13 @@ call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): found associated zapList obje
                   return
 #ifdef RECONCILE_ZAP_LOG_on
 call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): checking Field: "//trim(name), &
-  ESMF_LOGMSG_INFO, rc=localrc)
+  ESMF_LOGMSG_DEBUG, rc=localrc)
 #endif
                 if (name == thisname) then
                   zapFlag(k) = .false.  ! indicate that proxy has been restored
 #ifdef RECONCILE_ZAP_LOG_on
 call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): found Field: "//trim(name), &
-  ESMF_LOGMSG_INFO, rc=localrc)
+  ESMF_LOGMSG_DEBUG, rc=localrc)
 #endif
                   ! Bend pointers and copy contents to result in the desired
                   ! behavior for re-reconcile. From a user perspective of
@@ -3153,13 +3153,13 @@ call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): found Field: "//trim(name), &
                   return
 #ifdef RECONCILE_ZAP_LOG_on
 call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): checking FieldBundle: "//trim(name), &
-  ESMF_LOGMSG_INFO, rc=localrc)
+  ESMF_LOGMSG_DEBUG, rc=localrc)
 #endif
                 if (name == thisname) then
                   zapFlag(k) = .false.  ! indicate that proxy has been restored
 #ifdef RECONCILE_ZAP_LOG_on
 call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): found FieldBundle: "//trim(name), &
-  ESMF_LOGMSG_INFO, rc=localrc)
+  ESMF_LOGMSG_DEBUG, rc=localrc)
 #endif
                   ! Bend pointers and copy contents to result in the desired
                   ! behavior for re-reconcile. From a user perspective of
@@ -3338,7 +3338,7 @@ call ESMF_VMLogGarbageInfo(prefix="ZappedProxies aft: ", rc=localrc)
       end if
       call ESMF_VMBarrier (vm)
 #else
-      call ESMF_LogWrite(trim(text), ESMF_LOGMSG_INFO, rc=rc)
+      call ESMF_LogWrite(trim(text), ESMF_LOGMSG_DEBUG, rc=rc)
 #endif
     end if
 
@@ -3348,7 +3348,7 @@ call ESMF_VMLogGarbageInfo(prefix="ZappedProxies aft: ", rc=localrc)
       call ESMF_UtilIOUnitFlush (ESMF_UtilIOStdout)
       call ESMF_VMBarrier (vm)
 #else
-      call ESMF_LogWrite(trim(multitext), ESMF_LOGMSG_INFO, rc=rc)
+      call ESMF_LogWrite(trim(multitext), ESMF_LOGMSG_DEBUG, rc=rc)
 #endif
     end if
 

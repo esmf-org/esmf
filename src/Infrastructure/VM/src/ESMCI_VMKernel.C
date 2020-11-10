@@ -551,7 +551,7 @@ void VMK::init(MPI_Comm mpiCommunicator){
   std::stringstream msg;
   msg << "VMK::init: " << __LINE__
     << " ssiLocalPetCount=" << ssiLocalPetCount;
-  ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 }
 #endif
   delete [] temp_ssiPetCount;
@@ -772,7 +772,7 @@ void VMK::construct(void *ssarg){
   std::stringstream msg;
   msg << "VMK::init: " << __LINE__
     << " ssiLocalPetCount=" << ssiLocalPetCount;
-  ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 }
 #endif
   delete [] temp_ssiPetCount;
@@ -3090,7 +3090,7 @@ int VMK::commwait(commhandle **ch, status *status, int nanopause){
               << " src=" << mpis.MPI_SOURCE
               << " tag=" << mpis.MPI_TAG
               << " cnt=" << cnt;
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #else
           localrc = MPI_Wait(&((*ch)->mpireq[i]), mpi_s);
@@ -3226,7 +3226,7 @@ void VMK::epochFinal(){
     msg << "epochBuffer:" << __LINE__ << " ready to clear outstanding comm:"
     << " dst=" << getVas(lpid[its->first]) << " size=" << size
     << " buffer=" << buffer;
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
     sm->clear();
   }
@@ -3250,7 +3250,7 @@ void VMK::epochExit(bool keepAlloc){
         msg << "epochBuffer:" << __LINE__ << " ready to post non-blocking send:"
           << " dst=" << getVas(lpid[its->first]) << " size=" << size
           << " buffer=" << buffer;
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
         MPI_Isend(buffer, size, MPI_BYTE, lpid[its->first], tag, mpi_c,
           &sm->mpireq);
@@ -3266,7 +3266,7 @@ void VMK::epochExit(bool keepAlloc){
         << " dst=" << getVas(lpid[its->first]) 
         << " size=" << sm->streamBuffer.size()
         << " buffer=" << (void *)sm->streamBuffer.data();
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
         MPI_Isend((void *)sm->streamBuffer.data(), sm->streamBuffer.size(),
           MPI_BYTE, lpid[its->first], tag, mpi_c, &sm->mpireq);
@@ -3298,13 +3298,13 @@ void VMK::sendBuffer::clear(){
 #ifdef VM_EPOCHLOG_on
   std::stringstream msg;
   msg << "epochBuffer:" << __LINE__ << " ready to clear outstanding comm";
-  ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
   if (mpireq != MPI_REQUEST_NULL){
 #ifdef VM_EPOCHLOG_on
     std::stringstream msg;
     msg << "epochBuffer:" << __LINE__ << " actually posting MPI_Wait()";
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
     MPI_Wait(&mpireq, MPI_STATUS_IGNORE);
   }
@@ -3513,7 +3513,7 @@ int VMK::send(const void *message, int size, int dest, commhandle **ch,
       msg << "epochBuffer:" << __LINE__ << " non-blocking send" << 
       " firstFlag=" << sm->firstFlag <<
       " msg size=" << size;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
       if (sm->firstFlag){
         // deal with the first actions here
@@ -3840,7 +3840,7 @@ int VMK::recv(void *message, int size, int source, commhandle **ch, int tag){
       msg << "epochBuffer:" << __LINE__ << " non-blocking recv" << 
       " firstFlag=" << rm->firstFlag <<
       " size=" << size;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
       if (rm->firstFlag){
         // deal with the first actions here
@@ -3850,7 +3850,7 @@ int VMK::recv(void *message, int size, int source, commhandle **ch, int tag){
         std::stringstream msg;
         msg << "epochBuffer:" << __LINE__ << " ready to probe:"
         << " src=" << getVas(lpid[source]);
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
         int defaultTag = getDefaultTag(source,mypet);
         MPI_Status mpistat;
@@ -3869,7 +3869,7 @@ int VMK::recv(void *message, int size, int source, commhandle **ch, int tag){
         << " src=" << getVas(lpid[source])
         << " size=" << rm->streamBuffer.size()
         << " streamBuffer=" << (void *)rm->streamBuffer.data();
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
         MPI_Recv(rm->buffer, bytecount, MPI_BYTE,
           lpid[source], defaultTag, mpi_c, MPI_STATUS_IGNORE);
@@ -3885,7 +3885,7 @@ int VMK::recv(void *message, int size, int source, commhandle **ch, int tag){
       msg << "epochBuffer:" << __LINE__ << " processing recv chunk:"
       << " buffer=" << rm->buffer
       << " chunkSize=" << chunkSize << " chunkTag=" << chunkTag;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif      
       if (chunkSize!=size){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -6124,7 +6124,7 @@ namespace ESMCI{
             msg << "ComPat#" << __LINE__
               << " posting receive from i=" << i << " size=" << size
               << " recvBuffer=" << (void *)recvBuffer[i];
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
         }
@@ -6150,7 +6150,7 @@ namespace ESMCI{
             msg << "ComPat#" << __LINE__
               << " posting send to i=" << i << " size=" << size
               << " sendBuffer=" << (void *)sendBuffer[i];
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
         }
@@ -6162,7 +6162,7 @@ namespace ESMCI{
           std::stringstream msg;
           msg << "ComPat#" << __LINE__
             << " doing localPrepareAndProcess for PET=" << localPet;
-          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
         }
 #endif
         localPrepareAndProcess(localPet);
@@ -6181,7 +6181,7 @@ namespace ESMCI{
             msg << "ComPat#" << __LINE__
               << " finished receive from i=" << i << " size=" << size
               << " recvBuffer=" << (void *)recvBuffer[i];
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
           messageProcess(i, localPet, recvBuffer[i]);
@@ -6204,7 +6204,7 @@ namespace ESMCI{
             msg << "ComPat#" << __LINE__
               << " finished send to i=" << i << " size=" << size
               << " sendBuffer=" << (void *)sendBuffer[i];
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
           delete [] sendBuffer[i];              // garbage collection
@@ -6250,7 +6250,7 @@ namespace ESMCI{
         msg << "ComPat2#" << __LINE__
           << " requestPet=" << requestPet 
           << " responsePet=" << responsePet;
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       }
 #endif
       if (i==0){
@@ -6280,7 +6280,7 @@ namespace ESMCI{
           msg << "ComPat2#" << __LINE__
             << " recvRequestSize=" << recvRequestSize
             << " sendRequestSize=" << sendRequestSize;
-          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
         }
 #endif
         if (recvRequestSize>0){
@@ -6292,7 +6292,7 @@ namespace ESMCI{
             msg << "ComPat2#" << __LINE__
               << " receiving request from requestPet=" << requestPet
               << " in recvBuffer1=" << (void*)recvBuffer1;
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
         }
@@ -6310,7 +6310,7 @@ namespace ESMCI{
             msg << "ComPat2#" << __LINE__
               << " sending request to responsePet=" << responsePet
               << " in sendRequestBuffer=" << (void*)sendRequestBuffer;
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
           vmk->recv(&recvResponseSize, sizeof(int), responsePet, &recvCommh2);
@@ -6324,7 +6324,7 @@ namespace ESMCI{
             msg << "ComPat2#" << __LINE__
               << " finished receiving request from requestPet=" << requestPet
               << " in recvBuffer1=" << (void*)recvBuffer1;
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
           sendResponseBuffer = NULL; // detectable reset
@@ -6349,7 +6349,7 @@ namespace ESMCI{
           msg << "ComPat2#" << __LINE__
             << " sendResponseSize=" << sendResponseSize
             << " recvResponseSize=" << recvResponseSize;
-          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
         }
 #endif
         recvBuffer2 = NULL; // detectable reset
@@ -6362,7 +6362,7 @@ namespace ESMCI{
             msg << "ComPat2#" << __LINE__
               << " receiving response from responsePet=" << responsePet
               << " in recvBuffer2=" << (void*)recvBuffer2;
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
         }
@@ -6380,7 +6380,7 @@ namespace ESMCI{
             msg << "ComPat2#" << __LINE__
               << " sending response to requestPet=" << requestPet
               << " in sendResponseBuffer=" << (void*)sendResponseBuffer;
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
         }
@@ -6393,7 +6393,7 @@ namespace ESMCI{
             msg << "ComPat2#" << __LINE__
               << " finished receiving response from responsePet=" << responsePet
               << " in recvBuffer2=" << (void*)recvBuffer2;
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
           handleResponse(responsePet, recvBuffer2, recvResponseSize);
@@ -6450,7 +6450,7 @@ namespace ESMCI{
         msg << "ComPat2#" << __LINE__
           << " requestPet=" << requestPet 
           << " responsePet=" << responsePet;
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       }
 #endif
       if (i==0){
@@ -6483,7 +6483,7 @@ namespace ESMCI{
             msg << "ComPat2#" << __LINE__
               << " recvRequestSize=" << recvRequestSize
               << " sendRequestSize=" << sendRequestSize;
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
         if (recvRequestSize>0){
@@ -6495,7 +6495,7 @@ namespace ESMCI{
             msg << "ComPat2#" << __LINE__
               << " receiving request from requestPet=" << requestPet
               << " in recvBuffer1=" << (void*)recvBuffer1;
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
         }
@@ -6509,7 +6509,7 @@ namespace ESMCI{
             msg << "ComPat2#" << __LINE__
               << " sending request to responsePet=" << responsePet
               << " in sendRequestBuffer=" << (void*)sendRequestBuffer;
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
           vmk->recv(&recvResponseSize, sizeof(int), responsePet, &recvCommh2);
@@ -6523,7 +6523,7 @@ namespace ESMCI{
             msg << "ComPat2#" << __LINE__
               << " finished receiving request from requestPet=" << requestPet
               << " in recvBuffer1=" << (void*)recvBuffer1;
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
           sendResponseBuffer = NULL; // detectable reset
@@ -6542,7 +6542,7 @@ namespace ESMCI{
           msg << "ComPat2#" << __LINE__
             << " sendResponseSize=" << sendResponseSize
             << " recvResponseSize=" << recvResponseSize;
-          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
         }
 #endif
         recvBuffer2 = NULL; // detectable reset
@@ -6555,7 +6555,7 @@ namespace ESMCI{
             msg << "ComPat2#" << __LINE__
               << " receiving response from responsePet=" << responsePet
               << " in recvBuffer2=" << (void*)recvBuffer2;
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
         }
@@ -6569,7 +6569,7 @@ namespace ESMCI{
             msg << "ComPat2#" << __LINE__
               << " sending response to requestPet=" << requestPet
               << " in sendResponseBuffer=" << (void*)sendResponseBuffer;
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
         }
@@ -6582,7 +6582,7 @@ namespace ESMCI{
             msg << "ComPat2#" << __LINE__
               << " finished receiving response from responsePet=" << responsePet
               << " in recvBuffer2=" << (void*)recvBuffer2;
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
           handleResponse(responsePet, recvBuffer2, recvResponseSize);
