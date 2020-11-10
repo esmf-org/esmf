@@ -459,21 +459,24 @@ void test_mbmesh_get_info(const MBMeshTest * const mbt, int *rc){
 
   int nodeIds[num_node];
   InterArray<int> *nii = new InterArray<int>(nodeIds,num_node);
-  double nodeCoords[num_node*pdim];
+  double nodeCoords[num_node*orig_sdim];
   InterArray<double> *nci = new InterArray<double>(nodeCoords,num_node*orig_sdim);
   int nodeMask[num_node];
   InterArray<int> *nmi = new InterArray<int>(nodeMask,num_node);
   int nodeOwners[num_node];
   InterArray<int> *noi = new InterArray<int>(nodeOwners,num_node);
   
+
   MBMesh_GetNodeCreateInfo(mbt->meshp, nii, NULL, NULL, NULL, &localrc);
   if (localrc != ESMF_SUCCESS) {
     correct = false;
     return;
   }
 
-  if (nii->extent[0] != num_node) correct = false;
-  else {
+  if (nii->extent[0] != num_node) {
+    printf("Error allocating InterArray for nodeIds");
+    correct = false;
+  } else {
     bool print = false;
     for (int i=0; i<nii->extent[0]; ++i) {
       if (nii->array[i] != mbt->nodeId[i]) {
@@ -494,8 +497,10 @@ void test_mbmesh_get_info(const MBMeshTest * const mbt, int *rc){
     return;
   }
 
-  if (nci->extent[0] != num_node*orig_sdim) correct = false;
-  else {
+  if (nci->extent[0] != num_node*orig_sdim) {
+    printf("Error allocating InterArray for nodeCoords");
+    correct = false;
+  } else {
     bool print = false;
     for (int i=0; i<nci->extent[0]; ++i) {
       if (abs(nci->array[i] - mbt->nodeCoord[i]) > tol) {
@@ -516,8 +521,10 @@ void test_mbmesh_get_info(const MBMeshTest * const mbt, int *rc){
     return;
   }
 
-  if (noi->extent[0] != num_node) correct = false;
-  else {
+  if (noi->extent[0] != num_node) {
+    printf("Error allocating InterArray for nodeOwners");
+    correct = false;
+  } else {
     bool print = false;
     for (int i=0; i<noi->extent[0]; ++i) {
       if (noi->array[i] != mbt->nodeOwner[i]) {
@@ -539,8 +546,10 @@ void test_mbmesh_get_info(const MBMeshTest * const mbt, int *rc){
       return;
     }
   
-    if (nmi->extent[0] != num_node) correct = false;
-    else {
+    if (nmi->extent[0] != num_node) {
+      printf("Error allocating InterArray for nodeMask");
+      correct = false;
+    } else {
       bool print = false;
       for (int i=0; i<nmi->extent[0]; ++i) {
         if (nmi->array[i] != mbt->nodeMask[i]) {
@@ -571,8 +580,9 @@ void test_mbmesh_get_info(const MBMeshTest * const mbt, int *rc){
   InterArray<int> *emi = new InterArray<int>(elemMask,num_elem);
   double elemArea[num_elem];
   InterArray<double> *eai = new InterArray<double>(elemArea,num_elem);
-  double elemCoords[num_elem*pdim];
+  double elemCoords[num_elem*orig_sdim];
   InterArray<double> *eci = new InterArray<double>(elemCoords,num_elem*orig_sdim);
+
 
   MBMesh_GetElemCreateInfo(mbt->meshp, eii, NULL, NULL, NULL, NULL, NULL, &localrc);
   if (localrc != ESMF_SUCCESS) {
@@ -580,8 +590,10 @@ void test_mbmesh_get_info(const MBMeshTest * const mbt, int *rc){
     return;
   }
 
-  if (eii->extent[0] != num_elem) correct = false;
-  else {
+  if (eii->extent[0] != num_elem) {
+    printf("Error allocating InterArray for elemIds");
+    correct = false;
+  } else {
     bool print = false;
     for (int i=0; i<eii->extent[0]; ++i) {
       if (eii->array[i] != mbt->elemId[i]) {
@@ -602,8 +614,10 @@ void test_mbmesh_get_info(const MBMeshTest * const mbt, int *rc){
     return;
   }
 
-  if (eti->extent[0] != num_elem) correct = false;
-  else {
+  if (eti->extent[0] != num_elem) {
+    printf("Error allocating InterArray for elemTypes");
+    correct = false;
+  } else {
     bool print = false;
     for (int i=0; i<eti->extent[0]; ++i) {
       if (eti->array[i] != mbt->elemType[i]) {
@@ -624,8 +638,10 @@ void test_mbmesh_get_info(const MBMeshTest * const mbt, int *rc){
     return;
   }
 
-  if (ecni->extent[0] != numelemconn) correct = false;
-  else {
+  if (ecni->extent[0] != numelemconn) {
+    printf("Error allocating InterArray for elemConn");
+    correct = false;
+  } else {
     bool print = false;
     for (int i=0; i<ecni->extent[0]; ++i) {
       if (ecni->array[i] != mbt->elemConn[i]) {
@@ -647,8 +663,10 @@ void test_mbmesh_get_info(const MBMeshTest * const mbt, int *rc){
       return;
     }
   
-    if (eai->extent[0] != num_elem) correct = false;
-    else {
+    if (eai->extent[0] != num_elem) {
+      printf("Error allocating InterArray for elemArea");
+      correct = false;
+    } else {
       bool print = false;
       for (int i=0; i<eai->extent[0]; ++i) {
         if (abs(eai->array[i] - mbt->elemArea[i]) > tol) {
@@ -671,8 +689,10 @@ void test_mbmesh_get_info(const MBMeshTest * const mbt, int *rc){
       return;
     }
   
-    if (eci->extent[0] != num_elem*orig_sdim) correct = false;
-    else {
+    if (eci->extent[0] != num_elem*orig_sdim) {
+      printf("Error allocating InterArray for elemCoords");
+      correct = false;
+    } else {
       bool print = false;
       for (int i=0; i<eci->extent[0]; ++i) {
         if (abs(eci->array[i] - mbt->elemCoord[i]) > tol) {
@@ -695,8 +715,10 @@ void test_mbmesh_get_info(const MBMeshTest * const mbt, int *rc){
       return;
     }
   
-    if (emi->extent[0] != num_elem) correct = false;
-    else {
+    if (emi->extent[0] != num_elem) {
+      printf("Error allocating InterArray for elemMask");
+      correct = false;
+    } else {
       bool print = false;
       for (int i=0; i<emi->extent[0]; ++i) {
         if (emi->array[i] != mbt->elemMask[i]) {
@@ -811,5 +833,6 @@ int main(int argc, char *argv[]) {
 
   return 0;
 }
+
 
 
