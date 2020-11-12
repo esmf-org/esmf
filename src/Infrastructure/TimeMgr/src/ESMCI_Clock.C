@@ -30,6 +30,7 @@
 
 #include "ESMCI_LogErr.h"
 #include "ESMCI_Alarm.h"
+#include "ESMCI_TraceRegion.h"
 
 //-------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
@@ -573,6 +574,8 @@ int Clock::count=0;
       return(rc);
     }
 
+TraceEventRegionEnter("Clock::advance(): actual step", &rc);
+
     if (direction == ESMF_DIRECTION_FORWARD) {
 
       // save current time, then advance it
@@ -617,6 +620,8 @@ int Clock::count=0;
 
     }
 
+TraceEventRegionExit("Clock::advance(): actual step", &rc);
+
     // TODO: validate (range check) new time against its calendar ?
 
     if (ringingAlarmCount != ESMC_NULL_POINTER) *ringingAlarmCount = 0;
@@ -637,6 +642,8 @@ int Clock::count=0;
         f90ArrayElementSize = (int)(ringingAlarmList2ndElementPtr -
                                     ringingAlarmList1stElementPtr);
     }
+
+TraceEventRegionEnter("Clock::advance(): traverse alarm list", &rc);
 
     // traverse alarm list (i) for ringing alarms (j)
     for(int i=0, j=0; i<alarmCount; i++) {
@@ -675,6 +682,8 @@ int Clock::count=0;
         }
       }
     }
+
+TraceEventRegionExit("Clock::advance(): traverse alarm list", &rc);
 
     if (userChangedDirection) userChangedDirection = false;
 
