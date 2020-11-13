@@ -149,11 +149,13 @@ module NUOPC_Model
 ! !IROUTINE: NUOPC_ModelGet - Get info from a Model
 !
 ! !INTERFACE:
-  subroutine NUOPC_ModelGet(model, driverClock, modelClock, &
-    importState, exportState, rc)
+  subroutine NUOPC_ModelGet(model, driverClock, modelClockAdvanced, &
+    modelClockRetarded, modelClock, importState, exportState, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: model
     type(ESMF_Clock),    intent(out), optional :: driverClock
+    type(ESMF_Clock),    intent(out), optional :: modelClockAdvanced
+    type(ESMF_Clock),    intent(out), optional :: modelClockRetarded
     type(ESMF_Clock),    intent(out), optional :: modelClock
     type(ESMF_State),    intent(out), optional :: importState
     type(ESMF_State),    intent(out), optional :: exportState
@@ -175,8 +177,10 @@ module NUOPC_Model
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
 
     ! query ModeBase
-    call NUOPC_ModelBaseGet(model, driverClock=driverClock, clock=modelClock, &
-      importState=importState, exportState=exportState, rc=localrc)
+    call NUOPC_ModelBaseGet(model, driverClock=driverClock, &
+      advancedClock=modelClockAdvanced, retardedClock=modelClockRetarded, &
+      clock=modelClock, importState=importState, exportState=exportState, &
+      rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out

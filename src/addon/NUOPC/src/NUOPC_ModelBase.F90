@@ -40,7 +40,9 @@ module NUOPC_ModelBase
     label_SetClock, &
     label_DataInitialize, &
     label_Advance, &
-    label_AdvanceClock, &
+    label_AdvanceClockAdvanced, &
+    label_AdvanceClockRetarded, &
+    label_AdvanceClock, & !TODO: deprecated, use label_AdvanceClockRetarded
     label_CheckImport, &
     label_SetRunClock, &
     label_TimestampExport, &
@@ -54,7 +56,11 @@ module NUOPC_ModelBase
   character(*), parameter :: &
     label_Advance = "ModelBase_Advance"
   character(*), parameter :: &
-    label_AdvanceClock = "ModelBase_AdvanceClock"
+    label_AdvanceClockAdvanced = "ModelBase_AdvanceClockAdvanced"
+  character(*), parameter :: &
+    label_AdvanceClockRetarded = "ModelBase_AdvanceClockRetarded"
+  character(*), parameter :: &
+    label_AdvanceClock = label_AdvanceClockRetarded
   character(*), parameter :: &
     label_CheckImport = "ModelBase_CheckImport"
   character(*), parameter :: &
@@ -78,9 +84,16 @@ module NUOPC_ModelBase
   character(*), parameter :: &
     label_DataInitialize = "ModelBase_DataInitialize"
 
+  type type_InternalClocks
+    type(ESMF_Clock)      :: advanced
+    type(ESMF_Clock)      :: retarded
+  end type
+
   type type_InternalStateStruct
-    type(ESMF_Clock)      :: driverClock
-    type(ESMF_Time)       :: preAdvanceCurrTime
+    type(ESMF_Clock)          :: driverClock
+    type(ESMF_Time)           :: preAdvanceCurrTime
+    type(type_InternalClocks) :: internalClocks(20) !TODO: should be Container and grow with run phases added
+    integer                   :: phase  ! index into internalClocks(:)
   end type
 
   type type_InternalState
@@ -509,7 +522,7 @@ module NUOPC_ModelBase
       ! DataInitialize: choose different generic code depending on spec details
       if (isPresentDataInitialize) then
         call NUOPC_CompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
-          phaseLabelList=(/"IPDv05p8"/), userRoutine=InitializeIPDvXp08, rc=rc)
+          phaseLabelList=(/"IPDvXp08"/), userRoutine=InitializeIPDvXp08, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) &
           return  ! bail out
@@ -1562,7 +1575,8 @@ module NUOPC_ModelBase
     integer                   :: verbosity, diagnostic, profiling
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
-    
+    type(type_InternalState)  :: is
+
     rc = ESMF_SUCCESS
 
     nullify(impStdNameList)
@@ -1684,6 +1698,26 @@ module NUOPC_ModelBase
     if (btest(profiling,1)) then
       call ESMF_TraceRegionExit("label_SetClock")
     endif
+
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! all of the internalClocks to start out as copies of internalClock
+    call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    do i=1, size(is%wrap%internalClocks)
+      is%wrap%internalClocks(i)%advanced = ESMF_ClockCreate(internalClock, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      is%wrap%internalClocks(i)%retarded = ESMF_ClockCreate(internalClock, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    enddo
 
     ! query if all import Fields are connected
     call NUOPC_GetStateMemberLists(importState, StandardNameList=impStdNameList, &
@@ -2084,13 +2118,14 @@ module NUOPC_ModelBase
     logical                   :: existflag
     character(ESMF_MAXSTR)    :: name
     character(ESMF_MAXSTR)    :: msgString, pLabel
-    integer                   :: phase
+    integer                   :: phase, i
     type(ESMF_Clock)          :: internalClock
     logical                   :: clockIsPresent
     logical                   :: clockIsCreated
     integer                   :: verbosity, diagnostic, profiling
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
+    type(type_InternalState)  :: is
 
     rc = ESMF_SUCCESS
 
@@ -2182,6 +2217,10 @@ module NUOPC_ModelBase
     endif
     
     ! if the incoming clock is valid, then use to set currTime on internalClock
+    call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
     clockIsCreated = ESMF_ClockIsCreated(clock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -2190,14 +2229,26 @@ module NUOPC_ModelBase
       call ESMF_ClockGet(clock, currTime=currTime, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) &
-        return  ! bail out
       call ESMF_ClockSet(internalClock, currTime=currTime, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
+
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! all of the internalClocks to start out as copies of internalClock
+    do i=1, size(is%wrap%internalClocks)
+      is%wrap%internalClocks(i)%advanced = ESMF_ClockCreate(internalClock, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      is%wrap%internalClocks(i)%retarded = ESMF_ClockCreate(internalClock, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    enddo
 
     ! fill all export Fields with valid initial data for current time
     ! note that only connected Fields reside in exportState at this time
@@ -2385,9 +2436,19 @@ module NUOPC_ModelBase
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-    
+
     ! store the incoming clock as driverClock in internal state
     is%wrap%driverClock = clock
+
+    ! store the phase in internal state
+    is%wrap%phase = phase
+
+    ! set the phase specific internal Clock
+    call ESMF_GridCompSet(gcomp, clock=is%wrap%internalClocks(phase)%retarded, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
 
     ! SPECIALIZE required: label_SetRunClock
     if (btest(profiling,4)) then
@@ -2498,6 +2559,42 @@ module NUOPC_ModelBase
           return  ! bail out
       endif
 
+      if (btest(profiling,4)) then
+        call ESMF_TraceRegionEnter("label_AdvanceClockAdvanced")
+      endif
+      ! advance the advanced Clock to the new current time (optionally specialz)
+      call ESMF_MethodExecute(gcomp, label=label_AdvanceClockAdvanced, &
+        index=phase, existflag=existflag, userRc=localrc, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) &
+        return  ! bail out
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, &
+        rcToReturn=rc)) &
+        return  ! bail out
+      if (.not.existflag) then
+        ! -> next check for the label without phase index
+        call ESMF_MethodExecute(gcomp, label=label_AdvanceClockAdvanced, &
+          existflag=existflag, userRc=localrc, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) &
+          return  ! bail out
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, &
+          rcToReturn=rc)) &
+          return  ! bail out
+        if (.not.existflag) then
+          ! at last use the DEFAULT implementation to advance the Clock
+          call ESMF_ClockAdvance(is%wrap%internalClocks(phase)%advanced, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) &
+            return  ! bail out
+        endif
+      endif
+      if (btest(profiling,4)) then
+        call ESMF_TraceRegionExit("label_AdvanceClockAdvanced")
+      endif
+
       ! advance the model t->t+dt
       ! SPECIALIZE required: label_Advance
       if (btest(profiling,4)) then
@@ -2530,11 +2627,11 @@ module NUOPC_ModelBase
       endif
 
       if (btest(profiling,4)) then
-        call ESMF_TraceRegionEnter("label_AdvanceClock")
+        call ESMF_TraceRegionEnter("label_AdvanceClockRetarded")
       endif
-      ! advance the internalClock to the new current time (optionally specialz)
-      call ESMF_MethodExecute(gcomp, label=label_AdvanceClock, index=phase, &
-        existflag=existflag, userRc=localrc, rc=rc)
+      ! advance the retarded Clock to the new current time (optionally specialz)
+      call ESMF_MethodExecute(gcomp, label=label_AdvanceClockRetarded, &
+        index=phase, existflag=existflag, userRc=localrc, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
         return  ! bail out
@@ -2544,7 +2641,7 @@ module NUOPC_ModelBase
         return  ! bail out
       if (.not.existflag) then
         ! -> next check for the label without phase index
-        call ESMF_MethodExecute(gcomp, label=label_AdvanceClock, &
+        call ESMF_MethodExecute(gcomp, label=label_AdvanceClockRetarded, &
           existflag=existflag, userRc=localrc, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) &
@@ -2555,16 +2652,16 @@ module NUOPC_ModelBase
           return  ! bail out
         if (.not.existflag) then
           ! at last use the DEFAULT implementation to advance the Clock
-          call ESMF_ClockAdvance(internalClock, rc=rc)
+          call ESMF_ClockAdvance(is%wrap%internalClocks(phase)%retarded, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) &
             return  ! bail out
         endif
       endif
       if (btest(profiling,4)) then
-        call ESMF_TraceRegionExit("label_AdvanceClock")
+        call ESMF_TraceRegionExit("label_AdvanceClockRetarded")
       endif
-    
+
       ! handle verbosity
       if (btest(verbosity,12)) then
         call ESMF_ClockPrint(internalClock, options="currTime", &
@@ -2966,11 +3063,13 @@ module NUOPC_ModelBase
 ! !IROUTINE: NUOPC_ModelBaseGet - Get info from a ModelBase
 !
 ! !INTERFACE:
-  subroutine NUOPC_ModelBaseGet(gcomp, driverClock, clock, importState, &
-    exportState, rc)
+  subroutine NUOPC_ModelBaseGet(gcomp, driverClock, advancedClock, retardedClock, &
+    clock, importState, exportState, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: gcomp
     type(ESMF_Clock),    intent(out), optional :: driverClock
+    type(ESMF_Clock),    intent(out), optional :: advancedClock
+    type(ESMF_Clock),    intent(out), optional :: retardedClock
     type(ESMF_Clock),    intent(out), optional :: clock
     type(ESMF_State),    intent(out), optional :: importState
     type(ESMF_State),    intent(out), optional :: exportState
@@ -2993,14 +3092,19 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
     
     ! driverClock
-    if (present(driverClock)) then
+    if (present(driverClock).or.present(advancedClock) &
+      .or.present(retardedClock)) then
       ! query Component for the internal State
       nullify(is%wrap)
       call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      driverClock = is%wrap%driverClock
+      if (present(driverClock)) driverClock = is%wrap%driverClock
+      if (present(advancedClock)) &
+        advancedClock = is%wrap%internalClocks(is%wrap%phase)%advanced
+      if (present(retardedClock)) &
+        retardedClock = is%wrap%internalClocks(is%wrap%phase)%retarded
     endif
     
     ! remaining arguments
