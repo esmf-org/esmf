@@ -329,6 +329,17 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
   }
   out_mesh->has_elem_mask=src_mesh->has_elem_mask;
 
+  if (src_mesh->has_elem_area) {
+    double dbl_def_val=0.0;
+    merr=moab_mesh->tag_get_handle("elem_area_tag", 1, MB_TYPE_DOUBLE, out_mesh->elem_area_tag, MB_TAG_EXCL|MB_TAG_DENSE, &dbl_def_val);
+    if (merr != MB_SUCCESS) {
+      int localrc;
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                       moab::ErrorCodeStr[merr], ESMC_CONTEXT, &localrc)) throw localrc;
+    }     
+  }
+  out_mesh->has_elem_area=src_mesh->has_elem_area;
+
   // Do output
   *_out_mesh=out_mesh;
 }
