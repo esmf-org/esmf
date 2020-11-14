@@ -34,7 +34,7 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMCI_IntegrateUTest \
                $(ESMF_TESTDIR)/ESMF_MeshOpUTest \
                $(ESMF_TESTDIR)/ESMF_MeshUTest
 
-# TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_MBMesh_GlueUTest
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_MBMesh_GlueUTest
 # TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_MeshUTest
 # TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_MBMesh_ErrorUTest
 

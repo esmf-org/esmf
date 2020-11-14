@@ -52,14 +52,15 @@ namespace ESMCI {
 #define ESMC_METHOD "esmc_error::esmc_error()"
 esmc_error::esmc_error (const std::string &code_name, int esmc_rc, const std::string &msg) {
   assert(esmc_rc != ESMF_SUCCESS);
-  std::string the_msg;
-  if (code_name != "") {
-    the_msg = "Error/Return Code " + std::to_string(esmc_rc) + " (" + \
-                     code_name + ") - " + msg;
-  } else {
-    the_msg = "Error/Return Code " + std::to_string(esmc_rc) + " - " + msg;
-  }
-  this->msg = the_msg;
+  // std::string the_msg;
+  // if (code_name != "") {
+  //   the_msg = "Error/Return Code " + std::to_string(esmc_rc) + " (" + \
+  //                    code_name + ") - " + msg;
+  // } else {
+  //   the_msg = "Error/Return Code " + std::to_string(esmc_rc) + " - " + msg;
+  // }
+  // this->msg = the_msg;
+  this->msg = msg;
   this->esmc_rc = esmc_rc;
 }
 } // namespace

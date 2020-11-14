@@ -19,7 +19,7 @@
 
 #if defined ESMF_MOAB
 
-#include "ESMC_MBMeshTestUtilMBMesh.C"
+#include "ESMC_MBMeshTestGenMBMesh.C"
 
 #include "ESMCI_MBMesh_Glue.h"
 

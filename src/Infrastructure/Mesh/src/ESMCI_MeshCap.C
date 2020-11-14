@@ -1427,13 +1427,10 @@ void MeshCap::meshgetfrac(int *_num_elem, double *elem_fracs, int *rc) {
   if (is_esmf_mesh) {
     ESMCI_meshgetfrac(&mesh, _num_elem, elem_fracs, rc);
   } else {
-    printf(" Got Frac commented out!\n");
-#if 0
     ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
        "- this functionality is not currently supported using MOAB",
                                   ESMC_CONTEXT, rc);
     return;
-#endif
   }
 }
 

@@ -23,8 +23,7 @@
 #if defined ESMF_MOAB
 #include "ESMCI_MBMesh.h"
 #include "ESMCI_MBMesh_Glue.h"
-#include "ESMCI_MBMesh_Mapping.h"
-#include "ESMCI_MBMesh_Util.h"
+// #include "ESMCI_MBMesh_Util.h"
 #endif
 
 #include <iostream>
@@ -36,8 +35,6 @@
 // for Windows...
 #define M_PI 3.14159265358979323846
 #endif
-
-static double UNINITVAL = -42;
 
 // test base class ideas
 // - almost equal function
@@ -55,13 +52,18 @@ typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
         || std::fabs(x-y) < std::numeric_limits<T>::min();
 }
 
-#define ESMC_CHECK_RC_THROW(actual_rc) \
-  if (actual_rc != ESMF_SUCCESS) {\
-    ESMCI::esmc_error local_macro_error("", actual_rc, ""); \
-    if (ESMC_LogDefault.MsgFoundError(actual_rc, local_macro_error.what(), ESMC_CONTEXT, nullptr)) \
+#define MBMESHTEST_THROW_ERROR(msg) {\
+    ESMCI::esmc_error local_macro_error("", ESMC_RC_MOAB_ERROR, msg); \
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, local_macro_error.what(), ESMC_CONTEXT, nullptr); \
+    throw(local_macro_error);}
+
+#define MBMESHTEST_CHECK_RC_THROW(localrc) \
+  if (localrc != ESMF_SUCCESS) {\
+    ESMCI::esmc_error local_macro_error("", localrc, ""); \
+    if (ESMC_LogDefault.MsgFoundError(localrc, local_macro_error.what(), ESMC_CONTEXT, NULL)) \
       throw(local_macro_error);}
 
-#define ESMC_CATCH_MBMESH_TEST_RETHROW \
+#define MBMESHTEST_CATCH_RETHROW \
   catch (std::exception &exc) {\
     if (ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, exc.what(), ESMC_CONTEXT, nullptr)) \
       throw(exc); \
@@ -72,8 +74,8 @@ typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
     if (ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, msg, ESMC_CONTEXT, nullptr)) \
       throw(local_macro_error); }
 
-// for MBMesh routines, when pointer *rc is returned
-#define ESMC_CATCH_MBMESH_TEST_RETURN(rc) \
+// for MBMesh routines, when pointer to object is returned
+#define MBMESHTEST_CATCH_RETURN_NULL(rc) \
   catch (std::exception &exc) { \
     ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc); \
     return NULL; \
@@ -83,21 +85,33 @@ typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
     ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL, msg, ESMC_CONTEXT, rc); \
     return NULL; }
 
+// for MBMesh routines, when integer is returned
+#define MBMESHTEST_CATCH_RETURN_RC(rc) \
+  catch (std::exception &exc) { \
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc); \
+    return ESMF_FAILURE; \
+  } catch(...) { \
+    std::string msg; \
+    msg = "Unknown exception"; \
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL, msg, ESMC_CONTEXT, rc); \
+    return ESMF_FAILURE; }
+
 
 class MBMeshTest {
   public:
     MBMesh *mesh;
     // pointer to MBMesh for calls to glue layer routines that still use void*
     void *meshp;
+    void *meshp_redist;
 
     // integer values
     int pdim;
     int sdim;
     int orig_sdim;
-    int num_elem;
-    int num_node;
-    int num_elem_conn;
     ESMC_CoordSys_Flag coord_sys;
+    int num_node;
+    int num_elem;
+    int num_elem_conn;
 
     // present variables
     int node_mask_present;
@@ -106,150 +120,288 @@ class MBMeshTest {
     int elem_mask_present;
 
     // node information
-    int *nodeId = NULL;
-    int *nodeMask = NULL;
-    int *nodeOwner = NULL;
-    double *nodeCoord = NULL;
+    std::vector<int> nodeId;
+    std::vector<int> nodeMask;
+    std::vector<int> nodeOwner;
+    std::vector<double> nodeCoord;
 
     // element information
-    int *elemConn = NULL;
-    int *elemId = NULL;
-    int *elemMask = NULL;
-    int *elemType = NULL;
-    double *elemArea = NULL;
-    double *elemCoord = NULL;
+    std::vector<int> elemConn;
+    std::vector<int> elemId;
+    std::vector<int> elemMask;
+    std::vector<int> elemType;
+    std::vector<double> elemArea;
+    std::vector<double> elemCoord;
 
     // output variables
     std::string pass = "Pass - ";
     std::string fail = "Fail - ";
 
+    // for redist
+    int num_elem_gids;
+    int num_node_gids;
+    std::vector<int> elem_gids;
+    std::vector<int> node_gids;
+    bool do_redist;
 
-    MBMeshTest(int _pdim, int _sdim, int _num_elem, int _num_node, ESMC_CoordSys_Flag _coord_sys) {
+    int redist_num_node;
+    int redist_num_elem;
+    int redist_num_elem_conn;
+    std::vector<int> redist_nodeId;
+    std::vector<int> redist_nodeMask;
+    std::vector<int> redist_nodeOwner;
+    std::vector<double> redist_nodeCoord;
+    std::vector<int> redist_elemConn;
+    std::vector<int> redist_elemId;
+    std::vector<int> redist_elemMask;
+    std::vector<int> redist_elemType;
+    std::vector<double> redist_elemArea;
+    std::vector<double> redist_elemCoord;
+
+
+    MBMeshTest(int _pdim, int _sdim, ESMC_CoordSys_Flag _coord_sys, int _num_node, int _num_elem, int _num_elem_conn, bool redist=false, int _redist_num_node=0, int _redist_num_elem=0, int _redist_num_elem_conn=0) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MBMeshTest()"
 
       try {
+        mesh = new MBMesh();
+        meshp = static_cast<void *> (mesh);
+
         pdim = _pdim;
         sdim = _sdim;
         orig_sdim = _sdim;
-        // orig_sdim comes from coordsys and pdim
-        num_elem = _num_elem;
         num_node = _num_node;
+        num_elem = _num_elem;
+        num_elem_conn = _num_elem_conn;
         coord_sys = _coord_sys;
         
-        node_mask_present = false;
-        elem_area_present = false;
-        elem_coord_present = false;
-        elem_mask_present = false;
-  
-        // allocate the MBMesh object
+        nodeId.reserve(_num_node);
+        nodeCoord.reserve(_num_node*_sdim);
+        nodeOwner.reserve(_num_node);
+        elemId.reserve(_num_elem);
+        elemType.reserve(_num_elem);
+        elemConn.reserve(_num_elem_conn);
+        elemCoord.reserve(_num_elem*_sdim);
+        
+        nodeMask.reserve(_num_node);
+        elemMask.reserve(_num_elem);
+        elemArea.reserve(_num_elem);
+
+        std::generate(nodeMask.begin(), nodeMask.end(), std::rand);
+        std::generate(elemMask.begin(), elemMask.end(), std::rand);
+        std::generate(elemArea.begin(), elemArea.end(), std::rand);
+
+        do_redist = redist;
+        if (redist) {
+          redist_num_node = _redist_num_node;
+          redist_num_elem = _redist_num_elem;
+          redist_num_elem_conn = _redist_num_elem_conn;
+          redist_nodeId.reserve(_redist_num_node);
+          redist_nodeCoord.reserve(_redist_num_node*_sdim);
+          redist_nodeOwner.reserve(_redist_num_node);
+          redist_elemId.reserve(_redist_num_elem);
+          redist_elemType.reserve(_redist_num_elem);
+          redist_elemConn.reserve(_redist_num_elem_conn);
+          redist_elemCoord.reserve(_redist_num_elem*_sdim);
+          redist_nodeMask.reserve(_redist_num_node);
+          redist_elemMask.reserve(_redist_num_elem);
+          redist_elemArea.reserve(_redist_num_elem);
+        }
+
+      } MBMESHTEST_CATCH_RETHROW
+    }
+
+    MBMeshTest() {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MBMeshTest(default)"
+
+      try {
         mesh = new MBMesh();
         meshp = static_cast<void *> (mesh);
-  
+
+      } MBMESHTEST_CATCH_RETHROW
+    }
+
+    int build_mbmesh() {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MBMeshTest::build_mbmesh()"
+      // RETURN: rc : pass(0) fail(>0)
+      int rc = ESMF_FAILURE;
+
+      try {
+
+        // this->print();
+        node_mask_present = true;
+        elem_area_present = true;
+        elem_coord_present = true;
+        elem_mask_present = true;
+
+        InterArray<int> *iin = new InterArray<int>(nodeMask.data(),num_node);
+        InterArray<int> *iie = new InterArray<int>(elemMask.data(),num_elem);
+
         int localrc;
         MBMesh_create(&meshp, &pdim, &sdim, &coord_sys, &localrc);
-        ESMC_CHECK_RC_THROW(localrc)
+        MBMESHTEST_CHECK_RC_THROW(localrc)
 
-      } ESMC_CATCH_MBMESH_TEST_RETHROW
-    }
+        MBMesh_addnodes(&meshp, &num_node, nodeId.data(), nodeCoord.data(), 
+                        nodeOwner.data(), iin, &coord_sys, &orig_sdim, &localrc);
+        MBMESHTEST_CHECK_RC_THROW(localrc)
 
-    ~MBMeshTest(){
-      delete [] nodeId;
-      delete [] nodeOwner;
-      delete [] nodeCoord;
-      if (node_mask_present) delete [] nodeMask;
-      // 
-      delete [] elemConn;
-      delete [] elemId;
-      delete [] elemType;
-      if (elem_area_present) delete [] elemArea;
-      if (elem_coord_present) delete [] elemCoord;
-      if (elem_mask_present) delete [] elemMask;
-    }
-
-    void add_nodes(int *node_id, int *node_owner, 
-                   double *node_coord, int *node_mask=NULL) {
-#undef ESMC_METHOD
-#define ESMC_METHOD "MBMeshTest::add_nodes()"
-
-      try {
-        nodeId = new int[num_node];
-        std::copy(node_id, node_id+num_node, nodeId);
-        nodeOwner = new int[num_node];
-        std::copy(node_owner, node_owner+num_node, nodeOwner);
-        nodeCoord = new double[num_node*pdim];
-        std::copy(node_coord, node_coord+num_node*pdim, nodeCoord);
-  
-        InterArray<int> *iin = NULL;
-        if (node_mask != NULL) {
-          nodeMask = new int[num_node];
-          std::copy(node_mask, node_mask+num_node, nodeMask);
-          node_mask_present = true;
-          iin = new InterArray<int>(nodeMask,num_node);
-        }
-  
-        int localrc;
-        MBMesh_addnodes(&meshp, &num_node, nodeId, nodeCoord, nodeOwner, iin,
+        int regridconserve = 0;
+        MBMesh_addelements(&meshp, &num_elem, elemId.data(), elemType.data(), iie,
+                          &elem_area_present, elemArea.data(),
+                          &elem_coord_present, elemCoord.data(),
+                          &num_elem_conn, elemConn.data(),
+                          &regridconserve,
                           &coord_sys, &orig_sdim, &localrc);
-        ESMC_CHECK_RC_THROW(localrc)
-  
-        if (node_mask_present) delete iin;
-    
-      } ESMC_CATCH_MBMESH_TEST_RETHROW
+        MBMESHTEST_CHECK_RC_THROW(localrc)
+
+        delete iin;
+        delete iie;
+
+      } MBMESHTEST_CATCH_RETURN_RC(&rc)
+
+      rc = ESMF_SUCCESS;
+      return rc;
     }
 
-    void add_elems(int numelemconn, int *elem_conn, int *elem_id, 
-                   int *elem_type, int *elem_mask = NULL,
-                   double *elem_area = NULL, double *elem_coord = NULL,
-                   int *regridconserve = 0) {
+    int mbtRedist(MBMeshTest *mbt) {
 #undef ESMC_METHOD
-#define ESMC_METHOD "MBMeshTest::add_elems()"
+#define ESMC_METHOD "MBMeshTest::mbtRedist"
+      // RETURN: rc : pass(0) fail(>0)
+      int rc = ESMF_FAILURE;
 
       try {
-        num_elem_conn = numelemconn;
-  
-        elemConn = new int[numelemconn];
-        std::copy(elem_conn, elem_conn+num_elem_conn, elemConn);
-        elemId = new int[num_elem];
-        std::copy(elem_id, elem_id+num_elem, elemId);
-        elemType = new int[num_elem];
-        std::copy(elem_type, elem_type+num_elem, elemType);
+
+        if (!do_redist)
+          MBMESHTEST_THROW_ERROR("Cannot run redist with 1 core.")
         
-        InterArray<int> *iie = NULL;
-        if (elem_mask != NULL) {
-          elemMask = new int[num_elem];
-          std::copy(elem_mask, elem_mask+num_elem, elemMask);
-          elem_mask_present = true;
-          iie = new InterArray<int>(elemMask,num_elem);
-        }
-  
-        if (elem_area != NULL) {
-          elemArea = new double[num_elem];
-          std::copy(elem_area, elem_area+num_elem, elemArea);
-          elem_area_present = true;
-        }
-  
-        if (elem_coord != NULL) {
-          elemCoord = new double[num_elem*pdim];
-          std::copy(elem_coord, elem_coord+num_elem*pdim, elemCoord);
-          elem_coord_present = true;
-        }
-  
-        int localrc;
-        MBMesh_addelements(&meshp, &num_elem, elemId, elemType, iie,
-                          &elem_area_present, elemArea,
-                          &elem_coord_present, elemCoord,
-                          &numelemconn, elemConn,
-                          regridconserve,
-                          &coord_sys, &orig_sdim, &localrc);
-        ESMC_CHECK_RC_THROW(localrc)
-  
-        if (elem_mask_present) delete iie;
+        // first copy the information from mbt
+        mbt->pdim = pdim;
+        mbt->sdim = sdim;
+        mbt->orig_sdim = sdim;
+        mbt->num_node = num_node;
+        mbt->num_elem = num_elem;
+        mbt->num_elem_conn = num_elem_conn;
+        mbt->coord_sys = coord_sys;
+        
+        mbt->node_mask_present = node_mask_present;
+        mbt->elem_area_present = elem_area_present;
+        mbt->elem_coord_present = elem_coord_present;
+        mbt->elem_mask_present = elem_mask_present;
 
-      } ESMC_CATCH_MBMESH_TEST_RETHROW
+        mbt->nodeId.assign(redist_nodeId.begin(), redist_nodeId.end());
+        mbt->nodeCoord.assign(redist_nodeCoord.begin(), redist_nodeCoord.end());
+        mbt->nodeOwner.assign(redist_nodeOwner.begin(), redist_nodeOwner.end());
+        mbt->elemId.assign(redist_elemId.begin(), redist_elemId.end());
+        mbt->elemType.assign(redist_elemType.begin(), redist_elemType.end());
+        mbt->elemConn.assign(redist_elemConn.begin(), redist_elemConn.end());
+        mbt->elemCoord.assign(redist_elemCoord.begin(), redist_elemCoord.end());
+        mbt->nodeMask.assign(redist_nodeMask.begin(), redist_nodeMask.end());
+        mbt->elemMask.assign(redist_elemMask.begin(), redist_elemMask.end());
+        mbt->elemArea.assign(redist_elemArea.begin(), redist_elemArea.end());
+        
+        // store original meshp in meshp_redist for build_mbmesh_redist
+        mbt->meshp_redist = meshp;
+
+      } MBMESHTEST_CATCH_RETURN_RC(&rc)
+
+      rc = ESMF_SUCCESS;
+      return rc;
     }
 
-    int test_get_info(double tol = 1.e-15, int verbosity = 0){
+    int build_mbmesh_redist() {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MBMeshTest::build_mbmesh_redist()"
+      // RETURN: rc : pass(0) fail(>0)
+      int rc = ESMF_FAILURE;
+
+      try {
+
+        int localrc;
+        // MBMesh_createredistnodes(&meshp_redist, num_node, nodeId.data(),
+        //                          &meshp, &localrc);
+        MBMesh_createredistelems(&meshp_redist, &num_elem, elemId.data(),
+                                 &meshp, &localrc);
+        // MBMesh_createredist(&meshp_redist, num_node, nodeId.data(), &num_elem, 
+        //                     elemId.data(), &meshp, &localrc);
+        MBMESHTEST_CHECK_RC_THROW(localrc)
+
+      } MBMESHTEST_CATCH_RETURN_RC(&rc)
+
+      rc = ESMF_SUCCESS;
+      return rc;
+    }
+
+
+    int print() {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MBMeshTest::print()"
+      // RETURN: rc : pass(0) fail(>0)
+      int rc = ESMF_FAILURE;
+
+      try {
+        std::cout << "MBMeshTest Print:"<< std::endl;
+        std::cout << "pdim" << pdim << std::endl;
+        std::cout << "sdim"<< sdim << std::endl;
+        std::cout << "orig_sdim"<< orig_sdim << std::endl;
+        std::cout << "num_elem"<< num_elem << std::endl;
+        std::cout << "num_node"<< num_node << std::endl;
+        std::cout << "num_elem_conn"<< num_elem_conn << std::endl;
+        std::cout << "coord_sys"<< coord_sys << std::endl;
+        std::cout << "nodeId"<< std::endl;
+        for (const auto i: nodeId)
+          std::cout << i << ' ';
+        std::cout << "nodeMask"<< std::endl;
+        for (const auto i: nodeMask)
+          std::cout << i << ' ';
+        std::cout << "nodeOwner"<< std::endl;
+        for (const auto i: nodeOwner)
+          std::cout << i << ' ';
+        std::cout << "nodeCoord"<< std::endl;
+        for (const auto i: nodeCoord)
+          std::cout << i << ' ';
+        std::cout << "elemConn"<< std::endl;
+        for (const auto i: elemConn)
+          std::cout << i << ' ';
+        std::cout << "elemId"<< std::endl;
+        for (const auto i: elemId)
+          std::cout << i << ' ';
+        std::cout << "elemMask"<< std::endl;
+        for (const auto i: elemMask)
+          std::cout << i << ' ';
+        std::cout << "elemType"<< std::endl;
+        for (const auto i: elemType)
+          std::cout << i << ' ';
+        std::cout << "elemArea"<< std::endl;
+        for (const auto i: elemArea)
+          std::cout << i << ' ';
+        std::cout << "elemCoord"<< std::endl;
+        for (const auto i: elemCoord)
+          std::cout << i << ' ';
+
+        if (do_redist) {
+          std::cout << "num_elem_gids"<< std::endl;
+          std::cout << "num_node_gids"<< std::endl;
+          std::cout << "elem_gids"<< std::endl;
+          for (const auto i: elem_gids)
+            std::cout << i << ' ';
+          std::cout << "node_gids"<< std::endl;
+          for (const auto i: node_gids)
+            std::cout << i << ' ';
+        }
+
+      } MBMESHTEST_CATCH_RETURN_RC(&rc)
+
+      rc = ESMF_SUCCESS;
+      return rc;
+
+    }
+
+
+    int test_get_info(int verbosity = 0, double tol = 1.e-15){
+#undef ESMC_METHOD
+#define ESMC_METHOD "MBMeshTest::test_get_info()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
       bool correct = true;
@@ -264,15 +416,15 @@ class MBMeshTest {
 
       int nodeCount;
       MBMesh_GetNodeCount(meshp, &nodeCount, &localrc);
-      ESMC_CHECK_RC_THROW(localrc)
+      MBMESHTEST_CHECK_RC_THROW(localrc)
     
       int elemCount;
       MBMesh_GetElemCount(meshp, &elemCount, &localrc);
-      ESMC_CHECK_RC_THROW(localrc)
+      MBMESHTEST_CHECK_RC_THROW(localrc)
     
       int elemConnCount;
       MBMesh_GetElemConnCount(meshp, &elemConnCount, &localrc);
-      ESMC_CHECK_RC_THROW(localrc)
+      MBMESHTEST_CHECK_RC_THROW(localrc)
     
       if (nodeCount != num_node) {
         printf("nodeCount = %d (correct = %d)\n", nodeCount, num_node);
@@ -297,18 +449,18 @@ class MBMeshTest {
 
       int elemMaskIsPresent, elemAreaIsPresent, elemCoordIsPresent;
       MBMesh_GetElemInfoPresence(meshp, &elemMaskIsPresent, &elemAreaIsPresent, &elemCoordIsPresent, &localrc);
-      ESMC_CHECK_RC_THROW(localrc)
+      MBMESHTEST_CHECK_RC_THROW(localrc)
     
       if (elemMaskIsPresent!=elem_mask_present) {
-        printf("elemAreaIsPresent = %d (correct = %d)\n", elemAreaIsPresent, elem_area_present);
+        printf("elemMaskIsPresent = %d (correct = %d)\n", elemMaskIsPresent, elem_mask_present);
         correct = false;
       } 
       if (elemAreaIsPresent!=elem_area_present) {
-        printf("elemCoordIsPresent = %d (correct = %d)\n", elemCoordIsPresent, elem_coord_present);
+        printf("elemAreaIsPresent = %d (correct = %d)\n", elemAreaIsPresent, elem_area_present);
         correct = false;
       } 
       if (elemCoordIsPresent!=elem_coord_present) {
-        printf("elemMaskIsPresent = %d (correct = %d)\n", elemMaskIsPresent, elem_mask_present);
+        printf("elemCoordIsPresent = %d (correct = %d)\n", elemCoordIsPresent, elem_coord_present);
         correct = false;
       }
       
@@ -320,7 +472,7 @@ class MBMeshTest {
 
       int nodeMaskIsPresent;
       MBMesh_GetNodeInfoPresence(meshp, &nodeMaskIsPresent, &localrc);
-      ESMC_CHECK_RC_THROW(localrc)
+      MBMESHTEST_CHECK_RC_THROW(localrc)
     
       if (nodeMaskIsPresent!=node_mask_present) {
         printf("nodeMaskIsPresent = %d (correct = %d)\n", nodeMaskIsPresent, node_mask_present);
@@ -339,7 +491,7 @@ class MBMeshTest {
       InterArray<int> *noi = new InterArray<int>(nodeOwners,num_node);
       
       MBMesh_GetNodeCreateInfo(meshp, nii, NULL, NULL, NULL, &localrc);
-      ESMC_CHECK_RC_THROW(localrc)
+      MBMESHTEST_CHECK_RC_THROW(localrc)
 
       test = "nodeId";
       fail_print = false;
@@ -359,7 +511,7 @@ class MBMeshTest {
       }
     
       MBMesh_GetNodeCreateInfo(meshp, NULL, nci, NULL, NULL, &localrc);
-      ESMC_CHECK_RC_THROW(localrc)
+      MBMESHTEST_CHECK_RC_THROW(localrc)
     
       test = "nodeCoord";
       fail_print = false;
@@ -379,7 +531,7 @@ class MBMeshTest {
       }
     
       MBMesh_GetNodeCreateInfo(meshp, NULL, NULL, noi, NULL, &localrc);
-      ESMC_CHECK_RC_THROW(localrc)
+      MBMESHTEST_CHECK_RC_THROW(localrc)
     
       test = "nodeOwner";
       fail_print = false;
@@ -400,7 +552,7 @@ class MBMeshTest {
     
       if (node_mask_present) {
         MBMesh_GetNodeCreateInfo(meshp, NULL, NULL, NULL, nmi, &localrc);
-        ESMC_CHECK_RC_THROW(localrc)
+        MBMESHTEST_CHECK_RC_THROW(localrc)
       
         test = "nodeMask";
         fail_print = false;
@@ -436,7 +588,7 @@ class MBMeshTest {
       InterArray<double> *eci = new InterArray<double>(elemCoord,num_elem*orig_sdim);
     
       MBMesh_GetElemCreateInfo(meshp, eii, NULL, NULL, NULL, NULL, NULL, &localrc);
-      ESMC_CHECK_RC_THROW(localrc)
+      MBMESHTEST_CHECK_RC_THROW(localrc)
     
       test = "ElemId";
       fail_print = false;
@@ -456,7 +608,7 @@ class MBMeshTest {
       }
     
       MBMesh_GetElemCreateInfo(meshp, NULL, eti, NULL, NULL, NULL, NULL, &localrc);
-      ESMC_CHECK_RC_THROW(localrc)
+      MBMESHTEST_CHECK_RC_THROW(localrc)
     
       test = "ElemType";
       fail_print = false;
@@ -476,7 +628,7 @@ class MBMeshTest {
       }
     
       MBMesh_GetElemCreateInfo(meshp, NULL, NULL, ecni, NULL, NULL, NULL, &localrc);
-      ESMC_CHECK_RC_THROW(localrc)
+      MBMESHTEST_CHECK_RC_THROW(localrc)
     
       test = "ElemConn";
       fail_print = false;
@@ -497,7 +649,7 @@ class MBMeshTest {
     
       if (elem_area_present) {
         MBMesh_GetElemCreateInfo(meshp, NULL, NULL, NULL, NULL, eai, NULL, &localrc);
-        ESMC_CHECK_RC_THROW(localrc)
+        MBMESHTEST_CHECK_RC_THROW(localrc)
       
         test = "ElemArea";
         fail_print = false;
@@ -519,7 +671,7 @@ class MBMeshTest {
     
       if (elem_coord_present) {
         MBMesh_GetElemCreateInfo(meshp, NULL, NULL, NULL, NULL, NULL, eci, &localrc);
-        ESMC_CHECK_RC_THROW(localrc)
+        MBMESHTEST_CHECK_RC_THROW(localrc)
       
         test = "ElemCoord";
         fail_print = false;
@@ -541,7 +693,7 @@ class MBMeshTest {
     
       if (elem_mask_present) {
         MBMesh_GetElemCreateInfo(meshp, NULL, NULL, NULL, emi, NULL, NULL, &localrc);
-        ESMC_CHECK_RC_THROW(localrc)
+        MBMESHTEST_CHECK_RC_THROW(localrc)
       
         test = "ElemMask";
         fail_print = false;
@@ -569,7 +721,7 @@ class MBMeshTest {
       if (elem_coord_present) delete eci;
       if (elem_mask_present) delete emi;
     
-      } ESMC_CATCH_MBMESH_TEST_RETURN(&rc)
+      } MBMESHTEST_CATCH_RETURN_RC(&rc)
 
       if(correct == true) rc = ESMF_SUCCESS;
       return rc;

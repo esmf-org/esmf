@@ -22,2212 +22,223 @@
 #include "ESMC_Test.h"
 
 #if defined ESMF_MOAB
+#include "ESMC_MBMeshTest.C"
+
+
 #include "ESMCI_MBMesh.h"
-#include "ESMCI_MBMesh_Bilinear.h"
 #endif
 
 #include <iostream>
 #include <iterator>
 #include <vector>
-
+#include <algorithm>
 
 #if !defined (M_PI)
 // for Windows...
 #define M_PI 3.14159265358979323846
 #endif
 
-// test base class ideas
-// - almost equal function
-// - vector comparison with IWeights
-// - 
+static double UNINITVAL = -42;
 
-bool weights_correct(IWeights &wts, std::vector<double> weights) {
-  bool correct = true;
-  if (weights[0] != UNINITVAL) {
-    int ind = 0;
-    WMat::WeightMap::iterator mb = wts.begin_row(), me = wts.end_row();
-    for(; mb != me; ++mb) {
-      std::vector<WMat::Entry> row = mb->second;
-      std::vector<WMat::Entry>::iterator vb = row.begin(), ve = row.end();
-      for(; vb != ve; ++vb) {
-        WMat::Entry rv = *vb;
-        if (rv.value /= weights[ind]) correct = false;
-        ++ind;
-      }
-    }
-    if (weights.size() != ind) correct = false;
-  }
-  
-  return correct;
-}
-
-#if defined ESMF_MOAB
-bool weight_gen(MBMesh *mesh, PointList *pl, std::vector<double> weights, bool cart=true) {
-  bool correct = false;
-
-  // early exit for ESMF_MOAB=OFF
-  if (mesh == NULL || pl == NULL)
-    return true;
-  
-  // Cartesian?
-  int map_type = MB_MAP_TYPE_GREAT_CIRCLE;
-  if (cart) map_type = MB_MAP_TYPE_CART_APPROX;
-  
-  // do bilinear regridding between mesh and pointlist
-  IWeights wt, dst_status;
-  IWeights &wts = wt;
-  IWeights &ds = dst_status;
-  calc_bilinear_regrid_wgts(mesh, pl, wts, &map_type, true, ds);
-
-  // verify results
-  if (weights_correct(wts, weights)) correct = true;
-
-  // output weight matrix for debugging purposes
-// #define BILINEAR_WEIGHTS
-#ifdef BILINEAR_WEIGHTS
-  std::cout << std::endl << "Bilinear Weight Matrix" << std::endl;
-  // print out weights
-  WMat::WeightMap::iterator mb = wts.begin_row(), me = wts.end_row();
-  for(; mb != me; ++mb) {
-    WMat::Entry col = mb->first;
-    std::vector<WMat::Entry> row = mb->second;
-
-    std::cout << "[" << col.id << "," << col.idx << "," << col.value << ","
-         << col.src_id << "] - ";
-
-    std::vector<WMat::Entry>::iterator vb = row.begin(), ve = row.end();
-    for(; vb != ve; ++vb) {
-      WMat::Entry rv = *vb;
-      std::cout << "[" << rv.id << "," << rv.idx << "," << rv.value << ","
-           << rv.src_id << "] ";
-    }
-    std::cout << std::endl;
-  }
-  std::cout << std::endl;
-#endif
-
-  return correct;
-}
-#else
-// dummy function for ESMF_MOAB=OFF
-bool weight_gen(void *mesh, void *pl) {return true;}
-#endif
-
-#if defined ESMF_MOAB
-
-MBMesh* create_mesh_quad(int &rc) {
-  //
-  //
-  //  2.0   7 ------- 8 -------- 9
-  //        |         |          |
-  //        |    3    |    4     |
-  //        |         |          |
-  //  1.0   4 ------- 5 -------- 6
-  //        |         |          |
-  //        |    1    |    2     |
-  //        |         |          |
-  //  0.0   1 ------- 2 -------- 3
-  //
-  //       0.0       1.0        2.0
-  //
-  //      Node Ids at corners
-  //      Element Ids in centers
-  //
-  //
-  //      ( Everything owned by PET 0)
-  //
-
-  rc = ESMF_RC_NOT_IMPL;
-
-  int pdim = 2;
-  int sdim = 2;
-
-  // set Mesh parameters
-  int num_elem = 4;
-  int num_node = 9;
-
-  int nodeId_s [] ={10,20,30,40,50,60,70,80,90};
-  double nodeCoord_s [] ={0.0,0.0, 1.0,0.0, 2.0,0.0,
-               0.0,1.0, 1.0,1.0, 2.0,1.0,
-               0.0,2.0, 1.0,2.0, 2.0,2.0};
-  int nodeOwner_s [] ={0,0,0,0,0,0,0,0,0};
-  int nodeMask_s [] ={1,1,1,1,1,1,1,1,1};
-  int elemId_s [] ={1,2,3,4};
-  // ESMF_MESHELEMTYPE_QUAD
-  int elemType_s [] ={ESMC_MESHELEMTYPE_QUAD,
-                      ESMC_MESHELEMTYPE_QUAD,
-                      ESMC_MESHELEMTYPE_QUAD,
-                      ESMC_MESHELEMTYPE_QUAD};
-  int elemMask_s [] ={1,1,1,1};
-  double elemArea_s [] ={1.0,2.0,3.0,4.0}; // Wrong area, but just to test
-  int elemConn_s [] ={1,2,5,4,
-              2,3,6,5,
-              4,5,8,7,
-              5,6,9,8};
-  double elemCoord_s [] ={0.5,0.5,0.5,1.5,1.5,0.5,1.5,1.5};
-
-  ESMC_CoordSys_Flag local_coordSys=ESMC_COORDSYS_CART;
-
-  int orig_sdim = sdim;
-
-  MBMesh *mesh = new MBMesh();
-  void *meshp = static_cast<void *> (mesh);
-
-  MBMesh_create(&meshp, &pdim, &sdim, &local_coordSys, &rc);
-  if (rc != ESMF_SUCCESS) return NULL;
-
-  InterArray<int> *iin = new InterArray<int>(nodeMask_s,9);
-
-  MBMesh_addnodes(&meshp, &num_node, nodeId_s, nodeCoord_s, nodeOwner_s, iin,
-                  &local_coordSys, &orig_sdim, &rc);
-  if (rc != ESMF_SUCCESS) return NULL;
-
-  int areapresent = 1;
-  int coordspresent = 1;
-  int numelemconn = 16;
-  int regridconserve = 0;
-  InterArray<int> *iie = new InterArray<int>(elemMask_s,4);
-  MBMesh_addelements(&meshp, &num_elem, elemId_s, elemType_s, iie,
-                     &areapresent, elemArea_s,
-                     &coordspresent, elemCoord_s,
-                     &numelemconn, elemConn_s,
-                     &regridconserve,
-                     &local_coordSys, &orig_sdim, &rc);
-  if (rc != ESMF_SUCCESS) return NULL;
-
-  delete iin;
-  delete iie;
-
-  rc = ESMF_SUCCESS;
-  return static_cast<MBMesh *>(meshp);
-}
-
-
-MBMesh* create_mesh_quad_sph(int &rc) {
-  //
-  //
-  //  pi/5  7 ------- 8 -------- 9
-  //        |         |          |
-  //        |    3    |    4     |
-  //        |         |          |
-  //  pi/10 4 ------- 5 -------- 6
-  //        |         |          |
-  //        |    1    |    2     |
-  //        |         |          |
-  //  0.0   1 ------- 2 -------- 3
-  //
-  //       0.0       pi/10       pi/5
-  //
-  //      Node Ids at corners
-  //      Element Ids in centers
-  //
-  //
-  //      ( Everything owned by PET 0)
-  //
-
-  rc = ESMF_RC_NOT_IMPL;
-
-  double pi = 3.14159;
-
-  int pdim = 2;
-  int sdim = 3;
-
-  // set Mesh parameters
-  int num_elem = 4;
-  int num_node = 9;
-
-  int nodeId_s [] ={1,2,3,4,5,6,7,8,9};
-  double nodeCoord_s [] ={0.0,0.0, pi/10,0.0, pi/5,0.0,
-               0.0,pi/10, pi/10,pi/10, pi/5,pi/10,
-               0.0,pi/5, pi/10,pi/5, pi/5,pi/5};
-  int nodeOwner_s [] ={0,0,0,0,0,0,0,0,0};
-  int nodeMask_s [] ={1,1,1,1,1,1,1,1,1};
-  int elemId_s [] ={1,2,3,4};
-  // ESMF_MESHELEMTYPE_QUAD
-  int elemType_s [] ={ESMC_MESHELEMTYPE_QUAD,
-                      ESMC_MESHELEMTYPE_QUAD,
-                      ESMC_MESHELEMTYPE_QUAD,
-                      ESMC_MESHELEMTYPE_QUAD};
-  int elemMask_s [] ={1,1,1,1};
-  double elemArea_s [] ={1.0,2.0,3.0,4.0}; // Wrong area, but just to test
-  int elemConn_s [] ={1,2,5,4,
-              2,3,6,5,
-              4,5,8,7,
-              5,6,9,8};
-  double elemCoord_s [] ={pi/20,pi/20,pi/20,3*pi/20,3*pi/20,pi/20,3*pi/20,3*pi/20};
-
-  ESMC_CoordSys_Flag local_coordSys=ESMC_COORDSYS_SPH_DEG;
-
-  int orig_sdim = sdim;
-
-  MBMesh *mesh = new MBMesh();
-  void *meshp = static_cast<void *> (mesh);
-
-  MBMesh_create(&meshp, &pdim, &sdim, &local_coordSys, &rc);
-  if (rc != ESMF_SUCCESS) return NULL;
-
-  InterArray<int> *iin = new InterArray<int>(nodeMask_s,9);
-
-  MBMesh_addnodes(&meshp, &num_node, nodeId_s, nodeCoord_s, nodeOwner_s, iin,
-                  &local_coordSys, &orig_sdim, &rc);
-  if (rc != ESMF_SUCCESS) return NULL;
-
-  int areapresent = 1;
-  int coordspresent = 1;
-  int numelemconn = 16;
-  int regridconserve = 0;
-  InterArray<int> *iie = new InterArray<int>(elemMask_s,4);
-  MBMesh_addelements(&meshp, &num_elem, elemId_s, elemType_s, iie,
-                     &areapresent, elemArea_s,
-                     &coordspresent, elemCoord_s,
-                     &numelemconn, elemConn_s,
-                     &regridconserve,
-                     &local_coordSys, &orig_sdim, &rc);
-  if (rc != ESMF_SUCCESS) return NULL;
-
-  delete iin;
-  delete iie;
-
-  rc = ESMF_SUCCESS;
-  return static_cast<MBMesh *>(meshp);
-}
-
-MBMesh* create_mesh_tri(int &rc) {
-  //
-  //  2.0   7 ------- 8 -------- 9
-  //        |  \   6  |  7    /  |
-  //        |    \    |    /     |
-  //        |  5   \  | /     8  |
-  //  1.0   4 ------- 5 -------- 6
-  //        |  1    / |  \    4  |
-  //        |     /   |    \     |
-  //        |  /   2  |  3   \   |
-  //  0.0   1 ------- 2 -------- 3
-  //
-  //       0.0       1.0        2.0
-  //
-  //      Node Ids at corners
-  //      Element Ids in centers
-  //
-  //
-  //      ( Everything owned by PET 0)
-  //
-
-  rc = ESMF_RC_NOT_IMPL;
-
-  int pdim = 2;
-  int sdim = 2;
-
-  // set Mesh parameters
-  int num_elem = 8;
-  int num_node = 9;
-
-  int nodeId_s [] ={1,2,3,4,5,6,7,8,9};
-  double nodeCoord_s [] ={0.0,0.0, 1.0,0.0, 2.0,0.0,
-                          0.0,1.0, 1.0,1.0, 2.0,1.0,
-                          0.0,2.0, 1.0,2.0, 2.0,2.0};
-  int nodeOwner_s [] ={0,0,0,0,0,0,0,0,0};
-  int nodeMask_s [] ={1,1,1,1,1,1,1,1};
-  int elemId_s [] ={1,2,3,4,5,6,7,8};
-  // ESMF_MESHELEMTYPE_QUAD
-  int elemType_s [] ={ESMC_MESHELEMTYPE_TRI,
-                      ESMC_MESHELEMTYPE_TRI,
-                      ESMC_MESHELEMTYPE_TRI,
-                      ESMC_MESHELEMTYPE_TRI,
-                      ESMC_MESHELEMTYPE_TRI,
-                      ESMC_MESHELEMTYPE_TRI,
-                      ESMC_MESHELEMTYPE_TRI,
-                      ESMC_MESHELEMTYPE_TRI};
-  int elemMask_s [] ={1,1,1,1,1,1,1,1};
-  //double elemArea_s [] ={1.0,2.0,3.0,4.0,1.0,2.0,3.0,4.0};
-  int elemConn_s [] ={1,5,4,
-                      1,2,5,
-                      3,5,2,
-                      3,6,5,
-                      5,7,4,
-                      5,8,7,
-                      9,8,5,
-                      9,5,6};
-  //double elemCoord_s [] ={0.5,0.5,0.5,1.5,1.5,0.5,1.5,1.5};
-
-  ESMC_CoordSys_Flag local_coordSys=ESMC_COORDSYS_CART;
-
-  int orig_sdim = sdim;
-
-  MBMesh *mesh = new MBMesh();
-  void *meshp = static_cast<void *> (mesh);
-
-  MBMesh_create(&meshp, &pdim, &sdim, &local_coordSys, &rc);
-  if (rc != ESMF_SUCCESS) return NULL;
-
-  InterArray<int> *ii_node = new InterArray<int>(nodeMask_s,9);
-
-  MBMesh_addnodes(&meshp, &num_node, nodeId_s, nodeCoord_s, nodeOwner_s,
-                  ii_node, &local_coordSys, &orig_sdim, &rc);
-  if (rc != ESMF_SUCCESS) return NULL;
-
-  InterArray<int> *ii_elem = new InterArray<int>(elemMask_s,8);
-
-  int areapresent = 0;
-  int coordspresent = 0;
-  int numelemconn = 24;
-  int regridconserve = 0;
-  MBMesh_addelements(&meshp, &num_elem, elemId_s, elemType_s, ii_elem,
-                     &areapresent, NULL,
-                     &coordspresent, NULL,
-                     &numelemconn, elemConn_s,
-                     &regridconserve,
-                     &local_coordSys, &orig_sdim, &rc);
-  if (rc != ESMF_SUCCESS) return NULL;
-
-  delete ii_node;
-  delete ii_elem;
-
-  rc = ESMF_SUCCESS;
-  return static_cast<MBMesh *>(meshp);
-}
-
-MBMesh* create_mesh_tri_sph(int &rc) {
-  //
-  //  pi/5  7 ------- 8 -------- 9
-  //        |  \   6  |  7    /  |
-  //        |    \    |    /     |
-  //        |  5   \  | /     8  |
-  //  pi/10 4 ------- 5 -------- 6
-  //        |  1    / |  \    4  |
-  //        |     /   |    \     |
-  //        |  /   2  |  3   \   |
-  //  0.0   1 ------- 2 -------- 3
-  //
-  //       0.0       pi/10      pi/5
-  //
-  //      Node Ids at corners
-  //      Element Ids in centers
-  //
-  //
-  //      ( Everything owned by PET 0)
-  //
-
-  rc = ESMF_RC_NOT_IMPL;
-
-  double pi = 3.14159;
-
-  int pdim = 2;
-  int sdim = 3;
-
-  // set Mesh parameters
-  int num_elem = 8;
-  int num_node = 9;
-
-  int nodeId_s [] ={1,2,3,4,5,6,7,8,9};
-  double nodeCoord_s [] ={0.0,0.0, pi/10,0.0, pi/5,0.0,
-                          0.0,pi/10, pi/10,pi/10, pi/5,pi/10,
-                          0.0,pi/5, pi/10,pi/5, pi/5,pi/5};
-  int nodeOwner_s [] ={0,0,0,0,0,0,0,0,0};
-  int nodeMask_s [] ={1,1,1,1,1,1,1,1};
-  int elemId_s [] ={1,2,3,4,5,6,7,8};
-  // ESMF_MESHELEMTYPE_QUAD
-  int elemType_s [] ={ESMC_MESHELEMTYPE_TRI,
-                      ESMC_MESHELEMTYPE_TRI,
-                      ESMC_MESHELEMTYPE_TRI,
-                      ESMC_MESHELEMTYPE_TRI,
-                      ESMC_MESHELEMTYPE_TRI,
-                      ESMC_MESHELEMTYPE_TRI,
-                      ESMC_MESHELEMTYPE_TRI,
-                      ESMC_MESHELEMTYPE_TRI};
-  int elemMask_s [] ={1,1,1,1,1,1,1,1};
-  //double elemArea_s [] ={1.0,2.0,3.0,4.0,1.0,2.0,3.0,4.0};
-  int elemConn_s [] ={1,5,4,
-                      1,2,5,
-                      3,5,2,
-                      3,6,5,
-                      5,7,4,
-                      5,8,7,
-                      9,8,5,
-                      9,5,6};
-  //double elemCoord_s [] ={0.5,0.5,0.5,1.5,1.5,0.5,1.5,1.5};
-
-  ESMC_CoordSys_Flag local_coordSys=ESMC_COORDSYS_SPH_DEG;
-
-  int orig_sdim = sdim;
-
-  MBMesh *mesh = new MBMesh();
-  void *meshp = static_cast<void *> (mesh);
-
-  MBMesh_create(&meshp, &pdim, &sdim, &local_coordSys, &rc);
-  if (rc != ESMF_SUCCESS) return NULL;
-
-  InterArray<int> *ii_node = new InterArray<int>(nodeMask_s,9);
-
-  MBMesh_addnodes(&meshp, &num_node, nodeId_s, nodeCoord_s, nodeOwner_s,
-                  ii_node, &local_coordSys, &orig_sdim, &rc);
-  if (rc != ESMF_SUCCESS) return NULL;
-
-  InterArray<int> *ii_elem = new InterArray<int>(elemMask_s,8);
-
-  int areapresent = 0;
-  int coordspresent = 0;
-  int numelemconn = 24;
-  int regridconserve = 0;
-  MBMesh_addelements(&meshp, &num_elem, elemId_s, elemType_s, ii_elem,
-                     &areapresent, NULL,
-                     &coordspresent, NULL,
-                     &numelemconn, elemConn_s,
-                     &regridconserve,
-                     &local_coordSys, &orig_sdim, &rc);
-  if (rc != ESMF_SUCCESS) return NULL;
-
-  delete ii_node;
-  delete ii_elem;
-
-  rc = ESMF_SUCCESS;
-  return static_cast<MBMesh *>(meshp);
-}
-
-MBMesh* create_mesh_tet(int &rc) {
-/*
-                                       ,|,
-                                     ,7`\,\,
-                                   ,7`  `| `\,
-                                 ,7`     \,  `\,
-                               ,7`       `|    `\,
-                             ,7`          \,     `\,
-                           ,7`            `|       `\,
-                         ,7`               \,        `\,
-                       ,7`                 `|        /7`\,
-                     ,7`                    \,      AV `|`\,
-                   ,7`'TTs.,                `|     /7   \, `\,
-                 ,7` \\,  `'TTs.,            \,   AV    `|   `\,
-               ,7`   `|       `'TTs.,       `|  /7      \,    `\,
-             ,7`      \,            `'TTs.,   \,AV       `|      `\,
-           ,7`        `|                 `'TTs`|7         \,       `\,
-         ,7`           \,                     ,7\\,        `|         K`
-       ,7`             `|                  ,7` `|`\,       \,       AV
-     ,7`                \,               ,7`    \, `\,     `|      /7
-   ,7`                  `|             ,7`      `|   `\,    \,    AV
-  ,T,                    \,          ,7`         \,    `\,  `|   /7
-  `'TTs.,                `|        ,7`           `|      `\, \, AV
-       `'TTs.,            \,     ,7`              \,       `\||/7
-            `'TTs.,       `|   ,7`                `|         `AV
-                 `'TTs.,   \,,7`                   \,        /7
-                      `'TTs`|                      `|       AV
-                           `'TTs.,                  \,     /7
-                                `'TTs.,             `|    AV
-                                     `'TTV.,         \,  /7
-                                          `'TTs.,    `| AV
-                                               `'TTs.,\/7
-                                                    `'T`
-*/
-  // Get parallel information
-  int localPet, petCount;
-  ESMC_VM vm;
-
-  vm=ESMC_VMGetGlobal(&rc);
-  if (rc != ESMF_SUCCESS) return 0;
-
-  rc=ESMC_VMGet(vm, &localPet, &petCount, (int *)NULL, (MPI_Comm *)NULL,
-                (int *)NULL, (int *)NULL);
-  if (rc != ESMF_SUCCESS) return 0;
-
-  // Mesh variables
-  int pdim=3;
-  int sdim=3;
-  int num_elem, num_node;
-
-  // set Mesh parameters
-  int *nodeId;
-  double *nodeCoord;
-  int *nodeOwner;
-
-  int *elemId;
-  int *elemType;
-  int *elemConn;
-
-  MBMesh *mesh = new MBMesh();
-  void *meshp = static_cast<void *> (mesh);
-
-  ESMC_CoordSys_Flag coordsys=ESMC_COORDSYS_CART;
-  MBMesh_create(&meshp, &pdim, &sdim, &coordsys, &rc);
-
-    num_node = 10;
-    num_elem = 4;
-
-    nodeId    = (int *) malloc (num_node * sizeof (int));
-    nodeCoord = (double *) malloc (3*num_node * sizeof (double));
-    nodeOwner = (int *) malloc (num_node * sizeof (int));
-    elemId   = (int *) malloc (num_elem * sizeof (int));
-    elemType = (int *) malloc (num_elem * sizeof (int));
-    elemConn = (int *) malloc (4*num_elem * sizeof (int));
-
-    nodeId[0]=1;
-    nodeId[1]=2;
-    nodeId[2]=3;
-    nodeId[3]=4;
-    nodeId[4]=5;
-    nodeId[5]=6;
-    nodeId[6]=7;
-    nodeId[7]=8;
-    nodeId[8]=9;
-    nodeId[9]=10;
-
-    nodeCoord[0]=0.0; nodeCoord[1]=0.0; nodeCoord[2]=0.0;
-    nodeCoord[3]=1.0; nodeCoord[4]=0.0; nodeCoord[5]=0.0;
-    nodeCoord[6]=2.0; nodeCoord[7]=0.0; nodeCoord[8]=0.0;
-    nodeCoord[9]=0.5; nodeCoord[10]=1.0; nodeCoord[11]=0.0;
-    nodeCoord[12]=1.5; nodeCoord[13]=1.0; nodeCoord[14]=0.0;
-    nodeCoord[15]=1.0; nodeCoord[16]=2.0; nodeCoord[17]=0.0;
-    nodeCoord[18]=0.5; nodeCoord[19]=0.5; nodeCoord[20]=1.0;
-    nodeCoord[21]=1.0; nodeCoord[22]=0.5; nodeCoord[23]=1.0;
-    nodeCoord[24]=1.5; nodeCoord[25]=0.5; nodeCoord[26]=1.0;
-    nodeCoord[27]=1.0; nodeCoord[28]=1.5; nodeCoord[29]=1.0;
-
-    nodeOwner[0]=0;
-    nodeOwner[1]=0;
-    nodeOwner[2]=0;
-    nodeOwner[3]=0;
-    nodeOwner[4]=0;
-    nodeOwner[5]=0;
-    nodeOwner[6]=0;
-    nodeOwner[7]=0;
-    nodeOwner[8]=0;
-    nodeOwner[9]=0;
-
-    elemId[0]=1;
-    elemId[1]=2;
-    elemId[2]=3;
-    elemId[3]=4;
-
-    elemType[0]=ESMC_MESHELEMTYPE_TETRA;
-    elemType[1]=ESMC_MESHELEMTYPE_TETRA;
-    elemType[2]=ESMC_MESHELEMTYPE_TETRA;
-    elemType[3]=ESMC_MESHELEMTYPE_TETRA;
-
-    elemConn[0]=1; elemConn[1]=2; elemConn[2]=7; elemConn[3]=4;
-    elemConn[4]=2; elemConn[5]=3; elemConn[6]=9; elemConn[7]=5;
-    elemConn[8]=2; elemConn[9]=5; elemConn[10]=8; elemConn[11]=4;
-    elemConn[12]=4; elemConn[13]=5; elemConn[14]=10; elemConn[15]=6;
-
-    MBMesh_addnodes(&meshp, &num_node, nodeId, nodeCoord, nodeOwner, NULL,
-                    &coordsys, &sdim, &rc);
-
-    int areapresent = 0;
-    int coordspresent = 0;
-    int numelemconn = 4*num_elem;
-    int regridconserve = 0;
-    MBMesh_addelements(&meshp, &num_elem, elemId, elemType, NULL,
-                       &areapresent, NULL,
-                       &coordspresent, NULL,
-                       &numelemconn, elemConn,
-                       &regridconserve,
-                       &coordsys, &sdim, &rc);
-
-  rc = ESMF_SUCCESS;
-  return static_cast<MBMesh *>(meshp);
-}
-
-MBMesh* create_mesh_hex(int &rc) {
-
-  // Get parallel information
-  int localPet, petCount;
-  ESMC_VM vm;
-
-  vm=ESMC_VMGetGlobal(&rc);
-  if (rc != ESMF_SUCCESS) return 0;
-
-  rc=ESMC_VMGet(vm, &localPet, &petCount, (int *)NULL, (MPI_Comm *)NULL,
-                (int *)NULL, (int *)NULL);
-  if (rc != ESMF_SUCCESS) return 0;
-
-  // Mesh variables
-  int pdim=3;
-  int sdim=3;
-  int num_elem, num_node;
-
-  // set Mesh parameters
-  int *nodeId;
-  double *nodeCoord;
-  int *nodeOwner;
-
-  int *elemId;
-  int *elemType;
-  int *elemConn;
-
-  MBMesh *mesh = new MBMesh();
-  void *meshp = static_cast<void *> (mesh);
-
-  ESMC_CoordSys_Flag coordsys=ESMC_COORDSYS_CART;
-  MBMesh_create(&meshp, &pdim, &sdim, &coordsys, &rc);
-
-    num_node = 18;
-    num_elem = 4;
-
-    nodeId    = (int *) malloc (num_node * sizeof (int));
-    nodeCoord = (double *) malloc (3*num_node * sizeof (double));
-    nodeOwner = (int *) malloc (num_node * sizeof (int));
-    elemId   = (int *) malloc (num_elem * sizeof (int));
-    elemType = (int *) malloc (num_elem * sizeof (int));
-    elemConn = (int *) malloc (8*num_elem * sizeof (int));
-
-    nodeId[0]=1;
-    nodeId[1]=2;
-    nodeId[2]=3;
-    nodeId[3]=4;
-    nodeId[4]=5;
-    nodeId[5]=6;
-    nodeId[6]=7;
-    nodeId[7]=8;
-    nodeId[8]=9;
-    nodeId[9]=10;
-    nodeId[10]=11;
-    nodeId[11]=12;
-    nodeId[12]=13;
-    nodeId[13]=14;
-    nodeId[14]=15;
-    nodeId[15]=16;
-    nodeId[16]=17;
-    nodeId[17]=18;
-
-    nodeCoord[0] =1.0 ; nodeCoord[1] =1.0 ; nodeCoord[2] =1.0;
-    nodeCoord[3] =10.0; nodeCoord[4] =1.0 ; nodeCoord[5] =1.0;
-    nodeCoord[6] =20.0; nodeCoord[7] =1.0 ; nodeCoord[8] =1.0;
-    nodeCoord[9] =1.0 ; nodeCoord[10]=10.0; nodeCoord[11]=1.0;
-    nodeCoord[12]=10.0; nodeCoord[13]=10.0; nodeCoord[14]=1.0;
-    nodeCoord[15]=20.0; nodeCoord[16]=10.0; nodeCoord[17]=1.0;
-    nodeCoord[18]=1.0 ; nodeCoord[19]=20.0; nodeCoord[20]=1.0;
-    nodeCoord[21]=10.0; nodeCoord[22]=20.0; nodeCoord[23]=1.0;
-    nodeCoord[24]=20.0; nodeCoord[25]=20.0; nodeCoord[26]=1.0;
-    nodeCoord[27]=1.0 ; nodeCoord[28]=1.0 ; nodeCoord[29]=2.0;
-    nodeCoord[30]=10.0; nodeCoord[31]=1.0 ; nodeCoord[32]=2.0;
-    nodeCoord[33]=20.0; nodeCoord[34]=1.0 ; nodeCoord[35]=2.0;
-    nodeCoord[36]=1.0 ; nodeCoord[37]=10.0; nodeCoord[38]=2.0;
-    nodeCoord[39]=10.0; nodeCoord[40]=10.0; nodeCoord[41]=2.0;
-    nodeCoord[42]=20.0; nodeCoord[43]=10.0; nodeCoord[44]=2.0;
-    nodeCoord[45]=1.0 ; nodeCoord[46]=20.0; nodeCoord[47]=2.0;
-    nodeCoord[48]=10.0; nodeCoord[49]=20.0; nodeCoord[50]=2.0;
-    nodeCoord[51]=20.0; nodeCoord[52]=20.0; nodeCoord[53]=2.0;
-
-    nodeOwner[0]=0;
-    nodeOwner[1]=0;
-    nodeOwner[2]=0;
-    nodeOwner[3]=0;
-    nodeOwner[4]=0;
-    nodeOwner[5]=0;
-    nodeOwner[6]=0;
-    nodeOwner[7]=0;
-    nodeOwner[8]=0;
-    nodeOwner[9]=0;
-    nodeOwner[10]=0;
-    nodeOwner[11]=0;
-    nodeOwner[12]=0;
-    nodeOwner[13]=0;
-    nodeOwner[14]=0;
-    nodeOwner[15]=0;
-    nodeOwner[16]=0;
-    nodeOwner[17]=0;
-
-    elemId[0]=1;
-    elemId[1]=2;
-    elemId[2]=3;
-    elemId[3]=4;
-
-    elemType[0]=ESMC_MESHELEMTYPE_HEX;
-    elemType[1]=ESMC_MESHELEMTYPE_HEX;
-    elemType[2]=ESMC_MESHELEMTYPE_HEX;
-    elemType[3]=ESMC_MESHELEMTYPE_HEX;
-
-    elemConn[0]=1; elemConn[1]=2; elemConn[2]=5; elemConn[3]=4;
-        elemConn[4]=10; elemConn[5]=11; elemConn[6]=14; elemConn[7]=13;
-    elemConn[8]=2; elemConn[9]=3; elemConn[10]=6; elemConn[11]=5;
-        elemConn[12]=11; elemConn[13]=12; elemConn[14]=15; elemConn[15]=14;
-    elemConn[16]=4; elemConn[17]=5; elemConn[18]=8; elemConn[19]=7;
-        elemConn[20]=13; elemConn[21]=14; elemConn[22]=17; elemConn[23]=16;
-    elemConn[24]=5; elemConn[25]=6; elemConn[26]=9; elemConn[27]=8;
-        elemConn[28]=14; elemConn[29]=15; elemConn[30]=18; elemConn[31]=17;
-
-    MBMesh_addnodes(&meshp, &num_node, nodeId, nodeCoord, nodeOwner, NULL,
-                    &coordsys, &sdim, &rc);
-
-    int areapresent = 0;
-    int coordspresent = 0;
-    int numelemconn = 8*num_elem;
-    int regridconserve = 0;
-    MBMesh_addelements(&meshp, &num_elem, elemId, elemType, NULL,
-                       &areapresent, NULL,
-                       &coordspresent, NULL,
-                       &numelemconn, elemConn,
-                       &regridconserve,
-                       &coordsys, &sdim, &rc);
-
-  free(nodeId);
-  free(nodeCoord);
-  free(nodeOwner);
-  free(elemId);
-  free(elemType);
-  free(elemConn);
-
-  rc = ESMF_SUCCESS;
-  return static_cast<MBMesh *>(meshp);
-}
-
-MBMesh* create_mesh_quad_9_parallel_dual(ESMC_CoordSys_Flag coordsys, int &rc) {
-
-  //
-  //   3.0   13 ------ 14 ------ 15     [15] ----------- 16
-  //         |         |         |       |               |
-  //         |         |         |       |               |
-  //         |    8    |    9    |       |       10      |
-  //         |         |         |       |               |
-  //         |         |         |       |               |
-  //   2.0  [9] ----- [10] ---- [11]    [11] ---------- [12]
-  //
-  //       1.0       1.5       2.0     2.0             3.0
-  //
-  //                PET 2                      PET 3
-  //
-  //
-  //   2.0   9 ------- 10 ------ 11     [11] ----------- 12
-  //         |         |         |       |               |
-  //         |    5    |    6    |       |       7       |
-  //         |         |         |       |               |
-  //   1.5   5 ------- 6 ------- 7      [7] -----------  8
-  //         |         |  2   /  |       |               |
-  //         |    1    |    /    |       |       4       |
-  //         |         |  /   3  |       |               |
-  //   1.0   1 ------- 2 ------- 3      [3] ------------ 4
-  //
-  //         1.0       1.5     2.0      2.0             3.0
-  //
-  //                PET 0                      PET 1
-  //
-  //               Node Id labels at corners
-  //              Element Id labels in centers
-
-
-  // Get parallel information
-  int localPet, petCount;
-  ESMC_VM vm;
-
-  vm=ESMC_VMGetGlobal(&rc);
-  if (rc != ESMF_SUCCESS) return 0;
-
-  rc=ESMC_VMGet(vm, &localPet, &petCount, (int *)NULL, (MPI_Comm *)NULL,
-                (int *)NULL, (int *)NULL);
-  if (rc != ESMF_SUCCESS) return 0;
-
-  if (petCount != 4) {
-    Throw() << "Test function must be run with 4 processors";
-    return NULL;
-  }
-
-  // Mesh variables
-  int pdim=2;
-  int sdim=2;
-  int num_elem = 10;
-  int num_node = 16;
-
-  // set Mesh parameters
-  int *nodeId;
-  double *nodeCoord;
-  int *nodeOwner;
-
-  int *elemId;
-  int *elemType;
-  int *elemConn;
-  double *elemCoord;
-
-  int areapresent = 0;
-  int coordspresent = 1;
-  int numelemconn = 0;
-  int regridconserve = 0;
-
-  nodeId    = (int *) malloc (num_node * sizeof (int));
-  nodeCoord = (double *) malloc (2*num_node * sizeof (double));
-  nodeOwner = (int *) malloc (num_node * sizeof (int));
-  elemId   = (int *) malloc (num_elem * sizeof (int));
-  elemType = (int *) malloc (num_elem * sizeof (int));
-  elemConn = (int *) malloc (4*num_elem * sizeof (int));
-  elemCoord = (double *) malloc (2*num_elem * sizeof (double));
-
-  MBMesh *mesh = new MBMesh();
-  void *meshp = static_cast<void *> (mesh);
-  MBMesh_create(&meshp, &pdim, &sdim, &coordsys, &rc);
-
-  if (localPet == 0){
-    num_node = 9;
-    num_elem = 5;
-
-    nodeId[0]=1;
-    nodeId[1]=2;
-    nodeId[2]=3;
-    nodeId[3]=5;
-    nodeId[4]=6;
-    nodeId[5]=7;
-    nodeId[6]=9;
-    nodeId[7]=10;
-    nodeId[8]=11;
-
-    nodeCoord[0]=1.0;nodeCoord[1]=1.0;
-    nodeCoord[2]=1.5;nodeCoord[3]=1.0;
-    nodeCoord[4]=2.0;nodeCoord[5]=1.0;
-    nodeCoord[6]=1.0;nodeCoord[7]=1.5;
-    nodeCoord[8]=1.5;nodeCoord[9]=1.5;
-    nodeCoord[10]=2.0;nodeCoord[11]=1.5;
-    nodeCoord[12]=1.0;nodeCoord[13]=2.0;
-    nodeCoord[14]=1.5;nodeCoord[15]=2.0;
-    nodeCoord[16]=2.0;nodeCoord[17]=2.0;
-
-    nodeOwner[0]=0;
-    nodeOwner[1]=0;
-    nodeOwner[2]=0;
-    nodeOwner[3]=0;
-    nodeOwner[4]=0;
-    nodeOwner[5]=0;
-    nodeOwner[6]=0;
-    nodeOwner[7]=0;
-    nodeOwner[8]=0;
-
-    elemId[0]=1;
-    elemId[1]=2;
-    elemId[2]=3;
-    elemId[3]=5;
-    elemId[4]=6;
-
-    elemType[0]=ESMC_MESHELEMTYPE_QUAD;
-    elemType[1]=ESMC_MESHELEMTYPE_TRI;
-    elemType[2]=ESMC_MESHELEMTYPE_TRI;
-    elemType[3]=ESMC_MESHELEMTYPE_QUAD;
-    elemType[4]=ESMC_MESHELEMTYPE_QUAD;
-
-    elemConn[0]=1;elemConn[1]=2;elemConn[2]=5;elemConn[3]=4;
-    elemConn[4]=2;elemConn[5]=6;elemConn[6]=5;
-    elemConn[7]=3;elemConn[8]=6;elemConn[9]=2;
-    elemConn[10]=4;elemConn[11]=5;elemConn[12]=8;elemConn[13]=7;
-    elemConn[14]=5;elemConn[15]=6;elemConn[16]=9;elemConn[17]=8;
-
-    elemCoord[0]=1.25;elemCoord[1]=1.25;
-    elemCoord[2]=1.625;elemCoord[3]=1.375;
-    elemCoord[4]=1.825;elemCoord[5]=1.25;
-    elemCoord[6]=1.25;elemCoord[7]=1.75;
-    elemCoord[8]=1.75;elemCoord[9]=1.75;
-
-    numelemconn = 3*4+2*3;
-  }
-  else if (localPet == 1) {
-    num_node = 6;
-    num_elem = 2;
-
-    nodeId[0]=3;
-    nodeId[1]=4;
-    nodeId[2]=7;
-    nodeId[3]=8;
-    nodeId[4]=11;
-    nodeId[5]=12;
-
-    nodeCoord[0]=2.0;nodeCoord[1]=1.0;
-    nodeCoord[2]=3.0;nodeCoord[3]=1.0;
-    nodeCoord[4]=2.0;nodeCoord[5]=1.5;
-    nodeCoord[6]=3.0;nodeCoord[7]=1.5;
-    nodeCoord[8]=2.0;nodeCoord[9]=2.0;
-    nodeCoord[10]=3.0;nodeCoord[11]=2.0;
-
-    nodeOwner[0]=0;
-    nodeOwner[1]=1;
-    nodeOwner[2]=0;
-    nodeOwner[3]=1;
-    nodeOwner[4]=0;
-    nodeOwner[5]=1;
-
-    elemId[0]=4;
-    elemId[1]=7;
-
-    elemType[0]=ESMC_MESHELEMTYPE_QUAD;
-    elemType[1]=ESMC_MESHELEMTYPE_QUAD;
-
-    elemConn[0]=1;elemConn[1]=2;elemConn[2]=4;elemConn[3]=3;
-    elemConn[4]=3;elemConn[5]=4;elemConn[6]=6;elemConn[7]=5;
-
-    elemCoord[0]=2.5;elemCoord[1]=1.25;
-    elemCoord[2]=2.5;elemCoord[3]=1.75;
-
-    numelemconn = 4*num_elem;
-  }
-  else if (localPet == 2) {
-    num_node = 6;
-    num_elem = 2;
-
-    nodeId[0]=9;
-    nodeId[1]=10;
-    nodeId[2]=11;
-    nodeId[3]=13;
-    nodeId[4]=14;
-    nodeId[5]=15;
-
-    nodeCoord[0]=1.0;nodeCoord[1]=2.0;
-    nodeCoord[2]=1.5;nodeCoord[3]=2.0;
-    nodeCoord[4]=2.0;nodeCoord[5]=2.0;
-    nodeCoord[6]=1.0;nodeCoord[7]=3.0;
-    nodeCoord[8]=1.5;nodeCoord[9]=3.0;
-    nodeCoord[10]=2.0;nodeCoord[11]=3.0;
-
-    nodeOwner[0]=0;
-    nodeOwner[1]=0;
-    nodeOwner[2]=0;
-    nodeOwner[3]=2;
-    nodeOwner[4]=2;
-    nodeOwner[5]=2;
-
-    elemId[0]=8;
-    elemId[1]=9;
-
-    elemType[0]=ESMC_MESHELEMTYPE_QUAD;
-    elemType[1]=ESMC_MESHELEMTYPE_QUAD;
-
-    elemConn[0]=1;elemConn[1]=2;elemConn[2]=5;elemConn[3]=4;
-    elemConn[4]=2;elemConn[5]=3;elemConn[6]=6;elemConn[7]=5;
-
-    elemCoord[0]=1.25;elemCoord[1]=2.5;
-    elemCoord[2]=1.75;elemCoord[3]=2.5;
-    
-    numelemconn = 4*num_elem;
-  }
-  else if (localPet == 3) {
-    num_node = 4;
-    num_elem = 1;
-
-    nodeId[0]=11;
-    nodeId[1]=12;
-    nodeId[2]=15;
-    nodeId[3]=16;
-
-    nodeCoord[0]=2.0;nodeCoord[1]=2.0;
-    nodeCoord[2]=3.0;nodeCoord[3]=2.0;
-    nodeCoord[4]=2.0;nodeCoord[5]=3.0;
-    nodeCoord[6]=3.0;nodeCoord[7]=3.0;
-
-    nodeOwner[0]=0;
-    nodeOwner[1]=1;
-    nodeOwner[2]=2;
-    nodeOwner[3]=3;
-
-    elemId[0]=10;
-
-    elemType[0]=ESMC_MESHELEMTYPE_QUAD;
-
-    elemConn[0]=1;elemConn[1]=2;elemConn[2]=4;elemConn[3]=3;
-
-    elemCoord[0]=2.5;elemCoord[1]=2.5;
-    
-    numelemconn = 4*num_elem;
-  }
-
-  MBMesh_addnodes(&meshp, &num_node, nodeId, nodeCoord, nodeOwner, NULL,
-                  &coordsys, &sdim, &rc);
-
-  MBMesh_addelements(&meshp, &num_elem, elemId, elemType, NULL,
-                     &areapresent, NULL,
-                     &coordspresent, elemCoord,
-                     &numelemconn, elemConn,
-                     &regridconserve,
-                     &coordsys, &sdim, &rc);
-
-  free(nodeId);
-  free(nodeCoord);
-  free(nodeOwner);
-  free(elemId);
-  free(elemType);
-  free(elemConn);
-  free(elemCoord);
-
-  rc = ESMF_SUCCESS;
-  return static_cast<MBMesh *>(meshp);
-}
-
-MBMesh* create_mesh_quad_10_parallel(ESMC_CoordSys_Flag coordsys, int &rc) {
-
-  //
-  //   3.0   13 ------ 14 ------ 15     [15] ----------- 16
-  //         |         |         |       |               |
-  //         |         |         |       |               |
-  //         |    8    |    9    |       |       10      |
-  //         |         |         |       |               |
-  //         |         |         |       |               |
-  //   2.0  [9] ----- [10] ---- [11]    [11] ---------- [12]
-  //
-  //       1.0       1.5       2.0     2.0             3.0
-  //
-  //                PET 2                      PET 3
-  //
-  //
-  //   2.0   9 ------- 10 ------ 11     [11] ----------- 12
-  //         |         |         |       |               |
-  //         |    5    |    6    |       |       7       |
-  //         |         |         |       |               |
-  //   1.5   5 ------- 6 ------- 7      [7] -----------  8
-  //         |         |  \   3  |       |               |
-  //         |    1    |    \    |       |       4       |
-  //         |         | 2    \  |       |               |
-  //   1.0   1 ------- 2 ------- 3      [3] ------------ 4
-  //
-  //           1.0       1.5     2.0     2.0             3.0
-  //
-  //                PET 0                      PET 1
-  //
-  //               Node Id labels at corners
-  //              Element Id labels in centers
-
-
-  // Get parallel information
-  int localPet, petCount;
-  ESMC_VM vm;
-
-  vm=ESMC_VMGetGlobal(&rc);
-  if (rc != ESMF_SUCCESS) return 0;
-
-  rc=ESMC_VMGet(vm, &localPet, &petCount, (int *)NULL, (MPI_Comm *)NULL,
-                (int *)NULL, (int *)NULL);
-  if (rc != ESMF_SUCCESS) return 0;
-
-  if (petCount != 4) {
-    Throw() << "Test function must be run with 4 processors";
-    return NULL;
-  }
-
-  // Mesh variables
-  int pdim=2;
-  int sdim=2;
-  int num_elem = 10;
-  int num_node = 16;
-
-  // set Mesh parameters
-  int *nodeId;
-  double *nodeCoord;
-  int *nodeOwner;
-
-  int *elemId;
-  int *elemType;
-  int *elemConn;
-
-  int areapresent = 0;
-  int coordspresent = 0;
-  int numelemconn = 0;
-  int regridconserve = 0;
-
-  nodeId    = (int *) malloc (num_node * sizeof (int));
-  nodeCoord = (double *) malloc (2*num_node * sizeof (double));
-  nodeOwner = (int *) malloc (num_node * sizeof (int));
-  elemId   = (int *) malloc (num_elem * sizeof (int));
-  elemType = (int *) malloc (num_elem * sizeof (int));
-  elemConn = (int *) malloc (4*num_elem * sizeof (int));
-
-  MBMesh *mesh = new MBMesh();
-  void *meshp = static_cast<void *> (mesh);
-  MBMesh_create(&meshp, &pdim, &sdim, &coordsys, &rc);
-
-  if (localPet == 0){
-    num_node = 9;
-    num_elem = 5;
-
-    nodeId[0]=10;
-    nodeId[1]=20;
-    nodeId[2]=30;
-    nodeId[3]=50;
-    nodeId[4]=60;
-    nodeId[5]=70;
-    nodeId[6]=90;
-    nodeId[7]=100;
-    nodeId[8]=110;
-
-    nodeCoord[0]=1.0;nodeCoord[1]=1.0;
-    nodeCoord[2]=1.5;nodeCoord[3]=1.0;
-    nodeCoord[4]=2.0;nodeCoord[5]=1.0;
-    nodeCoord[6]=1.0;nodeCoord[7]=1.5;
-    nodeCoord[8]=1.5;nodeCoord[9]=1.5;
-    nodeCoord[10]=2.0;nodeCoord[11]=1.5;
-    nodeCoord[12]=1.0;nodeCoord[13]=2.0;
-    nodeCoord[14]=1.5;nodeCoord[15]=2.0;
-    nodeCoord[16]=2.0;nodeCoord[17]=2.0;
-
-    nodeOwner[0]=0;
-    nodeOwner[1]=0;
-    nodeOwner[2]=0;
-    nodeOwner[3]=0;
-    nodeOwner[4]=0;
-    nodeOwner[5]=0;
-    nodeOwner[6]=0;
-    nodeOwner[7]=0;
-    nodeOwner[8]=0;
-
-    elemId[0]=1;
-    elemId[1]=2;
-    elemId[2]=3;
-    elemId[3]=5;
-    elemId[4]=6;
-
-    elemType[0]=ESMC_MESHELEMTYPE_QUAD;
-    elemType[1]=ESMC_MESHELEMTYPE_TRI;
-    elemType[2]=ESMC_MESHELEMTYPE_TRI;
-    elemType[3]=ESMC_MESHELEMTYPE_QUAD;
-    elemType[4]=ESMC_MESHELEMTYPE_QUAD;
-
-    elemConn[0]=1;elemConn[1]=2;elemConn[2]=5;elemConn[3]=4;
-    elemConn[4]=2;elemConn[5]=3;elemConn[6]=5;
-    elemConn[7]=3;elemConn[8]=6;elemConn[9]=5;
-    elemConn[10]=4;elemConn[11]=5;elemConn[12]=8;elemConn[13]=7;
-    elemConn[14]=5;elemConn[15]=6;elemConn[16]=9;elemConn[17]=8;
-
-    numelemconn = 3*4+2*3;
-  }
-  else if (localPet == 1) {
-    num_node = 6;
-    num_elem = 2;
-
-    nodeId[0]=30;
-    nodeId[1]=40;
-    nodeId[2]=70;
-    nodeId[3]=80;
-    nodeId[4]=110;
-    nodeId[5]=120;
-
-    nodeCoord[0]=2.0;nodeCoord[1]=1.0;
-    nodeCoord[2]=3.0;nodeCoord[3]=1.0;
-    nodeCoord[4]=2.0;nodeCoord[5]=1.5;
-    nodeCoord[6]=3.0;nodeCoord[7]=1.5;
-    nodeCoord[8]=2.0;nodeCoord[9]=2.0;
-    nodeCoord[10]=3.0;nodeCoord[11]=2.0;
-
-    nodeOwner[0]=0;
-    nodeOwner[1]=1;
-    nodeOwner[2]=0;
-    nodeOwner[3]=1;
-    nodeOwner[4]=0;
-    nodeOwner[5]=1;
-
-    elemId[0]=4;
-    elemId[1]=7;
-
-    elemType[0]=ESMC_MESHELEMTYPE_QUAD;
-    elemType[1]=ESMC_MESHELEMTYPE_QUAD;
-
-    elemConn[0]=1;elemConn[1]=2;elemConn[2]=4;elemConn[3]=3;
-    elemConn[4]=3;elemConn[5]=4;elemConn[6]=6;elemConn[7]=5;
-
-    numelemconn = 4*num_elem;
-  }
-  else if (localPet == 2) {
-    num_node = 6;
-    num_elem = 2;
-
-    nodeId[0]=90;
-    nodeId[1]=100;
-    nodeId[2]=110;
-    nodeId[3]=130;
-    nodeId[4]=140;
-    nodeId[5]=150;
-
-    nodeCoord[0]=1.0;nodeCoord[1]=2.0;
-    nodeCoord[2]=1.5;nodeCoord[3]=2.0;
-    nodeCoord[4]=2.0;nodeCoord[5]=2.0;
-    nodeCoord[6]=1.0;nodeCoord[7]=3.0;
-    nodeCoord[8]=1.5;nodeCoord[9]=3.0;
-    nodeCoord[10]=2.0;nodeCoord[11]=3.0;
-
-    nodeOwner[0]=0;
-    nodeOwner[1]=0;
-    nodeOwner[2]=0;
-    nodeOwner[3]=2;
-    nodeOwner[4]=2;
-    nodeOwner[5]=2;
-
-    elemId[0]=8;
-    elemId[1]=9;
-
-    elemType[0]=ESMC_MESHELEMTYPE_QUAD;
-    elemType[1]=ESMC_MESHELEMTYPE_QUAD;
-
-    elemConn[0]=1;elemConn[1]=2;elemConn[2]=5;elemConn[3]=4;
-    elemConn[4]=2;elemConn[5]=3;elemConn[6]=6;elemConn[7]=5;
-
-    numelemconn = 4*num_elem;
-  }
-  else if (localPet == 3) {
-    num_node = 4;
-    num_elem = 1;
-
-    nodeId[0]=110;
-    nodeId[1]=120;
-    nodeId[2]=150;
-    nodeId[3]=160;
-
-    nodeCoord[0]=2.0;nodeCoord[1]=2.0;
-    nodeCoord[2]=3.0;nodeCoord[3]=2.0;
-    nodeCoord[4]=2.0;nodeCoord[5]=3.0;
-    nodeCoord[6]=3.0;nodeCoord[7]=3.0;
-
-    nodeOwner[0]=0;
-    nodeOwner[1]=1;
-    nodeOwner[2]=2;
-    nodeOwner[3]=3;
-
-    elemId[0]=10;
-
-    elemType[0]=ESMC_MESHELEMTYPE_QUAD;
-
-    elemConn[0]=1;elemConn[1]=2;elemConn[2]=4;elemConn[3]=3;
-
-    numelemconn = 4*num_elem;
-  }
-
-  MBMesh_addnodes(&meshp, &num_node, nodeId, nodeCoord, nodeOwner, NULL,
-                  &coordsys, &sdim, &rc);
-
-  MBMesh_addelements(&meshp, &num_elem, elemId, elemType, NULL,
-                     &areapresent, NULL,
-                     &coordspresent, NULL,
-                     &numelemconn, elemConn,
-                     &regridconserve,
-                     &coordsys, &sdim, &rc);
-
-  free(nodeId);
-  free(nodeCoord);
-  free(nodeOwner);
-  free(elemId);
-  free(elemType);
-  free(elemConn);
-
-  rc = ESMF_SUCCESS;
-  return static_cast<MBMesh *>(meshp);
-}
-
-MBMesh* create_mesh_quad_sph_10_parallel(ESMC_CoordSys_Flag coordsys, int &rc) {
-
-  //
-  //   3.0   13 ------ 14 ------ 15     [15] ----------- 16
-  //         |         |         |       |               |
-  //         |         |         |       |               |
-  //         |    8    |    9    |       |       10      |
-  //         |         |         |       |               |
-  //         |         |         |       |               |
-  //   2.0  [9] ----- [10] ---- [11]    [11] ---------- [12]
-  //
-  //       1.0       1.5       2.0     2.0             3.0
-  //
-  //                PET 2                      PET 3
-  //
-  //
-  //   2.0   9 ------- 10 ------ 11     [11] ----------- 12
-  //         |         |         |       |               |
-  //         |    5    |    6    |       |       7       |
-  //         |         |         |       |               |
-  //   1.5   5 ------- 6 ------- 7      [7] -----------  8
-  //         |         |  \   3  |       |               |
-  //         |    1    |    \    |       |       4       |
-  //         |         | 2    \  |       |               |
-  //   1.0   1 ------- 2 ------- 3      [3] ------------ 4
-  //
-  //           1.0       1.5     2.0     2.0             3.0
-  //
-  //                PET 0                      PET 1
-  //
-  //               Node Id labels at corners
-  //              Element Id labels in centers
-
-
-  // Get parallel information
-  int localPet, petCount;
-  ESMC_VM vm;
-
-  vm=ESMC_VMGetGlobal(&rc);
-  if (rc != ESMF_SUCCESS) return 0;
-
-  rc=ESMC_VMGet(vm, &localPet, &petCount, (int *)NULL, (MPI_Comm *)NULL,
-                (int *)NULL, (int *)NULL);
-  if (rc != ESMF_SUCCESS) return 0;
-
-  if (petCount != 4) {
-    Throw() << "Test function must be run with 4 processors";
-    return NULL;
-  }
-
-  // Mesh variables
-  int pdim=2;
-  int sdim=2;
-  int num_elem = 10;
-  int num_node = 16;
-
-  // set Mesh parameters
-  int *nodeId;
-  double *nodeCoord;
-  int *nodeOwner;
-
-  int *elemId;
-  int *elemType;
-  int *elemConn;
-
-  int areapresent = 0;
-  int coordspresent = 0;
-  int numelemconn = 0;
-  int regridconserve = 0;
-
-  int pi2 = 3.14159/2;
-
-  nodeId    = (int *) malloc (num_node * sizeof (int));
-  nodeCoord = (double *) malloc (2*num_node * sizeof (double));
-  nodeOwner = (int *) malloc (num_node * sizeof (int));
-  elemId   = (int *) malloc (num_elem * sizeof (int));
-  elemType = (int *) malloc (num_elem * sizeof (int));
-  elemConn = (int *) malloc (4*num_elem * sizeof (int));
-
-  MBMesh *mesh = new MBMesh();
-  void *meshp = static_cast<void *> (mesh);
-  MBMesh_create(&meshp, &pdim, &sdim, &coordsys, &rc);
-
-  if (localPet == 0){
-    num_node = 9;
-    num_elem = 5;
-
-    nodeId[0]=1;
-    nodeId[1]=2;
-    nodeId[2]=3;
-    nodeId[3]=5;
-    nodeId[4]=6;
-    nodeId[5]=7;
-    nodeId[6]=9;
-    nodeId[7]=10;
-    nodeId[8]=11;
-
-    nodeCoord[0]= 1.0 * pi2;nodeCoord[1]= 1.0 * pi2;
-    nodeCoord[2]= 1.5 * pi2;nodeCoord[3]= 1.0 * pi2;
-    nodeCoord[4]= 2.0 * pi2;nodeCoord[5]= 1.0 * pi2;
-    nodeCoord[6]= 1.0 * pi2;nodeCoord[7]= 1.5 * pi2;
-    nodeCoord[8]= 1.5 * pi2;nodeCoord[9]= 1.5 * pi2;
-    nodeCoord[10]=2.0 * pi2;nodeCoord[11]=1.5 * pi2;
-    nodeCoord[12]=1.0 * pi2;nodeCoord[13]=2.0 * pi2;
-    nodeCoord[14]=1.5 * pi2;nodeCoord[15]=2.0 * pi2;
-    nodeCoord[16]=2.0 * pi2;nodeCoord[17]=2.0 * pi2;
-
-    nodeOwner[0]=0;
-    nodeOwner[1]=0;
-    nodeOwner[2]=0;
-    nodeOwner[3]=0;
-    nodeOwner[4]=0;
-    nodeOwner[5]=0;
-    nodeOwner[6]=0;
-    nodeOwner[7]=0;
-    nodeOwner[8]=0;
-
-    elemId[0]=1;
-    elemId[1]=2;
-    elemId[2]=3;
-    elemId[3]=5;
-    elemId[4]=6;
-
-    elemType[0]=ESMC_MESHELEMTYPE_QUAD;
-    elemType[1]=ESMC_MESHELEMTYPE_TRI;
-    elemType[2]=ESMC_MESHELEMTYPE_TRI;
-    elemType[3]=ESMC_MESHELEMTYPE_QUAD;
-    elemType[4]=ESMC_MESHELEMTYPE_QUAD;
-
-    elemConn[0]=1;elemConn[1]=2;elemConn[2]=5;elemConn[3]=4;
-    elemConn[4]=2;elemConn[5]=3;elemConn[6]=5;
-    elemConn[7]=3;elemConn[8]=6;elemConn[9]=5;
-    elemConn[10]=4;elemConn[11]=5;elemConn[12]=8;elemConn[13]=7;
-    elemConn[14]=5;elemConn[15]=6;elemConn[16]=9;elemConn[17]=8;
-
-    numelemconn = 3*4+2*3;
-  }
-  else if (localPet == 1) {
-    num_node = 6;
-    num_elem = 2;
-
-    nodeId[0]=3;
-    nodeId[1]=4;
-    nodeId[2]=7;
-    nodeId[3]=8;
-    nodeId[4]=11;
-    nodeId[5]=12;
-
-    nodeCoord[0]= 2.0 * pi2;nodeCoord[1]= 1.0 * pi2;
-    nodeCoord[2]= 3.0 * pi2;nodeCoord[3]= 1.0 * pi2;
-    nodeCoord[4]= 2.0 * pi2;nodeCoord[5]= 1.5 * pi2;
-    nodeCoord[6]= 3.0 * pi2;nodeCoord[7]= 1.5 * pi2;
-    nodeCoord[8]= 2.0 * pi2;nodeCoord[9]= 2.0 * pi2;
-    nodeCoord[10]=3.0 * pi2;nodeCoord[11]=2.0 * pi2;
-
-    nodeOwner[0]=0;
-    nodeOwner[1]=1;
-    nodeOwner[2]=0;
-    nodeOwner[3]=1;
-    nodeOwner[4]=0;
-    nodeOwner[5]=1;
-
-    elemId[0]=4;
-    elemId[1]=7;
-
-    elemType[0]=ESMC_MESHELEMTYPE_QUAD;
-    elemType[1]=ESMC_MESHELEMTYPE_QUAD;
-
-    elemConn[0]=1;elemConn[1]=2;elemConn[2]=4;elemConn[3]=3;
-    elemConn[4]=3;elemConn[5]=4;elemConn[6]=6;elemConn[7]=5;
-
-    numelemconn = 4*num_elem;
-  }
-  else if (localPet == 2) {
-    num_node = 6;
-    num_elem = 2;
-
-    nodeId[0]=9;
-    nodeId[1]=10;
-    nodeId[2]=11;
-    nodeId[3]=13;
-    nodeId[4]=14;
-    nodeId[5]=15;
-
-    nodeCoord[0]= 1.0 * pi2;nodeCoord[1]= 2.0 * pi2;
-    nodeCoord[2]= 1.5 * pi2;nodeCoord[3]= 2.0 * pi2;
-    nodeCoord[4]= 2.0 * pi2;nodeCoord[5]= 2.0 * pi2;
-    nodeCoord[6]= 1.0 * pi2;nodeCoord[7]= 3.0 * pi2;
-    nodeCoord[8]= 1.5 * pi2;nodeCoord[9]= 3.0 * pi2;
-    nodeCoord[10]=2.0 * pi2;nodeCoord[11]=3.0 * pi2;
-
-    nodeOwner[0]=0;
-    nodeOwner[1]=0;
-    nodeOwner[2]=0;
-    nodeOwner[3]=2;
-    nodeOwner[4]=2;
-    nodeOwner[5]=2;
-
-    elemId[0]=8;
-    elemId[1]=9;
-
-    elemType[0]=ESMC_MESHELEMTYPE_QUAD;
-    elemType[1]=ESMC_MESHELEMTYPE_QUAD;
-
-    elemConn[0]=1;elemConn[1]=2;elemConn[2]=5;elemConn[3]=4;
-    elemConn[4]=2;elemConn[5]=3;elemConn[6]=6;elemConn[7]=5;
-
-    numelemconn = 4*num_elem;
-  }
-  else if (localPet == 3) {
-    num_node = 4;
-    num_elem = 1;
-
-    nodeId[0]=11;
-    nodeId[1]=12;
-    nodeId[2]=15;
-    nodeId[3]=16;
-
-    nodeCoord[0]=2.0 * pi2;nodeCoord[1]=2.0 * pi2;
-    nodeCoord[2]=3.0 * pi2;nodeCoord[3]=2.0 * pi2;
-    nodeCoord[4]=2.0 * pi2;nodeCoord[5]=3.0 * pi2;
-    nodeCoord[6]=3.0 * pi2;nodeCoord[7]=3.0 * pi2;
-
-    nodeOwner[0]=0;
-    nodeOwner[1]=1;
-    nodeOwner[2]=2;
-    nodeOwner[3]=3;
-
-    elemId[0]=10;
-
-    elemType[0]=ESMC_MESHELEMTYPE_QUAD;
-
-    elemConn[0]=1;elemConn[1]=2;elemConn[2]=4;elemConn[3]=3;
-
-    numelemconn = 4*num_elem;
-  }
-
-  MBMesh_addnodes(&meshp, &num_node, nodeId, nodeCoord, nodeOwner, NULL,
-                  &coordsys, &sdim, &rc);
-
-  MBMesh_addelements(&meshp, &num_elem, elemId, elemType, NULL,
-                     &areapresent, NULL,
-                     &coordspresent, NULL,
-                     &numelemconn, elemConn,
-                     &regridconserve,
-                     &coordsys, &sdim, &rc);
-
-  free(nodeId);
-  free(nodeCoord);
-  free(nodeOwner);
-  free(elemId);
-  free(elemType);
-  free(elemConn);
-
-  rc = ESMF_SUCCESS;
-  return static_cast<MBMesh *>(meshp);
-}
-
-MBMesh* create_mesh_quad_9_parallel(ESMC_CoordSys_Flag coordsys, int &rc) {
-
-  //
-  //      3.0   13 ------ 14                 [14] ----- 15 ------ 16
-  //             |         |                   |         |         |
-  //    PET 2    |    7    |           PET 3   |    8    |    9    |
-  //             |         |                   |         |         |
-  //            [9] ----- [10]                [10] ---- [11] ---- [12]
-
-  //       2.0   9 ------- 10 ------ 11 ------ 12
-  //             |         |         |         |
-  //    PET 1    |    4    |    5    |    6    |
-  //             |         |         |         |
-  //            [5] ----- [6] ----- [7] ----- [8]
-
-  //       1.5   5 ------- 6 ------- 7 ------- 8
-  //             |         |         |         |
-  //    PET 0    |    1    |    2    |    3    |
-  //             |         |         |         |
-  //       1.0   1 ------- 2 ------- 3  ------ 4
-  //
-  //           1.0       1.5       2.0         3.0
-  //
-  //               Node Id labels at corners
-  //              Element Id labels in centers
-
-  // Get parallel information
-  int localPet, petCount;
-  ESMC_VM vm;
-
-  vm=ESMC_VMGetGlobal(&rc);
-  if (rc != ESMF_SUCCESS) return 0;
-
-  rc=ESMC_VMGet(vm, &localPet, &petCount, (int *)NULL, (MPI_Comm *)NULL,
-                (int *)NULL, (int *)NULL);
-  if (rc != ESMF_SUCCESS) return 0;
-
-  if (petCount != 4) {
-    Throw() << "Test function must be run with 4 processors";
-    return NULL;
-  }
-
-  // Mesh variables
-  int pdim=2;
-  int sdim=2;
-  int num_elem = 9;
-  int num_node = 16;
-
-  // set Mesh parameters
-  int *nodeId;
-  double *nodeCoord;
-  int *nodeOwner;
-
-  int *elemId;
-  int *elemType;
-  int *elemConn;
-
-  int areapresent = 0;
-  int coordspresent = 0;
-  int numelemconn = 0;
-  int regridconserve = 0;
-
-  nodeId    = (int *) malloc (num_node * sizeof (int));
-  nodeCoord = (double *) malloc (2*num_node * sizeof (double));
-  nodeOwner = (int *) malloc (num_node * sizeof (int));
-  elemId   = (int *) malloc (num_elem * sizeof (int));
-  elemType = (int *) malloc (num_elem * sizeof (int));
-  elemConn = (int *) malloc (4*num_elem * sizeof (int));
-
-  MBMesh *mesh = new MBMesh();
-  void *meshp = static_cast<void *> (mesh);
-  MBMesh_create(&meshp, &pdim, &sdim, &coordsys, &rc);
-
-  if (localPet == 0){
-    num_node = 8;
-    num_elem = 3;
-
-    nodeId[0]=1;
-    nodeId[1]=2;
-    nodeId[2]=3;
-    nodeId[3]=4;
-    nodeId[4]=5;
-    nodeId[5]=6;
-    nodeId[6]=7;
-    nodeId[7]=8;
-
-    nodeCoord[0]=1.0;nodeCoord[1]=1.0;
-    nodeCoord[2]=1.5;nodeCoord[3]=1.0;
-    nodeCoord[4]=2.0;nodeCoord[5]=1.0;
-    nodeCoord[6]=3.0;nodeCoord[7]=1.0;
-    nodeCoord[8]=1.0;nodeCoord[9]=1.5;
-    nodeCoord[10]=1.5;nodeCoord[11]=1.5;
-    nodeCoord[12]=2.0;nodeCoord[13]=1.5;
-    nodeCoord[14]=3.0;nodeCoord[15]=1.5;
-
-    nodeOwner[0]=0;
-    nodeOwner[1]=0;
-    nodeOwner[2]=0;
-    nodeOwner[3]=0;
-    nodeOwner[4]=0;
-    nodeOwner[5]=0;
-    nodeOwner[6]=0;
-    nodeOwner[7]=0;
-
-    elemId[0]=1;
-    elemId[1]=2;
-    elemId[2]=3;
-
-    elemType[0]=ESMC_MESHELEMTYPE_QUAD;
-    elemType[1]=ESMC_MESHELEMTYPE_QUAD;
-    elemType[2]=ESMC_MESHELEMTYPE_QUAD;
-
-    elemConn[0]=1;elemConn[1]=2;elemConn[2]=6;elemConn[3]=5;
-    elemConn[4]=2;elemConn[5]=3;elemConn[6]=7;elemConn[7]=6;
-    elemConn[8]=3;elemConn[9]=4;elemConn[10]=8;elemConn[11]=7;
-
-    numelemconn = 4*num_elem;
-  }
-  else if (localPet == 1) {
-    num_node = 8;
-    num_elem = 3;
-
-    nodeId[0]=5;
-    nodeId[1]=6;
-    nodeId[2]=7;
-    nodeId[3]=8;
-    nodeId[4]=9;
-    nodeId[5]=10;
-    nodeId[6]=11;
-    nodeId[7]=12;
-
-    nodeCoord[0]=1.0;nodeCoord[1]=1.5;
-    nodeCoord[2]=1.5;nodeCoord[3]=1.5;
-    nodeCoord[4]=2.0;nodeCoord[5]=1.5;
-    nodeCoord[6]=3.0;nodeCoord[7]=1.5;
-    nodeCoord[8]=1.0;nodeCoord[9]=2.0;
-    nodeCoord[10]=1.5;nodeCoord[11]=2.0;
-    nodeCoord[12]=2.0;nodeCoord[13]=2.0;
-    nodeCoord[14]=3.0;nodeCoord[15]=2.0;
-
-    nodeOwner[0]=0;
-    nodeOwner[1]=0;
-    nodeOwner[2]=0;
-    nodeOwner[3]=0;
-    nodeOwner[4]=1;
-    nodeOwner[5]=1;
-    nodeOwner[6]=1;
-    nodeOwner[7]=1;
-
-    elemId[0]=4;
-    elemId[1]=5;
-    elemId[2]=6;
-
-    elemType[0]=ESMC_MESHELEMTYPE_QUAD;
-    elemType[1]=ESMC_MESHELEMTYPE_QUAD;
-    elemType[2]=ESMC_MESHELEMTYPE_QUAD;
-
-    elemConn[0]=1;elemConn[1]=2;elemConn[2]=6;elemConn[3]=5;
-    elemConn[4]=2;elemConn[5]=3;elemConn[6]=7;elemConn[7]=6;
-    elemConn[8]=3;elemConn[9]=4;elemConn[10]=8;elemConn[11]=7;
-
-    numelemconn = 4*num_elem;
-  }
-  else if (localPet == 2) {
-    num_node = 4;
-    num_elem = 1;
-
-    nodeId[0]=9;
-    nodeId[1]=10;
-    nodeId[2]=13;
-    nodeId[3]=14;
-
-    nodeCoord[0]=1.0;nodeCoord[1]=2.0;
-    nodeCoord[2]=1.5;nodeCoord[3]=2.0;
-    nodeCoord[4]=1.0;nodeCoord[5]=3.0;
-    nodeCoord[6]=1.5;nodeCoord[7]=3.0;
-
-    nodeOwner[0]=1;
-    nodeOwner[1]=1;
-    nodeOwner[2]=2;
-    nodeOwner[3]=2;
-
-    elemId[0]=7;
-
-    elemType[0]=ESMC_MESHELEMTYPE_QUAD;
-
-    elemConn[0]=1;elemConn[1]=2;elemConn[2]=4;elemConn[3]=3;
-
-    numelemconn = 4*num_elem;
-  }
-  else if (localPet == 3) {
-    num_node = 6;
-    num_elem = 2;
-
-    nodeId[0]=10;
-    nodeId[1]=11;
-    nodeId[2]=12;
-    nodeId[3]=14;
-    nodeId[4]=15;
-    nodeId[5]=16;
-
-    nodeCoord[0]=1.5;nodeCoord[1]=2.0;
-    nodeCoord[2]=2.0;nodeCoord[3]=2.0;
-    nodeCoord[4]=3.0;nodeCoord[5]=2.0;
-    nodeCoord[6]=1.5;nodeCoord[7]=3.0;
-    nodeCoord[8]=2.0;nodeCoord[9]=3.0;
-    nodeCoord[10]=3.0;nodeCoord[11]=3.0;
-
-    nodeOwner[0]=1;
-    nodeOwner[1]=1;
-    nodeOwner[2]=1;
-    nodeOwner[3]=2;
-    nodeOwner[4]=3;
-    nodeOwner[5]=3;
-
-    elemId[0]=8;
-    elemId[1]=9;
-
-    elemType[0]=ESMC_MESHELEMTYPE_QUAD;
-    elemType[1]=ESMC_MESHELEMTYPE_QUAD;
-
-    elemConn[0]=1;elemConn[1]=2;elemConn[2]=5;elemConn[3]=4;
-    elemConn[4]=2;elemConn[5]=3;elemConn[6]=6;elemConn[7]=5;
-
-    numelemconn = 4*num_elem;
-  }
-
-  MBMesh_addnodes(&meshp, &num_node, nodeId, nodeCoord, nodeOwner, NULL,
-                  &coordsys, &sdim, &rc);
-
-  MBMesh_addelements(&meshp, &num_elem, elemId, elemType, NULL,
-                     &areapresent, NULL,
-                     &coordspresent, NULL,
-                     &numelemconn, elemConn,
-                     &regridconserve,
-                     &coordsys, &sdim, &rc);
-
-  free(nodeId);
-  free(nodeCoord);
-  free(nodeOwner);
-  free(elemId);
-  free(elemType);
-  free(elemConn);
-
-  rc = ESMF_SUCCESS;
-  return static_cast<MBMesh *>(meshp);
-}
-
-// 10 element mesh created the same with one or four procs
-MBMesh* create_mesh_quad_10(int &rc) {
-  //
-  //
-  //  3.0   13 ------ 14 ------- 15 ------ 16
-  //        |         |          |         |
-  //        |    8    |    9     |    10   |
-  //        |         |          |         |
-  //  2.0   9 ------- 10 ------- 11 ------ 12
-  //        |         |          |         |
-  //        |    5    |    6     |    7    |
-  //        |         |          |         |
-  //  1.5   5 ------- 6 -------- 7 ------- 8
-  //        |         |  \    3  |         |
-  //        |    1    |    \     |    4    |
-  //        |         |  2   \   |         |
-  //  0.0   1 ------- 2 -------- 3 ------- 4
-  //
-  //       0.0       1.5        2.0        3.0
-  //
-  //      Node Ids at corners
-  //      Element Ids in centers
-  //
-  //
-  //      ( Everything owned by PET 0)
-  //
-
-  rc = ESMF_RC_NOT_IMPL;
-
-  // Get parallel information
-  int localPet, petCount;
-  ESMC_VM vm;
-  vm=ESMC_VMGetGlobal(&rc);
-  if (rc != ESMF_SUCCESS) return 0;
-
-  rc=ESMC_VMGet(vm, &localPet, &petCount, (int *)NULL, (MPI_Comm *)NULL,
-                (int *)NULL, (int *)NULL);
-  if (rc != ESMF_SUCCESS) return 0;
-
-  // mesh pointer
-  MBMesh *mesh = new MBMesh();
-  void *meshp = static_cast<void *> (mesh);
-
-  if (petCount == 1) {
-
-    int pdim = 2;
-    int sdim = 2;
-
-    // set Mesh parameters
-    int num_elem = 10;
-    int num_node = 16;
-
-    int nodeId_s [] ={10,20,30,40,50,60,70,80,90,110,120,130,140,150,160};
-    double nodeCoord_s [] ={0.0,0.0, 1.5,0.0, 2.0,0.0, 3.0,0.0,
-                            0.0,1.5, 1.5,1.5, 2.0,1.5, 3.0,1.5,
-                            0.0,2.0, 1.5,2.0, 2.0,2.0, 3.0,2.0,
-                            0.0,3.0, 1.5,3.0, 2.0,3.0, 3.0,3.0};
-    int nodeOwner_s [] ={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-    int nodeMask_s [] ={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-    int elemId_s [] ={1,2,3,4,5,6,7,8,9,10};
-    // ESMF_MESHELEMTYPE_QUAD
-    int elemType_s [] ={ESMC_MESHELEMTYPE_QUAD,
-                        ESMC_MESHELEMTYPE_TRI,
-                        ESMC_MESHELEMTYPE_TRI,
-                        ESMC_MESHELEMTYPE_QUAD,
-                        ESMC_MESHELEMTYPE_QUAD,
-                        ESMC_MESHELEMTYPE_QUAD,
-                        ESMC_MESHELEMTYPE_QUAD,
-                        ESMC_MESHELEMTYPE_QUAD,
-                        ESMC_MESHELEMTYPE_QUAD,
-                        ESMC_MESHELEMTYPE_QUAD};
-    int elemMask_s [] ={1,1,1,1,1,1,1,1,1,1};
-    int elemConn_s [] ={1,2,6,5,
-                        2,3,6,
-                        3,7,6,
-                        3,4,8,7,
-                        5,6,10,9,
-                        6,7,11,10,
-                        7,8,12,11,
-                        9,10,14,13,
-                        10,11,15,14,
-                        11,12,16,15};
-
-    ESMC_CoordSys_Flag local_coordSys=ESMC_COORDSYS_CART;
-
-    int orig_sdim = sdim;
-
-    MBMesh_create(&meshp, &pdim, &sdim, &local_coordSys, &rc);
-    if (rc != ESMF_SUCCESS) return NULL;
-
-    InterArray<int> *iin = new InterArray<int>(nodeMask_s,9);
-
-    MBMesh_addnodes(&meshp, &num_node, nodeId_s, nodeCoord_s, nodeOwner_s, iin,
-                    &local_coordSys, &orig_sdim, &rc);
-    if (rc != ESMF_SUCCESS) return NULL;
-
-    int areapresent = 1;
-    int coordspresent = 1;
-    int numelemconn = 16;
-    int regridconserve = 0;
-    MBMesh_addelements(&meshp, &num_elem, elemId_s, elemType_s, NULL,
-                       &areapresent, NULL,
-                       &coordspresent, NULL,
-                       &numelemconn, elemConn_s,
-                       &regridconserve,
-                       &local_coordSys, &orig_sdim, &rc);
-    if (rc != ESMF_SUCCESS) return NULL;
-
-    delete iin;
-  } else if (petCount == 4) {
-
-    //   3.0   13 ------ 14 ------ 15     [15] ----------- 16
-    //         |         |         |       |               |
-    //         |         |         |       |               |
-    //         |    8    |    9    |       |       10      |
-    //         |         |         |       |               |
-    //         |         |         |       |               |
-    //   2.0  [9] ----- [10] ---- [11]    [11] ---------- [12]
-    //
-    //       1.0       1.5       2.0     2.0             3.0
-    //
-    //                PET 2                      PET 3
-    //
-    //
-    //   2.0   9 ------- 10 ------ 11     [11] ----------- 12
-    //         |         |         |       |               |
-    //         |    5    |    6    |       |       7       |
-    //         |         |         |       |               |
-    //   1.5   5 ------- 6 ------- 7      [7] -----------  8
-    //         |         |  \   3  |       |               |
-    //         |    1    |    \    |       |       4       |
-    //         |         | 2    \  |       |               |
-    //   1.0   1 ------- 2 ------- 3      [3] ------------ 4
-    //
-    //           1.0       1.5     2.0     2.0             3.0
-    //
-    //                PET 0                      PET 1
-    //
-    //               Node Id labels at corners
-    //              Element Id labels in centers
-
-    // Mesh variables
-    int pdim=2;
-    int sdim=2;
-    int num_elem = 10;
-    int num_node = 16;
-
-    // set Mesh parameters
-    int *nodeId;
-    double *nodeCoord;
-    int *nodeOwner;
-
-    int *elemId;
-    int *elemType;
-    int *elemConn;
-
-    int areapresent = 0;
-    int coordspresent = 0;
-    int numelemconn = 0;
-    int regridconserve = 0;
-
-    ESMC_CoordSys_Flag coordsys=ESMC_COORDSYS_CART;
-
-    nodeId    = (int *) malloc (num_node * sizeof (int));
-    nodeCoord = (double *) malloc (2*num_node * sizeof (double));
-    nodeOwner = (int *) malloc (num_node * sizeof (int));
-    elemId   = (int *) malloc (num_elem * sizeof (int));
-    elemType = (int *) malloc (num_elem * sizeof (int));
-    elemConn = (int *) malloc (4*num_elem * sizeof (int));
-
-    MBMesh_create(&meshp, &pdim, &sdim, &coordsys, &rc);
-
-    if (localPet == 0){
-      num_node = 9;
-      num_elem = 5;
-
-      nodeId[0]=10;
-      nodeId[1]=20;
-      nodeId[2]=30;
-      nodeId[3]=50;
-      nodeId[4]=60;
-      nodeId[5]=70;
-      nodeId[6]=90;
-      nodeId[7]=100;
-      nodeId[8]=110;
-
-      nodeCoord[0]=1.0;nodeCoord[1]=1.0;
-      nodeCoord[2]=1.5;nodeCoord[3]=1.0;
-      nodeCoord[4]=2.0;nodeCoord[5]=1.0;
-      nodeCoord[6]=1.0;nodeCoord[7]=1.5;
-      nodeCoord[8]=1.5;nodeCoord[9]=1.5;
-      nodeCoord[10]=2.0;nodeCoord[11]=1.5;
-      nodeCoord[12]=1.0;nodeCoord[13]=2.0;
-      nodeCoord[14]=1.5;nodeCoord[15]=2.0;
-      nodeCoord[16]=2.0;nodeCoord[17]=2.0;
-
-      nodeOwner[0]=0;
-      nodeOwner[1]=0;
-      nodeOwner[2]=0;
-      nodeOwner[3]=0;
-      nodeOwner[4]=0;
-      nodeOwner[5]=0;
-      nodeOwner[6]=0;
-      nodeOwner[7]=0;
-      nodeOwner[8]=0;
-
-      elemId[0]=1;
-      elemId[1]=2;
-      elemId[2]=3;
-      elemId[3]=5;
-      elemId[4]=6;
-
-      elemType[0]=ESMC_MESHELEMTYPE_QUAD;
-      elemType[1]=ESMC_MESHELEMTYPE_TRI;
-      elemType[2]=ESMC_MESHELEMTYPE_TRI;
-      elemType[3]=ESMC_MESHELEMTYPE_QUAD;
-      elemType[4]=ESMC_MESHELEMTYPE_QUAD;
-
-      elemConn[0]=1;elemConn[1]=2;elemConn[2]=5;elemConn[3]=4;
-      elemConn[4]=2;elemConn[5]=3;elemConn[6]=5;
-      elemConn[7]=3;elemConn[8]=6;elemConn[9]=5;
-      elemConn[10]=4;elemConn[11]=5;elemConn[12]=8;elemConn[13]=7;
-      elemConn[14]=5;elemConn[15]=6;elemConn[16]=9;elemConn[17]=8;
-
-      numelemconn = 3*4+2*3;
-    }
-    else if (localPet == 1) {
-      num_node = 6;
-      num_elem = 2;
-
-      nodeId[0]=30;
-      nodeId[1]=40;
-      nodeId[2]=70;
-      nodeId[3]=80;
-      nodeId[4]=110;
-      nodeId[5]=120;
-
-      nodeCoord[0]=2.0;nodeCoord[1]=1.0;
-      nodeCoord[2]=3.0;nodeCoord[3]=1.0;
-      nodeCoord[4]=2.0;nodeCoord[5]=1.5;
-      nodeCoord[6]=3.0;nodeCoord[7]=1.5;
-      nodeCoord[8]=2.0;nodeCoord[9]=2.0;
-      nodeCoord[10]=3.0;nodeCoord[11]=2.0;
-
-      nodeOwner[0]=0;
-      nodeOwner[1]=1;
-      nodeOwner[2]=0;
-      nodeOwner[3]=1;
-      nodeOwner[4]=0;
-      nodeOwner[5]=1;
-
-      elemId[0]=4;
-      elemId[1]=7;
-
-      elemType[0]=ESMC_MESHELEMTYPE_QUAD;
-      elemType[1]=ESMC_MESHELEMTYPE_QUAD;
-
-      elemConn[0]=1;elemConn[1]=2;elemConn[2]=4;elemConn[3]=3;
-      elemConn[4]=3;elemConn[5]=4;elemConn[6]=6;elemConn[7]=5;
-
-      numelemconn = 4*num_elem;
-    }
-    else if (localPet == 2) {
-      num_node = 6;
-      num_elem = 2;
-
-      nodeId[0]=90;
-      nodeId[1]=100;
-      nodeId[2]=110;
-      nodeId[3]=130;
-      nodeId[4]=140;
-      nodeId[5]=150;
-
-      nodeCoord[0]=1.0;nodeCoord[1]=2.0;
-      nodeCoord[2]=1.5;nodeCoord[3]=2.0;
-      nodeCoord[4]=2.0;nodeCoord[5]=2.0;
-      nodeCoord[6]=1.0;nodeCoord[7]=3.0;
-      nodeCoord[8]=1.5;nodeCoord[9]=3.0;
-      nodeCoord[10]=2.0;nodeCoord[11]=3.0;
-
-      nodeOwner[0]=0;
-      nodeOwner[1]=0;
-      nodeOwner[2]=0;
-      nodeOwner[3]=2;
-      nodeOwner[4]=2;
-      nodeOwner[5]=2;
-
-      elemId[0]=8;
-      elemId[1]=9;
-
-      elemType[0]=ESMC_MESHELEMTYPE_QUAD;
-      elemType[1]=ESMC_MESHELEMTYPE_QUAD;
-
-      elemConn[0]=1;elemConn[1]=2;elemConn[2]=5;elemConn[3]=4;
-      elemConn[4]=2;elemConn[5]=3;elemConn[6]=6;elemConn[7]=5;
-
-      numelemconn = 4*num_elem;
-    }
-    else if (localPet == 3) {
-      num_node = 4;
-      num_elem = 1;
-
-      nodeId[0]=110;
-      nodeId[1]=120;
-      nodeId[2]=150;
-      nodeId[3]=160;
-
-      nodeCoord[0]=2.0;nodeCoord[1]=2.0;
-      nodeCoord[2]=3.0;nodeCoord[3]=2.0;
-      nodeCoord[4]=2.0;nodeCoord[5]=3.0;
-      nodeCoord[6]=3.0;nodeCoord[7]=3.0;
-
-      nodeOwner[0]=0;
-      nodeOwner[1]=1;
-      nodeOwner[2]=2;
-      nodeOwner[3]=3;
-
-      elemId[0]=10;
-
-      elemType[0]=ESMC_MESHELEMTYPE_QUAD;
-
-      elemConn[0]=1;elemConn[1]=2;elemConn[2]=4;elemConn[3]=3;
-
-      numelemconn = 4*num_elem;
-    }
-
-    MBMesh_addnodes(&meshp, &num_node, nodeId, nodeCoord, nodeOwner, NULL,
-                    &coordsys, &sdim, &rc);
-
-    MBMesh_addelements(&meshp, &num_elem, elemId, elemType, NULL,
-                       &areapresent, NULL,
-                       &coordspresent, NULL,
-                       &numelemconn, elemConn,
-                       &regridconserve,
-                       &coordsys, &sdim, &rc);
-
-    free(nodeId);
-    free(nodeCoord);
-    free(nodeOwner);
-    free(elemId);
-    free(elemType);
-    free(elemConn);
-
-  } else
-    Throw() << "Test function must be run with 1 or 4 processors";
-
-  rc = ESMF_SUCCESS;
-  return static_cast<MBMesh *>(meshp);
-}
-
-MBMeshTest *mbmesh_gen_quad_2d_cart(int &rc){
-  //
-  //
-  //  2.0   7 ------- 8 -------- 9
-  //        |         |          |
-  //        |    3    |    4     |
-  //        |         |          |
-  //  1.0   4 ------- 5 -------- 6
-  //        |         |          |
-  //        |    1    |    2     |
-  //        |         |          |
-  //  0.0   1 ------- 2 -------- 3
-  //
-  //       0.0       1.0        2.0
-  //
-  //      Node Ids at corners
-  //      Element Ids in centers
-  //
-  //
-  //      ( Everything owned by PET 0)
-  //
+#ifdef ESMF_MOAB
+MBMeshTest *mbmesh_gen_quad_2d_cart(int &rc, bool redist=false){
 #undef ESMC_METHOD
 #define ESMC_METHOD "mbmesh_gen_quad_2d_cart"
+  //
+  //
+  //  2.0   7 ------- 8 -------- 9
+  //        |         |          |
+  //        |    3    |    4     |
+  //        |         |          |
+  //  1.0   4 ------- 5 -------- 6
+  //        |         |          |
+  //        |    1    |    2     |
+  //        |         |          |
+  //  0.0   1 ------- 2 -------- 3
+  //
+  //       0.0       1.0        2.0
+  //
+  //      Node Ids at corners
+  //      Element Ids in centers
+  //
+  //
+  //      ( Everything owned by PET 0)
+  //
 
   rc = ESMF_RC_NOT_IMPL;
   MBMeshTest *mbt = NULL;
 
   try {
 
+    // Get parallel information
+    int localPet, petCount;
+    ESMC_VM vm;
+    vm=ESMC_VMGetGlobal(&rc);
+    MBMESHTEST_CHECK_RC_THROW(rc)
+
+    rc=ESMC_VMGet(vm, &localPet, &petCount, (int *)NULL, (MPI_Comm *)NULL,
+                  (int *)NULL, (int *)NULL);
+    MBMESHTEST_CHECK_RC_THROW(rc)
+
+    if (petCount !=1 && petCount != 4)
+      MBMESHTEST_THROW_ERROR("Must be run with 1 or 4 cores.")
+
     int pdim = 2;
     int sdim = 2;
-
-    int num_elem = 4;
-    int num_node = 9;
-
     ESMC_CoordSys_Flag coord_sys=ESMC_COORDSYS_CART;
 
-    int nodeId_s [] ={1,2,3,4,5,6,7,8,9};
-    double nodeCoord_s [] ={0.0,0.0, 1.0,0.0, 2.0,0.0,
-                 0.0,1.0, 1.0,1.0, 2.0,1.0,
-                 0.0,2.0, 1.0,2.0, 2.0,2.0};
-    int nodeOwner_s [] ={0,0,0,0,0,0,0,0,0};
-    int nodeMask_s [] ={1,1,1,1,1,1,1,1,1};
+    int num_node;
+    int num_elem;
+    int num_elem_conn;
+    int redist_num_node;
+    int redist_num_elem;
+    int redist_num_elem_conn;
 
-    int elemId_s [] ={1,2,3,4};
-    // ESMF_MESHELEMTYPE_QUAD
-    int elemType_s [] ={ESMC_MESHELEMTYPE_QUAD,
-                        ESMC_MESHELEMTYPE_QUAD,
-                        ESMC_MESHELEMTYPE_QUAD,
-                        ESMC_MESHELEMTYPE_QUAD};
-    int elemMask_s [] ={1,1,1,1};
-    double elemArea_s [] ={1.0,2.0,3.0,4.0}; // Wrong area, but just to test
-    int elemConn_s [] ={1,2,5,4,
-                2,3,6,5,
-                4,5,8,7,
-                5,6,9,8};
-    double elemCoord_s [] ={0.5,0.5,0.5,1.5,1.5,0.5,1.5,1.5};
+    if (petCount == 1) {
+      num_elem = 4;
+      num_node = 9;
+      num_elem_conn = 4*num_elem;
 
-    mbt = new MBMeshTest(pdim, sdim, num_elem, num_node, coord_sys);
+      if (redist)
+        MBMESHTEST_THROW_ERROR("Cannot run redist with 1 core.")
 
-    mbt->add_nodes(nodeId_s, nodeOwner_s, nodeCoord_s, nodeMask_s);
+    } else if (petCount == 4) {
+      if (localPet == 0) {
+        num_elem = 1;
+        num_node = 4;
+        num_elem_conn = 4;
+        redist_num_elem = 1;
+        redist_num_node = 4;
+        redist_num_elem_conn = 4;
+      } else if (localPet == 1) {
+        num_elem = 1;
+        num_node = 4;
+        num_elem_conn = 4;
+        redist_num_elem = 1;
+        redist_num_node = 4;
+        redist_num_elem_conn = 4;
+      } else if (localPet == 2) {
+        num_elem = 1;
+        num_node = 4;
+        num_elem_conn = 4;
+        redist_num_elem = 1;
+        redist_num_node = 4;
+        redist_num_elem_conn = 4;
+      } else if (localPet == 3) {
+        num_elem = 1;
+        num_node = 4;
+        num_elem_conn = 4;
+        redist_num_elem = 1;
+        redist_num_node = 4;
+        redist_num_elem_conn = 4;
+      }
+    }
 
-    int numelemconn = 16;
-    int regridconserve = 0;
+    if (!redist)
+      mbt = new MBMeshTest(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn);
+    else
+      mbt = new MBMeshTest(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist, redist_num_node, redist_num_elem, redist_num_elem_conn);
 
-    mbt->add_elems(numelemconn, elemConn_s, elemId_s, elemType_s, elemMask_s, elemArea_s, elemCoord_s, &regridconserve);
+    if (petCount == 1) {
+      mbt->nodeId = {1,2,3,4,5,6,7,8,9};
+      mbt->nodeCoord = {0.0,0.0, 1.0,0.0, 2.0,0.0,
+                        0.0,1.0, 1.0,1.0, 2.0,1.0,
+                        0.0,2.0, 1.0,2.0, 2.0,2.0};
+      mbt->nodeOwner = {0,0,0,0,0,0,0,0,0};
+      mbt->nodeMask = {1,1,1,1,1,1,1,1,1};
+  
+      mbt->elemId = {1,2,3,4};
+      mbt->elemType = {ESMC_MESHELEMTYPE_QUAD,
+                       ESMC_MESHELEMTYPE_QUAD,
+                       ESMC_MESHELEMTYPE_QUAD,
+                       ESMC_MESHELEMTYPE_QUAD};
+      mbt->elemMask = {1,1,1,1};
+      mbt->elemArea = {1.0,2.0,3.0,4.0};
+      mbt->elemConn = {1,2,5,4,
+                       2,3,6,5,
+                       4,5,8,7,
+                       5,6,9,8};
+      mbt->elemCoord = {0.5,0.5,0.5,1.5,1.5,0.5,1.5,1.5};
 
-  } ESMC_CATCH_MBMESH_TEST_RETURN(&rc)
+    } else if (petCount == 4) {
+      if (localPet == 0) {
+        mbt->nodeId ={1,2,4,5};
+        mbt->nodeCoord = {0.0,0.0, 1.0,0.0, 0.0,1.0, 1.0,1.0};
+        mbt->nodeOwner = {0,0,0,0};
+        mbt->elemId = {1};
+        mbt->elemType = {ESMC_MESHELEMTYPE_QUAD};
+        mbt->elemConn = {1,2,4,3};
+        mbt->elemCoord = {0.5,0.5};
+      } else if (localPet == 1) {
+        mbt->nodeId = {2,3,5,6};
+        mbt->nodeCoord = {1.0,0.0, 2.0,0.0, 1.0,1.0, 2.0,1.0};
+        mbt->nodeOwner = {0,1,0,1};
+        mbt->elemId = {2};
+        mbt->elemType = {ESMC_MESHELEMTYPE_QUAD};
+        mbt->elemConn = {1,2,4,3};
+        mbt->elemCoord = {1.5,0.5};
+      } else if (localPet == 2) {
+        mbt->nodeId = {4,5,7,8};
+        mbt->nodeCoord = {0.0,1.0, 1.0,1.0, 0.0,2.0, 1.0,2.0};
+        mbt->nodeOwner = {0,0,2,2};
+        mbt->elemId = {3};
+        mbt->elemType = {ESMC_MESHELEMTYPE_QUAD};
+        mbt->elemConn = {1,2,4,3};
+        mbt->elemCoord = {0.5,1.5};
+      } else if (localPet == 3) {
+        mbt->nodeId = {5,6,8,9};
+        mbt->nodeCoord = {1.0,1.0, 2.0,1.0, 1.0,2.0, 2.0,2.0};
+        mbt->nodeOwner = {0,1,2,3};
+        mbt->elemId = {4};
+        mbt->elemType = {ESMC_MESHELEMTYPE_QUAD};
+        mbt->elemConn = {1,2,4,3};
+        mbt->elemCoord = {1.5,1.5};
+      }
+
+      if (redist) {
+        if (localPet == 0) {
+          mbt->redist_nodeId = {5,6,8,9};
+          mbt->redist_nodeCoord = {1.0,1.0, 2.0,1.0, 1.0,2.0, 2.0,2.0};
+          mbt->redist_nodeOwner = {0,0,0,0};
+          mbt->redist_elemId = {4};
+          mbt->redist_elemType = {ESMC_MESHELEMTYPE_QUAD};
+          mbt->redist_elemConn = {1,2,4,3};
+          mbt->redist_elemCoord = {1.5,1.5};
+        } else if (localPet == 1) {
+          mbt->redist_nodeId = {4,5,7,8};
+          mbt->redist_nodeCoord = {0.0,1.0, 1.0,1.0, 0.0,2.0, 1.0,2.0};
+          mbt->redist_nodeOwner = {1,0,1,0};
+          mbt->redist_elemId = {3};
+          mbt->redist_elemType = {ESMC_MESHELEMTYPE_QUAD};
+          mbt->redist_elemConn = {1,2,4,3};
+          mbt->redist_elemCoord = {0.5,1.5};
+        } else if (localPet == 2) {
+          mbt->redist_nodeId = {2,3,5,6};
+          mbt->redist_nodeCoord = {1.0,0.0, 2.0,0.0, 1.0,1.0, 2.0,1.0};
+          mbt->redist_nodeOwner = {2,2,0,0};
+          mbt->redist_elemId = {2};
+          mbt->redist_elemType = {ESMC_MESHELEMTYPE_QUAD};
+          mbt->redist_elemConn = {1,2,4,3};
+          mbt->redist_elemCoord = {1.5,0.5};
+        } else if (localPet == 3) {
+          mbt->redist_nodeId ={1,2,4,5};
+          mbt->redist_nodeCoord = {0.0,0.0, 1.0,0.0, 0.0,1.0, 1.0,1.0};
+          mbt->redist_nodeOwner = {3,2,1,0};
+          mbt->redist_elemId = {1};
+          mbt->redist_elemType = {ESMC_MESHELEMTYPE_QUAD};
+          mbt->redist_elemConn = {1,2,4,3};
+          mbt->redist_elemCoord = {0.5,0.5};
+        }
+      }
+    }
+
+  } MBMESHTEST_CATCH_RETURN_NULL(&rc)
 
   rc = ESMF_SUCCESS;
   return mbt;
 }
 
-MBMeshTest *mbmesh_gen_quad_2d_sph(int &rc){
+MBMeshTest *mbmesh_gen_quad_2d_sph(int &rc, bool redist=false){
   //
   //
   //  pi/5  7 ------- 8 -------- 9
@@ -2256,53 +267,42 @@ MBMeshTest *mbmesh_gen_quad_2d_sph(int &rc){
 
   try {
 
-    double pi = 3.14159;
-  
-    int pdim = 2;
-    int sdim = 2;
-  
-    int num_elem = 4;
-    int num_node = 9;
-  
-    ESMC_CoordSys_Flag coord_sys=ESMC_COORDSYS_SPH_RAD;
-  
-    int nodeId_s [] ={1,2,3,4,5,6,7,8,9};
-    double nodeCoord_s [] ={0.0,0.0, pi/10,0.0, pi/5,0.0,
-                0.0,pi/10, pi/10,pi/10, pi/5,pi/10,
-                0.0,pi/5, pi/10,pi/5, pi/5,pi/5};
-    int nodeOwner_s [] ={0,0,0,0,0,0,0,0,0};
-    int nodeMask_s [] ={1,1,1,1,1,1,1,1,1};
-  
-    int elemId_s [] ={1,2,3,4};
-    // ESMF_MESHELEMTYPE_QUAD
-    int elemType_s [] ={ESMC_MESHELEMTYPE_QUAD,
-                        ESMC_MESHELEMTYPE_QUAD,
-                        ESMC_MESHELEMTYPE_QUAD,
-                        ESMC_MESHELEMTYPE_QUAD};
-    int elemMask_s [] ={1,1,1,1};
-    double elemArea_s [] ={1.0,2.0,3.0,4.0}; // Wrong area, but just to test
-    int elemConn_s [] ={1,2,5,4,
-                2,3,6,5,
-                4,5,8,7,
-                5,6,9,8};
-    double elemCoord_s [] ={pi/20,pi/20,pi/20,3*pi/20,3*pi/20,pi/20,3*pi/20,3*pi/ 20};
-  
-    mbt = new MBMeshTest(pdim, sdim, num_elem, num_node, coord_sys);
-  
-    mbt->add_nodes(nodeId_s, nodeOwner_s, nodeCoord_s, nodeMask_s);
-  
-    int numelemconn = 16;
-    int regridconserve = 0;
-  
-    mbt->add_elems(numelemconn, elemConn_s, elemId_s, elemType_s, elemMask_s, elemArea_s, elemCoord_s, &regridconserve);
+    // Get parallel information
+    int localPet, petCount;
+    ESMC_VM vm;
+    vm=ESMC_VMGetGlobal(&rc);
+    MBMESHTEST_CHECK_RC_THROW(rc)
 
-  } ESMC_CATCH_MBMESH_TEST_RETURN(&rc)
+    rc=ESMC_VMGet(vm, &localPet, &petCount, (int *)NULL, (MPI_Comm *)NULL,
+                  (int *)NULL, (int *)NULL);
+    MBMESHTEST_CHECK_RC_THROW(rc)
+
+    if (petCount !=1 && petCount != 4)
+      MBMESHTEST_THROW_ERROR("Must be run with 1 or 4 cores.")
+
+    // Cartesian to spherical coordinate transformation - radians (suitable for c:[0:2])
+    double pi = 3.14159;
+    double c2s = pi/10.;
+
+    int localrc;
+    mbt = mbmesh_gen_quad_2d_cart(localrc, redist);
+    MBMESHTEST_CHECK_RC_THROW(localrc)
+
+    std::for_each(mbt->nodeCoord.begin(), mbt->nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
+    std::for_each(mbt->elemCoord.begin(), mbt->elemCoord.end(), [&c2s](double &d) {d*=c2s;});
+
+    std::for_each(mbt->redist_nodeCoord.begin(), mbt->redist_nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
+    std::for_each(mbt->redist_elemCoord.begin(), mbt->redist_elemCoord.end(), [&c2s](double &d) {d*=c2s;});
+
+    mbt->coord_sys=ESMC_COORDSYS_SPH_RAD;
+
+  } MBMESHTEST_CATCH_RETURN_NULL(&rc)
 
   rc = ESMF_SUCCESS;
   return mbt;
 }
 
-MBMeshTest* mbmesh_gen_hex_3d_cart(int &rc) {
+MBMeshTest* mbmesh_gen_hex_3d_cart(int &rc, bool redist=false) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "mbmesh_gen_hex_3d_cart"
 
@@ -2311,42 +311,102 @@ MBMeshTest* mbmesh_gen_hex_3d_cart(int &rc) {
 
   try {
 
-    // Mesh variables
+    // Get parallel information
+    int localPet, petCount;
+    ESMC_VM vm;
+    vm=ESMC_VMGetGlobal(&rc);
+    MBMESHTEST_CHECK_RC_THROW(rc)
+
+    rc=ESMC_VMGet(vm, &localPet, &petCount, (int *)NULL, (MPI_Comm *)NULL,
+                  (int *)NULL, (int *)NULL);
+    MBMESHTEST_CHECK_RC_THROW(rc)
+
+    if (petCount !=1 && petCount != 4)
+      MBMESHTEST_THROW_ERROR("Must be run with 1 or 4 cores.")
+
     int pdim=3;
     int sdim=3;
+    ESMC_CoordSys_Flag coord_sys=ESMC_COORDSYS_CART;
 
-    int num_elem = 4;
-    int num_node = 18;
+    int num_node;
+    int num_elem;
+    int num_elem_conn;
+    int redist_num_node;
+    int redist_num_elem;
+    int redist_num_elem_conn;
 
-    ESMC_CoordSys_Flag coordsys=ESMC_COORDSYS_CART;
+    if (petCount == 1) {
+      int num_elem = 4;
+      int num_node = 18;
+      int numelemconn = 8*num_elem;
 
-    int nodeId [] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18};
-    double nodeCoord [] = {1.0 , 1.0 , 1.0,
-                           10.0, 1.0 , 1.0,
-                           20.0, 1.0 , 1.0,
-                           1.0 , 10.0, 1.0,
-                           10.0, 10.0, 1.0,
-                           20.0, 10.0, 1.0,
-                           1.0 , 20.0, 1.0,
-                           10.0, 20.0, 1.0,
-                           20.0, 20.0, 1.0,
-                           1.0 , 1.0 , 2.0,
-                           10.0, 1.0 , 2.0,
-                           20.0, 1.0 , 2.0,
-                           1.0 , 10.0, 2.0,
-                           10.0, 10.0, 2.0,
-                           20.0, 10.0, 2.0,
-                           1.0 , 20.0, 2.0,
-                           10.0, 20.0, 2.0,
-                           20.0, 20.0, 2.0};
-    int nodeOwner [] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+      if (redist)
+        MBMESHTEST_THROW_ERROR("Cannot run redist with 1 core.")
 
-    int elemId [] = {1,2,3,4};
-    int elemType [] = {ESMC_MESHELEMTYPE_HEX,
+    } else if (petCount == 4) {
+      if (localPet == 0) {
+        num_elem = 1;
+        num_node = 8;
+        num_elem_conn = 8;
+        redist_num_elem = 1;
+        redist_num_node = 8;
+        redist_num_elem_conn = 8;
+      } else if (localPet == 1) {
+        num_elem = 1;
+        num_node = 8;
+        num_elem_conn = 8;
+        redist_num_elem = 1;
+        redist_num_node = 8;
+        redist_num_elem_conn = 8;
+      } else if (localPet == 2) {
+        num_elem = 1;
+        num_node = 8;
+        num_elem_conn = 8;
+        redist_num_elem = 1;
+        redist_num_node = 8;
+        redist_num_elem_conn = 8;
+      } else if (localPet == 3) {
+        num_elem = 1;
+        num_node = 8;
+        num_elem_conn = 8;
+        redist_num_elem = 1;
+        redist_num_node = 8;
+        redist_num_elem_conn = 8;
+      }
+    }
+
+    if (!redist)
+      mbt = new MBMeshTest(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn);
+    else
+      mbt = new MBMeshTest(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist, redist_num_node, redist_num_elem, redist_num_elem_conn);
+
+    if (petCount == 1) {
+      mbt->nodeId = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18};
+      mbt->nodeCoord = {1.0 , 1.0 , 1.0, // 1
+                        10.0, 1.0 , 1.0, // 2
+                        20.0, 1.0 , 1.0, // 3
+                        1.0 , 10.0, 1.0, // 4
+                        10.0, 10.0, 1.0, // 5
+                        20.0, 10.0, 1.0, // 6
+                        1.0 , 20.0, 1.0, // 7
+                        10.0, 20.0, 1.0, // 8
+                        20.0, 20.0, 1.0, // 9
+                        1.0 , 1.0 , 2.0, // 10
+                        10.0, 1.0 , 2.0, // 11
+                        20.0, 1.0 , 2.0, // 12
+                        1.0 , 10.0, 2.0, // 13
+                        10.0, 10.0, 2.0, // 14
+                        20.0, 10.0, 2.0, // 15
+                        1.0 , 20.0, 2.0, // 16
+                        10.0, 20.0, 2.0, // 17
+                        20.0, 20.0, 2.0}; // 18
+      mbt->nodeOwner = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+      mbt->elemId = {1,2,3,4};
+      mbt->elemType = {ESMC_MESHELEMTYPE_HEX,
                        ESMC_MESHELEMTYPE_HEX,
                        ESMC_MESHELEMTYPE_HEX,
                        ESMC_MESHELEMTYPE_HEX};
-    int elemConn [] = {1,  2,   5,   4,
+      mbt->elemConn = {1,  2,   5,   4,
                        10, 11,  14,  13,
                        2,  3,   6,   5,
                        11, 12,  15,  14,
@@ -2355,22 +415,148 @@ MBMeshTest* mbmesh_gen_hex_3d_cart(int &rc) {
                        5,  6,   9,   8,
                        14, 15,  18,  17};
 
-    mbt = new MBMeshTest(pdim, sdim, num_elem, num_node, coordsys);
+    } else if (petCount == 4) {
+      if (localPet == 0) {
+        mbt->nodeId = {1,2,4,5,10,11,13,14};
+        mbt->nodeCoord = {1.0 , 1.0 , 1.0,  //1
+                          10.0, 1.0 , 1.0,  //2
+                          1.0 , 10.0, 1.0,  //4
+                          10.0, 10.0, 1.0,  //5
+                          1.0 , 1.0 , 2.0,  //10
+                          10.0, 1.0 , 2.0,  //11
+                          1.0 , 10.0, 2.0,  //13
+                          10.0, 10.0, 2.0}; //14
+        mbt->nodeOwner = {0,0,0,0,0,0,0,0};
+        mbt->elemId = {1};
+        mbt->elemType = {ESMC_MESHELEMTYPE_HEX};
+        mbt->elemConn = {1,2,4,3,5,6,8,7};
+        mbt->elemCoord = {5,5,0.5};
+      } else if (localPet == 1) {
+        mbt->nodeId = {2,3,5,6,11,12,14,15};
+        mbt->nodeCoord = {10.0, 1.0 , 1.0,  //2
+                          20.0, 1.0 , 1.0,  //3
+                          10.0, 10.0, 1.0,  //5
+                          20.0, 10.0, 1.0,  //6
+                          1.0 , 20.0, 1.0,  //7
+                          10.0, 20.0, 1.0,  //8
+                          20.0, 20.0, 1.0,  //9
+                          10.0, 1.0 , 2.0,  //11
+                          20.0, 1.0 , 2.0,  //12
+                          10.0, 10.0, 2.0,  //14
+                          20.0, 10.0, 2.0}; //15
+        mbt->nodeOwner = {0,1,0,1,0,1,0,1};
+        mbt->elemId = {2};
+        mbt->elemType = {ESMC_MESHELEMTYPE_HEX};
+        mbt->elemConn = {1,2,4,3,5,6,8,7};
+        mbt->elemCoord = {15,5,0.5};
+      } else if (localPet == 2) {
+        mbt->nodeId = {4,5,7,8,13,14,16,17};
+        mbt->nodeCoord = {1.0 , 10.0, 1.0,  //4
+                          10.0, 10.0, 1.0,  //5
+                          1.0 , 20.0, 1.0,  //7
+                          10.0, 20.0, 1.0,  //8
+                          1.0 , 10.0, 2.0,  //13
+                          10.0, 10.0, 2.0,  //14
+                          1.0 , 20.0, 2.0,  //16
+                          10.0, 20.0, 2.0}; //17
+        mbt->nodeOwner = {0,0,2,2,0,0,2,2};
+        mbt->elemId = {3};
+        mbt->elemType = {ESMC_MESHELEMTYPE_HEX};
+        mbt->elemConn = {1,2,4,3,5,6,8,7};
+        mbt->elemCoord = {5,15,0.5};
+      } else if (localPet == 3) {
+        mbt->nodeId = {5,6,8,9,14,15,17,18};
+        mbt->nodeCoord = {10.0, 10.0, 1.0,  //5
+                          20.0, 10.0, 1.0,  //6
+                          10.0, 20.0, 1.0,  //8
+                          20.0, 20.0, 1.0,  //9
+                          10.0, 10.0, 2.0,  //14
+                          20.0, 10.0, 2.0,  //15
+                          10.0, 20.0, 2.0,  //17
+                          20.0, 20.0, 2.0}; //18
+        mbt->nodeOwner = {0,1,2,3,0,1,2,3};
+        mbt->elemId = {4};
+        mbt->elemType = {ESMC_MESHELEMTYPE_HEX};
+        mbt->elemConn = {1,2,4,3,5,6,8,7};
+        mbt->elemCoord = {15,15,0.5};
+      }
 
-    mbt->add_nodes(nodeId, nodeOwner, nodeCoord, NULL);
+      if (redist) {
+        // total redist case
+        if (localPet == 0) {
+          mbt->redist_nodeId = {5,6,8,9,14,15,17,18};
+          mbt->redist_nodeCoord = {10.0, 10.0, 1.0,  //5
+                                   20.0, 10.0, 1.0,  //6
+                                   10.0, 20.0, 1.0,  //8
+                                   20.0, 20.0, 1.0,  //9
+                                   10.0, 10.0, 2.0,  //14
+                                   20.0, 10.0, 2.0,  //15
+                                   10.0, 20.0, 2.0,  //17
+                                   20.0, 20.0, 2.0}; //18
+          mbt->redist_nodeOwner = {0,0,0,0,0,0,0,0};
+          mbt->redist_elemId = {4};
+          mbt->redist_elemType = {ESMC_MESHELEMTYPE_HEX};
+          mbt->redist_elemConn = {1,2,4,3,5,6,8,7};
+          mbt->redist_elemCoord = {15,15,0.5};
+        } else if (localPet == 1) {
+          mbt->redist_nodeId = {4,5,7,8,13,14,16,17};
+          mbt->redist_nodeCoord = {1.0 , 10.0, 1.0,  //4
+                                   10.0, 10.0, 1.0,  //5
+                                   1.0 , 20.0, 1.0,  //7
+                                   10.0, 20.0, 1.0,  //8
+                                   1.0 , 10.0, 2.0,  //13
+                                   10.0, 10.0, 2.0,  //14
+                                   1.0 , 20.0, 2.0,  //16
+                                   10.0, 20.0, 2.0}; //17
+          mbt->redist_nodeOwner = {1,0,1,0,1,0,1,0};
+          mbt->redist_elemId = {3};
+          mbt->redist_elemType = {ESMC_MESHELEMTYPE_HEX};
+          mbt->redist_elemConn = {1,2,4,3,5,6,8,7};
+          mbt->redist_elemCoord = {5,15,0.5};
+        } else if (localPet == 2) {
+          mbt->redist_nodeId = {2,3,5,6,11,12,14,15};
+          mbt->redist_nodeCoord = {10.0, 1.0 , 1.0,  //2
+                                   20.0, 1.0 , 1.0,  //3
+                                   10.0, 10.0, 1.0,  //5
+                                   20.0, 10.0, 1.0,  //6
+                                   1.0 , 20.0, 1.0,  //7
+                                   10.0, 20.0, 1.0,  //8
+                                   20.0, 20.0, 1.0,  //9
+                                   10.0, 1.0 , 2.0,  //11
+                                   20.0, 1.0 , 2.0,  //12
+                                   10.0, 10.0, 2.0,  //14
+                                   20.0, 10.0, 2.0}; //15
+          mbt->redist_nodeOwner = {2,2,0,0,2,2,0,0};
+          mbt->redist_elemId = {2};
+          mbt->redist_elemType = {ESMC_MESHELEMTYPE_HEX};
+          mbt->redist_elemConn = {1,2,4,3,5,6,8,7};
+          mbt->redist_elemCoord = {15,5,0.5};
+        } else if (localPet == 3) {
+          mbt->redist_nodeId = {1,2,4,5,10,11,13,14};
+          mbt->redist_nodeCoord = {1.0 , 1.0 , 1.0,  //1
+                      10.0, 1.0 , 1.0,  //2
+                      1.0 , 10.0, 1.0,  //4
+                      10.0, 10.0, 1.0,  //5
+                      1.0 , 1.0 , 2.0,  //10
+                      10.0, 1.0 , 2.0,  //11
+                      1.0 , 10.0, 2.0,  //13
+                      10.0, 10.0, 2.0}; //14
+          mbt->redist_nodeOwner = {3,2,1,0,3,2,1,0};
+          mbt->redist_elemId = {1};
+          mbt->redist_elemType = {ESMC_MESHELEMTYPE_HEX};
+          mbt->redist_elemConn = {1,2,4,3,5,6,8,7};
+          mbt->redist_elemCoord = {5,5,0.5};
+        }
+      }
+    }
 
-    int numelemconn = 8*num_elem;
-    int regridconserve = 0;
-
-    mbt->add_elems(numelemconn, elemConn, elemId, elemType, NULL, NULL, NULL, &regridconserve);
-
-  } ESMC_CATCH_MBMESH_TEST_RETURN(&rc)
+  } MBMESHTEST_CATCH_RETURN_NULL(&rc)
 
   rc = ESMF_SUCCESS;
   return mbt;
 }
 
-MBMeshTest* mbmesh_gen_hex_3d_sph(int &rc) {
+MBMeshTest* mbmesh_gen_hex_3d_sph(int &rc, bool redist=false) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "mbmesh_gen_hex_3d_sph"
 
@@ -2379,68 +565,42 @@ MBMeshTest* mbmesh_gen_hex_3d_sph(int &rc) {
 
   try {
 
-    // Mesh variables
-    int pdim=3;
-    int sdim=3;
+    // Get parallel information
+    int localPet, petCount;
+    ESMC_VM vm;
+    vm=ESMC_VMGetGlobal(&rc);
+    MBMESHTEST_CHECK_RC_THROW(rc)
 
-    int num_elem = 4;
-    int num_node = 18;
+    rc=ESMC_VMGet(vm, &localPet, &petCount, (int *)NULL, (MPI_Comm *)NULL,
+                  (int *)NULL, (int *)NULL);
+    MBMESHTEST_CHECK_RC_THROW(rc)
 
-    ESMC_CoordSys_Flag coordsys=ESMC_COORDSYS_SPH_DEG;
+    if (petCount !=1 && petCount != 4)
+      MBMESHTEST_THROW_ERROR("Must be run with 1 or 4 cores.")
+
+    // Cartesian to spherical coordinate transformation - degrees (suitable for c:[0:30])
     double c2s = 10.;
 
+    int localrc;
+    mbt = mbmesh_gen_hex_3d_cart(localrc, redist);
+    MBMESHTEST_CHECK_RC_THROW(localrc)
+    std::for_each(mbt->nodeCoord.begin(), mbt->nodeCoord.end(), 
+                  [&c2s](double &d) {d*=c2s;});
+    std::for_each(mbt->elemCoord.begin(), mbt->elemCoord.end(), 
+                  [&c2s](double &d) {d*=c2s;});
 
-    int nodeId [] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18};
-    double nodeCoord [] = {1.0 *c2s, 1.0 *c2s, 1.0*c2s,
-                           10.0*c2s, 1.0 *c2s, 1.0*c2s,
-                           20.0*c2s, 1.0 *c2s, 1.0*c2s,
-                           1.0 *c2s, 10.0*c2s, 1.0*c2s,
-                           10.0*c2s, 10.0*c2s, 1.0*c2s,
-                           20.0*c2s, 10.0*c2s, 1.0*c2s,
-                           1.0 *c2s, 20.0*c2s, 1.0*c2s,
-                           10.0*c2s, 20.0*c2s, 1.0*c2s,
-                           20.0*c2s, 20.0*c2s, 1.0*c2s,
-                           1.0 *c2s, 1.0 *c2s, 2.0*c2s,
-                           10.0*c2s, 1.0 *c2s, 2.0*c2s,
-                           20.0*c2s, 1.0 *c2s, 2.0*c2s,
-                           1.0 *c2s, 10.0*c2s, 2.0*c2s,
-                           10.0*c2s, 10.0*c2s, 2.0*c2s,
-                           20.0*c2s, 10.0*c2s, 2.0*c2s,
-                           1.0 *c2s, 20.0*c2s, 2.0*c2s,
-                           10.0*c2s, 20.0*c2s, 2.0*c2s,
-                           20.0*c2s, 20.0*c2s, 2.0*c2s};
-    int nodeOwner [] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    std::for_each(mbt->redist_nodeCoord.begin(), mbt->redist_nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
+    std::for_each(mbt->redist_elemCoord.begin(), mbt->redist_elemCoord.end(), [&c2s](double &d) {d*=c2s;});
 
-    int elemId [] = {1,2,3,4};
-    int elemType [] = {ESMC_MESHELEMTYPE_HEX,
-                       ESMC_MESHELEMTYPE_HEX,
-                       ESMC_MESHELEMTYPE_HEX,
-                       ESMC_MESHELEMTYPE_HEX};
-    int elemConn [] = {1,  2,   5,   4,
-                       10, 11,  14,  13,
-                       2,  3,   6,   5,
-                       11, 12,  15,  14,
-                       4,  5,   8,   7,
-                       13, 14,  17,  16,
-                       5,  6,   9,   8,
-                       14, 15,  18,  17};
+    mbt->coord_sys=ESMC_COORDSYS_SPH_DEG;
 
-    mbt = new MBMeshTest(pdim, sdim, num_elem, num_node, coordsys);
-
-    mbt->add_nodes(nodeId, nodeOwner, nodeCoord, NULL);
-
-    int numelemconn = 8*num_elem;
-    int regridconserve = 0;
-
-    mbt->add_elems(numelemconn, elemConn, elemId, elemType, NULL, NULL, NULL, &regridconserve);
-
-  } ESMC_CATCH_MBMESH_TEST_RETURN(&rc)
+  } MBMESHTEST_CATCH_RETURN_NULL(&rc)
 
   rc = ESMF_SUCCESS;
   return mbt;
 }
 
-MBMeshTest* mbmesh_gen_ngon_2d_cart(int &rc) {
+MBMeshTest* mbmesh_gen_ngon_2d_cart(int &rc, bool redist=false) {
   //
   //  3.1                    / -- 15 -- \
   //  3.0    13 ------ 14 --             -- 16
@@ -2477,59 +637,228 @@ MBMeshTest* mbmesh_gen_ngon_2d_cart(int &rc) {
     int localPet, petCount;
     ESMC_VM vm;
     vm=ESMC_VMGetGlobal(&rc);
-    if (rc != ESMF_SUCCESS) return 0;
+    MBMESHTEST_CHECK_RC_THROW(rc)
 
     rc=ESMC_VMGet(vm, &localPet, &petCount, (int *)NULL, (MPI_Comm *)NULL,
                   (int *)NULL, (int *)NULL);
-    if (rc != ESMF_SUCCESS) return 0;
+    MBMESHTEST_CHECK_RC_THROW(rc)
+
+    if (petCount !=1 && petCount != 4)
+      MBMESHTEST_THROW_ERROR("Must be run with 1 or 4 cores.")
+
+    int pdim = 2;
+    int sdim = 2;
+    ESMC_CoordSys_Flag coord_sys=ESMC_COORDSYS_CART;
+
+    int num_node;
+    int num_elem;
+    int num_elem_conn;
+    int redist_num_node;
+    int redist_num_elem;
+    int redist_num_elem_conn;
 
     if (petCount == 1) {
-
-      int pdim = 2;
-      int sdim = 2;
-
-      // set Mesh parameters
       int num_elem = 5;
       int num_node = 16;
+      int num_elem_conn = 2*5+3*6;
 
-      int nodeId [] ={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
-      double nodeCoord [] ={0.1,0.1, 1.5,0.0, 2.0,0.1, 3.0,0.1,
-                            0.1,1.5, 1.5,1.5, 2.0,1.5, 2.9,1.5,
-                            0.0,2.0, 1.6,2.0, 2.2,1.9, 3.1,2.0,
-                            0.1,3.0, 1.5,3.0, 2.2,3.0, 3.0,3.0};
-      int nodeOwner [] ={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-      int nodeMask [] ={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-      int elemId [] ={1,2,3,4,5};
-      int elemType [] ={5,5,6,6,7};
-      int elemConn [] ={1,2,3,6,5,
-                        3,7,11,10,6,
-                        3,4,8,12,11,7,
-                        5,6,10,14,13,9,
-                        10,11,12,16,15,14};
-      int elemMask [] ={1,1,1,1,1,1,1,1,1,1};
-      double elemArea [] ={101,102,103,1014,1015};
-      double elemCoord [] ={1.0,1.0,1.74,1.76,2.4,1.6,1.01,2.042,2.1,2.5};
+      if (redist)
+        MBMESHTEST_THROW_ERROR("Cannot run redist with 1 core.")
 
-      ESMC_CoordSys_Flag coordsys=ESMC_COORDSYS_CART;
-      int numelemconn = 2*5+2*6+7;
-      int regridconserve = 0;
-
-      // mesh pointer
-      mbt = new MBMeshTest(pdim, sdim, num_elem, num_node, coordsys);
-
-      mbt->add_nodes(nodeId, nodeOwner, nodeCoord, nodeMask);
-      mbt->add_elems(numelemconn, elemConn, elemId, elemType, elemMask, elemArea, elemCoord, &regridconserve);
-    } else {
-      ESMC_THROW_ERROR(0,"mbmesh_gen_ngon_2d_cart does not run on more than one core.");
+    } else if (petCount == 4) {
+      if (localPet == 0) {
+        num_elem = 1;
+        num_node = 5;
+        num_elem_conn = 5;
+        redist_num_elem = 1;
+        redist_num_node = 6;
+        redist_num_elem_conn = 6;
+      } else if (localPet == 1) {
+        num_elem = 2;
+        num_node = 8;
+        num_elem_conn = 5+6;
+        redist_num_elem = 1;
+        redist_num_node = 6;
+        redist_num_elem_conn = 6;
+      } else if (localPet == 2) {
+        num_elem = 1;
+        num_node = 6;
+        num_elem_conn = 6;
+        redist_num_elem = 2;
+        redist_num_node = 8;
+        redist_num_elem_conn = 5+6;
+      } else if (localPet == 3) {
+        num_elem = 1;
+        num_node = 6;
+        num_elem_conn = 6;
+        redist_num_elem = 1;
+        redist_num_node = 5;
+        redist_num_elem_conn = 5;
+      }
     }
 
-  } ESMC_CATCH_MBMESH_TEST_RETURN(&rc)
+    if (!redist)
+      mbt = new MBMeshTest(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn);
+    else
+      mbt = new MBMeshTest(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist, redist_num_node, redist_num_elem, redist_num_elem_conn);
+
+    if (petCount == 1) {
+      mbt->nodeId = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
+      mbt->nodeCoord = {0.1,0.1, // 1
+                        1.5,0.0, // 2
+                        2.0,0.1, // 3
+                        3.0,0.1, // 4
+                        0.1,1.5, // 5
+                        1.5,1.5, // 6
+                        2.0,1.5, // 7
+                        2.9,1.5, // 8
+                        0.0,2.0, // 9
+                        1.6,2.0, // 10
+                        2.2,1.9, // 11
+                        3.1,2.0, // 12
+                        0.1,3.0, // 13
+                        1.5,3.0, // 14
+                        2.2,3.0, // 15
+                        3.0,3.0};// 16
+      mbt->nodeOwner = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+      mbt->elemId = {1,2,3,4,5};
+      mbt->elemType = {5,5,6,6,6};
+      mbt->elemConn = {1,2,3,6,5,
+                       3,7,11,10,6,
+                       3,4,8,12,11,7,
+                       5,6,10,14,13,9,
+                       10,11,12,16,15,14};
+      mbt->elemCoord = {1.0, 1.0,    // 1
+                        1.74,1.76,  // 2
+                        2.4, 1.6,    // 3
+                        1.01,2.042, // 4
+                        2.1, 2.5};   // 5
+
+    } else if (petCount == 4) {
+      if (localPet == 0) {
+        mbt->nodeId = {1,2,3,5,6};
+        mbt->nodeCoord = {0.1,0.1, // 1
+                          1.5,0.0, // 2
+                          2.0,0.1, // 3
+                          0.1,1.5, // 5
+                          1.5,1.5};// 6
+        mbt->nodeOwner = {0,0,0,0,0};
+        mbt->elemId = {1};
+        mbt->elemType = {5};
+        mbt->elemConn = {1,2,3,5,4};
+        mbt->elemCoord = {1.0,1.0};
+      } else if (localPet == 1) {
+        mbt->nodeId = {3,4,6,7,8,10,11,12};
+        mbt->nodeCoord = {2.0,0.1, // 3
+                          3.0,0.1, // 4
+                          1.5,1.5, // 6
+                          2.0,1.5, // 7
+                          2.9,1.5, // 8
+                          1.6,2.0, // 10
+                          2.2,1.9, // 11
+                          3.1,2.0};// 12
+        mbt->nodeOwner = {0,1,0,1,1,1,1,1};
+        mbt->elemId = {2,3};
+        mbt->elemType = {5,6};
+        mbt->elemConn = {1,4,7,6,3,
+                         1,2,5,8,7,4};
+        mbt->elemCoord = {1.74,1.76,
+                          2.4, 1.6,};
+      } else if (localPet == 2) {
+        mbt->nodeId = {5,6,9,10,13,14};
+        mbt->nodeCoord = {0.1,1.5, // 5
+                          1.5,1.5, // 6
+                          0.0,2.0, // 9
+                          1.6,2.0, // 10
+                          0.1,3.0, // 13
+                          1.5,3.0};// 14
+        mbt->nodeOwner = {0,0,2,1,2,2};
+        mbt->elemId = {4};
+        mbt->elemType = {6};
+        mbt->elemConn = {1,2,4,6,5,3};
+        mbt->elemCoord = {1.01,2.042};
+      } else if (localPet == 3) {
+        mbt->nodeId = {10,11,12,14,15,16};
+        mbt->nodeCoord = {1.6,2.0, // 10
+                          2.2,1.9, // 11
+                          3.1,2.0, // 12
+                          1.5,3.0, // 14
+                          2.2,3.0, // 15
+                          3.0,3.0};// 16
+        mbt->nodeOwner = {1,1,1,2,3,3};
+        mbt->elemId = {5};
+        mbt->elemType = {6};
+        mbt->elemConn = {1,2,3,6,5,4};
+        mbt->elemCoord = {2.1, 2.5};
+      }
+
+      if (redist) {
+        if (localPet == 0) {
+          mbt->nodeId = {10,11,12,14,15,16};
+          mbt->nodeCoord = {1.6,2.0, // 10
+                            2.2,1.9, // 11
+                            3.1,2.0, // 12
+                            1.5,3.0, // 14
+                            2.2,3.0, // 15
+                            3.0,3.0};// 16
+          mbt->nodeOwner = {0,0,0,0,0,0};
+          mbt->elemId = {5};
+          mbt->elemType = {6};
+          mbt->elemConn = {1,2,3,6,5,4};
+          mbt->elemCoord = {2.1, 2.5};
+        } else if (localPet == 1) {
+          mbt->nodeId = {5,6,9,10,13,14};
+          mbt->nodeCoord = {0.1,1.5, // 5
+                            1.5,1.5, // 6
+                            0.0,2.0, // 9
+                            1.6,2.0, // 10
+                            0.1,3.0, // 13
+                            1.5,3.0};// 14
+          mbt->nodeOwner = {1,1,1,0,1,0};
+          mbt->elemId = {4};
+          mbt->elemType = {6};
+          mbt->elemConn = {1,2,4,6,5,3};
+          mbt->elemCoord = {1.01,2.042};
+        } else if (localPet == 2) {
+          mbt->nodeId = {3,4,6,7,8,10,11,12};
+          mbt->nodeCoord = {2.0,0.1, // 3
+                            3.0,0.1, // 4
+                            1.5,1.5, // 6
+                            2.0,1.5, // 7
+                            2.9,1.5, // 8
+                            1.6,2.0, // 10
+                            2.2,1.9, // 11
+                            3.1,2.0};// 12
+          mbt->nodeOwner = {2,2,1,2,2,0,0,0};
+          mbt->elemId = {2,3};
+          mbt->elemType = {5,6};
+          mbt->elemConn = {1,4,7,6,3,
+                          1,2,5,8,7,4};
+          mbt->elemCoord = {1.74,1.76,
+                            2.4, 1.6,};
+        } else if (localPet == 3) {
+          mbt->nodeId = {1,2,3,5,6};
+          mbt->nodeCoord = {0.1,0.1, // 1
+                            1.5,0.0, // 2
+                            2.0,0.1, // 3
+                            0.1,1.5, // 5
+                            1.5,1.5};// 6
+          mbt->nodeOwner = {3,3,2,1,1};
+          mbt->elemId = {1};
+          mbt->elemType = {5};
+          mbt->elemConn = {1,2,3,5,4};
+          mbt->elemCoord = {1.0,1.0};
+        }
+      }
+    }
+
+  } MBMESHTEST_CATCH_RETURN_NULL(&rc)
 
   rc = ESMF_SUCCESS;
   return mbt;
 }
 
-MBMeshTest* mbmesh_gen_ngon_2d_sph(int &rc) {
+MBMeshTest* mbmesh_gen_ngon_2d_sph(int &rc, bool redist=false) {
   //
   //  3.1                    / -- 15 -- \
   //  3.0    13 ------ 14 --             -- 16
@@ -2566,66 +895,38 @@ MBMeshTest* mbmesh_gen_ngon_2d_sph(int &rc) {
     int localPet, petCount;
     ESMC_VM vm;
     vm=ESMC_VMGetGlobal(&rc);
-    if (rc != ESMF_SUCCESS) return 0;
+    MBMESHTEST_CHECK_RC_THROW(rc)
 
     rc=ESMC_VMGet(vm, &localPet, &petCount, (int *)NULL, (MPI_Comm *)NULL,
                   (int *)NULL, (int *)NULL);
-    if (rc != ESMF_SUCCESS) return 0;
+    MBMESHTEST_CHECK_RC_THROW(rc)
 
-    if (petCount == 1) {
+    if (petCount !=1 && petCount != 4)
+      MBMESHTEST_THROW_ERROR("Must be run with 1 or 4 cores.")
 
-      int pdim = 2;
-      int sdim = 2;
+    // Cartesian to spherical coordinate transformation - degrees (suitable for c:[0:3])
+    double c2s = 100.;
 
-      // set Mesh parameters
-      int num_elem = 5;
-      int num_node = 16;
+    int localrc;
+    mbt = mbmesh_gen_ngon_2d_cart(localrc, redist);
+    MBMESHTEST_CHECK_RC_THROW(localrc)
+    std::for_each(mbt->nodeCoord.begin(), mbt->nodeCoord.end(), 
+                  [&c2s](double &d) {d*=c2s;});
+    std::for_each(mbt->elemCoord.begin(), mbt->elemCoord.end(), 
+                  [&c2s](double &d) {d*=c2s;});
 
-      double c2s = 100;
+    std::for_each(mbt->redist_nodeCoord.begin(), mbt->redist_nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
+    std::for_each(mbt->redist_elemCoord.begin(), mbt->redist_elemCoord.end(), [&c2s](double &d) {d*=c2s;});
 
-      int nodeId [] ={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
-      double nodeCoord [] ={0.1*c2s, 0.1*c2s, 1.5*c2s, 0.0*c2s, 2.0*c2s, 0.1*c2s, 3.0*c2s, 0.1*c2s,
-                            0.1*c2s, 1.5*c2s, 1.5*c2s, 1.5*c2s, 2.0*c2s, 1.5*c2s, 2.9*c2s, 1.5*c2s,
-                            0.0*c2s, 2.0*c2s, 1.6*c2s, 2.0*c2s, 2.2*c2s, 1.9*c2s, 3.1*c2s, 2.0*c2s,
-                            0.1*c2s, 3.0*c2s, 1.5*c2s, 3.0*c2s, 2.2*c2s, 3.0*c2s, 3.0*c2s, 3.0*c2s};
-      int nodeOwner [] ={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-      int nodeMask [] ={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-      int elemId [] ={1,2,3,4,5};
-      int elemType [] ={5,5,6,6,7};
-      int elemConn [] ={1,2,3,6,5,
-                        3,7,11,10,6,
-                        3,4,8,12,11,7,
-                        5,6,10,14,13,9,
-                        10,11,12,16,15,14};
-      int elemMask [] ={1,1,1,1,1,1,1,1,1,1};
-      double elemArea [] ={101,102,103,1014,1015};
-      double elemCoord [] ={1.0 *c2s, 1.0  *c2s,
-                            1.74*c2s, 1.76 *c2s,
-                            2.4 *c2s, 1.6  *c2s,
-                            1.01*c2s, 2.042*c2s,
-                            2.1 *c2s, 2.5  *c2s};
+    mbt->coord_sys=ESMC_COORDSYS_SPH_DEG;
 
-      ESMC_CoordSys_Flag coordsys=ESMC_COORDSYS_SPH_DEG;
-      int numelemconn = 2*5+2*6+7;
-      int regridconserve = 0;
-
-      // mesh pointer
-      mbt = new MBMeshTest(pdim, sdim, num_elem, num_node, coordsys);
-
-      mbt->add_nodes(nodeId, nodeOwner, nodeCoord, nodeMask);
-      mbt->add_elems(numelemconn, elemConn, elemId, elemType, elemMask, elemArea, elemCoord, &regridconserve);
-    } else {
-      ESMC_THROW_ERROR(0,"mbmesh_gen_ngon_2d_sph does not run on more than one core.");
-    }
-
-  } ESMC_CATCH_MBMESH_TEST_RETURN(&rc)
+  } MBMESHTEST_CATCH_RETURN_NULL(&rc)
 
   rc = ESMF_SUCCESS;
   return mbt;
 }
 
-// 10 element mesh created the same with one or four procs
-MBMeshTest* mbmesh_gen_mix_2d_cart_par(int &rc) {
+MBMeshTest* mbmesh_gen_mix_2d_cart(int &rc, bool redist=false) {
   //
   //
   //  3.0   13 ------ 14 ------- 15 ------ 16
@@ -2662,65 +963,103 @@ MBMeshTest* mbmesh_gen_mix_2d_cart_par(int &rc) {
     int localPet, petCount;
     ESMC_VM vm;
     vm=ESMC_VMGetGlobal(&rc);
-    if (rc != ESMF_SUCCESS) return 0;
+    MBMESHTEST_CHECK_RC_THROW(rc)
 
     rc=ESMC_VMGet(vm, &localPet, &petCount, (int *)NULL, (MPI_Comm *)NULL,
                   (int *)NULL, (int *)NULL);
-    if (rc != ESMF_SUCCESS) return 0;
+    MBMESHTEST_CHECK_RC_THROW(rc)
+
+    if (petCount !=1 && petCount != 4)
+      MBMESHTEST_THROW_ERROR("Must be run with 1 or 4 cores.")
+
+    int pdim = 2;
+    int sdim = 2;
+    ESMC_CoordSys_Flag coord_sys=ESMC_COORDSYS_CART;
+
+    int num_node;
+    int num_elem;
+    int num_elem_conn;
+    int redist_num_node;
+    int redist_num_elem;
+    int redist_num_elem_conn;
 
     if (petCount == 1) {
-
-      int pdim = 2;
-      int sdim = 2;
-
-      // set Mesh parameters
       int num_elem = 10;
       int num_node = 16;
+      int num_elem_conn = 8*4+2*3;
 
-      int nodeId [] ={10,20,30,40,50,60,70,80,90,110,120,130,140,150,160};
-      double nodeCoord [] ={0.0,0.0, 1.5,0.0, 2.0,0.0, 3.0,0.0,
-                              0.0,1.5, 1.5,1.5, 2.0,1.5, 3.0,1.5,
-                              0.0,2.0, 1.5,2.0, 2.0,2.0, 3.0,2.0,
-                              0.0,3.0, 1.5,3.0, 2.0,3.0, 3.0,3.0};
-      int nodeOwner [] ={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-      int nodeMask [] ={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-      int elemId [] ={1,2,3,4,5,6,7,8,9,10};
-      // ESMF_MESHELEMTYPE_QUAD
-      int elemType [] ={ESMC_MESHELEMTYPE_QUAD,
-                          ESMC_MESHELEMTYPE_TRI,
-                          ESMC_MESHELEMTYPE_TRI,
-                          ESMC_MESHELEMTYPE_QUAD,
-                          ESMC_MESHELEMTYPE_QUAD,
-                          ESMC_MESHELEMTYPE_QUAD,
-                          ESMC_MESHELEMTYPE_QUAD,
-                          ESMC_MESHELEMTYPE_QUAD,
-                          ESMC_MESHELEMTYPE_QUAD,
-                          ESMC_MESHELEMTYPE_QUAD};
-      int elemConn [] ={1,2,6,5,
-                          2,3,6,
-                          3,7,6,
-                          3,4,8,7,
-                          5,6,10,9,
-                          6,7,11,10,
-                          7,8,12,11,
-                          9,10,14,13,
-                          10,11,15,14,
-                          11,12,16,15};
-      int elemMask [] ={1,1,1,1,1,1,1,1,1,1};
-      double elemArea [] ={101,102,103,1014,1015,106,107,108,109,110};
-      double elemCoord [] ={1.0,1.0,1.6,0.1,1.9,1.4,2.5,1.0,
-                            1.0,1.75,1.75, 1.75, 2.5, 1.75,
-                            1.0, 2.5, 1.75, 2.5, 2.5, 2.5};
+      if (redist)
+        MBMESHTEST_THROW_ERROR("Cannot run redist with 1 core.")
 
-      ESMC_CoordSys_Flag coordsys=ESMC_COORDSYS_CART;
-      int numelemconn = 8*4+2*3;
-      int regridconserve = 0;
+    } else if (petCount == 4) {
+      if (localPet == 0){
+        num_node = 9;
+        num_elem = 5;
+        num_elem_conn = 3*4+2*3;
+        redist_num_node = 4;
+        redist_num_elem = 1;
+        redist_num_elem_conn = 1*4;
+      } else if (localPet == 1) {
+        num_node = 6;
+        num_elem = 2;
+        num_elem_conn = 2*4;
+        redist_num_node = 6;
+        redist_num_elem = 2;
+        redist_num_elem_conn = 2*4;
+      } else if (localPet == 2) {
+        num_node = 6;
+        num_elem = 2;
+        num_elem_conn = 2*4;
+        redist_num_node = 6;
+        redist_num_elem = 2;
+        redist_num_elem_conn = 2*4;
+      } else if (localPet == 3) {
+        num_node = 4;
+        num_elem = 1;
+        num_elem_conn = 1*4;
+        redist_num_node = 9;
+        redist_num_elem = 5;
+        redist_num_elem_conn = 3*4+2*3;
+      }
+    }
 
-      // mesh pointer
-      mbt = new MBMeshTest(pdim, sdim, num_elem, num_node, coordsys);
+    if (!redist)
+      mbt = new MBMeshTest(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn);
+    else
+      mbt = new MBMeshTest(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist, redist_num_node, redist_num_elem, redist_num_elem_conn);
 
-      mbt->add_nodes(nodeId, nodeOwner, nodeCoord, nodeMask);
-      mbt->add_elems(numelemconn, elemConn, elemId, elemType, elemMask, elemArea, elemCoord, &regridconserve);
+    if (petCount == 1) {
+      mbt->nodeId ={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
+      mbt->nodeCoord ={0.0,0.0, 1.5,0.0, 2.0,0.0, 3.0,0.0,
+                       0.0,1.5, 1.5,1.5, 2.0,1.5, 3.0,1.5,
+                       0.0,2.0, 1.5,2.0, 2.0,2.0, 3.0,2.0,
+                       0.0,3.0, 1.5,3.0, 2.0,3.0, 3.0,3.0};
+      mbt->nodeOwner ={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+      mbt->elemId ={1,2,3,4,5,6,7,8,9,10};
+      mbt->elemType ={ESMC_MESHELEMTYPE_QUAD,
+                      ESMC_MESHELEMTYPE_TRI,
+                      ESMC_MESHELEMTYPE_TRI,
+                      ESMC_MESHELEMTYPE_QUAD,
+                      ESMC_MESHELEMTYPE_QUAD,
+                      ESMC_MESHELEMTYPE_QUAD,
+                      ESMC_MESHELEMTYPE_QUAD,
+                      ESMC_MESHELEMTYPE_QUAD,
+                      ESMC_MESHELEMTYPE_QUAD,
+                      ESMC_MESHELEMTYPE_QUAD};
+      mbt->elemConn ={1,2,6,5,
+                      2,3,6,
+                      3,7,6,
+                      3,4,8,7,
+                      5,6,10,9,
+                      6,7,11,10,
+                      7,8,12,11,
+                      9,10,14,13,
+                      10,11,15,14,
+                      11,12,16,15};
+      mbt->elemCoord ={1.0,1.0,  1.6, 0.1,  1.9,1.4, 2.5,1.0,
+                       1.0,1.75, 1.75,1.75, 2.5,1.75,
+                       1.0,2.5,  1.75,2.5,  2.5,2.5};
+
     } else if (petCount == 4) {
 
       //   3.0   13 ------ 14 ------ 15     [15] ----------- 16
@@ -2744,123 +1083,161 @@ MBMeshTest* mbmesh_gen_mix_2d_cart_par(int &rc) {
       //         |         |  \   3  |       |               |
       //         |    1    |    \    |       |       4       |
       //         |         | 2    \  |       |               |
-      //   1.0   1 ------- 2 ------- 3      [3] ------------ 4
+      //   0.0   1 ------- 2 ------- 3      [3] ------------ 4
       //
-      //           1.0       1.5     2.0     2.0             3.0
+      //         0.0       1.5       2.0     2.0             3.0
       //
       //                PET 0                      PET 1
       //
       //               Node Id labels at corners
       //              Element Id labels in centers
 
-      // Mesh variables
-      int pdim=2;
-      int sdim=2;
-
       if (localPet == 0){
-        int num_node = 9;
-        int num_elem = 5;
-
-        int nodeId [] = {10,20,30,50,60,70,90,100,110};
-        double nodeCoord [] = {1.0,1.0,1.5,1.0,2.0,1.0,1.0,1.5,1.5,1.5,2.0,1.5,1.0,2.0,1.5,2.0,2.0,2.0};
-        int nodeOwner [] = {0,0,0,0,0,0,0,0,0};
-        int nodeMask [] = {1,1,1,1,1,1,1,1,1};
-        int elemType [] = {4,3,3,4,4};
-        int elemId [] = {1,2,3,5,6};
-        int elemConn [] = {1,2,5,4,2,3,5,3,6,5,4,5,8,7,5,6,9,8};
-        int elemMask [] ={1,1,1,1,1};
-        double elemArea [] ={101,102,103,104,105};
-        double elemCoord [] ={1.0,1.0,1.6,0.1,1.9,1.4,
-                            1.0,1.75,1.75, 1.75};
-
-        ESMC_CoordSys_Flag coordsys=ESMC_COORDSYS_CART;
-        int numelemconn = 3*4+2*3;
-        int regridconserve = 0;
-
-        // mesh pointer
-        mbt = new MBMeshTest(pdim, sdim, num_elem, num_node, coordsys);
-        mbt->add_nodes(nodeId, nodeOwner, nodeCoord, nodeMask);
-        mbt->add_elems(numelemconn, elemConn, elemId, elemType, elemMask, elemArea, elemCoord, &regridconserve);
+        mbt->nodeId = {1,2,3,5,6,7,9,10,11};
+        mbt->nodeCoord = {1.0,1.0,1.5,1.0,2.0,1.0,1.0,1.5,1.5,1.5,2.0,1.5,1.0,2.0,1.5,2.0,2.0,2.0};
+        mbt->nodeOwner = {0,0,0,0,0,0,0,0,0};
+        mbt->elemType = {4,3,3,4,4};
+        mbt->elemId = {1,2,3,5,6};
+        mbt->elemConn = {1,2,5,4,2,3,5,3,6,5,4,5,8,7,5,6,9,8};
+        mbt->elemCoord ={1.0,1.0,1.6,0.1,1.9,1.4,
+                    1.0,1.75,1.75, 1.75};
+      } else if (localPet == 1) {
+        mbt->nodeId = {3,4,7,8,11,12};
+        mbt->nodeCoord = {2.0,1.0,3.0,1.0,2.0,1.5,3.0,1.5,2.0,2.0,3.0,2.0};
+        mbt->nodeOwner = {0,1,0,1,0,1};
+        mbt->elemId = {4,7};
+        mbt->elemType = {4,4};
+        mbt->elemConn = {1,2,4,3,3,4,6,5};
+        mbt->elemCoord ={2.5,1.0, 2.5, 1.75};
+      } else if (localPet == 2) {
+        mbt->nodeId = {9,10,11,13,14,15};
+        mbt->nodeCoord = {1.0,2.0,1.5,2.0,2.0,2.0,1.0,3.0,1.5,3.0,2.0,3.0};
+        mbt->nodeOwner = {0,0,0,2,2,2};
+        mbt->elemId = {8,9};
+        mbt->elemType = {4,4};
+        mbt->elemConn = {1,2,5,4,2,3,6,5};
+        mbt->elemCoord ={1.0, 2.5, 1.75, 2.5};
+      } else if (localPet == 3) {
+        mbt->nodeId = {11,12,15,16};
+        mbt->nodeCoord = {2.0,2.0,3.0,2.0,2.0,3.0,3.0,3.0};
+        mbt->nodeOwner = {0,1,2,3};
+        mbt->elemId = {10};
+        mbt->elemType = {4};
+        mbt->elemConn = {1,2,4,3};
+        mbt->elemCoord ={2.5, 2.5};
       }
-      else if (localPet == 1) {
-        int num_node = 6;
-        int num_elem = 2;
-
-        int nodeId [] = {30,40,70,80,110,120};
-        double nodeCoord [] = {2.0,1.0,3.0,1.0,2.0,1.5,3.0,1.5,2.0,2.0,3.0,2.0};
-        int nodeOwner [] = {0,1,0,1,0,1};
-        int nodeMask [] = {1,1,1,1,1,1};
-        int elemId [] = {4,7};
-        int elemType [] = {4,4};
-        int elemConn [] = {1,2,4,3,3,4,6,5};
-        int elemMask [] ={1,1};
-        double elemArea [] ={106,107};
-        double elemCoord [] ={2.5,1.0, 2.5, 1.75};
-
-        ESMC_CoordSys_Flag coordsys=ESMC_COORDSYS_CART;
-        int numelemconn = 4*num_elem;
-        int regridconserve = 0;
-
-        // mesh pointer
-        mbt = new MBMeshTest(pdim, sdim, num_elem, num_node, coordsys);
-        mbt->add_nodes(nodeId, nodeOwner, nodeCoord, nodeMask);
-        mbt->add_elems(numelemconn, elemConn, elemId, elemType, elemMask, elemArea, elemCoord, &regridconserve);
-      }
-      else if (localPet == 2) {
-        int num_node = 6;
-        int num_elem = 2;
-
-        int nodeId [] = {90,100,110,130,140,150};
-        double nodeCoord [] = {1.0,2.0,1.5,2.0,2.0,2.0,1.0,3.0,1.5,3.0,2.0,3.0};
-        int nodeOwner [] = {0,0,0,2,2,2};
-        int nodeMask [] = {1,1,1,1,1,1};
-        int elemId [] = {8,9};
-        int elemType [] = {4,4};
-        int elemConn [] = {1,2,5,4,2,3,6,5};
-        int elemMask [] ={1,1};
-        double elemArea [] ={108,109};
-        double elemCoord [] ={1.0, 2.5, 1.75, 2.5};
-
-        ESMC_CoordSys_Flag coordsys=ESMC_COORDSYS_CART;
-        int numelemconn = 4*num_elem;
-        int regridconserve = 0;
-
-        // mesh pointer
-        mbt = new MBMeshTest(pdim, sdim, num_elem, num_node, coordsys);
-        mbt->add_nodes(nodeId, nodeOwner, nodeCoord, nodeMask);
-        mbt->add_elems(numelemconn, elemConn, elemId, elemType, elemMask, elemArea, elemCoord, &regridconserve);
-      }
-      else if (localPet == 3) {
-        int num_node = 4;
-        int num_elem = 1;
-
-        int nodeId [] = {110,120,150,160};
-        double nodeCoord [] = {2.0,2.0,3.0,2.0,2.0,3.0,3.0,3.0};
-        int nodeOwner [] = {0,1,2,3};
-        int nodeMask [] = {1,1,1,1};
-        int elemId [] = {10};
-        int elemType [] = {4};
-        int elemConn [] = {1,2,4,3};
-        int elemMask [] ={1};
-        double elemArea [] ={110};
-        double elemCoord [] ={2.5, 2.5};
-
-        ESMC_CoordSys_Flag coordsys=ESMC_COORDSYS_CART;
-        int numelemconn = 4*num_elem;
-        int regridconserve = 0;
-
-        // mesh pointer
-        mbt = new MBMeshTest(pdim, sdim, num_elem, num_node, coordsys);
-        mbt->add_nodes(nodeId, nodeOwner, nodeCoord, nodeMask);
-        mbt->add_elems(numelemconn, elemConn, elemId, elemType, elemMask, elemCoord, NULL, &regridconserve);
+      if (redist) {
+        if (localPet == 0) {
+          mbt->redist_nodeId = {11,12,15,16};
+          mbt->redist_nodeCoord = {2.0,2.0,3.0,2.0,2.0,3.0,3.0,3.0};
+          mbt->redist_nodeOwner = {0,0,0,0};
+          mbt->redist_elemId = {10};
+          mbt->redist_elemType = {4};
+          mbt->redist_elemConn = {1,2,4,3};
+          mbt->redist_elemCoord ={2.5, 2.5};
+        } else if (localPet == 1) {
+          mbt->redist_nodeId = {9,10,11,13,14,15};
+          mbt->redist_nodeCoord = {1.0,2.0,1.5,2.0,2.0,2.0,1.0,3.0,1.5,3.0,2.0,3.0};
+          mbt->redist_nodeOwner = {1,1,0,1,1,0};
+          mbt->redist_elemId = {8,9};
+          mbt->redist_elemType = {4,4};
+          mbt->redist_elemConn = {1,2,5,4,2,3,6,5};
+          mbt->redist_elemCoord ={1.0, 2.5, 1.75, 2.5};
+        } else if (localPet == 2) {
+          mbt->redist_nodeId = {3,4,7,8,11,12};
+          mbt->redist_nodeCoord = {2.0,1.0,3.0,1.0,2.0,1.5,3.0,1.5,2.0,2.0,3.0,2.0};
+          mbt->redist_nodeOwner = {2,2,2,2,0,0};
+          mbt->redist_elemId = {4,7};
+          mbt->redist_elemType = {4,4};
+          mbt->redist_elemConn = {1,2,4,3,3,4,6,5};
+          mbt->redist_elemCoord ={2.5,1.0, 2.5, 1.75};
+        } else if (localPet == 3) {
+          mbt->redist_nodeId = {1,2,3,5,6,7,9,10,11};
+          mbt->redist_nodeCoord = {1.0,1.0,1.5,1.0,2.0,1.0,1.0,1.5,1.5,1.5,2.0,1.5,1.0,2.0,1.5,2.0,2.0,2.0};
+          mbt->redist_nodeOwner = {3,3,2,3,3,2,1,1,0};
+          mbt->redist_elemType = {4,3,3,4,4};
+          mbt->redist_elemId = {1,2,3,5,6};
+          mbt->redist_elemConn = {1,2,5,4,2,3,5,3,6,5,4,5,8,7,5,6,9,8};
+          mbt->redist_elemCoord ={1.0,1.0,1.6,0.1,1.9,1.4,
+                                  1.0,1.75,1.75, 1.75};
+        }
       }
     }
 
-  } ESMC_CATCH_MBMESH_TEST_RETURN(&rc)
+  } MBMESHTEST_CATCH_RETURN_NULL(&rc)
 
   rc = ESMF_SUCCESS;
   return mbt;
 }
+
+MBMeshTest* mbmesh_gen_mix_2d_sph(int &rc, bool redist=false) {
+  //
+  //
+  //  3.0   13 ------ 14 ------- 15 ------ 16
+  //        |         |          |         |
+  //        |    8    |    9     |    10   |
+  //        |         |          |         |
+  //  2.0   9 ------- 10 ------- 11 ------ 12
+  //        |         |          |         |
+  //        |    5    |    6     |    7    |
+  //        |         |          |         |
+  //  1.5   5 ------- 6 -------- 7 ------- 8
+  //        |         |  \    3  |         |
+  //        |    1    |    \     |    4    |
+  //        |         |  2   \   |         |
+  //  0.0   1 ------- 2 -------- 3 ------- 4
+  //
+  //       0.0       1.5        2.0        3.0
+  //
+  //      Node Ids at corners
+  //      Element Ids in centers
+  //
+  //
+  //      ( Everything owned by PET 0)
+  //
+#undef ESMC_METHOD
+#define ESMC_METHOD "mbmesh_gen_mix_2d_sph"
+
+  rc = ESMF_RC_NOT_IMPL;
+  MBMeshTest *mbt = NULL;
+
+  try {
+
+    // Get parallel information
+    int localPet, petCount;
+    ESMC_VM vm;
+    vm=ESMC_VMGetGlobal(&rc);
+    MBMESHTEST_CHECK_RC_THROW(rc)
+
+    rc=ESMC_VMGet(vm, &localPet, &petCount, (int *)NULL, (MPI_Comm *)NULL,
+                  (int *)NULL, (int *)NULL);
+    MBMESHTEST_CHECK_RC_THROW(rc)
+
+    if (petCount !=1 && petCount != 4)
+      MBMESHTEST_THROW_ERROR("Must be run with 1 or 4 cores.")
+
+    // Cartesian to spherical coordinate transformation - degrees (suitable for c:[0:3])
+    double c2s = 100.;
+
+    int localrc;
+    mbt = mbmesh_gen_mix_2d_cart(localrc, redist);
+    MBMESHTEST_CHECK_RC_THROW(localrc)
+    std::for_each(mbt->nodeCoord.begin(), mbt->nodeCoord.end(), 
+                  [&c2s](double &d) {d*=c2s;});
+    std::for_each(mbt->elemCoord.begin(), mbt->elemCoord.end(), 
+                  [&c2s](double &d) {d*=c2s;});
+
+    std::for_each(mbt->redist_nodeCoord.begin(), mbt->redist_nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
+    std::for_each(mbt->redist_elemCoord.begin(), mbt->redist_elemCoord.end(), [&c2s](double &d) {d*=c2s;});
+
+    mbt->coord_sys=ESMC_COORDSYS_SPH_DEG;
+
+  } MBMESHTEST_CATCH_RETURN_NULL(&rc)
+
+  rc = ESMF_SUCCESS;
+  return mbt;
+}
+
 
 
 #endif

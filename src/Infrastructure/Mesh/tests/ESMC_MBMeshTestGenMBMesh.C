@@ -22,21 +22,19 @@
 #include "ESMC_Test.h"
 
 #if defined ESMF_MOAB
-// other headers
-#include "ESMCI_MBMesh.h"
-#include "ESMCI_MBMesh_Bilinear.h"
-#include "ESMCI_MBMesh_Glue.h"
-#include "ESMCI_MBMesh_Mapping.h"
-#include "ESMCI_MBMesh_Util.h"
-#include "ESMCI_WMat.h"
-#include "ESMCI_PointList.h"
+#include "ESMC_MBMeshTest.C"
 
+
+#include "ESMCI_MBMesh.h"
+#include "ESMCI_MBMesh_Glue.h"
+#include "ESMCI_MBMesh_Bilinear.h"
+#include "ESMCI_MBMesh_Mapping.h"
 #endif
 
 #include <iostream>
 #include <iterator>
 #include <vector>
-
+#include <algorithm>
 
 #if !defined (M_PI)
 // for Windows...
@@ -44,12 +42,6 @@
 #endif
 
 static double UNINITVAL = -42;
-
-
-// test base class ideas
-// - almost equal function
-// - vector comparison with IWeights
-// - 
 
 bool weights_correct(IWeights &wts, std::vector<double> weights) {
   bool correct = true;
@@ -2163,4 +2155,5 @@ MBMesh* create_mesh_quad_10(int &rc) {
   rc = ESMF_SUCCESS;
   return static_cast<MBMesh *>(meshp);
 }
+
 #endif

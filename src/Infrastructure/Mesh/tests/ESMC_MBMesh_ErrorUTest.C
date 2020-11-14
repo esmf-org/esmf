@@ -18,7 +18,7 @@
 // other headers
 #include "ESMCI_MBMesh.h"
 #include "ESMCI_MBMesh_Util.h"
-#include "ESMC_MBMeshTestUtilMBMesh.C"
+#include "ESMC_MBMeshTestGenMBMesh.C"
 
 #include "MBTagConventions.hpp"
 
