@@ -215,7 +215,9 @@ void MBMesh_addnodes(void **mbmpp, int *_num_nodes, int *nodeId,
     // DEPRECATED
     // Will go away soon!
     mbmp->setup_verts_array();
-    
+
+    // Done creating nodes, so finalize
+    mbmp->finalize_nodes();
 
     //// Setup and fill other node fields ////
 
@@ -707,7 +709,6 @@ void _generate_info_for_split_elems(
             
             //   printf("id=%d subelem_size=%d\n",elemId[e],subelem_size);
             
-            
           // Get corner coordinates
           int crd_pos=0;
           for (int i=0; i<elemType[e]; i++) {
@@ -881,6 +882,9 @@ void _add_elems_all_one_type(MBMesh *mbmp, int localPet,
   ThrowRequire(num_nodes_per_elem*num_elems >= 0);
   EntityHandle *node_conn= new EntityHandle[num_nodes_per_elem*num_elems]; 
 
+  // Get vector of orig_nodes
+  std::vector<EntityHandle> const &orig_nodes=mbmp->get_orig_nodes();
+
   // Loop elements and construct connection list
   int conn_pos=0;
   for (int e = 0; e < num_elems; ++e) {
@@ -892,7 +896,7 @@ void _add_elems_all_one_type(MBMesh *mbmp, int localPet,
       int vert_index=elemConn[conn_pos]-1;
       
       // Setup connectivity list
-      node_conn[conn_pos] = mbmp->verts[vert_index];
+      node_conn[conn_pos] = orig_nodes.at(vert_index);
       
       // Advance to next
       conn_pos++;
@@ -1020,6 +1024,9 @@ void _add_elems_multiple_types(MBMesh *mbmp, int localPet,
   // Use temporary buffer for connection list
   EntityHandle *node_conn=(EntityHandle *)tmp_buff;
     
+  // Get vector of orig_nodes
+  std::vector<EntityHandle> const &orig_nodes=mbmp->get_orig_nodes();
+
   // Loop elements and fill informatiton
   int pos=0;
   int node_conn_pos=0;
@@ -1051,7 +1058,7 @@ void _add_elems_multiple_types(MBMesh *mbmp, int localPet,
         elemConn_pos++;
 
         // Setup connectivity list
-        node_conn[node_conn_pos] = mbmp->verts[vert_index];
+        node_conn[node_conn_pos] = orig_nodes.at(vert_index);
         
         // Advance to next connection pos
         node_conn_pos++;
@@ -1377,9 +1384,8 @@ void MBMesh_addelements(void **mbmpp,
     // Get spatial dimension of mesh
     int sdim=mbmp->pdim;
 
-    // Get number of verts
-    int num_verts = mbmp->num_verts;
-
+    // Get number of orig nodes
+    int num_nodes = mbmp->get_orig_nodes().size();
 
     //// Error check input ////
 
@@ -1434,7 +1440,7 @@ void MBMesh_addelements(void **mbmpp,
     // Block so node_used goes away
     { 
       std::vector<int> node_used;
-      node_used.resize(num_verts, 0);
+      node_used.resize(num_nodes, 0);
       
       // Error check elemConn array
       int c = 0;
@@ -1455,7 +1461,7 @@ void MBMesh_addelements(void **mbmpp,
                                              ESMC_CONTEXT, &localrc)) throw localrc;
           }
           
-          if (node_index > num_verts-1) {
+          if (node_index > num_nodes-1) {
             int localrc;
             if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                              "- elemConn entries should not be greater than number of nodes on processor ",
@@ -1472,7 +1478,7 @@ void MBMesh_addelements(void **mbmpp,
       
       // Make sure every node used
       bool every_node_used=true;
-      for (int i=0; i<num_verts; i++) {
+      for (int i=0; i<num_nodes; i++) {
         if (node_used[i] == 0) {
           every_node_used=false;
           break;
@@ -1533,15 +1539,19 @@ void MBMesh_addelements(void **mbmpp,
        // If there are local split elems, allocate and fill node coords
        double *nodeCoords=NULL;
        if (is_split_local) {
+
+         // Get vector of orig_nodes
+         std::vector<EntityHandle> const &orig_nodes=mbmp->get_orig_nodes();
          
          // Allocate space for node coords
-         if (mbmp->num_verts > 0) {
+         if (orig_nodes.size() > 0) {
+           
            // 3 because in MOAB 3 coords are stored per vert
-           nodeCoords=new double[3*(mbmp->num_verts)];
-
+           nodeCoords=new double[3*orig_nodes.size()];
+           
            // Get coords from MOAB
-           merr=mbmp->mesh->get_coords(mbmp->verts, mbmp->num_verts, nodeCoords);
-           MBMESH_CHECK_RC(merr);           
+           merr=mbmp->mesh->get_coords(&orig_nodes[0], orig_nodes.size(), nodeCoords);
+           MBMESH_CHECK_RC(merr);      
          }
        }
               

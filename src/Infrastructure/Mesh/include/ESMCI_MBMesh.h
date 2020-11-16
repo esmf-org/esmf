@@ -22,8 +22,10 @@ using namespace moab;
 #include "ESMCI_CoordSys.h"
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
+#include "Mesh/include/Legacy/ESMCI_Exception.h"
 
 #include <map>
+#include <vector>
 
 namespace ESMCI {
 
@@ -96,7 +98,11 @@ namespace ESMCI {
     ESMC_LogDefault.MsgFoundError(exc.getReturnCode(), ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc); \
     return; \
   } catch (std::exception &exc) { \
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc); \
+    if (exc.what()) { \
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, exc.what(), ESMC_CONTEXT, rc); \
+    } else { \
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "UNKNOWN", ESMC_CONTEXT, rc); \
+    } \
     return; \
   } catch(...) { \
     std::string msg; \
@@ -128,6 +134,19 @@ namespace ESMCI {
     EntityHandle *verts; // Temporary storage for element create
 
     int num_elems; // number of elems on this processor
+
+    // Guard variables to make sure things have been finalized
+    bool nodes_finalized;
+
+    // Vector of original node EntityHandles sorted by orig_pos
+    std::vector<EntityHandle> orig_nodes;
+
+    // Guard variables to make sure things have been finalized
+    bool elems_finalized;
+    
+    // Vector of original elem EntityHandles sorted by orig_pos
+    std::vector<EntityHandle> orig_elems;
+
 
     // Tags
     Tag gid_tag;
@@ -162,6 +181,7 @@ namespace ESMCI {
     int max_non_split_id;
     std::map<int,int> split_to_orig_id;
     std::map<int,double> split_id_to_frac;
+
 
     void CreateGhost();
 
@@ -238,18 +258,47 @@ namespace ESMCI {
     //      + Make versions of get_all_elems() and get_all_nodes() to just return local things? 
 
 
-    // BOB: Should these come out via return??
-    // RLO: that would be nice, but we can't without a Range return from MOAB..
-    //      an option would be to allocated space for a Range, deleted on destruct
+    // There are 3 main classes of Entities
+    // - all entities which are returned via a range
+    // - orig entities which we store as a vector sorted by the original position. Note that there may be entities which aren't original (e.g. ghost entities), so
+    //   orig_entities may be smaller than all entities. 
+    // - local entities which you need to go through one of the above lists and figure out which has owener==localPet. However, I think
+    //   that I might add a vector of these soon. 
 
     // Get a Range of all nodes and elements on this processor
     void get_all_nodes(Range &all_nodes);
     void get_all_elems(Range &all_elems);
 
+    // Return a reference to a vector of EntityHandles for the original nodes used for creation
+    // on this processor sorted in the order they were used for creation
+    std::vector<EntityHandle> const &get_orig_nodes() const {
+      if (!nodes_finalized) {Throw() << "Nodes not finalized, so orig_nodes not set.";}
+      return orig_nodes;
+    }
+
+    int num_orig_nodes() {
+      if (!nodes_finalized) {Throw() << "Nodes not finalized, so orig_nodes not set.";}
+      return orig_nodes.size();
+    }
+
+    // Return a reference to a vector of EntityHandles for the original elems used for creation
+    // on this processor sorted in the order they were used for creation
+    std::vector<EntityHandle> const &get_orig_elems() const {
+      if (!elems_finalized) {Throw() << "Elems not finalized, so orig_elems not set.";}
+      return orig_elems;
+    }
+
+    int num_orig_elems() {
+      if (!elems_finalized) {Throw() << "Elems not finalized, so orig_elems not set.";}
+      return orig_elems.size();
+    }
+
+
     // Basic accessors for number of nodes, elements, and connectivity
     int num_elem();
     int num_node();
     int num_elem_conn();
+
 
     // Range based accessors for required element tags
     void get_elem_connectivity(int *elem_conn);
@@ -266,6 +315,7 @@ namespace ESMCI {
     void get_node_owners(int *node_owners);
     // Range based accessors for optional node tags
     void get_node_mask(int *node_mask);
+
 
 
     // Accessors for values from a single EntityHandle (avoid if possible, slow)
@@ -323,6 +373,12 @@ namespace ESMCI {
 
     // change proc numbers to those of new VM
     void map_proc_numbers(int num_procs, int *proc_map);
+
+    // Call after all nodes have been added
+    void finalize_nodes();
+
+    // Call after all elems have been added
+    void finalize_elems();
 
 
 // DEPRECATED 

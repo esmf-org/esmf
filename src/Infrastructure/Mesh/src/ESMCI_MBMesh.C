@@ -80,9 +80,35 @@ using namespace std;
 
 // Empty mesh
 // TODO: Get rid of this once the more complete creation interfaces are used everywhere??
-MBMesh::MBMesh() : sdim(0),pdim(0),mesh(NULL),verts(NULL) {
+#if 0
+MBMesh::MBMesh(): sdim(0),pdim(0),mesh(NULL),verts(NULL) {
 
 } 
+#endif
+
+MBMesh::MBMesh(): 
+  pdim(0),
+  sdim(0), 
+  orig_sdim(0),
+  coordsys(ESMC_COORDSYS_UNINIT), 
+  mesh(NULL),
+  num_verts(0),
+  verts(NULL),
+  num_elems(0),
+  nodes_finalized(false),
+  elems_finalized(false),
+  has_node_orig_coords(false),
+  has_node_mask(false),
+  has_elem_frac(false),
+  has_elem_mask(false),
+  has_elem_area(false),
+  has_elem_coords(false),
+  has_elem_orig_coords(false), 
+  is_split(false),
+  max_non_split_id(0) {
+
+} 
+
 
 // From inputs
 // _pdim - parametric dimension
@@ -98,6 +124,8 @@ MBMesh::MBMesh(int _pdim, int _orig_sdim, ESMC_CoordSys_Flag _coordsys):
   num_verts(0),
   verts(NULL),
   num_elems(0),
+  nodes_finalized(false),
+  elems_finalized(false),
   has_node_orig_coords(false),
   has_node_mask(false),
   has_elem_frac(false),
@@ -107,6 +135,7 @@ MBMesh::MBMesh(int _pdim, int _orig_sdim, ESMC_CoordSys_Flag _coordsys):
   has_elem_orig_coords(false), 
   is_split(false),
   max_non_split_id(0) {
+
 
   // Moab error
   int merr;
@@ -136,7 +165,7 @@ MBMesh::MBMesh(int _pdim, int _orig_sdim, ESMC_CoordSys_Flag _coordsys):
   }
   
   // Setup orig_pos tag
-  int_def_val=-1;
+  int_def_val=-1; // Values < 0 indicate that enities are not from original creation
   merr=mesh->tag_get_handle("orig_pos", 1, MB_TYPE_INTEGER, orig_pos_tag, MB_TAG_EXCL|MB_TAG_DENSE, &int_def_val);
   if (merr != MB_SUCCESS) {
     if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
@@ -1590,7 +1619,7 @@ MBMesh::~MBMesh() {
 
   // Get rid of list of verts
   if (verts != NULL) delete [] verts;
-  
+
 } 
 
 
@@ -1796,6 +1825,99 @@ void MBMesh::setup_verts_array() {
 
 }
 
+
+// Call after all nodes have been added to setup some internal stuff
+void MBMesh::finalize_nodes() {
+  int merr, localrc;
+
+
+  // Get a range containing all nodes
+  Range all_nodes;
+  merr=mesh->get_entities_by_dimension(0,0,all_nodes);
+  MBMESH_CHECK_RC(merr);
+
+  // Setup list to hold pairs
+  std::vector<std::pair<int,EntityHandle> > pos_and_nodes;
+  pos_and_nodes.reserve(all_nodes.size());
+
+  // Loop through nodes putting into list
+  for(Range::const_iterator it=all_nodes.begin(); it !=all_nodes.end(); it++) {
+    EntityHandle node=*it;
+
+    // Get orig_pos
+    int orig_pos;
+    merr=mesh->tag_get_data(orig_pos_tag, &node, 1, &orig_pos);
+    MBMESH_CHECK_RC(merr);
+
+    // Skip ones with orig_pos<0 (they are not from original creation)
+    if (orig_pos < 0) continue;
+
+    // Stick in list
+    pos_and_nodes.push_back(std::make_pair(orig_pos,node));
+  }
+
+  // Put in order by original pos
+  std::sort(pos_and_nodes.begin(), pos_and_nodes.end());
+
+  // Setup orig_nodes list
+  orig_nodes.clear();
+  orig_nodes.reserve(pos_and_nodes.size());
+
+  // Fill array of node entities
+  for (int i = 0; i<pos_and_nodes.size(); ++i) {
+    orig_nodes.push_back(pos_and_nodes[i].second);
+  }
+
+
+  // Mark nodes as finalized, so things can be used
+  nodes_finalized=true;
+}
+
+
+// Call after all elems have been added to setup some internal stuff
+void MBMesh::finalize_elems() {
+  int merr, localrc;
+
+  // Get a range containing all elems
+  Range all_elems;
+  merr=mesh->get_entities_by_dimension(0,pdim,all_elems);
+  MBMESH_CHECK_RC(merr);
+
+  // Setup list to hold pairs
+  std::vector<std::pair<int,EntityHandle> > pos_and_elems;
+  pos_and_elems.reserve(all_elems.size());
+
+  // Loop through elems putting into list
+  for(Range::const_iterator it=all_elems.begin(); it !=all_elems.end(); it++) {
+    EntityHandle elem=*it;
+
+    // Get orig_pos
+    int orig_pos;
+    merr=mesh->tag_get_data(orig_pos_tag, &elem, 1, &orig_pos);
+    MBMESH_CHECK_RC(merr);
+
+    // Skip ones with orig_pos<0 (they are not from original creation)
+    if (orig_pos < 0) continue;
+
+    // Stick in list
+    pos_and_elems.push_back(std::make_pair(orig_pos,elem));
+  }
+
+  // Put in order by original pos
+  std::sort(pos_and_elems.begin(), pos_and_elems.end());
+
+  // Setup orig_elems list
+  orig_elems.clear();
+  orig_elems.reserve(pos_and_elems.size());
+
+  // Fill array of elem entities
+  for (int i = 0; i<pos_and_elems.size(); ++i) {
+    orig_elems.push_back(pos_and_elems[i].second);
+  }
+
+  // Mark elems as finalized, so things can be used
+  elems_finalized=true;
+}
 
 
 void MBMesh::CreateGhost() {
