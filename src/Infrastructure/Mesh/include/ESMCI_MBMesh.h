@@ -36,6 +36,7 @@ namespace ESMCI {
        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, \
                                      moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc; } \
 
+
   // DEPRECATED! Switch everything to the above
 #define MBMESH_CHECK_ERR(merr, localrc) \
   if (merr != MB_SUCCESS) \
@@ -126,12 +127,6 @@ namespace ESMCI {
 
     // RLO: why isn't this private? (and most of the other members as well)
     Interface *mesh; // Moab mesh  MAYBE I SHOULD NAME ThIS SOMETHING ELSE????
-
-    // TODO: change this to num_nodes 
-    int num_verts; // number of verts this processor
-
-    // eventualy get rid of this
-    EntityHandle *verts; // Temporary storage for element create
 
     int num_elems; // number of elems on this processor
 
@@ -351,6 +346,10 @@ namespace ESMCI {
 
     // Get orig coords from elem
     void get_elem_orig_coords(EntityHandle elem, double *orig_coords);
+
+    // Get the corner nodes of an element
+    void get_elem_corner_nodes(EntityHandle elem, int &num_corner_nodes, const EntityHandle *&corner_nodes);
+
 
     // Do halo communication on all node tags
     void halo_comm_nodes_all_tags(bool do_internal_coords=false);

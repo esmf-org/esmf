@@ -212,9 +212,6 @@ void MBMesh_addnodes(void **mbmpp, int *_num_nodes, int *nodeId,
                     nodeOwner,
                     added_nodes); 
     
-    // DEPRECATED
-    // Will go away soon!
-    mbmp->setup_verts_array();
 
     // Done creating nodes, so finalize
     mbmp->finalize_nodes();

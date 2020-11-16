@@ -81,7 +81,7 @@ using namespace std;
 // Empty mesh
 // TODO: Get rid of this once the more complete creation interfaces are used everywhere??
 #if 0
-MBMesh::MBMesh(): sdim(0),pdim(0),mesh(NULL),verts(NULL) {
+MBMesh::MBMesh(): sdim(0),pdim(0),mesh(NULL) {
 
 } 
 #endif
@@ -92,8 +92,6 @@ MBMesh::MBMesh():
   orig_sdim(0),
   coordsys(ESMC_COORDSYS_UNINIT), 
   mesh(NULL),
-  num_verts(0),
-  verts(NULL),
   num_elems(0),
   nodes_finalized(false),
   elems_finalized(false),
@@ -121,8 +119,6 @@ MBMesh::MBMesh(int _pdim, int _orig_sdim, ESMC_CoordSys_Flag _coordsys):
   orig_sdim(_orig_sdim),
   coordsys(_coordsys), 
   mesh(NULL),
-  num_verts(0),
-  verts(NULL),
   num_elems(0),
   nodes_finalized(false),
   elems_finalized(false),
@@ -246,9 +242,6 @@ EntityHandle MBMesh::add_node(double *orig_coords, int gid, int orig_pos, int ow
   merr=mesh->tag_set_data(owner_tag, &new_vert, 1, &owner);
   MBMESH_CHECK_RC(merr);
   
-  // Increment number of verts
-  num_verts++;
-
   // Output new vertex/node
   return new_vert;
 }
@@ -346,10 +339,7 @@ void MBMesh::add_nodes(int num_new_nodes,       // Number of nodes
   
   // Set Owners
   merr=mesh->tag_set_data(owner_tag, added_nodes, owners);
-  MBMESH_CHECK_RC(merr);
-  
-  // Increment number of verts
-  num_verts += num_new_nodes;
+  MBMESH_CHECK_RC(merr);  
 }
 
 
@@ -1012,6 +1002,18 @@ void MBMesh::get_elem_orig_coords(EntityHandle elem, double *orig_coords) {
   } 
 }
 
+// Get an element's corner nodes
+// It looks like MOAB just returns a pointer into the actual connectivity storage, so 
+// corner_nodes shouldn't be deallocated. 
+void MBMesh::get_elem_corner_nodes(EntityHandle elem, int &num_corner_nodes, const EntityHandle *&corner_nodes) {
+
+  // Error return code
+  int merr;
+  
+  // Get nodes in element
+  merr=mesh->get_connectivity(elem,corner_nodes,num_corner_nodes,true);
+  MBMESH_CHECK_RC(merr);
+}
 
 void MBMesh::setup_elem_mask() {
 
@@ -1616,10 +1618,6 @@ MBMesh::~MBMesh() {
   
   // Get rid of MOAB mesh
   if (mesh != NULL) delete mesh;
-
-  // Get rid of list of verts
-  if (verts != NULL) delete [] verts;
-
 } 
 
 
@@ -1635,16 +1633,17 @@ void MBMesh::debug_output_nodes() {
   // get the indexed pcomm object from the interface
   // ParallelComm *pcomm = ParallelComm::get_pcomm(this->mesh, 0);
 
+  // Get range of nodes
+  Range nodes;
+  this->get_all_nodes(nodes);
+
   // Output info
   cout<<"\n";
-  cout<<localPet<<"# NODE OVERALL INFO: num="<<num_verts;
+  cout<<localPet<<"# NODE OVERALL INFO: total num=",nodes.size();
   cout<<" has_orig_coords="<<has_node_orig_coords;
   cout<<" has_node_mask="<<has_node_mask;
   cout<<"\n";
 
-  // Get range of nodes
-  Range nodes;
-  this->get_all_nodes(nodes);
 
   // Loop over nodes outputting information
   for (Range::const_iterator it=nodes.begin(); it != nodes.end(); it++) {
@@ -1786,45 +1785,6 @@ void MBMesh::debug_output_elems() {
   }
   cout<<"\n";
 }
-
-// DEPRECATED 
-// TODO: Get rid of verts array
-// Call after all nodes have been added to setup verts array
-void MBMesh::setup_verts_array() {
-  int merr, localrc;
-
-  // Allocate storage for verts
-  verts=new EntityHandle[num_verts];
-  
-  // Get range of nodes
-  Range nodes;
-  merr=mesh->get_entities_by_dimension(0, 0, nodes);
-  MBMESH_CHECK_RC(merr);
-
-  // Complain if sizes don't match
-  if (num_verts != nodes.size()) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG,
-                                     "num_verts and node.size() don't match as they should",
-                                     ESMC_CONTEXT,&localrc)) throw localrc;
-  }
-
-
-  // Loop over nodes filling array
-  int i=0;
-  for (Range::const_iterator it=nodes.begin(); it != nodes.end(); it++) {
-    EntityHandle node=*it;
-
-    verts[i]=node;
-    i++;
-  }
-
-  // Sort so ordered by orig pos
-  // I'M NOT DOING THIS BECAUSE I DON'T THINK THAT 
-  // IT'S NECESSARY AND THIS SUBROUTINE SHOULD GO AWAY SOON, BUT
-  // LEAVING THIS NOTE JUST IN CASE...
-
-}
-
 
 // Call after all nodes have been added to setup some internal stuff
 void MBMesh::finalize_nodes() {
