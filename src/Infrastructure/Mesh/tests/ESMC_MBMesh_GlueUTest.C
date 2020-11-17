@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
                 (int *)NULL, (int *)NULL);
 
   if ((petCount == 1) && (do_redist == true)) {
-    printf("Can't redist on only one core, resetting redist to false");
+    printf("Can't redist on only one core, resetting redist to false.\n");
     do_redist = false;
 }
 
@@ -85,9 +85,11 @@ int main(int argc, char *argv[]) {
 
   // now do the same for a redist version of the same mesh
 #if defined ESMF_MOAB
-  rc = ESMF_FAILURE;
-  MBMeshTest *mbt_quad_redist = new MBMeshTest();
+  rc = ESMF_SUCCESS;
+  MBMeshTest *mbt_quad_redist;
   if (do_redist) {
+    rc = ESMF_FAILURE;
+    mbt_quad_redist = new MBMeshTest();
     if (localrc == ESMF_SUCCESS) localrc = mbt_quad->mbtRedist(mbt_quad_redist);
     if (localrc == ESMF_SUCCESS) localrc = mbt_quad_redist->build_mbmesh_redist();
     if (localrc == ESMF_SUCCESS) rc = mbt_quad_redist->test_get_info();
@@ -102,7 +104,7 @@ int main(int argc, char *argv[]) {
 
 #if defined ESMF_MOAB
   delete mbt_quad;
-  delete mbt_quad_redist;
+  if (do_redist) delete mbt_quad_redist;
 #endif
 
   // --------------------------------------------------------------------------
@@ -110,6 +112,7 @@ int main(int argc, char *argv[]) {
   // --------------------------------------------------------------------------
 #if defined ESMF_MOAB
   rc = ESMF_FAILURE;
+  // set up a MBMeshTest object
   MBMeshTest *mbt_quad_sph = mbmesh_gen_quad_2d_sph(localrc, do_redist);
   if (localrc == ESMF_SUCCESS) localrc = mbt_quad_sph->build_mbmesh();
   if (localrc == ESMF_SUCCESS) rc = mbt_quad_sph->test_get_info();
@@ -121,13 +124,16 @@ int main(int argc, char *argv[]) {
   strcpy(failMsg, "FAIL");
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
 
+  // now do the same for a redist version of the same mesh
 #if defined ESMF_MOAB
-  rc = ESMF_FAILURE;
-  MBMeshTest *mbt_quad_sph_redist = new MBMeshTest();
+  rc = ESMF_SUCCESS;
+  MBMeshTest *mbt_quad_sph_redist;
   if (do_redist) {
+    rc = ESMF_FAILURE;
+    mbt_quad_sph_redist = new MBMeshTest();
     if (localrc == ESMF_SUCCESS) localrc = mbt_quad_sph->mbtRedist(mbt_quad_sph_redist);
     if (localrc == ESMF_SUCCESS) localrc = mbt_quad_sph_redist->build_mbmesh_redist();
-    if (localrc == ESMF_SUCCESS) rc = mbt_quad_sph_redist->test_get_info(3);
+    if (localrc == ESMF_SUCCESS) rc = mbt_quad_sph_redist->test_get_info();
   }
 #else
   rc = ESMF_SUCCESS;
@@ -139,7 +145,7 @@ int main(int argc, char *argv[]) {
 
 #if defined ESMF_MOAB
   delete mbt_quad_sph;
-  delete mbt_quad_sph_redist;
+  if (do_redist) delete mbt_quad_sph_redist;
 #endif
 
   // --------------------------------------------------------------------------
@@ -159,9 +165,11 @@ int main(int argc, char *argv[]) {
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
 
 #if defined ESMF_MOAB
-  rc = ESMF_FAILURE;
-  MBMeshTest *mbt_hex_redist = new MBMeshTest();
+  rc = ESMF_SUCCESS;
+  MBMeshTest *mbt_hex_redist;
   if (do_redist) {
+    rc = ESMF_FAILURE;
+    mbt_hex_redist = new MBMeshTest();
     if (localrc == ESMF_SUCCESS) localrc = mbt_hex->mbtRedist(mbt_hex_redist);
     if (localrc == ESMF_SUCCESS) localrc = mbt_hex_redist->build_mbmesh_redist();
     if (localrc == ESMF_SUCCESS) rc = mbt_hex_redist->test_get_info();
@@ -176,7 +184,7 @@ int main(int argc, char *argv[]) {
 
 #if defined ESMF_MOAB
   delete mbt_hex;
-  delete mbt_hex_redist;
+  if (do_redist) delete mbt_hex_redist;
 #endif
 
   // --------------------------------------------------------------------------
@@ -196,12 +204,14 @@ int main(int argc, char *argv[]) {
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
 
 #if defined ESMF_MOAB
-  rc = ESMF_FAILURE;
-  MBMeshTest *mbt_hex_sph_redist = new MBMeshTest();
+  rc = ESMF_SUCCESS;
+  MBMeshTest *mbt_hex_sph_redist;
   if (do_redist) {
+    rc = ESMF_FAILURE;
+    mbt_hex_sph_redist = new MBMeshTest();
     if (localrc == ESMF_SUCCESS) localrc = mbt_hex_sph->mbtRedist(mbt_hex_sph_redist);
     if (localrc == ESMF_SUCCESS) localrc = mbt_hex_sph_redist->build_mbmesh_redist();
-    if (localrc == ESMF_SUCCESS) rc = mbt_hex_sph_redist->test_get_info(3);
+    if (localrc == ESMF_SUCCESS) rc = mbt_hex_sph_redist->test_get_info();
   }
 #else
   rc = ESMF_SUCCESS;
@@ -214,89 +224,90 @@ int main(int argc, char *argv[]) {
 
 #if defined ESMF_MOAB
   delete mbt_hex_sph;
-  delete mbt_hex_sph_redist;
+  if (do_redist) delete mbt_hex_sph_redist;
 #endif
 
-// TODO: ngons and mixed are hanging in redist, split element issue?
-do_redist = false;
-
-  // --------------------------------------------------------------------------
-  // mbmesh_gen_ngon_2d_cart
-  // --------------------------------------------------------------------------
-#if defined ESMF_MOAB
-  rc = ESMF_FAILURE;
-  MBMeshTest *mbt_ngon = mbmesh_gen_ngon_2d_cart(localrc, do_redist);
-  if (localrc == ESMF_SUCCESS) localrc = mbt_ngon->build_mbmesh();
-  if (localrc == ESMF_SUCCESS) rc = mbt_ngon->test_get_info();
-#else
-  rc = ESMF_SUCCESS;
-#endif
-  // //cannot yet get connectivity information for ngon meshes
-  // //NEX_disable_UTest
-  // strcpy(name, "MBMeshGet - Cartesian N-gons");
-  // strcpy(failMsg, "FAIL");
-  // ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
-
-#if defined ESMF_MOAB
-  rc = ESMF_FAILURE;
-  MBMeshTest *mbt_ngon_redist = new MBMeshTest();
-  if (do_redist) {
-    if (localrc == ESMF_SUCCESS) localrc = mbt_ngon->mbtRedist(mbt_ngon_redist);
-    if (localrc == ESMF_SUCCESS) localrc = mbt_ngon_redist->build_mbmesh_redist();
-    if (localrc == ESMF_SUCCESS) rc = mbt_ngon_redist->test_get_info();
-  }
-#else
-  rc = ESMF_SUCCESS;
-#endif
-  // //cannot yet get connectivity information for ngon meshes
-  // //NEX_disable_UTest
-  // strcpy(name, "MBMeshGet - Cartesian N-gons Redist");
-  // strcpy(failMsg, "FAIL");
-  // ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
-
-#if defined ESMF_MOAB
-  delete mbt_ngon;
-  delete mbt_ngon_redist;
-#endif
-
-  // --------------------------------------------------------------------------
-  // mbmesh_gen_ngon_2d_sph
-  // --------------------------------------------------------------------------
-#if defined ESMF_MOAB
-  rc = ESMF_FAILURE;
-  MBMeshTest *mbt_ngon_sph = mbmesh_gen_ngon_2d_sph(localrc, do_redist);
-  if (localrc == ESMF_SUCCESS) localrc = mbt_ngon_sph->build_mbmesh();
-  if (localrc == ESMF_SUCCESS) rc = mbt_ngon_sph->test_get_info();
-#else
-  rc = ESMF_SUCCESS;
-#endif
-  // //cannot yet get connectivity information for ngon meshes
-  // //NEX_disable_UTest
-  // strcpy(name, "MBMeshGet - Spherical N-gons");
-  // strcpy(failMsg, "FAIL");
-  // ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
-
-#if defined ESMF_MOAB
-  rc = ESMF_FAILURE;
-  MBMeshTest *mbt_ngon_sph_redist = new MBMeshTest();
-  if (do_redist) {
-    if (localrc == ESMF_SUCCESS) localrc = mbt_ngon_sph->mbtRedist(mbt_ngon_sph_redist);
-    if (localrc == ESMF_SUCCESS) localrc = mbt_ngon_sph_redist->build_mbmesh_redist();
-    if (localrc == ESMF_SUCCESS) rc = mbt_ngon_sph_redist->test_get_info();
-  }
-#else
-  rc = ESMF_SUCCESS;
-#endif
-  //cannot yet get connectivity information for ngon meshes
-  //NEX_disable_UTest
-  // strcpy(name, "MBMeshGet - Spherical N-gons Redist");
-  // strcpy(failMsg, "FAIL");
-  // ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
-
-#if defined ESMF_MOAB
-  delete mbt_ngon_sph;
-  delete mbt_ngon_sph_redist;
-#endif
+//   // --------------------------------------------------------------------------
+//   // mbmesh_gen_ngon_2d_cart
+//   // --------------------------------------------------------------------------
+// #if defined ESMF_MOAB
+//   rc = ESMF_FAILURE;
+//   MBMeshTest *mbt_ngon = mbmesh_gen_ngon_2d_cart(localrc, do_redist);
+//   if (localrc == ESMF_SUCCESS) localrc = mbt_ngon->build_mbmesh();
+//   if (localrc == ESMF_SUCCESS) rc = mbt_ngon->test_get_info();
+// #else
+//   rc = ESMF_SUCCESS;
+// #endif
+//   //cannot yet get connectivity information for ngon meshes
+//   //NEX_UTest
+//   strcpy(name, "MBMeshGet - Cartesian N-gons");
+//   strcpy(failMsg, "FAIL");
+//   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
+// 
+// #if defined ESMF_MOAB
+//   rc = ESMF_SUCCESS;
+//   MBMeshTest *mbt_ngon_redist;
+//   if (do_redist) {
+//     rc = ESMF_FAILURE;
+//     mbt_ngon_redist = new MBMeshTest();
+//     if (localrc == ESMF_SUCCESS) localrc = mbt_ngon->mbtRedist(mbt_ngon_redist);
+//     if (localrc == ESMF_SUCCESS) localrc = mbt_ngon_redist->build_mbmesh_redist();
+//     if (localrc == ESMF_SUCCESS) rc = mbt_ngon_redist->test_get_info();
+//   }
+// #else
+//   rc = ESMF_SUCCESS;
+// #endif
+//   //cannot yet get connectivity information for ngon meshes
+//   //NEX_UTest
+//   strcpy(name, "MBMeshGet - Cartesian N-gons Redist");
+//   strcpy(failMsg, "FAIL");
+//   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
+// 
+// #if defined ESMF_MOAB
+//   delete mbt_ngon;
+//   if (do_redist) delete mbt_ngon_redist;
+// #endif
+// 
+//   // --------------------------------------------------------------------------
+//   // mbmesh_gen_ngon_2d_sph
+//   // --------------------------------------------------------------------------
+// #if defined ESMF_MOAB
+//   rc = ESMF_FAILURE;
+//   MBMeshTest *mbt_ngon_sph = mbmesh_gen_ngon_2d_sph(localrc, do_redist);
+//   if (localrc == ESMF_SUCCESS) localrc = mbt_ngon_sph->build_mbmesh();
+//   if (localrc == ESMF_SUCCESS) rc = mbt_ngon_sph->test_get_info();
+// #else
+//   rc = ESMF_SUCCESS;
+// #endif
+//   //cannot yet get connectivity information for ngon meshes
+//   //NEX_UTest
+//   strcpy(name, "MBMeshGet - Spherical N-gons");
+//   strcpy(failMsg, "FAIL");
+//   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
+// 
+// #if defined ESMF_MOAB
+//   rc = ESMF_SUCCESS;
+//   MBMeshTest *mbt_ngon_sph_redist;
+//   if (do_redist) {
+//     rc = ESMF_FAILURE;
+//     mbt_ngon_sph_redist = new MBMeshTest();
+//     if (localrc == ESMF_SUCCESS) localrc = mbt_ngon_sph->mbtRedist(mbt_ngon_sph_redist);
+//     if (localrc == ESMF_SUCCESS) localrc = mbt_ngon_sph_redist->build_mbmesh_redist();
+//     if (localrc == ESMF_SUCCESS) rc = mbt_ngon_sph_redist->test_get_info();
+//   }
+// #else
+//   rc = ESMF_SUCCESS;
+// #endif
+//   // cannot yet get connectivity information for ngon meshes
+//   // NEX_UTest
+//   strcpy(name, "MBMeshGet - Spherical N-gons Redist");
+//   strcpy(failMsg, "FAIL");
+//   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
+// 
+// #if defined ESMF_MOAB
+//   delete mbt_ngon_sph;
+//   if (do_redist) delete mbt_ngon_sph_redist;
+// #endif
 
   // --------------------------------------------------------------------------
   // mixed Cartesian
@@ -305,7 +316,7 @@ do_redist = false;
   rc = ESMF_FAILURE;
   MBMeshTest *mbt_mix = mbmesh_gen_mix_2d_cart(localrc, do_redist);
   if (localrc == ESMF_SUCCESS) localrc = mbt_mix->build_mbmesh();
-  if (localrc == ESMF_SUCCESS) rc = mbt_mix->test_get_info();
+  if (localrc == ESMF_SUCCESS) rc = mbt_mix->test_get_info(1);
 #else
   rc = ESMF_SUCCESS;
 #endif
@@ -315,9 +326,11 @@ do_redist = false;
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
 
 #if defined ESMF_MOAB
-  rc = ESMF_FAILURE;
-  MBMeshTest *mbt_mix_redist = new MBMeshTest();
+  rc = ESMF_SUCCESS;
+  MBMeshTest *mbt_mix_redist;
   if (do_redist) {
+    rc = ESMF_FAILURE;
+    mbt_mix_redist = new MBMeshTest();
     if (localrc == ESMF_SUCCESS) localrc = mbt_mix->mbtRedist(mbt_mix_redist);
     if (localrc == ESMF_SUCCESS) localrc = mbt_mix_redist->build_mbmesh_redist();
     if (localrc == ESMF_SUCCESS) rc = mbt_mix_redist->test_get_info();
@@ -332,7 +345,7 @@ do_redist = false;
 
 #if defined ESMF_MOAB
   delete mbt_mix;
-  delete mbt_mix_redist;
+  if (do_redist) delete mbt_mix_redist;
 #endif
 
   // --------------------------------------------------------------------------
@@ -352,9 +365,11 @@ do_redist = false;
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
 
 #if defined ESMF_MOAB
-  rc = ESMF_FAILURE;
-  MBMeshTest *mbt_mix_sph_redist = new MBMeshTest();
+  rc = ESMF_SUCCESS;
+  MBMeshTest *mbt_mix_sph_redist;
   if (do_redist) {
+    rc = ESMF_FAILURE;
+    mbt_mix_sph_redist = new MBMeshTest();
     if (localrc == ESMF_SUCCESS) localrc = mbt_mix_sph->mbtRedist(mbt_mix_sph_redist);
     if (localrc == ESMF_SUCCESS) localrc = mbt_mix_sph_redist->build_mbmesh_redist();
     if (localrc == ESMF_SUCCESS) rc = mbt_mix_sph_redist->test_get_info();
@@ -369,7 +384,7 @@ do_redist = false;
 
 #if defined ESMF_MOAB
   delete mbt_mix_sph;
-  delete mbt_mix_sph_redist;
+  if (do_redist) delete mbt_mix_sph_redist;
 #endif
 
 

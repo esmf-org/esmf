@@ -3339,6 +3339,12 @@ void MBMesh_createredistelems(void **src_meshpp, int *num_elem_gids, int *elem_g
     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
       throw localrc;  // bail out with exception
 
+    VM *vm = VM::getCurrent(&localrc);
+    int petCount = vm->getPetCount();
+    int localPet = vm->getLocalPet();
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;
+
     // Dereference
     MBMesh *mesh=reinterpret_cast<MBMesh*> (*src_meshpp);
     MBMesh *out_mesh=reinterpret_cast<MBMesh*> (*output_meshpp);
@@ -3350,6 +3356,12 @@ void MBMesh_createredistelems(void **src_meshpp, int *num_elem_gids, int *elem_g
       int num_elem_gids_ws;
       int *elem_gids_ws=NULL;
       std::map<int,int> split_to_orig_id;
+
+#undef debug_printelemgids
+#ifdef debug_printelemgids
+  for (int i=0; i<*num_elem_gids; ++i)
+    printf("%d# elem gids %d\n", localPet, elem_gids[i]);
+#endif
 
       mbmesh_expand_split_elem_ids(mesh, *num_elem_gids, elem_gids, &num_elem_gids_ws, &elem_gids_ws, split_to_orig_id);
 

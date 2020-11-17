@@ -279,11 +279,12 @@ class MBMeshTest {
         // first copy the information from mbt
         mbt->pdim = pdim;
         mbt->sdim = sdim;
-        mbt->orig_sdim = sdim;
-        mbt->num_node = num_node;
-        mbt->num_elem = num_elem;
-        mbt->num_elem_conn = num_elem_conn;
+        mbt->orig_sdim = orig_sdim;
         mbt->coord_sys = coord_sys;
+
+        mbt->num_node = redist_num_node;
+        mbt->num_elem = redist_num_elem;
+        mbt->num_elem_conn = redist_num_elem_conn;
         
         mbt->node_mask_present = node_mask_present;
         mbt->elem_area_present = elem_area_present;
