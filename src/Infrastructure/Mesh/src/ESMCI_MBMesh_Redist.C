@@ -221,6 +221,7 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
   out_mesh->pdim=src_mesh->pdim;
   out_mesh->sdim=src_mesh->sdim;
   out_mesh->orig_sdim=src_mesh->orig_sdim;
+  out_mesh->coordsys=src_mesh->coordsys;
   
   
   // Add tags
@@ -1818,6 +1819,13 @@ void mbmesh_expand_split_elem_ids(MBMesh *mesh, int num_elem_gids, int *elem_gid
     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
       throw localrc;
 
+#undef debug_printelemgids
+#ifdef debug_printelemgids
+  for (int i=0; i<num_elem_gids; ++i)
+    printf("%d# elem gids %d\n", localPet, elem_gids[i]);
+#endif
+
+
     // OPTIMIZATION
     // Copy input array to UInt
     UInt *elem_gids_u=NULL;
@@ -1915,17 +1923,14 @@ void mbmesh_expand_split_elem_ids(MBMesh *mesh, int num_elem_gids, int *elem_gid
       }
     }
 
-    // Output
-    *_num_elem_gids_ws=num_elem_gids_ws;
-    *_elem_gids_ws=elem_gids_ws;
-
-#undef debug_printelemgids
 #ifdef debug_printelemgids
-  for (int i=0; i<num_elem_gids; ++i)
-    printf("%d# elem gids %d\n", localPet, elem_gids[i]);
   for (int i=0; i<num_elem_gids_ws; ++i)
     printf("%d# elem gids_ws %d\n", localPet, elem_gids_ws[i]);
 #endif
+
+    // Output
+    *_num_elem_gids_ws=num_elem_gids_ws;
+    *_elem_gids_ws=elem_gids_ws;
 
   } catch(std::exception &x) {
     // catch Mesh exception return code
@@ -2119,7 +2124,15 @@ void mbmesh_initialize_edir(MBMesh *mesh, int *num_elem_gids, int *elem_gids, st
   
   mbmesh_initialize_ddir(mesh, elems, num_elem_gids, elem_gids, src_elem_gids_proc, edir);
 
+#undef debug_printedir
 #ifdef debug_printedir
+    int localrc;
+    VM *vm = VM::getCurrent(&localrc);
+    int petCount = vm->getPetCount();
+    int localPet = vm->getLocalPet();
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;
+
   // print the vectors
   printf("%d# src_elem_gids_proc [%d] = [", localPet, src_elem_gids_proc.size());
   for (int i=0; i<src_elem_gids_proc.size(); ++i) {
