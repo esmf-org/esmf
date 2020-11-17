@@ -6168,43 +6168,14 @@ void ESMCI_MeshFitOnVM(Mesh **meshpp,
      ThrowRequire(meshpp);
      Mesh *mesh = *meshpp;
 
-     // Get current VM
-     VM *curr_vm=VM::getCurrent(&localrc);
-     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-       throw localrc;  // bail out with exception
-
-     // Get current VM size
-     int curr_vm_size=curr_vm->getPetCount();
-
-     // Get current VM rank
-     int curr_vm_rank=curr_vm->getLocalPet();
-
-     // Describe mapping of current PET
-     int new_vm_rank=-1; // if there is no pet, set to -1
+     // Set new comm
+     MPI_Comm new_comm=MPI_COMM_NULL;
      if ((ESMC_NOT_PRESENT_FILTER(new_vm) != ESMC_NULL_POINTER) && *new_vm) {
-       new_vm_rank=(*new_vm)->getLocalPet();
+       new_comm=(*new_vm)->getMpi_c();
      }
 
-     // Allocate array
-     int *rank_map=new int[curr_vm_size];
-
-     // Create array mapping from current vm to input vm
-     localrc=curr_vm->allgather(&new_vm_rank,rank_map,sizeof(int));
-     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-       throw localrc;  // bail out with exception
-
-#if 0
-     // debug output
-     for (int p=0; p<curr_vm_size; p++) {
-       printf("%d# %d to %d\n",curr_vm_rank,p,rank_map[p]);
-     }
-#endif
-
-     // Change proc numbers in mesh
-     mesh->map_proc_numbers(curr_vm_size, rank_map);
-
-    // Free map
-    delete [] rank_map;
+     // Change comm in Mesh
+     mesh->change_comm(new_comm);
 
   }catch(int localrc){
     // catch standard ESMF return code
