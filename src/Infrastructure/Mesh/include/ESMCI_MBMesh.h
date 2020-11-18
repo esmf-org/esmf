@@ -52,10 +52,10 @@ namespace ESMCI {
     throw(local_macro_error);}
 
 
-#define ESMC_CHECK_MOAB_RC_THROW(actual_rc) \
-  if (actual_rc != MB_SUCCESS) {\
-    ESMCI::esmc_error local_macro_error("", actual_rc, ""); \
-    if (ESMC_LogDefault.MsgFoundError(actual_rc, local_macro_error.what(), ESMC_CONTEXT, nullptr)) \
+#define ESMC_CHECK_MOAB_RC_THROW(moab_rc) \
+  if (moab_rc != MB_SUCCESS) {\
+    ESMCI::esmc_error local_macro_error("", ESMC_RC_MOAB_ERROR, moab::ErrorCodeStr[moab_rc]); \
+    if (ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, local_macro_error.what(), ESMC_CONTEXT, nullptr)) \
       throw(local_macro_error);}
 
 // should go in base, but it's here for now
