@@ -414,6 +414,24 @@ class MBMeshTest {
       std::string test;
 
       // get dimensions
+      int local_pdim, local_sdim;
+      MBMesh_GetDimensions(meshp, &local_sdim, &local_pdim, &localrc);
+      MBMESHTEST_CHECK_RC_THROW(localrc)
+
+      if (local_pdim != pdim) {
+        printf("pdim = %d (correct = %d)\n", local_pdim, pdim);
+        correct = false;
+      }
+
+      if (local_sdim != sdim) {
+        printf("sdim = %d (correct = %d)\n", local_sdim, sdim);
+        correct = false;
+      }
+
+      if (verbosity >= 2) {
+        printf("pdim = %d\n", pdim);
+        printf("sdim = %d\n", sdim);
+      }
 
       int nodeCount;
       MBMesh_GetNodeCount(meshp, &nodeCount, &localrc);

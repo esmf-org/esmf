@@ -94,6 +94,11 @@ void MBMesh_FitOnVM(void **meshpp, VM **new_vm, int *rc);
 
 void MBMesh_getarea(void **mbmpp, int *num_elem, double *elem_areas, int *rc);
 
+
+void MBMesh_GetCentroid(void *meshp, int *num_elem, double *elem_centroid, int *rc);
+
+void MBMesh_GetDimensions(void *meshp, int *sdim, int *pdim, int *rc);
+
 void MBMesh_GetElemCount(void *meshp, int *elemCount, int *rc);
 
 void MBMesh_GetNodeCount(void *meshp, int *nodeCount, int *rc);

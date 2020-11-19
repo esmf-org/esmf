@@ -260,6 +260,7 @@ namespace ESMCI {
     void get_elem_areas(double *elem_area);
     void get_elem_coords(double *elem_coords);
     void get_elem_mask(int *elem_mask);
+    void get_elem_centroids(double *elem_centroid);
 
     // Range based accessors for required node tags
     void get_node_coords(double *node_coords);

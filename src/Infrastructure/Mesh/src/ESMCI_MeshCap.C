@@ -1397,10 +1397,12 @@ void MeshCap::meshgetdimensions(int *sdim, int *pdim, int *rc) {
   if (is_esmf_mesh) {
     ESMCI_meshgetdimensions(&mesh, sdim, pdim, rc);
   } else {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-       "- this functionality is not currently supported using MOAB",
-                                  ESMC_CONTEXT, rc);
-    return;
+#if defined ESMF_MOAB
+    MBMesh_GetDimensions(&mbmesh, sdim, pdim, rc);
+#else
+   if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+      "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
+#endif
   }
 }
 
@@ -1412,10 +1414,12 @@ void MeshCap::meshgetcentroid(int *num_elem, double *elem_centroid, int *rc) {
   if (is_esmf_mesh) {
     ESMCI_meshgetcentroid(&mesh, num_elem, elem_centroid, rc);
   } else {
-     ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-       "- this functionality is not currently supported using MOAB",
-                                  ESMC_CONTEXT, rc);
-    return;
+#if defined ESMF_MOAB
+    MBMesh_GetCentroid(&mbmesh, num_elem, elem_centroid, rc);
+#else
+   if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+      "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
+#endif
   }
 }
 

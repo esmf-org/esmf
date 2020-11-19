@@ -41,6 +41,8 @@
 #include "moab/ParallelComm.hpp"
 #include "MBParallelConventions.h"
 #include "moab/ReadUtilIface.hpp"
+#include "moab/Util.hpp"
+
 
 #include "VM/include/ESMC_VM.h"
 
@@ -594,6 +596,36 @@ void MBMesh::get_elem_types(int *elem_types) {
   ESMC_CATCH_MOAB
 }
 
+void MBMesh::get_elem_centroids(double *elem_centroids) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh::get_elem_centroids()"
+  try {
+    int merr;
+  
+    Range elems;
+    merr=mesh->get_entities_by_dimension(0, pdim, elems);
+    ESMC_CHECK_MOAB_RC_THROW(merr)
+  
+    // mbutil = Util::Util();
+    
+    // auto i = 0;
+    // for (Range::const_iterator it=elems.begin(); it != elems.end(); it++) {
+    //   EntityHandle elem=*it;
+    // 
+    //   double coord[3];
+    //   mesh->centroid(this, elem, coord);
+    //   ESMC_CHECK_MOAB_RC_THROW(merr)
+    // 
+    //   elem_centroids[i*sdim] = coord[0];
+    //   elem_centroids[i*sdim+1] = coord[1];
+    //   if (sdim == 3)
+    //     elem_centroids[i*sdim+2] = coord[2];
+    // }
+
+  }
+  ESMC_CATCH_MOAB
+}
+
 void MBMesh::get_node_coords(double *node_coords) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh::get_node_coords()"
@@ -626,24 +658,6 @@ void MBMesh::get_node_coords(double *node_coords) {
       
       delete [] node_coords3d;
     }
-
-    // double *x = new double[nodes.size()];
-    // double *y = new double[nodes.size()];
-    // double *z = new double[nodes.size()];
-    // 
-    // merr=mesh->get_coords(nodes, x, y, z);
-    // ESMC_CHECK_MOAB_RC_THROW(merr)
-    // 
-    // // compact 3d coords to 2d
-    // for (int i=0; i<nodes.size(); ++i) {
-    //   node_coords[i*orig_sdim] = x[i];
-    //   node_coords[i*orig_sdim+1] = y[i];
-    //   if (orig_sdim == 3)
-    //     node_coords[i*orig_sdim+2] = z[i];
-    // }
-    // 
-    // delete [] x, y, z;
-
 
   }
   ESMC_CATCH_MOAB

@@ -3993,11 +3993,49 @@ void MBMesh_FitOnVM(void **meshpp, VM **new_vm, int *rc)
 
 } // ESMCI_MeshFitOnVM
 
+void MBMesh_GetDimensions(void *meshp, int *sdim, int *pdim, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh_GetDimensions()"
+  try {
+    MBMesh *mesh=reinterpret_cast<MBMesh*> (meshp);
+
+    *pdim = mesh->pdim;
+    *sdim = mesh->orig_sdim;
+  }
+  ESMC_CATCH_MBMESH(rc)
+  
+  if(rc != NULL) *rc = ESMF_SUCCESS;
+}
+
+void MBMesh_GetCentroid(void *meshp, int *num_elem, double *elem_centroid, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh_GetCentroid()"
+  try {
+    MBMesh *mesh=reinterpret_cast<MBMesh*> (meshp);
+
+    // pass as ESMCI::InterArray<int> *elemCentroid, use extent[0] over num_elem
+
+    char msg[256];
+    if (*num_elem != mesh->num_elem()) {
+      sprintf(msg, "elemCentroid array must be of size %d", mesh->num_elem());
+      ESMC_THROW_ERROR(ESMC_RC_ARG_SIZE, msg)
+    } else if (mesh->coordsys != ESMC_COORDSYS_CART) {
+      ESMC_THROW_ERROR(ESMC_RC_CANNOT_GET, "Cannot yet return centroids for spherical coordinates.")
+    }
+
+
+    mesh->get_elem_centroids(elem_centroid);
+
+  }
+  ESMC_CATCH_MBMESH(rc)
+  
+  if(rc != NULL) *rc = ESMF_SUCCESS;
+}
+
 void MBMesh_GetNodeCount(void *meshp, int *nodeCount, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_GetNodeCount()"
   try {
-    // Dereference
     MBMesh *mesh=reinterpret_cast<MBMesh*> (meshp);
 
     *nodeCount = mesh->num_node();
@@ -4011,7 +4049,6 @@ void MBMesh_GetElemCount(void *meshp, int *elemCount, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_GetElemCount()"
   try {
-    // Dereference
     MBMesh *mesh=reinterpret_cast<MBMesh*> (meshp);
 
     *elemCount = mesh->num_elem();
