@@ -2016,6 +2016,7 @@ module NUOPC_Base
     integer                           :: localrc
     type(NUOPC_FieldDictionaryEntry)  :: fdEntry
     type(ESMF_Info)                   :: info
+    integer                           :: timestamp(10)
     
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -2167,8 +2168,8 @@ module NUOPC_Base
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       
     ! set TimeStamp
-    call ESMF_FieldSetTimestamp(field, timestamp=(/0,0,0,0,0,0,0,0,0,0/), &
-      rc=localrc)
+    timestamp = (/0,0,0,0,0,0,0,0,0,0/)
+    call ESMF_FieldSetTimestamp(field, timestamp=timestamp, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       
@@ -4386,6 +4387,7 @@ module NUOPC_Base
     type(ESMF_CalKind_Flag) :: calkf
     integer                 :: localrc
     integer                 :: yy, mm, dd, h, m, s, ms, us, ns, ckf
+    integer                 :: timestamp(10)
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -4399,9 +4401,10 @@ module NUOPC_Base
       return  ! bail out
     ! convert calendar kind flag into integer
     ckf = calkf
+    ! initialize timestamp array
+    timestamp = (/yy,mm,dd,h,m,s,ms,us,ns,ckf/)
     ! set the 10 integer values representing the time stamp
-    call ESMF_FieldSetTimestamp(field, &
-      timestamp=(/yy,mm,dd,h,m,s,ms,us,ns,ckf/), rc=localrc)
+    call ESMF_FieldSetTimestamp(field, timestamp=timestamp, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME, &
