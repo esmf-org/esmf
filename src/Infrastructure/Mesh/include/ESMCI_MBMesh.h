@@ -205,7 +205,7 @@ namespace ESMCI {
     // Set node mask value on a Range of nodes
     void set_node_mask_val(Range nodes, int *mask_vals);
 
-    // Get node mask value
+    // Get node mask value for one entity
     int get_node_mask_val(EntityHandle node);
 
     // Set node coords
@@ -312,6 +312,46 @@ namespace ESMCI {
     void get_node_mask(int *node_mask);
 
 
+    //// Vector based accesors for object (either nodes or elems) info ////
+
+    // Get global ids for a vector of entities (e.g. for the orig_nodes)
+    void get_gid(std::vector<EntityHandle> const &objs, int *gids);
+
+    // Get owners for a vector of entities (e.g. for the orig_nodes)
+    void get_owners(std::vector<EntityHandle> const &objs, int *owners);
+
+    // Get orig_pos for a vector of entities (e.g. for the orig_nodes)
+    void get_orig_pos(std::vector<EntityHandle> const &objs, int *orig_pos);
+
+
+    //// Vector based accesors for node info ////
+
+    // Get node coords for a vector of entities (e.g. for the orig_nodes)
+    void get_node_orig_coords(std::vector<EntityHandle> const &nodes, double *orig_coords);
+
+    // Set node mask values for a vector of entities (e.g. for the orig_nodes)
+    void set_node_mask_val(std::vector<EntityHandle> const &nodes, int *mask_vals);
+
+    // Get node mask values for a vector of entities (e.g. for the orig_nodes)
+    void get_node_mask_val(std::vector<EntityHandle> const &nodes, int *mask_vals);
+
+
+    //// Vector based accesors for elem info ////
+
+    // Set elem mask values for a vector of entities (e.g. using orig_elems)
+    void set_elem_mask_val(std::vector<EntityHandle> const &elems, int *mask_val);
+
+    // Get elem mask values for a vector of entities (e.g. using orig_elems)
+    void get_elem_mask_val(std::vector<EntityHandle> const &elems, int *mask_val);
+
+    // Set elem area values for a vector of entities (e.g. using orig_elems)
+    void set_elem_area(std::vector<EntityHandle> const &elems, double *areas);
+
+    // Get elem area values for a vector of entities (e.g. using orig_elems)
+    void get_elem_area(std::vector<EntityHandle> const &elems, double *areas);
+
+    // Get elem coords for a vector of entities (e.g. using orig_elems)
+    void get_elem_orig_coords(std::vector<EntityHandle> const &elems, double *orig_coords);
 
     // Accessors for values from a single EntityHandle (avoid if possible, slow)
     int get_elem_mask_val(EntityHandle eh);

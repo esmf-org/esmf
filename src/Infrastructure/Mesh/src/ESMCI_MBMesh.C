@@ -748,6 +748,23 @@ void MBMesh::set_node_mask_val(Range nodes, int *mask_vals) {
 
 }
 
+void MBMesh::set_node_mask_val(std::vector<EntityHandle> const &nodes, int *mask_vals) {
+
+  // Error return codes
+  int localrc;
+  int merr;
+  
+  // If no masking, complain
+  if (!has_node_mask) Throw() << "node mask value not present in mesh.";
+
+  // Set data in MOAB
+  if (nodes.size() > 0) {
+    merr=mesh->tag_set_data(node_mask_val_tag, &nodes[0], nodes.size(), mask_vals);
+    ESMC_CHECK_MOAB_RC_THROW(merr);
+  }
+}
+
+
 int MBMesh::get_node_mask_val(EntityHandle node) {
 
   // Error return codes
@@ -764,6 +781,22 @@ int MBMesh::get_node_mask_val(EntityHandle node) {
 
   // Output information
   return mask_val;
+}
+
+void MBMesh::get_node_mask_val(std::vector<EntityHandle> const &nodes, int *mask_vals) {
+
+  // Error return codes
+  int localrc;
+  int merr;
+  
+  // If no masking, complain
+  if (!has_node_mask) Throw() << "node mask value not present in mesh.";
+
+  // Set data in MOAB
+  if (nodes.size() > 0) {
+    merr=mesh->tag_get_data(node_mask_val_tag, &nodes[0], nodes.size(), mask_vals);
+    ESMC_CHECK_MOAB_RC_THROW(merr);
+  }
 }
 
 
@@ -835,6 +868,42 @@ void MBMesh::get_node_orig_coords(EntityHandle node, double *orig_coords) {
     if (orig_sdim > 2) orig_coords[2]=coords[2];
   }
 }
+
+// Get the original coords for the node, if there are no orig coords then 
+// just uses coords (because those would be the original ones). 
+// orig_coords needs to be of size orig_sdim*nodes.size()
+void MBMesh::get_node_orig_coords(std::vector<EntityHandle> const &nodes, double *orig_coords) {
+
+  // Error return codes
+  int merr;
+
+  // If nothing in vector then leave
+  if (nodes.size() <= 0) return;
+
+  // If has orig coords then get those
+  if (has_node_orig_coords) {
+    merr=mesh->tag_get_data(node_orig_coords_tag, &nodes[0], nodes.size(), orig_coords);
+    ESMC_CHECK_MOAB_RC_THROW(merr);
+  } else {
+    int pos=0;
+    for (int i=0; i<nodes.size(); i++) {
+
+      // Get coords from MOAB
+      double coords[3]={0.0,0.0,0.0};
+      merr=mesh->get_coords(&nodes[i],1,coords);
+      ESMC_CHECK_MOAB_RC_THROW(merr);
+      
+      // Copy into buffer of size orig_sdim
+      orig_coords[pos]=coords[0];
+      orig_coords[pos+1]=coords[1];
+      if (orig_sdim > 2) orig_coords[pos+2]=coords[2];
+      
+      // advance pos
+      pos += orig_sdim;
+    }
+  }
+}
+
 
 
 // The coords variable here is in the original representation, not converted to cart. 
@@ -1001,6 +1070,32 @@ void MBMesh::get_elem_orig_coords(EntityHandle elem, double *orig_coords) {
   } 
 }
 
+
+// Get the original coords for a vector of elems, if there are no orig coords then 
+// just uses coords (because those would be the original ones). 
+// orig_coords needs to be of size orig_sdim*nodes.size()
+void MBMesh::get_elem_orig_coords(std::vector<EntityHandle> const &elems, double *orig_coords) {
+
+  // Error return codes
+  int merr;
+
+  // If nothing in list, just leave
+  if (elems.size() <= 0) return;
+
+  // If no coords, complain
+  if (!has_elem_coords) Throw() << "element coords not present in mesh.";
+
+  // If has orig coords then get those
+  if (has_elem_orig_coords) {
+    merr=mesh->tag_get_data(elem_orig_coords_tag, &elems[0], elems.size(), orig_coords);
+    ESMC_CHECK_MOAB_RC_THROW(merr);
+  } else {
+    merr=mesh->tag_get_data(elem_coords_tag, &elems[0], elems.size(), orig_coords);
+    ESMC_CHECK_MOAB_RC_THROW(merr);
+  } 
+}
+
+
 // Get an element's corner nodes
 // It looks like MOAB just returns a pointer into the actual connectivity storage, so 
 // corner_nodes shouldn't be deallocated. 
@@ -1067,6 +1162,41 @@ void MBMesh::set_elem_mask_val(Range elems, int *mask_vals) {
 
 
 
+void MBMesh::set_elem_mask_val(std::vector<EntityHandle> const &elems, int *mask_vals) {
+
+  // Error return codes
+  int localrc;
+  int merr;
+  
+  // If no masking, complain
+  if (!has_elem_mask) Throw() << "elem mask value not present in mesh.";
+
+  // Set data in MOAB
+  if (elems.size() > 0) {
+    merr=mesh->tag_set_data(elem_mask_val_tag, &elems[0], elems.size(), mask_vals);
+    ESMC_CHECK_MOAB_RC_THROW(merr);
+  }
+}
+
+
+
+void MBMesh::get_elem_mask_val(std::vector<EntityHandle> const &elems, int *mask_vals) {
+
+  // Error return codes
+  int localrc;
+  int merr;
+  
+  // If no masking, complain
+  if (!has_elem_mask) Throw() << "elem mask value not present in mesh.";
+
+  // Set data in MOAB
+  if (elems.size() > 0) {
+    merr=mesh->tag_get_data(elem_mask_val_tag, &elems[0], elems.size(), mask_vals);
+    ESMC_CHECK_MOAB_RC_THROW(merr);
+  }
+}
+
+
 
 int MBMesh::get_elem_mask_val(EntityHandle eh) {
 
@@ -1128,6 +1258,42 @@ void MBMesh::set_elem_area(Range elems, double *area) {
   merr=mesh->tag_set_data(elem_area_tag, elems, area);
   ESMC_CHECK_MOAB_RC_THROW(merr);
 }
+
+
+void MBMesh::set_elem_area(std::vector<EntityHandle> const &elems, double *areas) {
+
+  // Error return codes
+  int localrc;
+  int merr;
+  
+  // If no area, complain
+  if (!has_elem_area) Throw() << "elem areas not present in mesh.";
+
+  // Set data in MOAB
+  if (elems.size() > 0) {
+    merr=mesh->tag_set_data(elem_area_tag, &elems[0], elems.size(), areas);
+    ESMC_CHECK_MOAB_RC_THROW(merr);
+  }
+}
+
+
+
+void MBMesh::get_elem_area(std::vector<EntityHandle> const &elems, double *areas) {
+
+  // Error return codes
+  int localrc;
+  int merr;
+  
+  // If no area, complain
+  if (!has_elem_area) Throw() << "elem areas not present in mesh.";
+
+  // Set data in MOAB
+  if (elems.size() > 0) {
+    merr=mesh->tag_get_data(elem_area_tag, &elems[0], elems.size(), areas);
+    ESMC_CHECK_MOAB_RC_THROW(merr);
+  }
+}
+
 
 double MBMesh::get_elem_area(EntityHandle eh) {
 
@@ -1271,6 +1437,20 @@ int MBMesh::get_owner(EntityHandle eh) {
   return owner;
 }
 
+void MBMesh::get_owners(std::vector<EntityHandle> const &objs, int *owners) {
+
+  // Error return codes
+  int localrc;
+  int merr;
+  
+  // Set data in MOAB
+  if (objs.size() > 0) {
+    merr=mesh->tag_get_data(owner_tag, &objs[0], objs.size(), owners);
+    ESMC_CHECK_MOAB_RC_THROW(merr);
+  }
+}
+
+
 int MBMesh::get_orig_pos(EntityHandle eh) {
 
   // Error return codes
@@ -1285,6 +1465,20 @@ int MBMesh::get_orig_pos(EntityHandle eh) {
   // return owner
   return orig_pos;
 }
+
+void MBMesh::get_orig_pos(std::vector<EntityHandle> const &objs, int *orig_pos) {
+
+  // Error return codes
+  int localrc;
+  int merr;
+  
+  // Set data in MOAB
+  if (objs.size() > 0) {
+    merr=mesh->tag_get_data(orig_pos_tag, &objs[0], objs.size(), orig_pos);
+    ESMC_CHECK_MOAB_RC_THROW(merr);
+  }
+}
+
 
 
 int MBMesh::get_gid(EntityHandle eh) {
@@ -1301,6 +1495,20 @@ int MBMesh::get_gid(EntityHandle eh) {
   // return owner
   return gid;
 }
+
+void MBMesh::get_gid(std::vector<EntityHandle> const &objs, int *gids) {
+
+  // Error return codes
+  int localrc;
+  int merr;
+  
+  // Set data in MOAB
+  if (objs.size() > 0) {
+    merr=mesh->tag_get_data(gid_tag, &objs[0], objs.size(), gids);
+    ESMC_CHECK_MOAB_RC_THROW(merr);
+  }
+}
+
 
 
 

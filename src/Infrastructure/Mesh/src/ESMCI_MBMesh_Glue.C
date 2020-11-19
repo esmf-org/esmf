@@ -1574,6 +1574,8 @@ void MBMesh_addelements(void **mbmpp,
 
     ESMCI_MESHCREATE_TRACE_EXIT("MBMesh addelems add");
     
+    // Done creating elems, so finalize
+    mbmp->finalize_elems();
 
     //// Setup parallel sharing ///
     // DON'T DO, BECAUSE IT ISN'T NEEDED ALL THE TIME
