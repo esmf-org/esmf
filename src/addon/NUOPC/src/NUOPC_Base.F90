@@ -4441,6 +4441,7 @@ module NUOPC_Base
     type(ESMF_CalKind_Flag) :: calkf
     integer                 :: localrc, i
     integer                 :: yy, mm, dd, h, m, s, ms, us, ns, ckf
+    integer                 :: timestamp(10)
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -4454,9 +4455,11 @@ module NUOPC_Base
       return  ! bail out
     ! convert calendar kind flag into integer
     ckf = calkf
+    ! initialize timestamp array
+    timestamp = (/yy,mm,dd,h,m,s,ms,us,ns,ckf/)
+    ! set timestamp on each field
     do i=1, size(fieldList)
-      call ESMF_FieldSetTimestamp(fieldList(i), &
-        timestamp=(/yy,mm,dd,h,m,s,ms,us,ns,ckf/), rc=localrc)
+      call ESMF_FieldSetTimestamp(fieldList(i), timestamp=timestamp, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME, &

@@ -110,29 +110,9 @@ void MBMesh_create(void **mbmpp,
     *mbmpp=(void *)(new MBMesh(*pdim, *sdim, *coordSys));
     
    
-  } catch(std::exception &x) {
-    // catch Mesh exception return code
-    if (x.what()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                          x.what(), ESMC_CONTEXT, rc);
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                          "UNKNOWN", ESMC_CONTEXT, rc);
-    }
+  } 
+  ESMC_CATCH_MBMESH(rc);
 
-     return;
-  }catch(int localrc){
-    // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
-    return;
-  } catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-       " Caught unknown exception", ESMC_CONTEXT, rc);
-    return;
-  }
-
-
-  
   // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
   
@@ -212,10 +192,9 @@ void MBMesh_addnodes(void **mbmpp, int *_num_nodes, int *nodeId,
                     nodeOwner,
                     added_nodes); 
     
-    // DEPRECATED
-    // Will go away soon!
-    mbmp->setup_verts_array();
-    
+
+    // Done creating nodes, so finalize
+    mbmp->finalize_nodes();
 
     //// Setup and fill other node fields ////
 
@@ -236,26 +215,8 @@ void MBMesh_addnodes(void **mbmpp, int *_num_nodes, int *nodeId,
 #endif
 
 
-  } catch(std::exception &x) {
-    // catch Mesh exception return code
-    if (x.what()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                          x.what(), ESMC_CONTEXT, rc);
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                          "UNKNOWN", ESMC_CONTEXT, rc);
-    }
-
-     return;
-  }catch(int localrc){
-    // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
-    return;
-  } catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-       " Caught unknown exception", ESMC_CONTEXT, rc);
-    return;
-  }
+  } 
+  ESMC_CATCH_MBMESH(rc);
 
   // Set return code
    if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -692,7 +653,6 @@ void _generate_info_for_split_elems(
             
             //   printf("id=%d subelem_size=%d\n",elemId[e],subelem_size);
             
-            
           // Get corner coordinates
           int crd_pos=0;
           for (int i=0; i<elemType[e]; i++) {
@@ -866,6 +826,9 @@ void _add_elems_all_one_type(MBMesh *mbmp, int localPet,
   ThrowRequire(num_nodes_per_elem*num_elems >= 0);
   EntityHandle *node_conn= new EntityHandle[num_nodes_per_elem*num_elems]; 
 
+  // Get vector of orig_nodes
+  std::vector<EntityHandle> const &orig_nodes=mbmp->get_orig_nodes();
+
   // Loop elements and construct connection list
   int conn_pos=0;
   for (int e = 0; e < num_elems; ++e) {
@@ -877,7 +840,7 @@ void _add_elems_all_one_type(MBMesh *mbmp, int localPet,
       int vert_index=elemConn[conn_pos]-1;
       
       // Setup connectivity list
-      node_conn[conn_pos] = mbmp->verts[vert_index];
+      node_conn[conn_pos] = orig_nodes.at(vert_index);
       
       // Advance to next
       conn_pos++;
@@ -1005,6 +968,9 @@ void _add_elems_multiple_types(MBMesh *mbmp, int localPet,
   // Use temporary buffer for connection list
   EntityHandle *node_conn=(EntityHandle *)tmp_buff;
     
+  // Get vector of orig_nodes
+  std::vector<EntityHandle> const &orig_nodes=mbmp->get_orig_nodes();
+
   // Loop elements and fill informatiton
   int pos=0;
   int node_conn_pos=0;
@@ -1036,7 +1002,7 @@ void _add_elems_multiple_types(MBMesh *mbmp, int localPet,
         elemConn_pos++;
 
         // Setup connectivity list
-        node_conn[node_conn_pos] = mbmp->verts[vert_index];
+        node_conn[node_conn_pos] = orig_nodes.at(vert_index);
         
         // Advance to next connection pos
         node_conn_pos++;
@@ -1362,9 +1328,8 @@ void MBMesh_addelements(void **mbmpp,
     // Get spatial dimension of mesh
     int sdim=mbmp->pdim;
 
-    // Get number of verts
-    int num_verts = mbmp->num_verts;
-
+    // Get number of orig nodes
+    int num_nodes = mbmp->get_orig_nodes().size();
 
     //// Error check input ////
 
@@ -1419,7 +1384,7 @@ void MBMesh_addelements(void **mbmpp,
     // Block so node_used goes away
     { 
       std::vector<int> node_used;
-      node_used.resize(num_verts, 0);
+      node_used.resize(num_nodes, 0);
       
       // Error check elemConn array
       int c = 0;
@@ -1440,7 +1405,7 @@ void MBMesh_addelements(void **mbmpp,
                                              ESMC_CONTEXT, &localrc)) throw localrc;
           }
           
-          if (node_index > num_verts-1) {
+          if (node_index > num_nodes-1) {
             int localrc;
             if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                              "- elemConn entries should not be greater than number of nodes on processor ",
@@ -1457,7 +1422,7 @@ void MBMesh_addelements(void **mbmpp,
       
       // Make sure every node used
       bool every_node_used=true;
-      for (int i=0; i<num_verts; i++) {
+      for (int i=0; i<num_nodes; i++) {
         if (node_used[i] == 0) {
           every_node_used=false;
           break;
@@ -1518,15 +1483,19 @@ void MBMesh_addelements(void **mbmpp,
        // If there are local split elems, allocate and fill node coords
        double *nodeCoords=NULL;
        if (is_split_local) {
+
+         // Get vector of orig_nodes
+         std::vector<EntityHandle> const &orig_nodes=mbmp->get_orig_nodes();
          
          // Allocate space for node coords
-         if (mbmp->num_verts > 0) {
+         if (orig_nodes.size() > 0) {
+           
            // 3 because in MOAB 3 coords are stored per vert
-           nodeCoords=new double[3*(mbmp->num_verts)];
-
+           nodeCoords=new double[3*orig_nodes.size()];
+           
            // Get coords from MOAB
-           merr=mbmp->mesh->get_coords(mbmp->verts, mbmp->num_verts, nodeCoords);
-           MBMESH_CHECK_RC(merr);           
+           merr=mbmp->mesh->get_coords(&orig_nodes[0], orig_nodes.size(), nodeCoords);
+           ESMC_CHECK_MOAB_RC_THROW(merr);      
          }
        }
               
@@ -1586,6 +1555,8 @@ void MBMesh_addelements(void **mbmpp,
 
     ESMCI_MESHCREATE_TRACE_EXIT("MBMesh addelems add");
     
+    // Done creating elems, so finalize
+    mbmp->finalize_elems();
 
     //// Setup parallel sharing ///
     // DON'T DO, BECAUSE IT ISN'T NEEDED ALL THE TIME
@@ -1606,26 +1577,8 @@ void MBMesh_addelements(void **mbmpp,
     if (elemCoordsPresent) delete [] elemCoords_wsplit;
   }
 
-  } catch(std::exception &x) {
-    // catch Mesh exception return code
-    if (x.what()) {
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                          x.what(), ESMC_CONTEXT, rc);
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                          "UNKNOWN", ESMC_CONTEXT, rc);
-    }
-
-    return;
-  }catch(int localrc){
-    // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
-    return;
-  } catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", ESMC_CONTEXT, rc);
-     return;
   }
+  ESMC_CATCH_MBMESH(rc);
 
   // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -1708,26 +1661,8 @@ void MBMesh_turnonnodemask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg, 
       }
     }
 
-  } catch(std::exception &x) {
-    // catch Mesh exception return code
-    if (x.what()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            x.what(), ESMC_CONTEXT, rc);
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            "UNKNOWN", ESMC_CONTEXT, rc);
-    }
-
-    return;
-  }catch(int localrc){
-    // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
-    return;
-  } catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                             "- Caught unknown exception", ESMC_CONTEXT, rc);
-    return;
-  }
+  } 
+  ESMC_CATCH_MBMESH(rc);
 
   // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -1777,26 +1712,8 @@ void MBMesh_turnonnodemask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg, 
 
       }
     }
-  } catch(std::exception &x) {
-    // catch Mesh exception return code
-    if (x.what()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            x.what(), ESMC_CONTEXT, rc);
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            "UNKNOWN", ESMC_CONTEXT, rc);
-    }
-
-    return;
-  }catch(int localrc){
-     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
-    return;
-  } catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                        "- Caught unknown exception", ESMC_CONTEXT, rc);
-    return;
-  }
+  } 
+  ESMC_CATCH_MBMESH(rc);
 
   // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -1880,26 +1797,8 @@ void MBMesh_turnonelemmask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg, 
       }
     }
 
-  } catch(std::exception &x) {
-    // catch Mesh exception return code
-    if (x.what()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            x.what(), ESMC_CONTEXT, rc);
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            "UNKNOWN", ESMC_CONTEXT, rc);
-    }
-
-    return;
-  }catch(int localrc){
-    // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
-    return;
-  } catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                             "- Caught unknown exception", ESMC_CONTEXT, rc);
-    return;
-  }
+  } 
+  ESMC_CATCH_MBMESH(rc);
 
   // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -1950,26 +1849,8 @@ void MBMesh_turnonelemmask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg, 
       }
     }
 
-  } catch(std::exception &x) {
-    // catch Mesh exception return code
-    if (x.what()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            x.what(), ESMC_CONTEXT, rc);
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            "UNKNOWN", ESMC_CONTEXT, rc);
-    }
-
-    return;
-  }catch(int localrc){
-      // catch standard ESMF return code
-     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
-    return;
-  } catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                        "- Caught unknown exception", ESMC_CONTEXT, rc);
-    return;
   }
+  ESMC_CATCH_MBMESH(rc);
 
   // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -1999,26 +1880,8 @@ void MBMesh_destroy(void **mbmpp, int *rc) {
     // Set to null
     *mbmpp=NULL;
 
-  } catch(std::exception &x) {
-    // catch Mesh exception return code
-     if (x.what()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                          x.what(), ESMC_CONTEXT, rc);
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                          "UNKNOWN", ESMC_CONTEXT, rc);
-    }
-
-    return;
-  }catch(int localrc){
-    // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
-    return;
-  } catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", ESMC_CONTEXT, rc);
-    return;
-  }
+  } 
+  ESMC_CATCH_MBMESH(rc);
 
   // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -2146,27 +2009,8 @@ void MBMesh_createnodedistgrid(void **mbmpp, int *ngrid, int *num_lnodes, int *r
       }
     }
 
-  } catch(std::exception &x) {
-    // catch Mesh exception return code
-    if (x.what()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                          x.what(), ESMC_CONTEXT, rc);
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                          "UNKNOWN", ESMC_CONTEXT, rc);
-    }
-
-    return;
-  }catch(int localrc){
-    // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
-    return;
-  } catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", ESMC_CONTEXT, rc);
-    return;
-  }
-
+  } 
+  ESMC_CATCH_MBMESH(rc);
 
   // Create the distgrids
   {
@@ -2294,26 +2138,8 @@ void MBMesh_createelemdistgrid(void **mbmpp, int *egrid, int *num_lelems, int *r
     // Get list of elem gids in order
     getElemGIDS(mbmp, egids);
 
-  } catch(std::exception &x) {
-    // catch Mesh exception return code
-    if (x.what()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                          x.what(), ESMC_CONTEXT, rc);
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                          "UNKNOWN", ESMC_CONTEXT, rc);
-    }
-
-    return;
-  }catch(int localrc){
-    // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
-    return;
-  } catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", ESMC_CONTEXT, rc);
-    return;
-  }
+  } 
+  ESMC_CATCH_MBMESH(rc);
 
   {
     int esize = *num_lelems = egids.size();
@@ -2477,18 +2303,8 @@ void MBMesh_getlocalelemcoords(void **mbmpp, double *ecoords,
         }
       }
 
-    } catch(int localrc) {
-        // catch standard ESMF return code
-        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
-        if (rc!=NULL) *rc = localrc;
-        return;
-    } catch(...) {
-        localrc = ESMC_RC_INTNRL_BAD;
-        ESMC_LogDefault.MsgFoundError(localrc,
-            "- Caught unknown exception", ESMC_CONTEXT, rc);
-        if (rc!=NULL) *rc = localrc;
-        return;
-    }
+    } 
+    ESMC_CATCH_MBMESH(rc);
 
     // Set return code
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -2651,28 +2467,8 @@ void MBMesh_getarea(void **mbmpp, int *num_elem, double *elem_areas, int *rc) {
     }
 #endif
 
-  } catch(std::exception &x) {
-    // catch Mesh exception return code
-    if (x.what()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                          x.what(), ESMC_CONTEXT, rc);
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                          "UNKNOWN", ESMC_CONTEXT, rc);
-    }
-
-    return;
-  }catch(int localrc){
-    // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
-    return;
-  } catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", ESMC_CONTEXT, rc);
-    return;
-  }
-
-
+  } 
+  ESMC_CATCH_MBMESH(rc);
 
   // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -2826,26 +2622,8 @@ void MBMesh_getlocalcoords(void **mbmpp, double *ncoords, int *_orig_sdim, int *
 
 
 
-  } catch(std::exception &x) {
-    // catch Mesh exception return code
-    if (x.what()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                          x.what(), ESMC_CONTEXT, rc);
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                          "UNKNOWN", ESMC_CONTEXT, rc);
-    }
-
-    return;
-  }catch(int localrc){
-    // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
-    return;
-  } catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", ESMC_CONTEXT, rc);
-    return;
   }
+  ESMC_CATCH_MBMESH(rc);
 
   // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -3069,29 +2847,8 @@ void MBMesh_geteleminfointoarray(void *vmbmp,
           }
         }
 
-    } catch(std::exception &x) {
-        // catch Mesh exception return code
-        if (x.what()) {
-            localrc = ESMC_RC_INTNRL_BAD;
-            ESMC_LogDefault.MsgFoundError(localrc, x.what(), ESMC_CONTEXT, rc);
-    } else {
-        localrc = ESMC_RC_INTNRL_BAD;
-        ESMC_LogDefault.MsgFoundError(localrc, "UNKNOWN", ESMC_CONTEXT, rc);
-    }
-    if (rc!=NULL) *rc = localrc;
-    return;
-    } catch(int localrc) {
-        // catch standard ESMF return code
-        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
-        if (rc!=NULL) *rc = localrc;
-        return;
-    } catch(...) {
-        localrc = ESMC_RC_INTNRL_BAD;
-        ESMC_LogDefault.MsgFoundError(localrc,
-            "- Caught unknown exception", ESMC_CONTEXT, rc);
-        if (rc!=NULL) *rc = localrc;
-        return;
-    }
+    } 
+    ESMC_CATCH_MBMESH(rc);
 
     // Set return code
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -3186,26 +2943,8 @@ void MBMesh_serialize(void **mbmpp, char *buffer, int *length,
 // printf("%d# MBMesh_serialize - 3\n", Par::Rank());
 
 
-  } catch(std::exception &x) {
-    // catch Mesh exception return code
-    if (x.what()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            x.what(), ESMC_CONTEXT, rc);
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            "UNKNOWN", ESMC_CONTEXT, rc);
-    }
-
-    return;
-  }catch(int localrc){
-    // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
-    return;
-  } catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                           "- Caught unknown exception", ESMC_CONTEXT, rc);
-    return;
-  }
+  } 
+  ESMC_CATCH_MBMESH(rc);
 
 // printf("%d# MBMesh_serialize - 4\n", Par::Rank());
 
@@ -3297,26 +3036,8 @@ void MBMesh_deserialize(void **mbmpp, char *buffer, int *offset, int *rc,
 
 // printf("%d# MBMesh_deserialize - 1\n", Par::Rank());
 
-  } catch(std::exception &x) {
-    // catch Mesh exception return code
-    if (x.what()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            x.what(), ESMC_CONTEXT, rc);
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            "UNKNOWN", ESMC_CONTEXT, rc);
-    }
-
-    return;
-  }catch(int localrc){
-    // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
-    return;
-  } catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                           "- Caught unknown exception", ESMC_CONTEXT, rc);
-    return;
-  }
+  } 
+  ESMC_CATCH_MBMESH(rc);
 
 // printf("%d# MBMesh_deserialize - 2\n", Par::Rank());
 
@@ -3397,26 +3118,8 @@ void MBMesh_createredistelems(void **src_meshpp, int *num_elem_gids, int *elem_g
     // return the mbmesh as a void*
     *output_meshpp=reinterpret_cast<void*> (out_mesh);
 
-  } catch(std::exception &x) {
-    // catch Mesh exception return code
-    if (x.what()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            x.what(), ESMC_CONTEXT, rc);
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            "UNKNOWN", ESMC_CONTEXT, rc);
-    }
-  
-    return;
-  } catch(int localrc){
-    // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
-    return;
-  } catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                           "- Caught unknown exception", ESMC_CONTEXT, rc);
-    return;
-  }
+  } 
+  ESMC_CATCH_MBMESH(rc);
 
   if (rc!=NULL) *rc=ESMF_SUCCESS;
 
@@ -3455,26 +3158,8 @@ void MBMesh_createredistnodes(void **src_meshpp, int *num_node_gids, int *node_g
   // convert the out_mesh back to a void*
   *output_meshpp = reinterpret_cast<void *> (out_mesh);
 
-  } catch(std::exception &x) {
-    // catch Mesh exception return code
-    if (x.what()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            x.what(), ESMC_CONTEXT, rc);
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            "UNKNOWN", ESMC_CONTEXT, rc);
-    }
-
-    return;
-  }catch(int localrc){
-    // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
-    return;
-  } catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                           "- Caught unknown exception", ESMC_CONTEXT, rc);
-    return;
-  }
+  } 
+  ESMC_CATCH_MBMESH(rc);
 
   if (rc!=NULL) *rc=ESMF_SUCCESS;
 }
@@ -3540,26 +3225,8 @@ void MBMesh_createredist(void **src_meshpp, int *num_node_gids, int *node_gids,
     *output_meshpp=reinterpret_cast<void*> (out_mesh);
 
 
-  } catch(std::exception &x) {
-    // catch Mesh exception return code
-    if (x.what()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            x.what(), ESMC_CONTEXT, rc);
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            "UNKNOWN", ESMC_CONTEXT, rc);
-    }
-
-    return;
-  }catch(int localrc){
-    // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
-    return;
-  } catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                           "- Caught unknown exception", ESMC_CONTEXT, rc);
-    return;
-  }
+  } 
+  ESMC_CATCH_MBMESH(rc);
 
   if (rc!=NULL) *rc=ESMF_SUCCESS;
 
@@ -3653,27 +3320,8 @@ void MBMesh_checknodelist(void **meshpp, int *_num_node_gids, int *node_gids,
       }
     }
 
-  } catch(std::exception &x) {
-    // catch Mesh exception return code
-    if (x.what()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            x.what(), ESMC_CONTEXT, rc);
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            "UNKNOWN", ESMC_CONTEXT, rc);
-    }
-
-    return;
-  }catch(int localrc){
-    // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
-    return;
-  } catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                           "- Caught unknown exception", ESMC_CONTEXT, rc);
-    return;
-  }
-
+  } 
+  ESMC_CATCH_MBMESH(rc);
 
   if (rc!=NULL) *rc=ESMF_SUCCESS;
 }
@@ -3894,26 +3542,8 @@ void MBMesh_checkelemlist(void **meshpp, int *_num_elem_gids, int *elem_gids,
 #endif
 
 
-  } catch(std::exception &x) {
-    // catch Mesh exception return code
-    if (x.what()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            x.what(), ESMC_CONTEXT, rc);
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            "UNKNOWN", ESMC_CONTEXT, rc);
-    }
-
-    return;
-  }catch(int localrc){
-    // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
-    return;
-  } catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                           "- Caught unknown exception", ESMC_CONTEXT, rc);
-    return;
   }
+  ESMC_CATCH_MBMESH(rc);
 
 
   if (rc!=NULL) *rc=ESMF_SUCCESS;
@@ -3978,15 +3608,8 @@ void MBMesh_FitOnVM(void **meshpp, VM **new_vm, int *rc)
     // Free map
     delete [] rank_map;
 
-  }catch(int localrc){
-    // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,rc);
-    return;
-  } catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", ESMC_CONTEXT, rc);
-    return;
   }
+  ESMC_CATCH_MBMESH(rc);
 
   // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;

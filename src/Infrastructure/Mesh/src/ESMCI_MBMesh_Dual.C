@@ -555,9 +555,7 @@ namespace ESMCI {
   EntityHandle *nodes=NULL;
   if (num_nodes>0) {
     nodes=new EntityHandle[num_nodes];
-    dual_mesh->verts=nodes;
   }
-  dual_mesh->num_verts = num_nodes;
 
 #ifdef DEBUG_CONNECTIVITY
   {Range elemss;
@@ -995,7 +993,7 @@ namespace ESMCI {
         int vert_index=elemConn[cur_conn];
 
         // Setup connectivity list
-        elem_verts[n] = dual_mesh->verts[vert_index];
+        elem_verts[n] = nodes[vert_index];
 
         // Advance to next
         cur_conn++;
@@ -1039,6 +1037,14 @@ namespace ESMCI {
 
     // Set number of local elems
     dual_mesh->num_elems=num_elems;
+
+
+    // Get rid of nodes array
+    delete [] nodes;
+
+    // Finalize node and elem creation
+   dual_mesh->finalize_nodes();
+   dual_mesh->finalize_elems();
 
 
     // Output 

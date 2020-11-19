@@ -522,25 +522,12 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
       }
     }
 
-    //// Add list of verts to MBMesh struct ////
-    
-    // Allocate temp storage for verts
-    int num_verts=out_gid_to_vert->size();
-     EntityHandle *verts=new EntityHandle[num_verts];
-
-    // Loop and put verts into struct
-    int v=0;
-    std::map<int,EntityHandle>::const_iterator mi=out_gid_to_vert->begin();
-    std::map<int,EntityHandle>::const_iterator me=out_gid_to_vert->end();    
-    for (; mi != me; ++mi) {
-      verts[v]=mi->second;
-      v++;
-    }
     ESMCI_RENDEZVOUS_TRACE_EXIT("MBMesh rendezvous redist elements move verts create verts")
 
-    // Put into mesh
-    out_mesh->num_verts=num_verts;
-    out_mesh->verts=verts;
+    // Finalize nodes and elems
+    out_mesh->finalize_nodes();
+    out_mesh->finalize_elems();
+
   }
 
   // Redist elems to new mesh

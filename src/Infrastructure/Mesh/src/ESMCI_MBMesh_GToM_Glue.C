@@ -842,9 +842,9 @@ void MBMesh_GridToMeshCell(const Grid &grid_,
 // Do halo communication on all appropriate node tags
  mesh->halo_comm_nodes_all_tags(true);
 
- // setup verts array
- // TODO: Deprecated so get rid of this soon!!
- mesh->setup_verts_array();
+ // Finalize nodes and elems
+ mesh->finalize_nodes();
+ mesh->finalize_elems();
 
 
  // Debug output
