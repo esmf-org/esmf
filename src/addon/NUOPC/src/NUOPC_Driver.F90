@@ -5062,11 +5062,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverGet()
-  recursive subroutine NUOPC_DriverGet(driver, slotCount, parentClock, rc)
+  recursive subroutine NUOPC_DriverGet(driver, slotCount, parentClock, &
+    importState, exportState, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
     integer,             intent(out), optional :: slotCount
     type(ESMF_Clock),    intent(out), optional :: parentClock
+    type(ESMF_State),    intent(out), optional :: importState
+    type(ESMF_State),    intent(out), optional :: exportState
     integer,             intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -5103,6 +5106,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       parentClock = is%wrap%parentClock
     endif
     
+    ! remaining arguments
+    call ESMF_GridCompGet(driver, importState=importState, &
+      exportState=exportState, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
   end subroutine
   !-----------------------------------------------------------------------------
 
