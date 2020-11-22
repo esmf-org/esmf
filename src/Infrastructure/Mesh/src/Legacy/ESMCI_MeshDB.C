@@ -349,10 +349,44 @@ void MeshDB::add_node_local(MeshObj *node,
 }
 
 void MeshDB::element_connect(MeshObj &element, std::vector<MeshObj*> &nodevect) {
+
+  // Rotate to always start with lowest id 
+  
+  //// Find lowest id
+  UInt lowest_id=std::numeric_limits<unsigned int>::max();
+  int  lowest_id_index=0;
+  for (int i=0; i<nodevect.size(); i++) {
+    if (nodevect[i]->get_id() < lowest_id) {
+      lowest_id=nodevect[i]->get_id();
+      lowest_id_index=i;
+    } 
+  }
+
+  //// Declare tmp_node_array and check size
+#define TMP_NODE_VEC_SIZE 10
+  MeshObj *tmp_node_array[TMP_NODE_VEC_SIZE];
+  if (nodevect.size() > TMP_NODE_VEC_SIZE) Throw() << "element has more than the max number of nodes.";
+#undef TMP_NODE_VEC_SIZE
+
+  //// Rotate array if a triangle, quad, or tetrahedron
+  if (nodevect.size() != 8) {
+    for (int i=0; i<nodevect.size(); i++) {
+      int rot_index=(lowest_id_index+i)%nodevect.size();
+      tmp_node_array[i]=nodevect[rot_index];
+    }
+  } else { // Not clear if Hex can be rotated, so just copy for now
+    for (int i=0; i<nodevect.size(); i++) {
+      tmp_node_array[i]=nodevect[i];
+    }
+  }
+
+  // Add to element connections
   for (unsigned int i = 0; i < nodevect.size(); i++) {
+    MeshObj *node=tmp_node_array[i];
+
     // push node onto element
     MeshObj::Relation rel;
-    rel.obj = nodevect[i];
+    rel.obj = node;
     rel.ordinal = i;
     rel.polarity = true;
     rel.type = MeshObj::USES;
@@ -361,7 +395,7 @@ void MeshDB::element_connect(MeshObj &element, std::vector<MeshObj*> &nodevect) 
     // and element onto node
    rel.obj = &element; rel.ordinal = i;
    rel.type = MeshObj::USED_BY;
-   AddMeshObjRelation(*nodevect[i], rel);
+   AddMeshObjRelation(*node, rel);
   }
 }
 
