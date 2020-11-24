@@ -30,12 +30,6 @@ using namespace moab;
 
 namespace ESMCI {
 
-// DEPRECATED!
-#define MBMESH_CHECK_ERR(merr, localrc) \
-  if (merr != MB_SUCCESS) \
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, \
-      moab::ErrorCodeStr[merr], ESMC_CONTEXT, &localrc)) throw localrc;
-
 // use when no pointer *rc is expected to return
 #define ESMC_CHECK_MOAB_RC_RETHROW(merr) \
   if (merr != MB_SUCCESS) {\
