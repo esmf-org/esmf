@@ -64,26 +64,20 @@ using namespace ESMCI;
 
 extern "C" void FTN_X(f_esmf_getmeshdistgrid)(int*, int*, int*, int*);
 
-void MBMesh_create(void **mbmpp,
-                      int *pdim, int *sdim,
-                      ESMC_CoordSys_Flag *coordSys, int *rc)
+void MBMesh_create(void **mbmpp, int *pdim, int *sdim,
+                   ESMC_CoordSys_Flag *coordSys, int *rc)
 {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_create()"
-
   try {
-
-    // Error return vars
-    int merr;
-    int localrc;
+    int localrc, merr;
     
     // Init output
     *mbmpp=NULL;
     
     // Initialize the parallel environment for mesh (if not already done)
-    ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-      throw localrc;  // bail out with exception
+    ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
+    ESMC_THROW_PASSTHRU(localrc);
 
     
     //  Error check input //
@@ -111,7 +105,7 @@ void MBMesh_create(void **mbmpp,
     
    
   } 
-  ESMC_CATCH_MBMESH(rc);
+  CATCH_MBMESH_RETURN(rc);
 
   // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -122,21 +116,16 @@ void MBMesh_create(void **mbmpp,
 void MBMesh_addnodes(void **mbmpp, int *_num_nodes, int *nodeId,
                      double *nodeCoord, int *nodeOwner, InterArray<int> *nodeMaskII,
                      ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
-                       int *rc)
+                     int *rc)
 {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_addnodes()"
-
   try {
-
-    // Error return vars 
-    int merr;
-    int localrc;
+    int localrc, merr;
     
     // Initialize the parallel environment for mesh (if not already done)
-    ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-      throw localrc;  // bail out with exception
+    ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
+    ESMC_THROW_PASSTHRU(localrc);
 
 
     //// Setup some handy info ////
@@ -150,9 +139,7 @@ void MBMesh_addnodes(void **mbmpp, int *_num_nodes, int *nodeId,
 
     // Get petCount 
     int petCount = VM::getCurrent(&localrc)->getPetCount();
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-      throw localrc;  // bail out with exception
-    
+    ESMC_THROW_PASSTHRU(localrc);
 
     //// Error check input ////
 
@@ -216,7 +203,7 @@ void MBMesh_addnodes(void **mbmpp, int *_num_nodes, int *nodeId,
 
 
   } 
-  ESMC_CATCH_MBMESH(rc);
+  CATCH_MBMESH_RETURN(rc);
 
   // Set return code
    if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -281,69 +268,67 @@ static void triangulate_warea(int sdim, int num_p, double *p, int oeid,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "triangulate_warea()"
 
-          int localrc;
+  int localrc;
 
-          // Call into triagulation routines
-          int ret;
-          if (sdim==2) {
-            ret=triangulate_poly<GEOM_CART2D>(num_p, p, td,
-                                              ti, tri_ind);
-          } else if (sdim==3) {
-            ret=triangulate_poly<GEOM_SPH2D3D>(num_p, p, td,
-                                               ti, tri_ind);
-          } else {
-            if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-                                          " - triangulate can't be used for polygons with spatial dimension not equal to 2 or 3",
-                                              ESMC_CONTEXT, &localrc)) throw localrc;
-          }
+  // Call into triagulation routines
+  int ret;
+  if (sdim==2) {
+    ret=triangulate_poly<GEOM_CART2D>(num_p, p, td,
+                                      ti, tri_ind);
+  } else if (sdim==3) {
+    ret=triangulate_poly<GEOM_SPH2D3D>(num_p, p, td,
+                                       ti, tri_ind);
+  } else {
+    if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+                                  " - triangulate can't be used for polygons with spatial dimension not equal to 2 or 3",
+                                      ESMC_CONTEXT, &localrc)) throw localrc;
+  }
 
-          // Check return code
-          if (ret != ESMCI_TP_SUCCESS) {
-            if (ret == ESMCI_TP_DEGENERATE_POLY) {
-              if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-                   " - can't triangulate a polygon with less than 3 sides",
-                                                ESMC_CONTEXT, &localrc)) throw localrc;
-            } else if (ret == ESMCI_TP_CLOCKWISE_POLY) {
-              char msg[1024];
-              sprintf(msg," - there was a problem (e.g. repeated points, clockwise poly, etc.) with the triangulation of the element with id=%d ",oeid);
-              if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, msg,
-                                              ESMC_CONTEXT, &localrc)) throw localrc;
-            } else {
-              if (ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                                " - unknown error in triangulation", ESMC_CONTEXT, &localrc)) throw localrc;
-            }
-          }
+  // Check return code
+  if (ret != ESMCI_TP_SUCCESS) {
+    if (ret == ESMCI_TP_DEGENERATE_POLY) {
+      if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+           " - can't triangulate a polygon with less than 3 sides",
+                                        ESMC_CONTEXT, &localrc)) throw localrc;
+    } else if (ret == ESMCI_TP_CLOCKWISE_POLY) {
+      char msg[1024];
+      sprintf(msg," - there was a problem (e.g. repeated points, clockwise poly, etc.) with the triangulation of the element with id=%d ",oeid);
+      if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, msg,
+                                      ESMC_CONTEXT, &localrc)) throw localrc;
+    } else {
+      if (ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                        " - unknown error in triangulation", ESMC_CONTEXT, &localrc)) throw localrc;
+    }
+  }
 
 
-          // Calculate triangule areas
-          int ti_pos=0;
-          for (int i=0; i<num_p-2; i++) {
-            // Copy triangle coordinates into td
-            int td_pos=0;
-            for (int j=0; j<3; j++) {
-              double *pnt=p+sdim*tri_ind[ti_pos+j];
-              for (int k=0; k<sdim; k++) {
-                td[td_pos]=pnt[k];
-                td_pos++;
-              }
-            }
+  // Calculate triangule areas
+  int ti_pos=0;
+  for (int i=0; i<num_p-2; i++) {
+    // Copy triangle coordinates into td
+    int td_pos=0;
+    for (int j=0; j<3; j++) {
+      double *pnt=p+sdim*tri_ind[ti_pos+j];
+      for (int k=0; k<sdim; k++) {
+        td[td_pos]=pnt[k];
+        td_pos++;
+      }
+    }
 
-            // compute area of triangle
-            double area;
-            if (sdim == 2) {
-              area = area_of_flat_2D_polygon(3, td);
-            } else if (sdim == 3) {
-              area = great_circle_area(3, td);
-            } // Other sdim caught above
+    // compute area of triangle
+    double area;
+    if (sdim == 2) {
+      area = area_of_flat_2D_polygon(3, td);
+    } else if (sdim == 3) {
+      area = great_circle_area(3, td);
+    } // Other sdim caught above
 
-            // Save areas to use for computing fractions
-            tri_area[i]=area;
+    // Save areas to use for computing fractions
+    tri_area[i]=area;
 
-            // Advance to next triangle
-            ti_pos +=3;
-          }
-
-    return;
+    // Advance to next triangle
+    ti_pos +=3;
+  }
 }
 
 
@@ -361,35 +346,148 @@ void _detect_split_elems(
                          ) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "_detect_split_elems()"
+  try {
+    int localrc, merr;
 
-  // local rc code
-  int localrc;
-  
-  // MOAB error return
-  int merr;
-  
-  // Error Check Input //
-  if (num_elems > 0) {
-    ThrowRequire(elemType != NULL);
-    ThrowRequire(elemConn != NULL);
-  }
-  
-  // Get current mpi communicator
-  MPI_Comm mpi_comm;
-  mpi_comm=VM::getCurrent(&localrc)->getMpi_c();
-  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-    throw localrc;  // bail out with exception
-  
-  // Init is_split output
-  is_split=false;
-  is_split_local=false;
-  
-  // Count the number of extra elements we need for splitting
-  int num_extra_elem=0;
-  if (pdim==2) {
-    int conn_pos=0;
-    for (int e= 0; e<num_elems; ++e) {
+    // Error Check Input //
+    if (num_elems > 0) {
+      ThrowRequire(elemType != NULL);
+      ThrowRequire(elemConn != NULL);
+    }
+    
+    // Get current mpi communicator
+    MPI_Comm mpi_comm;
+    mpi_comm=VM::getCurrent(&localrc)->getMpi_c();
+    ESMC_THROW_RC(localrc);
+    
+    // Init is_split output
+    is_split=false;
+    is_split_local=false;
+    
+    // Count the number of extra elements we need for splitting
+    int num_extra_elem=0;
+    if (pdim==2) {
+      int conn_pos=0;
+      for (int e= 0; e<num_elems; ++e) {
+        
+        // Only count split elements
+        if (elemType[e] > 4) {
+          
+          // Loop here through each set of connection looking for polybreaks to
+          // figure out the size of each sub-elem
+          int subelem_size=0;
+          int num_elemtris=0;
+          for (int i=0; i<elemType[e]; i++) {
+            
+            // Advance size of element, or start a new one
+            if (elemConn[conn_pos] != MESH_POLYBREAK_IND) {
+              subelem_size++;
+            } else {
+              // record this elem
+              num_extra_elem += (subelem_size-2); // num tri = # sides-2
+              subelem_size=0;
+            }
+            
+            // next connection
+            conn_pos++;
+          }
+          
+          // record this elem
+          num_extra_elem += (subelem_size-3); // num tri = # sides-2 - 1 (for orig elem)
+        } else {
+          conn_pos += elemType[e];
+        }
+
+      }
       
+      // mark if mesh on this particular PET is split
+      if (num_extra_elem > 0) is_split_local=true;
+    
+      // Get the total number of extra split elems across all PETs  
+      int tot_num_extra_elem=0;
+      MPI_Allreduce(&num_extra_elem,&tot_num_extra_elem,1,MPI_INT,MPI_SUM,mpi_comm);
+      
+      // If there's extra elems on any PET, than it's a split mesh
+      if (tot_num_extra_elem>0) {
+        is_split=true;
+      } else {
+        is_split=false;
+      }
+    }
+  }
+  CATCH_MBMESH_RETHROW
+}
+
+
+// This routine should only be run when split elems have been detected by the above. 
+// It takes in a set of element creation information, and outputs the new split element creation information
+void _generate_info_for_split_elems(
+                                    // In
+                                    bool is_split_local,
+                                    int pdim, 
+                                    int orig_sdim, 
+                                    int sdim,
+                                    int num_elems,
+                                    int *elemId,
+                                    int *elemType, int *elemMask,
+                                    int areaPresent, double *elemArea,
+                                    int elemCoordsPresent, double *elemCoords,
+                                    int num_elemConn,
+                                    int *elemConn,
+                                    double *nodeCoords, // node coords in orig. node order
+
+                                    // Out
+                                    int  &max_non_split_id,
+                                    std::map<int,int> &split_to_orig_id, 
+                                    std::map<int,double> &split_id_to_frac,
+                                    int  &num_elems_wsplit,
+                                    int *&elemId_wsplit,
+                                    int *&elemType_wsplit,
+                                    int *&elemMask_wsplit,
+                                    double *&elemArea_wsplit,
+                                    double *&elemCoords_wsplit,
+                                    int *&elemConn_wsplit
+                                    ) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "_generate_info_for_split_elems()"
+  try {
+    ESMCI_MESHCREATE_TRACE_ENTER("MBMesh addelems split elem handling"); 
+
+    int localrc, merr;
+
+    //// Error Check Input ////
+
+    // If there are elems, then these shouldn't be NULL
+    if (num_elems > 0) {
+      ThrowRequire(elemId != NULL);
+      ThrowRequire(elemType != NULL);
+      ThrowRequire(elemConn != NULL);
+    }
+
+    // Check below closer to where it's used
+    // if ((num_elems > 0) && is_split_local)  {
+    //    ThrowRequire(nodeCoords != NULL);
+    // }
+
+    // If area is present, shouldn't be NULL
+    if (areaPresent) ThrowRequire(elemArea != NULL);
+    if (elemCoordsPresent) ThrowRequire(elemCoords != NULL);
+
+    
+
+    // Get current mpi communicator
+    MPI_Comm mpi_comm;
+    mpi_comm=VM::getCurrent(&localrc)->getMpi_c();
+    ESMC_THROW_RC(localrc);
+    
+    
+    // Count the number of extra elements we need for splitting
+    int num_extra_elem=0;
+    int max_num_conn=0;
+    int max_num_elemtris=0;
+    int conn_pos=0;
+    for (int e=0; e<num_elems; ++e) {
+        
       // Only count split elements
       if (elemType[e] > 4) {
         
@@ -405,294 +503,231 @@ void _detect_split_elems(
           } else {
             // record this elem
             num_extra_elem += (subelem_size-2); // num tri = # sides-2
+            num_elemtris += (subelem_size-2); // num tri = # sides-2
+            if (subelem_size > max_num_conn) max_num_conn=subelem_size;
             subelem_size=0;
           }
-          
+            
           // next connection
           conn_pos++;
         }
         
         // record this elem
         num_extra_elem += (subelem_size-3); // num tri = # sides-2 - 1 (for orig elem)
+        num_elemtris += (subelem_size-2); // num tri = # sides-2 (count orig elem)
+        if (num_elemtris > max_num_elemtris) max_num_elemtris=num_elemtris;
+        if (subelem_size > max_num_conn) max_num_conn=subelem_size;
       } else {
         conn_pos += elemType[e];
       }
-
     }
     
-    // mark if mesh on this particular PET is split
-    if (num_extra_elem > 0) is_split_local=true;
-  
-    // Get the total number of extra split elems across all PETs  
-    int tot_num_extra_elem=0;
-    MPI_Allreduce(&num_extra_elem,&tot_num_extra_elem,1,MPI_INT,MPI_SUM,mpi_comm);
-    
-    // If there's extra elems on any PET, than it's a split mesh
-    if (tot_num_extra_elem>0) {
-      is_split=true;
-    } else {
-      is_split=false;
+    // Compute the extra element ranges
+    int beg_extra_ids=0;
+    // get maximum local elem id
+    int max_id=0;
+    for (int e=0; e<num_elems; ++e) {
+      if (elemId[e] > max_id) {
+        max_id=elemId[e];
+      }
     }
-  }
 
-}
-
-
-// This routine should only be run when split elems have been detected by the above. 
-// It takes in a set of element creation information, and outputs the new split element creation information
-void _generate_info_for_split_elems(
-                                          // In
-                                          bool is_split_local, 
-
-                                          int pdim, 
-                                          int orig_sdim, 
-                                          int sdim, 
-
-                                          int num_elems,                                           
-                                          int *elemId, 
-                                          int *elemType, int *elemMask,
-                                          int areaPresent, double *elemArea,
-                                          int elemCoordsPresent, double *elemCoords,
-                                          int num_elemConn, 
-                                          int *elemConn,
-                                          double *nodeCoords, // node coords in orig. node order
-
-                                          // Out
-                                          int  &max_non_split_id,
-                                          std::map<int,int> &split_to_orig_id, 
-                                          std::map<int,double> &split_id_to_frac,
-
-                                          int  &num_elems_wsplit,
-                                          int *&elemId_wsplit,
-                                          int *&elemType_wsplit,
-                                          int *&elemMask_wsplit,
-                                          double *&elemArea_wsplit,
-                                          double *&elemCoords_wsplit,
-                                          int *&elemConn_wsplit
-                                          ) {
-#undef  ESMC_METHOD
-#define ESMC_METHOD "_generate_info_for_split_elems()"
-
-  ESMCI_MESHCREATE_TRACE_ENTER("MBMesh addelems split elem handling"); 
-
-  // local rc code
-  int localrc;
-  
-  // MOAB error return
-  int merr;
-
-  //// Error Check Input ////
-
-  // If there are elems, then these shouldn't be NULL
-  if (num_elems > 0) {
-    ThrowRequire(elemId != NULL);
-    ThrowRequire(elemType != NULL);
-    ThrowRequire(elemConn != NULL);
-  }
-
-  // Check below closer to where it's used
-  // if ((num_elems > 0) && is_split_local)  {
-  //    ThrowRequire(nodeCoords != NULL);
-  // }
-
-  // If area is present, shouldn't be NULL
-  if (areaPresent) ThrowRequire(elemArea != NULL);
-  if (elemCoordsPresent) ThrowRequire(elemCoords != NULL);
-
-  
-
-  // Get current mpi communicator
-  MPI_Comm mpi_comm;
-  mpi_comm=VM::getCurrent(&localrc)->getMpi_c();
-  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-    throw localrc;  // bail out with exception
-  
-  
-  // Count the number of extra elements we need for splitting
-  int num_extra_elem=0;
-  int max_num_conn=0;
-  int max_num_elemtris=0;
-  int conn_pos=0;
-  for (int e=0; e<num_elems; ++e) {
       
-    // Only count split elements
-    if (elemType[e] > 4) {
+    // Calc global max id
+    int global_max_id=0;
+    MPI_Allreduce(&max_id,&global_max_id,1,MPI_INT,MPI_MAX,mpi_comm);
+    
+    // Set maximum of non-split ids
+    max_non_split_id=global_max_id;
+    
+    // Calc our range of extra elem ids
+    beg_extra_ids=0;
+    MPI_Scan(&num_extra_elem,&beg_extra_ids,1,MPI_INT,MPI_SUM,mpi_comm);
+    
+    // Remove this processor's number from the sum to get the beginning
+    beg_extra_ids=beg_extra_ids-num_extra_elem;
+    
+    // Start 1 up from max
+    beg_extra_ids=beg_extra_ids+global_max_id+1;
+    
+    // printf("%d# beg_extra_ids=%d end=%d\n",Par::Rank(),beg_extra_ids,beg_extra_ids+num_extra_elem-1);
+    
+    ESMCI_MESHCREATE_TRACE_EXIT("MBMesh addelems split elem handling");
+    
+    
+    ESMCI_MESHCREATE_TRACE_ENTER("MBMesh addelems connectivity");
+    
+    // If there are split elems on this processor, then generate new split lists
+    if (is_split_local) {
+
+      // New number of elements
+      num_elems_wsplit=num_elems+num_extra_elem;
       
-      // Loop here through each set of connection looking for polybreaks to
-      // figure out the size of each sub-elem
-      int subelem_size=0;
-      int num_elemtris=0;
-      for (int i=0; i<elemType[e]; i++) {
-        
-        // Advance size of element, or start a new one
-        if (elemConn[conn_pos] != MESH_POLYBREAK_IND) {
-          subelem_size++;
-        } else {
-          // record this elem
-          num_extra_elem += (subelem_size-2); // num tri = # sides-2
-          num_elemtris += (subelem_size-2); // num tri = # sides-2
-          if (subelem_size > max_num_conn) max_num_conn=subelem_size;
-          subelem_size=0;
-        }
+      // Allocate arrays to hold split lists
+      ThrowRequire((num_elemConn+3*num_extra_elem) >= 0);
+      elemConn_wsplit=new int[num_elemConn+3*num_extra_elem];
+      ThrowRequire(num_elems_wsplit >= 0);
+      elemType_wsplit=new int[num_elems_wsplit];
+      elemId_wsplit=new int[num_elems_wsplit];
+      if (elemMask != NULL) elemMask_wsplit=new int[num_elems_wsplit];
+      if (areaPresent) elemArea_wsplit=new double[num_elems_wsplit];
+      if (elemCoordsPresent) elemCoords_wsplit=new double[orig_sdim*num_elems_wsplit];
           
-        // next connection
-        conn_pos++;
+      // Allocate some temporary variables for splitting
+      ThrowRequire(max_num_conn >= 0);
+      double *subelem_coords=new double[3*max_num_conn];
+      double *subelem_dbl_buf=new double[3*max_num_conn];
+      int    *subelem_int_buf=new int[max_num_conn];
+
+      ThrowRequire(max_num_elemtris >= 0);
+      double *elemtris_area=new double[max_num_elemtris];
+      int *elemtris_split_elem_pos=new int[max_num_elemtris];
+
+      // Allocate other temp. variables, but make sure they aren't of size <0. 
+      ThrowRequire((max_num_conn-2) >= 0);
+      int *subelem_tri_ind=new int[3*(max_num_conn-2)];
+      double *subelem_tri_area=new double[max_num_conn-2];
+      
+      // Check that nodeCoords is not NULL, because it's used below if num_elems>0
+      if (num_elems > 0)  {
+        ThrowRequire(nodeCoords != NULL);
       }
       
-      // record this elem
-      num_extra_elem += (subelem_size-3); // num tri = # sides-2 - 1 (for orig elem)
-      num_elemtris += (subelem_size-2); // num tri = # sides-2 (count orig elem)
-      if (num_elemtris > max_num_elemtris) max_num_elemtris=num_elemtris;
-      if (subelem_size > max_num_conn) max_num_conn=subelem_size;
-    } else {
-      conn_pos += elemType[e];
-    }
-  }
-  
-  // Compute the extra element ranges
-  int beg_extra_ids=0;
-  // get maximum local elem id
-  int max_id=0;
-  for (int e=0; e<num_elems; ++e) {
-    if (elemId[e] > max_id) {
-      max_id=elemId[e];
-    }
-  }
-
-    
-  // Calc global max id
-  int global_max_id=0;
-  MPI_Allreduce(&max_id,&global_max_id,1,MPI_INT,MPI_MAX,mpi_comm);
-  
-  // Set maximum of non-split ids
-  max_non_split_id=global_max_id;
-  
-  // Calc our range of extra elem ids
-  beg_extra_ids=0;
-  MPI_Scan(&num_extra_elem,&beg_extra_ids,1,MPI_INT,MPI_SUM,mpi_comm);
-  
-  // Remove this processor's number from the sum to get the beginning
-  beg_extra_ids=beg_extra_ids-num_extra_elem;
-  
-  // Start 1 up from max
-  beg_extra_ids=beg_extra_ids+global_max_id+1;
-  
-  // printf("%d# beg_extra_ids=%d end=%d\n",Par::Rank(),beg_extra_ids,beg_extra_ids+num_extra_elem-1);
-  
-  ESMCI_MESHCREATE_TRACE_EXIT("MBMesh addelems split elem handling");
-  
-  
-  ESMCI_MESHCREATE_TRACE_ENTER("MBMesh addelems connectivity");
-  
-  // If there are split elems on this processor, then generate new split lists
-  if (is_split_local) {
-
-    // New number of elements
-    num_elems_wsplit=num_elems+num_extra_elem;
-    
-    // Allocate arrays to hold split lists
-    ThrowRequire((num_elemConn+3*num_extra_elem) >= 0);
-    elemConn_wsplit=new int[num_elemConn+3*num_extra_elem];
-    ThrowRequire(num_elems_wsplit >= 0);
-    elemType_wsplit=new int[num_elems_wsplit];
-    elemId_wsplit=new int[num_elems_wsplit];
-    if (elemMask != NULL) elemMask_wsplit=new int[num_elems_wsplit];
-    if (areaPresent) elemArea_wsplit=new double[num_elems_wsplit];
-    if (elemCoordsPresent) elemCoords_wsplit=new double[orig_sdim*num_elems_wsplit];
-        
-    // Allocate some temporary variables for splitting
-    ThrowRequire(max_num_conn >= 0);
-    double *subelem_coords=new double[3*max_num_conn];
-    double *subelem_dbl_buf=new double[3*max_num_conn];
-    int    *subelem_int_buf=new int[max_num_conn];
-
-    ThrowRequire(max_num_elemtris >= 0);
-    double *elemtris_area=new double[max_num_elemtris];
-    int *elemtris_split_elem_pos=new int[max_num_elemtris];
-
-    // Allocate other temp. variables, but make sure they aren't of size <0. 
-    ThrowRequire((max_num_conn-2) >= 0);
-    int *subelem_tri_ind=new int[3*(max_num_conn-2)];
-    double *subelem_tri_area=new double[max_num_conn-2];
-    
-    // Check that nodeCoords is not NULL, because it's used below if num_elems>0
-    if (num_elems > 0)  {
-      ThrowRequire(nodeCoords != NULL);
-    }
-    
-    // new id counter
-    int curr_extra_id=beg_extra_ids;
-    
-    // Loop through elems generating split elems if necessary
-    int conn_pos = 0;
-    int split_conn_pos = 0;
-    int split_elem_pos = 0;
-    for (int e=0; e<num_elems; ++e) {
+      // new id counter
+      int curr_extra_id=beg_extra_ids;
       
-      // More than 4 side, split
-      if (elemType[e]>4) {
+      // Loop through elems generating split elems if necessary
+      int conn_pos = 0;
+      int split_conn_pos = 0;
+      int split_elem_pos = 0;
+      for (int e=0; e<num_elems; ++e) {
         
-        // Init for frac calc
-          int    num_elemtris=0;
-          double tot_elemtris_area=0.0;
+        // More than 4 side, split
+        if (elemType[e]>4) {
           
-          // Loop while we're still in this element
-          bool first_elem=true;
-          int end_of_elem=conn_pos+elemType[e];
-          while (conn_pos < end_of_elem) {
+          // Init for frac calc
+            int    num_elemtris=0;
+            double tot_elemtris_area=0.0;
             
-            // Skip poly breaks
-            if (elemConn[conn_pos] == MESH_POLYBREAK_IND) conn_pos++;
-            
-            // Find sub-elements (may be only one)
-            int subelem_size=0;
-            for (int i=conn_pos; i<end_of_elem; i++) {
-              if (elemConn[i] == MESH_POLYBREAK_IND) break;
-              subelem_size++;
-            }
-            
-            //   printf("id=%d subelem_size=%d\n",elemId[e],subelem_size);
-            
-          // Get corner coordinates
-          int crd_pos=0;
-          for (int i=0; i<elemType[e]; i++) {
-            int node_index=elemConn[conn_pos+i]-1; // -1 because elemConn 1-based, but C indexing 0-based
-            double *corner_coords=nodeCoords+3*node_index; // 3 is used because nodeCoords are always 3 doubles in MOAB
-            
-            for (int j=0; j<sdim; j++) {
-              subelem_coords[crd_pos]=corner_coords[j];
-              crd_pos++;
+            // Loop while we're still in this element
+            bool first_elem=true;
+            int end_of_elem=conn_pos+elemType[e];
+            while (conn_pos < end_of_elem) {
+              
+              // Skip poly breaks
+              if (elemConn[conn_pos] == MESH_POLYBREAK_IND) conn_pos++;
+              
+              // Find sub-elements (may be only one)
+              int subelem_size=0;
+              for (int i=conn_pos; i<end_of_elem; i++) {
+                if (elemConn[i] == MESH_POLYBREAK_IND) break;
+                subelem_size++;
+              }
+              
+              //   printf("id=%d subelem_size=%d\n",elemId[e],subelem_size);
+              
+            // Get corner coordinates
+            int crd_pos=0;
+            for (int i=0; i<elemType[e]; i++) {
+              int node_index=elemConn[conn_pos+i]-1; // -1 because elemConn 1-based, but C indexing 0-based
+              double *corner_coords=nodeCoords+3*node_index; // 3 is used because nodeCoords are always 3 doubles in MOAB
+              
+              for (int j=0; j<sdim; j++) {
+                subelem_coords[crd_pos]=corner_coords[j];
+                crd_pos++;
+              }
+
+              // printf("id=%d coord=%f %f \n",elemId[e],subelem_coords[crd_pos-2],subelem_coords[crd_pos-1]);
             }
 
-            // printf("id=%d coord=%f %f \n",elemId[e],subelem_coords[crd_pos-2],subelem_coords[crd_pos-1]);
-          }
+            // Triangulate polygon
+            triangulate_warea(sdim, subelem_size, subelem_coords, elemId[e],
+                              subelem_dbl_buf, subelem_int_buf,
+                              subelem_tri_ind, subelem_tri_area);
+            
+            
+            // Create split element list
+            int tI_pos=0;
+            for (int i=0; i<subelem_size-2; i++) {
+              // First id is same, others are from new ids
+              if (first_elem) {
+                elemId_wsplit[split_elem_pos]=elemId[e];
+                first_elem=false;
+              } else {
+                elemId_wsplit[split_elem_pos]=curr_extra_id;
+                split_to_orig_id[curr_extra_id]=elemId[e]; // Store map of split to original id
+                curr_extra_id++;
+              }
+              
+              // Type is triangle
+              elemType_wsplit[split_elem_pos]=3;
+              
+              // Set mask (if it exists)
+              if (elemMask != NULL) elemMask_wsplit[split_elem_pos]=elemMask[e];
+              
+              // Set element coords. (if it exists)
+              if (elemCoordsPresent) {
+                double *elem_pnt=elemCoords+orig_sdim*e;
+                double *elem_pnt_wsplit=elemCoords_wsplit+orig_sdim*split_elem_pos;
+                for (int j=0; j<orig_sdim; j++) {
+                  elem_pnt_wsplit[j]=elem_pnt[j];
+                }
+              }
+              
+              
+              // Set triangle corners based on subelem_tri_ind
+              elemConn_wsplit[split_conn_pos]=elemConn[conn_pos+subelem_tri_ind[tI_pos]];
+              elemConn_wsplit[split_conn_pos+1]=elemConn[conn_pos+subelem_tri_ind[tI_pos+1]];
+              elemConn_wsplit[split_conn_pos+2]=elemConn[conn_pos+subelem_tri_ind[tI_pos+2]];
+              
+              // Acumulate over sub-elems in one element
+              elemtris_split_elem_pos[num_elemtris]=split_elem_pos;
+              elemtris_area[num_elemtris]=subelem_tri_area[i];
+              tot_elemtris_area += elemtris_area[num_elemtris];
+              num_elemtris++;
 
-          // Triangulate polygon
-          triangulate_warea(sdim, subelem_size, subelem_coords, elemId[e],
-                            subelem_dbl_buf, subelem_int_buf,
-                            subelem_tri_ind, subelem_tri_area);
-          
-          
-          // Create split element list
-          int tI_pos=0;
-          for (int i=0; i<subelem_size-2; i++) {
-            // First id is same, others are from new ids
-            if (first_elem) {
-              elemId_wsplit[split_elem_pos]=elemId[e];
-              first_elem=false;
-            } else {
-              elemId_wsplit[split_elem_pos]=curr_extra_id;
-              split_to_orig_id[curr_extra_id]=elemId[e]; // Store map of split to original id
-              curr_extra_id++;
+              // printf("%d eid=%d seid=%d %d %d %d %f\n",i,elemId[e],elemId_wsplit[split_elem_pos-1],elemConn_wsplit[split_conn_pos],elemConn_wsplit[split_conn_pos+1],elemConn_wsplit[split_conn_pos+2],triFrac[i]);
+
+              // Advance
+              split_elem_pos++;
+              split_conn_pos +=3;
+              tI_pos +=3;
             }
-            
-            // Type is triangle
-            elemType_wsplit[split_elem_pos]=3;
-            
-            // Set mask (if it exists)
-            if (elemMask != NULL) elemMask_wsplit[split_elem_pos]=elemMask[e];
-            
-            // Set element coords. (if it exists)
+
+            // Advance to next elemConn position
+            conn_pos +=subelem_size;
+
+            } // end of loop through sub elems
+
+            // Loop over elem setting fracs
+            if (tot_elemtris_area > 0.0) {
+               for (int i=0; i<num_elemtris; i++) {
+                 double frac=elemtris_area[i]/tot_elemtris_area;
+                 int sep=elemtris_split_elem_pos[i];
+
+                 // Add frac to mesh split information
+                 split_id_to_frac[elemId_wsplit[sep]]=frac;
+
+                 // Set area to fraction of original area
+                 if (areaPresent) elemArea_wsplit[sep]=elemArea[e]*frac;
+               }
+             } else {
+               for (int i=0; i<num_elemtris; i++) {
+                 double frac=elemtris_area[i]/tot_elemtris_area;
+                 int sep=elemtris_split_elem_pos[i];
+
+                 // Add frac to mesh split information
+                 split_id_to_frac[elemId_wsplit[sep]]=0.0;
+
+                 // Set area to fraction of original area
+                 if (areaPresent) elemArea_wsplit[sep]=0.0;
+               }
+             }
+
+           } else { // just copy
+            elemId_wsplit[split_elem_pos]=elemId[e];
+            elemType_wsplit[split_elem_pos]=elemType[e];
+            if (areaPresent) elemArea_wsplit[split_elem_pos]=elemArea[e];
             if (elemCoordsPresent) {
               double *elem_pnt=elemCoords+orig_sdim*e;
               double *elem_pnt_wsplit=elemCoords_wsplit+orig_sdim*split_elem_pos;
@@ -700,89 +735,29 @@ void _generate_info_for_split_elems(
                 elem_pnt_wsplit[j]=elem_pnt[j];
               }
             }
-            
-            
-            // Set triangle corners based on subelem_tri_ind
-            elemConn_wsplit[split_conn_pos]=elemConn[conn_pos+subelem_tri_ind[tI_pos]];
-            elemConn_wsplit[split_conn_pos+1]=elemConn[conn_pos+subelem_tri_ind[tI_pos+1]];
-            elemConn_wsplit[split_conn_pos+2]=elemConn[conn_pos+subelem_tri_ind[tI_pos+2]];
-            
-            // Acumulate over sub-elems in one element
-            elemtris_split_elem_pos[num_elemtris]=split_elem_pos;
-            elemtris_area[num_elemtris]=subelem_tri_area[i];
-            tot_elemtris_area += elemtris_area[num_elemtris];
-            num_elemtris++;
-
-            // printf("%d eid=%d seid=%d %d %d %d %f\n",i,elemId[e],elemId_wsplit[split_elem_pos-1],elemConn_wsplit[split_conn_pos],elemConn_wsplit[split_conn_pos+1],elemConn_wsplit[split_conn_pos+2],triFrac[i]);
-
-            // Advance
+            if (elemMask != NULL) elemMask_wsplit[split_elem_pos]=elemMask[e];
             split_elem_pos++;
-            split_conn_pos +=3;
-            tI_pos +=3;
-          }
-
-          // Advance to next elemConn position
-          conn_pos +=subelem_size;
-
-          } // end of loop through sub elems
-
-          // Loop over elem setting fracs
-          if (tot_elemtris_area > 0.0) {
-             for (int i=0; i<num_elemtris; i++) {
-               double frac=elemtris_area[i]/tot_elemtris_area;
-               int sep=elemtris_split_elem_pos[i];
-
-               // Add frac to mesh split information
-               split_id_to_frac[elemId_wsplit[sep]]=frac;
-
-               // Set area to fraction of original area
-               if (areaPresent) elemArea_wsplit[sep]=elemArea[e]*frac;
-             }
-           } else {
-             for (int i=0; i<num_elemtris; i++) {
-               double frac=elemtris_area[i]/tot_elemtris_area;
-               int sep=elemtris_split_elem_pos[i];
-
-               // Add frac to mesh split information
-               split_id_to_frac[elemId_wsplit[sep]]=0.0;
-
-               // Set area to fraction of original area
-               if (areaPresent) elemArea_wsplit[sep]=0.0;
-             }
-           }
-
-         } else { // just copy
-          elemId_wsplit[split_elem_pos]=elemId[e];
-          elemType_wsplit[split_elem_pos]=elemType[e];
-          if (areaPresent) elemArea_wsplit[split_elem_pos]=elemArea[e];
-          if (elemCoordsPresent) {
-            double *elem_pnt=elemCoords+orig_sdim*e;
-            double *elem_pnt_wsplit=elemCoords_wsplit+orig_sdim*split_elem_pos;
-            for (int j=0; j<orig_sdim; j++) {
-              elem_pnt_wsplit[j]=elem_pnt[j];
+            for (int i=0; i<elemType[e]; i++) {
+              elemConn_wsplit[split_conn_pos]=elemConn[conn_pos];
+              split_conn_pos++;
+              conn_pos++;
             }
-          }
-          if (elemMask != NULL) elemMask_wsplit[split_elem_pos]=elemMask[e];
-          split_elem_pos++;
-          for (int i=0; i<elemType[e]; i++) {
-            elemConn_wsplit[split_conn_pos]=elemConn[conn_pos];
-            split_conn_pos++;
-            conn_pos++;
-          }
+        }
       }
+
+      // Deallocate temporary variables for splitting
+      delete [] subelem_coords;
+      delete [] subelem_dbl_buf;
+      delete [] subelem_int_buf;
+      delete [] subelem_tri_ind;
+      delete [] subelem_tri_area;
+      delete [] elemtris_area;
+      delete [] elemtris_split_elem_pos;
     }
 
-    // Deallocate temporary variables for splitting
-    delete [] subelem_coords;
-    delete [] subelem_dbl_buf;
-    delete [] subelem_int_buf;
-    delete [] subelem_tri_ind;
-    delete [] subelem_tri_area;
-    delete [] elemtris_area;
-    delete [] elemtris_split_elem_pos;
+    ESMCI_MESHCREATE_TRACE_EXIT("MBMesh addelems connectivity");
   }
-
-  ESMCI_MESHCREATE_TRACE_EXIT("MBMesh addelems connectivity");
+  CATCH_MBMESH_RETHROW
 }
 
 
@@ -801,107 +776,107 @@ void _add_elems_all_one_type(MBMesh *mbmp, int localPet,
                              ) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "_add_elems_all_one_type()"
+  try {
+    int localrc, merr;
 
-  // Return codes
-  int localrc;  // local rc code
-  int merr;   // MOAB error return
- 
-  // If number of elems is 0, then there's nothing to do, so just leave
-  if (num_elems <= 0) return;
+    // If number of elems is 0, then there's nothing to do, so just leave
+    if (num_elems <= 0) return;
 
-  // Check input
-  ThrowRequire(elemId != NULL);
-  ThrowRequire(elemConn != NULL);
-  if (areaPresent == 1) ThrowRequire(elemArea != NULL);
-  if (elemCoordsPresent == 1) ThrowRequire(elemCoords != NULL);
+    // Check input
+    ThrowRequire(elemId != NULL);
+    ThrowRequire(elemConn != NULL);
+    if (areaPresent == 1) ThrowRequire(elemArea != NULL);
+    if (elemCoordsPresent == 1) ThrowRequire(elemCoords != NULL);
 
-  // Get number of nodes_per_elem and MOAB entity type
-  int num_nodes_per_elem=0;
-  EntityType etype;
-  num_nodes_per_elem=ElemType2NumNodes(mbmp->pdim, curr_elem_type);  
-  etype=get_entity_type(mbmp->pdim, curr_elem_type);
-  
-   
-  // Allocate connection list
-  ThrowRequire(num_nodes_per_elem*num_elems >= 0);
-  EntityHandle *node_conn= new EntityHandle[num_nodes_per_elem*num_elems]; 
-
-  // Get vector of orig_nodes
-  std::vector<EntityHandle> const &orig_nodes=mbmp->get_orig_nodes();
-
-  // Loop elements and construct connection list
-  int conn_pos=0;
-  for (int e = 0; e < num_elems; ++e) {
+    // Get number of nodes_per_elem and MOAB entity type
+    int num_nodes_per_elem=0;
+    EntityType etype;
+    num_nodes_per_elem=ElemType2NumNodes(mbmp->pdim, curr_elem_type);  
+    etype=get_entity_type(mbmp->pdim, curr_elem_type);
     
-    // Loop over this element
-    for (int n = 0; n < num_nodes_per_elem; ++n) {
+     
+    // Allocate connection list
+    ThrowRequire(num_nodes_per_elem*num_elems >= 0);
+    EntityHandle *node_conn= new EntityHandle[num_nodes_per_elem*num_elems]; 
+
+    // Get vector of orig_nodes
+    std::vector<EntityHandle> const &orig_nodes=mbmp->get_orig_nodes();
+
+    // Loop elements and construct connection list
+    int conn_pos=0;
+    for (int e = 0; e < num_elems; ++e) {
       
-      // Get 0-based vert index
-      int vert_index=elemConn[conn_pos]-1;
-      
-      // Setup connectivity list
-      node_conn[conn_pos] = orig_nodes.at(vert_index);
-      
-      // Advance to next
-      conn_pos++;
-    }        
-  }
+      // Loop over this element
+      for (int n = 0; n < num_nodes_per_elem; ++n) {
+        
+        // Get 0-based vert index
+        int vert_index=elemConn[conn_pos]-1;
+        
+        // Setup connectivity list
+        node_conn[conn_pos] = orig_nodes.at(vert_index);
+        
+        // Advance to next
+        conn_pos++;
+      }        
+    }
 
 
-  // Allocate orig_pos list
-  ThrowRequire(num_elems >= 0);
-  int *orig_pos=new int[num_elems];
-  
-  // Fill orig_pos list
-  for (int i=0; i<num_elems; i++) {
-    orig_pos[i]=i;
-  }
-  
-
-  // Allocate owner list
-  ThrowRequire(num_elems >= 0);
-  int *owners=new int[num_elems];
-
-  // Fill owner list
-  for (int i=0; i<num_elems; i++) {
-    owners[i]=localPet;
-  }
-  
-  
-  // Create elems
-  Range added_elems;
-  mbmp->add_elems(num_elems, 
-                  etype, num_nodes_per_elem,
-                  node_conn, // List of nodes that make up each elem (of size num_new_elems*nodes_per_elem)
-                  elemId,      // global ids for each elem (of size num_new_elems)
-                  orig_pos,  // original position for each elem (of size num_new_elems)
-                  owners,     // owner for each elem (of size num_new_elems)
-                  added_elems);
-
-
-  //// Fill optional fields ////
-
-  // Mask
-  if ((elemMask != NULL) && mbmp->has_elem_mask) {
-    mbmp->set_elem_mask_val(added_elems, elemMask);
-  }
-
-  // Elem area
-  if (areaPresent && mbmp->has_elem_area) {
-    mbmp->set_elem_area(added_elems, elemArea);
-  }
-
-
-  // Elem coords
-  if (elemCoordsPresent && mbmp->has_elem_coords) {
-    mbmp->set_elem_coords(added_elems, elemCoords);
-  }
+    // Allocate orig_pos list
+    ThrowRequire(num_elems >= 0);
+    int *orig_pos=new int[num_elems];
+    
+    // Fill orig_pos list
+    for (int i=0; i<num_elems; i++) {
+      orig_pos[i]=i;
+    }
     
 
-  // Deallocate temp. arrays
-  delete [] node_conn;
-  delete [] orig_pos;
-  delete [] owners;
+    // Allocate owner list
+    ThrowRequire(num_elems >= 0);
+    int *owners=new int[num_elems];
+
+    // Fill owner list
+    for (int i=0; i<num_elems; i++) {
+      owners[i]=localPet;
+    }
+    
+    
+    // Create elems
+    Range added_elems;
+    mbmp->add_elems(num_elems, 
+                    etype, num_nodes_per_elem,
+                    node_conn, // List of nodes that make up each elem (of size num_new_elems*nodes_per_elem)
+                    elemId,      // global ids for each elem (of size num_new_elems)
+                    orig_pos,  // original position for each elem (of size num_new_elems)
+                    owners,     // owner for each elem (of size num_new_elems)
+                    added_elems);
+
+
+    //// Fill optional fields ////
+
+    // Mask
+    if ((elemMask != NULL) && mbmp->has_elem_mask) {
+      mbmp->set_elem_mask_val(added_elems, elemMask);
+    }
+
+    // Elem area
+    if (areaPresent && mbmp->has_elem_area) {
+      mbmp->set_elem_area(added_elems, elemArea);
+    }
+
+
+    // Elem coords
+    if (elemCoordsPresent && mbmp->has_elem_coords) {
+      mbmp->set_elem_coords(added_elems, elemCoords);
+    }
+      
+
+    // Deallocate temp. arrays
+    delete [] node_conn;
+    delete [] orig_pos;
+    delete [] owners;
+  }
+  CATCH_MBMESH_RETHROW
 }
 
 
@@ -923,199 +898,198 @@ void _add_elems_multiple_types(MBMesh *mbmp, int localPet,
                                ) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "_add_elems_multiple_types()"
-
-  // Return codes
-  int localrc;  // local rc code
-  int merr;   // MOAB error return
- 
-  // If number of elems is 0, then there's nothing to do, so just leave
-  if (num_elems <= 0) return;
-
-  // Check input
-  // (If num_elems > 0 then all of the below should exist)
-  ThrowRequire(elemId != NULL);
-  ThrowRequire(elemConn != NULL);
-  ThrowRequire(elemType != NULL);
-  if (areaPresent) ThrowRequire(elemArea != NULL);
-  if (elemCoordsPresent) ThrowRequire(elemCoords != NULL);
-  ThrowRequire(elem_id_buff != NULL);
-  ThrowRequire(elem_owner_buff != NULL);
-  ThrowRequire(elem_orig_pos_buff != NULL);
-  ThrowRequire(tmp_buff != NULL);
-
-
-  // Get number of nodes_per_elem and MOAB entity type
-  int num_nodes_per_elem=0;
-  EntityType etype;
-  num_nodes_per_elem=ElemType2NumNodes(mbmp->pdim,
-                                       curr_elem_type);  
-  etype=get_entity_type(mbmp->pdim,curr_elem_type);
-  
+  try {
+    int localrc, merr;
    
-  // Get number of elements of this type
-  int num_elems_of_type=0;
-  for (int e=0; e<num_elems; e++) {
-    if (elemType[e] == curr_elem_type) num_elems_of_type++;
-  }
+    // If number of elems is 0, then there's nothing to do, so just leave
+    if (num_elems <= 0) return;
+
+    // Check input
+    // (If num_elems > 0 then all of the below should exist)
+    ThrowRequire(elemId != NULL);
+    ThrowRequire(elemConn != NULL);
+    ThrowRequire(elemType != NULL);
+    if (areaPresent) ThrowRequire(elemArea != NULL);
+    if (elemCoordsPresent) ThrowRequire(elemCoords != NULL);
+    ThrowRequire(elem_id_buff != NULL);
+    ThrowRequire(elem_owner_buff != NULL);
+    ThrowRequire(elem_orig_pos_buff != NULL);
+    ThrowRequire(tmp_buff != NULL);
 
 
-  // Make sure buffers are big enough for elem info.
-  if (elem_info_buff_size < num_elems_of_type*sizeof(int)) Throw() << "elem info. buffers too small.";
-
-  // Make sure buffer is big enough for connection list
-  if (tmp_buff_size < num_nodes_per_elem*num_elems_of_type*sizeof(EntityHandle)) Throw() << "tmp_buff too small to hold node connections.";
-
-  // Use temporary buffer for connection list
-  EntityHandle *node_conn=(EntityHandle *)tmp_buff;
+    // Get number of nodes_per_elem and MOAB entity type
+    int num_nodes_per_elem=0;
+    EntityType etype;
+    num_nodes_per_elem=ElemType2NumNodes(mbmp->pdim,
+                                         curr_elem_type);  
+    etype=get_entity_type(mbmp->pdim,curr_elem_type);
     
-  // Get vector of orig_nodes
-  std::vector<EntityHandle> const &orig_nodes=mbmp->get_orig_nodes();
-
-  // Loop elements and fill informatiton
-  int pos=0;
-  int node_conn_pos=0;
-  int elemConn_pos=0;
-  for (int e=0; e<num_elems; ++e) {
-    
-    // Only do if the correct type
-    if (elemType[e] == curr_elem_type) {
-
-      // Fill id
-      elem_id_buff[pos]=elemId[e];
-      
-      // Fill Owner
-      elem_owner_buff[pos]=localPet;
-
-      // Fill orig pos
-      elem_orig_pos_buff[pos]=e;
-
-      // Advance to next pos
-      pos++;
-
-      // Fill connections
-      for (int n = 0; n < num_nodes_per_elem; ++n) {
-        
-        // Get 0-based vert index
-        int vert_index=elemConn[elemConn_pos]-1;
-        
-        // Advance to next connection pos
-        elemConn_pos++;
-
-        // Setup connectivity list
-        node_conn[node_conn_pos] = orig_nodes.at(vert_index);
-        
-        // Advance to next connection pos
-        node_conn_pos++;
-      }
-    } else {
-
-      // Even if we aren't an elem of the current type 
-      // Still need to Advance elemConn_pos so that we
-      // move through that array
-      
-      // Get number of node connections for this elem type
-      int tmp_num_nodes_per_elem=ElemType2NumNodes(mbmp->pdim, elemType[e]);  
-
-      // Advance to next elem connection pos
-      elemConn_pos += tmp_num_nodes_per_elem;
-    } 
-  }
-
-
-  
-  // Create elems
-  Range added_elems;
-  mbmp->add_elems(num_elems_of_type,
-                  etype, num_nodes_per_elem,
-                  node_conn, // List of nodes that make up each elem (of size num_new_elems*nodes_per_elem)
-                  elem_id_buff,      // global ids for each elem (of size num_new_elems)
-                  elem_orig_pos_buff,  // original position for each elem (of size num_new_elems)
-                  elem_owner_buff,     // owner for each elem (of size num_new_elems)
-                  added_elems);
-
-
-
-  //// Fill optional fields ////
-
-  // Elem mask
-  if ((elemMask != NULL) && mbmp->has_elem_mask) {
-
-    // Check size of buffer and set
-    if (tmp_buff_size < num_elems_of_type*sizeof(int)) Throw() << "tmp_buff too small to hold elem mask information.";
-    int *elem_mask_buff=(int *)tmp_buff;
-    
-    // copy info into buffer
-    int pos=0;
-    for (int e=0; e<num_elems; ++e) {
-    
-      // Only do if the correct type
-      if (elemType[e] == curr_elem_type) {
-
-        // Fill mask
-        elem_mask_buff[pos]=elemMask[e];
-      
-        // Advance to next pos
-        pos++;
-      }
+     
+    // Get number of elements of this type
+    int num_elems_of_type=0;
+    for (int e=0; e<num_elems; e++) {
+      if (elemType[e] == curr_elem_type) num_elems_of_type++;
     }
 
-    // Set info in element field
-    mbmp->set_elem_mask_val(added_elems, elem_mask_buff);
-  }
 
-  // Elem area
-  if (areaPresent && mbmp->has_elem_area) {
+    // Make sure buffers are big enough for elem info.
+    if (elem_info_buff_size < num_elems_of_type*sizeof(int)) Throw() << "elem info. buffers too small.";
 
-    // Check size of buffer and set
-    if (tmp_buff_size < num_elems_of_type*sizeof(double)) Throw() << "tmp_buff too small to hold elem area information.";
-    double *elem_area_buff=(double *)tmp_buff;
-    
-    // copy info into buffer
+    // Make sure buffer is big enough for connection list
+    if (tmp_buff_size < num_nodes_per_elem*num_elems_of_type*sizeof(EntityHandle)) Throw() << "tmp_buff too small to hold node connections.";
+
+    // Use temporary buffer for connection list
+    EntityHandle *node_conn=(EntityHandle *)tmp_buff;
+      
+    // Get vector of orig_nodes
+    std::vector<EntityHandle> const &orig_nodes=mbmp->get_orig_nodes();
+
+    // Loop elements and fill informatiton
     int pos=0;
+    int node_conn_pos=0;
+    int elemConn_pos=0;
     for (int e=0; e<num_elems; ++e) {
-    
+      
       // Only do if the correct type
       if (elemType[e] == curr_elem_type) {
 
-        // Fill area
-        elem_area_buff[pos]=elemArea[e];
-      
+        // Fill id
+        elem_id_buff[pos]=elemId[e];
+        
+        // Fill Owner
+        elem_owner_buff[pos]=localPet;
+
+        // Fill orig pos
+        elem_orig_pos_buff[pos]=e;
+
         // Advance to next pos
         pos++;
-      }
+
+        // Fill connections
+        for (int n = 0; n < num_nodes_per_elem; ++n) {
+          
+          // Get 0-based vert index
+          int vert_index=elemConn[elemConn_pos]-1;
+          
+          // Advance to next connection pos
+          elemConn_pos++;
+
+          // Setup connectivity list
+          node_conn[node_conn_pos] = orig_nodes.at(vert_index);
+          
+          // Advance to next connection pos
+          node_conn_pos++;
+        }
+      } else {
+
+        // Even if we aren't an elem of the current type 
+        // Still need to Advance elemConn_pos so that we
+        // move through that array
+        
+        // Get number of node connections for this elem type
+        int tmp_num_nodes_per_elem=ElemType2NumNodes(mbmp->pdim, elemType[e]);  
+
+        // Advance to next elem connection pos
+        elemConn_pos += tmp_num_nodes_per_elem;
+      } 
     }
 
-    // Set info in element field
-    mbmp->set_elem_area(added_elems, elem_area_buff);
-  }
 
-
-  // Elem coords
-  if (elemCoordsPresent && mbmp->has_elem_coords) {
-
-    // Check size of buffer and set
-    if (tmp_buff_size < mbmp->orig_sdim*num_elems_of_type*sizeof(double)) Throw() << "tmp_buff too small to hold elem area information.";
-    double *elem_coords_buff=(double *)tmp_buff;
     
-    // copy info into buffer
-    int pos=0;
-    for (int e = 0; e < num_elems; ++e) {
-    
-      // Only do if the correct type
-      if (elemType[e] == curr_elem_type) {
+    // Create elems
+    Range added_elems;
+    mbmp->add_elems(num_elems_of_type,
+                    etype, num_nodes_per_elem,
+                    node_conn, // List of nodes that make up each elem (of size num_new_elems*nodes_per_elem)
+                    elem_id_buff,      // global ids for each elem (of size num_new_elems)
+                    elem_orig_pos_buff,  // original position for each elem (of size num_new_elems)
+                    elem_owner_buff,     // owner for each elem (of size num_new_elems)
+                    added_elems);
 
-        // Fill Coords
-        for (int d=0; d<mbmp->orig_sdim; d++) {
-          elem_coords_buff[pos]=elemCoords[e+d];
+
+
+    //// Fill optional fields ////
+
+    // Elem mask
+    if ((elemMask != NULL) && mbmp->has_elem_mask) {
+
+      // Check size of buffer and set
+      if (tmp_buff_size < num_elems_of_type*sizeof(int)) Throw() << "tmp_buff too small to hold elem mask information.";
+      int *elem_mask_buff=(int *)tmp_buff;
+      
+      // copy info into buffer
+      int pos=0;
+      for (int e=0; e<num_elems; ++e) {
+      
+        // Only do if the correct type
+        if (elemType[e] == curr_elem_type) {
+
+          // Fill mask
+          elem_mask_buff[pos]=elemMask[e];
+        
+          // Advance to next pos
           pos++;
         }
       }
+
+      // Set info in element field
+      mbmp->set_elem_mask_val(added_elems, elem_mask_buff);
     }
 
-    // Set info in element field
-    mbmp->set_elem_coords(added_elems, elem_coords_buff);
+    // Elem area
+    if (areaPresent && mbmp->has_elem_area) {
+
+      // Check size of buffer and set
+      if (tmp_buff_size < num_elems_of_type*sizeof(double)) Throw() << "tmp_buff too small to hold elem area information.";
+      double *elem_area_buff=(double *)tmp_buff;
+      
+      // copy info into buffer
+      int pos=0;
+      for (int e=0; e<num_elems; ++e) {
+      
+        // Only do if the correct type
+        if (elemType[e] == curr_elem_type) {
+
+          // Fill area
+          elem_area_buff[pos]=elemArea[e];
+        
+          // Advance to next pos
+          pos++;
+        }
+      }
+
+      // Set info in element field
+      mbmp->set_elem_area(added_elems, elem_area_buff);
+    }
+
+
+    // Elem coords
+    if (elemCoordsPresent && mbmp->has_elem_coords) {
+
+      // Check size of buffer and set
+      if (tmp_buff_size < mbmp->orig_sdim*num_elems_of_type*sizeof(double)) Throw() << "tmp_buff too small to hold elem area information.";
+      double *elem_coords_buff=(double *)tmp_buff;
+      
+      // copy info into buffer
+      int pos=0;
+      for (int e = 0; e < num_elems; ++e) {
+      
+        // Only do if the correct type
+        if (elemType[e] == curr_elem_type) {
+
+          // Fill Coords
+          for (int d=0; d<mbmp->orig_sdim; d++) {
+            elem_coords_buff[pos]=elemCoords[e+d];
+            pos++;
+          }
+        }
+      }
+
+      // Set info in element field
+      mbmp->set_elem_coords(added_elems, elem_coords_buff);
+    }
   }
-    
+  CATCH_MBMESH_RETHROW
 }
 
 
@@ -1132,134 +1106,133 @@ void _add_elems_in_groups_by_type(MBMesh *mbmp, int localPet,
                                   ) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "_add_elems_in_groups_by_type()"
+  try {
+    int localrc, merr;
+   
+    // If number of elems is 0, then there's nothing to do, so just leave
+    if (num_elems <= 0) return;
 
-  // Return codes
-  int localrc;  // local rc code
-  int merr;   // MOAB error return
- 
-  // If number of elems is 0, then there's nothing to do, so just leave
-  if (num_elems <= 0) return;
-
-    // Check input
-  // (If num_elems > 0 then all of the below should exist)
-  ThrowRequire(elemId != NULL);
-  ThrowRequire(elemConn != NULL);
-  ThrowRequire(elemType != NULL);
-  if (areaPresent) ThrowRequire(elemArea != NULL);
-  if (elemCoordsPresent) ThrowRequire(elemCoords != NULL);
+      // Check input
+    // (If num_elems > 0 then all of the below should exist)
+    ThrowRequire(elemId != NULL);
+    ThrowRequire(elemConn != NULL);
+    ThrowRequire(elemType != NULL);
+    if (areaPresent) ThrowRequire(elemArea != NULL);
+    if (elemCoordsPresent) ThrowRequire(elemCoords != NULL);
 
 
-  //// Figure out the list of elem types that are used, and how many of each ////
+    //// Figure out the list of elem types that are used, and how many of each ////
 
-  // Right now there is a very small number of elem types with a very small range, so
-  // this is an efficent way to do this, if the range ever becomes larger this might
-  // have to change
+    // Right now there is a very small number of elem types with a very small range, so
+    // this is an efficent way to do this, if the range ever becomes larger this might
+    // have to change
 
-  // Variables for how many of each type, etc. 
+// Variables for how many of each type, etc. 
 #define MAX_ELEM_TYPE 12
 #define ELEM_TYPE_ARRAY_SIZE MAX_ELEM_TYPE+1   // NEED +1 BECAUSE C++ arrays are 0-based
-  int num_of_each_elem_type[ELEM_TYPE_ARRAY_SIZE];
-  int num_elem_types;
-  int elem_types[ELEM_TYPE_ARRAY_SIZE];
-  int num_per_type[ELEM_TYPE_ARRAY_SIZE];
+    int num_of_each_elem_type[ELEM_TYPE_ARRAY_SIZE];
+    int num_elem_types;
+    int elem_types[ELEM_TYPE_ARRAY_SIZE];
+    int num_per_type[ELEM_TYPE_ARRAY_SIZE];
 
-  // Int array to all zeros
-  for (int i=0; i<ELEM_TYPE_ARRAY_SIZE; i++) {
-    num_of_each_elem_type[i]=0;
-  }
-
-  // Figure out the number of each element type
-  for (int e=0; e<num_elems; e++) {
-    int etype=elemType[e];
-    if (etype > MAX_ELEM_TYPE) Throw() << "Unrecognized element type.";
-    num_of_each_elem_type[etype]++;
-  }
-
-  // Collapse to just non-zeros
-  num_elem_types=0;
-  for (int i=0; i<ELEM_TYPE_ARRAY_SIZE; i++) {
-    if (num_of_each_elem_type[i] > 0) {
-      elem_types[num_elem_types]=i;
-      num_per_type[num_elem_types]=num_of_each_elem_type[i];
-      num_elem_types++;
+    // Int array to all zeros
+    for (int i=0; i<ELEM_TYPE_ARRAY_SIZE; i++) {
+      num_of_each_elem_type[i]=0;
     }
-  }
-  
+
+    // Figure out the number of each element type
+    for (int e=0; e<num_elems; e++) {
+      int etype=elemType[e];
+      if (etype > MAX_ELEM_TYPE) Throw() << "Unrecognized element type.";
+      num_of_each_elem_type[etype]++;
+    }
+
+    // Collapse to just non-zeros
+    num_elem_types=0;
+    for (int i=0; i<ELEM_TYPE_ARRAY_SIZE; i++) {
+      if (num_of_each_elem_type[i] > 0) {
+        elem_types[num_elem_types]=i;
+        num_per_type[num_elem_types]=num_of_each_elem_type[i];
+        num_elem_types++;
+      }
+    }
+
 #undef MAX_ELEM_TYPE
 #undef ELEM_TYPE_ARRAY_SIZE
 
 
-  // If there is just one element type used, then do that and leave
-  if (num_elem_types == 1) {
+    // If there is just one element type used, then do that and leave
+    if (num_elem_types == 1) {
 
-    _add_elems_all_one_type(mbmp, localPet, 
-                            elem_types[0],
-                            num_elems,   
-                            elemId, 
-                            elemMask,
-                            areaPresent, elemArea,
-                            elemCoordsPresent, elemCoords,
-                            elemConn);
-      return;
-  }
-
-  // Across the different elem types find the max size of connection array and max number of elems 
-  int max_num_elems_per_type=0;
-  int max_num_conn_per_type=0;
-  for (int i=0; i<num_elem_types; i++) {
-    if (num_per_type[i] > max_num_elems_per_type) max_num_elems_per_type=num_per_type[i];
-
-    int num_conn=num_per_type[i]*ElemType2NumNodes(mbmp->pdim,elem_types[i]);  
-    if (num_conn > max_num_conn_per_type) max_num_conn_per_type=num_conn;
-  }  
-
-
-  // Allocate max space buffers to hold creation information for int types
-  ThrowRequire(max_num_elems_per_type > 0); // (If num_elems >0, then this should be >0)
-  int elem_info_buff_size=max_num_elems_per_type*sizeof(int);
-  int *elem_ids_buff=new int[max_num_elems_per_type];
-  int *elem_owner_buff=new int[max_num_elems_per_type];
-  int *elem_orig_pos_buff=new int[max_num_elems_per_type];
-
-  
-  // Allocate a buffer to use to hold node_conn, and optional fields
-  int tmp_buff_size=max_num_conn_per_type*sizeof(EntityHandle); // max size of node connections
-  if (elemMask != NULL) {
-    int max_size_of_elemMask=max_num_elems_per_type*sizeof(int);
-    if (max_size_of_elemMask > tmp_buff_size) tmp_buff_size=max_size_of_elemMask;
-  } 
-  if (areaPresent) {
-    int max_size_of_elemArea=max_num_elems_per_type*sizeof(double);
-    if (max_size_of_elemArea > tmp_buff_size) tmp_buff_size=max_size_of_elemArea;
-  } 
-  if (elemCoordsPresent) {
-    int max_size_of_elemCoords=mbmp->orig_sdim*max_num_elems_per_type*sizeof(double);
-    if (max_size_of_elemCoords > tmp_buff_size) tmp_buff_size=max_size_of_elemCoords;
-  } 
-  ThrowRequire(tmp_buff_size > 0); // (If num_elems >0, then this should be >0)
-  char *tmp_buff=new char[tmp_buff_size];
-  
-
-  // Loop through each type
-  for (int t=0; t<num_elem_types; t++) {
-
-    _add_elems_multiple_types(mbmp, localPet, elem_types[t],
-                              num_elems, elemId, elemType,  
-                              elemMask, 
+      _add_elems_all_one_type(mbmp, localPet, 
+                              elem_types[0],
+                              num_elems,   
+                              elemId, 
+                              elemMask,
                               areaPresent, elemArea,
                               elemCoordsPresent, elemCoords,
-                              elemConn,
-                              elem_info_buff_size, elem_ids_buff, elem_owner_buff, elem_orig_pos_buff, 
-                              tmp_buff_size, tmp_buff);
-                             
+                              elemConn);
+        return;
+    }
+
+    // Across the different elem types find the max size of connection array and max number of elems 
+    int max_num_elems_per_type=0;
+    int max_num_conn_per_type=0;
+    for (int i=0; i<num_elem_types; i++) {
+      if (num_per_type[i] > max_num_elems_per_type) max_num_elems_per_type=num_per_type[i];
+
+      int num_conn=num_per_type[i]*ElemType2NumNodes(mbmp->pdim,elem_types[i]);  
+      if (num_conn > max_num_conn_per_type) max_num_conn_per_type=num_conn;
+    }  
+
+
+    // Allocate max space buffers to hold creation information for int types
+    ThrowRequire(max_num_elems_per_type > 0); // (If num_elems >0, then this should be >0)
+    int elem_info_buff_size=max_num_elems_per_type*sizeof(int);
+    int *elem_ids_buff=new int[max_num_elems_per_type];
+    int *elem_owner_buff=new int[max_num_elems_per_type];
+    int *elem_orig_pos_buff=new int[max_num_elems_per_type];
+
+    
+    // Allocate a buffer to use to hold node_conn, and optional fields
+    int tmp_buff_size=max_num_conn_per_type*sizeof(EntityHandle); // max size of node connections
+    if (elemMask != NULL) {
+      int max_size_of_elemMask=max_num_elems_per_type*sizeof(int);
+      if (max_size_of_elemMask > tmp_buff_size) tmp_buff_size=max_size_of_elemMask;
+    } 
+    if (areaPresent) {
+      int max_size_of_elemArea=max_num_elems_per_type*sizeof(double);
+      if (max_size_of_elemArea > tmp_buff_size) tmp_buff_size=max_size_of_elemArea;
+    } 
+    if (elemCoordsPresent) {
+      int max_size_of_elemCoords=mbmp->orig_sdim*max_num_elems_per_type*sizeof(double);
+      if (max_size_of_elemCoords > tmp_buff_size) tmp_buff_size=max_size_of_elemCoords;
+    } 
+    ThrowRequire(tmp_buff_size > 0); // (If num_elems >0, then this should be >0)
+    char *tmp_buff=new char[tmp_buff_size];
+    
+
+    // Loop through each type
+    for (int t=0; t<num_elem_types; t++) {
+
+      _add_elems_multiple_types(mbmp, localPet, elem_types[t],
+                                num_elems, elemId, elemType,  
+                                elemMask, 
+                                areaPresent, elemArea,
+                                elemCoordsPresent, elemCoords,
+                                elemConn,
+                                elem_info_buff_size, elem_ids_buff, elem_owner_buff, elem_orig_pos_buff, 
+                                tmp_buff_size, tmp_buff);
+                               
+    }
+
+    // Deallocate buffers
+    delete [] elem_ids_buff;
+    delete [] elem_owner_buff;
+    delete [] elem_orig_pos_buff;
+    delete [] tmp_buff;
   }
-
-  // Deallocate buffers
-  delete [] elem_ids_buff;
-  delete [] elem_owner_buff;
-  delete [] elem_orig_pos_buff;
-  delete [] tmp_buff;
-
+  CATCH_MBMESH_RETHROW
 }
 
 
@@ -1274,26 +1247,21 @@ void MBMesh_addelements(void **mbmpp,
 {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_addelements()"
+  try {
 
-   try {
-
-     // Error return vars
-    int localrc;
-    int merr;
+    // Error return vars
+    int localrc, merr;
 
     // Initialize the parallel environment for mesh (if not already done)
-    ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-      throw localrc;  // bail out with exception
-
+    ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
+    ESMC_THROW_PASSTHRU(localrc);
 
     //// Setup some handy info ////
     ESMCI_MESHCREATE_TRACE_ENTER("MBMesh addelems setup");
 
     // Get localPet
     int localPet = VM::getCurrent(&localrc)->getLocalPet();
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-      throw localrc;  // bail out with exceptio
+    ESMC_THROW_PASSTHRU(localrc);
 
     // Get MBMesh object
     ThrowRequire(mbmpp != NULL); 
@@ -1495,7 +1463,7 @@ void MBMesh_addelements(void **mbmpp,
            
            // Get coords from MOAB
            merr=mbmp->mesh->get_coords(&orig_nodes[0], orig_nodes.size(), nodeCoords);
-           ESMC_CHECK_MOAB_RC_THROW(merr);      
+           ESMC_CHECK_MOAB_RC_RETHROW(merr);      
          }
        }
               
@@ -1578,7 +1546,7 @@ void MBMesh_addelements(void **mbmpp,
   }
 
   }
-  ESMC_CATCH_MBMESH(rc);
+  CATCH_MBMESH_RETURN(rc);
 
   // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -1586,25 +1554,21 @@ void MBMesh_addelements(void **mbmpp,
 
 
 
-
 void MBMesh_turnonnodemask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg,  int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_turnonnodemask()"
-
-  int merr, localrc;
-
   try {
+    int localrc, merr;
+
     // Initialize the parallel environment for mesh (if not already done)
-    ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-      throw localrc;  // bail out with exception
+    ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
+    ESMC_THROW_PASSTHRU(localrc);
 
     // Get Moab Mesh wrapper
     MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
 
     //Get MOAB Mesh
     Interface *moab_mesh=mbmp->mesh;
-
 
     // If no mask values then leave
     if (!present(maskValuesArg)) {
@@ -1625,10 +1589,7 @@ void MBMesh_turnonnodemask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg, 
       // Get a range containing all nodes
       Range range_node;
       merr=moab_mesh->get_entities_by_dimension(0,0,range_node);
-      if (merr != MB_SUCCESS) {
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                         moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-      }
+      ESMC_CHECK_MOAB_RC_RETHROW(merr);
 
       // Loop through elements setting values
       for(Range::iterator it=range_node.begin(); it !=range_node.end(); it++) {
@@ -1637,10 +1598,7 @@ void MBMesh_turnonnodemask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg, 
         // Get mask value
         int mv;
         merr=moab_mesh->tag_get_data(mbmp->node_mask_val_tag, &node, 1, &mv);
-        if (merr != MB_SUCCESS) {
-          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                           moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-        }
+        ESMC_CHECK_MOAB_RC_RETHROW(merr);
 
         // See if mv matches any mask values
         int masked=0;
@@ -1654,33 +1612,26 @@ void MBMesh_turnonnodemask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg, 
 
         // Set global id
         merr=moab_mesh->tag_set_data(mbmp->node_mask_tag, &node, 1, &masked);
-         if (merr != MB_SUCCESS) {
-          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                    moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-        }
+        ESMC_CHECK_MOAB_RC_RETHROW(merr);
       }
     }
-
   } 
-  ESMC_CATCH_MBMESH(rc);
+  CATCH_MBMESH_RETURN(rc);
 
   // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
-
 }
 
 // Turn OFF masking
  void MBMesh_turnoffnodemask(void **mbmpp, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_turnoffnodemask()"
-
-  int merr, localrc;
-
   try {
+    int localrc, merr;
+
     // Initialize the parallel environment for mesh (if not already done)
-    ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-      throw localrc;  // bail out with exception
+    ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
+    ESMC_THROW_PASSTHRU(localrc);
 
     // Get Moab Mesh wrapper
     MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
@@ -1693,10 +1644,7 @@ void MBMesh_turnonnodemask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg, 
       // Get a range containing all nodes
       Range range_node;
       merr=moab_mesh->get_entities_by_dimension(0,0,range_node);
-      if (merr != MB_SUCCESS) {
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                         moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-      }
+      ESMC_CHECK_MOAB_RC_RETHROW(merr);
 
       // Loop through elements setting values
       for(Range::iterator it=range_node.begin(); it !=range_node.end(); it++) {
@@ -1705,15 +1653,11 @@ void MBMesh_turnonnodemask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg, 
         // unset masked value
         int masked=0;
         merr=moab_mesh->tag_set_data(mbmp->node_mask_tag, &node, 1, &masked);
-        if (merr != MB_SUCCESS) {
-          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                    moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-        }
-
+        ESMC_CHECK_MOAB_RC_RETHROW(merr);
       }
     }
   } 
-  ESMC_CATCH_MBMESH(rc);
+  CATCH_MBMESH_RETURN(rc);
 
   // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -1723,23 +1667,18 @@ void MBMesh_turnonnodemask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg, 
 void MBMesh_turnonelemmask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg,  int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_turnonelemmask()"
-
-  int merr, localrc;
-
   try {
+    int localrc, merr;
 
     // Initialize the parallel environment for mesh (if not already done)
-    int localrc;
-    ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-      throw localrc;  // bail out with exception
+    ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
+    ESMC_THROW_PASSTHRU(localrc);
 
     // Get Moab Mesh wrapper
     MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
 
     //Get MOAB Mesh
     Interface *moab_mesh=mbmp->mesh;
-
 
     // If no mask values then leave
     if (!present(maskValuesArg)) {
@@ -1761,10 +1700,7 @@ void MBMesh_turnonelemmask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg, 
       // Get a range containing all elements
       Range range_elem;
       merr=moab_mesh->get_entities_by_dimension(0,mbmp->pdim,range_elem);
-      if (merr != MB_SUCCESS) {
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                         moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-      }
+      ESMC_CHECK_MOAB_RC_RETHROW(merr);
 
       // Loop through elements setting values
       for(Range::iterator it=range_elem.begin(); it !=range_elem.end(); it++) {
@@ -1790,15 +1726,11 @@ void MBMesh_turnonelemmask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg, 
 
         // Set global id
         merr=moab_mesh->tag_set_data(mbmp->elem_mask_tag, &elem, 1, &masked);
-         if (merr != MB_SUCCESS) {
-          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                    moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-        }
+        ESMC_CHECK_MOAB_RC_RETHROW(merr);
       }
     }
-
   } 
-  ESMC_CATCH_MBMESH(rc);
+  CATCH_MBMESH_RETURN(rc);
 
   // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -1806,17 +1738,15 @@ void MBMesh_turnonelemmask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg, 
 }
 
 // Turn OFF masking
- void MBMesh_turnoffelemmask(void **mbmpp, int *rc) {
+void MBMesh_turnoffelemmask(void **mbmpp, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_turnoffelemmask()"
-
-  int merr, localrc;
-
   try {
+    int localrc, merr;
+
     // Initialize the parallel environment for mesh (if not already done)
-    ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-      throw localrc;  // bail out with exception
+    ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
+    ESMC_THROW_PASSTHRU(localrc);
 
     // Get Moab Mesh wrapper
     MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
@@ -1829,10 +1759,7 @@ void MBMesh_turnonelemmask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg, 
       // Get a range containing all elements
       Range range_elem;
       merr=moab_mesh->get_entities_by_dimension(0,mbmp->pdim,range_elem);
-      if (merr != MB_SUCCESS) {
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                         moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-      }
+      ESMC_CHECK_MOAB_RC_RETHROW(merr);
 
       // Loop through elements setting values
       for(Range::iterator it=range_elem.begin(); it !=range_elem.end(); it++) {
@@ -1841,16 +1768,11 @@ void MBMesh_turnonelemmask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg, 
         // unset masked value
         int masked=0;
         merr=moab_mesh->tag_set_data(mbmp->elem_mask_tag, &elem, 1, &masked);
-        if (merr != MB_SUCCESS) {
-          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                    moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-        }
-
+        ESMC_CHECK_MOAB_RC_RETHROW(merr);
       }
     }
-
   }
-  ESMC_CATCH_MBMESH(rc);
+  CATCH_MBMESH_RETURN(rc);
 
   // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -1861,15 +1783,12 @@ void MBMesh_turnonelemmask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg, 
 void MBMesh_destroy(void **mbmpp, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_destroy()"
-
   try {
+    int localrc;
 
     // Initialize the parallel environment for mesh (if not already done)
-    int localrc;
-    int rc;
     ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-      throw localrc;  // bail out with exception
+    ESMC_THROW_PASSTHRU(localrc);
 
     // Get Moab Mesh wrapper
     MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
@@ -1881,7 +1800,7 @@ void MBMesh_destroy(void **mbmpp, int *rc) {
     *mbmpp=NULL;
 
   } 
-  ESMC_CATCH_MBMESH(rc);
+  CATCH_MBMESH_RETURN(rc);
 
   // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -1893,21 +1812,21 @@ void MBMesh_write(void **mbmpp, char *fname, int *rc,
     ESMCI_FortranStrLenArg nlen) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_write()"
+  try {
 
-  int localrc;
+    int localrc;
 
-  // Initialize the parallel environment for mesh (if not already done)
-  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-    throw localrc;  // bail out with exception
+    // Initialize the parallel environment for mesh (if not already done)
+    ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
+    ESMC_THROW_PASSTHRU(localrc);
 
-  // Get localPet
-  int localPet = VM::getCurrent(&localrc)->getLocalPet();
-  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,rc)) return;
+    // Get localPet
+    int localPet = VM::getCurrent(&localrc)->getLocalPet();
+    ESMC_THROW_PASSTHRU(localrc);
 
-  // Get petCount
-  int petCount = VM::getCurrent(&localrc)->getPetCount();
-  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,rc)) return;
+    // Get petCount
+    int petCount = VM::getCurrent(&localrc)->getPetCount();
+    ESMC_THROW_PASSTHRU(localrc);
 
 
     // Get Moab Mesh wrapper
@@ -1919,7 +1838,6 @@ void MBMesh_write(void **mbmpp, char *fname, int *rc,
     // Make c format string
     char *filename = ESMC_F90toCstring(fname, nlen);
 
- /* XMRKX */
     // Add vtk
 #define FILENAME_W_VTK_MAX 1024
     char filename_w_vtk[FILENAME_W_VTK_MAX];
@@ -1939,19 +1857,17 @@ void MBMesh_write(void **mbmpp, char *fname, int *rc,
 
     // Call into MOAB
     int merr=moab_mesh->write_file(filename_w_vtk,NULL,NULL);
-    if (merr != MB_SUCCESS) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                       moab::ErrorCodeStr[merr], ESMC_CONTEXT, rc)) return;
-    }
+    ESMC_CHECK_MOAB_RC_RETHROW(merr);
 
     // get rid of c format string
     delete [] filename;
 
-    // Set return code
-    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  } 
+  CATCH_MBMESH_RETURN(rc);
 
-
- }
+  // Set return code
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+}
 
 
 void MBMesh_createnodedistgrid(void **mbmpp, int *ngrid, int *num_lnodes, int *rc) {
@@ -1963,17 +1879,15 @@ void MBMesh_createnodedistgrid(void **mbmpp, int *ngrid, int *num_lnodes, int *r
   std::vector<int> ngids;
 
   try {
-    int localrc;
+    int localrc, merr;
 
     // Initialize the parallel environment for mesh (if not already done)
-    ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-      throw localrc;  // bail out with exception
+    ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
+    ESMC_THROW_PASSTHRU(localrc);
 
     // Get localPet
     int localPet = VM::getCurrent(&localrc)->getLocalPet();
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-      throw localrc;  // bail out with exception
+    ESMC_THROW_PASSTHRU(localrc);
 
     // Get Moab Mesh wrapper
     MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
@@ -1981,13 +1895,10 @@ void MBMesh_createnodedistgrid(void **mbmpp, int *ngrid, int *num_lnodes, int *r
     //Get MOAB Mesh
     Interface *moab_mesh=mbmp->mesh;
 
-    // MOAB error
-    int merr;
-
     // Get a range containing all nodes
     Range range_node;
     merr=mbmp->mesh->get_entities_by_dimension(0,0,range_node);
-    MBMESH_CHECK_ERR(merr, localrc);
+    ESMC_CHECK_MOAB_RC_RETHROW(merr);
 
     for(Range::const_iterator it=range_node.begin(); it !=range_node.end(); it++) {
       const EntityHandle *node=&(*it);
@@ -1995,14 +1906,14 @@ void MBMesh_createnodedistgrid(void **mbmpp, int *ngrid, int *num_lnodes, int *r
       // Get owner
       int owner;
       merr=moab_mesh->tag_get_data(mbmp->owner_tag, node, 1, &owner);
-      MBMESH_CHECK_ERR(merr, localrc);
+      ESMC_CHECK_MOAB_RC_RETHROW(merr);
 
       // If owned by this processor, put in list
       if (owner==localPet) {
         // Get gid
         int gid;
         merr=moab_mesh->tag_get_data(mbmp->gid_tag, node, 1, &gid);
-        MBMESH_CHECK_ERR(merr, localrc);
+        ESMC_CHECK_MOAB_RC_RETHROW(merr);
 
         // Stick in list
         ngids.push_back(gid);
@@ -2010,7 +1921,7 @@ void MBMesh_createnodedistgrid(void **mbmpp, int *ngrid, int *num_lnodes, int *r
     }
 
   } 
-  ESMC_CATCH_MBMESH(rc);
+  CATCH_MBMESH_RETURN(rc);
 
   // Create the distgrids
   {
@@ -2028,10 +1939,8 @@ void MBMesh_createnodedistgrid(void **mbmpp, int *ngrid, int *num_lnodes, int *r
 
   // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
-
 }
 
- /* XMRKX */
 /**
  * Sort elements by the order in which they were originally declared
  * (which is stored by get_data_index)
@@ -2042,78 +1951,64 @@ void MBMesh_createnodedistgrid(void **mbmpp, int *ngrid, int *num_lnodes, int *r
 void getElemGIDS(MBMesh *mbmp, std::vector<int> &egids) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "getElemGIDS()"
+  try {
+    int localrc, merr;
 
-  // Get localPet
-  int localrc;
-  int localPet = VM::getCurrent(&localrc)->getLocalPet();
-  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-    throw localrc;  // bail out with exception
+    // Get localPet
+    int localPet = VM::getCurrent(&localrc)->getLocalPet();
+    ESMC_THROW_RC(localrc);
 
-  //Get MOAB Mesh
-  Interface *moab_mesh=mbmp->mesh;
+    //Get MOAB Mesh
+    Interface *moab_mesh=mbmp->mesh;
 
-  // MOAB error
-  int merr;
+    // Get a range containing all elements
+    Range range_elem;
+    merr=moab_mesh->get_entities_by_dimension(0,mbmp->pdim,range_elem);
+    ESMC_CHECK_MOAB_RC_RETHROW(merr);
 
-  // Get a range containing all elements
-  Range range_elem;
-  merr=moab_mesh->get_entities_by_dimension(0,mbmp->pdim,range_elem);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-       moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-  }
+    // Loop through elements putting into list
+    std::vector<std::pair<int,int> > pos_and_gids;
+    for(Range::const_iterator it=range_elem.begin(); it !=range_elem.end(); it++) {
+      const EntityHandle *elemp=(&*it);
 
-  // Loop through elements putting into list
-  std::vector<std::pair<int,int> > pos_and_gids;
-  for(Range::const_iterator it=range_elem.begin(); it !=range_elem.end(); it++) {
-    const EntityHandle *elemp=(&*it);
+      // Get owner
+      int owner;
+      merr=moab_mesh->tag_get_data(mbmp->owner_tag, elemp, 1, &owner);
+      ESMC_CHECK_MOAB_RC_RETHROW(merr);
 
-    // Get owner
-    int owner;
-    merr=moab_mesh->tag_get_data(mbmp->owner_tag, elemp, 1, &owner);
-    if (merr != MB_SUCCESS) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                       moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+      // If owned by this processor, put in list
+      if (owner==localPet) {
+        // Get gid
+        int gid;
+        merr=moab_mesh->tag_get_data(mbmp->gid_tag, elemp, 1, &gid);
+        ESMC_CHECK_MOAB_RC_RETHROW(merr);
+
+        // Don't do split elements
+        if (mbmp->is_split && gid > mbmp->max_non_split_id) continue;
+
+        // Get orig_pos
+        int orig_pos;
+        merr=moab_mesh->tag_get_data(mbmp->orig_pos_tag, elemp, 1, &orig_pos);
+        ESMC_CHECK_MOAB_RC_RETHROW(merr);
+
+        // Stick in list
+        pos_and_gids.push_back(std::make_pair(orig_pos,gid));
+      }
     }
 
-    // If owned by this processor, put in list
-    if (owner==localPet) {
-      // Get gid
-      int gid;
-      merr=moab_mesh->tag_get_data(mbmp->gid_tag, elemp, 1, &gid);
-      if (merr != MB_SUCCESS) {
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                         moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-      }
+    // Put in order by original pos
+    std::sort(pos_and_gids.begin(), pos_and_gids.end());
 
-      // Don't do split elements
-      if (mbmp->is_split && gid > mbmp->max_non_split_id) continue;
+    // Fill array of element gids
+    egids.clear();
+    for (int i = 0; i<pos_and_gids.size(); ++i) {
+      egids.push_back(pos_and_gids[i].second);
 
-      // Get orig_pos
-      int orig_pos;
-      merr=moab_mesh->tag_get_data(mbmp->orig_pos_tag, elemp, 1, &orig_pos);
-      if (merr != MB_SUCCESS) {
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                         moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-      }
+      // printf("pos=%d egids=%d\n",pos_and_gids[i].first,pos_and_gids[i].second);
 
-      // Stick in list
-      pos_and_gids.push_back(std::make_pair(orig_pos,gid));
     }
   }
-
-  // Put in order by original pos
-  std::sort(pos_and_gids.begin(), pos_and_gids.end());
-
-  // Fill array of element gids
-  egids.clear();
-  for (int i = 0; i<pos_and_gids.size(); ++i) {
-    egids.push_back(pos_and_gids[i].second);
-
-    // printf("pos=%d egids=%d\n",pos_and_gids[i].first,pos_and_gids[i].second);
-
-  }
-
+  CATCH_MBMESH_RETHROW
 }
 
 
@@ -2128,9 +2023,8 @@ void MBMesh_createelemdistgrid(void **mbmpp, int *egrid, int *num_lelems, int *r
 
     int localrc;
     // Initialize the parallel environment for mesh (if not already done)
-    ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-      throw localrc;  // bail out with exception
+    ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
+    ESMC_THROW_PASSTHRU(localrc);
 
     // Get Moab Mesh wrapper
     MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
@@ -2139,7 +2033,7 @@ void MBMesh_createelemdistgrid(void **mbmpp, int *egrid, int *num_lelems, int *r
     getElemGIDS(mbmp, egids);
 
   } 
-  ESMC_CATCH_MBMESH(rc);
+  CATCH_MBMESH_RETURN(rc);
 
   {
     int esize = *num_lelems = egids.size();
@@ -2163,79 +2057,64 @@ void MBMesh_createelemdistgrid(void **mbmpp, int *egrid, int *num_lelems, int *r
 void getElems(void **mbmpp, std::vector<EntityHandle> &ehs) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_getElems()"
+  try {
+    // Get localPet
+    int localrc, merr;
+    int localPet = VM::getCurrent(&localrc)->getLocalPet();
+    ESMC_THROW_RC(localrc);
 
-  // Get localPet
-  int localrc;
-  int localPet = VM::getCurrent(&localrc)->getLocalPet();
-  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-    throw localrc;  // bail out with exception
+    // Get Moab Mesh wrapper
+    MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
 
-  // Get Moab Mesh wrapper
-  MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
+    //Get MOAB Mesh
+    Interface *moab_mesh=mbmp->mesh;
 
-  //Get MOAB Mesh
-  Interface *moab_mesh=mbmp->mesh;
+    // Get a range containing all elements
+    Range range_elem;
+    merr=moab_mesh->get_entities_by_dimension(0,mbmp->pdim,range_elem);
+    ESMC_CHECK_MOAB_RC_RETHROW(merr);
 
-  // MOAB error
-  int merr;
+    // Loop through elements putting into list
+    std::vector<std::pair<int,EntityHandle> > pos_and_elems;
+    for(Range::const_iterator it=range_elem.begin(); it !=range_elem.end(); it++) {
+      const EntityHandle *elemp=(&*it);
+      EntityHandle elem=*it;
 
+      // Get owner
+      int owner;
+      merr=moab_mesh->tag_get_data(mbmp->owner_tag, elemp, 1, &owner);
+      ESMC_CHECK_MOAB_RC_RETHROW(merr);
 
-  // Get a range containing all elements
-  Range range_elem;
-  merr=moab_mesh->get_entities_by_dimension(0,mbmp->pdim,range_elem);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-       moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-  }
+      // If owned by this processor, put in list
+      if (owner==localPet) {
+        // Get gid
+        int gid;
+        merr=moab_mesh->tag_get_data(mbmp->gid_tag, elemp, 1, &gid);
+        ESMC_CHECK_MOAB_RC_RETHROW(merr);
 
-  // Loop through elements putting into list
-  std::vector<std::pair<int,EntityHandle> > pos_and_elems;
-  for(Range::const_iterator it=range_elem.begin(); it !=range_elem.end(); it++) {
-    const EntityHandle *elemp=(&*it);
-    EntityHandle elem=*it;
+        // Get orig_pos
+        int orig_pos;
+        merr=moab_mesh->tag_get_data(mbmp->orig_pos_tag, elemp, 1, &orig_pos);
+        ESMC_CHECK_MOAB_RC_RETHROW(merr);
 
-    // Get owner
-    int owner;
-    merr=moab_mesh->tag_get_data(mbmp->owner_tag, elemp, 1, &owner);
-    if (merr != MB_SUCCESS) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                       moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+        // Stick in list
+        pos_and_elems.push_back(std::make_pair(orig_pos,elem));
+      }
     }
 
-    // If owned by this processor, put in list
-    if (owner==localPet) {
-      // Get gid
-      int gid;
-      merr=moab_mesh->tag_get_data(mbmp->gid_tag, elemp, 1, &gid);
-      if (merr != MB_SUCCESS) {
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                         moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-      }
+    // Put in order by original pos
+    std::sort(pos_and_elems.begin(), pos_and_elems.end());
 
-      // Get orig_pos
-      int orig_pos;
-      merr=moab_mesh->tag_get_data(mbmp->orig_pos_tag, elemp, 1, &orig_pos);
-      if (merr != MB_SUCCESS) {
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                         moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-      }
+    // Fill array of element gids
+    ehs.clear();
+    for (int i = 0; i<pos_and_elems.size(); ++i) {
+      ehs.push_back(pos_and_elems[i].second);
 
-      // Stick in list
-      pos_and_elems.push_back(std::make_pair(orig_pos,elem));
+      // printf("pos=%d egids=%d\n",pos_and_gids[i].first,pos_and_gids[i].second);
+
     }
-  }
-
-  // Put in order by original pos
-  std::sort(pos_and_elems.begin(), pos_and_elems.end());
-
-  // Fill array of element gids
-  ehs.clear();
-  for (int i = 0; i<pos_and_elems.size(); ++i) {
-    ehs.push_back(pos_and_elems[i].second);
-
-    // printf("pos=%d egids=%d\n",pos_and_gids[i].first,pos_and_gids[i].second);
-
-  }
+  } 
+  CATCH_MBMESH_RETHROW
 }
 
 
@@ -2244,13 +2123,12 @@ void MBMesh_getlocalelemcoords(void **mbmpp, double *ecoords,
 {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_getlocalelemcoords()"
-
-  int localrc,merr;
   try {
+    int localrc,merr;
+
     // Initialize the parallel environment for mesh (if not already done)
-    ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-      throw localrc;  // bail out with exception
+    ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
+    ESMC_THROW_PASSTHRU(localrc);
 
       // Get Moab Mesh wrapper
       MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
@@ -2283,10 +2161,7 @@ void MBMesh_getlocalelemcoords(void **mbmpp, double *ecoords,
           // Get orig_pos
           merr=moab_mesh->tag_get_data(mbmp->elem_orig_coords_tag,
                                        &elem, 1, ecoords+orig_sdim*i);
-          if (merr != MB_SUCCESS) {
-            if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                             moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-          }
+          ESMC_CHECK_MOAB_RC_RETHROW(merr);
         }
       } else {
         for (int i=0; i<ehs.size(); i++) {
@@ -2296,15 +2171,11 @@ void MBMesh_getlocalelemcoords(void **mbmpp, double *ecoords,
           // Get orig_pos
           merr=moab_mesh->tag_get_data(mbmp->elem_coords_tag,
                                        &elem, 1, ecoords+orig_sdim*i);
-          if (merr != MB_SUCCESS) {
-            if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                             moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-          }
+          ESMC_CHECK_MOAB_RC_RETHROW(merr);
         }
       }
-
     } 
-    ESMC_CATCH_MBMESH(rc);
+    CATCH_MBMESH_RETURN(rc);
 
     // Set return code
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -2323,12 +2194,12 @@ void MBMesh_getarea(void **mbmpp, int *num_elem, double *elem_areas, int *rc) {
   double poly_coords[MAX_NUM_POLY_COORDS];
   double tmp_coords[MAX_NUM_POLY_COORDS];
 
-  int merr, localrc;
   try {
+    int localrc, merr;
+
     // Initialize the parallel environment for mesh (if not already done)
-    ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-      throw localrc;  // bail out with exception
+    ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
+    ESMC_THROW_PASSTHRU(localrc);
 
     // Declare id vector
     std::vector<EntityHandle> ehs;
@@ -2366,11 +2237,7 @@ void MBMesh_getarea(void **mbmpp, int *num_elem, double *elem_areas, int *rc) {
     if (mbmp->has_elem_area) {
 
       merr=moab_mesh->tag_get_data(mbmp->elem_area_tag, &ehs[0], ehs.size(), elem_areas);
-      if (merr != MB_SUCCESS) {
-        int localrc;
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                         moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-      }
+      ESMC_CHECK_MOAB_RC_RETHROW(merr);
 
     } else {
       for (int i=0; i<ehs.size(); i++) {
@@ -2468,7 +2335,7 @@ void MBMesh_getarea(void **mbmpp, int *num_elem, double *elem_areas, int *rc) {
 #endif
 
   } 
-  ESMC_CATCH_MBMESH(rc);
+  CATCH_MBMESH_RETURN(rc);
 
   // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -2485,92 +2352,75 @@ void MBMesh_getarea(void **mbmpp, int *num_elem, double *elem_areas, int *rc) {
 void getNodes(void **mbmpp, std::vector<EntityHandle> &nodes) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "getNodes()"
+  try {
+    int localrc, merr;
 
-  // Get localPet
-  int localrc;
-  int localPet = VM::getCurrent(&localrc)->getLocalPet();
-  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-    throw localrc;  // bail out with exception
+    int localPet = VM::getCurrent(&localrc)->getLocalPet();
+    ESMC_THROW_RC(localrc);
 
-  // Get Moab Mesh wrapper
-  MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
+    // Get Moab Mesh wrapper
+    MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
 
-  //Get MOAB Mesh
-  Interface *moab_mesh=mbmp->mesh;
+    //Get MOAB Mesh
+    Interface *moab_mesh=mbmp->mesh;
 
-  // MOAB error
-  int merr;
+    // Get a range containing all nodes
+    Range range_node;
+    merr=moab_mesh->get_entities_by_dimension(0,0,range_node);
+    ESMC_CHECK_MOAB_RC_RETHROW(merr);
 
+    // Loop through nodes putting into list
+    std::vector<std::pair<int,EntityHandle> > pos_and_nodes;
+    for(Range::const_iterator it=range_node.begin(); it !=range_node.end(); it++) {
+      const EntityHandle *nodep=(&*it);
+      EntityHandle node=*it;
 
-  // Get a range containing all nodes
-  Range range_node;
-  merr=moab_mesh->get_entities_by_dimension(0,0,range_node);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-       moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-  }
+      // Get owner
+      int owner;
+      merr=moab_mesh->tag_get_data(mbmp->owner_tag, nodep, 1, &owner);
+      ESMC_CHECK_MOAB_RC_RETHROW(merr);
 
-  // Loop through nodes putting into list
-  std::vector<std::pair<int,EntityHandle> > pos_and_nodes;
-  for(Range::const_iterator it=range_node.begin(); it !=range_node.end(); it++) {
-    const EntityHandle *nodep=(&*it);
-    EntityHandle node=*it;
+      // If owned by this processor, put in list
+      if (owner==localPet) {
+        // Get gid
+        int gid;
+        merr=moab_mesh->tag_get_data(mbmp->gid_tag, nodep, 1, &gid);
+        ESMC_CHECK_MOAB_RC_RETHROW(merr);
 
-    // Get owner
-    int owner;
-    merr=moab_mesh->tag_get_data(mbmp->owner_tag, nodep, 1, &owner);
-    if (merr != MB_SUCCESS) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                       moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+        // Get orig_pos
+        int orig_pos;
+        merr=moab_mesh->tag_get_data(mbmp->orig_pos_tag, nodep, 1, &orig_pos);
+        ESMC_CHECK_MOAB_RC_RETHROW(merr);
+
+        // Stick in list
+        pos_and_nodes.push_back(std::make_pair(orig_pos,node));
+      }
     }
 
-    // If owned by this processor, put in list
-    if (owner==localPet) {
-      // Get gid
-      int gid;
-      merr=moab_mesh->tag_get_data(mbmp->gid_tag, nodep, 1, &gid);
-      if (merr != MB_SUCCESS) {
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                         moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-      }
+    // Put in order by original pos
+    std::sort(pos_and_nodes.begin(), pos_and_nodes.end());
 
-      // Get orig_pos
-      int orig_pos;
-      merr=moab_mesh->tag_get_data(mbmp->orig_pos_tag, nodep, 1, &orig_pos);
-      if (merr != MB_SUCCESS) {
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                         moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-      }
+    // Fill array of node entities
+    nodes.clear();
+    for (int i = 0; i<pos_and_nodes.size(); ++i) {
+      nodes.push_back(pos_and_nodes[i].second);
 
-      // Stick in list
-      pos_and_nodes.push_back(std::make_pair(orig_pos,node));
+      // printf("pos=%d ngids=%d\n",pos_and_gids[i].first,pos_and_gids[i].second);
+
     }
-  }
-
-  // Put in order by original pos
-  std::sort(pos_and_nodes.begin(), pos_and_nodes.end());
-
-  // Fill array of node entities
-  nodes.clear();
-  for (int i = 0; i<pos_and_nodes.size(); ++i) {
-    nodes.push_back(pos_and_nodes[i].second);
-
-    // printf("pos=%d ngids=%d\n",pos_and_gids[i].first,pos_and_gids[i].second);
-
-  }
+  } 
+  CATCH_MBMESH_RETHROW
 }
 
 void MBMesh_getlocalcoords(void **mbmpp, double *ncoords, int *_orig_sdim, int *rc)
 {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_getlocalcoords()"
-
-  int merr, localrc;
   try {
-    // Initialize the parallel environment for mesh (if not already done)
-    ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-      throw localrc;  // bail out with exception
+    int localrc, merr;
+
+    ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
+    ESMC_THROW_PASSTHRU(localrc);
 
     // Get Moab Mesh wrapper
     MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
@@ -2581,7 +2431,6 @@ void MBMesh_getlocalcoords(void **mbmpp, double *ncoords, int *_orig_sdim, int *
     // Get dimensions
     int sdim=mbmp->sdim;
     int pdim=mbmp->pdim;
-
 
     // Get original spatial dim
     int orig_sdim=*_orig_sdim;
@@ -2601,10 +2450,7 @@ void MBMesh_getlocalcoords(void **mbmpp, double *ncoords, int *_orig_sdim, int *
         // Get coords
         merr=moab_mesh->tag_get_data(mbmp->node_orig_coords_tag,
                                      &node, 1, ncoords+orig_sdim*i);
-        if (merr != MB_SUCCESS) {
-          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                           moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-        }
+        ESMC_CHECK_MOAB_RC_RETHROW(merr);
       }
     } else {
       for (int i=0; i<nodes.size(); i++) {
@@ -2613,21 +2459,14 @@ void MBMesh_getlocalcoords(void **mbmpp, double *ncoords, int *_orig_sdim, int *
 
         // Get coords
         merr=moab_mesh->get_coords(&node, 1, ncoords+orig_sdim*i);
-        if (merr != MB_SUCCESS) {
-          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                           moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-        }
+        ESMC_CHECK_MOAB_RC_RETHROW(merr);
       }
     }
-
-
-
   }
-  ESMC_CATCH_MBMESH(rc);
+  CATCH_MBMESH_RETURN(rc);
 
   // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
-
 }
 
 // Set data in Array based on typekind
@@ -2664,194 +2503,190 @@ void MBMesh_geteleminfointoarray(void *vmbmp,
                                  int *infoTypeElemArrays, 
                                  ESMCI::Array **elemArrays, 
                                  int *rc)
+{
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_geteleminfointoarray()"
 
-{
-  // Must match with ESMF_MeshGet()
+// Must match with ESMF_MeshGet()
 #define INFO_TYPE_ELEM_ARRAYS_MASK 1
 #define INFO_TYPE_ELEM_ARRAYS_AREA 2
 #define INFO_TYPE_ELEM_ARRAYS_MAX  2
 
+  try {
     int localrc;
-    try {
 
-        // Initialize the parallel environment for mesh (if not already done)
-        ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-        if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-            throw localrc;
+    // Initialize the parallel environment for mesh (if not already done)
+    ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
+    ESMC_THROW_PASSTHRU(localrc);
 
-        // Make sure that incoming Array distgrids match element distgrid
-        for (int i=0; i<numElemArrays; i++) {
+    // Make sure that incoming Array distgrids match element distgrid
+    for (int i=0; i<numElemArrays; i++) {
 
-          // Get match
-          DistGridMatch_Flag matchflag=DistGrid::match(elemArrays[i]->getDistGrid(),elemDistgrid,&localrc);
-          if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+      // Get match
+      DistGridMatch_Flag matchflag=DistGrid::match(elemArrays[i]->getDistGrid(),elemDistgrid,&localrc);
+      ESMC_THROW_PASSTHRU(localrc);
 
-          // Complain if it doesn't match sufficiently
-          if ((matchflag != DISTGRIDMATCH_EXACT) && (matchflag != DISTGRIDMATCH_ALIAS)) {
-            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-                                          " DistGrid in element information Array doesn't match Mesh element DistGrid.",
-                                          ESMC_CONTEXT, &localrc);
-            throw localrc;
-          }
+      // Complain if it doesn't match sufficiently
+      if ((matchflag != DISTGRIDMATCH_EXACT) && (matchflag != DISTGRIDMATCH_ALIAS)) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+                                      " DistGrid in element information Array doesn't match Mesh element DistGrid.",
+                                      ESMC_CONTEXT, &localrc);
+        throw localrc;
+      }
+    }
+
+    // Get Moab Mesh wrapper
+    MBMesh *mbmp=reinterpret_cast<MBMesh*>(vmbmp);
+
+    // Get the fields, Arrays for the various types of info
+    ESMCI::Array *elem_mask_Array=NULL;
+    ESMCI::Array *elem_area_Array=NULL;
+
+    for (int i=0; i<numElemArrays; i++) {
+      if (infoTypeElemArrays[i] == INFO_TYPE_ELEM_ARRAYS_MASK) { 
+        if (!mbmp->has_elem_mask) {
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+                                        " mesh doesn't contain element mask information.",
+                                        ESMC_CONTEXT, &localrc);
+          throw localrc;
         }
 
-        // Get Moab Mesh wrapper
-        MBMesh *mbmp=reinterpret_cast<MBMesh*>(vmbmp);
+        // Get array pointer
+        elem_mask_Array=elemArrays[i];
 
+        // Complain if the array has more than rank 1
+        if (elem_mask_Array->getRank() != 1) Throw() << "this call currently can't handle Array rank != 1";
+      }
 
-        // Get the fields, Arrays for the various types of info
-        ESMCI::Array *elem_mask_Array=NULL;
-        ESMCI::Array *elem_area_Array=NULL;
-
-        for (int i=0; i<numElemArrays; i++) {
-          if (infoTypeElemArrays[i] == INFO_TYPE_ELEM_ARRAYS_MASK) { 
-            if (!mbmp->has_elem_mask) {
-              ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-                                            " mesh doesn't contain element mask information.",
-                                            ESMC_CONTEXT, &localrc);
-              throw localrc;
-            }
-
-            // Get array pointer
-            elem_mask_Array=elemArrays[i];
-
-            // Complain if the array has more than rank 1                                 
-            if (elem_mask_Array->getRank() != 1) Throw() << "this call currently can't handle Array rank != 1";
-          }
-
-          if (infoTypeElemArrays[i] == INFO_TYPE_ELEM_ARRAYS_AREA) { 
-            if (!mbmp->has_elem_area) {
-              ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-                                            " mesh doesn't contain element area information.",
-                                            ESMC_CONTEXT, &localrc);
-              throw localrc;
-            }
-
-            // Get array pointer
-            elem_area_Array=elemArrays[i];
-
-            // Complain if the array has more than rank 1                                 
-            if (elem_area_Array->getRank() != 1) Throw() << "this call currently can't handle Array rank != 1";
-
-            // Complain if the Mesh is split 
-            if (mbmp->is_split) Throw() << "this call currently can't handle a mesh containing elems with > 4 corners";
-          }
+      if (infoTypeElemArrays[i] == INFO_TYPE_ELEM_ARRAYS_AREA) { 
+        if (!mbmp->has_elem_area) {
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+                                        " mesh doesn't contain element area information.",
+                                        ESMC_CONTEXT, &localrc);
+          throw localrc;
         }
 
+        // Get array pointer
+        elem_area_Array=elemArrays[i];
 
-        // Get elems
-        Range elems;
-        mbmp->get_all_elems(elems);
+        // Complain if the array has more than rank 1                                 
+        if (elem_area_Array->getRank() != 1) Throw() << "this call currently can't handle Array rank != 1";
 
-        // TODO: MAYBE HAVE THE LIST OF LOCAL elemhandles in order in the mbmesh, that way you could
-        //     probably just read/write them quickly in a chunk using one of the MOAB subroutines. 
-        //     However, until then, this is a good way to do it. 
+        // Complain if the Mesh is split 
+        if (mbmp->is_split) Throw() << "this call currently can't handle a mesh containing elems with > 4 corners";
+      }
+    }
 
-        // Loop and set up gid_to_elem_map
-        std::map<int,EntityHandle> gid_to_elem_map;
-        for (Range::iterator it=elems.begin(); it !=elems.end(); it++) {
-          EntityHandle elem=*it;
+
+    // Get elems
+    Range elems;
+    mbmp->get_all_elems(elems);
+
+    // TODO: MAYBE HAVE THE LIST OF LOCAL elemhandles in order in the mbmesh, that way you could
+    //     probably just read/write them quickly in a chunk using one of the MOAB subroutines.
+    //     However, until then, this is a good way to do it.
+
+    // Loop and set up gid_to_elem_map
+    std::map<int,EntityHandle> gid_to_elem_map;
+    for (Range::iterator it=elems.begin(); it !=elems.end(); it++) {
+      EntityHandle elem=*it;
+      
+      // Get node global id
+      int gid=mbmp->get_gid(elem);
+      
+      // Add to map
+      gid_to_elem_map[gid]=elem;
+    }
+
+    // Get LocalDeCount
+    int localDECount=elemDistgrid->getDELayout()->getLocalDeCount();
+
+    // Loop filling local DEs
+    for (int lDE=0; lDE<localDECount; lDE++) {
+
+      // Get sequence indices
+      std::vector<int> seqIndexList;
+      elemDistgrid->fillSeqIndexList(seqIndexList, lDE, 1);
+
+      // Get mask if needed
+      if (elem_mask_Array) {
+        // Get the array info
+        LocalArray *localArray=(elem_mask_Array->getLocalarrayList())[lDE];
+
+        // Get localDE lower bound
+        int lbound=(elem_mask_Array->getComputationalLBound())[lDE]; // (assumes array rank is 1)
+
+        // Typekind
+        ESMC_TypeKind_Flag typekind=elem_mask_Array->getTypekind();
+
+        // Loop seqIndices
+        for (int i=0; i<seqIndexList.size(); i++) {
+          int si=seqIndexList[i];
+
+          // Get elem with si as gid
+          std::map<int,EntityHandle>::iterator mi =  gid_to_elem_map.find(si);
           
-          // Get node global id
-          int gid=mbmp->get_gid(elem);
+          // If it doesn't exist, then go to next
+          if (mi == gid_to_elem_map.end()) {
+            Throw() << "element with that id not found in mesh";
+          }
           
-          // Add to map
-          gid_to_elem_map[gid]=elem;
+          // Get elem 
+          EntityHandle elem=mi->second;
+
+          // Get elem mask value
+          int mask_val=mbmp->get_elem_mask_val(elem);
+     
+          // Location in array
+          int index=i+lbound;
+          
+          // Convert and set data
+          MBMesh_set_Array_data(localArray, index, typekind, mask_val);
         }
+      }
 
+      // Get area if needed
+      if (elem_area_Array) {
+        // Get the array info
+        LocalArray *localArray=(elem_area_Array->getLocalarrayList())[lDE];
 
-        // Get LocalDeCount
-        int localDECount=elemDistgrid->getDELayout()->getLocalDeCount();
+        // Get localDE lower bound
+        int lbound=(elem_area_Array->getComputationalLBound())[lDE]; // (assumes array rank is 1)
+        // Typekind
+        ESMC_TypeKind_Flag typekind=elem_area_Array->getTypekind();
 
-        // Loop filling local DEs
-        for (int lDE=0; lDE<localDECount; lDE++) {
+        // Loop seqIndices
+        for (int i=0; i<seqIndexList.size(); i++) {
+          int si=seqIndexList[i];
 
-          // Get sequence indices
-          std::vector<int> seqIndexList;
-          elemDistgrid->fillSeqIndexList(seqIndexList, lDE, 1);
-
-
-          // Get mask if needed
-          if (elem_mask_Array) {
-            // Get the array info
-            LocalArray *localArray=(elem_mask_Array->getLocalarrayList())[lDE];
-
-            // Get localDE lower bound                                                    
-            int lbound=(elem_mask_Array->getComputationalLBound())[lDE]; // (assumes array rank is 1)                                                                          
-
-            // Typekind
-            ESMC_TypeKind_Flag typekind=elem_mask_Array->getTypekind();
-
-            // Loop seqIndices
-            for (int i=0; i<seqIndexList.size(); i++) {
-              int si=seqIndexList[i];
-
-              // Get elem with si as gid
-              std::map<int,EntityHandle>::iterator mi =  gid_to_elem_map.find(si);
-              
-              // If it doesn't exist, then go to next
-              if (mi == gid_to_elem_map.end()) {
-                Throw() << "element with that id not found in mesh";
-              }
-              
-              // Get elem 
-              EntityHandle elem=mi->second;
-
-              // Get elem mask value
-              int mask_val=mbmp->get_elem_mask_val(elem);
-         
-              // Location in array
-              int index=i+lbound;
-              
-              // Convert and set data
-              MBMesh_set_Array_data(localArray, index, typekind, mask_val);
-            }
+          // Get elem with si as gid
+          std::map<int,EntityHandle>::iterator mi =  gid_to_elem_map.find(si);
+          
+          // If it doesn't exist, then go to next
+          if (mi == gid_to_elem_map.end()) {
+            Throw() << "element with that id not found in mesh";
           }
+          
+          // Get elem 
+          EntityHandle elem=mi->second;
 
-          // Get area if needed
-          if (elem_area_Array) {
-            // Get the array info
-            LocalArray *localArray=(elem_area_Array->getLocalarrayList())[lDE];
-
-            // Get localDE lower bound                                                    
-            int lbound=(elem_area_Array->getComputationalLBound())[lDE]; // (assumes array rank is 1)                                                                          
-            // Typekind
-            ESMC_TypeKind_Flag typekind=elem_area_Array->getTypekind();
-
-            // Loop seqIndices
-            for (int i=0; i<seqIndexList.size(); i++) {
-              int si=seqIndexList[i];
-
-              // Get elem with si as gid
-              std::map<int,EntityHandle>::iterator mi =  gid_to_elem_map.find(si);
-              
-              // If it doesn't exist, then go to next
-              if (mi == gid_to_elem_map.end()) {
-                Throw() << "element with that id not found in mesh";
-              }
-              
-              // Get elem 
-              EntityHandle elem=mi->second;
-
-              // Get elem area
-              double area= mbmp->get_elem_area(elem);
-         
-              // Location in array
-              int index=i+lbound;
-              
-              // Convert and set data
-              MBMesh_set_Array_data(localArray, index, typekind, area);
-            }
-          }
+          // Get elem area
+          double area= mbmp->get_elem_area(elem);
+     
+          // Location in array
+          int index=i+lbound;
+          
+          // Convert and set data
+          MBMesh_set_Array_data(localArray, index, typekind, area);
         }
+      }
+    }
 
-    } 
-    ESMC_CATCH_MBMESH(rc);
+  } 
+  CATCH_MBMESH_RETURN(rc);
 
-    // Set return code
-    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  // Set return code
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
 
 #undef INFO_TYPE_ELEM_ARRAYS_MASK 
 #undef INFO_TYPE_ELEM_ARRAYS_AREA 
@@ -2864,19 +2699,13 @@ void MBMesh_serialize(void **mbmpp, char *buffer, int *length,
                       ESMCI_FortranStrLenArg buffer_l) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "mbmesh_serialize()"
-
   try {
 
-    // Initialize the parallel environment for mesh (if not already done)
-    {
-      int localrc;
-      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-      throw localrc;  // bail out with exception
-    }
+    int localrc;
+    ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
+    ESMC_THROW_PASSTHRU(localrc);
 
     int *ip;
-
 
     // Initialize return code; assume routine not implemented
     if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -2886,8 +2715,6 @@ void MBMesh_serialize(void **mbmpp, char *buffer, int *length,
 
     //Get MOAB Mesh
     Interface *mesh=mbmp->mesh;
-
-// printf("%d# MBMesh_serialize - 0\n", Par::Rank());
 
     // Calc Size
     int size = 0;
@@ -2900,8 +2727,6 @@ void MBMesh_serialize(void **mbmpp, char *buffer, int *length,
          return;
       }
     }
-    
-// printf("%d# MBMesh_serialize - 1\n", Par::Rank());
 
     // Save integers
     ip= (int *)(buffer + *offset);
@@ -2933,43 +2758,26 @@ void MBMesh_serialize(void **mbmpp, char *buffer, int *length,
       *ip++ = mbmp->max_non_split_id;
       size++;
     }
-    
-
-// printf("%d# MBMesh_serialize - 2\n", Par::Rank());
 
     // Adjust offset
     *offset += size * sizeof(int);
 
-// printf("%d# MBMesh_serialize - 3\n", Par::Rank());
-
-
   } 
-  ESMC_CATCH_MBMESH(rc);
-
-// printf("%d# MBMesh_serialize - 4\n", Par::Rank());
+  CATCH_MBMESH_RETURN(rc);
 
   if (rc!=NULL) *rc=ESMF_SUCCESS;
-
 }
 
 void MBMesh_deserialize(void **mbmpp, char *buffer, int *offset, int *rc,
                         ESMCI_FortranStrLenArg buffer_l) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "mbmesh_deserialize()"
-
   try {
 
-    // Initialize the parallel environment for mesh (if not already done)
-    {
-      int localrc;
-      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-      throw localrc;  // bail out with exception
-    }
-
-// printf("%d# MBMesh_deserialize - 0\n", Par::Rank());
-
     int localrc;
+    ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
+    ESMC_THROW_PASSTHRU(localrc);
+
     int *ip;
     int localsize = 0;
 
@@ -3033,13 +2841,8 @@ void MBMesh_deserialize(void **mbmpp, char *buffer, int *offset, int *rc,
     mesh->is_split = is_split;
     mesh->max_non_split_id = max_non_split_id;
 
-
-// printf("%d# MBMesh_deserialize - 1\n", Par::Rank());
-
   } 
-  ESMC_CATCH_MBMESH(rc);
-
-// printf("%d# MBMesh_deserialize - 2\n", Par::Rank());
+  CATCH_MBMESH_RETURN(rc);
 
   if (rc!=NULL) *rc=ESMF_SUCCESS;
 }
@@ -3051,26 +2854,21 @@ void MBMesh_createredistelems(void **src_meshpp, int *num_elem_gids, int *elem_g
                               void **output_meshpp, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_createredistelems()"
-
   try {
     int localrc;
 
     // Initialize the parallel environment for mesh (if not already done)
-    ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-      throw localrc;  // bail out with exception
+    ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
+    ESMC_THROW_PASSTHRU(localrc);
 
     VM *vm = VM::getCurrent(&localrc);
     int petCount = vm->getPetCount();
     int localPet = vm->getLocalPet();
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-      throw localrc;
+    ESMC_THROW_PASSTHRU(localrc);
 
     // Dereference
     MBMesh *mesh=reinterpret_cast<MBMesh*> (*src_meshpp);
     MBMesh *out_mesh=reinterpret_cast<MBMesh*> (*output_meshpp);
-
-#if 1
 
     if (mesh->is_split) {
       // If split mesh expand ids
@@ -3080,8 +2878,8 @@ void MBMesh_createredistelems(void **src_meshpp, int *num_elem_gids, int *elem_g
 
 #undef debug_printelemgids
 #ifdef debug_printelemgids
-  for (int i=0; i<*num_elem_gids; ++i)
-    printf("%d# elem gids %d\n", localPet, elem_gids[i]);
+      for (int i=0; i<*num_elem_gids; ++i)
+        printf("%d# elem gids %d\n", localPet, elem_gids[i]);
 #endif
 
       mbmesh_expand_split_elem_ids(mesh, *num_elem_gids, elem_gids, &num_elem_gids_ws, &elem_gids_ws, split_to_orig_id);
@@ -3101,28 +2899,14 @@ void MBMesh_createredistelems(void **src_meshpp, int *num_elem_gids, int *elem_g
       mbmesh_redist_elem(mesh, num_elem_gids, elem_gids, &out_mesh);
       out_mesh->is_split=mesh->is_split;
     }
-#else
-    mbmesh_redist_elem(mesh, num_elem_gids, elem_gids, &out_mesh);
-
-    // split element handling
-    out_mesh->is_split=mesh->is_split;
-
-    if (out_mesh->is_split) {
-      mbmesh_set_split_orig_id_map(mesh, out_mesh);
-      out_mesh->max_non_split_id=mesh->max_non_split_id;
-      // RLO: not sure we need this if above is used
-      // out_mesh->split_to_orig_id=mesh->split_to_orig_id;
-    }
-#endif
 
     // return the mbmesh as a void*
     *output_meshpp=reinterpret_cast<void*> (out_mesh);
 
   } 
-  ESMC_CATCH_MBMESH(rc);
+  CATCH_MBMESH_RETURN(rc);
 
   if (rc!=NULL) *rc=ESMF_SUCCESS;
-
 }
 
 void MBMesh_createredistnodes(void **src_meshpp, int *num_node_gids, int *node_gids,
@@ -3133,9 +2917,8 @@ void MBMesh_createredistnodes(void **src_meshpp, int *num_node_gids, int *node_g
     int localrc;
 
     // Initialize the parallel environment for mesh (if not already done)
-    ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-      throw localrc;  // bail out with exception
+    ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
+    ESMC_THROW_PASSTHRU(localrc);
 
     // Dereference
     MBMesh *mesh=reinterpret_cast<MBMesh*> (*src_meshpp);
@@ -3159,7 +2942,7 @@ void MBMesh_createredistnodes(void **src_meshpp, int *num_node_gids, int *node_g
   *output_meshpp = reinterpret_cast<void *> (out_mesh);
 
   } 
-  ESMC_CATCH_MBMESH(rc);
+  CATCH_MBMESH_RETURN(rc);
 
   if (rc!=NULL) *rc=ESMF_SUCCESS;
 }
@@ -3169,21 +2952,17 @@ void MBMesh_createredist(void **src_meshpp, int *num_node_gids, int *node_gids,
                          void **output_meshpp, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_createredist()"
-
   try {
     int localrc;
 
     // Initialize the parallel environment for mesh (if not already done)
-    ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-      throw localrc;  // bail out with exception
-
+    ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
+    ESMC_THROW_PASSTHRU(localrc);
 
     // Dereference
     MBMesh *mesh=reinterpret_cast<MBMesh*> (*src_meshpp);
     MBMesh *out_mesh=reinterpret_cast<MBMesh*> (*output_meshpp);
 
-#if 1
     if (mesh->is_split) {
       // If split mesh expand ids
       int num_elem_gids_ws;
@@ -3207,29 +2986,14 @@ void MBMesh_createredist(void **src_meshpp, int *num_node_gids, int *node_gids,
       mbmesh_redist(mesh, num_node_gids, node_gids, num_elem_gids, elem_gids, &out_mesh);
       out_mesh->is_split=mesh->is_split;
     }
-#else
-    mbmesh_redist(mesh, num_node_gids, node_gids, num_elem_gids, elem_gids, &out_mesh);
-
-    // split element handling
-    out_mesh->is_split=mesh->is_split;
-
-    if (out_mesh->is_split) {
-      mbmesh_set_split_orig_id_map(mesh, out_mesh);
-      out_mesh->max_non_split_id=mesh->max_non_split_id;
-      // RLO: not sure we need this if above is used
-      // out_mesh->split_to_orig_id=mesh->split_to_orig_id;
-    }
-#endif
 
     // return the mbmesh as a void*
     *output_meshpp=reinterpret_cast<void*> (out_mesh);
 
-
   } 
-  ESMC_CATCH_MBMESH(rc);
+  CATCH_MBMESH_RETURN(rc);
 
   if (rc!=NULL) *rc=ESMF_SUCCESS;
-
 }
 
 
@@ -3238,24 +3002,20 @@ void MBMesh_createredist(void **src_meshpp, int *num_node_gids, int *node_gids,
 // To do this check make sure the number of nodes in both cases are the same and that every
 // entry in node_gids is contained in meshpp
 void MBMesh_checknodelist(void **meshpp, int *_num_node_gids, int *node_gids,
-                                             int *rc) {
+                          int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_checknodelist()"
-
   try {
-
     int localrc, merr;
 
     // Initialize the parallel environment for mesh (if not already done)
-    ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-      throw localrc;  // bail out with exception
+    ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
+    ESMC_THROW_PASSTHRU(localrc);
 
     VM *vm = VM::getCurrent(&localrc);
     int petCount = vm->getPetCount();
     int localPet = vm->getLocalPet();
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-      throw localrc;
+    ESMC_THROW_PASSTHRU(localrc);
 
     // Dereference
     MBMesh *mesh=reinterpret_cast<MBMesh*> (*meshpp);
@@ -3266,10 +3026,7 @@ void MBMesh_checknodelist(void **meshpp, int *_num_node_gids, int *node_gids,
     // Loop through counting local nodes
     Range nodes;
     merr=mesh->mesh->get_entities_by_dimension(0,0,nodes);
-    if (merr != MB_SUCCESS) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-        moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-    }
+    ESMC_CHECK_MOAB_RC_RETHROW(merr);
 
     // list of the Mesh node gids
     std::vector<UInt> local_gids, local_owners;
@@ -3283,6 +3040,7 @@ void MBMesh_checknodelist(void **meshpp, int *_num_node_gids, int *node_gids,
 
       int node_owner;
       merr=mesh->mesh->tag_get_data(mesh->owner_tag, &node, 1, &node_owner);
+      ESMC_CHECK_MOAB_RC_RETHROW(merr);
 
       // only consider local nodes
       if (node_owner == localPet) { 
@@ -3321,7 +3079,7 @@ void MBMesh_checknodelist(void **meshpp, int *_num_node_gids, int *node_gids,
     }
 
   } 
-  ESMC_CATCH_MBMESH(rc);
+  CATCH_MBMESH_RETURN(rc);
 
   if (rc!=NULL) *rc=ESMF_SUCCESS;
 }
@@ -3332,25 +3090,20 @@ void MBMesh_checknodelist(void **meshpp, int *_num_node_gids, int *node_gids,
 // To do this check make sure the number of elems in both cases are the same and that every
 // entry in elem_gids is contained in meshpp
 void MBMesh_checkelemlist(void **meshpp, int *_num_elem_gids, int *elem_gids,
-                                             int *rc) {
+                          int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_checkelemlist()"
-
   try {
-
-    // Initialize the parallel environment for mesh (if not already done)
     int localrc, merr;
 
     // Initialize the parallel environment for mesh (if not already done)
-    ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-      throw localrc;  // bail out with exception
+    ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
+    ESMC_THROW_PASSTHRU(localrc);
 
     VM *vm = VM::getCurrent(&localrc);
     int petCount = vm->getPetCount();
     int localPet = vm->getLocalPet();
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-      throw localrc;
+    ESMC_THROW_PASSTHRU(localrc);
 
     // Dereference
     MBMesh *mesh=reinterpret_cast<MBMesh*> (*meshpp);
@@ -3358,14 +3111,10 @@ void MBMesh_checkelemlist(void **meshpp, int *_num_elem_gids, int *elem_gids,
     // For convenience deref number
     int num_elem_gids=*_num_elem_gids;
 
-
     // Loop through counting local elems
     Range elems;
     merr=mesh->mesh->get_entities_by_dimension(0,mesh->pdim,elems);
-    if (merr != MB_SUCCESS) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-        moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-    }
+    ESMC_CHECK_MOAB_RC_RETHROW(merr);
 
     // list of the Mesh elem gids
     std::vector<UInt> local_gids, local_owners;
@@ -3386,10 +3135,7 @@ void MBMesh_checkelemlist(void **meshpp, int *_num_elem_gids, int *elem_gids,
 
       int elem_owner;
       merr=mesh->mesh->tag_get_data(mesh->owner_tag, &elem, 1, &elem_owner);
-      if (merr != MB_SUCCESS) {
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-          moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-      }
+      ESMC_CHECK_MOAB_RC_RETHROW(merr);
 
       if (elem_owner == localPet) {
         num_local_elems++;
@@ -3443,42 +3189,14 @@ void MBMesh_checkelemlist(void **meshpp, int *_num_elem_gids, int *elem_gids,
       MBMesh_get_gid(mesh, ent, &gid);
       int owner;
       merr=mesh->mesh->tag_get_data(mesh->owner_tag, &ent, 1, &owner);
-      if (merr != MB_SUCCESS) {
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-          moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-      }
+      ESMC_CHECK_MOAB_RC_RETHROW(merr);
 
       printf("%d# checkelems - node %d owner %d\n", localPet, gid, owner);
     }
 
-    // Range edges;
-    // merr=mesh->mesh->get_entities_by_dimension(0,1,edges);
-    // if (merr != MB_SUCCESS) {
-    //   if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-    //     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-    // }
-    // 
-    // Range::const_iterator ei = edges.begin(), ee = edges.end();
-    // for (; ei != ee; ++ei) {
-    //   const EntityHandle ent = *ei;
-    //   int gid;
-    //   MBMesh_get_gid(mesh, ent, &gid);
-    //   int owner;
-    //   merr=mesh->mesh->tag_get_data(mesh->owner_tag, &ent, 1, &owner);
-    //   if (merr != MB_SUCCESS) {
-    //     if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-    //       moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-    //   }
-    // 
-    //   printf("%d# checkelems - edge %d owner %d\n", localPet, gid, owner);
-    // }
-
     Range elems;
     merr=mesh->mesh->get_entities_by_dimension(0,mesh->pdim,elems);
-    if (merr != MB_SUCCESS) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-        moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-    }
+    ESMC_CHECK_MOAB_RC_RETHROW(merr);
 
     Range::const_iterator si = elems.begin(), se = elems.end();
     for (; si != se; ++si) {
@@ -3487,10 +3205,7 @@ void MBMesh_checkelemlist(void **meshpp, int *_num_elem_gids, int *elem_gids,
       MBMesh_get_gid(mesh, ent, &gid);
       int owner;
       merr=mesh->mesh->tag_get_data(mesh->owner_tag, &ent, 1, &owner);
-      if (merr != MB_SUCCESS) {
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-          moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-      }
+      ESMC_CHECK_MOAB_RC_RETHROW(merr);
 
       printf("%d# checkelems - elem %d owner %d\n", localPet, gid, owner);
     }
@@ -3499,37 +3214,36 @@ void MBMesh_checkelemlist(void **meshpp, int *_num_elem_gids, int *elem_gids,
 
 #undef debug_printmoabsharedinfo
 #ifdef debug_printmoabsharedinfo
-  MPI_Comm mpi_comm = vm->getMpi_c();
+    MPI_Comm mpi_comm = vm->getMpi_c();
 
+    ParallelComm *pcomm = ParallelComm::get_pcomm(mesh->mesh, 0);
 
-  ParallelComm *pcomm = ParallelComm::get_pcomm(mesh->mesh, 0);
+    int nprocs = pcomm->size();
+    int rank = pcomm->rank();
 
-  int nprocs = pcomm->size();
-  int rank = pcomm->rank();
-
-  Range shared_ents;
-  // Get entities shared with all other processors
-  merr = pcomm->get_shared_entities(-1, shared_ents);
-  MBMESH_CHECK_ERR(merr, localrc);
-  
-  // Filter shared entities with not not_owned, which means owned
-  Range owned_entities;
-  merr = pcomm->filter_pstatus(shared_ents, PSTATUS_NOT_OWNED, PSTATUS_NOT, -1, &owned_entities);
-  MBMESH_CHECK_ERR(merr, localrc);
+    Range shared_ents;
+    // Get entities shared with all other processors
+    merr = pcomm->get_shared_entities(-1, shared_ents);
+    ESMC_CHECK_MOAB_RC_RETHROW(merr);
     
-  unsigned int nums[4] = {0}; // to store the owned entities per dimension
-  for (int i = 0; i < 4; i++)
-    // nums[i] = (nt)shared_ents.num_of_dimension(i);
-    nums[i] = (int)owned_entities.num_of_dimension(i);
-    
-  std::vector<int> rbuf(nprocs*4, 0);
-  MPI_Gather(nums, 4, MPI_INT, &rbuf[0], 4, MPI_INT, 0, mpi_comm);
-  // Print the stats gathered:
-  if (0 == rank) {
-    for (int i = 0; i < nprocs; i++)
-      std::cout << " Shared, owned entities on proc " << i << ": " << rbuf[4*i] << " verts, " <<
-          rbuf[4*i + 1] << " edges, " << rbuf[4*i + 2] << " faces, " << rbuf[4*i + 3] << " elements" << std::endl;
-  }
+    // Filter shared entities with not not_owned, which means owned
+    Range owned_entities;
+    merr = pcomm->filter_pstatus(shared_ents, PSTATUS_NOT_OWNED, PSTATUS_NOT, -1, &owned_entities);
+    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      
+    unsigned int nums[4] = {0}; // to store the owned entities per dimension
+    for (int i = 0; i < 4; i++)
+      // nums[i] = (nt)shared_ents.num_of_dimension(i);
+      nums[i] = (int)owned_entities.num_of_dimension(i);
+      
+    std::vector<int> rbuf(nprocs*4, 0);
+    MPI_Gather(nums, 4, MPI_INT, &rbuf[0], 4, MPI_INT, 0, mpi_comm);
+    // Print the stats gathered:
+    if (0 == rank) {
+      for (int i = 0; i < nprocs; i++)
+        std::cout << " Shared, owned entities on proc " << i << ": " << rbuf[4*i] << " verts, " <<
+            rbuf[4*i + 1] << " edges, " << rbuf[4*i + 2] << " faces, " << rbuf[4*i + 3] << " elements" << std::endl;
+    }
 #endif
 
 #define DEBUG_WRITE_MESH
@@ -3541,10 +3255,8 @@ void MBMesh_checkelemlist(void **meshpp, int *_num_elem_gids, int *elem_gids,
   MBMesh_write(&mbptr, fname, &rc, len);}
 #endif
 
-
   }
-  ESMC_CATCH_MBMESH(rc);
-
+  CATCH_MBMESH_RETURN(rc);
 
   if (rc!=NULL) *rc=ESMF_SUCCESS;
 }
@@ -3553,21 +3265,18 @@ void MBMesh_FitOnVM(void **meshpp, VM **new_vm, int *rc)
 {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_MeshFitOnVM()"
-  int localrc, merr;
-
   try {
+    int localrc, merr;
 
     // set up Par
-    ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-      throw localrc;  // bail out with exception
+    ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
+    ESMC_THROW_PASSTHRU(localrc);
 
     // Dereference
     MBMesh *mbmesh=reinterpret_cast<MBMesh*> (*meshpp);
 
     VM *curr_vm = VM::getCurrent(&localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-      throw localrc;
+    ESMC_THROW_PASSTHRU(localrc);
 
     // Get current VM size
     int curr_vm_size=curr_vm->getPetCount();
@@ -3586,8 +3295,7 @@ void MBMesh_FitOnVM(void **meshpp, VM **new_vm, int *rc)
 
     // Create array mapping from current vm to input vm
     localrc=curr_vm->allgather(&new_vm_rank,rank_map,sizeof(int));
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-      throw localrc;  // bail out with exception
+    ESMC_THROW_PASSTHRU(localrc);
 
 #if 0
     // debug output
@@ -3599,21 +3307,14 @@ void MBMesh_FitOnVM(void **meshpp, VM **new_vm, int *rc)
     // Change proc numbers in mesh
     mbmesh->map_proc_numbers(curr_vm_size, rank_map);
 
-    // reset Par
-    // Par::SetComm((*new_vm)->getMpi_c());
-
-    // create ParallelComm
-    // mbmesh->setup_parallel();
-
     // Free map
     delete [] rank_map;
 
   }
-  ESMC_CATCH_MBMESH(rc);
+  CATCH_MBMESH_RETURN(rc);
 
   // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
-
 } // ESMCI_MeshFitOnVM
 
 void MBMesh_GetDimensions(void *meshp, int *sdim, int *pdim, int *rc) {
@@ -3625,7 +3326,7 @@ void MBMesh_GetDimensions(void *meshp, int *sdim, int *pdim, int *rc) {
     *pdim = mesh->pdim;
     *sdim = mesh->orig_sdim;
   }
-  ESMC_CATCH_MBMESH(rc)
+  CATCH_MBMESH_RETURN(rc);
   
   if(rc != NULL) *rc = ESMF_SUCCESS;
 }
@@ -3646,11 +3347,10 @@ void MBMesh_GetCentroid(void *meshp, int *num_elem, double *elem_centroid, int *
       ESMC_THROW_ERROR(ESMC_RC_CANNOT_GET, "Cannot yet return centroids for spherical coordinates.")
     }
 
-
     mesh->get_elem_centroids(elem_centroid);
 
   }
-  ESMC_CATCH_MBMESH(rc)
+  CATCH_MBMESH_RETURN(rc);
   
   if(rc != NULL) *rc = ESMF_SUCCESS;
 }
@@ -3663,7 +3363,7 @@ void MBMesh_GetNodeCount(void *meshp, int *nodeCount, int *rc){
 
     *nodeCount = mesh->num_node();
   }
-  ESMC_CATCH_MBMESH(rc)
+  CATCH_MBMESH_RETURN(rc);
   
   if(rc != NULL) *rc = ESMF_SUCCESS;
 }
@@ -3676,7 +3376,7 @@ void MBMesh_GetElemCount(void *meshp, int *elemCount, int *rc){
 
     *elemCount = mesh->num_elem();
   }
-  ESMC_CATCH_MBMESH(rc)
+  CATCH_MBMESH_RETURN(rc);
   
   if(rc != NULL) *rc = ESMF_SUCCESS;
 }
@@ -3691,7 +3391,7 @@ void MBMesh_GetElemConnCount(void *meshp, int *elemConnCount, int *rc){
     // Output
     *elemConnCount = mesh->num_elem_conn();
   }
-  ESMC_CATCH_MBMESH(rc)
+  CATCH_MBMESH_RETURN(rc);
   
   if(rc != NULL) *rc = ESMF_SUCCESS;
 }
@@ -3720,7 +3420,7 @@ void MBMesh_GetElemInfoPresence(void *meshp,
     if (mesh->has_elem_coords) *elemCoordsIsPresent=1;
   
   }
-  ESMC_CATCH_MBMESH(rc)
+  CATCH_MBMESH_RETURN(rc);
   
   if(rc != NULL) *rc = ESMF_SUCCESS;
 }
@@ -3740,12 +3440,12 @@ void MBMesh_GetElemCreateInfo(void *meshp,
 
     // Initialize the parallel environment for mesh (if not already done)
     ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
-    ESMC_THROW_PASSTHRU(localrc)
+    ESMC_THROW_PASSTHRU(localrc);
 
     VM *vm = VM::getCurrent(&localrc);
     int petCount = vm->getPetCount();
     int localPet = vm->getLocalPet();
-    ESMC_THROW_PASSTHRU(localrc)
+    ESMC_THROW_PASSTHRU(localrc);
 
     // Dereference
     MBMesh *mesh=reinterpret_cast<MBMesh*> (meshp);
@@ -3858,7 +3558,7 @@ void MBMesh_GetElemCreateInfo(void *meshp,
     }
 
   }
-  ESMC_CATCH_MBMESH(rc)
+  CATCH_MBMESH_RETURN(rc);
   
   if(rc != NULL) *rc = ESMF_SUCCESS;
 }
@@ -3875,12 +3575,12 @@ void MBMesh_SetElemCreateInfo(void *meshp,
 
     // Initialize the parallel environment for mesh (if not already done)
     ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
-    ESMC_THROW_PASSTHRU(localrc)
+    ESMC_THROW_PASSTHRU(localrc);
 
     VM *vm = VM::getCurrent(&localrc);
     int petCount = vm->getPetCount();
     int localPet = vm->getLocalPet();
-    ESMC_THROW_PASSTHRU(localrc)
+    ESMC_THROW_PASSTHRU(localrc);
 
     // Dereference
     MBMesh *mesh=reinterpret_cast<MBMesh*> (meshp);
@@ -3933,7 +3633,7 @@ void MBMesh_SetElemCreateInfo(void *meshp,
     }
 
   }
-  ESMC_CATCH_MBMESH(rc)
+  CATCH_MBMESH_RETURN(rc);
   
   if(rc != NULL) *rc = ESMF_SUCCESS;
 }
@@ -3952,7 +3652,7 @@ void MBMesh_GetNodeInfoPresence(void *meshp,
     if (mesh->has_node_mask) *nodeMaskIsPresent=1;
 
   }
-  ESMC_CATCH_MBMESH(rc)
+  CATCH_MBMESH_RETURN(rc);
   
   if(rc != NULL) *rc = ESMF_SUCCESS;
 }
@@ -3970,12 +3670,12 @@ void MBMesh_GetNodeCreateInfo(void *meshp,
 
     // Initialize the parallel environment for mesh (if not already done)
     ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
-    ESMC_THROW_PASSTHRU(localrc)
+    ESMC_THROW_PASSTHRU(localrc);
 
     VM *vm = VM::getCurrent(&localrc);
     int petCount = vm->getPetCount();
     int localPet = vm->getLocalPet();
-    ESMC_THROW_PASSTHRU(localrc)
+    ESMC_THROW_PASSTHRU(localrc);
 
     // Dereference
     MBMesh *mesh=reinterpret_cast<MBMesh*> (meshp);
@@ -4053,7 +3753,7 @@ void MBMesh_GetNodeCreateInfo(void *meshp,
     }
 
   }
-  ESMC_CATCH_MBMESH(rc)
+  CATCH_MBMESH_RETURN(rc);
 
   if(rc != NULL) *rc = ESMF_SUCCESS;
 }
