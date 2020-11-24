@@ -320,12 +320,12 @@ class MBMeshTest {
       try {
 
         int localrc;
-        // MBMesh_createredistnodes(&meshp_redist, num_node, nodeId.data(),
+        // MBMesh_createredistnodes(&meshp_redist, &num_node, nodeId.data(),
         //                          &meshp, &localrc);
-        MBMesh_createredistelems(&meshp_redist, &num_elem, elemId.data(),
-                                 &meshp, &localrc);
-        // MBMesh_createredist(&meshp_redist, num_node, nodeId.data(), &num_elem, 
-        //                     elemId.data(), &meshp, &localrc);
+        // MBMesh_createredistelems(&meshp_redist, &num_elem, elemId.data(),
+        //                          &meshp, &localrc);
+        MBMesh_createredist(&meshp_redist, &num_node, nodeId.data(), &num_elem, 
+                            elemId.data(), &meshp, &localrc);
         MBMESHTEST_CHECK_RC_THROW(localrc)
 
       } MBMESHTEST_CATCH_RETURN_RC(&rc)

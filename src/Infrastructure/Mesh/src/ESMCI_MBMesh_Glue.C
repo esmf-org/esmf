@@ -3819,43 +3819,117 @@ void MBMesh_GetElemCreateInfo(void *meshp,
         ESMC_THROW_ERROR(ESMC_RC_ARG_SIZE, "elemCoords array must be of size elemCount*orig_sdim")
     }
 
-
-    // RLO: don't think we need to reorder lists with MBMesh..
+    // Fill info in arrays 
 
     // If it was passed in, fill elementIds array
     if (present(elemIds)) {
       int *elemIds_array=elemIds->array;
-      mesh->get_elem_ids(elemIds_array);
+      mesh->get_gid(mesh->get_orig_elems(), elemIds_array);
     }
 
     // If it was passed in, fill elementTypes array
     if (present(elemTypes)) {
       int *elemTypes_array=elemTypes->array;
-      mesh->get_elem_types(elemTypes_array);
+      mesh->get_elem_types(mesh->get_orig_elems(), elemTypes_array);
     }
 
     // If it was passed in, fill elementIds array
     if (present(elemConn)) {
       int *elemConn_array=elemConn->array;
-      mesh->get_elem_connectivity(elemConn_array);
+      mesh->get_elem_connectivity(mesh->get_orig_elems(), elemConn_array);
     }
 
     // If it was passed in, fill elementMask array
     if (present(elemMask)) {
       int *elemMask_array=elemMask->array;
-      mesh->get_elem_mask(elemMask_array);
+      mesh->get_elem_mask_val(mesh->get_orig_elems(), elemMask_array);
     }
 
     // If it was passed in, fill elementArea array
     if (present(elemArea)) {
       ESMC_R8 *elemArea_array=elemArea->array;
-      mesh->get_elem_areas(elemArea_array);
+      mesh->get_elem_area(mesh->get_orig_elems(), elemArea_array);
     }
 
     // If it was passed in, fill elemCoords array
     if (present(elemCoords)) {
       ESMC_R8 *elemCoords_array=elemCoords->array;
-      mesh->get_elem_coords(elemCoords_array);
+      mesh->get_elem_orig_coords(mesh->get_orig_elems(), elemCoords_array);
+    }
+
+  }
+  ESMC_CATCH_MBMESH(rc)
+  
+  if(rc != NULL) *rc = ESMF_SUCCESS;
+}
+
+
+void MBMesh_SetElemCreateInfo(void *meshp,
+                              ESMCI::InterArray<int> *elemMask,
+                              ESMCI::InterArray<ESMC_R8> *elemArea,
+                              int *rc){
+#undef ESMC_METHOD
+#define ESMC_METHOD "MBMesh_GetElemCreateInfo()"
+  try {
+    int localrc;
+
+    // Initialize the parallel environment for mesh (if not already done)
+    ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
+    ESMC_THROW_PASSTHRU(localrc)
+
+    VM *vm = VM::getCurrent(&localrc);
+    int petCount = vm->getPetCount();
+    int localPet = vm->getLocalPet();
+    ESMC_THROW_PASSTHRU(localrc)
+
+    // Dereference
+    MBMesh *mesh=reinterpret_cast<MBMesh*> (meshp);
+
+    // Doesn't work with split meshes right now
+    if (mesh->is_split)
+      ESMC_THROW_ERROR(ESMC_RC_ARG_VALUE, "Can't set elem info for a mesh containing >4 elements.")
+    
+    ////// Get some handy information //////
+    int num_elems=mesh->num_elem();
+    int orig_sdim=mesh->orig_sdim;
+
+    ////// Error check input arrays //////
+
+    if (present(elemMask)) {
+      if (!mesh->has_elem_mask)
+        ESMC_THROW_ERROR(ESMC_RC_CANNOT_GET, "Element mask not present.")
+
+      if (elemMask->dimCount !=1)
+        ESMC_THROW_ERROR(ESMC_RC_ARG_RANK, "elemMask array must be 1D")
+
+      if (elemMask->extent[0] != num_elems)
+        ESMC_THROW_ERROR(ESMC_RC_ARG_SIZE, "elemMask array must be of size elemCount")
+    }
+
+    if (present(elemArea)) {
+      if (!mesh->has_elem_area)
+        ESMC_THROW_ERROR(ESMC_RC_CANNOT_GET, "Element areas not present.")
+
+      if (elemArea->dimCount !=1)
+        ESMC_THROW_ERROR(ESMC_RC_ARG_RANK, "elemArea array must be 1D")
+
+      if (elemArea->extent[0] != num_elems)
+        ESMC_THROW_ERROR(ESMC_RC_ARG_SIZE, "elemArea array must be of size elemCount")
+    }
+
+
+    // Fill info in arrays 
+
+    // If it was passed in, fill elementMask array
+    if (present(elemMask)) {
+      int *elemMask_array=elemMask->array;
+      mesh->set_elem_mask_val(mesh->get_orig_elems(), elemMask_array);
+    }
+
+    // If it was passed in, fill elementArea array
+    if (present(elemArea)) {
+      ESMC_R8 *elemArea_array=elemArea->array;
+      mesh->set_elem_area(mesh->get_orig_elems(), elemArea_array);
     }
 
   }
@@ -3950,32 +4024,32 @@ void MBMesh_GetNodeCreateInfo(void *meshp,
         ESMC_THROW_ERROR(ESMC_RC_ARG_SIZE, "nodeMask array must be of size nodeCount")
     }
 
-    // RLO: don't think we need an ordered list of nodes here..
-
     // Fill info in arrays 
+
+    // mesh->debug_output_nodes();
 
     // If it was passed in, fill nodeIds array
     if (present(nodeIds)) {
       int *nodeIds_array=nodeIds->array;
-      mesh->get_node_ids(nodeIds_array);
+      mesh->get_gid(mesh->get_orig_nodes(), nodeIds_array); 
     }
 
     // If it was passed in, fill nodeCoords array
     if (present(nodeCoords)) {
       double *nodeCoords_array=nodeCoords->array;
-      mesh->get_node_coords(nodeCoords_array);
+      mesh->get_node_orig_coords(mesh->get_orig_nodes(), nodeCoords_array); 
     }
 
     // If it was passed in, fill nodeOwners array
     if (present(nodeOwners)) {
       int *nodeOwners_array=nodeOwners->array;
-      mesh->get_node_owners(nodeOwners_array);
+      mesh->get_owners(mesh->get_orig_nodes(), nodeOwners_array); 
     }
 
     // If it was passed in, fill nodeMask array
     if (present(nodeMask)) {
       int *nodeMask_array=nodeMask->array;
-      mesh->get_node_mask(nodeMask_array);
+      mesh->get_node_mask_val(mesh->get_orig_nodes(), nodeMask_array); 
     }
 
   }

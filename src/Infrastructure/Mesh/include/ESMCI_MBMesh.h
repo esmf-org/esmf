@@ -112,7 +112,6 @@ namespace ESMCI {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL, msg, ESMC_CONTEXT, rc); \
     return; }
 
-
 // may need one more for MBMesh routines which do not return rc pointer (constructor)
 
 
@@ -177,7 +176,6 @@ namespace ESMCI {
     int max_non_split_id;
     std::map<int,int> split_to_orig_id;
     std::map<int,double> split_id_to_frac;
-
 
     void CreateGhost();
 
@@ -354,6 +352,10 @@ namespace ESMCI {
 
     // Get elem coords for a vector of entities (e.g. using orig_elems)
     void get_elem_orig_coords(std::vector<EntityHandle> const &elems, double *orig_coords);
+
+    void get_elem_connectivity(std::vector<EntityHandle> const &elems, int *elem_conn);
+    void get_elem_types(std::vector<EntityHandle> const &elems, int *elem_conn);
+
 
     // Accessors for values from a single EntityHandle (avoid if possible, slow)
     int get_elem_mask_val(EntityHandle eh);

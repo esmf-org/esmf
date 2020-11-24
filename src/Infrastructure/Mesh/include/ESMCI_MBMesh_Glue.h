@@ -137,6 +137,11 @@ void MBMesh_geteleminfointoarray(void *vmbmp,
                                  ESMCI::Array **elemArrays, 
                                  int *rc);
 
+void MBMesh_SetElemCreateInfo(void *meshp,
+                              ESMCI::InterArray<int> *elemMask,
+                              ESMCI::InterArray<ESMC_R8> *elemArea,
+                              int *rc);
+
 void MBMesh_getlocalcoords(void **meshpp, double *ncoords,
                                int *_orig_sdim, int *rc);
 

@@ -85,6 +85,12 @@ void mbmesh_set_elem_owners_wo_list(MBMesh *mesh);
 void mbmesh_set_node_owners(MBMesh *mesh, DDir<> ndir);
 void mbmesh_set_node_owners_wo_list(MBMesh *mesh);
 
+// resetting owners after a redist
+void mbmesh_set_elem_orig_pos(MBMesh *mesh, int num_elem_gids, int *elem_gids);
+void mbmesh_set_elem_orig_pos_wo_list(MBMesh *mesh);
+void mbmesh_set_node_orig_pos(MBMesh *output_mesh, int num_node_gids, int *node_gids);
+void mbmesh_set_node_orig_pos_wo_list(MBMesh *mesh);
+
 // split element handling
 void mbmesh_invert_split_to_orig_id_map(MBMesh *mesh, 
   std::multimap<int, EntityHandle> &orig_id_to_split_elem);
@@ -523,11 +529,6 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
     }
 
     ESMCI_RENDEZVOUS_TRACE_EXIT("MBMesh rendezvous redist elements move verts create verts")
-
-    // Finalize nodes and elems
-    out_mesh->finalize_nodes();
-    out_mesh->finalize_elems();
-
   }
 
   // Redist elems to new mesh
@@ -868,10 +869,8 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
   }
 
 void mbmesh_redist_elem(MBMesh *mesh, int *num_elem_gids, int *elem_gids, MBMesh **out_mesh) {
-
 #undef  ESMC_METHOD
 #define ESMC_METHOD "mbmesh_redist_elem()"
-
   try {
 
     // vector of element processor pairs
@@ -896,25 +895,20 @@ void mbmesh_redist_elem(MBMesh *mesh, int *num_elem_gids, int *elem_gids, MBMesh
     mbmesh_set_elem_owners(*out_mesh, edir);
     mbmesh_set_node_owners_wo_list(*out_mesh);
 
-  } catch(std::exception &x) {
-    // catch Mesh exception return code
-    if (x.what()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            x.what(), ESMC_CONTEXT, NULL);
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            "UNKNOWN", ESMC_CONTEXT, NULL);
-    }
-  
-    return;
-  }
+    // reset the orig_pos
+    mbmesh_set_elem_orig_pos(*out_mesh, *num_elem_gids, elem_gids);
+    mbmesh_set_node_orig_pos_wo_list(*out_mesh);
 
+    // Finalize nodes and elems
+    (*out_mesh)->finalize_nodes();
+    (*out_mesh)->finalize_elems();
+
+  }
+  ESMC_CATCH_MOAB
 }
 void mbmesh_redist_node(MBMesh *mesh, int *num_node_gids, int *node_gids, MBMesh **out_mesh) {
-
 #undef  ESMC_METHOD
 #define ESMC_METHOD "mbmesh_redist_node()"
-
   try {
 
     // vector of element processor pairs
@@ -951,27 +945,22 @@ void mbmesh_redist_node(MBMesh *mesh, int *num_node_gids, int *node_gids, MBMesh
     // reset the owners
     mbmesh_set_node_owners(*out_mesh, ndir);
     mbmesh_set_elem_owners_wo_list(*out_mesh);
+
+    // reset the orig_pos
+    mbmesh_set_node_orig_pos(*out_mesh, *num_node_gids, node_gids);
+    mbmesh_set_elem_orig_pos_wo_list(*out_mesh);
     ESMCI_MESHREDIST_TRACE_EXIT("MBMesh post processing");
 
-  } catch(std::exception &x) {
-    // catch Mesh exception return code
-    if (x.what()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            x.what(), ESMC_CONTEXT, NULL);
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            "UNKNOWN", ESMC_CONTEXT, NULL);
-    }
+    // Finalize nodes and elems
+    (*out_mesh)->finalize_nodes();
+    (*out_mesh)->finalize_elems();
 
-    return;
   }
-
+  ESMC_CATCH_MOAB
 }
 void mbmesh_redist(MBMesh *mesh, int *num_node_gids, int *node_gids, int *num_elem_gids, int *elem_gids, MBMesh **out_mesh) {
-
 #undef  ESMC_METHOD
 #define ESMC_METHOD "mbmesh_redist()"
-
   try {
 
     // vector of element processor pairs
@@ -1008,19 +997,16 @@ void mbmesh_redist(MBMesh *mesh, int *num_node_gids, int *node_gids, int *num_el
     mbmesh_set_node_owners(*out_mesh, ndir);
     mbmesh_set_elem_owners(*out_mesh, edir);
 
-  } catch(std::exception &x) {
-    // catch Mesh exception return code
-    if (x.what()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            x.what(), ESMC_CONTEXT, NULL);
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            "UNKNOWN", ESMC_CONTEXT, NULL);
-    }
+    // reset the orig_pos
+    mbmesh_set_node_orig_pos(*out_mesh, *num_node_gids, node_gids);
+    mbmesh_set_elem_orig_pos(*out_mesh, *num_elem_gids, elem_gids);
 
-    return;
+    // Finalize nodes and elems
+    (*out_mesh)->finalize_nodes();
+    (*out_mesh)->finalize_elems();
+
   }
-
+  ESMC_CATCH_MOAB
 }
 
 
@@ -2620,22 +2606,18 @@ printf("%d#   adj_elem_id %d\n", localPet, adj_elem_id);
 
 // Assign node owners in output_mesh using ndir
 void mbmesh_set_node_owners(MBMesh *mesh, DDir<> ndir) {
-  Trace __trace("mbmesh_set_node_owners()");
-
-
-  int localrc, merr;
-
-  // Get a list of the Mesh nodes with gids
-  Range nodes;
-  std::vector<UInt> gids;
-
-  // get mesh nodes and gids
+#undef  ESMC_METHOD
+#define ESMC_METHOD "mbmesh_set_node_owners()"
   try {
+    int localrc, merr;
+
+    // Get a list of the Mesh nodes with gids
+    Range nodes;
+    std::vector<UInt> gids;
+
+    // get mesh nodes and gids
     merr=mesh->mesh->get_entities_by_dimension(0,0,nodes);
-    if (merr != MB_SUCCESS) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-        moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-    }
+    ESMC_CHECK_MOAB_RC_THROW(merr);
   
     gids.reserve(nodes.size());
 
@@ -2647,42 +2629,20 @@ void mbmesh_set_node_owners(MBMesh *mesh, DDir<> ndir) {
       MBMesh_get_gid(mesh, node, &gid);
       gids.push_back(gid);
     }
-  } catch(std::exception &x) {
-    // catch Mesh exception return code
-    if (x.what()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            x.what(), ESMC_CONTEXT, &localrc);
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            "UNKNOWN", ESMC_CONTEXT, &localrc);
-    }
-  }
 
-  // Get number of gids
-  UInt num_src_gids=gids.size();
-  std::vector<UInt> src_gids_proc(num_src_gids, 0);
-  std::vector<UInt> src_gids_lids(num_src_gids, 0);
+    // Get number of gids
+    UInt num_src_gids=gids.size();
+    std::vector<UInt> src_gids_proc(num_src_gids, 0);
+    std::vector<UInt> src_gids_lids(num_src_gids, 0);
 
-  // Get where each node is to go
-  try {
+    // Get where each node is to go
     if (num_src_gids) {
       ndir.RemoteGID(num_src_gids, &gids[0], &src_gids_proc[0], &src_gids_lids[0]);
     } else {
       ndir.RemoteGID(0, (UInt *)NULL, (UInt *)NULL, (UInt *)NULL);
     }
-  } catch(std::exception &x) {
-    // catch Mesh exception return code
-    if (x.what()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            x.what(), ESMC_CONTEXT, &localrc);
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            "UNKNOWN", ESMC_CONTEXT, &localrc);
-    }
-  }
 
-  // Loop setting owner
-  try {
+    // Loop setting owner
     int nodeowners[nodes.size()];
     for (int i = 0; i < num_src_gids; ++i) {
       nodeowners[i] = src_gids_proc[i];
@@ -2697,185 +2657,167 @@ printf("%d# node %d owner %d\n", localPet, gids[i], src_gids_proc[i]);
 
     // Set Owners
     merr=mesh->mesh->tag_set_data(mesh->owner_tag, nodes, nodeowners);
-    if (merr != MB_SUCCESS) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-         moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-    }
-  } catch(std::exception &x) {
-    // catch Mesh exception return code
-    if (x.what()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            x.what(), ESMC_CONTEXT, &localrc);
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            "UNKNOWN", ESMC_CONTEXT, &localrc);
-    }
+    ESMC_CHECK_MOAB_RC_THROW(merr);
+
   }
+  ESMC_CATCH_MOAB
 }
 
 
 // Assign node owners in mesh without ndir
 void mbmesh_set_node_owners_wo_list(MBMesh *mesh) {
-  Trace __trace("mbmesh_set_node_owners_wo_list()");
+#undef  ESMC_METHOD
+#define ESMC_METHOD "mbmesh_set_node_owners_wo_list()"
+  try {
+    int localrc, merr;
 
-  int localrc, merr;
-  VM *vm = VM::getCurrent(&localrc);
-  int petCount = vm->getPetCount();
-  int localPet = vm->getLocalPet();
-  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-    throw localrc;
+    // Get a list of the Mesh nodes with gids
+    Range nodes;
+    merr=mesh->mesh->get_entities_by_dimension(0, 0, nodes);
+    ESMC_CHECK_MOAB_RC_THROW(merr);
 
-  // Get a list of the Mesh nodes with gids
-  Range nodes;
-  merr=mesh->mesh->get_entities_by_dimension(0, 0, nodes);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-      moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-  }
+    std::vector<UInt> gids;
+    std::vector<UInt> lids; // Actually the number of associated elements
+    std::vector<UInt> owner; // The owner proc
+    owner.resize(nodes.size());
 
-  std::vector<UInt> gids;
-  std::vector<UInt> lids; // Actually the number of associated elements
-  std::vector<UInt> owner; // The owner proc
-  owner.resize(nodes.size());
+    Range::const_iterator si = nodes.begin(), se = nodes.end();
+    for (; si != se; ++si) {
+      const EntityHandle node = *si;
+      int gid;
+      MBMesh_get_gid(mesh, node, &gid);
+      gids.push_back(gid);
 
-  Range::const_iterator si = nodes.begin(), se = nodes.end();
-  for (; si != se; ++si) {
-    const EntityHandle node = *si;
-    int gid;
-    MBMesh_get_gid(mesh, node, &gid);
-    gids.push_back(gid);
-
-    // Count the number of associated elems
-    Range elems_on_node;
-    merr=mesh->mesh->get_adjacencies(&node, 1, mesh->pdim, false, elems_on_node);
-    if (merr != MB_SUCCESS) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-        moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-    }
+      // Count the number of associated elems
+      Range elems_on_node;
+      merr=mesh->mesh->get_adjacencies(&node, 1, mesh->pdim, false, elems_on_node);
+      ESMC_CHECK_MOAB_RC_THROW(merr);
 
 #undef debug__nodeowners
 #ifdef debug__nodeowners
-int node_owner;
-merr=mesh->mesh->tag_get_data(mesh->owner_tag, &node, 1, &node_owner);
+      VM *vm = VM::getCurrent(&localrc);
+      int localPet = vm->getLocalPet();
 
-Range::const_iterator eoni = elems_on_node.begin(), eone = elems_on_node.end();
-for (; eoni != eone; ++eoni) {
-  int egid;
-  const EntityHandle elem = *eoni;
-  MBMesh_get_gid(mesh, elem, &egid);
-  printf("%d# node %d owner %d adjacent element %d\n", localPet, gid, node_owner, egid);
-}
+      int node_owner;
+      merr=mesh->mesh->tag_get_data(mesh->owner_tag, &node, 1, &node_owner);
+      ESMC_CHECK_MOAB_RC_THROW(merr);
+
+      Range::const_iterator eoni = elems_on_node.begin(), eone =      elems_on_node.end();
+      for (; eoni != eone; ++eoni) {
+        int egid;
+        const EntityHandle elem = *eoni;
+        MBMesh_get_gid(mesh, elem, &egid);
+        printf("%d# node %d owner %d adjacent element %d\n", localPet, gid,       node_owner, egid);
+      }
 #endif
 
-    // Set the number of associated elements as the lids
-    lids.push_back(elems_on_node.size());
-  }
+      // Set the number of associated elements as the lids
+      lids.push_back(elems_on_node.size());
+    }
 
-  // Create a distributed directory with the above information
-  DDir<> dir;
+    // Create a distributed directory with the above information
+    DDir<> dir;
 
-  if (gids.size ()) {
-    dir.Create(gids.size(), &gids[0], &lids[0]);
-  } else {
-    dir.Create(0, (UInt*) NULL, 0);
-  }
+    if (gids.size ()) {
+      dir.Create(gids.size(), &gids[0], &lids[0]);
+    } else {
+      dir.Create(0, (UInt*) NULL, 0);
+    }
 
 #undef debug__gids
 #ifdef debug__gids
-for (int i=0; i<gids.size(); ++i)
-  printf("%d# gid %d lid %d\n", localPet, gids[i], lids[i]);
+    for (int i=0; i<gids.size(); ++i)
+      printf("%d# gid %d lid %d\n", localPet, gids[i], lids[i]);
 #endif
 
-   std::vector<DDir<>::dentry> lookups;
-   if (gids.size())
-     dir.RemoteGID(gids.size(), &gids[0], lookups);
-   else
-     dir.RemoteGID(0, (UInt *) NULL, lookups);
+    std::vector<DDir<>::dentry> lookups;
+    if (gids.size())
+      dir.RemoteGID(gids.size(), &gids[0], lookups);
+    else
+      dir.RemoteGID(0, (UInt *) NULL, lookups);
 
 
+    // Loop through the results.
+    int curr_pos=0;
+    UInt curr_gid=0;
+    UInt curr_lid_best=0;
+    UInt curr_proc_best=0;
+    bool first_time=true;
+    std::vector<DDir<>::dentry>::const_iterator ri = lookups.begin(), re = lookups.end();
+    for (; ri != re; ++ri) {
+      DDir<>::dentry dent = *ri;
 
-   // Loop through the results.
-   int curr_pos=0;
-   UInt curr_gid=0;
-   UInt curr_lid_best=0;
-   UInt curr_proc_best=0;
-   bool first_time=true;
-   std::vector<DDir<>::dentry>::const_iterator ri = lookups.begin(), re = lookups.end();
-   for (; ri != re; ++ri) {
-     DDir<>::dentry dent = *ri;
-
-     // Get info for this entry gid
-     UInt gid=dent.gid;
-     UInt lid=dent.origin_lid;
-     UInt proc=dent.origin_proc;
+      // Get info for this entry gid
+      UInt gid=dent.gid;
+      UInt lid=dent.origin_lid;
+      UInt proc=dent.origin_proc;
 
 #undef debug_lookupissue
 #ifdef debug_lookupissue
-    // Print out
-    printf("%d# gid=%d lid=%d orig_proc=%d \n",Par::Rank(),gid,lid,proc);
+      // Print out
+      printf("%d# gid=%d lid=%d orig_proc=%d \n",Par::Rank(),gid,lid,proc);
 #endif
 
-     // first time
-     if (first_time) {
-       // If this doesn't match throw error
-       if (gids[curr_pos] != gid) {
-         printf("Error: first time gid[curr_pos]=%d gid=%d\n",gids[curr_pos],gid);
+      // first time
+      if (first_time) {
+        // If this doesn't match throw error
+        if (gids[curr_pos] != gid) {
+          printf("Error: first time gid[curr_pos]=%d  gid=%d\n",gids[curr_pos],gid);
+  
+          Throw() << " Error: gid "<<gid<<" missing from search list!";
+        }
+  
+        // Set intial values
+        curr_gid=gids[curr_pos];
+        curr_lid_best=lid;
+        curr_proc_best=proc;
+  
+        first_time=false;
+      }
+  
+      // See if we're still looking at the same gid, if not move to   next
+      if (curr_gid != gid) {
+        // Set owner of gid before moving on
+        owner[curr_pos]=curr_proc_best;
+  
+        // Move to next gid
+        curr_pos++;
+  
+        // If this doesn't match throw error
+        if (gids[curr_pos] != gid) {
+          printf("Error: gid[curr_pos]=%dgid=%d\n",gids[curr_pos],gid);
+  
+          Throw() << " Error: gid "<<gid<<" missing from search list!";
+        }
+  
+        // Get info
+        curr_gid=gids[curr_pos];
+        curr_lid_best=lid;
+        curr_proc_best=proc;
+      } else {
+        // Still the same gid so see if the proc is better
+        if (lid > curr_lid_best) {
+          curr_lid_best=lid;
+          curr_proc_best=proc;
+        } else if (lid == curr_lid_best) {
+          // Same lid, so chose the lowest proc
+          if (proc < curr_proc_best) {
+            curr_lid_best=lid;
+            curr_proc_best=proc;
+          }
+        }
+      }
+    } // ri
 
-         Throw() << " Error: gid "<<gid<<" missing from search list!";
-       }
 
-       // Set intial values
-       curr_gid=gids[curr_pos];
-       curr_lid_best=lid;
-       curr_proc_best=proc;
+    // Set owner of last gid before moving on
+    // (could use gids.size() in if here also, but
+    //  owner.size seemed clearer...)
+    if (owner.size()) {
+      owner[curr_pos]=curr_proc_best;
+    }
 
-       first_time=false;
-     }
-
-     // See if we're still looking at the same gid, if not move to  next
-     if (curr_gid != gid) {
-       // Set owner of gid before moving on
-       owner[curr_pos]=curr_proc_best;
-
-       // Move to next gid
-       curr_pos++;
-
-       // If this doesn't match throw error
-       if (gids[curr_pos] != gid) {
-         printf("Error: gid[curr_pos]=%d gid=%d\n",gids[curr_pos],gid);
-
-         Throw() << " Error: gid "<<gid<<" missing from search list!";
-       }
-
-       // Get info
-       curr_gid=gids[curr_pos];
-       curr_lid_best=lid;
-       curr_proc_best=proc;
-     } else {
-       // Still the same gid so see if the proc is better
-       if (lid > curr_lid_best) {
-         curr_lid_best=lid;
-         curr_proc_best=proc;
-       } else if (lid == curr_lid_best) {
-         // Same lid, so chose the lowest proc
-         if (proc < curr_proc_best) {
-           curr_lid_best=lid;
-           curr_proc_best=proc;
-         }
-       }
-     }
-
-   } // ri
-
-
-   // Set owner of last gid before moving on
-   // (could use gids.size() in if here also, but
-   //  owner.size seemed clearer...)
-   if (owner.size()) {
-     owner[curr_pos]=curr_proc_best;
-   }
-
-   // printf("Last curr_pos=%d gids.size()=%d\n",curr_pos,gids.size());
+    // printf("Last curr_pos=%d gids.size()=%d\n",curr_pos,gids.size());
 
     int nodeowners[owner.size()];
     for (int i = 0; i < owner.size(); ++i)
@@ -2883,37 +2825,28 @@ for (int i=0; i<gids.size(); ++i)
 
     // Set owners
     merr=mesh->mesh->tag_set_data(mesh->owner_tag, nodes, nodeowners);
-    if (merr != MB_SUCCESS) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-         moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-    }
+    ESMC_CHECK_MOAB_RC_THROW(merr);
 
+  }
+  ESMC_CATCH_MOAB
 }
 
 
 // Assign elem owners in output_mesh using edir
 void mbmesh_set_elem_owners(MBMesh *mesh, DDir<> edir) {
-  Trace __trace("mbmesh_set_elem_owners()");
-
-  int localrc, merr;
-  VM *vm = VM::getCurrent(&localrc);
-  int petCount = vm->getPetCount();
-  int localPet = vm->getLocalPet();
-  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-    throw localrc;
-
-  // Get a list of the Mesh nodes with gids
-  Range elems;
-  std::vector<UInt> gids;
-  std::vector<EntityHandle> elemvec;
-
-  // get mesh nodes and gids
+#undef  ESMC_METHOD
+#define ESMC_METHOD "mbmesh_set_elem_owners()"
   try {
+    int localrc, merr;
+
+    // Get a list of the Mesh nodes with gids
+    Range elems;
+    std::vector<UInt> gids;
+    std::vector<EntityHandle> elemvec;
+
+    // get mesh nodes and gids
     merr=mesh->mesh->get_entities_by_dimension(0, mesh->pdim, elems);
-    if (merr != MB_SUCCESS) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-        moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-    }
+    ESMC_CHECK_MOAB_RC_THROW(merr);
   
     gids.reserve(elems.size());
     elemvec.reserve(elems.size());
@@ -2927,66 +2860,34 @@ void mbmesh_set_elem_owners(MBMesh *mesh, DDir<> edir) {
       gids.push_back(gid);
       elemvec.push_back(elem);
     }
-  } catch(std::exception &x) {
-    // catch Mesh exception return code
-    if (x.what()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            x.what(), ESMC_CONTEXT, &localrc);
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            "UNKNOWN", ESMC_CONTEXT, &localrc);
-    }
-  }
 
-  // Get number of gids
-  UInt num_src_gids=gids.size();
-  std::vector<UInt> src_gids_proc(num_src_gids, 0);
-  std::vector<UInt> src_gids_lids(num_src_gids, 0);
+    // Get number of gids
+    UInt num_src_gids=gids.size();
+    std::vector<UInt> src_gids_proc(num_src_gids, 0);
+    std::vector<UInt> src_gids_lids(num_src_gids, 0);
 
-  // Get where each element is to go
-  try {
+    // Get where each element is to go
     if (num_src_gids) {
       edir.RemoteGID(num_src_gids, &gids[0], &src_gids_proc[0], &src_gids_lids[0]);
     } else {
       edir.RemoteGID(0, (UInt *)NULL, (UInt *)NULL, (UInt *)NULL);
     }
-  } catch(std::exception &x) {
-    // catch Mesh exception return code
-    if (x.what()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            x.what(), ESMC_CONTEXT, &localrc);
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            "UNKNOWN", ESMC_CONTEXT, &localrc);
-    }
-  }
 
-  // Loop setting owner
-  try {
+    // Loop setting owner
     for (int i = 0; i < num_src_gids; ++i) {
       // Set Owners
       merr=mesh->mesh->tag_set_data(mesh->owner_tag, &elemvec[i], 1, &src_gids_proc[i]);
-      if (merr != MB_SUCCESS) {
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-           moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-      }
+      ESMC_CHECK_MOAB_RC_THROW(merr);
 #undef print_elemowners
 #ifdef print_elemowners
-VM *vm = VM::getCurrent(&localrc);
-int localPet = vm->getLocalPet();
-printf("%d# elem %d owner %d\n", localPet, gids[i], src_gids_proc[i]);
+      VM *vm = VM::getCurrent(&localrc);
+      int localPet = vm->getLocalPet();
+      printf("%d# elem %d owner %d\n", localPet, gids[i], src_gids_proc[i]);
 #endif
     }
-  } catch(std::exception &x) {
-    // catch Mesh exception return code
-    if (x.what()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            x.what(), ESMC_CONTEXT, &localrc);
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            "UNKNOWN", ESMC_CONTEXT, &localrc);
-    }
+
   }
+  ESMC_CATCH_MOAB
 }
 
 
@@ -2994,30 +2895,58 @@ printf("%d# elem %d owner %d\n", localPet, gids[i], src_gids_proc[i]);
 // WARNING: needs is_split set in output_mesh, and if is_split==true then needs
 //          split_to_orig_id map to be correct in output_mesh.
 void mbmesh_set_elem_owners_wo_list(MBMesh *mesh) {
-  Trace __trace("mbmesh_set_elem_owners_wo_list()");
+#undef  ESMC_METHOD
+#define ESMC_METHOD "mbmesh_set_elem_owners_wo_list()"
+  try {
+    int localrc, merr;
 
-try {
+    VM *vm = VM::getCurrent(&localrc);
+    int localPet = vm->getLocalPet();
+    if (localrc != ESMF_SUCCESS)
+      Throw () << "Could not retrieve VM information.";
 
-  int localrc, merr;
-  VM *vm = VM::getCurrent(&localrc);
-  int petCount = vm->getPetCount();
-  int localPet = vm->getLocalPet();
-  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-    throw localrc;
+    // Count number of split and non-split elements
+    int num_non_split=0;
+    int num_split=0;
 
-  // Count number of split and non-split elements
-  int num_non_split=0;
-  int num_split=0;
+    Range elems;
+    merr=mesh->mesh->get_entities_by_dimension(0, mesh->pdim, elems);
+    ESMC_CHECK_MOAB_RC_THROW(merr);
 
-  Range elems;
-  merr=mesh->mesh->get_entities_by_dimension(0, mesh->pdim, elems);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-      moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-  }
+    if (mesh->is_split) {
+      // Loop through elems
+      Range::const_iterator ei = elems.begin(), ee = elems.end();
+      for (; ei != ee; ++ei) {
+        const EntityHandle elem = *ei;
 
-  if (mesh->is_split) {
-    // Loop through elems
+        // Get element id
+        int eid;
+        MBMesh_get_gid(mesh, elem, &eid);
+
+        // If this is an elem created as the result of a split, then skip
+        std::map<int,int>::const_iterator soi = mesh->split_to_orig_id.find(eid);
+        if (soi == mesh->split_to_orig_id.end()) {
+          num_non_split++;
+        } else {
+          num_split++;
+        }
+      }
+    } else {
+      num_non_split=elems.size();
+    }
+
+
+    // Get a list of the Mesh nodes with gids
+    std::vector<UInt> gids;
+    gids.resize(num_non_split,0);
+    std::vector<UInt> lids; // Actually the number of associated elements
+    lids.resize(num_non_split,0);
+    std::vector<UInt> owner; // The owner proc
+    owner.resize(num_non_split,0);
+    std::vector<EntityHandle> elements;
+    elements.resize(num_non_split);
+
+    int i=0;
     Range::const_iterator ei = elems.begin(), ee = elems.end();
     for (; ei != ee; ++ei) {
       const EntityHandle elem = *ei;
@@ -3027,290 +2956,375 @@ try {
       MBMesh_get_gid(mesh, elem, &eid);
 
       // If this is an elem created as the result of a split, then skip
-      std::map<int,int>::const_iterator soi = mesh->split_to_orig_id.find(eid);
-      if (soi == mesh->split_to_orig_id.end()) {
-        num_non_split++;
-      } else {
-        num_split++;
+      if (mesh->is_split) {
+        std::map<int,int>::const_iterator soi = mesh->split_to_orig_id.find(eid);
+        if (soi != mesh->split_to_orig_id.end()) {
+          continue;
+        }
       }
-    }
-  } else {
-    num_non_split=elems.size();
-  }
 
+      // Set GID
+      gids[i]=eid;
 
-  // Get a list of the Mesh nodes with gids
-  std::vector<UInt> gids;
-  gids.resize(num_non_split,0);
-  std::vector<UInt> lids; // Actually the number of associated elements
-  lids.resize(num_non_split,0);
-  std::vector<UInt> owner; // The owner proc
-  owner.resize(num_non_split,0);
-  std::vector<EntityHandle> elements;
-  elements.resize(num_non_split);
+      // Set elem
+      elements[i]=elem;
 
-  int i=0;
-  Range::const_iterator ei = elems.begin(), ee = elems.end();
-  for (; ei != ee; ++ei) {
-    const EntityHandle elem = *ei;
+      // Count the number of local nodes associated with elem
+      int num_loc_nodes=0;
 
-    // Get element id
-    int eid;
-    MBMesh_get_gid(mesh, elem, &eid);
+      // Loop elements attached to this node
+      Range nodes_on_elem;
+      merr=mesh->mesh->get_adjacencies(&elem, 1, 0, false, nodes_on_elem);
+      ESMC_CHECK_MOAB_RC_THROW(merr);
 
+      Range::const_iterator nei = nodes_on_elem.begin(), nee = nodes_on_elem.end();
+      for (; nei != nee; ++nei) {
+        const EntityHandle node_on_elem = *nei;
+        int node_owner;
+        merr=mesh->mesh->tag_get_data(mesh->owner_tag, &node_on_elem, 1, &node_owner);
+        ESMC_CHECK_MOAB_RC_THROW(merr);
 
-    // If this is an elem created as the result of a split, then skip
-    if (mesh->is_split) {
-      std::map<int,int>::const_iterator soi = mesh->split_to_orig_id.find(eid);
-      if (soi != mesh->split_to_orig_id.end()) {
-        continue;
+        // only consider local elements
+        if (node_owner == localPet) ++num_loc_nodes;
       }
+
+      // Set the number of associated local nodes as the lids
+      lids[i]=num_loc_nodes;
+
+      // Next thing in list
+      ++i;
     }
 
-    // Set GID
-    gids[i]=eid;
+    // Create a distributed directory with the above information
+    DDir<> dir;
 
-    // Set elem
-    elements[i]=elem;
-
-    // Count the number of local nodes associated with elem
-    int num_loc_nodes=0;
-
-    // Loop elements attached to this node
-    Range nodes_on_elem;
-    merr=mesh->mesh->get_adjacencies(&elem, 1, 0, false, nodes_on_elem);
-    if (merr != MB_SUCCESS) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-        moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-    }
-    Range::const_iterator nei = nodes_on_elem.begin(), nee = nodes_on_elem.end();
-    for (; nei != nee; ++nei) {
-      const EntityHandle node_on_elem = *nei;
-      int node_owner;
-      merr=mesh->mesh->tag_get_data(mesh->owner_tag, &node_on_elem, 1, &node_owner);
-
-      // only consider local elements
-      if (node_owner == localPet) ++num_loc_nodes;
-    }
-
-    // Set the number of associated local nodes as the lids
-    lids[i]=num_loc_nodes;
-
-    // Next thing in list
-    ++i;
-  }
-
-  // Create a distributed directory with the above information
-  DDir<> dir;
-
-  if (gids.size ()) {
-    dir.Create(gids.size(), &gids[0], &lids[0]);
-  } else {
-    dir.Create(0, (UInt*) NULL, 0);
-  }
-
-
-  // Lookup elem gids
-  std::vector<DDir<>::dentry> lookups;
-  if (gids.size())
-    dir.RemoteGID(gids.size(), &gids[0], lookups);
-  else
-    dir.RemoteGID(0, (UInt *) NULL, lookups);
-
-
-  // Loop through the results.
-  int curr_pos=0;
-  UInt curr_gid=0;
-  UInt curr_lid_best=0;
-  UInt curr_proc_best=0;
-  bool first_time=true;
-  std::vector<DDir<>::dentry>::const_iterator ri = lookups.begin(), re = lookups.end();
-  for (; ri != re; ++ri) {
-    DDir<>::dentry dent = *ri;
-
-    // Get info for this entry gid
-    UInt gid=dent.gid;
-    UInt lid=dent.origin_lid;
-    UInt proc=dent.origin_proc;
-
-    // first time
-    if (first_time) {
-       // If this doesn't match throw error
-       if (gids[curr_pos] != gid) {
-         printf("Error: first time gid[curr_pos]=%d gid=%d\n",gids[curr_pos],gid);
-
-         Throw() << " Error: gid "<<gid<<" missing from search list!";
-       }
-
-       // Set intial values
-       curr_gid=gids[curr_pos];
-       curr_lid_best=lid;
-       curr_proc_best=proc;
-
-       first_time=false;
-    }
-
-
-    // See if we're still looking at the same gid, if not move to  next
-    if (curr_gid != gid) {
-       // Set owner of gid before moving on
-       owner[curr_pos]=curr_proc_best;
-
-       // Move to next gid
-       curr_pos++;
-
-       // If this doesn't match throw error
-       if (gids[curr_pos] != gid) {
-         printf("Error: gid[curr_pos]=%d gid=%d\n",gids[curr_pos],gid);
-
-         Throw() << " Error: gid "<<gid<<" missing from search list!";
-       }
-
-       // Get info
-       curr_gid=gids[curr_pos];
-       curr_lid_best=lid;
-       curr_proc_best=proc;
+    if (gids.size ()) {
+      dir.Create(gids.size(), &gids[0], &lids[0]);
     } else {
-       // Still the same gid so see if the proc is better
-       if (lid > curr_lid_best) {
+      dir.Create(0, (UInt*) NULL, 0);
+    }
+
+
+    // Lookup elem gids
+    std::vector<DDir<>::dentry> lookups;
+    if (gids.size())
+      dir.RemoteGID(gids.size(), &gids[0], lookups);
+    else
+      dir.RemoteGID(0, (UInt *) NULL, lookups);
+
+
+    // Loop through the results.
+    int curr_pos=0;
+    UInt curr_gid=0;
+    UInt curr_lid_best=0;
+    UInt curr_proc_best=0;
+    bool first_time=true;
+    std::vector<DDir<>::dentry>::const_iterator ri = lookups.begin(), re = lookups.end();
+    for (; ri != re; ++ri) {
+      DDir<>::dentry dent = *ri;
+
+      // Get info for this entry gid
+      UInt gid=dent.gid;
+      UInt lid=dent.origin_lid;
+      UInt proc=dent.origin_proc;
+
+      // first time
+      if (first_time) {
+         // If this doesn't match throw error
+         if (gids[curr_pos] != gid) {
+           printf("Error: first time gid[curr_pos]=%d gid=%d\n",gids[curr_pos],gid);
+
+           Throw() << " Error: gid "<<gid<<" missing from search list!";
+         }
+
+         // Set intial values
+         curr_gid=gids[curr_pos];
          curr_lid_best=lid;
          curr_proc_best=proc;
-       } else if (lid == curr_lid_best) {
-         // Same lid, so chose the lowest proc
-         if (proc < curr_proc_best) {
+
+         first_time=false;
+      }
+
+
+      // See if we're still looking at the same gid, if not move to  next
+      if (curr_gid != gid) {
+         // Set owner of gid before moving on
+         owner[curr_pos]=curr_proc_best;
+
+         // Move to next gid
+         curr_pos++;
+
+         // If this doesn't match throw error
+         if (gids[curr_pos] != gid) {
+           printf("Error: gid[curr_pos]=%d gid=%d\n",gids[curr_pos],gid);
+
+           Throw() << " Error: gid "<<gid<<" missing from search list!";
+         }
+
+         // Get info
+         curr_gid=gids[curr_pos];
+         curr_lid_best=lid;
+         curr_proc_best=proc;
+      } else {
+         // Still the same gid so see if the proc is better
+         if (lid > curr_lid_best) {
            curr_lid_best=lid;
            curr_proc_best=proc;
+         } else if (lid == curr_lid_best) {
+           // Same lid, so chose the lowest proc
+           if (proc < curr_proc_best) {
+             curr_lid_best=lid;
+             curr_proc_best=proc;
+           }
          }
-       }
+      }
+
+       // Print out
+       //  printf("%d# gid=%d lid=%d orig_proc=%d \n",Par::Rank(),gid,lid,proc);
+
+    } // ri
+
+
+    // Set owner of last gid before moving on
+    // (could use gids.size() in if here also, but
+    //  owner.size seemed clearer...)
+    if (owner.size()) {
+     owner[curr_pos]=curr_proc_best;
     }
 
-     // Print out
-     //  printf("%d# gid=%d lid=%d orig_proc=%d \n",Par::Rank(),gid,lid,proc);
-
-  } // ri
+    // printf("Last curr_pos=%d gids.size()=%d\n",curr_pos,gids.size());
 
 
-  // Set owner of last gid before moving on
-  // (could use gids.size() in if here also, but
-  //  owner.size seemed clearer...)
-  if (owner.size()) {
-   owner[curr_pos]=curr_proc_best;
-  }
+    // Loop setting owner and OWNER_ID
+    for (int i=0; i<gids.size(); i++) {
+      const EntityHandle elem=elements[i];
 
-  // printf("Last curr_pos=%d gids.size()=%d\n",curr_pos,gids.size());
+      merr=mesh->mesh->tag_set_data(mesh->owner_tag, &elem, 1, &owner[i]);
+      ESMC_CHECK_MOAB_RC_THROW(merr);
+    }
 
 
-  // Loop setting owner and OWNER_ID
-  for (int i=0; i<gids.size(); i++) {
-    const EntityHandle elem=elements[i];
+    // Do split elems
+    if (mesh->is_split) {
+      // Create list of split elems
+      std::vector<EntityHandle> split_elems;
+      split_elems.resize(num_split);
+      // Fill list of split elems
+      int pos=0;
+      Range elems;
+      merr=mesh->mesh->get_entities_by_dimension(0, mesh->pdim, elems);
+      ESMC_CHECK_MOAB_RC_THROW(merr);
 
-    merr=mesh->mesh->tag_set_data(mesh->owner_tag, &elem, 1, &owner[i]);
-    if (merr != MB_SUCCESS) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-         moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+      Range::const_iterator ei = elems.begin(), ee = elems.end();
+      for (; ei != ee; ++ei) {
+        const EntityHandle elem = *ei;
+        // Get element id
+        int eid;
+        MBMesh_get_gid(mesh, elem, &eid); 
+        // If this is an elem created as the result of a split, then skip
+        std::map<int,int>::const_iterator soi = mesh->split_to_orig_id.find(eid);
+        if (soi == mesh->split_to_orig_id.end()) {
+          continue;
+        } 
+        // Set elem
+        split_elems[pos]=elem; 
+        // Next in list
+        pos++;
+      }
+
+      // Loop setting owner and OWNER_ID
+      for (int i=0; i<split_elems.size(); i++) {
+        const EntityHandle elem =split_elems[i];
+
+        // Get element id
+        int eid;
+        MBMesh_get_gid(mesh, elem, &eid); 
+
+        // Get orig id
+        std::map<int,int>::const_iterator soi = mesh->split_to_orig_id.find(eid);
+        if (soi == mesh->split_to_orig_id.end()) {
+          Throw() << " split element not found in split_to_orig_id map";
+        }
+        int orig_id=soi->second;
+
+        // Get original element
+        // TODO: there should be a more elegant way to do this...
+        Range::const_iterator ei = elems.begin(), ee = elems.end();
+        for (; ei != ee; ++ei) {
+          const EntityHandle orig_elem = *ei;
+          // Get element id
+          int eid;
+          MBMesh_get_gid(mesh, orig_elem, &eid);
+
+          if (orig_id == eid) break;
+        }
+
+        // Get original element
+        if (ei == elems.end()) {
+          Throw() << " elem id not found in element map";
+        }
+
+        const EntityHandle orig_elem=*ei;
+
+        // Split element owner is original elements owner
+        int orig_owner;
+        merr=mesh->mesh->tag_get_data(mesh->owner_tag, &orig_elem, 1, &orig_owner);
+        ESMC_CHECK_MOAB_RC_THROW(merr);
+
+        // Set owner
+        merr=mesh->mesh->tag_set_data(mesh->owner_tag, &elem, 1, &orig_owner);
+        ESMC_CHECK_MOAB_RC_THROW(merr);
+      }
     }
   }
+  ESMC_CATCH_MOAB
+}
+
+// Assign node orig_pos in output_mesh using ndir
+void mbmesh_set_node_orig_pos(MBMesh *output_mesh, int num_node_gids, int *node_gids) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "mbmesh_set_node_orig_pos()"
+  try {
+    int localrc, merr;
+
+    // for using a std::map<UInt, EntityHandle>
+    typedef std::pair<UInt, EntityHandle> IDEntityPair;
+
+    // Get a list of the Mesh nodes with gids
+    Range nodes;
+
+    // get mesh nodes and gids
+    merr=output_mesh->mesh->get_entities_by_dimension(0,0,nodes);
+    ESMC_CHECK_MOAB_RC_THROW(merr);
+  
+    std::map<UInt, EntityHandle> gids_to_nodes;
+
+    // Loop through objects getting ids
+    Range::const_iterator si = nodes.begin(), se = nodes.end();
+    for (; si != se; ++si) {
+      const EntityHandle node = *si;
+      int gid;
+      MBMesh_get_gid(output_mesh, node, &gid);
+      gids_to_nodes.insert(IDEntityPair(gid,node));
+    }
+
+    // Loop setting orig_pos_tag
+    for (int i = 0; i < num_node_gids; ++i) {
+      std::map<UInt, EntityHandle>::const_iterator it = gids_to_nodes.find(node_gids[i]);
+
+      if (it != gids_to_nodes.end()) {
+        merr=output_mesh->mesh->tag_set_data(output_mesh->orig_pos_tag,
+                                             &it->second, 1, &i);
+        ESMC_CHECK_MOAB_RC_THROW(merr);
+      }
+
+#undef print_nodeorigpos
+#ifdef print_nodeorigpos
+      VM *vm = VM::getCurrent(&localrc);
+      int localPet = vm->getLocalPet();
+      printf("%d# node %d gid %d orig_pos %d\n", localPet, gids_to_nodes->first, gids_to_nodes->second(), i);
+#endif
+    }
+  }
+  ESMC_CATCH_MOAB
+}
 
 
-  // Do split elems
-  if (mesh->is_split) {
-    // Create list of split elems
-    std::vector<EntityHandle> split_elems;
-    split_elems.resize(num_split);
-    // Fill list of split elems
-    int pos=0;
+// Assign node orig_pos in mesh
+void mbmesh_set_node_orig_pos_wo_list(MBMesh *output_mesh) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "mbmesh_set_node_orig_pos_wo_list()"
+  try {
+    int localrc, merr;
+
+    // Get a list of the Mesh nodes with gids
+    Range nodes;
+    merr=output_mesh->mesh->get_entities_by_dimension(0, 0, nodes);
+    ESMC_CHECK_MOAB_RC_THROW(merr);
+
+    int index=0;
+    Range::const_iterator si = nodes.begin(), se = nodes.end();
+    for (; si != se; ++si) {
+      const EntityHandle node = *si;
+      merr=output_mesh->mesh->tag_set_data(output_mesh->orig_pos_tag, &node, 1, &index);
+      ESMC_CHECK_MOAB_RC_THROW(merr);
+      ++index;
+    }
+  }
+  ESMC_CATCH_MOAB
+}
+
+// Assign elem orig_pos in output_mesh
+void mbmesh_set_elem_orig_pos(MBMesh *output_mesh, int num_elem_gids, int *elem_gids) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "mbmesh_set_elem_orig_pos()"
+  try {
+    int localrc, merr;
+
+    // for using a std::map<UInt, EntityHandle>
+    typedef std::pair<UInt, EntityHandle> IDEntityPair;
+
+    // Get a list of the Mesh nodes with gids
     Range elems;
-    merr=mesh->mesh->get_entities_by_dimension(0, mesh->pdim, elems);
-    if (merr != MB_SUCCESS) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-        moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;}
 
+    // get mesh elems and gids
+    merr=output_mesh->mesh->get_entities_by_dimension(0, output_mesh->pdim, elems);
+    ESMC_CHECK_MOAB_RC_THROW(merr);
+
+    std::map<UInt, EntityHandle> gids_to_elems;
+
+    // Loop through objects getting ids
+    Range::const_iterator si = elems.begin(), se = elems.end();
+    for (; si != se; ++si) {
+      const EntityHandle elem = *si;
+      int gid;
+      MBMesh_get_gid(output_mesh, elem, &gid);
+      gids_to_elems.insert(IDEntityPair(gid,elem));
+    }
+
+    // Loop setting orig_pos_tag
+    for (int i = 0; i < num_elem_gids; ++i) {
+      std::map<UInt, EntityHandle>::const_iterator it = gids_to_elems.find(elem_gids[i]);
+
+      if (it != gids_to_elems.end()) {
+        merr=output_mesh->mesh->tag_set_data(output_mesh->orig_pos_tag,
+                                             &it->second, 1, &i);
+        ESMC_CHECK_MOAB_RC_THROW(merr);
+      }
+
+#undef print_elemorigpos
+#ifdef print_elemorigpos
+      VM *vm = VM::getCurrent(&localrc);
+      int localPet = vm->getLocalPet();
+      printf("%d# elem %d gid %d orig_pos %d\n", localPet, gids_to_elems->first, gids_to_elems->second(), i);
+#endif
+    }
+  }
+  ESMC_CATCH_MOAB
+}
+
+// Assign elem orig_pos in output_mesh
+void mbmesh_set_elem_orig_pos_wo_list(MBMesh *output_mesh) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "mbmesh_set_elem_orig_pos_wo_list()"
+  try {
+    int localrc, merr;
+
+    Range elems;
+    merr=output_mesh->mesh->get_entities_by_dimension(0, output_mesh->pdim, elems);
+    ESMC_CHECK_MOAB_RC_THROW(merr);
+
+    int index=0;
     Range::const_iterator ei = elems.begin(), ee = elems.end();
     for (; ei != ee; ++ei) {
       const EntityHandle elem = *ei;
-      // Get element id
-      int eid;
-      MBMesh_get_gid(mesh, elem, &eid); 
-      // If this is an elem created as the result of a split, then skip
-      std::map<int,int>::const_iterator soi = mesh->split_to_orig_id.find(eid);
-      if (soi == mesh->split_to_orig_id.end()) {
-        continue;
-      } 
-      // Set elem
-      split_elems[pos]=elem; 
-      // Next in list
-      pos++;
-    }
-
-    // Loop setting owner and OWNER_ID
-    for (int i=0; i<split_elems.size(); i++) {
-      const EntityHandle elem =split_elems[i];
-
-      // Get element id
-      int eid;
-      MBMesh_get_gid(mesh, elem, &eid); 
-
-      // Get orig id
-      std::map<int,int>::const_iterator soi = mesh->split_to_orig_id.find(eid);
-      if (soi == mesh->split_to_orig_id.end()) {
-        Throw() << " split element not found in split_to_orig_id map";
-      }
-      int orig_id=soi->second;
-
-      // Get original element
-      // TODO: there should be a more elegant way to do this...
-      Range::const_iterator ei = elems.begin(), ee = elems.end();
-      for (; ei != ee; ++ei) {
-        const EntityHandle orig_elem = *ei;
-        // Get element id
-        int eid;
-        MBMesh_get_gid(mesh, orig_elem, &eid);
-
-        if (orig_id == eid) break;
-      }
-
-      // Get original element
-      if (ei == elems.end()) {
-        Throw() << " elem id not found in element map";
-      }
-
-      const EntityHandle orig_elem=*ei;
-
-      // Split element owner is original elements owner
-      int orig_owner;
-      merr=mesh->mesh->tag_get_data(mesh->owner_tag, &orig_elem, 1, &orig_owner);
-      if (merr != MB_SUCCESS) {
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-          moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;}
-
-      // Set owner
-      merr=mesh->mesh->tag_set_data(mesh->owner_tag, &elem, 1, &orig_owner);
-      if (merr != MB_SUCCESS) {
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-          moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;}
+      merr=output_mesh->mesh->tag_set_data(output_mesh->orig_pos_tag, 
+                                           &elem, 1, &index);
+      ESMC_CHECK_MOAB_RC_THROW(merr);
+      ++index;
     }
   }
-} catch(std::exception &x) {
-  // catch Mesh exception return code
-  if (x.what()) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                          x.what(), ESMC_CONTEXT, NULL);
-  } else {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                          "UNKNOWN", ESMC_CONTEXT, NULL);
-  }
-
-  return;
-}catch(int localrc){
-  // catch standard ESMF return code
-  ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, NULL);
-  return;
-} catch(...){
-  ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                         "- Caught unknown exception", ESMC_CONTEXT, NULL);
-  return;
-}
-
+  ESMC_CATCH_MOAB
 }
 
 } // ESMCI namespace

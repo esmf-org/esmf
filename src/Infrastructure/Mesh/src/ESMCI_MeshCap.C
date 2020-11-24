@@ -1009,14 +1009,19 @@ void MeshCap::setElemInfo(ESMCI::InterArray<int> *elemMask,
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::setElemInfo()"
 
+  int localrc;
   // Call into func. depending on mesh type
   if (is_esmf_mesh) {
-    ESMCI_MeshSetElemInfo(mesh, elemMask, elemArea, rc);
+    ESMCI_MeshSetElemInfo(mesh, elemMask, elemArea, &localrc);
   } else {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-       "- this functionality is not currently supported using MOAB",
-                                  ESMC_CONTEXT, rc);
-    return;
+#if defined ESMF_MOAB
+    MBMesh_SetElemCreateInfo(mbmesh, elemMask, elemArea, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return;
+#else
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+       "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
+#endif
   }
 }
 

@@ -316,7 +316,7 @@ int main(int argc, char *argv[]) {
   rc = ESMF_FAILURE;
   MBMeshTest *mbt_mix = mbmesh_gen_mix_2d_cart(localrc, do_redist);
   if (localrc == ESMF_SUCCESS) localrc = mbt_mix->build_mbmesh();
-  if (localrc == ESMF_SUCCESS) rc = mbt_mix->test_get_info(1);
+  if (localrc == ESMF_SUCCESS) rc = mbt_mix->test_get_info();
 #else
   rc = ESMF_SUCCESS;
 #endif
@@ -333,7 +333,7 @@ int main(int argc, char *argv[]) {
     mbt_mix_redist = new MBMeshTest();
     if (localrc == ESMF_SUCCESS) localrc = mbt_mix->mbtRedist(mbt_mix_redist);
     if (localrc == ESMF_SUCCESS) localrc = mbt_mix_redist->build_mbmesh_redist();
-    if (localrc == ESMF_SUCCESS) rc = mbt_mix_redist->test_get_info();
+    if (localrc == ESMF_SUCCESS) rc = mbt_mix_redist->test_get_info(3);
   }
 #else
   rc = ESMF_SUCCESS;
