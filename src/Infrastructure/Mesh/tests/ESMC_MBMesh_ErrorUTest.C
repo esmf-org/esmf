@@ -152,7 +152,7 @@ int main(void){
   if (rc != ESMF_SUCCESS) return 0;
 
   //----------------------------------------------------------------------------
-  //NEX_UTest
+  //NEX_disable_UTest
   strcpy(name, "Throw an error from the MBMesh");
   strcpy(failMsg, "Did not return ESMC_RC_ARG_SIZE");
 #if defined ESMF_MOAB

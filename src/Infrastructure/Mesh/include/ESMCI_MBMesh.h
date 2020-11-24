@@ -31,45 +31,29 @@ using namespace moab;
 namespace ESMCI {
 
 // use when no pointer *rc is expected to return
-#define ESMC_CHECK_MOAB_RC_RETHROW(merr) \
+#define ESMC_CHECK_MOAB_THROW(merr) \
   if (merr != MB_SUCCESS) {\
     ESMCI::esmc_error local_macro_error("", ESMC_RC_MOAB_ERROR, moab::ErrorCodeStr[merr]); \
-    if (ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, local_macro_error.what(), ESMC_CONTEXT, nullptr)) \
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, local_macro_error.what(), ESMC_CONTEXT, nullptr); \
       throw(local_macro_error);}
 
 // use when no pointer *rc is expected to return
-#define ESMC_THROW_ERROR(actual_rc, msg) {\
-    std::string rcmsg; \
-    rcmsg = ESMC_LogGetErrMsg(actual_rc); \
-    ESMCI::esmc_error local_macro_error(rcmsg, actual_rc, msg); \
-    ESMC_LogDefault.MsgFoundError(actual_rc, local_macro_error.what(), ESMC_CONTEXT, nullptr); \
-    throw(local_macro_error);}
-
-// use when no pointer *rc is expected to return
-#define ESMC_THROW_RC(localrc) {\
-    std::string rcmsg; \
-    rcmsg = ESMC_LogGetErrMsg(localrc); \
-    ESMCI::esmc_error local_macro_error(rcmsg, localrc, ""); \
-    ESMC_LogDefault.MsgFoundError(localrc, local_macro_error.what(), ESMC_CONTEXT, nullptr); \
-    throw(local_macro_error);}
-
-// use when no pointer *rc is expected to return
-#define ESMC_THROW_MSG(msg) {\
-    int temp_rc = ESMC_RC_NOT_SET; \
-    std::string rcmsg; \
-    rcmsg = ESMC_LogGetErrMsg(temp_rc); \
-    ESMCI::esmc_error local_macro_error(rcmsg, temp_rc, msg); \
-    ESMC_LogDefault.MsgFoundError(temp_rc, local_macro_error.what(), ESMC_CONTEXT, nullptr); \
-    throw(local_macro_error);}
+#define ESMC_CHECK_THROW(localrc) \
+    if (localrc != ESMF_SUCCESS) {\
+      std::string rcmsg; \
+      rcmsg = ESMC_LogGetErrMsg(localrc); \
+      ESMCI::esmc_error local_macro_error(rcmsg, localrc, ""); \
+      ESMC_LogDefault.MsgFoundError(localrc, local_macro_error.what(), ESMC_CONTEXT, nullptr); \
+      throw(local_macro_error);}
 
 // use when pointer *rc is expected as a return value
-#define ESMC_THROW_PASSTHRU(localrc) \
+#define ESMC_CHECK_PASSTHRU_THROW(localrc) \
   if (localrc != ESMF_SUCCESS) {\
     ESMCI::esmc_error local_macro_error("", localrc, ""); \
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) \
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc); \
       throw(local_macro_error);}
 
-// for routines with direct access to MOAB, when pointer *rc is NOT returned
+// use when pointer *rc is NOT returned
 #define CATCH_MBMESH_RETHROW \
   catch(int localrc){ \
     if (localrc != ESMF_SUCCESS) {\
@@ -90,7 +74,7 @@ namespace ESMCI {
     if (ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, msg, ESMC_CONTEXT, nullptr)) \
       throw(local_macro_error); }
 
-// for MBMesh routines, when pointer *rc is returned
+// use when pointer *rc is returned
 #define CATCH_MBMESH_RETURN(rc) \
   catch(int localrc){ \
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc); \
@@ -113,9 +97,6 @@ namespace ESMCI {
     msg = "Unknown exception"; \
     ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL, msg, ESMC_CONTEXT, rc); \
     return; }
-
-// may need one more for MBMesh routines which do not return rc pointer (constructor)
-
 
 
   class MBMesh {

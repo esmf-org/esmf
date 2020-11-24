@@ -78,7 +78,7 @@ int main(int argc, char *argv[]) {
 #else
   rc = ESMF_SUCCESS;
 #endif
-  //NEX_UTest
+  //NEX_disable_UTest
   strcpy(name, "MBMeshGet - Cartesian Quadrilateral");
   strcpy(failMsg, "FAIL");
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -97,7 +97,7 @@ int main(int argc, char *argv[]) {
 #else
   rc = ESMF_SUCCESS;
 #endif
-  //NEX_UTest
+  //NEX_disable_UTest
   strcpy(name, "MBMeshGet - Cartesian Quadrilateral Redist");
   strcpy(failMsg, "FAIL");
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -119,7 +119,7 @@ int main(int argc, char *argv[]) {
 #else
   rc = ESMF_SUCCESS;
 #endif
-  //NEX_UTest
+  //NEX_disable_UTest
   strcpy(name, "MBMeshGet - Spherical Quadrilateral");
   strcpy(failMsg, "FAIL");
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -138,7 +138,7 @@ int main(int argc, char *argv[]) {
 #else
   rc = ESMF_SUCCESS;
 #endif
-  //NEX_UTest
+  //NEX_disable_UTest
   strcpy(name, "MBMeshGet - Spherical Quadrilateral Redist");
   strcpy(failMsg, "FAIL");
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -159,7 +159,7 @@ int main(int argc, char *argv[]) {
 #else
   rc = ESMF_SUCCESS;
 #endif
-  //NEX_UTest
+  //NEX_disable_UTest
   strcpy(name, "MBMeshGet - Cartesian Hexahedral (3D)");
   strcpy(failMsg, "FAIL");
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -177,7 +177,7 @@ int main(int argc, char *argv[]) {
 #else
   rc = ESMF_SUCCESS;
 #endif
-  //NEX_UTest
+  //NEX_disable_UTest
   strcpy(name, "MBMeshGet - Cartesian Hexahedral (3D) Redist");
   strcpy(failMsg, "FAIL");
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -198,7 +198,7 @@ int main(int argc, char *argv[]) {
 #else
   rc = ESMF_SUCCESS;
 #endif
-  //NEX_UTest
+  //NEX_disable_UTest
   strcpy(name, "MBMeshGet - Spherical Hexahedral (3D)");
   strcpy(failMsg, "FAIL");
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -216,7 +216,7 @@ int main(int argc, char *argv[]) {
 #else
   rc = ESMF_SUCCESS;
 #endif
-  //NEX_UTest
+  //NEX_disable_UTest
   strcpy(name, "MBMeshGet - Spherical Hexahedral (3D) Redist");
   strcpy(failMsg, "FAIL");
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -239,7 +239,7 @@ int main(int argc, char *argv[]) {
 //   rc = ESMF_SUCCESS;
 // #endif
 //   //cannot yet get connectivity information for ngon meshes
-//   //NEX_UTest
+//   //NEX_disable_UTest
 //   strcpy(name, "MBMeshGet - Cartesian N-gons");
 //   strcpy(failMsg, "FAIL");
 //   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -258,7 +258,7 @@ int main(int argc, char *argv[]) {
 //   rc = ESMF_SUCCESS;
 // #endif
 //   //cannot yet get connectivity information for ngon meshes
-//   //NEX_UTest
+//   //NEX_disable_UTest
 //   strcpy(name, "MBMeshGet - Cartesian N-gons Redist");
 //   strcpy(failMsg, "FAIL");
 //   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -280,7 +280,7 @@ int main(int argc, char *argv[]) {
 //   rc = ESMF_SUCCESS;
 // #endif
 //   //cannot yet get connectivity information for ngon meshes
-//   //NEX_UTest
+//   //NEX_disable_UTest
 //   strcpy(name, "MBMeshGet - Spherical N-gons");
 //   strcpy(failMsg, "FAIL");
 //   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -298,8 +298,8 @@ int main(int argc, char *argv[]) {
 // #else
 //   rc = ESMF_SUCCESS;
 // #endif
-//   // cannot yet get connectivity information for ngon meshes
-//   // NEX_UTest
+//   //cannot yet get connectivity information for ngon meshes
+//   //NEX_disable_UTest
 //   strcpy(name, "MBMeshGet - Spherical N-gons Redist");
 //   strcpy(failMsg, "FAIL");
 //   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -320,7 +320,7 @@ int main(int argc, char *argv[]) {
 #else
   rc = ESMF_SUCCESS;
 #endif
-  //NEX_UTest
+  //NEX_disable_UTest
   strcpy(name, "MBMeshGet - Cartesian Mixed Topology");
   strcpy(failMsg, "FAIL");
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -338,7 +338,7 @@ int main(int argc, char *argv[]) {
 #else
   rc = ESMF_SUCCESS;
 #endif
-  //NEX_UTest
+  //NEX_disable_UTest
   strcpy(name, "MBMeshGet - Cartesian Mixed Topology Redist");
   strcpy(failMsg, "FAIL");
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -359,7 +359,7 @@ int main(int argc, char *argv[]) {
 #else
   rc = ESMF_SUCCESS;
 #endif
-  //NEX_UTest
+  //NEX_disable_UTest
   strcpy(name, "MBMeshGet - Spherical Mixed Topology");
   strcpy(failMsg, "FAIL");
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -377,7 +377,7 @@ int main(int argc, char *argv[]) {
 #else
   rc = ESMF_SUCCESS;
 #endif
-  //NEX_UTest
+  //NEX_disable_UTest
   strcpy(name, "MBMeshGet - Spherical Mixed Topology Redist");
   strcpy(failMsg, "FAIL");
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);

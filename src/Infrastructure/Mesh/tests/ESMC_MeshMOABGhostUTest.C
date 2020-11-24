@@ -1155,18 +1155,18 @@ int main(void){
   
   // this is called in MBMesh_addelements
   // merr = pcomm->resolve_shared_ents(0, elems, mbmesh->pdim, mbmesh->pdim-1);
-  // ESMC_CHECK_MOAB_RC_RETHROW(merr);
+  // ESMC_CHECK_MOAB_THROW(merr);
     
   {
   Range shared_ents;
   // Get entities shared with all other processors
   merr = pcomm->get_shared_entities(-1, shared_ents);
-  ESMC_CHECK_MOAB_RC_RETHROW(merr);
+  ESMC_CHECK_MOAB_THROW(merr);
   
   // Filter shared entities with not not_owned, which means owned
   Range owned_entities;
   merr = pcomm->filter_pstatus(shared_ents, PSTATUS_NOT_OWNED, PSTATUS_NOT, -1, &owned_entities);
-  ESMC_CHECK_MOAB_RC_RETHROW(merr);
+  ESMC_CHECK_MOAB_THROW(merr);
     
   unsigned int nums[4] = {0}; // to store the owned entities per dimension
   for (int i = 0; i < 4; i++)
@@ -1192,7 +1192,7 @@ int main(void){
                                      1, // int num_layers
                                      0, // int addl_ents
                                      true);// bool store_remote_handles
-  ESMC_CHECK_MOAB_RC_RETHROW(merr);
+  ESMC_CHECK_MOAB_THROW(merr);
 
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1202,12 +1202,12 @@ int main(void){
   Range shared_ents;
   // Get entities shared with all other processors
   merr = pcomm->get_shared_entities(-1, shared_ents);
-  ESMC_CHECK_MOAB_RC_RETHROW(merr);
+  ESMC_CHECK_MOAB_THROW(merr);
   
   // Filter shared entities with not not_owned, which means owned
   Range owned_entities;
   merr = pcomm->filter_pstatus(shared_ents, PSTATUS_NOT_OWNED, PSTATUS_NOT, -1, &owned_entities);
-  ESMC_CHECK_MOAB_RC_RETHROW(merr);
+  ESMC_CHECK_MOAB_THROW(merr);
     
   unsigned int nums[4] = {0}; // to store the owned entities per dimension
   for (int i = 0; i < 4; i++)
@@ -1256,17 +1256,17 @@ int main(void){
 
   Range nodes;
   merr=mbmesh->mesh->get_entities_by_dimension(0, 0, nodes);
-  ESMC_CHECK_MOAB_RC_RETHROW(merr);
+  ESMC_CHECK_MOAB_THROW(merr);
 
   merr = pcomm->exchange_tags(node_tags, node_tags, nodes);
-  ESMC_CHECK_MOAB_RC_RETHROW(merr);
+  ESMC_CHECK_MOAB_THROW(merr);
   
   Range elems;
   merr=mbmesh->mesh->get_entities_by_dimension(0, mbmesh->pdim, elems);
-  ESMC_CHECK_MOAB_RC_RETHROW(merr);
+  ESMC_CHECK_MOAB_THROW(merr);
 
   merr = pcomm->exchange_tags(elem_tags, elem_tags, elems);
-  ESMC_CHECK_MOAB_RC_RETHROW(merr);
+  ESMC_CHECK_MOAB_THROW(merr);
 
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1288,7 +1288,7 @@ int main(void){
   // Get a range containing all nodes
   Range range_node;
   merr=mbmesh->mesh->get_entities_by_dimension(0,0,range_node);
-  ESMC_CHECK_MOAB_RC_RETHROW(merr);
+  ESMC_CHECK_MOAB_THROW(merr);
 
   printf("%d# node ids [", Par::Rank());
   for(Range::iterator it=range_node.begin(); it !=range_node.end(); it++) {
@@ -1296,7 +1296,7 @@ int main(void){
     
     int nid;
     merr=mbmesh->mesh->tag_get_data(mbmesh->gid_tag, node, 1, &nid);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
 
     printf("%d, ", nid);
   }
@@ -1304,7 +1304,7 @@ int main(void){
 
   Range range_elem;
   merr=mbmesh->mesh->get_entities_by_dimension(0,mbmesh->pdim,range_elem);
-  ESMC_CHECK_MOAB_RC_RETHROW(merr);
+  ESMC_CHECK_MOAB_THROW(merr);
 
   for(Range::iterator it=range_elem.begin(); it !=range_elem.end(); it++) {
     const EntityHandle *elem=&(*it);
@@ -1312,7 +1312,7 @@ int main(void){
     // Get element id
     int elem_id;
     merr = mbmesh->mesh->tag_get_data(mbmesh->gid_tag, elem, 1, &elem_id);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
     
     printf("%d, ", elem_id);
   }
@@ -1325,7 +1325,7 @@ int main(void){
   // Get a range containing all nodes
   Range range_node;
   merr=mbmesh->mesh->get_entities_by_dimension(0,0,range_node);
-  ESMC_CHECK_MOAB_RC_RETHROW(merr);
+  ESMC_CHECK_MOAB_THROW(merr);
 
   for(Range::iterator it=range_node.begin(); it !=range_node.end(); it++) {
     const EntityHandle *node=&(*it);
@@ -1336,12 +1336,12 @@ int main(void){
     // pdim instead of sdim here, for spherical cases
     Range adjs;
     merr = mbmesh->mesh->get_adjacencies(node, 1, mbmesh->pdim, false, adjs);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
     num_node_elems = adjs.size();
 
     int nid;
     merr=mbmesh->mesh->tag_get_data(mbmesh->gid_tag, node, 1, &nid);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
     
     printf("%d# node id %d, adjacencies %d [", Par::Rank(), nid, num_node_elems);
     for(Range::iterator it=adjs.begin(); it !=adjs.end(); it++) {
@@ -1350,7 +1350,7 @@ int main(void){
       // Get element id
       int elem_id;
       merr = mbmesh->mesh->tag_get_data(mbmesh->gid_tag, elem, 1, &elem_id);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
       
       printf("%d, ", elem_id);
     }

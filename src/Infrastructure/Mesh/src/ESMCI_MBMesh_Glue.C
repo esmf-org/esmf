@@ -77,7 +77,7 @@ void MBMesh_create(void **mbmpp, int *pdim, int *sdim,
     
     // Initialize the parallel environment for mesh (if not already done)
     ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
-    ESMC_THROW_PASSTHRU(localrc);
+    ESMC_CHECK_PASSTHRU_THROW(localrc);
 
     
     //  Error check input //
@@ -125,7 +125,7 @@ void MBMesh_addnodes(void **mbmpp, int *_num_nodes, int *nodeId,
     
     // Initialize the parallel environment for mesh (if not already done)
     ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
-    ESMC_THROW_PASSTHRU(localrc);
+    ESMC_CHECK_PASSTHRU_THROW(localrc);
 
 
     //// Setup some handy info ////
@@ -139,7 +139,7 @@ void MBMesh_addnodes(void **mbmpp, int *_num_nodes, int *nodeId,
 
     // Get petCount 
     int petCount = VM::getCurrent(&localrc)->getPetCount();
-    ESMC_THROW_PASSTHRU(localrc);
+    ESMC_CHECK_PASSTHRU_THROW(localrc);
 
     //// Error check input ////
 
@@ -358,7 +358,7 @@ void _detect_split_elems(
     // Get current mpi communicator
     MPI_Comm mpi_comm;
     mpi_comm=VM::getCurrent(&localrc)->getMpi_c();
-    ESMC_THROW_RC(localrc);
+    ESMC_CHECK_THROW(localrc);
     
     // Init is_split output
     is_split=false;
@@ -478,7 +478,7 @@ void _generate_info_for_split_elems(
     // Get current mpi communicator
     MPI_Comm mpi_comm;
     mpi_comm=VM::getCurrent(&localrc)->getMpi_c();
-    ESMC_THROW_RC(localrc);
+    ESMC_CHECK_THROW(localrc);
     
     
     // Count the number of extra elements we need for splitting
@@ -1254,14 +1254,14 @@ void MBMesh_addelements(void **mbmpp,
 
     // Initialize the parallel environment for mesh (if not already done)
     ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
-    ESMC_THROW_PASSTHRU(localrc);
+    ESMC_CHECK_PASSTHRU_THROW(localrc);
 
     //// Setup some handy info ////
     ESMCI_MESHCREATE_TRACE_ENTER("MBMesh addelems setup");
 
     // Get localPet
     int localPet = VM::getCurrent(&localrc)->getLocalPet();
-    ESMC_THROW_PASSTHRU(localrc);
+    ESMC_CHECK_PASSTHRU_THROW(localrc);
 
     // Get MBMesh object
     ThrowRequire(mbmpp != NULL); 
@@ -1463,7 +1463,7 @@ void MBMesh_addelements(void **mbmpp,
            
            // Get coords from MOAB
            merr=mbmp->mesh->get_coords(&orig_nodes[0], orig_nodes.size(), nodeCoords);
-           ESMC_CHECK_MOAB_RC_RETHROW(merr);      
+           ESMC_CHECK_MOAB_THROW(merr);      
          }
        }
               
@@ -1562,7 +1562,7 @@ void MBMesh_turnonnodemask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg, 
 
     // Initialize the parallel environment for mesh (if not already done)
     ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
-    ESMC_THROW_PASSTHRU(localrc);
+    ESMC_CHECK_PASSTHRU_THROW(localrc);
 
     // Get Moab Mesh wrapper
     MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
@@ -1589,7 +1589,7 @@ void MBMesh_turnonnodemask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg, 
       // Get a range containing all nodes
       Range range_node;
       merr=moab_mesh->get_entities_by_dimension(0,0,range_node);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
 
       // Loop through elements setting values
       for(Range::iterator it=range_node.begin(); it !=range_node.end(); it++) {
@@ -1598,7 +1598,7 @@ void MBMesh_turnonnodemask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg, 
         // Get mask value
         int mv;
         merr=moab_mesh->tag_get_data(mbmp->node_mask_val_tag, &node, 1, &mv);
-        ESMC_CHECK_MOAB_RC_RETHROW(merr);
+        ESMC_CHECK_MOAB_THROW(merr);
 
         // See if mv matches any mask values
         int masked=0;
@@ -1612,7 +1612,7 @@ void MBMesh_turnonnodemask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg, 
 
         // Set global id
         merr=moab_mesh->tag_set_data(mbmp->node_mask_tag, &node, 1, &masked);
-        ESMC_CHECK_MOAB_RC_RETHROW(merr);
+        ESMC_CHECK_MOAB_THROW(merr);
       }
     }
   } 
@@ -1631,7 +1631,7 @@ void MBMesh_turnonnodemask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg, 
 
     // Initialize the parallel environment for mesh (if not already done)
     ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
-    ESMC_THROW_PASSTHRU(localrc);
+    ESMC_CHECK_PASSTHRU_THROW(localrc);
 
     // Get Moab Mesh wrapper
     MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
@@ -1644,7 +1644,7 @@ void MBMesh_turnonnodemask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg, 
       // Get a range containing all nodes
       Range range_node;
       merr=moab_mesh->get_entities_by_dimension(0,0,range_node);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
 
       // Loop through elements setting values
       for(Range::iterator it=range_node.begin(); it !=range_node.end(); it++) {
@@ -1653,7 +1653,7 @@ void MBMesh_turnonnodemask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg, 
         // unset masked value
         int masked=0;
         merr=moab_mesh->tag_set_data(mbmp->node_mask_tag, &node, 1, &masked);
-        ESMC_CHECK_MOAB_RC_RETHROW(merr);
+        ESMC_CHECK_MOAB_THROW(merr);
       }
     }
   } 
@@ -1672,7 +1672,7 @@ void MBMesh_turnonelemmask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg, 
 
     // Initialize the parallel environment for mesh (if not already done)
     ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
-    ESMC_THROW_PASSTHRU(localrc);
+    ESMC_CHECK_PASSTHRU_THROW(localrc);
 
     // Get Moab Mesh wrapper
     MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
@@ -1700,7 +1700,7 @@ void MBMesh_turnonelemmask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg, 
       // Get a range containing all elements
       Range range_elem;
       merr=moab_mesh->get_entities_by_dimension(0,mbmp->pdim,range_elem);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
 
       // Loop through elements setting values
       for(Range::iterator it=range_elem.begin(); it !=range_elem.end(); it++) {
@@ -1726,7 +1726,7 @@ void MBMesh_turnonelemmask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg, 
 
         // Set global id
         merr=moab_mesh->tag_set_data(mbmp->elem_mask_tag, &elem, 1, &masked);
-        ESMC_CHECK_MOAB_RC_RETHROW(merr);
+        ESMC_CHECK_MOAB_THROW(merr);
       }
     }
   } 
@@ -1746,7 +1746,7 @@ void MBMesh_turnoffelemmask(void **mbmpp, int *rc) {
 
     // Initialize the parallel environment for mesh (if not already done)
     ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
-    ESMC_THROW_PASSTHRU(localrc);
+    ESMC_CHECK_PASSTHRU_THROW(localrc);
 
     // Get Moab Mesh wrapper
     MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
@@ -1759,7 +1759,7 @@ void MBMesh_turnoffelemmask(void **mbmpp, int *rc) {
       // Get a range containing all elements
       Range range_elem;
       merr=moab_mesh->get_entities_by_dimension(0,mbmp->pdim,range_elem);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
 
       // Loop through elements setting values
       for(Range::iterator it=range_elem.begin(); it !=range_elem.end(); it++) {
@@ -1768,7 +1768,7 @@ void MBMesh_turnoffelemmask(void **mbmpp, int *rc) {
         // unset masked value
         int masked=0;
         merr=moab_mesh->tag_set_data(mbmp->elem_mask_tag, &elem, 1, &masked);
-        ESMC_CHECK_MOAB_RC_RETHROW(merr);
+        ESMC_CHECK_MOAB_THROW(merr);
       }
     }
   }
@@ -1788,7 +1788,7 @@ void MBMesh_destroy(void **mbmpp, int *rc) {
 
     // Initialize the parallel environment for mesh (if not already done)
     ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
-    ESMC_THROW_PASSTHRU(localrc);
+    ESMC_CHECK_PASSTHRU_THROW(localrc);
 
     // Get Moab Mesh wrapper
     MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
@@ -1818,15 +1818,15 @@ void MBMesh_write(void **mbmpp, char *fname, int *rc,
 
     // Initialize the parallel environment for mesh (if not already done)
     ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
-    ESMC_THROW_PASSTHRU(localrc);
+    ESMC_CHECK_PASSTHRU_THROW(localrc);
 
     // Get localPet
     int localPet = VM::getCurrent(&localrc)->getLocalPet();
-    ESMC_THROW_PASSTHRU(localrc);
+    ESMC_CHECK_PASSTHRU_THROW(localrc);
 
     // Get petCount
     int petCount = VM::getCurrent(&localrc)->getPetCount();
-    ESMC_THROW_PASSTHRU(localrc);
+    ESMC_CHECK_PASSTHRU_THROW(localrc);
 
 
     // Get Moab Mesh wrapper
@@ -1857,7 +1857,7 @@ void MBMesh_write(void **mbmpp, char *fname, int *rc,
 
     // Call into MOAB
     int merr=moab_mesh->write_file(filename_w_vtk,NULL,NULL);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
 
     // get rid of c format string
     delete [] filename;
@@ -1883,11 +1883,11 @@ void MBMesh_createnodedistgrid(void **mbmpp, int *ngrid, int *num_lnodes, int *r
 
     // Initialize the parallel environment for mesh (if not already done)
     ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
-    ESMC_THROW_PASSTHRU(localrc);
+    ESMC_CHECK_PASSTHRU_THROW(localrc);
 
     // Get localPet
     int localPet = VM::getCurrent(&localrc)->getLocalPet();
-    ESMC_THROW_PASSTHRU(localrc);
+    ESMC_CHECK_PASSTHRU_THROW(localrc);
 
     // Get Moab Mesh wrapper
     MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
@@ -1898,7 +1898,7 @@ void MBMesh_createnodedistgrid(void **mbmpp, int *ngrid, int *num_lnodes, int *r
     // Get a range containing all nodes
     Range range_node;
     merr=mbmp->mesh->get_entities_by_dimension(0,0,range_node);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
 
     for(Range::const_iterator it=range_node.begin(); it !=range_node.end(); it++) {
       const EntityHandle *node=&(*it);
@@ -1906,14 +1906,14 @@ void MBMesh_createnodedistgrid(void **mbmpp, int *ngrid, int *num_lnodes, int *r
       // Get owner
       int owner;
       merr=moab_mesh->tag_get_data(mbmp->owner_tag, node, 1, &owner);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
 
       // If owned by this processor, put in list
       if (owner==localPet) {
         // Get gid
         int gid;
         merr=moab_mesh->tag_get_data(mbmp->gid_tag, node, 1, &gid);
-        ESMC_CHECK_MOAB_RC_RETHROW(merr);
+        ESMC_CHECK_MOAB_THROW(merr);
 
         // Stick in list
         ngids.push_back(gid);
@@ -1956,7 +1956,7 @@ void getElemGIDS(MBMesh *mbmp, std::vector<int> &egids) {
 
     // Get localPet
     int localPet = VM::getCurrent(&localrc)->getLocalPet();
-    ESMC_THROW_RC(localrc);
+    ESMC_CHECK_THROW(localrc);
 
     //Get MOAB Mesh
     Interface *moab_mesh=mbmp->mesh;
@@ -1964,7 +1964,7 @@ void getElemGIDS(MBMesh *mbmp, std::vector<int> &egids) {
     // Get a range containing all elements
     Range range_elem;
     merr=moab_mesh->get_entities_by_dimension(0,mbmp->pdim,range_elem);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
 
     // Loop through elements putting into list
     std::vector<std::pair<int,int> > pos_and_gids;
@@ -1974,14 +1974,14 @@ void getElemGIDS(MBMesh *mbmp, std::vector<int> &egids) {
       // Get owner
       int owner;
       merr=moab_mesh->tag_get_data(mbmp->owner_tag, elemp, 1, &owner);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
 
       // If owned by this processor, put in list
       if (owner==localPet) {
         // Get gid
         int gid;
         merr=moab_mesh->tag_get_data(mbmp->gid_tag, elemp, 1, &gid);
-        ESMC_CHECK_MOAB_RC_RETHROW(merr);
+        ESMC_CHECK_MOAB_THROW(merr);
 
         // Don't do split elements
         if (mbmp->is_split && gid > mbmp->max_non_split_id) continue;
@@ -1989,7 +1989,7 @@ void getElemGIDS(MBMesh *mbmp, std::vector<int> &egids) {
         // Get orig_pos
         int orig_pos;
         merr=moab_mesh->tag_get_data(mbmp->orig_pos_tag, elemp, 1, &orig_pos);
-        ESMC_CHECK_MOAB_RC_RETHROW(merr);
+        ESMC_CHECK_MOAB_THROW(merr);
 
         // Stick in list
         pos_and_gids.push_back(std::make_pair(orig_pos,gid));
@@ -2024,7 +2024,7 @@ void MBMesh_createelemdistgrid(void **mbmpp, int *egrid, int *num_lelems, int *r
     int localrc;
     // Initialize the parallel environment for mesh (if not already done)
     ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
-    ESMC_THROW_PASSTHRU(localrc);
+    ESMC_CHECK_PASSTHRU_THROW(localrc);
 
     // Get Moab Mesh wrapper
     MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
@@ -2061,7 +2061,7 @@ void getElems(void **mbmpp, std::vector<EntityHandle> &ehs) {
     // Get localPet
     int localrc, merr;
     int localPet = VM::getCurrent(&localrc)->getLocalPet();
-    ESMC_THROW_RC(localrc);
+    ESMC_CHECK_THROW(localrc);
 
     // Get Moab Mesh wrapper
     MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
@@ -2072,7 +2072,7 @@ void getElems(void **mbmpp, std::vector<EntityHandle> &ehs) {
     // Get a range containing all elements
     Range range_elem;
     merr=moab_mesh->get_entities_by_dimension(0,mbmp->pdim,range_elem);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
 
     // Loop through elements putting into list
     std::vector<std::pair<int,EntityHandle> > pos_and_elems;
@@ -2083,19 +2083,19 @@ void getElems(void **mbmpp, std::vector<EntityHandle> &ehs) {
       // Get owner
       int owner;
       merr=moab_mesh->tag_get_data(mbmp->owner_tag, elemp, 1, &owner);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
 
       // If owned by this processor, put in list
       if (owner==localPet) {
         // Get gid
         int gid;
         merr=moab_mesh->tag_get_data(mbmp->gid_tag, elemp, 1, &gid);
-        ESMC_CHECK_MOAB_RC_RETHROW(merr);
+        ESMC_CHECK_MOAB_THROW(merr);
 
         // Get orig_pos
         int orig_pos;
         merr=moab_mesh->tag_get_data(mbmp->orig_pos_tag, elemp, 1, &orig_pos);
-        ESMC_CHECK_MOAB_RC_RETHROW(merr);
+        ESMC_CHECK_MOAB_THROW(merr);
 
         // Stick in list
         pos_and_elems.push_back(std::make_pair(orig_pos,elem));
@@ -2128,7 +2128,7 @@ void MBMesh_getlocalelemcoords(void **mbmpp, double *ecoords,
 
     // Initialize the parallel environment for mesh (if not already done)
     ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
-    ESMC_THROW_PASSTHRU(localrc);
+    ESMC_CHECK_PASSTHRU_THROW(localrc);
 
       // Get Moab Mesh wrapper
       MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
@@ -2161,7 +2161,7 @@ void MBMesh_getlocalelemcoords(void **mbmpp, double *ecoords,
           // Get orig_pos
           merr=moab_mesh->tag_get_data(mbmp->elem_orig_coords_tag,
                                        &elem, 1, ecoords+orig_sdim*i);
-          ESMC_CHECK_MOAB_RC_RETHROW(merr);
+          ESMC_CHECK_MOAB_THROW(merr);
         }
       } else {
         for (int i=0; i<ehs.size(); i++) {
@@ -2171,7 +2171,7 @@ void MBMesh_getlocalelemcoords(void **mbmpp, double *ecoords,
           // Get orig_pos
           merr=moab_mesh->tag_get_data(mbmp->elem_coords_tag,
                                        &elem, 1, ecoords+orig_sdim*i);
-          ESMC_CHECK_MOAB_RC_RETHROW(merr);
+          ESMC_CHECK_MOAB_THROW(merr);
         }
       }
     } 
@@ -2199,7 +2199,7 @@ void MBMesh_getarea(void **mbmpp, int *num_elem, double *elem_areas, int *rc) {
 
     // Initialize the parallel environment for mesh (if not already done)
     ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
-    ESMC_THROW_PASSTHRU(localrc);
+    ESMC_CHECK_PASSTHRU_THROW(localrc);
 
     // Declare id vector
     std::vector<EntityHandle> ehs;
@@ -2237,7 +2237,7 @@ void MBMesh_getarea(void **mbmpp, int *num_elem, double *elem_areas, int *rc) {
     if (mbmp->has_elem_area) {
 
       merr=moab_mesh->tag_get_data(mbmp->elem_area_tag, &ehs[0], ehs.size(), elem_areas);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
 
     } else {
       for (int i=0; i<ehs.size(); i++) {
@@ -2356,7 +2356,7 @@ void getNodes(void **mbmpp, std::vector<EntityHandle> &nodes) {
     int localrc, merr;
 
     int localPet = VM::getCurrent(&localrc)->getLocalPet();
-    ESMC_THROW_RC(localrc);
+    ESMC_CHECK_THROW(localrc);
 
     // Get Moab Mesh wrapper
     MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
@@ -2367,7 +2367,7 @@ void getNodes(void **mbmpp, std::vector<EntityHandle> &nodes) {
     // Get a range containing all nodes
     Range range_node;
     merr=moab_mesh->get_entities_by_dimension(0,0,range_node);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
 
     // Loop through nodes putting into list
     std::vector<std::pair<int,EntityHandle> > pos_and_nodes;
@@ -2378,19 +2378,19 @@ void getNodes(void **mbmpp, std::vector<EntityHandle> &nodes) {
       // Get owner
       int owner;
       merr=moab_mesh->tag_get_data(mbmp->owner_tag, nodep, 1, &owner);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
 
       // If owned by this processor, put in list
       if (owner==localPet) {
         // Get gid
         int gid;
         merr=moab_mesh->tag_get_data(mbmp->gid_tag, nodep, 1, &gid);
-        ESMC_CHECK_MOAB_RC_RETHROW(merr);
+        ESMC_CHECK_MOAB_THROW(merr);
 
         // Get orig_pos
         int orig_pos;
         merr=moab_mesh->tag_get_data(mbmp->orig_pos_tag, nodep, 1, &orig_pos);
-        ESMC_CHECK_MOAB_RC_RETHROW(merr);
+        ESMC_CHECK_MOAB_THROW(merr);
 
         // Stick in list
         pos_and_nodes.push_back(std::make_pair(orig_pos,node));
@@ -2420,7 +2420,7 @@ void MBMesh_getlocalcoords(void **mbmpp, double *ncoords, int *_orig_sdim, int *
     int localrc, merr;
 
     ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
-    ESMC_THROW_PASSTHRU(localrc);
+    ESMC_CHECK_PASSTHRU_THROW(localrc);
 
     // Get Moab Mesh wrapper
     MBMesh *mbmp=reinterpret_cast<MBMesh*> (*mbmpp);
@@ -2450,7 +2450,7 @@ void MBMesh_getlocalcoords(void **mbmpp, double *ncoords, int *_orig_sdim, int *
         // Get coords
         merr=moab_mesh->tag_get_data(mbmp->node_orig_coords_tag,
                                      &node, 1, ncoords+orig_sdim*i);
-        ESMC_CHECK_MOAB_RC_RETHROW(merr);
+        ESMC_CHECK_MOAB_THROW(merr);
       }
     } else {
       for (int i=0; i<nodes.size(); i++) {
@@ -2459,7 +2459,7 @@ void MBMesh_getlocalcoords(void **mbmpp, double *ncoords, int *_orig_sdim, int *
 
         // Get coords
         merr=moab_mesh->get_coords(&node, 1, ncoords+orig_sdim*i);
-        ESMC_CHECK_MOAB_RC_RETHROW(merr);
+        ESMC_CHECK_MOAB_THROW(merr);
       }
     }
   }
@@ -2517,14 +2517,14 @@ void MBMesh_geteleminfointoarray(void *vmbmp,
 
     // Initialize the parallel environment for mesh (if not already done)
     ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
-    ESMC_THROW_PASSTHRU(localrc);
+    ESMC_CHECK_PASSTHRU_THROW(localrc);
 
     // Make sure that incoming Array distgrids match element distgrid
     for (int i=0; i<numElemArrays; i++) {
 
       // Get match
       DistGridMatch_Flag matchflag=DistGrid::match(elemArrays[i]->getDistGrid(),elemDistgrid,&localrc);
-      ESMC_THROW_PASSTHRU(localrc);
+      ESMC_CHECK_PASSTHRU_THROW(localrc);
 
       // Complain if it doesn't match sufficiently
       if ((matchflag != DISTGRIDMATCH_EXACT) && (matchflag != DISTGRIDMATCH_ALIAS)) {
@@ -2703,7 +2703,7 @@ void MBMesh_serialize(void **mbmpp, char *buffer, int *length,
 
     int localrc;
     ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
-    ESMC_THROW_PASSTHRU(localrc);
+    ESMC_CHECK_PASSTHRU_THROW(localrc);
 
     int *ip;
 
@@ -2776,7 +2776,7 @@ void MBMesh_deserialize(void **mbmpp, char *buffer, int *offset, int *rc,
 
     int localrc;
     ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
-    ESMC_THROW_PASSTHRU(localrc);
+    ESMC_CHECK_PASSTHRU_THROW(localrc);
 
     int *ip;
     int localsize = 0;
@@ -2859,12 +2859,12 @@ void MBMesh_createredistelems(void **src_meshpp, int *num_elem_gids, int *elem_g
 
     // Initialize the parallel environment for mesh (if not already done)
     ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
-    ESMC_THROW_PASSTHRU(localrc);
+    ESMC_CHECK_PASSTHRU_THROW(localrc);
 
     VM *vm = VM::getCurrent(&localrc);
     int petCount = vm->getPetCount();
     int localPet = vm->getLocalPet();
-    ESMC_THROW_PASSTHRU(localrc);
+    ESMC_CHECK_PASSTHRU_THROW(localrc);
 
     // Dereference
     MBMesh *mesh=reinterpret_cast<MBMesh*> (*src_meshpp);
@@ -2918,7 +2918,7 @@ void MBMesh_createredistnodes(void **src_meshpp, int *num_node_gids, int *node_g
 
     // Initialize the parallel environment for mesh (if not already done)
     ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
-    ESMC_THROW_PASSTHRU(localrc);
+    ESMC_CHECK_PASSTHRU_THROW(localrc);
 
     // Dereference
     MBMesh *mesh=reinterpret_cast<MBMesh*> (*src_meshpp);
@@ -2957,7 +2957,7 @@ void MBMesh_createredist(void **src_meshpp, int *num_node_gids, int *node_gids,
 
     // Initialize the parallel environment for mesh (if not already done)
     ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
-    ESMC_THROW_PASSTHRU(localrc);
+    ESMC_CHECK_PASSTHRU_THROW(localrc);
 
     // Dereference
     MBMesh *mesh=reinterpret_cast<MBMesh*> (*src_meshpp);
@@ -3010,12 +3010,12 @@ void MBMesh_checknodelist(void **meshpp, int *_num_node_gids, int *node_gids,
 
     // Initialize the parallel environment for mesh (if not already done)
     ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
-    ESMC_THROW_PASSTHRU(localrc);
+    ESMC_CHECK_PASSTHRU_THROW(localrc);
 
     VM *vm = VM::getCurrent(&localrc);
     int petCount = vm->getPetCount();
     int localPet = vm->getLocalPet();
-    ESMC_THROW_PASSTHRU(localrc);
+    ESMC_CHECK_PASSTHRU_THROW(localrc);
 
     // Dereference
     MBMesh *mesh=reinterpret_cast<MBMesh*> (*meshpp);
@@ -3026,7 +3026,7 @@ void MBMesh_checknodelist(void **meshpp, int *_num_node_gids, int *node_gids,
     // Loop through counting local nodes
     Range nodes;
     merr=mesh->mesh->get_entities_by_dimension(0,0,nodes);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
 
     // list of the Mesh node gids
     std::vector<UInt> local_gids, local_owners;
@@ -3040,7 +3040,7 @@ void MBMesh_checknodelist(void **meshpp, int *_num_node_gids, int *node_gids,
 
       int node_owner;
       merr=mesh->mesh->tag_get_data(mesh->owner_tag, &node, 1, &node_owner);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
 
       // only consider local nodes
       if (node_owner == localPet) { 
@@ -3098,12 +3098,12 @@ void MBMesh_checkelemlist(void **meshpp, int *_num_elem_gids, int *elem_gids,
 
     // Initialize the parallel environment for mesh (if not already done)
     ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
-    ESMC_THROW_PASSTHRU(localrc);
+    ESMC_CHECK_PASSTHRU_THROW(localrc);
 
     VM *vm = VM::getCurrent(&localrc);
     int petCount = vm->getPetCount();
     int localPet = vm->getLocalPet();
-    ESMC_THROW_PASSTHRU(localrc);
+    ESMC_CHECK_PASSTHRU_THROW(localrc);
 
     // Dereference
     MBMesh *mesh=reinterpret_cast<MBMesh*> (*meshpp);
@@ -3114,7 +3114,7 @@ void MBMesh_checkelemlist(void **meshpp, int *_num_elem_gids, int *elem_gids,
     // Loop through counting local elems
     Range elems;
     merr=mesh->mesh->get_entities_by_dimension(0,mesh->pdim,elems);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
 
     // list of the Mesh elem gids
     std::vector<UInt> local_gids, local_owners;
@@ -3135,7 +3135,7 @@ void MBMesh_checkelemlist(void **meshpp, int *_num_elem_gids, int *elem_gids,
 
       int elem_owner;
       merr=mesh->mesh->tag_get_data(mesh->owner_tag, &elem, 1, &elem_owner);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
 
       if (elem_owner == localPet) {
         num_local_elems++;
@@ -3189,14 +3189,14 @@ void MBMesh_checkelemlist(void **meshpp, int *_num_elem_gids, int *elem_gids,
       MBMesh_get_gid(mesh, ent, &gid);
       int owner;
       merr=mesh->mesh->tag_get_data(mesh->owner_tag, &ent, 1, &owner);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
 
       printf("%d# checkelems - node %d owner %d\n", localPet, gid, owner);
     }
 
     Range elems;
     merr=mesh->mesh->get_entities_by_dimension(0,mesh->pdim,elems);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
 
     Range::const_iterator si = elems.begin(), se = elems.end();
     for (; si != se; ++si) {
@@ -3205,7 +3205,7 @@ void MBMesh_checkelemlist(void **meshpp, int *_num_elem_gids, int *elem_gids,
       MBMesh_get_gid(mesh, ent, &gid);
       int owner;
       merr=mesh->mesh->tag_get_data(mesh->owner_tag, &ent, 1, &owner);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
 
       printf("%d# checkelems - elem %d owner %d\n", localPet, gid, owner);
     }
@@ -3224,12 +3224,12 @@ void MBMesh_checkelemlist(void **meshpp, int *_num_elem_gids, int *elem_gids,
     Range shared_ents;
     // Get entities shared with all other processors
     merr = pcomm->get_shared_entities(-1, shared_ents);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
     
     // Filter shared entities with not not_owned, which means owned
     Range owned_entities;
     merr = pcomm->filter_pstatus(shared_ents, PSTATUS_NOT_OWNED, PSTATUS_NOT, -1, &owned_entities);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
       
     unsigned int nums[4] = {0}; // to store the owned entities per dimension
     for (int i = 0; i < 4; i++)
@@ -3270,13 +3270,13 @@ void MBMesh_FitOnVM(void **meshpp, VM **new_vm, int *rc)
 
     // set up Par
     ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
-    ESMC_THROW_PASSTHRU(localrc);
+    ESMC_CHECK_PASSTHRU_THROW(localrc);
 
     // Dereference
     MBMesh *mbmesh=reinterpret_cast<MBMesh*> (*meshpp);
 
     VM *curr_vm = VM::getCurrent(&localrc);
-    ESMC_THROW_PASSTHRU(localrc);
+    ESMC_CHECK_PASSTHRU_THROW(localrc);
 
     // Get current VM size
     int curr_vm_size=curr_vm->getPetCount();
@@ -3295,7 +3295,7 @@ void MBMesh_FitOnVM(void **meshpp, VM **new_vm, int *rc)
 
     // Create array mapping from current vm to input vm
     localrc=curr_vm->allgather(&new_vm_rank,rank_map,sizeof(int));
-    ESMC_THROW_PASSTHRU(localrc);
+    ESMC_CHECK_PASSTHRU_THROW(localrc);
 
 #if 0
     // debug output
@@ -3341,10 +3341,9 @@ void MBMesh_GetCentroid(void *meshp, int *num_elem, double *elem_centroid, int *
 
     char msg[256];
     if (*num_elem != mesh->num_elem()) {
-      sprintf(msg, "elemCentroid array must be of size %d", mesh->num_elem());
-      ESMC_THROW_ERROR(ESMC_RC_ARG_SIZE, msg)
+      Throw () << "elemCentroid array must be of size " << mesh->num_elem();
     } else if (mesh->coordsys != ESMC_COORDSYS_CART) {
-      ESMC_THROW_ERROR(ESMC_RC_CANNOT_GET, "Cannot yet return centroids for spherical coordinates.")
+      Throw () << "Cannot yet return centroids for spherical coordinates.";
     }
 
     mesh->get_elem_centroids(elem_centroid);
@@ -3440,83 +3439,73 @@ void MBMesh_GetElemCreateInfo(void *meshp,
 
     // Initialize the parallel environment for mesh (if not already done)
     ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
-    ESMC_THROW_PASSTHRU(localrc);
+    ESMC_CHECK_PASSTHRU_THROW(localrc);
 
     VM *vm = VM::getCurrent(&localrc);
     int petCount = vm->getPetCount();
     int localPet = vm->getLocalPet();
-    ESMC_THROW_PASSTHRU(localrc);
+    ESMC_CHECK_PASSTHRU_THROW(localrc);
 
     // Dereference
     MBMesh *mesh=reinterpret_cast<MBMesh*> (meshp);
 
     // Doesn't work with split meshes right now
     if (mesh->is_split)
-      ESMC_THROW_ERROR(ESMC_RC_ARG_VALUE, "Can't get elem connection count from mesh containing >4 elements.")
+      Throw () << "Can't get elem connection count from mesh containing >4 elements.";
     
     ////// Get some handy information //////
-    int num_elems=mesh->num_elem();
-    int orig_sdim=mesh->orig_sdim;
+    int num_elems = mesh->num_elem();
+    int orig_sdim = mesh->orig_sdim;
+    int num_elem_conn = mesh->num_elem_conn();
 
     ////// Error check input arrays //////
 
     if (present(elemIds)) {
       if (elemIds->dimCount !=1)
-        ESMC_THROW_ERROR(ESMC_RC_ARG_RANK, "elemIds array must be 1D")
-
+        Throw () << "elemIds array must be 1D";
       if (elemIds->extent[0] != num_elems)
-        ESMC_THROW_ERROR(ESMC_RC_ARG_SIZE, "elemIds array must be of size elemCount")
+        Throw () << "elemIds array must be of size elemCount";
     }
 
     if (present(elemTypes)) {
       if (elemTypes->dimCount !=1)
-        ESMC_THROW_ERROR(ESMC_RC_ARG_RANK, "elemTypes array must be 1D")
-
+        Throw () << "elemTypes array must be 1D";
       if (elemTypes->extent[0] != num_elems)
-        ESMC_THROW_ERROR(ESMC_RC_ARG_SIZE, "elemTypes array must be of size elemCount")
+        Throw () << "elemTypes array must be of size elemCount";
     }
 
     if (present(elemConn)) {
       if (elemConn->dimCount !=1)
-        ESMC_THROW_ERROR(ESMC_RC_ARG_RANK, "elemConn array must be 1D")
-
-      int num_elem_conn = mesh->num_elem_conn();
-
+        Throw () << "elemConn array must be 1D";
       if (elemConn->extent[0] != num_elem_conn)
-        ESMC_THROW_ERROR(ESMC_RC_ARG_SIZE, "elemConn array must be of size elemConnCount")
+        Throw () << "elemConn array must be of size elemConnCount";
     }
 
     if (present(elemMask)) {
       if (!mesh->has_elem_mask)
-        ESMC_THROW_ERROR(ESMC_RC_CANNOT_GET, "Element mask not present.")
-
+        Throw () << "Element mask not present.";
       if (elemMask->dimCount !=1)
-        ESMC_THROW_ERROR(ESMC_RC_ARG_RANK, "elemMask array must be 1D")
-
+        Throw () << "elemMask array must be 1D";
       if (elemMask->extent[0] != num_elems)
-        ESMC_THROW_ERROR(ESMC_RC_ARG_SIZE, "elemMask array must be of size elemCount")
+        Throw () << "elemMask array must be of size elemCount";
     }
 
     if (present(elemArea)) {
       if (!mesh->has_elem_area)
-        ESMC_THROW_ERROR(ESMC_RC_CANNOT_GET, "Element areas not present.")
-
+        Throw () << "Element areas not present.";
       if (elemArea->dimCount !=1)
-        ESMC_THROW_ERROR(ESMC_RC_ARG_RANK, "elemArea array must be 1D")
-
+        Throw () << "elemArea array must be 1D";
       if (elemArea->extent[0] != num_elems)
-        ESMC_THROW_ERROR(ESMC_RC_ARG_SIZE, "elemArea array must be of size elemCount")
+        Throw () << "elemArea array must be of size elemCount";
     }
 
     if (present(elemCoords)) {
       if (!mesh->has_elem_coords)
-        ESMC_THROW_ERROR(ESMC_RC_CANNOT_GET, "Element coords not present.")
-
+        Throw () << "Element coords not present.";
       if (elemCoords->dimCount !=1)
-        ESMC_THROW_ERROR(ESMC_RC_ARG_RANK, "elemCoords array must be 1D")
-
+        Throw () << "elemCoords array must be 1D";
       if (elemCoords->extent[0] != num_elems*orig_sdim)
-        ESMC_THROW_ERROR(ESMC_RC_ARG_SIZE, "elemCoords array must be of size elemCount*orig_sdim")
+        Throw () << "elemCoords array must be of size elemCount*sdim";
     }
 
     // Fill info in arrays 
@@ -3575,19 +3564,19 @@ void MBMesh_SetElemCreateInfo(void *meshp,
 
     // Initialize the parallel environment for mesh (if not already done)
     ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
-    ESMC_THROW_PASSTHRU(localrc);
+    ESMC_CHECK_PASSTHRU_THROW(localrc);
 
     VM *vm = VM::getCurrent(&localrc);
     int petCount = vm->getPetCount();
     int localPet = vm->getLocalPet();
-    ESMC_THROW_PASSTHRU(localrc);
+    ESMC_CHECK_PASSTHRU_THROW(localrc);
 
     // Dereference
     MBMesh *mesh=reinterpret_cast<MBMesh*> (meshp);
 
     // Doesn't work with split meshes right now
     if (mesh->is_split)
-      ESMC_THROW_ERROR(ESMC_RC_ARG_VALUE, "Can't set elem info for a mesh containing >4 elements.")
+      Throw () << "Can't set elem info for a mesh containing >4 elements.";
     
     ////// Get some handy information //////
     int num_elems=mesh->num_elem();
@@ -3597,24 +3586,20 @@ void MBMesh_SetElemCreateInfo(void *meshp,
 
     if (present(elemMask)) {
       if (!mesh->has_elem_mask)
-        ESMC_THROW_ERROR(ESMC_RC_CANNOT_GET, "Element mask not present.")
-
+        Throw () << "Element mask not present.";
       if (elemMask->dimCount !=1)
-        ESMC_THROW_ERROR(ESMC_RC_ARG_RANK, "elemMask array must be 1D")
-
+        Throw () << "elemMask array must be 1D";
       if (elemMask->extent[0] != num_elems)
-        ESMC_THROW_ERROR(ESMC_RC_ARG_SIZE, "elemMask array must be of size elemCount")
+        Throw () << "elemMask array must be of size elemCount";
     }
 
     if (present(elemArea)) {
       if (!mesh->has_elem_area)
-        ESMC_THROW_ERROR(ESMC_RC_CANNOT_GET, "Element areas not present.")
-
+        Throw () << "Element areas not present.";
       if (elemArea->dimCount !=1)
-        ESMC_THROW_ERROR(ESMC_RC_ARG_RANK, "elemArea array must be 1D")
-
+        Throw () << "elemArea array must be 1D";
       if (elemArea->extent[0] != num_elems)
-        ESMC_THROW_ERROR(ESMC_RC_ARG_SIZE, "elemArea array must be of size elemCount")
+        Throw () << "elemArea array must be of size elemCount";
     }
 
 
@@ -3670,12 +3655,12 @@ void MBMesh_GetNodeCreateInfo(void *meshp,
 
     // Initialize the parallel environment for mesh (if not already done)
     ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
-    ESMC_THROW_PASSTHRU(localrc);
+    ESMC_CHECK_PASSTHRU_THROW(localrc);
 
     VM *vm = VM::getCurrent(&localrc);
     int petCount = vm->getPetCount();
     int localPet = vm->getLocalPet();
-    ESMC_THROW_PASSTHRU(localrc);
+    ESMC_CHECK_PASSTHRU_THROW(localrc);
 
     // Dereference
     MBMesh *mesh=reinterpret_cast<MBMesh*> (meshp);
@@ -3688,45 +3673,38 @@ void MBMesh_GetNodeCreateInfo(void *meshp,
     // If nodeIds array exists, error check
     if (present(nodeIds)) {
       if (nodeIds->dimCount !=1)
-        ESMC_THROW_ERROR(ESMC_RC_ARG_RANK, "nodeIds array must be 1D")
-
+        Throw () << "nodeIds array must be 1D";
       if (nodeIds->extent[0] != num_nodes)
-        ESMC_THROW_ERROR(ESMC_RC_ARG_SIZE, "nodeIds array must be of size nodeCount")
+        Throw () << "nodeIds array must be of size nodeCount";
     }
 
     // If nodeIds array exists, error check
     if (present(nodeCoords)) {
       if (nodeCoords->dimCount !=1)
-        ESMC_THROW_ERROR(ESMC_RC_ARG_RANK, "nodeCoords array must be 1D")
-
+        Throw () << "nodeCoords array must be 1D";
       if (nodeCoords->extent[0] != orig_sdim*num_nodes)
-        ESMC_THROW_ERROR(ESMC_RC_ARG_SIZE, "nodeCoords array must be of size nodeCount*orig_sdim")
+        Throw () << "nodeCoords array must be of size nodeCount*sdim";
     }
 
     // If nodeOwners array exists, error check
     if (present(nodeOwners)) {
       if (nodeOwners->dimCount !=1)
-        ESMC_THROW_ERROR(ESMC_RC_ARG_RANK, "nodeOwners array must be 1D")
-
+        Throw () << "nodeOwners array must be 1D";
       if (nodeOwners->extent[0] != num_nodes)
-        ESMC_THROW_ERROR(ESMC_RC_ARG_SIZE, "nodeOwners array must be of size nodeCount")
+        Throw () << "nodeOwners array must be of size nodeCount";
     }
 
     // If nodeMask array exists, error check
     if (present(nodeMask)) {
       if (!mesh->has_node_mask)
-        ESMC_THROW_ERROR(ESMC_RC_CANNOT_GET, "Node mask not present.")
-
+        Throw () << "Node mask not present.";
       if (nodeMask->dimCount !=1)
-        ESMC_THROW_ERROR(ESMC_RC_ARG_RANK, "nodeMask array must be 1D")
-
+        Throw () << "nodeMask array must be 1D";
       if (nodeMask->extent[0] != num_nodes)
-        ESMC_THROW_ERROR(ESMC_RC_ARG_SIZE, "nodeMask array must be of size nodeCount")
+        Throw () << "nodeMask array must be of size nodeCount";
     }
 
     // Fill info in arrays 
-
-    // mesh->debug_output_nodes();
 
     // If it was passed in, fill nodeIds array
     if (present(nodeIds)) {

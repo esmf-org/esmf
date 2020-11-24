@@ -136,7 +136,7 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
   // Get a range containing all nodes
   Range range_node;
   merr=src_mesh->mesh->get_entities_by_dimension(0,0,range_node);
-  ESMC_CHECK_MOAB_RC_RETHROW(merr);
+  ESMC_CHECK_MOAB_THROW(merr);
 
   int nn = 0;
   int on = 0;
@@ -145,14 +145,14 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
     const EntityHandle *node=&(*it);
     int owner;
     merr=src_mesh->mesh->tag_get_data(src_mesh->owner_tag, node, 1, &owner);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
     if (owner != Par::Rank()) on++;
   }
 
   // Get a range containing all elems
   Range range_elem;
   merr=src_mesh->mesh->get_entities_by_dimension(0,src_mesh->pdim,range_elem);
-  ESMC_CHECK_MOAB_RC_RETHROW(merr);
+  ESMC_CHECK_MOAB_THROW(merr);
 
   int ne = 0;
   int oe = 0;
@@ -161,7 +161,7 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
     const EntityHandle *elem=&(*it);
     int owner;
     merr=src_mesh->mesh->tag_get_data(src_mesh->owner_tag, elem, 1, &owner);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
     if (owner != Par::Rank()) oe++;
   }
 
@@ -192,7 +192,7 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
   // Get a range containing all nodes
   Range range_node;
   merr=src_mesh->mesh->get_entities_by_dimension(0,0,range_node);
-  ESMC_CHECK_MOAB_RC_RETHROW(merr);
+  ESMC_CHECK_MOAB_THROW(merr);
 
   int nn = 0;
   int on = 0;
@@ -201,14 +201,14 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
     const EntityHandle *node=&(*it);
     int owner;
     merr=src_mesh->mesh->tag_get_data(src_mesh->owner_tag, node, 1, &owner);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
     if (owner != Par::Rank()) on++;
   }
 
   // Get a range containing all elems
   Range range_elem;
   merr=src_mesh->mesh->get_entities_by_dimension(0,src_mesh->pdim,range_elem);
-  ESMC_CHECK_MOAB_RC_RETHROW(merr);
+  ESMC_CHECK_MOAB_THROW(merr);
 
   int ne = 0;
   int oe = 0;
@@ -217,7 +217,7 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
     const EntityHandle *elem=&(*it);
     int owner;
     merr=src_mesh->mesh->tag_get_data(src_mesh->owner_tag, elem, 1, &owner);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
     if (owner != Par::Rank()) oe++;
   }
 
@@ -231,18 +231,18 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
   // Get a range containing all nodes
   Range range_node;
   merr=src_mesh->mesh->get_entities_by_dimension(0,0,range_node);
-  ESMC_CHECK_MOAB_RC_RETHROW(merr);
+  ESMC_CHECK_MOAB_THROW(merr);
 
   for(Range::iterator it=range_node.begin(); it !=range_node.end(); it++) {
     const EntityHandle *node=&(*it);
 
     Range adjs;
     merr = src_mesh->mesh->get_adjacencies(node, 1, src_mesh->pdim, false, adjs);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
 
     {int nid;
     merr=src_mesh->mesh->tag_get_data(src_mesh->gid_tag, node, 1, &nid);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
     printf("%d# mesh node id %d, adjacencies %d [", Par::Rank(), nid, adjs.size());
     for(Range::iterator it=adjs.begin(); it !=adjs.end(); it++) {
       const EntityHandle *elem=&(*it);
@@ -250,7 +250,7 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
       // Get element id
       int elem_id;
       merr = src_mesh->mesh->tag_get_data(src_mesh->gid_tag, elem, 1, &elem_id);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
       
       printf("%d, ", elem_id);
     }
@@ -304,7 +304,7 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
   // Get a range containing all elements
   Range range_elem;
   merr=src_mesh->mesh->get_entities_by_dimension(0,src_mesh->pdim,range_elem);
-  ESMC_CHECK_MOAB_RC_RETHROW(merr);
+  ESMC_CHECK_MOAB_THROW(merr);
 
   std::map<int,int> id_to_index;
   int pos=0;
@@ -314,7 +314,7 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
     // Get element id
     int elem_id;
     merr=src_mesh->mesh->tag_get_data(src_mesh->gid_tag, elem, 1, &elem_id);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
 
     // Translate id if split
     if ((src_mesh->is_split) && (elem_id > src_mesh->max_non_split_id)) {
@@ -373,7 +373,7 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
   // Get a range containing all nodes
   Range range_node;
   merr=src_mesh->mesh->get_entities_by_dimension(0,0,range_node);
-  ESMC_CHECK_MOAB_RC_RETHROW(merr);
+  ESMC_CHECK_MOAB_THROW(merr);
 
   for(Range::iterator it=range_node.begin(); it !=range_node.end(); it++) {
     const EntityHandle *node=&(*it);
@@ -390,13 +390,13 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
     // pdim instead of sdim here, for spherical cases
     Range adjs;
     merr = src_mesh->mesh->get_adjacencies(node, 1, pdim, false, adjs);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
     num_node_elems = adjs.size();
 
 #ifdef DEBUG_CONNECTIVITY_ADJACENCIES
     {int nid;
     merr=src_mesh->mesh->tag_get_data(src_mesh->gid_tag, node, 1, &nid);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
     printf("%d# mesh node id %d, adjacencies %d [", Par::Rank(), nid, num_node_elems);
     for(Range::iterator it=adjs.begin(); it !=adjs.end(); it++) {
       const EntityHandle *elem=&(*it);
@@ -404,7 +404,7 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
       // Get element id
       int elem_id;
       merr = src_mesh->mesh->tag_get_data(src_mesh->gid_tag, elem, 1, &elem_id);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
       
       printf("%d, ", elem_id);
     }
@@ -472,7 +472,7 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
 #ifdef DEBUG_UNIQUE_ELEMS
     {int nid;
     merr=src_mesh->mesh->tag_get_data(src_mesh->gid_tag, node, 1, &nid);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
     printf("%d# mesh node id %d, unique elems %d [", Par::Rank(), nid, num_elems_around_node_ids);
     for (int i=0; i<num_elems_around_node_ids; i++) {  
       printf("%d, ", elems_around_node_ids[i]);
@@ -489,13 +489,13 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
     // Save elemId
     int elem_id;
     merr=src_mesh->mesh->tag_get_data(src_mesh->gid_tag, node, 1, &elem_id);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
     elemId[num_elems]=elem_id;
 
     // Save owner
     int owner;
     merr=src_mesh->mesh->tag_get_data(src_mesh->owner_tag, node, 1, &owner);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
     elemOwner[num_elems]=owner;
     
     // Next elem
@@ -559,7 +559,7 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
 #ifdef DEBUG_CONNECTIVITY
   {Range elemss;
   merr=src_mesh->mesh->get_entities_by_dimension(0, src_mesh->pdim, elemss);
-  ESMC_CHECK_MOAB_RC_RETHROW(merr);
+  ESMC_CHECK_MOAB_THROW(merr);
   printf("%d# range size = %d\n", localPet, elemss.size());}
 #endif
 
@@ -572,7 +572,7 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
       // Get element id
       int elem_id;
       merr=src_mesh->mesh->tag_get_data(src_mesh->gid_tag, elem, 1, &elem_id);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
 
       // Translate id if split
       if ((src_mesh->is_split) && (elem_id > src_mesh->max_non_split_id)) {
@@ -587,7 +587,7 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
       // Get owner
       int owner;
       merr=src_mesh->mesh->tag_get_data(src_mesh->owner_tag, elem, 1, &owner);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
 
       // Translate owner if split
       // (Interestingly we DON'T have to translate the owner for
@@ -606,12 +606,12 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
         double c[3];
         // merr = src_mesh->mesh->get_coords(elem, 1, c);
         merr=src_mesh->mesh->tag_get_data(src_mesh->elem_coords_tag, elem, 1, c);
-        ESMC_CHECK_MOAB_RC_RETHROW(merr);
+        ESMC_CHECK_MOAB_THROW(merr);
 
         // Add vertex
         EntityHandle new_node = 0;
         merr=dual_mesh->mesh->create_vertex(c,new_node);
-        ESMC_CHECK_MOAB_RC_RETHROW(merr);
+        ESMC_CHECK_MOAB_THROW(merr);
         nodes[pos] = new_node;
 
 #ifdef DEBUG_CONNECTIVITY
@@ -620,24 +620,24 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
         // Set Ids
         merr=dual_mesh->mesh->tag_set_data(dual_mesh->gid_tag, &new_node, 
           1, &elem_id);
-        ESMC_CHECK_MOAB_RC_RETHROW(merr);
+        ESMC_CHECK_MOAB_THROW(merr);
 
         // Set Owners
         merr=dual_mesh->mesh->tag_set_data(dual_mesh->owner_tag, 
           &new_node, 1, &owner);
-        ESMC_CHECK_MOAB_RC_RETHROW(merr);
+        ESMC_CHECK_MOAB_THROW(merr);
 
         // Set orig_pos
         merr=dual_mesh->mesh->tag_set_data(dual_mesh->orig_pos_tag, 
           &new_node, 1, &data_index);
-        ESMC_CHECK_MOAB_RC_RETHROW(merr);
+        ESMC_CHECK_MOAB_THROW(merr);
 
         // Set original coords
         if (dual_mesh->has_node_orig_coords) {
           // Set original coords
           merr=dual_mesh->mesh->tag_set_data(dual_mesh->node_orig_coords_tag, 
             &new_node, 1, c);
-          ESMC_CHECK_MOAB_RC_RETHROW(merr);
+          ESMC_CHECK_MOAB_THROW(merr);
         }
         
         // masking
@@ -647,12 +647,12 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
             int int_def_val=0; // So things are by default not masked
             merr=dual_mesh->mesh->tag_get_handle("node_mask", 1, MB_TYPE_INTEGER,
               dual_mesh->node_mask_tag, MB_TAG_EXCL|MB_TAG_DENSE, &int_def_val);
-            ESMC_CHECK_MOAB_RC_RETHROW(merr);
+            ESMC_CHECK_MOAB_THROW(merr);
             
             int_def_val=0; // So things are by default not masked
             merr=dual_mesh->mesh->tag_get_handle("node_mask_val", 1, MB_TYPE_INTEGER, 
               dual_mesh->node_mask_val_tag, MB_TAG_EXCL|MB_TAG_DENSE, &int_def_val);
-            ESMC_CHECK_MOAB_RC_RETHROW(merr);
+            ESMC_CHECK_MOAB_THROW(merr);
             
             // node mask is now initialized
             dual_mesh->has_node_mask = true;
@@ -661,20 +661,20 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
           // now set individual node mask values, based on elem mask
           int elem_mask;
           merr=src_mesh->mesh->tag_get_data(src_mesh->elem_mask_tag, elem, 1, &elem_mask);
-          ESMC_CHECK_MOAB_RC_RETHROW(merr);
+          ESMC_CHECK_MOAB_THROW(merr);
           
           int elem_mask_val;
           merr=src_mesh->mesh->tag_get_data(src_mesh->elem_mask_val_tag, elem, 1, &elem_mask_val);
-          ESMC_CHECK_MOAB_RC_RETHROW(merr);
+          ESMC_CHECK_MOAB_THROW(merr);
           
           // set the elem mask value in the node mask
           merr=dual_mesh->mesh->tag_set_data(dual_mesh->node_mask_tag, 
             &new_node, 1, &elem_mask);
-          ESMC_CHECK_MOAB_RC_RETHROW(merr);
+          ESMC_CHECK_MOAB_THROW(merr);
 
           merr=dual_mesh->mesh->tag_set_data(dual_mesh->node_mask_val_tag, 
             &new_node, 1, &elem_mask_val);
-          ESMC_CHECK_MOAB_RC_RETHROW(merr);
+          ESMC_CHECK_MOAB_THROW(merr);
         }
         
         data_index++;
@@ -692,7 +692,7 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
   if (dual_mesh->has_node_mask) {
     Range nodes;
     merr=dual_mesh->mesh->get_entities_by_dimension(0, 0, nodes);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
 
     int num_verts = nodes.size();
     int src_node_mask[num_verts];
@@ -701,10 +701,10 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
   printf("%d# - has_node_mask == %s\n", Par::Rank(), dual_mesh->has_node_mask ? "true" : "false");
 
     merr=dual_mesh->mesh->tag_get_data(dual_mesh->node_mask_val_tag, nodes, &src_node_mask);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
 
     merr=dual_mesh->mesh->tag_get_data(dual_mesh->gid_tag, nodes, &node_id);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
 
     printf("%d# src_node_id = [", Par::Rank());
     for (int i = 0; i < num_verts; ++i)
@@ -848,13 +848,13 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
           // get node id
           int nid;
           merr=dual_mesh->mesh->tag_get_data(dual_mesh->gid_tag, &node, 1, &nid);
-          ESMC_CHECK_MOAB_RC_RETHROW(merr);
+          ESMC_CHECK_MOAB_THROW(merr);
 
           printf("PET %d node id %d of %d, node %d [%d]\n", Par::Rank(), nid, elemType[e], elemConn[conn_pos+i], conn_pos+i);
 #endif
           double crd[3];
           merr = dual_mesh->mesh->get_coords(&node, 1, crd);
-          ESMC_CHECK_MOAB_RC_RETHROW(merr);
+          ESMC_CHECK_MOAB_THROW(merr);
           
           //double *crd=dm_node_coord->data(*node);
 
@@ -1003,33 +1003,33 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
 
       EntityHandle new_elem;
       merr=dual_mesh->mesh->create_element(etype,elem_verts,num_elem_verts,new_elem);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
 
        // Set global id
       merr=dual_mesh->mesh->tag_set_data(dual_mesh->gid_tag, &new_elem, 1, elemId+e);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
 
       // Set Position
       merr=dual_mesh->mesh->tag_set_data(dual_mesh->orig_pos_tag, &new_elem, 1, &e);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
 
       // Set Owner to the current pet
       // TODO: is this a good idea?
       merr=dual_mesh->mesh->tag_set_data(dual_mesh->owner_tag, &new_elem, 1, &elemOwner[e]);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
 
 
       // // Set elem mask value
       // if (dual_mesh->has_elem_mask) {
       //   merr=dual_mesh->mesh->tag_set_data(dual_mesh->elem_mask_val_tag, &new_elem, 1,
       //                                elemMaskII->array+e);
-      //   ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      //   ESMC_CHECK_MOAB_THROW(merr);
       // }
 
 #if 0
       // Set elem coords in the current elem
       merr=dual_mesh->mesh->tag_set_data(dual_mesh->elem_coords_tag, &new_elem, 1, elem_coords);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
 #endif
 
     } // for e
@@ -1186,7 +1186,7 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
     // merr=mesh->mesh->tag_get_data(mesh->node_orig_coords_tag, 
     //           node, 1, nc);
     merr = mesh->mesh->get_coords(node, 1, nc);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
     
     center[0]=nc[0];
     center[1]=nc[1];
@@ -1203,7 +1203,7 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
     // Range of elements around a node
     Range range_elem;
     merr = mesh->mesh->get_adjacencies(node, 1, pdim, false, range_elem);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
     
     for(Range::iterator it=range_elem.begin(); it !=range_elem.end(); it++) {
       const EntityHandle *elem=&(*it);
@@ -1214,10 +1214,10 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
 #ifdef DEBUG_TRI
 {int nid;
 merr=mesh->mesh->tag_get_data(mesh->gid_tag, node, 1, &nid);
-ESMC_CHECK_MOAB_RC_RETHROW(merr);
+ESMC_CHECK_MOAB_THROW(merr);
 int owner;
 merr = mesh->mesh->tag_get_data(mesh->owner_tag, node, 1, &owner);
-ESMC_CHECK_MOAB_RC_RETHROW(merr);
+ESMC_CHECK_MOAB_THROW(merr);
 
 if (range_elem.size() == 3) printf("%d# 3 adjacencies, node %d owener %d\n", Par::Rank(), nid, owner);
 }
@@ -1226,7 +1226,7 @@ if (range_elem.size() == 3) printf("%d# 3 adjacencies, node %d owener %d\n", Par
 #ifdef DEBUG_CONNECTIVITY_ADJACENCIES
     {int nid;
     merr=mesh->mesh->tag_get_data(mesh->gid_tag, node, 1, &nid);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
     printf("%d# unique algorithm - mesh node id %d, adjacencies %d [", Par::Rank(), nid, range_elem.size());
     for(Range::iterator it=range_elem.begin(); it !=range_elem.end(); it++) {
       const EntityHandle *elem=&(*it);
@@ -1234,7 +1234,7 @@ if (range_elem.size() == 3) printf("%d# 3 adjacencies, node %d owener %d\n", Par
       // Get element id
       int elem_id;
       merr = mesh->mesh->tag_get_data(mesh->gid_tag, elem, 1, &elem_id);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
       
       printf("%d, ", elem_id);
     }
@@ -1258,14 +1258,14 @@ if (range_elem.size() == 3) printf("%d# 3 adjacencies, node %d owener %d\n", Par
       // Get owner
       int owner;
       merr = mesh->mesh->tag_get_data(mesh->owner_tag, elem, 1, &owner);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
       
       if (owner == Par::Rank()) allnotowned = false;
       
       // Get element id
       int elem_id;
       merr = mesh->mesh->tag_get_data(mesh->gid_tag, elem, 1, &elem_id);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
 
       // Translate id if split
       if ((mesh->is_split) && (elem_id > mesh->max_non_split_id)) {
@@ -1282,7 +1282,7 @@ if (range_elem.size() == 3) printf("%d# 3 adjacencies, node %d owener %d\n", Par
         double ec[3];
         merr=mesh->mesh->tag_get_data(mesh->elem_coords_tag, elem, 1, ec);
         // merr = mesh->mesh->get_coords(elem, 1, ec);
-        ESMC_CHECK_MOAB_RC_RETHROW(merr);
+        ESMC_CHECK_MOAB_THROW(merr);
         double tmp_coords[3];
         tmp_coords[0]=ec[0];
         tmp_coords[1]=ec[1];
@@ -1330,7 +1330,7 @@ if (range_elem.size() == 3) printf("%d# 3 adjacencies, node %d owener %d\n", Par
       // Get element id
       int elem_id;
       merr = mesh->mesh->tag_get_data(mesh->gid_tag, elem, 1, &elem_id);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
 
       // Translate id if split
       if ((mesh->is_split) && (elem_id > mesh->max_non_split_id)) {
@@ -1348,7 +1348,7 @@ if (range_elem.size() == 3) printf("%d# 3 adjacencies, node %d owener %d\n", Par
       double ec[3];
       merr=mesh->mesh->tag_get_data(mesh->elem_coords_tag, elem, 1, ec);
       // merr = mesh->mesh->get_coords(elem, 1, ec);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
       vcurr[0]=ec[0];
         vcurr[1]=ec[1];
       vcurr[2]= sdim > 2 ? ec[2]:0.0;
@@ -1427,7 +1427,7 @@ if (range_elem.size() == 3) printf("%d# 3 adjacencies, node %d owener %d\n", Par
     // Get a range containing all elements
     Range range_elem;
     merr = mesh->mesh->get_entities_by_dimension(0, mesh->pdim, range_elem);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
 
     // Get number of split elements
     int num_gids=0;
@@ -1437,13 +1437,13 @@ if (range_elem.size() == 3) printf("%d# 3 adjacencies, node %d owener %d\n", Par
       // Only do local 
       int owner;
       merr = mesh->mesh->tag_get_data(mesh->owner_tag, elem, 1, &owner);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
       if (owner != localPet) continue;
 
       // Get element id
       int elem_id;
       merr=mesh->mesh->tag_get_data(mesh->gid_tag, elem, 1, &elem_id);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
 
       // If it's less than or equal to the maximum non split id then its not split
       if (elem_id <=  mesh->max_non_split_id) continue;
@@ -1469,13 +1469,13 @@ if (range_elem.size() == 3) printf("%d# 3 adjacencies, node %d owener %d\n", Par
         // Only do local 
         int owner;
         merr = mesh->mesh->tag_get_data(mesh->owner_tag, elem, 1, &owner);
-        ESMC_CHECK_MOAB_RC_RETHROW(merr);
+        ESMC_CHECK_MOAB_THROW(merr);
         if (owner != localPet) continue;
         
         // Get element id
         int elem_id;
         merr=mesh->mesh->tag_get_data(mesh->gid_tag, elem, 1, &elem_id);
-        ESMC_CHECK_MOAB_RC_RETHROW(merr);
+        ESMC_CHECK_MOAB_THROW(merr);
         
         // If it's less than or equal to the maximum non split id then its not  split
         if (elem_id <= mesh->max_non_split_id) continue;
@@ -1518,13 +1518,13 @@ if (range_elem.size() == 3) printf("%d# 3 adjacencies, node %d owener %d\n", Par
     // Only do non-local 
     int owner;
     merr = mesh->mesh->tag_get_data(mesh->owner_tag, elem, 1, &owner);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
     if (owner == localPet) continue;
 
     // Get element id
     int elem_id;
     merr=mesh->mesh->tag_get_data(mesh->gid_tag, elem, 1, &elem_id);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
 
     // If it's less than or equal to the maximum non split id then its not split
     if (elem_id <=  mesh->max_non_split_id) continue;
@@ -1547,13 +1547,13 @@ if (range_elem.size() == 3) printf("%d# 3 adjacencies, node %d owener %d\n", Par
     // Only do non-local 
     int owner;
     merr = mesh->mesh->tag_get_data(mesh->owner_tag, elem, 1, &owner);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
     if (owner == localPet) continue;
 
     // Get element id
     int elem_id;
     merr=mesh->mesh->tag_get_data(mesh->gid_tag, elem, 1, &elem_id);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
 
     // If it's less than or equal to the maximum non split id then its not split
     if (elem_id <=  mesh->max_non_split_id) continue;

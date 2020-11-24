@@ -128,13 +128,13 @@ void create_mbmesh_redist_elem(MBMesh *src_mesh,
     int localrc;
     MPI_Comm mpi_comm;
     mpi_comm=VM::getCurrent(&localrc)->getMpi_c();
-    ESMC_THROW_RC(localrc);
+    ESMC_CHECK_THROW(localrc);
   
     int num_proc = VM::getCurrent(&localrc)->getPetCount();
-    ESMC_THROW_RC(localrc);
+    ESMC_CHECK_THROW(localrc);
   
     int localPet = VM::getCurrent(&localrc)->getLocalPet();
-    ESMC_THROW_RC(localrc);
+    ESMC_CHECK_THROW(localrc);
 
 #ifdef DEBUG
     void *mbptr = (void *) src_mesh;
@@ -189,10 +189,10 @@ void create_pointlist_redist_point(PointList *src_pl,
     // Get Parallel Information
     int localrc;
     int num_proc = VM::getCurrent(&localrc)->getPetCount();
-    ESMC_THROW_RC(localrc);
+    ESMC_CHECK_THROW(localrc);
 
     int localPet = VM::getCurrent(&localrc)->getLocalPet();
-    ESMC_THROW_RC(localrc);
+    ESMC_CHECK_THROW(localrc);
 
     // Redist points to new pointlist
     create_pointlist_redist_move_points(src_pl, point_to_proc_list, _out_pl);
@@ -240,66 +240,66 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
      // Setup global id tag
     def_val=0;
     merr=moab_mesh->tag_get_handle(GLOBAL_ID_TAG_NAME, 1, MB_TYPE_INTEGER, out_mesh->gid_tag, MB_TAG_DENSE, &def_val);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
     
     // Setup orig_pos tag
     def_val=-1;
     merr=moab_mesh->tag_get_handle("orig_pos", 1, MB_TYPE_INTEGER, out_mesh->orig_pos_tag, MB_TAG_EXCL|MB_TAG_DENSE, &def_val);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
     
     // Setup owner tag
     def_val=-1;
     merr=moab_mesh->tag_get_handle("owner", 1, MB_TYPE_INTEGER, out_mesh->owner_tag, MB_TAG_EXCL|MB_TAG_DENSE, &def_val);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
 
     // Setup node_orig_coord tag
     if (src_mesh->has_node_orig_coords) {
       double dbl_def_val[3]={-1.0, -1.0, -1.0};
       merr=moab_mesh->tag_get_handle("node_orig_coords", out_mesh->orig_sdim, MB_TYPE_DOUBLE, out_mesh->node_orig_coords_tag, MB_TAG_EXCL|MB_TAG_DENSE, dbl_def_val);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
     }
     out_mesh->has_node_orig_coords=src_mesh->has_node_orig_coords;
 
     if (src_mesh->has_node_mask) {
       def_val=0;
       merr=moab_mesh->tag_get_handle("node_mask", 1, MB_TYPE_INTEGER, out_mesh->node_mask_tag, MB_TAG_EXCL|MB_TAG_DENSE, &def_val);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
 
       def_val=0;
       merr=moab_mesh->tag_get_handle("node_mask_val", 1, MB_TYPE_INTEGER, out_mesh->node_mask_val_tag, MB_TAG_EXCL|MB_TAG_DENSE, &def_val);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
     }
     out_mesh->has_node_mask=src_mesh->has_node_mask;
 
     if (src_mesh->has_elem_coords) {
       double  dbl_def_val[3]= {0.0, 0.0, 0.0};
       merr=moab_mesh->tag_get_handle("elem_coords", out_mesh->sdim, MB_TYPE_DOUBLE, out_mesh->elem_coords_tag,   MB_TAG_EXCL|MB_TAG_DENSE, dbl_def_val);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
     }
     out_mesh->has_elem_coords=src_mesh->has_elem_coords;
 
     if (src_mesh->has_elem_orig_coords) {
       double  dbl_def_val[3]= {0.0, 0.0, 0.0};
       merr=moab_mesh->tag_get_handle("elem_orig_coords", out_mesh->orig_sdim, MB_TYPE_DOUBLE, out_mesh->elem_orig_coords_tag,   MB_TAG_EXCL|MB_TAG_DENSE, dbl_def_val);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
     }
     out_mesh->has_elem_orig_coords=src_mesh->has_elem_orig_coords;
 
     if (src_mesh->has_elem_mask) {
       def_val=0;
       merr=moab_mesh->tag_get_handle("elem_mask", 1, MB_TYPE_INTEGER, out_mesh->elem_mask_tag, MB_TAG_EXCL|MB_TAG_DENSE, &def_val);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
 
       def_val=0;
       merr=moab_mesh->tag_get_handle("elem_mask_val", 1, MB_TYPE_INTEGER, out_mesh->elem_mask_val_tag, MB_TAG_EXCL|MB_TAG_DENSE, &def_val);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
     }
     out_mesh->has_elem_mask=src_mesh->has_elem_mask;
 
     if (src_mesh->has_elem_area) {
       double dbl_def_val=0.0;
       merr=moab_mesh->tag_get_handle("elem_area_tag", 1, MB_TYPE_DOUBLE, out_mesh->elem_area_tag, MB_TAG_EXCL|MB_TAG_DENSE, &dbl_def_val);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
     }
     out_mesh->has_elem_area=src_mesh->has_elem_area;
 
@@ -324,10 +324,10 @@ void create_mbmesh_redist_elem_move_verts(MBMesh *src_mesh,
 
     // Get Parallel Information
     int num_proc = VM::getCurrent(&localrc)->getPetCount();
-    ESMC_THROW_RC(localrc);
+    ESMC_CHECK_THROW(localrc);
     
     int localPet = VM::getCurrent(&localrc)->getLocalPet();
-    ESMC_THROW_RC(localrc);
+    ESMC_CHECK_THROW(localrc);
     
     ESMCI_RENDEZVOUS_TRACE_ENTER("MBMesh rendezvous redist elements move verts setup comm pattern")
 
@@ -348,7 +348,7 @@ void create_mbmesh_redist_elem_move_verts(MBMesh *src_mesh,
       int num_verts;
       const EntityHandle *verts;
       merr=src_mesh->mesh->get_connectivity(eh,verts,num_verts); // NEED TO PASS IN corners_only = true???
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
    
       // Loop verts getting gids and inserting into sets
       for (int v=0; v<num_verts; v++) {
@@ -497,10 +497,10 @@ void create_mbmesh_redist_elem_move_elems(MBMesh *src_mesh,
 
     // Get Parallel Information
     int num_proc = VM::getCurrent(&localrc)->getPetCount();
-    ESMC_THROW_RC(localrc);
+    ESMC_CHECK_THROW(localrc);
      
     int localPet = VM::getCurrent(&localrc)->getLocalPet();
-    ESMC_THROW_RC(localrc);
+    ESMC_CHECK_THROW(localrc);
 
     ESMCI_RENDEZVOUS_TRACE_ENTER("MBMesh rendezvous redist elements move elems setup comm pattern")
 
@@ -647,10 +647,10 @@ void create_pointlist_redist_move_points(PointList *pl,
 
     // Get Parallel Information
     int petCount = VM::getCurrent(&localrc)->getPetCount();
-    ESMC_THROW_RC(localrc);
+    ESMC_CHECK_THROW(localrc);
 
     int localPet = VM::getCurrent(&localrc)->getLocalPet();
-    ESMC_THROW_RC(localrc);
+    ESMC_CHECK_THROW(localrc);
 
     SparseMsg comm;
 
@@ -1016,7 +1016,7 @@ void pack_vert_comm(MBMesh *src_mesh, EntityHandle vert, char *buff) {
     // Pack coords
     double c[3]={0.0,0.0,0.0};
     int merr=src_mesh->mesh->get_coords(&vert,1,c);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
 
     // Load coords
     int sdim=src_mesh->sdim;
@@ -1028,7 +1028,7 @@ void pack_vert_comm(MBMesh *src_mesh, EntityHandle vert, char *buff) {
     if (src_mesh->has_node_orig_coords) {
       double noc[3];
       int merr=src_mesh->mesh->tag_get_data(src_mesh->node_orig_coords_tag, &vert, 1, &noc);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
       
       for (int i=0; i<src_mesh->sdim; ++i) {
         *((double *)(buff+off))=noc[i];
@@ -1040,7 +1040,7 @@ void pack_vert_comm(MBMesh *src_mesh, EntityHandle vert, char *buff) {
       // Get dst node mask 
       int masked;
       int merr=src_mesh->mesh->tag_get_data(src_mesh->node_mask_tag, &vert, 1, &masked);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
       
       // Pack number of mask
       *((int *)(buff+off))=masked;
@@ -1086,11 +1086,11 @@ void unpack_vert_comm(MBMesh *out_mesh, char *buff,  EntityHandle *_new_vert) {
     // Create new vertex
     EntityHandle new_vert;
     merr=out_mesh->mesh->create_vertex(coords, new_vert);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
 
     // Set gid
     merr=out_mesh->mesh->tag_set_data(out_mesh->gid_tag, &new_vert, 1, &gid);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
 
     if (out_mesh->has_node_orig_coords) {
       double noc[3]={0.0,0.0,0.0};
@@ -1100,7 +1100,7 @@ void unpack_vert_comm(MBMesh *out_mesh, char *buff,  EntityHandle *_new_vert) {
       }
       
       merr=out_mesh->mesh->tag_set_data(out_mesh->node_orig_coords_tag, &new_vert, 1, noc);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
     }
 
     if (out_mesh->has_node_mask) {
@@ -1109,7 +1109,7 @@ void unpack_vert_comm(MBMesh *out_mesh, char *buff,  EntityHandle *_new_vert) {
       off +=sizeof(int);
       
       merr=out_mesh->mesh->tag_set_data(out_mesh->node_mask_tag, &new_vert, 1, &masked);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
     }
     // Output vertex
     *_new_vert=new_vert;
@@ -1143,7 +1143,7 @@ int calc_size_elem_comm(MBMesh *src_mesh, EntityHandle eh) {
     const EntityHandle *verts;
     // TODO: do we need to pass in corners_only = true?
     merr=src_mesh->mesh->get_connectivity(eh,verts,num_verts);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
 
     // number of nodes
     size += num_verts*sizeof(int);
@@ -1192,7 +1192,7 @@ void pack_elem_comm(MBMesh *src_mesh, EntityHandle elem, char *buff) {
     const EntityHandle *verts;
     // TODO: do we need to pass in corners_only = true?
     merr=src_mesh->mesh->get_connectivity(elem,verts,num_verts); 
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
 
     // Pack number of verts
     *((int *)(buff+off))=num_verts;
@@ -1214,7 +1214,7 @@ void pack_elem_comm(MBMesh *src_mesh, EntityHandle elem, char *buff) {
     if (src_mesh->has_elem_coords) {
       double ec[3];
       int merr=src_mesh->mesh->tag_get_data(src_mesh->elem_coords_tag, &elem, 1, &ec);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
       
       for (int i=0; i<src_mesh->sdim; ++i) {
         *((double *)(buff+off))=ec[i];
@@ -1225,7 +1225,7 @@ void pack_elem_comm(MBMesh *src_mesh, EntityHandle elem, char *buff) {
     if (src_mesh->has_elem_orig_coords) {
       double eoc[3];
       int merr=src_mesh->mesh->tag_get_data(src_mesh->elem_orig_coords_tag, &elem, 1, &eoc);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
       
       for (int i=0; i<src_mesh->sdim; ++i) {
         *((double *)(buff+off))=eoc[i];
@@ -1237,7 +1237,7 @@ void pack_elem_comm(MBMesh *src_mesh, EntityHandle elem, char *buff) {
     if (src_mesh->has_elem_mask) {
       int masked;
       int merr=src_mesh->mesh->tag_get_data(src_mesh->elem_mask_tag, &elem, 1, &masked);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
       
       *((int *)(buff+off))=masked;
       off +=sizeof(int);
@@ -1366,11 +1366,11 @@ void unpack_elem_comm(MBMesh *out_mesh, char *buff, std::map<int,EntityHandle> *
     // Create new element
     EntityHandle new_elem;
     merr=out_mesh->mesh->create_element(etype,verts,num_verts,new_elem);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr); 
+    ESMC_CHECK_MOAB_THROW(merr); 
 
     // Set global id
     merr=out_mesh->mesh->tag_set_data(out_mesh->gid_tag, &new_elem, 1, &gid);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
 
     if (out_mesh->has_elem_coords) {
       double ec[3]={0.0,0.0,0.0};
@@ -1380,7 +1380,7 @@ void unpack_elem_comm(MBMesh *out_mesh, char *buff, std::map<int,EntityHandle> *
       }
 
       merr=out_mesh->mesh->tag_set_data(out_mesh->elem_coords_tag, &new_elem, 1, ec);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
     }
 
     if (out_mesh->has_elem_orig_coords) {
@@ -1391,7 +1391,7 @@ void unpack_elem_comm(MBMesh *out_mesh, char *buff, std::map<int,EntityHandle> *
       }
 
       merr=out_mesh->mesh->tag_set_data(out_mesh->elem_orig_coords_tag, &new_elem, 1, eoc);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
     }
 
     // (Only unpack mask field (not mask_val), since that's the only one needed for rend)
@@ -1400,7 +1400,7 @@ void unpack_elem_comm(MBMesh *out_mesh, char *buff, std::map<int,EntityHandle> *
       off +=sizeof(int);
 
       merr=out_mesh->mesh->tag_set_data(out_mesh->elem_mask_tag, &new_elem, 1, &masked);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
     }
     // Output elem
     *_new_elem=new_elem;
@@ -1418,12 +1418,12 @@ void mbmesh_invert_split_to_orig_id_map(MBMesh *mesh,
     VM *vm = VM::getCurrent(&localrc);
     int petCount = vm->getPetCount();
     int localPet = vm->getLocalPet();
-    ESMC_THROW_RC(localrc);
+    ESMC_CHECK_THROW(localrc);
 
     Range elems;
 
     merr=mesh->mesh->get_entities_by_dimension(0, mesh->pdim, elems);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
 
     // Loop through elems
     Range::const_iterator ei = elems.begin(), ee = elems.end();
@@ -1466,7 +1466,7 @@ void mbmesh_add_other_split_elems(MBMesh *mesh, const int &gid, const int &proc,
     VM *vm = VM::getCurrent(&localrc);
     int petCount = vm->getPetCount();
     int localPet = vm->getLocalPet();
-    ESMC_THROW_RC(localrc);
+    ESMC_CHECK_THROW(localrc);
 
     // If this is a split element
     std::map<int,double>::const_iterator sitf =  mesh->split_id_to_frac.find(gid);
@@ -1515,7 +1515,7 @@ void mbmesh_set_split_orig_id_map(MBMesh *src_mesh, MBMesh *output_mesh) {
     VM *vm = VM::getCurrent(&localrc);
     int petCount = vm->getPetCount();
     int localPet = vm->getLocalPet();
-    ESMC_THROW_RC(localrc);
+    ESMC_CHECK_THROW(localrc);
 
     Range elems, elems_out;
     UInt *gids_split=NULL;
@@ -1523,7 +1523,7 @@ void mbmesh_set_split_orig_id_map(MBMesh *src_mesh, MBMesh *output_mesh) {
     DDir<> id_map_dir;
 
     merr=src_mesh->mesh->get_entities_by_dimension(0, src_mesh->pdim, elems);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
 
     // Get number of elements
     int num_src_gids=elems.size();
@@ -1545,7 +1545,7 @@ void mbmesh_set_split_orig_id_map(MBMesh *src_mesh, MBMesh *output_mesh) {
 
         int owner;
         merr=src_mesh->mesh->tag_get_data(src_mesh->owner_tag, &elem, 1, &owner);
-        ESMC_CHECK_MOAB_RC_RETHROW(merr);
+        ESMC_CHECK_MOAB_THROW(merr);
 
         // only consider local nodes
         if (owner != localPet) continue;
@@ -1586,7 +1586,7 @@ void mbmesh_set_split_orig_id_map(MBMesh *src_mesh, MBMesh *output_mesh) {
 
     // output_mesh
     merr=output_mesh->mesh->get_entities_by_dimension(0, output_mesh->pdim, elems_out);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
 
     int num_out_gids=elems_out.size();
     
@@ -1640,7 +1640,7 @@ void mbmesh_expand_split_elem_ids(MBMesh *mesh, int num_elem_gids, int *elem_gid
     VM *vm = VM::getCurrent(&localrc);
     int petCount = vm->getPetCount();
     int localPet = vm->getLocalPet();
-    ESMC_THROW_RC(localrc);
+    ESMC_CHECK_THROW(localrc);
 
 #undef debug_printelemgids
 #ifdef debug_printelemgids
@@ -1662,7 +1662,7 @@ void mbmesh_expand_split_elem_ids(MBMesh *mesh, int num_elem_gids, int *elem_gid
     // Get number of elements
     Range elems;
     merr=mesh->mesh->get_entities_by_dimension(0, mesh->pdim, elems);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
     
     int num_gids=elems.size();
 
@@ -1683,7 +1683,7 @@ void mbmesh_expand_split_elem_ids(MBMesh *mesh, int num_elem_gids, int *elem_gid
 
         int elem_owner;
         merr=mesh->mesh->tag_get_data(mesh->owner_tag, &elem, 1, &elem_owner);
-        ESMC_CHECK_MOAB_RC_RETHROW(merr);
+        ESMC_CHECK_MOAB_THROW(merr);
 
         // Only do local
         if (elem_owner != localPet) continue;
@@ -1766,7 +1766,7 @@ void mbmesh_calc_split_id_to_frac(MBMesh *mesh) {
     VM *vm = VM::getCurrent(&localrc);
     int petCount = vm->getPetCount();
     int localPet = vm->getLocalPet();
-    ESMC_THROW_RC(localrc);
+    ESMC_CHECK_THROW(localrc);
 
     // Declare polygon information
 #define  MAX_NUM_POLY_COORDS  60
@@ -1821,7 +1821,7 @@ void mbmesh_calc_split_id_to_frac(MBMesh *mesh) {
 
       Range elems;
       merr=mesh->mesh->get_entities_by_dimension(0, mesh->pdim, elems);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
 
       Range::const_iterator si = elems.begin(), se = elems.end();
       for (; si != se; ++si) {
@@ -1905,7 +1905,7 @@ void mbmesh_initialize_edir(MBMesh *mesh, int *num_elem_gids, int *elem_gids, st
 
     // get mesh elements and gids
     int merr=mesh->mesh->get_entities_by_dimension(0,mesh->pdim,elems);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
     
     mbmesh_initialize_ddir(mesh, elems, num_elem_gids, elem_gids, src_elem_gids_proc, edir);
 
@@ -1915,7 +1915,7 @@ void mbmesh_initialize_edir(MBMesh *mesh, int *num_elem_gids, int *elem_gids, st
     VM *vm = VM::getCurrent(&localrc);
     int petCount = vm->getPetCount();
     int localPet = vm->getLocalPet();
-    ESMC_THROW_RC(localrc);
+    ESMC_CHECK_THROW(localrc);
 
     // print the vectors
     printf("%d# src_elem_gids_proc [%d] = [", localPet, src_elem_gids_proc.size());
@@ -1936,7 +1936,7 @@ void mbmesh_initialize_ndir(MBMesh *mesh, int *num_node_gids, int *node_gids, st
     Range nodes;
 
     int merr=mesh->mesh->get_entities_by_dimension(0,0,nodes);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
 
     mbmesh_initialize_ddir(mesh, nodes, num_node_gids, node_gids, src_node_gids_proc, ndir);
 
@@ -1946,7 +1946,7 @@ void mbmesh_initialize_ndir(MBMesh *mesh, int *num_node_gids, int *node_gids, st
     VM *vm = VM::getCurrent(&localrc);
     int petCount = vm->getPetCount();
     int localPet = vm->getLocalPet();
-    ESMC_THROW_RC(localrc);
+    ESMC_CHECK_THROW(localrc);
 
     // print the vectors
     printf("%d# src_node_gids_proc [%d] = [", localPet, src_node_gids_proc.size());
@@ -1968,7 +1968,7 @@ void mbmesh_initialize_ddir(MBMesh *mesh, const Range &ents, int *num_gids, int 
     VM *vm = VM::getCurrent(&localrc);
     int petCount = vm->getPetCount();
     int localPet = vm->getLocalPet();
-    ESMC_THROW_RC(localrc);
+    ESMC_CHECK_THROW(localrc);
 
     // distributed directory to determine element destinations
     std::vector<UInt> e_lids(*num_gids, 0);
@@ -2051,11 +2051,11 @@ void mbmesh_initialize_elem_to_proc_list(MBMesh *mesh, const std::vector<UInt> &
     VM *vm = VM::getCurrent(&localrc);
     int petCount = vm->getPetCount();
     int localPet = vm->getLocalPet();
-    ESMC_THROW_RC(localrc);
+    ESMC_CHECK_THROW(localrc);
 
     Range elems;
     merr=mesh->mesh->get_entities_by_dimension(0, mesh->pdim, elems);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
 
     Range::const_iterator si = elems.begin(), se = elems.end();
     int i = 0;
@@ -2097,11 +2097,11 @@ void mbmesh_expand_elem_to_proc_list(MBMesh *mesh, const std::vector<UInt> &src_
     VM *vm = VM::getCurrent(&localrc);
     int petCount = vm->getPetCount();
     int localPet = vm->getLocalPet();
-    ESMC_THROW_RC(localrc);
+    ESMC_CHECK_THROW(localrc);
 
     Range nodes;
     merr=mesh->mesh->get_entities_by_dimension(0,0,nodes);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
   
     Range::const_iterator si = nodes.begin(), se = nodes.end();
     int i = 0;
@@ -2109,7 +2109,7 @@ void mbmesh_expand_elem_to_proc_list(MBMesh *mesh, const std::vector<UInt> &src_
       const EntityHandle node = *si;
       int node_owner;
       merr=mesh->mesh->tag_get_data(mesh->owner_tag, &node, 1, &node_owner);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
 
       // only consider local nodes
       if (node_owner != localPet) { ++i; continue;}
@@ -2117,14 +2117,14 @@ void mbmesh_expand_elem_to_proc_list(MBMesh *mesh, const std::vector<UInt> &src_
       // Loop elements attached to this node
       Range elems_on_node;
       merr=mesh->mesh->get_adjacencies(&node, 1, mesh->pdim, false, elems_on_node);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
 
       Range::const_iterator eni = elems_on_node.begin(), ene = elems_on_node.end();
       for (; eni != ene; ++eni) {
         const EntityHandle elem_on_node = *eni;
         int elem_owner;
         merr=mesh->mesh->tag_get_data(mesh->owner_tag, &elem_on_node, 1, &elem_owner);
-        ESMC_CHECK_MOAB_RC_RETHROW(merr);
+        ESMC_CHECK_MOAB_THROW(merr);
 
         // only consider local elements
         if (elem_owner != localPet) continue;
@@ -2150,14 +2150,14 @@ void mbmesh_expand_elem_to_proc_list(MBMesh *mesh, const std::vector<UInt> &src_
 #undef debug_printnodelems
 #ifdef debug_printnodelems
     merr=mesh->mesh->get_entities_by_dimension(0,0,nodes);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
     
     Range::const_iterator si = nodes.begin(), se = nodes.end();
     for (; si != se; ++si) {
       const EntityHandle node = *si;
       int node_owner;
       merr=mesh->mesh->tag_get_data(mesh->owner_tag, &node, 1, &node_owner);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
 
       if (node_owner != localPet) { ++i; continue;}
 
@@ -2167,14 +2167,14 @@ void mbmesh_expand_elem_to_proc_list(MBMesh *mesh, const std::vector<UInt> &src_
 
       Range elems_on_node;
       merr=mesh->mesh->get_adjacencies(&node, 1, mesh->pdim, false, elems_on_node);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
 
       Range::const_iterator eni = elems_on_node.begin(), ene = elems_on_node.end();
       for (; eni != ene; ++eni) {
         const EntityHandle elem_on_node = *eni;
         int elem_owner;
         merr=mesh->mesh->tag_get_data(mesh->owner_tag, &elem_on_node, 1, &elem_owner);
-        ESMC_CHECK_MOAB_RC_RETHROW(merr);
+        ESMC_CHECK_MOAB_THROW(merr);
 
         if (elem_owner != localPet) continue;
 
@@ -2210,14 +2210,14 @@ void mbmesh_handle_unassigned_elements(MBMesh *mesh, std::multimap<int, EntityHa
     VM *vm = VM::getCurrent(&localrc);
     int petCount = vm->getPetCount();
     int localPet = vm->getLocalPet();
-    ESMC_THROW_RC(localrc);
+    ESMC_CHECK_THROW(localrc);
 
     bool found;
     int annointed_proc;
     Range elems;
 
     merr=mesh->mesh->get_entities_by_dimension(0, mesh->pdim, elems);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
 
     // Loop through elems
     Range::const_iterator ei = elems.begin(), ee = elems.end();
@@ -2261,7 +2261,7 @@ printf("%d#   elem %d missing\n", localPet, elem_id);
         // merr=mesh->mesh->get_adjacencies(&elem, 1, mesh->pdim, false, adj_elems, Interface::UNION);
         MeshTopoUtil mt = MeshTopoUtil(mesh->mesh);
         merr=mt.get_bridge_adjacencies(elem, 0, mesh->pdim, adj_elems);
-        ESMC_CHECK_MOAB_RC_RETHROW(merr);
+        ESMC_CHECK_MOAB_THROW(merr);
 #ifdef debug_missingelems
 printf("%d# looping %d adj_elems\n", localPet, adj_elems.size());
 #endif
@@ -2368,7 +2368,7 @@ void mbmesh_set_node_owners(MBMesh *mesh, DDir<> ndir) {
 
     // get mesh nodes and gids
     merr=mesh->mesh->get_entities_by_dimension(0,0,nodes);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
   
     gids.reserve(nodes.size());
 
@@ -2408,7 +2408,7 @@ printf("%d# node %d owner %d\n", localPet, gids[i], src_gids_proc[i]);
 
     // Set Owners
     merr=mesh->mesh->tag_set_data(mesh->owner_tag, nodes, nodeowners);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
 
   }
   CATCH_MBMESH_RETHROW
@@ -2425,7 +2425,7 @@ void mbmesh_set_node_owners_wo_list(MBMesh *mesh) {
     // Get a list of the Mesh nodes with gids
     Range nodes;
     merr=mesh->mesh->get_entities_by_dimension(0, 0, nodes);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
 
     std::vector<UInt> gids;
     std::vector<UInt> lids; // Actually the number of associated elements
@@ -2442,7 +2442,7 @@ void mbmesh_set_node_owners_wo_list(MBMesh *mesh) {
       // Count the number of associated elems
       Range elems_on_node;
       merr=mesh->mesh->get_adjacencies(&node, 1, mesh->pdim, false, elems_on_node);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
 
 #undef debug__nodeowners
 #ifdef debug__nodeowners
@@ -2451,7 +2451,7 @@ void mbmesh_set_node_owners_wo_list(MBMesh *mesh) {
 
       int node_owner;
       merr=mesh->mesh->tag_get_data(mesh->owner_tag, &node, 1, &node_owner);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
 
       Range::const_iterator eoni = elems_on_node.begin(), eone =      elems_on_node.end();
       for (; eoni != eone; ++eoni) {
@@ -2576,7 +2576,7 @@ void mbmesh_set_node_owners_wo_list(MBMesh *mesh) {
 
     // Set owners
     merr=mesh->mesh->tag_set_data(mesh->owner_tag, nodes, nodeowners);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
 
   }
   CATCH_MBMESH_RETHROW
@@ -2597,7 +2597,7 @@ void mbmesh_set_elem_owners(MBMesh *mesh, DDir<> edir) {
 
     // get mesh nodes and gids
     merr=mesh->mesh->get_entities_by_dimension(0, mesh->pdim, elems);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
   
     gids.reserve(elems.size());
     elemvec.reserve(elems.size());
@@ -2628,7 +2628,7 @@ void mbmesh_set_elem_owners(MBMesh *mesh, DDir<> edir) {
     for (int i = 0; i < num_src_gids; ++i) {
       // Set Owners
       merr=mesh->mesh->tag_set_data(mesh->owner_tag, &elemvec[i], 1, &src_gids_proc[i]);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
 #undef print_elemowners
 #ifdef print_elemowners
       VM *vm = VM::getCurrent(&localrc);
@@ -2662,7 +2662,7 @@ void mbmesh_set_elem_owners_wo_list(MBMesh *mesh) {
 
     Range elems;
     merr=mesh->mesh->get_entities_by_dimension(0, mesh->pdim, elems);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
 
     if (mesh->is_split) {
       // Loop through elems
@@ -2726,14 +2726,14 @@ void mbmesh_set_elem_owners_wo_list(MBMesh *mesh) {
       // Loop elements attached to this node
       Range nodes_on_elem;
       merr=mesh->mesh->get_adjacencies(&elem, 1, 0, false, nodes_on_elem);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
 
       Range::const_iterator nei = nodes_on_elem.begin(), nee = nodes_on_elem.end();
       for (; nei != nee; ++nei) {
         const EntityHandle node_on_elem = *nei;
         int node_owner;
         merr=mesh->mesh->tag_get_data(mesh->owner_tag, &node_on_elem, 1, &node_owner);
-        ESMC_CHECK_MOAB_RC_RETHROW(merr);
+        ESMC_CHECK_MOAB_THROW(merr);
 
         // only consider local elements
         if (node_owner == localPet) ++num_loc_nodes;
@@ -2851,7 +2851,7 @@ void mbmesh_set_elem_owners_wo_list(MBMesh *mesh) {
       const EntityHandle elem=elements[i];
 
       merr=mesh->mesh->tag_set_data(mesh->owner_tag, &elem, 1, &owner[i]);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
     }
 
 
@@ -2864,7 +2864,7 @@ void mbmesh_set_elem_owners_wo_list(MBMesh *mesh) {
       int pos=0;
       Range elems;
       merr=mesh->mesh->get_entities_by_dimension(0, mesh->pdim, elems);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
 
       Range::const_iterator ei = elems.begin(), ee = elems.end();
       for (; ei != ee; ++ei) {
@@ -2920,11 +2920,11 @@ void mbmesh_set_elem_owners_wo_list(MBMesh *mesh) {
         // Split element owner is original elements owner
         int orig_owner;
         merr=mesh->mesh->tag_get_data(mesh->owner_tag, &orig_elem, 1, &orig_owner);
-        ESMC_CHECK_MOAB_RC_RETHROW(merr);
+        ESMC_CHECK_MOAB_THROW(merr);
 
         // Set owner
         merr=mesh->mesh->tag_set_data(mesh->owner_tag, &elem, 1, &orig_owner);
-        ESMC_CHECK_MOAB_RC_RETHROW(merr);
+        ESMC_CHECK_MOAB_THROW(merr);
       }
     }
   }
@@ -2946,7 +2946,7 @@ void mbmesh_set_node_orig_pos(MBMesh *output_mesh, int num_node_gids, int *node_
 
     // get mesh nodes and gids
     merr=output_mesh->mesh->get_entities_by_dimension(0,0,nodes);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
   
     std::map<UInt, EntityHandle> gids_to_nodes;
 
@@ -2966,7 +2966,7 @@ void mbmesh_set_node_orig_pos(MBMesh *output_mesh, int num_node_gids, int *node_
       if (it != gids_to_nodes.end()) {
         merr=output_mesh->mesh->tag_set_data(output_mesh->orig_pos_tag,
                                              &it->second, 1, &i);
-        ESMC_CHECK_MOAB_RC_RETHROW(merr);
+        ESMC_CHECK_MOAB_THROW(merr);
       }
 
 #undef print_nodeorigpos
@@ -2991,14 +2991,14 @@ void mbmesh_set_node_orig_pos_wo_list(MBMesh *output_mesh) {
     // Get a list of the Mesh nodes with gids
     Range nodes;
     merr=output_mesh->mesh->get_entities_by_dimension(0, 0, nodes);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
 
     int index=0;
     Range::const_iterator si = nodes.begin(), se = nodes.end();
     for (; si != se; ++si) {
       const EntityHandle node = *si;
       merr=output_mesh->mesh->tag_set_data(output_mesh->orig_pos_tag, &node, 1, &index);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
       ++index;
     }
   }
@@ -3020,7 +3020,7 @@ void mbmesh_set_elem_orig_pos(MBMesh *output_mesh, int num_elem_gids, int *elem_
 
     // get mesh elems and gids
     merr=output_mesh->mesh->get_entities_by_dimension(0, output_mesh->pdim, elems);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
 
     std::map<UInt, EntityHandle> gids_to_elems;
 
@@ -3040,7 +3040,7 @@ void mbmesh_set_elem_orig_pos(MBMesh *output_mesh, int num_elem_gids, int *elem_
       if (it != gids_to_elems.end()) {
         merr=output_mesh->mesh->tag_set_data(output_mesh->orig_pos_tag,
                                              &it->second, 1, &i);
-        ESMC_CHECK_MOAB_RC_RETHROW(merr);
+        ESMC_CHECK_MOAB_THROW(merr);
       }
 
 #undef print_elemorigpos
@@ -3063,7 +3063,7 @@ void mbmesh_set_elem_orig_pos_wo_list(MBMesh *output_mesh) {
 
     Range elems;
     merr=output_mesh->mesh->get_entities_by_dimension(0, output_mesh->pdim, elems);
-    ESMC_CHECK_MOAB_RC_RETHROW(merr);
+    ESMC_CHECK_MOAB_THROW(merr);
 
     int index=0;
     Range::const_iterator ei = elems.begin(), ee = elems.end();
@@ -3071,7 +3071,7 @@ void mbmesh_set_elem_orig_pos_wo_list(MBMesh *output_mesh) {
       const EntityHandle elem = *ei;
       merr=output_mesh->mesh->tag_set_data(output_mesh->orig_pos_tag, 
                                            &elem, 1, &index);
-      ESMC_CHECK_MOAB_RC_RETHROW(merr);
+      ESMC_CHECK_MOAB_THROW(merr);
       ++index;
     }
   }
