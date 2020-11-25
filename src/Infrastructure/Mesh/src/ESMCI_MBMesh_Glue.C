@@ -1071,20 +1071,22 @@ void _add_elems_multiple_types(MBMesh *mbmp, int localPet,
       double *elem_coords_buff=(double *)tmp_buff;
       
       // copy info into buffer
-      int pos=0;
-      for (int e = 0; e < num_elems; ++e) {
-      
-        // Only do if the correct type
-        if (elemType[e] == curr_elem_type) {
+      int buff_pos=0;
+      int elemCoords_pos=0;
 
-          // Fill Coords
+      for (int e = 0; e < num_elems; ++e) {
+        // Only copy if the correct type
+        if (elemType[e] == curr_elem_type) {
+          // Copy Coords
           for (int d=0; d<mbmp->orig_sdim; d++) {
-            elem_coords_buff[pos]=elemCoords[e+d];
-            pos++;
-          }
+            elem_coords_buff[buff_pos]=elemCoords[elemCoords_pos];
+            buff_pos++;
+            elemCoords_pos++;
+          } 
+        } else { // Advance elemCoords_pos to move through array
+          elemCoords_pos += mbmp->orig_sdim;
         }
       }
-
       // Set info in element field
       mbmp->set_elem_coords(added_elems, elem_coords_buff);
     }
