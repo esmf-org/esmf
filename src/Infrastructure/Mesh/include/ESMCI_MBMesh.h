@@ -58,21 +58,26 @@ namespace ESMCI {
   catch(int localrc){ \
     if (localrc != ESMF_SUCCESS) {\
       ESMCI::esmc_error local_macro_error("", localrc, ""); \
-      if (ESMC_LogDefault.MsgFoundError(localrc, local_macro_error.what(), ESMC_CONTEXT, nullptr)) \
-        throw(local_macro_error);} \
+      ESMC_LogDefault.MsgFoundError(localrc, local_macro_error.what(), ESMC_CONTEXT, nullptr); \
+      throw(local_macro_error);} \
   } catch(std::string errstr){ \
     ESMCI::esmc_error local_macro_error("ESMC_RC_MOAB_ERROR", ESMC_RC_MOAB_ERROR, errstr); \
-    if (ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, errstr, ESMC_CONTEXT, nullptr)) \
-      throw(local_macro_error); \
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, errstr, ESMC_CONTEXT, nullptr); \
+    throw(local_macro_error); \
   } catch (std::exception &exc) {\
-    if (ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, exc.what(), ESMC_CONTEXT, nullptr)) \
-      throw(exc); \
+    if (exc.what()) { \
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, exc.what(), ESMC_CONTEXT, nullptr); \
+    } else { \
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, "Unknown exception", ESMC_CONTEXT, nullptr); \
+    } \
+    ESMCI::esmc_error local_macro_error("ESMC_RC_MOAB_ERROR", ESMC_RC_MOAB_ERROR, exc.what()); \
+    throw(local_macro_error); \
   } catch(...) {\
     std::string msg;\
     msg = "Unknown exception";\
     ESMCI::esmc_error local_macro_error("ESMC_RC_MOAB_ERROR", ESMC_RC_MOAB_ERROR, msg); \
-    if (ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, msg, ESMC_CONTEXT, nullptr)) \
-      throw(local_macro_error); }
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, msg, ESMC_CONTEXT, nullptr); \
+    throw(local_macro_error); }
 
 // use when pointer *rc is returned
 #define CATCH_MBMESH_RETURN(rc) \
@@ -87,9 +92,9 @@ namespace ESMCI {
     return; \
   } catch (std::exception &exc) { \
     if (exc.what()) { \
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, exc.what(), ESMC_CONTEXT, rc); \
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, exc.what(), ESMC_CONTEXT, rc); \
     } else { \
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "UNKNOWN", ESMC_CONTEXT, rc); \
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, "Unknown exception", ESMC_CONTEXT, rc); \
     } \
     return; \
   } catch(...) { \
