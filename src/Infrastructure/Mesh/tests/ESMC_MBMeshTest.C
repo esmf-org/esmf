@@ -328,6 +328,8 @@ class MBMeshTest {
                             elemId.data(), &meshp, &localrc);
         MBMESHTEST_CHECK_RC_THROW(localrc)
 
+        mesh = static_cast<MBMesh *> (meshp);
+
       } MBMESHTEST_CATCH_RETURN_RC(&rc)
 
       rc = ESMF_SUCCESS;
@@ -413,24 +415,30 @@ class MBMeshTest {
 
       std::string test;
 
+      // VM info
+      int localPet = VM::getCurrent(&localrc)->getLocalPet();
+      MBMESHTEST_CHECK_RC_THROW(localrc)
+
       // get dimensions
       int local_pdim, local_sdim;
       MBMesh_GetDimensions(meshp, &local_sdim, &local_pdim, &localrc);
       MBMESHTEST_CHECK_RC_THROW(localrc)
 
       if (local_pdim != pdim) {
-        printf("pdim = %d (correct = %d)\n", local_pdim, pdim);
+        std::cout << localPet << "# " << "pdim = " << local_pdim 
+                  << " (correct = " << pdim << ")" << std::endl;
         correct = false;
       }
 
       if (local_sdim != sdim) {
-        printf("sdim = %d (correct = %d)\n", local_sdim, sdim);
+        std::cout << localPet << "# " << "sdim = " << local_sdim 
+                  << " (correct = " << sdim << ")" << std::endl;
         correct = false;
       }
 
       if (verbosity >= 2) {
-        printf("pdim = %d\n", pdim);
-        printf("sdim = %d\n", sdim);
+        std::cout << localPet << "# " << "pdim = " << pdim
+                  << " sdim = " << sdim << std::endl;
       }
 
       int nodeCount;
@@ -446,24 +454,27 @@ class MBMeshTest {
       MBMESHTEST_CHECK_RC_THROW(localrc)
     
       if (nodeCount != num_node) {
-        printf("nodeCount = %d (correct = %d)\n", nodeCount, num_node);
+        std::cout << localPet << "# " << "nodeCount = " << nodeCount
+                  << " (correct = " << num_node << ")" << std::endl;
         correct = false;
       }
     
       if (elemCount != num_elem) {
-        printf("elemCount = %d (correct = %d)\n", elemCount, num_elem);
+        std::cout << localPet << "# " << "elemCount = " << elemCount
+                  << " (correct = " << num_elem << ")" << std::endl;
         correct = false;
       }
     
       if (elemConnCount != num_elem_conn) {
-        printf("elemConnCount = %d (correct = %d)\n", elemConnCount, num_elem_conn);
+        std::cout << localPet << "# " << "elemConnCount = " << elemConnCount
+                  << " (correct = " << num_elem_conn << ")" << std::endl;
         correct = false;
       }
       
 
       if (verbosity >= 2) {
-        printf("nodeCount = %d\n", nodeCount);
-        printf("elemCount = %d\n", elemCount);
+        std::cout << localPet << "# " << "nodeCount = " << nodeCount
+                  << " elemCount = " << elemCount << std::endl;
       }
 
       int elemMaskIsPresent, elemAreaIsPresent, elemCoordIsPresent;
@@ -471,22 +482,28 @@ class MBMeshTest {
       MBMESHTEST_CHECK_RC_THROW(localrc)
     
       if (elemMaskIsPresent!=elem_mask_present) {
-        printf("elemMaskIsPresent = %d (correct = %d)\n", elemMaskIsPresent, elem_mask_present);
+        std::cout << localPet << "# " << "elemMaskIsPresent = " << elemMaskIsPresent
+                  << " (correct = " << elem_mask_present << ")" << std::endl;
         correct = false;
       } 
       if (elemAreaIsPresent!=elem_area_present) {
-        printf("elemAreaIsPresent = %d (correct = %d)\n", elemAreaIsPresent, elem_area_present);
+        std::cout << localPet << "# " << "elemAreaIsPresent = " << elemAreaIsPresent
+                  << " (correct = " << elem_area_present << ")" << std::endl;
         correct = false;
       } 
       if (elemCoordIsPresent!=elem_coord_present) {
-        printf("elemCoordIsPresent = %d (correct = %d)\n", elemCoordIsPresent, elem_coord_present);
+        std::cout << localPet << "# " << "elemCoordIsPresent = " << elemCoordIsPresent
+                  << " (correct = " << elem_coord_present << ")" << std::endl;
         correct = false;
       }
       
       if (verbosity >= 2) {
-        printf("elemMaskIsPresent = %d\n", elemMaskIsPresent);
-        printf("elemAreaIsPresent = %d\n", elemAreaIsPresent);
-        printf("elemCoordIsPresent = %d\n", elemCoordIsPresent);
+        std::cout << localPet << "# " << "elemMaskIsPresent = " << elemMaskIsPresent
+                  << std::endl;
+        std::cout << localPet << "# " << "elemAreaIsPresent = " << elemAreaIsPresent
+                  << std::endl;
+        std::cout << localPet << "# " << "elemCoordIsPresent = " << elemCoordIsPresent
+                  << std::endl;
       }
 
       int nodeMaskIsPresent;
@@ -494,10 +511,16 @@ class MBMeshTest {
       MBMESHTEST_CHECK_RC_THROW(localrc)
     
       if (nodeMaskIsPresent!=node_mask_present) {
-        printf("nodeMaskIsPresent = %d (correct = %d)\n", nodeMaskIsPresent, node_mask_present);
+        std::cout << localPet << "# " << "nodeMaskIsPresent = " << nodeMaskIsPresent
+                  << " (correct = " << node_mask_present << ")" << std::endl;
         correct = false;
       }
     
+      if (verbosity >= 2) {
+        std::cout << localPet << "# " << "nodeMaskIsPresent = " << nodeMaskIsPresent
+                  << std::endl;
+      }
+
       // /////////////////// node create info ////////////////////////////
     
       int nodeIds[num_node];
@@ -522,7 +545,9 @@ class MBMeshTest {
           fail_print = true;
         }
         if (print && verbosity >= 3)
-          printf("node_id[%d] = %d (correct = %d)\n", i, nii->array[i], nodeId[i]);
+          std::cout << localPet << "# " << "node_id[" << i << "] = " 
+                    << nii->array[i] << " (correct = " << nodeId[i] << ")"
+                    << std::endl;
       }
       if (verbosity >= 1) {
         if (!fail_print) std::cout<< pass << test << std::endl;
@@ -542,7 +567,10 @@ class MBMeshTest {
           fail_print = true;
         }
         if (print && verbosity >= 3)
-          printf("node_coord[%d] = %.16f (correct = %.16f)\n", i, nci->array[i], nodeCoord[i]);
+          std::cout << localPet << "# " << "node_coord[" << i << "] = " 
+                    << std::setprecision(16) << nci->array[i] << " (correct = " 
+                    << std::setprecision(16) << nodeCoord[i] << ")"
+                    << std::endl;
       }
       if (verbosity >= 1) {
         if (!fail_print) std::cout<< pass << test << std::endl;
@@ -562,7 +590,9 @@ class MBMeshTest {
           fail_print = true;
         }
         if (print && verbosity >= 3)
-          printf("node_owner[%d] = %d (correct = %d)\n", i, noi->array[i], nodeOwner[i]);
+          std::cout << localPet << "# " << "node_owner[" << i << "] = " 
+                    << noi->array[i] << " (correct = " << nodeOwner[i] << ")"
+                    << std::endl;
       }
       if (verbosity >= 1) {
         if (!fail_print) std::cout<< pass << test << std::endl;
@@ -583,7 +613,9 @@ class MBMeshTest {
             fail_print = true;
           }
           if (print && verbosity >= 3)
-            printf("node_mask[%d] = %d (correct = %d)\n", i, nmi->array[i],   nodeMask[i]);
+            std::cout << localPet << "# " << "node_mask[" << i << "] = " 
+                      << nmi->array[i] << " (correct = " << nodeMask[i] << ")"
+                      << std::endl;
         }
         if (verbosity >= 1) {
           if (!fail_print) std::cout<< pass << test << std::endl;
@@ -619,7 +651,9 @@ class MBMeshTest {
           fail_print = true;
         }
         if (print && verbosity >= 3)
-          printf("elem_ids[%d] = %d (correct = %d)\n", i, eii->array[i], elemId[i]);
+          std::cout << localPet << "# " << "elem_ids[" << i << "] = " 
+                    << eii->array[i] << " (correct = " << elemId[i] << ")"
+                    << std::endl;
       }
       if (verbosity >= 1) {
         if (!fail_print) std::cout<< pass << test << std::endl;
@@ -639,7 +673,9 @@ class MBMeshTest {
           fail_print = true;
         }
         if (print && verbosity >= 3)
-          printf("elem_type[%d] = %d (correct = %d)\n", i, eti->array[i], elemType[i]);
+          std::cout << localPet << "# " << "elem_type[" << i << "] = " 
+                    << eti->array[i] << " (correct = " << elemType[i] << ")"
+                    << std::endl;
       }
       if (verbosity >= 1) {
         if (!fail_print) std::cout<< pass << test << std::endl;
@@ -659,7 +695,9 @@ class MBMeshTest {
           fail_print = true;
         }
         if (print && verbosity >= 3)
-          printf("elem_connectivity[%d] = %d (correct = %d)\n", i, ecni->array[i], elemConn[i]);
+          std::cout << localPet << "# " << "elem_connectivity[" << i << "] = " 
+                    << ecni->array[i] << " (correct = " << elemConn[i] << ")"
+                    << std::endl;
       }
       if (verbosity >= 1) {
         if (!fail_print) std::cout<< pass << test << std::endl;
@@ -680,7 +718,10 @@ class MBMeshTest {
             fail_print = true;
           }
           if (print && verbosity >= 3)
-            printf("elem_area[%d] = %.16f (correct = %.16f)\n", i, eai->array[i], elemArea[i]);
+            std::cout << localPet << "# " << "elem_area[" << i << "] = " 
+                      << std::setprecision(16) << eai->array[i] << " (correct = " 
+                      << std::setprecision(16) << elemArea[i] << ")"
+                      << std::endl;
         }
         if (verbosity >= 1) {
           if (!fail_print) std::cout<< pass << test << std::endl;
@@ -702,7 +743,10 @@ class MBMeshTest {
             fail_print = true;
           }
         if (print && verbosity >= 3)
-          printf("elem_coords[%d] = %.16f (correct = %.16f)\n", i, eci->array[i], elemCoord[i]);
+          std::cout << localPet << "# " << "elem_coord[" << i << "] = " 
+                    << std::setprecision(16) << eci->array[i] << " (correct = " 
+                    << std::setprecision(16) << elemCoord[i] << ")"
+                    << std::endl;
         }
         if (verbosity >= 1) {
           if (!fail_print) std::cout<< pass << test << std::endl;
@@ -724,7 +768,9 @@ class MBMeshTest {
             fail_print = true;
           }
           if (print && verbosity >= 3)
-            printf("elem_mask[%d] = %d (correct = %d)\n", i, emi->array[i], elemMask[i]);
+            std::cout << localPet << "# " << "elem_mask[" << i << "] = " 
+                      << emi->array[i] << " (correct = " << elemMask[i] << ")"
+                      << std::endl;
         }
         if (verbosity >= 1) {
           if (!fail_print) std::cout<< pass << test << std::endl;
