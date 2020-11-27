@@ -348,19 +348,6 @@ void MBMesh::add_nodes(int num_new_nodes,       // Number of nodes
 }
 
 
-
-// Get a Range of all nodes on this processor
-void MBMesh::get_all_nodes(Range &all_nodes) {
-#undef  ESMC_METHOD
-#define ESMC_METHOD "MBMesh::get_all_nodes()"
-
-  int merr=mesh->get_entities_by_dimension(0, 0, all_nodes);
-  ESMC_CHECK_MOAB_THROW(merr);
-
-}
-
-
-
 void MBMesh::setup_node_mask() {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh::setup_node_mask()"
@@ -382,21 +369,6 @@ void MBMesh::setup_node_mask() {
   has_node_mask=true;
 }
 
-// accessor for elems
-int MBMesh::num_elem(){
-#undef  ESMC_METHOD
-#define ESMC_METHOD "MBMesh::num_elem()"
-  int merr;
-  Range elems;
-  try {
-    merr=mesh->get_entities_by_dimension(0, pdim, elems);
-    ESMC_CHECK_MOAB_THROW(merr)
-  }
-  CATCH_MBMESH_RETHROW
-
-  return elems.size();
-}
-
 // accessor for nodes
 int MBMesh::num_node(){
 #undef  ESMC_METHOD
@@ -410,6 +382,21 @@ int MBMesh::num_node(){
   CATCH_MBMESH_RETHROW
 
   return nodes.size();
+}
+
+// accessor for elems
+int MBMesh::num_elem(){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh::num_elem()"
+  int merr;
+  Range elems;
+  try {
+    merr=mesh->get_entities_by_dimension(0, pdim, elems);
+    ESMC_CHECK_MOAB_THROW(merr)
+  }
+  CATCH_MBMESH_RETHROW
+
+  return elems.size();
 }
 
 int MBMesh::num_elem_conn(){
@@ -444,6 +431,132 @@ int MBMesh::num_elem_conn(){
   
   return elemConnCount;
 }
+
+// accessor for nodes
+int MBMesh::num_owned_node(){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh::num_owned_node()"
+  std::vector<EntityHandle> all_nodes;
+  try {
+    all_nodes = get_all_nodes();
+  }
+  CATCH_MBMESH_RETHROW
+
+  return all_nodes.size();
+}
+
+// accessor for nodes
+int MBMesh::num_owned_elem(){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh::num_owned_elem()"
+  std::vector<EntityHandle> all_elems;
+  try {
+    all_elems = get_all_elems();
+  }
+  CATCH_MBMESH_RETHROW
+
+  return all_elems.size();
+}
+
+// Get a Range of all nodes on this processor
+void MBMesh::get_all_nodes(Range &all_nodes) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh::get_all_nodes()"
+  try {
+    int merr=mesh->get_entities_by_dimension(0, 0, all_nodes);
+    ESMC_CHECK_MOAB_THROW(merr);
+  }
+  CATCH_MBMESH_RETHROW
+}
+
+// Get a Range of all elems on this processor
+void MBMesh::get_all_elems(Range &all_elems) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh::get_all_elems()"
+  try {
+    int merr=mesh->get_entities_by_dimension(0, pdim, all_elems);
+    ESMC_CHECK_MOAB_THROW(merr);
+  }
+  CATCH_MBMESH_RETHROW
+}
+
+// Get a vector of owned nodes on this processor
+std::vector<EntityHandle> const &MBMesh::get_all_nodes() {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh::get_all_nodes()"
+  std::vector<EntityHandle> all_nodes;
+  try {
+    int merr=mesh->get_entities_by_dimension(0, 0, all_nodes);
+    ESMC_CHECK_MOAB_THROW(merr);
+  }
+  CATCH_MBMESH_RETHROW
+
+  return all_nodes;
+}
+
+// Get a vector of owned elements on this processor
+std::vector<EntityHandle> const &MBMesh::get_all_elems() {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh::get_all_elems()"
+  std::vector<EntityHandle> all_elems;
+  try {
+    int merr=mesh->get_entities_by_dimension(0, pdim, all_elems);
+    ESMC_CHECK_MOAB_THROW(merr);
+  }
+  CATCH_MBMESH_RETHROW
+  
+  return all_elems;
+}
+
+// Get a vector of owned nodes on this processor
+std::vector<EntityHandle> const &MBMesh::get_owned_nodes() {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh::get_owned_nodes()"
+  std::vector<EntityHandle> owned_nodes;
+  try {
+    int localrc;
+    int localPet = VM::getCurrent(&localrc)->getLocalPet();
+    ESMC_CHECK_THROW(localrc);
+
+    std::vector<EntityHandle> all_nodes = get_all_nodes();
+    std::vector<EntityHandle>::const_iterator ni = all_nodes.begin();
+    std::vector<EntityHandle>::const_iterator ne = all_nodes.end();
+
+    for (ni; ni != ne; ++ni) {
+      int owner = get_owner(*ni);
+      if (owner == localPet) owned_nodes.push_back(*ni);
+    }
+  }
+  CATCH_MBMESH_RETHROW
+
+  return owned_nodes;
+}
+
+// Get a vector of owned elements on this processor
+std::vector<EntityHandle> const &MBMesh::get_owned_elems() {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh::get_owned_elems()"
+  std::vector<EntityHandle> owned_elems;
+  try {
+    int localrc;
+    int localPet = VM::getCurrent(&localrc)->getLocalPet();
+    ESMC_CHECK_THROW(localrc);
+
+    std::vector<EntityHandle> all_elems = get_all_elems();
+    std::vector<EntityHandle>::const_iterator ei = all_elems.begin();
+    std::vector<EntityHandle>::const_iterator ee = all_elems.end();
+
+    for (ei; ei != ee; ++ei) {
+      int owner = get_owner(*ei);
+      if (owner == localPet) owned_elems.push_back(*ei);
+    }
+  }
+  CATCH_MBMESH_RETHROW
+
+  return owned_elems;
+}
+
+
 
 void MBMesh::get_elem_areas(double *elem_area) {
 #undef  ESMC_METHOD
@@ -1147,15 +1260,6 @@ void MBMesh::add_elems(int num_new_elems,  // The number of elems to add
   num_elems += num_new_elems;
 }
 
-
-// Get a Range of all elems on this processor
-void MBMesh::get_all_elems(Range &all_elems) {
-#undef  ESMC_METHOD
-#define ESMC_METHOD "MBMesh::get_all_elems()"
-
-  int merr=mesh->get_entities_by_dimension(0, pdim, all_elems);
-  ESMC_CHECK_MOAB_THROW(merr);
-}
 
 
 // Get the internal Cartesian coords for the elem
@@ -2024,7 +2128,7 @@ void MBMesh::debug_output_nodes() {
 
   // Output info
   cout<<"\n";
-  cout<<localPet<<"# NODE OVERALL INFO: total num=",nodes.size();
+  cout<<localPet<<"# NODE OVERALL INFO: total num="<<nodes.size();
   cout<<" has_orig_coords="<<has_node_orig_coords;
   cout<<" has_node_mask="<<has_node_mask;
   cout<<"\n";
@@ -2097,7 +2201,7 @@ void MBMesh::debug_output_elems() {
 
   // Output info
   cout<<"\n";
-  cout<<localPet<<"# ELEM OVERALL INFO: num="<<num_elems;
+  cout<<localPet<<"# ELEM OVERALL INFO: num="<<num_elem();
   cout<<" has_elem_coords="<<has_elem_coords;
   cout<<" has_elem_orig_coords="<<has_elem_orig_coords;
   cout<<" has_elem_mask="<<has_elem_mask;

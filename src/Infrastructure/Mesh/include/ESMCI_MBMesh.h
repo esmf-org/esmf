@@ -247,9 +247,23 @@ namespace ESMCI {
     // - local entities which you need to go through one of the above lists and figure out which has owener==localPet. However, I think
     //   that I might add a vector of these soon. 
 
+    // Basic accessors for number of nodes, elements, and connectivity
+    int num_elem();
+    int num_node();
+    int num_elem_conn();
+    int num_owned_elem();
+    int num_owned_node();
+
+
     // Get a Range of all nodes and elements on this processor
     void get_all_nodes(Range &all_nodes);
     void get_all_elems(Range &all_elems);
+
+    std::vector<EntityHandle> const & get_all_nodes();
+    std::vector<EntityHandle> const & get_all_elems();
+
+    std::vector<EntityHandle> const & get_owned_nodes();
+    std::vector<EntityHandle> const & get_owned_elems();
 
     // Return a reference to a vector of EntityHandles for the original nodes used for creation
     // on this processor sorted in the order they were used for creation
@@ -275,11 +289,6 @@ namespace ESMCI {
       return orig_elems.size();
     }
 
-
-    // Basic accessors for number of nodes, elements, and connectivity
-    int num_elem();
-    int num_node();
-    int num_elem_conn();
 
 
     // Range based accessors for required element tags
