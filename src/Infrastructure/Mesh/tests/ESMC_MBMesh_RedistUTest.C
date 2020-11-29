@@ -218,6 +218,7 @@ int main(int argc, char *argv[]) {
 #if defined ESMF_MOAB
   // clean up
   delete mesh;
+  delete out_mesh;
 #endif
 
   //----------------------------------------------------------------------------
