@@ -2376,8 +2376,11 @@ void MBMesh::finalize_elems() {
 
     _num_elem = all_elems.size();
     _num_owned_elem = owned_elems.size();
-    _num_elem_conn = get_num_elem_conn();
-    _num_owned_elem_conn = get_num_owned_elem_conn();
+    // NOTE: cannot get connectivity of ngons
+    if (!this->is_split) {
+      _num_elem_conn = get_num_elem_conn();
+      _num_owned_elem_conn = get_num_owned_elem_conn();
+    }
 
     // Mark elems as finalized, so things can be used
     elems_finalized=true;
