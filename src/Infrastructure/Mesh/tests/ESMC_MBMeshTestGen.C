@@ -197,6 +197,9 @@ MBMeshTest *mbmesh_gen_quad_2d_cart(int &rc, bool redist=false){
 
       if (redist) {
         if (localPet == 0) {
+          mbt->redist_nodeId_in ={5,6,8,9};
+          mbt->redist_elemId_in = {4};
+
           mbt->redist_nodeId = {5,6,8,9};
           mbt->redist_nodeCoord = {1.0,1.0, 2.0,1.0, 1.0,2.0, 2.0,2.0};
           mbt->redist_nodeOwner = {0,0,0,0};
@@ -205,6 +208,9 @@ MBMeshTest *mbmesh_gen_quad_2d_cart(int &rc, bool redist=false){
           mbt->redist_elemConn = {1,2,4,3};
           mbt->redist_elemCoord = {1.5,1.5};
         } else if (localPet == 1) {
+          mbt->redist_nodeId_in ={4,7};
+          mbt->redist_elemId_in = {3};
+
           mbt->redist_nodeId = {4,5,7,8};
           mbt->redist_nodeCoord = {0.0,1.0, 1.0,1.0, 0.0,2.0, 1.0,2.0};
           mbt->redist_nodeOwner = {1,0,1,0};
@@ -213,6 +219,9 @@ MBMeshTest *mbmesh_gen_quad_2d_cart(int &rc, bool redist=false){
           mbt->redist_elemConn = {1,2,4,3};
           mbt->redist_elemCoord = {0.5,1.5};
         } else if (localPet == 2) {
+          mbt->redist_nodeId_in ={2,3};
+          mbt->redist_elemId_in = {2};
+
           mbt->redist_nodeId = {2,3,5,6};
           mbt->redist_nodeCoord = {1.0,0.0, 2.0,0.0, 1.0,1.0, 2.0,1.0};
           mbt->redist_nodeOwner = {2,2,0,0};
@@ -221,6 +230,9 @@ MBMeshTest *mbmesh_gen_quad_2d_cart(int &rc, bool redist=false){
           mbt->redist_elemConn = {1,2,4,3};
           mbt->redist_elemCoord = {1.5,0.5};
         } else if (localPet == 3) {
+          mbt->redist_nodeId_in ={1};
+          mbt->redist_elemId_in = {1};
+
           mbt->redist_nodeId ={1,2,4,5};
           mbt->redist_nodeCoord = {0.0,0.0, 1.0,0.0, 0.0,1.0, 1.0,1.0};
           mbt->redist_nodeOwner = {3,2,1,0};
@@ -287,6 +299,8 @@ MBMeshTest *mbmesh_gen_quad_2d_sph(int &rc, bool redist=false){
     int localrc;
     mbt = mbmesh_gen_quad_2d_cart(localrc, redist);
     MBMESHTEST_CHECK_RC_THROW(localrc)
+
+    mbt->name = ESMC_METHOD;
 
     std::for_each(mbt->nodeCoord.begin(), mbt->nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
     std::for_each(mbt->elemCoord.begin(), mbt->elemCoord.end(), [&c2s](double &d) {d*=c2s;});
@@ -484,6 +498,9 @@ MBMeshTest* mbmesh_gen_hex_3d_cart(int &rc, bool redist=false) {
       if (redist) {
         // total redist case
         if (localPet == 0) {
+          mbt->redist_nodeId_in ={5,6,8,9,14,15,17,18};
+          mbt->redist_elemId_in = {4};
+
           mbt->redist_nodeId = {5,6,8,9,14,15,17,18};
           mbt->redist_nodeCoord = {10.0, 10.0, 1.0,  //5
                                    20.0, 10.0, 1.0,  //6
@@ -499,6 +516,9 @@ MBMeshTest* mbmesh_gen_hex_3d_cart(int &rc, bool redist=false) {
           mbt->redist_elemConn = {1,2,4,3,5,6,8,7};
           mbt->redist_elemCoord = {15,15,0.5};
         } else if (localPet == 1) {
+          mbt->redist_nodeId_in ={4,7,13,16};
+          mbt->redist_elemId_in = {3};
+
           mbt->redist_nodeId = {4,5,7,8,13,14,16,17};
           mbt->redist_nodeCoord = {1.0 , 10.0, 1.0,  //4
                                    10.0, 10.0, 1.0,  //5
@@ -514,6 +534,9 @@ MBMeshTest* mbmesh_gen_hex_3d_cart(int &rc, bool redist=false) {
           mbt->redist_elemConn = {1,2,4,3,5,6,8,7};
           mbt->redist_elemCoord = {5,15,0.5};
         } else if (localPet == 2) {
+          mbt->redist_nodeId_in ={2,3,11,12};
+          mbt->redist_elemId_in = {2};
+
           mbt->redist_nodeId = {2,3,5,6,11,12,14,15};
           mbt->redist_nodeCoord = {10.0, 1.0 , 1.0,  //2
                                    20.0, 1.0 , 1.0,  //3
@@ -532,6 +555,9 @@ MBMeshTest* mbmesh_gen_hex_3d_cart(int &rc, bool redist=false) {
           mbt->redist_elemConn = {1,2,4,3,5,6,8,7};
           mbt->redist_elemCoord = {15,5,0.5};
         } else if (localPet == 3) {
+          mbt->redist_nodeId_in ={1,10};
+          mbt->redist_elemId_in = {1};
+
           mbt->redist_nodeId = {1,2,4,5,10,11,13,14};
           mbt->redist_nodeCoord = {1.0 , 1.0 , 1.0,  //1
                       10.0, 1.0 , 1.0,  //2
@@ -584,6 +610,9 @@ MBMeshTest* mbmesh_gen_hex_3d_sph(int &rc, bool redist=false) {
     int localrc;
     mbt = mbmesh_gen_hex_3d_cart(localrc, redist);
     MBMESHTEST_CHECK_RC_THROW(localrc)
+
+    mbt->name = ESMC_METHOD;
+
     std::for_each(mbt->nodeCoord.begin(), mbt->nodeCoord.end(), 
                   [&c2s](double &d) {d*=c2s;});
     std::for_each(mbt->elemCoord.begin(), mbt->elemCoord.end(), 
@@ -794,6 +823,9 @@ MBMeshTest* mbmesh_gen_ngon_2d_cart(int &rc, bool redist=false) {
 
       if (redist) {
         if (localPet == 0) {
+          mbt->redist_nodeId_in ={10,11,12,14,15,16};
+          mbt->redist_elemId_in = {5};
+
           mbt->redist_nodeId = {10,11,12,14,15,16};
           mbt->redist_nodeCoord = {1.6,2.0, // 10
                             2.2,1.9, // 11
@@ -807,6 +839,9 @@ MBMeshTest* mbmesh_gen_ngon_2d_cart(int &rc, bool redist=false) {
           mbt->redist_elemConn = {1,2,3,6,5,4};
           mbt->redist_elemCoord = {2.1, 2.5};
         } else if (localPet == 1) {
+          mbt->redist_nodeId_in ={5,6,9,13};
+          mbt->redist_elemId_in = {4};
+
           mbt->redist_nodeId = {5,6,9,10,13,14};
           mbt->redist_nodeCoord = {0.1,1.5, // 5
                             1.5,1.5, // 6
@@ -820,6 +855,9 @@ MBMeshTest* mbmesh_gen_ngon_2d_cart(int &rc, bool redist=false) {
           mbt->redist_elemConn = {1,2,4,6,5,3};
           mbt->redist_elemCoord = {1.01,2.042};
         } else if (localPet == 2) {
+          mbt->redist_nodeId_in ={3,4,7,8};
+          mbt->redist_elemId_in = {2,3};
+
           mbt->redist_nodeId = {3,4,6,7,8,10,11,12};
           mbt->redist_nodeCoord = {2.0,0.1, // 3
                             3.0,0.1, // 4
@@ -837,6 +875,9 @@ MBMeshTest* mbmesh_gen_ngon_2d_cart(int &rc, bool redist=false) {
           mbt->redist_elemCoord = {1.74,1.76,
                             2.4, 1.6,};
         } else if (localPet == 3) {
+          mbt->redist_nodeId_in ={1,2};
+          mbt->redist_elemId_in = {1};
+
           mbt->redist_nodeId = {1,2,3,5,6};
           mbt->redist_nodeCoord = {0.1,0.1, // 1
                             1.5,0.0, // 2
@@ -910,10 +951,14 @@ MBMeshTest* mbmesh_gen_ngon_2d_sph(int &rc, bool redist=false) {
     int localrc;
     mbt = mbmesh_gen_ngon_2d_cart(localrc, redist);
     MBMESHTEST_CHECK_RC_THROW(localrc)
+
+    mbt->name = ESMC_METHOD;
+
     std::for_each(mbt->nodeCoord.begin(), mbt->nodeCoord.end(), 
                   [&c2s](double &d) {d*=c2s;});
     std::for_each(mbt->elemCoord.begin(), mbt->elemCoord.end(), 
                   [&c2s](double &d) {d*=c2s;});
+
 
     std::for_each(mbt->redist_nodeCoord.begin(), mbt->redist_nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
     std::for_each(mbt->redist_elemCoord.begin(), mbt->redist_elemCoord.end(), [&c2s](double &d) {d*=c2s;});
@@ -1128,6 +1173,9 @@ MBMeshTest* mbmesh_gen_mix_2d_cart(int &rc, bool redist=false) {
       }
       if (redist) {
         if (localPet == 0) {
+          mbt->redist_nodeId_in ={11,12,15,16};
+          mbt->redist_elemId_in = {10};
+
           mbt->redist_nodeId = {11,12,15,16};
           mbt->redist_nodeCoord = {2.0,2.0,3.0,2.0,2.0,3.0,3.0,3.0};
           mbt->redist_nodeOwner = {0,0,0,0};
@@ -1136,6 +1184,9 @@ MBMeshTest* mbmesh_gen_mix_2d_cart(int &rc, bool redist=false) {
           mbt->redist_elemConn = {1,2,4,3};
           mbt->redist_elemCoord ={2.5, 2.5};
         } else if (localPet == 1) {
+          mbt->redist_nodeId_in ={9,10,13,14};
+          mbt->redist_elemId_in = {8,9};
+
           mbt->redist_nodeId = {9,10,11,13,14,15};
           mbt->redist_nodeCoord = {1.0,2.0,1.5,2.0,2.0,2.0,1.0,3.0,1.5,3.0,2.0,3.0};
           mbt->redist_nodeOwner = {1,1,0,1,1,0};
@@ -1144,6 +1195,9 @@ MBMeshTest* mbmesh_gen_mix_2d_cart(int &rc, bool redist=false) {
           mbt->redist_elemConn = {1,2,5,4,2,3,6,5};
           mbt->redist_elemCoord ={1.0, 2.5, 1.75, 2.5};
         } else if (localPet == 2) {
+          mbt->redist_nodeId_in ={3,4,7,8};
+          mbt->redist_elemId_in = {4,7};
+
           mbt->redist_nodeId = {3,4,7,8,11,12};
           mbt->redist_nodeCoord = {2.0,1.0,3.0,1.0,2.0,1.5,3.0,1.5,2.0,2.0,3.0,2.0};
           mbt->redist_nodeOwner = {2,2,2,2,0,0};
@@ -1152,6 +1206,9 @@ MBMeshTest* mbmesh_gen_mix_2d_cart(int &rc, bool redist=false) {
           mbt->redist_elemConn = {1,2,4,3,3,4,6,5};
           mbt->redist_elemCoord ={2.5,1.0, 2.5, 1.75};
         } else if (localPet == 3) {
+          mbt->redist_nodeId_in ={1,2,5,6};
+          mbt->redist_elemId_in = {1,2,3,5,6};
+
           mbt->redist_nodeId = {1,2,3,5,6,7,9,10,11};
           mbt->redist_nodeCoord = {1.0,1.0,1.5,1.0,2.0,1.0,1.0,1.5,1.5,1.5,2.0,1.5,1.0,2.0,1.5,2.0,2.0,2.0};
           mbt->redist_nodeOwner = {3,3,2,3,3,2,1,1,0};
@@ -1222,6 +1279,9 @@ MBMeshTest* mbmesh_gen_mix_2d_sph(int &rc, bool redist=false) {
     int localrc;
     mbt = mbmesh_gen_mix_2d_cart(localrc, redist);
     MBMESHTEST_CHECK_RC_THROW(localrc)
+
+    mbt->name = ESMC_METHOD;
+
     std::for_each(mbt->nodeCoord.begin(), mbt->nodeCoord.end(), 
                   [&c2s](double &d) {d*=c2s;});
     std::for_each(mbt->elemCoord.begin(), mbt->elemCoord.end(), 
