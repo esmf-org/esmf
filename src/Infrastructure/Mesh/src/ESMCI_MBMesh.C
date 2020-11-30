@@ -369,94 +369,6 @@ void MBMesh::setup_node_mask() {
   has_node_mask=true;
 }
 
-// accessor for nodes
-int MBMesh::num_node(){
-#undef  ESMC_METHOD
-#define ESMC_METHOD "MBMesh::num_node()"
-  int merr;
-  Range nodes;
-  try {
-    merr=mesh->get_entities_by_dimension(0, 0, nodes);
-    ESMC_CHECK_MOAB_THROW(merr)
-  }
-  CATCH_MBMESH_RETHROW
-
-  return nodes.size();
-}
-
-// accessor for elems
-int MBMesh::num_elem(){
-#undef  ESMC_METHOD
-#define ESMC_METHOD "MBMesh::num_elem()"
-  int merr;
-  Range elems;
-  try {
-    merr=mesh->get_entities_by_dimension(0, pdim, elems);
-    ESMC_CHECK_MOAB_THROW(merr)
-  }
-  CATCH_MBMESH_RETHROW
-
-  return elems.size();
-}
-
-int MBMesh::num_elem_conn(){
-#undef  ESMC_METHOD
-#define ESMC_METHOD "MBMesh::num_elem_conn()"
-  int elemConnCount=0;
-  try {
-    int merr;
-    // Doesn't work with split meshes right now
-    if (this->is_split)
-      Throw () << "Can't get elem connection count from mesh containing >4 elements.";
-
-    // Get range of elems
-    Range elems;
-    merr=mesh->get_entities_by_dimension(0, pdim, elems);
-    ESMC_CHECK_MOAB_THROW(merr)
-
-    // Loop summing number of nodes per element
-    for (Range::const_iterator it=elems.begin(); it != elems.end(); it++) {
-      EntityHandle elem=*it;
-
-      // Get topology of element
-      std::vector<EntityHandle> nodes_on_elem;
-      merr=mesh->get_connectivity(&elem, 1, nodes_on_elem);
-      ESMC_CHECK_MOAB_THROW(merr)
-
-      // Add number of nodes for this elem to connection count
-      elemConnCount += nodes_on_elem.size();
-    }
-  }
-  CATCH_MBMESH_RETHROW
-  
-  return elemConnCount;
-}
-
-// accessor for nodes
-int MBMesh::num_owned_node(){
-#undef  ESMC_METHOD
-#define ESMC_METHOD "MBMesh::num_owned_node()"
-  std::vector<EntityHandle> all_nodes;
-  try {
-    all_nodes = get_all_nodes();
-  }
-  CATCH_MBMESH_RETHROW
-
-  return all_nodes.size();
-}
-
-// accessor for nodes
-int MBMesh::num_owned_elem(){
-#undef  ESMC_METHOD
-#define ESMC_METHOD "MBMesh::num_owned_elem()"
-  std::vector<EntityHandle> all_elems;
-  try {
-    all_elems = get_all_elems();
-  }
-  CATCH_MBMESH_RETHROW
-
-  return all_elems.size();
-}
 
 // Get a Range of all nodes on this processor
 void MBMesh::get_all_nodes(Range &all_nodes) {
@@ -481,44 +393,39 @@ void MBMesh::get_all_elems(Range &all_elems) {
 }
 
 // Get a vector of owned nodes on this processor
-std::vector<EntityHandle> const &MBMesh::get_all_nodes() {
+void MBMesh::get_all_nodes(std::vector<EntityHandle> &all_nodes) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh::get_all_nodes()"
-  std::vector<EntityHandle> all_nodes;
   try {
     int merr=mesh->get_entities_by_dimension(0, 0, all_nodes);
     ESMC_CHECK_MOAB_THROW(merr);
   }
   CATCH_MBMESH_RETHROW
-
-  return all_nodes;
 }
 
 // Get a vector of owned elements on this processor
-std::vector<EntityHandle> const &MBMesh::get_all_elems() {
+void MBMesh::get_all_elems(std::vector<EntityHandle> &all_elems) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh::get_all_elems()"
-  std::vector<EntityHandle> all_elems;
   try {
     int merr=mesh->get_entities_by_dimension(0, pdim, all_elems);
     ESMC_CHECK_MOAB_THROW(merr);
   }
   CATCH_MBMESH_RETHROW
-  
-  return all_elems;
 }
 
 // Get a vector of owned nodes on this processor
-std::vector<EntityHandle> const &MBMesh::get_owned_nodes() {
+void MBMesh::get_owned_nodes(std::vector<EntityHandle> &owned_nodes) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh::get_owned_nodes()"
-  std::vector<EntityHandle> owned_nodes;
   try {
     int localrc;
     int localPet = VM::getCurrent(&localrc)->getLocalPet();
     ESMC_CHECK_THROW(localrc);
 
-    std::vector<EntityHandle> all_nodes = get_all_nodes();
+    std::vector<EntityHandle> all_nodes;
+    get_all_nodes(all_nodes);
+
     std::vector<EntityHandle>::const_iterator ni = all_nodes.begin();
     std::vector<EntityHandle>::const_iterator ne = all_nodes.end();
 
@@ -528,21 +435,19 @@ std::vector<EntityHandle> const &MBMesh::get_owned_nodes() {
     }
   }
   CATCH_MBMESH_RETHROW
-
-  return owned_nodes;
 }
 
 // Get a vector of owned elements on this processor
-std::vector<EntityHandle> const &MBMesh::get_owned_elems() {
+void MBMesh::get_owned_elems(std::vector<EntityHandle> &owned_elems) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh::get_owned_elems()"
-  std::vector<EntityHandle> owned_elems;
   try {
     int localrc;
     int localPet = VM::getCurrent(&localrc)->getLocalPet();
     ESMC_CHECK_THROW(localrc);
 
-    std::vector<EntityHandle> all_elems = get_all_elems();
+    std::vector<EntityHandle> all_elems;
+    get_all_elems(all_elems);
     std::vector<EntityHandle>::const_iterator ei = all_elems.begin();
     std::vector<EntityHandle>::const_iterator ee = all_elems.end();
 
@@ -552,11 +457,81 @@ std::vector<EntityHandle> const &MBMesh::get_owned_elems() {
     }
   }
   CATCH_MBMESH_RETHROW
-
-  return owned_elems;
 }
 
+int MBMesh::get_num_elem_conn(){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh::num_elem_conn()"
+  int elemConnCount=0;
+  try {
+    int merr;
+    // Doesn't work with split meshes right now
+    if (this->is_split)
+      Throw () << "Can't get elem connection count from mesh containing >4 elements.";
 
+    // Get all elems
+    std::vector<EntityHandle> elems;
+    get_all_elems(elems);
+    std::vector<EntityHandle>::const_iterator ei = elems.begin();
+    std::vector<EntityHandle>::const_iterator ee = elems.end();
+
+    // Loop summing number of nodes per element
+    for (ei; ei != ee; ++ei) {
+      EntityHandle elem=*ei;
+
+      // Get topology of element
+      std::vector<EntityHandle> nodes_on_elem;
+      merr=mesh->get_connectivity(&elem, 1, nodes_on_elem);
+      ESMC_CHECK_MOAB_THROW(merr)
+
+      // Add number of nodes for this elem to connection count
+      elemConnCount += nodes_on_elem.size();
+    }
+  }
+  CATCH_MBMESH_RETHROW
+  
+  return elemConnCount;
+}
+
+int MBMesh::get_num_owned_elem_conn(){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh::num_owned_elem_conn()"
+  int elemConnCount=0;
+  try {
+    int merr;
+    // Doesn't work with split meshes right now
+    if (this->is_split)
+      Throw () << "Can't get elem connection count from mesh containing >4 elements.";
+
+    int localrc;
+    int localPet = VM::getCurrent(&localrc)->getLocalPet();
+    ESMC_CHECK_THROW(localrc);
+
+    // Get owned elems
+    std::vector<EntityHandle> elems;
+    get_owned_elems(elems);
+    std::vector<EntityHandle>::const_iterator ei = elems.begin();
+    std::vector<EntityHandle>::const_iterator ee = elems.end();
+
+    // Loop summing number of nodes per element
+    for (ei; ei != ee; ++ei) {
+      EntityHandle elem=*ei;
+
+      if (localPet == get_owner(elem)) {
+        // Get topology of element
+        std::vector<EntityHandle> nodes_on_elem;
+        merr=mesh->get_connectivity(&elem, 1, nodes_on_elem);
+        ESMC_CHECK_MOAB_THROW(merr)
+  
+        // Add number of nodes for this elem to connection count
+        elemConnCount += nodes_on_elem.size();
+      }
+    }
+  }
+  CATCH_MBMESH_RETHROW
+  
+  return elemConnCount;
+}
 
 void MBMesh::get_elem_areas(double *elem_area) {
 #undef  ESMC_METHOD
@@ -2296,49 +2271,58 @@ void MBMesh::debug_output_elems() {
 void MBMesh::finalize_nodes() {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh::finalize_nodes()"
-  int localrc, merr;
+  try {
+    int merr;
+  
+    // 1. compute original nodes
+    // RLO: We already save the tag, so why not compute as needed?
+    Range all_nodes;
+    get_all_nodes(all_nodes);
+  
+    // Setup list to hold pairs
+    std::vector<std::pair<int,EntityHandle> > pos_and_nodes;
+    pos_and_nodes.reserve(all_nodes.size());
+  
+    // Loop through nodes putting into list
+    for(Range::const_iterator it=all_nodes.begin(); it !=all_nodes.end();   it++) {
+      EntityHandle node=*it;
+  
+      // Get orig_pos
+      int orig_pos;
+      merr=mesh->tag_get_data(orig_pos_tag, &node, 1, &orig_pos);
+      ESMC_CHECK_MOAB_THROW(merr);
+  
+      // Skip ones with orig_pos<0 (they are not from original creation)
+      if (orig_pos < 0) continue;
+  
+      // Stick in list
+      pos_and_nodes.push_back(std::make_pair(orig_pos,node));
+    }
+  
+    // Put in order by original pos
+    std::sort(pos_and_nodes.begin(), pos_and_nodes.end());
+  
+    // Setup orig_nodes list
+    orig_nodes.clear();
+    orig_nodes.reserve(pos_and_nodes.size());
+  
+    // Fill array of node entities
+    for (int i = 0; i<pos_and_nodes.size(); ++i) {
+      orig_nodes.push_back(pos_and_nodes[i].second);
+    }
+  
+    // 2. set private info
+    vector<EntityHandle> owned_nodes;
+    get_owned_nodes(owned_nodes);
+  
+    _num_node = all_nodes.size();
+    _num_owned_node = owned_nodes.size();
+  
+    // Mark nodes as finalized, so things can be used
+    nodes_finalized=true;
 
-
-  // Get a range containing all nodes
-  Range all_nodes;
-  merr=mesh->get_entities_by_dimension(0,0,all_nodes);
-  ESMC_CHECK_MOAB_THROW(merr);
-
-  // Setup list to hold pairs
-  std::vector<std::pair<int,EntityHandle> > pos_and_nodes;
-  pos_and_nodes.reserve(all_nodes.size());
-
-  // Loop through nodes putting into list
-  for(Range::const_iterator it=all_nodes.begin(); it !=all_nodes.end(); it++) {
-    EntityHandle node=*it;
-
-    // Get orig_pos
-    int orig_pos;
-    merr=mesh->tag_get_data(orig_pos_tag, &node, 1, &orig_pos);
-    ESMC_CHECK_MOAB_THROW(merr);
-
-    // Skip ones with orig_pos<0 (they are not from original creation)
-    if (orig_pos < 0) continue;
-
-    // Stick in list
-    pos_and_nodes.push_back(std::make_pair(orig_pos,node));
   }
-
-  // Put in order by original pos
-  std::sort(pos_and_nodes.begin(), pos_and_nodes.end());
-
-  // Setup orig_nodes list
-  orig_nodes.clear();
-  orig_nodes.reserve(pos_and_nodes.size());
-
-  // Fill array of node entities
-  for (int i = 0; i<pos_and_nodes.size(); ++i) {
-    orig_nodes.push_back(pos_and_nodes[i].second);
-  }
-
-
-  // Mark nodes as finalized, so things can be used
-  nodes_finalized=true;
+  CATCH_MBMESH_RETHROW
 }
 
 
@@ -2346,47 +2330,59 @@ void MBMesh::finalize_nodes() {
 void MBMesh::finalize_elems() {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh::finalize_elems()"
-  int localrc, merr;
+  try {
+    int merr;
 
-  // Get a range containing all elems
-  Range all_elems;
-  merr=mesh->get_entities_by_dimension(0,pdim,all_elems);
-  ESMC_CHECK_MOAB_THROW(merr);
+    // 1. compute original nodes
+    // RLO: We already save the tag, so why not compute as needed?
+    Range all_elems;
+    get_all_elems(all_elems);
 
-  // Setup list to hold pairs
-  std::vector<std::pair<int,EntityHandle> > pos_and_elems;
-  pos_and_elems.reserve(all_elems.size());
+    // Setup list to hold pairs
+    std::vector<std::pair<int,EntityHandle> > pos_and_elems;
+    pos_and_elems.reserve(all_elems.size());
 
-  // Loop through elems putting into list
-  for(Range::const_iterator it=all_elems.begin(); it !=all_elems.end(); it++) {
-    EntityHandle elem=*it;
+    // Loop through elems putting into list
+    for(Range::const_iterator it=all_elems.begin(); it !=all_elems.end(); it++) {
+      EntityHandle elem=*it;
 
-    // Get orig_pos
-    int orig_pos;
-    merr=mesh->tag_get_data(orig_pos_tag, &elem, 1, &orig_pos);
-    ESMC_CHECK_MOAB_THROW(merr);
+      // Get orig_pos
+      int orig_pos;
+      merr=mesh->tag_get_data(orig_pos_tag, &elem, 1, &orig_pos);
+      ESMC_CHECK_MOAB_THROW(merr);
 
-    // Skip ones with orig_pos<0 (they are not from original creation)
-    if (orig_pos < 0) continue;
+      // Skip ones with orig_pos<0 (they are not from original creation)
+      if (orig_pos < 0) continue;
 
-    // Stick in list
-    pos_and_elems.push_back(std::make_pair(orig_pos,elem));
+      // Stick in list
+      pos_and_elems.push_back(std::make_pair(orig_pos,elem));
+    }
+
+    // Put in order by original pos
+    std::sort(pos_and_elems.begin(), pos_and_elems.end());
+
+    // Setup orig_elems list
+    orig_elems.clear();
+    orig_elems.reserve(pos_and_elems.size());
+
+    // Fill array of elem entities
+    for (int i = 0; i<pos_and_elems.size(); ++i) {
+      orig_elems.push_back(pos_and_elems[i].second);
+    }
+
+    // 2. set private info
+    vector<EntityHandle> owned_elems;
+    get_owned_elems(owned_elems);
+
+    _num_elem = all_elems.size();
+    _num_owned_elem = owned_elems.size();
+    _num_elem_conn = get_num_elem_conn();
+    _num_owned_elem_conn = get_num_owned_elem_conn();
+
+    // Mark elems as finalized, so things can be used
+    elems_finalized=true;
   }
-
-  // Put in order by original pos
-  std::sort(pos_and_elems.begin(), pos_and_elems.end());
-
-  // Setup orig_elems list
-  orig_elems.clear();
-  orig_elems.reserve(pos_and_elems.size());
-
-  // Fill array of elem entities
-  for (int i = 0; i<pos_and_elems.size(); ++i) {
-    orig_elems.push_back(pos_and_elems[i].second);
-  }
-
-  // Mark elems as finalized, so things can be used
-  elems_finalized=true;
+  CATCH_MBMESH_RETHROW
 }
 
 

@@ -107,6 +107,14 @@ namespace ESMCI {
   class MBMesh {
 #if defined ESMF_MOAB
 
+  private:
+    int _num_node;
+    int _num_elem;
+    int _num_elem_conn;
+    int _num_owned_node;
+    int _num_owned_elem;
+    int _num_owned_elem_conn;
+
   public:
     int pdim; 
     int sdim; // Spatial dim of coordinates (after conversion), maybe change to cart_sdim? 
@@ -248,22 +256,48 @@ namespace ESMCI {
     //   that I might add a vector of these soon. 
 
     // Basic accessors for number of nodes, elements, and connectivity
-    int num_elem();
-    int num_node();
-    int num_elem_conn();
-    int num_owned_elem();
-    int num_owned_node();
+    int num_node(){
+      if (!nodes_finalized) {Throw() << "Nodes not finalized, so num_node not set.";}
+      return _num_node;
+    };
 
+    int num_elem(){
+      if (!elems_finalized) {Throw() << "Elements not finalized, so num_elem not set.";}
+      return _num_elem;
+    };
+
+    int num_elem_conn(){
+      if (!elems_finalized) {Throw() << "Elements not finalized, so num_elem_conn not set.";}
+      return _num_elem_conn;
+    };
+
+    int num_owned_node(){
+      if (!nodes_finalized) {Throw() << "Nodes not finalized, so num_owned_node not set.";}
+      return _num_owned_node;
+    };
+
+    int num_owned_elem(){
+      if (!elems_finalized) {Throw() << "Elements not finalized, so num_owned_elem not set.";}
+      return _num_owned_elem;
+    };
+
+    int num_owned_elem_conn(){
+      if (!elems_finalized) {Throw() << "Elements not finalized, so num_owned_elem_conn not set.";}
+      return _num_owned_elem_conn;
+    };
 
     // Get a Range of all nodes and elements on this processor
     void get_all_nodes(Range &all_nodes);
     void get_all_elems(Range &all_elems);
 
-    std::vector<EntityHandle> const & get_all_nodes();
-    std::vector<EntityHandle> const & get_all_elems();
+    void get_all_nodes(std::vector<EntityHandle> &all_nodes);
+    void get_all_elems(std::vector<EntityHandle> &all_elems);
 
-    std::vector<EntityHandle> const & get_owned_nodes();
-    std::vector<EntityHandle> const & get_owned_elems();
+    void get_owned_nodes(std::vector<EntityHandle> &owned_nodes);
+    void get_owned_elems(std::vector<EntityHandle> &owned_elems);
+
+    int get_num_elem_conn();
+    int get_num_owned_elem_conn();
 
     // Return a reference to a vector of EntityHandles for the original nodes used for creation
     // on this processor sorted in the order they were used for creation

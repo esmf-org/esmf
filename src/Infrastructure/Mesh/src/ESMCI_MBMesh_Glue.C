@@ -3248,7 +3248,7 @@ void MBMesh_checkelemlist(void **meshpp, int *_num_elem_gids, int *elem_gids,
     }
 #endif
 
-#define DEBUG_WRITE_MESH
+#undef DEBUG_WRITE_MESH
 #ifdef DEBUG_WRITE_MESH
   {void *mbptr = (void *) mesh;
   int rc;
