@@ -21,5 +21,9 @@ CLOBBERDIRS =
 
 include ${ESMF_DIR}/makefile
 
+ifeq ($(ESMF_MOAB),internal)
+ESMF_CXXCOMPILECPPFLAGS += -I$(ESMF_DIR)/src/Infrastructure/Mesh/src/Moab
+endif
+
 DIRS	  = 
 

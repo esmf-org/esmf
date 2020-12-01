@@ -64,7 +64,7 @@ using namespace ESMCI;
 
 extern "C" void FTN_X(f_esmf_getmeshdistgrid)(int*, int*, int*, int*);
 
-void MBMesh_create(void **mbmpp, int *pdim, int *sdim,
+void MBMesh_create(MBMesh **mbmpp, int *pdim, int *sdim,
                    ESMC_CoordSys_Flag *coordSys, int *rc)
 {
 #undef  ESMC_METHOD
@@ -101,7 +101,7 @@ void MBMesh_create(void **mbmpp, int *pdim, int *sdim,
 
     
     // Create new Mesh
-    *mbmpp=(void *)(new MBMesh(*pdim, *sdim, *coordSys));
+    *mbmpp = new MBMesh(*pdim, *sdim, *coordSys);
     
    
   } 
@@ -113,7 +113,7 @@ void MBMesh_create(void **mbmpp, int *pdim, int *sdim,
 } // meshcreate
 
 
-void MBMesh_addnodes(void **mbmpp, int *_num_nodes, int *nodeId,
+void MBMesh_addnodes(MBMesh **mbmpp, int *_num_nodes, int *nodeId,
                      double *nodeCoord, int *nodeOwner, InterArray<int> *nodeMaskII,
                      ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                      int *rc)
@@ -1238,7 +1238,7 @@ void _add_elems_in_groups_by_type(MBMesh *mbmp, int localPet,
 }
 
 
-void MBMesh_addelements(void **mbmpp,
+void MBMesh_addelements(MBMesh **mbmpp,
                         int *_num_elems, int *elemId, 
                         int *elemType, InterArray<int> *_elemMaskII ,
                         int *_areaPresent, double *elemArea,
@@ -1556,7 +1556,7 @@ void MBMesh_addelements(void **mbmpp,
 
 
 
-void MBMesh_turnonnodemask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg,  int *rc) {
+void MBMesh_turnonnodemask(MBMesh **mbmpp, ESMCI::InterArray<int> *maskValuesArg,  int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_turnonnodemask()"
   try {
@@ -1625,7 +1625,7 @@ void MBMesh_turnonnodemask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg, 
 }
 
 // Turn OFF masking
- void MBMesh_turnoffnodemask(void **mbmpp, int *rc) {
+ void MBMesh_turnoffnodemask(MBMesh **mbmpp, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_turnoffnodemask()"
   try {
@@ -1666,7 +1666,7 @@ void MBMesh_turnonnodemask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg, 
 
 }
 
-void MBMesh_turnonelemmask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg,  int *rc) {
+void MBMesh_turnonelemmask(MBMesh **mbmpp, ESMCI::InterArray<int> *maskValuesArg,  int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_turnonelemmask()"
   try {
@@ -1740,7 +1740,7 @@ void MBMesh_turnonelemmask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg, 
 }
 
 // Turn OFF masking
-void MBMesh_turnoffelemmask(void **mbmpp, int *rc) {
+void MBMesh_turnoffelemmask(MBMesh **mbmpp, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_turnoffelemmask()"
   try {
@@ -1782,7 +1782,7 @@ void MBMesh_turnoffelemmask(void **mbmpp, int *rc) {
 
 
 
-void MBMesh_destroy(void **mbmpp, int *rc) {
+void MBMesh_destroy(MBMesh **mbmpp, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_destroy()"
   try {
@@ -1810,7 +1810,7 @@ void MBMesh_destroy(void **mbmpp, int *rc) {
 
 
 
-void MBMesh_write(void **mbmpp, char *fname, int *rc,
+void MBMesh_write(MBMesh **mbmpp, char *fname, int *rc,
     ESMCI_FortranStrLenArg nlen) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_write()"
@@ -1872,7 +1872,7 @@ void MBMesh_write(void **mbmpp, char *fname, int *rc,
 }
 
 
-void MBMesh_createnodedistgrid(void **mbmpp, int *ngrid, int *num_lnodes, int *rc) {
+void MBMesh_createnodedistgrid(MBMesh **mbmpp, int *ngrid, int *num_lnodes, int *rc) {
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_createnodedistgrid()"
@@ -2014,7 +2014,7 @@ void getElemGIDS(MBMesh *mbmp, std::vector<int> &egids) {
 }
 
 
-void MBMesh_createelemdistgrid(void **mbmpp, int *egrid, int *num_lelems, int *rc) {
+void MBMesh_createelemdistgrid(MBMesh **mbmpp, int *egrid, int *num_lelems, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_createelemdistgrid()"
 
@@ -2056,7 +2056,7 @@ void MBMesh_createelemdistgrid(void **mbmpp, int *egrid, int *num_lelems, int *r
 
 
 // DO THIS BETTER, HAVE A FIELD THAT CONTAINS THE POSITION IN THE FINAL ARRAY AND -1 FOR ANYTHING NOT LOCAL OR SPLIT
-void getElems(void **mbmpp, std::vector<EntityHandle> &ehs) {
+void getElems(MBMesh **mbmpp, std::vector<EntityHandle> &ehs) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_getElems()"
   try {
@@ -2120,7 +2120,7 @@ void getElems(void **mbmpp, std::vector<EntityHandle> &ehs) {
 }
 
 
-void MBMesh_getlocalelemcoords(void **mbmpp, double *ecoords,
+void MBMesh_getlocalelemcoords(MBMesh **mbmpp, double *ecoords,
                                int *_orig_sdim, int *rc)
 {
 #undef  ESMC_METHOD
@@ -2184,7 +2184,7 @@ void MBMesh_getlocalelemcoords(void **mbmpp, double *ecoords,
 }
 
 
-void MBMesh_getarea(void **mbmpp, int *num_elem, double *elem_areas, int *rc) {
+void MBMesh_getarea(MBMesh **mbmpp, int *num_elem, double *elem_areas, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_getarea()"
 
@@ -2351,7 +2351,7 @@ void MBMesh_getarea(void **mbmpp, int *num_elem, double *elem_areas, int *rc) {
 }
 
 // DO THIS BETTER, HAVE A FIELD THAT CONTAINS THE POSITION IN THE FINAL ARRAY AND -1 FOR ANYTHING NOT LOCAL OR SPLIT
-void getNodes(void **mbmpp, std::vector<EntityHandle> &nodes) {
+void getNodes(MBMesh **mbmpp, std::vector<EntityHandle> &nodes) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "getNodes()"
   try {
@@ -2414,7 +2414,7 @@ void getNodes(void **mbmpp, std::vector<EntityHandle> &nodes) {
   CATCH_MBMESH_RETHROW
 }
 
-void MBMesh_getlocalcoords(void **mbmpp, double *ncoords, int *_orig_sdim, int *rc)
+void MBMesh_getlocalcoords(MBMesh **mbmpp, double *ncoords, int *_orig_sdim, int *rc)
 {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_getlocalcoords()"
@@ -2499,7 +2499,7 @@ template void MBMesh_set_Array_data(LocalArray *localArray, int index, ESMC_Type
 
 
 
-void MBMesh_geteleminfointoarray(void *vmbmp,
+void MBMesh_geteleminfointoarray(MBMesh *vmbmp,
                                  ESMCI::DistGrid *elemDistgrid, 
                                  int numElemArrays,
                                  int *infoTypeElemArrays, 
@@ -2696,7 +2696,7 @@ void MBMesh_geteleminfointoarray(void *vmbmp,
 }
 
 
-void MBMesh_serialize(void **mbmpp, char *buffer, int *length, 
+void MBMesh_serialize(MBMesh **mbmpp, char *buffer, int *length, 
                       int *offset, ESMC_InquireFlag *inquireflag, int *rc,
                       ESMCI_FortranStrLenArg buffer_l) {
 #undef  ESMC_METHOD
@@ -2770,7 +2770,7 @@ void MBMesh_serialize(void **mbmpp, char *buffer, int *length,
   if (rc!=NULL) *rc=ESMF_SUCCESS;
 }
 
-void MBMesh_deserialize(void **mbmpp, char *buffer, int *offset, int *rc,
+void MBMesh_deserialize(MBMesh **mbmpp, char *buffer, int *offset, int *rc,
                         ESMCI_FortranStrLenArg buffer_l) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "mbmesh_deserialize()"
@@ -2852,8 +2852,8 @@ void MBMesh_deserialize(void **mbmpp, char *buffer, int *offset, int *rc,
 
 /// REDIST ///
 
-void MBMesh_createredistelems(void **src_meshpp, int *num_elem_gids, int *elem_gids,
-                              void **output_meshpp, int *rc) {
+void MBMesh_createredistelems(MBMesh **src_meshpp, int *num_elem_gids, int *elem_gids,
+                              MBMesh **output_meshpp, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_createredistelems()"
   try {
@@ -2868,11 +2868,7 @@ void MBMesh_createredistelems(void **src_meshpp, int *num_elem_gids, int *elem_g
     int localPet = vm->getLocalPet();
     ESMC_CHECK_PASSTHRU_THROW(localrc);
 
-    // Dereference
-    MBMesh *mesh=reinterpret_cast<MBMesh*> (*src_meshpp);
-    MBMesh *out_mesh=reinterpret_cast<MBMesh*> (*output_meshpp);
-
-    if (mesh->is_split) {
+    if ((*src_meshpp)->is_split) {
       // If split mesh expand ids
       int num_elem_gids_ws;
       int *elem_gids_ws=NULL;
@@ -2884,26 +2880,24 @@ void MBMesh_createredistelems(void **src_meshpp, int *num_elem_gids, int *elem_g
         printf("%d# elem gids %d\n", localPet, elem_gids[i]);
 #endif
 
-      mbmesh_expand_split_elem_ids(mesh, *num_elem_gids, elem_gids, &num_elem_gids_ws, &elem_gids_ws, split_to_orig_id);
+      mbmesh_expand_split_elem_ids(*src_meshpp, *num_elem_gids, elem_gids, 
+                                   &num_elem_gids_ws, &elem_gids_ws, split_to_orig_id);
 
-      mbmesh_redist_elem(mesh, &num_elem_gids_ws, elem_gids_ws, &out_mesh);
+      mbmesh_redist_elem(*src_meshpp, &num_elem_gids_ws, elem_gids_ws, output_meshpp);
 
-      out_mesh->is_split=mesh->is_split;
-      out_mesh->max_non_split_id=mesh->max_non_split_id;
-      out_mesh->split_to_orig_id=split_to_orig_id;
+      (*output_meshpp)->is_split=(*src_meshpp)->is_split;
+      (*output_meshpp)->max_non_split_id=(*src_meshpp)->max_non_split_id;
+      (*output_meshpp)->split_to_orig_id=split_to_orig_id;
 
       // calculate split_id_to_frac map from other info
-      mbmesh_calc_split_id_to_frac(out_mesh);
+      mbmesh_calc_split_id_to_frac(*output_meshpp);
 
       // free split gids
       if (elem_gids_ws !=NULL) delete [] elem_gids_ws;
     } else {
-      mbmesh_redist_elem(mesh, num_elem_gids, elem_gids, &out_mesh);
-      out_mesh->is_split=mesh->is_split;
+      mbmesh_redist_elem(*src_meshpp, num_elem_gids, elem_gids, output_meshpp);
+      (*output_meshpp)->is_split=(*src_meshpp)->is_split;
     }
-
-    // return the mbmesh as a void*
-    *output_meshpp=reinterpret_cast<void*> (out_mesh);
 
   } 
   CATCH_MBMESH_RETURN(rc);
@@ -2911,8 +2905,8 @@ void MBMesh_createredistelems(void **src_meshpp, int *num_elem_gids, int *elem_g
   if (rc!=NULL) *rc=ESMF_SUCCESS;
 }
 
-void MBMesh_createredistnodes(void **src_meshpp, int *num_node_gids, int *node_gids,
-                              void **output_meshpp, int *rc) {
+void MBMesh_createredistnodes(MBMesh **src_meshpp, int *num_node_gids, int *node_gids,
+                              MBMesh **output_meshpp, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_createredistnodes()"
   try {
@@ -2922,26 +2916,19 @@ void MBMesh_createredistnodes(void **src_meshpp, int *num_node_gids, int *node_g
     ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
     ESMC_CHECK_PASSTHRU_THROW(localrc);
 
-    // Dereference
-    MBMesh *mesh=reinterpret_cast<MBMesh*> (*src_meshpp);
-    MBMesh *out_mesh=reinterpret_cast<MBMesh*> (*output_meshpp);
-
-    mbmesh_redist_node(mesh, num_node_gids, node_gids, &out_mesh);
+    mbmesh_redist_node(*src_meshpp, num_node_gids, node_gids, output_meshpp);
 
     ESMCI_MESHREDIST_TRACE_ENTER("MBMesh split id postprocessing");
     // split element handling
-    out_mesh->is_split=mesh->is_split;
+    (*output_meshpp)->is_split=(*src_meshpp)->is_split;
 
-    if (out_mesh->is_split) {
-      mbmesh_set_split_orig_id_map(mesh, out_mesh);
-      out_mesh->max_non_split_id=mesh->max_non_split_id;
+    if ((*output_meshpp)->is_split) {
+      mbmesh_set_split_orig_id_map(*src_meshpp, *output_meshpp);
+      (*output_meshpp)->max_non_split_id=(*src_meshpp)->max_non_split_id;
       // RLO: not sure we need this if above is used
-      // out_mesh->split_to_orig_id=mesh->split_to_orig_id;
+      // (*output_meshpp)->split_to_orig_id=(*src_meshpp)->split_to_orig_id;
     }
     ESMCI_MESHREDIST_TRACE_EXIT("MBMesh split id postprocessing");
-
-  // convert the out_mesh back to a void*
-  *output_meshpp = reinterpret_cast<void *> (out_mesh);
 
   } 
   CATCH_MBMESH_RETURN(rc);
@@ -2949,9 +2936,9 @@ void MBMesh_createredistnodes(void **src_meshpp, int *num_node_gids, int *node_g
   if (rc!=NULL) *rc=ESMF_SUCCESS;
 }
 
-void MBMesh_createredist(void **src_meshpp, int *num_node_gids, int *node_gids,
+void MBMesh_createredist(MBMesh **src_meshpp, int *num_node_gids, int *node_gids,
                          int *num_elem_gids, int *elem_gids,  
-                         void **output_meshpp, int *rc) {
+                         MBMesh **output_meshpp, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_createredist()"
   try {
@@ -2961,36 +2948,32 @@ void MBMesh_createredist(void **src_meshpp, int *num_node_gids, int *node_gids,
     ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
     ESMC_CHECK_PASSTHRU_THROW(localrc);
 
-    // Dereference
-    MBMesh *mesh=reinterpret_cast<MBMesh*> (*src_meshpp);
-    MBMesh *out_mesh=reinterpret_cast<MBMesh*> (*output_meshpp);
-
-    if (mesh->is_split) {
+    if ((*src_meshpp)->is_split) {
       // If split mesh expand ids
       int num_elem_gids_ws;
       int *elem_gids_ws=NULL;
       std::map<int,int> split_to_orig_id;
 
-      mbmesh_expand_split_elem_ids(mesh, *num_elem_gids, elem_gids, &num_elem_gids_ws, &elem_gids_ws, split_to_orig_id);
+      mbmesh_expand_split_elem_ids((*src_meshpp), *num_elem_gids, elem_gids, 
+                                   &num_elem_gids_ws, &elem_gids_ws, split_to_orig_id);
 
-      mbmesh_redist(mesh, num_node_gids, node_gids, &num_elem_gids_ws, elem_gids_ws, &out_mesh);
+      mbmesh_redist((*src_meshpp), num_node_gids, node_gids, 
+                    &num_elem_gids_ws, elem_gids_ws, output_meshpp);
  
-      out_mesh->is_split=mesh->is_split;
-      out_mesh->max_non_split_id=mesh->max_non_split_id;
-      out_mesh->split_to_orig_id=split_to_orig_id;
+      (*output_meshpp)->is_split=(*src_meshpp)->is_split;
+      (*output_meshpp)->max_non_split_id=(*src_meshpp)->max_non_split_id;
+      (*output_meshpp)->split_to_orig_id=split_to_orig_id;
 
       // calculate split_id_to_frac map from other info
-      mbmesh_calc_split_id_to_frac(out_mesh);
+      mbmesh_calc_split_id_to_frac(*output_meshpp);
 
       // Free split gids
       if (elem_gids_ws !=NULL) delete [] elem_gids_ws;
     } else {
-      mbmesh_redist(mesh, num_node_gids, node_gids, num_elem_gids, elem_gids, &out_mesh);
-      out_mesh->is_split=mesh->is_split;
+      mbmesh_redist((*src_meshpp), num_node_gids, node_gids, 
+                    num_elem_gids, elem_gids, output_meshpp);
+      (*output_meshpp)->is_split=(*src_meshpp)->is_split;
     }
-
-    // return the mbmesh as a void*
-    *output_meshpp=reinterpret_cast<void*> (out_mesh);
 
   } 
   CATCH_MBMESH_RETURN(rc);
@@ -3003,7 +2986,7 @@ void MBMesh_createredist(void **src_meshpp, int *num_node_gids, int *node_gids,
 // it returns an error (used to test MeshRedist()).
 // To do this check make sure the number of nodes in both cases are the same and that every
 // entry in node_gids is contained in meshpp
-void MBMesh_checknodelist(void **meshpp, int *_num_node_gids, int *node_gids,
+void MBMesh_checknodelist(MBMesh **meshpp, int *_num_node_gids, int *node_gids,
                           int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_checknodelist()"
@@ -3019,15 +3002,12 @@ void MBMesh_checknodelist(void **meshpp, int *_num_node_gids, int *node_gids,
     int localPet = vm->getLocalPet();
     ESMC_CHECK_PASSTHRU_THROW(localrc);
 
-    // Dereference
-    MBMesh *mesh=reinterpret_cast<MBMesh*> (*meshpp);
-
     // For convenience deref number
     int num_node_gids=*_num_node_gids;
 
     // Loop through counting local nodes
     Range nodes;
-    merr=mesh->mesh->get_entities_by_dimension(0,0,nodes);
+    merr=(*meshpp)->mesh->get_entities_by_dimension(0,0,nodes);
     ESMC_CHECK_MOAB_THROW(merr);
 
     // list of the Mesh node gids
@@ -3041,7 +3021,7 @@ void MBMesh_checknodelist(void **meshpp, int *_num_node_gids, int *node_gids,
       const EntityHandle node = *si;
 
       int node_owner;
-      merr=mesh->mesh->tag_get_data(mesh->owner_tag, &node, 1, &node_owner);
+      merr=(*meshpp)->mesh->tag_get_data((*meshpp)->owner_tag, &node, 1, &node_owner);
       ESMC_CHECK_MOAB_THROW(merr);
 
       // only consider local nodes
@@ -3049,7 +3029,7 @@ void MBMesh_checknodelist(void **meshpp, int *_num_node_gids, int *node_gids,
         ++num_local_nodes;
 
         int gid;
-        MBMesh_get_gid(mesh, node, &gid);
+        MBMesh_get_gid((*meshpp), node, &gid);
         local_gids.push_back(gid);
 
         local_owners.push_back(node_owner);
@@ -3062,8 +3042,8 @@ void MBMesh_checknodelist(void **meshpp, int *_num_node_gids, int *node_gids,
 
     // See if number of local nodes is the same
     if (num_node_gids != num_local_nodes) {
-      Throw() << "Number of local nodes in mesh ("<<num_local_nodes<<
-                 ") different that number in list ("<<num_node_gids<<")";
+      Throw() << "Number of local nodes in mesh (" << num_local_nodes <<
+                 ") different that number in list (" << num_node_gids << ")";
     }
 
 
@@ -3072,11 +3052,12 @@ void MBMesh_checknodelist(void **meshpp, int *_num_node_gids, int *node_gids,
       std::vector<UInt>::const_iterator ni = std::find(local_gids.begin(), local_gids.end(), node_gids[i]);
 
       if (ni == local_gids.end()) {
-        Throw() << "Node "<<node_gids[i]<<" not found in Mesh.";
+        Throw() << "Node "<<node_gids[i] << " not found in Mesh.";
       }
 
       if (local_owners[ni-local_gids.begin()] != localPet) {
-        Throw() << "Node "<<node_gids[i]<<" in Mesh, but not local." << local_owners[ni-local_gids.begin()] << "  " << localPet;
+        Throw() << "Node "<<node_gids[i] << " in Mesh, but not local." 
+                << local_owners[ni-local_gids.begin()] << "  " << localPet;
       }
     }
 
@@ -3091,7 +3072,7 @@ void MBMesh_checknodelist(void **meshpp, int *_num_node_gids, int *node_gids,
 // it returns an error (used to test MeshRedist()).
 // To do this check make sure the number of elems in both cases are the same and that every
 // entry in elem_gids is contained in meshpp
-void MBMesh_checkelemlist(void **meshpp, int *_num_elem_gids, int *elem_gids,
+void MBMesh_checkelemlist(MBMesh **meshpp, int *_num_elem_gids, int *elem_gids,
                           int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_checkelemlist()"
@@ -3107,15 +3088,12 @@ void MBMesh_checkelemlist(void **meshpp, int *_num_elem_gids, int *elem_gids,
     int localPet = vm->getLocalPet();
     ESMC_CHECK_PASSTHRU_THROW(localrc);
 
-    // Dereference
-    MBMesh *mesh=reinterpret_cast<MBMesh*> (*meshpp);
-
     // For convenience deref number
     int num_elem_gids=*_num_elem_gids;
 
     // Loop through counting local elems
     Range elems;
-    merr=mesh->mesh->get_entities_by_dimension(0,mesh->pdim,elems);
+    merr=(*meshpp)->mesh->get_entities_by_dimension(0, (*meshpp)->pdim, elems);
     ESMC_CHECK_MOAB_THROW(merr);
 
     // list of the Mesh elem gids
@@ -3130,20 +3108,20 @@ void MBMesh_checkelemlist(void **meshpp, int *_num_elem_gids, int *elem_gids,
 
       // Get element id
       int elem_id;
-      MBMesh_get_gid(mesh, elem, &elem_id);
+      MBMesh_get_gid(*meshpp, elem, &elem_id);
 
       // Don't do split elements
-     if (mesh->is_split && (elem_id > mesh->max_non_split_id)) continue;
+     if ((*meshpp)->is_split && (elem_id > (*meshpp)->max_non_split_id)) continue;
 
       int elem_owner;
-      merr=mesh->mesh->tag_get_data(mesh->owner_tag, &elem, 1, &elem_owner);
+      merr=(*meshpp)->mesh->tag_get_data((*meshpp)->owner_tag, &elem, 1, &elem_owner);
       ESMC_CHECK_MOAB_THROW(merr);
 
       if (elem_owner == localPet) {
         num_local_elems++;
 
         int gid;
-        MBMesh_get_gid(mesh, elem, &gid);
+        MBMesh_get_gid(*meshpp, elem, &gid);
         local_gids.push_back(gid);
 
         local_owners.push_back(elem_owner);
@@ -3156,8 +3134,8 @@ void MBMesh_checkelemlist(void **meshpp, int *_num_elem_gids, int *elem_gids,
 
     // See if number of local elems is the same
     if (num_elem_gids != num_local_elems) {
-      Throw() << "Number of local elems in mesh ("<<num_local_elems<<
-                 ") different that number in list ("<<num_elem_gids<<")";
+      Throw() << "Number of local elems in mesh (" << num_local_elems
+              << ") different that number in list (" << num_elem_gids << ")";
     }
 
     // Loop making sure elems are all here
@@ -3169,7 +3147,8 @@ void MBMesh_checkelemlist(void **meshpp, int *_num_elem_gids, int *elem_gids,
       }
 
       if (local_owners[ni-local_gids.begin()] != localPet) {
-        Throw() << "Elem "<<elem_gids[i]<<" in Mesh, but not local." << local_owners[ni-local_gids.begin()] << "  " << localPet;
+        Throw() << "Elem "<<elem_gids[i]<<" in Mesh, but not local." 
+                << local_owners[ni-local_gids.begin()] << "  " << localPet;
       }
     }
 
@@ -3178,83 +3157,37 @@ void MBMesh_checkelemlist(void **meshpp, int *_num_elem_gids, int *elem_gids,
 #ifdef debug_printentities
     {
     Range nodes;
-    merr=mesh->mesh->get_entities_by_dimension(0,0,nodes);
-    if (merr != MB_SUCCESS) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-        moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-    }
+    merr=(*meshpp)->mesh->get_entities_by_dimension(0, 0, nodes);
+    ESMC_CHECK_MOAB_THROW(merr);
 
     Range::const_iterator ni = nodes.begin(), ne = nodes.end();
     for (; ni != ne; ++ni) {
       const EntityHandle ent = *ni;
       int gid;
-      MBMesh_get_gid(mesh, ent, &gid);
+      MBMesh_get_gid(*meshpp, ent, &gid);
       int owner;
-      merr=mesh->mesh->tag_get_data(mesh->owner_tag, &ent, 1, &owner);
+      merr=(*meshpp)->mesh->tag_get_data((*meshpp)->owner_tag, &ent, 1, &owner);
       ESMC_CHECK_MOAB_THROW(merr);
 
       printf("%d# checkelems - node %d owner %d\n", localPet, gid, owner);
     }
 
     Range elems;
-    merr=mesh->mesh->get_entities_by_dimension(0,mesh->pdim,elems);
+    merr=(*meshpp)->mesh->get_entities_by_dimension(0, (*meshpp)->pdim, elems);
     ESMC_CHECK_MOAB_THROW(merr);
 
     Range::const_iterator si = elems.begin(), se = elems.end();
     for (; si != se; ++si) {
       const EntityHandle ent = *si;
       int gid;
-      MBMesh_get_gid(mesh, ent, &gid);
+      MBMesh_get_gid((*meshpp), ent, &gid);
       int owner;
-      merr=mesh->mesh->tag_get_data(mesh->owner_tag, &ent, 1, &owner);
+      merr=(*meshpp)->mesh->tag_get_data((*meshpp)->owner_tag, &ent, 1, &owner);
       ESMC_CHECK_MOAB_THROW(merr);
 
       printf("%d# checkelems - elem %d owner %d\n", localPet, gid, owner);
     }
     }
-#endif
-
-#undef debug_printmoabsharedinfo
-#ifdef debug_printmoabsharedinfo
-    MPI_Comm mpi_comm = vm->getMpi_c();
-
-    ParallelComm *pcomm = ParallelComm::get_pcomm(mesh->mesh, 0);
-
-    int nprocs = pcomm->size();
-    int rank = pcomm->rank();
-
-    Range shared_ents;
-    // Get entities shared with all other processors
-    merr = pcomm->get_shared_entities(-1, shared_ents);
-    ESMC_CHECK_MOAB_THROW(merr);
-    
-    // Filter shared entities with not not_owned, which means owned
-    Range owned_entities;
-    merr = pcomm->filter_pstatus(shared_ents, PSTATUS_NOT_OWNED, PSTATUS_NOT, -1, &owned_entities);
-    ESMC_CHECK_MOAB_THROW(merr);
-      
-    unsigned int nums[4] = {0}; // to store the owned entities per dimension
-    for (int i = 0; i < 4; i++)
-      // nums[i] = (nt)shared_ents.num_of_dimension(i);
-      nums[i] = (int)owned_entities.num_of_dimension(i);
-      
-    std::vector<int> rbuf(nprocs*4, 0);
-    MPI_Gather(nums, 4, MPI_INT, &rbuf[0], 4, MPI_INT, 0, mpi_comm);
-    // Print the stats gathered:
-    if (0 == rank) {
-      for (int i = 0; i < nprocs; i++)
-        std::cout << " Shared, owned entities on proc " << i << ": " << rbuf[4*i] << " verts, " <<
-            rbuf[4*i + 1] << " edges, " << rbuf[4*i + 2] << " faces, " << rbuf[4*i + 3] << " elements" << std::endl;
-    }
-#endif
-
-#undef DEBUG_WRITE_MESH
-#ifdef DEBUG_WRITE_MESH
-  {void *mbptr = (void *) mesh;
-  int rc;
-  int len = 12; char fname[len];
-  sprintf(fname, "meshredist_%d", localPet);
-  MBMesh_write(&mbptr, fname, &rc, len);}
 #endif
 
   }
@@ -3263,7 +3196,7 @@ void MBMesh_checkelemlist(void **meshpp, int *_num_elem_gids, int *elem_gids,
   if (rc!=NULL) *rc=ESMF_SUCCESS;
 }
 
-void MBMesh_FitOnVM(void **meshpp, VM **new_vm, int *rc)
+void MBMesh_FitOnVM(MBMesh **meshpp, VM **new_vm, int *rc)
 {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_MeshFitOnVM()"
@@ -3273,9 +3206,6 @@ void MBMesh_FitOnVM(void **meshpp, VM **new_vm, int *rc)
     // set up Par
     ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
     ESMC_CHECK_PASSTHRU_THROW(localrc);
-
-    // Dereference
-    MBMesh *mbmesh=reinterpret_cast<MBMesh*> (*meshpp);
 
     VM *curr_vm = VM::getCurrent(&localrc);
     ESMC_CHECK_PASSTHRU_THROW(localrc);
@@ -3307,7 +3237,7 @@ void MBMesh_FitOnVM(void **meshpp, VM **new_vm, int *rc)
 #endif
 
     // Change proc numbers in mesh
-    mbmesh->map_proc_numbers(curr_vm_size, rank_map);
+    (*meshpp)->map_proc_numbers(curr_vm_size, rank_map);
 
     // Free map
     delete [] rank_map;
@@ -3319,36 +3249,32 @@ void MBMesh_FitOnVM(void **meshpp, VM **new_vm, int *rc)
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 } // ESMCI_MeshFitOnVM
 
-void MBMesh_GetDimensions(void *meshp, int *sdim, int *pdim, int *rc) {
+void MBMesh_GetDimensions(MBMesh *meshp, int *sdim, int *pdim, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_GetDimensions()"
   try {
-    MBMesh *mesh=reinterpret_cast<MBMesh*> (meshp);
-
-    *pdim = mesh->pdim;
-    *sdim = mesh->orig_sdim;
+    *pdim = meshp->pdim;
+    *sdim = meshp->orig_sdim;
   }
   CATCH_MBMESH_RETURN(rc);
   
   if(rc != NULL) *rc = ESMF_SUCCESS;
 }
 
-void MBMesh_GetCentroid(void *meshp, int *num_elem, double *elem_centroid, int *rc){
+void MBMesh_GetCentroid(MBMesh *meshp, int *num_elem, double *elem_centroid, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_GetCentroid()"
   try {
-    MBMesh *mesh=reinterpret_cast<MBMesh*> (meshp);
-
     // pass as ESMCI::InterArray<int> *elemCentroid, use extent[0] over num_elem
 
     char msg[256];
-    if (*num_elem != mesh->num_elem()) {
-      Throw () << "elemCentroid array must be of size " << mesh->num_elem();
-    } else if (mesh->coordsys != ESMC_COORDSYS_CART) {
+    if (*num_elem != meshp->num_elem()) {
+      Throw () << "elemCentroid array must be of size " << meshp->num_elem();
+    } else if (meshp->coordsys != ESMC_COORDSYS_CART) {
       Throw () << "Cannot yet return centroids for spherical coordinates.";
     }
 
-    mesh->get_elem_centroids(elem_centroid);
+    meshp->get_elem_centroids(elem_centroid);
 
   }
   CATCH_MBMESH_RETURN(rc);
@@ -3356,48 +3282,40 @@ void MBMesh_GetCentroid(void *meshp, int *num_elem, double *elem_centroid, int *
   if(rc != NULL) *rc = ESMF_SUCCESS;
 }
 
-void MBMesh_GetNodeCount(void *meshp, int *nodeCount, int *rc){
+void MBMesh_GetNodeCount(MBMesh *meshp, int *nodeCount, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_GetNodeCount()"
   try {
-    MBMesh *mesh=reinterpret_cast<MBMesh*> (meshp);
-
-    *nodeCount = mesh->num_node();
+    *nodeCount = meshp->num_node();
   }
   CATCH_MBMESH_RETURN(rc);
   
   if(rc != NULL) *rc = ESMF_SUCCESS;
 }
 
-void MBMesh_GetElemCount(void *meshp, int *elemCount, int *rc){
+void MBMesh_GetElemCount(MBMesh *meshp, int *elemCount, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_GetElemCount()"
   try {
-    MBMesh *mesh=reinterpret_cast<MBMesh*> (meshp);
-
-    *elemCount = mesh->num_elem();
+    *elemCount = meshp->num_elem();
   }
   CATCH_MBMESH_RETURN(rc);
   
   if(rc != NULL) *rc = ESMF_SUCCESS;
 }
 
-void MBMesh_GetElemConnCount(void *meshp, int *elemConnCount, int *rc){
+void MBMesh_GetElemConnCount(MBMesh *meshp, int *elemConnCount, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_GetElemConnCount()"
   try {
-    // Dereference
-    MBMesh *mesh=reinterpret_cast<MBMesh*> (meshp);
-
-    // Output
-    *elemConnCount = mesh->num_elem_conn();
+    *elemConnCount = meshp->num_elem_conn();
   }
   CATCH_MBMESH_RETURN(rc);
   
   if(rc != NULL) *rc = ESMF_SUCCESS;
 }
 
-void MBMesh_GetElemInfoPresence(void *meshp, 
+void MBMesh_GetElemInfoPresence(MBMesh *meshp, 
                                 int *elemMaskIsPresent,
                                 int *elemAreaIsPresent,
                                 int *elemCoordsIsPresent,
@@ -3405,21 +3323,17 @@ void MBMesh_GetElemInfoPresence(void *meshp,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_GetElemInfoPresence()"
   try {
-    // Dereference
-    MBMesh *mesh=reinterpret_cast<MBMesh*> (meshp);
-
     // Check if element mask is present
     *elemMaskIsPresent=0;
-    if (mesh->has_elem_mask) *elemMaskIsPresent=1;
+    if (meshp->has_elem_mask) *elemMaskIsPresent=1;
   
     // Check if element area is present
     *elemAreaIsPresent=0;
-    if (mesh->has_elem_area) *elemAreaIsPresent=1;
+    if (meshp->has_elem_area) *elemAreaIsPresent=1;
   
     // Check if element coords are present
     *elemCoordsIsPresent=0;
-    if (mesh->has_elem_coords) *elemCoordsIsPresent=1;
-  
+    if (meshp->has_elem_coords) *elemCoordsIsPresent=1;
   }
   CATCH_MBMESH_RETURN(rc);
   
@@ -3427,7 +3341,7 @@ void MBMesh_GetElemInfoPresence(void *meshp,
 }
 
 
-void MBMesh_GetElemCreateInfo(void *meshp,
+void MBMesh_GetElemCreateInfo(MBMesh *meshp,
                               ESMCI::InterArray<int> *elemIds,
                               ESMCI::InterArray<int> *elemTypes,
                               ESMCI::InterArray<int> *elemConn,
@@ -3448,17 +3362,14 @@ void MBMesh_GetElemCreateInfo(void *meshp,
     int localPet = vm->getLocalPet();
     ESMC_CHECK_PASSTHRU_THROW(localrc);
 
-    // Dereference
-    MBMesh *mesh=reinterpret_cast<MBMesh*> (meshp);
-
     // Doesn't work with split meshes right now
-    if (mesh->is_split)
+    if (meshp->is_split)
       Throw () << "Can't get elem connection count from mesh containing >4 elements.";
     
     ////// Get some handy information //////
-    int num_elems = mesh->num_elem();
-    int orig_sdim = mesh->orig_sdim;
-    int num_elem_conn = mesh->num_elem_conn();
+    int num_elems = meshp->num_elem();
+    int orig_sdim = meshp->orig_sdim;
+    int num_elem_conn = meshp->num_elem_conn();
 
     ////// Error check input arrays //////
 
@@ -3484,7 +3395,7 @@ void MBMesh_GetElemCreateInfo(void *meshp,
     }
 
     if (present(elemMask)) {
-      if (!mesh->has_elem_mask)
+      if (!meshp->has_elem_mask)
         Throw () << "Element mask not present.";
       if (elemMask->dimCount !=1)
         Throw () << "elemMask array must be 1D";
@@ -3493,7 +3404,7 @@ void MBMesh_GetElemCreateInfo(void *meshp,
     }
 
     if (present(elemArea)) {
-      if (!mesh->has_elem_area)
+      if (!meshp->has_elem_area)
         Throw () << "Element areas not present.";
       if (elemArea->dimCount !=1)
         Throw () << "elemArea array must be 1D";
@@ -3502,7 +3413,7 @@ void MBMesh_GetElemCreateInfo(void *meshp,
     }
 
     if (present(elemCoords)) {
-      if (!mesh->has_elem_coords)
+      if (!meshp->has_elem_coords)
         Throw () << "Element coords not present.";
       if (elemCoords->dimCount !=1)
         Throw () << "elemCoords array must be 1D";
@@ -3515,37 +3426,37 @@ void MBMesh_GetElemCreateInfo(void *meshp,
     // If it was passed in, fill elementIds array
     if (present(elemIds)) {
       int *elemIds_array=elemIds->array;
-      mesh->get_gid(mesh->get_orig_elems(), elemIds_array);
+      meshp->get_gid(meshp->get_orig_elems(), elemIds_array);
     }
 
     // If it was passed in, fill elementTypes array
     if (present(elemTypes)) {
       int *elemTypes_array=elemTypes->array;
-      mesh->get_elem_types(mesh->get_orig_elems(), elemTypes_array);
+      meshp->get_elem_types(meshp->get_orig_elems(), elemTypes_array);
     }
 
     // If it was passed in, fill elementIds array
     if (present(elemConn)) {
       int *elemConn_array=elemConn->array;
-      mesh->get_elem_connectivity(mesh->get_orig_elems(), elemConn_array);
+      meshp->get_elem_connectivity(meshp->get_orig_elems(), elemConn_array);
     }
 
     // If it was passed in, fill elementMask array
     if (present(elemMask)) {
       int *elemMask_array=elemMask->array;
-      mesh->get_elem_mask_val(mesh->get_orig_elems(), elemMask_array);
+      meshp->get_elem_mask_val(meshp->get_orig_elems(), elemMask_array);
     }
 
     // If it was passed in, fill elementArea array
     if (present(elemArea)) {
       ESMC_R8 *elemArea_array=elemArea->array;
-      mesh->get_elem_area(mesh->get_orig_elems(), elemArea_array);
+      meshp->get_elem_area(meshp->get_orig_elems(), elemArea_array);
     }
 
     // If it was passed in, fill elemCoords array
     if (present(elemCoords)) {
       ESMC_R8 *elemCoords_array=elemCoords->array;
-      mesh->get_elem_orig_coords(mesh->get_orig_elems(), elemCoords_array);
+      meshp->get_elem_orig_coords(meshp->get_orig_elems(), elemCoords_array);
     }
 
   }
@@ -3555,7 +3466,7 @@ void MBMesh_GetElemCreateInfo(void *meshp,
 }
 
 
-void MBMesh_SetElemCreateInfo(void *meshp,
+void MBMesh_SetElemCreateInfo(MBMesh *meshp,
                               ESMCI::InterArray<int> *elemMask,
                               ESMCI::InterArray<ESMC_R8> *elemArea,
                               int *rc){
@@ -3573,21 +3484,18 @@ void MBMesh_SetElemCreateInfo(void *meshp,
     int localPet = vm->getLocalPet();
     ESMC_CHECK_PASSTHRU_THROW(localrc);
 
-    // Dereference
-    MBMesh *mesh=reinterpret_cast<MBMesh*> (meshp);
-
     // Doesn't work with split meshes right now
-    if (mesh->is_split)
+    if (meshp->is_split)
       Throw () << "Can't set elem info for a mesh containing >4 elements.";
     
     ////// Get some handy information //////
-    int num_elems=mesh->num_elem();
-    int orig_sdim=mesh->orig_sdim;
+    int num_elems=meshp->num_elem();
+    int orig_sdim=meshp->orig_sdim;
 
     ////// Error check input arrays //////
 
     if (present(elemMask)) {
-      if (!mesh->has_elem_mask)
+      if (!meshp->has_elem_mask)
         Throw () << "Element mask not present.";
       if (elemMask->dimCount !=1)
         Throw () << "elemMask array must be 1D";
@@ -3596,7 +3504,7 @@ void MBMesh_SetElemCreateInfo(void *meshp,
     }
 
     if (present(elemArea)) {
-      if (!mesh->has_elem_area)
+      if (!meshp->has_elem_area)
         Throw () << "Element areas not present.";
       if (elemArea->dimCount !=1)
         Throw () << "elemArea array must be 1D";
@@ -3610,41 +3518,35 @@ void MBMesh_SetElemCreateInfo(void *meshp,
     // If it was passed in, fill elementMask array
     if (present(elemMask)) {
       int *elemMask_array=elemMask->array;
-      mesh->set_elem_mask_val(mesh->get_orig_elems(), elemMask_array);
+      meshp->set_elem_mask_val(meshp->get_orig_elems(), elemMask_array);
     }
 
     // If it was passed in, fill elementArea array
     if (present(elemArea)) {
       ESMC_R8 *elemArea_array=elemArea->array;
-      mesh->set_elem_area(mesh->get_orig_elems(), elemArea_array);
+      meshp->set_elem_area(meshp->get_orig_elems(), elemArea_array);
     }
-
   }
   CATCH_MBMESH_RETURN(rc);
   
   if(rc != NULL) *rc = ESMF_SUCCESS;
 }
 
-void MBMesh_GetNodeInfoPresence(void *meshp, 
+void MBMesh_GetNodeInfoPresence(MBMesh *meshp, 
                                 int *nodeMaskIsPresent,
                                 int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_GetNodeInfoPresence()"
   try {
-    // Dereference
-    MBMesh *mesh=reinterpret_cast<MBMesh*> (meshp);
-
-    // Check if node mask is present
     *nodeMaskIsPresent=0;
-    if (mesh->has_node_mask) *nodeMaskIsPresent=1;
-
+    if (meshp->has_node_mask) *nodeMaskIsPresent=1;
   }
   CATCH_MBMESH_RETURN(rc);
   
   if(rc != NULL) *rc = ESMF_SUCCESS;
 }
 
-void MBMesh_GetNodeCreateInfo(void *meshp,
+void MBMesh_GetNodeCreateInfo(MBMesh *meshp,
                               ESMCI::InterArray<int> *nodeIds,
                               ESMCI::InterArray<ESMC_R8> *nodeCoords,
                               ESMCI::InterArray<int> *nodeOwners,
@@ -3664,11 +3566,8 @@ void MBMesh_GetNodeCreateInfo(void *meshp,
     int localPet = vm->getLocalPet();
     ESMC_CHECK_PASSTHRU_THROW(localrc);
 
-    // Dereference
-    MBMesh *mesh=reinterpret_cast<MBMesh*> (meshp);
-
-    int num_nodes=mesh->num_node();
-    int orig_sdim=mesh->orig_sdim;
+    int num_nodes=meshp->num_node();
+    int orig_sdim=meshp->orig_sdim;
 
     // Error check input arrays
 
@@ -3698,7 +3597,7 @@ void MBMesh_GetNodeCreateInfo(void *meshp,
 
     // If nodeMask array exists, error check
     if (present(nodeMask)) {
-      if (!mesh->has_node_mask)
+      if (!meshp->has_node_mask)
         Throw () << "Node mask not present.";
       if (nodeMask->dimCount !=1)
         Throw () << "nodeMask array must be 1D";
@@ -3711,25 +3610,25 @@ void MBMesh_GetNodeCreateInfo(void *meshp,
     // If it was passed in, fill nodeIds array
     if (present(nodeIds)) {
       int *nodeIds_array=nodeIds->array;
-      mesh->get_gid(mesh->get_orig_nodes(), nodeIds_array); 
+      meshp->get_gid(meshp->get_orig_nodes(), nodeIds_array); 
     }
 
     // If it was passed in, fill nodeCoords array
     if (present(nodeCoords)) {
       double *nodeCoords_array=nodeCoords->array;
-      mesh->get_node_orig_coords(mesh->get_orig_nodes(), nodeCoords_array); 
+      meshp->get_node_orig_coords(meshp->get_orig_nodes(), nodeCoords_array); 
     }
 
     // If it was passed in, fill nodeOwners array
     if (present(nodeOwners)) {
       int *nodeOwners_array=nodeOwners->array;
-      mesh->get_owners(mesh->get_orig_nodes(), nodeOwners_array); 
+      meshp->get_owners(meshp->get_orig_nodes(), nodeOwners_array); 
     }
 
     // If it was passed in, fill nodeMask array
     if (present(nodeMask)) {
       int *nodeMask_array=nodeMask->array;
-      mesh->get_node_mask_val(mesh->get_orig_nodes(), nodeMask_array); 
+      meshp->get_node_mask_val(meshp->get_orig_nodes(), nodeMask_array); 
     }
 
   }

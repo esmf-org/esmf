@@ -48,7 +48,7 @@
 
 #if defined ESMF_MOAB
 
-int mesh_print_void(void *mesh) {
+int mesh_print(MBMesh *mesh) {
   int rc;
   int localPet, petCount;
   ESMC_VM vm;
@@ -63,10 +63,9 @@ int mesh_print_void(void *mesh) {
                 (int *)NULL, (int *)NULL);
   if (rc != ESMF_SUCCESS) return 0;
 
-  MBMesh *mbmesh = static_cast<MBMesh*> (mesh); 
 
   //Get MOAB Mesh
-  Interface *interface=mbmesh->mesh;
+  Interface *interface=mesh->mesh;
 
   // Get regions, by dimension, so we stay generic to entity type
   Range elems;
@@ -80,7 +79,7 @@ int mesh_print_void(void *mesh) {
 
     int elem_id = interface->id_from_handle(elem);
     //print
-    MBMesh_get_gid(mbmesh, elem, &elem_id);
+    MBMesh_get_gid(mesh, elem, &elem_id);
     std::cout << "PET " << localPet << " - Element " << elem_id
               //<< ": coords = [" << coords[0] << ", " << coords[1] << "]"
               << std::endl;
@@ -124,9 +123,6 @@ int main(int argc, char *argv[]) {
   // build a mesh
   MBMesh *mesh;
   mesh = create_mesh_quad(rc);
-  
-  void *meshp = static_cast<void *> (mesh);
-  void *meshp2;
 
   int len = 100*sizeof(int);
   char *buffer = new char[len];
@@ -140,7 +136,7 @@ int main(int argc, char *argv[]) {
 
   //----------------------------------------------------------------------------
   //NEX_UTest
-  MBMesh_serialize(&meshp, buffer, &length, &offset, &inquireflag, &rc, buffer_l);
+  MBMesh_serialize(&mesh, buffer, &length, &offset, &inquireflag, &rc, buffer_l);
 #else
   rc = ESMF_SUCCESS;
 #endif
@@ -150,12 +146,13 @@ int main(int argc, char *argv[]) {
 
 #if defined ESMF_MOAB
 
-  rc = mesh_print_void(meshp);
+  rc = mesh_print(mesh);
 
   offset = 0;
   //----------------------------------------------------------------------------
   //NEX_UTest
-  MBMesh_deserialize(&meshp2, buffer, &offset, &rc, buffer_l);
+  MBMesh *mesh2;
+  MBMesh_deserialize(&mesh2, buffer, &offset, &rc, buffer_l);
 #else
   rc = ESMF_SUCCESS;
 #endif
@@ -164,15 +161,12 @@ int main(int argc, char *argv[]) {
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 
 #if defined ESMF_MOAB
-
-  rc = mesh_print_void(meshp2);
+  rc = mesh_print(mesh2);
 
   // clean up
   delete buffer;
   delete mesh;
-  // cast back to MBMesh for proper deallocation of void*
-  MBMesh *meshp2mb = static_cast<MBMesh *> (meshp2);
-  delete meshp2mb;
+  delete mesh2;
 #endif
 
   //----------------------------------------------------------------------------

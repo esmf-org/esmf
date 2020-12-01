@@ -126,14 +126,13 @@ MBMesh* create_mesh_pent_single(int &rc, bool cart) {
   int elemMask_s [] ={1};
 
   MBMesh *mesh = new MBMesh();
-  void *meshp = static_cast<void *> (mesh);
 
-  MBMesh_create(&meshp, &pdim, &sdim, &coordSys, &rc);
+  MBMesh_create(&mesh, &pdim, &sdim, &coordSys, &rc);
   if (rc != ESMF_SUCCESS) return NULL;
 
   InterArray<int> *ii_node = new InterArray<int>(nodeMask_s,num_node);
 
-  MBMesh_addnodes(&meshp, &num_node, nodeId_s, nodeCoord, nodeOwner_s,
+  MBMesh_addnodes(&mesh, &num_node, nodeId_s, nodeCoord, nodeOwner_s,
                   ii_node, &coordSys, &sdim, &rc);
   if (rc != ESMF_SUCCESS) return NULL;
 
@@ -143,7 +142,7 @@ MBMesh* create_mesh_pent_single(int &rc, bool cart) {
   int coordspresent = 0;
   int numelemconn = num_node;
   int regridconserve = 0;
-  MBMesh_addelements(&meshp, &num_elem, elemId_s, elemType_s, ii_elem,
+  MBMesh_addelements(&mesh, &num_elem, elemId_s, elemType_s, ii_elem,
                      &areapresent, NULL,
                      &coordspresent, NULL,
                      &numelemconn, elemConn_s,
@@ -155,7 +154,7 @@ MBMesh* create_mesh_pent_single(int &rc, bool cart) {
   delete ii_elem;
 
   rc = ESMF_SUCCESS;
-  return static_cast<MBMesh *>(meshp);
+  return mesh;
 }
 
 Mesh* create_mesh_pent_legacy(int &rc, bool cart) {
@@ -326,14 +325,13 @@ MBMesh* create_mesh_quad_single(int &rc, bool cart) {
   int elemMask_s [] ={1};
 
   MBMesh *mesh = new MBMesh();
-  void *meshp = static_cast<void *> (mesh);
 
-  MBMesh_create(&meshp, &pdim, &sdim, &coordSys, &rc);
+  MBMesh_create(&mesh, &pdim, &sdim, &coordSys, &rc);
   if (rc != ESMF_SUCCESS) return NULL;
 
   InterArray<int> *ii_node = new InterArray<int>(nodeMask_s,4);
 
-  MBMesh_addnodes(&meshp, &num_node, nodeId_s, nodeCoord, nodeOwner_s,
+  MBMesh_addnodes(&mesh, &num_node, nodeId_s, nodeCoord, nodeOwner_s,
                   ii_node, &coordSys, &sdim, &rc);
   if (rc != ESMF_SUCCESS) return NULL;
 
@@ -343,7 +341,7 @@ MBMesh* create_mesh_quad_single(int &rc, bool cart) {
   int coordspresent = 0;
   int numelemconn = 4;
   int regridconserve = 0;
-  MBMesh_addelements(&meshp, &num_elem, elemId_s, elemType_s, ii_elem,
+  MBMesh_addelements(&mesh, &num_elem, elemId_s, elemType_s, ii_elem,
                      &areapresent, NULL,
                      &coordspresent, NULL,
                      &numelemconn, elemConn_s,
@@ -355,7 +353,7 @@ MBMesh* create_mesh_quad_single(int &rc, bool cart) {
   delete ii_elem;
 
   rc = ESMF_SUCCESS;
-  return static_cast<MBMesh *>(meshp);
+  return mesh;
 }
 
 MBMesh* create_mesh_tri_single(int &rc, bool cart) {
@@ -433,14 +431,13 @@ MBMesh* create_mesh_tri_single(int &rc, bool cart) {
   int elemMask_s [] ={1};
 
   MBMesh *mesh = new MBMesh();
-  void *meshp = static_cast<void *> (mesh);
 
-  MBMesh_create(&meshp, &pdim, &sdim, &coordSys, &rc);
+  MBMesh_create(&mesh, &pdim, &sdim, &coordSys, &rc);
   if (rc != ESMF_SUCCESS) return NULL;
 
   InterArray<int> *ii_node = new InterArray<int>(nodeMask_s,3);
 
-  MBMesh_addnodes(&meshp, &num_node, nodeId_s, nodeCoord, nodeOwner_s,
+  MBMesh_addnodes(&mesh, &num_node, nodeId_s, nodeCoord, nodeOwner_s,
                   ii_node, &coordSys, &sdim, &rc);
   if (rc != ESMF_SUCCESS) return NULL;
 
@@ -450,7 +447,7 @@ MBMesh* create_mesh_tri_single(int &rc, bool cart) {
   int coordspresent = 0;
   int numelemconn = 3;
   int regridconserve = 0;
-  MBMesh_addelements(&meshp, &num_elem, elemId_s, elemType_s, ii_elem,
+  MBMesh_addelements(&mesh, &num_elem, elemId_s, elemType_s, ii_elem,
                      &areapresent, NULL,
                      &coordspresent, NULL,
                      &numelemconn, elemConn_s,
@@ -462,7 +459,7 @@ MBMesh* create_mesh_tri_single(int &rc, bool cart) {
   delete ii_elem;
 
   rc = ESMF_SUCCESS;
-  return static_cast<MBMesh *>(meshp);
+  return mesh;
 }
 
 PointList* create_pointlist_for_quad_single(int &rc, bool cart) {

@@ -38,8 +38,7 @@
 
 namespace ESMCI {
 
-  void MBMesh_GridToMeshCell(const Grid &grid_, 
-                            void **out_meshpp, int *rc);
+  void MBMesh_GridToMeshCell(const Grid &grid_, MBMesh **out_meshpp, int *rc);
 
 } // namespace
 

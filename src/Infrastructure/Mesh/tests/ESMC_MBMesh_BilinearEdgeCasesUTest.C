@@ -119,14 +119,13 @@ MBMesh* create_mesh_quad_single(int &rc, bool cart, bool collapsed = false) {
   int elemMask_s [] ={1};
 
   MBMesh *mesh = new MBMesh();
-  void *meshp = static_cast<void *> (mesh);
 
-  MBMesh_create(&meshp, &pdim, &sdim, &coordSys, &rc);
+  MBMesh_create(&mesh, &pdim, &sdim, &coordSys, &rc);
   if (rc != ESMF_SUCCESS) return NULL;
 
   InterArray<int> *ii_node = new InterArray<int>(nodeMask_s,4);
 
-  MBMesh_addnodes(&meshp, &num_node, nodeId_s, nodeCoord, nodeOwner_s,
+  MBMesh_addnodes(&mesh, &num_node, nodeId_s, nodeCoord, nodeOwner_s,
                   ii_node, &coordSys, &sdim, &rc);
   if (rc != ESMF_SUCCESS) return NULL;
 
@@ -137,7 +136,7 @@ MBMesh* create_mesh_quad_single(int &rc, bool cart, bool collapsed = false) {
   int coordspresent = 0;
   int numelemconn = 4;
   int regridconserve = 0;
-  MBMesh_addelements(&meshp, &num_elem, elemId_s, elemType_s, ii_elem,
+  MBMesh_addelements(&mesh, &num_elem, elemId_s, elemType_s, ii_elem,
                      &areapresent, NULL,
                      &coordspresent, NULL,
                      &numelemconn, elemConn_s,
@@ -145,22 +144,21 @@ MBMesh* create_mesh_quad_single(int &rc, bool cart, bool collapsed = false) {
                      &coordSys, &sdim, &rc);
   if (rc != ESMF_SUCCESS) return NULL;
 
-MBMesh *mbmesh = static_cast<MBMesh *>(meshp);
 
 #ifdef DEBUG_MASK
   EntityHandle *verts=new EntityHandle[num_node];
-  mbmesh->verts=verts;
+  mesh->verts=verts;
   printf("~~~~~~~~~~~~~~ DEBUG - ESMCI_MBMESH_BILINEAR_TEST ~~~~~~~~~~~~~~~\n");
-  printf("ESMCI_MBMESH_BILINEAR_TEST - has_node_mask == %s\n", mbmesh->has_node_mask ? "true" : "false");
+  printf("ESMCI_MBMESH_BILINEAR_TEST - has_node_mask == %s\n", mesh->has_node_mask ? "true" : "false");
   
   int testmask[num_node];
   int merr;
   // this fails with a moab error, invalid tag ( try passing elements instead of verts?)
   Range nodes;
-  merr=mbmesh->mesh->get_entities_by_dimension(0, 0, nodes);
+  merr=mesh->mesh->get_entities_by_dimension(0, 0, nodes);
   if (merr != MB_SUCCESS) throw (ESMC_RC_MOAB_ERROR);
 
-  merr=mbmesh->mesh->tag_get_data(mbmesh->node_mask_val_tag,  nodes, testmask);
+  merr=mesh->mesh->tag_get_data(mesh->node_mask_val_tag,  nodes, testmask);
   if (merr != MB_SUCCESS) throw (ESMC_RC_MOAB_ERROR);
 
   printf("ESMCI_MBMESH_BILINEAR_TEST - tag_get_data test mask is = [");
@@ -175,7 +173,7 @@ MBMesh *mbmesh = static_cast<MBMesh *>(meshp);
   delete ii_elem;
 
   rc = ESMF_SUCCESS;
-  return mbmesh;
+  return mesh;
 }
 
 MBMesh* create_mesh_tri_single(int &rc, bool cart) {
@@ -240,14 +238,13 @@ MBMesh* create_mesh_tri_single(int &rc, bool cart) {
   int elemMask_s [] ={1};
 
   MBMesh *mesh = new MBMesh();
-  void *meshp = static_cast<void *> (mesh);
 
-  MBMesh_create(&meshp, &pdim, &sdim, &coordSys, &rc);
+  MBMesh_create(&mesh, &pdim, &sdim, &coordSys, &rc);
   if (rc != ESMF_SUCCESS) return NULL;
 
   InterArray<int> *ii_node = new InterArray<int>(nodeMask_s,3);
 
-  MBMesh_addnodes(&meshp, &num_node, nodeId_s, nodeCoord, nodeOwner_s,
+  MBMesh_addnodes(&mesh, &num_node, nodeId_s, nodeCoord, nodeOwner_s,
                   ii_node, &coordSys, &sdim, &rc);
   if (rc != ESMF_SUCCESS) return NULL;
 
@@ -257,7 +254,7 @@ MBMesh* create_mesh_tri_single(int &rc, bool cart) {
   int coordspresent = 0;
   int numelemconn = 3;
   int regridconserve = 0;
-  MBMesh_addelements(&meshp, &num_elem, elemId_s, elemType_s, ii_elem,
+  MBMesh_addelements(&mesh, &num_elem, elemId_s, elemType_s, ii_elem,
                      &areapresent, NULL,
                      &coordspresent, NULL,
                      &numelemconn, elemConn_s,
@@ -269,7 +266,7 @@ MBMesh* create_mesh_tri_single(int &rc, bool cart) {
   delete ii_elem;
 
   rc = ESMF_SUCCESS;
-  return static_cast<MBMesh *>(meshp);
+  return mesh;
 }
 
 PointList* create_pointlist_on_edge(int &rc, bool cart) {

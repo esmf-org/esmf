@@ -2102,169 +2102,173 @@ MBMesh::~MBMesh() {
 void MBMesh::debug_output_nodes() {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh::debug_output_nodes()"
-  int localrc, merr;
+  try {
+    int localrc, merr;
 
-  // Get localPet
-  int localPet = VM::getCurrent(&localrc)->getLocalPet();
-  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-    throw localrc;  // bail out with exception
+    // Get localPet
+    int localPet = VM::getCurrent(&localrc)->getLocalPet();
+    ESMC_CHECK_THROW(localrc);
 
-  // get the indexed pcomm object from the interface
-  // ParallelComm *pcomm = ParallelComm::get_pcomm(this->mesh, 0);
+    // get the indexed pcomm object from the interface
+    // ParallelComm *pcomm = ParallelComm::get_pcomm(this->mesh, 0);
 
-  // Get range of nodes
-  Range nodes;
-  this->get_all_nodes(nodes);
-
-  // Output info
-  cout<<"\n";
-  cout<<localPet<<"# NODE OVERALL INFO: total num="<<nodes.size();
-  cout<<" has_orig_coords="<<has_node_orig_coords;
-  cout<<" has_node_mask="<<has_node_mask;
-  cout<<"\n";
-
-
-  // Loop over nodes outputting information
-  for (Range::const_iterator it=nodes.begin(); it != nodes.end(); it++) {
-    EntityHandle node=*it;
+    // Get range of nodes
+    Range nodes;
+    this->get_all_nodes(nodes);
 
     // Output info
-    cout<<localPet<<"# NODE:";
-    
-    // Output global id
-    int gid=this->get_gid(node);
-    cout<<" gid="<<gid;
-
-    // output node owner
-    int owner=this->get_owner(node);
-    cout<<" owner="<<owner;
-
-    // FOR DEBUGGING 
-    // output moab owner
-    //int moab_owner;
-    //pcomm->get_owner(node,moab_owner);
-    //cout<<" moab_owner="<<moab_owner;
-    
-    // get node orig pos
-    int orig_pos=this->get_orig_pos(node);
-    cout<<" orig_pos="<<orig_pos;
-
-    // Output coords
-    double coords[3];
-    this->get_node_cart_coords(node,coords);
-    cout<<" coords=["<<coords[0]<<" "<<coords[1];
-    if (sdim > 2) cout<<" "<<coords[2];
-    cout<<"]";
-
-    // Orig coords
-    if (has_node_orig_coords) {
-      double orig_coords[3];
-      this->get_node_orig_coords(node, orig_coords);
-      cout<<" orig_coords=["<<coords[0]<<" "<<coords[1];
-      if (orig_sdim > 2) cout<<" "<<coords[2];
-      cout<<"]";
-    }
-
-    // Orig coords
-    if (has_node_mask) {
-      int mask_val=this->get_node_mask_val(node);
-      cout<<" mask_val="<<mask_val;
-    }
-
-    //end line
     cout<<"\n";
+    cout<<localPet<<"# NODE OVERALL INFO: total num="<<nodes.size();
+    cout<<" has_orig_coords="<<has_node_orig_coords;
+    cout<<" has_node_mask="<<has_node_mask;
+    cout<<"\n";
+
+
+    // Loop over nodes outputting information
+    for (Range::const_iterator it=nodes.begin(); it != nodes.end(); it++) {
+      EntityHandle node=*it;
+
+      // Output info
+      cout<<localPet<<"# NODE:";
+      
+      // Output global id
+      int gid=this->get_gid(node);
+      cout<<" gid="<<gid;
+
+      // output node owner
+      int owner=this->get_owner(node);
+      cout<<" owner="<<owner;
+
+      // FOR DEBUGGING 
+      // output moab owner
+      //int moab_owner;
+      //pcomm->get_owner(node,moab_owner);
+      //cout<<" moab_owner="<<moab_owner;
+      
+      // get node orig pos
+      int orig_pos=this->get_orig_pos(node);
+      cout<<" orig_pos="<<orig_pos;
+
+      // Output coords
+      double coords[3];
+      this->get_node_cart_coords(node,coords);
+      cout<<" coords=["<<coords[0]<<" "<<coords[1];
+      if (sdim > 2) cout<<" "<<coords[2];
+      cout<<"]";
+
+      // Orig coords
+      if (has_node_orig_coords) {
+        double orig_coords[3];
+        this->get_node_orig_coords(node, orig_coords);
+        cout<<" orig_coords=["<<coords[0]<<" "<<coords[1];
+        if (orig_sdim > 2) cout<<" "<<coords[2];
+        cout<<"]";
+      }
+
+      // Orig coords
+      if (has_node_mask) {
+        int mask_val=this->get_node_mask_val(node);
+        cout<<" mask_val="<<mask_val;
+      }
+
+      //end line
+      cout<<"\n";
+    }
   }
+  CATCH_MBMESH_RETHROW
 }
 
 void MBMesh::debug_output_elems() {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh::debug_output_elems()"
-  int localrc, merr;
+  try {
+    int localrc, merr;
 
-  // Get localPet
-  int localPet = VM::getCurrent(&localrc)->getLocalPet();
-  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-    throw localrc;  // bail out with exception
+    // Get localPet
+    int localPet = VM::getCurrent(&localrc)->getLocalPet();
+    ESMC_CHECK_THROW(localrc);
 
-  // get the indexed pcomm object from the interface
-  //  ParallelComm *pcomm = ParallelComm::get_pcomm(this->mesh, 0);
-
-  // Output info
-  cout<<"\n";
-  cout<<localPet<<"# ELEM OVERALL INFO: num="<<num_elem();
-  cout<<" has_elem_coords="<<has_elem_coords;
-  cout<<" has_elem_orig_coords="<<has_elem_orig_coords;
-  cout<<" has_elem_mask="<<has_elem_mask;
-  cout<<" has_elem_area="<<has_elem_area;
-  cout<<"\n";
-
-
-  // Get range of elems
-  Range elems;
-  merr=mesh->get_entities_by_dimension(0, pdim, elems);
-  ESMC_CHECK_MOAB_THROW(merr);
-
-
-  // Loop over nodes outputting information
-  for (Range::const_iterator it=elems.begin(); it != elems.end(); it++) {
-    EntityHandle elem=*it;
+    // get the indexed pcomm object from the interface
+    //  ParallelComm *pcomm = ParallelComm::get_pcomm(this->mesh, 0);
 
     // Output info
-    cout<<localPet<<"# ELEM:";
-    
-    // Output global id
-    int gid=this->get_gid(elem);
-    cout<<" gid="<<gid;
+    cout<<"\n";
+    cout<<localPet<<"# ELEM OVERALL INFO: num="<<num_elem();
+    cout<<" has_elem_coords="<<has_elem_coords;
+    cout<<" has_elem_orig_coords="<<has_elem_orig_coords;
+    cout<<" has_elem_mask="<<has_elem_mask;
+    cout<<" has_elem_area="<<has_elem_area;
+    cout<<"\n";
 
-    // output node owner
-    int owner=this->get_owner(elem);
-    cout<<" owner="<<owner;
 
-    // FOR DEBUGGING 
-    // output moab owner
-    //int moab_owner;
-    //pcomm->get_owner(node,moab_owner);
-    //cout<<" moab_owner="<<moab_owner;
-    
-    // get elem orig pos
-    int orig_pos=this->get_orig_pos(elem);
-    cout<<" orig_pos="<<orig_pos;
+    // Get range of elems
+    Range elems;
+    merr=mesh->get_entities_by_dimension(0, pdim, elems);
+    ESMC_CHECK_MOAB_THROW(merr);
 
-    // Output coords
-    if (has_elem_coords) {
-      double coords[3];
-      this->get_elem_cart_coords(elem,coords);
-      cout<<" coords=["<<coords[0]<<" "<<coords[1];
-      if (sdim > 2) cout<<" "<<coords[2];
-      cout<<"]";
+
+    // Loop over nodes outputting information
+    for (Range::const_iterator it=elems.begin(); it != elems.end(); it++) {
+      EntityHandle elem=*it;
+
+      // Output info
+      cout<<localPet<<"# ELEM:";
+      
+      // Output global id
+      int gid=this->get_gid(elem);
+      cout<<" gid="<<gid;
+
+      // output node owner
+      int owner=this->get_owner(elem);
+      cout<<" owner="<<owner;
+
+      // FOR DEBUGGING 
+      // output moab owner
+      //int moab_owner;
+      //pcomm->get_owner(node,moab_owner);
+      //cout<<" moab_owner="<<moab_owner;
+      
+      // get elem orig pos
+      int orig_pos=this->get_orig_pos(elem);
+      cout<<" orig_pos="<<orig_pos;
+
+      // Output coords
+      if (has_elem_coords) {
+        double coords[3];
+        this->get_elem_cart_coords(elem,coords);
+        cout<<" coords=["<<coords[0]<<" "<<coords[1];
+        if (sdim > 2) cout<<" "<<coords[2];
+        cout<<"]";
+      }
+
+      // Orig coords
+      if (has_elem_orig_coords) {
+        double orig_coords[3];
+        this->get_elem_orig_coords(elem, orig_coords);
+        cout<<" orig_coords=["<<orig_coords[0]<<" "<<orig_coords[1];
+        if (orig_sdim > 2) cout<<" "<<orig_coords[2];
+        cout<<"]";
+      }
+
+      // Mask value
+      if (has_elem_mask) {
+        int mask_val=this->get_elem_mask_val(elem);
+        cout<<" mask_val="<<mask_val;
+      }
+
+      // Mask value
+      if (has_elem_area) {
+        int area=this->get_elem_area(elem);
+        cout<<" area="<<area;
+      }
+
+
+      //end line
+      cout<<"\n";
     }
-
-    // Orig coords
-    if (has_elem_orig_coords) {
-      double orig_coords[3];
-      this->get_elem_orig_coords(elem, orig_coords);
-      cout<<" orig_coords=["<<orig_coords[0]<<" "<<orig_coords[1];
-      if (orig_sdim > 2) cout<<" "<<orig_coords[2];
-      cout<<"]";
-    }
-
-    // Mask value
-    if (has_elem_mask) {
-      int mask_val=this->get_elem_mask_val(elem);
-      cout<<" mask_val="<<mask_val;
-    }
-
-    // Mask value
-    if (has_elem_area) {
-      int area=this->get_elem_area(elem);
-      cout<<" area="<<area;
-    }
-
-
-    //end line
     cout<<"\n";
   }
-  cout<<"\n";
+  CATCH_MBMESH_RETHROW
 }
 
 // Call after all nodes have been added to setup some internal stuff
@@ -2392,146 +2396,77 @@ void MBMesh::finalize_elems() {
 void MBMesh::CreateGhost() {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh::CreateGhost()"
+  try {
+    int localrc, merr;
 
-  int localrc, merr;
+    ESMC_VM vm;
+    vm = ESMC_VMGetCurrent(&localrc);
+    ESMC_CHECK_THROW(localrc);
 
-  // Do this for now instead of initiating mesh parallel stuff
-  // TODO: MAYBE EVENTUALLY PUT THIS INTO MBMesh???
-  ESMC_VM vm;
-  vm = ESMC_VMGetCurrent(&localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-    throw localrc;  // bail out with exception
+    int localPet, petCount;
+    MPI_Comm mpi_comm;
+    localrc = ESMC_VMGet(vm, &localPet, &petCount, NULL, &mpi_comm, NULL, NULL);
+    ESMC_CHECK_THROW(localrc);
 
-  int localPet, petCount;
-  MPI_Comm mpi_comm;
-  localrc = ESMC_VMGet(vm, &localPet, &petCount, NULL, &mpi_comm, NULL, NULL);
-  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-    throw localrc;  // bail out with exception
+    // set up the MOAB parallel environment
+    ParallelComm *pcomm= new ParallelComm(mesh, mpi_comm);
 
-  // set up the MOAB parallel environment
-  ParallelComm *pcomm= new ParallelComm(mesh, mpi_comm);
+    // Get list of elements
+    Range elems;
+    merr=mesh->get_entities_by_dimension(0, pdim, elems);
+    ESMC_CHECK_MOAB_THROW(merr);
+      
+    // Resolve object sharing 
+    merr = pcomm->resolve_shared_ents(0, elems, pdim, pdim-1);
+    ESMC_CHECK_MOAB_THROW(merr);
 
-  // Get list of elements
-  Range elems;
-  merr=mesh->get_entities_by_dimension(0, pdim, elems);
-  ESMC_CHECK_MOAB_THROW(merr);
+    // Now exchange 1 layer of ghost elements, using vertices as bridge
+    merr = pcomm->exchange_ghost_cells(this->pdim, // int ghost_dim
+                                       0, // int bridge_dim
+                                       1, // int num_layers
+                                       0, // int addl_ents
+                                       true);// bool store_remote_handles
+    ESMC_CHECK_MOAB_THROW(merr);
+
+    vector<Tag> node_tags;
+    vector<Tag> elem_tags;
     
-  // Resolve object sharing 
-  merr = pcomm->resolve_shared_ents(0, elems, pdim, pdim-1);
-  ESMC_CHECK_MOAB_THROW(merr);
-
-
-#ifdef DEBUG_MOAB_GHOST_EXCHANGE
-  int nprocs = pcomm->size();
-  int rank = pcomm->rank();
-
-  Range shared_ents;
-  // Get entities shared with all other processors
-  merr = pcomm->get_shared_entities(-1, shared_ents);
-  ESMC_CHECK_MOAB_THROW(merr);
-  
-  // Filter shared entities with not not_owned, which means owned
-  Range owned_entities;
-  merr = pcomm->filter_pstatus(shared_ents, PSTATUS_NOT_OWNED, PSTATUS_NOT, -1, &owned_entities);
-  ESMC_CHECK_MOAB_THROW(merr);
-    
-  unsigned int nums[4] = {0}; // to store the owned entities per dimension
-  for (int i = 0; i < 4; i++)
-    // nums[i] = (nt)shared_ents.num_of_dimension(i);
-    nums[i] = (int)owned_entities.num_of_dimension(i);
-    
-  vector<int> rbuf(nprocs*4, 0);
-  MPI_Gather(nums, 4, MPI_INT, &rbuf[0], 4, MPI_INT, 0, mpi_comm);
-  // Print the stats gathered:
-  if (0 == rank) {
-    for (int i = 0; i < nprocs; i++)
-      cout << " Shared, owned entities on proc " << i << ": " << rbuf[4*i] << " verts, " <<
-          rbuf[4*i + 1] << " edges, " << rbuf[4*i + 2] << " faces, " << rbuf[4*i + 3] << " elements" << endl;
-  }
-#endif
-
-  // Now exchange 1 layer of ghost elements, using vertices as bridge
-  merr = pcomm->exchange_ghost_cells(this->pdim, // int ghost_dim
-                                     0, // int bridge_dim
-                                     1, // int num_layers
-                                     0, // int addl_ents
-                                     true);// bool store_remote_handles
-  ESMC_CHECK_MOAB_THROW(merr);
-
-  vector<Tag> node_tags;
-  vector<Tag> elem_tags;
-  
-  node_tags.push_back(this->gid_tag);
-  node_tags.push_back(this->orig_pos_tag);
-  node_tags.push_back(this->owner_tag);
-  if (this->has_node_orig_coords) node_tags.push_back(this->node_orig_coords_tag);
-  if (this->has_node_mask) {
-    node_tags.push_back(this->node_mask_tag);
-    node_tags.push_back(this->node_mask_val_tag);
-  }
-  
-  elem_tags.push_back(this->gid_tag);
-  elem_tags.push_back(this->orig_pos_tag);
-  elem_tags.push_back(this->owner_tag);
-  if (this->has_elem_frac) elem_tags.push_back(this->elem_frac_tag);
-  if (this->has_elem_mask) {
-    elem_tags.push_back(this->elem_mask_tag);
-    elem_tags.push_back(this->elem_mask_val_tag);
-  }
-  if (this->has_elem_area) elem_tags.push_back(this->elem_area_tag);
-  if (this->has_elem_coords) elem_tags.push_back(this->elem_coords_tag);
-  if (this->has_elem_orig_coords) elem_tags.push_back(this->elem_orig_coords_tag);
-  
-  // pcomm->set_debug_verbosity(4);
-
-  Range nodes;
-  merr=this->mesh->get_entities_by_dimension(0, 0, nodes);
-  ESMC_CHECK_MOAB_THROW(merr);
-
-  merr = pcomm->exchange_tags(node_tags, node_tags, nodes);
-  ESMC_CHECK_MOAB_THROW(merr);
-
-  merr = pcomm->exchange_tags(elem_tags, elem_tags, elems);
-  ESMC_CHECK_MOAB_THROW(merr);
-
-
-#ifdef DEBUG_WRITE_MESH
-  {void *mbptr = (void *) this;
-  int rc;
-  int len = 12; char fname[len];
-  sprintf(fname, "meshdual_%d", localPet);
-  MBMesh_write(&mbptr, fname, &rc, len);}
-#endif
-
-#ifdef DEBUG_MOAB_GHOST_EXCHANGE
-  // Repeat the reports, after ghost exchange
-  shared_ents.clear();
-  owned_entities.clear();
-  merr = pcomm->get_shared_entities(-1, shared_ents);
-  ESMC_CHECK_MOAB_THROW(merr);
-  
-  merr = pcomm->filter_pstatus(shared_ents, PSTATUS_NOT_OWNED, PSTATUS_NOT, -1, &owned_entities);
-  ESMC_CHECK_MOAB_THROW(merr);
-  
-  // Find out how many shared entities of each dimension are owned on this processor
-  for (int i = 0; i < 4; i++)
-    // nums[i] = (int)shared_ents.num_of_dimension(i);
-    nums[i] = (int)owned_entities.num_of_dimension(i);
-  
-  // Gather the statistics on processor 0
-  MPI_Gather(nums, 4, MPI_INT, &rbuf[0], 4, MPI_INT, 0, mpi_comm);
-  if (0 == rank) {
-    cout << " \n\n After exchanging one ghost layer: \n";
-    for (int i = 0; i < nprocs; i++) {
-      cout << " Shared, owned entities on proc " << i << ": " << rbuf[4*i] << " verts, " <<
-          rbuf[4*i + 1] << " edges, " << rbuf[4*i + 2] << " faces, " << rbuf[4*i + 3] << " elements" << endl;
+    node_tags.push_back(this->gid_tag);
+    node_tags.push_back(this->orig_pos_tag);
+    node_tags.push_back(this->owner_tag);
+    if (this->has_node_orig_coords) node_tags.push_back(this->node_orig_coords_tag);
+    if (this->has_node_mask) {
+      node_tags.push_back(this->node_mask_tag);
+      node_tags.push_back(this->node_mask_val_tag);
     }
+    
+    elem_tags.push_back(this->gid_tag);
+    elem_tags.push_back(this->orig_pos_tag);
+    elem_tags.push_back(this->owner_tag);
+    if (this->has_elem_frac) elem_tags.push_back(this->elem_frac_tag);
+    if (this->has_elem_mask) {
+      elem_tags.push_back(this->elem_mask_tag);
+      elem_tags.push_back(this->elem_mask_val_tag);
+    }
+    if (this->has_elem_area) elem_tags.push_back(this->elem_area_tag);
+    if (this->has_elem_coords) elem_tags.push_back(this->elem_coords_tag);
+    if (this->has_elem_orig_coords) elem_tags.push_back(this->elem_orig_coords_tag);
+    
+    Range nodes;
+    merr=this->mesh->get_entities_by_dimension(0, 0, nodes);
+    ESMC_CHECK_MOAB_THROW(merr);
+
+    merr = pcomm->exchange_tags(node_tags, node_tags, nodes);
+    ESMC_CHECK_MOAB_THROW(merr);
+
+    merr = pcomm->exchange_tags(elem_tags, elem_tags, elems);
+    ESMC_CHECK_MOAB_THROW(merr);
+
+    // Get the indexed pcomm object from the interface
+    delete pcomm;
+
   }
-#endif
-
-  // Get the indexed pcomm object from the interface
-  delete pcomm;
-
+  CATCH_MBMESH_RETHROW
 }
 
 // Called after a Redist
@@ -2541,70 +2476,67 @@ void MBMesh::CreateGhost() {
 void MBMesh::map_proc_numbers(int num_procs, int *proc_map) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh::map_proc_numbers()"
-  int localrc, merr;
+  try {
+    int localrc, merr;
 
-  // Get range of nodes
-  Range nodes;
-  merr=mesh->get_entities_by_dimension(0, 0, nodes);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], 
-                                     ESMC_CONTEXT,&localrc)) throw localrc;
-  }
+    // Get range of nodes
+    Range nodes;
+    merr=mesh->get_entities_by_dimension(0, 0, nodes);
+    ESMC_CHECK_MOAB_THROW(merr);
 
-  // Loop through nodes changing owners to owners in new VM
-  for (Range::const_iterator it=nodes.begin(); it != nodes.end(); it++) {
-    EntityHandle node=*it;
+    // Loop through nodes changing owners to owners in new VM
+    for (Range::const_iterator it=nodes.begin(); it != nodes.end(); it++) {
+      EntityHandle node=*it;
 
-    int orig_owner=this->get_owner(node);
-    if ((orig_owner < 0) || (orig_owner > num_procs-1)) {
-      Throw()<<" mesh node owner rank outside current vm";
+      int orig_owner=this->get_owner(node);
+      if ((orig_owner < 0) || (orig_owner > num_procs-1)) {
+        Throw() << " mesh node owner rank outside current vm";
+      }
+
+      // map to new owner rank in new vm
+      int new_owner=proc_map[orig_owner];
+      // Make sure that the new one is ok
+      if (new_owner < 0) {
+        Throw() << " mesh node owner outside of new vm";
+      }
+
+      // Set new owner
+      this->set_owner(node, new_owner);
     }
 
-    // map to new owner rank in new vm
-    int new_owner=proc_map[orig_owner];
-    // Make sure that the new one is ok
-    if (new_owner < 0) {
-      Throw()<<" mesh node owner outside of new vm";
+    // Get range of elems
+    Range elems;
+    merr=mesh->get_entities_by_dimension(0, pdim, elems);
+    ESMC_CHECK_MOAB_THROW(merr);
+
+    // Loop through elems changing owners to owners in new VM
+    for (Range::const_iterator it=elems.begin(); it != elems.end(); it++) {
+      EntityHandle elem=*it;
+
+      int orig_owner=this->get_owner(elem);
+      // Error check owner
+      if ((orig_owner < 0) || (orig_owner > num_procs-1)) {
+        Throw() << " mesh element owner rank outside current vm";
+      }
+
+      // map to new owner rank in new vm
+      int new_owner=proc_map[orig_owner];
+      // Make sure that the new one is ok
+      if (new_owner < 0) {
+         Throw() << " mesh element owner outside of new vm";
+      }
+      // Set new owner
+      this->set_owner(elem, new_owner);
     }
 
-    // Set new owner
-    this->set_owner(node, new_owner);
+    // NOTE: not sure it this needs to be done for the mbmesh
+    // // Change CommReg
+    // CommReg::map_proc_numbers(num_procs, proc_map);
+    // // Remove ghosting, because it would be wrong now that procs have changed.
+    // RemoveGhost();
+
   }
-
-  // Get range of elems
-  Range elems;
-  merr=mesh->get_entities_by_dimension(0, pdim, elems);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-  }
-
-  // Loop through elems changing owners to owners in new VM
-  for (Range::const_iterator it=elems.begin(); it != elems.end(); it++) {
-    EntityHandle elem=*it;
-
-    int orig_owner=this->get_owner(elem);
-    // Error check owner
-    if ((orig_owner < 0) || (orig_owner > num_procs-1)) {
-      Throw()<<" mesh element owner rank outside current vm";
-    }
-
-    // map to new owner rank in new vm
-    int new_owner=proc_map[orig_owner];
-    // Make sure that the new one is ok
-    if (new_owner < 0) {
-       Throw()<<" mesh element owner outside of new vm";
-    }
-    // Set new owner
-    this->set_owner(elem, new_owner);
-  }
-
-  // NOTE: not sure it this needs to be done for the mbmesh
-  // // Change CommReg
-  // CommReg::map_proc_numbers(num_procs, proc_map);
-  // // Remove ghosting, because it would be wrong now that procs have changed.
-  // RemoveGhost();
+  CATCH_MBMESH_RETHROW
 }
 
 

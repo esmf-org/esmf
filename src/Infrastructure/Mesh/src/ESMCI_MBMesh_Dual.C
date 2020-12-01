@@ -271,15 +271,11 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
 
     // Create Mesh
     MBMesh *dual_mesh=NULL;
-    void *dmp=NULL;
     ESMC_CoordSys_Flag cs = ESMC_COORDSYS_CART;
     if (src_mesh->sdim != src_mesh->orig_sdim) cs = ESMC_COORDSYS_SPH_DEG;
     
-    MBMesh_create(&dmp, &pdim, &src_mesh->orig_sdim, &cs, &localrc);
+    MBMesh_create(&dual_mesh, &pdim, &src_mesh->orig_sdim, &cs, &localrc);
     ESMC_CHECK_PASSTHRU_THROW(localrc);
-
-    // dual_mesh = dynamic_cast<MBMesh *> (dmp);
-    dual_mesh = (MBMesh *) (dmp);
 
     // set some flags that are normally set in the addnodes and addelements calls
     dual_mesh->has_node_orig_coords = false;
