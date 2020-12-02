@@ -15,6 +15,7 @@
 
 #if defined ESMF_MOAB
 #include "moab/Core.hpp"
+// #include "MBTagConventions.hpp"
 using namespace moab;
 #endif
 
@@ -29,66 +30,57 @@ using namespace moab;
 
 namespace ESMCI {
 
-
-#define MBMESH_CHECK_RC(merr) \
-    if (merr != MB_SUCCESS) {  \
-       int localrc; \
-       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, \
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc; } \
-
-
-  // DEPRECATED! Switch everything to the above
-#define MBMESH_CHECK_ERR(merr, localrc) \
-  if (merr != MB_SUCCESS) \
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, \
-      moab::ErrorCodeStr[merr], ESMC_CONTEXT, &localrc)) throw localrc;
-
-
-#define ESMC_THROW_ERROR(actual_rc, msg) {\
-    std::string rcmsg; \
-    rcmsg = ESMC_LogGetErrMsg(actual_rc); \
-    ESMCI::esmc_error local_macro_error(rcmsg, actual_rc, msg); \
-    ESMC_LogDefault.MsgFoundError(actual_rc, local_macro_error.what(), ESMC_CONTEXT, nullptr); \
-    throw(local_macro_error);}
-
-
-#define ESMC_CHECK_MOAB_RC_THROW(moab_rc) \
-  if (moab_rc != MB_SUCCESS) {\
-    ESMCI::esmc_error local_macro_error("", ESMC_RC_MOAB_ERROR, moab::ErrorCodeStr[moab_rc]); \
-    if (ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, local_macro_error.what(), ESMC_CONTEXT, nullptr)) \
+// use when no pointer *rc is expected to return
+#define ESMC_CHECK_MOAB_THROW(merr) \
+  if (merr != MB_SUCCESS) {\
+    ESMCI::esmc_error local_macro_error("", ESMC_RC_MOAB_ERROR, moab::ErrorCodeStr[merr]); \
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, local_macro_error.what(), ESMC_CONTEXT, nullptr); \
       throw(local_macro_error);}
 
-// should go in base, but it's here for now
-// for use when pointer *rc is expected as a return value
-#define ESMC_THROW_PASSTHRU(localrc) \
+// use when no pointer *rc is expected to return
+#define ESMC_CHECK_THROW(localrc) \
+    if (localrc != ESMF_SUCCESS) {\
+      std::string rcmsg; \
+      rcmsg = ESMC_LogGetErrMsg(localrc); \
+      ESMCI::esmc_error local_macro_error(rcmsg, localrc, ""); \
+      ESMC_LogDefault.MsgFoundError(localrc, local_macro_error.what(), ESMC_CONTEXT, nullptr); \
+      throw(local_macro_error);}
+
+// use when pointer *rc is expected as a return value
+#define ESMC_CHECK_PASSTHRU_THROW(localrc) \
   if (localrc != ESMF_SUCCESS) {\
     ESMCI::esmc_error local_macro_error("", localrc, ""); \
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) \
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc); \
       throw(local_macro_error);}
 
-// for routines with direct access to MOAB, when pointer *rc is NOT returned
-#define ESMC_CATCH_MOAB \
+// use when pointer *rc is NOT returned
+#define CATCH_MBMESH_RETHROW \
   catch(int localrc){ \
     if (localrc != ESMF_SUCCESS) {\
       ESMCI::esmc_error local_macro_error("", localrc, ""); \
-      if (ESMC_LogDefault.MsgFoundError(localrc, local_macro_error.what(), ESMC_CONTEXT, nullptr)) \
-        throw(local_macro_error);} \
+      ESMC_LogDefault.MsgFoundError(localrc, local_macro_error.what(), ESMC_CONTEXT, nullptr); \
+      throw(local_macro_error);} \
   } catch(std::string errstr){ \
     ESMCI::esmc_error local_macro_error("ESMC_RC_MOAB_ERROR", ESMC_RC_MOAB_ERROR, errstr); \
-    if (ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, errstr, ESMC_CONTEXT, nullptr)) \
-      throw(local_macro_error); \
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, errstr, ESMC_CONTEXT, nullptr); \
+    throw(local_macro_error); \
   } catch (std::exception &exc) {\
-    if (ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, exc.what(), ESMC_CONTEXT, nullptr)) \
-      throw(exc); \
+    if (exc.what()) { \
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, exc.what(), ESMC_CONTEXT, nullptr); \
+    } else { \
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, "Unknown exception", ESMC_CONTEXT, nullptr); \
+    } \
+    ESMCI::esmc_error local_macro_error("ESMC_RC_MOAB_ERROR", ESMC_RC_MOAB_ERROR, exc.what()); \
+    throw(local_macro_error); \
   } catch(...) {\
     std::string msg;\
     msg = "Unknown exception";\
     ESMCI::esmc_error local_macro_error("ESMC_RC_MOAB_ERROR", ESMC_RC_MOAB_ERROR, msg); \
-    if (ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, msg, ESMC_CONTEXT, nullptr)) \
-      throw(local_macro_error); }
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, msg, ESMC_CONTEXT, nullptr); \
+    throw(local_macro_error); }
 
-// for MBMesh routines, when pointer *rc is returned
-#define ESMC_CATCH_MBMESH(rc) \
+// use when pointer *rc is returned
+#define CATCH_MBMESH_RETURN(rc) \
   catch(int localrc){ \
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc); \
     return; \
@@ -100,9 +92,9 @@ namespace ESMCI {
     return; \
   } catch (std::exception &exc) { \
     if (exc.what()) { \
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, exc.what(), ESMC_CONTEXT, rc); \
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, exc.what(), ESMC_CONTEXT, rc); \
     } else { \
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "UNKNOWN", ESMC_CONTEXT, rc); \
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, "Unknown exception", ESMC_CONTEXT, rc); \
     } \
     return; \
   } catch(...) { \
@@ -112,12 +104,16 @@ namespace ESMCI {
     return; }
 
 
-// may need one more for MBMesh routines which do not return rc pointer (constructor)
-
-
-
   class MBMesh {
 #if defined ESMF_MOAB
+
+  private:
+    int _num_node;
+    int _num_elem;
+    int _num_elem_conn;
+    int _num_owned_node;
+    int _num_owned_elem;
+    int _num_owned_elem_conn;
 
   public:
     int pdim; 
@@ -176,7 +172,6 @@ namespace ESMCI {
     int max_non_split_id;
     std::map<int,int> split_to_orig_id;
     std::map<int,double> split_id_to_frac;
-
 
     void CreateGhost();
 
@@ -260,9 +255,49 @@ namespace ESMCI {
     // - local entities which you need to go through one of the above lists and figure out which has owener==localPet. However, I think
     //   that I might add a vector of these soon. 
 
+    // Basic accessors for number of nodes, elements, and connectivity
+    int num_node(){
+      if (!nodes_finalized) {Throw() << "Nodes not finalized, so num_node not set.";}
+      return _num_node;
+    };
+
+    int num_elem(){
+      if (!elems_finalized) {Throw() << "Elements not finalized, so num_elem not set.";}
+      return _num_elem;
+    };
+
+    int num_elem_conn(){
+      if (!elems_finalized) {Throw() << "Elements not finalized, so num_elem_conn not set.";}
+      return _num_elem_conn;
+    };
+
+    int num_owned_node(){
+      if (!nodes_finalized) {Throw() << "Nodes not finalized, so num_owned_node not set.";}
+      return _num_owned_node;
+    };
+
+    int num_owned_elem(){
+      if (!elems_finalized) {Throw() << "Elements not finalized, so num_owned_elem not set.";}
+      return _num_owned_elem;
+    };
+
+    int num_owned_elem_conn(){
+      if (!elems_finalized) {Throw() << "Elements not finalized, so num_owned_elem_conn not set.";}
+      return _num_owned_elem_conn;
+    };
+
     // Get a Range of all nodes and elements on this processor
     void get_all_nodes(Range &all_nodes);
     void get_all_elems(Range &all_elems);
+
+    void get_all_nodes(std::vector<EntityHandle> &all_nodes);
+    void get_all_elems(std::vector<EntityHandle> &all_elems);
+
+    void get_owned_nodes(std::vector<EntityHandle> &owned_nodes);
+    void get_owned_elems(std::vector<EntityHandle> &owned_elems);
+
+    int get_num_elem_conn();
+    int get_num_owned_elem_conn();
 
     // Return a reference to a vector of EntityHandles for the original nodes used for creation
     // on this processor sorted in the order they were used for creation
@@ -289,11 +324,6 @@ namespace ESMCI {
     }
 
 
-    // Basic accessors for number of nodes, elements, and connectivity
-    int num_elem();
-    int num_node();
-    int num_elem_conn();
-
 
     // Range based accessors for required element tags
     void get_elem_connectivity(int *elem_conn);
@@ -303,6 +333,7 @@ namespace ESMCI {
     void get_elem_areas(double *elem_area);
     void get_elem_coords(double *elem_coords);
     void get_elem_mask(int *elem_mask);
+    void get_elem_centroids(double *elem_centroid);
 
     // Range based accessors for required node tags
     void get_node_coords(double *node_coords);
@@ -352,6 +383,10 @@ namespace ESMCI {
 
     // Get elem coords for a vector of entities (e.g. using orig_elems)
     void get_elem_orig_coords(std::vector<EntityHandle> const &elems, double *orig_coords);
+
+    void get_elem_connectivity(std::vector<EntityHandle> const &elems, int *elem_conn);
+    void get_elem_types(std::vector<EntityHandle> const &elems, int *elem_conn);
+
 
     // Accessors for values from a single EntityHandle (avoid if possible, slow)
     int get_elem_mask_val(EntityHandle eh);

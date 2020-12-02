@@ -12,8 +12,9 @@
 #ifndef ESMCI_MeshCap_h
 #define ESMCI_MeshCap_h
 
-#include "ESMCI_Mesh.h"
+#include "Mesh/include/ESMCI_Mesh.h"
 
+#include "Mesh/include/ESMCI_MBMesh.h"
 #include "Mesh/include/Regridding/ESMCI_Regrid_Helper.h"
 
 #include "ESMCI_Macros.h"
@@ -35,7 +36,7 @@ namespace ESMCI {
     MeshCap();
     bool is_esmf_mesh;
     Mesh *mesh;     // Make 1 void pointer here for both
-    void *mbmesh;
+    MBMesh *mbmesh;
 
     // NOT NEEDED RIGHT NOW
     //    bool is_internal_mesh_esmf() {return is_esmf_mesh;}
@@ -51,42 +52,42 @@ namespace ESMCI {
       if (is_esmf_mesh) {
         return (void *)mesh;
       } else {
-        return mbmesh;
+        return static_cast<void*> (mbmesh);
       }
     }
 
     void fit_on_vm(VM **vm, int *rc);
 
     void MeshCap_to_PointList(ESMC_MeshLoc_Flag meshLoc,
-                                   ESMCI::InterArray<int> *maskValuesArg, PointList **out_pl,
-                                   int *rc);
+                              ESMCI::InterArray<int> *maskValuesArg, PointList **out_pl,
+                              int *rc);
 
     static MeshCap *create_from_ptr(void **_mesh,
-                             bool _is_esmf_mesh, int *rc);
+                                    bool _is_esmf_mesh, int *rc);
 
 
     static MeshCap *meshcreate(int *pdim, int *sdim,
-                                 ESMC_CoordSys_Flag *coordSys,
-                                 bool _is_esmf_mesh, int *rc);
+                               ESMC_CoordSys_Flag *coordSys,
+                               bool _is_esmf_mesh, int *rc);
 
     static MeshCap *meshcreate_easy_elems(int *pdim,
-                                        int *sdim,
-                                        int *num_elems,
-                                        InterArray<int> *elemIdsII,
-                                        int *elemTypes,
-                                        InterArray<int> *elemMaskII,
-                                        int *num_elemCorners,
-                                        double *elemCornerCoords,
-                                        int *has_elemArea,
-                                        double *elemArea,
-                                        int *has_elemCoords,
-                                        double *elemCoords,
-                                        ESMC_CoordSys_Flag *coordSys,
+                                          int *sdim,
+                                          int *num_elems,
+                                          InterArray<int> *elemIdsII,
+                                          int *elemTypes,
+                                          InterArray<int> *elemMaskII,
+                                          int *num_elemCorners,
+                                          double *elemCornerCoords,
+                                          int *has_elemArea,
+                                          double *elemArea,
+                                          int *has_elemCoords,
+                                          double *elemCoords,
+                                          ESMC_CoordSys_Flag *coordSys,
                                           bool _is_esmf_mesh, int *rc);
 
     static MeshCap *meshcreate_from_grid(Grid **gridpp,
-                                                  bool _is_esmf_mesh,
-                                                  int *rc);
+                                         bool _is_esmf_mesh,
+                                         int *rc);
 
     void meshaddnodes(int *num_nodes, int *nodeId,
                       double *nodeCoord, int *nodeOwner, InterArray<int> *nodeMaskII,
@@ -159,10 +160,10 @@ namespace ESMCI {
                      double *pnts, int *pets, int *rc);
 
     void geteleminfointoarray(DistGrid *elemDistgrid,
-                                   int numElemArrays,
-                                   int *infoTypeElemArrays,
-                                   Array **elemArrays,
-                                   int *rc);
+                              int numElemArrays,
+                              int *infoTypeElemArrays,
+                              Array **elemArrays,
+                              int *rc);
 
     void getlocalcoords(double *nodeCoord, int *_orig_sdim, int *rc);
 
@@ -193,33 +194,32 @@ namespace ESMCI {
     void meshturnoffnodemask(int *rc);
 
     static void get_polygon_area(int *spatialdim, int *nedges,
-                          double *points, double *area, int *rc);
+                                 double *points, double *area, int *rc);
 
     static MeshCap *meshcreatefrommeshes(MeshCap **meshapp, MeshCap **meshbpp,
-                                         ESMC_MeshOp_Flag * meshop, double * threshold, int *rc);
+                                         ESMC_MeshOp_Flag * meshop, 
+                                         double *threshold, int *rc);
 
 
-    static MeshCap *meshcreateredistelems(MeshCap **src_meshpp, int *num_elem_gids, int *elem_gids,
-                                          int *rc);
+    static MeshCap *meshcreateredistelems(MeshCap **src_meshpp, int *num_elem_gids, 
+                                          int *elem_gids, int *rc);
 
 
-    static MeshCap *meshcreateredistnodes(MeshCap **src_meshpp,int *num_node_gids, int *node_gids,
-                                          int *rc);
+    static MeshCap *meshcreateredistnodes(MeshCap **src_meshpp,int *num_node_gids, 
+                                          int *node_gids, int *rc);
 
     static MeshCap *meshcreateredist(MeshCap **src_meshpp, int *num_node_gids, int *node_gids,
                                      int *num_elem_gids, int *elem_gids, int *rc);
 
-    void meshchecknodelist(int *_num_node_gids, int *node_gids,
-                           int *rc);
+    void meshchecknodelist(int *_num_node_gids, int *node_gids, int *rc);
 
-    void meshcheckelemlist(int *_num_elem_gids, int *elem_gids,
-                           int *rc);
+    void meshcheckelemlist(int *_num_elem_gids, int *elem_gids, int *rc);
 
     static void sphdeg_to_cart(double *lon, double *lat,
                         double *x, double *y, double *z, int *rc);
 
-    void meshsetpoles(int *_pole_obj_type, int *_pole_val, int *_min_pole_gid, int *_max_pole_gid,
-                           int *rc);
+    void meshsetpoles(int *_pole_obj_type, int *_pole_val, int *_min_pole_gid, 
+                      int *_max_pole_gid, int *rc);
 
     static MeshCap *meshcreatedual(MeshCap **src_meshpp, int *rc);
 
@@ -274,8 +274,7 @@ namespace ESMCI {
                                     int *nentries, ESMCI::TempWeights **tweights,
                                     int*rc);
 
-     static MeshCap *merge(MeshCap **srcmeshpp, MeshCap **dstmeshpp,
-                           int*rc);
+     static MeshCap *merge(MeshCap **srcmeshpp, MeshCap **dstmeshpp, int*rc);
 
 
      void getNodeCount(int *nodeCount, int *rc);
@@ -299,8 +298,7 @@ namespace ESMCI {
                       ESMCI::InterArray<ESMC_R8> *elemArea,
                       int *rc);
 
-     void getNodeInfoPresence(int *nodeMaskIsPresent,
-                              int *rc);
+     void getNodeInfoPresence(int *nodeMaskIsPresent, int *rc);
 
      void getNodeCreateInfo(ESMCI::InterArray<int> *nodeIds,
                             ESMCI::InterArray<ESMC_R8> *nodeCoords,
@@ -309,8 +307,7 @@ namespace ESMCI {
                             int *rc);
 
 
-     void meshsetfrac(double * fraction,
-                      int*rc);
+     void meshsetfrac(double * fraction, int*rc);
 
      void xgrid_getfrac2(Grid **gridpp,
                          ESMCI::Array **arraypp, int *staggerLoc,

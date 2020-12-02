@@ -89,9 +89,9 @@ extern "C" void FTN_X(c_esmc_arraysmmstoreind4)(ESMCI::Array **srcArray,
     int *srcTermProcessing, int *pipelineDepth, int *rc);
 
 
-void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, 
+void MBMesh_regrid_create(MBMesh **meshsrcpp, ESMCI::Array **arraysrcpp, 
                           ESMCI::PointList **plsrcpp,
-                          void **meshdstpp, ESMCI::Array **arraydstpp, 
+                          MBMesh **meshdstpp, ESMCI::Array **arraydstpp, 
                           ESMCI::PointList **pldstpp,
                           int *regridMethod,
                           int *map_type,
@@ -122,8 +122,8 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp,
     throw localrc;  // bail out with exception
 
   // Get Moab Mesh wrapper
-  MBMesh *mbmsrcp=*((MBMesh **)meshsrcpp);
-  MBMesh *mbmdstp=*((MBMesh **)meshdstpp);
+  MBMesh *mbmsrcp=*meshsrcpp;
+  MBMesh *mbmdstp=*meshdstpp;
 
 // #define MOAB_REGRID
 #ifdef MOAB_REGRID

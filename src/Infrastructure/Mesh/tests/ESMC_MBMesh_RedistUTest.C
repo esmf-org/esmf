@@ -23,8 +23,8 @@
 
 #if defined ESMF_MOAB
 
-#include "ESMC_MBMeshTestUtilMBMesh.C"
-#include "ESMC_MBMeshTestUtilPL.C"
+#include "ESMC_MBMeshTestGenMBMesh.C"
+#include "ESMC_MBMeshTestGenPL.C"
 
 // other headers
 #include "ESMCI_MBMesh.h"
@@ -197,14 +197,13 @@ int main(int argc, char *argv[]) {
   //   elem_gids[4] = 6;
   // }
 
-  void *out_mesh;
+  MBMesh *out_mesh;
 
   //----------------------------------------------------------------------------
   //NEX_disable_UTest_Multi_Proc_Only
   // call redist algorithm
-  void *meshv = static_cast<void*> (mesh);
-  MBMesh_createredistnodes(&meshv, &num_node_gids, node_gids, &out_mesh, &rc);
-  // MBMesh_createredistelems(&meshv, &num_elem_gids, elem_gids, &out_mesh, &rc);
+  MBMesh_createredistnodes(&mesh, &num_node_gids, node_gids, &out_mesh, &rc);
+  // MBMesh_createredistelems(&mesh, &num_elem_gids, elem_gids, &out_mesh, &rc);
 #else
   rc = ESMF_SUCCESS;
 #endif
@@ -212,12 +211,12 @@ int main(int argc, char *argv[]) {
   strcpy(failMsg, "MeshRedist failed");
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 
-  //MBMesh *outmbmesh = static_cast<MBMesh*> (out_mesh);
-  //rc = mesh_print(outmbmesh);
+
 
 #if defined ESMF_MOAB
   // clean up
   delete mesh;
+  delete out_mesh;
 #endif
 
   //----------------------------------------------------------------------------

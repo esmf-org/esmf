@@ -18,7 +18,7 @@
 // other headers
 #include "ESMCI_MBMesh.h"
 #include "ESMCI_MBMesh_Util.h"
-#include "ESMC_MBMeshTestUtilMBMesh.C"
+#include "ESMC_MBMeshTestGenMBMesh.C"
 
 #include "MBTagConventions.hpp"
 
@@ -95,14 +95,13 @@ MBMesh* create_mesh_halfway(int &rc) {
   int orig_sdim = sdim;
 
   MBMesh *mesh = new MBMesh();
-  void *meshp = static_cast<void *> (mesh);
 
-  MBMesh_create(&meshp, &pdim, &sdim, &local_coordSys, &rc);
+  MBMesh_create(&mesh, &pdim, &sdim, &local_coordSys, &rc);
   if (rc != ESMF_SUCCESS) return NULL;
 
   // InterArray<int> *iin = new InterArray<int>(nodeMask_s,9);
   // 
-  // MBMesh_addnodes(&meshp, &num_node, nodeId_s, nodeCoord_s, nodeOwner_s, iin,
+  // MBMesh_addnodes(&mesh, &num_node, nodeId_s, nodeCoord_s, nodeOwner_s, iin,
   //                 &local_coordSys, &orig_sdim, &rc);
   // if (rc != ESMF_SUCCESS) return NULL;
   // 
@@ -111,7 +110,7 @@ MBMesh* create_mesh_halfway(int &rc) {
   // int numelemconn = 16;
   // int regridconserve = 0;
   // InterArray<int> *iie = new InterArray<int>(elemMask_s,4);
-  // MBMesh_addelements(&meshp, &num_elem, elemId_s, elemType_s, iie,
+  // MBMesh_addelements(&mesh, &num_elem, elemId_s, elemType_s, iie,
   //                    &areapresent, elemArea_s,
   //                    &coordspresent, elemCoord_s,
   //                    &numelemconn, elemConn_s,
@@ -123,7 +122,7 @@ MBMesh* create_mesh_halfway(int &rc) {
   // delete iie;
 
   rc = ESMF_SUCCESS;
-  return static_cast<MBMesh *>(meshp);
+  return mesh;
 }
 
 
@@ -152,17 +151,16 @@ int main(void){
   if (rc != ESMF_SUCCESS) return 0;
 
   //----------------------------------------------------------------------------
-  //NEX_UTest
+  //NEX_disable_UTest
   strcpy(name, "Throw an error from the MBMesh");
   strcpy(failMsg, "Did not return ESMC_RC_ARG_SIZE");
 #if defined ESMF_MOAB
   int localrc;
   MBMesh *mesh = create_mesh_halfway(localrc);
   if (localrc == ESMF_SUCCESS) {
-    void *meshp = static_cast<void *> (mesh);
     int elemIds[1];
     InterArray<int> *eii = new InterArray<int>(elemIds,1);
-    MBMesh_GetElemCreateInfo(meshp, eii, NULL, NULL, NULL, NULL, NULL, &rc);
+    MBMesh_GetElemCreateInfo(mesh, eii, NULL, NULL, NULL, NULL, NULL, &rc);
     delete eii;
   }
 #else

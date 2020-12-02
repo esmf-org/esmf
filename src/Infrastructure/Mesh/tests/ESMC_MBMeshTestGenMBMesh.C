@@ -22,21 +22,19 @@
 #include "ESMC_Test.h"
 
 #if defined ESMF_MOAB
-// other headers
-#include "ESMCI_MBMesh.h"
-#include "ESMCI_MBMesh_Bilinear.h"
-#include "ESMCI_MBMesh_Glue.h"
-#include "ESMCI_MBMesh_Mapping.h"
-#include "ESMCI_MBMesh_Util.h"
-#include "ESMCI_WMat.h"
-#include "ESMCI_PointList.h"
+#include "ESMC_MBMeshTest.C"
 
+
+#include "ESMCI_MBMesh.h"
+#include "ESMCI_MBMesh_Glue.h"
+#include "ESMCI_MBMesh_Bilinear.h"
+#include "ESMCI_MBMesh_Mapping.h"
 #endif
 
 #include <iostream>
 #include <iterator>
 #include <vector>
-
+#include <algorithm>
 
 #if !defined (M_PI)
 // for Windows...
@@ -44,12 +42,6 @@
 #endif
 
 static double UNINITVAL = -42;
-
-
-// test base class ideas
-// - almost equal function
-// - vector comparison with IWeights
-// - 
 
 bool weights_correct(IWeights &wts, std::vector<double> weights) {
   bool correct = true;
@@ -120,7 +112,7 @@ bool weight_gen(MBMesh *mesh, PointList *pl, std::vector<double> weights, bool c
 }
 #else
 // dummy function for ESMF_MOAB=OFF
-bool weight_gen(void *mesh, void *pl) {return true;}
+bool weight_gen(MBMesh *mesh, PointList *pl) {return true;}
 #endif
 
 #if defined ESMF_MOAB
@@ -181,14 +173,13 @@ MBMesh* create_mesh_quad(int &rc) {
   int orig_sdim = sdim;
 
   MBMesh *mesh = new MBMesh();
-  void *meshp = static_cast<void *> (mesh);
 
-  MBMesh_create(&meshp, &pdim, &sdim, &local_coordSys, &rc);
+  MBMesh_create(&mesh, &pdim, &sdim, &local_coordSys, &rc);
   if (rc != ESMF_SUCCESS) return NULL;
 
   InterArray<int> *iin = new InterArray<int>(nodeMask_s,9);
 
-  MBMesh_addnodes(&meshp, &num_node, nodeId_s, nodeCoord_s, nodeOwner_s, iin,
+  MBMesh_addnodes(&mesh, &num_node, nodeId_s, nodeCoord_s, nodeOwner_s, iin,
                   &local_coordSys, &orig_sdim, &rc);
   if (rc != ESMF_SUCCESS) return NULL;
 
@@ -197,7 +188,7 @@ MBMesh* create_mesh_quad(int &rc) {
   int numelemconn = 16;
   int regridconserve = 0;
   InterArray<int> *iie = new InterArray<int>(elemMask_s,4);
-  MBMesh_addelements(&meshp, &num_elem, elemId_s, elemType_s, iie,
+  MBMesh_addelements(&mesh, &num_elem, elemId_s, elemType_s, iie,
                      &areapresent, elemArea_s,
                      &coordspresent, elemCoord_s,
                      &numelemconn, elemConn_s,
@@ -209,7 +200,7 @@ MBMesh* create_mesh_quad(int &rc) {
   delete iie;
 
   rc = ESMF_SUCCESS;
-  return static_cast<MBMesh *>(meshp);
+  return mesh;
 }
 
 
@@ -271,14 +262,13 @@ MBMesh* create_mesh_quad_sph(int &rc) {
   int orig_sdim = sdim;
 
   MBMesh *mesh = new MBMesh();
-  void *meshp = static_cast<void *> (mesh);
 
-  MBMesh_create(&meshp, &pdim, &sdim, &local_coordSys, &rc);
+  MBMesh_create(&mesh, &pdim, &sdim, &local_coordSys, &rc);
   if (rc != ESMF_SUCCESS) return NULL;
 
   InterArray<int> *iin = new InterArray<int>(nodeMask_s,9);
 
-  MBMesh_addnodes(&meshp, &num_node, nodeId_s, nodeCoord_s, nodeOwner_s, iin,
+  MBMesh_addnodes(&mesh, &num_node, nodeId_s, nodeCoord_s, nodeOwner_s, iin,
                   &local_coordSys, &orig_sdim, &rc);
   if (rc != ESMF_SUCCESS) return NULL;
 
@@ -287,7 +277,7 @@ MBMesh* create_mesh_quad_sph(int &rc) {
   int numelemconn = 16;
   int regridconserve = 0;
   InterArray<int> *iie = new InterArray<int>(elemMask_s,4);
-  MBMesh_addelements(&meshp, &num_elem, elemId_s, elemType_s, iie,
+  MBMesh_addelements(&mesh, &num_elem, elemId_s, elemType_s, iie,
                      &areapresent, elemArea_s,
                      &coordspresent, elemCoord_s,
                      &numelemconn, elemConn_s,
@@ -299,7 +289,7 @@ MBMesh* create_mesh_quad_sph(int &rc) {
   delete iie;
 
   rc = ESMF_SUCCESS;
-  return static_cast<MBMesh *>(meshp);
+  return mesh;
 }
 
 MBMesh* create_mesh_tri(int &rc) {
@@ -365,14 +355,13 @@ MBMesh* create_mesh_tri(int &rc) {
   int orig_sdim = sdim;
 
   MBMesh *mesh = new MBMesh();
-  void *meshp = static_cast<void *> (mesh);
 
-  MBMesh_create(&meshp, &pdim, &sdim, &local_coordSys, &rc);
+  MBMesh_create(&mesh, &pdim, &sdim, &local_coordSys, &rc);
   if (rc != ESMF_SUCCESS) return NULL;
 
   InterArray<int> *ii_node = new InterArray<int>(nodeMask_s,9);
 
-  MBMesh_addnodes(&meshp, &num_node, nodeId_s, nodeCoord_s, nodeOwner_s,
+  MBMesh_addnodes(&mesh, &num_node, nodeId_s, nodeCoord_s, nodeOwner_s,
                   ii_node, &local_coordSys, &orig_sdim, &rc);
   if (rc != ESMF_SUCCESS) return NULL;
 
@@ -382,7 +371,7 @@ MBMesh* create_mesh_tri(int &rc) {
   int coordspresent = 0;
   int numelemconn = 24;
   int regridconserve = 0;
-  MBMesh_addelements(&meshp, &num_elem, elemId_s, elemType_s, ii_elem,
+  MBMesh_addelements(&mesh, &num_elem, elemId_s, elemType_s, ii_elem,
                      &areapresent, NULL,
                      &coordspresent, NULL,
                      &numelemconn, elemConn_s,
@@ -394,7 +383,7 @@ MBMesh* create_mesh_tri(int &rc) {
   delete ii_elem;
 
   rc = ESMF_SUCCESS;
-  return static_cast<MBMesh *>(meshp);
+  return mesh;
 }
 
 MBMesh* create_mesh_tri_sph(int &rc) {
@@ -462,14 +451,13 @@ MBMesh* create_mesh_tri_sph(int &rc) {
   int orig_sdim = sdim;
 
   MBMesh *mesh = new MBMesh();
-  void *meshp = static_cast<void *> (mesh);
-
-  MBMesh_create(&meshp, &pdim, &sdim, &local_coordSys, &rc);
+  
+  MBMesh_create(&mesh, &pdim, &sdim, &local_coordSys, &rc);
   if (rc != ESMF_SUCCESS) return NULL;
 
   InterArray<int> *ii_node = new InterArray<int>(nodeMask_s,9);
 
-  MBMesh_addnodes(&meshp, &num_node, nodeId_s, nodeCoord_s, nodeOwner_s,
+  MBMesh_addnodes(&mesh, &num_node, nodeId_s, nodeCoord_s, nodeOwner_s,
                   ii_node, &local_coordSys, &orig_sdim, &rc);
   if (rc != ESMF_SUCCESS) return NULL;
 
@@ -479,7 +467,7 @@ MBMesh* create_mesh_tri_sph(int &rc) {
   int coordspresent = 0;
   int numelemconn = 24;
   int regridconserve = 0;
-  MBMesh_addelements(&meshp, &num_elem, elemId_s, elemType_s, ii_elem,
+  MBMesh_addelements(&mesh, &num_elem, elemId_s, elemType_s, ii_elem,
                      &areapresent, NULL,
                      &coordspresent, NULL,
                      &numelemconn, elemConn_s,
@@ -491,7 +479,7 @@ MBMesh* create_mesh_tri_sph(int &rc) {
   delete ii_elem;
 
   rc = ESMF_SUCCESS;
-  return static_cast<MBMesh *>(meshp);
+  return mesh;
 }
 
 MBMesh* create_mesh_tet(int &rc) {
@@ -554,10 +542,9 @@ MBMesh* create_mesh_tet(int &rc) {
   int *elemConn;
 
   MBMesh *mesh = new MBMesh();
-  void *meshp = static_cast<void *> (mesh);
-
+  
   ESMC_CoordSys_Flag coordsys=ESMC_COORDSYS_CART;
-  MBMesh_create(&meshp, &pdim, &sdim, &coordsys, &rc);
+  MBMesh_create(&mesh, &pdim, &sdim, &coordsys, &rc);
 
     num_node = 10;
     num_elem = 4;
@@ -617,14 +604,14 @@ MBMesh* create_mesh_tet(int &rc) {
     elemConn[8]=2; elemConn[9]=5; elemConn[10]=8; elemConn[11]=4;
     elemConn[12]=4; elemConn[13]=5; elemConn[14]=10; elemConn[15]=6;
 
-    MBMesh_addnodes(&meshp, &num_node, nodeId, nodeCoord, nodeOwner, NULL,
+    MBMesh_addnodes(&mesh, &num_node, nodeId, nodeCoord, nodeOwner, NULL,
                     &coordsys, &sdim, &rc);
 
     int areapresent = 0;
     int coordspresent = 0;
     int numelemconn = 4*num_elem;
     int regridconserve = 0;
-    MBMesh_addelements(&meshp, &num_elem, elemId, elemType, NULL,
+    MBMesh_addelements(&mesh, &num_elem, elemId, elemType, NULL,
                        &areapresent, NULL,
                        &coordspresent, NULL,
                        &numelemconn, elemConn,
@@ -632,7 +619,7 @@ MBMesh* create_mesh_tet(int &rc) {
                        &coordsys, &sdim, &rc);
 
   rc = ESMF_SUCCESS;
-  return static_cast<MBMesh *>(meshp);
+  return mesh;
 }
 
 MBMesh* create_mesh_hex(int &rc) {
@@ -663,10 +650,9 @@ MBMesh* create_mesh_hex(int &rc) {
   int *elemConn;
 
   MBMesh *mesh = new MBMesh();
-  void *meshp = static_cast<void *> (mesh);
-
+  
   ESMC_CoordSys_Flag coordsys=ESMC_COORDSYS_CART;
-  MBMesh_create(&meshp, &pdim, &sdim, &coordsys, &rc);
+  MBMesh_create(&mesh, &pdim, &sdim, &coordsys, &rc);
 
     num_node = 18;
     num_elem = 4;
@@ -754,14 +740,14 @@ MBMesh* create_mesh_hex(int &rc) {
     elemConn[24]=5; elemConn[25]=6; elemConn[26]=9; elemConn[27]=8;
         elemConn[28]=14; elemConn[29]=15; elemConn[30]=18; elemConn[31]=17;
 
-    MBMesh_addnodes(&meshp, &num_node, nodeId, nodeCoord, nodeOwner, NULL,
+    MBMesh_addnodes(&mesh, &num_node, nodeId, nodeCoord, nodeOwner, NULL,
                     &coordsys, &sdim, &rc);
 
     int areapresent = 0;
     int coordspresent = 0;
     int numelemconn = 8*num_elem;
     int regridconserve = 0;
-    MBMesh_addelements(&meshp, &num_elem, elemId, elemType, NULL,
+    MBMesh_addelements(&mesh, &num_elem, elemId, elemType, NULL,
                        &areapresent, NULL,
                        &coordspresent, NULL,
                        &numelemconn, elemConn,
@@ -776,7 +762,7 @@ MBMesh* create_mesh_hex(int &rc) {
   free(elemConn);
 
   rc = ESMF_SUCCESS;
-  return static_cast<MBMesh *>(meshp);
+  return mesh;
 }
 
 MBMesh* create_mesh_quad_9_parallel_dual(ESMC_CoordSys_Flag coordsys, int &rc) {
@@ -859,8 +845,7 @@ MBMesh* create_mesh_quad_9_parallel_dual(ESMC_CoordSys_Flag coordsys, int &rc) {
   elemCoord = (double *) malloc (2*num_elem * sizeof (double));
 
   MBMesh *mesh = new MBMesh();
-  void *meshp = static_cast<void *> (mesh);
-  MBMesh_create(&meshp, &pdim, &sdim, &coordsys, &rc);
+    MBMesh_create(&mesh, &pdim, &sdim, &coordsys, &rc);
 
   if (localPet == 0){
     num_node = 9;
@@ -1030,10 +1015,10 @@ MBMesh* create_mesh_quad_9_parallel_dual(ESMC_CoordSys_Flag coordsys, int &rc) {
     numelemconn = 4*num_elem;
   }
 
-  MBMesh_addnodes(&meshp, &num_node, nodeId, nodeCoord, nodeOwner, NULL,
+  MBMesh_addnodes(&mesh, &num_node, nodeId, nodeCoord, nodeOwner, NULL,
                   &coordsys, &sdim, &rc);
 
-  MBMesh_addelements(&meshp, &num_elem, elemId, elemType, NULL,
+  MBMesh_addelements(&mesh, &num_elem, elemId, elemType, NULL,
                      &areapresent, NULL,
                      &coordspresent, elemCoord,
                      &numelemconn, elemConn,
@@ -1049,7 +1034,7 @@ MBMesh* create_mesh_quad_9_parallel_dual(ESMC_CoordSys_Flag coordsys, int &rc) {
   free(elemCoord);
 
   rc = ESMF_SUCCESS;
-  return static_cast<MBMesh *>(meshp);
+  return mesh;
 }
 
 MBMesh* create_mesh_quad_10_parallel(ESMC_CoordSys_Flag coordsys, int &rc) {
@@ -1130,8 +1115,7 @@ MBMesh* create_mesh_quad_10_parallel(ESMC_CoordSys_Flag coordsys, int &rc) {
   elemConn = (int *) malloc (4*num_elem * sizeof (int));
 
   MBMesh *mesh = new MBMesh();
-  void *meshp = static_cast<void *> (mesh);
-  MBMesh_create(&meshp, &pdim, &sdim, &coordsys, &rc);
+    MBMesh_create(&mesh, &pdim, &sdim, &coordsys, &rc);
 
   if (localPet == 0){
     num_node = 9;
@@ -1287,10 +1271,10 @@ MBMesh* create_mesh_quad_10_parallel(ESMC_CoordSys_Flag coordsys, int &rc) {
     numelemconn = 4*num_elem;
   }
 
-  MBMesh_addnodes(&meshp, &num_node, nodeId, nodeCoord, nodeOwner, NULL,
+  MBMesh_addnodes(&mesh, &num_node, nodeId, nodeCoord, nodeOwner, NULL,
                   &coordsys, &sdim, &rc);
 
-  MBMesh_addelements(&meshp, &num_elem, elemId, elemType, NULL,
+  MBMesh_addelements(&mesh, &num_elem, elemId, elemType, NULL,
                      &areapresent, NULL,
                      &coordspresent, NULL,
                      &numelemconn, elemConn,
@@ -1305,7 +1289,7 @@ MBMesh* create_mesh_quad_10_parallel(ESMC_CoordSys_Flag coordsys, int &rc) {
   free(elemConn);
 
   rc = ESMF_SUCCESS;
-  return static_cast<MBMesh *>(meshp);
+  return mesh;
 }
 
 MBMesh* create_mesh_quad_sph_10_parallel(ESMC_CoordSys_Flag coordsys, int &rc) {
@@ -1388,8 +1372,7 @@ MBMesh* create_mesh_quad_sph_10_parallel(ESMC_CoordSys_Flag coordsys, int &rc) {
   elemConn = (int *) malloc (4*num_elem * sizeof (int));
 
   MBMesh *mesh = new MBMesh();
-  void *meshp = static_cast<void *> (mesh);
-  MBMesh_create(&meshp, &pdim, &sdim, &coordsys, &rc);
+    MBMesh_create(&mesh, &pdim, &sdim, &coordsys, &rc);
 
   if (localPet == 0){
     num_node = 9;
@@ -1545,10 +1528,10 @@ MBMesh* create_mesh_quad_sph_10_parallel(ESMC_CoordSys_Flag coordsys, int &rc) {
     numelemconn = 4*num_elem;
   }
 
-  MBMesh_addnodes(&meshp, &num_node, nodeId, nodeCoord, nodeOwner, NULL,
+  MBMesh_addnodes(&mesh, &num_node, nodeId, nodeCoord, nodeOwner, NULL,
                   &coordsys, &sdim, &rc);
 
-  MBMesh_addelements(&meshp, &num_elem, elemId, elemType, NULL,
+  MBMesh_addelements(&mesh, &num_elem, elemId, elemType, NULL,
                      &areapresent, NULL,
                      &coordspresent, NULL,
                      &numelemconn, elemConn,
@@ -1563,7 +1546,7 @@ MBMesh* create_mesh_quad_sph_10_parallel(ESMC_CoordSys_Flag coordsys, int &rc) {
   free(elemConn);
 
   rc = ESMF_SUCCESS;
-  return static_cast<MBMesh *>(meshp);
+  return mesh;
 }
 
 MBMesh* create_mesh_quad_9_parallel(ESMC_CoordSys_Flag coordsys, int &rc) {
@@ -1636,8 +1619,7 @@ MBMesh* create_mesh_quad_9_parallel(ESMC_CoordSys_Flag coordsys, int &rc) {
   elemConn = (int *) malloc (4*num_elem * sizeof (int));
 
   MBMesh *mesh = new MBMesh();
-  void *meshp = static_cast<void *> (mesh);
-  MBMesh_create(&meshp, &pdim, &sdim, &coordsys, &rc);
+    MBMesh_create(&mesh, &pdim, &sdim, &coordsys, &rc);
 
   if (localPet == 0){
     num_node = 8;
@@ -1793,10 +1775,10 @@ MBMesh* create_mesh_quad_9_parallel(ESMC_CoordSys_Flag coordsys, int &rc) {
     numelemconn = 4*num_elem;
   }
 
-  MBMesh_addnodes(&meshp, &num_node, nodeId, nodeCoord, nodeOwner, NULL,
+  MBMesh_addnodes(&mesh, &num_node, nodeId, nodeCoord, nodeOwner, NULL,
                   &coordsys, &sdim, &rc);
 
-  MBMesh_addelements(&meshp, &num_elem, elemId, elemType, NULL,
+  MBMesh_addelements(&mesh, &num_elem, elemId, elemType, NULL,
                      &areapresent, NULL,
                      &coordspresent, NULL,
                      &numelemconn, elemConn,
@@ -1811,7 +1793,7 @@ MBMesh* create_mesh_quad_9_parallel(ESMC_CoordSys_Flag coordsys, int &rc) {
   free(elemConn);
 
   rc = ESMF_SUCCESS;
-  return static_cast<MBMesh *>(meshp);
+  return mesh;
 }
 
 // 10 element mesh created the same with one or four procs
@@ -1855,8 +1837,7 @@ MBMesh* create_mesh_quad_10(int &rc) {
 
   // mesh pointer
   MBMesh *mesh = new MBMesh();
-  void *meshp = static_cast<void *> (mesh);
-
+  
   if (petCount == 1) {
 
     int pdim = 2;
@@ -1901,12 +1882,12 @@ MBMesh* create_mesh_quad_10(int &rc) {
 
     int orig_sdim = sdim;
 
-    MBMesh_create(&meshp, &pdim, &sdim, &local_coordSys, &rc);
+    MBMesh_create(&mesh, &pdim, &sdim, &local_coordSys, &rc);
     if (rc != ESMF_SUCCESS) return NULL;
 
     InterArray<int> *iin = new InterArray<int>(nodeMask_s,9);
 
-    MBMesh_addnodes(&meshp, &num_node, nodeId_s, nodeCoord_s, nodeOwner_s, iin,
+    MBMesh_addnodes(&mesh, &num_node, nodeId_s, nodeCoord_s, nodeOwner_s, iin,
                     &local_coordSys, &orig_sdim, &rc);
     if (rc != ESMF_SUCCESS) return NULL;
 
@@ -1914,7 +1895,7 @@ MBMesh* create_mesh_quad_10(int &rc) {
     int coordspresent = 1;
     int numelemconn = 16;
     int regridconserve = 0;
-    MBMesh_addelements(&meshp, &num_elem, elemId_s, elemType_s, NULL,
+    MBMesh_addelements(&mesh, &num_elem, elemId_s, elemType_s, NULL,
                        &areapresent, NULL,
                        &coordspresent, NULL,
                        &numelemconn, elemConn_s,
@@ -1984,7 +1965,7 @@ MBMesh* create_mesh_quad_10(int &rc) {
     elemType = (int *) malloc (num_elem * sizeof (int));
     elemConn = (int *) malloc (4*num_elem * sizeof (int));
 
-    MBMesh_create(&meshp, &pdim, &sdim, &coordsys, &rc);
+    MBMesh_create(&mesh, &pdim, &sdim, &coordsys, &rc);
 
     if (localPet == 0){
       num_node = 9;
@@ -2140,10 +2121,10 @@ MBMesh* create_mesh_quad_10(int &rc) {
       numelemconn = 4*num_elem;
     }
 
-    MBMesh_addnodes(&meshp, &num_node, nodeId, nodeCoord, nodeOwner, NULL,
+    MBMesh_addnodes(&mesh, &num_node, nodeId, nodeCoord, nodeOwner, NULL,
                     &coordsys, &sdim, &rc);
 
-    MBMesh_addelements(&meshp, &num_elem, elemId, elemType, NULL,
+    MBMesh_addelements(&mesh, &num_elem, elemId, elemType, NULL,
                        &areapresent, NULL,
                        &coordspresent, NULL,
                        &numelemconn, elemConn,
@@ -2161,6 +2142,7 @@ MBMesh* create_mesh_quad_10(int &rc) {
     Throw() << "Test function must be run with 1 or 4 processors";
 
   rc = ESMF_SUCCESS;
-  return static_cast<MBMesh *>(meshp);
+  return mesh;
 }
+
 #endif

@@ -22,9 +22,9 @@
 #include "ESMC_Test.h"
 
 #if defined ESMF_MOAB
-#include "ESMC_MBMeshTestUtilMesh.C"
-#include "ESMC_MBMeshTestUtilMBMesh.C"
-#include "ESMC_MBMeshTestUtilPL.C"
+#include "ESMC_MBMeshTestGenNative.C"
+#include "ESMC_MBMeshTestGenMBMesh.C"
+#include "ESMC_MBMeshTestGenPL.C"
 
 // other headers
 #include "ESMCI_MBMesh.h"
@@ -147,14 +147,13 @@ MBMesh* create_mesh_quad_single(int &rc, bool cart, bool collapsed = false) {
   int elemMask_s [] ={1};
 
   MBMesh *mesh = new MBMesh();
-  void *meshp = static_cast<void *> (mesh);
 
-  MBMesh_create(&meshp, &pdim, &sdim, &coordSys, &rc);
+  MBMesh_create(&mesh, &pdim, &sdim, &coordSys, &rc);
   if (rc != ESMF_SUCCESS) return NULL;
 
   InterArray<int> *ii_node = new InterArray<int>(nodeMask_s,8);
 
-  MBMesh_addnodes(&meshp, &num_node, nodeId_s, nodeCoord, nodeOwner_s,
+  MBMesh_addnodes(&mesh, &num_node, nodeId_s, nodeCoord, nodeOwner_s,
                   ii_node, &coordSys, &sdim, &rc);
   if (rc != ESMF_SUCCESS) return NULL;
 
@@ -164,7 +163,7 @@ MBMesh* create_mesh_quad_single(int &rc, bool cart, bool collapsed = false) {
   int coordspresent = 0;
   int numelemconn = 8;
   int regridconserve = 0;
-  MBMesh_addelements(&meshp, &num_elem, elemId_s, elemType_s, ii_elem,
+  MBMesh_addelements(&mesh, &num_elem, elemId_s, elemType_s, ii_elem,
                      &areapresent, NULL,
                      &coordspresent, NULL,
                      &numelemconn, elemConn_s,
@@ -176,7 +175,7 @@ MBMesh* create_mesh_quad_single(int &rc, bool cart, bool collapsed = false) {
   delete ii_elem;
 
   rc = ESMF_SUCCESS;
-  return static_cast<MBMesh *>(meshp);
+  return mesh;
 }
 
 PointList* create_pointlist_on_edge(int &rc, bool cart) {
