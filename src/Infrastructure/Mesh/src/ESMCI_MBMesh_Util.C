@@ -49,6 +49,20 @@ static const char *const version = "$Id$";
 
 using namespace ESMCI;
 
+// expects pcoords to have 3 elements
+// expects pcoords in domain [-1,1] and translates to [0,1]
+// useful for translating pcoords from MOAB to ESMF domain
+void translate(double *pcoords) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "translate"
+
+  pcoords[0] = (pcoords[0]+1)/2;
+  pcoords[1] = (pcoords[1]+1)/2;
+  pcoords[2] = (pcoords[2]+1)/2;
+
+}
+
+
 // Get ids
 void MBMesh_get_gid(MBMesh *mbmp, EntityHandle eh, int *gid) {
   int merr;
@@ -287,19 +301,6 @@ void MBMesh_get_local_elem_gids(MBMesh *mbmp, std::vector<UInt> &egids) {
     // printf("pos=%d egids=%d\n",pos_and_gids[i].first,pos_and_gids[i].second);
 
   }
-}
-
-// expects pcoords to have 3 elements
-// expects pcoords in domain [-1,1] and translates to [0,1]
-// useful for translating pcoords from MOAB to ESMF domain
-void translate(double *pcoords) {
-#undef  ESMC_METHOD
-#define ESMC_METHOD "translate"
-
-  pcoords[0] = (pcoords[0]+1)/2;
-  pcoords[1] = (pcoords[1]+1)/2;
-  pcoords[2] = (pcoords[2]+1)/2;
-
 }
 
 

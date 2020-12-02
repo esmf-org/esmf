@@ -2078,16 +2078,6 @@ void MBMesh::halo_comm_elems_all_tags() {
 
 
 MBMesh::~MBMesh() {
-  
-  // Note: don't think we need to clear vectors of EntityHandles, but 
-  //       check again after MBMesh is a pointer in MeshCap (void * now)
-  // clear vectors
-  // orig_nodes.clear();
-  // orig_elems.clear();
-
-  // clear maps
-  // split_to_orig_id.clear();
-  // split_id_to_frac.clear();
 
   // MOAB::pcomm
   ParallelComm *pcomm = ParallelComm::get_pcomm(this->mesh, 0);

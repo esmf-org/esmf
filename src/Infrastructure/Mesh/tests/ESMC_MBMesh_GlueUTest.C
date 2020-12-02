@@ -89,10 +89,12 @@ int main(int argc, char *argv[]) {
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
 
   // write output to vtk
+#if defined ESMF_MOAB
   localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
   localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
   if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
     localrc = mbt_quad->print_vtk("mbt_quad");
+#endif
 
 
   // element redist
@@ -115,10 +117,12 @@ int main(int argc, char *argv[]) {
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
 
   // write output to vtk
+#if defined ESMF_MOAB
   localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
   localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
   if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
     localrc = mbt_quad_elem_redist->print_vtk("mbt_quad_elem_redist");
+#endif
 
   // node redist
 #if defined ESMF_MOAB
@@ -140,10 +144,12 @@ int main(int argc, char *argv[]) {
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
 
   // write output to vtk
+#if defined ESMF_MOAB
   localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
   localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
   if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
     localrc = mbt_quad_node_redist->print_vtk("mbt_quad_node_redist");
+#endif
 
   // element and node redist
 #if defined ESMF_MOAB
@@ -165,10 +171,12 @@ int main(int argc, char *argv[]) {
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
 
   // write output to vtk
+#if defined ESMF_MOAB
   localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
   localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
   if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
     localrc = mbt_quad_elno_redist->print_vtk("mbt_quad_elno_redist");
+#endif
 
 #if defined ESMF_MOAB
   delete mbt_quad;
@@ -197,10 +205,12 @@ int main(int argc, char *argv[]) {
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
 
   // write output to vtk
+#if defined ESMF_MOAB
   localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
   localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
   if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
     localrc = mbt_quad_sph->print_vtk("mbt_quad_sph");
+#endif
 
 
   // element redist
@@ -223,10 +233,12 @@ int main(int argc, char *argv[]) {
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
 
   // write output to vtk
+#if defined ESMF_MOAB
   localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
   localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
   if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
     localrc = mbt_quad_sph_elem_redist->print_vtk("mbt_quad_sph_elem_redist");
+#endif
 
   // node redist
 #if defined ESMF_MOAB
@@ -248,10 +260,12 @@ int main(int argc, char *argv[]) {
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
 
   // write output to vtk
+#if defined ESMF_MOAB
   localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
   localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
   if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
     localrc = mbt_quad_sph_node_redist->print_vtk("mbt_quad_sph_node_redist");
+#endif
 
   // element and node redist
 #if defined ESMF_MOAB
@@ -273,10 +287,12 @@ int main(int argc, char *argv[]) {
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
 
   // write output to vtk
+#if defined ESMF_MOAB
   localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
   localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
   if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
     localrc = mbt_quad_sph_elno_redist->print_vtk("mbt_quad_sph_elno_redist");
+#endif
 
 #if defined ESMF_MOAB
   delete mbt_quad_sph;
@@ -305,10 +321,12 @@ int main(int argc, char *argv[]) {
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
 
   // write output to vtk
+#if defined ESMF_MOAB
   localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
   localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
   if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
     localrc = mbt_hex->print_vtk("mbt_hex");
+#endif
 
 
 // redist
@@ -331,10 +349,12 @@ int main(int argc, char *argv[]) {
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
 
   // write output to vtk
+#if defined ESMF_MOAB
   localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
   localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
   if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
     localrc = mbt_hex_elem_redist->print_vtk("mbt_hex_elem_redist");
+#endif
 
 #if defined ESMF_MOAB
   rc = ESMF_SUCCESS;
@@ -355,10 +375,12 @@ int main(int argc, char *argv[]) {
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
 
   // write output to vtk
+#if defined ESMF_MOAB
   localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
   localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
   if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
     localrc = mbt_hex_node_redist->print_vtk("mbt_hex_node_redist");
+#endif
 
 #if defined ESMF_MOAB
   rc = ESMF_SUCCESS;
@@ -379,10 +401,12 @@ int main(int argc, char *argv[]) {
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
 
   // write output to vtk
+#if defined ESMF_MOAB
   localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
   localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
   if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
     localrc = mbt_hex_elno_redist->print_vtk("mbt_hex_elno_redist");
+#endif
 
 #if defined ESMF_MOAB
   delete mbt_hex;
@@ -409,11 +433,13 @@ int main(int argc, char *argv[]) {
   strcpy(failMsg, "FAIL");
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
 
+#if defined ESMF_MOAB
   // write output to vtk
   localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
   localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
   if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
     localrc = mbt_hex_sph->print_vtk("mbt_hex_sph");
+#endif
 
 // redist
 #if defined ESMF_MOAB
@@ -435,10 +461,12 @@ int main(int argc, char *argv[]) {
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
 
   // write output to vtk
+#if defined ESMF_MOAB
   localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
   localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
   if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
     localrc = mbt_hex_sph_elem_redist->print_vtk("mbt_hex_sph_elem_redist");
+#endif
 
 #if defined ESMF_MOAB
   rc = ESMF_SUCCESS;
@@ -459,10 +487,12 @@ int main(int argc, char *argv[]) {
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
 
   // write output to vtk
+#if defined ESMF_MOAB
   localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
   localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
   if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
     localrc = mbt_hex_sph_node_redist->print_vtk("mbt_hex_sph_node_redist");
+#endif
 
 #if defined ESMF_MOAB
   rc = ESMF_SUCCESS;
@@ -483,10 +513,12 @@ int main(int argc, char *argv[]) {
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
 
   // write output to vtk
+#if defined ESMF_MOAB
   localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
   localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
   if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
     localrc = mbt_hex_sph_elno_redist->print_vtk("mbt_hex_sph_elno_redist");
+#endif
 
 
 #if defined ESMF_MOAB
@@ -499,433 +531,465 @@ int main(int argc, char *argv[]) {
 #endif
 
 // RLO: due to some hefty memory leaks cannot run all tests right now..
-//   // --------------------------------------------------------------------------
-//   // mixed Cartesian
-//   // --------------------------------------------------------------------------
-// #if defined ESMF_MOAB
-//   rc = ESMF_FAILURE;
-//   MBMeshTest *mbt_mix = mbmesh_gen_mix_2d_cart(localrc, do_redist);
-//   if (localrc == ESMF_SUCCESS) localrc = mbt_mix->build_mbmesh();
-//   if (localrc == ESMF_SUCCESS) rc = mbt_mix->test_get_info();
-// #else
-//   rc = ESMF_SUCCESS;
-// #endif
-//   //NEX_disable_UTest
-//   strcpy(name, "MBMeshGet - Cartesian Mixed Topology");
-//   strcpy(failMsg, "FAIL");
-//   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
-// 
-//   // write output to vtk
-//   localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
-//   localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
-//   if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
-//     localrc = mbt_mix->print_vtk("mbt_mix");
-// 
-// // elem redist 
-// #if defined ESMF_MOAB
-//   rc = ESMF_SUCCESS;
-//   MBMeshTest *mbt_mix_elem_redist;
-//   if (do_redist) {
-//     rc = ESMF_FAILURE;
-//     mbt_mix_elem_redist = new MBMeshTest();
-//     if (localrc == ESMF_SUCCESS) localrc = mbt_mix->mbtRedist(mbt_mix_elem_redist);
-//     if (localrc == ESMF_SUCCESS) localrc = mbt_mix_elem_redist->build_mbmesh_redist(true, false);
-//     if (localrc == ESMF_SUCCESS) rc = mbt_mix_elem_redist->test_redist_info(true, false);
-//   }
-// #else
-//   rc = ESMF_SUCCESS;
-// #endif
-//   //NEX_disable_UTest
-//   strcpy(name, "MBMeshGet - Cartesian Mixed Topology Element Redist");
-//   strcpy(failMsg, "FAIL");
-//   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
-// 
-//   // write output to vtk
-//   localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
-//   localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
-//   if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
-//     localrc = mbt_mix_elem_redist->print_vtk("mbt_mix_elem_redist");
-// 
-// // node redist 
-// #if defined ESMF_MOAB
-//   rc = ESMF_SUCCESS;
-//   MBMeshTest *mbt_mix_node_redist;
-//   if (do_redist) {
-//     rc = ESMF_FAILURE;
-//     mbt_mix_node_redist = new MBMeshTest();
-//     if (localrc == ESMF_SUCCESS) localrc = mbt_mix->mbtRedist(mbt_mix_node_redist);
-//     if (localrc == ESMF_SUCCESS) localrc = mbt_mix_node_redist->build_mbmesh_redist(false, true);
-//     if (localrc == ESMF_SUCCESS) rc = mbt_mix_node_redist->test_redist_info(false, true);
-//   }
-// #else
-//   rc = ESMF_SUCCESS;
-// #endif
-//   //NEX_disable_UTest
-//   strcpy(name, "MBMeshGet - Cartesian Mixed Topology Node Redist");
-//   strcpy(failMsg, "FAIL");
-//   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
-// 
-//   // write output to vtk
-//   localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
-//   localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
-//   if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
-//     localrc = mbt_mix_node_redist->print_vtk("mbt_mix_node_redist");
-// 
-// // element and node redist 
-// #if defined ESMF_MOAB
-//   rc = ESMF_SUCCESS;
-//   MBMeshTest *mbt_mix_elno_redist;
-//   if (do_redist) {
-//     rc = ESMF_FAILURE;
-//     mbt_mix_elno_redist = new MBMeshTest();
-//     if (localrc == ESMF_SUCCESS) localrc = mbt_mix->mbtRedist(mbt_mix_elno_redist);
-//     if (localrc == ESMF_SUCCESS) localrc = mbt_mix_elno_redist->build_mbmesh_redist(true, true);
-//     if (localrc == ESMF_SUCCESS) rc = mbt_mix_elno_redist->test_redist_info(true, true);
-//   }
-// #else
-//   rc = ESMF_SUCCESS;
-// #endif
-//   //NEX_disable_UTest
-//   strcpy(name, "MBMeshGet - Cartesian Mixed Topology Element and Node Redist");
-//   strcpy(failMsg, "FAIL");
-//   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
-// 
-//   // write output to vtk
-//   localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
-//   localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
-//   if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
-//     localrc = mbt_mix_elno_redist->print_vtk("mbt_mix_elno_redist");
-// 
-// #if defined ESMF_MOAB
-//   delete mbt_mix;
-//   if (do_redist) {
-//     delete mbt_mix_elem_redist;
-//     delete mbt_mix_node_redist;
-//     delete mbt_mix_elno_redist;
-//   }
-// #endif
-// 
-//   // --------------------------------------------------------------------------
-//   //  mixed spherical
-//   // --------------------------------------------------------------------------
-// #if defined ESMF_MOAB
-//   rc = ESMF_FAILURE;
-//   MBMeshTest *mbt_mix_sph = mbmesh_gen_mix_2d_sph(localrc, do_redist);
-//   if (localrc == ESMF_SUCCESS) localrc = mbt_mix_sph->build_mbmesh();
-//   if (localrc == ESMF_SUCCESS) rc = mbt_mix_sph->test_get_info();
-// #else
-//   rc = ESMF_SUCCESS;
-// #endif
-//   //NEX_disable_UTest
-//   strcpy(name, "MBMeshGet - Spherical Mixed Topology");
-//   strcpy(failMsg, "FAIL");
-//   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
-// 
-//   // write output to vtk
-//   localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
-//   localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
-//   if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
-//     localrc = mbt_mix_sph->print_vtk("mbt_mix_sph");
-// 
-// // elem redist
-// #if defined ESMF_MOAB
-//   rc = ESMF_SUCCESS;
-//   MBMeshTest *mbt_mix_sph_elem_redist;
-//   if (do_redist) {
-//     rc = ESMF_FAILURE;
-//     mbt_mix_sph_elem_redist = new MBMeshTest();
-//     if (localrc == ESMF_SUCCESS) localrc = mbt_mix_sph->mbtRedist(mbt_mix_sph_elem_redist);
-//     if (localrc == ESMF_SUCCESS) localrc = mbt_mix_sph_elem_redist->build_mbmesh_redist(true, false);
-//     if (localrc == ESMF_SUCCESS) rc = mbt_mix_sph_elem_redist->test_redist_info(true, false);
-//   }
-// #else
-//   rc = ESMF_SUCCESS;
-// #endif
-//   //NEX_disable_UTest
-//   strcpy(name, "MBMeshGet - Spherical Mixed Topology Element Redist");
-//   strcpy(failMsg, "FAIL");
-//   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
-// 
-//   // write output to vtk
-//   localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
-//   localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
-//   if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
-//     localrc = mbt_mix_sph_elem_redist->print_vtk("mbt_mix_sph_elem_redist");
-// 
-// // node redist
-// #if defined ESMF_MOAB
-//   rc = ESMF_SUCCESS;
-//   MBMeshTest *mbt_mix_sph_node_redist;
-//   if (do_redist) {
-//     rc = ESMF_FAILURE;
-//     mbt_mix_sph_node_redist = new MBMeshTest();
-//     if (localrc == ESMF_SUCCESS) localrc = mbt_mix_sph->mbtRedist(mbt_mix_sph_node_redist);
-//     if (localrc == ESMF_SUCCESS) localrc = mbt_mix_sph_node_redist->build_mbmesh_redist(false, true);
-//     if (localrc == ESMF_SUCCESS) rc = mbt_mix_sph_node_redist->test_redist_info(false, true);
-//   }
-// #else
-//   rc = ESMF_SUCCESS;
-// #endif
-//   //NEX_disable_UTest
-//   strcpy(name, "MBMeshGet - Spherical Mixed Topology Node Redist");
-//   strcpy(failMsg, "FAIL");
-//   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
-// 
-//   // write output to vtk
-//   localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
-//   localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
-//   if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
-//     localrc = mbt_mix_sph_node_redist->print_vtk("mbt_mix_sph_node_redist");
-// 
-// // elem and node redist
-// #if defined ESMF_MOAB
-//   rc = ESMF_SUCCESS;
-//   MBMeshTest *mbt_mix_sph_elno_redist;
-//   if (do_redist) {
-//     rc = ESMF_FAILURE;
-//     mbt_mix_sph_elno_redist = new MBMeshTest();
-//     if (localrc == ESMF_SUCCESS) localrc = mbt_mix_sph->mbtRedist(mbt_mix_sph_elno_redist);
-//     if (localrc == ESMF_SUCCESS) localrc = mbt_mix_sph_elno_redist->build_mbmesh_redist(true, true);
-//     if (localrc == ESMF_SUCCESS) rc = mbt_mix_sph_elno_redist->test_redist_info(true, true);
-//   }
-// #else
-//   rc = ESMF_SUCCESS;
-// #endif
-//   //NEX_disable_UTest
-//   strcpy(name, "MBMeshGet - Spherical Mixed Topology Element and Node Redist");
-//   strcpy(failMsg, "FAIL");
-//   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
-// 
-//   // write output to vtk
-//   localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
-//   localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
-//   if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
-//     localrc = mbt_mix_sph_elno_redist->print_vtk("mbt_mix_sph_elno_redist");
-// 
-// #if defined ESMF_MOAB
-//   delete mbt_mix_sph;
-//   if (do_redist) {
-//     delete mbt_mix_sph_elem_redist;
-//     delete mbt_mix_sph_node_redist;
-//     delete mbt_mix_sph_elno_redist;
-//   }
-// #endif
+  // --------------------------------------------------------------------------
+  // mixed Cartesian
+  // --------------------------------------------------------------------------
+#if defined ESMF_MOAB
+  rc = ESMF_FAILURE;
+  MBMeshTest *mbt_mix = mbmesh_gen_mix_2d_cart(localrc, do_redist);
+  if (localrc == ESMF_SUCCESS) localrc = mbt_mix->build_mbmesh();
+  if (localrc == ESMF_SUCCESS) rc = mbt_mix->test_get_info();
+#else
+  rc = ESMF_SUCCESS;
+#endif
+  //NEX_disable_UTest
+  strcpy(name, "MBMeshGet - Cartesian Mixed Topology");
+  strcpy(failMsg, "FAIL");
+  ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
 
-//   // --------------------------------------------------------------------------
-//   // mbmesh_gen_ngon_2d_cart
-//   // --------------------------------------------------------------------------
-// #if defined ESMF_MOAB
-//   rc = ESMF_FAILURE;
-//   MBMeshTest *mbt_ngon = mbmesh_gen_ngon_2d_cart(localrc, do_redist);
-//   if (localrc == ESMF_SUCCESS) localrc = mbt_ngon->build_mbmesh();
-//   if (localrc == ESMF_SUCCESS) rc = mbt_ngon->test_get_info();
-// #else
-//   rc = ESMF_SUCCESS;
-// #endif
-//   //cannot yet get connectivity information for ngon meshes
-//   //NEX_disable_UTest
-//   strcpy(name, "MBMeshGet - Cartesian N-gons");
-//   strcpy(failMsg, "FAIL");
-//   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
-// 
-//   // write output to vtk
-//   localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
-//   localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
-//   if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
-//     localrc = mbt_ngon->print_vtk("mbt_ngon");
-// 
-// // redist
-// #if defined ESMF_MOAB
-//   rc = ESMF_SUCCESS;
-//   MBMeshTest *mbt_ngon_elem_redist;
-//   if (do_redist) {
-//     rc = ESMF_FAILURE;
-//     mbt_ngon_elem_redist = new MBMeshTest();
-//     if (localrc == ESMF_SUCCESS) localrc = mbt_ngon->mbtRedist(mbt_ngon_elem_redist);
-//     if (localrc == ESMF_SUCCESS) localrc = mbt_ngon_elem_redist->build_mbmesh_redist(true, false);
-//     if (localrc == ESMF_SUCCESS) rc = mbt_ngon_elem_redist->test_redist_info(true, false);
-//   }
-// #else
-//   rc = ESMF_SUCCESS;
-// #endif
-//   //cannot yet get connectivity information for ngon meshes
-//   //NEX_disable_UTest
-//   strcpy(name, "MBMeshGet - Cartesian N-gons Element Redist");
-//   strcpy(failMsg, "FAIL");
-//   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
-// 
-//   // write output to vtk
-//   localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
-//   localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
-//   if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
-//     localrc = mbt_ngon_elem_redist->print_vtk("mbt_ngon_elem_redist");
-// 
-// #if defined ESMF_MOAB
-//   rc = ESMF_SUCCESS;
-//   MBMeshTest *mbt_ngon_node_redist;
-//   if (do_redist) {
-//     rc = ESMF_FAILURE;
-//     mbt_ngon_node_redist = new MBMeshTest();
-//     if (localrc == ESMF_SUCCESS) localrc = mbt_ngon->mbtRedist(mbt_ngon_node_redist);
-//     if (localrc == ESMF_SUCCESS) localrc = mbt_ngon_node_redist->build_mbmesh_redist(false, true);
-//     if (localrc == ESMF_SUCCESS) rc = mbt_ngon_node_redist->test_redist_info(false, true);
-//   }
-// #else
-//   rc = ESMF_SUCCESS;
-// #endif
-//   //cannot yet get connectivity information for ngon meshes
-//   //NEX_disable_UTest
-//   strcpy(name, "MBMeshGet - Cartesian N-gons Node Redist");
-//   strcpy(failMsg, "FAIL");
-//   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
-// 
-//   // write output to vtk
-//   localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
-//   localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
-//   if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
-//     localrc = mbt_ngon_node_redist->print_vtk("mbt_ngon_node_redist");
-// 
-// #if defined ESMF_MOAB
-//   rc = ESMF_SUCCESS;
-//   MBMeshTest *mbt_ngon_elno_redist;
-//   if (do_redist) {
-//     rc = ESMF_FAILURE;
-//     mbt_ngon_elno_redist = new MBMeshTest();
-//     if (localrc == ESMF_SUCCESS) localrc = mbt_ngon->mbtRedist(mbt_ngon_elno_redist);
-//     if (localrc == ESMF_SUCCESS) localrc = mbt_ngon_elno_redist->build_mbmesh_redist(true, true);
-//     if (localrc == ESMF_SUCCESS) rc = mbt_ngon_elno_redist->test_redist_info(true, true);
-//   }
-// #else
-//   rc = ESMF_SUCCESS;
-// #endif
-//   //cannot yet get connectivity information for ngon meshes
-//   //NEX_disable_UTest
-//   strcpy(name, "MBMeshGet - Cartesian N-gons Element and Node Redist");
-//   strcpy(failMsg, "FAIL");
-//   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
-// 
-//   // write output to vtk
-//   localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
-//   localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
-//   if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
-//     localrc = mbt_ngon_elno_redist->print_vtk("mbt_ngon_elno_redist");
-// 
-// #if defined ESMF_MOAB
-//   delete mbt_ngon;
-//   if (do_redist) {
-//     delete mbt_ngon_elem_redist;
-//     delete mbt_ngon_node_redist;
-//     delete mbt_ngon_elno_redist;
-//   }
-// #endif
-// 
-//   // --------------------------------------------------------------------------
-//   // mbmesh_gen_ngon_2d_sph
-//   // --------------------------------------------------------------------------
-// #if defined ESMF_MOAB
-//   rc = ESMF_FAILURE;
-//   MBMeshTest *mbt_ngon_sph = mbmesh_gen_ngon_2d_sph(localrc, do_redist);
-//   if (localrc == ESMF_SUCCESS) localrc = mbt_ngon_sph->build_mbmesh();
-//   if (localrc == ESMF_SUCCESS) rc = mbt_ngon_sph->test_get_info();
-// #else
-//   rc = ESMF_SUCCESS;
-// #endif
-//   //cannot yet get connectivity information for ngon meshes
-//   //NEX_disable_UTest
-//   strcpy(name, "MBMeshGet - Spherical N-gons");
-//   strcpy(failMsg, "FAIL");
-//   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
-// 
-//   // write output to vtk
-//   localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
-//   localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
-//   if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
-//     localrc = mbt_ngon_sph->print_vtk("mbt_ngon_sph");
-// 
-// // redist
-// #if defined ESMF_MOAB
-//   rc = ESMF_SUCCESS;
-//   MBMeshTest *mbt_ngon_sph_elem_redist;
-//   if (do_redist) {
-//     rc = ESMF_FAILURE;
-//     mbt_ngon_sph_elem_redist = new MBMeshTest();
-//     if (localrc == ESMF_SUCCESS) localrc = mbt_ngon_sph->mbtRedist(mbt_ngon_sph_elem_redist);
-//     if (localrc == ESMF_SUCCESS) localrc = mbt_ngon_sph_elem_redist->build_mbmesh_redist(true, false);
-//     if (localrc == ESMF_SUCCESS) rc = mbt_ngon_sph_elem_redist->test_redist_info(true, false);
-//   }
-// #else
-//   rc = ESMF_SUCCESS;
-// #endif
-//   //cannot yet get connectivity information for ngon meshes
-//   //NEX_disable_UTest
-//   strcpy(name, "MBMeshGet - Spherical N-gons Element Redist");
-//   strcpy(failMsg, "FAIL");
-//   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
-// 
-//   // write output to vtk
-//   localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
-//   localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
-//   if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
-//     localrc = mbt_ngon_sph_elem_redist->print_vtk("mbt_ngon_sph_elem_redist");
-// 
-// #if defined ESMF_MOAB
-//   rc = ESMF_SUCCESS;
-//   MBMeshTest *mbt_ngon_sph_node_redist;
-//   if (do_redist) {
-//     rc = ESMF_FAILURE;
-//     mbt_ngon_sph_node_redist = new MBMeshTest();
-//     if (localrc == ESMF_SUCCESS) localrc = mbt_ngon_sph->mbtRedist(mbt_ngon_sph_node_redist);
-//     if (localrc == ESMF_SUCCESS) localrc = mbt_ngon_sph_node_redist->build_mbmesh_redist(false, true);
-//     if (localrc == ESMF_SUCCESS) rc = mbt_ngon_sph_node_redist->test_redist_info(false, true);
-//   }
-// #else
-//   rc = ESMF_SUCCESS;
-// #endif
-//   //cannot yet get connectivity information for ngon meshes
-//   //NEX_disable_UTest
-//   strcpy(name, "MBMeshGet - Spherical N-gons Node Redist");
-//   strcpy(failMsg, "FAIL");
-//   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
-// 
-//   // write output to vtk
-//   localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
-//   localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
-//   if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
-//     localrc = mbt_ngon_sph_node_redist->print_vtk("mbt_ngon_sph_node_redist");
-// 
-// #if defined ESMF_MOAB
-//   rc = ESMF_SUCCESS;
-//   MBMeshTest *mbt_ngon_sph_elno_redist;
-//   if (do_redist) {
-//     rc = ESMF_FAILURE;
-//     mbt_ngon_sph_elno_redist = new MBMeshTest();
-//     if (localrc == ESMF_SUCCESS) localrc = mbt_ngon_sph->mbtRedist(mbt_ngon_sph_elno_redist);
-//     if (localrc == ESMF_SUCCESS) localrc = mbt_ngon_sph_elno_redist->build_mbmesh_redist(true, true);
-//     if (localrc == ESMF_SUCCESS) rc = mbt_ngon_sph_elno_redist->test_redist_info(true, true);
-//   }
-// #else
-//   rc = ESMF_SUCCESS;
-// #endif
-//   //cannot yet get connectivity information for ngon meshes
-//   //NEX_disable_UTest
-//   strcpy(name, "MBMeshGet - Spherical N-gons Redist");
-//   strcpy(failMsg, "FAIL");
-//   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
-// 
-//   // write output to vtk
-//   localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
-//   localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
-//   if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
-//     localrc = mbt_ngon_sph_elno_redist->print_vtk("mbt_ngon_sph_elno_redist");
-// 
-// #if defined ESMF_MOAB
-//   delete mbt_ngon_sph;
-//   if (do_redist) {
-//     delete mbt_ngon_sph_elem_redist;
-//     delete mbt_ngon_sph_node_redist;
-//     delete mbt_ngon_sph_elno_redist;
-//   }
-// #endif
+  // write output to vtk
+#if defined ESMF_MOAB
+  localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
+  localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
+  if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
+    localrc = mbt_mix->print_vtk("mbt_mix");
+#endif
+
+// elem redist 
+#if defined ESMF_MOAB
+  rc = ESMF_SUCCESS;
+  MBMeshTest *mbt_mix_elem_redist;
+  if (do_redist) {
+    rc = ESMF_FAILURE;
+    mbt_mix_elem_redist = new MBMeshTest();
+    if (localrc == ESMF_SUCCESS) localrc = mbt_mix->mbtRedist(mbt_mix_elem_redist);
+    if (localrc == ESMF_SUCCESS) localrc = mbt_mix_elem_redist->build_mbmesh_redist(true, false);
+    if (localrc == ESMF_SUCCESS) rc = mbt_mix_elem_redist->test_redist_info(true, false);
+  }
+#else
+  rc = ESMF_SUCCESS;
+#endif
+  //NEX_disable_UTest
+  strcpy(name, "MBMeshGet - Cartesian Mixed Topology Element Redist");
+  strcpy(failMsg, "FAIL");
+  ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  // write output to vtk
+#if defined ESMF_MOAB
+  localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
+  localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
+  if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
+    localrc = mbt_mix_elem_redist->print_vtk("mbt_mix_elem_redist");
+#endif
+
+// node redist 
+#if defined ESMF_MOAB
+  rc = ESMF_SUCCESS;
+  MBMeshTest *mbt_mix_node_redist;
+  if (do_redist) {
+    rc = ESMF_FAILURE;
+    mbt_mix_node_redist = new MBMeshTest();
+    if (localrc == ESMF_SUCCESS) localrc = mbt_mix->mbtRedist(mbt_mix_node_redist);
+    if (localrc == ESMF_SUCCESS) localrc = mbt_mix_node_redist->build_mbmesh_redist(false, true);
+    if (localrc == ESMF_SUCCESS) rc = mbt_mix_node_redist->test_redist_info(false, true);
+  }
+#else
+  rc = ESMF_SUCCESS;
+#endif
+  //NEX_disable_UTest
+  strcpy(name, "MBMeshGet - Cartesian Mixed Topology Node Redist");
+  strcpy(failMsg, "FAIL");
+  ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  // write output to vtk
+#if defined ESMF_MOAB
+  localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
+  localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
+  if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
+    localrc = mbt_mix_node_redist->print_vtk("mbt_mix_node_redist");
+#endif
+
+// element and node redist 
+#if defined ESMF_MOAB
+  rc = ESMF_SUCCESS;
+  MBMeshTest *mbt_mix_elno_redist;
+  if (do_redist) {
+    rc = ESMF_FAILURE;
+    mbt_mix_elno_redist = new MBMeshTest();
+    if (localrc == ESMF_SUCCESS) localrc = mbt_mix->mbtRedist(mbt_mix_elno_redist);
+    if (localrc == ESMF_SUCCESS) localrc = mbt_mix_elno_redist->build_mbmesh_redist(true, true);
+    if (localrc == ESMF_SUCCESS) rc = mbt_mix_elno_redist->test_redist_info(true, true);
+  }
+#else
+  rc = ESMF_SUCCESS;
+#endif
+  //NEX_disable_UTest
+  strcpy(name, "MBMeshGet - Cartesian Mixed Topology Element and Node Redist");
+  strcpy(failMsg, "FAIL");
+  ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  // write output to vtk
+#if defined ESMF_MOAB
+  localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
+  localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
+  if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
+    localrc = mbt_mix_elno_redist->print_vtk("mbt_mix_elno_redist");
+#endif
+
+#if defined ESMF_MOAB
+  delete mbt_mix;
+  if (do_redist) {
+    delete mbt_mix_elem_redist;
+    delete mbt_mix_node_redist;
+    delete mbt_mix_elno_redist;
+  }
+#endif
+
+  // --------------------------------------------------------------------------
+  //  mixed spherical
+  // --------------------------------------------------------------------------
+#if defined ESMF_MOAB
+  rc = ESMF_FAILURE;
+  MBMeshTest *mbt_mix_sph = mbmesh_gen_mix_2d_sph(localrc, do_redist);
+  if (localrc == ESMF_SUCCESS) localrc = mbt_mix_sph->build_mbmesh();
+  if (localrc == ESMF_SUCCESS) rc = mbt_mix_sph->test_get_info();
+#else
+  rc = ESMF_SUCCESS;
+#endif
+  //NEX_disable_UTest
+  strcpy(name, "MBMeshGet - Spherical Mixed Topology");
+  strcpy(failMsg, "FAIL");
+  ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  // write output to vtk
+#if defined ESMF_MOAB
+  localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
+  localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
+  if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
+    localrc = mbt_mix_sph->print_vtk("mbt_mix_sph");
+#endif
+
+// elem redist
+#if defined ESMF_MOAB
+  rc = ESMF_SUCCESS;
+  MBMeshTest *mbt_mix_sph_elem_redist;
+  if (do_redist) {
+    rc = ESMF_FAILURE;
+    mbt_mix_sph_elem_redist = new MBMeshTest();
+    if (localrc == ESMF_SUCCESS) localrc = mbt_mix_sph->mbtRedist(mbt_mix_sph_elem_redist);
+    if (localrc == ESMF_SUCCESS) localrc = mbt_mix_sph_elem_redist->build_mbmesh_redist(true, false);
+    if (localrc == ESMF_SUCCESS) rc = mbt_mix_sph_elem_redist->test_redist_info(true, false);
+  }
+#else
+  rc = ESMF_SUCCESS;
+#endif
+  //NEX_disable_UTest
+  strcpy(name, "MBMeshGet - Spherical Mixed Topology Element Redist");
+  strcpy(failMsg, "FAIL");
+  ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  // write output to vtk
+#if defined ESMF_MOAB
+  localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
+  localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
+  if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
+    localrc = mbt_mix_sph_elem_redist->print_vtk("mbt_mix_sph_elem_redist");
+#endif
+
+// node redist
+#if defined ESMF_MOAB
+  rc = ESMF_SUCCESS;
+  MBMeshTest *mbt_mix_sph_node_redist;
+  if (do_redist) {
+    rc = ESMF_FAILURE;
+    mbt_mix_sph_node_redist = new MBMeshTest();
+    if (localrc == ESMF_SUCCESS) localrc = mbt_mix_sph->mbtRedist(mbt_mix_sph_node_redist);
+    if (localrc == ESMF_SUCCESS) localrc = mbt_mix_sph_node_redist->build_mbmesh_redist(false, true);
+    if (localrc == ESMF_SUCCESS) rc = mbt_mix_sph_node_redist->test_redist_info(false, true);
+  }
+#else
+  rc = ESMF_SUCCESS;
+#endif
+  //NEX_disable_UTest
+  strcpy(name, "MBMeshGet - Spherical Mixed Topology Node Redist");
+  strcpy(failMsg, "FAIL");
+  ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  // write output to vtk
+#if defined ESMF_MOAB
+  localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
+  localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
+  if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
+    localrc = mbt_mix_sph_node_redist->print_vtk("mbt_mix_sph_node_redist");
+#endif
+
+// elem and node redist
+#if defined ESMF_MOAB
+  rc = ESMF_SUCCESS;
+  MBMeshTest *mbt_mix_sph_elno_redist;
+  if (do_redist) {
+    rc = ESMF_FAILURE;
+    mbt_mix_sph_elno_redist = new MBMeshTest();
+    if (localrc == ESMF_SUCCESS) localrc = mbt_mix_sph->mbtRedist(mbt_mix_sph_elno_redist);
+    if (localrc == ESMF_SUCCESS) localrc = mbt_mix_sph_elno_redist->build_mbmesh_redist(true, true);
+    if (localrc == ESMF_SUCCESS) rc = mbt_mix_sph_elno_redist->test_redist_info(true, true);
+  }
+#else
+  rc = ESMF_SUCCESS;
+#endif
+  //NEX_disable_UTest
+  strcpy(name, "MBMeshGet - Spherical Mixed Topology Element and Node Redist");
+  strcpy(failMsg, "FAIL");
+  ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  // write output to vtk
+#if defined ESMF_MOAB
+  localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
+  localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
+  if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
+    localrc = mbt_mix_sph_elno_redist->print_vtk("mbt_mix_sph_elno_redist");
+#endif
+
+#if defined ESMF_MOAB
+  delete mbt_mix_sph;
+  if (do_redist) {
+    delete mbt_mix_sph_elem_redist;
+    delete mbt_mix_sph_node_redist;
+    delete mbt_mix_sph_elno_redist;
+  }
+#endif
+
+  // --------------------------------------------------------------------------
+  // mbmesh_gen_ngon_2d_cart
+  // --------------------------------------------------------------------------
+#if defined ESMF_MOAB
+  rc = ESMF_FAILURE;
+  MBMeshTest *mbt_ngon = mbmesh_gen_ngon_2d_cart(localrc, do_redist);
+  if (localrc == ESMF_SUCCESS) localrc = mbt_ngon->build_mbmesh();
+  if (localrc == ESMF_SUCCESS) rc = mbt_ngon->test_get_info();
+#else
+  rc = ESMF_SUCCESS;
+#endif
+  //cannot yet get connectivity information for ngon meshes
+  //NEX_disable_UTest
+  strcpy(name, "MBMeshGet - Cartesian N-gons");
+  strcpy(failMsg, "FAIL");
+  ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  // write output to vtk
+#if defined ESMF_MOAB
+  localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
+  localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
+  if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
+    localrc = mbt_ngon->print_vtk("mbt_ngon");
+#endif
+
+// redist
+#if defined ESMF_MOAB
+  rc = ESMF_SUCCESS;
+  MBMeshTest *mbt_ngon_elem_redist;
+  if (do_redist) {
+    rc = ESMF_FAILURE;
+    mbt_ngon_elem_redist = new MBMeshTest();
+    if (localrc == ESMF_SUCCESS) localrc = mbt_ngon->mbtRedist(mbt_ngon_elem_redist);
+    if (localrc == ESMF_SUCCESS) localrc = mbt_ngon_elem_redist->build_mbmesh_redist(true, false);
+    if (localrc == ESMF_SUCCESS) rc = mbt_ngon_elem_redist->test_redist_info(true, false);
+  }
+#else
+  rc = ESMF_SUCCESS;
+#endif
+  //cannot yet get connectivity information for ngon meshes
+  //NEX_disable_UTest
+  strcpy(name, "MBMeshGet - Cartesian N-gons Element Redist");
+  strcpy(failMsg, "FAIL");
+  ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  // write output to vtk
+#if defined ESMF_MOAB
+  localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
+  localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
+  if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
+    localrc = mbt_ngon_elem_redist->print_vtk("mbt_ngon_elem_redist");
+#endif
+
+#if defined ESMF_MOAB
+  rc = ESMF_SUCCESS;
+  MBMeshTest *mbt_ngon_node_redist;
+  if (do_redist) {
+    rc = ESMF_FAILURE;
+    mbt_ngon_node_redist = new MBMeshTest();
+    if (localrc == ESMF_SUCCESS) localrc = mbt_ngon->mbtRedist(mbt_ngon_node_redist);
+    if (localrc == ESMF_SUCCESS) localrc = mbt_ngon_node_redist->build_mbmesh_redist(false, true);
+    if (localrc == ESMF_SUCCESS) rc = mbt_ngon_node_redist->test_redist_info(false, true);
+  }
+#else
+  rc = ESMF_SUCCESS;
+#endif
+  //cannot yet get connectivity information for ngon meshes
+  //NEX_disable_UTest
+  strcpy(name, "MBMeshGet - Cartesian N-gons Node Redist");
+  strcpy(failMsg, "FAIL");
+  ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  // write output to vtk
+#if defined ESMF_MOAB
+  localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
+  localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
+  if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
+    localrc = mbt_ngon_node_redist->print_vtk("mbt_ngon_node_redist");
+#endif
+
+#if defined ESMF_MOAB
+  rc = ESMF_SUCCESS;
+  MBMeshTest *mbt_ngon_elno_redist;
+  if (do_redist) {
+    rc = ESMF_FAILURE;
+    mbt_ngon_elno_redist = new MBMeshTest();
+    if (localrc == ESMF_SUCCESS) localrc = mbt_ngon->mbtRedist(mbt_ngon_elno_redist);
+    if (localrc == ESMF_SUCCESS) localrc = mbt_ngon_elno_redist->build_mbmesh_redist(true, true);
+    if (localrc == ESMF_SUCCESS) rc = mbt_ngon_elno_redist->test_redist_info(true, true);
+  }
+#else
+  rc = ESMF_SUCCESS;
+#endif
+  //cannot yet get connectivity information for ngon meshes
+  //NEX_disable_UTest
+  strcpy(name, "MBMeshGet - Cartesian N-gons Element and Node Redist");
+  strcpy(failMsg, "FAIL");
+  ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  // write output to vtk
+#if defined ESMF_MOAB
+  localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
+  localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
+  if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
+    localrc = mbt_ngon_elno_redist->print_vtk("mbt_ngon_elno_redist");
+#endif
+
+#if defined ESMF_MOAB
+  delete mbt_ngon;
+  if (do_redist) {
+    delete mbt_ngon_elem_redist;
+    delete mbt_ngon_node_redist;
+    delete mbt_ngon_elno_redist;
+  }
+#endif
+
+  // --------------------------------------------------------------------------
+  // mbmesh_gen_ngon_2d_sph
+  // --------------------------------------------------------------------------
+#if defined ESMF_MOAB
+  rc = ESMF_FAILURE;
+  MBMeshTest *mbt_ngon_sph = mbmesh_gen_ngon_2d_sph(localrc, do_redist);
+  if (localrc == ESMF_SUCCESS) localrc = mbt_ngon_sph->build_mbmesh();
+  if (localrc == ESMF_SUCCESS) rc = mbt_ngon_sph->test_get_info();
+#else
+  rc = ESMF_SUCCESS;
+#endif
+  //cannot yet get connectivity information for ngon meshes
+  //NEX_disable_UTest
+  strcpy(name, "MBMeshGet - Spherical N-gons");
+  strcpy(failMsg, "FAIL");
+  ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  // write output to vtk
+#if defined ESMF_MOAB
+  localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
+  localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
+  if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
+    localrc = mbt_ngon_sph->print_vtk("mbt_ngon_sph");
+#endif
+
+// redist
+#if defined ESMF_MOAB
+  rc = ESMF_SUCCESS;
+  MBMeshTest *mbt_ngon_sph_elem_redist;
+  if (do_redist) {
+    rc = ESMF_FAILURE;
+    mbt_ngon_sph_elem_redist = new MBMeshTest();
+    if (localrc == ESMF_SUCCESS) localrc = mbt_ngon_sph->mbtRedist(mbt_ngon_sph_elem_redist);
+    if (localrc == ESMF_SUCCESS) localrc = mbt_ngon_sph_elem_redist->build_mbmesh_redist(true, false);
+    if (localrc == ESMF_SUCCESS) rc = mbt_ngon_sph_elem_redist->test_redist_info(true, false);
+  }
+#else
+  rc = ESMF_SUCCESS;
+#endif
+  //cannot yet get connectivity information for ngon meshes
+  //NEX_disable_UTest
+  strcpy(name, "MBMeshGet - Spherical N-gons Element Redist");
+  strcpy(failMsg, "FAIL");
+  ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  // write output to vtk
+#if defined ESMF_MOAB
+  localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
+  localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
+  if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
+    localrc = mbt_ngon_sph_elem_redist->print_vtk("mbt_ngon_sph_elem_redist");
+#endif
+
+#if defined ESMF_MOAB
+  rc = ESMF_SUCCESS;
+  MBMeshTest *mbt_ngon_sph_node_redist;
+  if (do_redist) {
+    rc = ESMF_FAILURE;
+    mbt_ngon_sph_node_redist = new MBMeshTest();
+    if (localrc == ESMF_SUCCESS) localrc = mbt_ngon_sph->mbtRedist(mbt_ngon_sph_node_redist);
+    if (localrc == ESMF_SUCCESS) localrc = mbt_ngon_sph_node_redist->build_mbmesh_redist(false, true);
+    if (localrc == ESMF_SUCCESS) rc = mbt_ngon_sph_node_redist->test_redist_info(false, true);
+  }
+#else
+  rc = ESMF_SUCCESS;
+#endif
+  //cannot yet get connectivity information for ngon meshes
+  //NEX_disable_UTest
+  strcpy(name, "MBMeshGet - Spherical N-gons Node Redist");
+  strcpy(failMsg, "FAIL");
+  ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  // write output to vtk
+#if defined ESMF_MOAB
+  localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
+  localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
+  if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
+    localrc = mbt_ngon_sph_node_redist->print_vtk("mbt_ngon_sph_node_redist");
+#endif
+
+#if defined ESMF_MOAB
+  rc = ESMF_SUCCESS;
+  MBMeshTest *mbt_ngon_sph_elno_redist;
+  if (do_redist) {
+    rc = ESMF_FAILURE;
+    mbt_ngon_sph_elno_redist = new MBMeshTest();
+    if (localrc == ESMF_SUCCESS) localrc = mbt_ngon_sph->mbtRedist(mbt_ngon_sph_elno_redist);
+    if (localrc == ESMF_SUCCESS) localrc = mbt_ngon_sph_elno_redist->build_mbmesh_redist(true, true);
+    if (localrc == ESMF_SUCCESS) rc = mbt_ngon_sph_elno_redist->test_redist_info(true, true);
+  }
+#else
+  rc = ESMF_SUCCESS;
+#endif
+  //cannot yet get connectivity information for ngon meshes
+  //NEX_disable_UTest
+  strcpy(name, "MBMeshGet - Spherical N-gons Redist");
+  strcpy(failMsg, "FAIL");
+  ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  // write output to vtk
+#if defined ESMF_MOAB
+  localrc = ESMC_VMReduce(vm, &rc, &globalpass, 1, &i4, &sum, 0);
+  localrc = ESMC_VMBroadcast(vm, &globalpass, 1, &i4, 0);
+  if ((localrc == ESMF_SUCCESS) && (globalpass == 0) && writevtk)
+    localrc = mbt_ngon_sph_elno_redist->print_vtk("mbt_ngon_sph_elno_redist");
+#endif
+
+#if defined ESMF_MOAB
+  delete mbt_ngon_sph;
+  if (do_redist) {
+    delete mbt_ngon_sph_elem_redist;
+    delete mbt_ngon_sph_node_redist;
+    delete mbt_ngon_sph_elno_redist;
+  }
+#endif
 
 
   //----------------------------------------------------------------------------

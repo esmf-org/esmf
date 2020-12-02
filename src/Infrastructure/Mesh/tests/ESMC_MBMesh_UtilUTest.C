@@ -130,6 +130,26 @@ int main(int argc, char *argv[]) {
 #endif
 
   //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Throw an error from the MBMesh");
+  strcpy(failMsg, "Did not return ESMC_RC_ARG_SIZE");
+#if defined ESMF_MOAB
+  int localrc;
+  MBMesh *mesh = create_mesh_halfway(localrc);
+  if (localrc == ESMF_SUCCESS) {
+    int elemIds[1];
+    InterArray<int> *eii = new InterArray<int>(elemIds,1);
+    MBMesh_GetElemCreateInfo(mesh, eii, NULL, NULL, NULL, NULL, NULL, &rc);
+    delete eii;
+  }
+#else
+  rc = ESMC_RC_ARG_SIZE;
+#endif
+  ESMC_Test((rc==ESMC_RC_ARG_SIZE), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+
+  //----------------------------------------------------------------------------
   ESMC_TestEnd(__FILE__, __LINE__, 0);
 
   return 0;

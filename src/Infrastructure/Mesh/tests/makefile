@@ -20,7 +20,6 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMCI_IntegrateUTest \
                $(ESMF_TESTDIR)/ESMC_MBMesh_BilinearEdgeCases3DUTest \
                $(ESMF_TESTDIR)/ESMC_MBMesh_CreateUTest \
                $(ESMF_TESTDIR)/ESMC_MBMesh_CreateParUTest \
-               $(ESMF_TESTDIR)/ESMC_MBMesh_ErrorUTest \
                $(ESMF_TESTDIR)/ESMC_MBMesh_ExtrapolateUTest \
                $(ESMF_TESTDIR)/ESMC_MBMesh_GlueUTest \
                $(ESMF_TESTDIR)/ESMC_MBMesh_RedistUTest \
@@ -36,7 +35,6 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMCI_IntegrateUTest \
 
 # TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_MBMesh_GlueUTest
 # TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_MeshUTest
-# TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_MBMesh_ErrorUTest
 
 # not quite ready for primetime
                # $(ESMF_TESTDIR)/ESMC_MBMesh_DualUTest \
@@ -69,9 +67,6 @@ TESTS_RUN     = RUN_ESMCI_IntegrateUTest \
 #                RUN_ESMC_MBMesh_RendezvousUTest \
 #                RUN_ESMC_MBMesh_RendezvousParUTest \
 
-# this test needs some refinement
-                # RUN_ESMC_MBMesh_ErrorUTest \
-
 
 TESTS_RUN_UNI = RUN_ESMCI_IntegrateUTestUNI \
                 RUN_ESMC_MeshUTestUNI \
@@ -93,9 +88,6 @@ TESTS_RUN_UNI = RUN_ESMCI_IntegrateUTestUNI \
 # this test is not complete, should test both elem and node rendezvous 
 #   current version fails in uni on electra intel
 #                RUN_ESMC_MBMesh_RendezvousUTestUNI \
-
-# this test needs some refinement
-                # RUN_ESMC_MBMesh_ErrorUTestUNI \
 
 
 include ${ESMF_DIR}/makefile
@@ -228,16 +220,6 @@ RUN_ESMC_MBMesh_GlueUTest:
 
 RUN_ESMC_MBMesh_GlueParUTest:
 	$(MAKE) TNAME=MBMesh_GluePar NP=4 ctest
-
-
-RUN_ESMC_MBMesh_ErrorUTestUNI:
-	$(MAKE) TNAME=MBMesh_Error NP=1 ctest
-
-RUN_ESMC_MBMesh_ErrorUTest:
-	$(MAKE) TNAME=MBMesh_Error NP=4 ctest
-
-RUN_ESMC_MBMesh_ErrorParUTest:
-	$(MAKE) TNAME=MBMesh_ErrorPar NP=4 ctest
 
 
 RUN_ESMC_MBMesh_RendezvousUTest:
