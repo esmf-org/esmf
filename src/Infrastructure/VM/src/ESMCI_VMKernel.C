@@ -334,10 +334,9 @@ bool VMK::isSsiSharedMemoryEnabled(){
 }
 
     
-void VMK::init(MPI_Comm mpiCommunicator){
-  // initialize the physical machine and a default (all MPI) virtual machine
-  // initialize signal handling -> this MUST happen before MPI_Init is called!!
+void VMK::InitPreMPI(){
 #if !defined (ESMF_NO_SIGNALS)
+  // initialize signal handling -> this MUST happen before MPI_Init is called!!
   struct sigaction action;
   action.sa_handler = SIG_DFL;
   action.sa_flags   = 0;
@@ -348,6 +347,11 @@ void VMK::init(MPI_Comm mpiCommunicator){
   sigaddset(&sigs_to_block, VM_SIG1);
   sigprocmask(SIG_BLOCK, &sigs_to_block, NULL); // block VM_SIG1
 #endif
+}
+
+
+void VMK::init(MPI_Comm mpiCommunicator){
+  // initialize the physical machine and a default (all MPI) virtual machine
   // obtain command line arguments and store in the VM class
   argc = 0; // reset
   for (int k=0; k<100; k++)
@@ -363,6 +367,7 @@ void VMK::init(MPI_Comm mpiCommunicator){
   MPI_Initialized(&mpi_init_outside_esmf);
 #ifndef ESMF_MPIUNI
   if (!mpi_init_outside_esmf){
+    InitPreMPI(); // must call before MPI is initialized
 #ifdef ESMF_MPICH
     // MPICH1.2 is not standard compliant and needs valid args
     // make copy of argc and argv for MPICH because it modifies them and

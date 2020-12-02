@@ -1116,6 +1116,17 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
+  void FTN_X(c_esmc_vminitializeprempi)(int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vminitializeprempi()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    ESMCI::VMK::InitPreMPI();
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
   void FTN_X(c_esmc_vminitialize)(ESMCI::VM **vm, int *mpiCommunicator, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vminitialize()"

@@ -326,6 +326,8 @@ class VMK{
     void commqueueitem_link(commhandle *commh);
     int  commqueueitem_unlink(commhandle *commh);
   public:
+    static void InitPreMPI();
+      // initialization step before MPI is initialized
     void init(MPI_Comm mpiCommunicator=MPI_COMM_WORLD);
       // initialize the physical machine and a default (all MPI) virtual machine
     void finalize(int finalizeMpi=1);
