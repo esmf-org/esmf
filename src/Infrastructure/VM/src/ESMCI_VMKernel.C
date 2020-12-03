@@ -122,6 +122,7 @@ namespace ESMCI {
 MPI_Comm VMK::default_mpi_c;
 int VMK::mpi_thread_level;
 int VMK::mpi_init_outside_esmf;
+int VMK::pre_mpi_init = 0;
 int VMK::nssiid;
 int VMK::ncores;
 int *VMK::cpuid;
@@ -347,6 +348,7 @@ void VMK::InitPreMPI(){
   sigaddset(&sigs_to_block, VM_SIG1);
   sigprocmask(SIG_BLOCK, &sigs_to_block, NULL); // block VM_SIG1
 #endif
+  pre_mpi_init = 1; // set flag
 }
 
 
@@ -1171,11 +1173,11 @@ static void *vmk_sigcatcher(void *arg){
   vmkt->arg = (void *)&pid;
   // more preparation
   VMK vm;  // need a handle to a VM object to access the static members
-  if (vm.mpi_init_outside_esmf){
+  if (!vm.pre_mpi_init){
     int localrc;
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "Cannot safely use signals inside VMKernel when MPI was initialized "
-      "outside of ESMF.", ESMC_CONTEXT, &localrc);
+      "Cannot safely use signals inside VMKernel because signal handling was "
+      "not installed before MPI was initialized.", ESMC_CONTEXT, &localrc);
     throw localrc;  // bail out with exception
   }
 #ifdef ESMF_NO_SIGNALS
