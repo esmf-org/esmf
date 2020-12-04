@@ -30,6 +30,8 @@
 #include <iterator>
 #include <vector>
 #include <cstring>
+#include <random>
+// #include <functional>
 
 #if !defined (M_PI)
 // for Windows...
@@ -163,7 +165,7 @@ class MBMeshTest {
 
     std::map<std::string, std::function<int(void)>>  function_map;
 
-    MBMeshTest(int _pdim, int _sdim, ESMC_CoordSys_Flag _coord_sys, int _num_node, int _num_elem, int _num_elem_conn, int _redist_num_node=0, int _redist_num_elem=0, int _redist_num_elem_conn=0) {
+    MBMeshTest(int _pdim, int _sdim, ESMC_CoordSys_Flag _coord_sys, int _num_node, int _num_elem, int _num_elem_conn, int _redist_num_node, int _redist_num_elem, int _redist_num_elem_conn) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MBMeshTest()"
       try {
@@ -189,14 +191,21 @@ class MBMeshTest {
         elemMask.reserve(_num_elem);
         elemArea.reserve(_num_elem);
 
-        std::generate(nodeMask.begin(), nodeMask.end(), std::rand);
-        std::generate(elemMask.begin(), elemMask.end(), std::rand);
-        std::generate(elemArea.begin(), elemArea.end(), std::rand);
+        // generate random numbers to fill mask and area vectors
+        std::uniform_int_distribution<int> distribution_int(0, 42);
+        std::uniform_real_distribution<double> distribution_real(0.0f, 42.0f);
+        std::mt19937 engine; // Mersenne twister MT19937
+        auto generator_int = std::bind(distribution_int, engine);
+        auto generator_real = std::bind(distribution_real, engine);
+
+        std::generate_n(nodeMask.begin(), _num_node, generator_int);
+        std::generate_n(elemMask.begin(), _num_elem, generator_int);
+        std::generate_n(elemArea.begin(), _num_elem, generator_real);
 
         redist_num_node = _redist_num_node;
         redist_num_elem = _redist_num_elem;
         redist_num_elem_conn = _redist_num_elem_conn;
-        if (_redist_num_node == 0) {
+        if (_redist_num_node > 0) {
           redist_nodeId.reserve(_redist_num_node);
           redist_nodeCoord.reserve(_redist_num_node*_sdim);
           redist_nodeOwner.reserve(_redist_num_node);
@@ -204,9 +213,14 @@ class MBMeshTest {
           redist_elemType.reserve(_redist_num_elem);
           redist_elemConn.reserve(_redist_num_elem_conn);
           redist_elemCoord.reserve(_redist_num_elem*_sdim);
+          
           redist_nodeMask.reserve(_redist_num_node);
           redist_elemMask.reserve(_redist_num_elem);
           redist_elemArea.reserve(_redist_num_elem);
+
+          std::generate_n(redist_nodeMask.begin(), _redist_num_node, generator_int);
+          std::generate_n(redist_elemMask.begin(), _redist_num_elem, generator_int);
+          std::generate_n(redist_elemArea.begin(), _redist_num_elem, generator_real);
         }
         
         function_map["get"] = std::bind(&MBMeshTest::get, this);
