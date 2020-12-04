@@ -143,9 +143,9 @@ int main(int argc, char *argv[]) {
     delete eii;
   }
 #else
-  rc = ESMC_RC_ARG_SIZE;
+  rc = ESMC_RC_MOAB_ERROR;
 #endif
-  ESMC_Test((rc==ESMC_RC_ARG_SIZE), name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test((rc==ESMC_RC_MOAB_ERROR), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
 
