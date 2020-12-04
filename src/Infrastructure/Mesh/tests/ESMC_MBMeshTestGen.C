@@ -56,12 +56,6 @@ MBMeshTest *quad_2d_cart(int &rc){
   //
   //       0.0       1.0        2.0
   //
-  //      Node Ids at corners
-  //      Element Ids in centers
-  //
-  //
-  //      ( Everything owned by PET 0)
-  //
 
   rc = ESMF_RC_NOT_IMPL;
   MBMeshTest *mbt = NULL;
@@ -139,15 +133,12 @@ MBMeshTest *quad_2d_cart(int &rc){
                         0.0,1.0, 1.0,1.0, 2.0,1.0,
                         0.0,2.0, 1.0,2.0, 2.0,2.0};
       mbt->nodeOwner = {0,0,0,0,0,0,0,0,0};
-      mbt->nodeMask = {1,1,1,1,1,1,1,1,1};
   
       mbt->elemId = {1,2,3,4};
       mbt->elemType = {ESMC_MESHELEMTYPE_QUAD,
                        ESMC_MESHELEMTYPE_QUAD,
                        ESMC_MESHELEMTYPE_QUAD,
                        ESMC_MESHELEMTYPE_QUAD};
-      mbt->elemMask = {1,1,1,1};
-      mbt->elemArea = {1.0,2.0,3.0,4.0};
       mbt->elemConn = {1,2,5,4,
                        2,3,6,5,
                        4,5,8,7,
@@ -245,7 +236,6 @@ MBMeshTest *quad_2d_cart(int &rc){
 
 MBMeshTest *quad_2d_sph(int &rc){
   //
-  //
   //  pi/5  7 ------- 8 -------- 9
   //        |         |          |
   //        |    3    |    4     |
@@ -257,12 +247,6 @@ MBMeshTest *quad_2d_sph(int &rc){
   //  0.0   1 ------- 2 -------- 3
   //
   //       0.0       pi/10       pi/5
-  //
-  //      Node Ids at corners
-  //      Element Ids in centers
-  //
-  //
-  //      ( Everything owned by PET 0)
   //
 #undef ESMC_METHOD
 #define ESMC_METHOD "mbmesh_gen_quad_2d_sph"
@@ -291,6 +275,292 @@ MBMeshTest *quad_2d_sph(int &rc){
 
     int localrc;
     mbt = quad_2d_cart(localrc);
+    ESMC_CHECK_THROW(localrc)
+
+    mbt->name = ESMC_METHOD;
+
+    std::for_each(mbt->nodeCoord.begin(), mbt->nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
+    std::for_each(mbt->elemCoord.begin(), mbt->elemCoord.end(), [&c2s](double &d) {d*=c2s;});
+
+    std::for_each(mbt->redist_nodeCoord.begin(), mbt->redist_nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
+    std::for_each(mbt->redist_elemCoord.begin(), mbt->redist_elemCoord.end(), [&c2s](double &d) {d*=c2s;});
+
+    mbt->coord_sys=ESMC_COORDSYS_SPH_RAD;
+
+  } CATCH_MBMESHTEST_RETURN_NULL(&rc)
+
+  rc = ESMF_SUCCESS;
+  return mbt;
+}
+
+MBMeshTest* tri_2d_cart(int &rc) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "tri_2d_cart"
+  //
+  //  2.0   7 ------- 8 -------- 9
+  //        |  \   6  |  7    /  |
+  //        |    \    |    /     |
+  //        |  5   \  | /     8  |
+  //  1.0   4 ------- 5 -------- 6
+  //        |  1    / |  \    4  |
+  //        |     /   |    \     |
+  //        |  /   2  |  3   \   |
+  //  0.0   1 ------- 2 -------- 3
+  //
+  //       0.0       1.0        2.0
+  //
+
+  rc = ESMF_RC_NOT_IMPL;
+  MBMeshTest *mbt = NULL;
+
+  try {
+
+    // Get parallel information
+    int localPet, petCount;
+    ESMC_VM vm;
+    vm=ESMC_VMGetGlobal(&rc);
+    ESMC_CHECK_THROW(rc)
+
+    rc=ESMC_VMGet(vm, &localPet, &petCount, (int *)NULL, (MPI_Comm *)NULL,
+                  (int *)NULL, (int *)NULL);
+    ESMC_CHECK_THROW(rc)
+
+    if (petCount !=1 && petCount != 4)
+      Throw () << "Must be run with 1 or 4 cores.";
+
+    int pdim = 2;
+    int sdim = 2;
+    ESMC_CoordSys_Flag coord_sys=ESMC_COORDSYS_CART;
+
+    int num_node = 0;
+    int num_elem = 0;
+    int num_elem_conn = 0;
+    int redist_num_node = 0;
+    int redist_num_elem = 0;
+    int redist_num_elem_conn = 0;
+
+    if (petCount == 1) {
+      num_elem = 8;
+      num_node = 9;
+      num_elem_conn = 3*num_elem;
+
+    } else if (petCount == 4) {
+      if (localPet == 0) {
+        num_elem = 2;
+        num_node = 3;
+        num_elem_conn = 6;
+        redist_num_elem = 2;
+        redist_num_node = 3;
+        redist_num_elem_conn = 6;
+      } else if (localPet == 1) {
+        num_elem = 2;
+        num_node = 3;
+        num_elem_conn = 6;
+        redist_num_elem = 2;
+        redist_num_node = 3;
+        redist_num_elem_conn = 6;
+      } else if (localPet == 2) {
+        num_elem = 2;
+        num_node = 3;
+        num_elem_conn = 6;
+        redist_num_elem = 2;
+        redist_num_node = 3;
+        redist_num_elem_conn = 6;
+      } else if (localPet == 3) {
+        num_elem = 2;
+        num_node = 3;
+        num_elem_conn = 6;
+        redist_num_elem = 2;
+        redist_num_node = 3;
+        redist_num_elem_conn = 6;
+      }
+    }
+
+    mbt = new MBMeshTest(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist_num_node, redist_num_elem, redist_num_elem_conn);
+
+    mbt->name = ESMC_METHOD;
+
+    if (petCount == 1) {
+        mbt->nodeId = {1,2,3,4,5,6,7,8,9};
+        mbt->nodeCoord = {0.0,0.0, 1.0,0.0, 2.0,0.0,
+                          0.0,1.0, 1.0,1.0, 2.0,1.0,
+                          0.0,2.0, 1.0,2.0, 2.0,2.0};
+        mbt->nodeOwner = {0,0,0,0,0,0,0,0,0};
+        mbt->elemId = {1,2,3,4,5,6,7,8};
+        mbt->elemType = {ESMC_MESHELEMTYPE_TRI,
+                         ESMC_MESHELEMTYPE_TRI,
+                         ESMC_MESHELEMTYPE_TRI,
+                         ESMC_MESHELEMTYPE_TRI,
+                         ESMC_MESHELEMTYPE_TRI,
+                         ESMC_MESHELEMTYPE_TRI,
+                         ESMC_MESHELEMTYPE_TRI,
+                         ESMC_MESHELEMTYPE_TRI};
+        mbt->elemConn = {1,5,4,
+                         1,2,5,
+                         3,5,2,
+                         3,6,5,
+                         5,7,4,
+                         5,8,7,
+                         9,8,5,
+                         9,5,6};
+        mbt->elemCoord = {0.1,0.9, 0.9,0.1, 1.1,0.1, 1.9,0.9,
+                          0.1,1.1, 0.9,1.9, 1.1,1.9, 1.9,0.9};
+
+    } else if (petCount == 4) {
+      if (localPet == 0) {
+        mbt->nodeId = {1,2,4,5};
+        mbt->nodeCoord = {0.0,0.0, 1.0,0.0,
+                          0.0,1.0, 1.0,1.0};
+        mbt->nodeOwner = {0,0,0,0};
+        mbt->elemId = {1,2};
+        mbt->elemType = {ESMC_MESHELEMTYPE_TRI,
+                         ESMC_MESHELEMTYPE_TRI};
+        mbt->elemConn = {1,2,3,
+                         2,4,3};
+        mbt->elemCoord = {0.9,0.1, 0.1,0.9};
+      } else if (localPet == 1) {
+        mbt->nodeId = {2,3,5,6};
+        mbt->nodeCoord = {1.0,0.0, 2.0,0.0,
+                          1.0,1.0, 2.0,1.0};
+        mbt->nodeOwner = {0,1,0,1};
+        mbt->elemId = {3,4};
+        mbt->elemType = {ESMC_MESHELEMTYPE_TRI,
+                         ESMC_MESHELEMTYPE_TRI};
+        mbt->elemConn = {1,2,3,
+                         2,4,3};
+        mbt->elemCoord = {1.1,0.1, 1.9,0.9};
+      } else if (localPet == 2) {
+        mbt->nodeId = {4,5,7,8};
+        mbt->nodeCoord = {0.0,1.0, 1.0,1.0,
+                          0.0,2.0, 1.0,2.0};
+        mbt->nodeOwner = {0,0,2,2};
+        mbt->elemId = {5,6};
+        mbt->elemType = {ESMC_MESHELEMTYPE_TRI,
+                         ESMC_MESHELEMTYPE_TRI};
+        mbt->elemConn = {1,2,3,
+                         2,4,3};
+        mbt->elemCoord = {0.1,1.1, 0.9,1.9};
+      } else if (localPet == 3) {
+        mbt->nodeId = {5,6,8,9};
+        mbt->nodeCoord = {1.0,1.0, 2.0,1.0,
+                          1.0,2.0, 2.0,2.0};
+        mbt->nodeOwner = {0,1,2,3};
+        mbt->elemId = {7,8};
+        mbt->elemType = {ESMC_MESHELEMTYPE_TRI,
+                         ESMC_MESHELEMTYPE_TRI};
+        mbt->elemConn = {1,2,3,
+                         2,4,3};
+        mbt->elemCoord = {1.1,1.9, 1.9,0.9};
+      }
+
+      // redist
+      if (localPet == 0) {
+        mbt->redist_nodeId_in ={5,6,8,9};
+        mbt->redist_elemId_in = {7,8};
+
+        mbt->redist_nodeId = {5,6,8,9};
+        mbt->redist_nodeCoord = {1.0,1.0, 2.0,1.0,
+                                 1.0,2.0, 2.0,2.0};
+        mbt->redist_nodeOwner = {0,0,0,0};
+        mbt->redist_elemId = {7,8};
+        mbt->redist_elemType = {ESMC_MESHELEMTYPE_TRI,
+                                ESMC_MESHELEMTYPE_TRI};
+        mbt->redist_elemConn = {1,2,3,
+                                2,4,3};
+        mbt->redist_elemCoord = {1.1,1.9, 1.9,0.9};
+      } else if (localPet == 1) {
+        mbt->redist_nodeId_in ={4,5,7,8};
+        mbt->redist_elemId_in = {5,6};
+
+        mbt->redist_nodeId = {4,5,7,8};
+        mbt->redist_nodeCoord = {0.0,1.0, 1.0,1.0,
+                                 0.0,2.0, 1.0,2.0};
+        mbt->redist_nodeOwner = {1,0,1,0};
+        mbt->redist_elemId = {5,6};
+        mbt->redist_elemType = {ESMC_MESHELEMTYPE_TRI,
+                                ESMC_MESHELEMTYPE_TRI};
+        mbt->redist_elemConn = {1,2,3,
+                                2,4,3};
+        mbt->redist_elemCoord = {0.1,1.1, 0.9,1.9};
+      } else if (localPet == 2) {
+        mbt->redist_nodeId_in ={2,3,5,6};
+        mbt->redist_elemId_in = {3,4};
+
+        mbt->redist_nodeId = {2,3,5,6};
+        mbt->redist_nodeCoord = {1.0,0.0, 2.0,0.0,
+                                 1.0,1.0, 2.0,1.0};
+        mbt->redist_nodeOwner = {2,2,0,0};
+        mbt->redist_elemId = {3,4};
+        mbt->redist_elemType = {ESMC_MESHELEMTYPE_TRI,
+                                ESMC_MESHELEMTYPE_TRI};
+        mbt->redist_elemConn = {1,2,3,
+                                2,4,3};
+        mbt->redist_elemCoord = {0.1,0.9, 0.9,0.1, 1.1,0.1, 1.9,0.9,
+                                 0.1,1.1, 0.9,1.9, 1.1,1.9, 1.9,0.9};
+      } else if (localPet == 3) {
+        mbt->redist_nodeId_in ={1,2,4,5};
+        mbt->redist_elemId_in = {1,2};
+
+        mbt->redist_nodeId = {1,2,4,5};
+        mbt->redist_nodeCoord = {0.0,0.0, 1.0,0.0,
+                                 0.0,1.0, 1.0,1.0};
+        mbt->redist_nodeOwner = {3,2,1,0};
+        mbt->redist_elemId = {1,2};
+        mbt->redist_elemType = {ESMC_MESHELEMTYPE_TRI,
+                                ESMC_MESHELEMTYPE_TRI};
+        mbt->redist_elemConn = {1,2,3,
+                                2,4,3};
+        mbt->redist_elemCoord = {0.1,0.9, 0.9,0.1};
+      }
+    }
+
+  } CATCH_MBMESHTEST_RETURN_NULL(&rc)
+
+  rc = ESMF_SUCCESS;
+  return mbt;
+}
+
+MBMeshTest *tri_2d_sph(int &rc){
+  //
+  //  2.0   7 ------- 8 -------- 9
+  //        |  \   6  |  7    /  |
+  //        |    \    |    /     |
+  //        |  5   \  | /     8  |
+  //  1.0   4 ------- 5 -------- 6
+  //        |  1    / |  \    4  |
+  //        |     /   |    \     |
+  //        |  /   2  |  3   \   |
+  //  0.0   1 ------- 2 -------- 3
+  //
+  //       0.0       1.0        2.0
+  //
+#undef ESMC_METHOD
+#define ESMC_METHOD "tri_2d_sph"
+
+  rc = ESMF_RC_NOT_IMPL;
+  MBMeshTest *mbt = NULL;
+
+  try {
+
+    // Get parallel information
+    int localPet, petCount;
+    ESMC_VM vm;
+    vm=ESMC_VMGetGlobal(&rc);
+    ESMC_CHECK_THROW(rc)
+
+    rc=ESMC_VMGet(vm, &localPet, &petCount, (int *)NULL, (MPI_Comm *)NULL,
+                  (int *)NULL, (int *)NULL);
+    ESMC_CHECK_THROW(rc)
+
+    if (petCount !=1 && petCount != 4)
+      Throw () << "Must be run with 1 or 4 cores.";
+
+    // Cartesian to spherical coordinate transformation - radians (suitable for c:[0:2])
+    double pi = 3.14159;
+    double c2s = pi/10.;
+
+    int localrc;
+    mbt = tri_2d_cart(localrc);
     ESMC_CHECK_THROW(localrc)
 
     mbt->name = ESMC_METHOD;
@@ -635,12 +905,6 @@ MBMeshTest *ngon_2d_cart(int &rc) {
   //   0          \ -- 2 -----/
   //      0  .1   1  1.5        2  2.2 2.5  3  3.1
   //
-  //      Node Ids at corners
-  //      Element Ids in centers
-  //
-  //
-  //      ( Everything owned by PET 0)
-  //
 #undef ESMC_METHOD
 #define ESMC_METHOD "mbmesh_gen_ngon_2d_cart"
 
@@ -899,12 +1163,6 @@ MBMeshTest *ngon_2d_sph(int &rc) {
   //   0          \ -- 2 -----/
   //      0  .1   1  1.5        2  2.2 2.5  3  3.1
   //
-  //      Node Ids at corners
-  //      Element Ids in centers
-  //
-  //
-  //      ( Everything owned by PET 0)
-  //
 #undef ESMC_METHOD
 #define ESMC_METHOD "mbmesh_gen_ngon_2d_sph"
 
@@ -970,12 +1228,6 @@ MBMeshTest *mix_2d_cart(int &rc) {
   //  0.0   1 ------- 2 -------- 3 ------- 4
   //
   //       0.0       1.5        2.0        3.0
-  //
-  //      Node Ids at corners
-  //      Element Ids in centers
-  //
-  //
-  //      ( Everything owned by PET 0)
   //
 #undef ESMC_METHOD
 #define ESMC_METHOD "mbmesh_gen_mix_2d_cart_par"
@@ -1111,8 +1363,6 @@ MBMeshTest *mix_2d_cart(int &rc) {
       //
       //                PET 0                      PET 1
       //
-      //               Node Id labels at corners
-      //              Element Id labels in centers
 
       if (localPet == 0){
         mbt->nodeId = {1,2,3,5,6,7,9,10,11};
@@ -1205,7 +1455,6 @@ MBMeshTest *mix_2d_cart(int &rc) {
 
 MBMeshTest *mix_2d_sph(int &rc) {
   //
-  //
   //  3.0   13 ------ 14 ------- 15 ------ 16
   //        |         |          |         |
   //        |    8    |    9     |    10   |
@@ -1221,12 +1470,6 @@ MBMeshTest *mix_2d_sph(int &rc) {
   //  0.0   1 ------- 2 -------- 3 ------- 4
   //
   //       0.0       1.5        2.0        3.0
-  //
-  //      Node Ids at corners
-  //      Element Ids in centers
-  //
-  //
-  //      ( Everything owned by PET 0)
   //
 #undef ESMC_METHOD
 #define ESMC_METHOD "mbmesh_gen_mix_2d_sph"

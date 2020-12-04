@@ -67,23 +67,27 @@ int main(int argc, char *argv[]) {
     test_functions.push_back("write_vtk");
 
   std::vector<std::string> test_meshes;
-    test_meshes.push_back("quad_2d");
+    test_meshes.push_back("quad_2d_cart");
     test_meshes.push_back("quad_2d_sph");
-    test_meshes.push_back("hex_3d");
+    test_meshes.push_back("tri_2d_cart");
+    test_meshes.push_back("tri_2d_sph");
+    test_meshes.push_back("hex_3d_cart");
     test_meshes.push_back("hex_3d_sph");
-    test_meshes.push_back("mix_2d");
-    test_meshes.push_back("mix_2d");
-    test_meshes.push_back("ngon_2d");
+    test_meshes.push_back("mix_2d_cart");
+    test_meshes.push_back("mix_2d_sph");
+    test_meshes.push_back("ngon_2d_cart");
     test_meshes.push_back("ngon_2d_sph");
 
   std::map<std::string, std::function<MBMeshTest*(int&)>>  mesh_map =
-    {{"quad_2d", quad_2d_cart},
+    {{"quad_2d_cart", quad_2d_cart},
     {"quad_2d_sph", quad_2d_sph},
-    {"hex_3d", hex_3d_cart},
+    {"tri_2d_cart", tri_2d_cart},
+    {"tri_2d_sph", tri_2d_sph},
+    {"hex_3d_cart", hex_3d_cart},
     {"hex_3d_sph", hex_3d_sph},
-    {"mix_2d", mix_2d_cart},
-    {"mix_2d", mix_2d_cart},
-    {"ngon_2d", ngon_2d_cart},
+    {"mix_2d_cart", mix_2d_cart},
+    {"mix_2d_sph", mix_2d_sph},
+    {"ngon_2d_cart", ngon_2d_cart},
     {"ngon_2d_sph", ngon_2d_sph}
     };
 
@@ -147,6 +151,16 @@ int main(int argc, char *argv[]) {
     //NEX_UTest
     //NEX_UTest
     //NEX_UTest  40
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest  50
 
   //----------------------------------------------------------------------------
   ESMC_TestEnd(__FILE__, __LINE__, 0);
