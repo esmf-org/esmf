@@ -18,7 +18,6 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMCI_IntegrateUTest \
                 $(ESMF_TESTDIR)/ESMC_MBMesh_CreateUTest \
                 $(ESMF_TESTDIR)/ESMC_MBMesh_CreateParUTest \
                 $(ESMF_TESTDIR)/ESMC_MBMesh_ExtrapolateUTest \
-                $(ESMF_TESTDIR)/ESMC_MBMesh_RedistUTest \
                 $(ESMF_TESTDIR)/ESMC_MBMesh_RendezvousUTest \
                 $(ESMF_TESTDIR)/ESMC_MBMesh_RendezvousParUTest \
                 $(ESMF_TESTDIR)/ESMC_MBMesh_SearchUTest \
