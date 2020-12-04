@@ -30,11 +30,8 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMCI_IntegrateUTest \
                 $(ESMF_TESTDIR)/ESMC_NearestUTest \
                 $(ESMF_TESTDIR)/ESMC_Proj4UTest 
 
-TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_MBMeshUTest
+# TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_MBMeshUTest
 # TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_MeshUTest
-
-# not quite ready for primetime
-               # $(ESMF_TESTDIR)/ESMC_MBMesh_DualUTest \
 
 TESTS_RUN     = RUN_ESMCI_IntegrateUTest \
                 RUN_ESMC_MBMeshUTest \
@@ -42,7 +39,6 @@ TESTS_RUN     = RUN_ESMCI_IntegrateUTest \
                 RUN_ESMC_MBMesh_BilinearSingleElemUTest \
                 RUN_ESMC_MBMesh_BilinearEdgeCasesUTest \
                 RUN_ESMC_MBMesh_BilinearEdgeCases3DUTest \
-                RUN_ESMC_MBMesh_DualUTest \
                 RUN_ESMC_MBMesh_ExtrapolateUTest \
                 RUN_ESMC_MBMesh_SearchUTest \
                 RUN_ESMC_MBMesh_SerializeUTest \
@@ -68,7 +64,6 @@ TESTS_RUN_UNI = RUN_ESMCI_IntegrateUTestUNI \
                 RUN_ESMC_MBMesh_BilinearSingleElemUTestUNI \
                 RUN_ESMC_MBMesh_BilinearEdgeCasesUTestUNI \
                 RUN_ESMC_MBMesh_BilinearEdgeCases3DUTestUNI \
-                RUN_ESMC_MBMesh_DualUTestUNI \
                 RUN_ESMC_MBMesh_SearchUTestUNI \
                 RUN_ESMC_MBMesh_SerializeUTestUNI \
                 RUN_ESMC_MBMesh_UtilUTestUNI \
@@ -180,16 +175,6 @@ RUN_ESMC_MBMesh_BilinearEdgeCases3DUTestUNI:
 
 RUN_ESMC_MBMesh_BilinearEdgeCases3DUTest:
 	$(MAKE) TNAME=MBMesh_BilinearEdgeCases3D NP=1 ctest
-
-
-RUN_ESMC_MBMesh_DualUTestUNI:
-	$(MAKE) TNAME=MBMesh_Dual NP=1 ctest
-
-RUN_ESMC_MBMesh_DualUTest:
-	$(MAKE) TNAME=MBMesh_Dual NP=4 ctest
-
-RUN_ESMC_MBMesh_DualParUTest:
-	$(MAKE) TNAME=MBMesh_DualPar NP=4 ctest
 
 
 RUN_ESMC_MBMesh_ExtrapolateUTest:
