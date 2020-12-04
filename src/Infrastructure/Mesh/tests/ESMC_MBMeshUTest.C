@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
   std::vector<std::string> test_apis;
     test_apis.push_back("get");
     // dual does not work in 3d and does not handle elemMask/Area/Coord
-    // test_apis.push_back("dual");
+    test_apis.push_back("dual");
     test_apis.push_back("elem_redist");
     test_apis.push_back("node_redist");
     test_apis.push_back("elno_redist");
@@ -107,6 +107,13 @@ int main(int argc, char *argv[]) {
 
   // skip the following tests
   std::vector<std::pair<std::string, std::string>> skip_test = {\
+    // don't yet return elem_count from ngons
+    {"get", "ngon_2d_cart"},
+    {"get", "ngon_2d_sph"},
+    // dual not implemented in 3d
+    {"dual", "hex_3d_cart"},
+    {"dual", "hex_3d_sph"},
+    // ESMCI_MBMesh_Redist.C, line:2336:Could not find a suitable processor for this element
     {"node_redist", "tri_2d_cart"},
     {"node_redist", "tri_2d_sph"},
   };
@@ -115,9 +122,6 @@ int main(int argc, char *argv[]) {
     for (const auto mesh: test_meshes) {    
       rc = ESMF_FAILURE;
       
-      // test->verbosity = 0;
-      // test->tol = 1.e-15;
-        
       auto skip_itr = std::find_if(skip_test.begin(), skip_test.end(), FindPair(api, mesh));
 
       // don't run cases that hang
@@ -127,6 +131,9 @@ int main(int argc, char *argv[]) {
       
         MBMeshTest *test = mesh_map[mesh](localrc);
         
+        // test->verbosity = 3;
+        // test->tol = 1.e-15;
+
         if (localrc == ESMF_SUCCESS) localrc = test->build();
         if (localrc == ESMF_SUCCESS) rc = test->function_map[api]();
         
@@ -183,6 +190,12 @@ int main(int argc, char *argv[]) {
     //NEX_UTest
     //NEX_UTest
     //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest 50
     //NEX_UTest
     //NEX_UTest
     //NEX_UTest

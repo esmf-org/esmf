@@ -469,7 +469,7 @@ MBMeshTest* tri_2d_cart(int &rc) {
                                 2,4,3};
         mbt->redist_elemCoord = {1.1,1.9, 1.9,0.9};
       } else if (localPet == 1) {
-        mbt->redist_nodeId_in ={4,5,7,8};
+        mbt->redist_nodeId_in ={4,7};
         mbt->redist_elemId_in = {5,6};
 
         mbt->redist_nodeId = {4,5,7,8};
@@ -483,7 +483,7 @@ MBMeshTest* tri_2d_cart(int &rc) {
                                 2,4,3};
         mbt->redist_elemCoord = {0.1,1.1, 0.9,1.9};
       } else if (localPet == 2) {
-        mbt->redist_nodeId_in ={2,3,5,6};
+        mbt->redist_nodeId_in ={2,3};
         mbt->redist_elemId_in = {3,4};
 
         mbt->redist_nodeId = {2,3,5,6};
@@ -498,7 +498,7 @@ MBMeshTest* tri_2d_cart(int &rc) {
         mbt->redist_elemCoord = {0.1,0.9, 0.9,0.1, 1.1,0.1, 1.9,0.9,
                                  0.1,1.1, 0.9,1.9, 1.1,1.9, 1.9,0.9};
       } else if (localPet == 3) {
-        mbt->redist_nodeId_in ={1,2,4,5};
+        mbt->redist_nodeId_in ={1};
         mbt->redist_elemId_in = {1,2};
 
         mbt->redist_nodeId = {1,2,4,5};

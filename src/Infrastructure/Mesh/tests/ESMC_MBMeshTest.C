@@ -305,11 +305,10 @@ class MBMeshTest {
         MBMeshDual(mesh, &target, &localrc);
         ESMC_CHECK_THROW(localrc);
 
-        test_redist_info(false, false);
+        rc = test_dual_info();
       }
       CATCH_MBMESHTEST_RETURN_RC(&rc)
 
-      rc = ESMF_SUCCESS;
       return rc;
     }
 
@@ -332,11 +331,10 @@ class MBMeshTest {
                                  &ne, redist_elemId.data(), &target, &localrc);
         ESMC_CHECK_THROW(localrc);
 
-        test_redist_info(true, false);
+        rc = test_redist_info(true, false);
       }
       CATCH_MBMESHTEST_RETURN_RC(&rc)
 
-      rc = ESMF_SUCCESS;
       return rc;
     }
 
@@ -359,11 +357,10 @@ class MBMeshTest {
                                  &target, &localrc);
         ESMC_CHECK_THROW(localrc);
 
-        test_redist_info(false, true);
+        rc = test_redist_info(false, true);
       }
       CATCH_MBMESHTEST_RETURN_RC(&rc)
 
-      rc = ESMF_SUCCESS;
       return rc;
     }
 
@@ -387,11 +384,10 @@ class MBMeshTest {
                             &ne, redist_elemId.data(), &target, &localrc);
         ESMC_CHECK_THROW(localrc);
 
-        test_redist_info(true, true);
+        rc = test_redist_info(true, true);
       }
       CATCH_MBMESHTEST_RETURN_RC(&rc)
 
-      rc = ESMF_SUCCESS;
       return rc;
     }
 
@@ -405,6 +401,9 @@ class MBMeshTest {
         Throw () << "to_pointlist test not yet implemented.";
       }
       CATCH_MBMESH_RETHROW
+
+      rc = ESMF_SUCCESS;
+      return rc;
     }
 
 
@@ -423,6 +422,9 @@ class MBMeshTest {
         ESMC_CHECK_THROW(localrc);
       }
       CATCH_MBMESH_RETHROW
+
+      rc = ESMF_SUCCESS;
+      return rc;
     }
 
     int print() {
@@ -982,6 +984,114 @@ class MBMeshTest {
       return rc;
     }
 
+    int test_dual_info(){
+#undef ESMC_METHOD
+#define ESMC_METHOD "MBMeshTest::test_dual_info()"
+      // RETURN: rc : pass(0) fail(>0)
+      int rc = ESMF_FAILURE;
+      bool correct = true;
+
+      try {
+      bool fail_print, print;
+      int localrc; 
+
+      // VM info
+      int localPet = VM::getCurrent(&localrc)->getLocalPet();
+      ESMC_CHECK_THROW(localrc);
+
+      // get dimensions
+      int local_pdim, local_sdim;
+      MBMesh_GetDimensions(target, &local_sdim, &local_pdim, &localrc);
+      ESMC_CHECK_THROW(localrc);
+
+      if (local_pdim != pdim) {
+        std::cout << localPet << "# " << "pdim = " << local_pdim 
+                  << " (correct = " << pdim << ")" << std::endl;
+        correct = false;
+      }
+
+      if (local_sdim != sdim) {
+        std::cout << localPet << "# " << "sdim = " << local_sdim 
+                  << " (correct = " << sdim << ")" << std::endl;
+        correct = false;
+      }
+
+      if (verbosity >= 2) {
+        std::cout << localPet << "# " << "pdim = " << pdim
+                  << " sdim = " << sdim << std::endl;
+      }
+
+      // RLO: don't think the elem mask is set in the dual yet
+      // int elemMaskIsPresent, elemAreaIsPresent, elemCoordIsPresent;
+      // MBMesh_GetElemInfoPresence(target, &elemMaskIsPresent, &elemAreaIsPresent, &elemCoordIsPresent, &localrc);
+      // ESMC_CHECK_THROW(localrc);
+      // 
+      // if (elemMaskIsPresent!=node_mask_present) {
+      //   std::cout << localPet << "# " << "elemMaskIsPresent = " << elemMaskIsPresent
+      //             << " (correct = " << node_mask_present << ")" << std::endl;
+      //   correct = false;
+      // } 
+      // 
+      // if (verbosity >= 2) {
+      //   std::cout << localPet << "# " << "elemMaskIsPresent = " << elemMaskIsPresent
+      //             << std::endl;
+      // }
+
+      int nodeMaskIsPresent;
+      MBMesh_GetNodeInfoPresence(target, &nodeMaskIsPresent, &localrc);
+      ESMC_CHECK_THROW(localrc);
+    
+      if (nodeMaskIsPresent!=elem_mask_present) {
+        std::cout << localPet << "# " << "nodeMaskIsPresent = " << nodeMaskIsPresent
+                  << " (correct = " << elem_mask_present << ")" << std::endl;
+        correct = false;
+      }
+    
+      if (verbosity >= 2) {
+        std::cout << localPet << "# " << "nodeMaskIsPresent = " << nodeMaskIsPresent
+                  << std::endl;
+      }
+
+      // RLO: not sure how to do this for the dual..
+      // int nodeCount;
+      // MBMesh_GetNodeCount(target,&nodeCount, &localrc);
+      // ESMC_CHECK_THROW(localrc);
+      // 
+      // int elemCount;
+      // MBMesh_GetElemCount(target,&elemCount, &localrc);
+      // ESMC_CHECK_THROW(localrc);
+      // 
+      // int elemConnCount;
+      // MBMesh_GetElemConnCount(target,&elemConnCount, &localrc);
+      // ESMC_CHECK_THROW(localrc);
+      // 
+      // if (verbosity >= 2) {
+      //   std::cout << localPet << "# " << "nodeCount = " << nodeCount << "(" << num_node << ")"
+      //             << " elemCount = " << elemCount << "(" << num_elem << ")" << std::endl;
+      // }
+      // 
+      // if (nodeCount == num_node) {
+      //   localrc = test_get_node_info_redist();
+      //   ESMC_CHECK_THROW(localrc);
+      // }
+      // 
+      // if (elemCount == num_elem) {
+      //   localrc = test_get_elem_info_redist();
+      //   ESMC_CHECK_THROW(localrc);
+      // }
+      // 
+      // if (elemConnCount == num_elem_conn) {
+      //   localrc = test_get_elem_conn_info_redist();
+      //   ESMC_CHECK_THROW(localrc);
+      // }
+
+      }
+      CATCH_MBMESHTEST_RETURN_RC(&rc)
+
+      if(correct == true) rc = ESMF_SUCCESS;
+      return rc;
+    }
+    
     int test_redist_info(bool element, bool node){
 #undef ESMC_METHOD
 #define ESMC_METHOD "MBMeshTest::test_redist_info()"
@@ -1022,15 +1132,15 @@ class MBMeshTest {
 
       /////////////////// node create info ////////////////////////////
       if (node) {
-        int nn = redist_nodeId.size();
-        MBMesh_checknodelist(&target, &nn, redist_nodeId.data(), &localrc);
+        int nn = redist_nodeId_in.size();
+        MBMesh_checknodelist(&target, &nn, redist_nodeId_in.data(), &localrc);
         ESMC_CHECK_THROW(localrc);
       }
 
       /////////////////// elem create info ////////////////////////////
       if (element) {
-        int ne = redist_elemId.size();
-        MBMesh_checkelemlist(&target, &ne, redist_elemId.data(), &localrc);
+        int ne = redist_elemId_in.size();
+        MBMesh_checkelemlist(&target, &ne, redist_elemId_in.data(), &localrc);
         ESMC_CHECK_THROW(localrc);
       }
 
