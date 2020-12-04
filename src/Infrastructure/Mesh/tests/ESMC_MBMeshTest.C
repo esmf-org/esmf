@@ -23,7 +23,7 @@
 #if defined ESMF_MOAB
 #include "ESMCI_MBMesh.h"
 #include "ESMCI_MBMesh_Glue.h"
-// #include "ESMCI_MBMeshTest.h"
+#include "ESMCI_MBMesh_Dual.h"
 #endif
 
 #include <iostream>
@@ -227,6 +227,7 @@ class MBMeshTest {
         }
         
         function_map["get"] = std::bind(&MBMeshTest::get, this);
+        function_map["dual"] = std::bind(&MBMeshTest::dual, this);
         function_map["elem_redist"] = std::bind(&MBMeshTest::elem_redist, this);
         function_map["node_redist"] = std::bind(&MBMeshTest::node_redist, this);
         function_map["elno_redist"] = std::bind(&MBMeshTest::elno_redist, this);
@@ -279,6 +280,32 @@ class MBMeshTest {
         delete iin;
         delete iie;
 
+      }
+      CATCH_MBMESHTEST_RETURN_RC(&rc)
+
+      rc = ESMF_SUCCESS;
+      return rc;
+    }
+
+    int dual() {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MBMeshTest::dual()"
+      // RETURN: rc : pass(0) fail(>0)
+      int rc = ESMF_FAILURE;
+
+      try {
+        int localrc;
+
+        // skip redist if run on one processor
+        if (redist_num_node == 0)
+          return ESMF_SUCCESS;
+          
+        int ne = redist_elemId.size();
+
+        MBMeshDual(mesh, &target, &localrc);
+        ESMC_CHECK_THROW(localrc);
+
+        test_redist_info(false, false);
       }
       CATCH_MBMESHTEST_RETURN_RC(&rc)
 

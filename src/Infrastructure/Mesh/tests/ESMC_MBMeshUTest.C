@@ -38,6 +38,18 @@
 #define M_PI 3.14159265358979323846
 #endif
 
+struct FindPair {
+    FindPair (std::string first, std::string second)
+    : m_first_value(first), m_second_value(second) {}
+
+    std::string m_first_value;
+    std::string m_second_value;
+    bool operator()
+        ( const std::pair<std::string, std::string> &p ) {
+            return (p.first == m_first_value && p.second == m_second_value);
+    }
+};
+
 int main(int argc, char *argv[]) {
 
   std::string failMsg = "FAIL";
@@ -58,13 +70,15 @@ int main(int argc, char *argv[]) {
                 (int *)NULL, (int *)NULL);
 
   // these are bound to MBMeshTest in constructor, must match!
-  std::vector<std::string> test_functions;
-    test_functions.push_back("get");
-    test_functions.push_back("elem_redist");
-    test_functions.push_back("node_redist");
-    test_functions.push_back("elno_redist");
-    // test_functions.push_back("to_pointlist");
-    test_functions.push_back("write_vtk");
+  std::vector<std::string> test_apis;
+    test_apis.push_back("get");
+    // dual does not work in 3d and does not handle elemMask/Area/Coord
+    // test_apis.push_back("dual");
+    test_apis.push_back("elem_redist");
+    test_apis.push_back("node_redist");
+    test_apis.push_back("elno_redist");
+    // test_apis.push_back("to_pointlist");
+    test_apis.push_back("write_vtk");
 
   std::vector<std::string> test_meshes;
     test_meshes.push_back("quad_2d_cart");
@@ -78,8 +92,8 @@ int main(int argc, char *argv[]) {
     test_meshes.push_back("ngon_2d_cart");
     test_meshes.push_back("ngon_2d_sph");
 
-  std::map<std::string, std::function<MBMeshTest*(int&)>>  mesh_map =
-    {{"quad_2d_cart", quad_2d_cart},
+  std::map<std::string, std::function<MBMeshTest*(int&)>>  mesh_map = {\
+    {"quad_2d_cart", quad_2d_cart},
     {"quad_2d_sph", quad_2d_sph},
     {"tri_2d_cart", tri_2d_cart},
     {"tri_2d_sph", tri_2d_sph},
@@ -89,32 +103,29 @@ int main(int argc, char *argv[]) {
     {"mix_2d_sph", mix_2d_sph},
     {"ngon_2d_cart", ngon_2d_cart},
     {"ngon_2d_sph", ngon_2d_sph}
-    };
+  };
 
-  // the following combos hang
-  std::vector<std::string> exc_f;
-    exc_f.push_back("node_redist");
-  std::vector<std::string> exc_m;
-    exc_m.push_back("tri_2d_cart");
-    exc_m.push_back("tri_2d_sph");
+  // skip the following tests
+  std::vector<std::pair<std::string, std::string>> skip_test = {\
+    {"node_redist", "tri_2d_cart"},
+    {"node_redist", "tri_2d_sph"},
+  };
 
-
-  for (const auto api: test_functions) {
+  for (const auto api: test_apis) {
     for (const auto mesh: test_meshes) {    
       rc = ESMF_FAILURE;
       
-      auto exc_mesh = std::find(std::begin(exc_m), std::end(exc_m), mesh);
-      auto exc_func = std::find(std::begin(exc_f), std::end(exc_f), api);
-      
+      // test->verbosity = 0;
+      // test->tol = 1.e-15;
+        
+      auto skip_itr = std::find_if(skip_test.begin(), skip_test.end(), FindPair(api, mesh));
+
       // don't run cases that hang
-      if ((exc_mesh != exc_m.end()) && (exc_func != exc_f.end())) {
+      if (skip_itr != skip_test.end()) {
         rc = ESMF_SUCCESS;
       } else {
       
         MBMeshTest *test = mesh_map[mesh](localrc);
-        
-        // test->verbosity = 0;
-        // test->tol = 1.e-15;
         
         if (localrc == ESMF_SUCCESS) localrc = test->build();
         if (localrc == ESMF_SUCCESS) rc = test->function_map[api]();
@@ -178,6 +189,15 @@ int main(int argc, char *argv[]) {
     //NEX_UTest
     //NEX_UTest
     //NEX_UTest  50
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest  58
+
 
   //----------------------------------------------------------------------------
   ESMC_TestEnd(__FILE__, __LINE__, 0);
