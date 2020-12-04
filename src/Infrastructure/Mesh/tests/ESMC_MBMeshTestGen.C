@@ -347,31 +347,31 @@ MBMeshTest* tri_2d_cart(int &rc) {
     } else if (petCount == 4) {
       if (localPet == 0) {
         num_elem = 2;
-        num_node = 3;
+        num_node = 4;
         num_elem_conn = 6;
         redist_num_elem = 2;
-        redist_num_node = 3;
+        redist_num_node = 4;
         redist_num_elem_conn = 6;
       } else if (localPet == 1) {
         num_elem = 2;
-        num_node = 3;
+        num_node = 4;
         num_elem_conn = 6;
         redist_num_elem = 2;
-        redist_num_node = 3;
+        redist_num_node = 4;
         redist_num_elem_conn = 6;
       } else if (localPet == 2) {
         num_elem = 2;
-        num_node = 3;
+        num_node = 4;
         num_elem_conn = 6;
         redist_num_elem = 2;
-        redist_num_node = 3;
+        redist_num_node = 4;
         redist_num_elem_conn = 6;
       } else if (localPet == 3) {
         num_elem = 2;
-        num_node = 3;
+        num_node = 4;
         num_elem_conn = 6;
         redist_num_elem = 2;
-        redist_num_node = 3;
+        redist_num_node = 4;
         redist_num_elem_conn = 6;
       }
     }
