@@ -24,6 +24,8 @@
 #include "ESMCI_MBMesh.h"
 #include "ESMCI_MBMesh_Glue.h"
 #include "ESMCI_MBMesh_Dual.h"
+#include "ESMCI_MBMesh_Util.h"
+#include "ESMCI_PointList.h"
 #endif
 
 #include <iostream>
@@ -96,6 +98,21 @@ typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
     msg = "Unknown exception"; \
     ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL, msg, ESMC_CONTEXT, rc); \
     return (*rc); }
+
+// for MBMesh routines, when integer is returned
+#define CATCH_MBMESHTEST_FAIL(rc) \
+  catch(int localrc){ \
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc); \
+  } catch(std::string errstr){ \
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, errstr, ESMC_CONTEXT, rc); \
+  } catch (ESMCI::esmc_error &exc) { \
+    ESMC_LogDefault.MsgFoundError(exc.getReturnCode(), ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc); \
+  } catch (std::exception &exc) { \
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc); \
+  } catch(...) { \
+    std::string msg; \
+    msg = "Unknown exception"; \
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL, msg, ESMC_CONTEXT, rc);}
 
 
 class MBMeshTest {
@@ -231,7 +248,8 @@ class MBMeshTest {
         function_map["elem_redist"] = std::bind(&MBMeshTest::elem_redist, this);
         function_map["node_redist"] = std::bind(&MBMeshTest::node_redist, this);
         function_map["elno_redist"] = std::bind(&MBMeshTest::elno_redist, this);
-        function_map["to_pointlist"] = std::bind(&MBMeshTest::to_pointlist, this);
+        function_map["to_pointlist_elem"] = std::bind(&MBMeshTest::to_pointlist_elem, this);
+        function_map["to_pointlist_node"] = std::bind(&MBMeshTest::to_pointlist_node, this);
         function_map["write_vtk"] = std::bind(&MBMeshTest::write_vtk, this);
 
       }
@@ -391,14 +409,37 @@ class MBMeshTest {
       return rc;
     }
 
-    int to_pointlist() {
+    int to_pointlist_elem() {
 #undef ESMC_METHOD
-#define ESMC_METHOD "MBMeshTest::to_pointlist()"
+#define ESMC_METHOD "MBMeshTest::to_pointlist_elem()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
 
       try {
-        Throw () << "to_pointlist test not yet implemented.";
+        int localrc;
+        
+        PointList *pl;
+        pl = MBMesh_to_PointList(mesh, ESMC_MESHLOC_ELEMENT, NULL, &localrc);
+        ESMC_CHECK_THROW(localrc);
+      }
+      CATCH_MBMESH_RETHROW
+
+      rc = ESMF_SUCCESS;
+      return rc;
+    }
+
+    int to_pointlist_node() {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MBMeshTest::to_pointlist_node()"
+      // RETURN: rc : pass(0) fail(>0)
+      int rc = ESMF_FAILURE;
+
+      try {
+        int localrc;
+        
+        PointList *pl;
+        pl = MBMesh_to_PointList(mesh, ESMC_MESHLOC_NODE, NULL, &localrc);
+        ESMC_CHECK_THROW(localrc);
       }
       CATCH_MBMESH_RETHROW
 

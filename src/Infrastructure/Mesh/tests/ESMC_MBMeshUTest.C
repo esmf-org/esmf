@@ -72,12 +72,12 @@ int main(int argc, char *argv[]) {
   // these are bound to MBMeshTest in constructor, must match!
   std::vector<std::string> test_apis;
     test_apis.push_back("get");
-    // dual does not work in 3d and does not handle elemMask/Area/Coord
     test_apis.push_back("dual");
     test_apis.push_back("elem_redist");
     test_apis.push_back("node_redist");
     test_apis.push_back("elno_redist");
-    // test_apis.push_back("to_pointlist");
+    test_apis.push_back("to_pointlist_elem");
+    test_apis.push_back("to_pointlist_node");
     test_apis.push_back("write_vtk");
 
   std::vector<std::string> test_meshes;
@@ -129,19 +129,23 @@ int main(int argc, char *argv[]) {
         rc = ESMF_SUCCESS;
       } else {
       
-        MBMeshTest *test = mesh_map[mesh](localrc);
-        
-        // test->verbosity = 3;
-        // test->tol = 1.e-15;
-
-        if (localrc == ESMF_SUCCESS) localrc = test->build();
-        if (localrc == ESMF_SUCCESS) rc = test->function_map[api]();
+        try {
+          MBMeshTest *test = mesh_map[mesh](localrc);
+          
+          // test->verbosity = 3;
+          // test->tol = 1.e-15;
+          
+          if (localrc == ESMF_SUCCESS) localrc = test->build();
+          if (localrc == ESMF_SUCCESS) rc = test->function_map[api]();
+          
+          delete test;
+        }
+        CATCH_MBMESHTEST_FAIL(&rc)
         
         std::string name = "MBMesh - " + api + " - " + mesh;
         ESMC_Test(rc==ESMF_SUCCESS, name.c_str(), failMsg.c_str(), 
                   &result, __FILE__, __LINE__, 0);
                   
-        delete test;
       }
     }
   }
@@ -195,7 +199,27 @@ int main(int argc, char *argv[]) {
     //NEX_UTest
     //NEX_UTest
     //NEX_UTest
-    //NEX_UTest 50
+    //NEX_UTest  50
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest  60
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest 70
     //NEX_UTest
     //NEX_UTest
     //NEX_UTest
