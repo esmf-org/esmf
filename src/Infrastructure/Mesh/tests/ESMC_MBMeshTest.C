@@ -103,8 +103,8 @@ class MBMeshTest {
     int verbosity = 0;
     double tol = 1.e-15;
     
-    MBMesh *mesh;
-    MBMesh *redist;
+    MBMesh *mesh= nullptr;
+    MBMesh *target = nullptr;
     std::string name = "Mesh";
 
     // integer values
@@ -177,6 +177,9 @@ class MBMeshTest {
         num_node = _num_node;
         num_elem = _num_elem;
         num_elem_conn = _num_elem_conn;
+        redist_num_node = _redist_num_node;
+        redist_num_elem = _redist_num_elem;
+        redist_num_elem_conn = _redist_num_elem_conn;
         coord_sys = _coord_sys;
         
         nodeId.reserve(_num_node);
@@ -234,6 +237,11 @@ class MBMeshTest {
       CATCH_MBMESH_RETHROW
     }
 
+    ~MBMeshTest(){
+      if (mesh) delete mesh;
+      if (target) delete target;
+    }
+    
     int build() {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MBMeshTest::build()"
@@ -294,11 +302,10 @@ class MBMeshTest {
         int ne = redist_elemId.size();
 
         MBMesh_createredistelems(&mesh,
-                                 &ne, redist_elemId.data(), &redist, &localrc);
+                                 &ne, redist_elemId.data(), &target, &localrc);
         ESMC_CHECK_THROW(localrc);
 
-        test_redist_info(true, true);
-        delete redist;
+        test_redist_info(true, false);
       }
       CATCH_MBMESHTEST_RETURN_RC(&rc)
 
@@ -322,11 +329,10 @@ class MBMeshTest {
         int nn = redist_nodeId.size();
         
         MBMesh_createredistnodes(&mesh, &nn, redist_nodeId.data(), 
-                                 &redist, &localrc);
+                                 &target, &localrc);
         ESMC_CHECK_THROW(localrc);
 
-        test_redist_info(true, true);
-        delete redist;
+        test_redist_info(false, true);
       }
       CATCH_MBMESHTEST_RETURN_RC(&rc)
 
@@ -351,11 +357,10 @@ class MBMeshTest {
         int ne = redist_elemId.size();
         
         MBMesh_createredist(&mesh, &nn, redist_nodeId.data(), 
-                            &ne, redist_elemId.data(), &redist, &localrc);
+                            &ne, redist_elemId.data(), &target, &localrc);
         ESMC_CHECK_THROW(localrc);
 
         test_redist_info(true, true);
-        delete redist;
       }
       CATCH_MBMESHTEST_RETURN_RC(&rc)
 
@@ -440,14 +445,14 @@ class MBMeshTest {
           std::cout << i << ' ';
         std::cout << std::endl;
 
-        std::cout << "num_elem_gids"<< std::endl;
-        std::cout << "num_node_gids"<< std::endl;
-        std::cout << "elem_gids"<< std::endl;
-        for (const auto i: elem_gids)
-          std::cout << i << ' ';
-        std::cout << std::endl << "node_gids"<< std::endl;
-        for (const auto i: node_gids)
-          std::cout << i << ' ';
+        // std::cout << "num_elem_gids"<< std::endl;
+        // std::cout << "num_node_gids"<< std::endl;
+        // std::cout << "elem_gids"<< std::endl;
+        // for (const auto i: elem_gids)
+        //   std::cout << i << ' ';
+        // std::cout << std::endl << "node_gids"<< std::endl;
+        // for (const auto i: node_gids)
+        //   std::cout << i << ' ';
       }
       CATCH_MBMESHTEST_RETURN_RC(&rc)
 
@@ -967,7 +972,7 @@ class MBMeshTest {
 
       // get dimensions
       int local_pdim, local_sdim;
-      MBMesh_GetDimensions(mesh, &local_sdim, &local_pdim, &localrc);
+      MBMesh_GetDimensions(target, &local_sdim, &local_pdim, &localrc);
       ESMC_CHECK_THROW(localrc);
 
       if (local_pdim != pdim) {
@@ -991,19 +996,19 @@ class MBMeshTest {
       /////////////////// node create info ////////////////////////////
       if (node) {
         int nn = redist_nodeId.size();
-        MBMesh_checknodelist(&redist, &nn, redist_nodeId.data(), &localrc);
+        MBMesh_checknodelist(&target, &nn, redist_nodeId.data(), &localrc);
         ESMC_CHECK_THROW(localrc);
       }
 
       /////////////////// elem create info ////////////////////////////
       if (element) {
         int ne = redist_elemId.size();
-        MBMesh_checkelemlist(&redist, &ne, redist_elemId.data(), &localrc);
+        MBMesh_checkelemlist(&target, &ne, redist_elemId.data(), &localrc);
         ESMC_CHECK_THROW(localrc);
       }
 
       int elemMaskIsPresent, elemAreaIsPresent, elemCoordIsPresent;
-      MBMesh_GetElemInfoPresence(redist, &elemMaskIsPresent, &elemAreaIsPresent, &elemCoordIsPresent, &localrc);
+      MBMesh_GetElemInfoPresence(target, &elemMaskIsPresent, &elemAreaIsPresent, &elemCoordIsPresent, &localrc);
       ESMC_CHECK_THROW(localrc);
     
       if (elemMaskIsPresent!=elem_mask_present) {
@@ -1032,7 +1037,7 @@ class MBMeshTest {
       }
 
       int nodeMaskIsPresent;
-      MBMesh_GetNodeInfoPresence(redist, &nodeMaskIsPresent, &localrc);
+      MBMesh_GetNodeInfoPresence(target, &nodeMaskIsPresent, &localrc);
       ESMC_CHECK_THROW(localrc);
     
       if (nodeMaskIsPresent!=node_mask_present) {
@@ -1049,15 +1054,15 @@ class MBMeshTest {
       // RLO: I think we can only reliably and consistently check owned info
       // /////////////////// counts ////////////////////////////
       // int nodeCount;
-      // MBMesh_GetNodeCount(redist,&nodeCount, &localrc);
+      // MBMesh_GetNodeCount(target,&nodeCount, &localrc);
       // ESMC_CHECK_THROW(localrc);
       // 
       // int elemCount;
-      // MBMesh_GetElemCount(redist,&elemCount, &localrc);
+      // MBMesh_GetElemCount(target,&elemCount, &localrc);
       // ESMC_CHECK_THROW(localrc);
       // 
       // int elemConnCount;
-      // MBMesh_GetElemConnCount(redist,&elemConnCount, &localrc);
+      // MBMesh_GetElemConnCount(target,&elemConnCount, &localrc);
       // ESMC_CHECK_THROW(localrc);
     
       // if (verbosity >= 2) {
