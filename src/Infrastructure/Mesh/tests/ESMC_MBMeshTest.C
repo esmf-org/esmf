@@ -124,6 +124,9 @@ class MBMeshTest {
     MBMesh *target = nullptr;
     std::string name = "Mesh";
 
+    // buffer that needs to be deleted
+    char *serialize_buffer = nullptr;
+    
     // integer values
     int pdim;
     int sdim;
@@ -243,11 +246,12 @@ class MBMeshTest {
           std::generate_n(redist_elemArea.begin(), _redist_num_elem, generator_real);
         }
         
-        function_map["get"] = std::bind(&MBMeshTest::get, this);
+        function_map["createget"] = std::bind(&MBMeshTest::createget, this);
         function_map["dual"] = std::bind(&MBMeshTest::dual, this);
-        function_map["elem_redist"] = std::bind(&MBMeshTest::elem_redist, this);
-        function_map["node_redist"] = std::bind(&MBMeshTest::node_redist, this);
-        function_map["elno_redist"] = std::bind(&MBMeshTest::elno_redist, this);
+        function_map["redist_elem"] = std::bind(&MBMeshTest::redist_elem, this);
+        function_map["redist_node"] = std::bind(&MBMeshTest::redist_node, this);
+        function_map["redist_elno"] = std::bind(&MBMeshTest::redist_elno, this);
+        function_map["serialize"] = std::bind(&MBMeshTest::serialize, this);
         function_map["to_pointlist_elem"] = std::bind(&MBMeshTest::to_pointlist_elem, this);
         function_map["to_pointlist_node"] = std::bind(&MBMeshTest::to_pointlist_node, this);
         function_map["write_vtk"] = std::bind(&MBMeshTest::write_vtk, this);
@@ -259,6 +263,7 @@ class MBMeshTest {
     ~MBMeshTest(){
       if (mesh) delete mesh;
       if (target) delete target;
+      if (serialize_buffer) delete serialize_buffer;
     }
     
     int build() {
@@ -330,9 +335,9 @@ class MBMeshTest {
       return rc;
     }
 
-    int elem_redist() {
+    int redist_elem() {
 #undef ESMC_METHOD
-#define ESMC_METHOD "MBMeshTest::elem_redist()"
+#define ESMC_METHOD "MBMeshTest::redist_elem()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
 
@@ -356,9 +361,9 @@ class MBMeshTest {
       return rc;
     }
 
-    int node_redist() {
+    int redist_node() {
 #undef ESMC_METHOD
-#define ESMC_METHOD "MBMeshTest::node_redist()"
+#define ESMC_METHOD "MBMeshTest::redist_node()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
 
@@ -382,9 +387,9 @@ class MBMeshTest {
       return rc;
     }
 
-    int elno_redist() {
+    int redist_elno() {
 #undef ESMC_METHOD
-#define ESMC_METHOD "MBMeshTest::elno_redist()"
+#define ESMC_METHOD "MBMeshTest::redist_elno()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
 
@@ -406,6 +411,41 @@ class MBMeshTest {
       }
       CATCH_MBMESHTEST_RETURN_RC(&rc)
 
+      return rc;
+    }
+
+    int serialize() {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MBMeshTest::serialize()"
+      // RETURN: rc : pass(0) fail(>0)
+      int rc = ESMF_FAILURE;
+
+      try {
+        int localrc;
+        
+        // serialization buffer
+        int len = 100*sizeof(int);
+        serialize_buffer = new char[len];
+        int length = len; 
+        int offset = 0;
+        ESMC_InquireFlag inquireflag = ESMF_NOINQUIRE;
+        ESMCI_FortranStrLenArg buffer_l = len;
+
+        // serialize, deserialize, verify
+        MBMesh_serialize(&mesh, serialize_buffer, &length, &offset, 
+                         &inquireflag, &localrc, buffer_l);
+        ESMC_CHECK_THROW(localrc);
+        
+        offset = 0;
+        // deserialize
+        MBMesh_deserialize(&target, serialize_buffer, &offset, &localrc, buffer_l);
+        ESMC_CHECK_THROW(localrc);
+        
+        // verify
+      }
+      CATCH_MBMESH_RETHROW
+
+      rc = ESMF_SUCCESS;
       return rc;
     }
 
@@ -446,7 +486,6 @@ class MBMeshTest {
       rc = ESMF_SUCCESS;
       return rc;
     }
-
 
     int write_vtk() {
 #undef ESMC_METHOD
@@ -531,9 +570,9 @@ class MBMeshTest {
     }
 
 
-    int get(){
+    int createget(){
 #undef ESMC_METHOD
-#define ESMC_METHOD "MBMeshTest::test_get_info()"
+#define ESMC_METHOD "MBMeshTest::createget()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
       bool correct = true;

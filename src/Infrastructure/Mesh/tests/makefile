@@ -19,7 +19,6 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMCI_IntegrateUTest \
                 $(ESMF_TESTDIR)/ESMC_MBMesh_RendezvousUTest \
                 $(ESMF_TESTDIR)/ESMC_MBMesh_RendezvousParUTest \
                 $(ESMF_TESTDIR)/ESMC_MBMesh_SearchUTest \
-                $(ESMF_TESTDIR)/ESMC_MBMesh_SerializeUTest \
                 $(ESMF_TESTDIR)/ESMC_MBMesh_UtilUTest \
                 $(ESMF_TESTDIR)/ESMC_MeshUTest \
                 $(ESMF_TESTDIR)/ESMC_MeshMOABUTest \
@@ -40,7 +39,6 @@ TESTS_RUN     = RUN_ESMCI_IntegrateUTest \
                 RUN_ESMC_MBMesh_BilinearEdgeCases3DUTest \
                 RUN_ESMC_MBMesh_ExtrapolateUTest \
                 RUN_ESMC_MBMesh_SearchUTest \
-                RUN_ESMC_MBMesh_SerializeUTest \
                 RUN_ESMC_MBMesh_UtilUTest \
                 RUN_ESMC_MeshUTest \
                 RUN_ESMC_MeshMOABUTest \
@@ -63,7 +61,6 @@ TESTS_RUN_UNI = RUN_ESMCI_IntegrateUTestUNI \
                 RUN_ESMC_MBMesh_BilinearEdgeCasesUTestUNI \
                 RUN_ESMC_MBMesh_BilinearEdgeCases3DUTestUNI \
                 RUN_ESMC_MBMesh_SearchUTestUNI \
-                RUN_ESMC_MBMesh_SerializeUTestUNI \
                 RUN_ESMC_MBMesh_UtilUTestUNI \
                 RUN_ESMC_MeshUTestUNI \
                 RUN_ESMC_MeshMOABUTestUNI \
@@ -186,7 +183,6 @@ RUN_ESMC_MBMeshUTestUNI:
 	$(MAKE) TNAME=MBMesh NP=1 ctest
 
 
-
 RUN_ESMC_MBMesh_RendezvousUTest:
 	$(MAKE) TNAME=MBMesh_Rendezvous NP=1 ctest
 
@@ -197,13 +193,6 @@ RUN_ESMC_MBMesh_RendezvousParUTest:
 	$(MAKE) TNAME=MBMesh_RendezvousPar NP=4 ctest
 
 
-RUN_ESMC_MBMesh_UtilUTest:
-	$(MAKE) TNAME=MBMesh_Util NP=4 ctest
-
-RUN_ESMC_MBMesh_UtilUTestUNI:
-	$(MAKE) TNAME=MBMesh_Util NP=1 ctest
-
-
 RUN_ESMC_MBMesh_SearchUTest:
 	$(MAKE) TNAME=MBMesh_Search NP=4 ctest
 
@@ -211,11 +200,11 @@ RUN_ESMC_MBMesh_SearchUTestUNI:
 	$(MAKE) TNAME=MBMesh_Search NP=1 ctest
 
 
-RUN_ESMC_MBMesh_SerializeUTest:
-	$(MAKE) TNAME=MBMesh_Serialize NP=4 ctest
+RUN_ESMC_MBMesh_UtilUTest:
+	$(MAKE) TNAME=MBMesh_Util NP=4 ctest
 
-RUN_ESMC_MBMesh_SerializeUTestUNI:
-	$(MAKE) TNAME=MBMesh_Serialize NP=1 ctest
+RUN_ESMC_MBMesh_UtilUTestUNI:
+	$(MAKE) TNAME=MBMesh_Util NP=1 ctest
 
 
 RUN_ESMC_NearestUTest:

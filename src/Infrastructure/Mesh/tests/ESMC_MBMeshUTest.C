@@ -71,11 +71,12 @@ int main(int argc, char *argv[]) {
 
   // these are bound to MBMeshTest in constructor, must match!
   std::vector<std::string> test_apis;
-    test_apis.push_back("get");
+    test_apis.push_back("createget");
     test_apis.push_back("dual");
-    test_apis.push_back("elem_redist");
-    test_apis.push_back("node_redist");
-    test_apis.push_back("elno_redist");
+    test_apis.push_back("redist_elem");
+    test_apis.push_back("redist_node");
+    test_apis.push_back("redist_elno");
+    test_apis.push_back("serialize");
     test_apis.push_back("to_pointlist_elem");
     test_apis.push_back("to_pointlist_node");
     test_apis.push_back("write_vtk");
@@ -114,8 +115,8 @@ int main(int argc, char *argv[]) {
     {"dual", "hex_3d_cart"},
     {"dual", "hex_3d_sph"},
     // ESMCI_MBMesh_Redist.C, line:2336:Could not find a suitable processor for this element
-    {"node_redist", "tri_2d_cart"},
-    {"node_redist", "tri_2d_sph"},
+    {"redist_node", "tri_2d_cart"},
+    {"redist_node", "tri_2d_sph"},
   };
 
   for (const auto api: test_apis) {
@@ -219,7 +220,17 @@ int main(int argc, char *argv[]) {
     //NEX_UTest
     //NEX_UTest
     //NEX_UTest
-    //NEX_UTest 70
+    //NEX_UTest  70
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest 80
     //NEX_UTest
     //NEX_UTest
     //NEX_UTest
