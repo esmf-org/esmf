@@ -8,8 +8,7 @@ LOCDIR    = src/Infrastructure/Mesh/tests
 
 .NOTPARALLEL:
 
-TESTS_BUILD   = $(ESMF_TESTDIR)/ESMCI_IntegrateUTest \
-                $(ESMF_TESTDIR)/ESMC_MBMeshUTest \
+TESTS_BUILD	  = $(ESMF_TESTDIR)/ESMC_MBMeshUTest \
                 $(ESMF_TESTDIR)/ESMC_MBMesh_BilinearUTest \
                 $(ESMF_TESTDIR)/ESMC_MBMesh_BilinearParUTest \
                 $(ESMF_TESTDIR)/ESMC_MBMesh_BilinearSingleElemUTest \
@@ -20,19 +19,19 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMCI_IntegrateUTest \
                 $(ESMF_TESTDIR)/ESMC_MBMesh_RendezvousParUTest \
                 $(ESMF_TESTDIR)/ESMC_MBMesh_SearchUTest \
                 $(ESMF_TESTDIR)/ESMC_MBMesh_UtilUTest \
-                $(ESMF_TESTDIR)/ESMC_MeshUTest \
                 $(ESMF_TESTDIR)/ESMC_MeshMOABUTest \
+                $(ESMF_TESTDIR)/ESMCI_IntegrateUTest \
+                $(ESMF_TESTDIR)/ESMC_MeshUTest \
                 $(ESMF_TESTDIR)/ESMC_MeshVTKUTest \
                 $(ESMF_TESTDIR)/ESMF_MeshOpUTest \
                 $(ESMF_TESTDIR)/ESMF_MeshUTest \
                 $(ESMF_TESTDIR)/ESMC_NearestUTest \
-                $(ESMF_TESTDIR)/ESMC_Proj4UTest 
+                $(ESMF_TESTDIR)/ESMC_Proj4UTest
 
 # TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_MBMeshUTest
 # TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_MeshUTest
 
-TESTS_RUN     = RUN_ESMCI_IntegrateUTest \
-                RUN_ESMC_MBMeshUTest \
+TESTS_RUN    =  RUN_ESMC_MBMesh_BilinearUTest \
                 RUN_ESMC_MBMesh_BilinearParUTest \
                 RUN_ESMC_MBMesh_BilinearSingleElemUTest \
                 RUN_ESMC_MBMesh_BilinearEdgeCasesUTest \
@@ -40,8 +39,10 @@ TESTS_RUN     = RUN_ESMCI_IntegrateUTest \
                 RUN_ESMC_MBMesh_ExtrapolateUTest \
                 RUN_ESMC_MBMesh_SearchUTest \
                 RUN_ESMC_MBMesh_UtilUTest \
-                RUN_ESMC_MeshUTest \
                 RUN_ESMC_MeshMOABUTest \
+                RUN_ESMCI_IntegrateUTest \
+                RUN_ESMC_MBMeshUTest \
+                RUN_ESMC_MeshUTest \
                 RUN_ESMC_MeshVTKUTest \
                 RUN_ESMF_MeshOpUTest \
                 RUN_ESMF_MeshUTest \
@@ -54,16 +55,16 @@ TESTS_RUN     = RUN_ESMCI_IntegrateUTest \
 #                RUN_ESMC_MBMesh_RendezvousParUTest \
 
 
-TESTS_RUN_UNI = RUN_ESMCI_IntegrateUTestUNI \
-                RUN_ESMC_MBMeshUTestUNI \
+TESTS_RUN_UNI = RUN_ESMC_MBMeshUTestUNI \
                 RUN_ESMC_MBMesh_BilinearUTestUNI \
                 RUN_ESMC_MBMesh_BilinearSingleElemUTestUNI \
                 RUN_ESMC_MBMesh_BilinearEdgeCasesUTestUNI \
                 RUN_ESMC_MBMesh_BilinearEdgeCases3DUTestUNI \
                 RUN_ESMC_MBMesh_SearchUTestUNI \
                 RUN_ESMC_MBMesh_UtilUTestUNI \
-                RUN_ESMC_MeshUTestUNI \
                 RUN_ESMC_MeshMOABUTestUNI \
+                RUN_ESMCI_IntegrateUTestUNI \
+                RUN_ESMC_MeshUTestUNI \
                 RUN_ESMF_MeshOpUTestUNI \
                 RUN_ESMF_MeshUTestUNI \
                 RUN_ESMC_Proj4UTestUNI

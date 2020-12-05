@@ -28,6 +28,7 @@
 #include "moab/Core.hpp"
 #endif
 
+#include <cstring>
 
 int main(int argc, char *argv[]) {
 

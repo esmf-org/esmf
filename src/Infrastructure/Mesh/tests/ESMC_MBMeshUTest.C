@@ -31,7 +31,8 @@
 #include <vector>
 #include <cstring>
 #include <map>
-// #include <functional>
+#include <functional>
+#include <algorithm> //find_if
 
 #if !defined (M_PI)
 // for Windows...
@@ -93,6 +94,7 @@ int main(int argc, char *argv[]) {
     test_meshes.push_back("ngon_2d_cart");
     test_meshes.push_back("ngon_2d_sph");
 
+#if defined ESMF_MOAB
   std::map<std::string, std::function<MBMeshTest*(int&)>>  mesh_map = {\
     {"quad_2d_cart", quad_2d_cart},
     {"quad_2d_sph", quad_2d_sph},
@@ -105,12 +107,13 @@ int main(int argc, char *argv[]) {
     {"ngon_2d_cart", ngon_2d_cart},
     {"ngon_2d_sph", ngon_2d_sph}
   };
+#endif
 
   // skip the following tests
   std::vector<std::pair<std::string, std::string>> skip_test = {\
     // don't yet return elem_count from ngons
-    {"get", "ngon_2d_cart"},
-    {"get", "ngon_2d_sph"},
+    {"createget", "ngon_2d_cart"},
+    {"createget", "ngon_2d_sph"},
     // dual not implemented in 3d
     {"dual", "hex_3d_cart"},
     {"dual", "hex_3d_sph"},
@@ -123,13 +126,14 @@ int main(int argc, char *argv[]) {
     for (const auto mesh: test_meshes) {    
       rc = ESMF_FAILURE;
       
-      auto skip_itr = std::find_if(skip_test.begin(), skip_test.end(), FindPair(api, mesh));
+      auto skip_itr = std::find_if(skip_test.begin(), skip_test.end(), 
+                                   FindPair(api, mesh));
 
       // don't run cases that hang
       if (skip_itr != skip_test.end()) {
         rc = ESMF_SUCCESS;
       } else {
-      
+#if defined ESMF_MOAB
         try {
           MBMeshTest *test = mesh_map[mesh](localrc);
           
@@ -142,12 +146,14 @@ int main(int argc, char *argv[]) {
           delete test;
         }
         CATCH_MBMESHTEST_FAIL(&rc)
-        
-        std::string name = "MBMesh - " + api + " - " + mesh;
-        ESMC_Test(rc==ESMF_SUCCESS, name.c_str(), failMsg.c_str(), 
-                  &result, __FILE__, __LINE__, 0);
-                  
+#else
+        rc = ESMF_SUCCESS;
+#endif
       }
+
+      std::string name = "MBMesh - " + api + " - " + mesh;
+      ESMC_Test(rc==ESMF_SUCCESS, name.c_str(), failMsg.c_str(), 
+                &result, __FILE__, __LINE__, 0);
     }
   }
 
@@ -235,6 +241,13 @@ int main(int argc, char *argv[]) {
     //NEX_UTest
     //NEX_UTest
     //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest 90
+
 
 
   //----------------------------------------------------------------------------
