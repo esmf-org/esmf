@@ -2444,11 +2444,13 @@ module NUOPC_ModelBase
     is%wrap%phase = phase
 
     ! set the phase specific internal Clock
+#if 0
     call ESMF_GridCompSet(gcomp, clock=is%wrap%internalClocks(phase)%retarded, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
+#endif
 
     ! SPECIALIZE required: label_SetRunClock
     if (btest(profiling,4)) then
@@ -2584,11 +2586,13 @@ module NUOPC_ModelBase
           rcToReturn=rc)) &
           return  ! bail out
         if (.not.existflag) then
+call ESMF_TraceRegionEnter("DEFAULT label_AdvanceClockAdvanced")
           ! at last use the DEFAULT implementation to advance the Clock
           call ESMF_ClockAdvance(is%wrap%internalClocks(phase)%advanced, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) &
             return  ! bail out
+call ESMF_TraceRegionExit("DEFAULT label_AdvanceClockAdvanced")
         endif
       endif
       if (btest(profiling,4)) then
@@ -2651,11 +2655,17 @@ module NUOPC_ModelBase
           rcToReturn=rc)) &
           return  ! bail out
         if (.not.existflag) then
+call ESMF_TraceRegionEnter("DEFAULT label_AdvanceClockRetarded")
           ! at last use the DEFAULT implementation to advance the Clock
+#if 0
           call ESMF_ClockAdvance(is%wrap%internalClocks(phase)%retarded, rc=rc)
+#else
+          call ESMF_ClockAdvance(internalClock, rc=rc)
+#endif
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) &
             return  ! bail out
+call ESMF_TraceRegionExit("DEFAULT label_AdvanceClockRetarded")
         endif
       endif
       if (btest(profiling,4)) then
