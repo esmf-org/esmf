@@ -120,19 +120,12 @@ module NUOPC_Mediator
 
     ! local variables
     character(ESMF_MAXSTR)    :: name
-    type(ESMF_State)          :: exportState
     type(type_InternalState)  :: is
 
     rc = ESMF_SUCCESS
 
     ! query the component for info
     call NUOPC_CompGet(gcomp, name=name, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-
-    ! get to the clock and exportState
-    call ESMF_GridCompGet(gcomp, exportState=exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
@@ -145,10 +138,13 @@ module NUOPC_Mediator
       return  ! bail out
 
     ! update timestamp on export Fields
-    call NUOPC_SetTimestamp(exportState, is%wrap%preAdvanceCurrTime, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
+    if (associated(is%wrap%cachedExportFieldList)) then
+      call NUOPC_SetTimestamp(is%wrap%cachedExportFieldList, &
+        is%wrap%preAdvanceCurrTime, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) &
+        return  ! bail out
+    endif
 
   end subroutine
 
