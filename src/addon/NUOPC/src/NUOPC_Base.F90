@@ -12,8 +12,6 @@
 #define FILENAME "src/addon/NUOPC/src/NUOPC_Base.F90"
 !==============================================================================
 
-#define PROFILE_off
-
 module NUOPC_Base
 
   !-----------------------------------------------------------------------------
@@ -124,6 +122,7 @@ module NUOPC_Base
   interface NUOPC_SetTimestamp
     module procedure NUOPC_SetTimestampField
     module procedure NUOPC_SetTimestampFieldList
+    module procedure NUOPC_SetTimestampFieldListClk
     module procedure NUOPC_SetTimestampState
     module procedure NUOPC_SetTimestampStateClk
   end interface
@@ -1361,14 +1360,17 @@ module NUOPC_Base
     if (itemCount > 0) then
 
       ! determine fieldCount, potentially throughout nested state structure
+call ESMF_TraceRegionEnter("calling NUOPC_GetStateMemberCount", rc=rc)
       call NUOPC_GetStateMemberCount(state, fieldCount=fieldCount, &
         nestedFlag=l_nestedFlag, rc=localrc)
+call ESMF_TraceRegionExit("calling NUOPC_GetStateMemberCount", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME, &
         rcToReturn=rc)) &
         return  ! bail out
 
+call ESMF_TraceRegionEnter("deal with allocs", rc=rc)
       ! deal with optional StandardNameList
       if (present(StandardNameList)) then
         if (associated(StandardNameList)) then
@@ -1501,12 +1503,15 @@ module NUOPC_Base
             return  ! bail out
         endif
       endif
+call ESMF_TraceRegionExit("deal with allocs", rc=rc)
 
+call ESMF_TraceRegionEnter("call first level NUOPC_GetStateMemberListsIntrnl", rc=rc)
       ! fill lists that are present
       itemIndex = 1 ! initialize
       call NUOPC_GetStateMemberListsIntrnl(state, StandardNameList, &
         ConnectedList, NamespaceList, CplSetList, itemNameList, fieldList, &
         stateList, l_nestedFlag, "", itemIndex, rc=localrc)
+call ESMF_TraceRegionExit("call first level NUOPC_GetStateMemberListsIntrnl", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME, &
@@ -4418,10 +4423,11 @@ module NUOPC_Base
 ! !IROUTINE: NUOPC_SetTimestamp - Set the TimeStamp on Fields in a list
 ! !INTERFACE:
   ! Private name; call using NUOPC_SetTimestamp()
-  subroutine NUOPC_SetTimestampFieldList(fieldList, time, rc)
+  subroutine NUOPC_SetTimestampFieldList(fieldList, time, selective, rc)
 ! !ARGUMENTS:
     type(ESMF_Field), intent(inout)         :: fieldList(:)
     type(ESMF_Time),  intent(in)            :: time
+    logical,          intent(in),  optional :: selective
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Set the TimeStamp according to {\tt time} on {\tt field}.
@@ -4434,6 +4440,10 @@ module NUOPC_Base
 !     The list of {\tt ESMF\_Field} objects to be time stampped.
 !   \item[time]
 !     The {\tt ESMF\_Time} object defining the TimeStamp.
+!   \item[{[selective]}]
+!     If {\tt .true.}, then only set the TimeStamp on those fields
+!     for which the "Updated" attribute is equal to "true". Otherwise set the
+!     TimeStamp on all the fields. Default is {\tt .false.}.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -4445,9 +4455,14 @@ module NUOPC_Base
     integer                 :: localrc, i
     integer                 :: yy, mm, dd, h, m, s, ms, us, ns, ckf
     integer                 :: timestamp(10)
+    logical                 :: selectiveArg
+    character(len=40)       :: value
 
     if (present(rc)) rc = ESMF_SUCCESS
-
+    
+    selectiveArg = .false.  !default
+    if (present(selective)) selectiveArg = selective
+    
     ! access the 10 pieces of a time object
     call ESMF_TimeGet(time, yy=yy, mm=mm, dd=dd, h=h, m=m, s=s, ms=ms, us=us, &
       ns=ns, calkindflag=calkf, rc=localrc)
@@ -4461,14 +4476,94 @@ module NUOPC_Base
     ! initialize timestamp array
     timestamp = (/yy,mm,dd,h,m,s,ms,us,ns,ckf/)
     ! set timestamp on each field
-    do i=1, size(fieldList)
-      call ESMF_FieldSetTimestamp(fieldList(i), timestamp=timestamp, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME, &
-        rcToReturn=rc)) &
-        return  ! bail out
-    enddo
+call ESMF_TraceRegionEnter("loop over fields", rc=rc)
+    if (selectiveArg) then
+      do i=1, size(fieldList)
+        call NUOPC_GetAttribute(fieldList(i), name="Updated", value=value, &
+          rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)) &
+          return  ! bail out
+        if (trim(value)=="true") then
+          call ESMF_FieldSetTimestamp(fieldList(i), timestamp=timestamp, &
+            rc=localrc)
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, &
+            file=FILENAME, &
+            rcToReturn=rc)) &
+            return  ! bail out
+        endif
+      enddo
+    else
+      do i=1, size(fieldList)
+        call ESMF_FieldSetTimestamp(fieldList(i), timestamp=timestamp, &
+          rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)) &
+          return  ! bail out
+      enddo
+    endif
+call ESMF_TraceRegionExit("loop over fields", rc=rc)
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_SetTimestamp - Set the TimeStamp on Fields in a list from Clock
+! !INTERFACE:
+  ! Private name; call using NUOPC_SetTimestamp()
+  subroutine NUOPC_SetTimestampFieldListClk(fieldList, clock, selective, rc)
+! !ARGUMENTS:
+    type(ESMF_Field), intent(inout)         :: fieldList(:)
+    type(ESMF_Clock), intent(in)            :: clock
+    logical,          intent(in),  optional :: selective
+    integer,          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Set the TimeStamp according to {\tt time} on {\tt field}.
+!
+!   This call should rarely be needed in user written code.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[fieldList]
+!     The list of {\tt ESMF\_Field} objects to be time stampped.
+!   \item[clock]
+!     The {\tt ESMF\_Clock} object defining the TimeStamp by its current time.
+!   \item[{[selective]}]
+!     If {\tt .true.}, then only set the TimeStamp on those fields
+!     for which the "Updated" attribute is equal to "true". Otherwise set the
+!     TimeStamp on all the fields. Default is {\tt .false.}.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                               :: localrc
+    type(ESMF_Time)                       :: time
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    call ESMF_ClockGet(clock, currTime=time, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME, &
+      rcToReturn=rc)) &
+      return  ! bail out
+
+    call NUOPC_SetTimestamp(fieldList, time=time, selective=selective, &
+      rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME, &
+      rcToReturn=rc)) &
+      return  ! bail out
+
   end subroutine
   !-----------------------------------------------------------------------------
 
