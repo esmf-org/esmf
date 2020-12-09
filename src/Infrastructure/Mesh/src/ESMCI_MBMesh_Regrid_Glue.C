@@ -44,6 +44,7 @@
 #include "Mesh/include/ESMCI_MBMesh_Bilinear.h"
 #include "Mesh/include/ESMCI_MBMesh_Conserve.h"
 #include "Mesh/include/ESMCI_MBMesh_Extrapolation.h"
+#include "Mesh/include/ESMCI_MBMesh_Patch.h"
 
 #include <iostream>
 #include <vector>
@@ -1200,6 +1201,9 @@ int calc_regrid_wgts(MBMesh *srcmbmp, MBMesh *dstmbmp,
                              set_dst_status, dst_status,
                              regridMethod, extrapNumSrcPnts,
                              extrapDistExponent);
+  } else if (*regridMethod == ESMC_REGRID_METHOD_PATCH) {
+    calc_patch_regrid_wgts(srcmbmp, dstpl, wts, map_type,
+                              set_dst_status, dst_status);
   } else {
     Throw() << "This regrid method is not currently supported.";
   }
