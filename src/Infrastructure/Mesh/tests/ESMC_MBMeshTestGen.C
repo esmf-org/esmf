@@ -1517,6 +1517,146 @@ MBMeshTest *mix_2d_sph(int &rc) {
   return mbt;
 }
 
+// MBMesh* create_mesh_tet(int &rc) {
+// /*
+//                                        ,|,
+//                                      ,7`\,\,
+//                                    ,7`  `| `\,
+//                                  ,7`     \,  `\,
+//                                ,7`       `|    `\,
+//                              ,7`          \,     `\,
+//                            ,7`            `|       `\,
+//                          ,7`               \,        `\,
+//                        ,7`                 `|        /7`\,
+//                      ,7`                    \,      AV `|`\,
+//                    ,7`'TTs.,                `|     /7   \, `\,
+//                  ,7` \\,  `'TTs.,            \,   AV    `|   `\,
+//                ,7`   `|       `'TTs.,       `|  /7      \,    `\,
+//              ,7`      \,            `'TTs.,   \,AV       `|      `\,
+//            ,7`        `|                 `'TTs`|7         \,       `\,
+//          ,7`           \,                     ,7\\,        `|         K`
+//        ,7`             `|                  ,7` `|`\,       \,       AV
+//      ,7`                \,               ,7`    \, `\,     `|      /7
+//    ,7`                  `|             ,7`      `|   `\,    \,    AV
+//   ,T,                    \,          ,7`         \,    `\,  `|   /7
+//   `'TTs.,                `|        ,7`           `|      `\, \, AV
+//        `'TTs.,            \,     ,7`              \,       `\||/7
+//             `'TTs.,       `|   ,7`                `|         `AV
+//                  `'TTs.,   \,,7`                   \,        /7
+//                       `'TTs`|                      `|       AV
+//                            `'TTs.,                  \,     /7
+//                                 `'TTs.,             `|    AV
+//                                      `'TTV.,         \,  /7
+//                                           `'TTs.,    `| AV
+//                                                `'TTs.,\/7
+//                                                     `'T`
+// */
+//   // Get parallel information
+//   int localPet, petCount;
+//   ESMC_VM vm;
+// 
+//   vm=ESMC_VMGetGlobal(&rc);
+//   if (rc != ESMF_SUCCESS) return 0;
+// 
+//   rc=ESMC_VMGet(vm, &localPet, &petCount, (int *)NULL, (MPI_Comm *)NULL,
+//                 (int *)NULL, (int *)NULL);
+//   if (rc != ESMF_SUCCESS) return 0;
+// 
+//   // Mesh variables
+//   int pdim=3;
+//   int sdim=3;
+//   int num_elem, num_node;
+// 
+//   // set Mesh parameters
+//   int *nodeId;
+//   double *nodeCoord;
+//   int *nodeOwner;
+// 
+//   int *elemId;
+//   int *elemType;
+//   int *elemConn;
+// 
+//   MBMesh *mesh = new MBMesh();
+// 
+//   ESMC_CoordSys_Flag coordsys=ESMC_COORDSYS_CART;
+//   MBMesh_create(&mesh, &pdim, &sdim, &coordsys, &rc);
+// 
+//     num_node = 10;
+//     num_elem = 4;
+// 
+//     nodeId    = (int *) malloc (num_node * sizeof (int));
+//     nodeCoord = (double *) malloc (3*num_node * sizeof (double));
+//     nodeOwner = (int *) malloc (num_node * sizeof (int));
+//     elemId   = (int *) malloc (num_elem * sizeof (int));
+//     elemType = (int *) malloc (num_elem * sizeof (int));
+//     elemConn = (int *) malloc (4*num_elem * sizeof (int));
+// 
+//     nodeId[0]=1;
+//     nodeId[1]=2;
+//     nodeId[2]=3;
+//     nodeId[3]=4;
+//     nodeId[4]=5;
+//     nodeId[5]=6;
+//     nodeId[6]=7;
+//     nodeId[7]=8;
+//     nodeId[8]=9;
+//     nodeId[9]=10;
+// 
+//     nodeCoord[0]=0.0; nodeCoord[1]=0.0; nodeCoord[2]=0.0;
+//     nodeCoord[3]=1.0; nodeCoord[4]=0.0; nodeCoord[5]=0.0;
+//     nodeCoord[6]=2.0; nodeCoord[7]=0.0; nodeCoord[8]=0.0;
+//     nodeCoord[9]=0.5; nodeCoord[10]=1.0; nodeCoord[11]=0.0;
+//     nodeCoord[12]=1.5; nodeCoord[13]=1.0; nodeCoord[14]=0.0;
+//     nodeCoord[15]=1.0; nodeCoord[16]=2.0; nodeCoord[17]=0.0;
+//     nodeCoord[18]=0.5; nodeCoord[19]=0.5; nodeCoord[20]=1.0;
+//     nodeCoord[21]=1.0; nodeCoord[22]=0.5; nodeCoord[23]=1.0;
+//     nodeCoord[24]=1.5; nodeCoord[25]=0.5; nodeCoord[26]=1.0;
+//     nodeCoord[27]=1.0; nodeCoord[28]=1.5; nodeCoord[29]=1.0;
+// 
+//     nodeOwner[0]=0;
+//     nodeOwner[1]=0;
+//     nodeOwner[2]=0;
+//     nodeOwner[3]=0;
+//     nodeOwner[4]=0;
+//     nodeOwner[5]=0;
+//     nodeOwner[6]=0;
+//     nodeOwner[7]=0;
+//     nodeOwner[8]=0;
+//     nodeOwner[9]=0;
+// 
+//     elemId[0]=1;
+//     elemId[1]=2;
+//     elemId[2]=3;
+//     elemId[3]=4;
+// 
+//     elemType[0]=ESMC_MESHELEMTYPE_TETRA;
+//     elemType[1]=ESMC_MESHELEMTYPE_TETRA;
+//     elemType[2]=ESMC_MESHELEMTYPE_TETRA;
+//     elemType[3]=ESMC_MESHELEMTYPE_TETRA;
+// 
+//     elemConn[0]=1; elemConn[1]=2; elemConn[2]=7; elemConn[3]=4;
+//     elemConn[4]=2; elemConn[5]=3; elemConn[6]=9; elemConn[7]=5;
+//     elemConn[8]=2; elemConn[9]=5; elemConn[10]=8; elemConn[11]=4;
+//     elemConn[12]=4; elemConn[13]=5; elemConn[14]=10; elemConn[15]=6;
+// 
+//     MBMesh_addnodes(&mesh, &num_node, nodeId, nodeCoord, nodeOwner, NULL,
+//                     &coordsys, &sdim, &rc);
+// 
+//     int areapresent = 0;
+//     int coordspresent = 0;
+//     int numelemconn = 4*num_elem;
+//     int regridconserve = 0;
+//     MBMesh_addelements(&mesh, &num_elem, elemId, elemType, NULL,
+//                        &areapresent, NULL,
+//                        &coordspresent, NULL,
+//                        &numelemconn, elemConn,
+//                        &regridconserve,
+//                        &coordsys, &sdim, &rc);
+// 
+//   rc = ESMF_SUCCESS;
+//   return mesh;
+// }
+
 
 
 #endif

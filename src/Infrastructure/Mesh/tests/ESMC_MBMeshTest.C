@@ -22,8 +22,13 @@
 
 #if defined ESMF_MOAB
 #include "ESMCI_MBMesh.h"
-#include "ESMCI_MBMesh_Glue.h"
+#include "ESMCI_MBMesh_Bilinear.h"
 #include "ESMCI_MBMesh_Dual.h"
+#include "ESMCI_MBMesh_Glue.h"
+#include "ESMCI_MBMesh_Mapping.h"
+#include "ESMCI_MBMesh_Patch.h"
+#include "ESMCI_MBMesh_Rendez_EtoP.h"
+#include "ESMCI_MBMesh_Search_EtoP.h"
 #include "ESMCI_MBMesh_Util.h"
 #include "ESMCI_PointList.h"
 #endif
@@ -34,11 +39,6 @@
 #include <cstring>
 #include <random>
 // #include <functional>
-
-#if !defined (M_PI)
-// for Windows...
-#define M_PI 3.14159265358979323846
-#endif
 
 // test base class ideas
 // - almost equal function
@@ -120,8 +120,12 @@ class MBMeshTest {
     int verbosity = 0;
     double tol = 1.e-15;
     
+    int np = 0;
+    int rank = -1;
+    
     MBMesh *mesh= nullptr;
     MBMesh *target = nullptr;
+    PointList *pl = nullptr;
     std::string name = "Mesh";
 
     // buffer that needs to be deleted
@@ -191,6 +195,12 @@ class MBMeshTest {
       try {
         mesh = new MBMesh();
 
+        // Get parallel information
+        int localrc;
+        localrc=ESMC_VMGet(ESMC_VMGetGlobal(&localrc), &rank, &np, 
+                      (int *)NULL, (MPI_Comm *)NULL, (int *)NULL, (int *)NULL);
+        ESMC_CHECK_THROW(localrc);
+
         pdim = _pdim;
         sdim = _sdim;
         orig_sdim = _sdim;
@@ -251,6 +261,22 @@ class MBMeshTest {
         function_map["redist_elem"] = std::bind(&MBMeshTest::redist_elem, this);
         function_map["redist_node"] = std::bind(&MBMeshTest::redist_node, this);
         function_map["redist_elno"] = std::bind(&MBMeshTest::redist_elno, this);
+        function_map["regrid_rendezvous_center"] = std::bind(&MBMeshTest::regrid_rendezvous_center, this);
+        function_map["regrid_rendezvous_corner"] = std::bind(&MBMeshTest::regrid_rendezvous_corner, this);
+        function_map["regrid_search_center"] = std::bind(&MBMeshTest::regrid_search_center, this);
+        function_map["regrid_search_corner"] = std::bind(&MBMeshTest::regrid_search_corner, this);
+        function_map["regrid_bilinear_center"] = std::bind(&MBMeshTest::regrid_bilinear_center, this);
+        function_map["regrid_bilinear_corner"] = std::bind(&MBMeshTest::regrid_bilinear_corner, this);
+        // function_map["regrid_conserve_center"] = std::bind(&MBMeshTest::regrid_conserve_center, this);
+        // function_map["regrid_conserve_corner"] = std::bind(&MBMeshTest::regrid_conserve_corner, this);
+        // function_map["regrid_conserve_2nd_center"] = std::bind(&MBMeshTest::regrid_conserve_2nd_center, this);
+        // function_map["regrid_conserve_2nd_corner"] = std::bind(&MBMeshTest::regrid_conserve_2nd_corner, this);
+        // function_map["regrid_nearest_d2s_center"] = std::bind(&MBMeshTest::regrid_nearest_d2s_center, this);
+        // function_map["regrid_nearest_d2s_corner"] = std::bind(&MBMeshTest::regrid_nearest_d2s_corner, this);
+        // function_map["regrid_nearest_s2d_center"] = std::bind(&MBMeshTest::regrid_nearest_s2d_center, this);
+        // function_map["regrid_nearest_s2d_corner"] = std::bind(&MBMeshTest::regrid_nearest_s2d_corner, this);
+        function_map["regrid_patch_center"] = std::bind(&MBMeshTest::regrid_patch_center, this);
+        function_map["regrid_patch_corner"] = std::bind(&MBMeshTest::regrid_patch_corner, this);
         function_map["serialize"] = std::bind(&MBMeshTest::serialize, this);
         function_map["to_pointlist_elem"] = std::bind(&MBMeshTest::to_pointlist_elem, this);
         function_map["to_pointlist_node"] = std::bind(&MBMeshTest::to_pointlist_node, this);
@@ -263,6 +289,7 @@ class MBMeshTest {
     ~MBMeshTest(){
       if (mesh) delete mesh;
       if (target) delete target;
+      if (pl) delete pl;
       if (serialize_buffer) delete serialize_buffer;
     }
     
@@ -319,8 +346,8 @@ class MBMeshTest {
       try {
         int localrc;
 
-        // skip redist if run on one processor
-        if (redist_num_node == 0)
+        // skip if run on one processor
+        if (np == 1)
           return ESMF_SUCCESS;
           
         int ne = redist_elemId.size();
@@ -328,10 +355,17 @@ class MBMeshTest {
         MBMeshDual(mesh, &target, &localrc);
         ESMC_CHECK_THROW(localrc);
 
-        rc = test_dual_info();
+        // verify dual info on target
+        localrc = test_dual_info();
+        ESMC_CHECK_THROW(localrc);
+
+        // verify the original mesh is still valid
+        localrc = createget();
+        ESMC_CHECK_THROW(localrc);
       }
       CATCH_MBMESHTEST_RETURN_RC(&rc)
 
+      rc = ESMF_SUCCESS;
       return rc;
     }
 
@@ -344,8 +378,8 @@ class MBMeshTest {
       try {
         int localrc;
 
-        // skip redist if run on one processor
-        if (redist_num_node == 0)
+        // skip if run on one processor
+        if (np == 1)
           return ESMF_SUCCESS;
           
         int ne = redist_elemId.size();
@@ -354,10 +388,17 @@ class MBMeshTest {
                                  &ne, redist_elemId.data(), &target, &localrc);
         ESMC_CHECK_THROW(localrc);
 
-        rc = test_redist_info(true, false);
+        // verify redist info on target
+        localrc = test_redist_info(true, false);
+        ESMC_CHECK_THROW(localrc);
+
+        // verify the original mesh is still valid
+        localrc = createget();
+        ESMC_CHECK_THROW(localrc);
       }
       CATCH_MBMESHTEST_RETURN_RC(&rc)
 
+      rc = ESMF_SUCCESS;
       return rc;
     }
 
@@ -370,8 +411,8 @@ class MBMeshTest {
       try {
         int localrc;
         
-        // skip redist if run on one processor
-        if (redist_num_node == 0)
+        // skip if run on one processor
+        if (np == 1)
           return ESMF_SUCCESS;
           
         int nn = redist_nodeId.size();
@@ -380,10 +421,17 @@ class MBMeshTest {
                                  &target, &localrc);
         ESMC_CHECK_THROW(localrc);
 
-        rc = test_redist_info(false, true);
+        // verify redist info on target
+        localrc = test_redist_info(false, true);
+        ESMC_CHECK_THROW(localrc);
+
+        // verify the original mesh is still valid
+        localrc = createget();
+        ESMC_CHECK_THROW(localrc);
       }
       CATCH_MBMESHTEST_RETURN_RC(&rc)
 
+      rc = ESMF_SUCCESS;
       return rc;
     }
 
@@ -396,8 +444,8 @@ class MBMeshTest {
       try {
         int localrc;
         
-        // skip redist if run on one processor
-        if (redist_num_node == 0)
+        // skip if run on one processor
+        if (np == 1)
           return ESMF_SUCCESS;
           
         int nn = redist_nodeId.size();
@@ -407,10 +455,319 @@ class MBMeshTest {
                             &ne, redist_elemId.data(), &target, &localrc);
         ESMC_CHECK_THROW(localrc);
 
+        // verify redist info on target
         rc = test_redist_info(true, true);
+        ESMC_CHECK_THROW(localrc);
+
+        // verify the original mesh is still valid
+        localrc = createget();
+        ESMC_CHECK_THROW(localrc);
       }
       CATCH_MBMESHTEST_RETURN_RC(&rc)
 
+      rc = ESMF_SUCCESS;
+      return rc;
+    }
+
+    int regrid_rendezvous_center() {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MBMeshTest::regrid_rendezvous_center()"
+      // RETURN: rc : pass(0) fail(>0)
+      int rc = ESMF_FAILURE;
+
+      try {
+        int localrc;
+        
+        // skip if run on one processor
+        if (np == 1)
+          return ESMF_SUCCESS;
+        
+        pl = MBMesh_to_PointList(mesh, ESMC_MESHLOC_ELEMENT, NULL, &localrc);
+        ESMC_CHECK_THROW(localrc);
+        
+        // Cartesian?
+        int map_type = MB_MAP_TYPE_GREAT_CIRCLE;
+        if (coord_sys == ESMC_COORDSYS_CART)
+          map_type = MB_MAP_TYPE_CART_APPROX;
+        
+        MBMesh *mesh_rend=NULL;
+        PointList *pl_rend=NULL;
+        create_rendez_mbmesh_etop(mesh, pl, &mesh_rend, &pl_rend, &map_type);
+
+        // TODO: verify mesh_rend and pls
+
+        // verify the original mesh is still valid
+        localrc = createget();
+        ESMC_CHECK_THROW(localrc);
+      }
+      CATCH_MBMESHTEST_RETURN_RC(&rc)
+
+      rc = ESMF_SUCCESS;
+      return rc;
+    }
+
+    int regrid_rendezvous_corner() {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MBMeshTest::regrid_rendezvous_corner()"
+      // RETURN: rc : pass(0) fail(>0)
+      int rc = ESMF_FAILURE;
+
+      try {
+        int localrc;
+        
+        // skip if run on one processor
+        if (np == 1)
+          return ESMF_SUCCESS;
+        
+        pl = MBMesh_to_PointList(mesh, ESMC_MESHLOC_NODE, NULL, &localrc);
+        ESMC_CHECK_THROW(localrc);
+        
+        // Cartesian?
+        int map_type = MB_MAP_TYPE_GREAT_CIRCLE;
+        if (coord_sys == ESMC_COORDSYS_CART)
+          map_type = MB_MAP_TYPE_CART_APPROX;
+        
+        MBMesh *mesh_rend=NULL;
+        PointList *pl_rend=NULL;
+        create_rendez_mbmesh_etop(mesh, pl, &mesh_rend, &pl_rend, &map_type);
+
+        // TODO: verify mesh_rend and pls
+
+        // verify the original mesh is still valid
+        localrc = createget();
+        ESMC_CHECK_THROW(localrc);
+      }
+      CATCH_MBMESHTEST_RETURN_RC(&rc)
+
+      rc = ESMF_SUCCESS;
+      return rc;
+    }
+
+    int regrid_search_center() {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MBMeshTest::regrid_search_center()"
+      // RETURN: rc : pass(0) fail(>0)
+      int rc = ESMF_FAILURE;
+
+      try {
+        int localrc;
+        
+        // skip if run on one processor
+        if (np == 1)
+          return ESMF_SUCCESS;
+        
+        pl = MBMesh_to_PointList(mesh, ESMC_MESHLOC_ELEMENT, NULL, &localrc);
+        ESMC_CHECK_THROW(localrc);
+        
+        // Cartesian?
+        int map_type = MB_MAP_TYPE_GREAT_CIRCLE;
+        if (coord_sys == ESMC_COORDSYS_CART)
+          map_type = MB_MAP_TYPE_CART_APPROX;
+        
+        WMat dst_status;
+
+        // search between mesh and pointlist
+        MBMesh_Search_EToP_Result_List sr;
+        MBMesh_Search_EToP(mesh, pl, ESMCI_UNMAPPEDACTION_IGNORE, &map_type,
+                     10E-8, sr, false, dst_status, NULL, NULL);
+
+        // TODO: verify sr and dst_status and pl
+
+        // verify the original mesh is still valid
+        localrc = createget();
+        ESMC_CHECK_THROW(localrc);
+      }
+      CATCH_MBMESHTEST_RETURN_RC(&rc)
+
+      rc = ESMF_SUCCESS;
+      return rc;
+    }
+
+    int regrid_search_corner() {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MBMeshTest::regrid_search_corner()"
+      // RETURN: rc : pass(0) fail(>0)
+      int rc = ESMF_FAILURE;
+
+      try {
+        int localrc;
+        
+        // skip if run on one processor
+        if (np == 1)
+          return ESMF_SUCCESS;
+        
+        pl = MBMesh_to_PointList(mesh, ESMC_MESHLOC_NODE, NULL, &localrc);
+        ESMC_CHECK_THROW(localrc);
+        
+        // Cartesian?
+        int map_type = MB_MAP_TYPE_GREAT_CIRCLE;
+        if (coord_sys == ESMC_COORDSYS_CART)
+          map_type = MB_MAP_TYPE_CART_APPROX;
+        
+        WMat dst_status;
+
+        // search between mesh and pointlist
+        MBMesh_Search_EToP_Result_List sr;
+        MBMesh_Search_EToP(mesh, pl, ESMCI_UNMAPPEDACTION_IGNORE, &map_type,
+                     10E-8, sr, false, dst_status, NULL, NULL);
+
+        // TODO: verify sr and dst_status and pl
+
+        // verify the original mesh is still valid
+        localrc = createget();
+        ESMC_CHECK_THROW(localrc);
+      }
+      CATCH_MBMESHTEST_RETURN_RC(&rc)
+
+      rc = ESMF_SUCCESS;
+      return rc;
+    }
+
+    int regrid_bilinear_center() {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MBMeshTest::regrid_bilinear_center()"
+      // RETURN: rc : pass(0) fail(>0)
+      int rc = ESMF_FAILURE;
+
+      try {
+        int localrc;
+        
+        // skip if run on one processor
+        if (np == 1)
+          return ESMF_SUCCESS;
+        
+        pl = MBMesh_to_PointList(mesh, ESMC_MESHLOC_ELEMENT, NULL, &localrc);
+        ESMC_CHECK_THROW(localrc);
+        
+        // Cartesian?
+        int map_type = MB_MAP_TYPE_GREAT_CIRCLE;
+        if (coord_sys == ESMC_COORDSYS_CART)
+          map_type = MB_MAP_TYPE_CART_APPROX;
+        
+        // calculate bilinear weights between mesh and pointlist
+        IWeights wts, dst_status;
+        calc_bilinear_regrid_wgts(mesh, pl, wts, &map_type, true, dst_status);
+
+        // TODO: verify the wts and dst_status
+
+        // verify the original mesh is still valid
+        localrc = createget();
+        ESMC_CHECK_THROW(localrc);
+      }
+      CATCH_MBMESHTEST_RETURN_RC(&rc)
+
+      rc = ESMF_SUCCESS;
+      return rc;
+    }
+
+    int regrid_bilinear_corner() {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MBMeshTest::regrid_bilinear_corner()"
+      // RETURN: rc : pass(0) fail(>0)
+      int rc = ESMF_FAILURE;
+
+      try {
+        int localrc;
+        
+        // skip if run on one processor
+        if (np == 1)
+          return ESMF_SUCCESS;
+        
+        pl = MBMesh_to_PointList(mesh, ESMC_MESHLOC_NODE, NULL, &localrc);
+        ESMC_CHECK_THROW(localrc);
+        
+        // Cartesian?
+        int map_type = MB_MAP_TYPE_GREAT_CIRCLE;
+        if (coord_sys == ESMC_COORDSYS_CART)
+          map_type = MB_MAP_TYPE_CART_APPROX;
+        
+        // calculate bilinear weights between mesh and pointlist
+        IWeights wts, dst_status;
+        calc_bilinear_regrid_wgts(mesh, pl, wts, &map_type, true, dst_status);
+
+        // TODO: verify the wts and dst_status
+
+        // verify the original mesh is still valid
+        localrc = createget();
+        ESMC_CHECK_THROW(localrc);
+      }
+      CATCH_MBMESHTEST_RETURN_RC(&rc)
+
+      rc = ESMF_SUCCESS;
+      return rc;
+    }
+
+    int regrid_patch_center() {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MBMeshTest::regrid_patch_center()"
+      // RETURN: rc : pass(0) fail(>0)
+      int rc = ESMF_FAILURE;
+
+      try {
+        int localrc;
+        
+        // skip if run on one processor
+        if (np == 1)
+          return ESMF_SUCCESS;
+        
+        pl = MBMesh_to_PointList(mesh, ESMC_MESHLOC_ELEMENT, NULL, &localrc);
+        ESMC_CHECK_THROW(localrc);
+        
+        // Cartesian?
+        int map_type = MB_MAP_TYPE_GREAT_CIRCLE;
+        if (coord_sys == ESMC_COORDSYS_CART)
+          map_type = MB_MAP_TYPE_CART_APPROX;
+        
+        // calculate bilinear weights between mesh and pointlist
+        IWeights wts, dst_status;
+        calc_patch_regrid_wgts(mesh, pl, wts, &map_type, true, dst_status);
+
+        // TODO: verify the wts and dst_status
+
+        // verify the original mesh is still valid
+        localrc = createget();
+        ESMC_CHECK_THROW(localrc);
+      }
+      CATCH_MBMESHTEST_RETURN_RC(&rc)
+
+      rc = ESMF_SUCCESS;
+      return rc;
+    }
+
+    int regrid_patch_corner() {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MBMeshTest::regrid_patch_corner()"
+      // RETURN: rc : pass(0) fail(>0)
+      int rc = ESMF_FAILURE;
+
+      try {
+        int localrc;
+        
+        // skip if run on one processor
+        if (np == 1)
+          return ESMF_SUCCESS;
+        
+        pl = MBMesh_to_PointList(mesh, ESMC_MESHLOC_NODE, NULL, &localrc);
+        ESMC_CHECK_THROW(localrc);
+        
+        // Cartesian?
+        int map_type = MB_MAP_TYPE_GREAT_CIRCLE;
+        if (coord_sys == ESMC_COORDSYS_CART)
+          map_type = MB_MAP_TYPE_CART_APPROX;
+        
+        // calculate bilinear weights between mesh and pointlist
+        IWeights wts, dst_status;
+        calc_patch_regrid_wgts(mesh, pl, wts, &map_type, true, dst_status);
+
+        // TODO: verify the wts and dst_status
+
+        // verify the original mesh is still valid
+        localrc = createget();
+        ESMC_CHECK_THROW(localrc);
+      }
+      CATCH_MBMESHTEST_RETURN_RC(&rc)
+
+      rc = ESMF_SUCCESS;
       return rc;
     }
 
@@ -441,7 +798,11 @@ class MBMeshTest {
         MBMesh_deserialize(&target, serialize_buffer, &offset, &localrc, buffer_l);
         ESMC_CHECK_THROW(localrc);
         
-        // verify
+        // TODO: verify the deserialized target mesh
+
+        // verify the original mesh is still valid
+        localrc = createget();
+        ESMC_CHECK_THROW(localrc);
       }
       CATCH_MBMESH_RETHROW
 
@@ -458,8 +819,13 @@ class MBMeshTest {
       try {
         int localrc;
         
-        PointList *pl;
         pl = MBMesh_to_PointList(mesh, ESMC_MESHLOC_ELEMENT, NULL, &localrc);
+        ESMC_CHECK_THROW(localrc);
+
+        // TODO: verify the pl
+
+        // verify the original mesh is still valid
+        localrc = createget();
         ESMC_CHECK_THROW(localrc);
       }
       CATCH_MBMESH_RETHROW
@@ -480,6 +846,12 @@ class MBMeshTest {
         PointList *pl;
         pl = MBMesh_to_PointList(mesh, ESMC_MESHLOC_NODE, NULL, &localrc);
         ESMC_CHECK_THROW(localrc);
+
+        // TODO: verify the pl
+
+        // verify the original mesh is still valid
+        localrc = createget();
+        ESMC_CHECK_THROW(localrc);
       }
       CATCH_MBMESH_RETHROW
 
@@ -499,6 +871,12 @@ class MBMeshTest {
         char fname[len];
         sprintf(fname, "%s_%d", name.c_str(), Par::Rank());
         MBMesh_write(&mesh, fname, &localrc, len);
+        ESMC_CHECK_THROW(localrc);
+
+        // TODO: verify the write (with a read?)
+
+        // verify the original mesh is still valid
+        localrc = createget();
         ESMC_CHECK_THROW(localrc);
       }
       CATCH_MBMESH_RETHROW
@@ -584,8 +962,7 @@ class MBMeshTest {
       std::string test;
 
       // VM info
-      int localPet = VM::getCurrent(&localrc)->getLocalPet();
-      ESMC_CHECK_THROW(localrc);
+      int localPet = rank;
 
       // get dimensions
       int local_pdim, local_sdim;
@@ -719,8 +1096,7 @@ class MBMeshTest {
       std::string test;
 
       // VM info
-      int localPet = VM::getCurrent(&localrc)->getLocalPet();
-      ESMC_CHECK_THROW(localrc);
+      int localPet = rank;
 
       // get dimensions
       int local_pdim, local_sdim;
@@ -853,8 +1229,7 @@ class MBMeshTest {
       std::string test;
 
       // VM info
-      int localPet = VM::getCurrent(&localrc)->getLocalPet();
-      ESMC_CHECK_THROW(localrc);
+      int localPet = rank;
 
       // get dimensions
       int local_pdim, local_sdim;
@@ -1019,8 +1394,7 @@ class MBMeshTest {
       std::string test;
 
       // VM info
-      int localPet = VM::getCurrent(&localrc)->getLocalPet();
-      ESMC_CHECK_THROW(localrc);
+      int localPet = rank;
 
       // get dimensions
       int local_pdim, local_sdim;
@@ -1076,8 +1450,7 @@ class MBMeshTest {
       int localrc; 
 
       // VM info
-      int localPet = VM::getCurrent(&localrc)->getLocalPet();
-      ESMC_CHECK_THROW(localrc);
+      int localPet = rank;
 
       // get dimensions
       int local_pdim, local_sdim;
@@ -1184,8 +1557,7 @@ class MBMeshTest {
       int localrc; 
 
       // VM info
-      int localPet = VM::getCurrent(&localrc)->getLocalPet();
-      ESMC_CHECK_THROW(localrc);
+      int localPet = rank;
 
       // get dimensions
       int local_pdim, local_sdim;
