@@ -1017,9 +1017,6 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
 
     } // for e
 
-    // Set number of local elems
-    dual_mesh->num_elems=num_elems;
-
     // Get rid of nodes array
     delete [] nodes;
 
