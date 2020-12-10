@@ -30,8 +30,6 @@
 
 #include <cstring>
 
-using namespace ESMCI;
-
 #if defined ESMF_MOAB
 MBMesh* create_mesh_halfway(int &rc) {
   //
