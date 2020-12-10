@@ -429,7 +429,9 @@ void _generate_info_for_split_elems(
                                     int sdim,
                                     int num_elems,
                                     int *elemId,
-                                    int *elemType, int *elemMask,
+                                    int *elemType, 
+                                    int *orig_pos, 
+                                    int *elemMask,
                                     int areaPresent, double *elemArea,
                                     int elemCoordsPresent, double *elemCoords,
                                     int num_elemConn,
@@ -443,6 +445,7 @@ void _generate_info_for_split_elems(
                                     int  &num_elems_wsplit,
                                     int *&elemId_wsplit,
                                     int *&elemType_wsplit,
+                                    int *&orig_pos_wsplit,
                                     int *&elemMask_wsplit,
                                     double *&elemArea_wsplit,
                                     double *&elemCoords_wsplit,
@@ -461,6 +464,7 @@ void _generate_info_for_split_elems(
     if (num_elems > 0) {
       ThrowRequire(elemId != NULL);
       ThrowRequire(elemType != NULL);
+      ThrowRequire(orig_pos != NULL);
       ThrowRequire(elemConn != NULL);
     }
 
@@ -568,6 +572,7 @@ void _generate_info_for_split_elems(
       elemConn_wsplit=new int[num_elemConn+3*num_extra_elem];
       ThrowRequire(num_elems_wsplit >= 0);
       elemType_wsplit=new int[num_elems_wsplit];
+      orig_pos_wsplit=new int[num_elems_wsplit];
       elemId_wsplit=new int[num_elems_wsplit];
       if (elemMask != NULL) elemMask_wsplit=new int[num_elems_wsplit];
       if (areaPresent) elemArea_wsplit=new double[num_elems_wsplit];
@@ -652,9 +657,11 @@ void _generate_info_for_split_elems(
               // First id is same, others are from new ids
               if (first_elem) {
                 elemId_wsplit[split_elem_pos]=elemId[e];
+                orig_pos_wsplit[split_elem_pos]=orig_pos[e];
                 first_elem=false;
               } else {
                 elemId_wsplit[split_elem_pos]=curr_extra_id;
+                orig_pos_wsplit[split_elem_pos]=MBMesh::ORIG_POS_SPLITELEM;
                 split_to_orig_id[curr_extra_id]=elemId[e]; // Store map of split to original id
                 curr_extra_id++;
               }
@@ -726,6 +733,7 @@ void _generate_info_for_split_elems(
 
            } else { // just copy
             elemId_wsplit[split_elem_pos]=elemId[e];
+            orig_pos_wsplit[split_elem_pos]=orig_pos[e];
             elemType_wsplit[split_elem_pos]=elemType[e];
             if (areaPresent) elemArea_wsplit[split_elem_pos]=elemArea[e];
             if (elemCoordsPresent) {
@@ -769,6 +777,7 @@ void _add_elems_all_one_type(MBMesh *mbmp, int localPet,
                              int curr_elem_type,
                              int num_elems,   
                              int *elemId, 
+                             int *orig_pos, 
                              int *elemMask,
                              int areaPresent, double *elemArea,
                              int elemCoordsPresent, double *elemCoords,
@@ -821,17 +830,7 @@ void _add_elems_all_one_type(MBMesh *mbmp, int localPet,
       }        
     }
 
-
-    // Allocate orig_pos list
-    ThrowRequire(num_elems >= 0);
-    int *orig_pos=new int[num_elems];
     
-    // Fill orig_pos list
-    for (int i=0; i<num_elems; i++) {
-      orig_pos[i]=i;
-    }
-    
-
     // Allocate owner list
     ThrowRequire(num_elems >= 0);
     int *owners=new int[num_elems];
@@ -874,7 +873,6 @@ void _add_elems_all_one_type(MBMesh *mbmp, int localPet,
 
     // Deallocate temp. arrays
     delete [] node_conn;
-    delete [] orig_pos;
     delete [] owners;
   }
   CATCH_MBMESH_RETHROW
@@ -890,6 +888,7 @@ void _add_elems_multiple_types(MBMesh *mbmp, int localPet,
                                int num_elems,   
                                int *elemId, 
                                int *elemType, 
+                               int *orig_pos, 
                                int *elemMask,
                                int areaPresent, double *elemArea,
                                int elemCoordsPresent, double *elemCoords,
@@ -910,6 +909,7 @@ void _add_elems_multiple_types(MBMesh *mbmp, int localPet,
     ThrowRequire(elemId != NULL);
     ThrowRequire(elemConn != NULL);
     ThrowRequire(elemType != NULL);
+    ThrowRequire(orig_pos != NULL);
     if (areaPresent) ThrowRequire(elemArea != NULL);
     if (elemCoordsPresent) ThrowRequire(elemCoords != NULL);
     ThrowRequire(elem_id_buff != NULL);
@@ -962,7 +962,7 @@ void _add_elems_multiple_types(MBMesh *mbmp, int localPet,
         elem_owner_buff[pos]=localPet;
 
         // Fill orig pos
-        elem_orig_pos_buff[pos]=e;
+        elem_orig_pos_buff[pos]=orig_pos[e];
 
         // Advance to next pos
         pos++;
@@ -1103,7 +1103,9 @@ void _add_elems_multiple_types(MBMesh *mbmp, int localPet,
 void _add_elems_in_groups_by_type(MBMesh *mbmp, int localPet, 
                                   int num_elems,
                                   int *elemId, 
-                                  int *elemType, int *elemMask,
+                                  int *elemType,
+                                  int *orig_pos,
+                                  int *elemMask,
                                   int areaPresent, double *elemArea,
                                   int elemCoordsPresent, double *elemCoords,
                                   int *elemConn                              
@@ -1172,6 +1174,7 @@ void _add_elems_in_groups_by_type(MBMesh *mbmp, int localPet,
                               elem_types[0],
                               num_elems,   
                               elemId, 
+                              orig_pos, 
                               elemMask,
                               areaPresent, elemArea,
                               elemCoordsPresent, elemCoords,
@@ -1220,7 +1223,7 @@ void _add_elems_in_groups_by_type(MBMesh *mbmp, int localPet,
     for (int t=0; t<num_elem_types; t++) {
 
       _add_elems_multiple_types(mbmp, localPet, elem_types[t],
-                                num_elems, elemId, elemType,  
+                                num_elems, elemId, elemType, orig_pos, 
                                 elemMask, 
                                 areaPresent, elemArea,
                                 elemCoordsPresent, elemCoords,
@@ -1429,6 +1432,19 @@ void MBMesh_addelements(MBMesh **mbmpp,
 
      ESMCI_MESHCREATE_TRACE_EXIT("MBMesh addelems setup");
 
+     /// Add orig_pos array to track the original position of elems in input lists
+ 
+     // Allocate memory for orig_pos
+     // orig_pos is the pointer that can be switched to different memory later
+     // orig_pos_alloc always points to this memory for later deleting     
+     int *orig_pos_alloc=NULL;
+     orig_pos_alloc=new int[num_elems]; 
+     int *orig_pos=orig_pos_alloc; 
+
+     // Fill orig_pos 
+     for (int i=0; i<num_elems; i++) {
+       orig_pos[i]=i;
+     }
 
      //// See if there are any split elements, if so generate split information ////
 
@@ -1449,6 +1465,7 @@ void MBMesh_addelements(MBMesh **mbmpp,
      double *elemArea_wsplit=NULL;
      double *elemCoords_wsplit=NULL;
      int *elemMask_wsplit=NULL;
+     int *orig_pos_wsplit=NULL;
 
      if (is_split) {
 
@@ -1475,20 +1492,21 @@ void MBMesh_addelements(MBMesh **mbmpp,
        // Generate split info 
        _generate_info_for_split_elems(// In
                                       is_split_local,pdim, orig_sdim, sdim, 
-                                      num_elems, elemId, elemType, elemMask, 
+                                      num_elems, elemId, elemType, orig_pos, elemMask,
                                       areaPresent, elemArea, elemCoordsPresent, elemCoords,
                                       num_elemConn, elemConn, nodeCoords, 
                                  
                                       // Out
                                       mbmp->max_non_split_id, mbmp->split_to_orig_id,  mbmp->split_id_to_frac,
-                                      num_elems_wsplit, elemId_wsplit, elemType_wsplit, elemMask_wsplit, 
-                                      elemArea_wsplit, elemCoords_wsplit, elemConn_wsplit);
+                                      num_elems_wsplit, elemId_wsplit, elemType_wsplit, orig_pos_wsplit, 
+                                      elemMask_wsplit, elemArea_wsplit, elemCoords_wsplit, elemConn_wsplit);
 
        // If there was a local split elem, then use the split info for creating elems below. 
        if (is_split_local) {
          num_elems=num_elems_wsplit;
          elemConn=elemConn_wsplit;
          elemType=elemType_wsplit;
+         orig_pos=orig_pos_wsplit,
          elemId=elemId_wsplit;
          elemMask=elemMask_wsplit;
          if (areaPresent) elemArea=elemArea_wsplit;
@@ -1522,7 +1540,7 @@ void MBMesh_addelements(MBMesh **mbmpp,
 
     // Add elements in groups by type, also set optional fields in elements      
     _add_elems_in_groups_by_type(mbmp, localPet, 
-                                 num_elems, elemId, elemType, elemMask,
+                                 num_elems, elemId, elemType, orig_pos, elemMask,
                                  areaPresent, elemArea, elemCoordsPresent, elemCoords,
                                  elemConn);
 
@@ -1545,10 +1563,14 @@ void MBMesh_addelements(MBMesh **mbmpp,
     delete [] elemConn_wsplit;
     delete [] elemType_wsplit;
     delete [] elemId_wsplit;
+    delete [] orig_pos_wsplit;
     if (present(elemMaskII)) delete [] elemMask_wsplit;
     if (areaPresent) delete [] elemArea_wsplit;
     if (elemCoordsPresent) delete [] elemCoords_wsplit;
   }
+
+  // Get rid of orig_pos
+  delete [] orig_pos_alloc;
 
   }
   CATCH_MBMESH_RETURN(rc);

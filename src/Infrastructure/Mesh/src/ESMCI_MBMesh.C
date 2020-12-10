@@ -181,7 +181,9 @@ MBMesh::MBMesh(int _pdim, int _orig_sdim, ESMC_CoordSys_Flag _coordsys):
   }
   
   // Setup orig_pos tag
-  int_def_val=-1; // Values < 0 indicate that enities are not from original creation
+  int_def_val=ORIG_POS_AFTERCREATE; // Default to AFTERCREATE, so that if objects
+                                    // are created later after the original mesh creation
+                                    // we know. 
   merr=mesh->tag_get_handle("orig_pos", 1, MB_TYPE_INTEGER, orig_pos_tag, MB_TAG_EXCL|MB_TAG_DENSE, &int_def_val);
   if (merr != MB_SUCCESS) {
     if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
@@ -504,7 +506,7 @@ void MBMesh::get_sorted_orig_nodes(std::vector<EntityHandle> &orig_nodes) {
       ESMC_CHECK_MOAB_THROW(merr);
   
       // Skip ones with orig_pos<0 (they are not from original creation)
-      if (orig_pos < 0) continue;
+      if (orig_pos < ORIG_POS_MIN_OUTPUT) continue;
   
       // Stick in list
       pos_and_nodes.push_back(std::make_pair(orig_pos,node));
@@ -554,7 +556,7 @@ void MBMesh::get_sorted_orig_elems(std::vector<EntityHandle> &orig_elems) {
       ESMC_CHECK_MOAB_THROW(merr);
 
       // Skip ones with orig_pos<0 (they are not from original creation)
-      if (orig_pos < 0) continue;
+      if (orig_pos < ORIG_POS_MIN_OUTPUT) continue;
 
       // Stick in list
       pos_and_elems.push_back(std::make_pair(orig_pos,elem));
@@ -2434,7 +2436,8 @@ void MBMesh::CreateGhost() {
     vector<Tag> elem_tags;
     
     node_tags.push_back(this->gid_tag);
-    // node_tags.push_back(this->orig_pos_tag);
+    // Don't comm. orig_pos because it's different each PET 
+    // node_tags.push_back(this->orig_pos_tag); 
     node_tags.push_back(this->owner_tag);
     if (this->has_node_orig_coords) node_tags.push_back(this->node_orig_coords_tag);
     if (this->has_node_mask) {
@@ -2443,6 +2446,7 @@ void MBMesh::CreateGhost() {
     }
     
     elem_tags.push_back(this->gid_tag);
+    // Don't comm. orig_pos because it's different each PET 
     // elem_tags.push_back(this->orig_pos_tag);
     elem_tags.push_back(this->owner_tag);
     if (this->has_elem_frac) elem_tags.push_back(this->elem_frac_tag);

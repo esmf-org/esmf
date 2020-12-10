@@ -138,6 +138,7 @@ namespace ESMCI {
     Tag gid_tag;
     Tag orig_pos_tag;
     Tag owner_tag;
+    enum {ORIG_POS_MIN_OUTPUT=0, ORIG_POS_AFTERCREATE=-1, ORIG_POS_SPLITELEM=-2}; 
 
     bool has_node_orig_coords;
     Tag node_orig_coords_tag;
