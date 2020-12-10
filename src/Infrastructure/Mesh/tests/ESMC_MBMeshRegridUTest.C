@@ -106,6 +106,8 @@ int main(int argc, char *argv[]) {
     {"regrid_conserve_2nd", "hex_3d_sph"}
   };
 
+  MBTGen *generate = new MBTGen();
+
   for (const auto api: test_apis) {
     for (const auto mesh: test_meshes) {    
       rc = ESMF_FAILURE;
@@ -119,7 +121,6 @@ int main(int argc, char *argv[]) {
       } else {
 #if defined ESMF_MOAB
         try {
-          MBTGen *generate = new MBTGen();
           MBT *test = generate->mesh_map[mesh](localrc);
           
           // test->verbosity = 3;
@@ -142,55 +143,56 @@ int main(int argc, char *argv[]) {
                 &result, __FILE__, __LINE__, 0);
     }
   }
+  delete generate;
 
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest  // 10
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest  // 20
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest  // 30
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest  // 40
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest  // 10
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest  // 20
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest  // 30
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest  // 40
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
 
 
 
