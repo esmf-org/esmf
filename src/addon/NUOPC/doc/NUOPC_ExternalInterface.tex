@@ -20,7 +20,7 @@ The external NUOPC interface is currently defined by the Initialize, Run, and Fi
      \hline\hline
      {\tt ESMF\_METHOD\_INITIALIZE} & label\_ExternalAdvertise & Called after the external component has 
                                                                  set up the import- and exportStates with 
-                                                                 fields that it plans to interact with.
+                                                                 fields (advertised) that it plans to interact with.
                                                                  On the NUOPC application side this call will
                                                                  got through the complete advertise cylce.\\ \hline
      {\tt ESMF\_METHOD\_INITIALIZE} & label\_ExternalRealize   & Called after the external component has
@@ -46,12 +46,26 @@ Here {\tt methodFlag} and {\tt phaseLabel} corrsepond to the respective argument
 The following code example demonstrates typical use of the external interface.
 
 \begin{verbatim}
+  ! Create the import/export States
+  ! NOTE: The "stateintent" must be specified, and it must be set from the
+  ! perspective of the external level!
+  externalExportState = ESMF_StateCreate(stateintent=ESMF_STATEINTENT_EXPORT, rc=rc)
+    ! check rc
+  externalImportState = ESMF_StateCreate(stateintent=ESMF_STATEINTENT_IMPORT, rc=rc)
+    ! check rc
+
+  ! Advertise field(s) in external import state to receive from the NUOPC layer
+  call NUOPC_Advertise(externalImportState, &
+    StandardNames=(/"sea_surface_temperature"/), &
+    TransferOfferGeomObject="cannot provide", SharePolicyField="share", rc=rc)
+    ! check rc
+
   ! Call "ExternalAdvertise" Initialize for the earth system Component
   call NUOPC_CompSearchPhaseMap(nuopcApp, methodflag=ESMF_METHOD_INITIALIZE, &
     phaseLabel=label_ExternalAdvertise, phaseIndex=phase, rc=rc)
     ! check rc
   call ESMF_GridCompInitialize(nuopcApp, phase=phase, clock=clock, &
-    importState=esmImportState, exportState=esmExportState, userRc=urc, rc=rc)
+    importState=externalExportState, exportState=externalImportState, userRc=urc, rc=rc)
     ! check rc and urc
 
   ! Call "ExternalRealize" Initialize for the earth system Component
@@ -59,7 +73,7 @@ The following code example demonstrates typical use of the external interface.
     phaseLabel=label_ExternalRealize, phaseIndex=phase, rc=rc)
     ! check rc
   call ESMF_GridCompInitialize(nuopcApp, phase=phase, clock=clock, &
-    importState=esmImportState, exportState=esmExportState, userRc=urc, rc=rc)
+    importState=externalExportState, exportState=externalImportState, userRc=urc, rc=rc)
     ! check rc and urc
 
   ! Call "ExternalDataInit" Initialize for the earth system Component
@@ -67,17 +81,21 @@ The following code example demonstrates typical use of the external interface.
     phaseLabel=label_ExternalDataInit, phaseIndex=phase, rc=rc)
     ! check rc
   call ESMF_GridCompInitialize(nuopcApp, phase=phase, clock=clock, &
-    importState=esmImportState, exportState=esmExportState, userRc=urc, rc=rc)
+    importState=externalExportState, exportState=externalImportState, userRc=urc, rc=rc)
     ! check rc and urc
+
+! Note: this is where time stepping would be implemented as a loop using clock
 
   ! Run the earth system Component
   call ESMF_GridCompRun(nuopcApp, clock=clock, &
-    importState=esmImportState, exportState=esmExportState, userRc=urc, rc=rc)
+    importState=externalExportState, exportState=externalImportState, userRc=urc, rc=rc)
     ! check rc and urc
+
+! End of time stepping loop if present
 
   ! Finalize the earth system Component
   call ESMF_GridCompFinalize(nuopcApp, clock=clock, &
-    importState=esmImportState, exportState=esmExportState, userRc=urc, rc=rc)
+    importState=externalExportState, exportState=externalImportState, userRc=urc, rc=rc)
     ! check rc and urc
 \end{verbatim}
 
