@@ -2675,7 +2675,7 @@ module NUOPC_Comp
       ! set component kind specific verbosity levels
       if (trim(valueString)=="Driver") then
         max   = 65535  ! all 16 lower bits set
-        high  = 32513  ! bits 0, 8, 9, 10, 11, 12, 13, 14
+        high  = 32529  ! bits 0, 4, 8, 9, 10, 11, 12, 13, 14
         low   =  9985  ! bits 0, 8, 9, 10, 13 
       else if (trim(valueString)=="Model") then
         max   = 65535  ! all 16 lower bits set
