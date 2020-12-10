@@ -23,7 +23,7 @@
 #if defined ESMF_MOAB
 #include "ESMCI_MBMesh.h"
 #include "ESMCI_MBMesh_Glue.h"
-#include "ESMC_MBMeshTestGen.C"
+#include "ESMC_MBTGen.C"
 #endif
 
 #include <iostream>
@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
   rc=ESMC_VMGet(vm, &localPet, &petCount, (int *)NULL, (MPI_Comm *)NULL,
                 (int *)NULL, (int *)NULL);
 
-  // these are bound to MBMeshTest in constructor, must match!
+  // these are bound to MBT in constructor, must match!
   std::vector<std::string> test_apis;
     test_apis.push_back("createget");
     test_apis.push_back("dual");
@@ -79,6 +79,7 @@ int main(int argc, char *argv[]) {
     test_apis.push_back("to_pointlist_node");
     test_apis.push_back("write_vtk");
 
+  // these are bound to MBTGen in constructor, must match!
   std::vector<std::string> test_meshes;
     test_meshes.push_back("quad_2d_cart");
     test_meshes.push_back("quad_2d_sph");
@@ -92,21 +93,6 @@ int main(int argc, char *argv[]) {
     // address this when fix for elemcount from ngons (split elem orig_pos) is fixed
     // test_meshes.push_back("ngon_2d_cart");
     // test_meshes.push_back("ngon_2d_sph");
-
-#if defined ESMF_MOAB
-  std::map<std::string, std::function<MBMeshTest*(int&)>>  mesh_map = {\
-    {"quad_2d_cart", quad_2d_cart},
-    {"quad_2d_sph", quad_2d_sph},
-    {"tri_2d_cart", tri_2d_cart},
-    {"tri_2d_sph", tri_2d_sph},
-    {"hex_3d_cart", hex_3d_cart},
-    {"hex_3d_sph", hex_3d_sph},
-    {"mix_2d_cart", mix_2d_cart},
-    {"mix_2d_sph", mix_2d_sph},
-    // {"ngon_2d_cart", ngon_2d_cart},
-    // {"ngon_2d_sph", ngon_2d_sph}
-  };
-#endif
 
   // skip the following tests
   std::vector<std::pair<std::string, std::string>> skip_test = {\
@@ -134,17 +120,19 @@ int main(int argc, char *argv[]) {
       } else {
 #if defined ESMF_MOAB
         try {
-          MBMeshTest *test = mesh_map[mesh](localrc);
+          MBTGen *generate = new MBTGen();
+          MBT *test = generate->mesh_map[mesh](localrc);
           
           // test->verbosity = 3;
           // test->tol = 1.e-15;
-          
+          // test->print();
+
           if (localrc == ESMF_SUCCESS) localrc = test->build();
           if (localrc == ESMF_SUCCESS) rc = test->function_map[api]();
           
           delete test;
         }
-        CATCH_MBMESHTEST_FAIL(&rc)
+        CATCH_MBT_FAIL(&rc)
 #else
         rc = ESMF_SUCCESS;
 #endif
