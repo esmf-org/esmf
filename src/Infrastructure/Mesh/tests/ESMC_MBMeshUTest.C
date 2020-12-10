@@ -70,8 +70,7 @@ int main(int argc, char *argv[]) {
   // these are bound to MBMeshTest in constructor, must match!
   std::vector<std::string> test_apis;
     test_apis.push_back("createget");
-    // original mesh seems to be modified when generating a dual mesh
-    // test_apis.push_back("dual");
+    test_apis.push_back("dual");
     test_apis.push_back("redist_elem");
     test_apis.push_back("redist_node");
     test_apis.push_back("redist_elno");
@@ -219,6 +218,14 @@ int main(int argc, char *argv[]) {
     //NEX_UTest  60
     //NEX_UTest
     //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest
+    //NEX_UTest  70
     //NEX_UTest
     //NEX_UTest
 

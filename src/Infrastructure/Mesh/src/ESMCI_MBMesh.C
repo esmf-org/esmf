@@ -2434,7 +2434,7 @@ void MBMesh::CreateGhost() {
     vector<Tag> elem_tags;
     
     node_tags.push_back(this->gid_tag);
-    node_tags.push_back(this->orig_pos_tag);
+    // node_tags.push_back(this->orig_pos_tag);
     node_tags.push_back(this->owner_tag);
     if (this->has_node_orig_coords) node_tags.push_back(this->node_orig_coords_tag);
     if (this->has_node_mask) {
@@ -2443,7 +2443,7 @@ void MBMesh::CreateGhost() {
     }
     
     elem_tags.push_back(this->gid_tag);
-    elem_tags.push_back(this->orig_pos_tag);
+    // elem_tags.push_back(this->orig_pos_tag);
     elem_tags.push_back(this->owner_tag);
     if (this->has_elem_frac) elem_tags.push_back(this->elem_frac_tag);
     if (this->has_elem_mask) {
