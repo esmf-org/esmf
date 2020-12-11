@@ -146,6 +146,7 @@ MBMesh::MBMesh(int _pdim, int _orig_sdim, ESMC_CoordSys_Flag _coordsys):
   // Moab error
   int merr;
 
+  // Init
   _num_node = 0;
   _num_elem = 0;
   _num_elem_conn = 0;
@@ -175,48 +176,34 @@ MBMesh::MBMesh(int _pdim, int _orig_sdim, ESMC_CoordSys_Flag _coordsys):
   // Setup global id tag
   int_def_val=0;
   merr=mesh->tag_get_handle(GLOBAL_ID_TAG_NAME, 1, MB_TYPE_INTEGER, gid_tag, MB_TAG_DENSE, &int_def_val);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT, &localrc)) throw localrc;
-  }
+  ESMC_CHECK_MOAB_THROW(merr);
   
   // Setup orig_pos tag
   int_def_val=ORIG_POS_AFTERCREATE; // Default to AFTERCREATE, so that if objects
                                     // are created later after the original mesh creation
                                     // we know. 
   merr=mesh->tag_get_handle("orig_pos", 1, MB_TYPE_INTEGER, orig_pos_tag, MB_TAG_EXCL|MB_TAG_DENSE, &int_def_val);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT, &localrc)) throw localrc;
-  }
+  ESMC_CHECK_MOAB_THROW(merr);
   
   // Setup owner tag
   int_def_val=-1;
   merr=mesh->tag_get_handle("owner", 1, MB_TYPE_INTEGER, owner_tag, MB_TAG_EXCL|MB_TAG_DENSE, &int_def_val);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT, &localrc)) throw localrc;
-  }
+  ESMC_CHECK_MOAB_THROW(merr);
+
   
   // Setup node_orig_coord tag
   has_node_orig_coords=false;
   if (coordsys != ESMC_COORDSYS_CART) {
     double dbl_def_val[3]={-1.0, -1.0, -1.0};
     merr=mesh->tag_get_handle("node_orig_coords", orig_sdim, MB_TYPE_DOUBLE, node_orig_coords_tag, MB_TAG_EXCL|MB_TAG_DENSE, dbl_def_val);
-    if (merr != MB_SUCCESS) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                       moab::ErrorCodeStr[merr], ESMC_CONTEXT, &localrc)) throw localrc;
-    }
+    ESMC_CHECK_MOAB_THROW(merr);
     has_node_orig_coords=true;
   }
 
   // Setup elem frac
   double dbl_def_val_1=1.0;
   merr=mesh->tag_get_handle("elem_frac", 1, MB_TYPE_DOUBLE, elem_frac_tag, MB_TAG_EXCL|MB_TAG_DENSE, &dbl_def_val_1);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT, &localrc)) throw localrc;
-  }
+  ESMC_CHECK_MOAB_THROW(merr);
   has_elem_frac=true;
 
 } 
