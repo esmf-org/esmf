@@ -121,12 +121,12 @@ class MBT {
     double tol = 1.e-15;
     
     int np = 0;
-    int rank = -1;
+    int localPet = -1;
     
     MBMesh *mesh= nullptr;
     MBMesh *target = nullptr;
     PointList *pl = nullptr;
-    std::string name = "Mesh";
+    std::string name = "MBMesh";
 
     // buffer that needs to be deleted
     char *serialize_buffer = nullptr;
@@ -153,12 +153,12 @@ class MBT {
     std::vector<double> nodeCoord;
 
     // element information
-    std::vector<int> elemConn;
     std::vector<int> elemId;
     std::vector<int> elemMask;
     std::vector<int> elemType;
     std::vector<double> elemArea;
     std::vector<double> elemCoord;
+    std::vector<int> elemConn;
 
     // output variables
     std::string pass = "Pass - ";
@@ -197,7 +197,7 @@ class MBT {
 
         // Get parallel information
         int localrc;
-        localrc=ESMC_VMGet(ESMC_VMGetGlobal(&localrc), &rank, &np, 
+        localrc=ESMC_VMGet(ESMC_VMGetGlobal(&localrc), &localPet, &np, 
                       (int *)NULL, (MPI_Comm *)NULL, (int *)NULL, (int *)NULL);
         ESMC_CHECK_THROW(localrc);
 
@@ -337,6 +337,25 @@ class MBT {
       return rc;
     }
 
+    int createget(){
+#undef ESMC_METHOD
+#define ESMC_METHOD "MBT::createget()"
+      // RETURN: rc : pass(0) fail(>0)
+      int rc = ESMF_FAILURE;
+
+      try {
+        int localrc;
+        
+        localrc = test_get_info(mesh);
+        ESMC_CHECK_THROW(localrc);
+
+      }
+      CATCH_MBT_RETURN_RC(&rc)
+
+      rc = ESMF_SUCCESS;
+      return rc;
+    }
+
     int dual() {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MBT::dual()"
@@ -347,20 +366,23 @@ class MBT {
         int localrc;
 
         // skip if run on one processor
-        if (np == 1)
+        if (np == 1) {
+          name = "SKIP - " + name;
           return ESMF_SUCCESS;
+        }
           
         int ne = redist_elemId.size();
 
         MBMeshDual(mesh, &target, &localrc);
         ESMC_CHECK_THROW(localrc);
 
-        // verify dual info on target
-        localrc = test_dual_info();
+        // verify the original mesh is still valid
+        localrc = test_get_info(mesh);
         ESMC_CHECK_THROW(localrc);
 
-        // verify the original mesh is still valid
-        localrc = createget();
+        // verify dual info on target
+        // this is tricky will require vtk output for empirical discovery
+        // localrc = test_dual_info(target);
         ESMC_CHECK_THROW(localrc);
       }
       CATCH_MBT_RETURN_RC(&rc)
@@ -379,8 +401,10 @@ class MBT {
         int localrc;
 
         // skip if run on one processor
-        if (np == 1)
+        if (np == 1) {
+          name = "SKIP - " + name;
           return ESMF_SUCCESS;
+        }
           
         int ne = redist_elemId.size();
 
@@ -388,12 +412,12 @@ class MBT {
                                  &ne, redist_elemId.data(), &target, &localrc);
         ESMC_CHECK_THROW(localrc);
 
-        // verify redist info on target
-        localrc = test_redist_info(true, false);
+        // verify the original mesh is still valid
+        localrc = test_get_info(mesh);
         ESMC_CHECK_THROW(localrc);
 
-        // verify the original mesh is still valid
-        localrc = createget();
+        // verify redist info on target
+        localrc = test_redist_info(target, true, false);
         ESMC_CHECK_THROW(localrc);
       }
       CATCH_MBT_RETURN_RC(&rc)
@@ -412,8 +436,10 @@ class MBT {
         int localrc;
         
         // skip if run on one processor
-        if (np == 1)
+        if (np == 1) {
+          name = "SKIP - " + name;
           return ESMF_SUCCESS;
+        }
           
         int nn = redist_nodeId.size();
         
@@ -421,12 +447,12 @@ class MBT {
                                  &target, &localrc);
         ESMC_CHECK_THROW(localrc);
 
-        // verify redist info on target
-        localrc = test_redist_info(false, true);
+        // verify the original mesh is still valid
+        localrc = test_get_info(mesh);
         ESMC_CHECK_THROW(localrc);
 
-        // verify the original mesh is still valid
-        localrc = createget();
+        // verify redist info on target
+        localrc = test_redist_info(target, false, true);
         ESMC_CHECK_THROW(localrc);
       }
       CATCH_MBT_RETURN_RC(&rc)
@@ -445,8 +471,10 @@ class MBT {
         int localrc;
         
         // skip if run on one processor
-        if (np == 1)
+        if (np == 1) {
+          name = "SKIP - " + name;
           return ESMF_SUCCESS;
+        }
           
         int nn = redist_nodeId.size();
         int ne = redist_elemId.size();
@@ -455,12 +483,12 @@ class MBT {
                             &ne, redist_elemId.data(), &target, &localrc);
         ESMC_CHECK_THROW(localrc);
 
-        // verify redist info on target
-        rc = test_redist_info(true, true);
+        // verify the original mesh is still valid
+        localrc = test_get_info(mesh);
         ESMC_CHECK_THROW(localrc);
 
-        // verify the original mesh is still valid
-        localrc = createget();
+        // verify redist info on target
+        rc = test_redist_info(target, true, true);
         ESMC_CHECK_THROW(localrc);
       }
       CATCH_MBT_RETURN_RC(&rc)
@@ -479,8 +507,10 @@ class MBT {
         int localrc;
         
         // skip if run on one processor
-        if (np == 1)
+        if (np == 1) {
+          name = "SKIP - " + name;
           return ESMF_SUCCESS;
+        }
         
         pl = MBMesh_to_PointList(mesh, ESMC_MESHLOC_ELEMENT, NULL, &localrc);
         ESMC_CHECK_THROW(localrc);
@@ -494,11 +524,11 @@ class MBT {
         PointList *pl_rend=NULL;
         create_rendez_mbmesh_etop(mesh, pl, &mesh_rend, &pl_rend, &map_type);
 
-        // TODO: verify mesh_rend and pls
-
         // verify the original mesh is still valid
-        localrc = createget();
+        localrc = test_get_info(mesh);
         ESMC_CHECK_THROW(localrc);
+
+        // TODO: verify mesh_rend and pls
       }
       CATCH_MBT_RETURN_RC(&rc)
 
@@ -516,8 +546,10 @@ class MBT {
         int localrc;
         
         // skip if run on one processor
-        if (np == 1)
+        if (np == 1) {
+          name = "SKIP - " + name;
           return ESMF_SUCCESS;
+        }
         
         pl = MBMesh_to_PointList(mesh, ESMC_MESHLOC_NODE, NULL, &localrc);
         ESMC_CHECK_THROW(localrc);
@@ -531,11 +563,11 @@ class MBT {
         PointList *pl_rend=NULL;
         create_rendez_mbmesh_etop(mesh, pl, &mesh_rend, &pl_rend, &map_type);
 
-        // TODO: verify mesh_rend and pls
-
         // verify the original mesh is still valid
-        localrc = createget();
+        localrc = test_get_info(mesh);
         ESMC_CHECK_THROW(localrc);
+
+        // TODO: verify mesh_rend and pls
       }
       CATCH_MBT_RETURN_RC(&rc)
 
@@ -553,8 +585,10 @@ class MBT {
         int localrc;
         
         // skip if run on one processor
-        if (np == 1)
+        if (np == 1) {
+          name = "SKIP - " + name;
           return ESMF_SUCCESS;
+        }
         
         pl = MBMesh_to_PointList(mesh, ESMC_MESHLOC_ELEMENT, NULL, &localrc);
         ESMC_CHECK_THROW(localrc);
@@ -571,11 +605,11 @@ class MBT {
         MBMesh_Search_EToP(mesh, pl, ESMCI_UNMAPPEDACTION_IGNORE, &map_type,
                      10E-8, sr, false, dst_status, NULL, NULL);
 
-        // TODO: verify sr and dst_status and pl
-
         // verify the original mesh is still valid
-        localrc = createget();
+        localrc = test_get_info(mesh);
         ESMC_CHECK_THROW(localrc);
+
+        // TODO: verify sr and dst_status and pl
       }
       CATCH_MBT_RETURN_RC(&rc)
 
@@ -593,8 +627,10 @@ class MBT {
         int localrc;
         
         // skip if run on one processor
-        if (np == 1)
+        if (np == 1) {
+          name = "SKIP - " + name;
           return ESMF_SUCCESS;
+        }
         
         pl = MBMesh_to_PointList(mesh, ESMC_MESHLOC_NODE, NULL, &localrc);
         ESMC_CHECK_THROW(localrc);
@@ -611,11 +647,11 @@ class MBT {
         MBMesh_Search_EToP(mesh, pl, ESMCI_UNMAPPEDACTION_IGNORE, &map_type,
                      10E-8, sr, false, dst_status, NULL, NULL);
 
-        // TODO: verify sr and dst_status and pl
-
         // verify the original mesh is still valid
-        localrc = createget();
+        localrc = test_get_info(mesh);
         ESMC_CHECK_THROW(localrc);
+
+        // TODO: verify sr and dst_status and pl
       }
       CATCH_MBT_RETURN_RC(&rc)
 
@@ -632,10 +668,6 @@ class MBT {
       try {
         int localrc;
         
-        // skip if run on one processor
-        if (np == 1)
-          return ESMF_SUCCESS;
-        
         pl = MBMesh_to_PointList(mesh, ESMC_MESHLOC_ELEMENT, NULL, &localrc);
         ESMC_CHECK_THROW(localrc);
         
@@ -648,11 +680,11 @@ class MBT {
         IWeights wts, dst_status;
         calc_bilinear_regrid_wgts(mesh, pl, wts, &map_type, true, dst_status);
 
-        // TODO: verify the wts and dst_status
-
         // verify the original mesh is still valid
-        localrc = createget();
+        localrc = test_get_info(mesh);
         ESMC_CHECK_THROW(localrc);
+
+        // TODO: verify the wts and dst_status
       }
       CATCH_MBT_RETURN_RC(&rc)
 
@@ -669,10 +701,6 @@ class MBT {
       try {
         int localrc;
         
-        // skip if run on one processor
-        if (np == 1)
-          return ESMF_SUCCESS;
-        
         pl = MBMesh_to_PointList(mesh, ESMC_MESHLOC_NODE, NULL, &localrc);
         ESMC_CHECK_THROW(localrc);
         
@@ -685,11 +713,11 @@ class MBT {
         IWeights wts, dst_status;
         calc_bilinear_regrid_wgts(mesh, pl, wts, &map_type, true, dst_status);
 
-        // TODO: verify the wts and dst_status
-
         // verify the original mesh is still valid
-        localrc = createget();
+        localrc = test_get_info(mesh);
         ESMC_CHECK_THROW(localrc);
+
+        // TODO: verify the wts and dst_status
       }
       CATCH_MBT_RETURN_RC(&rc)
 
@@ -706,10 +734,6 @@ class MBT {
       try {
         int localrc;
         
-        // skip if run on one processor
-        if (np == 1)
-          return ESMF_SUCCESS;
-        
         pl = MBMesh_to_PointList(mesh, ESMC_MESHLOC_ELEMENT, NULL, &localrc);
         ESMC_CHECK_THROW(localrc);
         
@@ -722,11 +746,11 @@ class MBT {
         IWeights wts, dst_status;
         calc_patch_regrid_wgts(mesh, pl, wts, &map_type, true, dst_status);
 
-        // TODO: verify the wts and dst_status
-
         // verify the original mesh is still valid
-        localrc = createget();
+        localrc = test_get_info(mesh);
         ESMC_CHECK_THROW(localrc);
+
+        // TODO: verify the wts and dst_status
       }
       CATCH_MBT_RETURN_RC(&rc)
 
@@ -743,10 +767,6 @@ class MBT {
       try {
         int localrc;
         
-        // skip if run on one processor
-        if (np == 1)
-          return ESMF_SUCCESS;
-        
         pl = MBMesh_to_PointList(mesh, ESMC_MESHLOC_NODE, NULL, &localrc);
         ESMC_CHECK_THROW(localrc);
         
@@ -759,11 +779,11 @@ class MBT {
         IWeights wts, dst_status;
         calc_patch_regrid_wgts(mesh, pl, wts, &map_type, true, dst_status);
 
-        // TODO: verify the wts and dst_status
-
         // verify the original mesh is still valid
-        localrc = createget();
+        localrc = test_get_info(mesh);
         ESMC_CHECK_THROW(localrc);
+
+        // TODO: verify the wts and dst_status
       }
       CATCH_MBT_RETURN_RC(&rc)
 
@@ -797,11 +817,14 @@ class MBT {
         // deserialize
         MBMesh_deserialize(&target, serialize_buffer, &offset, &localrc, buffer_l);
         ESMC_CHECK_THROW(localrc);
-        
-        // TODO: verify the deserialized target mesh
 
         // verify the original mesh is still valid
-        localrc = createget();
+        localrc = test_get_info(mesh);
+        ESMC_CHECK_THROW(localrc);
+        
+        // TODO: verify the deserialized target mesh
+        // can't get counts because ents not finalized, because no actual info
+        // localrc = test_get_info(target);
         ESMC_CHECK_THROW(localrc);
       }
       CATCH_MBMESH_RETHROW
@@ -822,11 +845,11 @@ class MBT {
         pl = MBMesh_to_PointList(mesh, ESMC_MESHLOC_ELEMENT, NULL, &localrc);
         ESMC_CHECK_THROW(localrc);
 
-        // TODO: verify the pl
-
         // verify the original mesh is still valid
-        localrc = createget();
+        localrc = test_get_info(mesh);
         ESMC_CHECK_THROW(localrc);
+
+        // TODO: verify the pl
       }
       CATCH_MBMESH_RETHROW
 
@@ -847,11 +870,11 @@ class MBT {
         pl = MBMesh_to_PointList(mesh, ESMC_MESHLOC_NODE, NULL, &localrc);
         ESMC_CHECK_THROW(localrc);
 
-        // TODO: verify the pl
-
         // verify the original mesh is still valid
-        localrc = createget();
+        localrc = test_get_info(mesh);
         ESMC_CHECK_THROW(localrc);
+
+        // TODO: verify the pl
       }
       CATCH_MBMESH_RETHROW
 
@@ -869,15 +892,15 @@ class MBT {
         int localrc;
         int len = name.length();
         char fname[len];
-        sprintf(fname, "%s_%d", name.c_str(), Par::Rank());
+        sprintf(fname, "%s_%d", name.c_str(), localPet);
         MBMesh_write(&mesh, fname, &localrc, len);
         ESMC_CHECK_THROW(localrc);
 
-        // TODO: verify the write (with a read?)
-
         // verify the original mesh is still valid
-        localrc = createget();
+        localrc = test_get_info(mesh);
         ESMC_CHECK_THROW(localrc);
+
+        // TODO: verify the write (with a read?)
       }
       CATCH_MBMESH_RETHROW
 
@@ -947,22 +970,15 @@ class MBT {
       return rc;
     }
 
-
-    int createget(){
+    int test_get_counts(MBMesh *mesh){
 #undef ESMC_METHOD
-#define ESMC_METHOD "MBT::createget()"
+#define ESMC_METHOD "MBT::test_get_counts()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
       bool correct = true;
 
       try {
-      bool fail_print, print;
       int localrc;
-
-      std::string test;
-
-      // VM info
-      int localPet = rank;
 
       // get dimensions
       int local_pdim, local_sdim;
@@ -970,19 +986,22 @@ class MBT {
       ESMC_CHECK_THROW(localrc);
 
       if (local_pdim != pdim) {
-        std::cout << localPet << "# " << "pdim = " << local_pdim 
+        std::cout << localPet << "# " << name  << " - "
+                  << "pdim = " << local_pdim 
                   << " (correct = " << pdim << ")" << std::endl;
         correct = false;
       }
 
-      if (local_sdim != sdim) {
-        std::cout << localPet << "# " << "sdim = " << local_sdim 
-                  << " (correct = " << sdim << ")" << std::endl;
+      if (local_sdim != orig_sdim) {
+        std::cout << localPet << "# " << name  << " - "
+                  << "sdim = " << local_sdim 
+                  << " (correct = " << orig_sdim << ")" << std::endl;
         correct = false;
       }
 
       if (verbosity >= 2) {
-        std::cout << localPet << "# " << "pdim = " << pdim
+        std::cout << localPet << "# " << name  << " - "
+                  << "pdim = " << pdim
                   << " sdim = " << sdim << std::endl;
       }
 
@@ -999,81 +1018,32 @@ class MBT {
       ESMC_CHECK_THROW(localrc);
     
       if (nodeCount != num_node) {
-        std::cout << localPet << "# " << "nodeCount = " << nodeCount
+        std::cout << localPet << "# " << name  << " - "
+                  << "nodeCount = " << nodeCount
                   << " (correct = " << num_node << ")" << std::endl;
         correct = false;
       }
     
       if (elemCount != num_elem) {
-        std::cout << localPet << "# " << "elemCount = " << elemCount
+        std::cout << localPet << "# " << name  << " - "
+                  << "elemCount = " << elemCount
                   << " (correct = " << num_elem << ")" << std::endl;
         correct = false;
       }
     
       if (elemConnCount != num_elem_conn) {
-        std::cout << localPet << "# " << "elemConnCount = " << elemConnCount
+        std::cout << localPet << "# " << name  << " - "
+                  << "elemConnCount = " << elemConnCount
                   << " (correct = " << num_elem_conn << ")" << std::endl;
         correct = false;
       }
       
 
       if (verbosity >= 2) {
-        std::cout << localPet << "# " << "nodeCount = " << nodeCount
+        std::cout << localPet << "# " << name  << " - "
+                  << "nodeCount = " << nodeCount
                   << " elemCount = " << elemCount << std::endl;
       }
-
-      int elemMaskIsPresent, elemAreaIsPresent, elemCoordIsPresent;
-      MBMesh_GetElemInfoPresence(mesh, &elemMaskIsPresent, &elemAreaIsPresent, &elemCoordIsPresent, &localrc);
-      ESMC_CHECK_THROW(localrc);
-    
-      if (elemMaskIsPresent!=elem_mask_present) {
-        std::cout << localPet << "# " << "elemMaskIsPresent = " << elemMaskIsPresent
-                  << " (correct = " << elem_mask_present << ")" << std::endl;
-        correct = false;
-      } 
-      if (elemAreaIsPresent!=elem_area_present) {
-        std::cout << localPet << "# " << "elemAreaIsPresent = " << elemAreaIsPresent
-                  << " (correct = " << elem_area_present << ")" << std::endl;
-        correct = false;
-      } 
-      if (elemCoordIsPresent!=elem_coord_present) {
-        std::cout << localPet << "# " << "elemCoordIsPresent = " << elemCoordIsPresent
-                  << " (correct = " << elem_coord_present << ")" << std::endl;
-        correct = false;
-      }
-      
-      if (verbosity >= 2) {
-        std::cout << localPet << "# " << "elemMaskIsPresent = " << elemMaskIsPresent
-                  << std::endl;
-        std::cout << localPet << "# " << "elemAreaIsPresent = " << elemAreaIsPresent
-                  << std::endl;
-        std::cout << localPet << "# " << "elemCoordIsPresent = " << elemCoordIsPresent
-                  << std::endl;
-      }
-
-      int nodeMaskIsPresent;
-      MBMesh_GetNodeInfoPresence(mesh, &nodeMaskIsPresent, &localrc);
-      ESMC_CHECK_THROW(localrc);
-    
-      if (nodeMaskIsPresent!=node_mask_present) {
-        std::cout << localPet << "# " << "nodeMaskIsPresent = " << nodeMaskIsPresent
-                  << " (correct = " << node_mask_present << ")" << std::endl;
-        correct = false;
-      }
-    
-      if (verbosity >= 2) {
-        std::cout << localPet << "# " << "nodeMaskIsPresent = " << nodeMaskIsPresent
-                  << std::endl;
-      }
-
-      localrc = test_get_node_info();
-      ESMC_CHECK_THROW(localrc);
-
-      localrc = test_get_elem_info();
-      ESMC_CHECK_THROW(localrc);
-
-      localrc = test_get_elem_conn_info();
-      ESMC_CHECK_THROW(localrc);
 
       }
       CATCH_MBT_RETURN_RC(&rc)
@@ -1082,7 +1052,79 @@ class MBT {
       return rc;
     }
 
-    int test_get_node_info(){
+    int test_get_presence(MBMesh *mesh, bool check_elem = true, bool check_node = true){
+#undef ESMC_METHOD
+#define ESMC_METHOD "MBT::test_get_presence()"
+      // RETURN: rc : pass(0) fail(>0)
+      int rc = ESMF_FAILURE;
+      bool correct = true;
+
+      try {
+        int localrc;
+
+        if (check_elem) {
+          int elemMaskIsPresent, elemAreaIsPresent, elemCoordIsPresent;
+          MBMesh_GetElemInfoPresence(mesh, &elemMaskIsPresent, &elemAreaIsPresent, &elemCoordIsPresent, &localrc);
+          ESMC_CHECK_THROW(localrc);
+    
+          if (elemMaskIsPresent!=elem_mask_present) {
+            std::cout << localPet << "# " << name  << " - "
+                      << "elemMaskIsPresent = " << elemMaskIsPresent
+                      << " (correct = " << elem_mask_present << ")" << std::endl;
+            correct = false;
+          } 
+          if (elemAreaIsPresent!=elem_area_present) {
+            std::cout << localPet << "# " << name  << " - "
+                      << "elemAreaIsPresent = " << elemAreaIsPresent
+                      << " (correct = " << elem_area_present << ")" << std::endl;
+            correct = false;
+          } 
+          if (elemCoordIsPresent!=elem_coord_present) {
+            std::cout << localPet << "# " << name  << " - "
+                      << "elemCoordIsPresent = " << elemCoordIsPresent
+                      << " (correct = " << elem_coord_present << ")" << std::endl;
+            correct = false;
+          }
+          
+          if (verbosity >= 2) {
+            std::cout << localPet << "# " << name  << " - "
+                      << "elemMaskIsPresent = " << elemMaskIsPresent
+                      << std::endl;
+            std::cout << localPet << "# " << name  << " - "
+                      << "elemAreaIsPresent = " << elemAreaIsPresent
+                      << std::endl;
+            std::cout << localPet << "# " << name  << " - "
+                      << "elemCoordIsPresent = " << elemCoordIsPresent
+                      << std::endl;
+          }
+        }
+        
+        if (check_node) {
+          int nodeMaskIsPresent;
+          MBMesh_GetNodeInfoPresence(mesh, &nodeMaskIsPresent, &localrc);
+          ESMC_CHECK_THROW(localrc);
+    
+          if (nodeMaskIsPresent!=node_mask_present) {
+            std::cout << localPet << "# " << name  << " - "
+                      << "nodeMaskIsPresent = " << nodeMaskIsPresent
+                      << " (correct = " << node_mask_present << ")" << std::endl;
+            correct = false;
+          }
+    
+          if (verbosity >= 2) {
+            std::cout << localPet << "# " << name  << " - "
+                      << "nodeMaskIsPresent = " << nodeMaskIsPresent
+                      << std::endl;
+          }
+        }
+      }
+      CATCH_MBT_RETURN_RC(&rc)
+
+      if(correct == true) rc = ESMF_SUCCESS;
+      return rc;
+    }
+
+    int test_get_node_info(MBMesh *mesh){
 #undef ESMC_METHOD
 #define ESMC_METHOD "MBT::test_get_node_info()"
       // RETURN: rc : pass(0) fail(>0)
@@ -1094,9 +1136,6 @@ class MBT {
       int localrc;
 
       std::string test;
-
-      // VM info
-      int localPet = rank;
 
       // get dimensions
       int local_pdim, local_sdim;
@@ -1127,7 +1166,8 @@ class MBT {
           fail_print = true;
         }
         if (print && verbosity >= 3)
-          std::cout << localPet << "# " << "node_id[" << i << "] = " 
+          std::cout << localPet << "# " << name  << " - "
+                    << "node_id[" << i << "] = " 
                     << nii->array[i] << " (correct = " << nodeId[i] << ")"
                     << std::endl;
       }
@@ -1149,7 +1189,8 @@ class MBT {
           fail_print = true;
         }
         if (print && verbosity >= 3)
-          std::cout << localPet << "# " << "node_coord[" << i << "] = " 
+          std::cout << localPet << "# " << name  << " - "
+                    << "node_coord[" << i << "] = " 
                     << std::setprecision(16) << nci->array[i] << " (correct = " 
                     << std::setprecision(16) << nodeCoord[i] << ")"
                     << std::endl;
@@ -1172,7 +1213,8 @@ class MBT {
           fail_print = true;
         }
         if (print && verbosity >= 3)
-          std::cout << localPet << "# " << "node_owner[" << i << "] = " 
+          std::cout << localPet << "# " << name  << " - "
+                    << "node_owner[" << i << "] = " 
                     << noi->array[i] << " (correct = " << nodeOwner[i] << ")"
                     << std::endl;
       }
@@ -1195,7 +1237,8 @@ class MBT {
             fail_print = true;
           }
           if (print && verbosity >= 3)
-            std::cout << localPet << "# " << "node_mask[" << i << "] = " 
+            std::cout << localPet << "# " << name  << " - "
+                      << "node_mask[" << i << "] = " 
                       << nmi->array[i] << " (correct = " << nodeMask[i] << ")"
                       << std::endl;
         }
@@ -1215,7 +1258,7 @@ class MBT {
       return rc;
     }
 
-    int test_get_elem_info(){
+    int test_get_elem_info(MBMesh *mesh){
 #undef ESMC_METHOD
 #define ESMC_METHOD "MBT::test_get_elem_info()"
       // RETURN: rc : pass(0) fail(>0)
@@ -1227,9 +1270,6 @@ class MBT {
       int localrc;
 
       std::string test;
-
-      // VM info
-      int localPet = rank;
 
       // get dimensions
       int local_pdim, local_sdim;
@@ -1262,7 +1302,8 @@ class MBT {
           fail_print = true;
         }
         if (print && verbosity >= 3)
-          std::cout << localPet << "# " << "elem_ids[" << i << "] = " 
+          std::cout << localPet << "# " << name  << " - "
+                    << "elem_ids[" << i << "] = " 
                     << eii->array[i] << " (correct = " << elemId[i] << ")"
                     << std::endl;
       }
@@ -1284,7 +1325,8 @@ class MBT {
           fail_print = true;
         }
         if (print && verbosity >= 3)
-          std::cout << localPet << "# " << "elem_type[" << i << "] = " 
+          std::cout << localPet << "# " << name  << " - "
+                    << "elem_type[" << i << "] = " 
                     << eti->array[i] << " (correct = " << elemType[i] << ")"
                     << std::endl;
       }
@@ -1307,7 +1349,8 @@ class MBT {
             fail_print = true;
           }
           if (print && verbosity >= 3)
-            std::cout << localPet << "# " << "elem_area[" << i << "] = " 
+            std::cout << localPet << "# " << name  << " - "
+                      << "elem_area[" << i << "] = " 
                       << std::setprecision(16) << eai->array[i] << " (correct = " 
                       << std::setprecision(16) << elemArea[i] << ")"
                       << std::endl;
@@ -1332,7 +1375,8 @@ class MBT {
             fail_print = true;
           }
         if (print && verbosity >= 3)
-          std::cout << localPet << "# " << "elem_coord[" << i << "] = " 
+          std::cout << localPet << name  << " - "
+                    << "# " << "elem_coord[" << i << "] = " 
                     << std::setprecision(16) << eci->array[i] << " (correct = " 
                     << std::setprecision(16) << elemCoord[i] << ")"
                     << std::endl;
@@ -1357,7 +1401,8 @@ class MBT {
             fail_print = true;
           }
           if (print && verbosity >= 3)
-            std::cout << localPet << "# " << "elem_mask[" << i << "] = " 
+            std::cout << localPet << "# " << name  << " - "
+                      << "elem_mask[" << i << "] = " 
                       << emi->array[i] << " (correct = " << elemMask[i] << ")"
                       << std::endl;
         }
@@ -1380,7 +1425,7 @@ class MBT {
     }
 
 
-    int test_get_elem_conn_info(){
+    int test_get_elem_conn_info(MBMesh *mesh){
 #undef ESMC_METHOD
 #define ESMC_METHOD "MBT::test_get_elem_conn_info()"
       // RETURN: rc : pass(0) fail(>0)
@@ -1392,9 +1437,6 @@ class MBT {
       int localrc;
 
       std::string test;
-
-      // VM info
-      int localPet = rank;
 
       // get dimensions
       int local_pdim, local_sdim;
@@ -1419,7 +1461,8 @@ class MBT {
           fail_print = true;
         }
         if (print && verbosity >= 3)
-          std::cout << localPet << "# " << "elem_connectivity[" << i << "] = " 
+          std::cout << localPet << "# " << name  << " - "
+                    << "elem_connectivity[" << i << "] = " 
                     << ecni->array[i] << " (correct = " << elemConn[i] << ")"
                     << std::endl;
       }
@@ -1438,246 +1481,244 @@ class MBT {
       return rc;
     }
 
-    int test_dual_info(){
+    int test_get_info(MBMesh *mesh){
 #undef ESMC_METHOD
-#define ESMC_METHOD "MBT::test_dual_info()"
+#define ESMC_METHOD "MBT::test_get_info()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
-      bool correct = true;
 
       try {
-      bool fail_print, print;
-      int localrc; 
-
-      // VM info
-      int localPet = rank;
-
-      // get dimensions
-      int local_pdim, local_sdim;
-      MBMesh_GetDimensions(target, &local_sdim, &local_pdim, &localrc);
-      ESMC_CHECK_THROW(localrc);
-
-      if (local_pdim != pdim) {
-        std::cout << localPet << "# " << "pdim = " << local_pdim 
-                  << " (correct = " << pdim << ")" << std::endl;
-        correct = false;
-      }
-
-      if (local_sdim != sdim) {
-        std::cout << localPet << "# " << "sdim = " << local_sdim 
-                  << " (correct = " << sdim << ")" << std::endl;
-        correct = false;
-      }
-
-      if (verbosity >= 2) {
-        std::cout << localPet << "# " << "pdim = " << pdim
-                  << " sdim = " << sdim << std::endl;
-      }
-
-      // RLO: don't think the elem mask is set in the dual yet
-      // int elemMaskIsPresent, elemAreaIsPresent, elemCoordIsPresent;
-      // MBMesh_GetElemInfoPresence(target, &elemMaskIsPresent, &elemAreaIsPresent, &elemCoordIsPresent, &localrc);
-      // ESMC_CHECK_THROW(localrc);
-      // 
-      // if (elemMaskIsPresent!=node_mask_present) {
-      //   std::cout << localPet << "# " << "elemMaskIsPresent = " << elemMaskIsPresent
-      //             << " (correct = " << node_mask_present << ")" << std::endl;
-      //   correct = false;
-      // } 
-      // 
-      // if (verbosity >= 2) {
-      //   std::cout << localPet << "# " << "elemMaskIsPresent = " << elemMaskIsPresent
-      //             << std::endl;
-      // }
-
-      int nodeMaskIsPresent;
-      MBMesh_GetNodeInfoPresence(target, &nodeMaskIsPresent, &localrc);
-      ESMC_CHECK_THROW(localrc);
-    
-      if (nodeMaskIsPresent!=elem_mask_present) {
-        std::cout << localPet << "# " << "nodeMaskIsPresent = " << nodeMaskIsPresent
-                  << " (correct = " << elem_mask_present << ")" << std::endl;
-        correct = false;
-      }
-    
-      if (verbosity >= 2) {
-        std::cout << localPet << "# " << "nodeMaskIsPresent = " << nodeMaskIsPresent
-                  << std::endl;
-      }
-
-      // RLO: not sure how to do this for the dual..
-      // int nodeCount;
-      // MBMesh_GetNodeCount(target,&nodeCount, &localrc);
-      // ESMC_CHECK_THROW(localrc);
-      // 
-      // int elemCount;
-      // MBMesh_GetElemCount(target,&elemCount, &localrc);
-      // ESMC_CHECK_THROW(localrc);
-      // 
-      // int elemConnCount;
-      // MBMesh_GetElemConnCount(target,&elemConnCount, &localrc);
-      // ESMC_CHECK_THROW(localrc);
-      // 
-      // if (verbosity >= 2) {
-      //   std::cout << localPet << "# " << "nodeCount = " << nodeCount << "(" << num_node << ")"
-      //             << " elemCount = " << elemCount << "(" << num_elem << ")" << std::endl;
-      // }
-      // 
-      // if (nodeCount == num_node) {
-      //   localrc = test_get_node_info_redist();
-      //   ESMC_CHECK_THROW(localrc);
-      // }
-      // 
-      // if (elemCount == num_elem) {
-      //   localrc = test_get_elem_info_redist();
-      //   ESMC_CHECK_THROW(localrc);
-      // }
-      // 
-      // if (elemConnCount == num_elem_conn) {
-      //   localrc = test_get_elem_conn_info_redist();
-      //   ESMC_CHECK_THROW(localrc);
-      // }
+        int localrc;
+        
+        localrc = test_get_counts(mesh);
+        ESMC_CHECK_THROW(localrc);
+        
+        localrc = test_get_presence(mesh);
+        ESMC_CHECK_THROW(localrc);
+        
+        localrc = test_get_node_info(mesh);
+        ESMC_CHECK_THROW(localrc);
+        
+        localrc = test_get_elem_info(mesh);
+        ESMC_CHECK_THROW(localrc);
+        
+        localrc = test_get_elem_conn_info(mesh);
+        ESMC_CHECK_THROW(localrc);
 
       }
       CATCH_MBT_RETURN_RC(&rc)
 
-      if(correct == true) rc = ESMF_SUCCESS;
+      rc = ESMF_SUCCESS;
+      return rc;
+    }
+
+    int transfer_dual_info(){
+#undef ESMC_METHOD
+#define ESMC_METHOD "MBT::transfer_dual_info()"
+      // RETURN: rc : pass(0) fail(>0)
+      int rc = ESMF_FAILURE;
+
+      try {
+        int localrc; 
+
+        num_node = num_elem;
+        num_elem = num_node;
+        // num_elem_conn = ;
+
+        nodeId.clear();
+        nodeMask.clear();
+        nodeOwner.clear();
+        nodeCoord.clear();
+        elemId.clear();
+        elemMask.clear();
+        elemType.clear();
+        elemArea.clear();
+        elemCoord.clear();
+        elemConn.clear();
+
+        nodeId = elemId;
+        nodeMask = elemMask;
+        // nodeOwner = ;
+        nodeCoord = elemCoord;
+        elemId = nodeId;
+        elemMask = nodeMask;
+        // elemType = ;
+        // elemArea = ;
+        elemCoord = nodeCoord;
+        // elemConn = ;
+
+      }
+      CATCH_MBT_RETURN_RC(&rc)
+
+      rc = ESMF_SUCCESS;
+      return rc;
+    }
+
+
+    int test_dual_info(MBMesh *mesh){
+#undef ESMC_METHOD
+#define ESMC_METHOD "MBT::test_dual_info()"
+      // RETURN: rc : pass(0) fail(>0)
+      int rc = ESMF_FAILURE;
+
+      try {
+        int localrc; 
+
+        localrc = transfer_dual_info();
+        ESMC_CHECK_THROW(localrc);
+        
+        localrc = test_get_counts(target);
+        ESMC_CHECK_THROW(localrc);
+        
+        // dual does not yet have elem masking
+        bool check_node = true;
+        bool check_elem = false;
+        localrc = test_get_presence(target, check_elem, check_node);
+        ESMC_CHECK_THROW(localrc);
+        
+        // RLO: not sure how to do this for the dual..
+        
+        // localrc = test_get_node_info(mesh);
+        // ESMC_CHECK_THROW(localrc);
+        // 
+        // localrc = test_get_elem_info(mesh);
+        // ESMC_CHECK_THROW(localrc);
+        // 
+        // localrc = test_get_elem_conn_info(mesh);
+        // ESMC_CHECK_THROW(localrc);
+
+      }
+      CATCH_MBT_RETURN_RC(&rc)
+
+      rc = ESMF_SUCCESS;
       return rc;
     }
     
-    int test_redist_info(bool element, bool node){
+    int transfer_redist_info(){
+#undef ESMC_METHOD
+#define ESMC_METHOD "MBT::transfer_redist_info()"
+      // RETURN: rc : pass(0) fail(>0)
+      int rc = ESMF_FAILURE;
+
+      try {
+        int localrc; 
+
+        num_node = redist_num_node;
+        num_elem = redist_num_elem;
+        num_elem_conn = redist_num_elem_conn;
+
+        nodeId.clear();
+        nodeMask.clear();
+        nodeOwner.clear();
+        nodeCoord.clear();
+        elemId.clear();
+        elemMask.clear();
+        elemType.clear();
+        elemArea.clear();
+        elemCoord.clear();
+        elemConn.clear();
+
+        nodeId = redist_nodeId;
+        nodeMask = redist_nodeMask;
+        nodeOwner = redist_nodeOwner;
+        nodeCoord = redist_nodeCoord;
+        elemId = redist_elemId;
+        elemMask = redist_elemMask;
+        elemType = redist_elemType;
+        elemArea = redist_elemArea;
+        elemCoord = redist_elemCoord;
+        elemConn = redist_elemConn;
+
+      }
+      CATCH_MBT_RETURN_RC(&rc)
+
+      rc = ESMF_SUCCESS;
+      return rc;
+    }
+
+    int test_redist_info(MBMesh *mesh, bool check_elem, bool check_node){
 #undef ESMC_METHOD
 #define ESMC_METHOD "MBT::test_redist_info()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
-      bool correct = true;
 
       try {
-      bool fail_print, print;
-      int localrc; 
+        int localrc; 
 
-      // VM info
-      int localPet = rank;
+        // transfer redist info to from test "_redist" variables
+        localrc = transfer_redist_info();
+        ESMC_CHECK_THROW(localrc);
 
-      // get dimensions
-      int local_pdim, local_sdim;
-      MBMesh_GetDimensions(target, &local_sdim, &local_pdim, &localrc);
-      ESMC_CHECK_THROW(localrc);
-
-      if (local_pdim != pdim) {
-        std::cout << localPet << "# " << "pdim = " << local_pdim 
-                  << " (correct = " << pdim << ")" << std::endl;
-        correct = false;
-      }
-
-      if (local_sdim != sdim) {
-        std::cout << localPet << "# " << "sdim = " << local_sdim 
-                  << " (correct = " << sdim << ")" << std::endl;
-        correct = false;
-      }
-
-      if (verbosity >= 2) {
-        std::cout << localPet << "# " << "pdim = " << pdim
-                  << " sdim = " << sdim << std::endl;
-      }
-
-
+        // in the node redist case there are more elements created
+        // really need to subclass MBT to allow different specs
+        if (!(check_node and !check_elem))
+          localrc = test_get_counts(target);
+        ESMC_CHECK_THROW(localrc);
+        
       /////////////////// node create info ////////////////////////////
-      if (node) {
+      if (check_node) {
         int nn = redist_nodeId_in.size();
         MBMesh_checknodelist(&target, &nn, redist_nodeId_in.data(), &localrc);
         ESMC_CHECK_THROW(localrc);
       }
 
       /////////////////// elem create info ////////////////////////////
-      if (element) {
+      if (check_elem) {
         int ne = redist_elemId_in.size();
         MBMesh_checkelemlist(&target, &ne, redist_elemId_in.data(), &localrc);
         ESMC_CHECK_THROW(localrc);
       }
 
-      int elemMaskIsPresent, elemAreaIsPresent, elemCoordIsPresent;
-      MBMesh_GetElemInfoPresence(target, &elemMaskIsPresent, &elemAreaIsPresent, &elemCoordIsPresent, &localrc);
+        // check_node and check_elem default to true
+        localrc = test_get_presence(target);
+        ESMC_CHECK_THROW(localrc);
+        
+        // localrc = test_get_node_info(mesh);
+        // ESMC_CHECK_THROW(localrc);
+        // 
+        // localrc = test_get_elem_info(mesh);
+        // ESMC_CHECK_THROW(localrc);
+        // 
+        // localrc = test_get_elem_conn_info(mesh);
+        // ESMC_CHECK_THROW(localrc);
+
+      /////////////////// counts ////////////////////////////
+      int nodeCount;
+      MBMesh_GetNodeCount(target,&nodeCount, &localrc);
+      ESMC_CHECK_THROW(localrc);
+      
+      int elemCount;
+      MBMesh_GetElemCount(target,&elemCount, &localrc);
+      ESMC_CHECK_THROW(localrc);
+      
+      int elemConnCount;
+      MBMesh_GetElemConnCount(target,&elemConnCount, &localrc);
       ESMC_CHECK_THROW(localrc);
     
-      if (elemMaskIsPresent!=elem_mask_present) {
-        std::cout << localPet << "# " << "elemMaskIsPresent = " << elemMaskIsPresent
-                  << " (correct = " << elem_mask_present << ")" << std::endl;
-        correct = false;
-      } 
-      if (elemAreaIsPresent!=elem_area_present) {
-        std::cout << localPet << "# " << "elemAreaIsPresent = " << elemAreaIsPresent
-                  << " (correct = " << elem_area_present << ")" << std::endl;
-        correct = false;
-      } 
-      if (elemCoordIsPresent!=elem_coord_present) {
-        std::cout << localPet << "# " << "elemCoordIsPresent = " << elemCoordIsPresent
-                  << " (correct = " << elem_coord_present << ")" << std::endl;
-        correct = false;
+      if (verbosity >= 2) {
+        std::cout << localPet << "# " << "nodeCount = " << nodeCount << "(" << num_node << ")"
+                  << " elemCount = " << elemCount << "(" << num_elem << ")" << std::endl;
       }
       
-      if (verbosity >= 2) {
-        std::cout << localPet << "# " << "elemMaskIsPresent = " << elemMaskIsPresent
-                  << std::endl;
-        std::cout << localPet << "# " << "elemAreaIsPresent = " << elemAreaIsPresent
-                  << std::endl;
-        std::cout << localPet << "# " << "elemCoordIsPresent = " << elemCoordIsPresent
-                  << std::endl;
+      if (nodeCount == num_node) {
+        // localrc = test_get_node_info_redist(target);
+        ESMC_CHECK_THROW(localrc);
       }
-
-      int nodeMaskIsPresent;
-      MBMesh_GetNodeInfoPresence(target, &nodeMaskIsPresent, &localrc);
-      ESMC_CHECK_THROW(localrc);
-    
-      if (nodeMaskIsPresent!=node_mask_present) {
-        std::cout << localPet << "# " << "nodeMaskIsPresent = " << nodeMaskIsPresent
-                  << " (correct = " << node_mask_present << ")" << std::endl;
-        correct = false;
+      
+      if (elemCount == num_elem) {
+        // localrc = test_get_elem_info_redist(target);
+        ESMC_CHECK_THROW(localrc);
       }
-    
-      if (verbosity >= 2) {
-        std::cout << localPet << "# " << "nodeMaskIsPresent = " << nodeMaskIsPresent
-                  << std::endl;
+      
+      if (elemConnCount == num_elem_conn) {
+        // localrc = test_get_elem_conn_info_redist(target);
+        ESMC_CHECK_THROW(localrc);
       }
-
-      // RLO: I think we can only reliably and consistently check owned info
-      // /////////////////// counts ////////////////////////////
-      // int nodeCount;
-      // MBMesh_GetNodeCount(target,&nodeCount, &localrc);
-      // ESMC_CHECK_THROW(localrc);
-      // 
-      // int elemCount;
-      // MBMesh_GetElemCount(target,&elemCount, &localrc);
-      // ESMC_CHECK_THROW(localrc);
-      // 
-      // int elemConnCount;
-      // MBMesh_GetElemConnCount(target,&elemConnCount, &localrc);
-      // ESMC_CHECK_THROW(localrc);
-    
-      // if (verbosity >= 2) {
-      //   std::cout << localPet << "# " << "nodeCount = " << nodeCount << "(" << num_node << ")"
-      //             << " elemCount = " << elemCount << "(" << num_elem << ")" << std::endl;
-      // }
-      // 
-      // if (nodeCount == num_node) {
-      //   localrc = test_get_node_info_redist();
-      //   ESMC_CHECK_THROW(localrc);
-      // }
-      // 
-      // if (elemCount == num_elem) {
-      //   localrc = test_get_elem_info_redist();
-      //   ESMC_CHECK_THROW(localrc);
-      // }
-      // 
-      // if (elemConnCount == num_elem_conn) {
-      //   localrc = test_get_elem_conn_info_redist();
-      //   ESMC_CHECK_THROW(localrc);
-      // }
 
       }
       CATCH_MBT_RETURN_RC(&rc)
 
-      if(correct == true) rc = ESMF_SUCCESS;
+      rc = ESMF_SUCCESS;
       return rc;
     }
 };

@@ -113,17 +113,21 @@ int main(int argc, char *argv[]) {
     for (const auto mesh: test_meshes) {    
       rc = ESMF_FAILURE;
       
+      std::string name = "MBMesh - " + api + " - " + mesh;
+
       auto skip_itr = std::find_if(skip_test.begin(), skip_test.end(), 
                                    FindPair(api, mesh));
 
       // don't run cases that hang
       if (skip_itr != skip_test.end()) {
+        name = "SKIP - " + name;
         rc = ESMF_SUCCESS;
       } else {
 #if defined ESMF_MOAB
         try {
           MBT *test = generate->mesh_map[mesh](localrc);
           
+          test->name = name;
           // test->verbosity = 3;
           // test->tol = 1.e-15;
           // test->print();
@@ -139,7 +143,6 @@ int main(int argc, char *argv[]) {
 #endif
       }
 
-      std::string name = "MBMesh - " + api + " - " + mesh;
       ESMC_Test(rc==ESMF_SUCCESS, name.c_str(), failMsg.c_str(), 
                 &result, __FILE__, __LINE__, 0);
     }
