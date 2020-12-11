@@ -2831,7 +2831,7 @@ void MBMesh_deserialize(MBMesh **mbmpp, char *buffer, int *offset, int *rc,
     // Adjust offset
     *offset += localsize*sizeof(int);
 
-    MBMesh_create(mbmpp, &pdim, &sdim, &coordsys, &localrc);
+    MBMesh_create(mbmpp, &pdim, &orig_sdim, &coordsys, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
       return;
 
