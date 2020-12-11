@@ -3278,8 +3278,11 @@ void MBMesh_GetDimensions(MBMesh *meshp, int *sdim, int *pdim, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_GetDimensions()"
   try {
-    *pdim = meshp->pdim;
-    *sdim = meshp->orig_sdim;
+    if (sdim)
+      *sdim = meshp->orig_sdim;
+
+    if (pdim)
+      *pdim = meshp->pdim;
   }
   CATCH_MBMESH_RETURN(rc);
   
@@ -3293,7 +3296,7 @@ void MBMesh_GetCentroid(MBMesh *meshp, int *num_elem, double *elem_centroid, int
     // pass as ESMCI::InterArray<int> *elemCentroid, use extent[0] over num_elem
 
     char msg[256];
-    if (*num_elem != meshp->num_elem()) {
+    if (*num_elem != meshp->num_orig_elem()) {
       Throw () << "elemCentroid array must be of size " << meshp->num_elem();
     } else if (meshp->coordsys != ESMC_COORDSYS_CART) {
       Throw () << "Cannot yet return centroids for spherical coordinates.";
@@ -3349,16 +3352,22 @@ void MBMesh_GetElemInfoPresence(MBMesh *meshp,
 #define ESMC_METHOD "MBMesh_GetElemInfoPresence()"
   try {
     // Check if element mask is present
-    *elemMaskIsPresent=0;
-    if (meshp->has_elem_mask) *elemMaskIsPresent=1;
+    if (elemMaskIsPresent) {
+      *elemMaskIsPresent=0;
+      if (meshp->has_elem_mask) *elemMaskIsPresent=1;
+    }
   
     // Check if element area is present
-    *elemAreaIsPresent=0;
-    if (meshp->has_elem_area) *elemAreaIsPresent=1;
-  
+    if (elemAreaIsPresent) {
+      *elemAreaIsPresent=0;
+      if (meshp->has_elem_area) *elemAreaIsPresent=1;
+    }
+
     // Check if element coords are present
-    *elemCoordsIsPresent=0;
-    if (meshp->has_elem_coords) *elemCoordsIsPresent=1;
+    if (elemCoordsIsPresent) {
+      *elemCoordsIsPresent=0;
+      if (meshp->has_elem_coords) *elemCoordsIsPresent=1;
+    }
   }
   CATCH_MBMESH_RETURN(rc);
   
@@ -3389,12 +3398,12 @@ void MBMesh_GetElemCreateInfo(MBMesh *meshp,
 
     // Doesn't work with split meshes right now
     if (meshp->is_split)
-      Throw () << "Can't get elem connection count from mesh containing >4 elements.";
+      if (elemConn) 
+        Throw () << "Can't get elem connection count from mesh containing >4 elements.";
     
     ////// Get some handy information //////
-    int num_elems = meshp->num_elem();
+    int num_elems = meshp->num_orig_elem();
     int orig_sdim = meshp->orig_sdim;
-    int num_elem_conn = meshp->num_elem_conn();
 
     ////// Error check input arrays //////
 
@@ -3413,6 +3422,9 @@ void MBMesh_GetElemCreateInfo(MBMesh *meshp,
     }
 
     if (present(elemConn)) {
+      // this is to allow calling for anything other than elemConn
+      // num_elem_conn can be moved back to top after elemconn from ngons fixed
+      int num_elem_conn = meshp->num_elem_conn();
       if (elemConn->dimCount !=1)
         Throw () << "elemConn array must be 1D";
       if (elemConn->extent[0] != num_elem_conn)
@@ -3464,6 +3476,9 @@ void MBMesh_GetElemCreateInfo(MBMesh *meshp,
 
     // If it was passed in, fill elementIds array
     if (present(elemConn)) {
+      // this is to allow calling for anything other than elemConn
+      // num_elem_conn can be moved back to top after elemconn from ngons fixed
+      int num_elem_conn = meshp->num_elem_conn();
       int *elemConn_array=elemConn->array;
       meshp->get_elem_connectivity(orig_elems, elemConn_array);
     }
