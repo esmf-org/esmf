@@ -38,7 +38,6 @@ class MBTGen {
 public:
   
   double UNINITVAL = -42;
-  
 
   std::map<std::string, std::function<MBT*(int&)>>  mesh_map;
 
@@ -60,7 +59,7 @@ MBTGen() {
 
 MBT *quad_2d_cart(int &rc){
 #undef ESMC_METHOD
-#define ESMC_METHOD "mbmesh_gen_quad_2d_cart"
+#define ESMC_METHOD "quad_2d_cart"
   //
   //
   //  2.0   7 ------- 8 -------- 9
@@ -268,7 +267,7 @@ MBT *quad_2d_sph(int &rc){
   //       0.0       pi/10       pi/5
   //
 #undef ESMC_METHOD
-#define ESMC_METHOD "mbmesh_gen_quad_2d_sph"
+#define ESMC_METHOD "quad_2d_sph"
 
   rc = ESMF_RC_NOT_IMPL;
   MBT *mbt = NULL;
@@ -600,7 +599,7 @@ MBT *tri_2d_sph(int &rc){
 
 MBT *hex_3d_cart(int &rc) {
 #undef ESMC_METHOD
-#define ESMC_METHOD "mbmesh_gen_hex_3d_cart"
+#define ESMC_METHOD "hex_3d_cart"
 
   rc = ESMF_RC_NOT_IMPL;
   MBT *mbt = NULL;
@@ -860,7 +859,7 @@ MBT *hex_3d_cart(int &rc) {
 
 MBT *hex_3d_sph(int &rc) {
 #undef ESMC_METHOD
-#define ESMC_METHOD "mbmesh_gen_hex_3d_sph"
+#define ESMC_METHOD "hex_3d_sph"
 
   rc = ESMF_RC_NOT_IMPL;
   MBT *mbt = NULL;
@@ -925,7 +924,7 @@ MBT *ngon_2d_cart(int &rc) {
   //      0  .1   1  1.5        2  2.2 2.5  3  3.1
   //
 #undef ESMC_METHOD
-#define ESMC_METHOD "mbmesh_gen_ngon_2d_cart"
+#define ESMC_METHOD "ngon_2d_cart"
 
   rc = ESMF_RC_NOT_IMPL;
   MBT *mbt = NULL;
@@ -1183,7 +1182,7 @@ MBT *ngon_2d_sph(int &rc) {
   //      0  .1   1  1.5        2  2.2 2.5  3  3.1
   //
 #undef ESMC_METHOD
-#define ESMC_METHOD "mbmesh_gen_ngon_2d_sph"
+#define ESMC_METHOD "ngon_2d_sph"
 
   rc = ESMF_RC_NOT_IMPL;
   MBT *mbt = NULL;
@@ -1249,7 +1248,7 @@ MBT *mix_2d_cart(int &rc) {
   //       0.0       1.5        2.0        3.0
   //
 #undef ESMC_METHOD
-#define ESMC_METHOD "mbmesh_gen_mix_2d_cart_par"
+#define ESMC_METHOD "mix_2d_cart_par"
 
   rc = ESMF_RC_NOT_IMPL;
   MBT *mbt = NULL;
@@ -1491,7 +1490,7 @@ MBT *mix_2d_sph(int &rc) {
   //       0.0       1.5        2.0        3.0
   //
 #undef ESMC_METHOD
-#define ESMC_METHOD "mbmesh_gen_mix_2d_sph"
+#define ESMC_METHOD "mix_2d_sph"
 
   rc = ESMF_RC_NOT_IMPL;
   MBT *mbt = NULL;
