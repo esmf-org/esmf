@@ -1021,6 +1021,43 @@ void MBMesh::set_node_mask_val(std::vector<EntityHandle> const &nodes, int *mask
 }
 
 
+void MBMesh::set_node_mask(EntityHandle eh, int mask) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh::set_node_mask()"
+
+  // Error return codes
+  int localrc;
+  int merr;
+
+  // If no masking, complain
+  if (!has_node_mask) Throw() << "node mask not present in mesh.";
+  
+  // Set data
+  merr=mesh->tag_set_data(node_mask_tag, &eh, 1, &mask);
+  ESMC_CHECK_MOAB_THROW(merr);
+}
+
+
+int MBMesh::get_node_mask(EntityHandle node) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh::get_node_mask()"
+
+  // Error return codes
+  int localrc;
+  int merr;
+  
+  // If no masking, then error
+  if (!has_node_mask) Throw() << "node mask not present in mesh.";
+
+  // Get mask
+  int mask;
+  merr=mesh->tag_get_data(node_mask_tag, &node, 1, &mask);
+  ESMC_CHECK_MOAB_THROW(merr);
+
+  // Output information
+  return mask;
+}
+
 int MBMesh::get_node_mask_val(EntityHandle node) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh::get_node_mask_val()"
@@ -1397,6 +1434,45 @@ void MBMesh::setup_elem_mask() {
   // Turn on masking
   has_elem_mask=true;
 }
+
+
+void MBMesh::set_elem_mask(EntityHandle eh, int mask) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh::set_elem_mask()"
+
+  // Error return codes
+  int localrc;
+  int merr;
+
+  // If no masking, complain
+  if (!has_elem_mask) Throw() << "elem mask not present in mesh.";
+  
+  // Set data
+  merr=mesh->tag_set_data(elem_mask_tag, &eh, 1, &mask);
+  ESMC_CHECK_MOAB_THROW(merr);
+}
+
+
+int MBMesh::get_elem_mask(EntityHandle eh) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh::get_elem_mask()"
+
+  // Error return codes
+  int localrc;
+  int merr;
+  
+  // If no masking, then error
+  if (!has_elem_mask) Throw() << "element mask not present in mesh.";
+
+  // Get mask
+  int mask;
+  merr=mesh->tag_get_data(elem_mask_tag, &eh, 1, &mask);
+  ESMC_CHECK_MOAB_THROW(merr);
+
+  // Output information
+  return mask;
+}
+
 
 void MBMesh::set_elem_mask_val(EntityHandle eh, int mask_val) {
 #undef  ESMC_METHOD

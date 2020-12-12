@@ -199,6 +199,12 @@ namespace ESMCI {
     // Get node mask value for one entity
     int get_node_mask_val(EntityHandle node);
 
+    // Get node mask for one entity
+    int get_node_mask(EntityHandle node);
+
+    // Set node mask
+    void set_node_mask(EntityHandle eh, int mask_val);
+
     // Set node coords
     void set_node_coords(EntityHandle eh, double *orig_coords);
 
@@ -385,6 +391,12 @@ namespace ESMCI {
 
     // Turn on elem masking
     void setup_elem_mask();
+
+    // Get elem mask (not mask val) 
+    int get_elem_mask(EntityHandle eh);
+
+    // Set elem mask (not mask val) 
+    void set_elem_mask(EntityHandle eh, int mask);
 
     // Set an element mask value 
     void set_elem_mask_val(EntityHandle eh, int mask_val);

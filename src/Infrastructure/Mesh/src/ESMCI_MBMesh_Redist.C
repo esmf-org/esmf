@@ -981,12 +981,12 @@ int calc_size_vert_comm(MBMesh *src_mesh) {
 
     // ADD OTHER THINGS HERE AS ADDED TO VERT
     if (src_mesh->has_node_orig_coords) {
-      size += sizeof(double)*src_mesh->sdim;
+      size += sizeof(double)*src_mesh->orig_sdim;
     }
 
     if (src_mesh->has_node_mask) {
-      // Only pack mask field (not mask_val), since that's the only one needed for rend. 
-      size += sizeof(int);
+      size += sizeof(int); // node_mask
+      size += sizeof(int); // node_mask_val
     }
     // output size
     return size;
@@ -999,13 +999,14 @@ void pack_vert_comm(MBMesh *src_mesh, EntityHandle vert, char *buff) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "pack_vert_comm()"
   try {
+    // MOAB Error RC
+    int merr;
+
     // Offset
     int off=0;
 
     // Pack gid
-    int gid;
-    MBMesh_get_gid(src_mesh, vert, &gid);
-
+    int gid=src_mesh->get_gid(vert);
     *((int *)(buff+off))=gid;
     off +=sizeof(int);
     
@@ -1015,10 +1016,8 @@ void pack_vert_comm(MBMesh *src_mesh, EntityHandle vert, char *buff) {
 
     // Pack coords
     double c[3]={0.0,0.0,0.0};
-    int merr=src_mesh->mesh->get_coords(&vert,1,c);
-    ESMC_CHECK_MOAB_THROW(merr);
+    src_mesh->get_node_cart_coords(vert, c);
 
-    // Load coords
     int sdim=src_mesh->sdim;
     for (int i=0; i<sdim; i++) {
       *((double *)(buff+off))=c[i];
@@ -1027,23 +1026,23 @@ void pack_vert_comm(MBMesh *src_mesh, EntityHandle vert, char *buff) {
 
     if (src_mesh->has_node_orig_coords) {
       double noc[3];
-      int merr=src_mesh->mesh->tag_get_data(src_mesh->node_orig_coords_tag, &vert, 1, &noc);
-      ESMC_CHECK_MOAB_THROW(merr);
-      
-      for (int i=0; i<src_mesh->sdim; ++i) {
+      src_mesh->get_node_orig_coords(vert, noc);
+
+      for (int i=0; i<src_mesh->orig_sdim; ++i) {
         *((double *)(buff+off))=noc[i];
         off +=sizeof(double);
       }
     }
 
     if (src_mesh->has_node_mask) {
-      // Get dst node mask 
-      int masked;
-      int merr=src_mesh->mesh->tag_get_data(src_mesh->node_mask_tag, &vert, 1, &masked);
-      ESMC_CHECK_MOAB_THROW(merr);
-      
       // Pack number of mask
+      int masked=src_mesh->get_node_mask(vert);
       *((int *)(buff+off))=masked;
+      off +=sizeof(int);
+
+      // Pack number of mask val
+      int mask_val=src_mesh->get_node_mask_val(vert);
+      *((int *)(buff+off))=mask_val;
       off +=sizeof(int);
     }
   }
@@ -1084,6 +1083,9 @@ void unpack_vert_comm(MBMesh *out_mesh, char *buff,  EntityHandle *_new_vert) {
     //    printf("RECV: gid=%d coords=[%f %f]\n",gid,c[0],c[1]);
 
     // Create new vertex
+    // NEED TO SWITDH THESE TO USE ACCESSOR METHODS EVENTUALLY, BUT 
+    // I WANT TO THINK A BIT ABOUT HOW TO STRUCTURE THE NEW ONES THAT WILL 
+    // BE NECESSARY
     EntityHandle new_vert;
     merr=out_mesh->mesh->create_vertex(coords, new_vert);
     ESMC_CHECK_MOAB_THROW(merr);
@@ -1107,10 +1109,14 @@ void unpack_vert_comm(MBMesh *out_mesh, char *buff,  EntityHandle *_new_vert) {
       int masked;
       masked=*((int *)(buff+off));
       off +=sizeof(int);
-      
-      merr=out_mesh->mesh->tag_set_data(out_mesh->node_mask_tag, &new_vert, 1, &masked);
-      ESMC_CHECK_MOAB_THROW(merr);
+      out_mesh->set_node_mask(new_vert, masked);
+
+      int mask_val;
+      mask_val=*((int *)(buff+off));
+      off +=sizeof(int);
+      out_mesh->set_node_mask_val(new_vert, mask_val);
     }
+
     // Output vertex
     *_new_vert=new_vert;
   }
@@ -1155,13 +1161,18 @@ int calc_size_elem_comm(MBMesh *src_mesh, EntityHandle eh) {
     }
 
     if (src_mesh->has_elem_orig_coords) {
-      size += sizeof(double)*src_mesh->sdim;
+      size += sizeof(double)*src_mesh->orig_sdim;
     }
 
     if (src_mesh->has_elem_mask) {
-      // Only pack mask field (not mask_val), since that's the only one needed for rend. 
-      size += sizeof(int);
+      size += sizeof(int); // elem mask
+      size += sizeof(int); // elem mask_val
     }
+
+    if (src_mesh->has_elem_area) {
+      size += sizeof(double);
+    }
+
     // output size
     return size;
   }
@@ -1178,9 +1189,7 @@ void pack_elem_comm(MBMesh *src_mesh, EntityHandle elem, char *buff) {
     int off=0;
  
     // Pack gid
-    int gid;
-    MBMesh_get_gid(src_mesh, elem, &gid);
-
+    int gid=src_mesh->get_gid(elem);
     *((int *)(buff+off))=gid;
     off +=sizeof(int);
     
@@ -1190,9 +1199,7 @@ void pack_elem_comm(MBMesh *src_mesh, EntityHandle elem, char *buff) {
      // Get number of verts and vert list 
     int num_verts;
     const EntityHandle *verts;
-    // TODO: do we need to pass in corners_only = true?
-    merr=src_mesh->mesh->get_connectivity(elem,verts,num_verts); 
-    ESMC_CHECK_MOAB_THROW(merr);
+    src_mesh->get_elem_corner_nodes(elem, num_verts, verts);
 
     // Pack number of verts
     *((int *)(buff+off))=num_verts;
@@ -1200,10 +1207,9 @@ void pack_elem_comm(MBMesh *src_mesh, EntityHandle elem, char *buff) {
 
     // Pack node data
     for (int v=0; v<num_verts; v++) {
-       int vert_gid;
-        
+
       // Get gid of vert
-      MBMesh_get_gid(src_mesh, verts[v], &vert_gid);
+      int vert_gid=src_mesh->get_gid(verts[v]);
 
       // Pack into buffer
       *((int *)(buff+off))=vert_gid;
@@ -1213,8 +1219,7 @@ void pack_elem_comm(MBMesh *src_mesh, EntityHandle elem, char *buff) {
     // Pack elem data
     if (src_mesh->has_elem_coords) {
       double ec[3];
-      int merr=src_mesh->mesh->tag_get_data(src_mesh->elem_coords_tag, &elem, 1, &ec);
-      ESMC_CHECK_MOAB_THROW(merr);
+      src_mesh->get_elem_cart_coords(elem, ec);
       
       for (int i=0; i<src_mesh->sdim; ++i) {
         *((double *)(buff+off))=ec[i];
@@ -1224,10 +1229,9 @@ void pack_elem_comm(MBMesh *src_mesh, EntityHandle elem, char *buff) {
 
     if (src_mesh->has_elem_orig_coords) {
       double eoc[3];
-      int merr=src_mesh->mesh->tag_get_data(src_mesh->elem_orig_coords_tag, &elem, 1, &eoc);
-      ESMC_CHECK_MOAB_THROW(merr);
+      src_mesh->get_elem_orig_coords(elem, eoc);
       
-      for (int i=0; i<src_mesh->sdim; ++i) {
+      for (int i=0; i<src_mesh->orig_sdim; ++i) {
         *((double *)(buff+off))=eoc[i];
         off +=sizeof(double);
       }
@@ -1235,13 +1239,23 @@ void pack_elem_comm(MBMesh *src_mesh, EntityHandle elem, char *buff) {
 
     // (Only pack mask field (not mask_val), since that's the only one needed for rend)
     if (src_mesh->has_elem_mask) {
-      int masked;
-      int merr=src_mesh->mesh->tag_get_data(src_mesh->elem_mask_tag, &elem, 1, &masked);
-      ESMC_CHECK_MOAB_THROW(merr);
-      
+      // Elem mask
+      int masked=src_mesh->get_elem_mask(elem);      
       *((int *)(buff+off))=masked;
       off +=sizeof(int);
+
+      // Elem mask val
+      int mask_val=src_mesh->get_elem_mask_val(elem);      
+      *((int *)(buff+off))=mask_val;
+      off +=sizeof(int);
     }
+
+    if (src_mesh->has_elem_area) {
+      double area=src_mesh->get_elem_area(elem);
+      *((double *)(buff+off))=area;
+      off +=sizeof(double);
+    }
+
   }
   CATCH_MBMESH_RETHROW
 }
@@ -1273,12 +1287,18 @@ int calc_size_from_buff_elem_comm(MBMesh *out_mesh, char *buff) {
     }
 
     if (out_mesh->has_elem_orig_coords) {
-      size += sizeof(double)*out_mesh->sdim;
+      size += sizeof(double)*out_mesh->orig_sdim;
     }
 
     if (out_mesh->has_elem_mask) {
-      size += sizeof(int);
+      size += sizeof(int); // elem mask
+      size += sizeof(int); // elem mask_val
     }
+
+    if (out_mesh->has_elem_area) {
+      size += sizeof(double);
+    }
+
     // return size
     return size;
   }
@@ -1316,6 +1336,7 @@ static EntityType _get_entity_type(int pdim, int num_verts) {
 void unpack_elem_comm(MBMesh *out_mesh, char *buff, std::map<int,EntityHandle> *out_gid_to_vert, EntityHandle *_new_elem) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "unpack_elem_comm()"
+
   try {
     int localrc, merr;
 
@@ -1364,6 +1385,9 @@ void unpack_elem_comm(MBMesh *out_mesh, char *buff, std::map<int,EntityHandle> *
     EntityType etype=_get_entity_type(out_mesh->pdim, num_verts);
 
     // Create new element
+    // NEED TO SWITDH THESE TO USE ACCESSOR METHODS EVENTUALLY, BUT 
+    // I WANT TO THINK A BIT ABOUT HOW TO STRUCTURE THE NEW METHODS THAT WILL 
+    // BE NECESSARY
     EntityHandle new_elem;
     merr=out_mesh->mesh->create_element(etype,verts,num_verts,new_elem);
     ESMC_CHECK_MOAB_THROW(merr); 
@@ -1385,7 +1409,7 @@ void unpack_elem_comm(MBMesh *out_mesh, char *buff, std::map<int,EntityHandle> *
 
     if (out_mesh->has_elem_orig_coords) {
       double eoc[3]={0.0,0.0,0.0};
-      for (int i=0; i<out_mesh->sdim; ++i) {
+      for (int i=0; i<out_mesh->orig_sdim; ++i) {
         eoc[i]=*((double *)(buff+off));
         off +=sizeof(double);
       }
@@ -1394,14 +1418,26 @@ void unpack_elem_comm(MBMesh *out_mesh, char *buff, std::map<int,EntityHandle> *
       ESMC_CHECK_MOAB_THROW(merr);
     }
 
-    // (Only unpack mask field (not mask_val), since that's the only one needed for rend)
+
     if (out_mesh->has_elem_mask) {
+      // Unpack/set elem mask
       int masked=*((int *)(buff+off));
       off +=sizeof(int);
+      out_mesh->set_elem_mask(new_elem, masked);      
 
-      merr=out_mesh->mesh->tag_set_data(out_mesh->elem_mask_tag, &new_elem, 1, &masked);
-      ESMC_CHECK_MOAB_THROW(merr);
+      // Unpack/set elem mask val
+      int mask_val=*((int *)(buff+off));
+      off +=sizeof(int);
+      out_mesh->set_elem_mask_val(new_elem, mask_val);      
     }
+
+    if (out_mesh->has_elem_area) {
+      // Unpack/set elem area
+      double area=*((double *)(buff+off));
+      off +=sizeof(double);
+      out_mesh->set_elem_area(new_elem, area);      
+    }
+
     // Output elem
     *_new_elem=new_elem;
   }
