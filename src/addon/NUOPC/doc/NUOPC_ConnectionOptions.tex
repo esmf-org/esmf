@@ -34,7 +34,7 @@ OptionName and the value strings are case insensitive. There are single and mult
      {\tt ignoreDegenerate} & Ignore degenerate cells when checking the input Grids or Meshes for errors. & single & {\tt true}, {\tt false}(default)\\ \hline
      {\tt ignoreUnmatchedIndices} & Ignore unmatched sequence indices when redistributing between source and destination index space. & single & {\tt true}, {\tt false}(default)\\ \hline
      {\tt pipelineDepth} & Maximum number of outstanding non-blocking communication calls during the parallel interpolation. Only relevant for cases where the automatic tuning procedure fails to find a setting that works well on a given hardware. & single & integer\\ \hline
-     {\tt poleMethod} & Extrapolation method around the pole(s). & single & {\tt none}(default), {\tt allavg}, {\tt npntavg}={\em "integer indicating number of points"}\\ \hline
+     {\tt poleMethod} & Extrapolation method around the pole(s). & single & {\tt none}(default), {\tt allavg}, {\tt npntavg}={\em "integer indicating number of points"}, {\tt teeth}\\ \hline
      {\tt remapMethod} & Redistribution or interpolation to compute the regridding weights. & single & {\tt redist}, {\tt bilinear}(default), {\tt patch}, {\tt nearest\_stod}, {\tt nearest\_dtos}, {\tt conserve}\\ \hline
      {\tt srcMaskValues} & List of integer values that defines the mask values. & multi & List of integers.\\ \hline
      {\tt srcTermProcessing} & Number of terms in each partial sum of the interpolation to process on the source side. This setting impacts the bit-for-bit reproducibility of the parallel interpolation results between runs. The strictest bit-for-bit setting is achieved by setting the value to 1. & single & integer\\ \hline

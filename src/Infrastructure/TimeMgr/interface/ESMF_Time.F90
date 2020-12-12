@@ -1166,7 +1166,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_TimeSetDefault()"
 !BOP
-! !IROUTINE: ESMF_TimeSetDefault - Initialize or set a Time
+! !IROUTINE: ESMF_TimeSet - Initialize or set a Time
 
 ! !INTERFACE:
   ! Private name; call using ESMF_TimeSet()
@@ -1385,7 +1385,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_TimeSetString()"
 !BOP
-! !IROUTINE: ESMF_TimeSetString - Initialize or set a Time
+! !IROUTINE: ESMF_TimeSet - Initialize or set a Time from ISO format string
 
 ! !INTERFACE:
   ! Private name; call using ESMF_TimeSet()
@@ -1405,7 +1405,7 @@
 !     \item[time]
 !          The object instance to initialize.
 !     \item[timeString]
-!          ISO format time string.
+!          ISO format time string. E.g. 2012-10-24T18:00:00.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
