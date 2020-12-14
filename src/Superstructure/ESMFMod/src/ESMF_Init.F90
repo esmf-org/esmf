@@ -63,7 +63,7 @@ module ESMF_InitMod
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:
 
-      public ESMF_InitializePreMPI, ESMF_Initialize, ESMF_Finalize
+      public ESMF_Initialize, ESMF_InitializePreMPI, ESMF_Finalize
       public ESMF_IsInitialized, ESMF_IsFinalized
                   
       ! should be private to framework - needed by other modules
@@ -76,72 +76,6 @@ module ESMF_InitMod
       contains
 
 !==============================================================================
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InitializePreMPI"
-!BOP
-! !IROUTINE:  ESMF_InitializePreMPI - Initialize parts of ESMF that must happen before MPI is initialized
-!
-! !INTERFACE:
-      subroutine ESMF_InitializePreMPI(keywordEnforcer, rc)
-!
-! !ARGUMENTS:
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      integer,                 intent(out), optional :: rc
-
-!
-! !DESCRIPTION:
-!     This method is {\em only} needed for cases where MPI is initialized
-!     explicitly by user code. In most typical cases {\tt ESMF\_Initialize()}
-!     is called before MPI is initialized, and takes care of all the internal
-!     initialization, including MPI.
-!
-!     There are circumstances where it is necessary or convenient to
-!     initialize MPI before calling into {\tt ESMF\_Initialize()}. This option
-!     is supported by ESMF, and for most cases no special action is required
-!     on the user side. However, for cases where {\tt ESMF\_*CompSetVM*()}
-!     methods are used to move processing elements (PEs), i.e. CPU cores,
-!     between persistent execution threads (PETs), ESMF uses POSIX signals
-!     between PETs. In order to do so safely, the proper signal handlers must
-!     be installed before MPI is initialized. This is accomplished by calling
-!     {\tt ESMF\_InitializePreMPI()} from the user code prior to the MPI
-!     initialization.
-!
-!     Note also that in order to use any of the advanced resource management
-!     functions that ESMF provides via the {\tt ESMF\_*CompSetVM*()} methods,
-!     the MPI environment must be thread-safe. {\tt ESMF\_Initialize()} handles
-!     this automatically if it is in charge of initializing MPI. However, if the
-!     user code initializes MPI before calling into {\tt ESMF\_Initialize()},
-!     it must do so via {\tt MPI\_Init\_thread()}, specifying
-!     {\tt MPI\_THREAD\_SERIALIZED} or above for the required level of thread
-!     support.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!     \end{description}
-!EOP
-      integer       :: localrc                        ! local return code
-
-      ! assume failure until success
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! initialize pre MPI parts of global VM
-      call ESMF_VMInitializePreMPI(rc=localrc)
-                                      
-      ! on failure LogErr is not initialized -> explicit print on error
-      if (localrc .ne. ESMF_SUCCESS) then
-        write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error initializing framework"
-        return 
-      endif 
-      ! on success LogErr is assumed to be functioning
-      
-      if (present(rc)) rc = ESMF_SUCCESS
-      end subroutine ESMF_InitializePreMPI
-!------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 ! 
@@ -341,6 +275,72 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_Initialize
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InitializePreMPI"
+!BOP
+! !IROUTINE:  ESMF_InitializePreMPI - Initialize parts of ESMF that must happen before MPI is initialized
+!
+! !INTERFACE:
+      subroutine ESMF_InitializePreMPI(keywordEnforcer, rc)
+!
+! !ARGUMENTS:
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer,                 intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!     This method is {\em only} needed for cases where MPI is initialized
+!     explicitly by user code. In most typical cases {\tt ESMF\_Initialize()}
+!     is called before MPI is initialized, and takes care of all the internal
+!     initialization, including MPI.
+!
+!     There are circumstances where it is necessary or convenient to
+!     initialize MPI before calling into {\tt ESMF\_Initialize()}. This option
+!     is supported by ESMF, and for most cases no special action is required
+!     on the user side. However, for cases where {\tt ESMF\_*CompSetVM*()}
+!     methods are used to move processing elements (PEs), i.e. CPU cores,
+!     between persistent execution threads (PETs), ESMF uses POSIX signals
+!     between PETs. In order to do so safely, the proper signal handlers must
+!     be installed before MPI is initialized. This is accomplished by calling
+!     {\tt ESMF\_InitializePreMPI()} from the user code prior to the MPI
+!     initialization.
+!
+!     Note also that in order to use any of the advanced resource management
+!     functions that ESMF provides via the {\tt ESMF\_*CompSetVM*()} methods,
+!     the MPI environment must be thread-safe. {\tt ESMF\_Initialize()} handles
+!     this automatically if it is in charge of initializing MPI. However, if the
+!     user code initializes MPI before calling into {\tt ESMF\_Initialize()},
+!     it must do so via {\tt MPI\_Init\_thread()}, specifying
+!     {\tt MPI\_THREAD\_SERIALIZED} or above for the required level of thread
+!     support.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!EOP
+      integer       :: localrc                        ! local return code
+
+      ! assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! initialize pre MPI parts of global VM
+      call ESMF_VMInitializePreMPI(rc=localrc)
+                                      
+      ! on failure LogErr is not initialized -> explicit print on error
+      if (localrc .ne. ESMF_SUCCESS) then
+        write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error initializing framework"
+        return 
+      endif 
+      ! on success LogErr is assumed to be functioning
+      
+      if (present(rc)) rc = ESMF_SUCCESS
+      end subroutine ESMF_InitializePreMPI
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
