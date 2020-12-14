@@ -455,6 +455,7 @@ module ESMF_VMMod
   public ESMF_CommHandleValidate
   
 ! - ESMF-internal methods:
+  public ESMF_VMInitializePreMPI
   public ESMF_VMInitialize
   public ESMF_VMFinalize
   public ESMF_VMAbort
@@ -9112,6 +9113,50 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMWtimePrec
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMInitializePreMPI()"
+!BOPI
+! !IROUTINE: ESMF_VMInitializePreMPI - Initialize parts of the Global VM that must happen before MPI is initialized
+
+! !INTERFACE:
+  subroutine ESMF_VMInitializePreMPI(rc)
+!
+! !ARGUMENTS:
+    integer, intent(out), optional :: rc           
+!
+! !DESCRIPTION:
+!   Initialize parts of the Global VM that must happen before MPI is initialized.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Call into the C++ interface.
+    call c_ESMC_VMInitializePreMPI(localrc)
+    ! Cannot use LogErr here because LogErr initializes _after_ VM
+    if (localrc /= ESMF_SUCCESS) then
+      if (present(rc)) rc = localrc
+      return
+    endif
+    
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMInitializePreMPI
 !------------------------------------------------------------------------------
 
 

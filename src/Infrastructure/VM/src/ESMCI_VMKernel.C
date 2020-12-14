@@ -122,6 +122,7 @@ namespace ESMCI {
 MPI_Comm VMK::default_mpi_c;
 int VMK::mpi_thread_level;
 int VMK::mpi_init_outside_esmf;
+int VMK::pre_mpi_init = 0;
 int VMK::nssiid;
 int VMK::ncores;
 int *VMK::cpuid;
@@ -334,10 +335,9 @@ bool VMK::isSsiSharedMemoryEnabled(){
 }
 
     
-void VMK::init(MPI_Comm mpiCommunicator){
-  // initialize the physical machine and a default (all MPI) virtual machine
-  // initialize signal handling -> this MUST happen before MPI_Init is called!!
+void VMK::InitPreMPI(){
 #if !defined (ESMF_NO_SIGNALS)
+  // initialize signal handling -> this MUST happen before MPI_Init is called!!
   struct sigaction action;
   action.sa_handler = SIG_DFL;
   action.sa_flags   = 0;
@@ -348,6 +348,12 @@ void VMK::init(MPI_Comm mpiCommunicator){
   sigaddset(&sigs_to_block, VM_SIG1);
   sigprocmask(SIG_BLOCK, &sigs_to_block, NULL); // block VM_SIG1
 #endif
+  pre_mpi_init = 1; // set flag
+}
+
+
+void VMK::init(MPI_Comm mpiCommunicator){
+  // initialize the physical machine and a default (all MPI) virtual machine
   // obtain command line arguments and store in the VM class
   argc = 0; // reset
   for (int k=0; k<100; k++)
@@ -363,6 +369,7 @@ void VMK::init(MPI_Comm mpiCommunicator){
   MPI_Initialized(&mpi_init_outside_esmf);
 #ifndef ESMF_MPIUNI
   if (!mpi_init_outside_esmf){
+    InitPreMPI(); // must call before MPI is initialized
 #ifdef ESMF_MPICH
     // MPICH1.2 is not standard compliant and needs valid args
     // make copy of argc and argv for MPICH because it modifies them and
@@ -1166,11 +1173,11 @@ static void *vmk_sigcatcher(void *arg){
   vmkt->arg = (void *)&pid;
   // more preparation
   VMK vm;  // need a handle to a VM object to access the static members
-  if (vm.mpi_init_outside_esmf){
+  if (!vm.pre_mpi_init){
     int localrc;
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "Cannot safely use signals inside VMKernel when MPI was initialized "
-      "outside of ESMF.", ESMC_CONTEXT, &localrc);
+      "Cannot safely use signals inside VMKernel because signal handling was "
+      "not installed before MPI was initialized.", ESMC_CONTEXT, &localrc);
     throw localrc;  // bail out with exception
   }
 #ifdef ESMF_NO_SIGNALS

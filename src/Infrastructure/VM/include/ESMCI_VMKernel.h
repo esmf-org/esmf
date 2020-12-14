@@ -299,6 +299,7 @@ class VMK{
     static MPI_Comm default_mpi_c;
     static int mpi_thread_level;
     static int mpi_init_outside_esmf;
+    static int pre_mpi_init;
     // Static data members that hold command line arguments
     // There are two sets of these variables. The first set of variables is
     // used to obtain the command line arguments in the obtain_args() method
@@ -326,6 +327,8 @@ class VMK{
     void commqueueitem_link(commhandle *commh);
     int  commqueueitem_unlink(commhandle *commh);
   public:
+    static void InitPreMPI();
+      // initialization step before MPI is initialized
     void init(MPI_Comm mpiCommunicator=MPI_COMM_WORLD);
       // initialize the physical machine and a default (all MPI) virtual machine
     void finalize(int finalizeMpi=1);
