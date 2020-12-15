@@ -2888,9 +2888,10 @@ module NUOPC_Connector
               staggerloc=staggerloc, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return
-call ESMF_PointerLog(grid%this, prefix="acceptorField set persistent shared Grid: ", rc=rc)
+call ESMF_PointerLog(grid%this, prefix="acceptorField set persistent shared Grid: ", &
+  logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
             ! must make Grid persistent to be safe when sharing with other VM
-            call c_ESMC_SetPersist(grid, ESMF_TRUE, rc=rc)
+            call c_ESMC_SetPersist(grid, ESMF_TRUE, rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return
           else
@@ -2903,16 +2904,20 @@ call ESMF_PointerLog(grid%this, prefix="acceptorField set persistent shared Grid
             gridListMatch=.false.
             gridListE=>gridList
             do while (associated(gridListE))
-call ESMF_PointerLog(grid%this, prefix="Comparing Grid: "//trim(geomobjname)//": ", rc=rc)
+call ESMF_PointerLog(grid%this, prefix="Comparing Grid: "//trim(geomobjname)//": ", &
+  logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
+
 call ESMF_GridGet(gridListE%keyGrid, name=msgString, rc=rc)
 call ESMF_PointerLog(gridListE%keyGrid%this, &
-                                prefix="    to keyGrid: "//trim(msgString)//": ", rc=rc)
+  prefix="    to keyGrid: "//trim(msgString)//": ", &
+  logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
 !TODO: Actually want to check for alias match.
-!              if (gridListE%providerGrid == grid) then
+              if (gridListE%keyGrid == grid) then
 !TODO: But for now this does not work due to proxy duplication, and as a 
 !TODO: work-around matching is done by name. This is very fragile and should
 !TODO: be fixed as soon as we can rely on correct proxy behavior!
-              if (trim(geomobjname)==trim(msgString)) then
+!              if (trim(geomobjname)==trim(msgString)) then
+call ESMF_LogWrite("Matching Grid found!", ESMF_LOGMSG_DEBUG, rc=rc)
                 gridListMatch=.true.
                 exit
               endif
@@ -3134,9 +3139,10 @@ call ESMF_PointerLog(gridListE%keyGrid%this, &
               rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-call ESMF_PointerLog(mesh%this, prefix="acceptorField set persistent shared Mesh: ", rc=rc)
+call ESMF_PointerLog(mesh%this, prefix="acceptorField set persistent shared Mesh: ", &
+  logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
             ! must make Mesh persistent to be safe when sharing with other VM
-            call c_ESMC_SetPersist(mesh, ESMF_TRUE, rc=rc)
+            call c_ESMC_SetPersist(mesh, ESMF_TRUE, rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return
           else
@@ -3149,16 +3155,19 @@ call ESMF_PointerLog(mesh%this, prefix="acceptorField set persistent shared Mesh
             meshListMatch=.false.
             meshListE=>meshList
             do while (associated(meshListE))
-call ESMF_PointerLog(mesh%this, prefix="Comparing Mesh: "//trim(geomobjname)//": ", rc=rc)
+call ESMF_PointerLog(mesh%this, prefix="Comparing Mesh: "//trim(geomobjname)//": ", &
+  logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
 call ESMF_MeshGet(meshListE%keyMesh, name=msgString, rc=rc)
 call ESMF_PointerLog(meshListE%keyMesh%this, &
-                                prefix="    to keyMesh: "//trim(msgString)//": ", rc=rc)
+  prefix="    to keyMesh: "//trim(msgString)//": ", &
+  logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
 !TODO: Actually want to check for alias match.
-!              if (meshListE%providerMesh == mesh) then
+              if (meshListE%keyMesh == mesh) then
 !TODO: But for now this does not work due to proxy duplication, and as a 
 !TODO: work-around matching is done by name. This is very fragile and should
 !TODO: be fixed as soon as we can rely on correct proxy behavior!
-              if (trim(geomobjname)==trim(msgString)) then
+!              if (trim(geomobjname)==trim(msgString)) then
+call ESMF_LogWrite("Matching Mesh found!", ESMF_LOGMSG_DEBUG, rc=rc)
                 meshListMatch=.true.
                 exit
               endif
@@ -3946,16 +3955,19 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
             gridListMatch=.false.
             gridListE=>gridList
             do while (associated(gridListE))
-call ESMF_PointerLog(acceptorGrid%this, prefix="Comparing Grid: "//trim(geomobjname)//": ", rc=rc)
+call ESMF_PointerLog(acceptorGrid%this, prefix="Comparing Grid: "//trim(geomobjname)//": ", &
+  logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
 call ESMF_GridGet(gridListE%keyGrid, name=msgString, rc=rc)
 call ESMF_PointerLog(gridListE%keyGrid%this, &
-                                        prefix="    to keyGrid: "//trim(msgString)//": ", rc=rc)
+  prefix="    to keyGrid: "//trim(msgString)//": ", &
+  logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
 !TODO: Actually want to check for alias match.
-!              if (acceptorGrid == gridListE%keyGrid) then
+              if (acceptorGrid == gridListE%keyGrid) then
 !TODO: But for now this does not work due to proxy duplication, and as a 
 !TODO: work-around matching is done by name. This is very fragile and should
 !TODO: be fixed as soon as we can rely on correct proxy behavior!
-              if (trim(geomobjname)==trim(msgString)) then
+!              if (trim(geomobjname)==trim(msgString)) then
+call ESMF_LogWrite("Matching Grid found!", ESMF_LOGMSG_DEBUG, rc=rc)
                 gridListMatch=.true.
                 exit
               endif
@@ -4050,16 +4062,19 @@ call ESMF_PointerLog(gridListE%keyGrid%this, &
             meshListMatch=.false.
             meshListE=>meshList
             do while (associated(meshListE))
-call ESMF_PointerLog(acceptorMesh%this, prefix="Comparing Mesh: "//trim(geomobjname)//": ", rc=rc)
+call ESMF_PointerLog(acceptorMesh%this, prefix="Comparing Mesh: "//trim(geomobjname)//": ", &
+  logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
 call ESMF_MeshGet(meshListE%keyMesh, name=msgString, rc=rc)
 call ESMF_PointerLog(meshListE%keyMesh%this, &
-                                        prefix="    to keyMesh: "//trim(msgString)//": ", rc=rc)
+  prefix="    to keyMesh: "//trim(msgString)//": ", &
+  logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
 !TODO: Actually want to check for alias match.
-!              if (acceptorMesh == meshListE%keyMesh) then
+              if (acceptorMesh == meshListE%keyMesh) then
 !TODO: But for now this does not work due to proxy duplication, and as a 
 !TODO: work-around matching is done by name. This is very fragile and should
 !TODO: be fixed as soon as we can rely on correct proxy behavior!
-              if (trim(geomobjname)==trim(msgString)) then
+!              if (trim(geomobjname)==trim(msgString)) then
+call ESMF_LogWrite("Matching Mesh found!", ESMF_LOGMSG_DEBUG, rc=rc)
                 meshListMatch=.true.
                 exit
               endif

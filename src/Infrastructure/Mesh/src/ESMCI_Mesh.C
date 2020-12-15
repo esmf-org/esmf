@@ -62,7 +62,8 @@ Mesh::Mesh() : MeshDB(), FieldReg(), CommReg(),
                sghost(NULL),
                committed(false),
                is_split(false),
-	       ind(-1), side(-1)
+	       ind(-1), side(-1),
+               orig_comm(MPI_COMM_NULL)
 {
 
    GetCommRel(MeshObj::NODE).Init("node_sym", *this, *this, true);
@@ -1488,6 +1489,9 @@ void Mesh::Commit() {
   if (committed)
     Throw() << "Mesh is already committed!";
 
+  // Set orig mpi info  
+  orig_comm=Par::Comm();
+
   // Create sides/edges, if requested
   if (use_sides) {
     CreateAllSides();
@@ -1573,6 +1577,17 @@ void Mesh::ProxyCommit(int numSetsArg,
 void Mesh::CreateGhost() {
   if (sghost) return; // must already be scratched
 
+  // Only do on the original comm that this mesh was committed on, so 
+  // leave if that's not set
+  if (orig_comm == MPI_COMM_NULL) return;
+
+  // Save current comm
+  MPI_Comm curr_comm=Par::Comm();
+
+  // Switch to orig comm
+  ESMCI::Par::Init("MESHLOG", false, orig_comm);
+
+  // Create ghost comm
   sghost = new CommReg("_ghost", *this, *this);
 
   std::vector<CommRel::CommNode> selem;
@@ -1639,16 +1654,28 @@ void Mesh::CreateGhost() {
   sghost->GetCommRel(MeshObj::FACE).build_range(true);
   sghost->GetCommRel(MeshObj::ELEMENT).build_range(true);
 
-
   // Send coordinates
   MEField<> *cd = GetCoordField();
   sghost->SendFields(1, &cd, &cd);
 
+  // Switch back to curr comm
+  ESMCI::Par::Init("MESHLOG", false, curr_comm);
 }
 
 void Mesh::RemoveGhost() {
   if (!sghost) return; // must already be scratched
 
+  // Only do on the original comm that this mesh was committed on, so 
+  // leave if that's not set
+  if (orig_comm == MPI_COMM_NULL) return;
+
+  // Save current comm
+  MPI_Comm curr_comm=Par::Comm();
+
+  // Switch to orig comm
+  ESMCI::Par::Init("MESHLOG", false, orig_comm);
+
+  // Traspose ghost
   sghost->Transpose();
 
   sghost->GetCommRel(MeshObj::ELEMENT).delete_domain();
@@ -1657,14 +1684,27 @@ void Mesh::RemoveGhost() {
   sghost->GetCommRel(MeshObj::NODE).delete_domain();
 
   delete sghost; sghost = 0; // does delete do this?? don't remember...
+
+  // Switch back to curr comm
+  ESMCI::Par::Init("MESHLOG", false, curr_comm);
 }
 
 // Convenience function to communicate all fields to ghost locations
  void Mesh::GhostCommAllFields() {
 
+  // Only do on the original comm that this mesh was committed on, so 
+  // leave if that's not set
+  if (orig_comm == MPI_COMM_NULL) return;
+
    // Error check
    if (!sghost) Throw()<<"Ghost communicator must be present for ghost communication.";
    
+   // Save current comm
+   MPI_Comm curr_comm=Par::Comm();
+   
+   // Switch to orig comm
+   ESMCI::Par::Init("MESHLOG", false, orig_comm);
+
    // Vector of  all Fields in mesh
    std::vector<MEField<>*> fields;
    
@@ -1680,6 +1720,10 @@ void Mesh::RemoveGhost() {
    } else {
      sghost->SendFields(0, NULL, NULL);
    }
+
+
+   // Switch back to curr comm
+   ESMCI::Par::Init("MESHLOG", false, curr_comm);
  }
  
 
@@ -2027,10 +2071,10 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
 
  }
 
- // Change the proc numbers in a mesh to correspond to a different set. This isn't to 
- // merge procs into one another, but to map them to different number. E.g. if they 
- // are being switched to a different VM or MPI_COMM.
- void Mesh::map_proc_numbers(int num_procs, int *proc_map) {
+
+ // Change the node and element owners in the piece of the mesh on this processor to
+ // a different set 
+ void Mesh::map_obj_owners(int num_procs, int *proc_map) {
 
      // Loop through nodes changing owners to owners in new VM
      MeshDB::iterator ni = this->node_begin_all(), ne = this->node_end_all();
@@ -2082,12 +2126,72 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
        // Set new owner
        elem.set_owner((UInt)new_owner);
      }
+ }
 
-     // Change CommReg
-     CommReg::map_proc_numbers(num_procs, proc_map);
 
-     // Remove ghosting, because it would be wrong now that procs have changed.
-     RemoveGhost();
+ // Change the proc numbers in a mesh to correspond to a different set. This isn't to 
+ // merge procs into one another, but to map them to different number. E.g. if they 
+ // are being switched to a different VM or MPI_COMM.
+ void Mesh::map_proc_numbers(int num_procs, int *proc_map) {
+
+   // Change node and elem ownership
+   this->map_obj_owners(num_procs, proc_map);
+   
+   // Change CommReg
+   CommReg::map_proc_numbers(num_procs, proc_map);
+   
+   // Remove ghosting, because it would be wrong now that procs have changed.
+   RemoveGhost();
+ }
+
+
+ // Switch Mesh to new comm
+ // (I.e. change node&elem ownership, orig_comm, etc.)
+ // This needs to be called across the original comm and the new comm. For
+ // pieces of the mesh not in the new comm, new_comm should be set to MPI_COMM_NULL
+ // new_comm has to contain all the pieces of the mesh that contain nodes and elems (e.g. the only pieces outside
+ // of new_comm should be empty/proxy mesh pieces)
+ void Mesh::change_comm(MPI_Comm new_comm) {
+
+    // If not in orig comm, just set and leave because there is nothing to do
+   if (orig_comm == MPI_COMM_NULL) {
+     orig_comm=new_comm;
+     return;
+   }
+
+
+   // Get rank in new comm, if not in new_comm set to -1, so it's detected if we have nodes/elems not in new_comm
+   int new_rank=-1;
+   if (new_comm != MPI_COMM_NULL) {
+     MPI_Comm_rank(new_comm, &new_rank);
+   }
+
+   // Save current comm
+   MPI_Comm curr_comm=Par::Comm();
+
+   // Switch to orig comm
+   ESMCI::Par::Init("MESHLOG", false, orig_comm);
+   
+   // Get size
+   int orig_comm_size=Par::Size();
+
+   // Allocate map
+   int *orig_to_new_map = new int[orig_comm_size];
+
+    // Fill map
+   MPI_Allgather(&new_rank, 1, MPI_INT, orig_to_new_map, 1, MPI_INT, orig_comm);
+
+   // Move nodes and elems to new owners
+   this->map_proc_numbers(orig_comm_size, orig_to_new_map);
+   
+   // Deallocate map
+   delete [] orig_to_new_map;
+   
+   // Switch back to current comm
+   ESMCI::Par::Init("MESHLOG", false, curr_comm);
+   
+   // Change comm
+   orig_comm=new_comm;
  }
 
 

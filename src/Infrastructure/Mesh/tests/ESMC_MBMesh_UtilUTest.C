@@ -22,26 +22,13 @@
 #include "ESMC_Test.h"
 
 #if defined ESMF_MOAB
-
-#include "ESMC_MBMeshTestUtilMBMesh.C"
-
-// other headers
+#include "ESMC_MBMeshTestGenMBMesh.C"
 #include "ESMCI_MBMesh.h"
-#include "ESMCI_MBMesh_Util.h"
-
 #include "MBTagConventions.hpp"
 #include "moab/Core.hpp"
 #endif
 
-#include <iostream>
-#include <iterator>
-#include <vector>
 #include <cstring>
-
-#if !defined (M_PI)
-// for Windows...
-#define M_PI 3.14159265358979323846
-#endif
 
 int main(int argc, char *argv[]) {
 
@@ -58,11 +45,6 @@ int main(int argc, char *argv[]) {
   //----------------------------------------------------------------------------
   rc=ESMC_LogSet(true);
 
-#if defined ESMF_MOAB
-  //----------------------------------------------------------------------------
-  //ESMC_MoabSet(true);
-#endif
-
   // Get parallel information
   vm=ESMC_VMGetGlobal(&rc);
   if (rc != ESMF_SUCCESS) return 0;
@@ -71,63 +53,24 @@ int main(int argc, char *argv[]) {
                 (int *)NULL, (int *)NULL);
   if (rc != ESMF_SUCCESS) return 0;
 
-  // common vector for pointlist verification
-  std::vector<double*> cv;
-
-  // --------------------------------------------------------------------------
-  // quad mesh bilinear
-  // --------------------------------------------------------------------------
-#if defined ESMF_MOAB
-
-  // build a mesh
-  MBMesh *mesh_quad;
-  mesh_quad = create_mesh_quad(rc);
-
-  // build a pointlist
-  PointList *pl_quad;
-  pl_quad = MBMesh_to_PointList(mesh_quad, ESMC_MESHLOC_NODE, NULL, &rc);
-
   //----------------------------------------------------------------------------
   //NEX_UTest
+  strcpy(name, "Throw an error from the MBMesh");
+  strcpy(failMsg, "Did not return ESMC_RC_MOAB_ERROR");
+#if defined ESMF_MOAB
+  int localrc;
+  MBMesh *mesh = create_mesh_halfway(localrc);
+  if (localrc == ESMF_SUCCESS) {
+    int elemIds[1];
+    InterArray<int> *eii = new InterArray<int>(elemIds,1);
+    MBMesh_GetElemCreateInfo(mesh, eii, NULL, NULL, NULL, NULL, NULL, &rc);
+    delete eii;
+  }
 #else
-  rc = ESMF_SUCCESS;
+  rc = ESMC_RC_MOAB_ERROR;
 #endif
-  strcpy(name, "Quadrilateral mesh pointlist generation");
-  strcpy(failMsg, "Mesh to Pointlist did not work correctly");
-  ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
-
-#if defined ESMF_MOAB
-  // clean up
-  delete pl_quad;
-  delete mesh_quad;
-#endif
-  // --------------------------------------------------------------------------
-  // spherical quad mesh bilinear
-  // --------------------------------------------------------------------------
-#if defined ESMF_MOAB
-
-  // build a mesh
-  MBMesh *mesh_quad_sph;
-  mesh_quad_sph = create_mesh_quad_sph(rc);
-
-  // build a pointlist
-  PointList *pl_quad_sph;
-  pl_quad_sph = MBMesh_to_PointList(mesh_quad_sph, ESMC_MESHLOC_NODE, NULL, &rc);
-
+  ESMC_Test((rc==ESMC_RC_MOAB_ERROR), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
-  //NEX_UTest
-#else
-  rc = ESMF_SUCCESS;
-#endif
-  strcpy(name, "Spherical quadrilateral mesh pointlist generation");
-  strcpy(failMsg, "Mesh to Pointlist to not work correctly");
-  ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
-
-#if defined ESMF_MOAB
-  // clean up
-  delete pl_quad_sph;
-  delete mesh_quad_sph;
-#endif
 
   //----------------------------------------------------------------------------
   ESMC_TestEnd(__FILE__, __LINE__, 0);

@@ -45,18 +45,18 @@
 
 using namespace ESMCI;
 
-void MBMesh_create(void **mbmpp,
+void MBMesh_create(MBMesh **mbmpp,
                    int *pdim, int *sdim,
                    ESMC_CoordSys_Flag *coordSys, int *rc);
 
 
-void MBMesh_addnodes(void **mbmpp, int *num_nodes, int *nodeId,
+void MBMesh_addnodes(MBMesh **mbmpp, int *num_nodes, int *nodeId,
                      double *nodeCoord, int *nodeOwner, InterArray<int> *nodeMaskII,
                      ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                      int *rc);
 
 
-void MBMesh_addelements(void **mbmpp,
+void MBMesh_addelements(MBMesh **mbmpp,
                         int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
                          int *_areaPresent, double *elemArea,
                         int *_coordsPresent, double *elemCoords,
@@ -65,64 +65,105 @@ void MBMesh_addelements(void **mbmpp,
                         int *rc);
 
 
-void MBMesh_destroy(void **mbmpp, int *rc);
+void MBMesh_destroy(MBMesh **mbmpp, int *rc);
 
-void MBMesh_write(void **mbmpp, char *fname, int *rc,
+void MBMesh_write(MBMesh **mbmpp, char *fname, int *rc,
                   ESMCI_FortranStrLenArg nlen);
 
 
-void MBMesh_createnodedistgrid(void **meshpp, int *ngrid, int *num_lnodes, int *rc);
+void MBMesh_createnodedistgrid(MBMesh **meshpp, int *ngrid, int *num_lnodes, int *rc);
 
-void MBMesh_createelemdistgrid(void **meshpp, int *egrid, int *num_lelems, int *rc);
+void MBMesh_createelemdistgrid(MBMesh **meshpp, int *egrid, int *num_lelems, int *rc);
 
-void MBMesh_createredistelems(void **src_meshpp, int *num_elem_gids, int *elem_gids,
-                              void **output_meshpp, int *rc);
+void MBMesh_createredistelems(MBMesh **src_meshpp, int *num_elem_gids, int *elem_gids,
+                              MBMesh **output_meshpp, int *rc);
 
-void MBMesh_createredistnodes(void **src_meshpp, int *num_node_gids, int *node_gids,
-                              void **output_meshpp, int *rc);
+void MBMesh_createredistnodes(MBMesh **src_meshpp, int *num_node_gids, int *node_gids,
+                              MBMesh **output_meshpp, int *rc);
 
-void MBMesh_createredist(void **src_meshpp, int *num_node_gids, int *node_gids,
-                            int *num_elem_gids, int *elem_gids,  void **output_meshpp, int *rc);
+void MBMesh_createredist(MBMesh **src_meshpp, int *num_node_gids, int *node_gids,
+                            int *num_elem_gids, int *elem_gids,  MBMesh **output_meshpp, int *rc);
 
-void MBMesh_checkelemlist(void **meshpp, int *_num_elem_gids, int *elem_gids,
+void MBMesh_checkelemlist(MBMesh **meshpp, int *_num_elem_gids, int *elem_gids,
                                            int *rc);
 
-void MBMesh_checknodelist(void **meshpp, int *_num_node_gids, int *node_gids,
+void MBMesh_checknodelist(MBMesh **meshpp, int *_num_node_gids, int *node_gids,
                                              int *rc);
 
-void MBMesh_FitOnVM(void **meshpp, VM **new_vm, int *rc);
+void MBMesh_FitOnVM(MBMesh **meshpp, VM **new_vm, int *rc);
 
-void MBMesh_getarea(void **mbmpp, int *num_elem, double *elem_areas, int *rc);
+void MBMesh_getarea(MBMesh **mbmpp, int *num_elem, double *elem_areas, int *rc);
 
-void MBMesh_geteleminfointoarray(void *vmbmp,
+
+void MBMesh_GetCentroid(MBMesh *meshp, int *num_elem, double *elem_centroid, int *rc);
+
+void MBMesh_GetDimensions(MBMesh *meshp, int *sdim, int *pdim, int *rc);
+
+void MBMesh_GetElemCount(MBMesh *meshp, int *elemCount, int *rc);
+
+void MBMesh_GetNodeCount(MBMesh *meshp, int *nodeCount, int *rc);
+
+void MBMesh_GetElemConnCount(MBMesh *meshp, int *elemConnCount, int *rc);
+
+void MBMesh_GetElemInfoPresence(MBMesh *meshp, 
+                                int *elemMaskIsPresent,
+                                int *elemAreaIsPresent,
+                                int *elemCoordsIsPresent,
+                                int *rc);
+
+void MBMesh_GetElemCreateInfo(MBMesh *mesh,
+                              ESMCI::InterArray<int> *elemIds,
+                              ESMCI::InterArray<int> *elemTypes,
+                              ESMCI::InterArray<int> *elemConn,
+                              ESMCI::InterArray<int> *elemMask,
+                              ESMCI::InterArray<ESMC_R8> *elemArea,
+                              ESMCI::InterArray<ESMC_R8> *elemCoords, int *rc);
+
+void MBMesh_GetNodeInfoPresence(MBMesh *meshp, 
+                                int *nodeMaskIsPresent,
+                                int *rc);
+
+void MBMesh_GetNodeCreateInfo(MBMesh *meshp,
+                              ESMCI::InterArray<int> *nodeIds,
+                              ESMCI::InterArray<ESMC_R8> *nodeCoords,
+                              ESMCI::InterArray<int> *nodeOwners,
+                              ESMCI::InterArray<int> *nodeMask,
+                              int *rc);
+
+void MBMesh_geteleminfointoarray(MBMesh *vmbmp,
                                  ESMCI::DistGrid *elemDistgrid, 
                                  int numElemArrays,
                                  int *infoTypeElemArrays, 
                                  ESMCI::Array **elemArrays, 
                                  int *rc);
 
-void MBMesh_getlocalcoords(void **meshpp, double *ncoords,
+void MBMesh_SetElemCreateInfo(MBMesh *meshp,
+                              ESMCI::InterArray<int> *elemMask,
+                              ESMCI::InterArray<ESMC_R8> *elemArea,
+                              int *rc);
+
+void MBMesh_getlocalcoords(MBMesh **meshpp, double *ncoords,
                                int *_orig_sdim, int *rc);
 
-void MBMesh_getlocalelemcoords(void **meshpp, double *ecoords,
+void MBMesh_getlocalelemcoords(MBMesh **meshpp, double *ecoords,
                                int *_orig_sdim, int *rc);
 
-void MBMesh_serialize(void **mbmpp, char *buffer, int *length, 
+void MBMesh_serialize(MBMesh **mbmpp, char *buffer, int *length, 
                       int *offset, ESMC_InquireFlag *inquireflag, int *rc,
                       ESMCI_FortranStrLenArg buffer_l);
 
-void MBMesh_deserialize(void **mbmpp, char *buffer, int *offset, int *rc,
+void MBMesh_deserialize(MBMesh **mbmpp, char *buffer, int *offset, int *rc,
                         ESMCI_FortranStrLenArg buffer_l);
 
-void MBMesh_turnonelemmask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg,  int *rc);
-void MBMesh_turnoffelemmask(void **mbmpp, int *rc);
+void MBMesh_turnonelemmask(MBMesh **mbmpp, ESMCI::InterArray<int> *maskValuesArg,  int *rc);
+void MBMesh_turnoffelemmask(MBMesh **mbmpp, int *rc);
 
-void MBMesh_turnonnodemask(void **meshpp, ESMCI::InterArray<int> *maskValuesArg,  int *rc);
-void MBMesh_turnoffnodemask(void **meshpp, int *rc);
+void MBMesh_turnonnodemask(MBMesh **meshpp, ESMCI::InterArray<int> *maskValuesArg,  int *rc);
+void MBMesh_turnoffnodemask(MBMesh **meshpp, int *rc);
 
 EntityType get_entity_type(int pdim, int etype);
 
-int ElemType2NumNodes(int pdim, int sdim, int etype);
+int ElemType2NumNodes(int pdim, int etype);
 
 #endif // ESMF_MOAB
 

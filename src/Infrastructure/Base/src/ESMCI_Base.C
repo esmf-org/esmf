@@ -52,6 +52,7 @@ namespace ESMCI {
 #define ESMC_METHOD "esmc_error::esmc_error()"
 esmc_error::esmc_error (const std::string &code_name, int esmc_rc, const std::string &msg) {
   assert(esmc_rc != ESMF_SUCCESS);
+  // RLO: the following seems too verbose to me
   std::string the_msg;
   if (code_name != "") {
     the_msg = "Error/Return Code " + std::to_string(esmc_rc) + " (" + \
@@ -60,6 +61,8 @@ esmc_error::esmc_error (const std::string &code_name, int esmc_rc, const std::st
     the_msg = "Error/Return Code " + std::to_string(esmc_rc) + " - " + msg;
   }
   this->msg = the_msg;
+  // RLO: I would replace the above with the following, test failure in ESMC_InfoUTest.C
+  // this->msg = msg;
   this->esmc_rc = esmc_rc;
 }
 } // namespace
@@ -829,7 +832,7 @@ void ESMC_Base::constructInfo(ESMC_Base& base) {
     //   "Base object ID: %d, Ref count: %d, Status=%s, Name=%s, Class=%s\n",
     //       ID, refCount, ESMC_StatusString(baseStatus), baseName, className);
     // printf(msgbuf);
-    // ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
+    // ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_DEBUG);
 
   // root Attribute
   if (level > 0) {
@@ -856,7 +859,7 @@ void ESMC_Base::constructInfo(ESMC_Base& base) {
   }
 //  if ((root->getCountAttr() > 0 || root->getCountPack() > 0) && tofile) {
   std::cout << " Root Info (Attributes):" << std::endl;
-  // ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
+  // ESMC_LogDefault.Write(msgbuf, ESMC_ESMC_LOGMSG_DEBUG);
 
   // traverse the Attribute hierarchy, printing as we go
   if (append)
@@ -1123,7 +1126,7 @@ void ESMC_Base::constructInfo(ESMC_Base& base) {
   char msgbuf[ESMF_MAXSTR];
   sprintf(msgbuf, "ESMC_Base constructor: %d, %p, %s, %s, %s", __LINE__, this,
     this->ESMC_BaseGetClassName(), this->ESMC_BaseGetName(), baseName);
-  ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
+  ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_DEBUG);
 #endif
 
   // add object to list for automatic garbage collection
@@ -1187,7 +1190,7 @@ void ESMC_Base::constructInfo(ESMC_Base& base) {
   char msgbuf[ESMF_MAXSTR];
   sprintf(msgbuf, "ESMC_Base constructor: %d, %p, %s, %s, %s", __LINE__, this,
     this->ESMC_BaseGetClassName(), this->ESMC_BaseGetName(), baseName);
-  ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
+  ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_DEBUG);
 #endif
 
   // add object to list for automatic garbage collection
@@ -1264,7 +1267,7 @@ void ESMC_Base::constructInfo(ESMC_Base& base) {
   char msgbuf[ESMF_MAXSTR];
   sprintf(msgbuf, "ESMC_Base constructor: %d, %p, %s, %s, %s", __LINE__, this,
     this->ESMC_BaseGetClassName(), this->ESMC_BaseGetName(), baseName);
-  ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
+  ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_DEBUG);
 #endif
 
   // add object to list for automatic garbage collection
@@ -1303,10 +1306,10 @@ void ESMC_Base::constructInfo(ESMC_Base& base) {
 #if 0
   char msgbuf[ESMF_MAXSTR];
   sprintf(msgbuf, "In ~ESMC_Base() for %p", this);
-  ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
+  ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_DEBUG);
   sprintf(msgbuf, " -> Base name: %s, classname: %s", this->ESMC_BaseGetName(),
     this->ESMC_BaseGetClassName());
-  ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
+  ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_DEBUG);
 #endif
 
   if (vmIDCreator){
@@ -1327,7 +1330,7 @@ void ESMC_Base::constructInfo(ESMC_Base& base) {
 #if 0
   std::stringstream debugmsg;
   debugmsg << "From ~ESMC_Base(): rootalias=" << rootalias;
-  ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+  ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
 #endif
 
   // delete the root Info if not an alias

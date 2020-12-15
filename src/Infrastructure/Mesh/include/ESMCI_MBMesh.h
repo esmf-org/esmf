@@ -15,24 +15,105 @@
 
 #if defined ESMF_MOAB
 #include "moab/Core.hpp"
+// #include "MBTagConventions.hpp"
 using namespace moab;
 #endif
 
+#include "ESMCI_Base.h"
 #include "ESMCI_CoordSys.h"
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
+#include "Mesh/include/Legacy/ESMCI_Exception.h"
 
 #include <map>
+#include <vector>
 
 namespace ESMCI {
 
-#define MBMESH_CHECK_ERR(merr, localrc) {\
-  if (merr != MB_SUCCESS) \
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, \
-      moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc; }\
+// use when no pointer *rc is expected to return
+#define ESMC_CHECK_MOAB_THROW(merr) \
+  if (merr != MB_SUCCESS) {\
+    ESMCI::esmc_error local_macro_error("", ESMC_RC_MOAB_ERROR, moab::ErrorCodeStr[merr]); \
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, local_macro_error.what(), ESMC_CONTEXT, nullptr); \
+      throw(local_macro_error);}
+
+// use when no pointer *rc is expected to return
+#define ESMC_CHECK_THROW(localrc) \
+    if (localrc != ESMF_SUCCESS) {\
+      std::string rcmsg; \
+      rcmsg = ESMC_LogGetErrMsg(localrc); \
+      ESMCI::esmc_error local_macro_error(rcmsg, localrc, ""); \
+      ESMC_LogDefault.MsgFoundError(localrc, local_macro_error.what(), ESMC_CONTEXT, nullptr); \
+      throw(local_macro_error);}
+
+// use when pointer *rc is expected as a return value
+#define ESMC_CHECK_PASSTHRU_THROW(localrc) \
+  if (localrc != ESMF_SUCCESS) {\
+    ESMCI::esmc_error local_macro_error("", localrc, ""); \
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc); \
+      throw(local_macro_error);}
+
+// use when pointer *rc is NOT returned
+#define CATCH_MBMESH_RETHROW \
+  catch(int localrc){ \
+    if (localrc != ESMF_SUCCESS) {\
+      ESMCI::esmc_error local_macro_error("", localrc, ""); \
+      ESMC_LogDefault.MsgFoundError(localrc, local_macro_error.what(), ESMC_CONTEXT, nullptr); \
+      throw(local_macro_error);} \
+  } catch(std::string errstr){ \
+    ESMCI::esmc_error local_macro_error("ESMC_RC_MOAB_ERROR", ESMC_RC_MOAB_ERROR, errstr); \
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, errstr, ESMC_CONTEXT, nullptr); \
+    throw(local_macro_error); \
+  } catch (std::exception &exc) {\
+    if (exc.what()) { \
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, exc.what(), ESMC_CONTEXT, nullptr); \
+    } else { \
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, "Unknown exception", ESMC_CONTEXT, nullptr); \
+    } \
+    ESMCI::esmc_error local_macro_error("ESMC_RC_MOAB_ERROR", ESMC_RC_MOAB_ERROR, exc.what()); \
+    throw(local_macro_error); \
+  } catch(...) {\
+    std::string msg;\
+    msg = "Unknown exception";\
+    ESMCI::esmc_error local_macro_error("ESMC_RC_MOAB_ERROR", ESMC_RC_MOAB_ERROR, msg); \
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, msg, ESMC_CONTEXT, nullptr); \
+    throw(local_macro_error); }
+
+// use when pointer *rc is returned
+#define CATCH_MBMESH_RETURN(rc) \
+  catch(int localrc){ \
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc); \
+    return; \
+  } catch(std::string errstr){ \
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, errstr, ESMC_CONTEXT, rc); \
+    return; \
+  } catch (ESMCI::esmc_error &exc) { \
+    ESMC_LogDefault.MsgFoundError(exc.getReturnCode(), ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc); \
+    return; \
+  } catch (std::exception &exc) { \
+    if (exc.what()) { \
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, exc.what(), ESMC_CONTEXT, rc); \
+    } else { \
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR, "Unknown exception", ESMC_CONTEXT, rc); \
+    } \
+    return; \
+  } catch(...) { \
+    std::string msg; \
+    msg = "Unknown exception"; \
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL, msg, ESMC_CONTEXT, rc); \
+    return; }
+
 
   class MBMesh {
 #if defined ESMF_MOAB
+
+  private:
+    int _num_node;
+    int _num_elem;
+    int _num_elem_conn;
+    int _num_owned_node;
+    int _num_owned_elem;
+    int _num_owned_elem_conn;
 
   public:
     int pdim; 
@@ -40,14 +121,23 @@ namespace ESMCI {
     int orig_sdim;  // Original spatial dim before converting
     ESMC_CoordSys_Flag coordsys;
 
+    // RLO: why isn't this private? (and most of the other members as well)
     Interface *mesh; // Moab mesh  MAYBE I SHOULD NAME ThIS SOMETHING ELSE????
 
-    int num_verts; // number of verts this processor
-
-    // eventualy get rid of this
-    EntityHandle *verts; // Temporary storage for element create
-
     int num_elems; // number of elems on this processor
+
+    // Guard variables to make sure things have been finalized
+    bool nodes_finalized;
+
+    // Vector of original node EntityHandles sorted by orig_pos
+    std::vector<EntityHandle> orig_nodes;
+
+    // Guard variables to make sure things have been finalized
+    bool elems_finalized;
+    
+    // Vector of original elem EntityHandles sorted by orig_pos
+    std::vector<EntityHandle> orig_elems;
+
 
     // Tags
     Tag gid_tag;
@@ -91,10 +181,50 @@ namespace ESMCI {
     // Add one node
     EntityHandle add_node(double *orig_coords, int gid, int orig_pos, int owner);
 
+    // Add a set of nodes
+    // Returns the range of added nodes
+    void add_nodes(int num_nodes,       // Number of nodes
+                   double *orig_coords, // For each node it's orig_coords
+                   int *gids,           // For each node it's gid
+                   int *orig_pos,       // For each node it's orig_pos, if NULL just order
+                   int *owners,         // For each node it's owner
+                   Range &added_nodes);
+
+
+    // Turn on node masking for this mesh
+    void setup_node_mask();
+
+    // Set node mask value
+    void set_node_mask_val(EntityHandle eh, int mask_val);
+
+    // Set node mask value on a Range of nodes
+    void set_node_mask_val(Range nodes, int *mask_vals);
+
+    // Get node mask value for one entity
+    int get_node_mask_val(EntityHandle node);
+
+    // Set node coords
+    void set_node_coords(EntityHandle eh, double *orig_coords);
+
+    // Get original node coords
+    void get_node_orig_coords(EntityHandle node, double *coords);
+
+    // Get internal Cartesian node coords
+    void get_node_cart_coords(EntityHandle node, double *coords);
+
     // Add one elem
     EntityHandle add_elem(EntityType elem_type, int num_nodes, EntityHandle *nodes, 
                           int gid, int orig_pos, int owner);
 
+    // Add a set of elems
+    // Returns the range of added elems
+    void add_elems(int num_elems,  // The number of elems to add
+                   EntityType elem_type, int nodes_per_elem, // The type and number of nodes in each elem
+                   EntityHandle *nodes, // List of nodes that make up each elem (of size num_elems*nodes_per_elem)
+                   int *gid,      // global ids for each elem (of size num_elems)
+                   int *orig_pos,  // original position for each elem (of size num_elems)
+                   int *owner,     // owner for each elem (of size num_elems)
+                   Range &added_elems);
 
 
     // Change owner
@@ -118,34 +248,156 @@ namespace ESMCI {
     //      + Make versions of get_all_elems() and get_all_nodes() to just return local things? 
 
 
-    // TODO: Should these come out via return??
+    // There are 3 main classes of Entities
+    // - all entities which are returned via a range
+    // - orig entities which we store as a vector sorted by the original position. Note that there may be entities which aren't original (e.g. ghost entities), so
+    //   orig_entities may be smaller than all entities. 
+    // - local entities which you need to go through one of the above lists and figure out which has owener==localPet. However, I think
+    //   that I might add a vector of these soon. 
 
-    // Get a Range of all nodes on this processor
+    // Basic accessors for number of nodes, elements, and connectivity
+    int num_node(){
+      if (!nodes_finalized) {Throw() << "Nodes not finalized, so num_node not set.";}
+      return _num_node;
+    };
+
+    int num_elem(){
+      if (!elems_finalized) {Throw() << "Elements not finalized, so num_elem not set.";}
+      return _num_elem;
+    };
+
+    int num_elem_conn(){
+      if (!elems_finalized) {Throw() << "Elements not finalized, so num_elem_conn not set.";}
+      return _num_elem_conn;
+    };
+
+    int num_owned_node(){
+      if (!nodes_finalized) {Throw() << "Nodes not finalized, so num_owned_node not set.";}
+      return _num_owned_node;
+    };
+
+    int num_owned_elem(){
+      if (!elems_finalized) {Throw() << "Elements not finalized, so num_owned_elem not set.";}
+      return _num_owned_elem;
+    };
+
+    int num_owned_elem_conn(){
+      if (!elems_finalized) {Throw() << "Elements not finalized, so num_owned_elem_conn not set.";}
+      return _num_owned_elem_conn;
+    };
+
+    // Get a Range of all nodes and elements on this processor
     void get_all_nodes(Range &all_nodes);
-
-    // Get range of all elems on this processor
     void get_all_elems(Range &all_elems);
 
+    void get_all_nodes(std::vector<EntityHandle> &all_nodes);
+    void get_all_elems(std::vector<EntityHandle> &all_elems);
 
-    // Turn on node masking for this mesh
-    void setup_node_mask();
+    void get_owned_nodes(std::vector<EntityHandle> &owned_nodes);
+    void get_owned_elems(std::vector<EntityHandle> &owned_elems);
 
-    // Set node mask value
-    void set_node_mask_val(EntityHandle eh, int mask_val);
+    int get_num_elem_conn();
+    int get_num_owned_elem_conn();
+
+    // Return a reference to a vector of EntityHandles for the original nodes used for creation
+    // on this processor sorted in the order they were used for creation
+    std::vector<EntityHandle> const &get_orig_nodes() const {
+      if (!nodes_finalized) {Throw() << "Nodes not finalized, so orig_nodes not set.";}
+      return orig_nodes;
+    }
+
+    int num_orig_nodes() {
+      if (!nodes_finalized) {Throw() << "Nodes not finalized, so orig_nodes not set.";}
+      return orig_nodes.size();
+    }
+
+    // Return a reference to a vector of EntityHandles for the original elems used for creation
+    // on this processor sorted in the order they were used for creation
+    std::vector<EntityHandle> const &get_orig_elems() const {
+      if (!elems_finalized) {Throw() << "Elems not finalized, so orig_elems not set.";}
+      return orig_elems;
+    }
+
+    int num_orig_elems() {
+      if (!elems_finalized) {Throw() << "Elems not finalized, so orig_elems not set.";}
+      return orig_elems.size();
+    }
 
 
-    // Set node coords
-    void set_node_coords(EntityHandle eh, double *orig_coords);
+
+    // Range based accessors for required element tags
+    void get_elem_connectivity(int *elem_conn);
+    void get_elem_ids(int *elem_ids);
+    void get_elem_types(int *elem_types);
+    // Range-based accessors for optional element tags
+    void get_elem_areas(double *elem_area);
+    void get_elem_coords(double *elem_coords);
+    void get_elem_mask(int *elem_mask);
+    void get_elem_centroids(double *elem_centroid);
+
+    // Range based accessors for required node tags
+    void get_node_coords(double *node_coords);
+    void get_node_ids(int *node_ids);
+    void get_node_owners(int *node_owners);
+    // Range based accessors for optional node tags
+    void get_node_mask(int *node_mask);
+
+
+    //// Vector based accesors for object (either nodes or elems) info ////
+
+    // Get global ids for a vector of entities (e.g. for the orig_nodes)
+    void get_gid(std::vector<EntityHandle> const &objs, int *gids);
+
+    // Get owners for a vector of entities (e.g. for the orig_nodes)
+    void get_owners(std::vector<EntityHandle> const &objs, int *owners);
+
+    // Get orig_pos for a vector of entities (e.g. for the orig_nodes)
+    void get_orig_pos(std::vector<EntityHandle> const &objs, int *orig_pos);
+
+
+    //// Vector based accesors for node info ////
+
+    // Get node coords for a vector of entities (e.g. for the orig_nodes)
+    void get_node_orig_coords(std::vector<EntityHandle> const &nodes, double *orig_coords);
+
+    // Set node mask values for a vector of entities (e.g. for the orig_nodes)
+    void set_node_mask_val(std::vector<EntityHandle> const &nodes, int *mask_vals);
+
+    // Get node mask values for a vector of entities (e.g. for the orig_nodes)
+    void get_node_mask_val(std::vector<EntityHandle> const &nodes, int *mask_vals);
+
+
+    //// Vector based accesors for elem info ////
+
+    // Set elem mask values for a vector of entities (e.g. using orig_elems)
+    void set_elem_mask_val(std::vector<EntityHandle> const &elems, int *mask_val);
+
+    // Get elem mask values for a vector of entities (e.g. using orig_elems)
+    void get_elem_mask_val(std::vector<EntityHandle> const &elems, int *mask_val);
+
+    // Set elem area values for a vector of entities (e.g. using orig_elems)
+    void set_elem_area(std::vector<EntityHandle> const &elems, double *areas);
+
+    // Get elem area values for a vector of entities (e.g. using orig_elems)
+    void get_elem_area(std::vector<EntityHandle> const &elems, double *areas);
+
+    // Get elem coords for a vector of entities (e.g. using orig_elems)
+    void get_elem_orig_coords(std::vector<EntityHandle> const &elems, double *orig_coords);
+
+    void get_elem_connectivity(std::vector<EntityHandle> const &elems, int *elem_conn);
+    void get_elem_types(std::vector<EntityHandle> const &elems, int *elem_conn);
+
+
+    // Accessors for values from a single EntityHandle (avoid if possible, slow)
+    int get_elem_mask_val(EntityHandle eh);
+    double get_elem_area(EntityHandle eh);
 
     // Turn on elem masking
     void setup_elem_mask();
 
     // Set an element mask value 
     void set_elem_mask_val(EntityHandle eh, int mask_val);
-
-    // Get an element mask value 
-    int get_elem_mask_val(EntityHandle eh);
-
+    void set_elem_mask_val(Range elems, int *mask_vals);
 
     // Setup elem areas
     void setup_elem_area();
@@ -153,9 +405,8 @@ namespace ESMCI {
     // Set an elem area value
     void set_elem_area(EntityHandle eh, double area);
 
-    // Get an elem area value
-    double get_elem_area(EntityHandle eh);
-
+    // Set a range of element area values 
+    void set_elem_area(Range elems, double *area);
 
     // Setup elem coords
     void setup_elem_coords();
@@ -163,11 +414,24 @@ namespace ESMCI {
     // Set coords in an elem
     void set_elem_coords(EntityHandle eh, double *orig_coords);
 
+    void set_elem_coords(Range elems, double *orig_coords);
+
+    // Get Cartesian coords from elem
+    void get_elem_cart_coords(EntityHandle elem, double *coords);
+
+    // Get orig coords from elem
+    void get_elem_orig_coords(EntityHandle elem, double *orig_coords);
+
+    // Get the corner nodes of an element
+    void get_elem_corner_nodes(EntityHandle elem, int &num_corner_nodes, const EntityHandle *&corner_nodes);
+
+
     // Do halo communication on all node tags
     void halo_comm_nodes_all_tags(bool do_internal_coords=false);
 
     // Do halo communication on all elem tags
     void halo_comm_elems_all_tags();
+
 
     // Setup MBMesh to operate in parallel by resolving shared ents, etc. 
     void setup_parallel();
@@ -183,6 +447,12 @@ namespace ESMCI {
 
     // change proc numbers to those of new VM
     void map_proc_numbers(int num_procs, int *proc_map);
+
+    // Call after all nodes have been added
+    void finalize_nodes();
+
+    // Call after all elems have been added
+    void finalize_elems();
 
 
 // DEPRECATED 

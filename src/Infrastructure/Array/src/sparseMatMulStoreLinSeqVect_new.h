@@ -594,7 +594,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   }
 #ifdef STORELINSEQVECT_NEW_TIMERS_on
   vm->timerStop("find_srcSeqIndexMinMax");
-  vm->timerLog("find_srcSeqIndexMinMax");
+  vm->timerLog("find_srcSeqIndexMinMax", ESMC_LOGMSG_DEBUG);
 #endif
   
 #ifdef ASMM_STORE_MEMLOG_on
@@ -606,7 +606,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
     std::stringstream msg;
     msg << "STORELINSEQVECT_NEW_LOG:" << __LINE__ << " global srcMin/Max = " 
       << srcSeqIndexMinGlobal << "/" << srcSeqIndexMaxGlobal;
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
     
@@ -670,7 +670,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   }
 #ifdef STORELINSEQVECT_NEW_TIMERS_on
   vm->timerStop("construct_haveInfo");
-  vm->timerLog("construct_haveInfo");
+  vm->timerLog("construct_haveInfo", ESMC_LOGMSG_DEBUG);
 #endif
   
 #ifdef ASMM_STORE_MEMLOG_on
@@ -696,7 +696,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
       msg.str("");  // clear
       msg << "STORELINSEQVECT_NEW_LOG:" << __LINE__ << " hasInfoList[" <<
         i << "] = " << hasInfoList[i];
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
   }
 #endif
@@ -715,7 +715,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
       *min_element(hasInfoListCounts.begin(), hasInfoListCounts.end()) << 
       " max=" << 
       *max_element(hasInfoListCounts.begin(), hasInfoListCounts.end());
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
 
@@ -733,7 +733,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
     std::stringstream msg;
     msg << "STORELINSEQVECT_NEW_LOG:" << __LINE__ << 
       " totalHasInfoListCount=" << totalHasInfoListCount;
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
   
@@ -745,7 +745,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   
 #ifdef STORELINSEQVECT_NEW_TIMERS_on
   vm->timerStop("construct_hasInfo");
-  vm->timerLog("construct_hasInfo");
+  vm->timerLog("construct_hasInfo", ESMC_LOGMSG_DEBUG);
 #endif
     
 #ifdef ASMM_STORE_MEMLOG_on
@@ -841,7 +841,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
     }
     
 #ifdef STORELINSEQVECT_NEW_TIMERS_on
-    vm->timerLog("construct_responderPet");
+    vm->timerLog("construct_responderPet", ESMC_LOGMSG_DEBUG);
 #endif
     
 #ifdef ASMM_STORE_MEMLOG_on
@@ -865,7 +865,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
     
 #ifdef STORELINSEQVECT_NEW_TIMERS_on
     vm->timerStop("reduce_scatter");
-    vm->timerLog("reduce_scatter");
+    vm->timerLog("reduce_scatter", ESMC_LOGMSG_DEBUG);
 #endif
     
 #ifdef STORELINSEQVECT_NEW_LOG_on
@@ -873,7 +873,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
       std::stringstream msg;
       msg << "STORELINSEQVECT_NEW_LOG:" << __LINE__ << 
         " nrecvs=" << nrecvs;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
 
@@ -892,7 +892,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
     
 #ifdef STORELINSEQVECT_NEW_TIMERS_on
     vm->timerStop("alltoall");
-    vm->timerLog("alltoall");
+    vm->timerLog("alltoall", ESMC_LOGMSG_DEBUG);
 #endif
 
 #ifdef ASMM_STORE_MEMLOG_on
@@ -1036,7 +1036,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
         << seqIndex.decompSeqIndex <<"/"<< seqIndex.tensorSeqIndex
         << " arrayElement.getSequenceIndex() = "
         << seqIndexTest.decompSeqIndex <<"/"<< seqIndexTest.tensorSeqIndex;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
         arrayElement.next();
@@ -1046,15 +1046,15 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   
 #ifdef STORELINSEQVECT_NEW_TIMERS_on
     vm->timerStop("construct_srcElementSort");
-    vm->timerLog("construct_srcElementSort");
+    vm->timerLog("construct_srcElementSort", ESMC_LOGMSG_DEBUG);
 #endif
 
 #ifdef STORELINSEQVECT_NEW_TIMERS_on
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new2.1a"));
 #endif
-  vm->timerLog("linIndex");
-  vm->timerLog("seqIndex");
+  vm->timerLog("linIndex", ESMC_LOGMSG_DEBUG);
+  vm->timerLog("seqIndex", ESMC_LOGMSG_DEBUG);
 #endif  // TIMERS
   
 #ifdef ASMM_STORE_MEMLOG_on
@@ -1166,7 +1166,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   
 #ifdef STORELINSEQVECT_NEW_TIMERS_on
     vm->timerStop("fill_LinSeqVect");
-    vm->timerLog("fill_LinSeqVect");
+    vm->timerLog("fill_LinSeqVect", ESMC_LOGMSG_DEBUG);
 #endif
     
 #ifdef ASMM_STORE_MEMLOG_on
@@ -1241,7 +1241,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
       " erasing itD with seqIndex.decompSeqIndex=" << 
       itD->seqIndex.decompSeqIndex << " .tensorSeqIndex=" <<
       itD->seqIndex.tensorSeqIndex;
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
         itD = dstLinSeqVect[i].erase(itD);  // erase the element
@@ -1253,7 +1253,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
     }
   }
 #ifdef STORELINSEQVECT_NEW_TIMERS_on
-  vm->timerLog("cleanout_dstLinSeqVect");
+  vm->timerLog("cleanout_dstLinSeqVect", ESMC_LOGMSG_DEBUG);
 #endif
   
 #ifdef ASMM_STORE_MEMLOG_on
@@ -1297,23 +1297,23 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
           ".seqIndex = "<< srcLinSeqVect[j][k].seqIndex.decompSeqIndex
           <<"/"<< srcLinSeqVect[j][k].seqIndex.tensorSeqIndex <<
           ", .factorList.size() = "<< srcLinSeqVect[j][k].factorList.size();
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
         msg.str("");  // clear
         for (unsigned kk=0; kk<srcLinSeqVect[j][k].factorList.size(); kk++){
           msg << "ASMM_STORE_LOG:" << __LINE__ << " \tfactorList["<< kk <<"]";
-          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           msg.str("");  // clear
           msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.partnerSeqIndex ="
             << srcLinSeqVect[j][k].factorList[kk].partnerSeqIndex.decompSeqIndex
             <<"/"
             << srcLinSeqVect[j][k].factorList[kk].partnerSeqIndex.tensorSeqIndex;
-          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           msg.str("");  // clear
           msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.partnerDe =";
           for (unsigned jj=0;
             jj<srcLinSeqVect[j][k].factorList[kk].partnerDe.size(); jj++)
             msg << srcLinSeqVect[j][k].factorList[kk].partnerDe[jj] <<", ";
-          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           msg.str("");  // clear
           switch (typekindFactors){
           case ESMC_TYPEKIND_R4:
@@ -1335,7 +1335,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
           default:
             break;
           }
-          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           msg.str("");  // clear
         }
       }
@@ -1349,23 +1349,23 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
           ".seqIndex = "<< dstLinSeqVect[j][k].seqIndex.decompSeqIndex
           <<"/"<< dstLinSeqVect[j][k].seqIndex.tensorSeqIndex <<
           ", .factorList.size() = "<< dstLinSeqVect[j][k].factorList.size();
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
         msg.str("");  // clear
         for (unsigned kk=0; kk<dstLinSeqVect[j][k].factorList.size(); kk++){
           msg << "ASMM_STORE_LOG:" << __LINE__ << " \tfactorList["<< kk <<"]";
-          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           msg.str("");  // clear
           msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.partnerSeqIndex ="
             << dstLinSeqVect[j][k].factorList[kk].partnerSeqIndex.decompSeqIndex
             <<"/"
             << dstLinSeqVect[j][k].factorList[kk].partnerSeqIndex.tensorSeqIndex;
-          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           msg.str("");  // clear
           msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.partnerDe =";
           for (unsigned jj=0;
             jj<dstLinSeqVect[j][k].factorList[kk].partnerDe.size(); jj++)
             msg << dstLinSeqVect[j][k].factorList[kk].partnerDe[jj] <<", ";
-          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           msg.str("");  // clear
           switch (typekindFactors){
           case ESMC_TYPEKIND_R4:
@@ -1387,7 +1387,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
           default:
             break;
           }
-          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           msg.str("");  // clear
         }
       }

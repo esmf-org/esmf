@@ -841,7 +841,7 @@ void FTN_X(c_esmc_ftablecallentrypointvm)(
       <<  recursionCount << " *recursionCount="
       << (recursionCount ? *recursionCount : -1)
       << " vm_cargo=" << vm_cargo << " newCargoFlag=" << newCargoFlag;
-    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
 

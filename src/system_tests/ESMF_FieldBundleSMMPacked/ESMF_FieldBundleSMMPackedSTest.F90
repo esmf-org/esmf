@@ -10,25 +10,25 @@
 ! System test FieldBundleSMMPacked.
 !    Two gridded components and one coupler component, one-way coupling.
 !
-!    First gridded component runs on 4 PETs and defines a 2D source FieldBundle
-!    100x150. Second gridded component defines a destination FieldBundle also
+!    First gridded component runs on 4 PETs and defines a 2D source packed FieldBundle
+!    100x150. Second gridded component defines a destination packed FieldBundle also
 !    100x150 but runs on only 2 PETs. Both gridded components use DELayouts
-!    with 1 DE per PET. The decomposition of the source FieldBundle is defined as
-!    (petCount x 1) = (4 x 1) while the destination FieldBundle is decomposed as
+!    with 1 DE per PET. The decomposition of the source packed FieldBundle is defined as
+!    (petCount x 1) = (4 x 1) while the destination packed FieldBundle is decomposed as
 !    (1 x petCount) = (1 x 2).
 !
-!    The first component initializes the source FieldBundle to a geometric function:
+!    The first component initializes the source packed FieldBundle to a geometric function:
 !
-!       10.0 + 5.0*sin((I/Imax)*pi) + 2.0*sin((J/Jmax)*pi)
+!       K*10.0 + 5.0*sin((I/Imax)*pi) + 2.0*sin((J/Jmax)*pi)
 !
 !    The coupler component runs on all 6 PETs and reconciles import and export
-!    States which contain source and destination FieldBundle, respectively. The
+!    States which contain source and destination packed FieldBundle, respectively. The
 !    coupler component then calls FieldBundleSMM() using the identity matrix.
-!    This amounts to a redistribution of the source FieldBundle data onto the
-!    destination FieldBundle.
+!    This amounts to a redistribution of the source packed FieldBundle data onto the
+!    destination packed FieldBundle.
 !
 !    Finally the second gridded component compares the data stored in the
-!    destination FieldBundle to the exact solution of the above function as a measure
+!    destination packed FieldBundle to the exact solution of the above function as a measure
 !    of the accuracy of the FieldBundleSMM() method.
 !
 !-------------------------------------------------------------------------

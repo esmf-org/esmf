@@ -75,8 +75,8 @@ extern "C" {
   // nested States.
   size_t slc = cname.find_first_of ("/");
   if (slc != string::npos) {
-    ESMC_LogDefault.Write(cname+" must not have a slash (/) in its name", ESMC_LOGMSG_INFO,
-      ESMC_CONTEXT);
+    ESMC_LogDefault.Write(cname+" must not have a slash (/) in its name",
+      ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
     if (rc) *rc = ESMF_RC_ARG_VALUE;
     return;
   }
@@ -171,7 +171,7 @@ extern "C" {
 
   if (!base) {
     //printf("uninitialized Base object\n");
-    ESMC_LogDefault.Write("Base object uninitialized", ESMC_LOGMSG_INFO,
+    ESMC_LogDefault.Write("Base object uninitialized", ESMC_LOGMSG_WARN,
       ESMC_CONTEXT);
     if (rc) *rc = ESMF_SUCCESS;
     return;
@@ -231,7 +231,7 @@ extern "C" {
 
   if (!base) {
     //printf("uninitialized Base object\n");
-    ESMC_LogDefault.Write("Base object uninitialized", ESMC_LOGMSG_INFO,
+    ESMC_LogDefault.Write("Base object uninitialized", ESMC_LOGMSG_WARN,
       ESMC_CONTEXT);
     if (rc) *rc = ESMF_SUCCESS;
     return;
@@ -283,7 +283,7 @@ extern "C" {
   *base = new ESMC_Base(-1);
   if (!base) {
     //printf("uninitialized Base object\n");
-    ESMC_LogDefault.Write("Base object error", ESMC_LOGMSG_INFO, ESMC_CONTEXT);
+    ESMC_LogDefault.Write("Base object error", ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
     if (rc) *rc = ESMF_FAILURE;
     return;
   }
@@ -368,7 +368,7 @@ extern "C" {
 
   if (!base) {
     //printf("uninitialized Base object\n");
-    ESMC_LogDefault.Write("Base object uninitialized", ESMC_LOGMSG_INFO,
+    ESMC_LogDefault.Write("Base object uninitialized", ESMC_LOGMSG_ERROR,
       ESMC_CONTEXT);
     if (rc) *rc = ESMF_FAILURE;
     return;
@@ -500,8 +500,8 @@ extern "C" {
   // nested States.
   size_t slc = oname.find_first_of ("/");
   if (slc != string::npos) {
-    ESMC_LogDefault.Write(oname+" must not have a slash (/) in its name", ESMC_LOGMSG_INFO,
-      ESMC_CONTEXT);
+    ESMC_LogDefault.Write(oname+" must not have a slash (/) in its name",
+      ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
     if (rc) *rc = ESMF_RC_ARG_VALUE;
     return;
   }

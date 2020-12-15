@@ -685,8 +685,6 @@ TraceEventRegionEnter("Clock::advance(): traverse alarm list", &rc);
 
 TraceEventRegionExit("Clock::advance(): traverse alarm list", &rc);
 
-    if (userChangedDirection) userChangedDirection = false;
-
     return(rc);
 
  } // end Clock::advance
@@ -2072,8 +2070,6 @@ TraceEventRegionExit("Clock::advance(): traverse alarm list", &rc);
 
     // check new alarm to see if it's time to ring
     alarm->Alarm::checkRingTime(&rc);
-
-    if (userChangedDirection) userChangedDirection = false;
 
     return(rc);
 

@@ -31,6 +31,7 @@
 #include "Mesh/include/ESMCI_MathUtil.h"
 
 #include "Mesh/include/ESMCI_MBMesh.h"
+#include "Mesh/include/ESMCI_MBMesh_GToM_Glue.h"
 #include "Mesh/include/ESMCI_GToM_Util.h"
 
 #include <limits>
@@ -60,9 +61,11 @@ namespace ESMCI {
   // DEBUG
   //bool mbmmesh_gqcn_debug=false;
 
-  static void _get_quad_corner_nodes_from_tile(MBMesh *mesh, std::map<int,EntityHandle> *gid_to_node_map, DistGrid *cnrDistgrid, int tile, int index[2], 
-                                               int cnr_offset[NUM_QUAD_CORNERS][2], int *local_node_index, 
-                                               EntityHandle *cnr_nodes, bool *_all_nodes_ok) {
+  static void _get_quad_corner_nodes_from_tile(MBMesh *mesh, 
+              std::map<int,EntityHandle> *gid_to_node_map, 
+              DistGrid *cnrDistgrid, int tile, int index[2], 
+              int cnr_offset[NUM_QUAD_CORNERS][2], int *local_node_index, 
+              EntityHandle *cnr_nodes, bool *_all_nodes_ok) {
   // Init output
   *_all_nodes_ok=true;
 
@@ -132,9 +135,11 @@ namespace ESMCI {
   }
 }
 
-  static void _get_quad_corner_nodes_from_localDE(MBMesh *mesh, std::map<int,EntityHandle> *gid_to_node_map, DistGrid *cnrDistgrid, int localDE, int de_index[2], 
-                                               int cnr_offset[NUM_QUAD_CORNERS][2], int *local_node_index, 
-                                               EntityHandle *cnr_nodes, bool *_all_nodes_ok) {
+  static void _get_quad_corner_nodes_from_localDE(MBMesh *mesh, 
+              std::map<int,EntityHandle> *gid_to_node_map, DistGrid *cnrDistgrid, 
+              int localDE, int de_index[2], 
+              int cnr_offset[NUM_QUAD_CORNERS][2], int *local_node_index, 
+              EntityHandle *cnr_nodes, bool *_all_nodes_ok) {
 
     //// Translate localDE info into tile info ////
     int tile;
@@ -519,7 +524,7 @@ namespace ESMCI {
 
 
 void MBMesh_GridToMeshCell(const Grid &grid_,
-                           void **out_meshpp, 
+                           MBMesh **out_meshpp, 
                            int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_GridToMeshCell()"
@@ -574,7 +579,7 @@ void MBMesh_GridToMeshCell(const Grid &grid_,
  MBMesh *mesh = new MBMesh(dimCount, dimCount, grid->getCoordSys());
 
  // Set output mesh
- *out_meshpp=(void *)mesh;
+ *out_meshpp = mesh;
 
  // Get distgrid for the center staggerloc
  DistGrid *centerDistgrid;
@@ -841,9 +846,9 @@ void MBMesh_GridToMeshCell(const Grid &grid_,
 // Do halo communication on all appropriate node tags
  mesh->halo_comm_nodes_all_tags(true);
 
- // setup verts array
- // TODO: Deprecated so get rid of this soon!!
- mesh->setup_verts_array();
+ // Finalize nodes and elems
+ mesh->finalize_nodes();
+ mesh->finalize_elems();
 
 
  // Debug output

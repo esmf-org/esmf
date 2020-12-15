@@ -97,9 +97,6 @@ using namespace std;
 // Note that SIGUSR2 interferes with LAM!
 #endif
 #endif
-// Pthread stack sizes
-#define VM_PTHREAD_STACKSIZE_SERVICE  (4194304) //  4MiB for service threads
-#define VM_PTHREAD_STACKSIZE_USER    (20971520) // 20MiB for user threads
 
 #if defined (ESMF_OS_MinGW)
 // Windows equivalent to POSIX getpid(2)
@@ -122,6 +119,7 @@ namespace ESMCI {
 MPI_Comm VMK::default_mpi_c;
 int VMK::mpi_thread_level;
 int VMK::mpi_init_outside_esmf;
+int VMK::pre_mpi_init = 0;
 int VMK::nssiid;
 int VMK::ncores;
 int *VMK::cpuid;
@@ -157,7 +155,7 @@ typedef struct{
 }vmkt_t;
 
 int vmkt_create(vmkt_t *vmkt, void *(*vmkt_spawn)(void *), void *arg,
-  bool service){
+  bool service, size_t minStackSize){
   vmkt->flag = 0;     // initialize
   vmkt->released = 0; // initialize
 #ifndef ESMF_NO_PTHREADS
@@ -186,9 +184,8 @@ int vmkt_create(vmkt_t *vmkt, void *(*vmkt_spawn)(void *), void *arg,
       // setting stack size for a user thread
       size_t default_stack_size;
       pthread_attr_getstacksize(&pthreadAttrs, &default_stack_size);
-      if (default_stack_size < (size_t)VM_PTHREAD_STACKSIZE_USER){
-        pthread_attr_setstacksize(&pthreadAttrs,
-          (size_t)VM_PTHREAD_STACKSIZE_USER);
+      if (default_stack_size < minStackSize){
+        pthread_attr_setstacksize(&pthreadAttrs, minStackSize);
       }
     }
 #if (VERBOSITY > 0)
@@ -334,10 +331,9 @@ bool VMK::isSsiSharedMemoryEnabled(){
 }
 
     
-void VMK::init(MPI_Comm mpiCommunicator){
-  // initialize the physical machine and a default (all MPI) virtual machine
-  // initialize signal handling -> this MUST happen before MPI_Init is called!!
+void VMK::InitPreMPI(){
 #if !defined (ESMF_NO_SIGNALS)
+  // initialize signal handling -> this MUST happen before MPI_Init is called!!
   struct sigaction action;
   action.sa_handler = SIG_DFL;
   action.sa_flags   = 0;
@@ -348,6 +344,12 @@ void VMK::init(MPI_Comm mpiCommunicator){
   sigaddset(&sigs_to_block, VM_SIG1);
   sigprocmask(SIG_BLOCK, &sigs_to_block, NULL); // block VM_SIG1
 #endif
+  pre_mpi_init = 1; // set flag
+}
+
+
+void VMK::init(MPI_Comm mpiCommunicator){
+  // initialize the physical machine and a default (all MPI) virtual machine
   // obtain command line arguments and store in the VM class
   argc = 0; // reset
   for (int k=0; k<100; k++)
@@ -363,6 +365,7 @@ void VMK::init(MPI_Comm mpiCommunicator){
   MPI_Initialized(&mpi_init_outside_esmf);
 #ifndef ESMF_MPIUNI
   if (!mpi_init_outside_esmf){
+    InitPreMPI(); // must call before MPI is initialized
 #ifdef ESMF_MPICH
     // MPICH1.2 is not standard compliant and needs valid args
     // make copy of argc and argv for MPICH because it modifies them and
@@ -551,7 +554,7 @@ void VMK::init(MPI_Comm mpiCommunicator){
   std::stringstream msg;
   msg << "VMK::init: " << __LINE__
     << " ssiLocalPetCount=" << ssiLocalPetCount;
-  ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 }
 #endif
   delete [] temp_ssiPetCount;
@@ -772,7 +775,7 @@ void VMK::construct(void *ssarg){
   std::stringstream msg;
   msg << "VMK::init: " << __LINE__
     << " ssiLocalPetCount=" << ssiLocalPetCount;
-  ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 }
 #endif
   delete [] temp_ssiPetCount;
@@ -1166,11 +1169,11 @@ static void *vmk_sigcatcher(void *arg){
   vmkt->arg = (void *)&pid;
   // more preparation
   VMK vm;  // need a handle to a VM object to access the static members
-  if (vm.mpi_init_outside_esmf){
+  if (!vm.pre_mpi_init){
     int localrc;
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "Cannot safely use signals inside VMKernel when MPI was initialized "
-      "outside of ESMF.", ESMC_CONTEXT, &localrc);
+      "Cannot safely use signals inside VMKernel because signal handling was "
+      "not installed before MPI was initialized.", ESMC_CONTEXT, &localrc);
     throw localrc;  // bail out with exception
   }
 #ifdef ESMF_NO_SIGNALS
@@ -1494,11 +1497,11 @@ void *VMK::startup(class VMKPlan *vmp,
               // mypet (k) contributes to this pet (i)
               // mypet does not spawn but contributes -> spawn blocker thread
               *rc = vmkt_create(&(sarg[0].vmkt), vmk_block, (void *)&sarg[0],
-                true);  // service thread
+                true, vmp->minStackSize);  // service thread
               if (*rc) return NULL;  // could not create pthread -> bail out
               // also spawn sigcatcher thread
               *rc = vmkt_create(&(sarg[0].vmkt_extra), vmk_sigcatcher,
-                (void *)&sarg[0], true);  // service thread
+                (void *)&sarg[0], true, vmp->minStackSize);  // service thread
 #if (VERBOSITY > 5)
               fprintf(stderr, "parent thread is back from vmkt_create()s "
                 "for vmk_block and vmk_sigcatcher\n");
@@ -1969,7 +1972,7 @@ void *VMK::startup(class VMKPlan *vmp,
       // in the thread-based case the VM cannot be constructured until the
       // pthreadID is known!
       *rc = vmkt_create(&(sarg[i].vmkt), vmk_spawn, (void *)&sarg[i],
-        false); // not a service thread
+        false, vmp->minStackSize); // not a service thread
       if (*rc) return NULL;  // could not create pthread -> bail out
     }
   }
@@ -2336,6 +2339,8 @@ VMKPlan::VMKPlan(){
   cspawnid = NULL;
   // invalidate the VMK pointer array
   myvms = NULL;
+  // set the default pthread specification
+  minStackSize = VM_PTHREAD_STACKSIZE_USER;
   // set the default communication preferences
   pref_intra_process = PREF_INTRA_PROCESS_SHMHACK;
   pref_intra_ssi = PREF_INTRA_SSI_MPI1;
@@ -3090,7 +3095,7 @@ int VMK::commwait(commhandle **ch, status *status, int nanopause){
               << " src=" << mpis.MPI_SOURCE
               << " tag=" << mpis.MPI_TAG
               << " cnt=" << cnt;
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #else
           localrc = MPI_Wait(&((*ch)->mpireq[i]), mpi_s);
@@ -3226,7 +3231,7 @@ void VMK::epochFinal(){
     msg << "epochBuffer:" << __LINE__ << " ready to clear outstanding comm:"
     << " dst=" << getVas(lpid[its->first]) << " size=" << size
     << " buffer=" << buffer;
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
     sm->clear();
   }
@@ -3250,7 +3255,7 @@ void VMK::epochExit(bool keepAlloc){
         msg << "epochBuffer:" << __LINE__ << " ready to post non-blocking send:"
           << " dst=" << getVas(lpid[its->first]) << " size=" << size
           << " buffer=" << buffer;
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
         MPI_Isend(buffer, size, MPI_BYTE, lpid[its->first], tag, mpi_c,
           &sm->mpireq);
@@ -3266,7 +3271,7 @@ void VMK::epochExit(bool keepAlloc){
         << " dst=" << getVas(lpid[its->first]) 
         << " size=" << sm->streamBuffer.size()
         << " buffer=" << (void *)sm->streamBuffer.data();
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
         MPI_Isend((void *)sm->streamBuffer.data(), sm->streamBuffer.size(),
           MPI_BYTE, lpid[its->first], tag, mpi_c, &sm->mpireq);
@@ -3298,13 +3303,13 @@ void VMK::sendBuffer::clear(){
 #ifdef VM_EPOCHLOG_on
   std::stringstream msg;
   msg << "epochBuffer:" << __LINE__ << " ready to clear outstanding comm";
-  ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
   if (mpireq != MPI_REQUEST_NULL){
 #ifdef VM_EPOCHLOG_on
     std::stringstream msg;
     msg << "epochBuffer:" << __LINE__ << " actually posting MPI_Wait()";
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
     MPI_Wait(&mpireq, MPI_STATUS_IGNORE);
   }
@@ -3513,7 +3518,7 @@ int VMK::send(const void *message, int size, int dest, commhandle **ch,
       msg << "epochBuffer:" << __LINE__ << " non-blocking send" << 
       " firstFlag=" << sm->firstFlag <<
       " msg size=" << size;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
       if (sm->firstFlag){
         // deal with the first actions here
@@ -3840,7 +3845,7 @@ int VMK::recv(void *message, int size, int source, commhandle **ch, int tag){
       msg << "epochBuffer:" << __LINE__ << " non-blocking recv" << 
       " firstFlag=" << rm->firstFlag <<
       " size=" << size;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
       if (rm->firstFlag){
         // deal with the first actions here
@@ -3850,7 +3855,7 @@ int VMK::recv(void *message, int size, int source, commhandle **ch, int tag){
         std::stringstream msg;
         msg << "epochBuffer:" << __LINE__ << " ready to probe:"
         << " src=" << getVas(lpid[source]);
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
         int defaultTag = getDefaultTag(source,mypet);
         MPI_Status mpistat;
@@ -3869,7 +3874,7 @@ int VMK::recv(void *message, int size, int source, commhandle **ch, int tag){
         << " src=" << getVas(lpid[source])
         << " size=" << rm->streamBuffer.size()
         << " streamBuffer=" << (void *)rm->streamBuffer.data();
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
         MPI_Recv(rm->buffer, bytecount, MPI_BYTE,
           lpid[source], defaultTag, mpi_c, MPI_STATUS_IGNORE);
@@ -3885,7 +3890,7 @@ int VMK::recv(void *message, int size, int source, commhandle **ch, int tag){
       msg << "epochBuffer:" << __LINE__ << " processing recv chunk:"
       << " buffer=" << rm->buffer
       << " chunkSize=" << chunkSize << " chunkTag=" << chunkTag;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif      
       if (chunkSize!=size){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -6124,7 +6129,7 @@ namespace ESMCI{
             msg << "ComPat#" << __LINE__
               << " posting receive from i=" << i << " size=" << size
               << " recvBuffer=" << (void *)recvBuffer[i];
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
         }
@@ -6150,7 +6155,7 @@ namespace ESMCI{
             msg << "ComPat#" << __LINE__
               << " posting send to i=" << i << " size=" << size
               << " sendBuffer=" << (void *)sendBuffer[i];
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
         }
@@ -6162,7 +6167,7 @@ namespace ESMCI{
           std::stringstream msg;
           msg << "ComPat#" << __LINE__
             << " doing localPrepareAndProcess for PET=" << localPet;
-          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
         }
 #endif
         localPrepareAndProcess(localPet);
@@ -6181,7 +6186,7 @@ namespace ESMCI{
             msg << "ComPat#" << __LINE__
               << " finished receive from i=" << i << " size=" << size
               << " recvBuffer=" << (void *)recvBuffer[i];
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
           messageProcess(i, localPet, recvBuffer[i]);
@@ -6204,7 +6209,7 @@ namespace ESMCI{
             msg << "ComPat#" << __LINE__
               << " finished send to i=" << i << " size=" << size
               << " sendBuffer=" << (void *)sendBuffer[i];
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
           delete [] sendBuffer[i];              // garbage collection
@@ -6250,7 +6255,7 @@ namespace ESMCI{
         msg << "ComPat2#" << __LINE__
           << " requestPet=" << requestPet 
           << " responsePet=" << responsePet;
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       }
 #endif
       if (i==0){
@@ -6280,7 +6285,7 @@ namespace ESMCI{
           msg << "ComPat2#" << __LINE__
             << " recvRequestSize=" << recvRequestSize
             << " sendRequestSize=" << sendRequestSize;
-          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
         }
 #endif
         if (recvRequestSize>0){
@@ -6292,7 +6297,7 @@ namespace ESMCI{
             msg << "ComPat2#" << __LINE__
               << " receiving request from requestPet=" << requestPet
               << " in recvBuffer1=" << (void*)recvBuffer1;
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
         }
@@ -6310,7 +6315,7 @@ namespace ESMCI{
             msg << "ComPat2#" << __LINE__
               << " sending request to responsePet=" << responsePet
               << " in sendRequestBuffer=" << (void*)sendRequestBuffer;
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
           vmk->recv(&recvResponseSize, sizeof(int), responsePet, &recvCommh2);
@@ -6324,7 +6329,7 @@ namespace ESMCI{
             msg << "ComPat2#" << __LINE__
               << " finished receiving request from requestPet=" << requestPet
               << " in recvBuffer1=" << (void*)recvBuffer1;
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
           sendResponseBuffer = NULL; // detectable reset
@@ -6349,7 +6354,7 @@ namespace ESMCI{
           msg << "ComPat2#" << __LINE__
             << " sendResponseSize=" << sendResponseSize
             << " recvResponseSize=" << recvResponseSize;
-          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
         }
 #endif
         recvBuffer2 = NULL; // detectable reset
@@ -6362,7 +6367,7 @@ namespace ESMCI{
             msg << "ComPat2#" << __LINE__
               << " receiving response from responsePet=" << responsePet
               << " in recvBuffer2=" << (void*)recvBuffer2;
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
         }
@@ -6380,7 +6385,7 @@ namespace ESMCI{
             msg << "ComPat2#" << __LINE__
               << " sending response to requestPet=" << requestPet
               << " in sendResponseBuffer=" << (void*)sendResponseBuffer;
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
         }
@@ -6393,7 +6398,7 @@ namespace ESMCI{
             msg << "ComPat2#" << __LINE__
               << " finished receiving response from responsePet=" << responsePet
               << " in recvBuffer2=" << (void*)recvBuffer2;
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
           handleResponse(responsePet, recvBuffer2, recvResponseSize);
@@ -6450,7 +6455,7 @@ namespace ESMCI{
         msg << "ComPat2#" << __LINE__
           << " requestPet=" << requestPet 
           << " responsePet=" << responsePet;
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       }
 #endif
       if (i==0){
@@ -6483,7 +6488,7 @@ namespace ESMCI{
             msg << "ComPat2#" << __LINE__
               << " recvRequestSize=" << recvRequestSize
               << " sendRequestSize=" << sendRequestSize;
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
         if (recvRequestSize>0){
@@ -6495,7 +6500,7 @@ namespace ESMCI{
             msg << "ComPat2#" << __LINE__
               << " receiving request from requestPet=" << requestPet
               << " in recvBuffer1=" << (void*)recvBuffer1;
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
         }
@@ -6509,7 +6514,7 @@ namespace ESMCI{
             msg << "ComPat2#" << __LINE__
               << " sending request to responsePet=" << responsePet
               << " in sendRequestBuffer=" << (void*)sendRequestBuffer;
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
           vmk->recv(&recvResponseSize, sizeof(int), responsePet, &recvCommh2);
@@ -6523,7 +6528,7 @@ namespace ESMCI{
             msg << "ComPat2#" << __LINE__
               << " finished receiving request from requestPet=" << requestPet
               << " in recvBuffer1=" << (void*)recvBuffer1;
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
           sendResponseBuffer = NULL; // detectable reset
@@ -6542,7 +6547,7 @@ namespace ESMCI{
           msg << "ComPat2#" << __LINE__
             << " sendResponseSize=" << sendResponseSize
             << " recvResponseSize=" << recvResponseSize;
-          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
         }
 #endif
         recvBuffer2 = NULL; // detectable reset
@@ -6555,7 +6560,7 @@ namespace ESMCI{
             msg << "ComPat2#" << __LINE__
               << " receiving response from responsePet=" << responsePet
               << " in recvBuffer2=" << (void*)recvBuffer2;
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
         }
@@ -6569,7 +6574,7 @@ namespace ESMCI{
             msg << "ComPat2#" << __LINE__
               << " sending response to requestPet=" << requestPet
               << " in sendResponseBuffer=" << (void*)sendResponseBuffer;
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
         }
@@ -6582,7 +6587,7 @@ namespace ESMCI{
             msg << "ComPat2#" << __LINE__
               << " finished receiving response from responsePet=" << responsePet
               << " in recvBuffer2=" << (void*)recvBuffer2;
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
           handleResponse(responsePet, recvBuffer2, recvResponseSize);

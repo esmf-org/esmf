@@ -3001,7 +3001,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   subroutine ESMF_GridCompSetVMMaxPEs(gridcomp, keywordEnforcer, &
-    maxPeCountPerPet, prefIntraProcess, prefIntraSsi, prefInterSsi, rc)
+    maxPeCountPerPet, prefIntraProcess, prefIntraSsi, prefInterSsi, &
+    minStackSize, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp), intent(inout)         :: gridcomp
@@ -3010,6 +3011,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(in),  optional :: prefIntraProcess
     integer,             intent(in),  optional :: prefIntraSsi
     integer,             intent(in),  optional :: prefInterSsi
+    integer,             intent(in),  optional :: minStackSize
     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -3043,6 +3045,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[prefInterSsi]}]
 !   Communication preference between different single system images (SSIs).
 !   {\em Currently options not documented. Use default.}
+! \item[{[minStackSize]}]
+!   Minimum stack size in byte of any Pthread that is created in the VM with the
+!   intention of executing user code. In case where OpenMP threads are used
+!   under the user code, the combined stacks of all OpenMP threads must fit
+!   inside each of the created Pthread stacks.
+!   The default is to use the system default {\em stacksize} set by the
+!   {\tt limit} or {\tt ulimit} command. However notice that a setting of
+!   {\em unlimited} would result in usage of a very small system dependent
+!   stack size (e.g. 2MiB on x86\_64 Linux). ESMF therefore implements an
+!   absolute minimum of 20MiB.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -3059,7 +3071,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! call Comp method
     call ESMF_CompSetVMMaxPEs(gridcomp%compp, maxPeCountPerPet, &
-      prefIntraProcess, prefIntraSsi, prefInterSsi, rc=localrc)
+      prefIntraProcess, prefIntraSsi, prefInterSsi, minStackSize, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -3078,7 +3090,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   subroutine ESMF_GridCompSetVMMaxThreads(gridcomp, keywordEnforcer, &
-    maxPetCountPerVas, prefIntraProcess, prefIntraSsi, prefInterSsi, rc)
+    maxPetCountPerVas, prefIntraProcess, prefIntraSsi, prefInterSsi, &
+    minStackSize, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp), intent(inout)         :: gridcomp
@@ -3087,6 +3100,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(in),  optional :: prefIntraProcess
     integer,             intent(in),  optional :: prefIntraSsi
     integer,             intent(in),  optional :: prefInterSsi
+    integer,             intent(in),  optional :: minStackSize
     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -3122,6 +3136,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[prefInterSsi]}]
 !   Communication preference between different single system images (SSIs).
 !   {\em Currently options not documented. Use default.}
+! \item[{[minStackSize]}]
+!   Minimum stack size in byte of any Pthread that is created in the VM with the
+!   intention of executing user code. In case where OpenMP threads are used
+!   under the user code, the combined stacks of all OpenMP threads must fit
+!   inside each of the created Pthread stacks.
+!   The default is to use the system default {\em stacksize} set by the
+!   {\tt limit} or {\tt ulimit} command. However notice that a setting of
+!   {\em unlimited} would result in usage of a very small system dependent
+!   stack size (e.g. 2MiB on x86\_64 Linux). ESMF therefore implements an
+!   absolute minimum of 20MiB.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -3138,7 +3162,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! call Comp method
     call ESMF_CompSetVMMaxThreads(gridcomp%compp, maxPetCountPerVas, &
-      prefIntraProcess, prefIntraSsi, prefInterSsi, rc=localrc)
+      prefIntraProcess, prefIntraSsi, prefInterSsi, minStackSize, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -3157,7 +3181,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   subroutine ESMF_GridCompSetVMMinThreads(gridcomp, keywordEnforcer, &
-    maxPeCountPerPet, prefIntraProcess, prefIntraSsi, prefInterSsi, rc)
+    maxPeCountPerPet, prefIntraProcess, prefIntraSsi, prefInterSsi, &
+    minStackSize, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp), intent(inout)         :: gridcomp
@@ -3166,6 +3191,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(in),  optional :: prefIntraProcess
     integer,             intent(in),  optional :: prefIntraSsi
     integer,             intent(in),  optional :: prefInterSsi
+    integer,             intent(in),  optional :: minStackSize
     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -3198,6 +3224,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[prefInterSsi]}]
 !   Communication preference between different single system images (SSIs).
 !   {\em Currently options not documented. Use default.}
+! \item[{[minStackSize]}]
+!   Minimum stack size in byte of any Pthread that is created in the VM with the
+!   intention of executing user code. In case where OpenMP threads are used
+!   under the user code, the combined stacks of all OpenMP threads must fit
+!   inside each of the created Pthread stacks.
+!   The default is to use the system default {\em stacksize} set by the
+!   {\tt limit} or {\tt ulimit} command. However notice that a setting of
+!   {\em unlimited} would result in usage of a very small system dependent
+!   stack size (e.g. 2MiB on x86\_64 Linux). ESMF therefore implements an
+!   absolute minimum of 20MiB.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -3214,7 +3250,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! call Comp method
     call ESMF_CompSetVMMinThreads(gridcomp%compp, maxPeCountPerPet, &
-      prefIntraProcess, prefIntraSsi, prefInterSsi, rc=localrc)
+      prefIntraProcess, prefIntraSsi, prefInterSsi, minStackSize, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

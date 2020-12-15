@@ -1116,6 +1116,17 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
+  void FTN_X(c_esmc_vminitializeprempi)(int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vminitializeprempi()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    ESMCI::VMK::InitPreMPI();
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
   void FTN_X(c_esmc_vminitialize)(ESMCI::VM **vm, int *mpiCommunicator, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vminitialize()"
@@ -1271,6 +1282,26 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
+  void FTN_X(c_esmc_vmplansetminstacksize)(ESMCI::VMPlan **ptr,
+    int *minStackSize, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmplansetminstacksize()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
+    // Sort out the non-present F90 optional arguments. 
+    minStackSize = ESMC_NOT_PRESENT_FILTER(minStackSize);
+    int loc_minStackSize = VM_PTHREAD_STACKSIZE_USER; 
+    if ((void*)minStackSize != ESMC_NULL_POINTER)
+      loc_minStackSize = *minStackSize;
+    // set the minStackSize
+    (*ptr)->minStackSize = (size_t)loc_minStackSize;
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+   
   void FTN_X(c_esmc_vmplanmaxpes)(ESMCI::VMPlan **ptr, ESMCI::VM **vm,
     int *max, int *pref_intra_process, int *pref_intra_ssi, int *pref_inter_ssi,
     int *npetlist, int *petlist, int *rc){
@@ -1551,8 +1582,8 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS; // TODO: finish error handling
   }
 
-  void FTN_X(c_esmc_vmidlog)(ESMCI::VMId **vmid, char *prefix, int *rc,
-    ESMCI_FortranStrLenArg prefix_l){
+  void FTN_X(c_esmc_vmidlog)(ESMCI::VMId **vmid, char *prefix, 
+    ESMC_LogMsgType_Flag *logMsgFlag, int *rc, ESMCI_FortranStrLenArg prefix_l){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmidlog()"
     // Initialize return code; assume routine not implemented
@@ -1562,7 +1593,7 @@ extern "C" {
     ESMCI_NULL_CHECK_PRC(*vmid, rc)
     try{
       std::string prefixStr(prefix, prefix_l);
-      (*vmid)->log(prefixStr);
+      (*vmid)->log(prefixStr, *logMsgFlag);
     }catch(int localrc){
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc))
@@ -1748,16 +1779,26 @@ extern "C" {
   }
   
   void FTN_X(c_esmc_vmlogpointer)(void *ptr, char *prefix,
-    ESMCI_FortranStrLenArg prefix_l ){
+    ESMC_LogMsgType_Flag *logMsgFlag, ESMCI_FortranStrLenArg prefix_l){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmlogpointer()"
     std::string prefixStr(prefix, prefix_l);
     std::stringstream msg;
     msg << prefixStr << ptr;
     if (ptr) msg << " => " << *(void **)ptr;
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), *logMsgFlag);
   }
   
+  void FTN_X(c_pointerlog)(void **ptr, char *prefix, 
+    ESMC_LogMsgType_Flag *logMsgFlag, ESMCI_FortranStrLenArg prefix_l){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_pointerlog()"
+    std::string prefixStr(prefix, prefix_l);
+    std::stringstream msg;
+    msg << prefixStr << *ptr;
+    ESMC_LogDefault.Write(msg.str(), *logMsgFlag);
+  }
+
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   // Fortran entry point to automatic garbage collection on Component scope
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1825,14 +1866,14 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_vmlogcurrentgarbageinfo)(char *prefix, int *rc,
-    ESMCI_FortranStrLenArg prefix_l){
+  void FTN_X(c_esmc_vmlogcurrentgarbageinfo)(char *prefix,
+    ESMC_LogMsgType_Flag *logMsgFlag, int *rc, ESMCI_FortranStrLenArg prefix_l){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmlogcurrentgarbageinfo()"
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     try{
       std::string prefixStr(prefix, prefix_l);
-      ESMCI::VM::logGarbageInfo(prefixStr, true);
+      ESMCI::VM::logGarbageInfo(prefixStr, true, *logMsgFlag);
     }catch(int localrc){
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc))
@@ -1850,14 +1891,14 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_vmloggarbageinfo)(char *prefix, int *rc,
-    ESMCI_FortranStrLenArg prefix_l){
+  void FTN_X(c_esmc_vmloggarbageinfo)(char *prefix,
+    ESMC_LogMsgType_Flag *logMsgFlag, int *rc, ESMCI_FortranStrLenArg prefix_l){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmloggarbageinfo()"
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     try{
       std::string prefixStr(prefix, prefix_l);
-      ESMCI::VM::logGarbageInfo(prefixStr);
+      ESMCI::VM::logGarbageInfo(prefixStr, *logMsgFlag);
     }catch(int localrc){
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc))
@@ -1879,14 +1920,14 @@ extern "C" {
   // Fortran entry point to backtrace
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  void FTN_X(c_esmc_vmlogbacktrace)(char *prefix, int *rc,
-    ESMCI_FortranStrLenArg prefix_l){
+  void FTN_X(c_esmc_vmlogbacktrace)(char *prefix,
+    ESMC_LogMsgType_Flag *logMsgFlag, int *rc, ESMCI_FortranStrLenArg prefix_l){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmlogbacktrace()"
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     try{
       std::string prefixStr(prefix, prefix_l);
-      ESMCI::VM::logBacktrace(prefixStr);
+      ESMCI::VM::logBacktrace(prefixStr, *logMsgFlag);
     }catch(int localrc){
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc))
@@ -1936,7 +1977,7 @@ extern "C" {
   void FTN_X(c_esmc_vmlogsystem)(char *prefix,
     ESMC_LogMsgType_Flag *logMsgFlag, int *rc, ESMCI_FortranStrLenArg prefix_l){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_vmlog()"
+#define ESMC_METHOD "c_esmc_vmlogsystem()"
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     try{
       std::string prefixStr(prefix, prefix_l);
@@ -1987,7 +2028,8 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
     
-  void FTN_X(c_esmc_vmlogmeminfo)(char *prefix, ESMCI::LogErr **log, int *rc,
+  void FTN_X(c_esmc_vmlogmeminfo)(char *prefix,
+    ESMC_LogMsgType_Flag *logMsgFlag, ESMCI::LogErr **log, int *rc,
     ESMCI_FortranStrLenArg prefix_l){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmlogmeminfo()"
@@ -1997,10 +2039,10 @@ extern "C" {
 #if 0
 // Currently the ESMCI side does not support custom Logs. Do not send this down!
       if (ESMC_NOT_PRESENT_FILTER(log) != ESMC_NULL_POINTER)
-        ESMCI::VM::logMemInfo(prefixStr, *log);
+        ESMCI::VM::logMemInfo(prefixStr, *logMsgFlag, *log);
       else
 #endif
-        ESMCI::VM::logMemInfo(prefixStr);
+        ESMCI::VM::logMemInfo(prefixStr, *logMsgFlag);
     }catch(int localrc){
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc))

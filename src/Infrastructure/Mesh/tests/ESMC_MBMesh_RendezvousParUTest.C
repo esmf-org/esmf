@@ -22,8 +22,8 @@
 #include "ESMC_Test.h"
 
 #if defined ESMF_MOAB
-#include "ESMC_MBMeshTestUtilMBMesh.C"
-#include "ESMC_MBMeshTestUtilPL.C"
+#include "ESMC_MBMeshTestGenMBMesh.C"
+#include "ESMC_MBMeshTestGenPL.C"
 
 // other headers
 #include "ESMCI_MBMesh.h"
