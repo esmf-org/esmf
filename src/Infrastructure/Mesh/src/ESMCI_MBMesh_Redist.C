@@ -216,92 +216,26 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
     int merr;
     
     // New Mesh    
-    MBMesh *out_mesh = new MBMesh();
-    
-    // Create MOAB Mesh
-    Interface *moab_mesh=new Core();
-    
-    // Set Moab Mesh
-    out_mesh->mesh=moab_mesh;
-    
-    // Set dimensions
-    out_mesh->pdim=src_mesh->pdim;
-    out_mesh->sdim=src_mesh->sdim;
-    out_mesh->orig_sdim=src_mesh->orig_sdim;
-    out_mesh->coordsys=src_mesh->coordsys;
-    
-    
-    // Add tags
-    // TODO: eventually do this in one func shared with other creates, so only
-      //       needs to be updated in one place
-    // Default value
-    int def_val = 0;
-    
-     // Setup global id tag
-    def_val=0;
-    merr=moab_mesh->tag_get_handle(GLOBAL_ID_TAG_NAME, 1, MB_TYPE_INTEGER, out_mesh->gid_tag, MB_TAG_DENSE, &def_val);
-    ESMC_CHECK_MOAB_THROW(merr);
-    
-    // Setup orig_pos tag
-    def_val=-1;
-    merr=moab_mesh->tag_get_handle("orig_pos", 1, MB_TYPE_INTEGER, out_mesh->orig_pos_tag, MB_TAG_EXCL|MB_TAG_DENSE, &def_val);
-    ESMC_CHECK_MOAB_THROW(merr);
-    
-    // Setup owner tag
-    def_val=-1;
-    merr=moab_mesh->tag_get_handle("owner", 1, MB_TYPE_INTEGER, out_mesh->owner_tag, MB_TAG_EXCL|MB_TAG_DENSE, &def_val);
-    ESMC_CHECK_MOAB_THROW(merr);
-
-    // Setup node_orig_coord tag
-    if (src_mesh->has_node_orig_coords) {
-      double dbl_def_val[3]={-1.0, -1.0, -1.0};
-      merr=moab_mesh->tag_get_handle("node_orig_coords", out_mesh->orig_sdim, MB_TYPE_DOUBLE, out_mesh->node_orig_coords_tag, MB_TAG_EXCL|MB_TAG_DENSE, dbl_def_val);
-      ESMC_CHECK_MOAB_THROW(merr);
-    }
-    out_mesh->has_node_orig_coords=src_mesh->has_node_orig_coords;
-
+    MBMesh *out_mesh = new MBMesh(src_mesh->pdim,
+                                  src_mesh->orig_sdim,
+                                  src_mesh->coordsys);
+        
+    // Copy which fields are set up
     if (src_mesh->has_node_mask) {
-      def_val=0;
-      merr=moab_mesh->tag_get_handle("node_mask", 1, MB_TYPE_INTEGER, out_mesh->node_mask_tag, MB_TAG_EXCL|MB_TAG_DENSE, &def_val);
-      ESMC_CHECK_MOAB_THROW(merr);
-
-      def_val=0;
-      merr=moab_mesh->tag_get_handle("node_mask_val", 1, MB_TYPE_INTEGER, out_mesh->node_mask_val_tag, MB_TAG_EXCL|MB_TAG_DENSE, &def_val);
-      ESMC_CHECK_MOAB_THROW(merr);
+      out_mesh->setup_node_mask();
     }
-    out_mesh->has_node_mask=src_mesh->has_node_mask;
 
     if (src_mesh->has_elem_coords) {
-      double  dbl_def_val[3]= {0.0, 0.0, 0.0};
-      merr=moab_mesh->tag_get_handle("elem_coords", out_mesh->sdim, MB_TYPE_DOUBLE, out_mesh->elem_coords_tag,   MB_TAG_EXCL|MB_TAG_DENSE, dbl_def_val);
-      ESMC_CHECK_MOAB_THROW(merr);
+      out_mesh->setup_elem_coords();
     }
-    out_mesh->has_elem_coords=src_mesh->has_elem_coords;
-
-    if (src_mesh->has_elem_orig_coords) {
-      double  dbl_def_val[3]= {0.0, 0.0, 0.0};
-      merr=moab_mesh->tag_get_handle("elem_orig_coords", out_mesh->orig_sdim, MB_TYPE_DOUBLE, out_mesh->elem_orig_coords_tag,   MB_TAG_EXCL|MB_TAG_DENSE, dbl_def_val);
-      ESMC_CHECK_MOAB_THROW(merr);
-    }
-    out_mesh->has_elem_orig_coords=src_mesh->has_elem_orig_coords;
 
     if (src_mesh->has_elem_mask) {
-      def_val=0;
-      merr=moab_mesh->tag_get_handle("elem_mask", 1, MB_TYPE_INTEGER, out_mesh->elem_mask_tag, MB_TAG_EXCL|MB_TAG_DENSE, &def_val);
-      ESMC_CHECK_MOAB_THROW(merr);
-
-      def_val=0;
-      merr=moab_mesh->tag_get_handle("elem_mask_val", 1, MB_TYPE_INTEGER, out_mesh->elem_mask_val_tag, MB_TAG_EXCL|MB_TAG_DENSE, &def_val);
-      ESMC_CHECK_MOAB_THROW(merr);
+      out_mesh->setup_elem_mask();
     }
-    out_mesh->has_elem_mask=src_mesh->has_elem_mask;
 
     if (src_mesh->has_elem_area) {
-      double dbl_def_val=0.0;
-      merr=moab_mesh->tag_get_handle("elem_area_tag", 1, MB_TYPE_DOUBLE, out_mesh->elem_area_tag, MB_TAG_EXCL|MB_TAG_DENSE, &dbl_def_val);
-      ESMC_CHECK_MOAB_THROW(merr);
+      out_mesh->setup_elem_area();
     }
-    out_mesh->has_elem_area=src_mesh->has_elem_area;
 
     // Do output
     *_out_mesh=out_mesh;

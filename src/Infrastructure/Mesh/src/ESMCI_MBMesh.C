@@ -80,13 +80,6 @@ using namespace std;
 #define ESMC_METHOD "MBMesh::func()"
 
 // Empty mesh
-// TODO: Get rid of this once the more complete creation interfaces are used everywhere??
-#if 0
-MBMesh::MBMesh(): sdim(0),pdim(0),mesh(NULL) {
-
-} 
-#endif
-
 MBMesh::MBMesh(): 
   pdim(0),
   sdim(0), 
