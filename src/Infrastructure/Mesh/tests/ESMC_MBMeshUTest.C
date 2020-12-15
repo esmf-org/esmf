@@ -89,16 +89,11 @@ int main(int argc, char *argv[]) {
     test_meshes.push_back("hex_3d_sph");
     test_meshes.push_back("mix_2d_cart");
     test_meshes.push_back("mix_2d_sph");
-    // cannot return the elemconncount from ngons, so verification of original mesh always fails
-    // address this when fix for elemcount from ngons (split elem orig_pos) is fixed
-    // test_meshes.push_back("ngon_2d_cart");
-    // test_meshes.push_back("ngon_2d_sph");
+    test_meshes.push_back("ngon_2d_cart");
+    test_meshes.push_back("ngon_2d_sph");
 
   // skip the following tests
   std::vector<std::pair<std::string, std::string>> skip_test = {\
-    // don't yet return elem_count from ngons
-    {"createget", "ngon_2d_cart"},
-    {"createget", "ngon_2d_sph"},
     // dual not implemented in 3d
     {"dual", "hex_3d_cart"},
     {"dual", "hex_3d_sph"},
@@ -222,7 +217,24 @@ int main(int argc, char *argv[]) {
   //NEX_UTest  70
   //NEX_UTest
   //NEX_UTest
-
+  //NEX_UTest  
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest  80
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
 
 
   //----------------------------------------------------------------------------
