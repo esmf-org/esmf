@@ -1369,142 +1369,147 @@ call ESMF_TraceRegionExit("calling NUOPC_GetStateMemberCount", rc=rc)
         file=FILENAME, &
         rcToReturn=rc)) &
         return  ! bail out
+        
+    else
+      fieldCount = 0
+    endif
 
 call ESMF_TraceRegionEnter("deal with allocs", rc=rc)
-      ! deal with optional StandardNameList
-      if (present(StandardNameList)) then
-        if (associated(StandardNameList)) then
-          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-            msg="StandardNameList must enter unassociated", &
-            line=__LINE__, &
-            file=FILENAME, &
-            rcToReturn=rc)
+    ! deal with optional StandardNameList
+    if (present(StandardNameList)) then
+      if (associated(StandardNameList)) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="StandardNameList must enter unassociated", &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)
+        return  ! bail out
+      else
+        allocate(StandardNameList(fieldCount), stat=stat)
+        if (ESMF_LogFoundAllocError(stat, msg="allocating StandardNameList", &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)) &
           return  ! bail out
-        else
-          allocate(StandardNameList(fieldCount), stat=stat)
-          if (ESMF_LogFoundAllocError(stat, msg="allocating StandardNameList", &
-            line=__LINE__, &
-            file=FILENAME, &
-            rcToReturn=rc)) &
-            return  ! bail out
-        endif
       endif
+    endif
 
-      ! deal with optional itemNameList
-      if (present(itemNameList)) then
-        if (associated(itemNameList)) then
-          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-            msg="itemNameList must enter unassociated", &
-            line=__LINE__, &
-            file=FILENAME, &
-            rcToReturn=rc)
+    ! deal with optional itemNameList
+    if (present(itemNameList)) then
+      if (associated(itemNameList)) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="itemNameList must enter unassociated", &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)
+        return  ! bail out
+      else
+        allocate(itemNameList(fieldCount), stat=stat)
+        if (ESMF_LogFoundAllocError(stat, msg="allocating itemNameList", &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)) &
           return  ! bail out
-        else
-          allocate(itemNameList(fieldCount), stat=stat)
-          if (ESMF_LogFoundAllocError(stat, msg="allocating itemNameList", &
-            line=__LINE__, &
-            file=FILENAME, &
-            rcToReturn=rc)) &
-            return  ! bail out
-        endif
       endif
+    endif
 
-      ! deal with optional ConnectedList
-      if (present(ConnectedList)) then
-        if (associated(ConnectedList)) then
-          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-            msg="ConnectedList must enter unassociated", &
-            line=__LINE__, &
-            file=FILENAME, &
-            rcToReturn=rc)
+    ! deal with optional ConnectedList
+    if (present(ConnectedList)) then
+      if (associated(ConnectedList)) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="ConnectedList must enter unassociated", &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)
+        return  ! bail out
+      else
+        allocate(ConnectedList(fieldCount), stat=stat)
+        if (ESMF_LogFoundAllocError(stat, msg="allocating ConnectedList", &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)) &
           return  ! bail out
-        else
-          allocate(ConnectedList(fieldCount), stat=stat)
-          if (ESMF_LogFoundAllocError(stat, msg="allocating ConnectedList", &
-            line=__LINE__, &
-            file=FILENAME, &
-            rcToReturn=rc)) &
-            return  ! bail out
-        endif
       endif
+    endif
 
-      ! deal with optional NamespaceList
-      if (present(NamespaceList)) then
-        if (associated(NamespaceList)) then
-          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-            msg="NamespaceList must enter unassociated", &
-            line=__LINE__, &
-            file=FILENAME, &
-            rcToReturn=rc)
+    ! deal with optional NamespaceList
+    if (present(NamespaceList)) then
+      if (associated(NamespaceList)) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="NamespaceList must enter unassociated", &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)
+        return  ! bail out
+      else
+        allocate(NamespaceList(fieldCount), stat=stat)
+        if (ESMF_LogFoundAllocError(stat, msg="allocating NamespaceList", &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)) &
           return  ! bail out
-        else
-          allocate(NamespaceList(fieldCount), stat=stat)
-          if (ESMF_LogFoundAllocError(stat, msg="allocating NamespaceList", &
-            line=__LINE__, &
-            file=FILENAME, &
-            rcToReturn=rc)) &
-            return  ! bail out
-        endif
       endif
+    endif
 
-      ! deal with optional CplSetList
-      if (present(CplSetList)) then
-        if (associated(CplSetList)) then
-          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-            msg="CplSetList must enter unassociated", &
-            line=__LINE__, &
-            file=FILENAME, &
-            rcToReturn=rc)
+    ! deal with optional CplSetList
+    if (present(CplSetList)) then
+      if (associated(CplSetList)) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="CplSetList must enter unassociated", &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)
+        return  ! bail out
+      else
+        allocate(CplSetList(fieldCount), stat=stat)
+        if (ESMF_LogFoundAllocError(stat, msg="allocating CplSetList", &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)) &
           return  ! bail out
-        else
-          allocate(CplSetList(fieldCount), stat=stat)
-          if (ESMF_LogFoundAllocError(stat, msg="allocating CplSetList", &
-            line=__LINE__, &
-            file=FILENAME, &
-            rcToReturn=rc)) &
-            return  ! bail out
-        endif
       endif
+    endif
 
-      ! deal with optional fieldList
-      if (present(fieldList)) then
-        if (associated(fieldList)) then
-          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-            msg="fieldList must enter unassociated", &
-            line=__LINE__, &
-            file=FILENAME, &
-            rcToReturn=rc)
+    ! deal with optional fieldList
+    if (present(fieldList)) then
+      if (associated(fieldList)) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="fieldList must enter unassociated", &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)
+        return  ! bail out
+      else
+        allocate(fieldList(fieldCount), stat=stat)
+        if (ESMF_LogFoundAllocError(stat, msg="allocating fieldList", &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)) &
           return  ! bail out
-        else
-          allocate(fieldList(fieldCount), stat=stat)
-          if (ESMF_LogFoundAllocError(stat, msg="allocating fieldList", &
-            line=__LINE__, &
-            file=FILENAME, &
-            rcToReturn=rc)) &
-            return  ! bail out
-        endif
       endif
+    endif
 
-      ! deal with optional stateList
-      if (present(stateList)) then
-        if (associated(stateList)) then
-          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-            msg="stateList must enter unassociated", &
-            line=__LINE__, &
-            file=FILENAME, &
-            rcToReturn=rc)
+    ! deal with optional stateList
+    if (present(stateList)) then
+      if (associated(stateList)) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="stateList must enter unassociated", &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)
+        return  ! bail out
+      else
+        allocate(stateList(fieldCount), stat=stat)
+        if (ESMF_LogFoundAllocError(stat, msg="allocating stateList", &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)) &
           return  ! bail out
-        else
-          allocate(stateList(fieldCount), stat=stat)
-          if (ESMF_LogFoundAllocError(stat, msg="allocating stateList", &
-            line=__LINE__, &
-            file=FILENAME, &
-            rcToReturn=rc)) &
-            return  ! bail out
-        endif
       endif
+    endif
 call ESMF_TraceRegionExit("deal with allocs", rc=rc)
 
+    if (fieldCount > 0) then
 call ESMF_TraceRegionEnter("call first level NUOPC_GetStateMemberListsIntrnl", rc=rc)
       ! fill lists that are present
       itemIndex = 1 ! initialize
