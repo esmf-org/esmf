@@ -259,8 +259,13 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
     ! Specialize default Run -> checking import Fields
+#if 0
     call NUOPC_CompSpecialize(gcomp, specLabel=label_CheckImport, &
       specRoutine=CheckImport, rc=rc)
+#else
+    call NUOPC_CompSpecialize(gcomp, specLabel=label_CheckImport, &
+      specRoutine=NUOPC_NoOp, rc=rc)
+#endif      
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
