@@ -174,6 +174,11 @@ namespace ESMCI {
     // Mesh from inputs
     MBMesh(int _pdim, int _orig_sdim, ESMC_CoordSys_Flag _coordSys);
 
+    // Create empty mesh
+    // EVENTUALLY MAKE THIS PRIVATE TO ENCOURAGE THE USE OF THE CONSTRUCTOR
+    // THAT SETS EVEYTHING UP CORRECTLY
+    MBMesh();
+
     // Add one node
     EntityHandle add_node(double *orig_coords, int gid, int orig_pos, int owner);
 
@@ -464,9 +469,6 @@ namespace ESMCI {
     void setup_verts_array();
 
 #endif
-
-    // Create empty mesh
-    MBMesh();
 
     // Get rid of mesh
     ~MBMesh();

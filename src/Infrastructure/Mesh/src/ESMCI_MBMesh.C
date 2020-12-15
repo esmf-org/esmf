@@ -80,6 +80,8 @@ using namespace std;
 #define ESMC_METHOD "MBMesh::func()"
 
 // Empty mesh
+// EVENTUALLY MAKE THIS PRIVATE TO ENCOURAGE THE USE OF THE CONSTRUCTOR
+// THAT SETS EVEYTHING UP CORRECTLY
 MBMesh::MBMesh(): 
   pdim(0),
   sdim(0), 
@@ -108,7 +110,6 @@ MBMesh::MBMesh():
     _num_owned_elem = 0;
     _num_owned_elem_conn = 0;
 } 
-
 
 // From inputs
 // _pdim - parametric dimension
