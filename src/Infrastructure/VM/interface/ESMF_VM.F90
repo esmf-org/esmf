@@ -469,6 +469,7 @@ module ESMF_VMMod
   public ESMF_VMPlanGetInit
   public ESMF_VMPlanGetThis
   public ESMF_VMPlanSetThis
+  public ESMF_VMPlanSetMinStackSize
   public ESMF_VMPlanMaxPEs
   public ESMF_VMPlanMaxThreads
   public ESMF_VMPlanMinThreads
@@ -9759,6 +9760,56 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
     
   end subroutine ESMF_VMPlanSetThis
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMPlanSetMinStackSize()"
+!BOPI
+! !IROUTINE: ESMF_VMPlanSetMinStackSize - Set the minimum stack size
+
+! !INTERFACE:
+  subroutine ESMF_VMPlanSetMinStackSize(vmplan, minStackSize, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VMPlan), intent(inout)         :: vmplan
+    integer,           intent(in),  optional :: minStackSize
+    integer,           intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Set the minimum stack size.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vmplan] 
+!        VMPlan
+!     \item[{[minStackSize]}] 
+!        Minimum stack size for Pthreads created to execute user code.
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMPlanGetInit, vmplan, rc)
+
+    ! Call into the C++ interface.
+    call c_ESMC_VMPlanSetMinStackSize(vmplan, minStackSize, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMPlanSetMinStackSize
 !------------------------------------------------------------------------------
 
 

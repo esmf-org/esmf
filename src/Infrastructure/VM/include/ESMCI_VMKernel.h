@@ -50,6 +50,10 @@ enum vmType { vmBYTE=1, vmI4, vmI8, vmR4, vmR8, vmL4};
 // epochs
 enum vmEpoch  { epochNone=0, epochBuffer};
 
+// Pthread stack sizes
+#define VM_PTHREAD_STACKSIZE_SERVICE  (4194304) //  4MiB for service threads
+#define VM_PTHREAD_STACKSIZE_USER    (20971520) // 20MiB for user threads
+
 // VM_ANY_SOURCE and VM_ANY_TAG
 #define VM_ANY_SRC                    (-2)
 #define VM_ANY_TAG                    (-2)
@@ -529,6 +533,8 @@ class VMKPlan{
     int *spawnflag;   // for each pet: 0-don't spawn, >=1-spawn threads
     int *contribute;  // pet id to which non-spawning pet contributes its cores
     int *cspawnid;    // idication to which one of spawned pets to contribute to
+    // Pthread specifications
+    size_t minStackSize;  // minimum stack size for any user thread created
     // VMK references for this PET (as many entries as this PET spawns)
     int nspawn;       // number of PETs this PET will spwan
     VMK **myvms; // this array holds pointers to heap VMK instances

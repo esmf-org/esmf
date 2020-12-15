@@ -1282,6 +1282,26 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
+  void FTN_X(c_esmc_vmplansetminstacksize)(ESMCI::VMPlan **ptr,
+    int *minStackSize, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmplansetminstacksize()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
+    // Sort out the non-present F90 optional arguments. 
+    minStackSize = ESMC_NOT_PRESENT_FILTER(minStackSize);
+    int loc_minStackSize = VM_PTHREAD_STACKSIZE_USER; 
+    if ((void*)minStackSize != ESMC_NULL_POINTER)
+      loc_minStackSize = *minStackSize;
+    // set the minStackSize
+    (*ptr)->minStackSize = (size_t)loc_minStackSize;
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+   
   void FTN_X(c_esmc_vmplanmaxpes)(ESMCI::VMPlan **ptr, ESMCI::VM **vm,
     int *max, int *pref_intra_process, int *pref_intra_ssi, int *pref_inter_ssi,
     int *npetlist, int *petlist, int *rc){

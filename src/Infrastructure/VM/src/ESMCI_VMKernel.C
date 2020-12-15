@@ -97,9 +97,6 @@ using namespace std;
 // Note that SIGUSR2 interferes with LAM!
 #endif
 #endif
-// Pthread stack sizes
-#define VM_PTHREAD_STACKSIZE_SERVICE  (4194304) //  4MiB for service threads
-#define VM_PTHREAD_STACKSIZE_USER    (20971520) // 20MiB for user threads
 
 #if defined (ESMF_OS_MinGW)
 // Windows equivalent to POSIX getpid(2)
@@ -158,7 +155,7 @@ typedef struct{
 }vmkt_t;
 
 int vmkt_create(vmkt_t *vmkt, void *(*vmkt_spawn)(void *), void *arg,
-  bool service){
+  bool service, size_t minStackSize){
   vmkt->flag = 0;     // initialize
   vmkt->released = 0; // initialize
 #ifndef ESMF_NO_PTHREADS
@@ -187,9 +184,8 @@ int vmkt_create(vmkt_t *vmkt, void *(*vmkt_spawn)(void *), void *arg,
       // setting stack size for a user thread
       size_t default_stack_size;
       pthread_attr_getstacksize(&pthreadAttrs, &default_stack_size);
-      if (default_stack_size < (size_t)VM_PTHREAD_STACKSIZE_USER){
-        pthread_attr_setstacksize(&pthreadAttrs,
-          (size_t)VM_PTHREAD_STACKSIZE_USER);
+      if (default_stack_size < minStackSize){
+        pthread_attr_setstacksize(&pthreadAttrs, minStackSize);
       }
     }
 #if (VERBOSITY > 0)
@@ -1501,11 +1497,11 @@ void *VMK::startup(class VMKPlan *vmp,
               // mypet (k) contributes to this pet (i)
               // mypet does not spawn but contributes -> spawn blocker thread
               *rc = vmkt_create(&(sarg[0].vmkt), vmk_block, (void *)&sarg[0],
-                true);  // service thread
+                true, vmp->minStackSize);  // service thread
               if (*rc) return NULL;  // could not create pthread -> bail out
               // also spawn sigcatcher thread
               *rc = vmkt_create(&(sarg[0].vmkt_extra), vmk_sigcatcher,
-                (void *)&sarg[0], true);  // service thread
+                (void *)&sarg[0], true, vmp->minStackSize);  // service thread
 #if (VERBOSITY > 5)
               fprintf(stderr, "parent thread is back from vmkt_create()s "
                 "for vmk_block and vmk_sigcatcher\n");
@@ -1976,7 +1972,7 @@ void *VMK::startup(class VMKPlan *vmp,
       // in the thread-based case the VM cannot be constructured until the
       // pthreadID is known!
       *rc = vmkt_create(&(sarg[i].vmkt), vmk_spawn, (void *)&sarg[i],
-        false); // not a service thread
+        false, vmp->minStackSize); // not a service thread
       if (*rc) return NULL;  // could not create pthread -> bail out
     }
   }
@@ -2343,6 +2339,8 @@ VMKPlan::VMKPlan(){
   cspawnid = NULL;
   // invalidate the VMK pointer array
   myvms = NULL;
+  // set the default pthread specification
+  minStackSize = VM_PTHREAD_STACKSIZE_USER;
   // set the default communication preferences
   pref_intra_process = PREF_INTRA_PROCESS_SHMHACK;
   pref_intra_ssi = PREF_INTRA_SSI_MPI1;

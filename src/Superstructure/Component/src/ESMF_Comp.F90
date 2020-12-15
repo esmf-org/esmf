@@ -2040,7 +2040,7 @@ contains
 
 ! !INTERFACE:
   subroutine ESMF_CompSetVMMaxPEs(compp, max, pref_intra_process, &
-    pref_intra_ssi, pref_inter_ssi, rc)
+    pref_intra_ssi, pref_inter_ssi, minStackSize, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CompClass), pointer               :: compp
@@ -2048,6 +2048,7 @@ contains
     integer,              intent(in),  optional :: pref_intra_process
     integer,              intent(in),  optional :: pref_intra_ssi
     integer,              intent(in),  optional :: pref_inter_ssi
+    integer,              intent(in),  optional :: minStackSize
     integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2065,6 +2066,8 @@ contains
 !          Intra SSI communication preference
 !     \item[{[pref\_inter\_ssi]}] 
 !          Inter process communication preference
+!     \item[{[minStackSize]}] 
+!          Minimum stack size for Pthreads created to execute user code.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2108,13 +2111,19 @@ contains
     call ESMF_VMPlanMaxPEs(compp%vmplan, compp%vm_parent, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
       compp%npetlist, compp%petlist, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! set MinStackSize
+    call ESMF_VMPlanSetMinStackSize(compp%vmplan, minStackSize, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
- 
+
   end subroutine ESMF_CompSetVMMaxPEs
 !------------------------------------------------------------------------------
 
@@ -2127,7 +2136,7 @@ contains
 
 ! !INTERFACE:
   subroutine ESMF_CompSetVMMaxThreads(compp, max, pref_intra_process, &
-    pref_intra_ssi, pref_inter_ssi, rc)
+    pref_intra_ssi, pref_inter_ssi, minStackSize, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CompClass), pointer               :: compp
@@ -2135,7 +2144,8 @@ contains
     integer,              intent(in),  optional :: pref_intra_process
     integer,              intent(in),  optional :: pref_intra_ssi
     integer,              intent(in),  optional :: pref_inter_ssi
-    integer,              intent(out), optional :: rc           
+    integer,              intent(in),  optional :: minStackSize
+    integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Print VM internals
@@ -2152,6 +2162,8 @@ contains
 !          Intra SSI communication preference
 !     \item[{[pref\_inter\_ssi]}] 
 !          Inter process communication preference
+!     \item[{[minStackSize]}] 
+!          Minimum stack size for Pthreads created to execute user code.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2195,13 +2207,19 @@ contains
     call ESMF_VMPlanMaxThreads(compp%vmplan, compp%vm_parent, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
       compp%npetlist, compp%petlist, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! set MinStackSize
+    call ESMF_VMPlanSetMinStackSize(compp%vmplan, minStackSize, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
- 
+
   end subroutine ESMF_CompSetVMMaxThreads
 !------------------------------------------------------------------------------
 
@@ -2214,7 +2232,7 @@ contains
 
 ! !INTERFACE:
   subroutine ESMF_CompSetVMMinThreads(compp, max, pref_intra_process, &
-    pref_intra_ssi, pref_inter_ssi, rc)
+    pref_intra_ssi, pref_inter_ssi, minStackSize, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CompClass), pointer               :: compp
@@ -2222,6 +2240,7 @@ contains
     integer,              intent(in),  optional :: pref_intra_process
     integer,              intent(in),  optional :: pref_intra_ssi
     integer,              intent(in),  optional :: pref_inter_ssi
+    integer,              intent(in),  optional :: minStackSize
     integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2239,6 +2258,8 @@ contains
 !          Intra SSI communication preference
 !     \item[{[pref\_inter\_ssi]}] 
 !          Inter process communication preference
+!     \item[{[minStackSize]}] 
+!          Minimum stack size for Pthreads created to execute user code.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2282,13 +2303,19 @@ contains
     call ESMF_VMPlanMinThreads(compp%vmplan, compp%vm_parent, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
       compp%npetlist, compp%petlist, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! set MinStackSize
+    call ESMF_VMPlanSetMinStackSize(compp%vmplan, minStackSize, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
- 
+
   end subroutine ESMF_CompSetVMMinThreads
 !------------------------------------------------------------------------------
 
