@@ -79,16 +79,9 @@ module NUOPC_ModelBase
     label_DataInitialize = "ModelBase_DataInitialize"
 
   type type_InternalStateStruct
-<<<<<<< HEAD
-    type(ESMF_Clock)      :: driverClock
-    type(ESMF_Time)       :: preAdvanceCurrTime
-=======
     type(ESMF_Clock)          :: driverClock
     type(ESMF_Time)           :: preAdvanceCurrTime
-    type(type_InternalClocks) :: internalClocks(20) !TODO: should be Container and grow with run phases added
-    integer                   :: phase  ! index into internalClocks(:)
     type(ESMF_Field), pointer :: cachedExportFieldList(:)
->>>>>>> 7f8c283712... Cache the export state fieldList (recursive through nesting structure) inside
   end type
 
   type type_InternalState
@@ -2118,6 +2111,7 @@ module NUOPC_ModelBase
     integer                   :: verbosity, diagnostic, profiling
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
+    type(type_InternalState)  :: is
 
     rc = ESMF_SUCCESS
 
@@ -2245,6 +2239,12 @@ module NUOPC_ModelBase
       call ESMF_TraceRegionExit("label_DataInitialize")
     endif
     
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
     ! update timestamp on all the export Fields
     nullify(is%wrap%cachedExportFieldList)
     call NUOPC_GetStateMemberLists(exportState, &
