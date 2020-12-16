@@ -3047,14 +3047,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   {\em Currently options not documented. Use default.}
 ! \item[{[minStackSize]}]
 !   Minimum stack size in byte of any Pthread that is created in the VM with the
-!   intention of executing user code. In case where OpenMP threads are used
-!   under the user code, the combined stacks of all OpenMP threads must fit
-!   inside each of the created Pthread stacks.
-!   The default is to use the system default {\em stacksize} set by the
-!   {\tt limit} or {\tt ulimit} command. However notice that a setting of
-!   {\em unlimited} would result in usage of a very small system dependent
-!   stack size (e.g. 2MiB on x86\_64 Linux). ESMF therefore implements an
-!   absolute minimum of 20MiB.
+!   intention of executing user code as a PET. For cases where OpenMP threads
+!   are used by the user code, each thread allocates its own private stack. For
+!   all threads {\em other} than the master, the stack size is set via the 
+!   typical {\tt OMP\_STACKSIZE} environment variable mechanism. The PET itself,
+!   however, becomes the {\em master} of the OpenMP thread team, and is not
+!   affected by {\tt OMP\_STACKSIZE}. It is the master's stack that can be
+!   sized via the {\tt minStackSize} argument, and a large enough size is often
+!   critical.
+!
+!   When {\tt minStackSize} is absent, the default is to use the system default
+!   set by the {\tt limit} or {\tt ulimit} command. However, the stack of a
+!   Pthread cannot be unlimited, and a shell {\em stacksize} setting of
+!   {\em unlimited}, or any setting below the ESMF implemented minimum,
+!   will result in setting the stack size to 20MiB (the ESMF minimum).
+!   Depending on how much private data is used by the user code under
+!   the master thread, the default might be too small, and {\tt minStackSize}
+!   must be used to allocate sufficient stack space.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -3138,14 +3147,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   {\em Currently options not documented. Use default.}
 ! \item[{[minStackSize]}]
 !   Minimum stack size in byte of any Pthread that is created in the VM with the
-!   intention of executing user code. In case where OpenMP threads are used
-!   under the user code, the combined stacks of all OpenMP threads must fit
-!   inside each of the created Pthread stacks.
-!   The default is to use the system default {\em stacksize} set by the
-!   {\tt limit} or {\tt ulimit} command. However notice that a setting of
-!   {\em unlimited} would result in usage of a very small system dependent
-!   stack size (e.g. 2MiB on x86\_64 Linux). ESMF therefore implements an
-!   absolute minimum of 20MiB.
+!   intention of executing user code as a PET. For cases where OpenMP threads
+!   are used by the user code, each thread allocates its own private stack. For
+!   all threads {\em other} than the master, the stack size is set via the 
+!   typical {\tt OMP\_STACKSIZE} environment variable mechanism. The PET itself,
+!   however, becomes the {\em master} of the OpenMP thread team, and is not
+!   affected by {\tt OMP\_STACKSIZE}. It is the master's stack that can be
+!   sized via the {\tt minStackSize} argument, and a large enough size is often
+!   critical.
+!
+!   When {\tt minStackSize} is absent, the default is to use the system default
+!   set by the {\tt limit} or {\tt ulimit} command. However, the stack of a
+!   Pthread cannot be unlimited, and a shell {\em stacksize} setting of
+!   {\em unlimited}, or any setting below the ESMF implemented minimum,
+!   will result in setting the stack size to 20MiB (the ESMF minimum).
+!   Depending on how much private data is used by the user code under
+!   the master thread, the default might be too small, and {\tt minStackSize}
+!   must be used to allocate sufficient stack space.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -3226,14 +3244,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   {\em Currently options not documented. Use default.}
 ! \item[{[minStackSize]}]
 !   Minimum stack size in byte of any Pthread that is created in the VM with the
-!   intention of executing user code. In case where OpenMP threads are used
-!   under the user code, the combined stacks of all OpenMP threads must fit
-!   inside each of the created Pthread stacks.
-!   The default is to use the system default {\em stacksize} set by the
-!   {\tt limit} or {\tt ulimit} command. However notice that a setting of
-!   {\em unlimited} would result in usage of a very small system dependent
-!   stack size (e.g. 2MiB on x86\_64 Linux). ESMF therefore implements an
-!   absolute minimum of 20MiB.
+!   intention of executing user code as a PET. For cases where OpenMP threads
+!   are used by the user code, each thread allocates its own private stack. For
+!   all threads {\em other} than the master, the stack size is set via the 
+!   typical {\tt OMP\_STACKSIZE} environment variable mechanism. The PET itself,
+!   however, becomes the {\em master} of the OpenMP thread team, and is not
+!   affected by {\tt OMP\_STACKSIZE}. It is the master's stack that can be
+!   sized via the {\tt minStackSize} argument, and a large enough size is often
+!   critical.
+!
+!   When {\tt minStackSize} is absent, the default is to use the system default
+!   set by the {\tt limit} or {\tt ulimit} command. However, the stack of a
+!   Pthread cannot be unlimited, and a shell {\em stacksize} setting of
+!   {\em unlimited}, or any setting below the ESMF implemented minimum,
+!   will result in setting the stack size to 20MiB (the ESMF minimum).
+!   Depending on how much private data is used by the user code under
+!   the master thread, the default might be too small, and {\tt minStackSize}
+!   must be used to allocate sufficient stack space.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
