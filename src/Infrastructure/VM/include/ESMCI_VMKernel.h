@@ -50,6 +50,10 @@ enum vmType { vmBYTE=1, vmI4, vmI8, vmR4, vmR8, vmL4};
 // epochs
 enum vmEpoch  { epochNone=0, epochBuffer};
 
+// Pthread stack sizes
+#define VM_PTHREAD_STACKSIZE_SERVICE  (4194304) //  4MiB for service threads
+#define VM_PTHREAD_STACKSIZE_USER    (20971520) // 20MiB for user threads
+
 // VM_ANY_SOURCE and VM_ANY_TAG
 #define VM_ANY_SRC                    (-2)
 #define VM_ANY_TAG                    (-2)
@@ -299,6 +303,7 @@ class VMK{
     static MPI_Comm default_mpi_c;
     static int mpi_thread_level;
     static int mpi_init_outside_esmf;
+    static int pre_mpi_init;
     // Static data members that hold command line arguments
     // There are two sets of these variables. The first set of variables is
     // used to obtain the command line arguments in the obtain_args() method
@@ -326,6 +331,8 @@ class VMK{
     void commqueueitem_link(commhandle *commh);
     int  commqueueitem_unlink(commhandle *commh);
   public:
+    static void InitPreMPI();
+      // initialization step before MPI is initialized
     void init(MPI_Comm mpiCommunicator=MPI_COMM_WORLD);
       // initialize the physical machine and a default (all MPI) virtual machine
     void finalize(int finalizeMpi=1);
@@ -526,6 +533,8 @@ class VMKPlan{
     int *spawnflag;   // for each pet: 0-don't spawn, >=1-spawn threads
     int *contribute;  // pet id to which non-spawning pet contributes its cores
     int *cspawnid;    // idication to which one of spawned pets to contribute to
+    // Pthread specifications
+    size_t minStackSize;  // minimum stack size for any user thread created
     // VMK references for this PET (as many entries as this PET spawns)
     int nspawn;       // number of PETs this PET will spwan
     VMK **myvms; // this array holds pointers to heap VMK instances
