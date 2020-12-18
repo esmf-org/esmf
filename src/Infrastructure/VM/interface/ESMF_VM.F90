@@ -455,6 +455,7 @@ module ESMF_VMMod
   public ESMF_CommHandleValidate
   
 ! - ESMF-internal methods:
+  public ESMF_VMInitializePreMPI
   public ESMF_VMInitialize
   public ESMF_VMFinalize
   public ESMF_VMAbort
@@ -468,6 +469,7 @@ module ESMF_VMMod
   public ESMF_VMPlanGetInit
   public ESMF_VMPlanGetThis
   public ESMF_VMPlanSetThis
+  public ESMF_VMPlanSetMinStackSize
   public ESMF_VMPlanMaxPEs
   public ESMF_VMPlanMaxThreads
   public ESMF_VMPlanMinThreads
@@ -3438,7 +3440,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     type(ESMF_VM),  intent(in)            :: vm
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,        intent(out), optional :: rc           
+    integer,        intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -5420,7 +5422,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     type(ESMF_VM), intent(out)            :: vm
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,       intent(out), optional  :: rc           
+    integer,       intent(out), optional  :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -5484,7 +5486,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     type(ESMF_VM), intent(out)           :: vm
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,       intent(out), optional :: rc           
+    integer,       intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -5560,7 +5562,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
     type(ESMF_VMId), intent(out)           :: vmId
-    integer,         intent(out), optional :: rc           
+    integer,         intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Get the {\tt ESMF\_VMId} of the current execution context.
@@ -5605,7 +5607,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     integer, intent(in)             :: fobjCount
     integer, intent(in)             :: objCount
-    integer, intent(out), optional  :: rc           
+    integer, intent(out), optional  :: rc
 !
 ! !DESCRIPTION:
 !   Get garbage collection information of the current execution context.
@@ -5657,7 +5659,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     integer, intent(in)             :: virtMemPet
     integer, intent(in)             :: physMemPet
-    integer, intent(out), optional  :: rc           
+    integer, intent(out), optional  :: rc
 !
 ! !DESCRIPTION:
 !   Get memory info from the system for this PET.
@@ -5744,7 +5746,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_VM),          intent(in)              :: vm
     character(len=*),       intent(in),   optional  :: prefix
     type(ESMF_LogMsg_Flag), intent(in),   optional  :: logMsgFlag
-    integer, intent(out),                 optional  :: rc           
+    integer, intent(out),                 optional  :: rc
 !
 ! !DESCRIPTION:
 !   Log the VM.
@@ -6015,7 +6017,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     character(len=*),       intent(in),   optional  :: prefix
     type(ESMF_LogMsg_Flag), intent(in),   optional  :: logMsgFlag
-    integer, intent(out),                 optional  :: rc           
+    integer, intent(out),                 optional  :: rc
 !
 ! !DESCRIPTION:
 !   Log the VM.
@@ -6068,7 +6070,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     type(ESMF_VM),   intent(in)            :: vm
     type(ESMF_VMId), intent(out)           :: vmId
-    integer,         intent(out), optional :: rc           
+    integer,         intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Get the {\tt ESMF\_VMId} of the {\tt ESMF\_VM} object.
@@ -6118,7 +6120,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     type(ESMF_VM),  intent(in)            :: vm
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,        intent(out), optional :: rc           
+    integer,        intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -6181,7 +6183,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    type(ESMF_Sync_Flag),              intent(in),  optional :: syncflag
 !    type(ESMF_CommHandle),             intent(out), optional :: commhandle
-!    integer,                           intent(out), optional :: rc           
+!    integer,                           intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -6247,7 +6249,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
     type(ESMF_CommHandle),         intent(out), optional :: commhandle
-    integer,                       intent(out), optional :: rc           
+    integer,                       intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -6320,7 +6322,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
     type(ESMF_CommHandle),         intent(out), optional :: commhandle
-    integer,                       intent(out), optional :: rc           
+    integer,                       intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -6393,7 +6395,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
-    integer,                    intent(out), optional :: rc           
+    integer,                    intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -6466,7 +6468,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
-    integer,                    intent(out), optional :: rc           
+    integer,                    intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -6539,7 +6541,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
-    integer,                    intent(out), optional :: rc           
+    integer,                    intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -6612,7 +6614,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),   intent(out), optional :: commhandle
-    integer,                 intent(out), optional :: rc           
+    integer,                 intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -7761,7 +7763,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    type(ESMF_Sync_Flag),             intent(in),  optional :: syncflag
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
-!    integer,                          intent(out), optional :: rc           
+!    integer,                          intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -7826,7 +7828,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
     type(ESMF_CommHandle),         intent(out), optional :: commhandle
-    integer,                       intent(out), optional :: rc           
+    integer,                       intent(out), optional :: rc
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
@@ -7898,7 +7900,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
     type(ESMF_CommHandle),         intent(out), optional :: commhandle
-    integer,                       intent(out), optional :: rc           
+    integer,                       intent(out), optional :: rc
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
@@ -7970,7 +7972,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
-    integer,                    intent(out), optional :: rc           
+    integer,                    intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -8043,7 +8045,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
-    integer,                    intent(out), optional :: rc           
+    integer,                    intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -8116,7 +8118,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
-    integer,                    intent(out), optional :: rc           
+    integer,                    intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -8189,7 +8191,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),   intent(out), optional :: commhandle
-    integer,                 intent(out), optional :: rc           
+    integer,                 intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -8335,7 +8337,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    type(ESMF_Sync_Flag),             intent(in),  optional :: syncflag
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
-!    integer,                          intent(out), optional :: rc           
+!    integer,                          intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -8412,7 +8414,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
     type(ESMF_CommHandle),         intent(out), optional :: commhandle
-    integer,                       intent(out), optional :: rc           
+    integer,                       intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -8488,7 +8490,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
     type(ESMF_CommHandle),         intent(out), optional :: commhandle
-    integer,                       intent(out), optional :: rc           
+    integer,                       intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -8564,7 +8566,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
-    integer,                    intent(out), optional :: rc           
+    integer,                    intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -8640,7 +8642,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
-    integer,                    intent(out), optional :: rc           
+    integer,                    intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -8716,7 +8718,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
-    integer,                    intent(out), optional :: rc           
+    integer,                    intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -8792,7 +8794,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),   intent(out), optional :: commhandle
-    integer,                 intent(out), optional :: rc           
+    integer,                 intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -8858,7 +8860,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     type(ESMF_VM), intent(in)            :: vm
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,       intent(out), optional :: rc           
+    integer,       intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Partially collective {\tt ESMF\_VM} communication call that blocks calling
@@ -9117,6 +9119,50 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMInitializePreMPI()"
+!BOPI
+! !IROUTINE: ESMF_VMInitializePreMPI - Initialize parts of the Global VM that must happen before MPI is initialized
+
+! !INTERFACE:
+  subroutine ESMF_VMInitializePreMPI(rc)
+!
+! !ARGUMENTS:
+    integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Initialize parts of the Global VM that must happen before MPI is initialized.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Call into the C++ interface.
+    call c_ESMC_VMInitializePreMPI(localrc)
+    ! Cannot use LogErr here because LogErr initializes _after_ VM
+    if (localrc /= ESMF_SUCCESS) then
+      if (present(rc)) rc = localrc
+      return
+    endif
+    
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMInitializePreMPI
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMInitialize()"
 !BOPI
 ! !IROUTINE: ESMF_VMInitialize - Initialize the Global VM
@@ -9126,7 +9172,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
     integer, intent(in),  optional :: mpiCommunicator
-    integer, intent(out), optional :: rc           
+    integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Initialize the Global VM.
@@ -9274,7 +9320,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_VM),      intent(in)              :: vm
     type(ESMF_VMPlan),  intent(in)              :: vmplan
     type(ESMF_Pointer), intent(inout)           :: vm_info
-    integer,            intent(out),  optional  :: rc           
+    integer,            intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
 !   Shutdown a VM.
@@ -9496,7 +9542,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                 intent(in)            :: npetlist
     integer,                 intent(in)            :: petlist(:)
     type(ESMF_Context_Flag), intent(in)            :: contextflag
-    integer,                 intent(out), optional :: rc           
+    integer,                 intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Construct a default plan.
@@ -9553,7 +9599,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
     type(ESMF_VMPlan), intent(inout)  :: vmplan
-    integer, intent(out), optional    :: rc           
+    integer, intent(out), optional    :: rc
 !
 ! !DESCRIPTION:
 !   Destruct a vmplan.
@@ -9719,6 +9765,56 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMPlanSetMinStackSize()"
+!BOPI
+! !IROUTINE: ESMF_VMPlanSetMinStackSize - Set the minimum stack size
+
+! !INTERFACE:
+  subroutine ESMF_VMPlanSetMinStackSize(vmplan, minStackSize, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VMPlan), intent(inout)         :: vmplan
+    integer,           intent(in),  optional :: minStackSize
+    integer,           intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Set the minimum stack size.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vmplan] 
+!        VMPlan
+!     \item[{[minStackSize]}] 
+!        Minimum stack size for Pthreads created to execute user code.
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMPlanGetInit, vmplan, rc)
+
+    ! Call into the C++ interface.
+    call c_ESMC_VMPlanSetMinStackSize(vmplan, minStackSize, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMPlanSetMinStackSize
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMPlanMaxPEs()"
 !BOPI
 ! !IROUTINE: ESMF_VMPlanMaxPEs - Set up a MaxPEs vmplan
@@ -9736,7 +9832,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,           intent(in),  optional :: pref_inter_ssi
     integer,           intent(in)            :: npetlist
     integer,           intent(in)            :: petlist(:)
-    integer,           intent(out), optional :: rc           
+    integer,           intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Set up a MaxPEs vmplan.
@@ -9808,7 +9904,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,           intent(in),  optional :: pref_inter_ssi
     integer,           intent(in)            :: npetlist
     integer,           intent(in)            :: petlist(:)
-    integer,           intent(out), optional :: rc           
+    integer,           intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Set up a MaxThreads vmplan.
@@ -9880,7 +9976,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,           intent(in),  optional :: pref_inter_ssi
     integer,           intent(in)            :: npetlist
     integer,           intent(in)            :: petlist(:)
-    integer,           intent(out), optional :: rc           
+    integer,           intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Set up a MinThreads vmplan.
@@ -9953,7 +10049,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     type(ESMF_VMId),   intent(in)            :: vmId1
     type(ESMF_VMId),   intent(in)            :: vmId2
-    integer,           intent(out), optional :: rc           
+    integer,           intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Compare two ESMF_VMId objects.
@@ -10002,7 +10098,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     type(ESMF_VMId),   intent(inout)         :: dest(:)
     type(ESMF_VMId),   intent(in)            :: source(:)
-    integer,           intent(out), optional :: rc           
+    integer,           intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Copy the contents of ESMF_VMId objects.  Note that the destination
@@ -10116,7 +10212,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
     type(ESMF_VMId),   intent(in)            :: vmId
-    integer,           intent(out), optional :: rc           
+    integer,           intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Print an ESMF_VMId object.
@@ -10165,7 +10261,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
     type(ESMF_VMId),   intent(in)            :: vmId(:)
-    integer,           intent(out), optional :: rc           
+    integer,           intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Print an ESMF_VMId object.
@@ -10220,7 +10316,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
     type(ESMF_VMId),   intent(inout)         :: vmId
-    integer,           intent(out), optional :: rc           
+    integer,           intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Create an ESMF_VMId object. This allocates memory on the C side.
@@ -10264,7 +10360,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
     type(ESMF_VMId),   intent(inout)         :: vmId(:)
-    integer,           intent(out), optional :: rc           
+    integer,           intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Create an ESMF_VMId object. This allocates memory on the C side.
@@ -10311,7 +10407,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
     type(ESMF_VMId),   intent(inout)         :: vmId
-    integer,           intent(out), optional :: rc           
+    integer,           intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Destroy an ESMF_VMId object. This frees memory on the C side.
@@ -10355,7 +10451,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
     type(ESMF_VMId),   intent(inout)         :: vmId(:)
-    integer,           intent(out), optional :: rc           
+    integer,           intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Destroy an ESMF_VMId object. This frees memory on the C side.
@@ -10533,7 +10629,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_VM),            intent(in)              :: vm
     type(ESMF_VMId),          intent(out)             :: vmId
     integer,                  intent(in)              :: srcPet
-    integer,                  intent(out),  optional  :: rc           
+    integer,                  intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
 !   Receive {\tt ESMF\_VMId}.
@@ -10583,7 +10679,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_VM),            intent(in)              :: vm
     type(ESMF_VMId),          intent(in)              :: vmId
     integer,                  intent(in)              :: dstPet
-    integer,                  intent(out),  optional  :: rc           
+    integer,                  intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
 !   Send {\tt ESMF\_VMId}.
