@@ -111,6 +111,9 @@ namespace ESMCI {
     int _num_node;
     int _num_elem;
     int _num_elem_conn;
+    int _num_orig_node;
+    int _num_orig_elem;
+    int _num_orig_elem_conn;
     int _num_owned_node;
     int _num_owned_elem;
     int _num_owned_elem_conn;
@@ -124,25 +127,18 @@ namespace ESMCI {
     // RLO: why isn't this private? (and most of the other members as well)
     Interface *mesh; // Moab mesh  MAYBE I SHOULD NAME ThIS SOMETHING ELSE????
 
-    int num_elems; // number of elems on this processor
-
     // Guard variables to make sure things have been finalized
     bool nodes_finalized;
-
-    // Vector of original node EntityHandles sorted by orig_pos
-    std::vector<EntityHandle> orig_nodes;
 
     // Guard variables to make sure things have been finalized
     bool elems_finalized;
     
-    // Vector of original elem EntityHandles sorted by orig_pos
-    std::vector<EntityHandle> orig_elems;
-
 
     // Tags
     Tag gid_tag;
     Tag orig_pos_tag;
     Tag owner_tag;
+    enum {ORIG_POS_MIN_OUTPUT=0, ORIG_POS_AFTERCREATE=-1, ORIG_POS_SPLITELEM=-2}; 
 
     bool has_node_orig_coords;
     Tag node_orig_coords_tag;
@@ -157,15 +153,15 @@ namespace ESMCI {
     bool has_elem_orig_coords;
     Tag  elem_orig_coords_tag;
 
-    bool has_elem_frac; // TODO: Get rid of this
-    Tag  elem_frac_tag;
-
     bool has_elem_mask;
     Tag elem_mask_tag;
     Tag elem_mask_val_tag;
 
     bool has_elem_area;
     Tag  elem_area_tag;
+
+    bool has_elem_frac; // TODO: Get rid of this
+    Tag  elem_frac_tag;
 
     // Split stuff
     bool is_split;
@@ -177,6 +173,11 @@ namespace ESMCI {
 
     // Mesh from inputs
     MBMesh(int _pdim, int _orig_sdim, ESMC_CoordSys_Flag _coordSys);
+
+    // Create empty mesh
+    // EVENTUALLY MAKE THIS PRIVATE TO ENCOURAGE THE USE OF THE CONSTRUCTOR
+    // THAT SETS EVEYTHING UP CORRECTLY
+    MBMesh();
 
     // Add one node
     EntityHandle add_node(double *orig_coords, int gid, int orig_pos, int owner);
@@ -202,6 +203,12 @@ namespace ESMCI {
 
     // Get node mask value for one entity
     int get_node_mask_val(EntityHandle node);
+
+    // Get node mask for one entity
+    int get_node_mask(EntityHandle node);
+
+    // Set node mask
+    void set_node_mask(EntityHandle eh, int mask_val);
 
     // Set node coords
     void set_node_coords(EntityHandle eh, double *orig_coords);
@@ -286,9 +293,20 @@ namespace ESMCI {
       return _num_owned_elem_conn;
     };
 
-    // Get a Range of all nodes and elements on this processor
-    void get_all_nodes(Range &all_nodes);
-    void get_all_elems(Range &all_elems);
+    int num_orig_node() {
+      if (!nodes_finalized) {Throw() << "Nodes not finalized, so num_orig_node not set.";}
+      return _num_orig_node;
+    }
+
+    int num_orig_elem() {
+      if (!elems_finalized) {Throw() << "Elems not finalized, so num_orig_elem not set.";}
+      return _num_orig_elem;
+    }
+
+    int num_orig_elem_conn() {
+      if (!elems_finalized) {Throw() << "Elems not finalized, so num_orig_elem_conn not set.";}
+      return _num_orig_elem_conn;
+    }
 
     void get_all_nodes(std::vector<EntityHandle> &all_nodes);
     void get_all_elems(std::vector<EntityHandle> &all_elems);
@@ -296,34 +314,18 @@ namespace ESMCI {
     void get_owned_nodes(std::vector<EntityHandle> &owned_nodes);
     void get_owned_elems(std::vector<EntityHandle> &owned_elems);
 
-    int get_num_elem_conn();
-    int get_num_owned_elem_conn();
-
-    // Return a reference to a vector of EntityHandles for the original nodes used for creation
+    // Return a a vector of EntityHandles for the original nodes used for creation
     // on this processor sorted in the order they were used for creation
-    std::vector<EntityHandle> const &get_orig_nodes() const {
-      if (!nodes_finalized) {Throw() << "Nodes not finalized, so orig_nodes not set.";}
-      return orig_nodes;
-    }
+    void get_sorted_orig_nodes(std::vector<EntityHandle> &owned_nodes);
+    void get_sorted_orig_elems(std::vector<EntityHandle> &owned_elems);
 
-    int num_orig_nodes() {
-      if (!nodes_finalized) {Throw() << "Nodes not finalized, so orig_nodes not set.";}
-      return orig_nodes.size();
-    }
+    // used in finalize
+    int get_num_elem_conn(std::vector<EntityHandle> elems);
+    
 
-    // Return a reference to a vector of EntityHandles for the original elems used for creation
-    // on this processor sorted in the order they were used for creation
-    std::vector<EntityHandle> const &get_orig_elems() const {
-      if (!elems_finalized) {Throw() << "Elems not finalized, so orig_elems not set.";}
-      return orig_elems;
-    }
-
-    int num_orig_elems() {
-      if (!elems_finalized) {Throw() << "Elems not finalized, so orig_elems not set.";}
-      return orig_elems.size();
-    }
-
-
+    // Get a Range of all nodes and elements on this processor
+    void get_all_nodes(Range &all_nodes);
+    void get_all_elems(Range &all_elems);
 
     // Range based accessors for required element tags
     void get_elem_connectivity(int *elem_conn);
@@ -395,6 +397,12 @@ namespace ESMCI {
     // Turn on elem masking
     void setup_elem_mask();
 
+    // Get elem mask (not mask val) 
+    int get_elem_mask(EntityHandle eh);
+
+    // Set elem mask (not mask val) 
+    void set_elem_mask(EntityHandle eh, int mask);
+
     // Set an element mask value 
     void set_elem_mask_val(EntityHandle eh, int mask_val);
     void set_elem_mask_val(Range elems, int *mask_vals);
@@ -461,9 +469,6 @@ namespace ESMCI {
     void setup_verts_array();
 
 #endif
-
-    // Create empty mesh
-    MBMesh();
 
     // Get rid of mesh
     ~MBMesh();

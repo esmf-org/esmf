@@ -21,7 +21,7 @@
 // ESMF Test header
 #include "ESMC_Test.h"
 
-#include "ESMC_MBMeshTestGenPL.C"
+#include "ESMC_MeshTestGenPL.C"
 
 // other headers
 #include "ESMCI_MBMesh_Extrapolation.h"
