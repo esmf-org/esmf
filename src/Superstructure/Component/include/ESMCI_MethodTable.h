@@ -29,6 +29,7 @@
 //-----------------------------------------------------------------------------
 
 #include <string>
+#include <map>
 
 namespace ESMCI {
 
@@ -42,67 +43,35 @@ class MethodTable;
 
 class MethodElement{
   private:
-    const std::string label;
     void *pointer;
     std::string name;
     std::string shobj;
-    MethodElement *nextElement;
   public:
     // native C++ constructors/destructors
-    MethodElement(void):label(""){
+    MethodElement(void){
       pointer = NULL;
       name = std::string("");
       shobj = std::string("");
-      nextElement = NULL;
     }
-    MethodElement(std::string labelArg):label(labelArg){
-      pointer = NULL;
-      name = std::string("");
-      shobj = std::string("");
-      nextElement = NULL;
-    }
-    MethodElement(std::string labelArg, void *pointerArg):label(labelArg){
+    MethodElement(void *pointerArg){
       pointer = pointerArg;
       name = std::string("");
       shobj = std::string("");
-      nextElement = NULL;
     }
-    MethodElement(std::string labelArg, std::string nameArg,
-      std::string shobjArg):label(labelArg){
+    MethodElement(std::string nameArg, std::string shobjArg){
       pointer = NULL;
       name = nameArg;
       shobj = shobjArg;
-      nextElement = NULL;
-    }
-    ~MethodElement(void){
-      nextElement = NULL;
     }
     // other methods
-    int print(void)const;
-    int execute(void *object, int *userRc);
+    int execute(void *object, int *userRc)const;
     int resolve(void);
   friend class MethodTable;
 };
 
-
-class MethodTable{
-  private:
-    MethodElement *table;
+class MethodTable : std::map<std::string, MethodElement>{
   public:
-    // native C++ constructors/destructors
-    MethodTable(void){
-      table = NULL;
-    }
-    ~MethodTable(void){
-      while (table){
-        MethodElement *next = table->nextElement;   
-        delete table;
-        table = next;
-      }
-      table = NULL;
-    }
     // other methods
-    int print(void)const;
     int add(std::string labelArg, void *pointer);
     int add(std::string labelArg, std::string name, std::string sharedObj);
     int addreplace(std::string labelArg, void *pointer);
