@@ -14,6 +14,7 @@
 #include "ESMCI_VM.h"
 
 #define VM_MEMLOG_off
+#define VM_COMMQUEUELOG_off
 #define VM_EPOCHLOG_off
 #define VM_SSISHMLOG_off
 
@@ -3140,25 +3141,29 @@ int VMK::commwait(commhandle **ch, status *status, int nanopause){
       printf("VMK: only MPI non-blocking implemented\n");
       localrc = VMK_ERROR;
     }
-    // if this *ch is in the request queue x-> unlink and delete
-    if (commqueueitem_unlink(*ch)){ 
-      delete *ch; // delete the container commhandle that was linked
-      *ch = NULL; // ensure this container will not point to anything
-    }
+  }
+  // if this *ch is in the request queue x-> unlink and delete
+  if (commqueueitem_unlink(*ch)){ 
+    delete *ch; // delete the container commhandle that was linked
+    *ch = NULL; // ensure this container will not point to anything
   }
   return localrc;
 }
 
 
 void VMK::commqueuewait(){
+#ifdef VM_COMMQUEUELOG_on
+    std::stringstream msg;
+    msg << "commqueue:" << __LINE__ << " VMK::commqueuewait() nhandles=" <<
+      nhandles;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+#endif
   int n=nhandles;
   commhandle *fh;
   for (int i=0; i<n; i++){
-//    printf("VMK::commqueuewait: %d\n", nhandles);
     fh = firsthandle;
     commwait(&fh);
   }
-//  printf("VMK::commqueuewait: %d\n", nhandles);
 }
 
 
@@ -3308,10 +3313,15 @@ void VMK::sendBuffer::clear(){
   if (mpireq != MPI_REQUEST_NULL){
 #ifdef VM_EPOCHLOG_on
     std::stringstream msg;
-    msg << "epochBuffer:" << __LINE__ << " actually posting MPI_Wait()";
+    msg << "epochBuffer:" << __LINE__ << " posting MPI_Wait()";
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
     MPI_Wait(&mpireq, MPI_STATUS_IGNORE);
+#ifdef VM_EPOCHLOG_on
+    msg.str(""); // clear
+    msg << "epochBuffer:" << __LINE__ << " returned from MPI_Wait()";
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+#endif
   }
 #ifdef USE_STRSTREAM
   stream.freeze(false); // unfreeze the persistent buffer for deallocation
