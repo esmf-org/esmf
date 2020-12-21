@@ -3529,6 +3529,11 @@ int VMK::send(const void *message, int size, int dest, commhandle **ch,
       append(sm->stream, size);
       append(sm->stream, tag);
       sm->stream.write((const char*)message, size);
+#ifdef VM_EPOCHLOG_on
+      msg.str(""); // clear
+      msg << "epochBuffer:" << __LINE__ << " non-blocking send write complete";
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+#endif
     }else{
       (*ch)->nelements=1;
       (*ch)->type=1;          // MPI
