@@ -48,7 +48,7 @@ struct FindPair {
 
 int main(int argc, char *argv[]) {
 #undef ESMC_METHOD
-#define ESMC_METHOD "MBMeshUTest::main()"
+#define ESMC_METHOD "MBMeshRegidUTest::main()"
 
   std::string failMsg = "FAIL";
   int result = 0;
@@ -69,15 +69,22 @@ int main(int argc, char *argv[]) {
 
   // these are bound to MBT in constructor, must match!
   std::vector<std::string> test_apis;
-    test_apis.push_back("createget");
-    test_apis.push_back("dual");
-    test_apis.push_back("redist_elem");
-    test_apis.push_back("redist_node");
-    test_apis.push_back("redist_elno");
-    test_apis.push_back("serialize");
-    test_apis.push_back("to_pointlist_elem");
-    test_apis.push_back("to_pointlist_node");
-    test_apis.push_back("write_vtk");
+    test_apis.push_back("regrid_rendezvous_center");
+    test_apis.push_back("regrid_rendezvous_corner");
+    test_apis.push_back("regrid_search_center");
+    test_apis.push_back("regrid_search_corner");
+    test_apis.push_back("regrid_bilinear_center");
+    test_apis.push_back("regrid_bilinear_corner");
+    // test_apis.push_back("regrid_conserve_center");
+    // test_apis.push_back("regrid_conserve_corner");
+    // test_apis.push_back("regrid_conserve_2nd_center");
+    // test_apis.push_back("regrid_conserve_2nd_corner");
+    // test_apis.push_back("regrid_nearest_d2s_center");
+    // test_apis.push_back("regrid_nearest_d2s_corner");
+    // test_apis.push_back("regrid_nearest_s2d_center");
+    // test_apis.push_back("regrid_nearest_s2d_corner");
+    // test_apis.push_back("regrid_patch_center");
+    // test_apis.push_back("regrid_patch_corner");
 
   // these are bound to MBTGen in constructor, must match!
   std::vector<std::string> test_meshes;
@@ -89,17 +96,14 @@ int main(int argc, char *argv[]) {
     test_meshes.push_back("hex_3d_sph");
     test_meshes.push_back("mix_2d_cart");
     test_meshes.push_back("mix_2d_sph");
-    test_meshes.push_back("ngon_2d_cart");
-    test_meshes.push_back("ngon_2d_sph");
+    // test_meshes.push_back("ngon_2d_cart");
+    // test_meshes.push_back("ngon_2d_sph");
 
   // skip the following tests
   std::vector<std::pair<std::string, std::string>> skip_test = {\
-    // dual not implemented in 3d
-    {"dual", "hex_3d_cart"},
-    {"dual", "hex_3d_sph"},
-    // ESMCI_MBMesh_Redist.C, line:2336:Could not find a suitable processor for this element
-    {"redist_node", "tri_2d_cart"},
-    {"redist_node", "tri_2d_sph"},
+    // regrid_conserve_2nd doesn't work in 3d
+    {"regrid_conserve_2nd", "hex_3d_cart"},
+    {"regrid_conserve_2nd", "hex_3d_sph"}
   };
 
   MBTGen *generate = new MBTGen();
@@ -108,25 +112,21 @@ int main(int argc, char *argv[]) {
     for (const auto mesh: test_meshes) {    
       rc = ESMF_FAILURE;
       
-      std::string name = "MBMesh - " + api + " - " + mesh;
-
       auto skip_itr = std::find_if(skip_test.begin(), skip_test.end(), 
                                    FindPair(api, mesh));
 
       // don't run cases that hang
       if (skip_itr != skip_test.end()) {
-        name = "SKIP - " + name;
         rc = ESMF_SUCCESS;
       } else {
 #if defined ESMF_MOAB
         try {
           MBT *test = generate->mesh_map[mesh](localrc);
           
-          test->name = name;
           // test->verbosity = 3;
           // test->tol = 1.e-15;
           // test->print();
-
+          
           if (localrc == ESMF_SUCCESS) localrc = test->build();
           if (localrc == ESMF_SUCCESS) rc = test->function_map[api]();
           
@@ -138,11 +138,11 @@ int main(int argc, char *argv[]) {
 #endif
       }
 
+      std::string name = "MBMesh - " + api + " - " + mesh;
       ESMC_Test(rc==ESMF_SUCCESS, name.c_str(), failMsg.c_str(), 
                 &result, __FILE__, __LINE__, 0);
     }
   }
-  
   delete generate;
 
   //NEX_UTest
@@ -154,7 +154,7 @@ int main(int argc, char *argv[]) {
   //NEX_UTest
   //NEX_UTest
   //NEX_UTest
-  //NEX_UTest  10
+  //NEX_UTest  // 10
   //NEX_UTest
   //NEX_UTest
   //NEX_UTest
@@ -164,7 +164,7 @@ int main(int argc, char *argv[]) {
   //NEX_UTest
   //NEX_UTest
   //NEX_UTest
-  //NEX_UTest  20
+  //NEX_UTest  // 20
   //NEX_UTest
   //NEX_UTest
   //NEX_UTest
@@ -174,7 +174,7 @@ int main(int argc, char *argv[]) {
   //NEX_UTest
   //NEX_UTest
   //NEX_UTest
-  //NEX_UTest  30
+  //NEX_UTest  // 30
   //NEX_UTest
   //NEX_UTest
   //NEX_UTest
@@ -184,7 +184,7 @@ int main(int argc, char *argv[]) {
   //NEX_UTest
   //NEX_UTest
   //NEX_UTest
-  //NEX_UTest  40
+  //NEX_UTest  // 40
   //NEX_UTest
   //NEX_UTest
   //NEX_UTest
@@ -193,48 +193,8 @@ int main(int argc, char *argv[]) {
   //NEX_UTest
   //NEX_UTest
   //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest  50
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest  60
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest  70
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest  
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest  80
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
+
+
 
 
   //----------------------------------------------------------------------------

@@ -23,25 +23,43 @@
 
 #if defined ESMF_MOAB
 #include "ESMCI_MBMesh.h"
-#include "ESMC_MBMeshTest.C"
+#include "ESMC_MBT.C"
 #endif
 
 #include <iostream>
 #include <iterator>
 #include <vector>
 #include <algorithm>
+#include <functional>
 
-#if !defined (M_PI)
-// for Windows...
-#define M_PI 3.14159265358979323846
-#endif
+#if defined ESMF_MOAB
 
-static double UNINITVAL = -42;
+class MBTGen {
+public:
+  
+  double UNINITVAL = -42;
 
-#ifdef ESMF_MOAB
-MBMeshTest *quad_2d_cart(int &rc){
+  std::map<std::string, std::function<MBT*(int&)>>  mesh_map;
+
+MBTGen() {
+  try {
+    mesh_map["quad_2d_cart"] = std::bind(&MBTGen::quad_2d_cart, this, std::placeholders::_1);
+    mesh_map["quad_2d_sph"] = std::bind(&MBTGen::quad_2d_sph, this, std::placeholders::_1);
+    mesh_map["tri_2d_cart"] = std::bind(&MBTGen::tri_2d_cart, this, std::placeholders::_1);
+    mesh_map["tri_2d_sph"] = std::bind(&MBTGen::tri_2d_sph, this, std::placeholders::_1);
+    mesh_map["hex_3d_cart"] = std::bind(&MBTGen::hex_3d_cart, this, std::placeholders::_1);
+    mesh_map["hex_3d_sph"] = std::bind(&MBTGen::hex_3d_sph, this, std::placeholders::_1);
+    mesh_map["mix_2d_cart"] = std::bind(&MBTGen::mix_2d_cart, this, std::placeholders::_1);
+    mesh_map["mix_2d_sph"] = std::bind(&MBTGen::mix_2d_sph, this, std::placeholders::_1);
+    mesh_map["ngon_2d_cart"] = std::bind(&MBTGen::ngon_2d_cart, this, std::placeholders::_1);
+    mesh_map["ngon_2d_sph"] = std::bind(&MBTGen::ngon_2d_sph, this, std::placeholders::_1);
+  }
+  CATCH_MBMESH_RETHROW
+}
+
+MBT *quad_2d_cart(int &rc){
 #undef ESMC_METHOD
-#define ESMC_METHOD "mbmesh_gen_quad_2d_cart"
+#define ESMC_METHOD "quad_2d_cart"
   //
   //
   //  2.0   7 ------- 8 -------- 9
@@ -58,7 +76,7 @@ MBMeshTest *quad_2d_cart(int &rc){
   //
 
   rc = ESMF_RC_NOT_IMPL;
-  MBMeshTest *mbt = NULL;
+  MBT *mbt = NULL;
 
   try {
 
@@ -123,7 +141,7 @@ MBMeshTest *quad_2d_cart(int &rc){
       }
     }
 
-    mbt = new MBMeshTest(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist_num_node, redist_num_elem, redist_num_elem_conn);
+    mbt = new MBT(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist_num_node, redist_num_elem, redist_num_elem_conn);
 
     mbt->name = ESMC_METHOD;
 
@@ -228,13 +246,13 @@ MBMeshTest *quad_2d_cart(int &rc){
       }
     }
 
-  } CATCH_MBMESHTEST_RETURN_NULL(&rc)
+  } CATCH_MBT_RETURN_NULL(&rc)
 
   rc = ESMF_SUCCESS;
   return mbt;
 }
 
-MBMeshTest *quad_2d_sph(int &rc){
+MBT *quad_2d_sph(int &rc){
   //
   //  pi/5  7 ------- 8 -------- 9
   //        |         |          |
@@ -249,10 +267,10 @@ MBMeshTest *quad_2d_sph(int &rc){
   //       0.0       pi/10       pi/5
   //
 #undef ESMC_METHOD
-#define ESMC_METHOD "mbmesh_gen_quad_2d_sph"
+#define ESMC_METHOD "quad_2d_sph"
 
   rc = ESMF_RC_NOT_IMPL;
-  MBMeshTest *mbt = NULL;
+  MBT *mbt = NULL;
 
   try {
 
@@ -287,13 +305,13 @@ MBMeshTest *quad_2d_sph(int &rc){
 
     mbt->coord_sys=ESMC_COORDSYS_SPH_RAD;
 
-  } CATCH_MBMESHTEST_RETURN_NULL(&rc)
+  } CATCH_MBT_RETURN_NULL(&rc)
 
   rc = ESMF_SUCCESS;
   return mbt;
 }
 
-MBMeshTest* tri_2d_cart(int &rc) {
+MBT* tri_2d_cart(int &rc) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "tri_2d_cart"
   //
@@ -311,7 +329,7 @@ MBMeshTest* tri_2d_cart(int &rc) {
   //
 
   rc = ESMF_RC_NOT_IMPL;
-  MBMeshTest *mbt = NULL;
+  MBT *mbt = NULL;
 
   try {
 
@@ -376,7 +394,7 @@ MBMeshTest* tri_2d_cart(int &rc) {
       }
     }
 
-    mbt = new MBMeshTest(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist_num_node, redist_num_elem, redist_num_elem_conn);
+    mbt = new MBT(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist_num_node, redist_num_elem, redist_num_elem_conn);
 
     mbt->name = ESMC_METHOD;
 
@@ -514,13 +532,13 @@ MBMeshTest* tri_2d_cart(int &rc) {
       }
     }
 
-  } CATCH_MBMESHTEST_RETURN_NULL(&rc)
+  } CATCH_MBT_RETURN_NULL(&rc)
 
   rc = ESMF_SUCCESS;
   return mbt;
 }
 
-MBMeshTest *tri_2d_sph(int &rc){
+MBT *tri_2d_sph(int &rc){
   //
   //  2.0   7 ------- 8 -------- 9
   //        |  \   6  |  7    /  |
@@ -538,7 +556,7 @@ MBMeshTest *tri_2d_sph(int &rc){
 #define ESMC_METHOD "tri_2d_sph"
 
   rc = ESMF_RC_NOT_IMPL;
-  MBMeshTest *mbt = NULL;
+  MBT *mbt = NULL;
 
   try {
 
@@ -573,18 +591,18 @@ MBMeshTest *tri_2d_sph(int &rc){
 
     mbt->coord_sys=ESMC_COORDSYS_SPH_RAD;
 
-  } CATCH_MBMESHTEST_RETURN_NULL(&rc)
+  } CATCH_MBT_RETURN_NULL(&rc)
 
   rc = ESMF_SUCCESS;
   return mbt;
 }
 
-MBMeshTest *hex_3d_cart(int &rc) {
+MBT *hex_3d_cart(int &rc) {
 #undef ESMC_METHOD
-#define ESMC_METHOD "mbmesh_gen_hex_3d_cart"
+#define ESMC_METHOD "hex_3d_cart"
 
   rc = ESMF_RC_NOT_IMPL;
-  MBMeshTest *mbt = NULL;
+  MBT *mbt = NULL;
 
   try {
 
@@ -649,7 +667,7 @@ MBMeshTest *hex_3d_cart(int &rc) {
       }
     }
 
-    mbt = new MBMeshTest(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist_num_node, redist_num_elem, redist_num_elem_conn);
+    mbt = new MBT(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist_num_node, redist_num_elem, redist_num_elem_conn);
 
     mbt->name = ESMC_METHOD;
 
@@ -833,18 +851,18 @@ MBMeshTest *hex_3d_cart(int &rc) {
       }
     }
 
-  } CATCH_MBMESHTEST_RETURN_NULL(&rc)
+  } CATCH_MBT_RETURN_NULL(&rc)
 
   rc = ESMF_SUCCESS;
   return mbt;
 }
 
-MBMeshTest *hex_3d_sph(int &rc) {
+MBT *hex_3d_sph(int &rc) {
 #undef ESMC_METHOD
-#define ESMC_METHOD "mbmesh_gen_hex_3d_sph"
+#define ESMC_METHOD "hex_3d_sph"
 
   rc = ESMF_RC_NOT_IMPL;
-  MBMeshTest *mbt = NULL;
+  MBT *mbt = NULL;
 
   try {
 
@@ -880,13 +898,13 @@ MBMeshTest *hex_3d_sph(int &rc) {
 
     mbt->coord_sys=ESMC_COORDSYS_SPH_DEG;
 
-  } CATCH_MBMESHTEST_RETURN_NULL(&rc)
+  } CATCH_MBT_RETURN_NULL(&rc)
 
   rc = ESMF_SUCCESS;
   return mbt;
 }
 
-MBMeshTest *ngon_2d_cart(int &rc) {
+MBT *ngon_2d_cart(int &rc) {
   //
   //  3.1                    / -- 15 -- \
   //  3.0    13 ------ 14 --             -- 16
@@ -906,10 +924,10 @@ MBMeshTest *ngon_2d_cart(int &rc) {
   //      0  .1   1  1.5        2  2.2 2.5  3  3.1
   //
 #undef ESMC_METHOD
-#define ESMC_METHOD "mbmesh_gen_ngon_2d_cart"
+#define ESMC_METHOD "ngon_2d_cart"
 
   rc = ESMF_RC_NOT_IMPL;
-  MBMeshTest *mbt = NULL;
+  MBT *mbt = NULL;
 
   try {
 
@@ -974,7 +992,7 @@ MBMeshTest *ngon_2d_cart(int &rc) {
       }
     }
 
-    mbt = new MBMeshTest(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist_num_node, redist_num_elem, redist_num_elem_conn);
+    mbt = new MBT(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist_num_node, redist_num_elem, redist_num_elem_conn);
 
     mbt->name = ESMC_METHOD;
 
@@ -1138,13 +1156,13 @@ MBMeshTest *ngon_2d_cart(int &rc) {
       }
     }
 
-  } CATCH_MBMESHTEST_RETURN_NULL(&rc)
+  } CATCH_MBT_RETURN_NULL(&rc)
 
   rc = ESMF_SUCCESS;
   return mbt;
 }
 
-MBMeshTest *ngon_2d_sph(int &rc) {
+MBT *ngon_2d_sph(int &rc) {
   //
   //  3.1                    / -- 15 -- \
   //  3.0    13 ------ 14 --             -- 16
@@ -1164,10 +1182,10 @@ MBMeshTest *ngon_2d_sph(int &rc) {
   //      0  .1   1  1.5        2  2.2 2.5  3  3.1
   //
 #undef ESMC_METHOD
-#define ESMC_METHOD "mbmesh_gen_ngon_2d_sph"
+#define ESMC_METHOD "ngon_2d_sph"
 
   rc = ESMF_RC_NOT_IMPL;
-  MBMeshTest *mbt = NULL;
+  MBT *mbt = NULL;
 
   try {
 
@@ -1204,13 +1222,13 @@ MBMeshTest *ngon_2d_sph(int &rc) {
 
     mbt->coord_sys=ESMC_COORDSYS_SPH_DEG;
 
-  } CATCH_MBMESHTEST_RETURN_NULL(&rc)
+  } CATCH_MBT_RETURN_NULL(&rc)
 
   rc = ESMF_SUCCESS;
   return mbt;
 }
 
-MBMeshTest *mix_2d_cart(int &rc) {
+MBT *mix_2d_cart(int &rc) {
   //
   //
   //  3.0   13 ------ 14 ------- 15 ------ 16
@@ -1230,10 +1248,10 @@ MBMeshTest *mix_2d_cart(int &rc) {
   //       0.0       1.5        2.0        3.0
   //
 #undef ESMC_METHOD
-#define ESMC_METHOD "mbmesh_gen_mix_2d_cart_par"
+#define ESMC_METHOD "mix_2d_cart_par"
 
   rc = ESMF_RC_NOT_IMPL;
-  MBMeshTest *mbt = NULL;
+  MBT *mbt = NULL;
 
   try {
 
@@ -1298,7 +1316,7 @@ MBMeshTest *mix_2d_cart(int &rc) {
       }
     }
 
-    mbt = new MBMeshTest(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist_num_node, redist_num_elem, redist_num_elem_conn);
+    mbt = new MBT(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist_num_node, redist_num_elem, redist_num_elem_conn);
 
     mbt->name = ESMC_METHOD;
 
@@ -1447,13 +1465,13 @@ MBMeshTest *mix_2d_cart(int &rc) {
       }
     }
 
-  } CATCH_MBMESHTEST_RETURN_NULL(&rc)
+  } CATCH_MBT_RETURN_NULL(&rc)
 
   rc = ESMF_SUCCESS;
   return mbt;
 }
 
-MBMeshTest *mix_2d_sph(int &rc) {
+MBT *mix_2d_sph(int &rc) {
   //
   //  3.0   13 ------ 14 ------- 15 ------ 16
   //        |         |          |         |
@@ -1472,10 +1490,10 @@ MBMeshTest *mix_2d_sph(int &rc) {
   //       0.0       1.5        2.0        3.0
   //
 #undef ESMC_METHOD
-#define ESMC_METHOD "mbmesh_gen_mix_2d_sph"
+#define ESMC_METHOD "mix_2d_sph"
 
   rc = ESMF_RC_NOT_IMPL;
-  MBMeshTest *mbt = NULL;
+  MBT *mbt = NULL;
 
   try {
 
@@ -1511,12 +1529,152 @@ MBMeshTest *mix_2d_sph(int &rc) {
 
     mbt->coord_sys=ESMC_COORDSYS_SPH_DEG;
 
-  } CATCH_MBMESHTEST_RETURN_NULL(&rc)
+  } CATCH_MBT_RETURN_NULL(&rc)
 
   rc = ESMF_SUCCESS;
   return mbt;
 }
 
+// MBMesh* create_mesh_tet(int &rc) {
+// /*
+//                                        ,|,
+//                                      ,7`\,\,
+//                                    ,7`  `| `\,
+//                                  ,7`     \,  `\,
+//                                ,7`       `|    `\,
+//                              ,7`          \,     `\,
+//                            ,7`            `|       `\,
+//                          ,7`               \,        `\,
+//                        ,7`                 `|        /7`\,
+//                      ,7`                    \,      AV `|`\,
+//                    ,7`'TTs.,                `|     /7   \, `\,
+//                  ,7` \\,  `'TTs.,            \,   AV    `|   `\,
+//                ,7`   `|       `'TTs.,       `|  /7      \,    `\,
+//              ,7`      \,            `'TTs.,   \,AV       `|      `\,
+//            ,7`        `|                 `'TTs`|7         \,       `\,
+//          ,7`           \,                     ,7\\,        `|         K`
+//        ,7`             `|                  ,7` `|`\,       \,       AV
+//      ,7`                \,               ,7`    \, `\,     `|      /7
+//    ,7`                  `|             ,7`      `|   `\,    \,    AV
+//   ,T,                    \,          ,7`         \,    `\,  `|   /7
+//   `'TTs.,                `|        ,7`           `|      `\, \, AV
+//        `'TTs.,            \,     ,7`              \,       `\||/7
+//             `'TTs.,       `|   ,7`                `|         `AV
+//                  `'TTs.,   \,,7`                   \,        /7
+//                       `'TTs`|                      `|       AV
+//                            `'TTs.,                  \,     /7
+//                                 `'TTs.,             `|    AV
+//                                      `'TTV.,         \,  /7
+//                                           `'TTs.,    `| AV
+//                                                `'TTs.,\/7
+//                                                     `'T`
+// */
+//   // Get parallel information
+//   int localPet, petCount;
+//   ESMC_VM vm;
+// 
+//   vm=ESMC_VMGetGlobal(&rc);
+//   if (rc != ESMF_SUCCESS) return 0;
+// 
+//   rc=ESMC_VMGet(vm, &localPet, &petCount, (int *)NULL, (MPI_Comm *)NULL,
+//                 (int *)NULL, (int *)NULL);
+//   if (rc != ESMF_SUCCESS) return 0;
+// 
+//   // Mesh variables
+//   int pdim=3;
+//   int sdim=3;
+//   int num_elem, num_node;
+// 
+//   // set Mesh parameters
+//   int *nodeId;
+//   double *nodeCoord;
+//   int *nodeOwner;
+// 
+//   int *elemId;
+//   int *elemType;
+//   int *elemConn;
+// 
+//   MBMesh *mesh = new MBMesh();
+// 
+//   ESMC_CoordSys_Flag coordsys=ESMC_COORDSYS_CART;
+//   MBMesh_create(&mesh, &pdim, &sdim, &coordsys, &rc);
+// 
+//     num_node = 10;
+//     num_elem = 4;
+// 
+//     nodeId    = (int *) malloc (num_node * sizeof (int));
+//     nodeCoord = (double *) malloc (3*num_node * sizeof (double));
+//     nodeOwner = (int *) malloc (num_node * sizeof (int));
+//     elemId   = (int *) malloc (num_elem * sizeof (int));
+//     elemType = (int *) malloc (num_elem * sizeof (int));
+//     elemConn = (int *) malloc (4*num_elem * sizeof (int));
+// 
+//     nodeId[0]=1;
+//     nodeId[1]=2;
+//     nodeId[2]=3;
+//     nodeId[3]=4;
+//     nodeId[4]=5;
+//     nodeId[5]=6;
+//     nodeId[6]=7;
+//     nodeId[7]=8;
+//     nodeId[8]=9;
+//     nodeId[9]=10;
+// 
+//     nodeCoord[0]=0.0; nodeCoord[1]=0.0; nodeCoord[2]=0.0;
+//     nodeCoord[3]=1.0; nodeCoord[4]=0.0; nodeCoord[5]=0.0;
+//     nodeCoord[6]=2.0; nodeCoord[7]=0.0; nodeCoord[8]=0.0;
+//     nodeCoord[9]=0.5; nodeCoord[10]=1.0; nodeCoord[11]=0.0;
+//     nodeCoord[12]=1.5; nodeCoord[13]=1.0; nodeCoord[14]=0.0;
+//     nodeCoord[15]=1.0; nodeCoord[16]=2.0; nodeCoord[17]=0.0;
+//     nodeCoord[18]=0.5; nodeCoord[19]=0.5; nodeCoord[20]=1.0;
+//     nodeCoord[21]=1.0; nodeCoord[22]=0.5; nodeCoord[23]=1.0;
+//     nodeCoord[24]=1.5; nodeCoord[25]=0.5; nodeCoord[26]=1.0;
+//     nodeCoord[27]=1.0; nodeCoord[28]=1.5; nodeCoord[29]=1.0;
+// 
+//     nodeOwner[0]=0;
+//     nodeOwner[1]=0;
+//     nodeOwner[2]=0;
+//     nodeOwner[3]=0;
+//     nodeOwner[4]=0;
+//     nodeOwner[5]=0;
+//     nodeOwner[6]=0;
+//     nodeOwner[7]=0;
+//     nodeOwner[8]=0;
+//     nodeOwner[9]=0;
+// 
+//     elemId[0]=1;
+//     elemId[1]=2;
+//     elemId[2]=3;
+//     elemId[3]=4;
+// 
+//     elemType[0]=ESMC_MESHELEMTYPE_TETRA;
+//     elemType[1]=ESMC_MESHELEMTYPE_TETRA;
+//     elemType[2]=ESMC_MESHELEMTYPE_TETRA;
+//     elemType[3]=ESMC_MESHELEMTYPE_TETRA;
+// 
+//     elemConn[0]=1; elemConn[1]=2; elemConn[2]=7; elemConn[3]=4;
+//     elemConn[4]=2; elemConn[5]=3; elemConn[6]=9; elemConn[7]=5;
+//     elemConn[8]=2; elemConn[9]=5; elemConn[10]=8; elemConn[11]=4;
+//     elemConn[12]=4; elemConn[13]=5; elemConn[14]=10; elemConn[15]=6;
+// 
+//     MBMesh_addnodes(&mesh, &num_node, nodeId, nodeCoord, nodeOwner, NULL,
+//                     &coordsys, &sdim, &rc);
+// 
+//     int areapresent = 0;
+//     int coordspresent = 0;
+//     int numelemconn = 4*num_elem;
+//     int regridconserve = 0;
+//     MBMesh_addelements(&mesh, &num_elem, elemId, elemType, NULL,
+//                        &areapresent, NULL,
+//                        &coordspresent, NULL,
+//                        &numelemconn, elemConn,
+//                        &regridconserve,
+//                        &coordsys, &sdim, &rc);
+// 
+//   rc = ESMF_SUCCESS;
+//   return mesh;
+// }
 
+};
 
 #endif

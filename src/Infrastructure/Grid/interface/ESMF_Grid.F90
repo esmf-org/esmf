@@ -5196,6 +5196,210 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     end function ESMF_GridCreateFrmDistGridArb
 
+    ! Find out how the corners around the centers in a SCRIP grid 
+    ! align with each other
+    subroutine find_corner_align(dim1,dim2,cornerX2D,cornerY2D, &
+         foundAlign, topCorner,topRightCorner,btmRightCorner,btmCorner,rc)
+      integer :: dim1,dim2
+      real(ESMF_KIND_R8) :: cornerX2D(:,:),cornerY2D(:,:)
+      logical :: foundAlign
+      integer :: topCorner
+      integer :: topRightCorner
+      integer :: BtmRightCorner
+      integer :: btmCorner
+      integer :: rc
+      
+      integer :: i,j
+      real(ESMF_KIND_R8) :: tol=0.0000000001
+      logical :: matches
+      integer :: count,inPos,outPos
+      integer :: ip1,im1
+      
+      ! Init Output
+      foundAlign=.false.
+      topCorner=-1
+      topRightCorner=-1
+      BtmRightCorner=-1
+      btmCorner=-1
+      rc=ESMF_SUCCESS
+      
+      ! Error check inputs
+      if (dim1 == 1) then
+         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+              msg="- Currently can't handle a grid thats width 1 in only 1st dim", &
+              ESMF_CONTEXT, rcToReturn=rc)
+         return
+      endif
+      
+      if (dim2 == 1) then
+         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+              msg="- Currently can't handle a grid thats width 1 in only 2nd dim", &
+              ESMF_CONTEXT, rcToReturn=rc)
+         return
+      endif
+      
+      ! Figure out which corner indice is the top row of corners
+      ! It won't match any of the neighbors corners
+      TopCorner=-1
+      do i=1,4
+         
+         ! See if it matches nbr to the right
+         matches=.false.
+         do j=1,4
+            if ((abs(cornerX2D(i,1)-cornerX2D(j,2))<tol) .and. &
+                 (abs(cornerY2D(i,1)-cornerY2D(j,2))<tol)) then
+               matches=.true.
+               exit
+            endif
+         enddo
+         if (matches) cycle
+         
+         ! See if it matches nbr to the below
+         matches=.false.
+         do j=1,4
+            if ((abs(cornerX2D(i,1)-cornerX2D(j,dim1+1))<tol) .and. &
+                 (abs(cornerY2D(i,1)-cornerY2D(j,dim1+1))<tol)) then
+               matches=.true.
+               exit
+            endif
+         enddo
+         if (matches) cycle
+         
+         ! See if it matches nbr to the below and to the right
+         matches=.false.
+         do j=1,4
+            if ((abs(cornerX2D(i,1)-cornerX2D(j,dim1+2))<tol) .and. &
+                 (abs(cornerY2D(i,1)-cornerY2D(j,dim1+2))<tol)) then
+               matches=.true.
+               exit
+            endif
+         enddo
+         if (matches) cycle
+         
+         ! Doesn't match anyone
+         TopCorner=i
+         
+         ! Exit the loop
+         exit
+      enddo
+      
+      ! Make sure we found a corner
+      if (TopCorner == -1) then
+         foundAlign=.false.
+         rc=ESMF_SUCCESS ! Successfully found that we couldn't find alignment, not an error in this case
+         return
+      endif
+
+      ! Figure out which corner indice is the top right row of corners
+      ! It will match the top right, but not the bottom right
+      TopRightCorner=-1
+      do i=1,4
+         
+         ! See if it matches nbr to the right
+         matches=.false.
+         do j=1,4
+            if ((abs(cornerX2D(i,1)-cornerX2D(j,2))<tol) .and. &
+                 (abs(cornerY2D(i,1)-cornerY2D(j,2))<tol)) then
+               matches=.true.
+               exit
+            endif
+         enddo
+         if (.not. matches) cycle
+         
+         ! See if it matches nbr to the below right
+         matches=.false.
+         do j=1,4
+            if ((abs(cornerX2D(i,1)-cornerX2D(j,dim1+2))<tol) .and. &
+                 (abs(cornerY2D(i,1)-cornerY2D(j,dim1+2))<tol)) then
+               matches=.true.
+               exit
+            endif
+         enddo
+         
+         ! correct matching so should be BtmCorner
+         if (.not. matches) then
+            TopRightCorner=i
+            exit
+         endif
+      enddo
+      
+      ! Make sure we found a corner
+      if (TopRightCorner == -1) then
+         foundAlign=.false.
+         rc=ESMF_SUCCESS ! Successfully found that we couldn't find alignment, not an error in this case
+         return
+      endif
+      
+      ! Figure out which corner indice is the bottom row of corners
+      ! It will match the one below , but not the one to the right
+      BtmCorner=-1
+      do i=1,4
+         
+         ! See if it matches nbr to the right
+         matches=.false.
+         do j=1,4
+            if ((abs(cornerX2D(i,1)-cornerX2D(j,2))<tol) .and. &
+                 (abs(cornerY2D(i,1)-cornerY2D(j,2))<tol)) then
+               matches=.true.
+               exit
+            endif
+         enddo
+         if (matches) cycle
+         
+         ! See if it matches nbr to the below
+         matches=.false.
+         do j=1,4
+            if ((abs(cornerX2D(i,1)-cornerX2D(j,dim1+1))<tol) .and. &
+                 (abs(cornerY2D(i,1)-cornerY2D(j,dim1+1))<tol)) then
+               matches=.true.
+               exit
+            endif
+         enddo
+         
+         ! correct matching so should be BtmCorner
+         if (matches) then
+            BtmCorner=i
+            exit
+         endif         
+      enddo
+      
+      ! Make sure we found a corner
+      if (BtmCorner == -1) then
+         foundAlign=.false.
+         rc=ESMF_SUCCESS ! Successfully found that we couldn't find alignment, not an error in this case
+         return
+      endif
+      
+      
+      ! Figure out which corner indice is the bottom right row of corners
+      ! It will match the bottom right, but not the top right
+      BtmRightCorner=-1
+      do i=1,4
+         
+         ! eliminate all other possibilities
+         if (i == TopCorner) cycle
+         if (i == TopRightCorner) cycle
+         if (i == BtmCorner) cycle
+         
+         BtmRightCorner=i
+      enddo
+      
+      ! Make sure we found a corner
+      if (BtmRightCorner == -1) then
+         foundAlign=.false.
+         rc=ESMF_SUCCESS ! Successfully found that we couldn't find alignment, not an error in this case
+         return
+      endif
+      
+      ! Made it all the way through, so found align
+      foundAlign=.true.
+      
+      ! return success
+      rc=ESMF_SUCCESS
+      
+    end subroutine find_corner_align
+
+
 !-------------------------------------------------------------------------------------------
 ! Internal subroutine to convert the 2D corner coordinate arrays which contain all the corners
 ! surrounding each center point into a 1D Array without repeats.
@@ -5207,8 +5411,10 @@ subroutine convert_corner_arrays_to_1D(isSphere,dim1,dim2,cornerX2D,cornerY2D,co
  real(ESMF_KIND_R8) :: cornerX(:),cornerY(:)
  integer :: rc
 
+ integer :: localrc
  integer :: i,j
  real(ESMF_KIND_R8) :: tol=0.0000000001
+ logical :: foundAlign
  integer :: topCorner
  integer :: topRightCorner
  integer :: BtmRightCorner
@@ -5244,177 +5450,20 @@ subroutine convert_corner_arrays_to_1D(isSphere,dim1,dim2,cornerX2D,cornerY2D,co
     return
  endif
 
- if (dim1 == 1) then
-     call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
- msg="- Currently can't handle a grid thats width 1 in only 1st dim", &
-          ESMF_CONTEXT, rcToReturn=rc)
-     return
+ ! Find the alignment of the corners
+ call find_corner_align(dim1,dim2,cornerX2D,cornerY2D, &
+      foundAlign,topCorner,topRightCorner,btmRightCorner,btmCorner,rc=localrc)
+ if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+ ! IF we couldn't find an align then just default
+ if (.not. foundAlign) then
+    topCorner=1
+    topRightCorner=2
+    btmRightCorner=3
+    btmCorner=4
  endif
-
- if (dim2 == 1) then
-     call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
- msg="- Currently can't handle a grid thats width 1 in only 2nd dim", &
-          ESMF_CONTEXT, rcToReturn=rc)
-     return
- endif
-
-
- ! Figure out which corner indice is the top row of corners
- ! It won't match any of the neighbors corners
- TopCorner=-1
- do i=1,4
-
-    ! See if it matches nbr to the right
-    matches=.false.
-    do j=1,4
-       if ((abs(cornerX2D(i,1)-cornerX2D(j,2))<tol) .and. &
-           (abs(cornerY2D(i,1)-cornerY2D(j,2))<tol)) then
-          matches=.true.
-          exit
-       endif
-    enddo
-    if (matches) cycle
-
-    ! See if it matches nbr to the below
-    matches=.false.
-    do j=1,4
-       if ((abs(cornerX2D(i,1)-cornerX2D(j,dim1+1))<tol) .and. &
-           (abs(cornerY2D(i,1)-cornerY2D(j,dim1+1))<tol)) then
-          matches=.true.
-          exit
-       endif
-    enddo
-    if (matches) cycle
-
-   ! See if it matches nbr to the below and to the right
-    matches=.false.
-    do j=1,4
-       if ((abs(cornerX2D(i,1)-cornerX2D(j,dim1+2))<tol) .and. &
-           (abs(cornerY2D(i,1)-cornerY2D(j,dim1+2))<tol)) then
-          matches=.true.
-          exit
-       endif
-    enddo
-    if (matches) cycle
-
-    ! Doesn't match anyone
-    TopCorner=i
-
-    ! Exit the loop
-    exit
- enddo
-
-  ! Make sure we found a corner
-  if (TopCorner == -1) then
-     call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-          msg="- Bad corner array in SCRIP file", &
-          ESMF_CONTEXT, rcToReturn=rc)
-     return
-  endif
-
-
- ! Figure out which corner indice is the top right row of corners
- ! It will match the top right, but not the bottom right
- TopRightCorner=-1
- do i=1,4
-
-    ! See if it matches nbr to the right
-    matches=.false.
-    do j=1,4
-       if ((abs(cornerX2D(i,1)-cornerX2D(j,2))<tol) .and. &
-           (abs(cornerY2D(i,1)-cornerY2D(j,2))<tol)) then
-          matches=.true.
-          exit
-       endif
-    enddo
-    if (.not. matches) cycle
-
-    ! See if it matches nbr to the below right
-    matches=.false.
-    do j=1,4
-       if ((abs(cornerX2D(i,1)-cornerX2D(j,dim1+2))<tol) .and. &
-           (abs(cornerY2D(i,1)-cornerY2D(j,dim1+2))<tol)) then
-          matches=.true.
-          exit
-       endif
-    enddo
-
-    ! correct matching so should be BtmCorner
-    if (.not. matches) then
-       TopRightCorner=i
-       exit
-    endif
- enddo
-
-  ! Make sure we found a corner
-  if (TopRightCorner == -1) then
-     call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG,msg="- Bad corner array in SCRIP file", &
-          ESMF_CONTEXT, rcToReturn=rc)
-     return
-  endif
-
- ! Figure out which corner indice is the bottom row of corners
- ! It will match the one below , but not the one to the right
- BtmCorner=-1
- do i=1,4
-
-    ! See if it matches nbr to the right
-    matches=.false.
-    do j=1,4
-       if ((abs(cornerX2D(i,1)-cornerX2D(j,2))<tol) .and. &
-           (abs(cornerY2D(i,1)-cornerY2D(j,2))<tol)) then
-          matches=.true.
-          exit
-       endif
-    enddo
-    if (matches) cycle
-
-    ! See if it matches nbr to the below
-    matches=.false.
-    do j=1,4
-       if ((abs(cornerX2D(i,1)-cornerX2D(j,dim1+1))<tol) .and. &
-           (abs(cornerY2D(i,1)-cornerY2D(j,dim1+1))<tol)) then
-          matches=.true.
-          exit
-       endif
-    enddo
-
-    ! correct matching so should be BtmCorner
-    if (matches) then
-       BtmCorner=i
-       exit
-    endif
-
- enddo
-
-  ! Make sure we found a corner
-  if (BtmCorner == -1) then
-     call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, msg="- Bad corner array in SCRIP file", &
-          ESMF_CONTEXT, rcToReturn=rc)
-     return
-  endif
-
-
- ! Figure out which corner indice is the bottom right row of corners
- ! It will match the bottom right, but not the top right
- BtmRightCorner=-1
- do i=1,4
-
-    ! eliminate all other possibilities
-    if (i == TopCorner) cycle
-    if (i == TopRightCorner) cycle
-    if (i == BtmCorner) cycle
-
-    BtmRightCorner=i
- enddo
-
-  ! Make sure we found a corner
-  if (BtmRightCorner == -1) then
-     call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG,msg="- Bad corner array in SCRIP file", &
-          ESMF_CONTEXT, rcToReturn=rc)
-     return
-  endif
-
 
 #if 0
 ! Error check corner info from file to make sure corners are consistent throughout file
