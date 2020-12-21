@@ -74,6 +74,8 @@ module NUOPC_Connector
     integer                             :: srcFieldCount
     integer                             :: dstFieldCount    
     logical                             :: srcDstOverlap
+    logical                             :: srcFlag
+    logical                             :: dstFlag
     type(ESMF_RouteHandle)              :: rh
     type(ESMF_State)                    :: state
     type(ESMF_Region_Flag), pointer     :: zeroRegions(:)
@@ -5159,7 +5161,7 @@ call ESMF_LogWrite("Matching Mesh found!", ESMF_LOGMSG_DEBUG, rc=rc)
     
     ! determine whether there is src/dst overlap on any PET
     call DetermineSrcDstOverlap(is%wrap%srcFieldList, is%wrap%dstFieldList, &
-      is%wrap%srcDstOverlap, verbosity, rc=rc)
+      is%wrap%srcDstOverlap, is%wrap%srcFlag, is%wrap%dstFlag, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -5255,15 +5257,16 @@ call ESMF_LogWrite("Matching Mesh found!", ESMF_LOGMSG_DEBUG, rc=rc)
   !-----------------------------------------------------------------------------
 
   subroutine DetermineSrcDstOverlap(srcFieldList, dstFieldList, srcDstOverlap, &
-    verbosity, rc)
+    srcFlag, dstFlag, verbosity, rc)
     type(ESMF_Field), pointer           :: srcFieldList(:)
     type(ESMF_Field), pointer           :: dstFieldList(:)
     logical,                intent(out) :: srcDstOverlap
+    logical,                intent(out) :: srcFlag
+    logical,                intent(out) :: dstFlag
     integer,                intent(in)  :: verbosity
     integer,                intent(out) :: rc
     ! local variables
     integer                           :: i, localPet
-    logical                           :: srcFlag, dstFlag
     type(ESMF_VM)                     :: vm
     character(ESMF_MAXSTR)            :: fieldName
     character(len=240)                :: msgString
@@ -5960,7 +5963,22 @@ call ESMF_LogWrite("Matching Mesh found!", ESMF_LOGMSG_DEBUG, rc=rc)
     call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      
+    
+    ! conditional profiling for src/dst PETs
+    if (btest(profiling,3) .and. .not.is%wrap%srcDstOverlap) then
+      if (is%wrap%srcFlag) then
+        call ESMF_TraceRegionEnter(rName//"-srcPETs", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      elseif (is%wrap%dstFlag) then
+        call ESMF_TraceRegionEnter(rName//"-dstPETs", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      endif
+    endif
+    
     ! store the incoming clock as driverClock in internal state
     is%wrap%driverClock = clock
 
@@ -6093,6 +6111,21 @@ call ESMF_LogWrite("Matching Mesh found!", ESMF_LOGMSG_DEBUG, rc=rc)
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! conditional profiling for src/dst PETs
+    if (btest(profiling,3) .and. .not.is%wrap%srcDstOverlap) then
+      if (is%wrap%srcFlag) then
+        call ESMF_TraceRegionExit(rName//"-srcPETs", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      elseif (is%wrap%dstFlag) then
+        call ESMF_TraceRegionExit(rName//"-dstPETs", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      endif
+    endif
 
     ! handle profiling
     if (btest(profiling,3)) then
