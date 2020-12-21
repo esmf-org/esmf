@@ -79,8 +79,9 @@ module NUOPC_ModelBase
     label_DataInitialize = "ModelBase_DataInitialize"
 
   type type_InternalStateStruct
-    type(ESMF_Clock)      :: driverClock
-    type(ESMF_Time)       :: preAdvanceCurrTime
+    type(ESMF_Clock)          :: driverClock
+    type(ESMF_Time)           :: preAdvanceCurrTime
+    type(ESMF_Field), pointer :: cachedExportFieldList(:)
   end type
 
   type type_InternalState
@@ -1804,6 +1805,7 @@ module NUOPC_ModelBase
     integer                   :: verbosity, diagnostic, profiling
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
+    type(type_InternalState)  :: is
 
     rc = ESMF_SUCCESS
 
@@ -1966,21 +1968,34 @@ module NUOPC_ModelBase
         line=__LINE__, file=FILENAME)) return  ! bail out
     endif
     
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
     ! correct setting of timestamps
+    nullify(is%wrap%cachedExportFieldList)
+    call NUOPC_GetStateMemberLists(exportState, &
+      fieldList=is%wrap%cachedExportFieldList, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
     call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
     if (allUpdated) then
       ! update timestamp on all the export Fields
-      call NUOPC_SetTimestamp(exportState, internalClock, rc=rc)
+      call NUOPC_SetTimestamp(is%wrap%cachedExportFieldList, internalClock, &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
         return  ! bail out
     else
       ! update timestamp on only those export Fields that have the 
       ! "Updated" attribute set to "true"
-      call NUOPC_SetTimestamp(exportState, internalClock, &
+      call NUOPC_SetTimestamp(is%wrap%cachedExportFieldList, internalClock, &
         selective=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
@@ -2091,6 +2106,7 @@ module NUOPC_ModelBase
     integer                   :: verbosity, diagnostic, profiling
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
+    type(type_InternalState)  :: is
 
     rc = ESMF_SUCCESS
 
@@ -2218,12 +2234,24 @@ module NUOPC_ModelBase
       call ESMF_TraceRegionExit("label_DataInitialize")
     endif
     
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
     ! update timestamp on all the export Fields
+    nullify(is%wrap%cachedExportFieldList)
+    call NUOPC_GetStateMemberLists(exportState, &
+      fieldList=is%wrap%cachedExportFieldList, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
     call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call NUOPC_SetTimestamp(exportState, internalClock, rc=rc)
+    call NUOPC_SetTimestamp(is%wrap%cachedExportFieldList, internalClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
@@ -2900,6 +2928,10 @@ module NUOPC_ModelBase
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
+
+    ! destroy relevant internal State members
+    if (associated(is%wrap%cachedExportFieldList)) &
+      deallocate(is%wrap%cachedExportFieldList)
 
     ! deallocate internal state memory
     deallocate(is%wrap, stat=stat)
