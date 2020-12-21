@@ -30,7 +30,7 @@ module NUOPC_Base
   
   ! public
   public NUOPC_PhaseMapStringLength       ! parameter
-  integer, parameter :: NUOPC_PhaseMapStringLength = 160
+  integer, parameter :: NUOPC_PhaseMapStringLength = 400
 
   ! public FieldDictionary API
   public NUOPC_FieldDictionary            ! variable
