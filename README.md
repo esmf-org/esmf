@@ -6,8 +6,8 @@
 
 Hello and welcome to ESMF.
 
- * The [ESMF User's Guide](http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_usrdoc/node3.html) contains information on building and installing ESMF.
- * The [ESMF Reference Manual](http://www.earthsystemmodeling.org/esmf_releases/last_built/ESMF_refdoc/) contains information on the architecture of ESMF,
+ * The [ESMF User's Guide](http://earthsystemmodeling.org/docs/nightly/develop/ESMF_usrdoc/) contains information on building and installing ESMF.
+ * The [ESMF Reference Manual](http://earthsystemmodeling.org/docs/nightly/develop/ESMF_refdoc/) contains information on the architecture of ESMF,
    example code, and details of the API (Application Programming Interface).
  * Please contact <esmf_support@ucar.edu> with any questions or problems.
 
@@ -18,8 +18,8 @@ Hello and welcome to ESMF.
 
 ## Building ESMF
 
- * To build ESMF from source consult the [Building ESMF](http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_usrdoc/node6.html#SECTION00064000000000000000) section of the [ESMF User's Guide](http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_usrdoc/node3.html).
- * For testing ESMF, see [Testing makefile targets](http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_usrdoc/node6.html#SECTION00064500000000000000).
+ * To build ESMF from source consult the [Building ESMF](http://earthsystemmodeling.org/docs/nightly/develop/ESMF_usrdoc/node9.html) section of the [ESMF User's Guide](http://earthsystemmodeling.org/docs/nightly/develop/ESMF_usrdoc/).
+ * For testing ESMF, see [Testing makefile targets](http://earthsystemmodeling.org/docs/nightly/develop/ESMF_usrdoc/node11.html).
  * Pre-built binaries for ESMF and ESMPy are also available on `conda-forge` (_note Windows is not supported_):
 ```
 conda create -c conda-forge -n <env> esmf esmpy
@@ -27,7 +27,7 @@ conda create -c conda-forge -n <env> esmf esmpy
 
 ## Linking to ESMF
 
- * To link your application to an ESMF installation follow instructions located in [Compiling and Linking User Code against an ESMF Installation](http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_usrdoc/node7.html).
+ * To link your application to an ESMF installation follow instructions located in [Compiling and Linking User Code against an ESMF Installation](http://earthsystemmodeling.org/docs/nightly/develop/ESMF_usrdoc/node7.html).
 
 ## Add-On Packages
 
@@ -41,16 +41,10 @@ See each addon package for a specific README file.
 ## More Help
 
 Information about the ESMF project can be found at the ESMF web site:
- * https://www.earthsystemcog.org/
+ * https://www.earthsystemmodeling.org/
 
 Software documentation for the last public release is at:
- * https://www.earthsystemcog.org/ -> Users -> User Docs
+ * http://earthsystemmodeling.org/doc/ -> Users -> User Docs
 
 Software documentation for all releases is at:
- * https://www.earthsystemcog.org/ -> Software -> Download/Releases
-
-Demos, system tests, and use test cases, demonstrating how ESMF can be used in realistic situations are available at:
- * https://www.earthsystemcog.org/projects/esmf/code_examples/
-
-Contributions from ESMF users are available at:
- * http://sourceforge.net/projects/esmfcontrib
+ * http://earthsystemmodeling.org/static/releases.html
