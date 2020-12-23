@@ -11,6 +11,7 @@
 !==============================================================================
 #define FILENAME "src/addon/NUOPC/src/NUOPC_ModelBase.F90"
 !==============================================================================
+#define DEBUG_SETVM_on
 
 module NUOPC_ModelBase
 
@@ -22,15 +23,15 @@ module NUOPC_ModelBase
   use NUOPC
 
   implicit none
-  
+
   private
-  
+
   public &
     SetVM, &
     SetServices, &
     routine_Run, &
     routine_Nop
- 
+
   public &
     label_Advertise, &
     label_ModifyAdvertised, &
@@ -48,7 +49,7 @@ module NUOPC_ModelBase
     type_InternalStateStruct, &
     type_InternalState, &
     label_InternalState
-  
+
   character(*), parameter :: &
     label_InternalState = "ModelBase_InternalState"
   character(*), parameter :: &
@@ -94,7 +95,7 @@ module NUOPC_ModelBase
   !-----------------------------------------------------------------------------
   contains
   !-----------------------------------------------------------------------------
-  
+
   subroutine SetVM(gcomp, rc)
     type(ESMF_GridComp)  :: gcomp
     integer, intent(out) :: rc
@@ -105,21 +106,21 @@ module NUOPC_ModelBase
     logical                   :: pthreadsEnabled
     logical                   :: isPresent
     integer                   :: value
-    
+
     rc = ESMF_SUCCESS
 
     ! query the component for info
     call NUOPC_CompGet(gcomp, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
-#if 1
+
+#ifdef DEBUG_SETVM_on
     call ESMF_LogWrite("Generic ModelBase SetVM() is executing for: "// &
       trim(name), ESMF_LOGMSG_DEBUG, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 #endif
-    
+
     ! detect early return condition of the SetVM*() methods cannot be used
     call ESMF_VMGetGlobal(gvm, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -128,7 +129,7 @@ module NUOPC_ModelBase
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (.not.pthreadsEnabled) then
-#if 1
+#ifdef DEBUG_SETVM_on
       call ESMF_LogWrite("Generic ModelBase SetVM() is exiting "// &
         "due to lack of Pthreads support for: "// &
         trim(name), ESMF_LOGMSG_DEBUG, rc=rc)
@@ -137,14 +138,14 @@ module NUOPC_ModelBase
 #endif
       return  ! early successful return
     endif
-    
+
     ! looking for hints in the component's Attributes
     call NUOPC_CompAttributeGet(gcomp, name="maxPeCountPerPet", value=value, &
       isPresent=isPresent, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (isPresent) then
-#if 1
+#ifdef DEBUG_SETVM_on
       call ESMF_LogWrite("Generic ModelBase SetVM() is calling "// &
         "ESMF_GridCompSetVMMaxPEs() for: "// &
         trim(name), ESMF_LOGMSG_DEBUG, rc=rc)
@@ -155,7 +156,7 @@ module NUOPC_ModelBase
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     else
-#if 1
+#ifdef DEBUG_SETVM_on
       call ESMF_LogWrite("Generic ModelBase SetVM() did not find "// &
         "Attribute 'maxPeCountPerPet' for: "// &
         trim(name), ESMF_LOGMSG_DEBUG, rc=rc)
@@ -163,11 +164,11 @@ module NUOPC_ModelBase
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 #endif
     endif
-    
+
   end subroutine
 
   !-----------------------------------------------------------------------------
-  
+
   subroutine SetServices(gcomp, rc)
     type(ESMF_GridComp)  :: gcomp
     integer, intent(out) :: rc
