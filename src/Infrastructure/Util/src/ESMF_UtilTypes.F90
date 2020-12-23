@@ -83,12 +83,12 @@
 
       integer, parameter :: ESMF_VERSION_MAJOR        = 8
       integer, parameter :: ESMF_VERSION_MINOR        = 0
-      integer, parameter :: ESMF_VERSION_REVISION     = 1
-      integer, parameter :: ESMF_VERSION_PATCHLEVEL   = 1
-      logical, parameter :: ESMF_VERSION_PUBLIC       = .true.
-      logical, parameter :: ESMF_VERSION_BETASNAPSHOT = .false.
+      integer, parameter :: ESMF_VERSION_REVISION     = 2
+      integer, parameter :: ESMF_VERSION_PATCHLEVEL   = 2
+      logical, parameter :: ESMF_VERSION_PUBLIC       = .false.
+      logical, parameter :: ESMF_VERSION_BETASNAPSHOT = .true.
 
-      character(*), parameter :: ESMF_VERSION_STRING  = "8.0.1"
+      character(*), parameter :: ESMF_VERSION_STRING  = "8.0.2 beta snapshot"
 
 #if defined (ESMF_NETCDF)
       logical, parameter :: ESMF_IO_NETCDF_PRESENT = .true.

@@ -261,7 +261,7 @@ example code, and details of the API (Application Programming Interface).
 
 For more information on the ESMF_RegridWeightGen application, see the ESMF
 Reference Manual:
-http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_8_0_1/ESMF_refdoc/
+http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_8_0_2/ESMF_refdoc/
 
 Contributions from ESMF users are available at:
         http://sourceforge.net/projects/esmfcontrib
