@@ -1291,13 +1291,33 @@ extern "C" {
     int localrc = ESMC_RC_NOT_IMPL;
     // test for NULL pointer via macro before calling any class methods
     ESMCI_NULL_CHECK_PRC(ptr, rc)
-    // Sort out the non-present F90 optional arguments. 
+    // Sort out the non-present F90 optional arguments.
     minStackSize = ESMC_NOT_PRESENT_FILTER(minStackSize);
     int loc_minStackSize = VM_PTHREAD_STACKSIZE_USER; 
     if ((void*)minStackSize != ESMC_NULL_POINTER)
       loc_minStackSize = *minStackSize;
     // set the minStackSize
     (*ptr)->minStackSize = (size_t)loc_minStackSize;
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+   
+  void FTN_X(c_esmc_vmplansetopenmp)(ESMCI::VMPlan **ptr,
+    int *openMpHandling, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmplansetopenmp()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
+    // Sort out the non-present F90 optional arguments.
+    openMpHandling = ESMC_NOT_PRESENT_FILTER(openMpHandling);
+    int loc_openMpHandling = 3; // default: pin OpenMP threads
+    if ((void*)openMpHandling != ESMC_NULL_POINTER)
+      loc_openMpHandling = *openMpHandling;
+    // set the openMpHandling
+    (*ptr)->openmphandling = loc_openMpHandling;
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }

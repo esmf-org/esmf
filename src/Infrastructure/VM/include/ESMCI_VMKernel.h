@@ -548,7 +548,9 @@ class VMKPlan{
     int *lpid_mpi_g_part_map;
     MPI_Comm mpi_c_part;
     int commfreeflag;   // flag to indicate which PETs must free MPIcommunicator
-    
+    // OpenMP handling
+    int openmphandling; // 0-none, 1-setnumthreads, 2-initialize, 3-pinaffinity
+
   public:
     VMKPlan();
       // native constructor (sets communication preferences to defaults)

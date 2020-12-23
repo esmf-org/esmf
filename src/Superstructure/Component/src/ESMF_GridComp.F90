@@ -3002,7 +3002,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   subroutine ESMF_GridCompSetVMMaxPEs(gridcomp, keywordEnforcer, &
     maxPeCountPerPet, prefIntraProcess, prefIntraSsi, prefInterSsi, &
-    minStackSize, rc)
+    minStackSize, openMpHandling, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp), intent(inout)         :: gridcomp
@@ -3012,6 +3012,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(in),  optional :: prefIntraSsi
     integer,             intent(in),  optional :: prefInterSsi
     integer,             intent(in),  optional :: minStackSize
+    character(*),        intent(in),  optional :: openMpHandling
     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -3064,6 +3065,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Depending on how much private data is used by the user code under
 !   the master thread, the default might be too small, and {\tt minStackSize}
 !   must be used to allocate sufficient stack space.
+! \item[{[openMpHandling]}] 
+!   Handling of OpenMP threads. Supported: "none", "set", "init", "pin" (default).
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -3080,7 +3083,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! call Comp method
     call ESMF_CompSetVMMaxPEs(gridcomp%compp, maxPeCountPerPet, &
-      prefIntraProcess, prefIntraSsi, prefInterSsi, minStackSize, rc=localrc)
+      prefIntraProcess, prefIntraSsi, prefInterSsi, minStackSize, &
+      openMpHandling, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

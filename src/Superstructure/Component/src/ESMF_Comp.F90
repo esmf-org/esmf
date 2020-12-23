@@ -2040,7 +2040,7 @@ contains
 
 ! !INTERFACE:
   subroutine ESMF_CompSetVMMaxPEs(compp, max, pref_intra_process, &
-    pref_intra_ssi, pref_inter_ssi, minStackSize, rc)
+    pref_intra_ssi, pref_inter_ssi, minStackSize, openMpHandling, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CompClass), pointer               :: compp
@@ -2049,6 +2049,7 @@ contains
     integer,              intent(in),  optional :: pref_intra_ssi
     integer,              intent(in),  optional :: pref_inter_ssi
     integer,              intent(in),  optional :: minStackSize
+    character(*),         intent(in),  optional :: openMpHandling
     integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2068,6 +2069,9 @@ contains
 !          Inter process communication preference
 !     \item[{[minStackSize]}] 
 !          Minimum stack size for Pthreads created to execute user code.
+!     \item[{[openMpHandling]}] 
+!          Handling of OpenMP threads. Supported: "none", "set", "init", "pin"
+!          (default).
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2075,6 +2079,7 @@ contains
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
+    integer                 :: intOpenMpHandling
 
     ! Initialize return code; assume not implemented until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -2117,6 +2122,24 @@ contains
 
     ! set MinStackSize
     call ESMF_VMPlanSetMinStackSize(compp%vmplan, minStackSize, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! deal with OpenMpHandling
+    intOpenMpHandling = 3 ! default: pin OpenMP threads to PEs
+    if (present(openMpHandling)) then
+      if (trim(openMpHandling) == "none") then
+        intOpenMpHandling = 0
+      else if (trim(openMpHandling) == "set") then
+        intOpenMpHandling = 1
+      else if (trim(openMpHandling) == "init") then
+        intOpenMpHandling = 2
+      else if (trim(openMpHandling) == "pin") then
+        intOpenMpHandling = 3
+      endif
+    endif
+    call ESMF_VMPlanSetOpenMP(compp%vmplan, intOpenMpHandling, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

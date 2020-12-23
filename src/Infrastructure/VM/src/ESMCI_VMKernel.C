@@ -697,6 +697,7 @@ struct SpawnArg{
   MPI_Comm mpi_c_ssi;
   int mpi_c_freeflag;
   int nothreadsflag;
+  int openmphandling;
   // shared memory variables
   esmf_pthread_mutex_t *pth_mutex2;
   esmf_pthread_mutex_t *pth_mutex;
@@ -801,16 +802,23 @@ void VMK::construct(void *ssarg){
     CPU_SET(ssipe[cid[mypet][i]], &cpuset);
   pthread_setaffinity_np(mypthid, sizeof(cpu_set_t), &cpuset);
 #ifndef ESMF_NO_OPENMP
-  // Set the number of OpenMP threads and pin each thread to a specific PE
-  omp_set_num_threads(ncpet[mypet]);
+  // OpenMP handling according to sarg->openmphandling
+  if (sarg->openmphandling>0){
+    // Set the number of OpenMP threads
+    omp_set_num_threads(ncpet[mypet]);
+    if (sarg->openmphandling>1){
 #pragma omp parallel
-  {
-    cpu_set_t cpuset;
-    CPU_ZERO(&cpuset);
-    CPU_SET(ssipe[cid[mypet][omp_get_thread_num()]], &cpuset);
-    pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
-  }
+      {
+        cpu_set_t cpuset;
+        CPU_ZERO(&cpuset);
+        CPU_SET(ssipe[cid[mypet][omp_get_thread_num()]], &cpuset);
+        if (sarg->openmphandling>2){
+          pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
+        }
+      }
 #endif
+    }
+  }
 #endif
 #endif
   // pthread mutex control
@@ -1955,6 +1963,7 @@ void *VMK::startup(class VMKPlan *vmp,
     // cargo
     sarg[i].cargo = cargo;
     // threading stuff
+    sarg[i].openmphandling = vmp->openmphandling;
     sarg[i].nothreadsflag = vmp->nothreadflag;
     if (vmp->nothreadflag){
       // for a VM that is not thread-based the VM can already be constructed
@@ -2334,6 +2343,7 @@ VMKPlan::VMKPlan(){
   // native constructor
   nothreadflag = 1; // by default use non-threaded VMs
   parentVMflag = 0; // default is to create a new VM for every child
+  openmphandling = 3; // default to pin OpenMP threads
   // invalidate the arrays
   spawnflag = NULL;
   contribute = NULL;
@@ -2490,6 +2500,7 @@ void VMKPlan::vmkplan_maxthreads(VMK &vm, int max, int *plist,
   vmkplan_garbage();
   // now set stuff up...
   nothreadflag = 0; // this plan will allow ESMF-threading
+  openmphandling = 3; // default to pin OpenMP threads
   npets = vm.npets;
   if (nplist != 0)
     this->nplist = nplist;
@@ -2628,6 +2639,7 @@ void VMKPlan::vmkplan_minthreads(VMK &vm, int max, int *plist,
   vmkplan_garbage();
   // now set stuff up...
   nothreadflag = 0; // this plan will allow ESMF-threading
+  openmphandling = 3; // default to pin OpenMP threads
   npets = vm.npets;
   if (nplist != 0)
     this->nplist = nplist;
@@ -2738,6 +2750,7 @@ void VMKPlan::vmkplan_maxcores(VMK &vm, int max, int *plist,
   vmkplan_garbage();
   // now set stuff up...
   nothreadflag = 0; // this plan will allow ESMF-threading
+  openmphandling = 3; // default to pin OpenMP threads
   npets = vm.npets;
   if (nplist != 0)
     this->nplist = nplist;
@@ -2845,6 +2858,7 @@ void VMKPlan::vmkplan_print(){
   printf("pref_intra_process:\t%d\n", pref_intra_process);
   printf("pref_intra_ssi:\t%d\n", pref_intra_ssi);
   printf("pref_inter_ssi:\t%d\n", pref_inter_ssi);
+  printf("openmphandling = %d\n", openmphandling);
   printf("--- vmkplan_print end ---\n");
 }
 
