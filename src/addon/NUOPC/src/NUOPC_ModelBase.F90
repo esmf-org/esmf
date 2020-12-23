@@ -104,8 +104,16 @@ module NUOPC_ModelBase
     type(ESMF_VM)             :: gvm
     character(ESMF_MAXSTR)    :: name
     logical                   :: pthreadsEnabled
-    logical                   :: isPresent
+    logical                   :: isPresent, isStructured
+    logical                   :: isPresent2, isStructured2
     integer                   :: value
+    integer                   :: size, idx
+    integer                   :: size2, idx2
+    type(ESMF_Info)           :: info
+    character(80)             :: ikey
+    character(80)             :: ikey2
+    integer                   :: maxCount, minStackSize
+    character(80)             :: msgString
 
     rc = ESMF_SUCCESS
 
@@ -121,44 +129,117 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 #endif
 
-    ! detect early return condition of the SetVM*() methods cannot be used
+    ! query global information about this ESMF execution instance
     call ESMF_VMGetGlobal(gvm, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call ESMF_VMGet(gvm, pthreadsEnabledFlag=pthreadsEnabled, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    if (.not.pthreadsEnabled) then
-#ifdef DEBUG_SETVM_on
-      call ESMF_LogWrite("Generic ModelBase SetVM() is exiting "// &
-        "due to lack of Pthreads support for: "// &
-        trim(name), ESMF_LOGMSG_DEBUG, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-#endif
-      return  ! early successful return
-    endif
 
-    ! looking for hints in the component's Attributes
-    call NUOPC_CompAttributeGet(gcomp, name="maxPeCountPerPet", value=value, &
-      isPresent=isPresent, rc=rc)
+    ! iterate through NUOPC Hints
+
+    call ESMF_InfoGetFromHost(gcomp, info=info, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    if (isPresent) then
+
+    call ESMF_InfoGet(info, key="/NUOPC/Hint", isPresent=isPresent, &
+      isStructured=isStructured, size=size, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    if (isPresent .and. isStructured) then
+      do idx=1, size
+        call ESMF_InfoGet(info, key="/NUOPC/Hint", idx=idx, ikey=ikey, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        if (trim(ikey)=="PePerPet") then
+          ! conditionally error out if call into SetVM cannot be supported
+          if (.not.pthreadsEnabled) then
+            call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+              msg="Generic ModelBase SetVM() detected lacking Pthreads "// &
+              "support for: "//trim(name), &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+            return  ! bail out
+          endif
+          ! set defaults
+          maxCount = -1
+          minStackSize = -1
+          ! iterate through the PePerPet hint
+          call ESMF_InfoGet(info, key="/NUOPC/Hint/PePerPet", &
+            isPresent=isPresent2, isStructured=isStructured2, size=size2, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (isPresent2 .and. isStructured2) then
+            do idx2=1, size2
+              call ESMF_InfoGet(info, key="/NUOPC/Hint/PePerPet", idx=idx2, &
+                ikey=ikey2, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              if (trim(ikey2)=="maxCount") then
+                call ESMF_InfoGet(info, key="/NUOPC/Hint/PePerPet/maxCount", &
+                  value=maxCount, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              elseif (trim(ikey2)=="minStackSize") then
+                call ESMF_InfoGet(info, key="/NUOPC/Hint/PePerPet/minStackSize", &
+                  value=minStackSize, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              else
+                call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+                  msg="Unknown NUOPC Hint: "//trim(ikey)//"/"//trim(ikey2), &
+                  line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+                return  ! bail out
+              endif
+            enddo
+          endif
+          ! make the actual call into ESMF_GridCompSetVMMaxPEs()
 #ifdef DEBUG_SETVM_on
-      call ESMF_LogWrite("Generic ModelBase SetVM() is calling "// &
-        "ESMF_GridCompSetVMMaxPEs() for: "// &
-        trim(name), ESMF_LOGMSG_DEBUG, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call ESMF_LogWrite("Generic ModelBase SetVM() is calling "// &
+            "ESMF_GridCompSetVMMaxPEs() for: "// &
+            trim(name)//" with:", ESMF_LOGMSG_DEBUG, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          write(msgString,*) " -  maxCount=", maxCount
+          call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_DEBUG, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          write(msgString,*) " -  minStackSize=", minStackSize
+          call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_DEBUG, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 #endif
-      call ESMF_GridCompSetVMMaxPEs(gcomp, maxPeCountPerPet=value, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (maxCount == -1 .and. minStackSize == -1) then
+            call ESMF_GridCompSetVMMaxPEs(gcomp, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          else if (maxCount > -1 .and. minStackSize == -1) then
+            call ESMF_GridCompSetVMMaxPEs(gcomp, maxPeCountPerPet=maxCount, &
+              rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          else if (maxCount == -1 .and. minStackSize > -1) then
+            call ESMF_GridCompSetVMMaxPEs(gcomp, minStackSize=minStackSize, &
+              rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          else if (maxCount > -1 .and. minStackSize > -1) then
+            call ESMF_GridCompSetVMMaxPEs(gcomp, maxPeCountPerPet=maxCount, &
+              minStackSize=minStackSize, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
+        else
+          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+            msg="Unknown NUOPC Hint: "//trim(ikey), &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+          return  ! bail out
+        endif
+      enddo
     else
 #ifdef DEBUG_SETVM_on
-      call ESMF_LogWrite("Generic ModelBase SetVM() did not find "// &
-        "Attribute 'maxPeCountPerPet' for: "// &
+      call ESMF_LogWrite("Generic ModelBase SetVM() found no NUOPC Hint for: "// &
         trim(name), ESMF_LOGMSG_DEBUG, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
