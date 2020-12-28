@@ -169,6 +169,39 @@ namespace ESMCI {
     std::map<int,int> split_to_orig_id;
     std::map<int,double> split_id_to_frac;
 
+    // RLO: this requires C++11
+    static constexpr auto ms = 4;
+    const std::pair<int, int> MOAB2ESMFElemType[ms] = {{2, 3}, {3, 4}, {5, 10}, {9, 12}};
+    const std::pair<int, int> ESMF2MOABElemType[ms] = {{3, 2}, {4, 3}, {10, 5}, {12, 9}};
+
+    int M2EType(int key, int range = ms);
+    int M2ETypeT(int value, int range = ms);
+    int E2MType(int key, int range = ms);
+    int E2MTypeT(int value, int range = ms);
+    
+    // ESMF Mesh element types defined in Mesh/include/ESMCI_Mesh.h
+    //
+    // ESMC_MESHELEMTYPE_TRI  3
+    // ESMC_MESHELEMTYPE_QUAD 4
+    // ESMC_MESHELEMTYPE_TETRA 10
+    // ESMC_MESHELEMTYPE_HEX  12
+    //
+    // enum MOAB_ENTITY_TYPE_NAME {
+    //   MBVERTEX = 0,
+    //   MBEDGE,    1
+    //   MBTRI,     2
+    //   MBQUAD,    3
+    //   MBPOLYGON, 4
+    //   MBTET,     5
+    //   MBPYRAMID, 6
+    //   MBPRISM,   7
+    //   MBKNIFE,   8
+    //   MBHEX,     9
+    //   MBPOLYHEDRON, 10
+    //   MBENTITYSET,  11
+    //   MBMAXTYPE     12
+    // };
+    
     void CreateGhost();
 
     // Mesh from inputs

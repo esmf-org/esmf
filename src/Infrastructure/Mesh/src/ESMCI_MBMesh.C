@@ -79,6 +79,40 @@ using namespace std;
 #define ESMF
 #define ESMC_METHOD "MBMesh::func()"
 
+
+int MBMesh::M2EType(int key, int range) {
+  return
+    (range == 0) ? throw "Key not present":
+    (MOAB2ESMFElemType[range - 1].first == key) ? 
+      MOAB2ESMFElemType[range - 1].second:
+    M2EType(key, range - 1);
+};
+
+int MBMesh::M2ETypeT(int value, int range) {
+  return
+    (range == 0) ? throw "Value not present":
+    (MOAB2ESMFElemType[range - 1].second == value) ? 
+      MOAB2ESMFElemType[range - 1].first:
+    M2ETypeT(value, range - 1);
+};
+
+int MBMesh::E2MType(int key, int range) {
+  return
+    (range == 0) ? throw "Key not present":
+    (ESMF2MOABElemType[range - 1].first == key) ? 
+      ESMF2MOABElemType[range - 1].second:
+    E2MType(key, range - 1);
+};
+
+int MBMesh::E2MTypeT(int value, int range) {
+  return
+    (range == 0) ? throw "Value not present":
+    (ESMF2MOABElemType[range - 1].second == value) ? 
+      ESMF2MOABElemType[range - 1].first:
+    E2MTypeT(value, range - 1);
+};
+
+
 // Empty mesh
 // EVENTUALLY MAKE THIS PRIVATE TO ENCOURAGE THE USE OF THE CONSTRUCTOR
 // THAT SETS EVEYTHING UP CORRECTLY
@@ -677,33 +711,37 @@ void MBMesh::get_elem_types(int *elem_types) {
 #define ESMC_METHOD "MBMesh::get_elem_types()"
   try {
     int merr;
-  
-    Range elems;
-    merr=mesh->get_entities_by_dimension(0, pdim, elems);
+
+    std::vector<EntityHandle> elems;
+    get_owned_elems(elems);
     ESMC_CHECK_MOAB_THROW(merr)
-  
+
+    std::vector<EntityHandle>::const_iterator it = elems.begin();
     int i = 0;
-    for (Range::const_iterator it=elems.begin(); it != elems.end(); it++) {
+    for (it; it != elems.end(); it++) {
       EntityHandle elem=*it;
   
       // Get topology of element
-      Range nodes_on_elem;
-      merr=mesh->get_connectivity(&elem, 1, nodes_on_elem);
+      int type = mesh->type_from_handle(elem);
       ESMC_CHECK_MOAB_THROW(merr)
 
-      elem_types[i] = 0;
-      if (pdim == 2) {
-        if (nodes_on_elem.size() == 3) elem_types[i] = ESMC_MESHELEMTYPE_TRI;
-        else if (nodes_on_elem.size() == 4) elem_types[i] = ESMC_MESHELEMTYPE_QUAD;
-        else
-          Throw () << "Element type not recognized.";
-      } else if (pdim == 3) {
-        if (nodes_on_elem.size() == 4) elem_types[i] = ESMC_MESHELEMTYPE_TETRA;
-        else if (nodes_on_elem.size() == 8) elem_types[i] = ESMC_MESHELEMTYPE_HEX;       
-        else
-          Throw () << "Element type not recognized.";
-      } else
-        Throw () << "Parameteric dimension not recognized.";
+      elem_types[i] = M2EType(type);
+
+      // // NOTE: old style
+      // Range nodes_on_elem;
+      // merr=mesh->get_connectivity(&elem, 1, nodes_on_elem);
+      // if (pdim == 2) {
+      //   if (nodes_on_elem.size() == 3) elem_types[i] = ESMC_MESHELEMTYPE_TRI;
+      //   else if (nodes_on_elem.size() == 4) elem_types[i] = ESMC_MESHELEMTYPE_QUAD;
+      //   else
+      //     Throw () << "Element type not recognized.";
+      // } else if (pdim == 3) {
+      //   if (nodes_on_elem.size() == 4) elem_types[i] = ESMC_MESHELEMTYPE_TETRA;
+      //   else if (nodes_on_elem.size() == 8) elem_types[i] = ESMC_MESHELEMTYPE_HEX;       
+      //   else
+      //     Throw () << "Element type not recognized.";
+      // } else
+      //   Throw () << "Parameteric dimension not recognized.";
       i++;
     }
 

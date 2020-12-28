@@ -38,6 +38,7 @@
 #include <vector>
 #include <cstring>
 #include <random>
+#include <regex>
 // #include <functional>
 
 // test base class ideas
@@ -257,6 +258,7 @@ class MBT {
         }
         
         function_map["createget"] = std::bind(&MBT::createget, this);
+        function_map["mbtypes"] = std::bind(&MBT::mbtypes, this);
         function_map["dual"] = std::bind(&MBT::dual, this);
         function_map["redist_elem"] = std::bind(&MBT::redist_elem, this);
         function_map["redist_node"] = std::bind(&MBT::redist_node, this);
@@ -348,6 +350,36 @@ class MBT {
         
         localrc = test_get_info(mesh);
         ESMC_CHECK_THROW(localrc);
+
+      }
+      CATCH_MBT_RETURN_RC(&rc)
+
+      rc = ESMF_SUCCESS;
+      return rc;
+    }
+
+    int mbtypes(){
+#undef ESMC_METHOD
+#define ESMC_METHOD "MBT::mbtypes()"
+      // RETURN: rc : pass(0) fail(>0)
+      int rc = ESMF_FAILURE;
+
+      try {
+        int localrc;
+        
+        localrc = test_get_info(mesh);
+        ESMC_CHECK_THROW(localrc);
+
+        Range elems;
+        int merr=mesh->mesh->get_entities_by_dimension(0,mesh->pdim,elems);
+        ESMC_CHECK_THROW(merr)
+        
+        for (Range::iterator it=elems.begin(); it !=elems.end(); it++) {
+          const EntityHandle elem=*it;
+          int type = mesh->mesh->type_from_handle(elem);
+          std::cout << "type = " << type << std::endl;
+        }
+
 
       }
       CATCH_MBT_RETURN_RC(&rc)
@@ -890,9 +922,24 @@ class MBT {
 
       try {
         int localrc;
-        int len = name.length();
+        
+        // regex to split on space and dash
+        std::regex regex{R"([\s-]+)"};
+        // iterator over substrings
+        std::sregex_token_iterator it{name.begin(), name.end(), regex, -1};
+        // vector of substrings, {} indicates end of range
+        std::vector<std::string> name_sub{it, {}};
+        std::string test = name_sub.back();
+        // for (const auto i : name_sub)
+        //   std::cout << i << ", ";
+        // std::cout << std::endl;
+        // std::cout << test << std::endl;
+        
+        // create test file name using localPet
+        int len = test.length();
         char fname[len];
-        sprintf(fname, "%s_%d", name.c_str(), localPet);
+        sprintf(fname, "%s_%d", test.c_str(), localPet);
+        
         MBMesh_write(&mesh, fname, &localrc, len);
         ESMC_CHECK_THROW(localrc);
 

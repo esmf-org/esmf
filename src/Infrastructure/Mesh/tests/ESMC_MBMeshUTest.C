@@ -78,6 +78,7 @@ int main(int argc, char *argv[]) {
     test_apis.push_back("to_pointlist_elem");
     test_apis.push_back("to_pointlist_node");
     test_apis.push_back("write_vtk");
+    // test_apis.push_back("mbtypes");
 
   // these are bound to MBTGen in constructor, must match!
   std::vector<std::string> test_meshes;
