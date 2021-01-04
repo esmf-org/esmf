@@ -1,4 +1,4 @@
-[![ESMF](https://circleci.com/gh/esmf-org/esmf.svg?style=svg)](http://www.earthsystemmodeling.org/esmf_releases/last_built/ESMF_refdoc/)  
+[![ESMF](https://circleci.com/gh/esmf-org/esmf.svg?style=svg)](http://www.earthsystemmodeling.org/docs/nightly/develop/ESMF_refdoc/)  
 
 # Earth System Modeling Framework (ESMF)  
 
