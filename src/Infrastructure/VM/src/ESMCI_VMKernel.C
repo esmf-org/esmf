@@ -816,9 +816,9 @@ void VMK::construct(void *ssarg){
           pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
         }
       }
-#endif
     }
   }
+#endif
 #endif
 #endif
   // pthread mutex control
