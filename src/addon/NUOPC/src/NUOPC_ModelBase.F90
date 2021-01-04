@@ -112,7 +112,7 @@ module NUOPC_ModelBase
     type(ESMF_Info)           :: info
     character(80)             :: ikey
     character(80)             :: ikey2
-    integer                   :: maxCount, minStackSize
+    integer                   :: maxCount, minStackSize, openMpNumThreads
     character(40)             :: msgString, openMpHandling
 
     rc = ESMF_SUCCESS
@@ -166,6 +166,7 @@ module NUOPC_ModelBase
           maxCount = -1
           minStackSize = -1
           openMpHandling = ""
+          openMpNumThreads = -1
           ! iterate through the PePerPet hint
           call ESMF_InfoGet(info, key="/NUOPC/Hint/PePerPet", &
             isPresent=isPresent2, isStructured=isStructured2, size=size2, rc=rc)
@@ -177,19 +178,28 @@ module NUOPC_ModelBase
                 ikey=ikey2, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-              if (trim(ikey2)=="maxCount") then
-                call ESMF_InfoGet(info, key="/NUOPC/Hint/PePerPet/maxCount", &
+              if (trim(ikey2)=="MaxCount") then
+                call ESMF_InfoGet(info, &
+                  key="/NUOPC/Hint/PePerPet/MaxCount", &
                   value=maxCount, rc=rc)
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-              elseif (trim(ikey2)=="minStackSize") then
-                call ESMF_InfoGet(info, key="/NUOPC/Hint/PePerPet/minStackSize", &
+              elseif (trim(ikey2)=="MinStackSize") then
+                call ESMF_InfoGet(info, &
+                  key="/NUOPC/Hint/PePerPet/MinStackSize", &
                   value=minStackSize, rc=rc)
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-              elseif (trim(ikey2)=="openMP") then
-                call ESMF_InfoGet(info, key="/NUOPC/Hint/PePerPet/openMP", &
+              elseif (trim(ikey2)=="OpenMpHandling") then
+                call ESMF_InfoGet(info, &
+                  key="/NUOPC/Hint/PePerPet/OpenMpHandling", &
                   value=openMpHandling, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              elseif (trim(ikey2)=="OpenMpNumThreads") then
+                call ESMF_InfoGet(info, &
+                  key="/NUOPC/Hint/PePerPet/OpenMpNumThreads", &
+                  value=openMpNumThreads, rc=rc)
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
               else
@@ -207,37 +217,47 @@ module NUOPC_ModelBase
             trim(name)//" with:", ESMF_LOGMSG_DEBUG, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          write(msgString,"(A,I10)") " -  maxCount =     ", maxCount
+          write(msgString,"(' - ',A20,' = ',I10)") "MaxCount", maxCount
           call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_DEBUG, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          write(msgString,"(A,I10)") " -  minStackSize = ", minStackSize
+          write(msgString,"(' - ',A20,' = ',I10)") "MinStackSize", &
+            minStackSize
           call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_DEBUG, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          write(msgString,"(A,A)")   " -  openMP =       ", trim(openMpHandling)
+          write(msgString,"(' - ',A20,' = ',A10)") "OpenMpHandling", &
+            trim(openMpHandling)
+          call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_DEBUG, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          write(msgString,"(' - ',A20,' = ',I10)") "OpenMpNumThreads", &
+            openMpNumThreads
           call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_DEBUG, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 #endif
           if (maxCount == -1 .and. minStackSize == -1) then
             call ESMF_GridCompSetVMMaxPEs(gcomp, openMpHandling=openMpHandling,&
-              rc=rc)
+              openMpNumThreads=openMpNumThreads, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           else if (maxCount > -1 .and. minStackSize == -1) then
             call ESMF_GridCompSetVMMaxPEs(gcomp, maxPeCountPerPet=maxCount, &
-              openMpHandling=openMpHandling, rc=rc)
+              openMpHandling=openMpHandling, openMpNumThreads=openMpNumThreads,&
+              rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           else if (maxCount == -1 .and. minStackSize > -1) then
             call ESMF_GridCompSetVMMaxPEs(gcomp, minStackSize=minStackSize, &
-              openMpHandling=openMpHandling, rc=rc)
+              openMpHandling=openMpHandling, openMpNumThreads=openMpNumThreads,&
+              rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           else if (maxCount > -1 .and. minStackSize > -1) then
             call ESMF_GridCompSetVMMaxPEs(gcomp, maxPeCountPerPet=maxCount, &
-              minStackSize=minStackSize, openMpHandling=openMpHandling, rc=rc)
+              minStackSize=minStackSize, openMpHandling=openMpHandling, &
+              openMpNumThreads=openMpNumThreads, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           endif

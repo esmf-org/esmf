@@ -9821,11 +9821,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_VMPlanSetOpenMP - Set OpenMP handling
 
 ! !INTERFACE:
-  subroutine ESMF_VMPlanSetOpenMP(vmplan, openMpHandling, rc)
+  subroutine ESMF_VMPlanSetOpenMP(vmplan, openMpHandling, openMpNumThreads, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VMPlan), intent(inout)         :: vmplan
     integer,           intent(in),  optional :: openMpHandling
+    integer,           intent(in),  optional :: openMpNumThreads
     integer,           intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -9835,8 +9836,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{description}
 !   \item[vmplan] 
 !        VMPlan
-!     \item[{[openMpHandling]}] 
-!        OpenMP handling mode.
+!   \item[{[openMpHandling]}] 
+!        OpenMP handling mode. Defaults to pinning.
+!   \item[{[openMpNumThreads]}] 
+!        Number of OpenMP threads under the local PET. Defaults to local peCount.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -9853,7 +9856,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_VMPlanGetInit, vmplan, rc)
 
     ! Call into the C++ interface.
-    call c_ESMC_VMPlanSetOpenMP(vmplan, openMpHandling, localrc)
+    call c_ESMC_VMPlanSetOpenMP(vmplan, openMpHandling, openMpNumThreads, &
+      localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

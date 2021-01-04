@@ -550,6 +550,7 @@ class VMKPlan{
     int commfreeflag;   // flag to indicate which PETs must free MPIcommunicator
     // OpenMP handling
     int openmphandling; // 0-none, 1-setnumthreads, 2-initialize, 3-pinaffinity
+    int openmpnumthreads; // -1 default: local peCount
 
   public:
     VMKPlan();

@@ -1303,7 +1303,7 @@ extern "C" {
   }
    
   void FTN_X(c_esmc_vmplansetopenmp)(ESMCI::VMPlan **ptr,
-    int *openMpHandling, int *rc){
+    int *openMpHandling, int *openMpNumThreads, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmplansetopenmp()"
     // Initialize return code; assume routine not implemented
@@ -1316,8 +1316,21 @@ extern "C" {
     int loc_openMpHandling = 3; // default: pin OpenMP threads
     if ((void*)openMpHandling != ESMC_NULL_POINTER)
       loc_openMpHandling = *openMpHandling;
+    openMpNumThreads = ESMC_NOT_PRESENT_FILTER(openMpNumThreads);
+    int loc_openMpNumThreads = -1; // default: local peCount
+    if ((void*)openMpNumThreads != ESMC_NULL_POINTER)
+      loc_openMpNumThreads = *openMpNumThreads;
+    // validate argument consistency
+    if (loc_openMpHandling==0 && loc_openMpNumThreads >= 0){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, "Incompatible "
+        "openMpNumThreads setting for requested openMpHandling.",
+        ESMC_CONTEXT, rc);
+      return; // bail out
+    }
     // set the openMpHandling
     (*ptr)->openmphandling = loc_openMpHandling;
+    // set the openMpNumThreads
+    (*ptr)->openmpnumthreads = loc_openMpNumThreads;
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }

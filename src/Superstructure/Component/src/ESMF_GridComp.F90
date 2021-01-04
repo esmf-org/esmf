@@ -3002,7 +3002,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   subroutine ESMF_GridCompSetVMMaxPEs(gridcomp, keywordEnforcer, &
     maxPeCountPerPet, prefIntraProcess, prefIntraSsi, prefInterSsi, &
-    minStackSize, openMpHandling, rc)
+    minStackSize, openMpHandling, openMpNumThreads, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp), intent(inout)         :: gridcomp
@@ -3013,6 +3013,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(in),  optional :: prefInterSsi
     integer,             intent(in),  optional :: minStackSize
     character(*),        intent(in),  optional :: openMpHandling
+    integer,             intent(in),  optional :: openMpNumThreads
     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -3066,7 +3067,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   the master thread, the default might be too small, and {\tt minStackSize}
 !   must be used to allocate sufficient stack space.
 ! \item[{[openMpHandling]}] 
-!   Handling of OpenMP threads. Supported: "none", "set", "init", "pin" (default).
+!   Handling of OpenMP threads. Supported options are:
+!   \begin{itemize}
+!   \item "{\tt none}" - OpenMP handling is completely left to the user.
+!   \item "{\tt set}"  - ESMF uses the {\tt omp\_set\_num\_threads()} API to set
+!                        the number of OpenMP threads in each team.
+!   \item "{\tt init}" - ESMF sets the number of OpenMP threads in each team,
+!                        and triggers the instantiation of the team.
+!   \item "{\tt pin}" (default) - ESMF sets the number of OpenMP threads in each team,
+!                        triggers the instantiation of the team, and pins each
+!                        OpenMP thread to the corresponding PE.
+!   \end{itemize}
+! \item[{[openMpNumThreads]}] 
+!   Number of OpenMP threads in each OpenMP thread team. This can be any
+!   positive number. By default, or if {\tt openMpNumThreads} is negative, each
+!   PET sets the number of OpenMP threads to its local peCount.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -3084,7 +3099,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! call Comp method
     call ESMF_CompSetVMMaxPEs(gridcomp%compp, maxPeCountPerPet, &
       prefIntraProcess, prefIntraSsi, prefInterSsi, minStackSize, &
-      openMpHandling, rc=localrc)
+      openMpHandling, openMpNumThreads, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
