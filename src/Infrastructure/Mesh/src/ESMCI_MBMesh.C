@@ -132,7 +132,8 @@ MBMesh::MBMesh():
   has_elem_area(false),
   has_elem_frac(false),
   is_split(false),
-  max_non_split_id(0) {
+  max_non_split_id(0),
+  has_ghost(false) {
 
     _num_node = 0;
     _num_elem = 0;
@@ -168,7 +169,8 @@ MBMesh::MBMesh(int _pdim, int _orig_sdim, ESMC_CoordSys_Flag _coordsys):
   has_elem_area(false),
   has_elem_frac(false),
   is_split(false),
-  max_non_split_id(0) {
+  max_non_split_id(0),
+  has_ghost(false) {
 
 
   // Moab error
@@ -2498,6 +2500,10 @@ void MBMesh::CreateGhost() {
   try {
     int localrc, merr;
 
+    // If already ghosted, leave
+    if (has_ghost) return;
+
+    // Get VM info
     ESMC_VM vm;
     vm = ESMC_VMGetCurrent(&localrc);
     ESMC_CHECK_THROW(localrc);
@@ -2563,8 +2569,11 @@ void MBMesh::CreateGhost() {
     merr = pcomm->exchange_tags(elem_tags, elem_tags, elems);
     ESMC_CHECK_MOAB_THROW(merr);
 
-    // Get the indexed pcomm object from the interface
+    // Get rid of the pcomm object now that we're done with it
     delete pcomm;
+
+    // Mark as ghosted
+    has_ghost=true;
 
   }
   CATCH_MBMESH_RETHROW

@@ -130,7 +130,7 @@ module NUOPC_Driver
   ! Internal drived types
   !---------------------------------------------
   type ComponentMapEntryT
-    character(len=160)              :: label
+    character(len=400)              :: label
     type(ESMF_GridComp)             :: component
     integer, pointer                :: petList(:)
   end type
@@ -139,7 +139,7 @@ module NUOPC_Driver
   end type
   !---------------------------------------------
   type ConnectorMapEntryT
-    character(len=330)              :: label
+    character(len=400)              :: label
     type(ESMF_CplComp)              :: connector
     integer, pointer                :: petList(:)
   end type
@@ -577,7 +577,7 @@ module NUOPC_Driver
     integer                   :: phase
     integer                   :: verbosity, vInherit, profiling
     character(len=10)         :: vString
-    character(len=160)        :: namespace  ! long engough for component label
+    character(len=400)        :: namespace  ! long engough for component label
     type(ComponentMapEntry)   :: cmEntry
     type(ESMF_GridComp), pointer :: compList(:)
     type(ESMF_CplComp)        :: connector
@@ -6642,7 +6642,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                   :: i
     type(type_InternalState)  :: is
     type(ESMF_CplComp), pointer   :: connectorList(:)
-    character(len=160)            :: value
+    character(len=400)            :: value
     logical                       :: isSet
     logical                       :: forceConsumerConnection
 
@@ -6814,7 +6814,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! local variables
       integer                         :: j, jj, stat
       integer                         :: cplListSize, cplSetListSize
-      character(len=160), allocatable :: cplList(:), cplSetList(:)
+      character(len=400), allocatable :: cplList(:), cplSetList(:)
       character(ESMF_MAXSTR), pointer :: chopStringList(:)
       character(ESMF_MAXSTR)          :: cplName
       character(ESMF_MAXSTR), pointer :: stateStandardNameList(:)
@@ -6942,7 +6942,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer, intent(out)            :: rc
       ! local variables
       integer                         :: j, cplListSize
-      character(len=160), allocatable :: cplList(:)
+      character(len=400), allocatable :: cplList(:)
       call NUOPC_CompAttributeGet(connector, name="CplList", &
         itemCount=cplListSize, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -7145,8 +7145,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! local variables
       integer                         :: j, jj, jjj, stat
       integer                         :: cplListSize, cplSetListSize
-      character(len=160), allocatable :: cplList(:), cplSetList(:)
-      character(len=160), allocatable :: cplListNew(:), cplSetListNew(:)
+      character(len=400), allocatable :: cplList(:), cplSetList(:)
+      character(len=400), allocatable :: cplListNew(:), cplSetListNew(:)
       character(ESMF_MAXSTR), pointer :: chopStringList(:)
       character(ESMF_MAXSTR)          :: cplName, fieldName
       character(ESMF_MAXSTR), pointer :: stateStandardNameList(:)

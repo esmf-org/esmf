@@ -55,6 +55,7 @@ module ESMF_CompMod
   use ESMF_StateMod
   use ESMF_InitMacrosMod
   use ESMF_IOUtilMod
+  use ESMF_UtilMod
   
   implicit none
 
@@ -2040,7 +2041,8 @@ contains
 
 ! !INTERFACE:
   subroutine ESMF_CompSetVMMaxPEs(compp, max, pref_intra_process, &
-    pref_intra_ssi, pref_inter_ssi, minStackSize, rc)
+    pref_intra_ssi, pref_inter_ssi, minStackSize, openMpHandling, &
+    openMpNumThreads, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CompClass), pointer               :: compp
@@ -2049,6 +2051,8 @@ contains
     integer,              intent(in),  optional :: pref_intra_ssi
     integer,              intent(in),  optional :: pref_inter_ssi
     integer,              intent(in),  optional :: minStackSize
+    character(*),         intent(in),  optional :: openMpHandling
+    integer,              intent(in),  optional :: openMpNumThreads
     integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2068,6 +2072,12 @@ contains
 !          Inter process communication preference
 !     \item[{[minStackSize]}] 
 !          Minimum stack size for Pthreads created to execute user code.
+!     \item[{[openMpHandling]}] 
+!          Handling of OpenMP threads. Supported: "none", "set", "init", "pin"
+!          (default).
+!     \item[{[openMpNumThreads]}] 
+!          Number of OpenMP threads under each PET. By default each PET uses
+!          its local peCount.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2075,6 +2085,8 @@ contains
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
+    integer                 :: intOpenMpHandling
+    character(len=:), allocatable  :: lowerOpenMpHandling
 
     ! Initialize return code; assume not implemented until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -2115,8 +2127,40 @@ contains
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! set MinStackSize
+    ! set minStackSize
     call ESMF_VMPlanSetMinStackSize(compp%vmplan, minStackSize, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! set openMpHandling
+    intOpenMpHandling = 3 ! default: pin OpenMP threads to PEs
+    if (present(openMpHandling)) then
+      lowerOpenMpHandling = ESMF_UtilStringLowerCase(openMpHandling, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (trim(lowerOpenMpHandling) == "none") then
+        intOpenMpHandling = 0
+      else if (trim(lowerOpenMpHandling) == "set") then
+        intOpenMpHandling = 1
+      else if (trim(lowerOpenMpHandling) == "init") then
+        intOpenMpHandling = 2
+      else if ((trim(lowerOpenMpHandling) == "pin") .or. &
+        (trim(lowerOpenMpHandling) == "")) then
+        intOpenMpHandling = 3 ! default
+      else
+        ! not a supported option -> error out
+        deallocate(lowerOpenMpHandling)
+        call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
+          msg="Invalid 'openMpHandling' option provided.", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+      deallocate(lowerOpenMpHandling)
+    endif
+    call ESMF_VMPlanSetOpenMP(compp%vmplan, intOpenMpHandling, &
+      openMpNumThreads, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
