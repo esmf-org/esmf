@@ -3227,9 +3227,8 @@ module NUOPC_Connector
               acceptorDG_nodal = ESMF_DistGridCreate(providerDG_nodal, vm=vm, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-              !TODO: When Mesh implements a name, make sure to transfer it here!
               mesh = ESMF_MeshCreate(acceptorDG, nodalDistgrid=acceptorDG_nodal, &
-                rc=rc)
+                name=geomobjname, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
               if (btest(verbosity,11)) then
@@ -3957,6 +3956,8 @@ module NUOPC_Connector
           call ESMF_FieldGet(providerField, geomtype=geomtype, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+          ! ESMF_GEOMTYPE_GRID
           if (geomtype==ESMF_GEOMTYPE_GRID) then
             call ESMF_FieldGet(acceptorField, grid=acceptorGrid, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4070,6 +4071,8 @@ module NUOPC_Connector
                   return  ! bail out
                endif
             endif
+
+          ! ESMF_GEOMTYPE_MESH
           elseif (geomtype==ESMF_GEOMTYPE_MESH) then
             call ESMF_FieldGet(acceptorField, mesh=acceptorMesh, vm=vm, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4155,7 +4158,8 @@ module NUOPC_Connector
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
                 acceptorMesh = ESMF_MeshCreate(providerMesh, &
-                  nodalDistgrid=nDistgrid, elementDistgrid=eDistgrid, vm=vm, rc=rc)
+                  nodalDistgrid=nDistgrid, elementDistgrid=eDistgrid, vm=vm, &
+                  name=geomobjname, rc=rc)
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
               elseif (isPresentNDG.and. .not.isPresentEDG) then
@@ -4164,7 +4168,7 @@ module NUOPC_Connector
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
                 acceptorMesh = ESMF_MeshCreate(providerMesh, &
-                  nodalDistgrid=nDistgrid, vm=vm, rc=rc)
+                  nodalDistgrid=nDistgrid, vm=vm, name=geomobjname, rc=rc)
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
               elseif (isPresentEDG.and. .not.isPresentNDG) then
@@ -4173,7 +4177,7 @@ module NUOPC_Connector
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
                 acceptorMesh = ESMF_MeshCreate(providerMesh, &
-                  elementDistgrid=eDistgrid, vm=vm, rc=rc)
+                  elementDistgrid=eDistgrid, vm=vm, name=geomobjname, rc=rc)
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
               else
@@ -4219,6 +4223,8 @@ module NUOPC_Connector
                   return  ! bail out
                endif
             endif
+
+          ! ESMF_GEOMTYPE_LOCSTREAM
           elseif (geomtype==ESMF_GEOMTYPE_LOCSTREAM) then
             call ESMF_FieldGet(providerField, locstream=providerLocstream, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4258,6 +4264,8 @@ module NUOPC_Connector
             if (sharedField) then
               !TODO: sharedField, can now be created because mesh is complete
             endif
+
+          ! unsupported ESMF_GEOMTYPE
           else
             call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
               msg="Provided GeomType must be Grid, Mesh, or LocStream.", &
