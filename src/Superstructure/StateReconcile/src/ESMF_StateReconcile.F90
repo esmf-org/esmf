@@ -2897,7 +2897,8 @@ contains
       stypep => state%statep
 
 #ifdef RECONCILE_ZAP_LOG_on
-      call ESMF_VMLogGarbageInfo(prefix="ZapProxies bef: ", rc=localrc)
+      call ESMF_VMLogGarbageInfo(prefix="ZapProxies bef: ", &
+        logMsgFlag=ESMF_LOGMSG_DEBUG, rc=localrc)
 #endif
 
       itemList => null ()
@@ -2997,7 +2998,8 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
       stypep%zapList => itemList ! hang on for ESMF_ReconcileZappedProxies()
 
 #ifdef RECONCILE_ZAP_LOG_on
-      call ESMF_VMLogGarbageInfo(prefix="ZapProxies aft: ", rc=localrc)
+      call ESMF_VMLogGarbageInfo(prefix="ZapProxies aft: ", &
+        logMsgFlag=ESMF_LOGMSG_DEBUG, rc=localrc)
 #endif
 
       if (present(rc)) rc = ESMF_SUCCESS
@@ -3069,7 +3071,8 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
     allocate(tempFBAlloc%this)
 
 #ifdef RECONCILE_ZAP_LOG_on
-    call ESMF_VMLogGarbageInfo(prefix="ZappedProxies bef: ", rc=localrc)
+    call ESMF_VMLogGarbageInfo(prefix="ZappedProxies bef: ", &
+      logMsgFlag=ESMF_LOGMSG_DEBUG, rc=localrc)
 #endif
 
     if (associated(itemList).and.associated(zapList)) then
@@ -3216,7 +3219,8 @@ call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): found FieldBundle: "//trim(na
     endif
 
 #ifdef RECONCILE_ZAP_LOG_on
-call ESMF_VMLogGarbageInfo(prefix="ZappedProxies aft: ", rc=localrc)
+    call ESMF_VMLogGarbageInfo(prefix="ZappedProxies aft: ", &
+      logMsgFlag=ESMF_LOGMSG_DEBUG, rc=localrc)
 #endif
 
     deallocate(tempFieldAlloc%ftypep)
