@@ -1931,7 +1931,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     try{
       std::string prefixStr(prefix, prefix_l);
-      ESMCI::VM::logGarbageInfo(prefixStr, *logMsgFlag);
+      ESMCI::VM::logGarbageInfo(prefixStr, false, *logMsgFlag);
     }catch(int localrc){
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc))

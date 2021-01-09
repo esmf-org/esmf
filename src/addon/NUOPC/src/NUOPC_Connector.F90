@@ -12,6 +12,8 @@
 #define FILENAME "src/addon/NUOPC/src/NUOPC_Connector.F90"
 !==============================================================================
 
+#define DEBUGLOG_on
+
 module NUOPC_Connector
 
   !-----------------------------------------------------------------------------
@@ -1728,7 +1730,7 @@ module NUOPC_Connector
     endif
 
   end subroutine
-  
+
   !-----------------------------------------------------------------------------
 
   subroutine InitializeIPDv05p3(connector, importState, exportState, clock, rc)
@@ -1736,7 +1738,7 @@ module NUOPC_Connector
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
-    
+
     ! local variables
     character(*), parameter         :: rName="InitializeIPDv05p3"
     character(ESMF_MAXSTR), pointer :: cplList(:), chopStringList(:)
@@ -1779,7 +1781,7 @@ module NUOPC_Connector
       diagnostic=diagnostic, profiling=profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      
+
     ! handle profiling
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
@@ -1792,7 +1794,7 @@ module NUOPC_Connector
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      
+
     ! handle diagnostic
     if (diagnostic>0) then
       call ESMF_ClockGet(clock, currTime=currTime, rc=rc)
@@ -1835,7 +1837,7 @@ module NUOPC_Connector
     nullify(exportFieldList)
     nullify(exportNamespaceList)
     nullify(exportCplSetList)
-    
+
     ! query Component for its internal State
     nullify(is%wrap)
     call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc)
@@ -1866,7 +1868,7 @@ module NUOPC_Connector
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
-    
+
     ! get the cplList Attribute
     call NUOPC_CompAttributeGet(connector, name="CplList", &
       itemCount=cplListSize, rc=rc)
@@ -1931,12 +1933,12 @@ module NUOPC_Connector
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
 
-    ! clean starting condition for pointer member inside internal state   
+    ! clean starting condition for pointer member inside internal state
     do i=1, is%wrap%cplSetCount
       nullify(is%wrap%cplSet(i)%zeroRegions)
       nullify(is%wrap%cplSet(i)%termOrders)
     enddo
-    
+
     ! prepare chopStringList
     nullify(chopStringList)
 
@@ -1959,7 +1961,7 @@ module NUOPC_Connector
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
       endif
-      
+
       ! find import and export side match
       foundFlag = .false. ! reset
       do eMatch=1, size(exportStandardNameList)  ! consumer side
@@ -1982,12 +1984,12 @@ module NUOPC_Connector
                 exportNamespaceList(eMatch), &
                 importCplSetList(iMatch), &
                 exportCplSetList(eMatch))
-              
+
             if (bondLevel == -1) cycle  ! break out and look for next match
-            
-            ! Getting to this place in the double loop means that the 
+
+            ! Getting to this place in the double loop means that the
             ! standard name match has a connection that supports the match.
-            
+
             ! -> look at the current ProducerConnection entry to see what to do
             eField = exportFieldList(eMatch)
             call NUOPC_GetAttribute(eField, name="ProducerConnection", &
@@ -2004,12 +2006,12 @@ module NUOPC_Connector
                 exit
               endif
             endif
-            
+
           endif
         enddo
         if (foundFlag) exit
       enddo
-      
+
       if (.not.foundFlag) then
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg="Bad internal error - should never get here!",&
@@ -2017,7 +2019,7 @@ module NUOPC_Connector
           rcToReturn=rc)
         return  ! bail out
       endif
-      
+
       if (btest(verbosity,12)) then
         write (msgString, '(A)') trim(name)//": - connected."
         call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
@@ -2025,12 +2027,12 @@ module NUOPC_Connector
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
       endif
-      
+
       if (iMatch>0 .and. eMatch>0) then
         ! there are matching Fields in the import and export States
         iField=importFieldList(iMatch)
         eField=exportFieldList(eMatch)
-        
+
         ! set the connected Attribute on import Field
         call NUOPC_SetAttribute(iField, name="Connected", value="true", &
           rc=rc)
@@ -2045,7 +2047,7 @@ module NUOPC_Connector
           rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-        
+
         ! coordinate the transfer and sharing between components
         call NUOPC_GetAttribute(iField, name="ProducerTransferOffer", &
           value=iTransferOffer, rc=rc)
@@ -2282,7 +2284,7 @@ module NUOPC_Connector
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           ! now know globally whether this is a sharable situation or not
           if (helperOut == 0) sharable = .true.
-        
+
           if (btest(verbosity,12)) then
             if (sharable) then
               write (msgString, '(A)') trim(name)//": "//&
@@ -2304,7 +2306,7 @@ module NUOPC_Connector
           endif
 
           if (sharable) then
-            ! One side accepts the other and VMs allow sharing 
+            ! One side accepts the other and VMs allow sharing
             ! Look at GeomObject sharing
             call NUOPC_GetAttribute(iField, name="SharePolicyGeomObject", &
               value=iSharePolicy, rc=rc)
@@ -2336,7 +2338,7 @@ module NUOPC_Connector
             else
               ! at least one side does not want to share -> not shared
               ! but don't modify attribute here because if alread shared through
-              ! another connection, it must stay shared. Rely on "not shared" 
+              ! another connection, it must stay shared. Rely on "not shared"
               ! default.
               if (btest(verbosity,12)) then
                 write (msgString, '(A)') trim(name)//": "//&
@@ -2380,7 +2382,7 @@ module NUOPC_Connector
             else
               ! at least one side does not want to share -> not shared
               ! but don't modify attribute here because if alread shared through
-              ! another connection, it must stay shared. Rely on "not shared" 
+              ! another connection, it must stay shared. Rely on "not shared"
               ! default.
               if (btest(verbosity,12)) then
                 write (msgString, '(A)') trim(name)//": "//&
@@ -2411,12 +2413,12 @@ module NUOPC_Connector
     if (associated(exportFieldList)) deallocate(exportFieldList)
     if (associated(exportNamespaceList)) deallocate(exportNamespaceList)
     if (associated(exportCplSetList)) deallocate(exportCplSetList)
-    
-    ! create the State member    
+
+    ! create the State member
     is%wrap%state = ESMF_StateCreate(rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
+
     ! handle diagnostic
     if (btest(diagnostic,2)) then
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
@@ -2436,7 +2438,7 @@ module NUOPC_Connector
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
-    
+
     ! extro
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2451,7 +2453,7 @@ module NUOPC_Connector
     endif
 
   end subroutine
-  
+
   !-----------------------------------------------------------------------------
 
   subroutine InitializeIPDv05p4(connector, importState, exportState, clock, rc)
@@ -2459,7 +2461,7 @@ module NUOPC_Connector
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
-    
+
     ! local variables
     character(*), parameter         :: rName="InitializeIPDv05p4"
     character(ESMF_MAXSTR), pointer :: cplList(:), chopStringList(:)
@@ -2529,7 +2531,7 @@ module NUOPC_Connector
       diagnostic=diagnostic, profiling=profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      
+
     ! handle profiling
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
@@ -2587,7 +2589,7 @@ module NUOPC_Connector
     nullify(exportStateList)
     nullify(exportNamespaceList)
     nullify(exportCplSetList)
-    
+
     ! query Component for its internal State
     nullify(is%wrap)
     call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc)
@@ -2614,7 +2616,7 @@ module NUOPC_Connector
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
-    
+
     ! get the cplList Attribute
     call NUOPC_CompAttributeGet(connector, name="CplList", &
       itemCount=cplListSize, rc=rc)
@@ -2667,12 +2669,12 @@ module NUOPC_Connector
 
     ! prepare chopStringList
     nullify(chopStringList)
-    
+
     ! prepare gridList
     nullify(gridList)
     ! prepare meshList
     nullify(meshList)
-    
+
     ! main loop over all entries in the cplList
     do i=1, cplListSize
       call NUOPC_ChopString(cplList(i), chopChar=":", &
@@ -2681,7 +2683,7 @@ module NUOPC_Connector
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       cplName = chopStringList(1) ! first part is the standard name of cpl field
       deallocate(chopStringList)
-      
+
       if (btest(verbosity,11).or.btest(verbosity,12)) then
         write (iString,'(I4)') i
         write (msgString, '(A)') trim(name)//": handle "// &
@@ -2692,7 +2694,7 @@ module NUOPC_Connector
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
       endif
-      
+
       ! find import and export side match
       foundFlag = .false. ! reset
       do eMatch=1, size(exportStandardNameList)  ! consumer side
@@ -2715,12 +2717,12 @@ module NUOPC_Connector
               exportNamespaceList(eMatch), &
               importCplSetList(iMatch), &
               exportCplSetList(eMatch))
-              
+
             if (bondLevel == -1) cycle  ! break out and look for next match
-            
-            ! Getting to this place in the double loop means that the 
+
+            ! Getting to this place in the double loop means that the
             ! standard name match has a connection that supports the match.
-            
+
             ! -> look at the current ProducerConnection entry to see what to do
             eField = exportFieldList(eMatch)
             call NUOPC_GetAttribute(eField, name="ProducerConnection", &
@@ -2737,12 +2739,12 @@ module NUOPC_Connector
                 exit
               endif
             endif
-            
+
           endif
         enddo
         if (foundFlag) exit
       enddo
-      
+
       if (.not.foundFlag) then
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg="Bad internal error - should never get here!",&
@@ -2750,12 +2752,12 @@ module NUOPC_Connector
           rcToReturn=rc)
         return  ! bail out
       endif
-      
+
       if (iMatch>0 .and. eMatch>0) then
         ! there are matching Fields in the import and export States
         iField=importFieldList(iMatch)
         eField=exportFieldList(eMatch)
-        
+
         ! check if TransferAction of one side is "accept"
         call NUOPC_GetAttribute(iField, name="ProducerTransferAction", &
           value=iTransferAction, rc=rc)
@@ -2765,7 +2767,7 @@ module NUOPC_Connector
           value=eTransferAction, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          
+
         if ((trim(iTransferAction)=="provide") &
           .and.(trim(eTransferAction)=="accept")) then
           providerField = iField
@@ -2792,10 +2794,10 @@ module NUOPC_Connector
           endif
           cycle ! continue with the next i
         endif
-        
+
         ! there is transfer: provider -> acceptor
         ! determine if there is any sharing of GeomObject and/or Field
-        
+
         call NUOPC_GetAttribute(iField, name="ShareStatusGeomObject", &
           value=iShareStatusG, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2877,7 +2879,7 @@ module NUOPC_Connector
           rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-        
+
         ! ESMF_GEOMTYPE_GRID
         if (geomtype==ESMF_GEOMTYPE_GRID) then
           call ESMF_FieldGet(providerField, grid=grid, staggerloc=staggerloc, &
@@ -2890,9 +2892,12 @@ module NUOPC_Connector
               staggerloc=staggerloc, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return
-call ESMF_PointerLog(grid%this, prefix="acceptorField set persistent shared Grid: ", &
-  logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
             ! must make Grid persistent to be safe when sharing with other VM
+#ifdef DEBUGLOG_on
+            call ESMF_PointerLog(grid%this, &
+              prefix="acceptorField set persistent shared provider Grid: ", &
+              logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
+#endif
             call c_ESMC_SetPersist(grid, ESMF_TRUE, rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return
@@ -2903,23 +2908,24 @@ call ESMF_PointerLog(grid%this, prefix="acceptorField set persistent shared Grid
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             ! see if provider grid has been dealt with before
+            ! key in on provider grid as to only transfer each provider grid once
             gridListMatch=.false.
             gridListE=>gridList
             do while (associated(gridListE))
-call ESMF_PointerLog(grid%this, prefix="Comparing Grid: "//trim(geomobjname)//": ", &
-  logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
-
-call ESMF_GridGet(gridListE%keyGrid, name=msgString, rc=rc)
-call ESMF_PointerLog(gridListE%keyGrid%this, &
-  prefix="    to keyGrid: "//trim(msgString)//": ", &
-  logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
-!TODO: Actually want to check for alias match.
-              if (gridListE%keyGrid == grid) then
-!TODO: But for now this does not work due to proxy duplication, and as a 
-!TODO: work-around matching is done by name. This is very fragile and should
-!TODO: be fixed as soon as we can rely on correct proxy behavior!
-!              if (trim(geomobjname)==trim(msgString)) then
-call ESMF_LogWrite("Matching Grid found!", ESMF_LOGMSG_DEBUG, rc=rc)
+#ifdef DEBUGLOG_on
+              call ESMF_PointerLog(grid%this, &
+                prefix="Comparing provider Grid: "//trim(geomobjname)//": ", &
+                logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
+              call ESMF_GridGet(gridListE%keyGrid, name=msgString, rc=rc)
+              call ESMF_PointerLog(gridListE%keyGrid%this, &
+                prefix="    to provider keyGrid: "//trim(msgString)//": ", &
+                logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
+#endif
+              if (gridListE%keyGrid == grid) then ! checking for grid alias
+#ifdef DEBUGLOG_on
+                call ESMF_LogWrite("Matching provider Grid found!", &
+                  ESMF_LOGMSG_DEBUG, rc=rc)
+#endif
                 gridListMatch=.true.
                 exit
               endif
@@ -2927,7 +2933,8 @@ call ESMF_LogWrite("Matching Grid found!", ESMF_LOGMSG_DEBUG, rc=rc)
             enddo
             if (btest(verbosity,11)) then
               write(msgString, *) "gridListMatch=", gridListMatch
-              call ESMF_LogWrite(trim(name)//": "//trim(msgString)//" for Grid: "&
+              call ESMF_LogWrite(trim(name)//": "//trim(msgString)//&
+                " for provider Grid: " &
                 //trim(geomobjname), ESMF_LOGMSG_INFO, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -3106,7 +3113,6 @@ call ESMF_LogWrite("Matching Grid found!", ESMF_LOGMSG_DEBUG, rc=rc)
                endif
             endif
           endif
-          
           ! clean-up
           deallocate(minIndex, maxIndex, stat=rc)
           if (ESMF_LogFoundDeallocError(rc, &
@@ -3126,7 +3132,7 @@ call ESMF_LogWrite("Matching Grid found!", ESMF_LOGMSG_DEBUG, rc=rc)
               msg="Deallocating ungriddedUBound", &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           endif
-        
+
         ! ESMF_GEOMTYPE_MESH
         elseif (geomtype==ESMF_GEOMTYPE_MESH) then
           call ESMF_FieldGet(providerField, mesh=mesh, meshloc=meshloc, rc=rc)
@@ -3141,8 +3147,11 @@ call ESMF_LogWrite("Matching Grid found!", ESMF_LOGMSG_DEBUG, rc=rc)
               rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-call ESMF_PointerLog(mesh%this, prefix="acceptorField set persistent shared Mesh: ", &
-  logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
+#ifdef DEBUGLOG_on
+            call ESMF_PointerLog(mesh%this, &
+              prefix="acceptorField set persistent shared acceptor Mesh: ", &
+              logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
+#endif
             ! must make Mesh persistent to be safe when sharing with other VM
             call c_ESMC_SetPersist(mesh, ESMF_TRUE, rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -3154,22 +3163,24 @@ call ESMF_PointerLog(mesh%this, prefix="acceptorField set persistent shared Mesh
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             ! see if provider mesh has been dealt with before
+            ! key in on provider mesh as to only transfer each provider mesh once
             meshListMatch=.false.
             meshListE=>meshList
             do while (associated(meshListE))
-call ESMF_PointerLog(mesh%this, prefix="Comparing Mesh: "//trim(geomobjname)//": ", &
-  logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
-call ESMF_MeshGet(meshListE%keyMesh, name=msgString, rc=rc)
-call ESMF_PointerLog(meshListE%keyMesh%this, &
-  prefix="    to keyMesh: "//trim(msgString)//": ", &
-  logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
-!TODO: Actually want to check for alias match.
-              if (meshListE%keyMesh == mesh) then
-!TODO: But for now this does not work due to proxy duplication, and as a 
-!TODO: work-around matching is done by name. This is very fragile and should
-!TODO: be fixed as soon as we can rely on correct proxy behavior!
-!              if (trim(geomobjname)==trim(msgString)) then
-call ESMF_LogWrite("Matching Mesh found!", ESMF_LOGMSG_DEBUG, rc=rc)
+#ifdef DEBUGLOG_on
+              call ESMF_PointerLog(mesh%this, &
+                prefix="Comparing provider Mesh: "//trim(geomobjname)//": ", &
+                logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
+              call ESMF_MeshGet(meshListE%keyMesh, name=msgString, rc=rc)
+              call ESMF_PointerLog(meshListE%keyMesh%this, &
+                prefix="    to provider keyMesh: "//trim(msgString)//": ", &
+                logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
+#endif
+              if (meshListE%keyMesh == mesh) then ! checking for mesh alias
+#ifdef DEBUGLOG_on
+                call ESMF_LogWrite("Matching provider Mesh found!", &
+                  ESMF_LOGMSG_DEBUG, rc=rc)
+#endif
                 meshListMatch=.true.
                 exit
               endif
@@ -3177,7 +3188,8 @@ call ESMF_LogWrite("Matching Mesh found!", ESMF_LOGMSG_DEBUG, rc=rc)
             enddo
             if (btest(verbosity,11)) then
               write(msgString, *) "meshListMatch=", meshListMatch
-              call ESMF_LogWrite(trim(name)//": "//trim(msgString)//" for Mesh: "&
+              call ESMF_LogWrite(trim(name)//": "//trim(msgString)// &
+                " for provider Mesh: " &
                 //trim(geomobjname), ESMF_LOGMSG_INFO, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -3215,9 +3227,8 @@ call ESMF_LogWrite("Matching Mesh found!", ESMF_LOGMSG_DEBUG, rc=rc)
               acceptorDG_nodal = ESMF_DistGridCreate(providerDG_nodal, vm=vm, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-              !TODO: When Mesh implements a name, make sure to transfer it here!
               mesh = ESMF_MeshCreate(acceptorDG, nodalDistgrid=acceptorDG_nodal, &
-                rc=rc)
+                name=geomobjname, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
               if (btest(verbosity,11)) then
@@ -3328,7 +3339,6 @@ call ESMF_LogWrite("Matching Mesh found!", ESMF_LOGMSG_DEBUG, rc=rc)
                endif
             endif
           endif
-
           ! clean-up
           deallocate(gridToFieldMap, stat=rc)
           if (ESMF_LogFoundDeallocError(rc, &
@@ -3495,7 +3505,7 @@ call ESMF_LogWrite("Matching Mesh found!", ESMF_LOGMSG_DEBUG, rc=rc)
     if (associated(exportStateList)) deallocate(exportStateList)
     if (associated(exportNamespaceList)) deallocate(exportNamespaceList)
     if (associated(exportCplSetList)) deallocate(exportCplSetList)
-    
+
     ! handle diagnostic
     if (btest(diagnostic,2)) then
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
@@ -3538,7 +3548,7 @@ call ESMF_LogWrite("Matching Mesh found!", ESMF_LOGMSG_DEBUG, rc=rc)
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
-    
+
     ! local variables
     character(*), parameter         :: rName="InitializeIPDv05p5"
     character(ESMF_MAXSTR), pointer :: cplList(:), chopStringList(:)
@@ -3590,7 +3600,7 @@ call ESMF_LogWrite("Matching Mesh found!", ESMF_LOGMSG_DEBUG, rc=rc)
 
     type(GridL), pointer            :: gridList, gridListE
     logical                         :: gridListMatch
-    
+
     type(MeshL), pointer            :: meshList, meshListE
     logical                         :: meshListMatch
 
@@ -3601,7 +3611,7 @@ call ESMF_LogWrite("Matching Mesh found!", ESMF_LOGMSG_DEBUG, rc=rc)
       diagnostic=diagnostic, profiling=profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      
+
     ! handle profiling
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
@@ -3686,7 +3696,7 @@ call ESMF_LogWrite("Matching Mesh found!", ESMF_LOGMSG_DEBUG, rc=rc)
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
-    
+
     ! get the cplList Attribute
     call NUOPC_CompAttributeGet(connector, name="CplList", &
       itemCount=cplListSize, rc=rc)
@@ -3736,7 +3746,7 @@ call ESMF_LogWrite("Matching Mesh found!", ESMF_LOGMSG_DEBUG, rc=rc)
       namespaceList=exportNamespaceList, cplSetList=exportCplSetList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
+
     ! prepare chopStringList
     nullify(chopStringList)
 
@@ -3744,7 +3754,7 @@ call ESMF_LogWrite("Matching Mesh found!", ESMF_LOGMSG_DEBUG, rc=rc)
     nullify(gridList)
     ! prepare meshList
     nullify(meshList)
-    
+
     ! main loop over all entries in the cplList
     do i=1, cplListSize
       call NUOPC_ChopString(cplList(i), chopChar=":", &
@@ -3753,7 +3763,7 @@ call ESMF_LogWrite("Matching Mesh found!", ESMF_LOGMSG_DEBUG, rc=rc)
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       cplName = chopStringList(1) ! first part is the standard name of cpl field
       deallocate(chopStringList)
-      
+
       if (btest(verbosity,11).or.btest(verbosity,12)) then
         write (iString,'(I4)') i
         write (msgString, '(A)') trim(name)//": handle "// &
@@ -3764,7 +3774,7 @@ call ESMF_LogWrite("Matching Mesh found!", ESMF_LOGMSG_DEBUG, rc=rc)
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
       endif
-      
+
       ! find import and export side match
       foundFlag = .false. ! reset
       do eMatch=1, size(exportStandardNameList)  ! consumer side
@@ -3787,12 +3797,12 @@ call ESMF_LogWrite("Matching Mesh found!", ESMF_LOGMSG_DEBUG, rc=rc)
               exportNamespaceList(eMatch), &
               importCplSetList(iMatch), &
               exportCplSetList(eMatch))
-              
+
             if (bondLevel == -1) cycle  ! break out and look for next match
-            
-            ! Getting to this place in the double loop means that the 
+
+            ! Getting to this place in the double loop means that the
             ! standard name match has a connection that supports the match.
-            
+
             ! -> look at the current ProducerConnection entry to see what to do
             eField = exportFieldList(eMatch)
             call NUOPC_GetAttribute(eField, name="ProducerConnection", &
@@ -3809,12 +3819,12 @@ call ESMF_LogWrite("Matching Mesh found!", ESMF_LOGMSG_DEBUG, rc=rc)
                 exit
               endif
             endif
-            
+
           endif
         enddo
         if (foundFlag) exit
       enddo
-      
+
       if (.not.foundFlag) then
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg="Bad internal error - should never get here!",&
@@ -3822,7 +3832,7 @@ call ESMF_LogWrite("Matching Mesh found!", ESMF_LOGMSG_DEBUG, rc=rc)
           rcToReturn=rc)
         return  ! bail out
       endif
-      
+
       if (iMatch>0 .and. eMatch>0) then
         ! there are matching Fields in the import and export States
         iField=importFieldList(iMatch)
@@ -3837,7 +3847,7 @@ call ESMF_LogWrite("Matching Mesh found!", ESMF_LOGMSG_DEBUG, rc=rc)
           value=eTransferAction, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          
+
         if ((trim(iTransferAction)=="provide") &
           .and.(trim(eTransferAction)=="accept")) then
           providerField = iField
@@ -3865,7 +3875,7 @@ call ESMF_LogWrite("Matching Mesh found!", ESMF_LOGMSG_DEBUG, rc=rc)
 
         ! there is transfer: provider -> acceptor
         ! determine if there is any sharing of GeomObject and/or Field
-        
+
         call NUOPC_GetAttribute(iField, name="ShareStatusGeomObject", &
           value=iShareStatusG, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -3946,6 +3956,8 @@ call ESMF_LogWrite("Matching Mesh found!", ESMF_LOGMSG_DEBUG, rc=rc)
           call ESMF_FieldGet(providerField, geomtype=geomtype, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+          ! ESMF_GEOMTYPE_GRID
           if (geomtype==ESMF_GEOMTYPE_GRID) then
             call ESMF_FieldGet(acceptorField, grid=acceptorGrid, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -3954,22 +3966,27 @@ call ESMF_LogWrite("Matching Mesh found!", ESMF_LOGMSG_DEBUG, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             ! see if old acceptor grid has been dealt with before
+            ! key in on old acceptor grid here (and not provider grid!) because
+            ! it must be assumed that the acceptor side has created separate
+            ! acceptor grids for the same transferred provider grid in the
+            ! previous phase
             gridListMatch=.false.
             gridListE=>gridList
             do while (associated(gridListE))
-call ESMF_PointerLog(acceptorGrid%this, prefix="Comparing Grid: "//trim(geomobjname)//": ", &
-  logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
-call ESMF_GridGet(gridListE%keyGrid, name=msgString, rc=rc)
-call ESMF_PointerLog(gridListE%keyGrid%this, &
-  prefix="    to keyGrid: "//trim(msgString)//": ", &
-  logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
-!TODO: Actually want to check for alias match.
-              if (acceptorGrid == gridListE%keyGrid) then
-!TODO: But for now this does not work due to proxy duplication, and as a 
-!TODO: work-around matching is done by name. This is very fragile and should
-!TODO: be fixed as soon as we can rely on correct proxy behavior!
-!              if (trim(geomobjname)==trim(msgString)) then
-call ESMF_LogWrite("Matching Grid found!", ESMF_LOGMSG_DEBUG, rc=rc)
+#ifdef DEBUGLOG_on
+              call ESMF_PointerLog(acceptorGrid%this, &
+                prefix="Comparing acceptor Grid: "//trim(geomobjname)//": ", &
+                logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
+              call ESMF_GridGet(gridListE%keyGrid, name=msgString, rc=rc)
+              call ESMF_PointerLog(gridListE%keyGrid%this, &
+                prefix="    to acceptor keyGrid: "//trim(msgString)//": ", &
+                logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
+#endif
+              if (acceptorGrid == gridListE%keyGrid) then ! checking for grid alias
+#ifdef DEBUGLOG_on
+                call ESMF_LogWrite("Matching acceptor found!", &
+                  ESMF_LOGMSG_DEBUG, rc=rc)
+#endif
                 gridListMatch=.true.
                 exit
               endif
@@ -3977,7 +3994,8 @@ call ESMF_LogWrite("Matching Grid found!", ESMF_LOGMSG_DEBUG, rc=rc)
             enddo
             if (btest(verbosity,11)) then
               write(msgString, *) "gridListMatch=", gridListMatch
-              call ESMF_LogWrite(trim(name)//": "//trim(msgString)//" for Grid: "&
+              call ESMF_LogWrite(trim(name)//": "//trim(msgString)// &
+                " for acceptor Grid: " &
                 //trim(geomobjname), ESMF_LOGMSG_INFO, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -4053,6 +4071,8 @@ call ESMF_LogWrite("Matching Grid found!", ESMF_LOGMSG_DEBUG, rc=rc)
                   return  ! bail out
                endif
             endif
+
+          ! ESMF_GEOMTYPE_MESH
           elseif (geomtype==ESMF_GEOMTYPE_MESH) then
             call ESMF_FieldGet(acceptorField, mesh=acceptorMesh, vm=vm, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4061,22 +4081,27 @@ call ESMF_LogWrite("Matching Grid found!", ESMF_LOGMSG_DEBUG, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             ! see if old acceptor mesh has been dealt with before
+            ! key in on old acceptor mesh here (and not provider mesh!) because
+            ! it must be assumed that the acceptor side has created separate
+            ! acceptor meshes for the same transferred provider mesh in the
+            ! previous phase
             meshListMatch=.false.
             meshListE=>meshList
             do while (associated(meshListE))
-call ESMF_PointerLog(acceptorMesh%this, prefix="Comparing Mesh: "//trim(geomobjname)//": ", &
-  logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
-call ESMF_MeshGet(meshListE%keyMesh, name=msgString, rc=rc)
-call ESMF_PointerLog(meshListE%keyMesh%this, &
-  prefix="    to keyMesh: "//trim(msgString)//": ", &
-  logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
-!TODO: Actually want to check for alias match.
-              if (acceptorMesh == meshListE%keyMesh) then
-!TODO: But for now this does not work due to proxy duplication, and as a 
-!TODO: work-around matching is done by name. This is very fragile and should
-!TODO: be fixed as soon as we can rely on correct proxy behavior!
-!              if (trim(geomobjname)==trim(msgString)) then
-call ESMF_LogWrite("Matching Mesh found!", ESMF_LOGMSG_DEBUG, rc=rc)
+#ifdef DEBUGLOG_on
+              call ESMF_PointerLog(acceptorMesh%this, &
+                prefix="Comparing acceptor Mesh: "//trim(geomobjname)//": ", &
+                logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
+              call ESMF_MeshGet(meshListE%keyMesh, name=msgString, rc=rc)
+              call ESMF_PointerLog(meshListE%keyMesh%this, &
+                prefix="    to acceptor keyMesh: "//trim(msgString)//": ", &
+                logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
+#endif
+              if (acceptorMesh == meshListE%keyMesh) then ! checking for mesh alias
+#ifdef DEBUGLOG_on
+                call ESMF_LogWrite("Matching acceptor Mesh found!", &
+                  ESMF_LOGMSG_DEBUG, rc=rc)
+#endif
                 meshListMatch=.true.
                 exit
               endif
@@ -4084,7 +4109,8 @@ call ESMF_LogWrite("Matching Mesh found!", ESMF_LOGMSG_DEBUG, rc=rc)
             enddo
             if (btest(verbosity,11)) then
               write(msgString, *) "meshListMatch=", meshListMatch
-              call ESMF_LogWrite(trim(name)//": "//trim(msgString)//" for Mesh: "&
+              call ESMF_LogWrite(trim(name)//": "//trim(msgString)// &
+                " for acceptor Mesh: " &
                 //trim(geomobjname), ESMF_LOGMSG_INFO, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -4117,7 +4143,7 @@ call ESMF_LogWrite("Matching Mesh found!", ESMF_LOGMSG_DEBUG, rc=rc)
               call ESMF_FieldGet(providerField, mesh=providerMesh, &
                 meshloc=meshloc, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out            
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
               call ESMF_MeshGet(providerMesh, isMemFreed=meshNoConnections, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -4132,7 +4158,8 @@ call ESMF_LogWrite("Matching Mesh found!", ESMF_LOGMSG_DEBUG, rc=rc)
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
                 acceptorMesh = ESMF_MeshCreate(providerMesh, &
-                  nodalDistgrid=nDistgrid, elementDistgrid=eDistgrid, vm=vm, rc=rc)
+                  nodalDistgrid=nDistgrid, elementDistgrid=eDistgrid, vm=vm, &
+                  name=geomobjname, rc=rc)
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
               elseif (isPresentNDG.and. .not.isPresentEDG) then
@@ -4141,7 +4168,7 @@ call ESMF_LogWrite("Matching Mesh found!", ESMF_LOGMSG_DEBUG, rc=rc)
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
                 acceptorMesh = ESMF_MeshCreate(providerMesh, &
-                  nodalDistgrid=nDistgrid, vm=vm, rc=rc)
+                  nodalDistgrid=nDistgrid, vm=vm, name=geomobjname, rc=rc)
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
               elseif (isPresentEDG.and. .not.isPresentNDG) then
@@ -4150,7 +4177,7 @@ call ESMF_LogWrite("Matching Mesh found!", ESMF_LOGMSG_DEBUG, rc=rc)
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
                 acceptorMesh = ESMF_MeshCreate(providerMesh, &
-                  elementDistgrid=eDistgrid, vm=vm, rc=rc)
+                  elementDistgrid=eDistgrid, vm=vm, name=geomobjname, rc=rc)
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
               else
@@ -4196,6 +4223,8 @@ call ESMF_LogWrite("Matching Mesh found!", ESMF_LOGMSG_DEBUG, rc=rc)
                   return  ! bail out
                endif
             endif
+
+          ! ESMF_GEOMTYPE_LOCSTREAM
           elseif (geomtype==ESMF_GEOMTYPE_LOCSTREAM) then
             call ESMF_FieldGet(providerField, locstream=providerLocstream, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4235,6 +4264,8 @@ call ESMF_LogWrite("Matching Mesh found!", ESMF_LOGMSG_DEBUG, rc=rc)
             if (sharedField) then
               !TODO: sharedField, can now be created because mesh is complete
             endif
+
+          ! unsupported ESMF_GEOMTYPE
           else
             call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
               msg="Provided GeomType must be Grid, Mesh, or LocStream.", &
@@ -4243,7 +4274,7 @@ call ESMF_LogWrite("Matching Mesh found!", ESMF_LOGMSG_DEBUG, rc=rc)
             return  ! bail out
           endif
         endif
-        
+
       else
         !TODO: Fields mentioned via stdname in Cpl metadata not found -> error?
       endif
@@ -4295,7 +4326,7 @@ call ESMF_LogWrite("Matching Mesh found!", ESMF_LOGMSG_DEBUG, rc=rc)
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
-    
+
     ! extro
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
