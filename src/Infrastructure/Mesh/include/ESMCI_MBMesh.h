@@ -117,6 +117,7 @@ namespace ESMCI {
     int _num_owned_node;
     int _num_owned_elem;
     int _num_owned_elem_conn;
+    bool has_ghost;
 
   public:
     int pdim; 
