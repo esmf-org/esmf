@@ -922,7 +922,8 @@ class MBT {
 
       try {
         int localrc;
-        
+       
+/* 
         // regex to split on space and dash
         std::regex regex{R"([\s-]+)"};
         // iterator over substrings
@@ -934,7 +935,11 @@ class MBT {
         //   std::cout << i << ", ";
         // std::cout << std::endl;
         // std::cout << test << std::endl;
-        
+*/
+        // intel 19.0.5 on cheyenne uses gcc 4.8.5 for linking, which does not
+        // yet have a functional regex, uncomment above when fixed.
+        std::string test = name;
+      
         // create test file name using localPet
         int len = test.length();
         char fname[len];
