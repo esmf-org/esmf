@@ -289,6 +289,12 @@ module NUOPC_Connector
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -428,6 +434,12 @@ module NUOPC_Connector
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1023,6 +1035,12 @@ module NUOPC_Connector
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1300,6 +1318,12 @@ module NUOPC_Connector
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1631,6 +1655,12 @@ module NUOPC_Connector
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1783,6 +1813,12 @@ module NUOPC_Connector
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2533,6 +2569,12 @@ module NUOPC_Connector
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -3613,6 +3655,12 @@ module NUOPC_Connector
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4652,6 +4700,12 @@ module NUOPC_Connector
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4810,6 +4864,12 @@ module NUOPC_Connector
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -5804,6 +5864,12 @@ module NUOPC_Connector
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -5862,6 +5928,12 @@ module NUOPC_Connector
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -5927,6 +5999,12 @@ module NUOPC_Connector
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         
     ! handle profiling
+    if (btest(profiling,10)) then
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,3)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -6198,6 +6276,12 @@ module NUOPC_Connector
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! handle profiling
+    if (btest(profiling,11)) then
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,6)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
