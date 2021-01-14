@@ -796,155 +796,161 @@ void MBMesh_calc_1st_order_weights_2D_3D_sph(MBMesh *srcmbmp, EntityHandle src_e
   }
 
 
-void calc_conserve_mat_serial_2D_2D_cart(MBMesh *srcmbmp, MBMesh *dstmbmp, MBMesh_Search_EToE_Result_List &sres, IWeights &iw, IWeights &src_frac, IWeights &dst_frac) {
-  Trace __trace("calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw)");
+void calc_conserve_mat_serial_2D_2D_cart(MBMesh *srcmbmp, MBMesh *dstmbmp, 
+                                         MBMesh_Search_EToE_Result_List &sres, 
+                                         IWeights &iw, IWeights &src_frac, 
+                                         IWeights &dst_frac) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "calc_conserve_mat_serial_2D_2D_cart"
+  try {
+    int localrc, merr;
 
+    VM *vm = VM::getCurrent(&localrc);
+    int petCount = vm->getPetCount();
+    int localPet = vm->getLocalPet();
+    ESMC_CHECK_THROW(localrc);
 
-  // determine if we should use the dst_frac variable
-  bool use_dst_frac=false;
+    // determine if we should use the dst_frac variable
+    bool use_dst_frac=false;
 
-  // MOAB error
-   int merr;
+    // Get MOAB Meshes
+    Interface *src_moab_mesh=srcmbmp->mesh;
+    Interface *dst_moab_mesh=dstmbmp->mesh;
 
-  // Get MOAB Meshes
-  Interface *src_moab_mesh=srcmbmp->mesh;
-  Interface *dst_moab_mesh=dstmbmp->mesh;
+    // Declare vectors to hold weight and auxilary information
+    std::vector<int> valid;
+    std::vector<double> wgts;
+    std::vector<double> areas;
+    std::vector<double> dst_areas;
+    std::vector<int> dst_gids;
 
-  // Declare vectors to hold weight and auxilary information
-  std::vector<int> valid;
-  std::vector<double> wgts;
-  std::vector<double> areas;
-  std::vector<double> dst_areas;
-  std::vector<int> dst_gids;
+    // Temporary buffers for concave case,
+    // so there isn't lots of reallocation
+    std::vector<int> tmp_valid;
+    std::vector<double> tmp_areas;
+    std::vector<double> tmp_dst_areas;
 
-  // Temporary buffers for concave case,
-  // so there isn't lots of reallocation
-  std::vector<int> tmp_valid;
-  std::vector<double> tmp_areas;
-  std::vector<double> tmp_dst_areas;
-
-  // Find maximum number of dst elements in search results
-  int max_num_dst_elems=0;
-  MBMesh_Search_EToE_Result_List::iterator sb = sres.begin(), se = sres.end();
-  for (; sb != se; sb++) {
-    // NOTE: sr.elem is a src element and sr.elems is a list of dst elements
-    MBMesh_Search_EToE_Result &sr = **sb;
-
-    // If there are no associated dst elements then skip it
-    if (sr.dst_elems.size() > max_num_dst_elems) max_num_dst_elems=sr.dst_elems.size();
-  }
-
-
-  // Allocate space for weight calc output arrays
-  valid.resize(max_num_dst_elems,0);
-  wgts.resize(max_num_dst_elems,0.0);
-  areas.resize(max_num_dst_elems,0.0);
-  dst_areas.resize(max_num_dst_elems,0.0);
-  dst_gids.resize(max_num_dst_elems,0.0);
-
-  // Loop through search results
-  for (sb = sres.begin(); sb != se; sb++) {
-
-    // NOTE: sr.elem is a dst element and sr.elems is a list of src elements
+    // Find maximum number of dst elements in search results
+    int max_num_dst_elems=0;
+    MBMesh_Search_EToE_Result_List::iterator sb = sres.begin(), se = sres.end();
+    for (; sb != se; sb++) {
+      // NOTE: sr.elem is a src element and sr.elems is a list of dst elements
       MBMesh_Search_EToE_Result &sr = **sb;
 
-    // If there are no associated dst elements then skip it
-    if (sr.dst_elems.size() == 0) continue;
-
-    // Get src elem gid
-    int src_gid;
-    merr=src_moab_mesh->tag_get_data(srcmbmp->gid_tag, &sr.src_elem, 1, &src_gid);
-    if (merr != MB_SUCCESS) {
-      Throw() <<"MOAB ERROR: "<<moab::ErrorCodeStr[merr];
+      // If there are no associated dst elements then skip it
+      if (sr.dst_elems.size() > max_num_dst_elems) max_num_dst_elems=sr.dst_elems.size();
     }
 
-    // Get dst elem gids
-    for (int i=0; i<sr.dst_elems.size(); i++) {
-      merr=dst_moab_mesh->tag_get_data(dstmbmp->gid_tag, &(sr.dst_elems[i]), 1, &(dst_gids[i]));
-       if (merr != MB_SUCCESS) {
+
+    // Allocate space for weight calc output arrays
+    valid.resize(max_num_dst_elems,0);
+    wgts.resize(max_num_dst_elems,0.0);
+    areas.resize(max_num_dst_elems,0.0);
+    dst_areas.resize(max_num_dst_elems,0.0);
+    dst_gids.resize(max_num_dst_elems,0.0);
+
+    // Loop through search results
+    for (sb = sres.begin(); sb != se; sb++) {
+
+      // NOTE: sr.elem is a dst element and sr.elems is a list of src elements
+        MBMesh_Search_EToE_Result &sr = **sb;
+
+      // If there are no associated dst elements then skip it
+      if (sr.dst_elems.size() == 0) continue;
+
+      // Get src elem gid
+      int src_gid;
+      merr=src_moab_mesh->tag_get_data(srcmbmp->gid_tag, &sr.src_elem, 1, &src_gid);
+      if (merr != MB_SUCCESS) {
         Throw() <<"MOAB ERROR: "<<moab::ErrorCodeStr[merr];
       }
-    }
 
-
-    // If this source element is masked then skip it
-    if (srcmbmp->has_elem_mask) {
-        // Get src elem mask value
-        int masked;
-        merr=src_moab_mesh->tag_get_data(srcmbmp->elem_mask_tag, &sr.src_elem, 1, &masked);
-        if (merr != MB_SUCCESS) {
-          Throw() <<"MOAB ERROR: "<<moab::ErrorCodeStr[merr];
-        }
-
-        // Skip if masked
-        if (masked) {
-          continue; // if this is masked, then go to next search result
-        }
-    }
-
-#if 0
-    // If this source element is creeped out during merging then skip it
-    double src_frac2=1.0;
-    if(src_frac2_field){
-      const MeshObj &src_elem = *sr.elem;
-      src_frac2=*(double *)(src_frac2_field->data(src_elem));
-      if (src_frac2 == 0.0) continue;
-    }
-#endif
-
-
-    // Declare src_elem_area
-    double src_elem_area;
-
-    // Calculate weights
-    std::vector<sintd_node *> tmp_nodes;
-    std::vector<sintd_cell *> tmp_cells;
-    MBMesh_calc_1st_order_weights_2D_2D_cart(srcmbmp, sr.src_elem, dstmbmp, sr.dst_elems,
-                                             &src_elem_area, &valid, &wgts, &areas, &dst_areas);
-
-
-
-    // Invalidate masked destination elements
-    if (dstmbmp->has_elem_mask) {
+      // Get dst elem gids
       for (int i=0; i<sr.dst_elems.size(); i++) {
-        // Get dst elem mask value
-        int masked;
-        merr=dst_moab_mesh->tag_get_data(dstmbmp->elem_mask_tag, &(sr.dst_elems[i]), 1, &masked);
-        if (merr != MB_SUCCESS) {
+        merr=dst_moab_mesh->tag_get_data(dstmbmp->gid_tag, &(sr.dst_elems[i]), 1, &(dst_gids[i]));
+         if (merr != MB_SUCCESS) {
           Throw() <<"MOAB ERROR: "<<moab::ErrorCodeStr[merr];
         }
+      }
 
-         // Invalidate masked elems
-        if (masked) {
-          valid[i]=0;
+
+      // If this source element is masked then skip it
+      if (srcmbmp->has_elem_mask) {
+          // Get src elem mask value
+          int masked;
+          merr=src_moab_mesh->tag_get_data(srcmbmp->elem_mask_tag, &sr.src_elem, 1, &masked);
+          if (merr != MB_SUCCESS) {
+            Throw() <<"MOAB ERROR: "<<moab::ErrorCodeStr[merr];
+          }
+
+          // Skip if masked
+          if (masked) {
+            continue; // if this is masked, then go to next search result
+          }
+      }
+
+#if 0
+      // If this source element is creeped out during merging then skip it
+      double src_frac2=1.0;
+      if(src_frac2_field){
+        const MeshObj &src_elem = *sr.elem;
+        src_frac2=*(double *)(src_frac2_field->data(src_elem));
+        if (src_frac2 == 0.0) continue;
+      }
+#endif
+
+
+      // Declare src_elem_area
+      double src_elem_area;
+
+      // Calculate weights
+      std::vector<sintd_node *> tmp_nodes;
+      std::vector<sintd_cell *> tmp_cells;
+      MBMesh_calc_1st_order_weights_2D_2D_cart(srcmbmp, sr.src_elem, dstmbmp, sr.dst_elems,
+                                               &src_elem_area, &valid, &wgts, &areas, &dst_areas);
+
+
+
+      // Invalidate masked destination elements
+      if (dstmbmp->has_elem_mask) {
+        for (int i=0; i<sr.dst_elems.size(); i++) {
+          // Get dst elem mask value
+          int masked;
+          merr=dst_moab_mesh->tag_get_data(dstmbmp->elem_mask_tag, &(sr.dst_elems[i]), 1, &masked);
+          if (merr != MB_SUCCESS) {
+            Throw() <<"MOAB ERROR: "<<moab::ErrorCodeStr[merr];
+          }
+
+           // Invalidate masked elems
+          if (masked) {
+            valid[i]=0;
+          }
         }
       }
-    }
 
 
 #if 0
-    // Invalidate creeped out dst element
-    if(dst_frac2_field){
-      for (int i=0; i<sr.elems.size(); i++) {
-        const MeshObj &dst_elem = *sr.elems[i];
-        double *dst_frac2=dst_frac2_field->data(dst_elem);
-        if (*dst_frac2 == 0.0){
-          valid[i] = 0;
-          continue;
+      // Invalidate creeped out dst element
+      if(dst_frac2_field){
+        for (int i=0; i<sr.elems.size(); i++) {
+          const MeshObj &dst_elem = *sr.elems[i];
+          double *dst_frac2=dst_frac2_field->data(dst_elem);
+          if (*dst_frac2 == 0.0){
+            valid[i] = 0;
+            continue;
+          }
         }
       }
-    }
 #endif
 
-    // Count number of valid weights
-    int num_valid=0;
-    for (int i=0; i<sr.dst_elems.size(); i++) {
-      if (valid[i]==1) num_valid++;
-    }
+      // Count number of valid weights
+      int num_valid=0;
+      for (int i=0; i<sr.dst_elems.size(); i++) {
+        if (valid[i]==1) num_valid++;
+      }
 
-    // If none valid, then don't add weights
-    if (num_valid < 1) continue;
-
+      // If none valid, then don't add weights
+      if (num_valid < 1) continue;
 
       // Temporary empty col with negatives so unset values
       // can be detected if they sneak through
@@ -952,7 +958,7 @@ void calc_conserve_mat_serial_2D_2D_cart(MBMesh *srcmbmp, MBMesh *dstmbmp, MBMes
 
       // Insert fracs into src_frac
       {
-         // Allocate column of empty entries
+        // Allocate column of empty entries
         std::vector<IWeights::Entry> col;
         col.resize(num_valid,col_empty);
 
@@ -1018,7 +1024,7 @@ void calc_conserve_mat_serial_2D_2D_cart(MBMesh *srcmbmp, MBMesh *dstmbmp, MBMes
           // Calculate dest user area adjustment
           double dst_user_area_adj=1.0;
 #if 0
-           if (dst_area_field) {
+          if (dst_area_field) {
             const MeshObj &dst_elem = *(sr.dst_elems[i]);
             double *area=dst_area_field->data(dst_elem);
             if (*area==0.0) Throw() << "0.0 user area in destination grid";
@@ -1029,7 +1035,7 @@ void calc_conserve_mat_serial_2D_2D_cart(MBMesh *srcmbmp, MBMesh *dstmbmp, MBMes
           // Set col info
           IWeights::Entry col(src_gid, 0,
                               src_user_area_adj*dst_user_area_adj*wgts[i], 0);
-          //                              src_user_area_adj*dst_user_area_adj*src_frac2*wgts[i], 0);
+          //                  src_user_area_adj*dst_user_area_adj*src_frac2*wgts[i], 0);
 
           // Set row info
           IWeights::Entry row(dst_gids[i], 0, 0.0, 0);
@@ -1038,171 +1044,176 @@ void calc_conserve_mat_serial_2D_2D_cart(MBMesh *srcmbmp, MBMesh *dstmbmp, MBMes
           iw.InsertRowMergeSingle(row, col);
         }
       }
-} // for searchresult
+    } // for searchresult
 
+  }
+  CATCH_MBMESH_RETHROW
 }
 
 
 
-void calc_conserve_mat_serial_2D_3D_sph(MBMesh *srcmbmp, MBMesh *dstmbmp, MBMesh_Search_EToE_Result_List &sres, IWeights &iw, IWeights &src_frac, IWeights &dst_frac) {
-  Trace __trace("calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw)");
+void calc_conserve_mat_serial_2D_3D_sph(MBMesh *srcmbmp, MBMesh *dstmbmp, 
+                                        MBMesh_Search_EToE_Result_List &sres, 
+                                        IWeights &iw, IWeights &src_frac, 
+                                        IWeights &dst_frac) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "calc_conserve_mat_serial_2D_3D_sph"
+  try {
+    int localrc, merr;
 
+    VM *vm = VM::getCurrent(&localrc);
+    int petCount = vm->getPetCount();
+    int localPet = vm->getLocalPet();
+    ESMC_CHECK_THROW(localrc);
 
-  // determine if we should use the dst_frac variable
-  bool use_dst_frac=false;
+    // determine if we should use the dst_frac variable
+    bool use_dst_frac=false;
 
-  // MOAB error
-  int merr;
+    // Get MOAB Meshes
+    Interface *src_moab_mesh=srcmbmp->mesh;
+    Interface *dst_moab_mesh=dstmbmp->mesh;
 
-  // Get MOAB Meshes
-  Interface *src_moab_mesh=srcmbmp->mesh;
-  Interface *dst_moab_mesh=dstmbmp->mesh;
+    // Declare vectors to hold weight and auxilary information
+    std::vector<int> valid;
+    std::vector<double> wgts;
+    std::vector<double> areas;
+    std::vector<double> dst_areas;
+    std::vector<int> dst_gids;
 
-  // Declare vectors to hold weight and auxilary information
-  std::vector<int> valid;
-  std::vector<double> wgts;
-  std::vector<double> areas;
-  std::vector<double> dst_areas;
-  std::vector<int> dst_gids;
+    // Temporary buffers for concave case,
+    // so there isn't lots of reallocation
+    std::vector<int> tmp_valid;
+    std::vector<double> tmp_areas;
+    std::vector<double> tmp_dst_areas;
 
-  // Temporary buffers for concave case,
-  // so there isn't lots of reallocation
-  std::vector<int> tmp_valid;
-  std::vector<double> tmp_areas;
-  std::vector<double> tmp_dst_areas;
+     // Find maximum number of dst elements in search results
+    int max_num_dst_elems=0;
+    MBMesh_Search_EToE_Result_List::iterator sb = sres.begin(), se = sres.end();
+    for (; sb != se; sb++) {
+       // NOTE: sr.elem is a src element and sr.elems is a list of dst elements
+      MBMesh_Search_EToE_Result &sr = **sb;
 
-   // Find maximum number of dst elements in search results
-  int max_num_dst_elems=0;
-  MBMesh_Search_EToE_Result_List::iterator sb = sres.begin(), se = sres.end();
-  for (; sb != se; sb++) {
-     // NOTE: sr.elem is a src element and sr.elems is a list of dst elements
-    MBMesh_Search_EToE_Result &sr = **sb;
-
-    // If there are no associated dst elements then skip it
-     if (sr.dst_elems.size() > max_num_dst_elems) max_num_dst_elems=sr.dst_elems.size();
-  }
-
-
-  // Allocate space for weight calc output arrays
-  valid.resize(max_num_dst_elems,0);
-  wgts.resize(max_num_dst_elems,0.0);
-  areas.resize(max_num_dst_elems,0.0);
-  dst_areas.resize(max_num_dst_elems,0.0);
-  dst_gids.resize(max_num_dst_elems,0.0);
-
-  // Loop through search results
-  for (sb = sres.begin(); sb != se; sb++) {
-
-    // NOTE: sr.elem is a dst element and sr.elems is a list of src elements
-    MBMesh_Search_EToE_Result &sr = **sb;
-
-    // If there are no associated dst elements then skip it
-    if (sr.dst_elems.size() == 0) continue;
-
-    // Get src elem gid
-    int src_gid;
-    merr=src_moab_mesh->tag_get_data(srcmbmp->gid_tag, &sr.src_elem, 1, &src_gid);
-    if (merr != MB_SUCCESS) {
-      Throw() <<"MOAB ERROR: "<<moab::ErrorCodeStr[merr];
-    }
-
-    // Get dst elem gids
-    for (int i=0; i<sr.dst_elems.size(); i++) {
-      merr=dst_moab_mesh->tag_get_data(dstmbmp->gid_tag, &(sr.dst_elems[i]), 1, &(dst_gids[i]));
-      if (merr != MB_SUCCESS) {
-        Throw() <<"MOAB ERROR: "<<moab::ErrorCodeStr[merr];
-      }
+      // If there are no associated dst elements then skip it
+       if (sr.dst_elems.size() > max_num_dst_elems) max_num_dst_elems=sr.dst_elems.size();
     }
 
 
-    // If this source element is masked then skip it
-    if (srcmbmp->has_elem_mask) {
-        // Get src elem mask value
-        int masked;
-        merr=src_moab_mesh->tag_get_data(srcmbmp->elem_mask_tag, &sr.src_elem, 1, &masked);
-        if (merr != MB_SUCCESS) {
-          Throw() <<"MOAB ERROR: "<<moab::ErrorCodeStr[merr];
-        }
+    // Allocate space for weight calc output arrays
+    valid.resize(max_num_dst_elems,0);
+    wgts.resize(max_num_dst_elems,0.0);
+    areas.resize(max_num_dst_elems,0.0);
+    dst_areas.resize(max_num_dst_elems,0.0);
+    dst_gids.resize(max_num_dst_elems,0.0);
 
-        // Skip if masked
-        if (masked) {
-          continue; // if this is masked, then go to next search result
-        }
-    }
+    // Loop through search results
+    for (sb = sres.begin(); sb != se; sb++) {
 
-#if 0
-    // If this source element is creeped out during merging then skip it
-    double src_frac2=1.0;
-    if(src_frac2_field){
-       const MeshObj &src_elem = *sr.elem;
-      src_frac2=*(double *)(src_frac2_field->data(src_elem));
-      if (src_frac2 == 0.0) continue;
-    }
-#endif
+      // NOTE: sr.elem is a dst element and sr.elems is a list of src elements
+      MBMesh_Search_EToE_Result &sr = **sb;
 
+      // If there are no associated dst elements then skip it
+      if (sr.dst_elems.size() == 0) continue;
 
-    // Declare src_elem_area
-    double src_elem_area;
+      // Get src elem gid
+      int src_gid;
+      merr=src_moab_mesh->tag_get_data(srcmbmp->gid_tag, &sr.src_elem, 1, &src_gid);
+      ESMC_CHECK_MOAB_THROW(merr);
 
-    // Calculate weights
-    MBMesh_calc_1st_order_weights_2D_3D_sph(srcmbmp, sr.src_elem, dstmbmp, sr.dst_elems,
-                                            &src_elem_area, &valid, &wgts, &areas, &dst_areas,
-                                            &tmp_valid, &tmp_areas, &tmp_dst_areas);
-
-
-
-    // Invalidate masked destination elements
-    if (dstmbmp->has_elem_mask) {
+      // Get dst elem gids
       for (int i=0; i<sr.dst_elems.size(); i++) {
-        // Get dst elem mask value
-        int masked;
-        merr=dst_moab_mesh->tag_get_data(dstmbmp->elem_mask_tag, &(sr.dst_elems[i]), 1, &masked);
-        if (merr != MB_SUCCESS) {
-          Throw() <<"MOAB ERROR: "<<moab::ErrorCodeStr[merr];
-         }
+        merr=dst_moab_mesh->tag_get_data(dstmbmp->gid_tag, &(sr.dst_elems[i]), 
+                                         1, &(dst_gids[i]));
+        ESMC_CHECK_MOAB_THROW(merr);
+      }
 
-        // Invalidate masked elems
-        if (masked) {
-          valid[i]=0;
+
+      // If this source element is masked then skip it
+      if (srcmbmp->has_elem_mask) {
+          // Get src elem mask value
+          int masked;
+          merr=src_moab_mesh->tag_get_data(srcmbmp->elem_mask_tag, &sr.src_elem, 
+                                           1, &masked);
+          ESMC_CHECK_MOAB_THROW(merr);
+
+          // Skip if masked
+          if (masked) {
+            continue; // if this is masked, then go to next search result
+          }
+      }
+
+#if 0
+      // If this source element is creeped out during merging then skip it
+      double src_frac2=1.0;
+      if(src_frac2_field){
+        const MeshObj &src_elem = *sr.elem;
+        src_frac2=*(double *)(src_frac2_field->data(src_elem));
+        if (src_frac2 == 0.0) continue;
+      }
+#endif
+
+
+      // Declare src_elem_area
+      double src_elem_area;
+  
+      // Calculate weights
+      MBMesh_calc_1st_order_weights_2D_3D_sph(srcmbmp, sr.src_elem, dstmbmp, 
+                                              sr.dst_elems, &src_elem_area, 
+                                              &valid, &wgts, &areas, &dst_areas,
+                                              &tmp_valid, &tmp_areas, &tmp_dst_areas);
+  
+  
+  
+      // Invalidate masked destination elements
+      if (dstmbmp->has_elem_mask) {
+        for (int i=0; i<sr.dst_elems.size(); i++) {
+          // Get dst elem mask value
+          int masked;
+          merr=dst_moab_mesh->tag_get_data(dstmbmp->elem_mask_tag, 
+                                           &(sr.dst_elems[i]), 1, &masked);
+          ESMC_CHECK_MOAB_THROW(merr);
+  
+          // Invalidate masked elems
+          if (masked) {
+            valid[i]=0;
+          }
         }
       }
-    }
 
 
 #if 0
-    // Invalidate creeped out dst element
-    if(dst_frac2_field){
-      for (int i=0; i<sr.elems.size(); i++) {
-        const MeshObj &dst_elem = *sr.elems[i];
-        double *dst_frac2=dst_frac2_field->data(dst_elem);
-        if (*dst_frac2 == 0.0){
-          valid[i] = 0;
-          continue;
+      // Invalidate creeped out dst element
+      if(dst_frac2_field){
+        for (int i=0; i<sr.elems.size(); i++) {
+          const MeshObj &dst_elem = *sr.elems[i];
+          double *dst_frac2=dst_frac2_field->data(dst_elem);
+          if (*dst_frac2 == 0.0){
+            valid[i] = 0;
+            continue;
+          }
         }
       }
-    }
 #endif
 
-    // Count number of valid weights
-    int num_valid=0;
-    for (int i=0; i<sr.dst_elems.size(); i++) {
-      if (valid[i]==1) num_valid++;
-    }
-
-    // If none valid, then don't add weights
-     if (num_valid < 1) continue;
-
-
+      // Count number of valid weights
+      int num_valid=0;
+      for (int i=0; i<sr.dst_elems.size(); i++) {
+        if (valid[i]==1) num_valid++;
+      }
+  
+      // If none valid, then don't add weights
+      if (num_valid < 1) continue;
+  
+  
       // Temporary empty col with negatives so unset values
       // can be detected if they sneak through
       IWeights::Entry col_empty(-1, 0, -1.0, 0);
-
+  
       // Insert fracs into src_frac
       {
         // Allocate column of empty entries
          std::vector<IWeights::Entry> col;
         col.resize(num_valid,col_empty);
-
+  
         // Put weights into column
         int j=0;
         for (int i=0; i<sr.dst_elems.size(); i++) {
@@ -1212,34 +1223,34 @@ void calc_conserve_mat_serial_2D_3D_sph(MBMesh *srcmbmp, MBMesh *dstmbmp, MBMesh
             j++;
           }
         }
-
+  
         // Set row info
         IWeights::Entry row(src_gid, 0, 0.0, 0);
-
+  
         // Put weights into weight matrix
         src_frac.InsertRowMerge(row, col);
       }
-
-
+  
+  
       // Put weights into dst_frac and then add
       // Don't do this if there are no user areas
       if (use_dst_frac) {
         for (int i=0; i<sr.dst_elems.size(); i++) {
           if (valid[i]==1) {
-
+  
              // Set col info
             IWeights::Entry col(src_gid, 0, wgts[i], 0);
-
+  
             // Set row info
             IWeights::Entry row(dst_gids[i], 0, 0.0, 0);
-
+  
             // Put weights into weight matrix
             dst_frac.InsertRowMergeSingle(row, col);
           }
         }
       }
-
-
+  
+  
       // Calculate source user area adjustment
       double src_user_area_adj=1.0;
 #if 0
@@ -1253,7 +1264,7 @@ void calc_conserve_mat_serial_2D_3D_sph(MBMesh *srcmbmp, MBMesh *dstmbmp, MBMesh
       // Put weights into row column and then add
       for (int i=0; i<sr.dst_elems.size(); i++) {
         if (valid[i]==1) {
-
+  
           // Calculate dest user area adjustment
           double dst_user_area_adj=1.0;
 #if 0
@@ -1265,201 +1276,212 @@ void calc_conserve_mat_serial_2D_3D_sph(MBMesh *srcmbmp, MBMesh *dstmbmp, MBMesh
           }
 #endif
 
-           // Set col info
+          // Set col info
           IWeights::Entry col(src_gid, 0,
                               src_user_area_adj*dst_user_area_adj*wgts[i], 0);
-          //                              src_user_area_adj*dst_user_area_adj*src_frac2*wgts[i], 0);
-
+          //                  src_user_area_adj*dst_user_area_adj*src_frac2*wgts[i], 0);
+  
           // Set row info
           IWeights::Entry row(dst_gids[i], 0, 0.0, 0);
-
+  
           // Put weights into weight matrix
           iw.InsertRowMergeSingle(row, col);
         }
       }
-} // for searchresult
-
+    } // for searchresult
+    
+  }
+  CATCH_MBMESH_RETHROW
 }
 
 
 
-void calc_conserve_mat(MBMesh *srcmbmp, MBMesh *dstmbmp, MBMesh_Search_EToE_Result_List &sres, IWeights &iw, IWeights &src_frac, IWeights &dst_frac) {
-  Trace __trace("calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw)");
+void calc_conserve_mat(MBMesh *srcmbmp, MBMesh *dstmbmp, 
+                       MBMesh_Search_EToE_Result_List &sres, IWeights &iw, 
+                       IWeights &src_frac, IWeights &dst_frac) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "calc_conserve_mat"
+  try {
 
-  // both meshes have to have the same dimensions
-  if (srcmbmp->pdim != dstmbmp->pdim) {
-    Throw() << "src and dst mesh must have the same parametric dimension for conservative regridding";
-  }
-
-  if (srcmbmp->sdim != dstmbmp->sdim) {
-    Throw() << "src and dst mesh must have the same spatial dimension for conservative regridding";
-  }
-
-  // Get dimension, because they're the same can just get one
-  int sdim=srcmbmp->sdim;
-  int pdim=srcmbmp->pdim;
-
-  // Get weights depending on dimension
-  if (pdim==2) {
-    if (sdim==2) {
-      calc_conserve_mat_serial_2D_2D_cart(srcmbmp, dstmbmp, sres, iw, src_frac, dst_frac);
-    } else if (sdim==3) {
-      calc_conserve_mat_serial_2D_3D_sph(srcmbmp, dstmbmp, sres, iw, src_frac, dst_frac);
+    // both meshes have to have the same dimensions
+    if (srcmbmp->pdim != dstmbmp->pdim) {
+      Throw() << "src and dst mesh must have the same parametric dimension for conservative regridding";
     }
-  } else if (pdim==3) {
-    if (sdim==3) {
-      // calc_conserve_mat_serial_3D_3D_cart(srcmesh, dstmesh, midmesh, sres, iw, src_frac, dst_frac, zz);
+
+    if (srcmbmp->sdim != dstmbmp->sdim) {
+      Throw() << "src and dst mesh must have the same spatial dimension for conservative regridding";
+    }
+
+    // Get dimension, because they're the same can just get one
+    int sdim=srcmbmp->sdim;
+    int pdim=srcmbmp->pdim;
+
+    // Get weights depending on dimension
+    if (pdim==2) {
+      if (sdim==2) {
+        calc_conserve_mat_serial_2D_2D_cart(srcmbmp, dstmbmp, sres, iw, 
+                                            src_frac, dst_frac);
+      } else if (sdim==3) {
+        calc_conserve_mat_serial_2D_3D_sph(srcmbmp, dstmbmp, sres, iw, 
+                                           src_frac, dst_frac);
+      }
+    } else if (pdim==3) {
+      if (sdim==3) {
+        // calc_conserve_mat_serial_3D_3D_cart(srcmesh, dstmesh, midmesh, sres, iw, src_frac, dst_frac, zz);
+      } else {
+        Throw() << "Meshes with parametric dim == 3, but spatial dim !=3 not supported for conservative regridding";
+      }
     } else {
-      Throw() << "Meshes with parametric dim == 3, but spatial dim !=3 not supported for conservative regridding";
+      Throw() << "Meshes with parametric dimension != 2 or 3 not supported for conservative regridding";
     }
-  } else {
-    Throw() << "Meshes with parametric dimension != 2 or 3 not supported for conservative regridding";
-  }
 
+  }
+  CATCH_MBMESH_RETHROW
 }
 
 // Copy fractions to mesh
 void set_frac_in_mesh(MBMesh *mesh, IWeights &frac) {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "set_frac()"
+#define ESMC_METHOD "set_frac_in_mesh"
+  try {
 
-  // Error return codes
-  int merr,localrc;
+    // Error return codes
+    int merr,localrc;
 
-  // Get a range containing all elements
-  Range range_elem;
-  merr=mesh->mesh->get_entities_by_dimension(0,mesh->pdim,range_elem);
-  if (merr != MB_SUCCESS) {
-    Throw() << "MOAB ERROR:: "<<moab::ErrorCodeStr[merr];
-  }
-
-
-  // Loop the elements in the mesh and set to 0
-  std::map<int,EntityHandle> id_to_elem;
-  for(Range::iterator it=range_elem.begin(); it !=range_elem.end(); it++) {
-    const EntityHandle elem=*it;
-
-    // Init to 0.0
-    double frac=0;
-    merr=mesh->mesh->tag_set_data(mesh->elem_frac_tag, &elem, 1, &frac);
+    // Get a range containing all elements
+    Range range_elem;
+    merr=mesh->mesh->get_entities_by_dimension(0,mesh->pdim,range_elem);
     if (merr != MB_SUCCESS) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                       moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+      Throw() << "MOAB ERROR:: "<<moab::ErrorCodeStr[merr];
     }
 
-    // Get gid
-    int gid;
-    MBMesh_get_gid(mesh, elem, &gid);
 
-    // Get id to build map
-    id_to_elem[gid]=elem;
-  }
+    // Loop the elements in the mesh and set to 0
+    std::map<int,EntityHandle> id_to_elem;
+    for(Range::iterator it=range_elem.begin(); it !=range_elem.end(); it++) {
+      const EntityHandle elem=*it;
+
+      // Init to 0.0
+      double frac=0;
+      merr=mesh->mesh->tag_set_data(mesh->elem_frac_tag, &elem, 1, &frac);
+      ESMC_CHECK_MOAB_THROW(merr);
+
+      // Get gid
+      int gid;
+      MBMesh_get_gid(mesh, elem, &gid);
+
+      // Get id to build map
+      id_to_elem[gid]=elem;
+    }
 
 
-   // Go through weights calculating and setting frac
-   WMat::WeightMap::iterator wi = frac.begin_row(), we = frac.end_row();
-   for (; wi != we; ++wi) {
-     const WMat::Entry &w = wi->first;
+    // Go through weights calculating and setting frac
+    WMat::WeightMap::iterator wi = frac.begin_row(), we = frac.end_row();
+    for (; wi != we; ++wi) {
+      const WMat::Entry &w = wi->first;
       std::vector<WMat::Entry> &wcol = wi->second;
 
-     // total frac
-     double tot=0.0;
-     for (UInt j = 0; j < wcol.size(); ++j) {
-       WMat::Entry &wc = wcol[j];
-       tot += wc.value;
-     } // for j
+      // total frac
+      double tot=0.0;
+      for (UInt j = 0; j < wcol.size(); ++j) {
+        WMat::Entry &wc = wcol[j];
+        tot += wc.value;
+      } // for j
 
-     // Get entity handle from gid
-     std::map<int,EntityHandle>::iterator itoei =  id_to_elem.find(w.id);
-     if (itoei == id_to_elem.end()) {
-       Throw() << " Gid not found in map!";
-     }
+      // Get entity handle from gid
+      std::map<int,EntityHandle>::iterator itoei =  id_to_elem.find(w.id);
+      if (itoei == id_to_elem.end()) {
+        Throw() << " Gid not found in map!";
+      }
 
-     // Get EntityHandle
-     EntityHandle elem=itoei->second;
+      // Get EntityHandle
+      EntityHandle elem=itoei->second;
 
-     // Set to total
-     merr=mesh->mesh->tag_set_data(mesh->elem_frac_tag, &elem, 1, &tot);
-     if (merr != MB_SUCCESS) {
-       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-     }
-   } // for wi
+      // Set to total
+      merr=mesh->mesh->tag_set_data(mesh->elem_frac_tag, &elem, 1, &tot);
+      ESMC_CHECK_MOAB_THROW(merr);
+    } // for wi
+     
+  }
+  CATCH_MBMESH_RETHROW
 }
 
 
- /* XMRKX */
 void calc_cnsrv_regrid_wgts(MBMesh *srcmesh, MBMesh *dstmesh, IWeights &wts) {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "calc_cnsrc_regrid_wgts()"
+#define ESMC_METHOD "calc_cnsrv_regrid_wgts"
+  try {
+    int localrc;
 
-  // Get Parallel Information
-  int localrc;
-  int petCount = VM::getCurrent(&localrc)->getPetCount();
-  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-    throw localrc;  // bail out with exception
-
-
-  // Set meshes to use for regrid weight calculations
-  MBMesh *srcmesh_regrid=srcmesh;
-  MBMesh *dstmesh_regrid=dstmesh;
+    VM *vm = VM::getCurrent(&localrc);
+    int petCount = vm->getPetCount();
+    ESMC_CHECK_THROW(localrc);
 
 
-  // If parallel then generate rendezvous meshes...and use them instead
-  MBMesh *srcmesh_rend=NULL;
-  MBMesh *dstmesh_rend=NULL;
-  if (petCount > 1) {
+    // Set meshes to use for regrid weight calculations
+    MBMesh *srcmesh_regrid=srcmesh;
+    MBMesh *dstmesh_regrid=dstmesh;
 
-    // Create rendez meshes
-    ESMCI_REGRID_TRACE_ENTER("MBMesh regrid csrv rendezvous");
-    create_rendez_mbmesh_elem(srcmesh, dstmesh, &srcmesh_rend, &dstmesh_rend);
-    ESMCI_REGRID_TRACE_EXIT("MBMesh regrid csrv rendezvous");
 
-    // Use rendezvous meshes instead
-    srcmesh_regrid=srcmesh_rend;
-    dstmesh_regrid=dstmesh_rend;
+    // If parallel then generate rendezvous meshes...and use them instead
+    MBMesh *srcmesh_rend=NULL;
+    MBMesh *dstmesh_rend=NULL;
+    if (petCount > 1) {
+
+      // Create rendez meshes
+      ESMCI_REGRID_TRACE_ENTER("MBMesh regrid csrv rendezvous");
+      create_rendez_mbmesh_elem(srcmesh, dstmesh, &srcmesh_rend, &dstmesh_rend);
+      ESMCI_REGRID_TRACE_EXIT("MBMesh regrid csrv rendezvous");
+
+      // Use rendezvous meshes instead
+      srcmesh_regrid=srcmesh_rend;
+      dstmesh_regrid=dstmesh_rend;
+    }
+
+
+    // Do search
+    ESMCI_REGRID_TRACE_ENTER("MBMesh regrid csrv search");
+    MBMesh_Search_EToE_Result_List result;
+    MBMesh_Search_EToE(srcmesh_regrid, ESMCI_UNMAPPEDACTION_IGNORE, 
+                       dstmesh_regrid, ESMCI_UNMAPPEDACTION_IGNORE,
+                       1.0E-8, result);
+    ESMCI_REGRID_TRACE_EXIT("MBMesh regrid csrv search");
+
+
+    IWeights src_frac;
+    IWeights dst_frac;
+    ESMCI_REGRID_TRACE_ENTER("MBMesh regrid csrv calculate weights");
+    calc_conserve_mat(srcmesh_regrid, dstmesh_regrid, result, wts, 
+                      src_frac, dst_frac);
+    ESMCI_REGRID_TRACE_EXIT("MBMesh regrid csrv calculate weights");
+
+
+    // If parallel then migrate weights and fracs
+    // back to decompostion of original destination mesh
+    ESMCI_REGRID_TRACE_ENTER("MBMesh regrid csrv migrate weights");
+    if (petCount > 1) {
+       wts.MigrateToElem(*dstmesh);
+       dst_frac.MigrateToElem(*dstmesh);
+
+       // Migrate and set fracs
+       src_frac.MigrateToElem(*srcmesh);
+    }
+    ESMCI_REGRID_TRACE_EXIT("MBMesh regrid csrv migrate weights");
+
+    // Copy dst fractions to mesh
+    // TODO: If users areas are used, then use dst_frac instead
+    set_frac_in_mesh(dstmesh, wts);
+
+    // Copy src fractions to mesh
+    set_frac_in_mesh(srcmesh, src_frac);
+
+    // If parallel then get rid of rendezvous meshes.
+    if (petCount > 1) {
+      if (srcmesh_rend != NULL) delete srcmesh_rend;
+      if (dstmesh_rend != NULL) delete dstmesh_rend;
+    }
   }
-
-
-  // Do search
-  ESMCI_REGRID_TRACE_ENTER("MBMesh regrid csrv search");
-  MBMesh_Search_EToE_Result_List result;
-  MBMesh_Search_EToE(srcmesh_regrid, ESMCI_UNMAPPEDACTION_IGNORE, dstmesh_regrid, ESMCI_UNMAPPEDACTION_IGNORE,
-                 1.0E-8, result);
-  ESMCI_REGRID_TRACE_EXIT("MBMesh regrid csrv search");
-
-
-  IWeights src_frac;
-  IWeights dst_frac;
-  ESMCI_REGRID_TRACE_ENTER("MBMesh regrid csrv calculate weights");
-  calc_conserve_mat(srcmesh_regrid, dstmesh_regrid, result, wts, src_frac, dst_frac);
-  ESMCI_REGRID_TRACE_EXIT("MBMesh regrid csrv calculate weights");
-
-
-  // If parallel then migrate weights and fracs
-  // back to decompostion of original destination mesh
-  ESMCI_REGRID_TRACE_ENTER("MBMesh regrid csrv migrate weights");
-  if (petCount > 1) {
-     wts.MigrateToElem(*dstmesh);
-     dst_frac.MigrateToElem(*dstmesh);
-
-     // Migrate and set fracs
-     src_frac.MigrateToElem(*srcmesh);
-  }
-  ESMCI_REGRID_TRACE_EXIT("MBMesh regrid csrv migrate weights");
-
-  // Copy dst fractions to mesh
-  // TODO: If users areas are used, then use dst_frac instead
-  set_frac_in_mesh(dstmesh, wts);
-
-  // Copy src fractions to mesh
-  set_frac_in_mesh(srcmesh, src_frac);
-
-  // If parallel then get rid of rendezvous meshes.
-  if (petCount > 1) {
-    if (srcmesh_rend != NULL) delete srcmesh_rend;
-    if (dstmesh_rend != NULL) delete dstmesh_rend;
-  }
+  CATCH_MBMESH_RETHROW
 }
 
 #endif // ESMF_MOAB
