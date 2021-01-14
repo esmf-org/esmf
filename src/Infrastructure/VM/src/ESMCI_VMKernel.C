@@ -2194,26 +2194,31 @@ void VMK::shutdown(class VMKPlan *vmp, void *arg){
 #endif
   }
   // now free up the MPI communicators that were associated with the VMK
-  if (sarg[0].mpi_c_freeflag && (sarg[0].mpi_c != MPI_COMM_NULL)){
-    MPI_Comm_free(&(sarg[0].mpi_c));
-#if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
-#ifdef VM_SSISHMLOG_on
-    {
-      std::stringstream msg;
-      if (sarg[0].mpi_c_ssi != MPI_COMM_NULL){
-        int sz;
-        MPI_Comm_size(sarg[0].mpi_c_ssi, &sz);
-        msg << "VMK::shutdown()#" << __LINE__
-          << " about to call MPI_Comm_free() on mpi_c_ssi of size=" << sz;
-      }else{
-        msg << "VMK::shutdown()#" << __LINE__
-          << " about to call MPI_Comm_free() on mpi_c_ssi == MPI_COMM_NULL";
-        
-      }
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+  if (sarg[0].mpi_c_freeflag){
+    if (sarg[0].mpi_c != MPI_COMM_NULL){
+      MPI_Comm_free(&(sarg[0].mpi_c));
     }
+#if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
+    if (sarg[0].mpi_c_ssi != MPI_COMM_NULL){
+#ifdef VM_SSISHMLOG_on
+      {
+        std::stringstream msg;
+        if (sarg[0].mpi_c_ssi != MPI_COMM_NULL){
+          int sz;
+          MPI_Comm_size(sarg[0].mpi_c_ssi, &sz);
+          msg << "VMK::shutdown()#" << __LINE__
+            << " about to call MPI_Comm_free() on mpi_c_ssi of size=" << sz;
+        }else{
+          msg << "VMK::shutdown()#" << __LINE__
+            << " about to call MPI_Comm_free() on mpi_c_ssi == MPI_COMM_NULL";
+          
+        }
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+      }
+      MPI_Barrier(sarg[0].mpi_c_ssi);
 #endif
-    MPI_Comm_free(&(sarg[0].mpi_c_ssi));
+      MPI_Comm_free(&(sarg[0].mpi_c_ssi));
+    }
 #endif
   }
   // done holding info in SpawnArg array -> delete now
