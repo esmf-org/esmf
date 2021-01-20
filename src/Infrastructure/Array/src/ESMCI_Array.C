@@ -5803,6 +5803,12 @@ int Array::redistStore(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
+#define PROGRESSLOG_on
+
+#ifdef PROGRESSLOG_on
+  ESMC_LogDefault.Write("Array::redistStore(): Just entered routine.", ESMC_LOGMSG_INFO);
+#endif
+
   // every Pet must provide srcArray and dstArray
   if (srcArray == NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
@@ -5840,6 +5846,10 @@ int Array::redistStore(
     return rc;
   }
   //ESMCI_REGION_EXIT("ESMCI::Array::tRedistStore", localrc)
+
+#ifdef PROGRESSLOG_on
+  ESMC_LogDefault.Write("Array::redistStore(): Leaving routine.", ESMC_LOGMSG_INFO);
+#endif
 
   // return successfully
   rc = ESMF_SUCCESS;
@@ -5882,6 +5892,13 @@ template<typename SIT, typename DIT>
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+#define PROGRESSLOG_on
+
+#ifdef PROGRESSLOG_on
+  ESMC_LogDefault.Write("Array::tredistStore(): Just entered routine.", ESMC_LOGMSG_INFO);
+#endif
+
 
   try{
 
@@ -5933,6 +5950,11 @@ template<typename SIT, typename DIT>
     // -> this Pet will not provide factor
     typekindFactor = ESMF_NOKIND;
   }
+
+#ifdef PROGRESSLOG_on
+  ESMC_LogDefault.Write("Array::tredistStore(): communicate typekindFactor, allgather", ESMC_LOGMSG_INFO);
+#endif
+
 
   // communicate typekindFactor across all Pets
   ESMC_TypeKind_Flag *typekindList = new ESMC_TypeKind_Flag[petCount];
@@ -6020,6 +6042,10 @@ template<typename SIT, typename DIT>
     delete [] factorLocalList;
   }
   delete [] factorPetList;
+
+#ifdef PROGRESSLOG_on
+  ESMC_LogDefault.Write("Array::tredistStore(): set up local factorList and factorIndexList", ESMC_LOGMSG_INFO);
+#endif
 
   // set up local factorList and factorIndexList
   int factorListCount;
@@ -6336,6 +6362,10 @@ for (int i=0; i<factorListCount; i++)
   sparseMatrix.push_back(SparseMatrix<SIT,DIT> (typekindFactor, factorList,
     factorListCount, srcN, dstN, factorIndexList));
 
+#ifdef PROGRESSLOG_on
+  ESMC_LogDefault.Write("Array::tredistStore(): sparseMatMulStore", ESMC_LOGMSG_INFO);
+#endif
+
   // precompute sparse matrix multiplication
   int srcTermProcessing = 0;  // no need to use auto-tuning to figure this out
   localrc = sparseMatMulStore(srcArray, dstArray, routehandle, sparseMatrix,
@@ -6373,6 +6403,11 @@ for (int i=0; i<factorListCount; i++)
       "Caught exception", ESMC_CONTEXT, &rc);
     return rc;
   }
+
+#ifdef PROGRESSLOG_on
+  ESMC_LogDefault.Write("Array::tredistStore(): Leaving routine.", ESMC_LOGMSG_INFO);
+#endif
+
 
   // return successfully
   rc = ESMF_SUCCESS;
