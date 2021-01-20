@@ -353,6 +353,32 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test regrid with masks
+      write(failMsg, *) "Test unsuccessful"
+      write(name, *) "MOAB Bilinear on src Grid using corner stagger"
+
+      ! initialize
+      rc=ESMF_SUCCESS
+
+      ! do test
+#if defined ESMF_MOAB    
+
+      ! Turn on MOAB 
+      call ESMF_MeshSetMOAB(.true.)
+
+      ! Do test
+      call test_regridCnr(rc)
+
+      ! Turn off MOAB
+      call ESMF_MeshSetMOAB(.false.)
+#endif
+       ! return result
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test regrid with masks
