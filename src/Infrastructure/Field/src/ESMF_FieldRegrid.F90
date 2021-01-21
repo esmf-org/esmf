@@ -1655,6 +1655,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       logical :: moabOn
       integer :: tileCount, gridDimCount
+      type (ESMF_Mesh) :: tmpMesh
       integer :: localrc
       
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1672,11 +1673,34 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Convert Grid to Mesh
       ! ESMF_REGION_ENTER("gridToMesh", localrc)
       if (moabOn) then
-         ! Convert Grid to Mesh
-         b_or_p_GridToMesh=ESMF_MeshCreate(grid, rc=localrc)
-         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-         
+         ! Convert Grid to Mesh depending on staggerloc
+         if (staggerloc .eq. ESMF_STAGGERLOC_CORNER) then
+            b_or_p_GridToMesh=ESMF_MeshCreate(grid, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+
+         else if (staggerloc .eq. ESMF_STAGGERLOC_CENTER) then
+            ! Convert Grid to Mesh
+            tmpMesh=ESMF_MeshCreate(grid, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return            
+
+            ! Create Dual of Mesh (to move centers to corners)
+            b_or_p_GridToMesh=ESMF_MeshCreateDual(tmpMesh, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return            
+
+            ! Get rid of temporary Mesh
+            call ESMF_MeshDestroy(tmpMesh, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return            
+         else 
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
+                 msg=" when using MOAB, bilinear or patch regridding is currently not supported on this stagger location.", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
+            return
+         endif
+
          ! Turn on masking
          if (present(maskValues)) then
             call ESMF_MeshTurnOnCellMask(b_or_p_GridToMesh, maskValues=maskValues, rc=localrc);

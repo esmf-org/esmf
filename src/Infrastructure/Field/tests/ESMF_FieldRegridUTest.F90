@@ -358,7 +358,7 @@
       !EX_UTest
       ! Test regrid with masks
       write(failMsg, *) "Test unsuccessful"
-      write(name, *) "MOAB Bilinear on src Grid using corner stagger"
+      write(name, *) "MOAB bilinear regrid on Grid corner stagger"
 
       ! initialize
       rc=ESMF_SUCCESS
@@ -1183,6 +1183,34 @@
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
        !------------------------------------------------------------------------
+
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test regrid with masks
+      write(failMsg, *) "Test unsuccessful"
+      write(name, *) "MOAB bilinear regrid on Grid center stagger"
+
+      ! initialize
+      rc=ESMF_SUCCESS
+
+      ! do test
+#if defined ESMF_MOAB    
+      ! Turn on MOAB 
+      call ESMF_MeshSetMOAB(.true.)
+
+      ! do test
+      call test_regrid_gridufrm(rc)
+
+
+      ! Turn off MOAB
+      call ESMF_MeshSetMOAB(.false.)
+#endif
+
+      ! return result
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+       !------------------------------------------------------------------------
+
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -34638,7 +34666,7 @@ write(*,*) "LOCALRC=",localrc
   srcGrid=ESMF_GridCreate1PeriDimUfrm(maxIndex=(/src_nx,src_ny/), &
        minCornerCoord=(/0.0_ESMF_KIND_R8,-80.0_ESMF_KIND_R8/), &
        maxCornerCoord=(/360.0_ESMF_KIND_R8,80.0_ESMF_KIND_R8/), &
-       staggerLocList=(/ESMF_STAGGERLOC_CENTER/), &
+       staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
        rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
@@ -34650,7 +34678,7 @@ write(*,*) "LOCALRC=",localrc
   dstGrid=ESMF_GridCreateNoPeriDimUfrm(maxIndex=(/dst_nx,dst_ny/), &
        minCornerCoord=(/-50.0_ESMF_KIND_R8,-50.0_ESMF_KIND_R8/), &
        maxCornerCoord=(/50.0_ESMF_KIND_R8,50.0_ESMF_KIND_R8/), &
-       staggerLocList=(/ESMF_STAGGERLOC_CENTER/), &
+       staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
        rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
