@@ -679,8 +679,8 @@ struct SpawnArg{
   VMK *myvm;                  // pointer to vm instance on heap
   esmf_pthread_t pthid;       // pthread id of the spawned thread
   int mypet;                  // new mypet 
-  int *ncontributors;         // number of pets that contributed cores 
-  contrib_id **contributors;  // array of contributors
+  int ncontributors;          // number of pets that contribute cores to mypet
+  contrib_id *contributors;   // info about the contributors to mypet
   vmkt_t vmkt;                // this pet's vmkt
   vmkt_t vmkt_extra;          // extra vmkt for this pet (sigcatcher)
   // members which are identical for all new pets
@@ -1132,11 +1132,11 @@ static void *vmk_spawn(void *arg){
 #endif
 
     // before pet terminates it must send a signal indicating that core is free
-    for (int i=0; i<sarg->ncontributors[sarg->mypet]; i++){
+    for (int i=0; i<sarg->ncontributors; i++){
 #if (VERBOSITY > 5)
       fprintf(stderr, " send wake-up signal to : %d %d\n",
-        sarg->contributors[sarg->mypet][i].pid, 
-        sarg->contributors[sarg->mypet][i].blocker_tid);
+        sarg->contributors[i].pid, 
+        sarg->contributors[i].blocker_tid);
 #endif
       // send signal to the _other_ process
 #ifdef VM_PETMANAGEMENTLOG_on
@@ -1145,12 +1145,12 @@ static void *vmk_spawn(void *arg){
         msg << "VMK::vmk_spawn()#" << __LINE__
           << " thread " << vmkt->tid << ": " << pthread_self()
           << " sending kill(VM_SIG1) to PID="
-          << sarg->contributors[sarg->mypet][i].pid;
+          << sarg->contributors[i].pid;
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       }
 #endif
 #if !defined (ESMF_OS_MinGW)
-      kill(sarg->contributors[sarg->mypet][i].pid, VM_SIG1);
+      kill(sarg->contributors[i].pid, VM_SIG1);
 #else
 // TODO: Windows equivalent, perhaps using TerminateProcess
 #endif
@@ -1160,7 +1160,7 @@ static void *vmk_spawn(void *arg){
         msg << "VMK::vmk_spawn()#" << __LINE__
           << " thread " << vmkt->tid << ": " << pthread_self()
           << " done sending kill(VM_SIG1) to PID="
-          << sarg->contributors[sarg->mypet][i].pid;
+          << sarg->contributors[i].pid;
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       }
 #endif
@@ -1169,8 +1169,8 @@ static void *vmk_spawn(void *arg){
       if (vm->mpi_thread_level<MPI_THREAD_MULTIPLE)
         pthread_mutex_lock(&(vmkt->mut0));
 #endif
-      MPI_Send(&(sarg->contributors[sarg->mypet][i].blocker_vmkt),
-        sizeof(vmkt_t *), MPI_BYTE, sarg->contributors[sarg->mypet][i].mpi_pid,
+      MPI_Send(&(sarg->contributors[i].blocker_vmkt),
+        sizeof(vmkt_t *), MPI_BYTE, sarg->contributors[i].mpi_pid,
         VM_TID_MPI_TAG, vm->default_mpi_c);
 #ifndef ESMF_NO_PTHREADS
       if (vm->mpi_thread_level<MPI_THREAD_MULTIPLE)
@@ -2013,8 +2013,10 @@ void *VMK::startup(class VMKPlan *vmp,
     sarg[i].ncpet = new int[new_npets];
     sarg[i].nadevs = new int[new_npets];
     sarg[i].cid = new int*[new_npets];
-    sarg[i].ncontributors = new int[new_npets];
-    sarg[i].contributors = new contrib_id*[new_npets];
+    sarg[i].ncontributors = new_ncontributors[sarg[i].mypet];
+    sarg[i].contributors = new contrib_id[sarg[i].ncontributors];
+    for (int k=0; k<sarg[i].ncontributors; k++)
+      sarg[i].contributors[k] = new_contributors[sarg[i].mypet][k];
     for (int j=0; j<new_npets; j++){
       sarg[i].lpid[j] = new_lpid[j];
       sarg[i].pid[j] = new_pid[j];
@@ -2024,10 +2026,6 @@ void *VMK::startup(class VMKPlan *vmp,
       sarg[i].cid[j] = new int[new_ncpet[j]];
       for (int k=0; k<new_ncpet[j]; k++)
         sarg[i].cid[j][k] = new_cid[j][k];
-      sarg[i].ncontributors[j]=new_ncontributors[j];
-      sarg[i].contributors[j] = new contrib_id[new_ncontributors[j]];
-      for (int k=0; k<new_ncontributors[j]; k++)
-        sarg[i].contributors[j][k] = new_contributors[j][k];
     }
     sarg[i].mpi_c = new_mpi_c;
 #if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
@@ -2353,13 +2351,11 @@ void VMK::shutdown(class VMKPlan *vmp, void *arg){
     delete [] sarg[i].tid;
     delete [] sarg[i].ncpet;
     delete [] sarg[i].nadevs;
-    delete [] sarg[i].ncontributors;
+    delete [] sarg[i].contributors;
     for (int j=0; j<sarg[i].npets; j++){
       delete [] sarg[i].cid[j];
-      delete [] sarg[i].contributors[j];
     }
     delete [] sarg[i].cid;
-    delete [] sarg[i].contributors;
     delete [] sarg[i].sendChannel;
     delete [] sarg[i].recvChannel;
   }
