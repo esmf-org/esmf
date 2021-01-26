@@ -8757,6 +8757,11 @@ template<typename SIT, typename DIT>
   VMK::wtime(&t0);    //gjt - profile
 #endif
 
+#define PROGRESSLOG_on
+#ifdef PROGRESSLOG_on
+  ESMC_LogDefault.Write("ASMMStore1.0", ESMC_LOGMSG_INFO);
+#endif
+
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore1.0"));
 #endif
@@ -9041,6 +9046,10 @@ template<typename SIT, typename DIT>
 //return rc;
 //---DEBUG-------------------
 
+#ifdef PROGRESSLOG_on
+  ESMC_LogDefault.Write("ASMMStore1.1", ESMC_LOGMSG_INFO);
+#endif
+
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore1.1"));
 #endif
@@ -9091,6 +9100,10 @@ template<typename SIT, typename DIT>
     srcLinSeqVect(srcLocalDeCount);
   vector<vector<AssociationElement<SeqIndex<DIT>,SeqIndex<SIT> > > >
     dstLinSeqVect(dstLocalDeCount);
+
+#ifdef PROGRESSLOG_on
+  ESMC_LogDefault.Write("ASMMStore2.0a", ESMC_LOGMSG_INFO);
+#endif
 
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore2.0a"));
@@ -9156,6 +9169,10 @@ template<typename SIT, typename DIT>
   // Phase IV
   //---------------------------------------------------------------------------
 
+#ifdef PROGRESSLOG_on
+  ESMC_LogDefault.Write("ASMMStore4.0", ESMC_LOGMSG_INFO);
+#endif
+
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore4.0"));
 #endif
@@ -9198,7 +9215,11 @@ template<typename SIT, typename DIT>
   }
 #endif
 #endif
-  
+
+#ifdef PROGRESSLOG_on
+  ESMC_LogDefault.Write("ASMMStore4.1", ESMC_LOGMSG_INFO);
+#endif
+
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore4.1"));
 #endif
@@ -9221,6 +9242,10 @@ template<typename SIT, typename DIT>
   localrc = (*routehandle)->setStorage(xxe);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
+
+#ifdef PROGRESSLOG_on
+  ESMC_LogDefault.Write("ASMMStore4.2", ESMC_LOGMSG_INFO);
+#endif
 
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore4.2"));
@@ -9257,6 +9282,10 @@ template<typename SIT, typename DIT>
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
 
+#ifdef PROGRESSLOG_on
+  ESMC_LogDefault.Write("ASMMStore4.3", ESMC_LOGMSG_INFO);
+#endif
+
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore4.3"));
 #endif
@@ -9278,6 +9307,10 @@ template<typename SIT, typename DIT>
 #endif
 #endif
   
+#ifdef PROGRESSLOG_on
+  ESMC_LogDefault.Write("ASMMStore4.4", ESMC_LOGMSG_INFO);
+#endif
+
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore4.4"));
 #endif
@@ -9300,6 +9333,10 @@ template<typename SIT, typename DIT>
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
 
+#ifdef PROGRESSLOG_on
+  ESMC_LogDefault.Write("ASMMStore4.5", ESMC_LOGMSG_INFO);
+#endif
+
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore4.5"));
 #endif
@@ -9312,6 +9349,10 @@ template<typename SIT, typename DIT>
   // force vectors out of scope by swapping with empty vector, to free memory
   vector<ArrayHelper::SendnbElement<SeqIndex<SIT>,SeqIndex<DIT> > >().swap(sendnbVector);
   vector<ArrayHelper::RecvnbElement<SeqIndex<DIT>,SeqIndex<SIT> > >().swap(recvnbVector);
+
+#ifdef PROGRESSLOG_on
+  ESMC_LogDefault.Write("ASMMStore4.6", ESMC_LOGMSG_INFO);
+#endif
 
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore4.6"));
@@ -9399,6 +9440,10 @@ template<typename SIT, typename DIT>
       "Caught exception", ESMC_CONTEXT, &rc);
     return rc;
   }
+
+#ifdef PROGRESSLOG_on
+  ESMC_LogDefault.Write("ASMMStore5.0", ESMC_LOGMSG_INFO);
+#endif
 
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore5.0"));
