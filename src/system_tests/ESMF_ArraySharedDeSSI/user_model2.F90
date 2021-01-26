@@ -136,7 +136,7 @@ module user_model2
     ! -> Set the number of OpenMP threads accordingly
     call ESMF_GridCompGet(comp, vm=vm, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_VMLog(vm, prefix="model2: ", logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
+    call ESMF_VMLog(vm, prefix="model2: ", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     dataOkay = .true.
