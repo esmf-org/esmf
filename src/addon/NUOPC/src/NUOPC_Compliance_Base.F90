@@ -2408,7 +2408,6 @@ contains
         phaseLabel, attributeToCheck, rc)
 
         ! remove these when put into NUOPC_Comp module
-        use ESMF
         use NUOPC_Base, only : NUOPC_PhaseMapStringLength
         implicit none
 
@@ -2508,7 +2507,6 @@ contains
         phaseLabel, rc)
 
         ! remove these when put into NUOPC_Comp module
-        use ESMF
         use NUOPC_Base, only : NUOPC_PhaseMapStringLength
         implicit none
 
