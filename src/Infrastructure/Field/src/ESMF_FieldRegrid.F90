@@ -347,6 +347,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end subroutine ESMF_FieldRegridRelease
 !------------------------------------------------------------------------------
 
+
+
+
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldRegridStoreNX"
@@ -382,7 +386,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Field),               intent(inout)           :: dstField
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer(ESMF_KIND_I4),          intent(in),    optional :: srcMaskValues(:)
-      integer(ESMF_KIND_I4),         intent(in),    optional :: dstMaskValues(:)
+      integer(ESMF_KIND_I4),          intent(in),    optional :: dstMaskValues(:)
       type(ESMF_RegridMethod_Flag),   intent(in),    optional :: regridmethod
       type(ESMF_PoleMethod_Flag),     intent(in),    optional :: polemethod
       integer,                        intent(in),    optional :: regridPoleNPnts
@@ -661,7 +665,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
         integer :: localrc
-        integer              :: lregridScheme
         type(ESMF_RegridMethod_Flag) :: lregridmethod
         type(ESMF_GeomType_Flag)  :: srcgeomtype
         type(ESMF_GeomType_Flag)  :: dstgeomtype
@@ -677,12 +680,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_StaggerLoc) :: srcStaggerLoc,dstStaggerLoc
         type(ESMF_StaggerLoc) :: srcStaggerLocG2M,dstStaggerLocG2M
         type(ESMF_StaggerLoc) :: fracStaggerLoc
-         integer              :: gridDimCount
+        integer              :: gridDimCount
         type(ESMF_PoleMethod_Flag):: localpolemethod
-         integer              :: localRegridPoleNPnts
-        logical              :: srcIsLatLonDeg, dstIsLatLonDeg
-        integer              :: srcIsSphere, dstIsSphere
-        type(ESMF_RegridConserve) :: regridConserveG2M
+        integer              :: localRegridPoleNPnts
         real(ESMF_KIND_R8), pointer :: fracFptr(:)
         integer(ESMF_KIND_I4),       pointer :: tmp_indices(:,:)
         real(ESMF_KIND_R8),          pointer :: tmp_weights(:)
@@ -701,8 +701,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer :: localExtrapNumSrcPnts
         real(ESMF_KIND_R8) :: localExtrapDistExponent
         integer :: localExtrapNumLevels
-        integer :: localExtrapNumInputLevels
-
+        integer :: localExtrapNumInputLevels        
 
 !        real(ESMF_KIND_R8) :: beg_time, end_time
 !        call ESMF_VMWtime(beg_time)
@@ -783,11 +782,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         dstDual=.false.
         src_pl_used=.false.
         dst_pl_used=.false.
-
-        ! Set this for now just to not have to remove it everywhere
-        ! TODO get rid of it. 
-        lregridScheme = ESMF_REGRID_SCHEME_NATIVE
-
 
         ! Handle optional method argument
         if (present(regridmethod)) then
@@ -941,151 +935,54 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif
 
 
-        ! Set interpretation of grid based on regridScheme
-        if (lregridScheme .eq. ESMF_REGRID_SCHEME_FULL3D) then
-           srcIsSphere = 1
-           srcIsLatLonDeg=.true.
-           dstIsSphere = 1
-           dstIsLatLonDeg=.true.
-        else if (lregridScheme .eq. ESMF_REGRID_SCHEME_FULLTOREG3D) then
-           srcIsSphere = 1
-           srcIsLatLonDeg=.true.
-           dstIsSphere = 0
-           dstIsLatLonDeg=.true.
-        else if (lregridScheme .eq. ESMF_REGRID_SCHEME_REGTOFULL3D) then
-           srcIsSphere = 0
-           srcIsLatLonDeg=.true.
-           dstIsSphere = 1
-           dstIsLatLonDeg=.true.
-        else if (lregridScheme .eq. ESMF_REGRID_SCHEME_REGION3D) then
-           srcIsSphere = 0
-           srcIsLatLonDeg=.true.
-            dstIsSphere = 0
-           dstIsLatLonDeg=.true.
-        else if (lregridScheme .eq. ESMF_REGRID_SCHEME_DCON3D) then
-           srcIsSphere = 0
-           srcIsLatLonDeg=.true.
-           dstIsSphere = 0
-           dstIsLatLonDeg=.true.
-        else if (lregridScheme .eq. ESMF_REGRID_SCHEME_DCON3DWPOLE) then
-           srcIsSphere = 0
-           srcIsLatLonDeg=.true.
-           dstIsSphere = 0
-           dstIsLatLonDeg=.true.
-        else  
-           srcIsSphere = 0
-           srcIsLatLonDeg=.false.
-           dstIsSphere = 0
-           dstIsLatLonDeg=.false.
-        endif
-
-        ! Set conserve flag for GridToMesh
-        if ((lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE) .or. &
-             (lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE_2ND)) then
-           regridConserveG2M=ESMF_REGRID_CONSERVE_ON
-        else
-           regridConserveG2M=ESMF_REGRID_CONSERVE_OFF
-        endif
-
-
         ! If grids, then convert to a mesh to do the regridding
         if (srcgeomtype .eq. ESMF_GEOMTYPE_GRID) then
-          call ESMF_FieldGet(srcField, grid=srcGrid, &
-                 staggerloc=srcStaggerloc, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
 
-          ! if we're doing conservative then do some checking and
-          ! change staggerloc
-        if ((lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE) .or. &
-             (lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE_2ND)) then
-            ! Only Center stagger is supported right now until we figure out what the
-            ! control volume for the others should be
-            if (srcStaggerloc .ne. ESMF_STAGGERLOC_CENTER) then
-                 call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
-              msg="- can't currently do conservative regrid on a stagger other then center", & 
-              ESMF_CONTEXT, rcToReturn=rc) 
-              return
-            endif
-
-            ! Create the mesh from corner stagger to better represent the
-            ! control volumes
-            call ESMF_GridGet(grid=srcGrid, &
-                   dimCount=gridDimCount, tileCount=tileCount, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ! Get information about Grid from Field
+           call ESMF_FieldGet(srcField, grid=srcGrid, &
+                staggerloc=srcStaggerloc, rc=localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
-            if (gridDimCount .eq. 2) then
-               srcStaggerlocG2M=ESMF_STAGGERLOC_CORNER
-            else if (gridDimCount .eq. 3) then
-               srcStaggerlocG2M=ESMF_STAGGERLOC_CORNER_VFACE
-            else
+           
+           ! Create Mesh or PointList depending on regrid method
+           if (lregridmethod .eq. ESMF_REGRIDMETHOD_NEAREST_STOD .or. &
+                lregridmethod .eq. ESMF_REGRIDMETHOD_NEAREST_DTOS) then
+              
+              ! check grid
+              call checkGridLite(srcGrid,srcStaggerloc,rc=localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+              
+              srcPointList=ESMF_PointListCreate(srcGrid,srcStaggerloc, &
+                   maskValues=srcMaskValues, &
+                   rc=localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+              src_pl_used=.true.
+              
+           else if ((lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE) .or. &
+                (lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE_2ND)) then
+              
+              ! Only Center stagger is supported right now
+              if (srcStaggerloc .ne. ESMF_STAGGERLOC_CENTER) then
                  call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
-                 msg="- can currently only do conservative regridding on 2D or 3D grids", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-              return
-            endif
-          else 
-            ! If we're not conservative, then use the staggerloc that the field is built upon
-            srcStaggerlocG2M=srcStaggerloc
-          endif
-
-
-          if (lregridmethod .eq. ESMF_REGRIDMETHOD_NEAREST_STOD .or. &
-              lregridmethod .eq. ESMF_REGRIDMETHOD_NEAREST_DTOS) then
-
-            ! check grid
-            call checkGridLite(srcGrid,srcStaggerlocG2M,rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-
-            srcPointList=ESMF_PointListCreate(srcGrid,srcStaggerlocG2M, &
-                                              maskValues=srcMaskValues, &
-                                              rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-            src_pl_used=.true.
-
-  else if ((lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE) .or. &
-       (lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE_2ND)) then
-
-            ! check grid
-            call checkGrid(srcGrid,srcStaggerlocG2M,rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-
-            ! Convert Grid to Mesh
-            if (tileCount .eq. 1) then
-               srcMesh = ESMF_GridToMesh(srcGrid, srcStaggerLocG2M, srcIsSphere, srcIsLatLonDeg, &
-                    maskValues=srcMaskValues, regridConserve=regridConserveG2M, rc=localrc)
-               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc)) return
-            else 
-               srcMesh = ESMF_GridToMeshCell(srcGrid, rc=localrc)
-               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc)) return
-
-               ! Turn on masking
-               if (present(srcMaskValues)) then
-                  call ESMF_MeshTurnOnCellMask(srcMesh, maskValues=srcMaskValues, rc=localrc);
-                  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                       ESMF_CONTEXT, rcToReturn=rc)) return
-               endif
-            endif
-          else 
-
-            ! check grid
-            call checkGrid(srcGrid,srcStaggerlocG2M,rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-
-            ! ESMF_REGION_ENTER("gridToMesh", localrc)
-            ! Convert Grid to Mesh
-            srcMesh = ESMF_GridToMesh(srcGrid, srcStaggerLocG2M, srcIsSphere, srcIsLatLonDeg, &
-                        maskValues=srcMaskValues, regridConserve=regridConserveG2M, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-            ! ESMF_REGION_EXIT("gridToMesh", localrc)
-          endif
+                      msg="- can't currently do conservative regrid on a stagger other then center", & 
+                      ESMF_CONTEXT, rcToReturn=rc) 
+                 return
+              endif
+             
+             ! Create Mesh from Grid
+              srcMesh=conserve_GridToMesh(srcGrid,srcMaskValues,rc=localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+              
+           else    
+              ! Create Mesh from Grid
+              srcMesh=b_or_p_GridToMesh(srcGrid,srcStaggerloc,srcMaskValues, &
+                   rc=localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return                            
+           endif
 
         else if (srcgeomtype .eq. ESMF_GEOMTYPE_MESH) then
 
@@ -1198,113 +1095,74 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif
 
         if (dstgeomtype .eq. ESMF_GEOMTYPE_GRID) then
-          call ESMF_FieldGet(dstField, grid=dstGrid, &
-                 staggerloc=dstStaggerloc, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-
-          ! if we're doing conservative then do some checking and
-          ! change staggerloc
-          if ((lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE) .or. &
-               (lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE_2ND)) then
-            ! Only Center stagger is supported right now until we figure out what the
-            ! control volume for the others should be
-            if (dstStaggerloc .ne. ESMF_STAGGERLOC_CENTER) then
+           
+           ! Get information about destination Grid from Field
+           call ESMF_FieldGet(dstField, grid=dstGrid, &
+                staggerloc=dstStaggerloc, rc=localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+           
+           ! Create Mesh or PointList depending on regrid method
+           if ((lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE) .or. &
+                (lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE_2ND)) then
+              
+              ! Only Center stagger is supported right now until we figure out what the
+              ! control volume for the others should be
+              if (dstStaggerloc .ne. ESMF_STAGGERLOC_CENTER) then
                  call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
-              msg="- can't currently do conservative regrid on a stagger other then center", & 
-              ESMF_CONTEXT, rcToReturn=rc) 
-              return
-            endif
-
-            ! Create the mesh from corner stagger to better represent the
-            ! control volumes 
-            call ESMF_GridGet(grid=dstGrid, &
-                   dimCount=gridDimCount, tileCount=tileCount, &
-                   rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-            if (gridDimCount .eq. 2) then
-               dstStaggerlocG2M=ESMF_STAGGERLOC_CORNER
-            else if (gridDimCount .eq. 3) then
-               dstStaggerlocG2M=ESMF_STAGGERLOC_CORNER_VFACE
-            else
-               call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
-               msg="- can currently only do conservative regridding on 2D or 3D grids", & 
-               ESMF_CONTEXT, rcToReturn=rc) 
-               return
-            endif
-
-            ! check grid
-            call checkGrid(dstGrid,dstStaggerlocG2M,rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-
-          
-            ! Convert Grid to Mesh
-            if (tileCount .eq. 1) then
-               dstMesh = ESMF_GridToMesh(dstGrid, dstStaggerLocG2M, dstIsSphere, dstIsLatLonDeg, &
-                    maskValues=dstMaskValues, regridConserve=regridConserveG2M, rc=localrc)
-               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc)) return
-            else 
-               dstMesh = ESMF_GridToMeshCell(dstGrid, rc=localrc)
-               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc)) return
-
-               ! Turn on masking
-               if (present(dstMaskValues)) then
-                  call ESMF_MeshTurnOnCellMask(dstMesh, maskValues=dstMaskValues, rc=localrc);
-                  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                       ESMF_CONTEXT, rcToReturn=rc)) return
-               endif
-            endif
-          else 
-            ! If we're not conservative, then use the staggerloc that the field is built upon
-            dstStaggerlocG2M=dstStaggerloc
-
-            ! check grid
-            call checkGridLite(dstGrid,dstStaggerlocG2M,rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-
-            dstPointList=ESMF_PointListCreate(dstGrid,dstStaggerlocG2M, &
-                                              maskValues=dstMaskValues, &
-                                              rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-            dst_pl_used=.true.
-          endif
-
-          ! If we're doing creep fill, then also need Mesh
-          if ((localExtrapMethod==ESMF_EXTRAPMETHOD_CREEP) .or. &
-               (localExtrapMethod==ESMF_EXTRAPMETHOD_CREEP_NRST_D)) then 
-             dstMesh = ESMF_GridToMesh(dstGrid, dstStaggerLocG2M, dstIsSphere, dstIsLatLonDeg, &
-                  maskValues=dstMaskValues, regridConserve=regridConserveG2M, rc=localrc)
-             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                  ESMF_CONTEXT, rcToReturn=rc)) return
-          endif
-
+                      msg="- can't currently do conservative regrid on a stagger other then center", & 
+                      ESMF_CONTEXT, rcToReturn=rc) 
+                 return
+              endif
+              
+              ! Create Mesh from Grid
+              dstMesh=conserve_GridToMesh(dstGrid,dstMaskValues,rc=localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+              
+           else 
+              ! check grid
+              call checkGridLite(dstGrid,dstStaggerloc,rc=localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+              
+              dstPointList=ESMF_PointListCreate(dstGrid,dstStaggerloc, &
+                   maskValues=dstMaskValues, rc=localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+              dst_pl_used=.true.
+           endif
+           
+           ! If we're doing creep fill, then also need Mesh
+           if ((localExtrapMethod==ESMF_EXTRAPMETHOD_CREEP) .or. &
+                (localExtrapMethod==ESMF_EXTRAPMETHOD_CREEP_NRST_D)) then 
+              dstMesh = ESMF_GridToMesh(dstGrid, dstStaggerLoc, 0, .false., &
+                   maskValues=dstMaskValues, regridConserve=ESMF_REGRID_CONSERVE_OFF, rc=localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+           endif
+           
         else if (dstgeomtype .eq. ESMF_GEOMTYPE_MESH) then
-
-          call ESMF_FieldGet(dstField, mesh=tempMesh, meshloc=dstMeshloc, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-
-          ! Mesh needs to be built on elements for conservative, and nodes for the others
-          if ((lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE) .or. &
-               (lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE_2ND)) then
+           
+           call ESMF_FieldGet(dstField, mesh=tempMesh, meshloc=dstMeshloc, rc=localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+           
+           ! Mesh needs to be built on elements for conservative, and nodes for the others
+           if ((lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE) .or. &
+                (lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE_2ND)) then
               if (dstMeshloc .ne. ESMF_MESHLOC_ELEMENT) then
                  call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
-                 msg="- can currently only do conservative regridding on a mesh built on elements", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-                return 
+                      msg="- can currently only do conservative regridding on a mesh built on elements", & 
+                      ESMF_CONTEXT, rcToReturn=rc) 
+                 return 
               endif
-
+              
               ! Turn on masking
               if (present(dstMaskValues)) then
-                call ESMF_MeshTurnOnCellMask(tempMesh, maskValues=dstMaskValues, rc=localrc);
-                if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                  ESMF_CONTEXT, rcToReturn=rc)) return
+                 call ESMF_MeshTurnOnCellMask(tempMesh, maskValues=dstMaskValues, rc=localrc);
+                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                      ESMF_CONTEXT, rcToReturn=rc)) return
               endif
               dstMesh=tempMesh
 
@@ -1410,7 +1268,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   localLineType, &
                                   localNormType, &
                                   localpolemethod, localRegridPoleNPnts, &
-                                  lregridScheme, &
+                                  ESMF_REGRID_SCHEME_NATIVE, &
                                   hasStatusArray, statusArray, &
                                   localExtrapMethod, &
                                   localExtrapNumSrcPnts, &
@@ -1447,7 +1305,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   localLineType, &
                                   localNormType, &
                                   localpolemethod, localRegridPoleNPnts, &
-                                  lregridScheme, &
+                                  ESMF_REGRID_SCHEME_NATIVE, &
                                   hasStatusArray, statusArray, &
                                   localExtrapMethod, &
                                   localExtrapNumSrcPnts, &
@@ -1497,7 +1355,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                     return
                  endif
 
-                 ! Get Frac info
+                 ! Get staggerStaggerLocG2M
+                 call ESMF_GridGet(grid=srcGrid, &
+                      dimCount=gridDimCount, rc=localrc)
+                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                      ESMF_CONTEXT, rcToReturn=rc)) return
+                 
+                 ! Figure out staggerloc based on dimension
+                 if (gridDimCount .eq. 2) then
+                    srcStaggerlocG2M=ESMF_STAGGERLOC_CORNER
+                 else if (gridDimCount .eq. 3) then
+                    srcStaggerlocG2M=ESMF_STAGGERLOC_CORNER_VFACE
+                 else
+                    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
+                         msg="- can currently only do conservative regridding on 2D or 3D grids", & 
+                         ESMF_CONTEXT, rcToReturn=rc) 
+                    return
+                 endif
+
+                 ! Copy frac from Mesh field into fracArray
                  call ESMF_RegridGetFrac(srcGrid, mesh=srcMesh, array=fracArray, &
                       staggerloc=srcStaggerLocG2M, rc=localrc)
                  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
@@ -1544,6 +1420,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                     return
                  endif
 
+                 ! Get staggerStaggerLocG2M
+                 call ESMF_GridGet(grid=dstGrid, &
+                      dimCount=gridDimCount, rc=localrc)
+                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                      ESMF_CONTEXT, rcToReturn=rc)) return
+                 
+                 ! Figure out staggerloc based on dimension
+                 if (gridDimCount .eq. 2) then
+                    dstStaggerlocG2M=ESMF_STAGGERLOC_CORNER
+                 else if (gridDimCount .eq. 3) then
+                    dstStaggerlocG2M=ESMF_STAGGERLOC_CORNER_VFACE
+                 else
+                    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
+                         msg="- can currently only do conservative regridding on 2D or 3D grids", & 
+                         ESMF_CONTEXT, rcToReturn=rc) 
+                    return
+                 endif
+
+                 ! Copy frac from Mesh field into fracArray
                  call ESMF_RegridGetFrac(dstGrid, mesh=dstMesh, array=fracArray, &
                       staggerloc=dstStaggerLocG2M, rc=localrc)
                  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
@@ -1666,6 +1561,164 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        print*,'regrid store time= ',end_time-beg_time
 
     end subroutine ESMF_FieldRegridStoreNX
+
+
+   ! Small subroutine to hide some of the complexity of grid2mesh for conservative regrid
+    function conserve_GridToMesh(grid,maskValues,rc)
+      type (ESMF_Grid), intent(in)  :: grid
+      integer(ESMF_KIND_I4), intent(in),  optional :: maskValues(:)
+      integer, intent(out), optional :: rc
+      type (ESMF_Mesh) :: conserve_GridToMesh
+
+      logical :: moabOn
+      integer :: tileCount, gridDimCount
+      integer :: localrc
+      type (ESMF_StaggerLoc) :: staggerlocG2M
+      
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      
+      ! Create the mesh from corner stagger to better represent the
+      ! control volumes
+      call ESMF_GridGet(grid=grid, &
+           dimCount=gridDimCount, tileCount=tileCount, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Figure out staggerloc based on dimension
+      if (gridDimCount .eq. 2) then
+         staggerlocG2M=ESMF_STAGGERLOC_CORNER
+      else if (gridDimCount .eq. 3) then
+         staggerlocG2M=ESMF_STAGGERLOC_CORNER_VFACE
+      else
+         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
+              msg="- can currently only do conservative regridding on 2D or 3D grids", & 
+              ESMF_CONTEXT, rcToReturn=rc) 
+         return
+      endif
+      
+      ! check grid
+      call checkGrid(grid,staggerlocG2M,rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+      
+      
+      ! Check if Moab is on, if so do things a bit differently below
+      call ESMF_MeshGetMOAB(moabOn, rc=localrc) 
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+      
+        
+      ! Convert Grid to Mesh
+      if (moabOn) then
+         ! Convert Grid to Mesh
+         conserve_GridToMesh=ESMF_MeshCreate(grid, rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+         
+         ! Turn on masking
+         if (present(maskValues)) then
+            call ESMF_MeshTurnOnCellMask(conserve_GridToMesh, maskValues=maskValues, rc=localrc);
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+         endif
+      else 
+         if (tileCount .eq. 1) then
+            conserve_GridToMesh = ESMF_GridToMesh(grid, staggerLocG2M, 0, .false., &
+                 maskValues=maskValues, regridConserve=ESMF_REGRID_CONSERVE_ON, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+         else 
+            conserve_GridToMesh = ESMF_GridToMeshCell(grid, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+            
+            ! Turn on masking
+            if (present(maskValues)) then
+               call ESMF_MeshTurnOnCellMask(conserve_GridToMesh, maskValues=maskValues, rc=localrc);
+               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc)) return
+            endif
+         endif
+      endif
+        
+      if(present(rc)) rc = ESMF_SUCCESS
+    end function conserve_GridToMesh
+
+
+   ! Small subroutine to hide some of the complexity of grid2mesh for bilinear/patch
+    function b_or_p_GridToMesh(grid,staggerloc,maskValues,rc)
+      type (ESMF_Grid), intent(in)  :: grid
+      type (ESMF_StaggerLoc), intent(in) :: staggerloc
+      integer(ESMF_KIND_I4), intent(in),  optional :: maskValues(:)
+      integer, intent(out), optional :: rc
+      type (ESMF_Mesh) :: b_or_p_GridToMesh
+
+      logical :: moabOn
+      integer :: tileCount, gridDimCount
+      type (ESMF_Mesh) :: tmpMesh
+      integer :: localrc
+      
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+            
+      ! check grid
+      call checkGrid(grid,staggerloc,rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+      
+      ! Check if Moab is on, if so do things a bit differently below
+      call ESMF_MeshGetMOAB(moabOn, rc=localrc) 
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+              
+      ! Convert Grid to Mesh
+      ! ESMF_REGION_ENTER("gridToMesh", localrc)
+      if (moabOn) then
+         ! Convert Grid to Mesh depending on staggerloc
+         if (staggerloc .eq. ESMF_STAGGERLOC_CORNER) then
+            b_or_p_GridToMesh=ESMF_MeshCreate(grid, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+
+         else if (staggerloc .eq. ESMF_STAGGERLOC_CENTER) then
+            ! Convert Grid to Mesh
+            tmpMesh=ESMF_MeshCreate(grid, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return            
+
+            ! Create Dual of Mesh (to move centers to corners)
+            b_or_p_GridToMesh=ESMF_MeshCreateDual(tmpMesh, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return            
+
+            ! Get rid of temporary Mesh
+            call ESMF_MeshDestroy(tmpMesh, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return            
+         else 
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
+                 msg=" when using MOAB, bilinear or patch regridding is currently not supported on this stagger location.", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
+            return
+         endif
+
+         ! Turn on masking
+         if (present(maskValues)) then
+            call ESMF_MeshTurnOnCellMask(b_or_p_GridToMesh, maskValues=maskValues, rc=localrc);
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+         endif
+      else 
+         b_or_p_GridToMesh = ESMF_GridToMesh(grid, staggerLoc, 0, .false., &
+              maskValues=maskValues, regridConserve=ESMF_REGRID_CONSERVE_OFF, &
+              rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+      ! ESMF_REGION_EXIT("gridToMesh", localrc)
+        
+      if(present(rc)) rc = ESMF_SUCCESS
+    end function b_or_p_GridToMesh
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2455,7 +2508,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! TODO: Get rid of this
         lregridScheme = ESMF_REGRID_SCHEME_NATIVE
           
-
         ! Set interpretation of grid based on regridScheme
         if (lregridScheme .eq. ESMF_REGRID_SCHEME_FULL3D) then
            isSphere = 1
@@ -2687,6 +2739,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !------------------------------------------------------------------------------
 
+
+
+
+
     ! Small subroutine to make sure that Grid doesn't
     ! contain some of the properties that aren't currently
     ! allowed in regridding
@@ -2770,6 +2826,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
        if(present(rc)) rc = ESMF_SUCCESS
    end subroutine checkGridLite
+
 
 !------------------------------------------------------------------------------
 
