@@ -13,6 +13,8 @@
 #include "ESMCI_VMKernel.h"
 #include "ESMCI_VM.h"
 
+#define WITHBLOCKER_on
+
 #define VM_PETMANAGEMENTLOG_on
 #define VM_MEMLOG_off
 #define VM_COMMQUEUELOG_off
@@ -818,7 +820,9 @@ void VMK::construct(void *ssarg){
         CPU_ZERO(&cpuset);
         int cIndex = omp_get_thread_num()%ncpet[mypet];
         CPU_SET(ssipe[cid[mypet][cIndex]], &cpuset);
+//        if (sarg->openmphandling>2 && (omp_get_thread_num()!=0)){
         if (sarg->openmphandling>2){
+          // set affinity on all OpenMP threads
           pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
         }
       }
@@ -1112,7 +1116,15 @@ static void *vmk_spawn(void *arg){
     if (*f==1) break; // check whether this was a wrap up call
 
     //vm.barrier();
-    
+
+#if 0
+  cpu_set_t cpuset, cpuset_old;
+  pthread_getaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset_old);
+  CPU_ZERO(&cpuset);
+  CPU_SET(vm->getSsipe()[vm->getCid()[vm->getMypet()][0]], &cpuset);
+  pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
+#endif
+
     // call the function pointer with the new VMK as its argument
     // this is where we finally enter the user code again...
     if (vmkt->arg==NULL)
@@ -1120,6 +1132,10 @@ static void *vmk_spawn(void *arg){
     else
       sarg->fctp((void *)vm, vmkt->arg);
     //vmkt->routine(vmkt->arg);
+    
+#if 0
+  pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset_old);
+#endif
     
 #ifdef VM_PETMANAGEMENTLOG_on
     {
@@ -1288,6 +1304,9 @@ static void *vmk_sigcatcher(void *arg){
   // by that indicate that the resource has been made available again.
   // suspend thread until a signal arrives
 
+//  VMK::wtimedelay(0.005);
+
+
 #ifdef VM_PETMANAGEMENTLOG_on
     {
       std::stringstream msg;
@@ -1314,22 +1333,54 @@ static void *vmk_sigcatcher(void *arg){
 
   // this signal was received from a thread running under another process
   // receive the thread id of the blocker thread that needs to be woken up
+#ifdef VM_PETMANAGEMENTLOG_on
+    {
+      std::stringstream msg;
+      msg << "VMK::vmk_sigcatcher()#" << __LINE__
+        << " thread " << vmkt->tid << ": " << pthread_self()
+        << " pid=" << getpid() << " now calling MPI_Recv() for MPI_ANY_SOURCE.";
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+    }
+#endif
   MPI_Recv(&blocker_vmkt, sizeof(vmkt_t *), MPI_BYTE, MPI_ANY_SOURCE, 
     VM_TID_MPI_TAG, vm.default_mpi_c, &mpi_s);
-  // now wake up the correct blocker thread within this pid
-#if (VERBOSITY > 5)
-  fprintf(stderr, "It's the sigcatcher for pid %d again. I received the blocker"
-    " &vmkt\n"
-    " and I'll wake up blocker thread with &vmkt: %p\n", getpid(),
-    blocker_vmkt);
+#ifdef VM_PETMANAGEMENTLOG_on
+    {
+      std::stringstream msg;
+      msg << "VMK::vmk_sigcatcher()#" << __LINE__
+        << " thread " << vmkt->tid << ": " << pthread_self()
+        << " pid=" << getpid() << " returned from MPI_Recv() for MPI_ANY_SOURCE.";
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+    }
 #endif
-  
+    
+#ifdef WITHBLOCKER_on
+  // now wake up the correct blocker thread within this pid
+#ifdef VM_PETMANAGEMENTLOG_on
+    {
+      std::stringstream msg;
+      msg << "VMK::vmk_sigcatcher()#" << __LINE__
+        << " thread " << vmkt->tid << ": " << pthread_self()
+        << " pid=" << getpid() << " waking up blocker thread.";
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+    }
+#endif
 #ifndef ESMF_NO_PTHREADS
     pthread_mutex_lock(&(blocker_vmkt->mut_extra1));
     pthread_cond_signal(&(blocker_vmkt->cond_extra1));
     pthread_mutex_unlock(&(blocker_vmkt->mut_extra1));
 #endif
-      
+#ifdef VM_PETMANAGEMENTLOG_on
+    {
+      std::stringstream msg;
+      msg << "VMK::vmk_sigcatcher()#" << __LINE__
+        << " thread " << vmkt->tid << ": " << pthread_self()
+        << " pid=" << getpid() << " done waking up blocker thread.";
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+    }
+#endif
+#endif
+
     // this sigcatcher has done its job and is allowed to recycle to be caught..
   
     // now signal to parent thread that child is done with its work
@@ -1399,9 +1450,14 @@ static void *vmk_block(void *arg){
     // This blocker thread is responsible for staying alive until resources,
     // i.e. cores, become available to the contributing pet. The contributing
     // pet is blocked (asynchonously) via pthread_cond_wait().
-#if (VERBOSITY > 5)
-    fprintf(stderr, "I am a blocker for pid %d, my tid is %d and going "
-      "to sleep...\n", getpid(), pthread_self());
+#ifdef VM_PETMANAGEMENTLOG_on
+    {
+      std::stringstream msg;
+      msg << "VMK::vmk_block()#" << __LINE__
+        << " thread " << pthread_self()
+        << " going to sleep until sigcatcher wakes me up, pid=" << getpid();
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+    }
 #endif
 
     // suspend this thread until awoken by one of the sigcatcher threads  
@@ -1409,13 +1465,14 @@ static void *vmk_block(void *arg){
     pthread_cond_wait(&(vmkt->cond_extra1), &(vmkt->mut_extra1));
 #endif
 
-#if (VERBOSITY > 5)
-//    fprintf(stderr, "I am a blocker for pid %d, my tid is %d and\n"
-//    "woke up with signal: %d. I'll exit and therefore free block on my pet\n",
-//    getpid(), pthread_self(), caught);
-    fprintf(stderr, "I am a blocker for pid %d, my tid is %d and\n"
-      "woke up because of condition. I'll exit and therefore free block on my"
-      "pet\n", getpid(), pthread_self());
+#ifdef VM_PETMANAGEMENTLOG_on
+    {
+      std::stringstream msg;
+      msg << "VMK::vmk_block()#" << __LINE__
+        << " thread " << pthread_self()
+        << " awoken by sigcatcher, now get caught..., pid=" << getpid();
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+    }
 #endif
     // once the signal has been received from a sigcatcher the blocker can 
     // go into the catch section before returning to wait for release
@@ -2168,6 +2225,9 @@ void VMK::enter(class VMKPlan *vmp, void *arg, void *argvmkt){
   // (this is so that no signals get missed!)
   if (vmp->spawnflag[mypet]==0){
     if (vmp->contribute[mypet]>-1){
+
+#ifdef WITHBLOCKER_on
+
 #ifdef VM_PETMANAGEMENTLOG_on
       {
         std::stringstream msg;
@@ -2177,6 +2237,9 @@ void VMK::enter(class VMKPlan *vmp, void *arg, void *argvmkt){
       }
 #endif
       vmkt_release(&(sarg[0].vmkt), NULL);          // release blocker
+#endif
+      
+      
 #ifdef VM_PETMANAGEMENTLOG_on
       {
         std::stringstream msg;
@@ -2288,20 +2351,24 @@ void VMK::exit(class VMKPlan *vmp, void *arg){
       {
         std::stringstream msg;
         msg << "VMK::exit()#" << __LINE__
-          << " call vmkt_catch on blocker thread for contributor PET.";
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
-      }
-#endif
-      vmkt_catch(&(sarg[0].vmkt));
-#ifdef VM_PETMANAGEMENTLOG_on
-      {
-        std::stringstream msg;
-        msg << "VMK::exit()#" << __LINE__
           << " call vmkt_catch on sigcatcher thread for contributor PET.";
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       }
 #endif
       vmkt_catch(&(sarg[0].vmkt_extra));
+      
+#ifdef WITHBLOCKER_on
+#ifdef VM_PETMANAGEMENTLOG_on
+      {
+        std::stringstream msg;
+        msg << "VMK::exit()#" << __LINE__
+          << " call vmkt_catch on blocker thread for contributor PET.";
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+      }
+#endif
+      vmkt_catch(&(sarg[0].vmkt));
+#endif
+
     }
 #ifdef VM_PETMANAGEMENTLOG_on
     {
