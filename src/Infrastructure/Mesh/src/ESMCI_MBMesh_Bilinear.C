@@ -304,6 +304,16 @@ void calc_bilinear_regrid_wgts(MBMesh *srcmb, PointList *dstpl, IWeights &wts,
       if (dstpl_rend != NULL) delete dstpl_rend;
     }
     
+    // memory associated with results cannot be released by virtue of a
+    //   std::unique_ptr used to define MBMesh_Search_EToP_Result_List because
+    //   a std::set is used to form the temporary elements from which the 
+    //   std::unique_ptrs would need to be std::move(ed), and this is not 
+    //   available until c++17
+    // so we will delete these the (new) old fashioned way (C++11)
+    for (auto entry : result)
+      delete entry;
+    result.clear();
+    
   } CATCH_MBMESH_RETHROW
 }
 
