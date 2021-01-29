@@ -161,6 +161,7 @@ static void populate_box_elems(OTree *box,
     if (Mixed_BBoxIntersect(bounding_box, meshBBBox, btol)) {
 
       // Create Search result
+      // NOTE: this memory is leaked because OTree/ONode is not set up to delete it..
       MBMesh_Search_EToP_Result *sr=new MBMesh_Search_EToP_Result();
       sr->src_elem=elem;
       sr->dst_nodes.clear();
