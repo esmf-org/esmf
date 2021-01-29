@@ -1,6 +1,6 @@
 # Earth System Modeling Framework Python Interface (ESMPy)
 
-> Copyright 2002-2020, University Corporation for Atmospheric Research, Massachusetts Institute of Technology, Geophysical Fluid Dynamics Laboratory, University of Michigan, National Centers for Environmental Prediction, Los Alamos National Laboratory, Argonne National Laboratory, NASA Goddard Space Flight Center. Licensed under the University of Illinois-NCSA License.
+> Copyright 2002-2021, University Corporation for Atmospheric Research, Massachusetts Institute of Technology, Geophysical Fluid Dynamics Laboratory, University of Michigan, National Centers for Environmental Prediction, Los Alamos National Laboratory, Argonne National Laboratory, NASA Goddard Space Flight Center. Licensed under the University of Illinois-NCSA License.
 
  * [ESMPy Documentation](http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_8_0_1/esmpy_doc/html/index.html)
    * [Installation](http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_8_0_1/esmpy_doc/html/install.html)
