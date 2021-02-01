@@ -46,7 +46,7 @@ endif
 # Print compiler version string
 #
 ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -V
-ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V
+ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} --version
 
 ############################################################
 # on XT with CCE optimization level must be set explicitely
