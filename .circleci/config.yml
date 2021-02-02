@@ -176,10 +176,10 @@ jobs:
           command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
       - run:
           name: Checkout Code (ESMF)
-          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git
+          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git src
       - run:
           name: Docker Build esmf-doc-base
-          command: docker build -t "esmf/esmf-doc-base" --file "ESCOMP-Containers/ESMF/doc/esmf-doc-base/Dockerfile" --build-arg DOCKER_NAMESPACE="esmf" .
+          command: docker build -t "esmf/esmf-doc-base" --file "ESCOMP-Containers/ESMF/doc/esmf-doc-base/Dockerfile" .
       - run:
           name: Make log directory
           command: mkdir log 
@@ -188,7 +188,7 @@ jobs:
           command: |
             homedir=`pwd`
             echo "Homedir=$homedir"
-            ESMF_DIR=$homedir/esmf
+            ESMF_DIR=$homedir/src
             echo "ESMF_DIR=$ESMF_DIR"
             LOGDIR=$homedir/log
             echo "LOGDIR=$LOGDIR"
