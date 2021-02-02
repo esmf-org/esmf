@@ -193,10 +193,16 @@ jobs:
             LOGDIR=$homedir/log
             echo "LOGDIR=$LOGDIR"
       - run:
-          name: Run Test Coverage script
+          name: Go to src
           command: |
-            cd $ESMF_DIR
-            bash esmf/.circleci/sh/test_coverage.sh
+            ls 
+            pwd
+            cd src
+            ls 
+            pwd
+      - run:
+          name: Run Test Coverage
+          command: bash esmf/.circleci/sh/test_coverage.sh
 
   publish-test-coverage:
     machine: true
