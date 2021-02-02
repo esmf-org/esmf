@@ -1,7 +1,6 @@
-
+#!/usr/bin/env bash
 ############################### Extract test_esmf ########################################
 
-#!/bin/bash
 ###################################################################################
 # This script finds all the fortran public subroutines and finds if any unit tests
 # and system calls the routine. It prints out the resuts and creates the ESMF_Functions 
