@@ -437,7 +437,7 @@ workflows:
     jobs:
       - should-build-docs:
          type: approval
-      - build-test-coverage
+      - build-test-coverage:
           requires:
             - should-build-docs
       - publish-test-coverage:
