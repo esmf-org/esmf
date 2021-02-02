@@ -198,10 +198,12 @@ jobs:
       - run:
           name: Run Test Coverage script
           command: |
-            cp -r esmf-test-scripts/test_coverage_script/* $ESMF_DIR/.
+            ls
+            pwd
+            cp esmf-test-scripts/test_coverage_script/test_coverage test_coverage.sh
+            chmod +x test_coverage.sh
             cd $ESMF_DIR
-            chmod +x test_coverage
-            bash test_coverage
+            bash $homedir/test_coverage
 
   publish-test-coverage:
     machine: true
