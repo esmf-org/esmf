@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research, 
+// Copyright 2002-2021, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -84,26 +84,27 @@ void calc_bilinear_mat(MBMesh *srcmb, PointList *dstpl,
 #undef ESMC_METHOD
 #define ESMC_METHOD "MBMesh::calc_bilinear_mat"
 
-  int merr, localrc;
+  try {
+    int merr, localrc;
 
-  // Get MOAB mesh
-  Interface *mesh = srcmb->mesh;
+    // Get MOAB mesh
+    Interface *mesh = srcmb->mesh;
 
-  // Find maximum number of dst nodes in search results
-  unsigned int max_num_dst_nodes = 0;
-  MBMesh_Search_EToP_Result_List::iterator sb = sres.begin(), se = sres.end();
-  for (; sb != se; sb++) {
-    // NOTE: sr.elem is a src element and sr.nodes is a list of dst nodes
-    MBMesh_Search_EToP_Result &sr = **sb;
+    // Find maximum number of dst nodes in search results
+    unsigned int max_num_dst_nodes = 0;
+    MBMesh_Search_EToP_Result_List::iterator sb = sres.begin(), se = sres.end();
+    for (; sb != se; sb++) {
+      // NOTE: sr.elem is a src element and sr.nodes is a list of dst nodes
+      MBMesh_Search_EToP_Result &sr = **sb;
 
-    // If there are no associated dst nodes then skip it
-    if (sr.dst_nodes.size() > max_num_dst_nodes)
-      max_num_dst_nodes=sr.dst_nodes.size();
+      // If there are no associated dst nodes then skip it
+      if (sr.dst_nodes.size() > max_num_dst_nodes)
+        max_num_dst_nodes=sr.dst_nodes.size();
 
-   // iterate through nodes inside this search result element
-    vector<etop_sr>::iterator db = sr.dst_nodes.begin(),
-                                   de = sr.dst_nodes.end();
-    for (; db != de; db++) {
+     // iterate through nodes inside this search result element
+      vector<etop_sr>::iterator db = sr.dst_nodes.begin(),
+                                     de = sr.dst_nodes.end();
+      for (; db != de; db++) {
 
 #ifdef ESMF_REGRID_DEBUG_MAP_NODE
 {
@@ -227,8 +228,10 @@ void calc_bilinear_mat(MBMesh *srcmb, PointList *dstpl,
 
       // insert the row
       iw.InsertRow(row, col);
+      }
     }
   }
+  CATCH_MBMESH_RETHROW
 }
 
 void calc_bilinear_regrid_wgts(MBMesh *srcmb, PointList *dstpl, IWeights &wts, 
@@ -236,69 +239,72 @@ void calc_bilinear_regrid_wgts(MBMesh *srcmb, PointList *dstpl, IWeights &wts,
 #undef ESMC_METHOD
 #define ESMC_METHOD "calc_bilinear_regrid_wgts()"
 
-  // Get Parallel Information
-  int localrc;
-  int petCount = VM::getCurrent(&localrc)->getPetCount();
-  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-    throw localrc;  // bail out with exception
+  try {
+    // Get Parallel Information
+    int localrc;
+    int petCount = VM::getCurrent(&localrc)->getPetCount();
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception
 
-  // Set meshes to use for regrid weight calculations
-  MBMesh *srcmesh_regrid=srcmb;
-  PointList *dstpl_regrid=dstpl;
+    // Set meshes to use for regrid weight calculations
+    MBMesh *srcmesh_regrid=srcmb;
+    PointList *dstpl_regrid=dstpl;
 
 #ifdef DEBUG_POINTLIST
-  {printf("%d# calc_bilinear_regrid_wgts (%d) [", Par::Rank(), dstpl->get_curr_num_pts());
-  for (int p = 0; p < dstpl->get_curr_num_pts(); ++p) {
-    const int *id = dstpl->get_id_ptr(p);
-    double coords[3];
-    dstpl->get_coord(p, &coords[0]);
-     printf("%d [%f,%f,%f], ", dstpl->get_id_ptr(p), coords[0], coords[1], coords[2]);
-  }
-  printf("]\n");}
+    {printf("%d# calc_bilinear_regrid_wgts (%d) [", Par::Rank(), dstpl->get_curr_num_pts());
+    for (int p = 0; p < dstpl->get_curr_num_pts(); ++p) {
+      const int *id = dstpl->get_id_ptr(p);
+      double coords[3];
+      dstpl->get_coord(p, &coords[0]);
+       printf("%d [%f,%f,%f], ", dstpl->get_id_ptr(p), coords[0], coords[1], coords[2]);
+    }
+    printf("]\n");}
 #endif
  
-  // If parallel then generate rendezvous meshes...and use them instead
-  MBMesh *srcmesh_rend=NULL;
-  PointList *dstpl_rend=NULL;
-  if (petCount > 1) {
+    // If parallel then generate rendezvous meshes...and use them instead
+    MBMesh *srcmesh_rend=NULL;
+    PointList *dstpl_rend=NULL;
+    if (petCount > 1) {
 
-    // Create rendez meshes
-    ESMCI_REGRID_TRACE_ENTER("MBMesh regrid bilinear rendezvous");
-    create_rendez_mbmesh_etop(srcmb, dstpl, &srcmesh_rend, &dstpl_rend, map_type);
-    ESMCI_REGRID_TRACE_EXIT("MBMesh regrid bilinear rendezvous");
+      // Create rendez meshes
+      ESMCI_REGRID_TRACE_ENTER("MBMesh regrid bilinear rendezvous");
+      create_rendez_mbmesh_etop(srcmb, dstpl, &srcmesh_rend, &dstpl_rend, map_type);
+      ESMCI_REGRID_TRACE_EXIT("MBMesh regrid bilinear rendezvous");
 
-    // Use rendezvous meshes instead
-    srcmesh_regrid=srcmesh_rend;
-    dstpl_regrid=dstpl_rend;
-  }
+      // Use rendezvous meshes instead
+      srcmesh_regrid=srcmesh_rend;
+      dstpl_regrid=dstpl_rend;
+    }
 
-  // Do search
-  ESMCI_REGRID_TRACE_ENTER("MBMesh regrid bilinear search");
-  MBMesh_Search_EToP_Result_List result;
-  MBMesh_Search_EToP(srcmesh_regrid, 
-                      dstpl_regrid, ESMCI_UNMAPPEDACTION_IGNORE,
-                      map_type, 1.0E-8, result, 
-                      set_dst_status, dst_status, NULL, NULL);
-  ESMCI_REGRID_TRACE_EXIT("MBMesh regrid bilinear search");
+    // Do search
+    ESMCI_REGRID_TRACE_ENTER("MBMesh regrid bilinear search");
+    MBMesh_Search_EToP_Result_List result;
+    MBMesh_Search_EToP(srcmesh_regrid, 
+                        dstpl_regrid, ESMCI_UNMAPPEDACTION_IGNORE,
+                        map_type, 1.0E-8, result, 
+                        set_dst_status, dst_status, NULL, NULL);
+    ESMCI_REGRID_TRACE_EXIT("MBMesh regrid bilinear search");
 
-  // Calculate the bilinear weight matrix
-  ESMCI_REGRID_TRACE_ENTER("MBMesh regrid bilinear calculate weights");
-  calc_bilinear_mat(srcmesh_regrid, dstpl_regrid, result, wts);
-  ESMCI_REGRID_TRACE_EXIT("MBMesh regrid bilinear calculate weights");
+    // Calculate the bilinear weight matrix
+    ESMCI_REGRID_TRACE_ENTER("MBMesh regrid bilinear calculate weights");
+    calc_bilinear_mat(srcmesh_regrid, dstpl_regrid, result, wts);
+    ESMCI_REGRID_TRACE_EXIT("MBMesh regrid bilinear calculate weights");
 
-  // If parallel then migrate weights back to decompostion of original mesh
-  ESMCI_REGRID_TRACE_ENTER("MBMesh regrid bilinear migrate weights");
-  if (petCount > 1) {
-    wts.Migrate(*dstpl);
-    if (set_dst_status) dst_status.Migrate(*dstpl);
-  }
-  ESMCI_REGRID_TRACE_EXIT("MBMesh regrid bilinear migrate weights");
+    // If parallel then migrate weights back to decompostion of original mesh
+    ESMCI_REGRID_TRACE_ENTER("MBMesh regrid bilinear migrate weights");
+    if (petCount > 1) {
+      wts.Migrate(*dstpl);
+      if (set_dst_status) dst_status.Migrate(*dstpl);
+    }
+    ESMCI_REGRID_TRACE_EXIT("MBMesh regrid bilinear migrate weights");
 
-  // If parallel then get rid of rendezvous meshes.
-  if (petCount > 1) {
-    if (srcmesh_rend != NULL) delete srcmesh_rend;
-    if (dstpl_rend != NULL) delete dstpl_rend;
-  }
+    // If parallel then get rid of rendezvous meshes.
+    if (petCount > 1) {
+      if (srcmesh_rend != NULL) delete srcmesh_rend;
+      if (dstpl_rend != NULL) delete dstpl_rend;
+    }
+    
+  } CATCH_MBMESH_RETHROW
 }
 
 #endif // ESMF_MOAB

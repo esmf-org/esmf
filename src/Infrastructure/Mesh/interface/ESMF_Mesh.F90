@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research,
+! Copyright 2002-2021, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -218,6 +218,7 @@ module ESMF_MeshMod
   public ESMF_MeshCreateDual  ! not a public interface for now
   public ESMF_MeshSet
   public ESMF_MeshSetMOAB
+  public ESMF_MeshGetMOAB
   public ESMF_MeshSetIsCMeshFreed
   public ESMF_MeshGetIntPtr
   public ESMF_MeshCreateFromIntPtr
@@ -987,8 +988,7 @@ end subroutine
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
-    function ESMF_MeshCreate3Part(parametricDim, spatialDim, &
-                                  coordSys, name, rc)
+    function ESMF_MeshCreate3Part(parametricDim, spatialDim, coordSys, name, rc)
 !
 !
 ! !RETURN VALUE:
@@ -1019,7 +1019,7 @@ end subroutine
 !         The number of coordinate dimensions needed to describe the locations of the nodes
 !         making up the Mesh. For a manifold, the spatial dimension can be larger than the
 !         parametric dim (e.g. the 2D surface of a sphere in 3D space), but it can't be smaller.
-! \item[{[coordSys]}]
+!   \item[{[coordSys]}]
 !         The coordinate system of the grid coordinate data.
 !         For a full list of options, please see Section~\ref{const:coordsys}.
 !         If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
@@ -1512,18 +1512,19 @@ num_elems, &
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
     function ESMF_MeshCreateFromDG(distgrid, nodalDistgrid, parametricDim, &
-      spatialDim, coordSys, rc)
+      spatialDim, coordSys, name, rc)
 !
 !
 ! !RETURN VALUE:
     type(ESMF_Mesh)         :: ESMF_MeshCreateFromDG
 ! !ARGUMENTS:
-    type(ESMF_DistGrid),        intent(in)            :: distgrid
-    type(ESMF_DistGrid),        intent(in), optional  :: nodalDistgrid
-    integer,                    intent(in), optional  :: parametricDim
-    integer,                    intent(in), optional  :: spatialDim
-    type(ESMF_CoordSys_Flag),   intent(in), optional  :: coordSys
-    integer,                    intent(out), optional :: rc
+    type(ESMF_DistGrid),      intent(in)            :: distgrid
+    type(ESMF_DistGrid),      intent(in),  optional :: nodalDistgrid
+    integer,                  intent(in),  optional :: parametricDim
+    integer,                  intent(in),  optional :: spatialDim
+    type(ESMF_CoordSys_Flag), intent(in),  optional :: coordSys
+    character(len=*),         intent(in),  optional :: name
+    integer,                  intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
@@ -1547,6 +1548,8 @@ num_elems, &
 !         The coordinate system of the grid coordinate data.
 !         For a full list of options, please see Section~\ref{const:coordsys}.
 !         If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
+!   \item [{[name]}]
+!         The name of the Mesh.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1569,7 +1572,7 @@ num_elems, &
     endif
 
     ESMF_MeshCreateFromDG = ESMF_MeshCreate3part(l_pdim, l_sdim, &
-                           coordSysLocal, rc=localrc)
+                           coordSysLocal, name=name, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1853,17 +1856,18 @@ end function ESMF_MeshCreateFromGrid
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
-    function ESMF_MeshCreateFromMeshes(MeshA, MeshB, MeshOp, areaThreshold, rc)
+    function ESMF_MeshCreateFromMeshes(MeshA, MeshB, MeshOp, areaThreshold, name, rc)
 !
 !
 ! !RETURN VALUE:
     type(ESMF_Mesh)                                   :: ESMF_MeshCreateFromMeshes
 ! !ARGUMENTS:
-    type(ESMF_Mesh),            intent(in)            :: MeshA
-    type(ESMF_Mesh),            intent(in)            :: MeshB
-    type(ESMF_MeshOp_Flag),     intent(in)            :: MeshOp
-    real(ESMF_KIND_R8),         intent(in),  optional :: areaThreshold
-    integer,                    intent(out), optional :: rc
+    type(ESMF_Mesh),          intent(in)            :: MeshA
+    type(ESMF_Mesh),          intent(in)            :: MeshB
+    type(ESMF_MeshOp_Flag),   intent(in)            :: MeshOp
+    real(ESMF_KIND_R8),       intent(in),  optional :: areaThreshold
+    character(len=*),         intent(in),  optional :: name
+    integer,                  intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Create a Mesh from two source Meshes with spatial operations. These spatial operations
@@ -1883,6 +1887,8 @@ end function ESMF_MeshCreateFromGrid
 !         less than this threshold value are discarded. This is a user tunable parameter
 !         to handle roundoff error when computing with floating point numbers. The default
 !         value is 0.
+!   \item [{[name]}]
+!         The name of the Mesh.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1922,6 +1928,13 @@ end function ESMF_MeshCreateFromGrid
     ! Set Status
     ESMF_MeshCreateFromMeshes%status=ESMF_MESHSTATUS_COMPLETE
 
+    ! Set the name in Base object
+    if (present(name)) then
+      call c_ESMC_SetName(ESMF_MeshCreateFromMeshes, "Mesh", name, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
     ESMF_INIT_SET_CREATED(ESMF_MeshCreateFromMeshes)
 
     if (present(rc)) rc=ESMF_SUCCESS
@@ -1941,7 +1954,7 @@ end function ESMF_MeshCreateFromMeshes
   ! Private name; call using ESMF_MeshCreate()
     function ESMF_MeshCreateFromFile(filename, fileformat, keywordEnforcer, &
                  convertToDual, addUserArea, maskFlag, varname, &
-                 nodalDistgrid, elementDistgrid, rc)
+                 nodalDistgrid, elementDistgrid, name, rc)
 !
 !
 ! !RETURN VALUE:
@@ -1956,6 +1969,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*),           intent(in),  optional :: varname
     type(ESMF_DistGrid),        intent(in),  optional :: nodalDistgrid
     type(ESMF_DistGrid),        intent(in),  optional :: elementDistgrid
+    character(len=*),           intent(in),  optional :: name
     integer,                    intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2000,6 +2014,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item [{[elementDistgrid]}]
 !         A Distgrid describing the user-specified distribution of
 !         the elements across the PETs.
+!   \item [{[name]}]
+!         The name of the Mesh.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -2100,6 +2116,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call ESMF_MeshDestroy(myMesh)
     else
        ESMF_MeshCreateFromFile = myMesh
+    endif
+
+    ! Set the name in Base object
+    if (present(name)) then
+      call c_ESMC_SetName(ESMF_MeshCreateFromFile, "Mesh", name, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     if (present(rc)) rc=ESMF_SUCCESS
@@ -3228,19 +3251,20 @@ end subroutine ESMF_DistGridGetIds
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
     function ESMF_MeshCreateRedist(mesh, keywordEnforcer, nodalDistgrid, &
-      elementDistgrid, vm, rc)
+      elementDistgrid, vm, name, rc)
 !
 !
 ! !RETURN VALUE:
     type(ESMF_Mesh)                            :: ESMF_MeshCreateRedist
 
 ! !ARGUMENTS:
-    type(ESMF_Mesh),     intent(in)            :: mesh
+    type(ESMF_Mesh),          intent(in)            :: mesh
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_DistGrid), intent(in),  optional :: nodalDistgrid
-    type(ESMF_DistGrid), intent(in),  optional :: elementDistgrid
-    type(ESMF_VM),       intent(in),  optional :: vm
-    integer,             intent(out), optional :: rc
+    type(ESMF_DistGrid),      intent(in),  optional :: nodalDistgrid
+    type(ESMF_DistGrid),      intent(in),  optional :: elementDistgrid
+    type(ESMF_VM),            intent(in),  optional :: vm
+    character(len=*),         intent(in),  optional :: name
+    integer,                  intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !  Create a copy of an existing Mesh with a new distribution. Information
@@ -3253,19 +3277,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! \begin{description}
 !  \item [mesh]
-!       The source Mesh to be redistributed.
+!         The source Mesh to be redistributed.
 !  \item [{[nodalDistgrid]}]
-!       A Distgrid describing the new distribution of
-!       the nodes across the PETs.
+!         A Distgrid describing the new distribution of
+!         the nodes across the PETs.
 !  \item [{[elementDistgrid]}]
-!       A Distgrid describing the new distribution of
-!       the elements across the PETs.
+!         A Distgrid describing the new distribution of
+!         the elements across the PETs.
 !  \item[{[vm]}]
-!      If present, the Mesh object is created on the specified
-!      {\tt ESMF\_VM} object. The default is to create on the VM of the
-!      current context.
+!         If present, the Mesh object is created on the specified
+!         {\tt ESMF\_VM} object. The default is to create on the VM of the
+!         current context.
+!   \item [{[name]}]
+!         The name of the Mesh.
 !  \item [{[rc]}]
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
 !
 !EOP
@@ -3585,6 +3611,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
+    ! Set the name in Base object
+    if (present(name)) then
+      call c_ESMC_SetName(ESMF_MeshCreateRedist, "Mesh", name, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     ! Set as created
     ESMF_INIT_SET_CREATED(ESMF_MeshCreateRedist)
@@ -4630,15 +4662,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_MeshEmptyCreate - Create a Mesh to hold Distgrid information
 !
 ! !INTERFACE:
-    function ESMF_MeshEmptyCreate(nodalDistgrid, elementDistgrid, rc)
+    function ESMF_MeshEmptyCreate(nodalDistgrid, elementDistgrid, name, rc)
 !
 !
 ! !RETURN VALUE:
     type(ESMF_Mesh)         :: ESMF_MeshEmptyCreate
 ! !ARGUMENTS:
-    type(ESMF_DistGrid),        intent(in), optional  :: elementdistgrid
-    type(ESMF_DistGrid),        intent(in), optional  :: nodalDistgrid
-    integer,                    intent(out), optional :: rc
+    type(ESMF_DistGrid),      intent(in),  optional :: elementdistgrid
+    type(ESMF_DistGrid),      intent(in),  optional :: nodalDistgrid
+    character(len=*),         intent(in),  optional :: name
+    integer,                  intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
@@ -4652,6 +4685,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !         The nodal distgrid.
 !   \item [{[elementDistgrid]}]
 !         The elemental distgrid.
+!   \item [{[name]}]
+!         The name of the Mesh.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -4683,6 +4718,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call c_ESMC_MeshCreateBase(ESMF_MeshEmptyCreate, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Set the name in Base object
+    if (present(name)) then
+      call c_ESMC_SetName(ESMF_MeshEmptyCreate, "Mesh", name, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     ! mark as created
     ESMF_INIT_SET_CREATED(ESMF_MeshEmptyCreate)
@@ -6107,6 +6149,62 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
     end subroutine ESMF_MeshSetMOAB
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshGetMOAB()"
+!BOP
+! !IROUTINE: ESMF_MeshGetMOAB -- Check on status of using MOAB library internally.
+!
+! !INTERFACE:
+   subroutine ESMF_MeshGetMOAB(moabOn, rc)
+!
+! !ARGUMENTS:
+    logical, intent(out)                      :: moabOn
+    integer, intent(out), optional            :: rc
+!
+! !DESCRIPTION:
+!   This method is only temporary. It was created to enable testing during the stage in ESMF development while
+!   we have two internal mesh implementations. At some point it will be removed.
+!
+!   This method can be used to check whether the MOAB library is being used
+!   to hold the internal structure of the Mesh. When set to .true. the following
+!   Mesh create calls create a Mesh using MOAB internally. When set to .false. the following
+!   Mesh create calls use the ESMF native internal mesh respresentation. Note that ESMF Meshes
+!   created on MOAB are only supported in a limited set of operations and should be used
+!   with caution as they haven't yet been tested as thoroughly as the native version.
+!   Also, operations that use a pair of Meshes (e.g. regrid weight generation) are only supported between
+!   meshes of the same type (e.g. you can regrid between two MOAB meshes, but not between a MOAB and
+!   a native mesh).
+!
+!   \begin{description}
+!   \item [moabOn]
+!         Output variable which indicates current state of MOAB.
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer :: localrc
+    integer :: intMoabOn
+
+    ! Init localrc
+    localrc = ESMF_SUCCESS
+
+    ! Get status from C
+    call c_esmc_meshgetMOAB(intMoabOn, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Translate to logical
+    moabOn=.false.
+    if (intMoabOn .eq. 1) moabOn=.true.
+    
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    end subroutine ESMF_MeshGetMOAB
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

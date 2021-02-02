@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research,
+// Copyright 2002-2021, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -429,7 +429,9 @@ void _generate_info_for_split_elems(
                                     int sdim,
                                     int num_elems,
                                     int *elemId,
-                                    int *elemType, int *elemMask,
+                                    int *elemType, 
+                                    int *orig_pos, 
+                                    int *elemMask,
                                     int areaPresent, double *elemArea,
                                     int elemCoordsPresent, double *elemCoords,
                                     int num_elemConn,
@@ -443,6 +445,7 @@ void _generate_info_for_split_elems(
                                     int  &num_elems_wsplit,
                                     int *&elemId_wsplit,
                                     int *&elemType_wsplit,
+                                    int *&orig_pos_wsplit,
                                     int *&elemMask_wsplit,
                                     double *&elemArea_wsplit,
                                     double *&elemCoords_wsplit,
@@ -461,6 +464,7 @@ void _generate_info_for_split_elems(
     if (num_elems > 0) {
       ThrowRequire(elemId != NULL);
       ThrowRequire(elemType != NULL);
+      ThrowRequire(orig_pos != NULL);
       ThrowRequire(elemConn != NULL);
     }
 
@@ -568,6 +572,7 @@ void _generate_info_for_split_elems(
       elemConn_wsplit=new int[num_elemConn+3*num_extra_elem];
       ThrowRequire(num_elems_wsplit >= 0);
       elemType_wsplit=new int[num_elems_wsplit];
+      orig_pos_wsplit=new int[num_elems_wsplit];
       elemId_wsplit=new int[num_elems_wsplit];
       if (elemMask != NULL) elemMask_wsplit=new int[num_elems_wsplit];
       if (areaPresent) elemArea_wsplit=new double[num_elems_wsplit];
@@ -652,9 +657,11 @@ void _generate_info_for_split_elems(
               // First id is same, others are from new ids
               if (first_elem) {
                 elemId_wsplit[split_elem_pos]=elemId[e];
+                orig_pos_wsplit[split_elem_pos]=orig_pos[e];
                 first_elem=false;
               } else {
                 elemId_wsplit[split_elem_pos]=curr_extra_id;
+                orig_pos_wsplit[split_elem_pos]=MBMesh::ORIG_POS_SPLITELEM;
                 split_to_orig_id[curr_extra_id]=elemId[e]; // Store map of split to original id
                 curr_extra_id++;
               }
@@ -726,6 +733,7 @@ void _generate_info_for_split_elems(
 
            } else { // just copy
             elemId_wsplit[split_elem_pos]=elemId[e];
+            orig_pos_wsplit[split_elem_pos]=orig_pos[e];
             elemType_wsplit[split_elem_pos]=elemType[e];
             if (areaPresent) elemArea_wsplit[split_elem_pos]=elemArea[e];
             if (elemCoordsPresent) {
@@ -769,6 +777,7 @@ void _add_elems_all_one_type(MBMesh *mbmp, int localPet,
                              int curr_elem_type,
                              int num_elems,   
                              int *elemId, 
+                             int *orig_pos, 
                              int *elemMask,
                              int areaPresent, double *elemArea,
                              int elemCoordsPresent, double *elemCoords,
@@ -800,7 +809,8 @@ void _add_elems_all_one_type(MBMesh *mbmp, int localPet,
     EntityHandle *node_conn= new EntityHandle[num_nodes_per_elem*num_elems]; 
 
     // Get vector of orig_nodes
-    std::vector<EntityHandle> const &orig_nodes=mbmp->get_orig_nodes();
+    std::vector<EntityHandle> orig_nodes;
+    mbmp->get_sorted_orig_nodes(orig_nodes);
 
     // Loop elements and construct connection list
     int conn_pos=0;
@@ -820,17 +830,7 @@ void _add_elems_all_one_type(MBMesh *mbmp, int localPet,
       }        
     }
 
-
-    // Allocate orig_pos list
-    ThrowRequire(num_elems >= 0);
-    int *orig_pos=new int[num_elems];
     
-    // Fill orig_pos list
-    for (int i=0; i<num_elems; i++) {
-      orig_pos[i]=i;
-    }
-    
-
     // Allocate owner list
     ThrowRequire(num_elems >= 0);
     int *owners=new int[num_elems];
@@ -873,7 +873,6 @@ void _add_elems_all_one_type(MBMesh *mbmp, int localPet,
 
     // Deallocate temp. arrays
     delete [] node_conn;
-    delete [] orig_pos;
     delete [] owners;
   }
   CATCH_MBMESH_RETHROW
@@ -889,6 +888,7 @@ void _add_elems_multiple_types(MBMesh *mbmp, int localPet,
                                int num_elems,   
                                int *elemId, 
                                int *elemType, 
+                               int *orig_pos, 
                                int *elemMask,
                                int areaPresent, double *elemArea,
                                int elemCoordsPresent, double *elemCoords,
@@ -909,6 +909,7 @@ void _add_elems_multiple_types(MBMesh *mbmp, int localPet,
     ThrowRequire(elemId != NULL);
     ThrowRequire(elemConn != NULL);
     ThrowRequire(elemType != NULL);
+    ThrowRequire(orig_pos != NULL);
     if (areaPresent) ThrowRequire(elemArea != NULL);
     if (elemCoordsPresent) ThrowRequire(elemCoords != NULL);
     ThrowRequire(elem_id_buff != NULL);
@@ -942,7 +943,8 @@ void _add_elems_multiple_types(MBMesh *mbmp, int localPet,
     EntityHandle *node_conn=(EntityHandle *)tmp_buff;
       
     // Get vector of orig_nodes
-    std::vector<EntityHandle> const &orig_nodes=mbmp->get_orig_nodes();
+    std::vector<EntityHandle> orig_nodes;
+    mbmp->get_sorted_orig_nodes(orig_nodes);
 
     // Loop elements and fill informatiton
     int pos=0;
@@ -960,7 +962,7 @@ void _add_elems_multiple_types(MBMesh *mbmp, int localPet,
         elem_owner_buff[pos]=localPet;
 
         // Fill orig pos
-        elem_orig_pos_buff[pos]=e;
+        elem_orig_pos_buff[pos]=orig_pos[e];
 
         // Advance to next pos
         pos++;
@@ -1101,7 +1103,9 @@ void _add_elems_multiple_types(MBMesh *mbmp, int localPet,
 void _add_elems_in_groups_by_type(MBMesh *mbmp, int localPet, 
                                   int num_elems,
                                   int *elemId, 
-                                  int *elemType, int *elemMask,
+                                  int *elemType,
+                                  int *orig_pos,
+                                  int *elemMask,
                                   int areaPresent, double *elemArea,
                                   int elemCoordsPresent, double *elemCoords,
                                   int *elemConn                              
@@ -1170,6 +1174,7 @@ void _add_elems_in_groups_by_type(MBMesh *mbmp, int localPet,
                               elem_types[0],
                               num_elems,   
                               elemId, 
+                              orig_pos, 
                               elemMask,
                               areaPresent, elemArea,
                               elemCoordsPresent, elemCoords,
@@ -1218,7 +1223,7 @@ void _add_elems_in_groups_by_type(MBMesh *mbmp, int localPet,
     for (int t=0; t<num_elem_types; t++) {
 
       _add_elems_multiple_types(mbmp, localPet, elem_types[t],
-                                num_elems, elemId, elemType,  
+                                num_elems, elemId, elemType, orig_pos, 
                                 elemMask, 
                                 areaPresent, elemArea,
                                 elemCoordsPresent, elemCoords,
@@ -1299,7 +1304,7 @@ void MBMesh_addelements(MBMesh **mbmpp,
     int sdim=mbmp->pdim;
 
     // Get number of orig nodes
-    int num_nodes = mbmp->get_orig_nodes().size();
+    int num_nodes = mbmp->num_orig_node();
 
     //// Error check input ////
 
@@ -1427,6 +1432,19 @@ void MBMesh_addelements(MBMesh **mbmpp,
 
      ESMCI_MESHCREATE_TRACE_EXIT("MBMesh addelems setup");
 
+     /// Add orig_pos array to track the original position of elems in input lists
+ 
+     // Allocate memory for orig_pos
+     // orig_pos is the pointer that can be switched to different memory later
+     // orig_pos_alloc always points to this memory for later deleting     
+     int *orig_pos_alloc=NULL;
+     orig_pos_alloc=new int[num_elems]; 
+     int *orig_pos=orig_pos_alloc; 
+
+     // Fill orig_pos 
+     for (int i=0; i<num_elems; i++) {
+       orig_pos[i]=i;
+     }
 
      //// See if there are any split elements, if so generate split information ////
 
@@ -1447,6 +1465,7 @@ void MBMesh_addelements(MBMesh **mbmpp,
      double *elemArea_wsplit=NULL;
      double *elemCoords_wsplit=NULL;
      int *elemMask_wsplit=NULL;
+     int *orig_pos_wsplit=NULL;
 
      if (is_split) {
 
@@ -1455,7 +1474,8 @@ void MBMesh_addelements(MBMesh **mbmpp,
        if (is_split_local) {
 
          // Get vector of orig_nodes
-         std::vector<EntityHandle> const &orig_nodes=mbmp->get_orig_nodes();
+         std::vector<EntityHandle> orig_nodes;
+         mbmp->get_sorted_orig_nodes(orig_nodes);
          
          // Allocate space for node coords
          if (orig_nodes.size() > 0) {
@@ -1472,20 +1492,21 @@ void MBMesh_addelements(MBMesh **mbmpp,
        // Generate split info 
        _generate_info_for_split_elems(// In
                                       is_split_local,pdim, orig_sdim, sdim, 
-                                      num_elems, elemId, elemType, elemMask, 
+                                      num_elems, elemId, elemType, orig_pos, elemMask,
                                       areaPresent, elemArea, elemCoordsPresent, elemCoords,
                                       num_elemConn, elemConn, nodeCoords, 
                                  
                                       // Out
                                       mbmp->max_non_split_id, mbmp->split_to_orig_id,  mbmp->split_id_to_frac,
-                                      num_elems_wsplit, elemId_wsplit, elemType_wsplit, elemMask_wsplit, 
-                                      elemArea_wsplit, elemCoords_wsplit, elemConn_wsplit);
+                                      num_elems_wsplit, elemId_wsplit, elemType_wsplit, orig_pos_wsplit, 
+                                      elemMask_wsplit, elemArea_wsplit, elemCoords_wsplit, elemConn_wsplit);
 
        // If there was a local split elem, then use the split info for creating elems below. 
        if (is_split_local) {
          num_elems=num_elems_wsplit;
          elemConn=elemConn_wsplit;
          elemType=elemType_wsplit;
+         orig_pos=orig_pos_wsplit,
          elemId=elemId_wsplit;
          elemMask=elemMask_wsplit;
          if (areaPresent) elemArea=elemArea_wsplit;
@@ -1519,7 +1540,7 @@ void MBMesh_addelements(MBMesh **mbmpp,
 
     // Add elements in groups by type, also set optional fields in elements      
     _add_elems_in_groups_by_type(mbmp, localPet, 
-                                 num_elems, elemId, elemType, elemMask,
+                                 num_elems, elemId, elemType, orig_pos, elemMask,
                                  areaPresent, elemArea, elemCoordsPresent, elemCoords,
                                  elemConn);
 
@@ -1542,10 +1563,14 @@ void MBMesh_addelements(MBMesh **mbmpp,
     delete [] elemConn_wsplit;
     delete [] elemType_wsplit;
     delete [] elemId_wsplit;
+    delete [] orig_pos_wsplit;
     if (present(elemMaskII)) delete [] elemMask_wsplit;
     if (areaPresent) delete [] elemArea_wsplit;
     if (elemCoordsPresent) delete [] elemCoords_wsplit;
   }
+
+  // Get rid of orig_pos
+  delete [] orig_pos_alloc;
 
   }
   CATCH_MBMESH_RETURN(rc);
@@ -2828,7 +2853,7 @@ void MBMesh_deserialize(MBMesh **mbmpp, char *buffer, int *offset, int *rc,
     // Adjust offset
     *offset += localsize*sizeof(int);
 
-    MBMesh_create(mbmpp, &pdim, &sdim, &coordsys, &localrc);
+    MBMesh_create(mbmpp, &pdim, &orig_sdim, &coordsys, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
       return;
 
@@ -3253,8 +3278,11 @@ void MBMesh_GetDimensions(MBMesh *meshp, int *sdim, int *pdim, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_GetDimensions()"
   try {
-    *pdim = meshp->pdim;
-    *sdim = meshp->orig_sdim;
+    if (sdim)
+      *sdim = meshp->orig_sdim;
+
+    if (pdim)
+      *pdim = meshp->pdim;
   }
   CATCH_MBMESH_RETURN(rc);
   
@@ -3268,7 +3296,7 @@ void MBMesh_GetCentroid(MBMesh *meshp, int *num_elem, double *elem_centroid, int
     // pass as ESMCI::InterArray<int> *elemCentroid, use extent[0] over num_elem
 
     char msg[256];
-    if (*num_elem != meshp->num_elem()) {
+    if (*num_elem != meshp->num_orig_elem()) {
       Throw () << "elemCentroid array must be of size " << meshp->num_elem();
     } else if (meshp->coordsys != ESMC_COORDSYS_CART) {
       Throw () << "Cannot yet return centroids for spherical coordinates.";
@@ -3286,7 +3314,7 @@ void MBMesh_GetNodeCount(MBMesh *meshp, int *nodeCount, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_GetNodeCount()"
   try {
-    *nodeCount = meshp->num_node();
+    *nodeCount = meshp->num_orig_node();
   }
   CATCH_MBMESH_RETURN(rc);
   
@@ -3297,7 +3325,7 @@ void MBMesh_GetElemCount(MBMesh *meshp, int *elemCount, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_GetElemCount()"
   try {
-    *elemCount = meshp->num_elem();
+    *elemCount = meshp->num_orig_elem();
   }
   CATCH_MBMESH_RETURN(rc);
   
@@ -3308,7 +3336,7 @@ void MBMesh_GetElemConnCount(MBMesh *meshp, int *elemConnCount, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_GetElemConnCount()"
   try {
-    *elemConnCount = meshp->num_elem_conn();
+    *elemConnCount = meshp->num_orig_elem_conn();
   }
   CATCH_MBMESH_RETURN(rc);
   
@@ -3324,16 +3352,22 @@ void MBMesh_GetElemInfoPresence(MBMesh *meshp,
 #define ESMC_METHOD "MBMesh_GetElemInfoPresence()"
   try {
     // Check if element mask is present
-    *elemMaskIsPresent=0;
-    if (meshp->has_elem_mask) *elemMaskIsPresent=1;
+    if (elemMaskIsPresent) {
+      *elemMaskIsPresent=0;
+      if (meshp->has_elem_mask) *elemMaskIsPresent=1;
+    }
   
     // Check if element area is present
-    *elemAreaIsPresent=0;
-    if (meshp->has_elem_area) *elemAreaIsPresent=1;
-  
+    if (elemAreaIsPresent) {
+      *elemAreaIsPresent=0;
+      if (meshp->has_elem_area) *elemAreaIsPresent=1;
+    }
+
     // Check if element coords are present
-    *elemCoordsIsPresent=0;
-    if (meshp->has_elem_coords) *elemCoordsIsPresent=1;
+    if (elemCoordsIsPresent) {
+      *elemCoordsIsPresent=0;
+      if (meshp->has_elem_coords) *elemCoordsIsPresent=1;
+    }
   }
   CATCH_MBMESH_RETURN(rc);
   
@@ -3364,12 +3398,12 @@ void MBMesh_GetElemCreateInfo(MBMesh *meshp,
 
     // Doesn't work with split meshes right now
     if (meshp->is_split)
-      Throw () << "Can't get elem connection count from mesh containing >4 elements.";
+      if (elemConn) 
+        Throw () << "Can't get elem connection count from mesh containing >4 elements.";
     
     ////// Get some handy information //////
-    int num_elems = meshp->num_elem();
+    int num_elems = meshp->num_orig_elem();
     int orig_sdim = meshp->orig_sdim;
-    int num_elem_conn = meshp->num_elem_conn();
 
     ////// Error check input arrays //////
 
@@ -3388,6 +3422,9 @@ void MBMesh_GetElemCreateInfo(MBMesh *meshp,
     }
 
     if (present(elemConn)) {
+      // this is to allow calling for anything other than elemConn
+      // num_elem_conn can be moved back to top after elemconn from ngons fixed
+      int num_elem_conn = meshp->num_elem_conn();
       if (elemConn->dimCount !=1)
         Throw () << "elemConn array must be 1D";
       if (elemConn->extent[0] != num_elem_conn)
@@ -3422,41 +3459,46 @@ void MBMesh_GetElemCreateInfo(MBMesh *meshp,
     }
 
     // Fill info in arrays 
+    std::vector<EntityHandle> orig_elems;
+    meshp->get_sorted_orig_elems(orig_elems);
 
     // If it was passed in, fill elementIds array
     if (present(elemIds)) {
       int *elemIds_array=elemIds->array;
-      meshp->get_gid(meshp->get_orig_elems(), elemIds_array);
+      meshp->get_gid(orig_elems, elemIds_array);
     }
 
     // If it was passed in, fill elementTypes array
     if (present(elemTypes)) {
       int *elemTypes_array=elemTypes->array;
-      meshp->get_elem_types(meshp->get_orig_elems(), elemTypes_array);
+      meshp->get_elem_types(orig_elems, elemTypes_array);
     }
 
     // If it was passed in, fill elementIds array
     if (present(elemConn)) {
+      // this is to allow calling for anything other than elemConn
+      // num_elem_conn can be moved back to top after elemconn from ngons fixed
+      int num_elem_conn = meshp->num_elem_conn();
       int *elemConn_array=elemConn->array;
-      meshp->get_elem_connectivity(meshp->get_orig_elems(), elemConn_array);
+      meshp->get_elem_connectivity(orig_elems, elemConn_array);
     }
 
     // If it was passed in, fill elementMask array
     if (present(elemMask)) {
       int *elemMask_array=elemMask->array;
-      meshp->get_elem_mask_val(meshp->get_orig_elems(), elemMask_array);
+      meshp->get_elem_mask_val(orig_elems, elemMask_array);
     }
 
     // If it was passed in, fill elementArea array
     if (present(elemArea)) {
       ESMC_R8 *elemArea_array=elemArea->array;
-      meshp->get_elem_area(meshp->get_orig_elems(), elemArea_array);
+      meshp->get_elem_area(orig_elems, elemArea_array);
     }
 
     // If it was passed in, fill elemCoords array
     if (present(elemCoords)) {
       ESMC_R8 *elemCoords_array=elemCoords->array;
-      meshp->get_elem_orig_coords(meshp->get_orig_elems(), elemCoords_array);
+      meshp->get_elem_orig_coords(orig_elems, elemCoords_array);
     }
 
   }
@@ -3489,7 +3531,7 @@ void MBMesh_SetElemCreateInfo(MBMesh *meshp,
       Throw () << "Can't set elem info for a mesh containing >4 elements.";
     
     ////// Get some handy information //////
-    int num_elems=meshp->num_elem();
+    int num_elems=meshp->num_orig_elem();
     int orig_sdim=meshp->orig_sdim;
 
     ////// Error check input arrays //////
@@ -3514,17 +3556,19 @@ void MBMesh_SetElemCreateInfo(MBMesh *meshp,
 
 
     // Fill info in arrays 
+    std::vector<EntityHandle> orig_elems;
+    meshp->get_sorted_orig_elems(orig_elems);
 
     // If it was passed in, fill elementMask array
     if (present(elemMask)) {
       int *elemMask_array=elemMask->array;
-      meshp->set_elem_mask_val(meshp->get_orig_elems(), elemMask_array);
+      meshp->set_elem_mask_val(orig_elems, elemMask_array);
     }
 
     // If it was passed in, fill elementArea array
     if (present(elemArea)) {
       ESMC_R8 *elemArea_array=elemArea->array;
-      meshp->set_elem_area(meshp->get_orig_elems(), elemArea_array);
+      meshp->set_elem_area(orig_elems, elemArea_array);
     }
   }
   CATCH_MBMESH_RETURN(rc);
@@ -3566,7 +3610,7 @@ void MBMesh_GetNodeCreateInfo(MBMesh *meshp,
     int localPet = vm->getLocalPet();
     ESMC_CHECK_PASSTHRU_THROW(localrc);
 
-    int num_nodes=meshp->num_node();
+    int num_nodes=meshp->num_orig_node();
     int orig_sdim=meshp->orig_sdim;
 
     // Error check input arrays
@@ -3606,29 +3650,31 @@ void MBMesh_GetNodeCreateInfo(MBMesh *meshp,
     }
 
     // Fill info in arrays 
+    std::vector<EntityHandle> orig_nodes;
+    meshp->get_sorted_orig_nodes(orig_nodes);
 
     // If it was passed in, fill nodeIds array
     if (present(nodeIds)) {
       int *nodeIds_array=nodeIds->array;
-      meshp->get_gid(meshp->get_orig_nodes(), nodeIds_array); 
+      meshp->get_gid(orig_nodes, nodeIds_array); 
     }
 
     // If it was passed in, fill nodeCoords array
     if (present(nodeCoords)) {
       double *nodeCoords_array=nodeCoords->array;
-      meshp->get_node_orig_coords(meshp->get_orig_nodes(), nodeCoords_array); 
+      meshp->get_node_orig_coords(orig_nodes, nodeCoords_array); 
     }
 
     // If it was passed in, fill nodeOwners array
     if (present(nodeOwners)) {
       int *nodeOwners_array=nodeOwners->array;
-      meshp->get_owners(meshp->get_orig_nodes(), nodeOwners_array); 
+      meshp->get_owners(orig_nodes, nodeOwners_array); 
     }
 
     // If it was passed in, fill nodeMask array
     if (present(nodeMask)) {
       int *nodeMask_array=nodeMask->array;
-      meshp->get_node_mask_val(meshp->get_orig_nodes(), nodeMask_array); 
+      meshp->get_node_mask_val(orig_nodes, nodeMask_array); 
     }
 
   }

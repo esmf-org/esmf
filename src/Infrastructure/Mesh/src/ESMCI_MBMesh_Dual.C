@@ -2,7 +2,7 @@
 //
 // Earth System Modeling Framework
 // Copyright 
-// 2002-2020, University Corporation for Atmospheric Research, 
+// 2002-2021, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -270,22 +270,9 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
     int pdim=src_mesh->pdim;
 
     // Create Mesh
-    MBMesh *dual_mesh=NULL;
-    ESMC_CoordSys_Flag cs = ESMC_COORDSYS_CART;
-    if (src_mesh->sdim != src_mesh->orig_sdim) cs = ESMC_COORDSYS_SPH_DEG;
-    
-    MBMesh_create(&dual_mesh, &pdim, &src_mesh->orig_sdim, &cs, &localrc);
-    ESMC_CHECK_PASSTHRU_THROW(localrc);
-
-    // set some flags that are normally set in the addnodes and addelements calls
-    dual_mesh->has_node_orig_coords = false;
-    dual_mesh->has_node_mask = false;
-    dual_mesh->has_elem_frac = false;
-    dual_mesh->has_elem_mask = false;
-    dual_mesh->has_elem_area = false;
-    dual_mesh->has_elem_coords = false;
-    dual_mesh->has_elem_orig_coords = false;
-    // is_split too?
+    MBMesh *dual_mesh = new MBMesh(src_mesh->pdim,
+                                   src_mesh->orig_sdim,
+                                   src_mesh->coordsys);
 
     // Iterate through all src elements counting the number and creating a map
 
@@ -1016,9 +1003,6 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
 #endif
 
     } // for e
-
-    // Set number of local elems
-    dual_mesh->num_elems=num_elems;
 
     // Get rid of nodes array
     delete [] nodes;

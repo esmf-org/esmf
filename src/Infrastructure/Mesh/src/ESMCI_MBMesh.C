@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research, 
+// Copyright 2002-2021, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -79,35 +79,72 @@ using namespace std;
 #define ESMF
 #define ESMC_METHOD "MBMesh::func()"
 
+
+int MBMesh::M2EType(int key, int range) {
+  return
+    (range == 0) ? throw "Key not present":
+    (MOAB2ESMFElemType[range - 1].first == key) ? 
+      MOAB2ESMFElemType[range - 1].second:
+    M2EType(key, range - 1);
+};
+
+int MBMesh::M2ETypeT(int value, int range) {
+  return
+    (range == 0) ? throw "Value not present":
+    (MOAB2ESMFElemType[range - 1].second == value) ? 
+      MOAB2ESMFElemType[range - 1].first:
+    M2ETypeT(value, range - 1);
+};
+
+int MBMesh::E2MType(int key, int range) {
+  return
+    (range == 0) ? throw "Key not present":
+    (ESMF2MOABElemType[range - 1].first == key) ? 
+      ESMF2MOABElemType[range - 1].second:
+    E2MType(key, range - 1);
+};
+
+int MBMesh::E2MTypeT(int value, int range) {
+  return
+    (range == 0) ? throw "Value not present":
+    (ESMF2MOABElemType[range - 1].second == value) ? 
+      ESMF2MOABElemType[range - 1].first:
+    E2MTypeT(value, range - 1);
+};
+
+
 // Empty mesh
-// TODO: Get rid of this once the more complete creation interfaces are used everywhere??
-#if 0
-MBMesh::MBMesh(): sdim(0),pdim(0),mesh(NULL) {
-
-} 
-#endif
-
+// EVENTUALLY MAKE THIS PRIVATE TO ENCOURAGE THE USE OF THE CONSTRUCTOR
+// THAT SETS EVEYTHING UP CORRECTLY
 MBMesh::MBMesh(): 
   pdim(0),
   sdim(0), 
   orig_sdim(0),
   coordsys(ESMC_COORDSYS_UNINIT), 
   mesh(NULL),
-  num_elems(0),
   nodes_finalized(false),
   elems_finalized(false),
   has_node_orig_coords(false),
   has_node_mask(false),
-  has_elem_frac(false),
-  has_elem_mask(false),
-  has_elem_area(false),
   has_elem_coords(false),
   has_elem_orig_coords(false), 
+  has_elem_mask(false),
+  has_elem_area(false),
+  has_elem_frac(false),
   is_split(false),
-  max_non_split_id(0) {
+  max_non_split_id(0),
+  has_ghost(false) {
 
+    _num_node = 0;
+    _num_elem = 0;
+    _num_elem_conn = 0;
+    _num_orig_node = 0;
+    _num_orig_elem = 0;
+    _num_orig_elem_conn = 0;
+    _num_owned_node = 0;
+    _num_owned_elem = 0;
+    _num_owned_elem_conn = 0;
 } 
-
 
 // From inputs
 // _pdim - parametric dimension
@@ -122,22 +159,33 @@ MBMesh::MBMesh(int _pdim, int _orig_sdim, ESMC_CoordSys_Flag _coordsys):
   orig_sdim(_orig_sdim),
   coordsys(_coordsys), 
   mesh(NULL),
-  num_elems(0),
   nodes_finalized(false),
   elems_finalized(false),
   has_node_orig_coords(false),
   has_node_mask(false),
-  has_elem_frac(false),
-  has_elem_mask(false),
-  has_elem_area(false),
   has_elem_coords(false),
   has_elem_orig_coords(false), 
+  has_elem_mask(false),
+  has_elem_area(false),
+  has_elem_frac(false),
   is_split(false),
-  max_non_split_id(0) {
+  max_non_split_id(0),
+  has_ghost(false) {
 
 
   // Moab error
   int merr;
+
+  // Init
+  _num_node = 0;
+  _num_elem = 0;
+  _num_elem_conn = 0;
+  _num_orig_node = 0;
+  _num_orig_elem = 0;
+  _num_orig_elem_conn = 0;
+  _num_owned_node = 0;
+  _num_owned_elem = 0;
+  _num_owned_elem_conn = 0;
 
   // Get cartesian dimension
   int cart_sdim;
@@ -158,46 +206,34 @@ MBMesh::MBMesh(int _pdim, int _orig_sdim, ESMC_CoordSys_Flag _coordsys):
   // Setup global id tag
   int_def_val=0;
   merr=mesh->tag_get_handle(GLOBAL_ID_TAG_NAME, 1, MB_TYPE_INTEGER, gid_tag, MB_TAG_DENSE, &int_def_val);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT, &localrc)) throw localrc;
-  }
+  ESMC_CHECK_MOAB_THROW(merr);
   
   // Setup orig_pos tag
-  int_def_val=-1; // Values < 0 indicate that enities are not from original creation
+  int_def_val=ORIG_POS_AFTERCREATE; // Default to AFTERCREATE, so that if objects
+                                    // are created later after the original mesh creation
+                                    // we know. 
   merr=mesh->tag_get_handle("orig_pos", 1, MB_TYPE_INTEGER, orig_pos_tag, MB_TAG_EXCL|MB_TAG_DENSE, &int_def_val);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT, &localrc)) throw localrc;
-  }
+  ESMC_CHECK_MOAB_THROW(merr);
   
   // Setup owner tag
   int_def_val=-1;
   merr=mesh->tag_get_handle("owner", 1, MB_TYPE_INTEGER, owner_tag, MB_TAG_EXCL|MB_TAG_DENSE, &int_def_val);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT, &localrc)) throw localrc;
-  }
+  ESMC_CHECK_MOAB_THROW(merr);
+
   
   // Setup node_orig_coord tag
   has_node_orig_coords=false;
   if (coordsys != ESMC_COORDSYS_CART) {
     double dbl_def_val[3]={-1.0, -1.0, -1.0};
     merr=mesh->tag_get_handle("node_orig_coords", orig_sdim, MB_TYPE_DOUBLE, node_orig_coords_tag, MB_TAG_EXCL|MB_TAG_DENSE, dbl_def_val);
-    if (merr != MB_SUCCESS) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                       moab::ErrorCodeStr[merr], ESMC_CONTEXT, &localrc)) throw localrc;
-    }
+    ESMC_CHECK_MOAB_THROW(merr);
     has_node_orig_coords=true;
   }
 
   // Setup elem frac
   double dbl_def_val_1=1.0;
   merr=mesh->tag_get_handle("elem_frac", 1, MB_TYPE_DOUBLE, elem_frac_tag, MB_TAG_EXCL|MB_TAG_DENSE, &dbl_def_val_1);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT, &localrc)) throw localrc;
-  }
+  ESMC_CHECK_MOAB_THROW(merr);
   has_elem_frac=true;
 
 } 
@@ -459,7 +495,107 @@ void MBMesh::get_owned_elems(std::vector<EntityHandle> &owned_elems) {
   CATCH_MBMESH_RETHROW
 }
 
-int MBMesh::get_num_elem_conn(){
+void MBMesh::get_sorted_orig_nodes(std::vector<EntityHandle> &orig_nodes) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh::get_sorted_orig_nodes()"
+  try {
+    int localrc;
+    int localPet = VM::getCurrent(&localrc)->getLocalPet();
+    ESMC_CHECK_THROW(localrc);
+
+    int merr;
+  
+    // compute original nodes
+    Range all_nodes;
+    get_all_nodes(all_nodes);
+  
+    // Setup list to hold pairs
+    std::vector<std::pair<int,EntityHandle> > pos_and_nodes;
+    pos_and_nodes.reserve(all_nodes.size());
+  
+    // Loop through nodes putting into list
+    for(Range::const_iterator it=all_nodes.begin(); it !=all_nodes.end();   it++) {
+      EntityHandle node=*it;
+  
+      // Get orig_pos
+      int orig_pos;
+      merr=mesh->tag_get_data(orig_pos_tag, &node, 1, &orig_pos);
+      ESMC_CHECK_MOAB_THROW(merr);
+  
+      // Skip ones with orig_pos<0 (they are not from original creation)
+      if (orig_pos < ORIG_POS_MIN_OUTPUT) continue;
+  
+      // Stick in list
+      pos_and_nodes.push_back(std::make_pair(orig_pos,node));
+    }
+  
+    // Put in order by original pos
+    std::sort(pos_and_nodes.begin(), pos_and_nodes.end());
+  
+    // Setup orig_nodes list
+    orig_nodes.clear();
+    orig_nodes.reserve(pos_and_nodes.size());
+  
+    // Fill array of node entities
+    for (int i = 0; i<pos_and_nodes.size(); ++i) {
+      orig_nodes.push_back(pos_and_nodes[i].second);
+    }
+  
+  }
+  CATCH_MBMESH_RETHROW
+}
+
+void MBMesh::get_sorted_orig_elems(std::vector<EntityHandle> &orig_elems) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh::get_sorted_orig_elems()"
+  try {
+    int localrc;
+    int localPet = VM::getCurrent(&localrc)->getLocalPet();
+    ESMC_CHECK_THROW(localrc);
+
+    int merr;
+
+    // compute original nodes
+    Range all_elems;
+    get_all_elems(all_elems);
+
+    // Setup list to hold pairs
+    std::vector<std::pair<int,EntityHandle> > pos_and_elems;
+    pos_and_elems.reserve(all_elems.size());
+
+    // Loop through elems putting into list
+    for(Range::const_iterator it=all_elems.begin(); it !=all_elems.end(); it++) {
+      EntityHandle elem=*it;
+
+      // Get orig_pos
+      int orig_pos;
+      merr=mesh->tag_get_data(orig_pos_tag, &elem, 1, &orig_pos);
+      ESMC_CHECK_MOAB_THROW(merr);
+
+      // Skip ones with orig_pos<0 (they are not from original creation)
+      if (orig_pos < ORIG_POS_MIN_OUTPUT) continue;
+
+      // Stick in list
+      pos_and_elems.push_back(std::make_pair(orig_pos,elem));
+    }
+
+    // Put in order by original pos
+    std::sort(pos_and_elems.begin(), pos_and_elems.end());
+
+    // Setup orig_elems list
+    orig_elems.clear();
+    orig_elems.reserve(pos_and_elems.size());
+
+    // Fill array of elem entities
+    for (int i = 0; i<pos_and_elems.size(); ++i) {
+      orig_elems.push_back(pos_and_elems[i].second);
+    }
+
+  }
+  CATCH_MBMESH_RETHROW
+}
+
+int MBMesh::get_num_elem_conn(std::vector<EntityHandle> elems){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh::num_elem_conn()"
   int elemConnCount=0;
@@ -469,9 +605,6 @@ int MBMesh::get_num_elem_conn(){
     if (this->is_split)
       Throw () << "Can't get elem connection count from mesh containing >4 elements.";
 
-    // Get all elems
-    std::vector<EntityHandle> elems;
-    get_all_elems(elems);
     std::vector<EntityHandle>::const_iterator ei = elems.begin();
     std::vector<EntityHandle>::const_iterator ee = elems.end();
 
@@ -492,47 +625,6 @@ int MBMesh::get_num_elem_conn(){
   
   return elemConnCount;
 }
-
-int MBMesh::get_num_owned_elem_conn(){
-#undef  ESMC_METHOD
-#define ESMC_METHOD "MBMesh::num_owned_elem_conn()"
-  int elemConnCount=0;
-  try {
-    int merr;
-    // Doesn't work with split meshes right now
-    if (this->is_split)
-      Throw () << "Can't get elem connection count from mesh containing >4 elements.";
-
-    int localrc;
-    int localPet = VM::getCurrent(&localrc)->getLocalPet();
-    ESMC_CHECK_THROW(localrc);
-
-    // Get owned elems
-    std::vector<EntityHandle> elems;
-    get_owned_elems(elems);
-    std::vector<EntityHandle>::const_iterator ei = elems.begin();
-    std::vector<EntityHandle>::const_iterator ee = elems.end();
-
-    // Loop summing number of nodes per element
-    for (ei; ei != ee; ++ei) {
-      EntityHandle elem=*ei;
-
-      if (localPet == get_owner(elem)) {
-        // Get topology of element
-        std::vector<EntityHandle> nodes_on_elem;
-        merr=mesh->get_connectivity(&elem, 1, nodes_on_elem);
-        ESMC_CHECK_MOAB_THROW(merr)
-  
-        // Add number of nodes for this elem to connection count
-        elemConnCount += nodes_on_elem.size();
-      }
-    }
-  }
-  CATCH_MBMESH_RETHROW
-  
-  return elemConnCount;
-}
-
 void MBMesh::get_elem_areas(double *elem_area) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh::get_elem_areas()"
@@ -621,33 +713,37 @@ void MBMesh::get_elem_types(int *elem_types) {
 #define ESMC_METHOD "MBMesh::get_elem_types()"
   try {
     int merr;
-  
-    Range elems;
-    merr=mesh->get_entities_by_dimension(0, pdim, elems);
+
+    std::vector<EntityHandle> elems;
+    get_owned_elems(elems);
     ESMC_CHECK_MOAB_THROW(merr)
-  
+
+    std::vector<EntityHandle>::const_iterator it = elems.begin();
     int i = 0;
-    for (Range::const_iterator it=elems.begin(); it != elems.end(); it++) {
+    for (it; it != elems.end(); it++) {
       EntityHandle elem=*it;
   
       // Get topology of element
-      Range nodes_on_elem;
-      merr=mesh->get_connectivity(&elem, 1, nodes_on_elem);
+      int type = mesh->type_from_handle(elem);
       ESMC_CHECK_MOAB_THROW(merr)
 
-      elem_types[i] = 0;
-      if (pdim == 2) {
-        if (nodes_on_elem.size() == 3) elem_types[i] = ESMC_MESHELEMTYPE_TRI;
-        else if (nodes_on_elem.size() == 4) elem_types[i] = ESMC_MESHELEMTYPE_QUAD;
-        else
-          Throw () << "Element type not recognized.";
-      } else if (pdim == 3) {
-        if (nodes_on_elem.size() == 4) elem_types[i] = ESMC_MESHELEMTYPE_TETRA;
-        else if (nodes_on_elem.size() == 8) elem_types[i] = ESMC_MESHELEMTYPE_HEX;       
-        else
-          Throw () << "Element type not recognized.";
-      } else
-        Throw () << "Parameteric dimension not recognized.";
+      elem_types[i] = M2EType(type);
+
+      // // NOTE: old style
+      // Range nodes_on_elem;
+      // merr=mesh->get_connectivity(&elem, 1, nodes_on_elem);
+      // if (pdim == 2) {
+      //   if (nodes_on_elem.size() == 3) elem_types[i] = ESMC_MESHELEMTYPE_TRI;
+      //   else if (nodes_on_elem.size() == 4) elem_types[i] = ESMC_MESHELEMTYPE_QUAD;
+      //   else
+      //     Throw () << "Element type not recognized.";
+      // } else if (pdim == 3) {
+      //   if (nodes_on_elem.size() == 4) elem_types[i] = ESMC_MESHELEMTYPE_TETRA;
+      //   else if (nodes_on_elem.size() == 8) elem_types[i] = ESMC_MESHELEMTYPE_HEX;       
+      //   else
+      //     Throw () << "Element type not recognized.";
+      // } else
+      //   Throw () << "Parameteric dimension not recognized.";
       i++;
     }
 
@@ -756,7 +852,9 @@ void MBMesh::get_elem_connectivity(std::vector<EntityHandle> const &elems, int *
     // std::vector<int> nodeids(node_ids, node_ids + nodes.size());
     // delete [] node_ids;
     std::vector<int> nodeids(num_node(), -1);
-    get_gid(get_orig_nodes(), nodeids.data());
+    std::vector<EntityHandle> orig_nodes;
+    get_sorted_orig_nodes(orig_nodes);
+    get_gid(orig_nodes, nodeids.data());
 
     // now iterate through the elements
     int elemConnCountTemp = 0;
@@ -957,6 +1055,43 @@ void MBMesh::set_node_mask_val(std::vector<EntityHandle> const &nodes, int *mask
 }
 
 
+void MBMesh::set_node_mask(EntityHandle eh, int mask) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh::set_node_mask()"
+
+  // Error return codes
+  int localrc;
+  int merr;
+
+  // If no masking, complain
+  if (!has_node_mask) Throw() << "node mask not present in mesh.";
+  
+  // Set data
+  merr=mesh->tag_set_data(node_mask_tag, &eh, 1, &mask);
+  ESMC_CHECK_MOAB_THROW(merr);
+}
+
+
+int MBMesh::get_node_mask(EntityHandle node) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh::get_node_mask()"
+
+  // Error return codes
+  int localrc;
+  int merr;
+  
+  // If no masking, then error
+  if (!has_node_mask) Throw() << "node mask not present in mesh.";
+
+  // Get mask
+  int mask;
+  merr=mesh->tag_get_data(node_mask_tag, &node, 1, &mask);
+  ESMC_CHECK_MOAB_THROW(merr);
+
+  // Output information
+  return mask;
+}
+
 int MBMesh::get_node_mask_val(EntityHandle node) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh::get_node_mask_val()"
@@ -1137,9 +1272,6 @@ EntityHandle MBMesh::add_elem(EntityType elem_type, int num_nodes, EntityHandle 
   // Set Owner
   merr=mesh->tag_set_data(owner_tag, &new_elem, 1, &owner);
   ESMC_CHECK_MOAB_THROW(merr);
-  
-  // Increment number of verts
-  num_elems++;
 
   // Output new vertex/node
   return new_elem;
@@ -1230,9 +1362,6 @@ void MBMesh::add_elems(int num_new_elems,  // The number of elems to add
   // Set Owners
   merr=mesh->tag_set_data(owner_tag, added_elems, owners);
   ESMC_CHECK_MOAB_THROW(merr);
-  
-  // Increment number of elems
-  num_elems += num_new_elems;
 }
 
 
@@ -1339,6 +1468,45 @@ void MBMesh::setup_elem_mask() {
   // Turn on masking
   has_elem_mask=true;
 }
+
+
+void MBMesh::set_elem_mask(EntityHandle eh, int mask) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh::set_elem_mask()"
+
+  // Error return codes
+  int localrc;
+  int merr;
+
+  // If no masking, complain
+  if (!has_elem_mask) Throw() << "elem mask not present in mesh.";
+  
+  // Set data
+  merr=mesh->tag_set_data(elem_mask_tag, &eh, 1, &mask);
+  ESMC_CHECK_MOAB_THROW(merr);
+}
+
+
+int MBMesh::get_elem_mask(EntityHandle eh) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh::get_elem_mask()"
+
+  // Error return codes
+  int localrc;
+  int merr;
+  
+  // If no masking, then error
+  if (!has_elem_mask) Throw() << "element mask not present in mesh.";
+
+  // Get mask
+  int mask;
+  merr=mesh->tag_get_data(elem_mask_tag, &eh, 1, &mask);
+  ESMC_CHECK_MOAB_THROW(merr);
+
+  // Output information
+  return mask;
+}
+
 
 void MBMesh::set_elem_mask_val(EntityHandle eh, int mask_val) {
 #undef  ESMC_METHOD
@@ -2266,52 +2434,22 @@ void MBMesh::finalize_nodes() {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh::finalize_nodes()"
   try {
-    int merr;
+    //RLO: we had considered separate calls for the counts, however it
+    //     saves nothing in time, and very little in overall memory
   
-    // 1. compute original nodes
-    // RLO: We already save the tag, so why not compute as needed?
-    Range all_nodes;
-    get_all_nodes(all_nodes);
-  
-    // Setup list to hold pairs
-    std::vector<std::pair<int,EntityHandle> > pos_and_nodes;
-    pos_and_nodes.reserve(all_nodes.size());
-  
-    // Loop through nodes putting into list
-    for(Range::const_iterator it=all_nodes.begin(); it !=all_nodes.end();   it++) {
-      EntityHandle node=*it;
-  
-      // Get orig_pos
-      int orig_pos;
-      merr=mesh->tag_get_data(orig_pos_tag, &node, 1, &orig_pos);
-      ESMC_CHECK_MOAB_THROW(merr);
-  
-      // Skip ones with orig_pos<0 (they are not from original creation)
-      if (orig_pos < 0) continue;
-  
-      // Stick in list
-      pos_and_nodes.push_back(std::make_pair(orig_pos,node));
-    }
-  
-    // Put in order by original pos
-    std::sort(pos_and_nodes.begin(), pos_and_nodes.end());
-  
-    // Setup orig_nodes list
-    orig_nodes.clear();
-    orig_nodes.reserve(pos_and_nodes.size());
-  
-    // Fill array of node entities
-    for (int i = 0; i<pos_and_nodes.size(); ++i) {
-      orig_nodes.push_back(pos_and_nodes[i].second);
-    }
-  
-    // 2. set private info
+    vector<EntityHandle> all_nodes;
+    get_all_nodes(all_nodes);  
+
+    vector<EntityHandle> orig_nodes;
+    get_sorted_orig_nodes(orig_nodes);
+    
     vector<EntityHandle> owned_nodes;
     get_owned_nodes(owned_nodes);
   
     _num_node = all_nodes.size();
+    _num_orig_node = orig_nodes.size();
     _num_owned_node = owned_nodes.size();
-  
+
     // Mark nodes as finalized, so things can be used
     nodes_finalized=true;
 
@@ -2325,55 +2463,28 @@ void MBMesh::finalize_elems() {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh::finalize_elems()"
   try {
-    int merr;
+    //RLO: we had considered separate calls for the counts, however it
+    //     saves nothing in time, and very little in overall memory, plus
+    //     the vectors are useful for getting the connectivity counts
 
-    // 1. compute original nodes
-    // RLO: We already save the tag, so why not compute as needed?
-    Range all_elems;
+    vector<EntityHandle> all_elems;
     get_all_elems(all_elems);
 
-    // Setup list to hold pairs
-    std::vector<std::pair<int,EntityHandle> > pos_and_elems;
-    pos_and_elems.reserve(all_elems.size());
+    vector<EntityHandle> orig_elems;
+    get_sorted_orig_elems(orig_elems);
 
-    // Loop through elems putting into list
-    for(Range::const_iterator it=all_elems.begin(); it !=all_elems.end(); it++) {
-      EntityHandle elem=*it;
-
-      // Get orig_pos
-      int orig_pos;
-      merr=mesh->tag_get_data(orig_pos_tag, &elem, 1, &orig_pos);
-      ESMC_CHECK_MOAB_THROW(merr);
-
-      // Skip ones with orig_pos<0 (they are not from original creation)
-      if (orig_pos < 0) continue;
-
-      // Stick in list
-      pos_and_elems.push_back(std::make_pair(orig_pos,elem));
-    }
-
-    // Put in order by original pos
-    std::sort(pos_and_elems.begin(), pos_and_elems.end());
-
-    // Setup orig_elems list
-    orig_elems.clear();
-    orig_elems.reserve(pos_and_elems.size());
-
-    // Fill array of elem entities
-    for (int i = 0; i<pos_and_elems.size(); ++i) {
-      orig_elems.push_back(pos_and_elems[i].second);
-    }
-
-    // 2. set private info
     vector<EntityHandle> owned_elems;
     get_owned_elems(owned_elems);
 
     _num_elem = all_elems.size();
     _num_owned_elem = owned_elems.size();
+    _num_orig_elem = orig_elems.size();
+    
     // NOTE: cannot get connectivity of ngons
     if (!this->is_split) {
-      _num_elem_conn = get_num_elem_conn();
-      _num_owned_elem_conn = get_num_owned_elem_conn();
+      _num_elem_conn = get_num_elem_conn(all_elems);
+      _num_owned_elem_conn = get_num_elem_conn(owned_elems);
+      _num_orig_elem_conn = get_num_elem_conn(orig_elems);
     }
 
     // Mark elems as finalized, so things can be used
@@ -2389,6 +2500,10 @@ void MBMesh::CreateGhost() {
   try {
     int localrc, merr;
 
+    // If already ghosted, leave
+    if (has_ghost) return;
+
+    // Get VM info
     ESMC_VM vm;
     vm = ESMC_VMGetCurrent(&localrc);
     ESMC_CHECK_THROW(localrc);
@@ -2422,7 +2537,8 @@ void MBMesh::CreateGhost() {
     vector<Tag> elem_tags;
     
     node_tags.push_back(this->gid_tag);
-    node_tags.push_back(this->orig_pos_tag);
+    // Don't comm. orig_pos because it's different each PET 
+    // node_tags.push_back(this->orig_pos_tag); 
     node_tags.push_back(this->owner_tag);
     if (this->has_node_orig_coords) node_tags.push_back(this->node_orig_coords_tag);
     if (this->has_node_mask) {
@@ -2431,7 +2547,8 @@ void MBMesh::CreateGhost() {
     }
     
     elem_tags.push_back(this->gid_tag);
-    elem_tags.push_back(this->orig_pos_tag);
+    // Don't comm. orig_pos because it's different each PET 
+    // elem_tags.push_back(this->orig_pos_tag);
     elem_tags.push_back(this->owner_tag);
     if (this->has_elem_frac) elem_tags.push_back(this->elem_frac_tag);
     if (this->has_elem_mask) {
@@ -2452,8 +2569,11 @@ void MBMesh::CreateGhost() {
     merr = pcomm->exchange_tags(elem_tags, elem_tags, elems);
     ESMC_CHECK_MOAB_THROW(merr);
 
-    // Get the indexed pcomm object from the interface
+    // Get rid of the pcomm object now that we're done with it
     delete pcomm;
+
+    // Mark as ghosted
+    has_ghost=true;
 
   }
   CATCH_MBMESH_RETHROW

@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research,
+// Copyright 2002-2021, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -319,7 +319,7 @@ MeshCap *MeshCap::GridToMesh(const Grid &grid_, int staggerLoc,
 
   // Create mesh depending on the type
   Mesh *mesh;
-  MBMesh *mbmesh;
+  MBMesh *mbmesh = nullptr;
   if (_is_esmf_mesh) {
     ESMCI_GridToMesh(grid_, staggerLoc,
                      arrays,
@@ -364,7 +364,7 @@ MeshCap *MeshCap::GridToMeshCell(const Grid &grid_,
 
   // Create mesh depending on the type
   Mesh *mesh;
-  MBMesh *mbmesh;
+  MBMesh *mbmesh = nullptr;
   if (_is_esmf_mesh) {
     ESMCI_GridToMeshCell(grid_,
                          arrays,
@@ -640,7 +640,7 @@ MeshCap *MeshCap::meshcreate(int *pdim, int *sdim,
 
   // Create mesh depending on the type
   Mesh *mesh;
-  MBMesh *mbmesh;
+  MBMesh *mbmesh = nullptr;
   if (_is_esmf_mesh) {
     ESMCI_MESHCREATE_TRACE_ENTER("NativeMesh create");
     ESMCI_meshcreate(&mesh,
@@ -1231,7 +1231,7 @@ void MeshCap::meshdeserialize(char *buffer, int *offset,
 #define ESMC_METHOD "MeshCap::meshdeserialize()"
 
   Mesh *mesh;
-  MBMesh *mbmesh;
+  MBMesh *mbmesh = nullptr;
   int localrc;
   int local_is_esmf_mesh = 1;
 
@@ -1617,7 +1617,7 @@ MeshCap *MeshCap::meshcreateredistelems(MeshCap **src_meshpp, int *num_elem_gids
 
   // Call into func. depending on mesh type
   Mesh *mesh = NULL;
-  MBMesh *mbmesh = NULL;
+  MBMesh *mbmesh = nullptr;
 
   if (is_esmf_mesh) {
     ESMCI_MESHREDIST_TRACE_ENTER("NativeMesh redist (elements)");
@@ -1666,7 +1666,7 @@ MeshCap *MeshCap::meshcreateredistnodes(MeshCap **src_meshpp,int *num_node_gids,
 
   // Call into func. depending on mesh type
   Mesh *mesh = NULL;
-  MBMesh *mbmesh = NULL;
+  MBMesh *mbmesh = nullptr;
 
   if (is_esmf_mesh) {
     ESMCI_MESHREDIST_TRACE_ENTER("NativeMesh redist (nodes)");
@@ -1715,7 +1715,7 @@ MeshCap *MeshCap::meshcreateredist(MeshCap **src_meshpp, int *num_node_gids, int
 
   // Call into func. depending on mesh type
   Mesh *mesh = NULL;
-  MBMesh *mbmesh = NULL;
+  MBMesh *mbmesh = nullptr;
 
   if (is_esmf_mesh) {
     ESMCI_MESHREDIST_TRACE_ENTER("NativeMesh redist");
@@ -1860,7 +1860,7 @@ MeshCap *MeshCap::meshcreatedual(MeshCap **src_meshpp, int *rc) {
 
   // Call into func. depending on mesh type
   Mesh *mesh;
-  MBMesh *mbmesh;
+  MBMesh *mbmesh = nullptr;
   // Call into func. depending on mesh type
   if (is_esmf_mesh) {
     ESMCI_DUALMESH_TRACE_ENTER("NativeMesh Dual Mesh Generation");
@@ -1995,7 +1995,7 @@ MeshCap *MeshCap::meshcreate_easy_elems(int *pdim,
 
   // Create mesh depending on the type
   Mesh *mesh;
-  MBMesh *mbmesh;
+  MBMesh *mbmesh = nullptr;
   if (_is_esmf_mesh) {
     ESMCI_meshcreate_easy_elems(&mesh,
                                 pdim, sdim,
@@ -2058,7 +2058,7 @@ MeshCap *MeshCap::meshcreate_from_grid(Grid **gridpp,
 
   // Create mesh depending on the type
   Mesh *mesh;
-  MBMesh *mbmesh;
+  MBMesh *mbmesh = nullptr;
   if (_is_esmf_mesh) {
     ESMCI_GridToMeshCell(grid,
                          empty_arrays,

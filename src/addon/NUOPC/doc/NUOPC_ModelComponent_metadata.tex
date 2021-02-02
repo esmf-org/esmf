@@ -46,10 +46,13 @@ is {\em not} part of the Attribute name!
                        {\bf bit 6}: Top level profiling of {\em Finalize} phases.\newline
                        {\bf bit 7}: Specialization point profiling of {\em Finalize} phases.\newline
                        {\bf bit 8}: Additional profiling of internals of {\em Finalize} phases.\newline
+                       {\bf bit 9}: Leading barrier for {\em Initialize} phases.\newline
+                       {\bf bit 10}: Leading barrier for {\em Run} phases.\newline
+                       {\bf bit 11}: Leading barrier for {\em Finalize} phases.\newline
                      & 0, 1, 2, ... \newline
                        "off" = 0 (default), \newline
                        "low": Top level profiling. \newline
-                       "high": Top level and specialization point profiling. \newline
+                       "high": Top level, specialization point profiling, and additional profiling of internals. \newline
                        "max": All lower 16 bits set.\\ \hline
      {\tt Diagnostic} & String value, converted into an integer, and interpreted as a bit field. The lower 16 bits (0-15) are reserved to control diagnostic of the generic component implementation. Higher bits are available for user level diagnostic control. \newline
                        {\bf bit 0}: Dump fields of the importState on entering {\em Initialize} phases.\newline

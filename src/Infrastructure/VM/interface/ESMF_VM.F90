@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research, 
+! Copyright 2002-2021, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -470,6 +470,7 @@ module ESMF_VMMod
   public ESMF_VMPlanGetThis
   public ESMF_VMPlanSetThis
   public ESMF_VMPlanSetMinStackSize
+  public ESMF_VMPlanSetOpenMP
   public ESMF_VMPlanMaxPEs
   public ESMF_VMPlanMaxThreads
   public ESMF_VMPlanMinThreads
@@ -3438,7 +3439,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_VMBarrier(vm, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),  intent(in)            :: vm
+    type(ESMF_VM),  intent(in),  optional :: vm
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,        intent(out), optional :: rc
 !
@@ -3453,8 +3454,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   The arguments are:
 !   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
+!   \item[{[vm]}] 
+!        {\tt ESMF\_VM} object. Default use current VM.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -3462,6 +3463,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
+    type(ESMF_VM)           :: currentVM
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -3471,9 +3473,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
     ! Call into the C++ interface.
-    call c_ESMC_VMBarrier(vm, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present(vm)) then
+      call c_ESMC_VMBarrier(vm, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      call ESMF_VMGetCurrent(currentVM, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      call c_ESMC_VMBarrier(currentVM, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -9810,6 +9821,60 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMPlanSetMinStackSize
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMPlanSetOpenMP()"
+!BOPI
+! !IROUTINE: ESMF_VMPlanSetOpenMP - Set OpenMP handling
+
+! !INTERFACE:
+  subroutine ESMF_VMPlanSetOpenMP(vmplan, openMpHandling, openMpNumThreads, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VMPlan), intent(inout)         :: vmplan
+    integer,           intent(in),  optional :: openMpHandling
+    integer,           intent(in),  optional :: openMpNumThreads
+    integer,           intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Set the minimum stack size.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vmplan] 
+!        VMPlan
+!   \item[{[openMpHandling]}] 
+!        OpenMP handling mode. Defaults to pinning.
+!   \item[{[openMpNumThreads]}] 
+!        Number of OpenMP threads under the local PET. Defaults to local peCount.
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMPlanGetInit, vmplan, rc)
+
+    ! Call into the C++ interface.
+    call c_ESMC_VMPlanSetOpenMP(vmplan, openMpHandling, openMpNumThreads, &
+      localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMPlanSetOpenMP
 !------------------------------------------------------------------------------
 
 

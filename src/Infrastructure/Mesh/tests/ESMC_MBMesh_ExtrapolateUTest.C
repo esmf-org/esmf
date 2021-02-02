@@ -2,7 +2,7 @@
 //==============================================================================
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research,
+// Copyright 2002-2021, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -21,7 +21,7 @@
 // ESMF Test header
 #include "ESMC_Test.h"
 
-#include "ESMC_MBMeshTestGenPL.C"
+#include "ESMC_MeshTestGenPL.C"
 
 // other headers
 #include "ESMCI_MBMesh_Extrapolation.h"

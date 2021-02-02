@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research, 
+! Copyright 2002-2021, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -2712,7 +2712,7 @@ module NUOPC_Comp
         return  ! bail out
       profiling = ESMF_UtilString2Int(valueString, &
         specialStringList=(/"max ", "high", "low ", "off "/), &
-        specialValueList=(/65535, 219, 73, 0/), &
+        specialValueList=(/65535, 511, 73, 0/), &
         rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(lName)//":"//FILENAME, rcToReturn=rc)) &
@@ -2807,7 +2807,7 @@ module NUOPC_Comp
         return  ! bail out
       profiling = ESMF_UtilString2Int(valueString, &
         specialStringList=(/"max ", "high", "low ", "off "/), &
-        specialValueList=(/65535, 219, 73, 0/), &
+        specialValueList=(/65535, 511, 73, 0/), &
         rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(lName)//":"//FILENAME, rcToReturn=rc)) &

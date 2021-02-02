@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research, 
+// Copyright 2002-2021, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -548,7 +548,10 @@ class VMKPlan{
     int *lpid_mpi_g_part_map;
     MPI_Comm mpi_c_part;
     int commfreeflag;   // flag to indicate which PETs must free MPIcommunicator
-    
+    // OpenMP handling
+    int openmphandling; // 0-none, 1-setnumthreads, 2-initialize, 3-pinaffinity
+    int openmpnumthreads; // -1 default: local peCount
+
   public:
     VMKPlan();
       // native constructor (sets communication preferences to defaults)

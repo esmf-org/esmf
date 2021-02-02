@@ -164,6 +164,62 @@ jobs:
       - run:
           name: Push to github.io
           command: bash esmf/.circleci/sh/doc-push.sh
+          
+  build-api-change:
+    docker:
+      - image: cimg/base:2020.01
+    steps:
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          name: Checkout Code (ESCOMP-Containers)
+          command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
+      - run:
+          name: Checkout Code (ESMF)
+          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git
+      - run:
+          name: Docker Build esmf-doc-base
+          command: docker build -t "esmf/esmf-doc-base" --file "ESCOMP-Containers/ESMF/doc/esmf-doc-base/Dockerfile" --build-arg DOCKER_NAMESPACE="esmf" .
+      - run:
+          name: Set and echo env variable
+          command: |
+            echo $ESMF_DIR
+            echo $TAG1
+            echo $TAG2
+          environment:
+            ESMF_DIR: "esmf/"
+            TAG1: "develop"
+            TAG2: "ESMF_8_0_1"
+      - run:
+          name: Clone ESMF-Test-scripts 
+          command: git clone https://github.com/esmf-org/esmf-test-scripts.git
+      - run:
+          name: Run API Change script
+          command: |
+            cp -r esmf-test-scripts/API_change_script/* .
+            chmod +x  harvestAPIsFromRefDoc.py
+            ./_harvestAPIs
+      - run:
+          name: Clone ESMF-Test-artifacts
+          command: git clone https://github.com/esmf-org/esmf-test-artifacts.git
+      - run:
+          name: Copy .out file
+          command: |
+            set -Eeuxo pipefail
+            git config --global user.email "himanshupillai@gmail.com"
+            git config --global user.name "him-28"
+            cd esmf-test-artifacts
+            mkdir api_change
+            cd api_change
+            cp -r ../../APIs*.out .
+            cp -r ../../diff*.out .
+            cd ..
+      - run:
+          name: Push update to artifacts
+          command: |
+            git add .
+            git commit -a -m " API change log pushed in artifacts "
+            git push origin master
 
   esmpy-test:
     parameters:
@@ -380,6 +436,8 @@ workflows:
               only:
                 - develop
       - build-esmpy-docs
+      - build-api-change:
+          type: approval
       - publish-esmpy-docs:
           requires:
             - build-esmpy-docs

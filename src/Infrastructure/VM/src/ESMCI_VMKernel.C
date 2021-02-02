@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research, 
+// Copyright 2002-2021, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -14,6 +14,7 @@
 #include "ESMCI_VM.h"
 
 #define VM_MEMLOG_off
+#define VM_COMMQUEUELOG_off
 #define VM_EPOCHLOG_off
 #define VM_SSISHMLOG_off
 
@@ -696,6 +697,8 @@ struct SpawnArg{
   MPI_Comm mpi_c_ssi;
   int mpi_c_freeflag;
   int nothreadsflag;
+  int openmphandling;
+  int openmpnumthreads;
   // shared memory variables
   esmf_pthread_mutex_t *pth_mutex2;
   esmf_pthread_mutex_t *pth_mutex;
@@ -800,14 +803,25 @@ void VMK::construct(void *ssarg){
     CPU_SET(ssipe[cid[mypet][i]], &cpuset);
   pthread_setaffinity_np(mypthid, sizeof(cpu_set_t), &cpuset);
 #ifndef ESMF_NO_OPENMP
-  // Set the number of OpenMP threads and pin each thread to a specific PE
-  omp_set_num_threads(ncpet[mypet]);
+  // OpenMP handling according to sarg->openmphandling
+  if (sarg->openmphandling>0){
+    // Set the number of OpenMP threads
+    int numthreads = ncpet[mypet]; // default
+    if (sarg->openmpnumthreads>=0)
+      numthreads = sarg->openmpnumthreads;
+    omp_set_num_threads(numthreads);
+    if (sarg->openmphandling>1){
 #pragma omp parallel
-  {
-    cpu_set_t cpuset;
-    CPU_ZERO(&cpuset);
-    CPU_SET(ssipe[cid[mypet][omp_get_thread_num()]], &cpuset);
-    pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
+      {
+        cpu_set_t cpuset;
+        CPU_ZERO(&cpuset);
+        int cIndex = omp_get_thread_num()%ncpet[mypet];
+        CPU_SET(ssipe[cid[mypet][cIndex]], &cpuset);
+        if (sarg->openmphandling>2){
+          pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
+        }
+      }
+    }
   }
 #endif
 #endif
@@ -1703,6 +1717,16 @@ void *VMK::startup(class VMKPlan *vmp,
           MPI_Comm_split_type(vmp->mpi_c_part, MPI_COMM_TYPE_SHARED, 0, 
             MPI_INFO_NULL, &new_mpi_c_ssi);
           sarg[0].mpi_c_ssi = new_mpi_c_ssi;
+#ifdef VM_SSISHMLOG_on
+          {
+            std::stringstream msg;
+            int sz;
+            MPI_Comm_size(sarg[0].mpi_c_ssi, &sz);
+            msg << "VMK::startup()#" << __LINE__
+              << " created mpi_c_ssi of size=" << sz;
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+          }
+#endif
 #endif
         }else{
           // I am not the first under this lpid and must receive 
@@ -1713,6 +1737,17 @@ void *VMK::startup(class VMKPlan *vmp,
           sarg[0].mpi_c_freeflag = 0; // not responsible to free the communicat.
 #if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
           recv(&new_mpi_c_ssi, sizeof(MPI_Comm), foundfirstpet);
+#ifdef VM_SSISHMLOG_on
+          {
+            std::stringstream msg;
+            int sz;
+            MPI_Comm_size(new_mpi_c_ssi, &sz);
+            msg << "VMK::startup()#" << __LINE__
+              << " received mpi_c_ssi of size=" << sz
+              << " from PET: " << foundfirstpet;
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+          }
+#endif
 #endif
         }
       }else if (mypet == foundfirstpet){
@@ -1723,6 +1758,17 @@ void *VMK::startup(class VMKPlan *vmp,
         send(&new_mpi_c, sizeof(MPI_Comm), i);
 #if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
         send(&new_mpi_c_ssi, sizeof(MPI_Comm), i);
+#ifdef VM_SSISHMLOG_on
+        {
+          std::stringstream msg;
+          int sz;
+          MPI_Comm_size(new_mpi_c_ssi, &sz);
+          msg << "VMK::startup()#" << __LINE__
+            << " sent mpi_c_ssi of size=" << sz
+            << " to PET: " << i;
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+        }
+#endif
 #endif
       }
     }
@@ -1922,6 +1968,17 @@ void *VMK::startup(class VMKPlan *vmp,
     sarg[i].mpi_c = new_mpi_c;
 #if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
     sarg[i].mpi_c_ssi = new_mpi_c_ssi;
+#ifdef VM_SSISHMLOG_on
+    {
+      std::stringstream msg;
+      int sz;
+      MPI_Comm_size(sarg[i].mpi_c_ssi, &sz);
+      msg << "VMK::startup()#" << __LINE__
+        << " copied mpi_c_ssi of size=" << sz
+        << " into sarg[" << i << "]";
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+    }
+#endif
 #endif
     sarg[i].pth_mutex2 = new_pth_mutex2;
     sarg[i].pth_mutex = new_pth_mutex;
@@ -1954,6 +2011,8 @@ void *VMK::startup(class VMKPlan *vmp,
     // cargo
     sarg[i].cargo = cargo;
     // threading stuff
+    sarg[i].openmphandling = vmp->openmphandling;
+    sarg[i].openmpnumthreads = vmp->openmpnumthreads;
     sarg[i].nothreadsflag = vmp->nothreadflag;
     if (vmp->nothreadflag){
       // for a VM that is not thread-based the VM can already be constructed
@@ -2135,10 +2194,31 @@ void VMK::shutdown(class VMKPlan *vmp, void *arg){
 #endif
   }
   // now free up the MPI communicators that were associated with the VMK
-  if (sarg[0].mpi_c_freeflag && (sarg[0].mpi_c != MPI_COMM_NULL)){
-    MPI_Comm_free(&(sarg[0].mpi_c));
+  if (sarg[0].mpi_c_freeflag){
+    if (sarg[0].mpi_c != MPI_COMM_NULL){
+      MPI_Comm_free(&(sarg[0].mpi_c));
+    }
 #if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
-    MPI_Comm_free(&(sarg[0].mpi_c_ssi));
+    if (sarg[0].mpi_c_ssi != MPI_COMM_NULL){
+#ifdef VM_SSISHMLOG_on
+      {
+        std::stringstream msg;
+        if (sarg[0].mpi_c_ssi != MPI_COMM_NULL){
+          int sz;
+          MPI_Comm_size(sarg[0].mpi_c_ssi, &sz);
+          msg << "VMK::shutdown()#" << __LINE__
+            << " about to call MPI_Comm_free() on mpi_c_ssi of size=" << sz;
+        }else{
+          msg << "VMK::shutdown()#" << __LINE__
+            << " about to call MPI_Comm_free() on mpi_c_ssi == MPI_COMM_NULL";
+          
+        }
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+      }
+      MPI_Barrier(sarg[0].mpi_c_ssi);
+#endif
+      MPI_Comm_free(&(sarg[0].mpi_c_ssi));
+    }
 #endif
   }
   // done holding info in SpawnArg array -> delete now
@@ -2333,6 +2413,8 @@ VMKPlan::VMKPlan(){
   // native constructor
   nothreadflag = 1; // by default use non-threaded VMs
   parentVMflag = 0; // default is to create a new VM for every child
+  openmphandling = 3; // default to pin OpenMP threads
+  openmpnumthreads = -1; // default to local peCount
   // invalidate the arrays
   spawnflag = NULL;
   contribute = NULL;
@@ -2489,6 +2571,8 @@ void VMKPlan::vmkplan_maxthreads(VMK &vm, int max, int *plist,
   vmkplan_garbage();
   // now set stuff up...
   nothreadflag = 0; // this plan will allow ESMF-threading
+  openmphandling = 3; // default to pin OpenMP threads
+  openmpnumthreads = -1; // default to local peCount
   npets = vm.npets;
   if (nplist != 0)
     this->nplist = nplist;
@@ -2627,6 +2711,8 @@ void VMKPlan::vmkplan_minthreads(VMK &vm, int max, int *plist,
   vmkplan_garbage();
   // now set stuff up...
   nothreadflag = 0; // this plan will allow ESMF-threading
+  openmphandling = 3; // default to pin OpenMP threads
+  openmpnumthreads = -1; // default to local peCount
   npets = vm.npets;
   if (nplist != 0)
     this->nplist = nplist;
@@ -2737,6 +2823,8 @@ void VMKPlan::vmkplan_maxcores(VMK &vm, int max, int *plist,
   vmkplan_garbage();
   // now set stuff up...
   nothreadflag = 0; // this plan will allow ESMF-threading
+  openmphandling = 3; // default to pin OpenMP threads
+  openmpnumthreads = -1; // default to local peCount
   npets = vm.npets;
   if (nplist != 0)
     this->nplist = nplist;
@@ -2844,6 +2932,8 @@ void VMKPlan::vmkplan_print(){
   printf("pref_intra_process:\t%d\n", pref_intra_process);
   printf("pref_intra_ssi:\t%d\n", pref_intra_ssi);
   printf("pref_inter_ssi:\t%d\n", pref_inter_ssi);
+  printf("openmphandling   = %d\n", openmphandling);
+  printf("openmpnumthreads = %d\n", openmpnumthreads);
   printf("--- vmkplan_print end ---\n");
 }
 
@@ -3140,25 +3230,29 @@ int VMK::commwait(commhandle **ch, status *status, int nanopause){
       printf("VMK: only MPI non-blocking implemented\n");
       localrc = VMK_ERROR;
     }
-    // if this *ch is in the request queue x-> unlink and delete
-    if (commqueueitem_unlink(*ch)){ 
-      delete *ch; // delete the container commhandle that was linked
-      *ch = NULL; // ensure this container will not point to anything
-    }
+  }
+  // if this *ch is in the request queue x-> unlink and delete
+  if (commqueueitem_unlink(*ch)){ 
+    delete *ch; // delete the container commhandle that was linked
+    *ch = NULL; // ensure this container will not point to anything
   }
   return localrc;
 }
 
 
 void VMK::commqueuewait(){
+#ifdef VM_COMMQUEUELOG_on
+    std::stringstream msg;
+    msg << "commqueue:" << __LINE__ << " VMK::commqueuewait() nhandles=" <<
+      nhandles;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+#endif
   int n=nhandles;
   commhandle *fh;
   for (int i=0; i<n; i++){
-//    printf("VMK::commqueuewait: %d\n", nhandles);
     fh = firsthandle;
     commwait(&fh);
   }
-//  printf("VMK::commqueuewait: %d\n", nhandles);
 }
 
 
@@ -3308,10 +3402,15 @@ void VMK::sendBuffer::clear(){
   if (mpireq != MPI_REQUEST_NULL){
 #ifdef VM_EPOCHLOG_on
     std::stringstream msg;
-    msg << "epochBuffer:" << __LINE__ << " actually posting MPI_Wait()";
+    msg << "epochBuffer:" << __LINE__ << " posting MPI_Wait()";
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
     MPI_Wait(&mpireq, MPI_STATUS_IGNORE);
+#ifdef VM_EPOCHLOG_on
+    msg.str(""); // clear
+    msg << "epochBuffer:" << __LINE__ << " returned from MPI_Wait()";
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+#endif
   }
 #ifdef USE_STRSTREAM
   stream.freeze(false); // unfreeze the persistent buffer for deallocation
@@ -3529,6 +3628,11 @@ int VMK::send(const void *message, int size, int dest, commhandle **ch,
       append(sm->stream, size);
       append(sm->stream, tag);
       sm->stream.write((const char*)message, size);
+#ifdef VM_EPOCHLOG_on
+      msg.str(""); // clear
+      msg << "epochBuffer:" << __LINE__ << " non-blocking send write complete";
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+#endif
     }else{
       (*ch)->nelements=1;
       (*ch)->type=1;          // MPI

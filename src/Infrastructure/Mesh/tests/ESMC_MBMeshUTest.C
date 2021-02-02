@@ -1,7 +1,7 @@
 //==============================================================================
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research,
+// Copyright 2002-2021, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -23,7 +23,7 @@
 #if defined ESMF_MOAB
 #include "ESMCI_MBMesh.h"
 #include "ESMCI_MBMesh_Glue.h"
-#include "ESMC_MBMeshTestGen.C"
+#include "ESMC_MBTGen.C"
 #endif
 
 #include <iostream>
@@ -33,11 +33,6 @@
 #include <map>
 #include <functional>
 #include <algorithm> //find_if
-
-#if !defined (M_PI)
-// for Windows...
-#define M_PI 3.14159265358979323846
-#endif
 
 struct FindPair {
     FindPair (std::string first, std::string second)
@@ -52,6 +47,8 @@ struct FindPair {
 };
 
 int main(int argc, char *argv[]) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MBMeshUTest::main()"
 
   std::string failMsg = "FAIL";
   int result = 0;
@@ -70,7 +67,7 @@ int main(int argc, char *argv[]) {
   rc=ESMC_VMGet(vm, &localPet, &petCount, (int *)NULL, (MPI_Comm *)NULL,
                 (int *)NULL, (int *)NULL);
 
-  // these are bound to MBMeshTest in constructor, must match!
+  // these are bound to MBT in constructor, must match!
   std::vector<std::string> test_apis;
     test_apis.push_back("createget");
     test_apis.push_back("dual");
@@ -81,7 +78,9 @@ int main(int argc, char *argv[]) {
     test_apis.push_back("to_pointlist_elem");
     test_apis.push_back("to_pointlist_node");
     test_apis.push_back("write_vtk");
+    // test_apis.push_back("mbtypes");
 
+  // these are bound to MBTGen in constructor, must match!
   std::vector<std::string> test_meshes;
     test_meshes.push_back("quad_2d_cart");
     test_meshes.push_back("quad_2d_sph");
@@ -94,26 +93,8 @@ int main(int argc, char *argv[]) {
     test_meshes.push_back("ngon_2d_cart");
     test_meshes.push_back("ngon_2d_sph");
 
-#if defined ESMF_MOAB
-  std::map<std::string, std::function<MBMeshTest*(int&)>>  mesh_map = {\
-    {"quad_2d_cart", quad_2d_cart},
-    {"quad_2d_sph", quad_2d_sph},
-    {"tri_2d_cart", tri_2d_cart},
-    {"tri_2d_sph", tri_2d_sph},
-    {"hex_3d_cart", hex_3d_cart},
-    {"hex_3d_sph", hex_3d_sph},
-    {"mix_2d_cart", mix_2d_cart},
-    {"mix_2d_sph", mix_2d_sph},
-    {"ngon_2d_cart", ngon_2d_cart},
-    {"ngon_2d_sph", ngon_2d_sph}
-  };
-#endif
-
   // skip the following tests
   std::vector<std::pair<std::string, std::string>> skip_test = {\
-    // don't yet return elem_count from ngons
-    {"createget", "ngon_2d_cart"},
-    {"createget", "ngon_2d_sph"},
     // dual not implemented in 3d
     {"dual", "hex_3d_cart"},
     {"dual", "hex_3d_sph"},
@@ -122,132 +103,139 @@ int main(int argc, char *argv[]) {
     {"redist_node", "tri_2d_sph"},
   };
 
+  MBTGen *generate = new MBTGen();
+
   for (const auto api: test_apis) {
     for (const auto mesh: test_meshes) {    
       rc = ESMF_FAILURE;
       
+      std::string name = "MBMesh - " + api + " - " + mesh;
+
       auto skip_itr = std::find_if(skip_test.begin(), skip_test.end(), 
                                    FindPair(api, mesh));
 
       // don't run cases that hang
       if (skip_itr != skip_test.end()) {
+        name = "SKIP - " + name;
         rc = ESMF_SUCCESS;
       } else {
 #if defined ESMF_MOAB
         try {
-          MBMeshTest *test = mesh_map[mesh](localrc);
+          MBT *test = generate->mesh_map[mesh](localrc);
           
+          test->name = name;
           // test->verbosity = 3;
           // test->tol = 1.e-15;
-          
+          // test->print();
+
           if (localrc == ESMF_SUCCESS) localrc = test->build();
           if (localrc == ESMF_SUCCESS) rc = test->function_map[api]();
           
           delete test;
         }
-        CATCH_MBMESHTEST_FAIL(&rc)
+        CATCH_MBT_FAIL(&rc)
 #else
         rc = ESMF_SUCCESS;
 #endif
       }
 
-      std::string name = "MBMesh - " + api + " - " + mesh;
       ESMC_Test(rc==ESMF_SUCCESS, name.c_str(), failMsg.c_str(), 
                 &result, __FILE__, __LINE__, 0);
     }
   }
+  
+  delete generate;
 
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest  10
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest  20
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest  30
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest  40
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest  50
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest  60
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest  70
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest 80
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest
-    //NEX_UTest 90
-
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest  10
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest  20
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest  30
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest  40
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest  50
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest  60
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest  70
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest  
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest  80
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
 
 
   //----------------------------------------------------------------------------

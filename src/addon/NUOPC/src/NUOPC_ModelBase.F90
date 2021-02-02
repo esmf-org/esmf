@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research, 
+! Copyright 2002-2021, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -11,6 +11,7 @@
 !==============================================================================
 #define FILENAME "src/addon/NUOPC/src/NUOPC_ModelBase.F90"
 !==============================================================================
+#define DEBUG_SETVM_on
 
 module NUOPC_ModelBase
 
@@ -22,15 +23,15 @@ module NUOPC_ModelBase
   use NUOPC
 
   implicit none
-  
+
   private
-  
+
   public &
     SetVM, &
     SetServices, &
     routine_Run, &
     routine_Nop
- 
+
   public &
     label_Advertise, &
     label_ModifyAdvertised, &
@@ -48,7 +49,7 @@ module NUOPC_ModelBase
     type_InternalStateStruct, &
     type_InternalState, &
     label_InternalState
-  
+
   character(*), parameter :: &
     label_InternalState = "ModelBase_InternalState"
   character(*), parameter :: &
@@ -79,8 +80,9 @@ module NUOPC_ModelBase
     label_DataInitialize = "ModelBase_DataInitialize"
 
   type type_InternalStateStruct
-    type(ESMF_Clock)      :: driverClock
-    type(ESMF_Time)       :: preAdvanceCurrTime
+    type(ESMF_Clock)          :: driverClock
+    type(ESMF_Time)           :: preAdvanceCurrTime
+    type(ESMF_Field), pointer :: cachedExportFieldList(:)
   end type
 
   type type_InternalState
@@ -93,7 +95,7 @@ module NUOPC_ModelBase
   !-----------------------------------------------------------------------------
   contains
   !-----------------------------------------------------------------------------
-  
+
   subroutine SetVM(gcomp, rc)
     type(ESMF_GridComp)  :: gcomp
     integer, intent(out) :: rc
@@ -102,71 +104,183 @@ module NUOPC_ModelBase
     type(ESMF_VM)             :: gvm
     character(ESMF_MAXSTR)    :: name
     logical                   :: pthreadsEnabled
-    logical                   :: isPresent
+    logical                   :: isPresent, isStructured
+    logical                   :: isPresent2, isStructured2
     integer                   :: value
-    
+    integer                   :: size, idx
+    integer                   :: size2, idx2
+    type(ESMF_Info)           :: info
+    character(80)             :: ikey
+    character(80)             :: ikey2
+    integer                   :: maxCount, minStackSize, openMpNumThreads
+    character(40)             :: msgString, openMpHandling
+
     rc = ESMF_SUCCESS
 
     ! query the component for info
     call NUOPC_CompGet(gcomp, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
-#if 1
+
+#ifdef DEBUG_SETVM_on
     call ESMF_LogWrite("Generic ModelBase SetVM() is executing for: "// &
       trim(name), ESMF_LOGMSG_DEBUG, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 #endif
-    
-    ! detect early return condition of the SetVM*() methods cannot be used
+
+    ! query global information about this ESMF execution instance
     call ESMF_VMGetGlobal(gvm, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call ESMF_VMGet(gvm, pthreadsEnabledFlag=pthreadsEnabled, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    if (.not.pthreadsEnabled) then
-#if 1
-      call ESMF_LogWrite("Generic ModelBase SetVM() is exiting "// &
-        "due to lack of Pthreads support for: "// &
-        trim(name), ESMF_LOGMSG_DEBUG, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-#endif
-      return  ! early successful return
-    endif
-    
-    ! looking for hints in the component's Attributes
-    call NUOPC_CompAttributeGet(gcomp, name="maxPeCountPerPet", value=value, &
-      isPresent=isPresent, rc=rc)
+
+    ! iterate through NUOPC Hints
+
+    call ESMF_InfoGetFromHost(gcomp, info=info, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    if (isPresent) then
-#if 1
-      call ESMF_LogWrite("Generic ModelBase SetVM() is calling "// &
-        "ESMF_GridCompSetVMMaxPEs() for: "// &
-        trim(name), ESMF_LOGMSG_DEBUG, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    call ESMF_InfoGet(info, key="/NUOPC/Hint", isPresent=isPresent, &
+      isStructured=isStructured, size=size, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    if (isPresent .and. isStructured) then
+      do idx=1, size
+        call ESMF_InfoGet(info, key="/NUOPC/Hint", idx=idx, ikey=ikey, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        if (trim(ikey)=="PePerPet") then
+          ! conditionally error out if call into SetVM cannot be supported
+          if (.not.pthreadsEnabled) then
+            call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+              msg="Generic ModelBase SetVM() detected lacking Pthreads "// &
+              "support for: "//trim(name), &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+            return  ! bail out
+          endif
+          ! set defaults
+          maxCount = -1
+          minStackSize = -1
+          openMpHandling = ""
+          openMpNumThreads = -1
+          ! iterate through the PePerPet hint
+          call ESMF_InfoGet(info, key="/NUOPC/Hint/PePerPet", &
+            isPresent=isPresent2, isStructured=isStructured2, size=size2, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (isPresent2 .and. isStructured2) then
+            do idx2=1, size2
+              call ESMF_InfoGet(info, key="/NUOPC/Hint/PePerPet", idx=idx2, &
+                ikey=ikey2, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              if (trim(ikey2)=="MaxCount") then
+                call ESMF_InfoGet(info, &
+                  key="/NUOPC/Hint/PePerPet/MaxCount", &
+                  value=maxCount, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              elseif (trim(ikey2)=="MinStackSize") then
+                call ESMF_InfoGet(info, &
+                  key="/NUOPC/Hint/PePerPet/MinStackSize", &
+                  value=minStackSize, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              elseif (trim(ikey2)=="OpenMpHandling") then
+                call ESMF_InfoGet(info, &
+                  key="/NUOPC/Hint/PePerPet/OpenMpHandling", &
+                  value=openMpHandling, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              elseif (trim(ikey2)=="OpenMpNumThreads") then
+                call ESMF_InfoGet(info, &
+                  key="/NUOPC/Hint/PePerPet/OpenMpNumThreads", &
+                  value=openMpNumThreads, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              else
+                call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+                  msg="Unknown NUOPC Hint: "//trim(ikey)//"/"//trim(ikey2), &
+                  line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+                return  ! bail out
+              endif
+            enddo
+          endif
+          ! make the actual call into ESMF_GridCompSetVMMaxPEs()
+#ifdef DEBUG_SETVM_on
+          call ESMF_LogWrite("Generic ModelBase SetVM() is calling "// &
+            "ESMF_GridCompSetVMMaxPEs() for: "// &
+            trim(name)//" with:", ESMF_LOGMSG_DEBUG, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          write(msgString,"(' - ',A20,' = ',I10)") "MaxCount", maxCount
+          call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_DEBUG, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          write(msgString,"(' - ',A20,' = ',I10)") "MinStackSize", &
+            minStackSize
+          call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_DEBUG, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          write(msgString,"(' - ',A20,' = ',A10)") "OpenMpHandling", &
+            trim(openMpHandling)
+          call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_DEBUG, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          write(msgString,"(' - ',A20,' = ',I10)") "OpenMpNumThreads", &
+            openMpNumThreads
+          call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_DEBUG, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 #endif
-      call ESMF_GridCompSetVMMaxPEs(gcomp, maxPeCountPerPet=value, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (maxCount == -1 .and. minStackSize == -1) then
+            call ESMF_GridCompSetVMMaxPEs(gcomp, openMpHandling=openMpHandling,&
+              openMpNumThreads=openMpNumThreads, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          else if (maxCount > -1 .and. minStackSize == -1) then
+            call ESMF_GridCompSetVMMaxPEs(gcomp, maxPeCountPerPet=maxCount, &
+              openMpHandling=openMpHandling, openMpNumThreads=openMpNumThreads,&
+              rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          else if (maxCount == -1 .and. minStackSize > -1) then
+            call ESMF_GridCompSetVMMaxPEs(gcomp, minStackSize=minStackSize, &
+              openMpHandling=openMpHandling, openMpNumThreads=openMpNumThreads,&
+              rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          else if (maxCount > -1 .and. minStackSize > -1) then
+            call ESMF_GridCompSetVMMaxPEs(gcomp, maxPeCountPerPet=maxCount, &
+              minStackSize=minStackSize, openMpHandling=openMpHandling, &
+              openMpNumThreads=openMpNumThreads, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
+        else
+          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+            msg="Unknown NUOPC Hint: "//trim(ikey), &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+          return  ! bail out
+        endif
+      enddo
     else
-#if 1
-      call ESMF_LogWrite("Generic ModelBase SetVM() did not find "// &
-        "Attribute 'maxPeCountPerPet' for: "// &
+#ifdef DEBUG_SETVM_on
+      call ESMF_LogWrite("Generic ModelBase SetVM() found no NUOPC Hint for: "// &
         trim(name), ESMF_LOGMSG_DEBUG, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 #endif
     endif
-    
+
   end subroutine
 
   !-----------------------------------------------------------------------------
-  
+
   subroutine SetServices(gcomp, rc)
     type(ESMF_GridComp)  :: gcomp
     integer, intent(out) :: rc
@@ -331,6 +445,20 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_TraceRegionEnter("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TraceRegionExit("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -631,6 +759,20 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_TraceRegionEnter("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TraceRegionExit("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -818,6 +960,20 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_TraceRegionEnter("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TraceRegionExit("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1005,6 +1161,20 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_TraceRegionEnter("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TraceRegionExit("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1192,6 +1362,20 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_TraceRegionEnter("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TraceRegionExit("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1379,6 +1563,20 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_TraceRegionEnter("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TraceRegionExit("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1576,6 +1774,20 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_TraceRegionEnter("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TraceRegionExit("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1804,6 +2016,7 @@ module NUOPC_ModelBase
     integer                   :: verbosity, diagnostic, profiling
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
+    type(type_InternalState)  :: is
 
     rc = ESMF_SUCCESS
 
@@ -1814,6 +2027,20 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_TraceRegionEnter("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TraceRegionExit("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1966,21 +2193,34 @@ module NUOPC_ModelBase
         line=__LINE__, file=FILENAME)) return  ! bail out
     endif
     
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
     ! correct setting of timestamps
+    nullify(is%wrap%cachedExportFieldList)
+    call NUOPC_GetStateMemberLists(exportState, &
+      fieldList=is%wrap%cachedExportFieldList, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
     call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
     if (allUpdated) then
       ! update timestamp on all the export Fields
-      call NUOPC_SetTimestamp(exportState, internalClock, rc=rc)
+      call NUOPC_SetTimestamp(is%wrap%cachedExportFieldList, internalClock, &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
         return  ! bail out
     else
       ! update timestamp on only those export Fields that have the 
       ! "Updated" attribute set to "true"
-      call NUOPC_SetTimestamp(exportState, internalClock, &
+      call NUOPC_SetTimestamp(is%wrap%cachedExportFieldList, internalClock, &
         selective=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
@@ -2091,6 +2331,7 @@ module NUOPC_ModelBase
     integer                   :: verbosity, diagnostic, profiling
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
+    type(type_InternalState)  :: is
 
     rc = ESMF_SUCCESS
 
@@ -2101,6 +2342,20 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_TraceRegionEnter("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TraceRegionExit("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2218,12 +2473,24 @@ module NUOPC_ModelBase
       call ESMF_TraceRegionExit("label_DataInitialize")
     endif
     
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
     ! update timestamp on all the export Fields
+    nullify(is%wrap%cachedExportFieldList)
+    call NUOPC_GetStateMemberLists(exportState, &
+      fieldList=is%wrap%cachedExportFieldList, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
     call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call NUOPC_SetTimestamp(exportState, internalClock, rc=rc)
+    call NUOPC_SetTimestamp(is%wrap%cachedExportFieldList, internalClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
@@ -2330,6 +2597,20 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! handle profiling
+    if (btest(profiling,10)) then
+      call ESMF_TraceRegionEnter("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TraceRegionExit("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,3)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2809,6 +3090,20 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! handle profiling
+    if (btest(profiling,11)) then
+      call ESMF_TraceRegionEnter("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TraceRegionExit("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,6)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2900,6 +3195,10 @@ module NUOPC_ModelBase
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
+
+    ! destroy relevant internal State members
+    if (associated(is%wrap%cachedExportFieldList)) &
+      deallocate(is%wrap%cachedExportFieldList)
 
     ! deallocate internal state memory
     deallocate(is%wrap, stat=stat)
