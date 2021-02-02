@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -Eeuxo pipefail
 
-LOGDIR="log"
-
 git config --global user.email "himanshupillai@gmail.com"
 git config --global user.name "him-28"
 
