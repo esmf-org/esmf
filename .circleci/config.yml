@@ -203,7 +203,7 @@ jobs:
             cp esmf-test-scripts/test_coverage_script/test_coverage test_coverage.sh
             chmod +x test_coverage.sh
             cd $ESMF_DIR
-            bash $homedir/test_coverage
+            bash $homedir/test_coverage.sh
 
   publish-test-coverage:
     machine: true
