@@ -200,6 +200,8 @@ jobs:
             $homedir/test_coverage
 
   publish-test-coverage:
+    machine: true
+    resource_class: small
     steps:
       - run:
           name: Push to esmf-test-artifacts 
