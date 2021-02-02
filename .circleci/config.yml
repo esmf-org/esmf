@@ -187,17 +187,21 @@ jobs:
           name: Set and echo env variable
           command: |
             homedir=`pwd`
+            echo "Homedir=$homedir"
             ESMF_DIR=$homedir/esmf
+            echo "ESMF_DIR=$ESMF_DIR"
             LOGDIR=$homedir/log
+            echo "LOGDIR=$LOGDIR"
       - run:
           name: Clone ESMF-Test-scripts 
           command: git clone https://github.com/esmf-org/esmf-test-scripts.git
       - run:
           name: Run Test Coverage script
           command: |
-            cp -r esmf-test-scripts/test_coverage_script/* .
+            cp -r esmf-test-scripts/test_coverage_script/* $ESMF_DIR/.
             cd $ESMF_DIR
-            $homedir/test_coverage
+            chmod +x test_coverage
+            bash test_coverage
 
   publish-test-coverage:
     machine: true
@@ -434,6 +438,8 @@ workflows:
       - should-build-docs:
          type: approval
       - build-test-coverage
+          requires:
+            - should-build-docs
       - publish-test-coverage:
           requires:
             - build-test-coverage
